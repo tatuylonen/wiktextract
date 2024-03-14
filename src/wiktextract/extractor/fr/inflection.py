@@ -234,7 +234,8 @@ def process_inflection_table(
                             translate_raw_tags(
                                 new_form_data, table_template.template_name
                             )
-                            page_data[-1].forms.append(new_form_data)
+                            if len(new_form_data.form.strip()) > 0:
+                                page_data[-1].forms.append(new_form_data)
 
                     colspan_text = table_cell.attrs.get("colspan", "1")
                     if colspan_text.isdecimal():

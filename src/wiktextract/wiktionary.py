@@ -329,10 +329,16 @@ def check_json_data(
         dt: dict
 ) -> None:
     """Performs some basic checks on the generated data."""
-    word = dt.get("word")
-    if not word:
-        check_error(wxr, dt, None, None, None,
-                    "missing \"word\" field in data")
+    word = dt.get("word", dt.get("title"))
+    if word is None:
+        check_error(
+            wxr,
+            dt,
+            None,
+            None,
+            None,
+            'missing "word" or "title" field in data',
+        )
         return
     lang = dt.get("lang")
     if not lang:

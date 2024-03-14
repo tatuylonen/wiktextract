@@ -11,7 +11,7 @@ from .form_line import extract_form_line
 from .gloss import extract_gloss, process_exemple_template
 from .inflection import extract_inflection
 from .linkage import extract_linkage
-from .models import WordEntry
+from .models import Sense, WordEntry
 from .note import extract_note
 from .pronunciation import extract_pronunciation
 from .section_types import (
@@ -52,7 +52,9 @@ def parse_section(
             # find the subtitle type by only checking the template parameter.
             # https://fr.wiktionary.org/wiki/Modèle:S
             # https://fr.wiktionary.org/wiki/Wiktionnaire:Liste_des_sections
-            section_type = level_node_template.template_parameters.get(1)
+            section_type = level_node_template.template_parameters.get(
+                1, ""
+            ).lower()
             subtitle = clean_node(
                 wxr,
                 page_data[-1] if len(page_data) > 0 else base_data,
@@ -139,8 +141,10 @@ def process_pos_block(
             page_data[-1].tags.append("form-of")
     child_nodes = list(pos_title_node.filter_empty_str_child())
     form_line_start = 0  # Ligne de forme
+    level_node_index = len(child_nodes)
     gloss_start = len(child_nodes)
     lang_code = page_data[-1].lang_code
+    has_gloss_list = False
     for index, child in enumerate(child_nodes):
         if isinstance(child, WikiNode):
             if child.kind == NodeKind.TEMPLATE:
@@ -165,11 +169,22 @@ def process_pos_block(
                 if index < gloss_start:
                     gloss_start = index
                 extract_gloss(wxr, page_data, child)
+                has_gloss_list = True
             elif child.kind in LEVEL_KIND_FLAGS:
                 parse_section(wxr, page_data, base_data, child)
+                if index < level_node_index:
+                    level_node_index = index
 
     form_line_nodes = child_nodes[form_line_start:gloss_start]
     extract_form_line(wxr, page_data, form_line_nodes)
+    if not has_gloss_list:
+        gloss_text = clean_node(
+            wxr, None, child_nodes[form_line_start:level_node_index]
+        )
+        if gloss_text != "":
+            page_data[-1].senses.append(Sense(glosses=[gloss_text]))
+    if len(page_data[-1].senses) == 0:
+        page_data[-1].senses.append(Sense(tags=["no-gloss"]))
 
 
 def parse_page(

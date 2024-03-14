@@ -1,6 +1,6 @@
 import re
 from collections import defaultdict
-from typing import Union
+from typing import Optional, Union
 
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import TemplateNode
@@ -15,7 +15,7 @@ def extract_gloss(
     wxr: WiktextractContext,
     page_data: list[WordEntry],
     list_node: WikiNode,
-    parent_glosses: list[str] = [],
+    parent_sense: Optional[Sense] = None,
 ) -> None:
     for list_item_node in list_node.find_child(NodeKind.LIST_ITEM):
         gloss_nodes = list(
@@ -24,6 +24,11 @@ def extract_gloss(
             )
         )
         gloss_data = Sense()
+        if parent_sense is not None:
+            gloss_data.glosses.extend(parent_sense.glosses)
+            gloss_data.tags.extend(parent_sense.tags)
+            gloss_data.raw_tags.extend(parent_sense.raw_tags)
+            gloss_data.topics.extend(parent_sense.topics)
         # process modifier, theme tempaltes before gloss text
         # https://fr.wiktionary.org/wiki/Wiktionnaire:Liste_de_tous_les_modèles/Précisions_de_sens
         tag_indexes = set()
@@ -78,18 +83,19 @@ def extract_gloss(
         gloss_text = clean_node(wxr, gloss_data, gloss_only_nodes[:note_index])
         if not (gloss_text.startswith("(") and gloss_text.endswith(")")):
             gloss_text = gloss_text.strip(" ()")
-        gloss_data.glosses = parent_glosses + [gloss_text]
+        if gloss_text != "":
+            gloss_data.glosses.append(gloss_text)
         gloss_data.note = clean_node(
             wxr, gloss_data, gloss_only_nodes[note_index + 1 :]
         ).strip(" ().")
-        page_data[-1].senses.append(gloss_data)
+        if len(gloss_data.glosses) > 0:
+            page_data[-1].senses.append(gloss_data)
         for nest_gloss_list in list_item_node.find_child(NodeKind.LIST):
             if nest_gloss_list.sarg.endswith("#"):
-                extract_gloss(
-                    wxr, page_data, nest_gloss_list, gloss_data.glosses
-                )
+                extract_gloss(wxr, page_data, nest_gloss_list, gloss_data)
             elif nest_gloss_list.sarg.endswith("*"):
                 extract_examples(wxr, gloss_data, nest_gloss_list)
+
         translate_raw_tags(gloss_data)
 
 
