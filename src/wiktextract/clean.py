@@ -1372,7 +1372,10 @@ def clean_value(
         return " ".join(args[i:])
 
     def repl_link(m: re.Match) -> str:
-        if m.group(1) is not None and IMAGE_LINK_RE.match(m.group(1)) is not None:
+        if (
+            m.group(1) is not None
+            and IMAGE_LINK_RE.match(m.group(1)) is not None
+        ):
             return ""
         v = m.group(3).split("|")
         return clean_value(wxr, v[0], no_strip=True)
@@ -1381,7 +1384,9 @@ def clean_value(
         link = m.group(1)
         if IMAGE_LINK_RE.match(link) is not None:
             # Handle File / Image / Fichier 'links' here.
-            if NOT_INLINE_IMG_RE.match(m.group(0)) is None and "alt" in m.group(0):
+            if NOT_INLINE_IMG_RE.match(m.group(0)) is None and "alt" in m.group(
+                0
+            ):
                 # This image should be inline, so let's print its alt text
                 alt_m = re.search(r"\|\s*alt\s*=([^]|]+)(\||\]\])", m.group(0))
                 if alt_m is not None:
@@ -1411,8 +1416,18 @@ def clean_value(
 
     # Remove any remaining templates
     # title = re.sub(r"\{\{[^}]+\}\}", "", title)
-    # Remove tables
-    title = re.sub(r"(?s)\{\|.*?\|\}", "\n", title)
+
+    # Remove tables, which can contain other tables
+    prev = ""
+    while title != prev:
+        prev = title
+        title = re.sub(
+            r"\{\|((?!\{\|)(?!\|\}).)*\|\}",
+            "\n",
+            title,
+            flags=re.DOTALL,
+        )
+    # title = re.sub(r"(?s)\{\|.*?\|\}", "\n", title)
     # Remove second reference tags (<ref name="ref_name"/>)
     title = re.sub(r"<ref\s+name=\"[^\"]+\"\s*/>", "", title)
     # Remove references (<ref>...</ref>).
