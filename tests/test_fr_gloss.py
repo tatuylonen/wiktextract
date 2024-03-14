@@ -572,7 +572,28 @@ class TestFrGloss(TestCase):
                     {
                         "glosses": ["Espace affine"],
                         "topics": ["mathematics"],
-                    }
+                    },
                 ]
             },
+        )
+
+    def test_no_gloss_list(self):
+        self.wxr.wtp.start_page("Alta Normandia")
+        self.wxr.wtp.add_page("Modèle:langue", 10, "Ido")
+        self.wxr.wtp.add_page("Modèle:S", 10, "Nom propre")
+        page_data = parse_page(
+            self.wxr,
+            "Alta Normandia",
+            """== {{langue|io}} ==
+=== {{S|nom propre|io}} ===
+'''Alta Normandia'''
+[[Haute-Normandie]] (ancienne région de France).""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"],
+            [
+                {
+                    "glosses": ["Haute-Normandie (ancienne région de France)."],
+                },
+            ],
         )

@@ -141,8 +141,10 @@ def process_pos_block(
             page_data[-1].tags.append("form-of")
     child_nodes = list(pos_title_node.filter_empty_str_child())
     form_line_start = 0  # Ligne de forme
+    level_node_index = len(child_nodes)
     gloss_start = len(child_nodes)
     lang_code = page_data[-1].lang_code
+    has_gloss_list = False
     for index, child in enumerate(child_nodes):
         if isinstance(child, WikiNode):
             if child.kind == NodeKind.TEMPLATE:
@@ -167,11 +169,20 @@ def process_pos_block(
                 if index < gloss_start:
                     gloss_start = index
                 extract_gloss(wxr, page_data, child)
+                has_gloss_list = True
             elif child.kind in LEVEL_KIND_FLAGS:
                 parse_section(wxr, page_data, base_data, child)
+                if index < level_node_index:
+                    level_node_index = index
 
     form_line_nodes = child_nodes[form_line_start:gloss_start]
     extract_form_line(wxr, page_data, form_line_nodes)
+    if not has_gloss_list:
+        gloss_text = clean_node(
+            wxr, None, child_nodes[form_line_start:level_node_index]
+        )
+        if gloss_text != "":
+            page_data[-1].senses.append(Sense(glosses=[gloss_text]))
     if len(page_data[-1].senses) == 0:
         page_data[-1].senses.append(Sense(tags=["no-gloss"]))
 
