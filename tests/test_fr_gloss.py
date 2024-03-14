@@ -540,3 +540,39 @@ class TestFrGloss(TestCase):
                 ]
             },
         )
+
+    def test_empty_gloss_str(self):
+        self.wxr.wtp.start_page("affine")
+        self.wxr.wtp.add_page("Modèle:lexique", 10, "({{{1}}})")
+        root = self.wxr.wtp.parse(
+            """# {{lexique|mathématiques|fr}}
+## ''Application '''affine'''''
+## ''Espace '''affine'''''"""
+        )
+        page_data = [
+            WordEntry(
+                word="affine",
+                lang_code="fr",
+                lang="Français",
+                pos="adj",
+            )
+        ]
+        extract_gloss(self.wxr, page_data, root.children[0])
+        self.assertEqual(
+            page_data[0].model_dump(
+                exclude_defaults=True,
+                exclude=["word", "lang_code", "lang", "pos"],
+            ),
+            {
+                "senses": [
+                    {
+                        "glosses": ["Application affine"],
+                        "topics": ["mathematics"],
+                    },
+                    {
+                        "glosses": ["Espace affine"],
+                        "topics": ["mathematics"],
+                    }
+                ]
+            },
+        )
