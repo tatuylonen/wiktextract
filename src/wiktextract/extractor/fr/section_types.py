@@ -149,6 +149,7 @@ POS_SECTIONS: POSSubtitleData = {
     "rad": {"pos": "root", "tags": ["radical"]},
     "radical": {"pos": "root", "tags": ["radical"]},
     "rafsi": {"pos": "affix", "tags": ["rafsi"]},
+    "sinogramme": {"pos": "character", "tags": ["letter"]},
     "substantif": {"pos": "noun"},
     "suf": {"pos": "suffix", "tags": ["morpheme"]},
     "suff": {"pos": "suffix", "tags": ["morpheme"]},
