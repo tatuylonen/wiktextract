@@ -52,7 +52,9 @@ def parse_section(
             # find the subtitle type by only checking the template parameter.
             # https://fr.wiktionary.org/wiki/Modèle:S
             # https://fr.wiktionary.org/wiki/Wiktionnaire:Liste_des_sections
-            section_type = level_node_template.template_parameters.get(1)
+            section_type = level_node_template.template_parameters.get(
+                1, ""
+            ).lower()
             subtitle = clean_node(
                 wxr,
                 page_data[-1] if len(page_data) > 0 else base_data,
