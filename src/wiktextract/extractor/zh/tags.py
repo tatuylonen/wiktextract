@@ -70,6 +70,12 @@ VOICE_TAGS: dict[str, str] = {
     "條件形": "hypothetical conditional",
 }
 
+COMPARISON_TAGS: dict[str, str] = {
+    # https://en.wikipedia.org/wiki/Comparison_(grammar)
+    "原级": "positive",
+    "比較級": "comparative",
+    "最高級": "superlative",
+}
 
 GRAMMATICAL_TAGS: dict[str, str] = {
     **GENDER_TAGS,
@@ -79,6 +85,7 @@ GRAMMATICAL_TAGS: dict[str, str] = {
     **VERB_TAGS,
     **JA_STEM_FORMS,
     **VOICE_TAGS,
+    **COMPARISON_TAGS,
 }
 
 # https://zh.wiktionary.org/wiki/Template:Label
@@ -110,6 +117,7 @@ LABEL_TAGS = {
     "貶": "derogatory",
     "罕": "rare",
     "引": "broadly",
+    "現已罕用": "archaic",
 }
 
 
