@@ -184,7 +184,6 @@ class TestGloss(TestCase):
 
     def test_gloss_template(self):
         self.wxr.wtp.start_page("CC")
-        self.wxr.wtp.add_page("Template:head", 10, "{{{2|}}}")
         self.wxr.wtp.add_page("Template:n-g", 10, "{{{1|}}}")
         root = self.wxr.wtp.parse(
             "# {{n-g|[[ISO]] 3166-1 對科科斯群島（[[Cocos Islands]]）的兩字母代碼。}}"
@@ -198,6 +197,24 @@ class TestGloss(TestCase):
                     "glosses": [
                         "ISO 3166-1 對科科斯群島（Cocos Islands）的兩字母代碼。"
                     ]
+                }
+            ],
+        )
+
+    def test_gloss_lable_topic(self):
+        self.wxr.wtp.start_page("DC")
+        self.wxr.wtp.add_page("Template:lb", 10, "(航空学)")
+        root = self.wxr.wtp.parse(
+            "# {{lb|en|aviation}} 道格拉斯飞行器公司的產品名稱"
+        )
+        page_data = [WordEntry(word="", lang_code="", lang="", pos="")]
+        extract_gloss(self.wxr, page_data, root.children[0], Sense())
+        self.assertEqual(
+            page_data[0].model_dump(exclude_defaults=True)["senses"],
+            [
+                {
+                    "glosses": ["道格拉斯飞行器公司的產品名稱"],
+                    "topics": ["aeronautics"],
                 }
             ],
         )

@@ -1,4 +1,5 @@
 from .models import WordEntry
+from .topics import LABEL_TOPICS
 
 GENDER_TAGS: dict[str, str] = {
     "陰性": "feminine",
@@ -116,8 +117,10 @@ ALL_TAGS = {**GRAMMATICAL_TAGS, **LABEL_TAGS}
 def translate_raw_tags(data: WordEntry) -> WordEntry:
     raw_tags = []
     for raw_tag in data.raw_tags:
-        if raw_tag.lower() in ALL_TAGS:
+        if raw_tag in ALL_TAGS:
             data.tags.append(ALL_TAGS[raw_tag.lower()])
+        elif raw_tag in LABEL_TOPICS and hasattr(data, "topics"):
+            data.topics.append(LABEL_TOPICS[raw_tag])
         else:
             raw_tags.append(raw_tag)
     data.raw_tags = raw_tags
