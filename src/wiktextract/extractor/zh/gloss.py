@@ -29,6 +29,8 @@ def extract_gloss(
                     raw_tags.append(raw_tag.strip("()"))
                 elif raw_tag.startswith("〈") and raw_tag.endswith("〉"):
                     raw_tags.append(raw_tag.strip("〈〉"))
+                else:
+                    gloss_nodes.append(node)
             elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
                 continue
             else:

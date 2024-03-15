@@ -181,3 +181,23 @@ class TestGloss(TestCase):
                     parse_page(self.wxr, title, wikitext),
                     results,
                 )
+
+    def test_gloss_template(self):
+        self.wxr.wtp.start_page("CC")
+        self.wxr.wtp.add_page("Template:head", 10, "{{{2|}}}")
+        self.wxr.wtp.add_page("Template:n-g", 10, "{{{1|}}}")
+        root = self.wxr.wtp.parse(
+            "# {{n-g|[[ISO]] 3166-1 對科科斯群島（[[Cocos Islands]]）的兩字母代碼。}}"
+        )
+        page_data = [WordEntry(word="", lang_code="", lang="", pos="")]
+        extract_gloss(self.wxr, page_data, root.children[0], Sense())
+        self.assertEqual(
+            page_data[0].model_dump(exclude_defaults=True)["senses"],
+            [
+                {
+                    "glosses": [
+                        "ISO 3166-1 對科科斯群島（Cocos Islands）的兩字母代碼。"
+                    ]
+                }
+            ],
+        )
