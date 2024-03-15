@@ -115,6 +115,7 @@ class TestGloss(TestCase):
                     "lang_code": "zh",
                     "pos": "soft-redirect",
                     "redirects": ["別個"],
+                    'senses': [{'tags': ['no-gloss']}],
                     "word": "別个",
                 }
             ],
@@ -134,6 +135,7 @@ class TestGloss(TestCase):
                     "lang_code": "ja",
                     "pos": "soft-redirect",
                     "redirects": ["如月", "二月", "更衣", "衣更着"],
+                    'senses': [{'tags': ['no-gloss']}],
                     "word": "きさらぎ",
                 }
             ],
