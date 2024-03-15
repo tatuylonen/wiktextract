@@ -218,3 +218,28 @@ class TestGloss(TestCase):
                 }
             ],
         )
+
+    def test_two_label_topics(self):
+        self.wxr.wtp.start_page("DOS")
+        self.wxr.wtp.add_page("Template:lb", 10, "(計算機, 網路)")
+        self.wxr.wtp.add_page(
+            "Template:init of",
+            10,
+            "denial of service (“拒絕服務”)之首字母縮略詞。",
+        )
+        root = self.wxr.wtp.parse(
+            "# {{lb|en|計算機|網路}} {{init of|en|[[denial]] of [[service]]|t=拒絕服務}}"
+        )
+        page_data = [WordEntry(word="", lang_code="", lang="", pos="")]
+        extract_gloss(self.wxr, page_data, root.children[0], Sense())
+        self.assertEqual(
+            page_data[0].model_dump(exclude_defaults=True)["senses"],
+            [
+                {
+                    "glosses": [
+                        "denial of service (“拒絕服務”)之首字母縮略詞。"
+                    ],
+                    "topics": ["computing", "internet"],
+                }
+            ],
+        )

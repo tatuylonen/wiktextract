@@ -1,3 +1,5 @@
+import re
+
 from .models import WordEntry
 from .topics import LABEL_TOPICS
 
@@ -117,12 +119,13 @@ ALL_TAGS = {**GRAMMATICAL_TAGS, **LABEL_TAGS}
 def translate_raw_tags(data: WordEntry) -> WordEntry:
     raw_tags = []
     for raw_tag in data.raw_tags:
-        if raw_tag in ALL_TAGS:
-            data.tags.append(ALL_TAGS[raw_tag.lower()])
-        elif raw_tag in LABEL_TOPICS and hasattr(data, "topics"):
-            data.topics.append(LABEL_TOPICS[raw_tag])
-        else:
-            raw_tags.append(raw_tag)
+        for split_raw_tag in re.split(r"(?:,|，)\s*", raw_tag):
+            if split_raw_tag in ALL_TAGS:
+                data.tags.append(ALL_TAGS[split_raw_tag])
+            elif split_raw_tag in LABEL_TOPICS and hasattr(data, "topics"):
+                data.topics.append(LABEL_TOPICS[split_raw_tag])
+            else:
+                raw_tags.append(split_raw_tag)
     data.raw_tags = raw_tags
     return data
 
