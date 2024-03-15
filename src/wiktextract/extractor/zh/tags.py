@@ -1,4 +1,7 @@
+import re
+
 from .models import WordEntry
+from .topics import LABEL_TOPICS
 
 GENDER_TAGS: dict[str, str] = {
     "陰性": "feminine",
@@ -67,6 +70,12 @@ VOICE_TAGS: dict[str, str] = {
     "條件形": "hypothetical conditional",
 }
 
+COMPARISON_TAGS: dict[str, str] = {
+    # https://en.wikipedia.org/wiki/Comparison_(grammar)
+    "原级": "positive",
+    "比較級": "comparative",
+    "最高級": "superlative",
+}
 
 GRAMMATICAL_TAGS: dict[str, str] = {
     **GENDER_TAGS,
@@ -76,6 +85,7 @@ GRAMMATICAL_TAGS: dict[str, str] = {
     **VERB_TAGS,
     **JA_STEM_FORMS,
     **VOICE_TAGS,
+    **COMPARISON_TAGS,
 }
 
 # https://zh.wiktionary.org/wiki/Template:Label
@@ -107,6 +117,7 @@ LABEL_TAGS = {
     "貶": "derogatory",
     "罕": "rare",
     "引": "broadly",
+    "現已罕用": "archaic",
 }
 
 
@@ -116,10 +127,13 @@ ALL_TAGS = {**GRAMMATICAL_TAGS, **LABEL_TAGS}
 def translate_raw_tags(data: WordEntry) -> WordEntry:
     raw_tags = []
     for raw_tag in data.raw_tags:
-        if raw_tag.lower() in ALL_TAGS:
-            data.tags.append(ALL_TAGS[raw_tag.lower()])
-        else:
-            raw_tags.append(raw_tag)
+        for split_raw_tag in re.split(r"(?:,|，)\s*", raw_tag):
+            if split_raw_tag in ALL_TAGS:
+                data.tags.append(ALL_TAGS[split_raw_tag])
+            elif split_raw_tag in LABEL_TOPICS and hasattr(data, "topics"):
+                data.topics.append(LABEL_TOPICS[split_raw_tag])
+            else:
+                raw_tags.append(split_raw_tag)
     data.raw_tags = raw_tags
     return data
 

@@ -124,6 +124,7 @@ def extract_linkages(
                     lang_code=page_data[-1].lang_code,
                     lang=page_data[-1].lang,
                     word=page_data[-1].word,
+                    pos=page_data[-1].pos,
                 )
                 parse_section(wxr, page_data, base_data, node)
             elif len(node.children) > 0:

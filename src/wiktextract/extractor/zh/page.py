@@ -156,6 +156,8 @@ def process_pos_block(
         )
         if len(gloss_text) > 0:
             page_data[-1].senses.append(Sense(glosses=[gloss_text]))
+        else:
+            page_data[-1].senses.append(Sense(tags=["no-gloss"]))
 
 
 def extract_etymology(
@@ -255,6 +257,10 @@ def parse_page(
             parse_section(wxr, page_data, base_data, level3_node)
         if not level2_node.contain_node(NodeKind.LEVEL3):
             process_low_quality_page(wxr, level2_node, page_data)
+
+    for data in page_data:
+        if len(data.senses) == 0:
+            data.senses.append(Sense(tags=["no-gloss"]))
 
     return [d.model_dump(exclude_defaults=True) for d in page_data]
 

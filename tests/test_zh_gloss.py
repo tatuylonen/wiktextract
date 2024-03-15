@@ -115,6 +115,7 @@ class TestGloss(TestCase):
                     "lang_code": "zh",
                     "pos": "soft-redirect",
                     "redirects": ["別個"],
+                    'senses': [{'tags': ['no-gloss']}],
                     "word": "別个",
                 }
             ],
@@ -134,6 +135,7 @@ class TestGloss(TestCase):
                     "lang_code": "ja",
                     "pos": "soft-redirect",
                     "redirects": ["如月", "二月", "更衣", "衣更着"],
+                    'senses': [{'tags': ['no-gloss']}],
                     "word": "きさらぎ",
                 }
             ],
@@ -181,3 +183,65 @@ class TestGloss(TestCase):
                     parse_page(self.wxr, title, wikitext),
                     results,
                 )
+
+    def test_gloss_template(self):
+        self.wxr.wtp.start_page("CC")
+        self.wxr.wtp.add_page("Template:n-g", 10, "{{{1|}}}")
+        root = self.wxr.wtp.parse(
+            "# {{n-g|[[ISO]] 3166-1 對科科斯群島（[[Cocos Islands]]）的兩字母代碼。}}"
+        )
+        page_data = [WordEntry(word="", lang_code="", lang="", pos="")]
+        extract_gloss(self.wxr, page_data, root.children[0], Sense())
+        self.assertEqual(
+            page_data[0].model_dump(exclude_defaults=True)["senses"],
+            [
+                {
+                    "glosses": [
+                        "ISO 3166-1 對科科斯群島（Cocos Islands）的兩字母代碼。"
+                    ]
+                }
+            ],
+        )
+
+    def test_gloss_lable_topic(self):
+        self.wxr.wtp.start_page("DC")
+        self.wxr.wtp.add_page("Template:lb", 10, "(航空学)")
+        root = self.wxr.wtp.parse(
+            "# {{lb|en|aviation}} 道格拉斯飞行器公司的產品名稱"
+        )
+        page_data = [WordEntry(word="", lang_code="", lang="", pos="")]
+        extract_gloss(self.wxr, page_data, root.children[0], Sense())
+        self.assertEqual(
+            page_data[0].model_dump(exclude_defaults=True)["senses"],
+            [
+                {
+                    "glosses": ["道格拉斯飞行器公司的產品名稱"],
+                    "topics": ["aeronautics"],
+                }
+            ],
+        )
+
+    def test_two_label_topics(self):
+        self.wxr.wtp.start_page("DOS")
+        self.wxr.wtp.add_page("Template:lb", 10, "(計算機, 網路)")
+        self.wxr.wtp.add_page(
+            "Template:init of",
+            10,
+            "denial of service (“拒絕服務”)之首字母縮略詞。",
+        )
+        root = self.wxr.wtp.parse(
+            "# {{lb|en|計算機|網路}} {{init of|en|[[denial]] of [[service]]|t=拒絕服務}}"
+        )
+        page_data = [WordEntry(word="", lang_code="", lang="", pos="")]
+        extract_gloss(self.wxr, page_data, root.children[0], Sense())
+        self.assertEqual(
+            page_data[0].model_dump(exclude_defaults=True)["senses"],
+            [
+                {
+                    "glosses": [
+                        "denial of service (“拒絕服務”)之首字母縮略詞。"
+                    ],
+                    "topics": ["computing", "internet"],
+                }
+            ],
+        )
