@@ -99,12 +99,9 @@ def get_pos_from_template(
         pos_text = pos_text.split()[0]
         if pos_text in POS_TITLES:
             return POS_TITLES[pos_text]
-    elif template_name.startswith("suffix "):
-        # https://ru.wiktionary.org/wiki/Шаблон:suffix_ru
-        return {"pos": "suffix", "tags": ["morpheme"]}
 
-    for part in template_name.split()[:2]:
-        for subpart in part.split("-")[:2]:
+    for part in template_name.split(maxsplit=2):
+        for subpart in part.split("-", maxsplit=2):
             if subpart in POS_TEMPLATE_NAMES:
                 return POS_TEMPLATE_NAMES[subpart]
 
