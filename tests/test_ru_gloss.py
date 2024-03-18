@@ -12,7 +12,9 @@ class TestRUGloss(unittest.TestCase):
     def setUp(self) -> None:
         self.wxr = WiktextractContext(
             Wtp(lang_code="ru"),
-            WiktionaryConfig(dump_file_lang_code="ru"),
+            WiktionaryConfig(
+                dump_file_lang_code="ru", capture_language_codes=None
+            ),
         )
 
     def tearDown(self) -> None:
@@ -102,5 +104,30 @@ class TestRUGloss(unittest.TestCase):
                     "pos": "noun",
                     "senses": [{"glosses": ["восток"]}],
                 }
+            ],
+        )
+
+    def test_gloss_under_morphological_section(self):
+        self.wxr.wtp.start_page("-гез")
+        self.wxr.wtp.add_page("Шаблон:-tt-", 10, "Татарский")
+        self.assertEqual(
+            parse_page(
+                self.wxr,
+                "-гез",
+                """= {{-tt-}} =
+== {{заголовок|I}} ==
+=== Морфологические и синтаксические свойства ===
+{{affix tt|гез|вид=аффикс принадлежности}}
+==== Значение ====
+# при""",
+            ),
+            [
+                {
+                    "lang": "Татарский",
+                    "lang_code": "tt",
+                    "word": "-гез",
+                    "pos": "affix",
+                    "senses": [{"glosses": ["при"]}],
+                },
             ],
         )

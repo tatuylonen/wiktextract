@@ -29,7 +29,7 @@ POS_TEMPLATE_NAMES: POSSubtitleData = {
     "phrase": {"pos": "phrase"},
     "predic": {"pos": "adj"},
     "prep": {"pos": "prep"},
-    "suffix": {"pos": "suffix"},
+    "suffix": {"pos": "suffix", "tags": ["morpheme"]},
     "буква": {"pos": "character"},
     "гидроним": {"pos": "name"},
     "гл": {"pos": "verb"},
