@@ -149,6 +149,8 @@ def parse_section(
             page_data[-1].pos = pos_data["pos"]
             page_data[-1].tags.extend(pos_data.get("tags", []))
         extract_inflection(wxr, page_data[-1], level3_node)
+        for next_level_node in level3_node.find_child(LEVEL_KIND_FLAGS):
+            parse_section(wxr, page_data, next_level_node)
         # XXX: Extract grammatical tags (gender, etc.) from Russian Wiktionary
     elif section_title in POS_TITLES:
         pos_data = POS_TITLES[section_title]
