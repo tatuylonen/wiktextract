@@ -99,6 +99,9 @@ def get_pos_from_template(
         pos_text = pos_text.split()[0]
         if pos_text in POS_TITLES:
             return POS_TITLES[pos_text]
+    elif template_name.startswith("suffix "):
+        # https://ru.wiktionary.org/wiki/Шаблон:suffix_ru
+        return {"pos": "suffix", "tags": ["morpheme"]}
 
     for part in template_name.split()[:2]:
         for subpart in part.split("-")[:2]:
@@ -113,8 +116,13 @@ def get_pos(
         pos_data = get_pos_from_template(wxr, template_node)
         if pos_data is not None:
             return pos_data
+    # POS text could also in level node content
+    for template_node in level_node.find_content(NodeKind.TEMPLATE):
+        pos_data = get_pos_from_template(wxr, template_node)
+        if pos_data is not None:
+            return pos_data
 
-    # Search for POS in clean_text
+    # Search for POS in section text
     text = clean_node(
         wxr, None, list(level_node.invert_find_child(LEVEL_KIND_FLAGS))
     )
@@ -222,7 +230,10 @@ def parse_page(
             wxr.wtp.start_section(lang)
 
             base_data = WordEntry(
-                lang=lang, lang_code=lang_code, word=wxr.wtp.title
+                lang=lang,
+                lang_code=lang_code,
+                word=wxr.wtp.title,
+                pos="unknown",
             )
             base_data.categories.extend(categories["categories"])
 
@@ -263,14 +274,11 @@ def parse_page(
 
             for level2_node in level1_node.find_child(NodeKind.LEVEL2):
                 page_data.append(base_data.model_copy(deep=True))
-                if base_data.pos == "":
-                    for template_node in level2_node.find_content(
-                        NodeKind.TEMPLATE
-                    ):
-                        pos_data = get_pos_from_template(wxr, template_node)
-                        if pos_data is not None:
-                            page_data[-1].pos = pos_data["pos"]
-                            page_data[-1].tags.extend(pos_data.get("tags", []))
+                if base_data.pos == "unknown":
+                    pos_data = get_pos(wxr, level2_node)
+                    if pos_data is not None:
+                        page_data[-1].pos = pos_data["pos"]
+                        page_data[-1].tags.extend(pos_data.get("tags", []))
                 for level3_node in level2_node.find_child(NodeKind.LEVEL3):
                     parse_section(wxr, page_data, level3_node)
                 if page_data[-1] == base_data:
