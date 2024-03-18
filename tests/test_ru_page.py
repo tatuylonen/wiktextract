@@ -213,6 +213,7 @@ class TestRUPage(TestCase):
         )
 
     def test_plain_text_pos(self):
+        # "Прилагательное" -> "adj"
         self.wxr.wtp.start_page("anima")
         self.wxr.wtp.add_page("Шаблон:-eo-", 10, "Эсперанто")
         self.assertEqual(
@@ -232,6 +233,31 @@ class TestRUPage(TestCase):
                     "word": "anima",
                     "pos": "adj",
                     "senses": [{"glosses": ["душевный, духовный"]}],
+                },
+            ],
+        )
+
+    def test_suffix_pos_template(self):
+        self.wxr.wtp.start_page("-ен")
+        self.wxr.wtp.add_page("Шаблон:-ru-", 10, "Русский")
+        self.assertEqual(
+            parse_page(
+                self.wxr,
+                "-ен",
+                """= {{-ru-}} =
+== {{заголовок|I}} ==
+{{suffix ru|ен|оконч=ь}}
+=== Значение ===
+# при""",
+            ),
+            [
+                {
+                    "lang": "Русский",
+                    "lang_code": "ru",
+                    "word": "-ен",
+                    "pos": "suffix",
+                    "tags": ["morpheme"],
+                    "senses": [{"glosses": ["при"]}],
                 },
             ],
         )
