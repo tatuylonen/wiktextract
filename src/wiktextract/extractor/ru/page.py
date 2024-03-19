@@ -10,7 +10,7 @@ from wiktextract.wxr_context import WiktextractContext
 from .gloss import extract_gloss
 from .inflection import extract_inflection
 from .linkage import extract_linkages
-from .models import WordEntry
+from .models import WordEntry, Sense
 from .pronunciation import extract_pronunciation
 from .section_titles import LINKAGE_TITLES, POS_TEMPLATE_NAMES, POS_TITLES
 from .translation import extract_translations
@@ -295,4 +295,7 @@ def parse_page(
             if len(page_data) > 0 and page_data[-1] == base_data:
                 page_data.pop()
 
+    for d in page_data:
+        if len(d.senses) == 0:
+            d.senses.append(Sense(tags=["no-gloss"]))
     return [d.model_dump(exclude_defaults=True) for d in page_data]
