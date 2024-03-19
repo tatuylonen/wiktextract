@@ -49,5 +49,5 @@ def process_example_template(
                         sortid="ru/example/process_example_template/54",
                     )
 
-    if len(example.model_dump(exclude_defaults=True)) > 0:
+    if len(example.text) > 0:
         sense.examples.append(example)

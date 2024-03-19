@@ -46,7 +46,7 @@ class Sound(BaseModelWrap):
         default=[], description="Specifying the variant of the pronunciation"
     )
     raw_tags: list[str] = []
-    homophones: list[Linkage] = Field(
+    homophones: list[str] = Field(
         default=[], description="Words with same pronunciation"
     )
 

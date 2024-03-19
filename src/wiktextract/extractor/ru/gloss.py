@@ -58,13 +58,17 @@ GLOSS_TEMPLATES = {
 # Templates that specify a note for the gloss
 NOTE_TEMPLATES = {"пример", "помета", "??", "as ru"}
 
+IGNORED_TEMPLATES = {"нужен перевод"}
+
 
 def extract_gloss(
     wxr: WiktextractContext, word_entry: WordEntry, level_node: WikiNode
 ) -> None:
+    has_gloss_list = False
     for list_item in level_node.find_child_recursively(NodeKind.LIST_ITEM):
         process_gloss_nodes(wxr, word_entry, list_item.children)
-    if len(word_entry.senses) == 0:
+        has_gloss_list = True
+    if not has_gloss_list:
         # no list or empty list
         process_gloss_nodes(
             wxr,
@@ -87,7 +91,9 @@ def process_gloss_nodes(
 
     for child in gloss_nodes:
         if isinstance(child, WikiNode) and child.kind == NodeKind.TEMPLATE:
-            if child.template_name == "пример":
+            if child.template_name.lower() in IGNORED_TEMPLATES:
+                continue
+            elif child.template_name == "пример":
                 process_example_template(wxr, sense, child)
 
             elif child.template_name == "семантика":
