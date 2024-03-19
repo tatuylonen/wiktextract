@@ -49,6 +49,7 @@ POS_TEMPLATE_NAMES: POSSubtitleData = {
     "фам": {"pos": "name"},
     "част": {"pos": "particle"},
     "числ": {"pos": "num"},
+    "предл": {"pos": "prep"},
 }
 
 LINKAGE_TITLES: dict[str, str] = {
