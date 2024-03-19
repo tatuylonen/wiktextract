@@ -10,7 +10,7 @@ from wiktextract.wxr_context import WiktextractContext
 from .gloss import extract_gloss
 from .inflection import extract_inflection
 from .linkage import extract_linkages
-from .models import WordEntry, Sense
+from .models import Sense, WordEntry
 from .pronunciation import extract_pronunciation
 from .section_titles import LINKAGE_TITLES, POS_TEMPLATE_NAMES, POS_TITLES
 from .translation import extract_translations
