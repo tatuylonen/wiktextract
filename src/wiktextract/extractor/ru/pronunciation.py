@@ -7,7 +7,7 @@ from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
 from ..share import create_audio_url_dict
-from .models import Linkage, Sound, WordEntry
+from .models import Sound, WordEntry
 
 
 def process_transcription_template(
@@ -209,7 +209,7 @@ def extract_homophones(
 ):
     homophones_raw = clean_node(wxr, {}, template_params.get("омофоны", ""))
     homophones = [
-        Linkage(word=h.strip()) for h in homophones_raw.split(",") if h.strip()
+        h.strip() for h in homophones_raw.split(",") if h.strip() != ""
     ]
     if homophones:
         if isinstance(sounds, list):
