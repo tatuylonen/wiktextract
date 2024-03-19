@@ -157,8 +157,11 @@ def parse_section(
         page_data[-1].pos = pos_data["pos"]
         page_data[-1].tags.extend(pos_data.get("tags", []))
         extract_gloss(wxr, page_data[-1], level3_node)
-    elif section_title == "произношение" and wxr.config.capture_pronunciation:
-        extract_pronunciation(wxr, page_data[-1], level3_node)
+    elif section_title == "произношение":
+        if wxr.config.capture_pronunciation:
+            extract_pronunciation(wxr, page_data[-1], level3_node)
+        for next_level_node in level3_node.find_child(LEVEL_KIND_FLAGS):
+            parse_section(wxr, page_data, next_level_node)
     elif section_title == "семантические свойства":  # Semantic properties
         process_semantic_section(wxr, page_data, level3_node)
     elif section_title == "значение":

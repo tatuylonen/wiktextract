@@ -131,3 +131,30 @@ class TestRUGloss(unittest.TestCase):
                 },
             ],
         )
+
+    def test_gloss_under_sounds_section(self):
+        self.wxr.wtp.start_page("туп")
+        self.wxr.wtp.add_page("Шаблон:-tt-", 10, "Татарский")
+        self.assertEqual(
+            parse_page(
+                self.wxr,
+                "туп",
+                """= {{-tt-}} =
+== {{з|II}} ==
+=== Морфологические и синтаксические свойства ===
+{{сущ tt задн согласн глух|туп|слоги={{по слогам|туп}}|alt=tup}}
+=== Произношение ===
+{{transcription|}}
+==== Значение ====
+# ''подр.'' [[топ]]""",
+            ),
+            [
+                {
+                    "lang": "Татарский",
+                    "lang_code": "tt",
+                    "word": "туп",
+                    "pos": "noun",
+                    "senses": [{"glosses": ["подр. топ"]}],
+                },
+            ],
+        )
