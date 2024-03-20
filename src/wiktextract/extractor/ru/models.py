@@ -86,6 +86,7 @@ class Sense(BaseModelWrap):
         description="List of tags affecting the word sense.",
     )
     raw_tags: list[str] = []
+    topics: list[str] = []
     notes: list[str] = Field(
         default=[],
         description="List of notes for the word sense. Usually describing usage.",
