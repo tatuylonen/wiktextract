@@ -211,13 +211,69 @@ SLANG_TOPICS = {
     # "жарг. гом.": "жаргон гомосексуалов",
 }
 
+# Грамматические категории
+GRAMMATICAL_TAGS = {
+    "3л.": "impersonal",
+    "адъектив.": "adjective",
+    "безл.": "impersonal",
+    "вводн. сл.": "parenthetic",
+    "вин. п.": "accusative",
+    "вопр.": "interrogative",
+    # "восклиц.": "в восклицательных предложениях",
+    "гл.": "verb",
+    "дат. п.": "dative",
+    "ед. ч.": "singular",
+    "ж. р.": "feminine",
+    "женск.": "feminine",
+    "им. п.": "nominative",
+    # "исх. п.": "исходный падеж",
+    "исч.": "countable",
+    "м. р.": "masculine",
+    "местн. п.": "locative",
+    "метоним.": "metonymically",
+    "мн. ч.": "plural",
+    # "многокр.": "",
+    # "нареч.": "",
+    "неисч.": "uncountable",
+    "неодуш.": "inanimate",
+    "неперех.": "intransitive",
+    "нескл.": "indeclinable",
+    # "обобщ": "",
+    # "общ.": "",
+    # "однокр.": "",
+    "одуш.": "animate",
+    # "отриц.": "",
+    "перех.": "transitive",
+    # "повел.": "",
+    # "превосх. ст.": "",  # Шаблон:превосх.
+    "предик.": "predicative",
+    # "предл. п.": "",
+    # "прил.": "",
+    # "прич.": "",  # Шаблон:прич.
+    # "прош.": "",
+    # "разд. п.": "",
+    # "род. п.": "",
+    "собир.": "collective",
+    # "сокр.": "",  # Шаблон:аббр.
+    # "ср. р.": "",
+    # "сравн. ст.": "",  # Шаблон:сравн.
+    "статив.": "stative",
+    # "страд."; "",  # Шаблон:страд.
+    "субстантивир.": "substantive",
+    # "сущ.": "",
+    # "счётн.": "",  # Шаблон:счётн.
+    # "тв. п.": "",
+}
+
+ALL_TAGS = {**STYLE_TAGS, **GRAMMATICAL_TAGS}
+
 
 def translate_raw_tags(data: WordEntry) -> None:
     raw_tags = []
     for raw_tag in data.raw_tags:
         raw_tag_lower = raw_tag.lower()
-        if raw_tag_lower in STYLE_TAGS:
-            tr_tag = STYLE_TAGS[raw_tag_lower]
+        if raw_tag_lower in ALL_TAGS:
+            tr_tag = ALL_TAGS[raw_tag_lower]
             if isinstance(tr_tag, str):
                 data.tags.append(tr_tag)
             elif isinstance(tr_tag, list):
