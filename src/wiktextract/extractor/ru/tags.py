@@ -3,6 +3,7 @@ from typing import Union
 from .models import WordEntry
 
 # https://ru.wiktionary.org/wiki/Викисловарь:Условные_сокращения
+# Стиль
 STYLE_TAGS: dict[str, Union[str, list[str]]] = {
     "бран.": "offensive",
     "вульг.": "vulgar",
@@ -60,6 +61,74 @@ STYLE_TAGS: dict[str, Union[str, list[str]]] = {
     # "эррат.": "эрративное",
 }
 
+# Предметные области
+TOPIC_TAGS = {
+    "авиац.": "aeronautics",
+    "автомоб.": "automotive",
+    # "агрон.": "агрономическое",
+    "алхим.": "pseudoscience",
+    "альп.": "sports",
+    "анат.": "medicine",
+    "антроп.": "anthropology",
+    "артилл.": "weaponry",
+    "археол.": "history",
+    "архит.": "architecture",
+    "астрол.": "astrology",
+    "астрон.": "astronomy",
+    "библейск.": "religion",
+    "биол.": "biology",
+    "биохим.": "biochemistry",
+    "ботан.": "botany",
+    "бухг.": "finance",
+    "вет.": "zoology pathology",
+    "воен.": "military",
+    "гастрон.": "medicine",
+    "генет.": ["biology", "medicine"],
+    "геогр.": "geography",
+    "геод.": "geography",
+    "геол.": "geology",
+    "геометр.": "geometry",
+    "геофиз.": "geology",
+    "геральд.": ["hobbies", "nobility"],
+    "гидрол.": "geography",
+    "гидротехн.": "engineering",
+    "гляциол.": "geography",
+    "горн.": "mining",
+    "дипл.": "politics",
+    "ж.-д.": "railways",
+    "живоп.": "arts",
+    # "животн.": "животноводство",
+    "зоол.": "zoology",
+    "игр.": "games",
+    "информ.": "computing",
+    "искусств.": "art-history",
+    "ислам.": "Islam",
+    "ихтиол.": "ichthyology",
+    # "йогич.": "йогическое",
+    "карт.": "card-games",
+    "керам.": ["chemistry", "engineering"],
+    "кино": "film",
+    "кинол.": "dogs",
+    "комп.": "computing",
+    "косм.": "astronomy",
+    "кулин.": "cuisine",
+    # "культурол.": "культурологическое",
+    "лес.": "business",
+    "лингв.": "linguistics",
+    "матем.": "mathematics",
+    "машин.": "engineering",
+    "мед.": "medicine",
+    "металл.": "metallurgy",
+    "метеорол.": "meteorology",
+    "мех.": "mechanical-engineering",
+    "микробиол.": "microbiology",
+    "минер.": "mineralogy",
+    "мифол,": "mythology",
+    "морск.": "nautical",
+    "муз.": "music",
+    # "нефтегаз.": "нефтегазовая промышленность и нефтепереработка",
+}
+
 
 def translate_raw_tags(data: WordEntry) -> None:
     raw_tags = []
@@ -71,4 +140,6 @@ def translate_raw_tags(data: WordEntry) -> None:
                 data.tags.append(tr_tag)
             elif isinstance(tr_tag, list):
                 data.tags.extend(tr_tag)
+        elif hasattr(data, "topics") and raw_tag_lower in TOPIC_TAGS:
+            data.topics.append(TOPIC_TAGS[raw_tag_lower])
     data.raw_tags = raw_tags
