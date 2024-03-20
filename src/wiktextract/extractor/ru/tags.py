@@ -193,6 +193,24 @@ TOPICS = {
     "юр.": "legal",
 }
 
+# Жаргон
+SLANG_TOPICS = {
+    "автомоб. жарг.": "motorcycling",
+    "арест.": "prison",
+    "воен. жарг.": "military",
+    "жарг. аним.": "anime",
+    # "жарг. викип.": "жаргон википроектов"
+    "интернет.": "Internet",
+    "комп. жарг.": "computer",
+    # "студ. жарг.": "студенческий жаргон",
+    "техн. жарг.": "technical",
+    "крим. и крим. жарг.": "criminology",
+    "полит. жарг.": "politics",
+    "жарг. нарк.": "drugs",
+    "жарг. ЛГБТ": "LGBT",
+    # "жарг. гом.": "жаргон гомосексуалов",
+}
+
 
 def translate_raw_tags(data: WordEntry) -> None:
     raw_tags = []
@@ -204,6 +222,11 @@ def translate_raw_tags(data: WordEntry) -> None:
                 data.tags.append(tr_tag)
             elif isinstance(tr_tag, list):
                 data.tags.extend(tr_tag)
-        elif hasattr(data, "topics") and raw_tag_lower in TOPICS:
-            data.topics.append(TOPICS[raw_tag_lower])
+        elif hasattr(data, "topics"):
+            if raw_tag_lower in TOPICS:
+                data.topics.append(TOPICS[raw_tag_lower])
+            elif raw_tag_lower in SLANG_TOPICS:
+                data.topics.append(SLANG_TOPICS[raw_tag_lower])
+                if "slang" not in data.tags:
+                    data.tags.append("slang")
     data.raw_tags = raw_tags

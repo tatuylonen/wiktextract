@@ -200,3 +200,38 @@ class TestRUGloss(unittest.TestCase):
                 },
             ],
         )
+
+    def test_gloss_slang_topic(self):
+        self.wxr.wtp.start_page("фуражка")
+        self.wxr.wtp.add_page("Шаблон:-ru-", 10, "Русский")
+        self.wxr.wtp.add_page("Шаблон:воен. жарг.", 10, "воен. жарг.")
+        self.assertEqual(
+            parse_page(
+                self.wxr,
+                "фуражка",
+                """= {{-ru-}} =
+=== Морфологические и синтаксические свойства ===
+{{сущ-ru}}
+=== Семантические свойства ===
+==== Значение ====
+# {{воен. жарг.|ru}} то же, что фуражная шапка""",
+            ),
+            [
+                {
+                    "lang": "Русский",
+                    "lang_code": "ru",
+                    "word": "фуражка",
+                    "pos": "noun",
+                    "senses": [
+                        {
+                            "glosses": ["то же, что фуражная шапка"],
+                            "raw_glosses": [
+                                "воен. жарг. то же, что фуражная шапка"
+                            ],
+                            "tags": ["slang"],
+                            "topics": ["military"],
+                        }
+                    ],
+                },
+            ],
+        )
