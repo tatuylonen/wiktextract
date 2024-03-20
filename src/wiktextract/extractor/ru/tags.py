@@ -62,7 +62,7 @@ STYLE_TAGS: dict[str, Union[str, list[str]]] = {
 }
 
 # Предметные области
-TOPIC_TAGS = {
+TOPICS = {
     "авиац.": "aeronautics",
     "автомоб.": "automotive",
     # "агрон.": "агрономическое",
@@ -89,7 +89,7 @@ TOPIC_TAGS = {
     "геол.": "geology",
     "геометр.": "geometry",
     "геофиз.": "geology",
-    "геральд.": ["hobbies", "nobility"],
+    "геральд.": "heraldry",
     "гидрол.": "geography",
     "гидротехн.": "engineering",
     "гляциол.": "geography",
@@ -127,6 +127,70 @@ TOPIC_TAGS = {
     "морск.": "nautical",
     "муз.": "music",
     # "нефтегаз.": "нефтегазовая промышленность и нефтепереработка",
+    "нумизм.": "numismatics",
+    "океан.": "oceanography",
+    "оккульт.": "mysticism",
+    "опт.": ["physics", "engineering"],
+    "орнитол.": "ornithology",
+    "охотн.": "hunting",
+    "палеонт.": "paleontology",
+    "паразит.": "medicine",
+    "парикмах.": "hairdressing",
+    "плотн.": "carpentry",
+    "полигр.": "printing",
+    "полит.": "politics",
+    "портн.": "textiles",
+    "прогр.": "programming",
+    "психиатр.": "psychiatry",
+    "психол.": "psychology",
+    "пчел.": "agriculture",
+    "радио.": ["radio", "engineering"],
+    "радиоэл.": ["radio", "electricity"],
+    "рекл.": "marketing",
+    "религ.": "religion",
+    "рыбол.": "fishing",
+    "с.-х.": "agriculture",
+    "сексол.": "sexuality",
+    # "скорн.": "скорняжное дело",
+    "социол.": "sociology",
+    # "спелеол.": "спелеологический",
+    "спорт.": "sports",
+    "стат.": "statistics",
+    "столярн.": "carpentry",
+    "строит.": "construction",
+    "театр.": "theater",
+    "текст.": "textiles",
+    "телеком.": "telecommunications",
+    "техн.": "engineering",
+    "торг.": "commerce",
+    "управл.": "management",
+    "фант.": "fantasy",
+    "фарм.": "pharmacology",
+    "физ.": "physics",
+    "физиол.": "physiology",
+    "филат.": "philately",
+    "филол.": "philology",
+    "филос.": "philosophy",
+    "фин.": "finance",
+    "фолькл.": "folklore",
+    "фотогр.": "photography",
+    "хим.": "chemistry",
+    "хоз.": "economics",
+    # "хореогр.": "хореографическое",
+    "церк.": "religion",
+    "цирк.": "circus",
+    "цитол.": "cytology",
+    "шахм.": "chess",
+    "швейн.": "sewing",
+    "экол.": "ecology",
+    "экон.": "economics",
+    "эл.-техн.": "electrical-engineering",
+    "эл.-энерг.": "electricity",
+    "энтомол.": "entomology",
+    "этногр": "ethnography",
+    "этнолог.": "ethnology",
+    "ювел.": "jewelry",
+    "юр.": "legal",
 }
 
 
@@ -140,6 +204,6 @@ def translate_raw_tags(data: WordEntry) -> None:
                 data.tags.append(tr_tag)
             elif isinstance(tr_tag, list):
                 data.tags.extend(tr_tag)
-        elif hasattr(data, "topics") and raw_tag_lower in TOPIC_TAGS:
-            data.topics.append(TOPIC_TAGS[raw_tag_lower])
+        elif hasattr(data, "topics") and raw_tag_lower in TOPICS:
+            data.topics.append(TOPICS[raw_tag_lower])
     data.raw_tags = raw_tags
