@@ -66,7 +66,7 @@ class TestRUTranslation(unittest.TestCase):
                     "lang": "Итальянский",
                     "lang_code": "it",
                     "sense": "относящийся к России, россиянам",
-                    "raw_tags": ["форма (формы) мужского рода"],
+                    "tags": ["masculine"],
                     "word": "russo",
                 },
                 {

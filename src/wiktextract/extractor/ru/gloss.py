@@ -128,7 +128,10 @@ def process_gloss_nodes(
                 sense.tags.append(TAG_GLOSS_TEMPLATES[child.template_name])
                 clean_gloss_children.append(child)
                 raw_gloss_children.append(child)
-            elif child.template_name.endswith("."):
+            elif (
+                child.template_name.endswith(".")
+                or child.template_name == "помета"
+            ):
                 # Assume node is tag template
                 tag_templates.append(child)
                 raw_gloss_children.append(child)

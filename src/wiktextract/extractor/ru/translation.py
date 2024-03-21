@@ -5,6 +5,7 @@ from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
 from .models import Translation, WordEntry
+from .tags import translate_raw_tags
 
 
 def extract_translations(
@@ -61,6 +62,7 @@ def process_translate_block_template(
         if translation.word != "" and translation.lang != "":
             if translation.lang_code == "":
                 translation.lang_code = name_to_code(translation.lang, "ru")
+            translate_raw_tags(translation)
             word_entry.translations.append(translation)
 
 
@@ -77,15 +79,10 @@ def process_translate_list_span_tag(
                 translation.word = clean_node(wxr, None, node)
             elif isinstance(node, HTMLNode) and node.tag in ["span", "i"]:
                 # gender tag
-                title = node.attrs.get("title", "")
-                if len(title) > 0:
-                    translation.raw_tags.append(title)
+                tag = clean_node(wxr, None, node)
+                if len(tag) > 0:
+                    translation.raw_tags.append(tag)
                     added_tags_num += 1
-                else:
-                    tag = clean_node(wxr, None, node)
-                    if len(tag) > 0:
-                        translation.raw_tags.append(tag)
-                        added_tags_num += 1
             elif node.kind == NodeKind.ITALIC:
                 translation.raw_tags.append(clean_node(wxr, None, node))
                 added_tags_num += 1
@@ -102,6 +99,7 @@ def process_translate_list_span_tag(
                         translation.lang_code = name_to_code(
                             translation.lang, "ru"
                         )
+                    translate_raw_tags(translation)
                     word_entry.translations.append(
                         translation.model_copy(deep=True)
                     )
