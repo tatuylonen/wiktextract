@@ -265,7 +265,17 @@ GRAMMATICAL_TAGS = {
     # "тв. п.": "",
 }
 
-ALL_TAGS = {**STYLE_TAGS, **GRAMMATICAL_TAGS}
+# Прочие сокращения
+OTHER_TAGS = {
+    "букв.": "literary",
+    # "искаж.": "искажённое",
+    "неправ.": "irregular",
+    "перен.": "figuratively",
+    "редк.": "rare",
+    # "тж.": "",  # Шаблон:тж.
+}
+
+ALL_TAGS = {**STYLE_TAGS, **GRAMMATICAL_TAGS, **OTHER_TAGS}
 
 
 def translate_raw_tags(data: WordEntry) -> None:
