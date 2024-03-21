@@ -222,7 +222,7 @@ GRAMMATICAL_TAGS = {
     # "восклиц.": "в восклицательных предложениях",
     "гл.": "verb",
     "дат. п.": "dative",
-    "ед. ч.": "singular",
+    "ед. ч.": "singular",  # Шаблон:ед
     "ж. р.": "feminine",
     "женск.": "feminine",
     "им. п.": "nominative",
@@ -231,7 +231,7 @@ GRAMMATICAL_TAGS = {
     "м. р.": "masculine",
     "местн. п.": "locative",
     "метоним.": "metonymically",
-    "мн. ч.": "plural",
+    "мн. ч.": "plural",  # Шаблон:мн, Шаблон:мн.
     "неисч.": "uncountable",
     "неодуш.": "inanimate",
     "неперех.": "intransitive",
@@ -254,6 +254,15 @@ GRAMMATICAL_TAGS = {
     "субстантивир.": "substantive",
     # "сущ.": "",
     # "тв. п.": "",
+    # https://ru.wiktionary.org/wiki/Категория:Шаблоны:Условные_сокращения
+    "м.": "masculine",  # Шаблон:m
+    "ср.": "neuter",  # Шаблон:n
+    "ж.": "feminine",  # Шаблон:f
+    "ж. мн.": ["feminine", "plural"],  # Шаблон:f.pl
+    "несов.": "imperfective",  # Шаблон:impf
+    "м./ж.": ["masculine", "feminine"],  # Шаблон:m/f
+    "ср./м.": ["neuter", "masculine"],  # Шаблон:n/m
+    "сов.": "perfective",  # Шаблон:pf
 }
 
 # Прочие сокращения
