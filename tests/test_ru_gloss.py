@@ -16,6 +16,7 @@ class TestRUGloss(unittest.TestCase):
                 dump_file_lang_code="ru", capture_language_codes=None
             ),
         )
+        self.wxr.wtp.add_page("Шаблон:-ru-", 10, "Русский")
 
     def tearDown(self) -> None:
         self.wxr.wtp.close_db_conn()
@@ -161,7 +162,6 @@ class TestRUGloss(unittest.TestCase):
 
     def test_gloss_topic(self):
         self.wxr.wtp.start_page("прыгать")
-        self.wxr.wtp.add_page("Шаблон:-ru-", 10, "Русский")
         self.wxr.wtp.add_page(
             "Шаблон:=",
             10,
@@ -203,7 +203,6 @@ class TestRUGloss(unittest.TestCase):
 
     def test_gloss_slang_topic(self):
         self.wxr.wtp.start_page("фуражка")
-        self.wxr.wtp.add_page("Шаблон:-ru-", 10, "Русский")
         self.wxr.wtp.add_page("Шаблон:воен. жарг.", 10, "воен. жарг.")
         self.assertEqual(
             parse_page(
@@ -230,6 +229,36 @@ class TestRUGloss(unittest.TestCase):
                             ],
                             "tags": ["slang"],
                             "topics": ["military"],
+                        }
+                    ],
+                },
+            ],
+        )
+
+    def test_tag_gloss_template(self):
+        self.wxr.wtp.start_page("перехаживать")
+        self.wxr.wtp.add_page("Шаблон:многокр.", 10, "многокр. к переходить")
+        self.assertEqual(
+            parse_page(
+                self.wxr,
+                "перехаживать",
+                """= {{-ru-}} =
+=== Морфологические и синтаксические свойства ===
+{{гл ru 1a}}
+=== Семантические свойства ===
+==== Значение ====
+# {{многокр.|переходить}} """,
+            ),
+            [
+                {
+                    "lang": "Русский",
+                    "lang_code": "ru",
+                    "word": "перехаживать",
+                    "pos": "verb",
+                    "senses": [
+                        {
+                            "glosses": ["многокр. к переходить"],
+                            "tags": ["iterative"],
                         }
                     ],
                 },
