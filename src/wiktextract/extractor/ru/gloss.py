@@ -61,6 +61,19 @@ NOTE_TEMPLATES = {"пример", "помета", "??", "as ru"}
 
 IGNORED_TEMPLATES = {"нужен перевод"}
 
+TAG_GLOSS_TEMPLATES = {
+    "многокр.": "iterative",
+    "нареч.": "adverb",
+    "наречие": "adverb",  # redirect to "нареч."
+    "однокр.": "semelefactive",
+    "превосх.": "superlative",
+    "прич.": "participle",
+    "сокр.": "abbreviation",
+    "сравн.": "comparative",
+    "страд.": "passive",
+    "счётн.": "numeral",
+}
+
 
 def extract_gloss(
     wxr: WiktextractContext, word_entry: WordEntry, level_node: WikiNode
@@ -111,11 +124,14 @@ def process_gloss_nodes(
             elif child.template_name in GLOSS_TEMPLATES:
                 clean_gloss_children.append(child)
                 raw_gloss_children.append(child)
+            elif child.template_name in TAG_GLOSS_TEMPLATES:
+                sense.tags.append(TAG_GLOSS_TEMPLATES[child.template_name])
+                clean_gloss_children.append(child)
+                raw_gloss_children.append(child)
             elif child.template_name.endswith("."):
                 # Assume node is tag template
                 tag_templates.append(child)
                 raw_gloss_children.append(child)
-
         else:
             clean_gloss_children.append(child)
             raw_gloss_children.append(child)
@@ -131,9 +147,9 @@ def process_gloss_nodes(
         sense.raw_glosses.append(raw_gloss)
 
     for tag_template in tag_templates:
-        tag = clean_node(wxr, None, tag_template)
-        if tag != "":
-            sense.raw_tags.append(tag)
+        raw_tag = clean_node(wxr, None, tag_template)
+        if raw_tag != "":
+            sense.raw_tags.append(raw_tag)
 
     for note_template in note_templates:
         note = clean_node(wxr, None, note_template)

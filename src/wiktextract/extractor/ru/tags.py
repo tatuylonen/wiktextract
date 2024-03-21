@@ -232,40 +232,41 @@ GRAMMATICAL_TAGS = {
     "местн. п.": "locative",
     "метоним.": "metonymically",
     "мн. ч.": "plural",
-    # "многокр.": "",
-    # "нареч.": "",
     "неисч.": "uncountable",
     "неодуш.": "inanimate",
     "неперех.": "intransitive",
     "нескл.": "indeclinable",
     # "обобщ": "",
     # "общ.": "",
-    # "однокр.": "",
     "одуш.": "animate",
     # "отриц.": "",
     "перех.": "transitive",
     # "повел.": "",
-    # "превосх. ст.": "",  # Шаблон:превосх.
     "предик.": "predicative",
     # "предл. п.": "",
     # "прил.": "",
-    # "прич.": "",  # Шаблон:прич.
     # "прош.": "",
     # "разд. п.": "",
     # "род. п.": "",
     "собир.": "collective",
-    # "сокр.": "",  # Шаблон:аббр.
     # "ср. р.": "",
-    # "сравн. ст.": "",  # Шаблон:сравн.
     "статив.": "stative",
-    # "страд."; "",  # Шаблон:страд.
     "субстантивир.": "substantive",
     # "сущ.": "",
-    # "счётн.": "",  # Шаблон:счётн.
     # "тв. п.": "",
 }
 
-ALL_TAGS = {**STYLE_TAGS, **GRAMMATICAL_TAGS}
+# Прочие сокращения
+OTHER_TAGS = {
+    "букв.": "literary",
+    # "искаж.": "искажённое",
+    "неправ.": "irregular",
+    "перен.": "figuratively",
+    "редк.": "rare",
+    # "тж.": "",  # Шаблон:тж.
+}
+
+ALL_TAGS = {**STYLE_TAGS, **GRAMMATICAL_TAGS, **OTHER_TAGS}
 
 
 def translate_raw_tags(data: WordEntry) -> None:
@@ -285,4 +286,6 @@ def translate_raw_tags(data: WordEntry) -> None:
                 data.topics.append(SLANG_TOPICS[raw_tag_lower])
                 if "slang" not in data.tags:
                     data.tags.append("slang")
+        else:
+            raw_tags.append(raw_tag)
     data.raw_tags = raw_tags
