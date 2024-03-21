@@ -295,4 +295,6 @@ def translate_raw_tags(data: WordEntry) -> None:
                 data.topics.append(SLANG_TOPICS[raw_tag_lower])
                 if "slang" not in data.tags:
                     data.tags.append("slang")
+        else:
+            raw_tags.append(raw_tag)
     data.raw_tags = raw_tags
