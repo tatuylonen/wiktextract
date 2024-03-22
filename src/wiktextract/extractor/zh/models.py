@@ -58,6 +58,7 @@ class Sound(ChineseBaseModel):
     ogg_url: str = ""
     mp3_url: str = ""
     opus_url: str = ""
+    flac_url: str = ""
     tags: list[str] = []
     raw_tags: list[str] = []
     homophone: str = ""
