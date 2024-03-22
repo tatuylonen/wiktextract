@@ -1,136 +1,136 @@
 {
   "Template:-abbr-": {
-    "body": "===缩写===",
+    "body": "===缩写===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Template:-adjn-": {
-    "body": "===形容動詞===",
+    "body": "===形容動詞===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Template:-art-": {
-    "body": "===冠词===",
+    "body": "===冠词===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Template:-asyn-": {
-    "body": "===形容词===",
+    "body": "===形容词===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Template:-c-": {
-    "body": "===连词===",
+    "body": "===连词===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Template:-det-": {
-    "body": "===限定词===",
+    "body": "===限定词===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Template:-interj-": {
-    "body": "===叹词===",
+    "body": "===叹词===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Template:-meas-": {
-    "body": "===量词===",
+    "body": "===量词===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Template:-n p-": {
-    "body": "===專有名詞===",
+    "body": "===專有名詞===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Template:-n2-": {
-    "body": "===名词===",
+    "body": "===名词===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Template:-nsyn-": {
-    "body": "===名词===",
+    "body": "===名词===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Template:-p-": {
-    "body": "===代词===",
+    "body": "===代词===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Template:-phr-": {
-    "body": "===片語===",
+    "body": "===片語===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Template:-prep-": {
-    "body": "===介词===",
+    "body": "===介词===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Template:-sx-": {
-    "body": "===缩写===",
+    "body": "===缩写===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Template:-v2-": {
-    "body": "===动词===",
+    "body": "===动词===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Template:-verb-": {
-    "body": "===動詞===",
+    "body": "===動詞===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Template:-vsyn-": {
-    "body": "===动词===",
+    "body": "===动词===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Template:-vt-": {
-    "body": "===及物動詞===",
+    "body": "===及物動詞===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Template:=a=": {
-    "body": "===形容詞===",
+    "body": "===形容詞===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Template:=adv=": {
-    "body": "===副词===",
+    "body": "===副词===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Template:=c=": {
-    "body": "===连词===",
+    "body": "===连词===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Template:=i=": {
-    "body": "===感叹词===",
+    "body": "===感叹词===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Template:=n=": {
-    "body": "===名词===",
+    "body": "===名词===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Template:=p=": {
-    "body": "===代词===",
+    "body": "===代词===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Template:=part=": {
-    "body": "===助词===",
+    "body": "===助词===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Template:=v=": {
-    "body": "===动词===",
+    "body": "===动词===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
@@ -139,12 +139,12 @@
     "namespace_id": 10
   },
   "Template:发音": {
-    "body": "===发音===",
+    "body": "===发音===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Template:漢": {
-    "body": "==漢字==",
+    "body": "==漢字==\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
@@ -153,8 +153,12 @@
     "namespace_id": 10
   },
   "Template:語言標題": {
-    "body": "=={{{l|{{{語|{{{语|}}}}}}}}}==",
+    "body": "=={{{l|{{{語|{{{语|}}}}}}}}}==\n",
     "namespace_id": 10,
     "need_pre_expand": true
-  }
+  },
+  "Template:Dead link": {
+    "body": "",
+    "namespace_id": 10
+  },
 }

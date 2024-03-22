@@ -129,6 +129,7 @@ POS_TITLES: POSSubtitleData = {
     "汉语拼音": {"pos": "romanization"},
     "注音符號": {"pos": "character"},
     "漢字": {"pos": "character", "tags": ["han"]},
+    "汉字": {"pos": "character", "tags": ["han"]},
     "片語": {"pos": "phrase"},
     "物主代词": {"pos": "pron"},
     "環綴": {"pos": "circumfix", "tags": ["morpheme"]},
@@ -168,6 +169,8 @@ POS_TITLES: POSSubtitleData = {
         # Means 'definition', some pages don't have POS but use this title
         "pos": "unknown"
     },
+    "释义": {"pos": "unknown"},  # simplify form of "釋義"
+    "解释": {"pos": "unknown"},
     "量詞": {"pos": "classifier"},
     "量词": {"pos": "classifier"},
     "間綴": {"pos": "interfix", "tags": ["morpheme"]},

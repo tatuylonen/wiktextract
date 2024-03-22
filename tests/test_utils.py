@@ -64,7 +64,7 @@ class UtilsTests(unittest.TestCase):
 
     def test_audio_transcode_url(self):
         sound_data = create_audio_url_dict(
-            "LL-Q150 (fra)-DenisdeShawi-bonjour.wav"
+            "LL-Q150 (fra)-DenisdeShawi-bonjour.wav \u200e"
         )
         self.assertEqual(
             sound_data,
