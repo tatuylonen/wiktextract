@@ -156,5 +156,9 @@
     "body": "=={{{l|{{{語|{{{语|}}}}}}}}}==\n",
     "namespace_id": 10,
     "need_pre_expand": true
-  }
+  },
+  "Template:Dead link": {
+    "body": "",
+    "namespace_id": 10
+  },
 }
