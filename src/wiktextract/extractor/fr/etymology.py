@@ -56,7 +56,7 @@ def extract_etymology(
             wxr, None, level_node.children[:level_node_index]
         )
         if len(etymology_text) > 0:
-            etymology_dict[None].append(etymology_text)
+            etymology_dict[""].append(etymology_text)
 
     return etymology_dict
 
