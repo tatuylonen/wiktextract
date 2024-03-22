@@ -340,6 +340,8 @@ def check_json_data(
             'missing "word" or "title" field in data',
         )
         return
+    if "title" in dt:
+        return  # redirect pages don't have following fields
     lang = dt.get("lang")
     if not lang:
         check_error(wxr, dt, word, None, None,

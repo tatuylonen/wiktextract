@@ -183,8 +183,6 @@ def process_pos_block(
         )
         if gloss_text != "":
             page_data[-1].senses.append(Sense(glosses=[gloss_text]))
-    if len(page_data[-1].senses) == 0:
-        page_data[-1].senses.append(Sense(tags=["no-gloss"]))
 
 
 def parse_page(
@@ -223,6 +221,7 @@ def parse_page(
                     word=wxr.wtp.title,
                     lang_code=lang_code,
                     lang=lang_name,
+                    pos="unknown",
                     categories=categories.get("categories", []),
                 )
                 etymology_data: Optional[EtymologyData] = None
@@ -236,4 +235,7 @@ def parse_page(
                 if etymology_data is not None:
                     insert_etymology_data(lang_code, page_data, etymology_data)
 
+    for data in page_data:
+        if len(data.senses) == 0:
+            data.senses.append(Sense(tags=["no-gloss"]))
     return [m.model_dump(exclude_defaults=True) for m in page_data]

@@ -198,4 +198,4 @@ class TestEtymology(TestCase):
         self.wxr.wtp.start_page("autrice")
         root = self.wxr.wtp.parse("Paragraph 1\nParagraph 2")
         etymology_data = extract_etymology(self.wxr, root)
-        self.assertEqual(etymology_data, {None: ["Paragraph 1\nParagraph 2"]})
+        self.assertEqual(etymology_data, {"": ["Paragraph 1\nParagraph 2"]})

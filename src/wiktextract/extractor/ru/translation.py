@@ -16,12 +16,6 @@ def extract_translations(
     for template_node in level3_node.find_child(NodeKind.TEMPLATE):
         if template_node.template_name == "перев-блок":
             process_translate_block_template(wxr, word_entry, template_node)
-        else:
-            wxr.wtp.debug(
-                f"Found unexpected template {template_node.template_name} in translation section",
-                sortid="extractor/ru/translation/extract_translations/100",
-            )
-            pass
 
 
 def process_translate_block_template(
