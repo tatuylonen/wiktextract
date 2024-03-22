@@ -53,6 +53,7 @@ def split_chinese_variants(text: str) -> Iterable[tuple[Optional[str], str]]:
 
 
 def create_audio_url_dict(filename: str) -> dict[str, str]:
+    filename = filename.strip()
     file_url_key = filename[filename.rfind(".") + 1 :].lower() + "_url"
     filename_without_prefix = filename.removeprefix("File:")
     audio_dict = {
