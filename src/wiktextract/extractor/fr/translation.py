@@ -142,7 +142,8 @@ def process_translation_templates(
             translation_data.lang = code_to_name(
                 translation_data.lang_code, "fr"
             ).capitalize()
-        page_data[-1].translations.append(translation_data)
+        if len(translation_data.word) > 0:
+            page_data[-1].translations.append(translation_data)
     elif len(page_data[-1].translations) > 0:
         tag = clean_node(wxr, None, template_node).strip("()")
         if len(tag) > 0:
