@@ -164,6 +164,7 @@ SENSE_TAGS: dict[str, str] = {
     "familier": "colloquial",
     "par extension": "broadly",
     "en particulier": "especially",
+    "informel": "informal",
 }
 
 # https://en.wikipedia.org/wiki/Voice_(grammar)

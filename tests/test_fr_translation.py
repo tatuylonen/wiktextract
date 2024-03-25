@@ -73,7 +73,7 @@ class TestTranslation(TestCase):
                         "lang": "Arabe",
                         "word": "مرحبًا",
                         "roman": "mrḥbā",
-                        "raw_tags": ["Informel"],
+                        "tags": ["informal"],
                     },
                 ],
             },

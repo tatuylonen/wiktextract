@@ -201,7 +201,7 @@ def process_zh_lien_template(
     # https://fr.wiktionary.org/wiki/Modèle:zh-lien
     linkage_data.word = clean_node(wxr, None, node.template_parameters.get(1))
     linkage_data.roman = clean_node(
-        wxr, None, node.template_parameters.get(2)
+        wxr, None, node.template_parameters.get(2, "")
     )  # pinyin
     traditional_form = clean_node(
         wxr, None, node.template_parameters.get(3, "")
