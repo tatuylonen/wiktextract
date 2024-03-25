@@ -7,6 +7,7 @@ from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
 from .models import Translation, WordEntry
+from .tags import translate_raw_tags
 
 
 def extract_translation(
@@ -67,6 +68,7 @@ def process_italic_node(
         tag = tag.strip("()")
         if len(tag) > 0:
             page_data[-1].translations[-1].raw_tags.append(tag)
+            translate_raw_tags(page_data[-1].translations[-1])
 
 
 def process_translation_templates(
@@ -148,6 +150,7 @@ def process_translation_templates(
         tag = clean_node(wxr, None, template_node).strip("()")
         if len(tag) > 0:
             page_data[-1].translations[-1].raw_tags.append(tag)
+            translate_raw_tags(page_data[-1].translations[-1])
 
 
 # https://fr.wiktionary.org/wiki/Modèle:trad
