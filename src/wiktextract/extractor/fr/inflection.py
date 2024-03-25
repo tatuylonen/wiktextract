@@ -291,10 +291,12 @@ def process_en_adj_table(
             )
             form_text = clean_node(wxr, None, table_row.children[1])
             for form_line in form_text.splitlines():
-                if is_ipa_text(form_line):
+                if form_line in IGNORE_TABLE_CELL:
+                    continue
+                elif is_ipa_text(form_line):
                     insert_ipa(form_data, form_line)
                 else:
                     form_data.form = form_line
-            if form_data.form != page_data[-1].word:
+            if form_data.form != page_data[-1].word and len(form_data.form) > 0:
                 translate_raw_tags(form_data)
                 page_data[-1].forms.append(form_data)
