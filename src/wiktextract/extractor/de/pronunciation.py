@@ -140,8 +140,8 @@ def process_hoerbeispiele(
 def process_audio_template(
     wxr: WiktextractContext, sound_data: list[Sound], node: WikiNode
 ):
-    audio_file = node.template_parameters.get(1)
-    if audio_file:
+    audio_file = node.template_parameters.get(1, "").strip()
+    if len(audio_file) > 0:
         add_sound_data_without_appending_to_existing_properties(
             wxr, sound_data, create_audio_url_dict(audio_file)
         )
