@@ -57,6 +57,8 @@ def create_audio_url_dict(filename: str) -> dict[str, str]:
     filename = filename.strip(" \u200e")
     file_url_key = filename[filename.rfind(".") + 1 :].lower() + "_url"
     filename_without_prefix = filename.removeprefix("File:")
+    if len(filename_without_prefix) == 0:
+        return {}
     audio_dict = {
         "audio": filename_without_prefix,
         file_url_key: "https://commons.wikimedia.org/wiki/Special:FilePath/"
