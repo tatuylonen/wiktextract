@@ -10,17 +10,12 @@ from wiktextract.wxr_context import WiktextractContext
 
 class TestDEPage(unittest.TestCase):
     def setUp(self):
-        conf1 = WiktionaryConfig(
-            dump_file_lang_code="de",
-            capture_language_codes=None,
-            capture_translations=True,
-            # capture_pronunciation=True,
-            # capture_linkages=True,
-            # capture_compounds=True,
-            # capture_redirects=True,
-            # capture_examples=True,
+        self.wxr = WiktextractContext(
+            Wtp(lang_code="de"),
+            WiktionaryConfig(
+                dump_file_lang_code="de", capture_language_codes=None
+            ),
         )
-        self.wxr = WiktextractContext(Wtp(lang_code="de"), conf1)
         self.maxDiff = None
 
     def tearDown(self) -> None:
