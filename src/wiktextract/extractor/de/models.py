@@ -85,10 +85,6 @@ class Sense(BaseModelWrap):
         default=[],
         description="list of gloss strings for the word sense (usually only one). This has been cleaned, and should be straightforward text with no tagging.",
     )
-    raw_glosses: list[str] = Field(
-        default=[],
-        description="list of uncleaned raw glosses for the word sense (usually only one).",
-    )
     raw_tags: list[str] = Field(
         default=[],
         description="list of gloss strings for the word sense (usually only one). This has been cleaned, and should be straightforward text with no tagging.",

@@ -91,9 +91,6 @@ class TestDEPage(unittest.TestCase):
                             "glosses": [
                                 "Staat in Südosteuropa, im Süden der Balkanhalbinsel"
                             ],
-                            "raw_glosses": [
-                                "[1] Staat in Südosteuropa, im Süden der Balkanhalbinsel"
-                            ],
                             "senseid": "1",
                         }
                     ],

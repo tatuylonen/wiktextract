@@ -45,81 +45,81 @@ class TestDEGloss(unittest.TestCase):
             [
                 {
                     "glosses": ["gloss1"],
-                    "raw_glosses": ["[1] gloss1"],
                     "senseid": "1",
                 },
                 {
                     "glosses": ["gloss2"],
-                    "raw_glosses": ["[2] gloss2"],
                     "senseid": "2",
                 },
             ],
         )
 
-    def test_de_extract_glosses_with_subglosses(self):
-        self.wxr.wtp.start_page("")
+    def test_nested_gloss(self):
+        self.wxr.wtp.start_page("Keim")
+        self.wxr.wtp.add_page("Vorlage:K", 10, "{{{1|}}}, {{{2|}}}:")
         root = self.wxr.wtp.parse(
-            ":[1] gloss1\n::[a] subglossA\n::[b] subglossB"
+            """===Bedeutungen===
+:[2] das erste [[Entwicklungsstadium]]
+::[a] {{K|Botanik}} erster [[Trieb]] einer Pflanze
+::[b] {{K|Biologie|Medizin}} befruchtete [[Eizelle]], [[Embryo]]"""
         )
-
-        word_entry = self.get_default_word_entry()
-
-        extract_glosses(self.wxr, word_entry, root)
-
-        senses = [
-            s.model_dump(exclude_defaults=True) for s in word_entry.senses
-        ]
-
+        word_entry = WordEntry(
+            lang="Deutsch", lang_code="de", word="Keim", pos="noun"
+        )
+        extract_glosses(self.wxr, word_entry, root.children[0])
         self.assertEqual(
-            senses,
+            [s.model_dump(exclude_defaults=True) for s in word_entry.senses],
             [
                 {
-                    "glosses": ["gloss1"],
-                    "raw_glosses": ["[1] gloss1"],
-                    "senseid": "1",
+                    "glosses": ["das erste Entwicklungsstadium"],
+                    "senseid": "2",
                 },
                 {
-                    "glosses": ["subglossA"],
-                    "raw_glosses": ["[a] subglossA"],
-                    "senseid": "1a",
+                    "glosses": [
+                        "das erste Entwicklungsstadium",
+                        "erster Trieb einer Pflanze",
+                    ],
+                    "raw_tags": ["Botanik"],
+                    "senseid": "2a",
                 },
                 {
-                    "glosses": ["subglossB"],
-                    "raw_glosses": ["[b] subglossB"],
-                    "senseid": "1b",
+                    "glosses": [
+                        "das erste Entwicklungsstadium",
+                        "befruchtete Eizelle, Embryo",
+                    ],
+                    "raw_tags": ["Biologie", "Medizin"],
+                    "senseid": "2b",
                 },
             ],
         )
 
-    def test_de_extract_glosses_with_only_subglosses(self):
-        self.wxr.wtp.add_page("Vorlage:K", 10, "tag")
-        self.wxr.wtp.start_page("")
+    def test_nested_gloss_without_parent_gloss(self):
+        self.wxr.wtp.add_page("Vorlage:K", 10, "{{{1}}}:")
+        self.wxr.wtp.start_page("eingeben")
         root = self.wxr.wtp.parse(
-            ":[1] {{K|tag}}\n::[a] subglossA\n::[1b] subglossB"
+            """===Bedeutungen===
+*{{K|fachsprachlich}}
+:[4] {{K|Technik}} etwas, was eine Maschine bearbeiten soll, an diese übergeben
+:[5] {{K|EDV}} etwas in einen Computer übertragen"""
         )
-
-        word_entry = self.get_default_word_entry()
-
-        extract_glosses(self.wxr, word_entry, root)
-
-        senses = [
-            s.model_dump(exclude_defaults=True) for s in word_entry.senses
-        ]
-
+        word_entry = WordEntry(
+            lang="Deutsch", lang_code="de", word="eingeben", pos="verb"
+        )
+        extract_glosses(self.wxr, word_entry, root.children[0])
         self.assertEqual(
-            senses,
+            [s.model_dump(exclude_defaults=True) for s in word_entry.senses],
             [
                 {
-                    "raw_tags": ["tag"],
-                    "glosses": ["subglossA"],
-                    "raw_glosses": ["[a] subglossA"],
-                    "senseid": "1a",
+                    "raw_tags": ["fachsprachlich", "Technik"],
+                    "glosses": [
+                        "etwas, was eine Maschine bearbeiten soll, an diese übergeben"
+                    ],
+                    "senseid": "4",
                 },
                 {
-                    "raw_tags": ["tag"],
-                    "glosses": ["subglossB"],
-                    "raw_glosses": ["[1b] subglossB"],
-                    "senseid": "1b",
+                    "raw_tags": ["fachsprachlich", "EDV"],
+                    "glosses": ["etwas in einen Computer übertragen"],
+                    "senseid": "5",
                 },
             ],
         )

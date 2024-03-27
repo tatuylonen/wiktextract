@@ -3,10 +3,11 @@ import re
 
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import LevelNode
-from wiktextract.extractor.de.models import Sense, WordEntry
-from wiktextract.extractor.de.utils import find_and_remove_child, match_senseid
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
+
+from .models import Sense, WordEntry
+from .utils import find_and_remove_child, match_senseid
 
 
 def extract_glosses(
@@ -37,7 +38,7 @@ def process_gloss_list_item(
         item_type = list_item_node.sarg
         if item_type == "*":
             handle_sense_modifier(wxr, base_sense, list_item_node)
-        elif item_type in [":", "::"]:
+        elif item_type.endswith(":"):
             if any(
                 [
                     template_node.template_name
@@ -60,9 +61,6 @@ def process_gloss_list_item(
                 find_and_remove_child(list_item_node, NodeKind.LIST)
             )
 
-            raw_gloss = clean_node(wxr, {}, list_item_node.children)
-            sense_data.raw_glosses = [raw_gloss]
-
             process_K_template(wxr, sense_data, list_item_node)
 
             gloss_text = clean_node(wxr, sense_data, list_item_node.children)
@@ -81,8 +79,8 @@ def process_gloss_list_item(
             # XXX: Extract tags from nodes instead using Italic and Template
             gloss_text = extract_tags_from_gloss_text(sense_data, gloss_text)
 
-            if gloss_text or not sub_glosses_list_nodes:
-                sense_data.glosses = [gloss_text]
+            if len(gloss_text) > 0:
+                sense_data.glosses.append(gloss_text)
                 word_entry.senses.append(sense_data)
 
             for sub_list_node in sub_glosses_list_nodes:
@@ -92,7 +90,7 @@ def process_gloss_list_item(
                     base_sense,
                     sub_list_node,
                     senseid,
-                    sense_data if not gloss_text else None,
+                    sense_data,
                 )
 
         else:
@@ -112,7 +110,7 @@ def handle_sense_modifier(
             f"Found more than one child in sense modifier: {list_item_node.children}",
             sortid="extractor/de/gloss/handle_sense_modifier/114",
         )
-    modifier = clean_node(wxr, None, list_item_node.children)
+    modifier = clean_node(wxr, None, list_item_node.children).removesuffix(":")
     if modifier != "":
         sense.raw_tags = [modifier]
 
@@ -120,7 +118,7 @@ def handle_sense_modifier(
 def process_K_template(
     wxr: WiktextractContext,
     sense_data: Sense,
-    list_item_node: NodeKind.LIST_ITEM,
+    list_item_node: WikiNode,
 ) -> None:
     for template_node in list_item_node.find_child(NodeKind.TEMPLATE):
         if template_node.template_name == "K":
@@ -128,7 +126,9 @@ def process_K_template(
             text = clean_node(wxr, categories, template_node).removesuffix(":")
             sense_data.categories.extend(categories["categories"])
             tags = re.split(r";|,", text)
-            sense_data.raw_tags.extend([t.strip() for t in tags])
+            sense_data.raw_tags.extend(
+                [t.strip() for t in tags if len(t.strip()) > 0]
+            )
 
             # Prepositional and case information is sometimes only expanded to
             # category links and not present in cleaned node. We still want it
