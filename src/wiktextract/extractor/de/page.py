@@ -1,15 +1,16 @@
 import logging
-from typing import Union
+from typing import Any
 
 from mediawiki_langcodes import name_to_code
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import LevelNode
-from wiktextract.extractor.de.models import WordEntry
+from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
 from .example import extract_examples
 from .gloss import extract_glosses
 from .linkage import extract_linkages
+from .models import WordEntry
 from .pronunciation import extract_pronunciation
 from .section_titles import LINKAGE_TITLES, POS_SECTIONS
 from .translation import extract_translation
@@ -31,65 +32,36 @@ def parse_section(
     wxr: WiktextractContext,
     page_data: list[WordEntry],
     base_data: WordEntry,
-    level_node_or_children: Union[WikiNode, list[Union[WikiNode, str]]],
+    level_node: WikiNode,
 ) -> None:
     # Page structure: https://de.wiktionary.org/wiki/Hilfe:Formatvorlage
-    if isinstance(level_node_or_children, list):
-        for x in level_node_or_children:
-            parse_section(wxr, page_data, base_data, x)
-        return
-
-    elif not isinstance(level_node_or_children, WikiNode):
-        if (
-            not isinstance(level_node_or_children, str)
-            or not level_node_or_children.strip() == ""
-        ):
-            wxr.wtp.debug(
-                f"Unexpected node type in parse_section: {level_node_or_children}",
-                sortid="extractor/de/page/parse_section/31",
-            )
-        return
-
     # Level 3 headings are used to start POS sections like
     # === {{Wortart|Verb|Deutsch}} ===
-    elif level_node_or_children.kind == NodeKind.LEVEL3:
-        for template_node in level_node_or_children.find_content(
-            NodeKind.TEMPLATE
-        ):
-            # German Wiktionary uses a `Wortart` template to define the POS
-            if template_node.template_name == "Wortart":
-                process_pos_section(
-                    wxr,
-                    page_data,
-                    base_data,
-                    level_node_or_children,
-                    template_node,
-                )
-        return
-
+    if level_node.kind == NodeKind.LEVEL3:
+        process_pos_section(wxr, page_data, base_data, level_node)
     # Level 4 headings were introduced by overriding the default templates.
     # See overrides/de.json for details.
-    elif level_node_or_children.kind == NodeKind.LEVEL4:
-        section_name = level_node_or_children.largs[0][0]
+    elif level_node.kind == NodeKind.LEVEL4:
+        section_name = level_node.largs[0][0]
         wxr.wtp.start_subsection(section_name)
         if not len(page_data) > 0:
             wxr.wtp.debug(
-                f"Reached section without extracting some page data first: {level_node_or_children}",
+                f"Reached section without extracting some page data first: {level_node}",
                 sortid="extractor/de/page/parse_section/55",
             )
             return
         if section_name == "Bedeutungen":
-            extract_glosses(wxr, page_data[-1], level_node_or_children)
+            extract_glosses(wxr, page_data[-1], level_node)
         elif wxr.config.capture_pronunciation and section_name == "Aussprache":
-            extract_pronunciation(wxr, page_data[-1], level_node_or_children)
+            extract_pronunciation(wxr, page_data[-1], level_node)
         elif wxr.config.capture_examples and section_name == "Beispiele":
-            extract_examples(wxr, page_data[-1], level_node_or_children)
+            extract_examples(wxr, page_data[-1], level_node)
         elif (
             wxr.config.capture_translations and section_name == "Übersetzungen"
         ):
-            extract_translation(wxr, page_data[-1], level_node_or_children)
+            extract_translation(wxr, page_data[-1], level_node)
         elif wxr.config.capture_linkages and section_name in LINKAGE_TITLES:
-            extract_linkages(wxr, page_data[-1], level_node_or_children)
+            extract_linkages(wxr, page_data[-1], level_node)
 
 
 FORM_POS = {
@@ -116,29 +88,36 @@ def process_pos_section(
     page_data: list[WordEntry],
     base_data: WordEntry,
     level_node: LevelNode,
-    pos_template_node: WikiNode,
 ) -> None:
-    # Extract the POS
-    pos_argument = pos_template_node.template_parameters.get(1)
-    if pos_argument in IGNORE_POS:
+    pos_arguments = []
+    for template_node in level_node.find_content(NodeKind.TEMPLATE):
+        if template_node.template_name == "Wortart":
+            pos_argument = template_node.template_parameters.get(1, "")
+            if pos_argument in IGNORE_POS:
+                continue
+            if pos_argument in FORM_POS:
+                # XXX: Extract form from form pages. Investigate first if this is needed
+                # at all or redundant with form tables.
+                continue
+            if pos_argument in POS_SECTIONS:
+                pos_arguments.append(pos_argument)
+            else:
+                wxr.wtp.debug(
+                    f"Unknown Wortart template POS argument: {pos_argument}",
+                    sortid="extractor/de/page/process_pos_section/55",
+                )
+    if len(pos_arguments) == 0:
         return
-    if pos_argument in FORM_POS:
-        # XXX: Extract form from form pages. Investigate first if this is needed
-        # at all or redundant with form tables.
-        return
-
-    pos = ""
-    if pos_argument in POS_SECTIONS:
+    for pos_index, pos_argument in enumerate(pos_arguments):
         pos = POS_SECTIONS[pos_argument]["pos"]
-    else:
-        wxr.wtp.debug(
-            f"Unknown POS type: {pos_argument}",
-            sortid="extractor/de/page/process_pos_section/55",
-        )
-    base_data.pos = pos
+        pos_tags = POS_SECTIONS[pos_argument].get("tags", [])
+        base_data.tags.extend(pos_tags)
+        if pos_index == 0:
+            base_data.pos = pos
+        else:
+            base_data.other_pos.append(pos)
     page_data.append(base_data.model_copy(deep=True))
-
-    wxr.wtp.start_section(page_data[-1].lang_code + "_" + pos)
+    wxr.wtp.start_subsection(clean_node(wxr, None, level_node.largs))
 
     # There might be other templates in the level node that define grammatical
     # features other than the POS. Extract them here.
@@ -242,12 +221,11 @@ def process_pos_section(
                 f"Unexpected node in pos section: {non_l4_node}",
                 sortid="extractor/de/page/process_pos_section/41",
             )
-    return
 
 
 def parse_page(
     wxr: WiktextractContext, page_title: str, page_text: str
-) -> list[dict[str, any]]:
+) -> list[dict[str, Any]]:
     if wxr.config.verbose:
         logging.info(f"Parsing page: {page_title}")
 
@@ -270,11 +248,11 @@ def parse_page(
             # where <title> is the title of the page and <lang> is the
             # German name of the language of the section.
             if subtitle_template.template_name == "Sprache":
-                lang = subtitle_template.template_parameters.get(1)
-                lang_code = name_to_code(lang, "de")
+                lang_name = subtitle_template.template_parameters.get(1, "")
+                lang_code = name_to_code(lang_name, "de")
                 if lang_code == "":
                     wxr.wtp.warning(
-                        f"Unknown language: {lang}",
+                        f"Unknown language: {lang_name}",
                         sortid="extractor/de/page/parse_page/76",
                     )
                 if (
@@ -282,10 +260,10 @@ def parse_page(
                     and lang_code not in wxr.config.capture_language_codes
                 ):
                     continue
-
                 base_data = WordEntry(
-                    lang=lang, lang_code=lang_code, word=wxr.wtp.title
+                    lang=lang_name, lang_code=lang_code, word=page_title
                 )
-                parse_section(wxr, page_data, base_data, level2_node.children)
+                for level3_node in level2_node.find_child(NodeKind.LEVEL3):
+                    parse_section(wxr, page_data, base_data, level3_node)
 
     return [d.model_dump(exclude_defaults=True) for d in page_data]
