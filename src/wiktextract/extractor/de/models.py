@@ -85,10 +85,6 @@ class Sense(BaseModelWrap):
         default=[],
         description="list of gloss strings for the word sense (usually only one). This has been cleaned, and should be straightforward text with no tagging.",
     )
-    raw_glosses: list[str] = Field(
-        default=[],
-        description="list of uncleaned raw glosses for the word sense (usually only one).",
-    )
     raw_tags: list[str] = Field(
         default=[],
         description="list of gloss strings for the word sense (usually only one). This has been cleaned, and should be straightforward text with no tagging.",
@@ -144,6 +140,7 @@ class WordEntry(BaseModelWrap):
 
     word: str = Field(description="word string")
     pos: str = Field(default="", description="Part of speech type")
+    other_pos: list[str] = []
     # pos_title: str = Field(default=None, description="Original POS title")
     lang_code: str = Field(
         description="Wiktionary language code", examples=["es"]

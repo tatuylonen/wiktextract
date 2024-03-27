@@ -25,7 +25,7 @@ def extract_translation(
             )
         else:
             sense_translations = []
-            sense_id = level_node_child.template_parameters.get(1, "")
+            sense_id = str(level_node_child.template_parameters.get(1, ""))
             base_translation_data = Translation(sense_id=sense_id)
             if sense_id == "":
                 # XXX: Sense-disambiguate where senseids are in Ü-Liste (ca. 0.03% of pages), e.g.:

@@ -2,8 +2,8 @@ from wiktextract.config import POSSubtitleData
 
 # argument of title template https://de.wiktionary.org/wiki/Vorlage:Wortart
 POS_SECTIONS: POSSubtitleData = {
-    "Abkürzung (Deutsch)": {"pos": "abbrev"},
-    "Abkürzung": {"pos": "abbrev"},
+    "Abkürzung (Deutsch)": {"pos": "abbrev", "tags": ["abbreviation"]},
+    "Abkürzung": {"pos": "abbrev", "tags": ["abbreviation"]},
     "Abtönungspartikel": {"pos": "particle"},
     "Adjektiv ": {"pos": "adj"},
     "Adjektiv": {"pos": "adj"},
@@ -17,7 +17,7 @@ POS_SECTIONS: POSSubtitleData = {
     "Demonstrativpronomen": {"pos": "pron"},
     "Eigenname ": {"pos": "name"},
     "Eigenname": {"pos": "name"},
-    "Enklitikon": {"pos": "suffix"},
+    "Enklitikon": {"pos": "suffix", "tags": ["morpheme"]},
     "Fokuspartikel": {"pos": "particle"},
     "Formel": {"pos": "phrase"},
     "Gebundenes Lexem": {"pos": "lexeme"},
@@ -59,8 +59,8 @@ POS_SECTIONS: POSSubtitleData = {
     "Possessivpronomen ": {"pos": "pron"},
     "Possessivpronomen": {"pos": "pron"},
     "Postposition": {"pos": "postp"},
-    "Präfix": {"pos": "prefix"},
-    "Präfixoid": {"pos": "prefix"},
+    "Präfix": {"pos": "prefix", "tags": ["morpheme"]},
+    "Präfixoid": {"pos": "prefix", "tags": ["morpheme"]},
     "Präposition ": {"pos": "prep"},
     "Präposition": {"pos": "prep"},
     "Pronomen": {"pos": "pron"},
@@ -75,8 +75,8 @@ POS_SECTIONS: POSSubtitleData = {
     "Straßenname": {"pos": "name"},
     "Subjunktion": {"pos": "conj"},
     "Substantiv": {"pos": "noun"},
-    "Suffix": {"pos": "suffix"},
-    "Suffixoid": {"pos": "suffix"},
+    "Suffix": {"pos": "suffix", "tags": ["morpheme"]},
+    "Suffixoid": {"pos": "suffix", "tags": ["morpheme"]},
     "Symbol": {"pos": "symbol"},
     "Temporaladverb": {"pos": "adv"},
     "Temporaldverb": {"pos": "adv"},
@@ -89,7 +89,7 @@ POS_SECTIONS: POSSubtitleData = {
     "Wortverbindung": {"pos": "phrase"},
     "Zahlklassifikator": {"pos": "noun"},
     "Zahlzeichen": {"pos": "num"},
-    "Zirkumfix": {"pos": "circumfix"},
+    "Zirkumfix": {"pos": "circumfix", "tags": ["morpheme"]},
     "Zirkumposition": {"pos": "circumpos"},
 }
 
