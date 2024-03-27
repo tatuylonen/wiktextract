@@ -42,7 +42,7 @@ def parse_section(
     # Level 4 headings were introduced by overriding the default templates.
     # See overrides/de.json for details.
     elif level_node.kind == NodeKind.LEVEL4:
-        section_name = level_node.largs[0][0]
+        section_name = clean_node(wxr, None, level_node.largs)
         wxr.wtp.start_subsection(section_name)
         if not len(page_data) > 0:
             wxr.wtp.debug(
