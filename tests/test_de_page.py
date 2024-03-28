@@ -70,6 +70,7 @@ class TestDEPage(unittest.TestCase):
         )
 
     def test_multiple_pos(self):
+        self.wxr.wtp.add_page("Vorlage:n", 10, "n")
         self.wxr.wtp.start_page("Griechenland")
         self.assertEqual(
             parse_page(
@@ -95,6 +96,7 @@ class TestDEPage(unittest.TestCase):
                         }
                     ],
                     "word": "Griechenland",
+                    "raw_tags": ["n"],
                 }
             ],
         )
