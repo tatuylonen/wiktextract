@@ -1,12 +1,10 @@
 import unittest
-from unittest.mock import patch
 
 from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.de.gloss import (
     extract_glosses,
     extract_tags_from_gloss_text,
-    process_K_template,
 )
 from wiktextract.extractor.de.models import Sense
 from wiktextract.extractor.es.models import WordEntry
@@ -24,35 +22,6 @@ class TestDEGloss(unittest.TestCase):
 
     def tearDown(self) -> None:
         self.wxr.wtp.close_db_conn()
-
-    def get_default_word_entry(self):
-        return WordEntry(lang_code="de", lang="Deutsch", word="Beispiel")
-
-    def test_de_extract_glosses(self):
-        self.wxr.wtp.start_page("")
-        root = self.wxr.wtp.parse(":[1] gloss1 \n:[2] gloss2")
-
-        word_entry = self.get_default_word_entry()
-
-        extract_glosses(self.wxr, word_entry, root)
-
-        senses = [
-            s.model_dump(exclude_defaults=True) for s in word_entry.senses
-        ]
-
-        self.assertEqual(
-            senses,
-            [
-                {
-                    "glosses": ["gloss1"],
-                    "senseid": "1",
-                },
-                {
-                    "glosses": ["gloss2"],
-                    "senseid": "2",
-                },
-            ],
-        )
 
     def test_nested_gloss(self):
         self.wxr.wtp.start_page("Keim")
@@ -124,125 +93,63 @@ class TestDEGloss(unittest.TestCase):
             ],
         )
 
-    def test_process_K_template_removes_K_template_nodes(self):
-        self.wxr.wtp.add_page("Vorlage:K", 10, "tag1, tag2")
-        self.wxr.wtp.start_page("")
-        root = self.wxr.wtp.parse("{{K|tag1|tag2}} gloss1")
-
-        sense_data = Sense()
-
-        self.assertEqual(len(root.children), 2)
-
-        process_K_template(self.wxr, sense_data, root)
-
+    def test_k_template_ft_arg(self):
+        self.wxr.wtp.add_page(
+            "Vorlage:K",
+            10,
+            "<i>[[juristisch]],&#32;nur in der Wendung „auf etwas erkennen“&#58;</i>",
+        )
+        self.wxr.wtp.start_page("erkennen")
+        root = self.wxr.wtp.parse(
+            """===Bedeutungen===
+:[5] {{K|juristisch|ft=nur in der Wendung „auf etwas erkennen“}} im Rahmen eines Urteils ein benanntes Verbrechen bestätigen"""
+        )
+        word_entry = WordEntry(
+            lang="Deutsch", lang_code="de", word="erkennen", pos="verb"
+        )
+        extract_glosses(self.wxr, word_entry, root.children[0])
         self.assertEqual(
-            sense_data.model_dump(exclude_defaults=True),
-            {
-                "raw_tags": ["tag1", "tag2"],
-            },
+            [s.model_dump(exclude_defaults=True) for s in word_entry.senses],
+            [
+                {
+                    "raw_tags": ["juristisch"],
+                    "glosses": [
+                        "nur in der Wendung „auf etwas erkennen“: im Rahmen eines Urteils ein benanntes Verbrechen bestätigen"
+                    ],
+                    "senseid": "5",
+                },
+            ],
         )
 
-        self.assertEqual(len(root.children), 1)
-
-    def get_mock(self, mock_return_value: str):
-        def generic_mock(*args, **kwargs):
-            return mock_return_value
-
-        return generic_mock
-
-    def test_process_K_template(self):
-        # Test cases chosen from:
-        # https://de.wiktionary.org/wiki/Vorlage:K/Doku
-        test_cases = [
-            # https://de.wiktionary.org/wiki/delektieren
-            # One tag
-            {
-                "input": "{{K|refl.}}",
-                "expected_tags": ["reflexiv"],
-                "mock_return": "reflexiv:",
-            },
-            # https://de.wiktionary.org/wiki/abbreviare
-            # With ft and spr args
-            {
-                "input": "{{K|trans.|ft=etwas in seinem [[räumlich]]en oder [[zeitlich]]en [[Ausmaß]] verringern|spr=it}}",
-                "expected_tags": [
-                    "transitiv",
-                    "etwas in seinem räumlichen oder zeitlichen Ausmaß verringern",
-                ],
-                "mock_return": "transitiv, etwas in seinem räumlichen oder zeitlichen Ausmaß verringern:",
-            },
-            # https://de.wiktionary.org/wiki/abbreviare
-            # With multiple tags
-            {
-                "input": "{{K|trans.|Linguistik|Wortbildung|spr=it}}",
-                "expected_tags": [
-                    "transitiv",
-                    "Linguistik",
-                    "Wortbildung",
-                ],
-                "mock_return": "transitiv, Linguistik, Wortbildung:",
-            },
-            # https://de.wiktionary.org/wiki/almen
-            # Ideally we would filter out "besonders" but there doesn't seem
-            # to be a general rule which tags are semmantially relevant
-            # With multiple tags and t1, t2 args
-            {
-                "input": "{{K|trans.|t1=;|besonders|t2=_|bayrisch|österr.}}",
-                "expected_tags": [
-                    "transitiv",
-                    "besonders bayrisch",
-                    "österreichisch",
-                ],
-                "mock_return": "transitiv, besonders bayrisch, österreichisch",
-            },
-            # https://de.wiktionary.org/wiki/einlaufen
-            # With two tags and t7 arg
-            {
-                "input": "{{K|intrans.|Nautik|t7=_|ft=(von Schiffen)}}",
-                "expected_tags": ["intransitiv", "Nautik (von Schiffen)"],
-                "mock_return": "intransitiv, Nautik (von Schiffen):",
-            },
-            # https://de.wiktionary.org/wiki/zählen
-            # With Prä and Kas args
-            {
-                "input": "{{K|intrans.|Prä=auf|Kas=Akk.|ft=(auf jemanden/etwas zählen)}}",
-                "expected_tags": [
-                    "intransitiv",
-                    "(auf jemanden/etwas zählen)",
-                    "auf + Akk.",
-                ],
-                "mock_return": "intransitiv, (auf jemanden/etwas zählen):",
-            },
-            # https://de.wiktionary.org/wiki/bojovat
-            # With Prä and Kas args and redundant ft arg
-            {
-                "input": "{{K|intrans.|Prä=proti|Kas=Dativ||ft=bojovat [[proti]] + [[Dativ]]|spr=cs}}",
-                "expected_tags": [
-                    "intransitiv",
-                    "bojovat proti + Dativ",
-                    "proti + Dativ",
-                ],
-                "mock_return": "intransitiv, bojovat proti + Dativ:",
-            },
-        ]
-
-        for case in test_cases:
-            with self.subTest(case=case):
-                sense_data = Sense()
-
-                self.wxr.wtp.start_page("")
-
-                root = self.wxr.wtp.parse(case["input"])
-
-                with patch(
-                    "wiktextract.extractor.de.gloss.clean_node",
-                    self.get_mock(case["mock_return"]),
-                ):
-                    process_K_template(self.wxr, sense_data, root)
-                    self.assertEqual(
-                        sense_data.raw_tags,
-                        case["expected_tags"],
-                    )
+    def test_k_template_multiple_tags(self):
+        self.wxr.wtp.add_page(
+            "Vorlage:K",
+            10,
+            """<i>[[transitiv]]&#59;&#32;besonders&#32;[[bayrisch]],&#32;[[W:Österreichisches Deutsch|österreichisch]]&#58;</i>[[Kategorie:Verb transitiv&#32;(Deutsch)]][[Kategorie:Österreichisches Deutsch]]""",
+        )
+        self.wxr.wtp.start_page("almen")
+        root = self.wxr.wtp.parse(
+            """===Bedeutungen===
+:[1] {{K|trans.|t1=;|besonders|t2=_|bayrisch|österr.}} [[Vieh]] auf der Alm halten"""
+        )
+        word_entry = WordEntry(
+            lang="Deutsch", lang_code="de", word="almen", pos="verb"
+        )
+        extract_glosses(self.wxr, word_entry, root.children[0])
+        self.assertEqual(
+            [s.model_dump(exclude_defaults=True) for s in word_entry.senses],
+            [
+                {
+                    "categories": [
+                        "Verb transitiv (Deutsch)",
+                        "Österreichisches Deutsch",
+                    ],
+                    "raw_tags": ["trans.", "besonders", "bayrisch", "österr."],
+                    "glosses": ["Vieh auf der Alm halten"],
+                    "senseid": "1",
+                },
+            ],
+        )
 
     def test_de_extract_tags_from_gloss_text(self):
         test_cases = [
@@ -295,22 +202,43 @@ class TestDEGloss(unittest.TestCase):
 ::[2.2] ''passiv:'' bewohnt werden, zum [[Wohnsitz]] dienen
 * {{intrans.}}
 :[3] ''sich befinden:'' [[wohnen]]
-:[4] sich [[aufhalten]], [[heimisch]] sein, zu Hause sein
-:[5] sich eifrig mit etwas [[beschäftigen]]
+:[4] ''übertragen:'' sich [[aufhalten]], [[heimisch]] sein, zu Hause sein
 """
-        self.wxr.wtp.start_page("")
+        self.wxr.wtp.start_page("habitare")
         self.wxr.wtp.add_page("Vorlage:trans.", 10, "transitiv")
         self.wxr.wtp.add_page("Vorlage:intrans.", 10, "intransitiv")
-
         root = self.wxr.wtp.parse(wikitext)
-
-        word_entry = self.get_default_word_entry()
-
+        word_entry = WordEntry(
+            lang="Latein", lang_code="la", word="habitare", pos="verb"
+        )
         extract_glosses(self.wxr, word_entry, root)
-
-        for i in range(2):
-            self.assertEqual(word_entry.senses[i].raw_tags, ["transitiv"])
-        self.assertEqual(word_entry.senses[2].raw_tags, ["transitiv", "aktiv"])
-        self.assertEqual(word_entry.senses[3].raw_tags, ["transitiv", "passiv"])
-        for i in range(4, 6):
-            self.assertEqual(word_entry.senses[i].raw_tags, ["intransitiv"])
+        self.assertEqual(
+            [s.model_dump(exclude_defaults=True) for s in word_entry.senses],
+            [
+                {
+                    "raw_tags": ["transitiv"],
+                    "glosses": ["etwas oft haben, zu haben pflegen"],
+                    "senseid": "1",
+                },
+                {
+                    "raw_tags": ["transitiv", "Stadt/Dorf", "aktiv"],
+                    "glosses": ["bewohnen, wohnen"],
+                    "senseid": "2.1",
+                },
+                {
+                    "raw_tags": ["transitiv", "Stadt/Dorf", "passiv"],
+                    "glosses": ["bewohnt werden, zum Wohnsitz dienen"],
+                    "senseid": "2.2",
+                },
+                {
+                    "raw_tags": ["intransitiv", "sich befinden"],
+                    "glosses": ["wohnen"],
+                    "senseid": "3",
+                },
+                {
+                    "raw_tags": ["intransitiv", "übertragen"],
+                    "glosses": ["sich aufhalten, heimisch sein, zu Hause sein"],
+                    "senseid": "4",
+                },
+            ],
+        )

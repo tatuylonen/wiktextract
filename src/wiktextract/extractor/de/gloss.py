@@ -1,13 +1,12 @@
-import copy
 import re
 
 from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import LevelNode
+from wikitextprocessor.parser import LevelNode, TemplateNode
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
 from .models import Sense, WordEntry
-from .utils import find_and_remove_child, match_senseid
+from .utils import match_senseid
 
 
 def extract_glosses(
@@ -15,9 +14,9 @@ def extract_glosses(
     word_entry: WordEntry,
     level_node: LevelNode,
 ) -> None:
-    base_sense = Sense()
+    sense = Sense()
     for list_node in level_node.find_child(NodeKind.LIST):
-        process_gloss_list_item(wxr, word_entry, base_sense, list_node)
+        sense = process_gloss_list_item(wxr, word_entry, list_node, sense)
 
     for non_list_node in level_node.invert_find_child(NodeKind.LIST):
         wxr.wtp.debug(
@@ -29,67 +28,81 @@ def extract_glosses(
 def process_gloss_list_item(
     wxr: WiktextractContext,
     word_entry: WordEntry,
-    base_sense: Sense,
     list_node: WikiNode,
-    parent_senseid: str = "",
-    parent_gloss_data: Sense = None,
+    parent_sense: Sense,
 ) -> None:
     for list_item_node in list_node.find_child(NodeKind.LIST_ITEM):
         item_type = list_item_node.sarg
-        if item_type == "*":
-            handle_sense_modifier(wxr, base_sense, list_item_node)
+        if item_type == "*":  # only contains modifier template
+            for template in list_item_node.find_child(NodeKind.TEMPLATE):
+                raw_tag = clean_node(wxr, parent_sense, template).removesuffix(
+                    ":"
+                )
+                parent_sense = Sense()
+                parent_sense.raw_tags.append(raw_tag)
         elif item_type.endswith(":"):
-            if any(
-                [
-                    template_node.template_name
-                    in ["QS Herkunft", "QS Bedeutungen"]
-                    for template_node in list_item_node.find_child_recursively(
-                        NodeKind.TEMPLATE
+            sense_data = parent_sense.model_copy(deep=True)
+            gloss_nodes = []
+            for gloss_node in list_item_node.children:
+                if isinstance(gloss_node, TemplateNode):
+                    if gloss_node.template_name == "K":
+                        for (
+                            k_arg,
+                            k_arg_value,
+                        ) in gloss_node.template_parameters.items():
+                            if k_arg == "ft":
+                                gloss_nodes.append(
+                                    clean_node(wxr, None, k_arg_value)
+                                )
+                                gloss_nodes.append(":")
+                            elif isinstance(k_arg, int):
+                                raw_tag = clean_node(wxr, None, k_arg_value)
+                                sense_data.raw_tags.append(raw_tag)
+                        clean_node(wxr, sense_data, gloss_node)
+                    elif gloss_node.template_name in (
+                        "QS Herkunft",
+                        "QS Bedeutungen",
+                    ):
+                        continue
+                elif (
+                    isinstance(gloss_node, WikiNode)
+                    and gloss_node.kind == NodeKind.ITALIC
+                ):
+                    raw_tag = clean_node(wxr, None, gloss_node).removesuffix(
+                        ":"
                     )
-                ]
-            ):
-                continue
+                    sense_data.raw_tags.append(raw_tag)
+                elif not (
+                    isinstance(gloss_node, WikiNode)
+                    and gloss_node.kind == NodeKind.LIST
+                ):
+                    gloss_nodes.append(gloss_node)
 
-            sense_data = (
-                copy.deepcopy(base_sense)
-                if parent_gloss_data is None
-                else copy.deepcopy(parent_gloss_data)
-            )
-
-            # Extract sub-glosses for later processing
-            sub_glosses_list_nodes = list(
-                find_and_remove_child(list_item_node, NodeKind.LIST)
-            )
-
-            process_K_template(wxr, sense_data, list_item_node)
-
-            gloss_text = clean_node(wxr, sense_data, list_item_node.children)
-
+            gloss_text = clean_node(wxr, sense_data, gloss_nodes)
             senseid, gloss_text = match_senseid(gloss_text)
             if senseid != "":
-                if not senseid[0].isnumeric():
-                    senseid = parent_senseid + senseid
+                if (
+                    not senseid[0].isnumeric()
+                    and parent_sense is not None
+                    and len(parent_sense.senseid) != ""
+                ):
+                    senseid = parent_sense.senseid + senseid
                 sense_data.senseid = senseid
             elif len(gloss_text.strip()) > 0:
                 wxr.wtp.debug(
-                    f"Failed to extract sense number from gloss node: {list_item_node}",
+                    "Failed to extract sense number from gloss node",
                     sortid="extractor/de/glosses/extract_glosses/28",
                 )
-
-            # XXX: Extract tags from nodes instead using Italic and Template
-            gloss_text = extract_tags_from_gloss_text(sense_data, gloss_text)
 
             if len(gloss_text) > 0:
                 sense_data.glosses.append(gloss_text)
                 word_entry.senses.append(sense_data)
 
-            for sub_list_node in sub_glosses_list_nodes:
+            for sub_list_node in list_item_node.find_child(NodeKind.LIST):
                 process_gloss_list_item(
                     wxr,
                     word_entry,
-                    base_sense,
                     sub_list_node,
-                    senseid,
                     sense_data,
                 )
 
@@ -99,58 +112,7 @@ def process_gloss_list_item(
                 sortid="extractor/de/glosses/extract_glosses/29",
             )
             continue
-
-
-def handle_sense_modifier(
-    wxr: WiktextractContext, sense: Sense, list_item_node: WikiNode
-):
-    if len(list(list_item_node.filter_empty_str_child())) > 1:
-        # XXX: Clean up sense modifier where there is more than one modifier
-        wxr.wtp.debug(
-            f"Found more than one child in sense modifier: {list_item_node.children}",
-            sortid="extractor/de/gloss/handle_sense_modifier/114",
-        )
-    modifier = clean_node(wxr, None, list_item_node.children).removesuffix(":")
-    if modifier != "":
-        sense.raw_tags = [modifier]
-
-
-def process_K_template(
-    wxr: WiktextractContext,
-    sense_data: Sense,
-    list_item_node: WikiNode,
-) -> None:
-    for template_node in list_item_node.find_child(NodeKind.TEMPLATE):
-        if template_node.template_name == "K":
-            categories = {"categories": []}
-            text = clean_node(wxr, categories, template_node).removesuffix(":")
-            sense_data.categories.extend(categories["categories"])
-            tags = re.split(r";|,", text)
-            sense_data.raw_tags.extend(
-                [t.strip() for t in tags if len(t.strip()) > 0]
-            )
-
-            # Prepositional and case information is sometimes only expanded to
-            # category links and not present in cleaned node. We still want it
-            # as a tag.
-            prep = template_node.template_parameters.get("Prä")
-            case = template_node.template_parameters.get("Kas")
-            category = (prep if prep else "") + (" + " + case if case else "")
-            if category:
-                sense_data.raw_tags.append(category)
-
-            # XXX: Investigate better ways to handle free text in K template
-            ft = template_node.template_parameters.get("ft")
-            if ft:
-                wxr.wtp.debug(
-                    f"Found ft '{ft}' in K template which could be considered part of the gloss. Moved to tags for now.",
-                    sortid="extractor/de/glosses/extract_glosses/63",
-                )
-
-            # Remove the template_node from the children of list_item_node
-            list_item_node.children = [
-                c for c in list_item_node.children if c != template_node
-            ]
+    return parent_sense
 
 
 def extract_tags_from_gloss_text(sense_data: Sense, gloss_text: str) -> None:
