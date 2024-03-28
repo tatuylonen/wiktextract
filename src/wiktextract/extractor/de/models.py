@@ -165,3 +165,4 @@ class WordEntry(BaseModelWrap):
     proverbs: list[Linkage] = []
     synonyms: list[Linkage] = []
     tags: list[str] = []
+    raw_tags: list[str] = []

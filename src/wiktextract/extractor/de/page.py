@@ -106,6 +106,10 @@ def process_pos_section(
                     f"Unknown Wortart template POS argument: {pos_argument}",
                     sortid="extractor/de/page/process_pos_section/55",
                 )
+        elif template_node.template_name != "Geschlecht":
+            # ignore placeholder gender template "Geschlecht"
+            base_data.raw_tags.append(clean_node(wxr, base_data, template_node))
+
     if len(pos_arguments) == 0:
         return
     for pos_index, pos_argument in enumerate(pos_arguments):
@@ -118,76 +122,6 @@ def process_pos_section(
             base_data.other_pos.append(pos)
     page_data.append(base_data.model_copy(deep=True))
     wxr.wtp.start_subsection(clean_node(wxr, None, level_node.largs))
-
-    # There might be other templates in the level node that define grammatical
-    # features other than the POS. Extract them here.
-    for template_node in level_node.find_content(NodeKind.TEMPLATE):
-        template_name = template_node.template_name
-
-        GENDER_TAGS_TEMPLATES = {
-            "m",
-            "f",
-            "f ",
-            "n",
-            "n ",
-            "mf",
-            "mn.",
-            "fn",
-            "fm",
-            "nf",
-            "nm",
-            "mfn",
-            "u",
-            "un",
-            "Geschlecht",  # placeholder template
-        }
-
-        VERB_TAGS_TEMPLATES = {
-            "unreg.",
-            "intrans.",
-            "trans.",
-            "refl.",
-        }
-
-        ARAB_VERB_STEM_TEMPLATES = {
-            "Grundstamm",
-            "I",
-            "II",
-            "III",
-            "IV",
-            "V",
-            "VI",
-            "VII",
-            "VIII",
-        }
-
-        NOUN_TAGS_TEMPLATES = {
-            "adjektivische Deklination",
-            "kPl.",
-            "Pl.",
-            "mPl.",
-            "fPl.",
-            "nPl.",
-            "Sachklasse",
-            "Personenklasse",
-            "indekl.",
-            "Suaheli Klassen",
-        }
-
-        if template_name == "Wortart":
-            continue
-
-        elif template_name in GENDER_TAGS_TEMPLATES.union(
-            ARAB_VERB_STEM_TEMPLATES
-        ).union(NOUN_TAGS_TEMPLATES).union(VERB_TAGS_TEMPLATES):
-            # XXX: de: Extract additional grammatical markers
-            pass
-
-        else:
-            wxr.wtp.debug(
-                f"Unexpected template in POS section heading: {template_node}",
-                sortid="extractor/de/page/process_pos_section/31",
-            )
 
     for level_4_node in level_node.find_child(NodeKind.LEVEL4):
         parse_section(wxr, page_data, base_data, level_4_node)
