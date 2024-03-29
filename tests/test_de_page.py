@@ -39,6 +39,7 @@ class TestDEPage(unittest.TestCase):
                     "lang_code": "de",
                     "word": "Beispiel",
                     "pos": "noun",
+                    "senses": [{"tags": ["no-gloss"]}],
                 }
             ],
         )
@@ -65,6 +66,7 @@ class TestDEPage(unittest.TestCase):
                     "lang_code": "de",
                     "word": "Beispiel",
                     "pos": "noun",
+                    "senses": [{"tags": ["no-gloss"]}],
                 }
             ],
         )
