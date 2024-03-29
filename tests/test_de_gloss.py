@@ -4,9 +4,7 @@ from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.de.gloss import (
     extract_glosses,
-    extract_tags_from_gloss_text,
 )
-from wiktextract.extractor.de.models import Sense
 from wiktextract.extractor.es.models import WordEntry
 from wiktextract.wxr_context import WiktextractContext
 
@@ -151,48 +149,7 @@ class TestDEGloss(unittest.TestCase):
             ],
         )
 
-    def test_de_extract_tags_from_gloss_text(self):
-        test_cases = [
-            # https://de.wiktionary.org/wiki/Hengst
-            {
-                "input": "Zoologie: männliches Tier aus der Familie der Einhufer und Kamele",
-                "expected_tags": ["Zoologie"],
-                "expected_gloss": "männliches Tier aus der Familie der Einhufer und Kamele",
-            },
-            # https://de.wiktionary.org/wiki/ARD
-            {
-                "input": "umgangssprachlich, Kurzwort, Akronym: für das erste Fernsehprogramm der ARD",
-                "expected_tags": ["umgangssprachlich", "Kurzwort", "Akronym"],
-                "expected_gloss": "für das erste Fernsehprogramm der ARD",
-            },
-            # https://de.wiktionary.org/wiki/Endspiel
-            {
-                "input": "Drama von Samuel Beckett: Menschliche Existenz in der Endphase des Verfalls und der vergeblichen Suche nach einem Ausweg",
-                "expected_tags": None,
-                "expected_gloss": "Drama von Samuel Beckett: Menschliche Existenz in der Endphase des Verfalls und der vergeblichen Suche nach einem Ausweg",
-            },
-            # Add more test cases as needed
-        ]
-        for case in test_cases:
-            with self.subTest(case=case):
-                sense_data = Sense()
-
-                gloss_text = extract_tags_from_gloss_text(
-                    sense_data, case["input"]
-                )
-
-                if case["expected_tags"] is None:
-                    self.assertEqual(
-                        sense_data.model_dump(exclude_defaults=True), {}
-                    )
-                else:
-                    self.assertEqual(
-                        sense_data.raw_tags,
-                        case["expected_tags"],
-                    )
-                self.assertEqual(gloss_text, case["expected_gloss"])
-
-    def test_handle_sense_modifier(self):
+    def test_italic_sense_modifier(self):
         # https://de.wiktionary.org/wiki/habitare
         wikitext = """
 * {{trans.}}
@@ -239,6 +196,37 @@ class TestDEGloss(unittest.TestCase):
                     "raw_tags": ["intransitiv", "übertragen"],
                     "glosses": ["sich aufhalten, heimisch sein, zu Hause sein"],
                     "senseid": "4",
+                },
+            ],
+        )
+
+    def test_italit_node_multiple_raw_tags(self):
+        self.wxr.wtp.add_page(
+            "Vorlage:K", 10, "<i>[[Deutschland]],&#32;[[Fernsehen]]&#58;</i>"
+        )
+        self.wxr.wtp.add_page("Vorlage:ugs.", 10, "''[[umgangssprachlich]]''")
+        self.wxr.wtp.start_page("ARD")
+        root = self.wxr.wtp.parse(
+            """===Bedeutungen===
+:[2] {{K|Deutschland|Fernsehen}} {{ugs.}}, ''[[Kurzwort]], [[Akronym]]:'' für das erste Fernsehprogramm der ARD"""
+        )
+        word_entry = WordEntry(
+            lang="Deutsch", lang_code="de", word="ARD", pos="noun"
+        )
+        extract_glosses(self.wxr, word_entry, root.children[0])
+        self.assertEqual(
+            [s.model_dump(exclude_defaults=True) for s in word_entry.senses],
+            [
+                {
+                    "raw_tags": [
+                        "Deutschland",
+                        "Fernsehen",
+                        "umgangssprachlich",
+                        "Kurzwort",
+                        "Akronym",
+                    ],
+                    "glosses": ["für das erste Fernsehprogramm der ARD"],
+                    "senseid": "2",
                 },
             ],
         )
