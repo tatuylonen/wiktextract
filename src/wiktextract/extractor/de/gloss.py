@@ -1,11 +1,10 @@
-import re
-
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import LevelNode, TemplateNode
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
 from .models import Sense, WordEntry
+from .tags import translate_raw_tags
 from .utils import match_senseid
 
 
@@ -59,19 +58,32 @@ def process_gloss_list_item(
                                 raw_tag = clean_node(wxr, None, k_arg_value)
                                 sense_data.raw_tags.append(raw_tag)
                         clean_node(wxr, sense_data, gloss_node)
+                    elif gloss_node.template_name.endswith("."):
+                        raw_tag = clean_node(
+                            wxr, sense_data, gloss_node
+                        ).removesuffix(":")
+                        sense_data.raw_tags.append(raw_tag)
                     elif gloss_node.template_name in (
                         "QS Herkunft",
                         "QS Bedeutungen",
                     ):
                         continue
+                    else:
+                        gloss_nodes.append(gloss_node)
                 elif (
                     isinstance(gloss_node, WikiNode)
                     and gloss_node.kind == NodeKind.ITALIC
                 ):
-                    raw_tag = clean_node(wxr, None, gloss_node).removesuffix(
-                        ":"
-                    )
-                    sense_data.raw_tags.append(raw_tag)
+                    italic_text = clean_node(wxr, None, gloss_node)
+                    if italic_text.endswith(":"):
+                        for raw_tag in italic_text.removesuffix(":").split(
+                            ", "
+                        ):
+                            raw_tag = raw_tag.strip()
+                            if len(raw_tag) > 0:
+                                sense_data.raw_tags.append(raw_tag)
+                    else:
+                        gloss_nodes.append(italic_text)
                 elif not (
                     isinstance(gloss_node, WikiNode)
                     and gloss_node.kind == NodeKind.LIST
@@ -95,7 +107,8 @@ def process_gloss_list_item(
                 )
 
             if len(gloss_text) > 0:
-                sense_data.glosses.append(gloss_text)
+                sense_data.glosses.append(gloss_text.removeprefix(", "))
+                translate_raw_tags(sense_data)
                 word_entry.senses.append(sense_data)
 
             for sub_list_node in list_item_node.find_child(NodeKind.LIST):
@@ -113,16 +126,3 @@ def process_gloss_list_item(
             )
             continue
     return parent_sense
-
-
-def extract_tags_from_gloss_text(sense_data: Sense, gloss_text: str) -> None:
-    parts = gloss_text.split(":", 1)
-    if len(parts) > 1:
-        tags_part = parts[0].strip()
-
-        categories = [c.strip() for c in re.split(",", tags_part)]
-        if all(c.isalnum() for c in categories):
-            sense_data.raw_tags.extend(categories)
-            return parts[1].strip()
-
-    return gloss_text

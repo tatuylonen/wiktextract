@@ -289,9 +289,13 @@ class TrTests(unittest.TestCase):
     def test_tr24(self):
         data = self.runtr("Puxian Min: foo", lang="Chinese")
         self.assertEqual(self.wxr.wtp.debugs, [])
-        self.assertEqual(data, {"translations": [
-            {"word": "foo", "lang": "Chinese", "code": "zh",
-             "tags": ["Puxian-Min"]}]})
+        self.assertEqual(
+            data,
+            {
+                "translations": [
+                    {"code": "cpx", "lang": "Puxian Min Chinese", "word": "foo"}
+                ],
+            })
 
     def test_tr25(self):
         data = self.runtr("Hallig and Mooring: foo", lang="Danish")

@@ -166,3 +166,4 @@ class WordEntry(BaseModelWrap):
     synonyms: list[Linkage] = []
     tags: list[str] = []
     raw_tags: list[str] = []
+    categories: list[str] = []

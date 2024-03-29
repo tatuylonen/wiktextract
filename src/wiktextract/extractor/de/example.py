@@ -51,27 +51,25 @@ def extract_examples(
             for ref_node in ref_nodes:
                 extract_reference(wxr, example_data, ref_node)
 
-            example_text = clean_node(wxr, {}, list_item_node.children)
+            example_text = clean_node(wxr, None, list_item_node.children)
 
             senseid, example_text = match_senseid(example_text)
 
-            if example_text:
+            if len(example_text) > 0:
                 example_data.text = example_text
-
-            if senseid:
-                for sense in word_entry.senses:
-                    if sense.senseid == senseid:
-                        sense.examples.append(copy.deepcopy(example_data))
-
-            else:
-                if example_data:
+                if len(senseid) > 0:
+                    for sense in word_entry.senses:
+                        if sense.senseid == senseid:
+                            sense.examples.append(copy.deepcopy(example_data))
+                else:
                     wxr.wtp.debug(
-                        f"Found example data without senseid and text: {example_data}",
+                        f"Found example data without senseid: {example_data}",
                         sortid="extractor/de/examples/extract_examples/28",
                     )
+
     for non_list_node in level_node.invert_find_child(NodeKind.LIST):
         wxr.wtp.debug(
-            f"Found unexpected non-list node in example section: {non_list_node}",
+            f"Found unexpected non-list node in examples: {non_list_node}",
             sortid="extractor/de/examples/extract_examples/33",
         )
 
@@ -79,7 +77,7 @@ def extract_examples(
 def extract_reference(
     wxr: WiktextractContext, example_data: Example, ref_node: WikiNode
 ):
-    example_data.raw_ref = clean_node(wxr, {}, ref_node.children)
+    example_data.raw_ref = clean_node(wxr, None, ref_node.children)
 
     template_nodes = list(ref_node.find_child(NodeKind.TEMPLATE))
 

@@ -10,7 +10,7 @@ from wiktextract.wxr_context import WiktextractContext
 from .example import extract_examples
 from .gloss import extract_glosses
 from .linkage import extract_linkages
-from .models import WordEntry
+from .models import Sense, WordEntry
 from .pronunciation import extract_pronunciation
 from .section_titles import LINKAGE_TITLES, POS_SECTIONS
 from .translation import extract_translation
@@ -200,4 +200,7 @@ def parse_page(
                 for level3_node in level2_node.find_child(NodeKind.LEVEL3):
                     parse_section(wxr, page_data, base_data, level3_node)
 
+    for data in page_data:
+        if len(data.senses) == 0:
+            data.senses.append(Sense(tags=["no-gloss"]))
     return [d.model_dump(exclude_defaults=True) for d in page_data]
