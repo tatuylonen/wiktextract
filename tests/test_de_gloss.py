@@ -142,8 +142,8 @@ class TestDEGloss(unittest.TestCase):
                         "Verb transitiv (Deutsch)",
                         "Österreichisches Deutsch",
                     ],
-                    "tags": ["Austrian German"],
-                    "raw_tags": ["trans.", "besonders", "bayrisch"],
+                    "tags": ["transitive", "Austrian German"],
+                    "raw_tags": ["besonders", "bayrisch"],
                     "glosses": ["Vieh auf der Alm halten"],
                     "senseid": "1",
                 },
@@ -174,17 +174,19 @@ class TestDEGloss(unittest.TestCase):
             [s.model_dump(exclude_defaults=True) for s in word_entry.senses],
             [
                 {
-                    "raw_tags": ["transitiv"],
+                    "tags": ["transitive"],
                     "glosses": ["etwas oft haben, zu haben pflegen"],
                     "senseid": "1",
                 },
                 {
-                    "raw_tags": ["transitiv", "Stadt/Dorf", "aktiv"],
+                    "tags": ["transitive"],
+                    "raw_tags": ["Stadt/Dorf", "aktiv"],
                     "glosses": ["bewohnen, wohnen"],
                     "senseid": "2.1",
                 },
                 {
-                    "raw_tags": ["transitiv", "Stadt/Dorf", "passiv"],
+                    "tags": ["transitive"],
+                    "raw_tags": ["Stadt/Dorf", "passiv"],
                     "glosses": ["bewohnt werden, zum Wohnsitz dienen"],
                     "senseid": "2.2",
                 },
