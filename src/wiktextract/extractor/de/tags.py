@@ -1,6 +1,8 @@
 from .models import WordEntry
 
+# Sense tags
 # https://de.wiktionary.org/wiki/Vorlage:K
+# https://de.wiktionary.org/wiki/Vorlage:K/Abk
 K_TEMPLATE_TAGS = {
     "Abl.": "ablative",
     "Ablativ": "ablative",
@@ -117,6 +119,75 @@ K_TEMPLATE_TAGS = {
     "ostfränkisch": "East Franconian German",
     "pej.": "pejorative",
     "poet.": "poetic",
+    "PräpmG": "genitive prepositional",
+    "PmG": "genitive prepositional",
+    "reg.": "regional",
+    "refl.": "reflexive",
+    "reflexiv": "reflexive",
+    # "respektive": "",
+    "sal.": "casual",
+    "scherzh.": "jocular",
+    "schriftspr.": "literary",
+    # "schülerspr.": "",
+    "schwäb.": "Swabian",
+    "schwäbisch": "Swabian",
+    "Schweiz": "Swiss Standard German",
+    "schweiz.": "Swiss Standard German",
+    "schweizerisch": "Swiss Standard German",
+    "Schweizerdeutsch": "Swiss German",
+    "schweizerdeutsch": "Swiss German",
+    # "seemannsspr.": "",
+    "sein": "auxiliary verb",
+    # "sehr": "",  # very
+    # "seltener": "",  # rare
+    # "seltener auch": "",
+    "soldatenspr.": ["military", "slang"],
+    # "sonderspr.": "",
+    # "sonst": "",
+    # "sowie": "",
+    "spätlat.": "Late Latin",
+    "spätlateinisch": "Late Latin",
+    # "später": "",
+    "speziell": "special",
+    "südd.": "South German",
+    "süddt.": "South German",
+    # "techn.": "",
+    # "teils": "",
+    # "teilweise": "",
+    "tlwva.": "outdated",
+    "tlwvatd.": "outdated",
+    "trans.": "transitive",
+    "transitiv": "transitive",
+    # "über": "",
+    # "überwiegend": "mostly",
+    "übertr.": "figurative",
+    "ugs.": "colloquial",
+    # "und": "",
+    "ungebr.": "uncommon",
+    "unpers.": "impersonal",
+    "unpersönlich": "impersonal",
+    # "ursprünglich": "",
+    "va.": "outdated",
+    "vatd.": "outdated",
+    # "verh.": "",
+    "volkst.": "popular",
+    # "von": "",
+    # "vor allem": "",
+    # "vor allem in": "",
+    "vul.": "vulgar",
+    "vulg.": "vulgar",
+    "vlat.": ["vulgar", "Latin"],
+    "vulgärlat": ["vulgar", "Latin"],
+    "vulgärlateinisch": ["vulgar", "Latin"],
+    "wien.": "Vienna",
+    "wienerisch": "Vienna",
+    # "Wpräp": "",
+    # "z. B.": "",
+    # "z. T.": "",
+    # "zijn": "",
+    # "zum Beispiel": "",
+    # "zum Teil": "",
+    # "zumeist": "",
 }
 
 
@@ -124,7 +195,11 @@ def translate_raw_tags(data: WordEntry) -> None:
     raw_tags = []
     for raw_tag in data.raw_tags:
         if raw_tag in K_TEMPLATE_TAGS:
-            data.tags.append(K_TEMPLATE_TAGS[raw_tag])
+            tag = K_TEMPLATE_TAGS[raw_tag]
+            if isinstance(tag, str):
+                data.tags.append(tag)
+            elif isinstance(tag, list):
+                data.tags.extend(tag)
         else:
             raw_tags.append(raw_tag)
     data.raw_tags = raw_tags
