@@ -3,7 +3,7 @@ from typing import Any
 
 from mediawiki_langcodes import name_to_code
 from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import LevelNode
+from wikitextprocessor.parser import LevelNode, TemplateNode
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
@@ -199,8 +199,36 @@ def parse_page(
                 )
                 for level3_node in level2_node.find_child(NodeKind.LEVEL3):
                     parse_section(wxr, page_data, base_data, level3_node)
+                for template_node in level2_node.find_child(NodeKind.TEMPLATE):
+                    if template_node.template_name == "Ähnlichkeiten Umschrift":
+                        process_umschrift_template(
+                            wxr, page_data, base_data, template_node
+                        )
 
     for data in page_data:
         if len(data.senses) == 0:
             data.senses.append(Sense(tags=["no-gloss"]))
     return [d.model_dump(exclude_defaults=True) for d in page_data]
+
+
+def process_umschrift_template(
+    wxr: WiktextractContext,
+    page_data: list[WordEntry],
+    base_data: WordEntry,
+    template_node: TemplateNode,
+) -> None:
+    # https://de.wiktionary.org/wiki/Vorlage:Ähnlichkeiten_Umschrift
+    # soft-redirect template, similar to en edition's "zh-see"
+    data = base_data.model_copy(deep=True)
+    data.pos = "soft-redirect"
+    for key, value in template_node.template_parameters.items():
+        if isinstance(key, int):
+            redirect_page = clean_node(wxr, None, value)
+            link_arg = template_node.template_parameters.get(f"link{key}", "")
+            link_text = clean_node(wxr, None, link_arg)
+            if len(link_text) > 0:
+                redirect_page = link_text
+            if len(redirect_page) > 0:
+                data.redirects.append(redirect_page)
+    if len(data.redirects) > 0:
+        page_data.append(data)
