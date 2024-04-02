@@ -167,3 +167,4 @@ class WordEntry(BaseModelWrap):
     tags: list[str] = []
     raw_tags: list[str] = []
     categories: list[str] = []
+    redirects: list[str] = []

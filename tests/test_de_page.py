@@ -102,3 +102,29 @@ class TestDEPage(unittest.TestCase):
                 }
             ],
         )
+
+    def test_umschrift(self):
+        self.wxr.wtp.add_page("Vorlage:Sprache", 10, "{{{1}}}")
+        self.wxr.wtp.start_page("iku")
+        self.assertEqual(
+            parse_page(
+                self.wxr,
+                "iku",
+                """== hiki ({{Sprache|Umschrift}}) ==
+{{Ähnlichkeiten Umschrift
+|1=行く|spr1=ja
+|2=幾|spr2=ja
+|3=𒃷#𒃷 (iku) (Sumerisch)|spr3=sux|link3=𒃷
+}}""",
+            ),
+            [
+                {
+                    "lang_code": "",
+                    "lang": "Umschrift",
+                    "pos": "soft-redirect",
+                    "redirects": ["行く", "幾", "𒃷"],
+                    "senses": [{"tags": ["no-gloss"]}],
+                    "word": "iku",
+                }
+            ],
+        )
