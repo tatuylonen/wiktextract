@@ -190,12 +190,20 @@ K_TEMPLATE_TAGS = {
     # "zumeist": "",
 }
 
+GENDER_TAGS = {
+    "n": "neuter",
+    "m": "masculine",
+    "f": "feminine",
+}
+
+GRAMMATICAL_TAGS = {**K_TEMPLATE_TAGS, **GENDER_TAGS}
+
 
 def translate_raw_tags(data: WordEntry) -> None:
     raw_tags = []
     for raw_tag in data.raw_tags:
-        if raw_tag in K_TEMPLATE_TAGS:
-            tag = K_TEMPLATE_TAGS[raw_tag]
+        if raw_tag in GRAMMATICAL_TAGS:
+            tag = GRAMMATICAL_TAGS[raw_tag]
             if isinstance(tag, str):
                 data.tags.append(tag)
             elif isinstance(tag, list):
