@@ -144,3 +144,31 @@ class TestDETranslation(unittest.TestCase):
             word_entry.model_dump(exclude_defaults=True),
             {"word": "AM", "lang": "English", "lang_code": "en"},
         )
+
+    def test_wikinode_in_g_arguemnt(self):
+        self.wxr.wtp.add_page("Vorlage:fr", 10, "Französisch")
+        self.wxr.wtp.add_page(
+            "Vorlage:Üt",
+            10,
+            '<span lang="grc" xml:lang="grc">ἄρτος</span>&nbsp;(artos[[Wiktionary:Altgriechisch/Umschrift|<sup>☆</sup>]])&nbsp;<sup>→&nbsp;grc</sup>',
+        )
+        self.wxr.wtp.start_page("Brot")
+        root = self.wxr.wtp.parse("""{{Ü-Tabelle|1|G=[[Mitglied]] einer [[Gruppe]] von [[Person]]en sein|Ü-Liste=
+*{{fr}}: {{Ü|fr|appartenir}}
+}}""")
+        word_entry = WordEntry(
+            lang="Deutsch", lang_code="de", word="dazugehören"
+        )
+        extract_translation(self.wxr, word_entry, root)
+        self.assertEqual(
+            word_entry.model_dump(exclude_defaults=True)["translations"],
+            [
+                {
+                    "lang_code": "fr",
+                    "lang": "Französisch",
+                    "word": "appartenir",
+                    "sense": "Mitglied einer Gruppe von Personen sein",
+                    "sense_id": "1",
+                }
+            ],
+        )
