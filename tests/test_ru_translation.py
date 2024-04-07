@@ -8,6 +8,8 @@ from wiktextract.wxr_context import WiktextractContext
 
 
 class TestRUTranslation(unittest.TestCase):
+    maxDiff = None
+
     def setUp(self) -> None:
         self.wxr = WiktextractContext(
             Wtp(lang_code="ru"),
@@ -31,6 +33,7 @@ class TestRUTranslation(unittest.TestCase):
 * [[Итальянский]]<sub>it</sub>: <span lang="it">[[russo]]&nbsp;<sup>[[(it)]]</sup>&nbsp;<span title="форма (формы) мужского рода">''м.''</span></span>
 * [[Китайский]]<sub>zh</sub> (традиц.): <span lang="">''письменный'' [[俄文]] (Éwén), ''устный'' [[俄語]] (Éyǔ)</span>
 * [[Эсперанто]]<sup title='искусственный язык'>и</sup><sub>eo</sub>: <span lang="eo">[[rusa]]</span>
+* [[Латинский]]<sub>la</sub>: <span lang="la">[[lingua Ruthenica]] <i title="форма женского рода">ж.</i>, [[lingua Russica]] <i title="форма женского рода">ж.</i></span>
 |}""",
         )
         root = self.wxr.wtp.parse(
@@ -39,6 +42,7 @@ class TestRUTranslation(unittest.TestCase):
 |it=[[ruso]]
 |zh-tw=''письменный'' [[俄文]] (Éwén), ''устный'' [[俄語]] (Éyǔ)
 |eo=[[rusa]]
+|la=[[lingua Ruthenica]] {{f}}, [[lingua Russica]] {{f}}
 }}"""
         )
         word_entry = WordEntry(word="русский", lang_code="ru", lang="Русский")
@@ -81,7 +85,7 @@ class TestRUTranslation(unittest.TestCase):
                     "lang": "Китайский",
                     "lang_code": "zh",
                     "sense": "относящийся к России, россиянам",
-                    "raw_tags": ["традиц.", "устный"],
+                    "raw_tags": ["устный"],
                     "word": "俄語",
                     "roman": "Éyǔ",
                 },
@@ -91,6 +95,20 @@ class TestRUTranslation(unittest.TestCase):
                     "sense": "относящийся к России, россиянам",
                     "raw_tags": ["искусственный язык"],
                     "word": "rusa",
+                },
+                {
+                    "lang": "Латинский",
+                    "lang_code": "la",
+                    "sense": "относящийся к России, россиянам",
+                    "tags": ["feminine"],
+                    "word": "lingua Ruthenica",
+                },
+                {
+                    "lang": "Латинский",
+                    "lang_code": "la",
+                    "sense": "относящийся к России, россиянам",
+                    "tags": ["feminine"],
+                    "word": "lingua Russica",
                 },
             ],
         )
