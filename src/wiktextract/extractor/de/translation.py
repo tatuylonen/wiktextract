@@ -22,14 +22,17 @@ def process_u_tabelle_template(
     wxr: WiktextractContext, word_entry: WordEntry, template_node: TemplateNode
 ) -> None:
     # https://de.wiktionary.org/wiki/Vorlage:Ü-Tabelle
-    sense_id = template_node.template_parameters.get(1, "")
-    sense = template_node.template_parameters.get("G", "")
+    sense_id = clean_node(
+        wxr, None, template_node.template_parameters.get(1, "")
+    )
+    sense = clean_node(
+        wxr, None, template_node.template_parameters.get("G", "")
+    )
     for list_arg_name in ["Ü-Liste", "Dialekttabelle"]:
         list_arg_value = template_node.template_parameters.get(list_arg_name)
         if list_arg_value is None:
             continue
         tr_list = wxr.wtp.parse(wxr.wtp.node_to_wikitext(list_arg_value))
-        tr_list = tr_list.children[0]
         for list_item in tr_list.find_child_recursively(NodeKind.LIST_ITEM):
             process_u_tabelle_list_item(
                 wxr, word_entry, list_item, sense, sense_id
@@ -49,7 +52,7 @@ def process_u_tabelle_list_item(
         if isinstance(node, str):
             node = node.strip()
             if ":" in node:
-                lang_str = node[:node.index(":")]
+                lang_str = node[: node.index(":")]
                 if len(lang_str) > 0 and len(tr_data.lang) == 0:
                     tr_data.lang = lang_str
                     if len(tr_data.lang_code) == 0:
@@ -96,8 +99,12 @@ def process_u_template(
     # https://de.wiktionary.org/wiki/Vorlage:Ü
     # also "Ü?", "Üt", "Üt?", "Üxx4", "Üxx4?"
     if len(tr_data.lang_code) == 0:
-        tr_data.lang_code = u_template.template_parameters.get(1, "")
-    tr_data.word = u_template.template_parameters.get(2, "")
+        tr_data.lang_code = clean_node(
+            wxr, None, u_template.template_parameters.get(1, "")
+        )
+    tr_data.word = clean_node(
+        wxr, None, u_template.template_parameters.get(2, "")
+    )
     template_name = u_template.template_name
     tr_data.uncertain = template_name.endswith("?")
     template_name = template_name.removesuffix("?")
@@ -107,7 +114,9 @@ def process_u_template(
     elif template_name == "Üt":
         display_arg = 4
         if 3 in u_template.template_parameters:
-            tr_data.roman = u_template.template_parameters.get(3, "")
+            tr_data.roman = clean_node(
+                wxr, None, u_template.template_parameters.get(3, "")
+            )
         else:
             # this template could create roman without the third arg
             expanded_text = clean_node(wxr, None, u_template)
@@ -118,8 +127,12 @@ def process_u_template(
         display_arg = "v"
         if 3 in u_template.template_parameters:
             display_arg = 3
-        tr_data.roman = u_template.template_parameters.get("d", "")
+        tr_data.roman = clean_node(
+            wxr, None, u_template.template_parameters.get("d", "")
+        )
 
-    tr_word = u_template.template_parameters.get(display_arg, "")
+    tr_word = clean_node(
+        wxr, None, u_template.template_parameters.get(display_arg, "")
+    )
     if len(tr_word) > 0:
         tr_data.word = tr_word
