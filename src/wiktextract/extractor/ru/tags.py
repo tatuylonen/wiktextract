@@ -283,18 +283,23 @@ def translate_raw_tags(data: WordEntry) -> None:
     for raw_tag in data.raw_tags:
         raw_tag_lower = raw_tag.lower()
         if raw_tag_lower in ALL_TAGS:
-            tr_tag = ALL_TAGS[raw_tag_lower]
-            if isinstance(tr_tag, str):
-                data.tags.append(tr_tag)
-            elif isinstance(tr_tag, list):
-                data.tags.extend(tr_tag)
+            tr_data = ALL_TAGS[raw_tag_lower]
+            if isinstance(tr_data, str):
+                data.tags.append(tr_data)
+            elif isinstance(tr_data, list):
+                data.tags.extend(tr_data)
         elif hasattr(data, "topics"):
+            tr_data = ""
             if raw_tag_lower in TOPICS:
-                data.topics.append(TOPICS[raw_tag_lower])
+                tr_data = TOPICS[raw_tag_lower]
             elif raw_tag_lower in SLANG_TOPICS:
-                data.topics.append(SLANG_TOPICS[raw_tag_lower])
+                tr_data = SLANG_TOPICS[raw_tag_lower]
                 if "slang" not in data.tags:
                     data.tags.append("slang")
+            if isinstance(tr_data, str) and len(tr_data) > 0:
+                data.topics.append(tr_data)
+            elif isinstance(tr_data, list):
+                data.topics.extend(tr_data)
         else:
             raw_tags.append(raw_tag)
     data.raw_tags = raw_tags
