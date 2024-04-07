@@ -66,7 +66,6 @@ def process_translate_list_span_tag(
     translation: Translation,
     span_node: HTMLNode,
 ) -> None:
-    added_tags_num = 0
     for node in span_node.children:
         if isinstance(node, WikiNode):
             if node.kind == NodeKind.LINK:
@@ -76,10 +75,8 @@ def process_translate_list_span_tag(
                 tag = clean_node(wxr, None, node)
                 if len(tag) > 0:
                     translation.raw_tags.append(tag)
-                    added_tags_num += 1
             elif node.kind == NodeKind.ITALIC:
                 translation.raw_tags.append(clean_node(wxr, None, node))
-                added_tags_num += 1
         elif isinstance(node, str):
             # convert escaped characters like "&nbsp;"
             text = clean_node(wxr, None, node)
@@ -97,10 +94,9 @@ def process_translate_list_span_tag(
                     word_entry.translations.append(
                         translation.model_copy(deep=True)
                     )
-                # remove data of the last word
-                for _ in range(added_tags_num):
-                    translation.raw_tags.pop()
+                translation.word = ""
                 translation.roman = ""
-                added_tags_num = 0
+                translation.tags = []
+                translation.raw_tags = []
             elif text.startswith("(") and text.endswith(")"):
                 translation.roman = text.strip("()")
