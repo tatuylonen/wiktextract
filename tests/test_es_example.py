@@ -37,8 +37,10 @@ class TestESExample(unittest.TestCase):
         )
         sense_data = Sense()
         extract_example(self.wxr, sense_data, root.children)
+        dump_data = sense_data.model_dump(exclude_defaults=True)["examples"]
+        del dump_data[0]["example_templates"]
         self.assertEqual(
-            sense_data.model_dump(exclude_defaults=True)["examples"],
+            dump_data,
             [
                 {
                     "text": "And He has on His robe and on His thigh a name written: KING OF KINGS AND LORD OF LORDS",
@@ -46,6 +48,9 @@ class TestESExample(unittest.TestCase):
                     "ref": "Bible Revelation 19:16. Versión: New King James.\nTraducción: Biblia Apocalipsis 19:16. Versión: Reina-Valera 1995.",
                 }
             ],
+        )
+        self.assertEqual(
+            sense_data.examples[0].example_templates[0].name, "ejemplo"
         )
 
     def test_url_after_ejemplo_template(self):
@@ -63,8 +68,10 @@ class TestESExample(unittest.TestCase):
         )
         sense_data = Sense()
         extract_example(self.wxr, sense_data, root.children)
+        dump_data = sense_data.model_dump(exclude_defaults=True)["examples"]
+        del dump_data[0]["example_templates"]
         self.assertEqual(
-            sense_data.model_dump(exclude_defaults=True)["examples"],
+            dump_data,
             [
                 {
                     "text": "Nos gusta lo oscuro, y por eso triunfa la Necroporra, sea ético o no",
@@ -88,8 +95,10 @@ class TestESExample(unittest.TestCase):
         )
         sense_data = Sense()
         extract_example(self.wxr, sense_data, root.children)
+        dump_data = sense_data.model_dump(exclude_defaults=True)["examples"]
+        del dump_data[0]["example_templates"]
         self.assertEqual(
-            sense_data.model_dump(exclude_defaults=True)["examples"],
+            dump_data,
             [
                 {
                     "text": 'Papel: más viejo que Matusalén, pero graduado "cum laude" en eficacia publicitaria',

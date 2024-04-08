@@ -5,7 +5,7 @@ from wikitextprocessor.parser import TemplateNode, LEVEL_KIND_FLAGS
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
-from .models import EtymologyTemplate, WordEntry
+from .models import TemplateData, WordEntry
 
 
 def process_etymology_block(
@@ -39,7 +39,7 @@ def process_etymology_block(
 
         entry.etymology_templates = entry.etymology_templates or []
 
-        etymology_template = EtymologyTemplate(
+        etymology_template = TemplateData(
             name=template_node.template_name,
             expansion=clean_node(wxr, None, template_node),
         )

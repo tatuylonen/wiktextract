@@ -3,7 +3,7 @@ from wikitextprocessor.parser import TemplateNode, WikiNodeChildrenList
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
-from .models import Example, Sense
+from .models import Example, Sense, TemplateData
 
 
 def process_ejemplo_template(
@@ -39,6 +39,13 @@ def process_ejemplo_template(
             example_data.ref = clean_node(wxr, None, span_tag)
 
     if len(example_data.text) > 0:
+        template_data = TemplateData(
+            expansion=clean_node(wxr, None, expanded_template)
+        )
+        template_data.name = template_node.template_name
+        for arg, value in template_node.template_parameters.items():
+            template_data.args[str(arg)] = clean_node(wxr, None, value)
+        example_data.example_templates.append(template_data)
         sense_data.examples.append(example_data)
 
 
