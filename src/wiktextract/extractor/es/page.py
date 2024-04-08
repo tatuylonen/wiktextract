@@ -3,23 +3,15 @@ import re
 
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import WikiNodeChildrenList
-from wiktextract.extractor.es.etymology import process_etymology_block
-from wiktextract.extractor.es.example import extract_example
-from wiktextract.extractor.es.gloss import extract_gloss
-from wiktextract.extractor.es.linkage import (
-    extract_linkage,
-    process_linkage_template,
-)
-from wiktextract.extractor.es.models import WordEntry
-from wiktextract.extractor.es.pronunciation import (
-    process_audio_template,
-    process_pron_graf_template,
-)
-from wiktextract.extractor.es.sense_data import process_sense_data_list
-from wiktextract.extractor.es.translation import extract_translation
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
+from .etymology import process_etymology_block
+from .example import extract_example
+from .gloss import extract_gloss
+from .linkage import extract_linkage, process_linkage_template
+from .models import WordEntry
+from .pronunciation import process_audio_template, process_pron_graf_template
 from .section_titles import (
     ETYMOLOGY_TITLES,
     IGNORED_TITLES,
@@ -27,6 +19,8 @@ from .section_titles import (
     POS_TITLES,
     TRANSLATIONS_TITLES,
 )
+from .sense_data import process_sense_data_list
+from .translation import extract_translation
 
 # Templates that are used to form panels on pages and that
 # should be ignored in various positions
@@ -250,7 +244,8 @@ def process_sense_children(
     page_data: list[WordEntry],
     sense_children: WikiNodeChildrenList,
 ) -> None:
-    """In most cases additional information to a sense is given via special
+    """
+    In most cases additional information to a sense is given via special
     templates or lists. However, sometimes string nodes are used to add
     information to a preceeding template or list.
 
@@ -287,7 +282,7 @@ def process_sense_children(
                 process_linkage_template(
                     wxr, page_data[-1].senses[-1], group[0]
                 )
-            elif template_name in ["ejemplo", "ejemplos", "ejemplo_y_trad"]:
+            elif template_name == "ejemplo":
                 extract_example(wxr, page_data[-1].senses[-1], group)
             elif template_name == "uso":
                 # XXX: Extract usage note
@@ -302,9 +297,9 @@ def process_sense_children(
                 )
 
         elif isinstance(group[0], WikiNode) and group[0].kind == NodeKind.LIST:
-            list_node = group[
-                0
-            ]  # List groups seem to not be followed by string nodes. We, therefore, only process the list_node.
+            list_node = group[0]
+            # List groups seem to not be followed by string nodes.
+            # We, therefore, only process the list_node.
             process_sense_data_list(wxr, page_data[-1].senses[-1], list_node)
 
         elif (

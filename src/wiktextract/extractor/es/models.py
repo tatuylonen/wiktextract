@@ -55,17 +55,7 @@ class Example(BaseModelWrap):
     translation: str = Field(
         default="", description="Spanish translation of the example sentence"
     )
-    url: str = Field(default="", description="A web link")
-    first_name: str = Field(default="", description="Author's first name")
-    last_name: str = Field(default="", description="Author's last name")
-    title: str = Field(default="", description="Title of the reference")
-    pages: str = Field(default="", description="Page numbers")
-    year: str = Field(default="", description="Year of publication")
-    date: str = Field(default="", description="Date of publication")
-    journal: str = Field(default="", description="Name of journal")
-    chapter: str = Field(default="", description="Chapter name")
-    place: str = Field(default="", description="Place of publication")
-    editor: str = Field(default="", description="Editor")
+    ref: str = ""
 
 
 class Sense(BaseModelWrap):

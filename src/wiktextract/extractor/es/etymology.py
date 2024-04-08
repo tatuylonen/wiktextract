@@ -2,9 +2,10 @@ from typing import cast
 
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import TemplateNode
-from wiktextract.extractor.es.models import EtymologyTemplate, WordEntry
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
+
+from .models import EtymologyTemplate, WordEntry
 
 
 def process_etymology_block(

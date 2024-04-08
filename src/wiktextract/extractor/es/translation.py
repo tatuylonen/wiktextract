@@ -2,10 +2,11 @@ from typing import Optional
 
 from mediawiki_langcodes import code_to_name
 from wikitextprocessor import WikiNode
-from wiktextract.extractor.es.models import Translation, WordEntry
-from wiktextract.extractor.share import split_senseids
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
+
+from ..share import split_senseids
+from .models import Translation, WordEntry
 
 
 def extract_translation(

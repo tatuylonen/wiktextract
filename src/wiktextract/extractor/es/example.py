@@ -1,99 +1,45 @@
-import re
-from typing import Optional, Union
-
 from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import WikiNodeChildrenList
-from wiktextract.extractor.es.models import Example, Sense
+from wikitextprocessor.parser import TemplateNode, WikiNodeChildrenList
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
-EXAMPLE_TEMPLATE_KEY_MAPPING = {
-    "título": "title",
-    "nombre": "first_name",
-    "apellidos": "last_name",
-    "páginas": "pages",
-    "URL": "url",
-    "año": "year",
-    "capítulo": "chapter",
-    "fecha": "date",
-    "editorial": "journal",
-    "editor": "editor",
-    "ubicación": "place",
-}
+from .models import Example, Sense
 
 
-def clean_text_and_url_from_text_nodes(
-    wxr: WiktextractContext, nodes: WikiNodeChildrenList
-) -> tuple[str, Optional[str]]:
-    if not nodes:
-        return "", None
-
-    url_node = None
-    text_nodes_without_url = []
-    for n in nodes:
-        if isinstance(n, WikiNode) and n.kind == NodeKind.URL:
-            url_node = n
-        else:
-            text_nodes_without_url.append(n)
-
-    url = None
-    if url_node:
-        url = clean_node(wxr, {}, url_node)
-
-    text = clean_node(wxr, {}, text_nodes_without_url)
-
-    return text, url
-
-
-def add_template_params_to_example(
-    wxr: WiktextractContext,
-    params: Optional[
-        dict[
-            Union[str, int],
-            Union[str, WikiNode, list[Union[str, WikiNode]]],
-        ]
-    ],
-    example: Example,
-):
-    for key in params.keys():
-        if isinstance(key, int):
-            continue
-
-        ref_key = EXAMPLE_TEMPLATE_KEY_MAPPING.get(key, key)
-        if ref_key in example.model_fields:
-            setattr(example, ref_key, clean_node(wxr, {}, params.get(key)))
-        else:
-            wxr.wtp.debug(
-                f"Unknown key {key} in example template {params}",
-                sortid="extractor/es/example/add_template_params_to_reference/73",
-            )
-
-
-def process_example_template(
+def process_ejemplo_template(
     wxr: WiktextractContext,
     sense_data: Sense,
-    template_node: WikiNode,
+    template_node: TemplateNode,
 ):
-    params = template_node.template_parameters
-    text_nodes = params.get(1)
+    # https://es.wiktionary.org/wiki/Plantilla:ejemplo
+    # https://es.wiktionary.org/wiki/Módulo:ejemplo
+    example_data = Example(text="")
+    expanded_template = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(template_node), expand_all=True
+    )
+    for span_tag in expanded_template.find_html_recursively("span"):
+        span_class = span_tag.attrs.get("class")
+        if "cita" == span_class:
+            if (
+                len(span_tag.children) > 1
+                and isinstance(span_tag.children[-1], WikiNode)
+                and span_tag.children[-1].kind == NodeKind.URL
+            ):
+                example_data.text = clean_node(
+                    wxr, None, span_tag.children[:-1]
+                )
+                example_data.ref = clean_node(wxr, None, span_tag.children[-1])
+            else:
+                example_data.text = clean_node(wxr, None, span_tag)
+        elif "trad" == span_class:
+            example_data.translation = clean_node(
+                wxr, None, span_tag
+            ).removeprefix("Traducción: ")
+        elif "ref" == span_class:
+            example_data.ref = clean_node(wxr, None, span_tag)
 
-    # Remove url node before cleaning text nodes
-    text, url = clean_text_and_url_from_text_nodes(wxr, text_nodes)
-
-    if not text:
-        return
-
-    example = Example(text=text)
-
-    if url is not None:
-        example.url = url
-
-    if template_node.template_name == "ejemplo_y_trad":
-        example.translation = clean_node(wxr, {}, params.get(2))
-
-    add_template_params_to_example(wxr, params, example)
-
-    sense_data.examples.append(example)
+    if len(example_data.text) > 0:
+        sense_data.examples.append(example_data)
 
 
 def extract_example(
@@ -101,26 +47,25 @@ def extract_example(
     sense_data: Sense,
     nodes: WikiNodeChildrenList,
 ):
-    rest: WikiNodeChildrenList = []
-
+    text_nodes: WikiNodeChildrenList = []
     for node in nodes:
         if isinstance(node, WikiNode) and node.kind == NodeKind.TEMPLATE:
-            if node.template_name in ["ejemplo", "ejemplo_y_trad"]:
-                process_example_template(wxr, sense_data, node)
+            if node.template_name == "ejemplo":
+                process_ejemplo_template(wxr, sense_data, node)
             else:
-                rest.append(node)
+                text_nodes.append(node)
         elif isinstance(node, WikiNode) and node.kind == NodeKind.URL:
             if len(sense_data.examples) > 0:
-                sense_data.examples[-1].url = clean_node(wxr, {}, node)
+                sense_data.examples[-1].ref = clean_node(wxr, None, node)
         else:
-            rest.append(node)
+            text_nodes.append(node)
 
-    if not sense_data.examples and rest:
-        example = Example(text=clean_node(wxr, {}, rest))
+    if len(sense_data.examples) == 0 and len(text_nodes) > 0:
+        example = Example(text=clean_node(wxr, None, text_nodes))
         sense_data.examples.append(example)
-    elif rest:
+    elif len(text_nodes) > 0:
         wxr.wtp.debug(
-            f"Unprocessed nodes from example group: {rest}",
+            f"Unprocessed nodes from example group: {text_nodes}",
             sortid="extractor/es/example/extract_example/87",
         )
 
@@ -131,38 +76,32 @@ def process_example_list(
     list_item: WikiNode,
 ):
     for sub_list_item in list_item.find_child_recursively(NodeKind.LIST_ITEM):
+        example_data = Example(text="")
         text_nodes: WikiNodeChildrenList = []
-        template_nodes: list[WikiNode] = []
         for child in sub_list_item.children:
-            if isinstance(child, WikiNode) and child.kind == NodeKind.TEMPLATE:
-                template_nodes.append(child)
+            # "cita *" templates are obsolete
+            if isinstance(
+                child, TemplateNode
+            ) and child.template_name.startswith("cita "):
+                example_data.ref = clean_node(wxr, None, child)
+            elif (
+                isinstance(child, TemplateNode)
+                and child.template_name == "referencia incompleta"
+            ):
+                # ignore empty ref template
+                continue
             else:
                 text_nodes.append(child)
+        example_data.text = clean_node(wxr, None, text_nodes)
+        if len(example_data.text) > 0:
+            sense_data.examples.append(example_data)
 
-        text, url = clean_text_and_url_from_text_nodes(wxr, text_nodes)
-
-        if len(text) == 0:
-            continue
-
-        example = Example(text=text)
-        if url is not None:
-            example.url = url
-
-        for template_node in template_nodes:
-            if template_node.template_name == "cita libro":
-                add_template_params_to_example(
-                    wxr, template_node.template_parameters, example
-                )
-
-        sense_data.examples.append(example)
-
-    # If no example was found in sublists, assume example is in list_item.children directly.
-    if not sense_data.examples:
-        text, url = clean_text_and_url_from_text_nodes(wxr, list_item.children)
-        text = re.sub(r"^(Ejemplos?:?)", "", text).strip()
-        if len(text) == 0:
-            return
-        example = Example(text=text)
-        if url is not None:
-            example.url = url
-        sense_data.examples.append(example)
+    # If no example was found in sublists,
+    # assume example is in list_item.children directly.
+    if len(sense_data.examples) == 0:
+        text = clean_node(wxr, None, list_item.children).removeprefix(
+            "Ejemplo: "
+        )
+        if len(text) > 0:
+            example_data = Example(text=text)
+            sense_data.examples.append(example_data)

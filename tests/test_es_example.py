@@ -11,6 +11,8 @@ from wiktextract.wxr_context import WiktextractContext
 
 
 class TestESExample(unittest.TestCase):
+    maxDiff = None
+
     def setUp(self) -> None:
         self.wxr = WiktextractContext(
             Wtp(lang_code="es"),
@@ -20,129 +22,127 @@ class TestESExample(unittest.TestCase):
     def tearDown(self) -> None:
         self.wxr.wtp.close_db_conn()
 
-    def get_default_sense_data(self) -> Sense:
-        return Sense(glosses=["gloss1"])
+    def test_ejemplo_template(self):
+        # standard format
+        self.wxr.wtp.start_page("lord")
+        self.wxr.wtp.add_page(
+            "Plantilla:ejemplo",
+            10,
+            """:*'''Ejemplo:'''
+::<blockquote><span class='cita'>And He has on His robe and on His thigh a name written: KING OF KINGS AND '''LORD''' OF LORDS</span><span class='trad'>''Traducción:&nbsp;''Y en su vestidura y en su muslo tiene escrito este nombre: REY DE REYES Y '''SEÑOR''' DE SEÑORES</span><span class='ref'>''<span class='plainlinks'>[//www.biblegateway.com/passage/?search=Apocalipsis+19&version=NKJV Bible]</span> Revelation 19:16''. Versión: New King James. <br>Traducción: ''<span class='plainlinks'>[//www.biblegateway.com/passage/?search=Apocalipsis+19&version=RVR1960 Biblia]</span> Apocalipsis 19:16''. Versión: Reina-Valera 1995. </span></blockquote>
+""",
+        )
+        root = self.wxr.wtp.parse(
+            "{{ejemplo|And He has on His robe and on His thigh a name written: KING OF KINGS AND '''LORD''' OF LORDS|c=libro|v=New King James|t=Bible|pasaje=Revelation 19:16|u=https://www.biblegateway.com/passage/?search=Apocalipsis+19&version=NKJV|trad=Y en su vestidura y en su muslo tiene escrito este nombre: REY DE REYES Y '''SEÑOR''' DE SEÑORES|tradc=libro|tradv=Reina-Valera 1995|tradt=Biblia|tradpasaje=Apocalipsis 19:16|tradu=https://www.biblegateway.com/passage/?search=Apocalipsis+19&version=RVR1960}}"
+        )
+        sense_data = Sense()
+        extract_example(self.wxr, sense_data, root.children)
+        self.assertEqual(
+            sense_data.model_dump(exclude_defaults=True)["examples"],
+            [
+                {
+                    "text": "And He has on His robe and on His thigh a name written: KING OF KINGS AND LORD OF LORDS",
+                    "translation": "Y en su vestidura y en su muslo tiene escrito este nombre: REY DE REYES Y SEÑOR DE SEÑORES",
+                    "ref": "Bible Revelation 19:16. Versión: New King James.\nTraducción: Biblia Apocalipsis 19:16. Versión: Reina-Valera 1995.",
+                }
+            ],
+        )
 
-    def test_es_extract_example(self):
-        test_cases = [
-            # https://es.wiktionary.org/wiki/coñazo
-            {
-                "input": "{{ejemplo|La conferencia ha sido un ''coñazo''}}",
-                "expected": [{"text": "La conferencia ha sido un coñazo"}],
-            },
-            # https://es.wiktionary.org/wiki/necroporra
-            {
-                "input": "{{ejemplo|Nos gusta lo oscuro, y por eso triunfa la Necroporra, sea ético o no}}[https://www.menzig.es/a/necroporra-fantamorto-porra-famosos-muertos/ ]",
-                "expected": [
-                    {
-                        "text": "Nos gusta lo oscuro, y por eso triunfa la Necroporra, sea ético o no",
-                        "url": "https://www.menzig.es/a/necroporra-fantamorto-porra-famosos-muertos/",
-                    }
-                ],
-            },
-            # https://es.wiktionary.org/wiki/ser_más_viejo_que_Matusalén
-            {
-                "input": """{{ejemplo|Papel: más viejo que Matusalén, pero graduado "cum laude" en eficacia publicitaria [https://www.marketingdirecto.com/marketing-general/publicidad/papel-mas-viejo-matusalen-pero-graduado-cum-laude-eficacia-publicitaria]}}""",
-                "expected": [
-                    {
-                        "text": """Papel: más viejo que Matusalén, pero graduado "cum laude" en eficacia publicitaria""",
-                        "url": "https://www.marketingdirecto.com/marketing-general/publicidad/papel-mas-viejo-matusalen-pero-graduado-cum-laude-eficacia-publicitaria",
-                    }
-                ],
-            },
-            # https://es.wiktionary.org/wiki/zapotear
-            {
-                "input": "{{ejemplo|Era persona inteligente, culta, que me permitía ''zapotear'' los libros y me hacía comentarios sobre ellos y sus autores|título=Memorias intelectuales|apellidos=Jaramillo Uribe|nombre=Jaime|páginas=19|URL=https://books.google.com.co/books?id=X9MSAQAAIAAJ&q=zapotear|año=2007}}",
-                "expected": [
-                    {
-                        "text": "Era persona inteligente, culta, que me permitía zapotear los libros y me hacía comentarios sobre ellos y sus autores",
-                        "title": "Memorias intelectuales",
-                        "first_name": "Jaime",
-                        "last_name": "Jaramillo Uribe",
-                        "pages": "19",
-                        "url": "https://books.google.com.co/books?id=X9MSAQAAIAAJ&q=zapotear",
-                        "year": "2007",
-                    }
-                ],
-            },
-            # https://es.wiktionary.org/wiki/meek
-            {
-                "input": "{{ejemplo_y_trad|Blessed are the '''meek''', For they shall inherit the earth|Bienaventurados los '''mansos''', porque recibirán la tierra por heredad}}",
-                "expected": [
-                    {
-                        "text": "Blessed are the meek, For they shall inherit the earth",
-                        "translation": "Bienaventurados los mansos, porque recibirán la tierra por heredad",
-                    }
-                ],
-            },
-            # https://es.wiktionary.org/wiki/confesar
-            {
-                "input": "{{ejemplo}} El interrogatorio fue efectivo y el detenido ''confesó''.",
-                "expected": [
-                    {
-                        "text": "El interrogatorio fue efectivo y el detenido confesó.",
-                    }
-                ],
-            },
-        ]
-        for case in test_cases:
-            with self.subTest(case=case):
-                self.wxr.wtp.start_page("")
-                sense_data = self.get_default_sense_data()
+    def test_url_after_ejemplo_template(self):
+        # abnormal format
+        # https://es.wiktionary.org/wiki/necroporra
+        self.wxr.wtp.start_page("necroporra")
+        self.wxr.wtp.add_page(
+            "Plantilla:ejemplo",
+            10,
+            """:*'''Ejemplo:'''
+::<blockquote><span class='cita'>{{{1}}}</span></blockquote>""",
+        )
+        root = self.wxr.wtp.parse(
+            "{{ejemplo|Nos gusta lo oscuro, y por eso triunfa la Necroporra, sea ético o no}}[https://www.menzig.es/a/necroporra-fantamorto-porra-famosos-muertos/ ]"
+        )
+        sense_data = Sense()
+        extract_example(self.wxr, sense_data, root.children)
+        self.assertEqual(
+            sense_data.model_dump(exclude_defaults=True)["examples"],
+            [
+                {
+                    "text": "Nos gusta lo oscuro, y por eso triunfa la Necroporra, sea ético o no",
+                    "ref": "https://www.menzig.es/a/necroporra-fantamorto-porra-famosos-muertos/",
+                }
+            ],
+        )
 
-                root = self.wxr.wtp.parse(case["input"])
+    def test_url_in_ejemplo_template_first_param(self):
+        # abnormal format
+        # https://es.wiktionary.org/wiki/ser_más_viejo_que_Matusalén
+        self.wxr.wtp.start_page("ser más viejo que Matusalén")
+        self.wxr.wtp.add_page(
+            "Plantilla:ejemplo",
+            10,
+            """:*'''Ejemplo:'''
+::<blockquote><span class='cita'>{{{1}}}</span></blockquote>""",
+        )
+        root = self.wxr.wtp.parse(
+            '{{ejemplo|Papel: más viejo que Matusalén, pero graduado "cum laude" en eficacia publicitaria [https://www.marketingdirecto.com/marketing-general/publicidad/papel-mas-viejo-matusalen-pero-graduado-cum-laude-eficacia-publicitaria]}}'
+        )
+        sense_data = Sense()
+        extract_example(self.wxr, sense_data, root.children)
+        self.assertEqual(
+            sense_data.model_dump(exclude_defaults=True)["examples"],
+            [
+                {
+                    "text": 'Papel: más viejo que Matusalén, pero graduado "cum laude" en eficacia publicitaria',
+                    "ref": "https://www.marketingdirecto.com/marketing-general/publicidad/papel-mas-viejo-matusalen-pero-graduado-cum-laude-eficacia-publicitaria",
+                }
+            ],
+        )
 
-                extract_example(self.wxr, sense_data, root.children)
-                self.assertEqual(
-                    sense_data.model_dump(exclude_defaults=True)["examples"],
-                    case["expected"],
-                )
+    def test_example_after_empty_ejemplo_template(self):
+        # abnormal format
+        self.wxr.wtp.start_page("confesar")
+        self.wxr.wtp.add_page("Plantilla:ejemplo", 10, "")
+        root = self.wxr.wtp.parse(
+            "{{ejemplo}} El interrogatorio fue efectivo y el detenido ''confesó''."
+        )
+        sense_data = Sense()
+        extract_example(self.wxr, sense_data, root.children)
+        self.assertEqual(
+            sense_data.model_dump(exclude_defaults=True)["examples"],
+            [{"text": "El interrogatorio fue efectivo y el detenido confesó."}],
+        )
 
-    def test_es_process_example_list(self):
-        test_cases = [
-            {"input": ":*'''Ejemplo:'''\n", "expected": []},
-            # https://es.wiktionary.org/wiki/cerebro
-            {
-                "input": ":*'''Ejemplo:''' Tú serás el cerebro del plan.",
-                "expected": [{"text": "Tú serás el cerebro del plan."}],
-            },
-            # https://es.wiktionary.org/wiki/quicio
-            {
-                "input": """:*'''Ejemplo:'''
-::* «Apoyado contra el ''quicio'' de la puerta, adivina, de pronto, a su marido.» {{cita libro|nombre=María Luisa|apellidos=Bombal}}""",
-                "expected": [
-                    {
-                        "text": "«Apoyado contra el quicio de la puerta, adivina, de pronto, a su marido.»",
-                        "first_name": "María Luisa",
-                        "last_name": "Bombal",
-                    }
-                ],
-            },
-            # https://es.wiktionary.org/wiki/silepsis
-            {
-                "input": "::Su [[obra]] comprendió [[esculpir]] un [[busto]], varios [[retrato|retratos]] y uno que otro [[dibujo]] al [[carbón]].",
-                "expected": [
-                    {
-                        "text": "Su obra comprendió esculpir un busto, varios retratos y uno que otro dibujo al carbón."
-                    }
-                ],
-            },
-        ]
-        for case in test_cases:
-            with self.subTest(case=case):
-                self.wxr.wtp.start_page("")
-                sense_data = self.get_default_sense_data()
+    def test_example_text_not_in_nested_list(self):
+        # abnormal format
+        self.wxr.wtp.start_page("cerebro")
+        root = self.wxr.wtp.parse(
+            ":*'''Ejemplo:''' Tú serás el cerebro del plan."
+        )
+        sense_data = Sense()
+        process_example_list(self.wxr, sense_data, root.children[0].children[0])
+        self.assertEqual(
+            sense_data.model_dump(exclude_defaults=True)["examples"],
+            [{"text": "Tú serás el cerebro del plan."}],
+        )
 
-                root = self.wxr.wtp.parse(case["input"])
-
-                process_example_list(
-                    self.wxr, sense_data, root.children[0].children[0]
-                )
-                examples = [
-                    e.model_dump(exclude_defaults=True)
-                    for e in sense_data.examples
-                ]
-                self.assertEqual(
-                    examples,
-                    case["expected"],
-                )
+    def test_example_in_nested_list(self):
+        # abnormal format and obsolete template
+        self.wxr.wtp.start_page("quicio")
+        self.wxr.wtp.add_page(
+            "Plantilla:cita libro",
+            10,
+            "<cite>Bombal, María Luisa&#32;(2012).&#32;«La Amortajada», <i>La Última Niebla/La Amortajada</i>.&#32;Planeta,&#32;151.</cite>",
+        )
+        root = self.wxr.wtp.parse(""":*'''Ejemplo:'''
+::* «Apoyado contra el ''quicio'' de la puerta, adivina, de pronto, a su marido.» {{cita libro|nombre=María Luisa|apellidos=Bombal|título=La Última Niebla/La Amortajada|capítulo=La Amortajada|fecha=2012|editorial=Planeta|páginas=151}}""")
+        sense_data = Sense()
+        process_example_list(self.wxr, sense_data, root.children[0].children[0])
+        self.assertEqual(
+            sense_data.model_dump(exclude_defaults=True)["examples"],
+            [
+                {
+                    "text": "«Apoyado contra el quicio de la puerta, adivina, de pronto, a su marido.»",
+                    "ref": "Bombal, María Luisa (2012). «La Amortajada», La Última Niebla/La Amortajada. Planeta, 151.",
+                }
+            ],
+        )
