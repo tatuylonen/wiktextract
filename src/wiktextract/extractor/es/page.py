@@ -2,24 +2,20 @@ import logging
 import re
 
 from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import WikiNodeChildrenList
-from wiktextract.extractor.es.etymology import process_etymology_block
-from wiktextract.extractor.es.example import extract_example
-from wiktextract.extractor.es.gloss import extract_gloss
-from wiktextract.extractor.es.linkage import (
-    extract_linkage,
-    process_linkage_template,
+from wikitextprocessor.parser import (
+    LEVEL_KIND_FLAGS,
+    TemplateNode,
+    WikiNodeChildrenList,
 )
-from wiktextract.extractor.es.models import WordEntry
-from wiktextract.extractor.es.pronunciation import (
-    process_audio_template,
-    process_pron_graf_template,
-)
-from wiktextract.extractor.es.sense_data import process_sense_data_list
-from wiktextract.extractor.es.translation import extract_translation
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
+from .etymology import process_etymology_block
+from .example import extract_example
+from .gloss import extract_gloss
+from .linkage import extract_linkage, process_linkage_template
+from .models import WordEntry
+from .pronunciation import process_audio_template, process_pron_graf_template
 from .section_titles import (
     ETYMOLOGY_TITLES,
     IGNORED_TITLES,
@@ -27,6 +23,8 @@ from .section_titles import (
     POS_TITLES,
     TRANSLATIONS_TITLES,
 )
+from .sense_data import process_sense_data_list
+from .translation import extract_translation
 
 # Templates that are used to form panels on pages and that
 # should be ignored in various positions
@@ -89,7 +87,8 @@ def parse_entries(
             and not_sub_level_node.kind == NodeKind.LIST
             and not_sub_level_node.sarg == ":*"
         ):
-            # XXX: There might be other uses for this kind of list which are being ignored here
+            # XXX: There might be other uses for this kind of list which are
+            # being ignored here
             for child in not_sub_level_node.find_child_recursively(
                 NodeKind.TEMPLATE
             ):
@@ -104,7 +103,8 @@ def parse_entries(
 
     if unexpected_nodes:
         wxr.wtp.debug(
-            f"Found unexpected nodes {unexpected_nodes} in section {level_node.largs}",
+            f"Found unexpected nodes {unexpected_nodes} "
+            f"in section {level_node.largs}",
             sortid="extractor/es/page/parse_entries/69",
         )
 
@@ -145,24 +145,20 @@ def parse_section(
         pass
 
     elif pos_template_name in POS_TITLES or section_title in POS_TITLES:
-        pos_type = POS_TITLES[
-            pos_template_name if pos_template_name != "" else section_title
-        ]["pos"]
-
+        pos_data = POS_TITLES.get(
+            pos_template_name, POS_TITLES.get(section_title)
+        )
+        pos_type = pos_data["pos"]
         page_data.append(base_data.model_copy(deep=True))
         page_data[-1].pos = pos_type
         page_data[-1].pos_title = section_title
-
-        process_pos_block(
-            wxr,
-            page_data,
-            level_node,
-        )
+        process_pos_block(wxr, page_data, level_node)
 
     elif section_title in ETYMOLOGY_TITLES:
         if wxr.config.capture_etymologies:
             process_etymology_block(wxr, base_data, level_node)
-
+        for nested_level_node in level_node.find_child(LEVEL_KIND_FLAGS):
+            parse_section(wxr, page_data, base_data, nested_level_node)
     elif section_title in TRANSLATIONS_TITLES:
         if wxr.config.capture_translations:
             for template_node in level_node.find_child_recursively(
@@ -172,6 +168,8 @@ def parse_section(
                     extract_translation(wxr, page_data[-1], template_node)
 
     elif section_title in LINKAGE_TITLES:
+        if len(page_data) == 0:
+            page_data.append(base_data.model_copy(deep=True))
         extract_linkage(
             wxr, page_data[-1], level_node, LINKAGE_TITLES[section_title]
         )
@@ -205,7 +203,8 @@ def process_pos_block(
             and child.kind == NodeKind.LIST
             and child.sarg == ";"
         ):
-            # Consume sense_children of previous sense and extract gloss of new sense
+            # Consume sense_children of previous sense and extract gloss of
+            # new sense
             process_sense_children(wxr, page_data, sense_children)
             sense_children = []
 
@@ -232,11 +231,7 @@ def process_pos_block(
                 and child.kind == NodeKind.LINK
                 and "Categoría" in child.largs[0][0]
             ):
-                clean_node(
-                    wxr,
-                    page_data[-1],
-                    child,
-                )
+                clean_node(wxr, page_data[-1], child)
             else:
                 wxr.wtp.debug(
                     f"Found unexpected node in pos_block: {child}",
@@ -250,7 +245,8 @@ def process_sense_children(
     page_data: list[WordEntry],
     sense_children: WikiNodeChildrenList,
 ) -> None:
-    """In most cases additional information to a sense is given via special
+    """
+    In most cases additional information to a sense is given via special
     templates or lists. However, sometimes string nodes are used to add
     information to a preceeding template or list.
 
@@ -272,22 +268,17 @@ def process_sense_children(
         group: WikiNodeChildrenList,
     ) -> None:
         # Nested function for readibility
-
         if len(group) == 0:
             return
-        elif (
-            isinstance(group[0], WikiNode)
-            and group[0].kind == NodeKind.TEMPLATE
-        ):
+        elif isinstance(group[0], TemplateNode):
             template_name = group[0].template_name
-
             if template_name == "clear":
                 return
             elif template_name.removesuffix("s") in LINKAGE_TITLES:
                 process_linkage_template(
                     wxr, page_data[-1].senses[-1], group[0]
                 )
-            elif template_name in ["ejemplo", "ejemplos", "ejemplo_y_trad"]:
+            elif template_name == "ejemplo":
                 extract_example(wxr, page_data[-1].senses[-1], group)
             elif template_name == "uso":
                 # XXX: Extract usage note
@@ -297,14 +288,15 @@ def process_sense_children(
                 pass
             else:
                 wxr.wtp.debug(
-                    f"Found unexpected group specifying a sense: {group}, head template {template_name}",
+                    f"Found unexpected group specifying a sense: {group},"
+                    f"head template {template_name}",
                     sortid="extractor/es/page/process_group/102",
                 )
 
         elif isinstance(group[0], WikiNode) and group[0].kind == NodeKind.LIST:
-            list_node = group[
-                0
-            ]  # List groups seem to not be followed by string nodes. We, therefore, only process the list_node.
+            list_node = group[0]
+            # List groups seem to not be followed by string nodes.
+            # We, therefore, only process the list_node.
             process_sense_data_list(wxr, page_data[-1].senses[-1], list_node)
 
         elif (
@@ -313,11 +305,7 @@ def process_sense_children(
             and "Categoría" in child.largs[0][0]
         ):
             # Extract sense categories
-            clean_node(
-                wxr,
-                page_data[-1].senses[-1],
-                child,
-            )
+            clean_node(wxr, page_data[-1].senses[-1], child)
 
         else:
             wxr.wtp.debug(
@@ -326,13 +314,11 @@ def process_sense_children(
             )
 
     group: WikiNodeChildrenList = []
-
     for child in sense_children:
         if starts_new_group(child):
             process_group(wxr, page_data, group)
             group = []
         group.append(child)
-
     process_group(wxr, page_data, group)
 
 
@@ -360,17 +346,16 @@ def parse_page(
             # https://es.wiktionary.org/wiki/Apéndice:Códigos_de_idioma
             if subtitle_template.template_name == "lengua":
                 categories = {"categories": []}
-                lang_code = subtitle_template.template_parameters.get(1)
+                lang_code = subtitle_template.template_parameters.get(1).lower()
                 if (
                     wxr.config.capture_language_codes is not None
                     and lang_code not in wxr.config.capture_language_codes
                 ):
                     continue
-
-                lang = clean_node(wxr, categories, subtitle_template)
-                wxr.wtp.start_section(lang)
+                lang_name = clean_node(wxr, categories, subtitle_template)
+                wxr.wtp.start_section(lang_name)
                 base_data = WordEntry(
-                    lang=lang, lang_code=lang_code, word=wxr.wtp.title
+                    lang=lang_name, lang_code=lang_code, word=wxr.wtp.title
                 )
                 base_data.categories.extend(categories["categories"])
                 parse_entries(wxr, page_data, base_data, level2_node)

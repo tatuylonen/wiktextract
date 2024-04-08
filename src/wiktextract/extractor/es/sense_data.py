@@ -1,10 +1,10 @@
 from wikitextprocessor import NodeKind, WikiNode
-from wiktextract.extractor.es.example import process_example_list
-from wiktextract.extractor.es.linkage import process_linkage_list_children
-from wiktextract.extractor.es.models import Sense
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
+from .example import process_example_list
+from .linkage import process_linkage_list_children
+from .models import Sense
 from .section_titles import LINKAGE_TITLES
 
 

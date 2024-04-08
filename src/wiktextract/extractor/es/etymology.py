@@ -1,10 +1,11 @@
 from typing import cast
 
 from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import TemplateNode
-from wiktextract.extractor.es.models import EtymologyTemplate, WordEntry
+from wikitextprocessor.parser import LEVEL_KIND_FLAGS, TemplateNode
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
+
+from .models import TemplateData, WordEntry
 
 
 def process_etymology_block(
@@ -38,7 +39,7 @@ def process_etymology_block(
 
         entry.etymology_templates = entry.etymology_templates or []
 
-        etymology_template = EtymologyTemplate(
+        etymology_template = TemplateData(
             name=template_node.template_name,
             expansion=clean_node(wxr, None, template_node),
         )
@@ -68,4 +69,6 @@ def process_etymology_block(
         entry.etymology_templates.append(etymology_template)
 
     if has_etymology_info:
-        entry.etymology_text = clean_node(wxr, None, level_node.children)
+        entry.etymology_text = clean_node(
+            wxr, None, list(level_node.invert_find_child(LEVEL_KIND_FLAGS))
+        )
