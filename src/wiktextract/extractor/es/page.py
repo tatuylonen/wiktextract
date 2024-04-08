@@ -3,9 +3,9 @@ import re
 
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import (
-    WikiNodeChildrenList,
-    TemplateNode,
     LEVEL_KIND_FLAGS,
+    TemplateNode,
+    WikiNodeChildrenList,
 )
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
@@ -145,9 +145,10 @@ def parse_section(
         pass
 
     elif pos_template_name in POS_TITLES or section_title in POS_TITLES:
-        pos_type = POS_TITLES[
-            pos_template_name if pos_template_name != "" else section_title
-        ]["pos"]
+        pos_data = POS_TITLES.get(
+            pos_template_name, POS_TITLES.get(section_title)
+        )
+        pos_type = pos_data["pos"]
         page_data.append(base_data.model_copy(deep=True))
         page_data[-1].pos = pos_type
         page_data[-1].pos_title = section_title

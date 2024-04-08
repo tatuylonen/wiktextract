@@ -38,10 +38,14 @@ class TestESPage(unittest.TestCase):
     def test_gloss_under_etymology_section(self):
         # abnormal layout
         # https://es.wiktionary.org/wiki/agüero
+        # https://es.wiktionary.org/wiki/paya
         self.wxr.wtp.add_page("Plantilla:lengua", 10, "Español")
         self.wxr.wtp.add_page("Plantilla:etimología", 10, "Del latín *agurium")
+        self.wxr.wtp.add_page("Plantilla:lengua", 10, "Español")
         self.wxr.wtp.add_page(
-            "Plantilla:sustantivo masculino", 10, "Sustantivo masculino"
+            "Plantilla:sustantivo masculino y femenino",
+            10,
+            "Sustantivo femenino y masculino",
         )
         page_data = parse_page(
             self.wxr,
@@ -49,8 +53,8 @@ class TestESPage(unittest.TestCase):
             """=={{lengua|ES}}==
 ===Etimología===
 {{etimología|la|*agurium}}, variante del clásico augurium.
-===={{sustantivo masculino|es}}====
-;1: Presagio que algunos pueblos [[gentil]]es sacaban
+==== {{sustantivo masculino y femenino|es}} ====
+;2: Persona originaria de un pueblo amerindio de origen chibcha que habita Honduras.
 """,
         )
         self.assertEqual(
@@ -59,5 +63,8 @@ class TestESPage(unittest.TestCase):
         )
         self.assertEqual(
             page_data[0]["senses"][0]["glosses"],
-            ["Presagio que algunos pueblos gentiles sacaban"],
+            [
+                "Persona originaria de un pueblo amerindio de origen chibcha que habita Honduras."
+            ],
         )
+        self.assertEqual(page_data[0]["pos"], "noun")

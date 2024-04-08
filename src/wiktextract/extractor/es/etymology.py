@@ -1,7 +1,7 @@
 from typing import cast
 
 from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import TemplateNode, LEVEL_KIND_FLAGS
+from wikitextprocessor.parser import LEVEL_KIND_FLAGS, TemplateNode
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
