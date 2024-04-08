@@ -1,7 +1,7 @@
 from typing import cast
 
 from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import TemplateNode
+from wikitextprocessor.parser import TemplateNode, LEVEL_KIND_FLAGS
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
@@ -69,4 +69,6 @@ def process_etymology_block(
         entry.etymology_templates.append(etymology_template)
 
     if has_etymology_info:
-        entry.etymology_text = clean_node(wxr, None, level_node.children)
+        entry.etymology_text = clean_node(
+            wxr, None, list(level_node.invert_find_child(LEVEL_KIND_FLAGS))
+        )
