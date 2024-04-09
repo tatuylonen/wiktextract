@@ -47,6 +47,10 @@ def process_pron_graf_template(
             process_pron_graf_link_cell(
                 wxr, word_entry, value_node, header_text, "alternative"
             )
+        elif header_text == "homófonos":
+            process_pron_graf_link_cell(
+                wxr, word_entry, value_node, header_text, "homophone"
+            )
         elif header_text == "transliteraciones":
             process_pron_graf_text_cell(wxr, word_entry, value_node, "roman")
         elif header_text == "transcripciones silábicas":

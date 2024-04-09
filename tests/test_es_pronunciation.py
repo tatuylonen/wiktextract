@@ -151,6 +151,39 @@ class TestESPronunciation(unittest.TestCase):
             ],
         )
 
+    def test_pron_graf_homophone(self):
+        self.wxr.wtp.start_page("pore")
+        self.wxr.wtp.add_page(
+            "Plantilla:pron-graf",
+            10,
+            """{|
+|<span>pore</span>
+|-
+|'''homófonos'''
+|[[pour]],&nbsp;[[poor]]<ref>con la fusión pour-poor</ref>,&nbsp;[[paw]]<ref>no rótico, sin la fusión horse–hoarse</ref>
+|}""",
+        )
+        root = self.wxr.wtp.parse(
+            """{{pron-graf|leng=en
+|h=pour
+|h2=poor|hnota2=con la fusión pour-poor
+|h3=paw|hnota3=no rótico, sin la fusión horse–hoarse
+}}"""
+        )
+        word_entry = WordEntry(word="月", lang_code="ja", lang="Japonés")
+        process_pron_graf_template(self.wxr, word_entry, root.children[0])
+        self.assertEqual(
+            word_entry.model_dump(exclude_defaults=True)["sounds"],
+            [
+                {"homophone": "pour"},
+                {"homophone": "poor", "note": "con la fusión pour-poor"},
+                {
+                    "homophone": "paw",
+                    "note": "no rótico, sin la fusión horse–hoarse",
+                },
+            ],
+        )
+
     def test_process_audio_template(self):
         # https://es.wiktionary.org/wiki/os#Latín
         self.wxr.wtp.start_page("os")

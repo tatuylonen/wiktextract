@@ -103,6 +103,7 @@ class Sound(BaseModelWrap):
         False, description="This is `True` for the 'Variantes' row"
     )
     rhymes: str = ""
+    homophone: str = ""
 
 
 class WordEntry(BaseModelWrap):
