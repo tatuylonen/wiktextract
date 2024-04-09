@@ -23,6 +23,16 @@ class TestESPage(unittest.TestCase):
         Writes data affecting multiple entries to all affected WordEntry objects.
         https://es.wiktionary.org/wiki/love
         """
+        self.wxr.wtp.add_page(
+            "Plantilla:pron-graf",
+            10,
+            """{|
+|<span>love</span>
+|-
+|'''pronunciación''' (AFI)
+|[lʌv]<br/>
+|}""",
+        )
         page_data = parse_page(
             self.wxr,
             "love",

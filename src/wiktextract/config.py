@@ -12,7 +12,11 @@ from typing import (
     TypedDict,
 )
 
-from wikitextprocessor.core import CollatedErrorReturnData, ErrorMessageData
+from wikitextprocessor.core import (
+    CollatedErrorReturnData,
+    ErrorMessageData,
+    HTMLTagData,
+)
 
 if sys.version_info < (3, 10):
     from importlib_resources import files
@@ -63,6 +67,7 @@ class WiktionaryConfig:
         "extract_thesaurus_pages",
         "save_ns_names",
         "extract_ns_names",
+        "allowed_html_tags",
     )
 
     def __init__(
@@ -136,6 +141,7 @@ class WiktionaryConfig:
         ]
         # these are extracted namespaces
         self.extract_ns_names = ["Main", "Reconstruction"]
+        self.allowed_html_tags: dict[str, HTMLTagData] = {}
         self.load_edition_settings()
 
     def merge_return(self, ret: CollatedErrorReturnData):

@@ -57,41 +57,28 @@ def parse_entries(
     If a word has distinct etmylogies, these are separated by level 3 headings
     and subdivided by their POS at level 4 headings,
     e.g. https://es.wiktionary.org/wiki/churro
-
-
     """
-    next_level_kind = (
-        NodeKind.LEVEL3
-        if level_node.kind == NodeKind.LEVEL2
-        else NodeKind.LEVEL4
-    )
 
     # This might not be necessary but it's to prevent that base_data is applied
     # to entries that it shouldn't be applied to
     base_data_copy = base_data.model_copy(deep=True)
-
     unexpected_nodes = []
     # Parse data affecting all subsections and add to base_data_copy
-    for not_sub_level_node in level_node.invert_find_child(next_level_kind):
+    for node in level_node.invert_find_child(LEVEL_KIND_FLAGS):
         if (
-            isinstance(not_sub_level_node, WikiNode)
-            and not_sub_level_node.kind == NodeKind.TEMPLATE
-            and not_sub_level_node.template_name == "pron-graf"
+            isinstance(node, TemplateNode)
+            and node.template_name == "pron-graf"
+            and wxr.config.capture_pronunciation
         ):
-            if wxr.config.capture_pronunciation:
-                process_pron_graf_template(
-                    wxr, base_data_copy, not_sub_level_node
-                )
+            process_pron_graf_template(wxr, base_data_copy, node)
         elif (
-            (isinstance(not_sub_level_node, WikiNode))
-            and not_sub_level_node.kind == NodeKind.LIST
-            and not_sub_level_node.sarg == ":*"
+            isinstance(node, WikiNode)
+            and node.kind == NodeKind.LIST
+            and node.sarg == ":*"
         ):
             # XXX: There might be other uses for this kind of list which are
             # being ignored here
-            for child in not_sub_level_node.find_child_recursively(
-                NodeKind.TEMPLATE
-            ):
+            for child in node.find_child_recursively(NodeKind.TEMPLATE):
                 if (
                     child.template_name == "audio"
                     and wxr.config.capture_pronunciation
@@ -99,7 +86,7 @@ def parse_entries(
                     process_audio_template(wxr, base_data_copy, child)
 
         else:
-            unexpected_nodes.append(not_sub_level_node)
+            unexpected_nodes.append(node)
 
     if unexpected_nodes:
         wxr.wtp.debug(
@@ -108,7 +95,7 @@ def parse_entries(
             sortid="extractor/es/page/parse_entries/69",
         )
 
-    for sub_level_node in level_node.find_child(next_level_kind):
+    for sub_level_node in level_node.find_child(LEVEL_KIND_FLAGS):
         parse_section(wxr, page_data, base_data_copy, sub_level_node)
 
 
