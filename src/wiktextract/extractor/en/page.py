@@ -2190,7 +2190,14 @@ def parse_language(
             parts: list[str] = []
             ruby: list[tuple[str, str]] = []
             urls: list[str] = []
-            links: list[str] = []
+            # data about link text; this is used to skip splitting on
+            # linkage text items that contain stuff like commas; for
+            # example "Hunde, die bellen, beißen nicht" in article
+            # beißen is split into "Hunde", "die bellen" etc.
+            # We take that link text and use it, eventually,
+            # in split_at_comma_semi to skip splitting on those
+            # commas.
+            links_that_should_not_be_split: list[str] = []
 
             def item_recurse(
                 contents: list[Union[str, WikiNode]], italic=False
@@ -2199,7 +2206,7 @@ def parse_language(
                 nonlocal sense
                 nonlocal ruby
                 nonlocal parts
-                print("ITEM_RECURSE:", contents)
+                # print("ITEM_RECURSE:", contents)
                 for node in contents:
                     if isinstance(node, str):
                         parts.append(node)
@@ -2258,8 +2265,6 @@ def parse_language(
                         item_recurse(node.children, italic=True)
                     elif kind == NodeKind.LINK:
                         ignore = False
-                        print(f"{node}")
-                        print(f"{node.largs[1]=}")
                         if isinstance(node.largs[0][0], str):
                             v1 = node.largs[0][0].strip().lower()
                             if v1.startswith(
@@ -2276,8 +2281,13 @@ def parse_language(
                                     and v[0][0] == ":"
                                 ):
                                     v = [v[0][1:]] + list(v[1:])  # type:ignore
-                                if isinstance(v[0], str) and v[0].isalnum() == False:
-                                    links.append("".join(v))  # type: ignore
+                                if (
+                                    isinstance(v[0], str)
+                                    and v[0].isalnum() == False
+                                ):
+                                    links_that_should_not_be_split.append(
+                                        "".join(v[0])
+                                    )  # type: ignore
                                 item_recurse(v, italic=italic)
                     elif kind == NodeKind.URL:
                         if len(node.largs) < 2 and node.largs:
@@ -2301,15 +2311,14 @@ def parse_language(
                         )
 
             # print("LINKAGE CONTENTS BEFORE ITEM_RECURSE: {!r}"
-                  # .format(contents))
-                                    
+            #       .format(contents))
+
             item_recurse(contents)
             item = clean_node(wxr, None, parts)
             # print("LINKAGE ITEM CONTENTS:", parts)
             # print("CLEANED ITEM: {!r}".format(item))
             # print(f"URLS {urls=!r}")
 
-            print(f"{links=}")
             return parse_linkage_item_text(
                 wxr,
                 word,
@@ -2321,7 +2330,7 @@ def parse_language(
                 pos_datas,
                 is_reconstruction,
                 urls or None,
-                links or None,
+                links_that_should_not_be_split or None,
             )
 
         def parse_linkage_recurse(
@@ -3012,6 +3021,7 @@ def parse_language(
             if re.match(ignored_etymology_templates_re, name):
                 ignore_count += 1
             return None
+
         # CONTINUE_HERE
 
         def etym_post_template_fn(name, ht, expansion):

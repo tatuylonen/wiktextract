@@ -69,7 +69,11 @@ def split_at_comma_semi(
     parenthesis.  ``separators`` is default separators (setting it eliminates
     default separators).  ``extra`` is extra separators to be used in addition
     to ``separators``.  The separators in ``separators`` and ``extra`` must
-    be valid regexp pieces (already escaped if needed)."""
+    be valid regexp pieces (already escaped if needed). ``skipped`` can be a
+    list of strings, containing material that might be otherwise split, but
+    should not; for example phrases like 'Hunde, die bellen, beißen nicht',
+    which would otherwise be split on the commas. Often link text data, becase
+    those are prototypically one unit."""
     assert isinstance(text, str)
     assert isinstance(separators, (list, tuple))
     assert isinstance(extra, (list, tuple))
@@ -86,9 +90,7 @@ def split_at_comma_semi(
     splitters.append(r"[][()]")
     splitters.extend(sorted(separators, key=lambda x: -len(x)))
     split_re = "|".join(splitters)
-    print(f"{split_re=}")
     for m in re.finditer(split_re, text):
-        print(f"{m=}")
         if ofs < m.start():
             parts.append(text[ofs : m.start()])
         if m.start() == 0 and m.end() == len(text):
