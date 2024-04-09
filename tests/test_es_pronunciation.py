@@ -15,7 +15,13 @@ class TestESPronunciation(unittest.TestCase):
 
     def setUp(self) -> None:
         self.wxr = WiktextractContext(
-            Wtp(lang_code="es"), WiktionaryConfig(dump_file_lang_code="es")
+            Wtp(
+                lang_code="es",
+                extension_tags={
+                    "phonos": {"parents": ["phrasing"], "content": ["flow"]}
+                },
+            ),
+            WiktionaryConfig(dump_file_lang_code="es"),
         )
 
     def tearDown(self) -> None:
@@ -24,151 +30,116 @@ class TestESPronunciation(unittest.TestCase):
     def get_default_page_data(self) -> list[WordEntry]:
         return [WordEntry(word="test", lang_code="es", lang="Language")]
 
-    def test_es_extract_pronunciation(self):
-        # Test cases taken from https://es.wiktionary.org/wiki/Plantilla:pron-graf
+    def test_sound_file(self):
+        self.wxr.wtp.start_page("amigo")
+        self.wxr.wtp.add_page(
+            "Plantilla:pron-graf",
+            10,
+            """{|
+|<span>amigo</span>
+|-
+|'''pronunciación''' (AFI)
+|[aˈmi.ɣ̞o] <phonos file="LL-Q1321 (spa)-AdrianAbdulBaha-amigo.wav" leng="es"><small>''Colombia''</small></phonos><br/>
+|-
+|'''rima'''
+|[[:Categoría:ES:Rimas:i.ɡo|i.ɡo]][[Categoría:ES:Rimas:i.ɡo]]
+|}""",
+        )
+        root = self.wxr.wtp.parse(
+            "{{pron-graf|audio=LL-Q1321 (spa)-AdrianAbdulBaha-amigo.wav|aunota=Colombia}}"
+        )
+        word_entry = WordEntry(word="amigo", lang_code="es", lang="Español")
+        process_pron_graf_template(self.wxr, word_entry, root.children[0])
+        data = word_entry.model_dump(exclude_defaults=True)["sounds"]
+        for key in data[0].copy().keys():
+            if key.endswith("_url"):
+                del data[0][key]
+        self.assertEqual(
+            data,
+            [
+                {
+                    "ipa": "[aˈmi.ɣ̞o]",
+                    "audio": "LL-Q1321 (spa)-AdrianAbdulBaha-amigo.wav",
+                    "raw_tags": ["Colombia"],
+                },
+                {
+                    "rhymes": ["i.ɡo"],
+                },
+            ],
+        )
 
-        test_cases = [
-            {
-                "input": "{{pron-graf|fone=ˈsim.ple}}",
-                "sounds": [{"ipa": "ˈsim.ple"}],
-                "spellings": [],
-            },
-            {
-                "input": "{{pron-graf|g=exemplo|gnota=desusado}}",
-                "sounds": [],
-                "spellings": [
-                    {
-                        "alternative": "exemplo",
-                        "note": "desusado",
-                        "same_pronunciation": True,
-                    }
-                ],
-            },
-            {
-                "input": "{{pron-graf|leng=grc|tl=parádeigma}}",
-                "sounds": [{"roman": "parádeigma"}],
-                "spellings": [],
-            },
-            {
-                "input": """{{pron-graf|leng=hit
-            |ts=wa-a-tar|ts2=u̯a-a-tar
-            |tl=wātar|tl2=u̯ātar
-            |pron=no
-            |v=𒉿𒋻|vnota=watar}}
-            """,
-                "sounds": [
-                    {
-                        "roman": "wātar",
-                        "syllabic": "wa-a-tar",
-                    },
-                    {
-                        "roman": "u̯ātar",
-                        "syllabic": "u̯a-a-tar",
-                    },
-                ],
-                "spellings": [
-                    {
-                        "alternative": "𒉿𒋻",
-                        "note": "watar",
-                        "same_pronunciation": False,
-                    }
-                ],
-            },
-            {
-                "input": "{{pron-graf|leng=de|fone=ˈzɪm.pəl|fone2=ˈzɪmpl̩}}",
-                "sounds": [
-                    {"ipa": "ˈzɪm.pəl"},
-                    {"ipa": "ˈzɪmpl̩"},
-                ],
-                "spellings": [],
-            },
-            {
-                "input": "{{pron-graf|leng=en|pron=Reino Unido|fone=ˈɒ.pə.zɪt|fone2=ˈɒ.pə.sɪt|2pron=EE.UU.|2fone=ˈɑ.pə.sɪt|2fone2=ˈɑ.pə.sət}}",
-                "sounds": [
-                    {"ipa": "ˈɒ.pə.zɪt", "raw_tags": ["Reino Unido"]},
-                    {"ipa": "ˈɒ.pə.sɪt", "raw_tags": ["Reino Unido"]},
-                    {"ipa": "ˈɑ.pə.sɪt", "raw_tags": ["EE.UU."]},
-                    {"ipa": "ˈɑ.pə.sət", "raw_tags": ["EE.UU."]},
-                ],
-                "spellings": [],
-            },
-            {
-                "input": "{{pron-graf|leng=en|pron=británico|audio=En-uk-direction.ogg|2pron=americano|2audio=En-us-direction.ogg}}",
-                "sounds": [
-                    {
-                        "audio": "En-uk-direction.ogg",
-                        "raw_tags": ["británico"],
-                    },
-                    {
-                        "audio": "En-us-direction.ogg",
-                        "raw_tags": ["americano"],
-                    },
-                ],
-                "spellings": [],
-            },
-            #             {
-            #                 "input": """{{pron-graf|leng=??
-            # |ts=pa-ra-me-tir-uš
-            # |tl=parámetros
-            # |pron=estándar|fone=paˈɾa.me.tɾos|audio=Example.ogg|fone2=paˈɾa.me.tɾoː|fono3=paˈra.me.tros
-            # |2pron=segunda variación|2fono=paˈla.me.tlo|2fone2=paˈla.me.tɫo|2audio2=Example.ogg
-            # |3pron=tercera variación|3fone=paˈʐa.me.tʐo|3audio=Example.ogg|g=𒉺𒊏𒈨𒋻𒍑|gnota=pa-ra-me-tar-uš
-            # |v=𒉺𒊏𒈨𒋼𒊑𒍑|vnota=parámetreos
-            # |h=parámetroz
-            # |p=parametros|p2=barámetros|palt2=barámetrōs}}""",
-            #                 "sounds": [],
-            #                 "spellings": [],
-            #             },
-        ]
-        for case in test_cases:
-            with self.subTest(case=case):
-                # self.wxr.wtp.add_page("Modèle:pron-graf", 10, body="")
-                self.wxr.wtp.start_page("")
-                page_data = self.get_default_page_data()
-
-                root = self.wxr.wtp.parse(case["input"])
-
-                process_pron_graf_template(
-                    self.wxr, page_data[-1], root.children[0]
-                )
-
-                if len(case["sounds"]) > 0:
-                    sounds = page_data[0].model_dump(exclude_defaults=True)[
-                        "sounds"
-                    ]
-                    for sound in sounds:
-                        if "ogg_url" in sound:
-                            del sound["ogg_url"]
-                        if "mp3_url" in sound:
-                            del sound["mp3_url"]
-                    self.assertEqual(sounds, case["sounds"])
-                else:
-                    self.assertEqual(len(page_data[0].sounds), 0)
-
-                if len(case["spellings"]) > 0:
-                    self.assertEqual(
-                        page_data[0].model_dump(exclude_defaults=True)[
-                            "spellings"
-                        ],
-                        case["spellings"],
-                    )
-                else:
-                    self.assertEqual(len(page_data[0].spellings), 0)
+    def test_multiple_ipas(self):
+        self.wxr.wtp.start_page("opposite")
+        self.wxr.wtp.add_page(
+            "Plantilla:pron-graf",
+            10,
+            """{|
+|style="background:#DBDBDB;" colspan="2"|<span>opposite</span>
+|-
+|'''Reino Unido, Canadá''' (AFI)
+|/ˈɒp.ə.zɪt/<br/>/ˈɒp.ə.sɪt/<br/>
+|-
+|'''EE. UU., Canadá''' (AFI)
+|/ˈɑ.pə.sɪt/<br/>/ˈɑp.sɪt/<br/>/ˈɑ.pə.zɪt/<br/>
+|-
+|'''grafías alternativas'''
+|[[opposit]]<ref>arcaica</ref>
+|}""",
+        )
+        root = self.wxr.wtp.parse("""{{pron-graf|leng=en
+|pron=Reino Unido, Canadá|fono=ˈɒp.ə.zɪt|fono2=ˈɒp.ə.sɪt
+|2pron=EE. UU., Canadá|2fono=ˈɑ.pə.sɪt|2aunota=EE. UU.|2fono2=ˈɑp.sɪt|2fono3=ˈɑ.pə.zɪt
+|g=opposit|gnota=arcaica}}""")
+        word_entry = WordEntry(word="opposite", lang_code="en", lang="Inglés")
+        process_pron_graf_template(self.wxr, word_entry, root.children[0])
+        data = word_entry.model_dump(exclude_defaults=True)["sounds"]
+        for key in data[1].copy().keys():
+            if key.endswith("_url"):
+                del data[1][key]
+        self.assertEqual(
+            data,
+            [
+                {
+                    "ipa": "/ˈɒp.ə.zɪt/",
+                    "raw_tags": ["Reino Unido, Canadá"],
+                },
+                {
+                    "ipa": "/ˈɒp.ə.sɪt/",
+                    "raw_tags": ["Reino Unido, Canadá"],
+                },
+                {
+                    "ipa": "/ˈɑ.pə.sɪt/",
+                    "raw_tags": ["EE. UU., Canadá"],
+                },
+                {
+                    "ipa": "/ˈɑp.sɪt/",
+                    "raw_tags": ["EE. UU., Canadá"],
+                },
+                {
+                    "ipa": "/ˈɑ.pə.zɪt/",
+                    "raw_tags": ["EE. UU., Canadá"],
+                },
+                {
+                    "alternatives": [
+                        {
+                            "word": "opposit",
+                            "note": "arcaica",
+                        }
+                    ],
+                },
+            ],
+        )
 
     def test_process_audio_template(self):
-        # https://es.wiktionary.org/wiki/os
-        input = """{{audio|la-cls-os-long.ogg|'''Audio''' (clásico)|nb=apr}}"""
-
-        self.wxr.wtp.start_page("")
-
-        page_data = self.get_default_page_data()
-
-        root = self.wxr.wtp.parse(input)
-
-        process_audio_template(self.wxr, page_data[-1], root.children[0])
-
+        # https://es.wiktionary.org/wiki/os#Latín
+        self.wxr.wtp.start_page("os")
+        word_entry = WordEntry(word="os", lang="Latín", lang_code="la")
+        root = self.wxr.wtp.parse(
+            "{{audio|la-cls-os-long.ogg|'''Audio''' (clásico)|nb=apr}}"
+        )
+        process_audio_template(self.wxr, word_entry, root.children[0])
         self.assertEqual(
-            page_data[0].model_dump(exclude_defaults=True)["sounds"],
+            word_entry.model_dump(exclude_defaults=True)["sounds"],
             [
                 {
                     "audio": "la-cls-os-long.ogg",

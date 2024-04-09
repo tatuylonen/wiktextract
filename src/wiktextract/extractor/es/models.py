@@ -82,24 +82,16 @@ class Sense(BaseModelWrap):
     )
 
 
-class Spelling(BaseModelWrap):
-    alternative: str = Field(
-        default="", description="Alternative spelling with same pronunciation"
-    )
-    note: str = Field(
-        default="", description="Note regarding alternative spelling"
-    )
-    same_pronunciation: bool = Field(
-        default="",
-        description="Whether the alternative spelling has the same pronunciation as the default spelling",
+class AlterSound(BaseModelWrap):
+    word: str = ""
+    note: str = ""
+    not_same_pronunciation: bool = Field(
+        False, description="This is `True` for the 'Variantes' row"
     )
 
 
 class Sound(BaseModelWrap):
     ipa: str = Field(default="", description="International Phonetic Alphabet")
-    phonetic_transcription: str = Field(
-        default="", description="Phonetic transcription, less exact than IPA."
-    )
     audio: str = Field(default="", description="Audio file name")
     wav_url: str = Field(default="")
     ogg_url: str = Field(default="")
@@ -108,11 +100,17 @@ class Sound(BaseModelWrap):
     roman: str = Field(
         default="", description="Translitaration to Roman characters"
     )
-    syllabic: str = Field(default="", description="Syllabic transcription")
+    syllabic: list[str] = Field(
+        default=[], description="Syllabic transcription"
+    )
     raw_tags: list[str] = Field(
         default=[], description="Specifying the variant of the pronunciation"
     )
     tags: list[str] = []
+    alternatives: list[AlterSound] = Field(
+        default=[], description="Alternative spelling with same pronunciation"
+    )
+    rhymes: list[str] = []
 
 
 class WordEntry(BaseModelWrap):
@@ -137,7 +135,6 @@ class WordEntry(BaseModelWrap):
         description="list of non-disambiguated categories for the word",
     )
     sounds: list[Sound] = []
-    spellings: list[Spelling] = []
     translations: list[Translation] = []
     etymology_text: str = Field(
         default="", description="Etymology section as cleaned text."
@@ -160,3 +157,4 @@ class WordEntry(BaseModelWrap):
     related: list[Linkage] = []
     synonyms: list[Linkage] = []
     tags: list[str] = []
+    extra_sounds: dict[str, str] = {}
