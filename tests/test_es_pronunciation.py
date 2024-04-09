@@ -27,9 +27,6 @@ class TestESPronunciation(unittest.TestCase):
     def tearDown(self) -> None:
         self.wxr.wtp.close_db_conn()
 
-    def get_default_page_data(self) -> list[WordEntry]:
-        return [WordEntry(word="test", lang_code="es", lang="Language")]
-
     def test_sound_file(self):
         self.wxr.wtp.start_page("amigo")
         self.wxr.wtp.add_page(
@@ -63,7 +60,7 @@ class TestESPronunciation(unittest.TestCase):
                     "raw_tags": ["Colombia"],
                 },
                 {
-                    "rhymes": ["i.ɡo"],
+                    "rhymes": "i.ɡo",
                 },
             ],
         )
@@ -120,13 +117,37 @@ class TestESPronunciation(unittest.TestCase):
                     "raw_tags": ["EE. UU., Canadá"],
                 },
                 {
-                    "alternatives": [
-                        {
-                            "word": "opposit",
-                            "note": "arcaica",
-                        }
-                    ],
+                    "alternative": "opposit",
+                    "note": "arcaica",
                 },
+            ],
+        )
+
+    def test_pron_graf_roman(self):
+        self.wxr.wtp.start_page("月")
+        self.wxr.wtp.add_page(
+            "Plantilla:pron-graf",
+            10,
+            """{|
+|<span>月</span>
+|-
+|'''pronunciación'''
+|<span> falta [[Wikcionario:Pronunciación|agregar]]</span>
+|-
+|'''transliteraciones'''
+|tsuki<ref>sustantivo, acepción 1</ref>,&nbsp;getsu<ref>sustantivo, acepción 2</ref>
+|}""",
+        )
+        root = self.wxr.wtp.parse(
+            "{{pron-graf|leng=ja|tl1=tsuki|tlnota1=sustantivo, acepción 1|tl2=getsu|tlnota2=sustantivo, acepción 2}}"
+        )
+        word_entry = WordEntry(word="月", lang_code="ja", lang="Japonés")
+        process_pron_graf_template(self.wxr, word_entry, root.children[0])
+        self.assertEqual(
+            word_entry.model_dump(exclude_defaults=True)["sounds"],
+            [
+                {"roman": "tsuki", "note": "sustantivo, acepción 1"},
+                {"roman": "getsu", "note": "sustantivo, acepción 2"},
             ],
         )
 

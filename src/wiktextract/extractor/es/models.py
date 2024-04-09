@@ -82,35 +82,27 @@ class Sense(BaseModelWrap):
     )
 
 
-class AlterSound(BaseModelWrap):
-    word: str = ""
+class Sound(BaseModelWrap):
+    ipa: str = Field("", description="International Phonetic Alphabet")
+    audio: str = Field("", description="Audio file name")
+    wav_url: str = ""
+    ogg_url: str = ""
+    mp3_url: str = ""
+    flac_url: str = ""
+    roman: str = Field("", description="Translitaration to Roman characters")
+    syllabic: str = Field("", description="Syllabic transcription")
+    raw_tags: list[str] = Field(
+        [], description="Specifying the variant of the pronunciation"
+    )
+    tags: list[str] = []
+    alternative: str = Field(
+        "", description="Alternative spelling with same pronunciation"
+    )
     note: str = ""
     not_same_pronunciation: bool = Field(
         False, description="This is `True` for the 'Variantes' row"
     )
-
-
-class Sound(BaseModelWrap):
-    ipa: str = Field(default="", description="International Phonetic Alphabet")
-    audio: str = Field(default="", description="Audio file name")
-    wav_url: str = Field(default="")
-    ogg_url: str = Field(default="")
-    mp3_url: str = Field(default="")
-    flac_url: str = Field(default="")
-    roman: str = Field(
-        default="", description="Translitaration to Roman characters"
-    )
-    syllabic: list[str] = Field(
-        default=[], description="Syllabic transcription"
-    )
-    raw_tags: list[str] = Field(
-        default=[], description="Specifying the variant of the pronunciation"
-    )
-    tags: list[str] = []
-    alternatives: list[AlterSound] = Field(
-        default=[], description="Alternative spelling with same pronunciation"
-    )
-    rhymes: list[str] = []
+    rhymes: str = ""
 
 
 class WordEntry(BaseModelWrap):
