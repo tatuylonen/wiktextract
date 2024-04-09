@@ -370,7 +370,7 @@ def main():
 
     # Create expansion context
 
-    conf1 = WiktionaryConfig(
+    conf = WiktionaryConfig(
         dump_file_lang_code=args.dump_file_language_code,
         capture_language_codes=capture_lang_codes,
         capture_translations=args.translations,
@@ -393,13 +393,13 @@ def main():
         print("Alternatively, --db-path with --page can be used.")
         sys.exit(1)
 
-    context1 = Wtp(
+    wtp = Wtp(
         db_path=args.db_path,
         lang_code=args.dump_file_language_code,
         template_override_funcs=template_override_fns,
+        extension_tags=conf.allowed_html_tags,
     )
-
-    wxr = WiktextractContext(context1, conf1)
+    wxr = WiktextractContext(wtp, conf)
 
     # load redirects if given
     if args.redirects_file:

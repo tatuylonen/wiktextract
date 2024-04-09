@@ -1,4 +1,7 @@
 {
   "analyze_templates": false,
-  "extract_thesaurus_pages": false
+  "extract_thesaurus_pages": false,
+  "allowed_html_tags": {
+    "phonos": {"parents": ["phrasing"], "content": ["flow"]}
+  }
 }
