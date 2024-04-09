@@ -219,11 +219,12 @@ def parse_linkage_item_text(
     ruby: list,
     pos_datas: list,
     is_reconstruction: bool,
-    urls: Optional[List[str]] = None,
+    urls: Optional[list[str]] = None,
+    links: Optional[list[str]] = None,
 ) -> Optional[str]:
     """Parses a linkage item once it has been converted to a string.  This
     may add one or more linkages to ``data`` under ``field``.  This
-    returns None or a string that contains thats that should be applied
+    returns None or a string that contains tags that should be applied
     to additional linkages (commonly used in tables for Asian characters)."""
     assert isinstance(wxr, WiktextractContext)
     assert isinstance(word, str)  # Main word (derived from page title)
@@ -268,7 +269,7 @@ def parse_linkage_item_text(
     #       .format(field, item, sense))
 
     # Replace occurrences of ~ in the item by the page title
-    safetitle = wxr.wtp.title.replace("\\", "\\\\")
+    safetitle = wxr.wtp.title.replace("\\", "\\\\")  # type: ignore[union-attr]
     item = item.replace(" ~ ", " " + safetitle + " ")
     item = re.sub(r"^~ ", safetitle + " ", item)
     item = re.sub(r" ~$", " " + safetitle, item)
@@ -319,7 +320,7 @@ def parse_linkage_item_text(
         # Check for certain comma-separated tags combined
         # with English text at the beginning or end of a
         # comma-separated parenthesized list
-        lst = split_at_comma_semi(desc)
+        lst = split_at_comma_semi(desc, skipped=links)
         while len(lst) > 1:
             # Check for tags at the beginning
             cls = classify_desc(lst[0], no_unknown_starts=True)
@@ -499,7 +500,7 @@ def parse_linkage_item_text(
         # wife/English/Translations/Yiddish:
         #   "ווײַב‎ n (vayb) or f, פֿרוי‎ f (froy)"
         subitems = []
-        for item1 in split_at_comma_semi(item):
+        for item1 in split_at_comma_semi(item, skipped=links):
             if " or " not in item1:
                 subitems.append(item1)
                 continue
@@ -525,13 +526,15 @@ def parse_linkage_item_text(
                 and not re.search(r"\bor\b", wxr.wtp.title)
                 and all(
                     wxr.wtp.title not in x.split(" or ")
-                    for x in split_at_comma_semi(item2)
+                    for x in split_at_comma_semi(item2, skipped=links)
                     if " or " in x
                 )
             ):
                 # We can split this item.  Split the non-cleaned version
                 # that still has any intervening parenthesized parts.
-                subitems.extend(split_at_comma_semi(item1, extra=[" or "]))
+                subitems.extend(
+                    split_at_comma_semi(item1, extra=[" or "], skipped=links)
+                )
             else:
                 subitems.append(item1)
     if len(subitems) > 1:  # Would be merged from multiple subitems

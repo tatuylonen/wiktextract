@@ -3,7 +3,7 @@
 # Copyright (c) 2018-2022 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 import re
 from collections import defaultdict
-from typing import Any, Iterable
+from typing import Any, Iterable, Optional
 
 # Keys in ``data`` that can only have string values (a list of them)
 STR_KEYS = frozenset({"tags", "glosses"})
@@ -60,7 +60,10 @@ def data_extend(data: Any, key: str, values: Iterable) -> None:
 
 
 def split_at_comma_semi(
-    text: str, separators=(",", ";", "，", "،"), extra=()
+    text: str,
+    separators: Iterable[str] = (",", ";", "，", "،"),
+    extra: Iterable[str] = (),
+    skipped: Optional[Iterable[str]] = None,
 ) -> list[str]:
     """Splits the text at commas and semicolons, unless they are inside
     parenthesis.  ``separators`` is default separators (setting it eliminates
@@ -77,13 +80,23 @@ def split_at_comma_semi(
     parts = []
     if extra:
         separators = tuple(separators) + tuple(extra)
-    split_re = r"[][()]|" + "|".join(sorted(separators, key=lambda x: -len(x)))
+    splitters: list[str] = []
+    if skipped:
+        splitters.extend(skipped)
+    splitters.append(r"[][()]")
+    splitters.extend(sorted(separators, key=lambda x: -len(x)))
+    split_re = "|".join(splitters)
+    print(f"{split_re=}")
     for m in re.finditer(split_re, text):
+        print(f"{m=}")
         if ofs < m.start():
             parts.append(text[ofs : m.start()])
         if m.start() == 0 and m.end() == len(text):
             return [text]  # Don't split if it is the only content
         ofs = m.end()
+        if skipped and m.group(0) in skipped:
+            parts.append(m.group(0))
+            continue
         token = m.group(0)
         if token in "([":
             bracket_cnt += 1
