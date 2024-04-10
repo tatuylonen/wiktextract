@@ -55,7 +55,12 @@ def split_chinese_variants(text: str) -> Iterable[tuple[Optional[str], str]]:
 def create_audio_url_dict(filename: str) -> dict[str, str]:
     # remove white space and left-to-right mark
     filename = filename.strip(" \u200e")
-    file_url_key = filename[filename.rfind(".") + 1 :].lower() + "_url"
+    file_extension = filename[filename.rfind(".") + 1 :]
+    if file_extension.lower() == "ogv":
+        # ".ogv" pages are redirected to ".oga" pages in Wikipedia Commons
+        filename = filename[:filename.rfind(".")] + ".oga"
+        file_extension = "oga"
+    file_url_key = file_extension + "_url"
     filename_without_prefix = filename.removeprefix("File:")
     if len(filename_without_prefix) == 0:
         return {}
@@ -65,9 +70,9 @@ def create_audio_url_dict(filename: str) -> dict[str, str]:
         + filename_without_prefix,
     }
     transcode_formates = []
-    if not filename.lower().endswith((".oga", ".ogg")):
+    if file_extension not in ("oga", "ogg"):
         transcode_formates.append("ogg")
-    if not filename.lower().endswith(".mp3"):
+    if file_extension != "mp3":
         transcode_formates.append("mp3")
     for file_suffix in transcode_formates:
         audio_dict[f"{file_suffix}_url"] = create_transcode_url(

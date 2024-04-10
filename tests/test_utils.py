@@ -84,3 +84,5 @@ class UtilsTests(unittest.TestCase):
                 "mp3_url": "https://upload.wikimedia.org/wikipedia/commons/transcoded/b/b9/Fr-BonjourF.oga/Fr-BonjourF.oga.mp3",
             },
         )
+        sound_data = create_audio_url_dict("Qc-Vancouver.ogv")
+        self.assertEqual(sound_data["audio"], "Qc-Vancouver.oga")
