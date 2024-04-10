@@ -3232,8 +3232,10 @@ def parse_language(
             if not isinstance(node, WikiNode):
                 # print("  X{}".format(repr(node)[:40]))
                 continue
-            if isinstance(node, TemplateNode):
-                process_soft_redirect_template(wxr, node, redirect_list)
+            if (
+                isinstance(node, TemplateNode)
+                and process_soft_redirect_template(wxr, node, redirect_list)
+            ):
                 continue
 
             if node.kind not in LEVEL_KINDS:
@@ -3984,7 +3986,8 @@ def process_soft_redirect_template(
     wxr: WiktextractContext,
     template_node: TemplateNode,
     redirect_pages: list[str],
-) -> None:
+) -> bool:
+    # return `True` if the template is soft redirect template
     if template_node.template_name == "zh-see":
         # https://en.wiktionary.org/wiki/Template:zh-see
         title = clean_node(
@@ -3992,6 +3995,7 @@ def process_soft_redirect_template(
         )
         if title != "":
             redirect_pages.append(title)
+        return True
     elif template_node.template_name == "ja-see":
         # https://en.wiktionary.org/wiki/Template:ja-see
         for key, value in template_node.template_parameters.items():
@@ -3999,3 +4003,5 @@ def process_soft_redirect_template(
                 title = clean_node(wxr, None, value)
                 if title != "":
                     redirect_pages.append(title)
+        return True
+    return False
