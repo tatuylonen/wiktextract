@@ -3,7 +3,7 @@
 # Copyright (c) 2018-2022 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 import re
 from collections import defaultdict
-from typing import Any, Iterable
+from typing import Any, Iterable, Optional
 
 # Keys in ``data`` that can only have string values (a list of them)
 STR_KEYS = frozenset({"tags", "glosses"})
@@ -60,13 +60,20 @@ def data_extend(data: Any, key: str, values: Iterable) -> None:
 
 
 def split_at_comma_semi(
-    text: str, separators=(",", ";", "，", "،"), extra=()
+    text: str,
+    separators: Iterable[str] = (",", ";", "，", "،"),
+    extra: Iterable[str] = (),
+    skipped: Optional[Iterable[str]] = None,
 ) -> list[str]:
     """Splits the text at commas and semicolons, unless they are inside
     parenthesis.  ``separators`` is default separators (setting it eliminates
     default separators).  ``extra`` is extra separators to be used in addition
     to ``separators``.  The separators in ``separators`` and ``extra`` must
-    be valid regexp pieces (already escaped if needed)."""
+    be valid regexp pieces (already escaped if needed). ``skipped`` can be a
+    list of strings, containing material that might be otherwise split, but
+    should not; for example phrases like 'Hunde, die bellen, beißen nicht',
+    which would otherwise be split on the commas. Often link text data, becase
+    those are prototypically one unit."""
     assert isinstance(text, str)
     assert isinstance(separators, (list, tuple))
     assert isinstance(extra, (list, tuple))
@@ -77,13 +84,21 @@ def split_at_comma_semi(
     parts = []
     if extra:
         separators = tuple(separators) + tuple(extra)
-    split_re = r"[][()]|" + "|".join(sorted(separators, key=lambda x: -len(x)))
+    splitters: list[str] = []
+    if skipped:
+        splitters.extend(skipped)
+    splitters.append(r"[][()]")
+    splitters.extend(sorted(separators, key=lambda x: -len(x)))
+    split_re = "|".join(splitters)
     for m in re.finditer(split_re, text):
         if ofs < m.start():
             parts.append(text[ofs : m.start()])
         if m.start() == 0 and m.end() == len(text):
             return [text]  # Don't split if it is the only content
         ofs = m.end()
+        if skipped and m.group(0) in skipped:
+            parts.append(m.group(0))
+            continue
         token = m.group(0)
         if token in "([":
             bracket_cnt += 1

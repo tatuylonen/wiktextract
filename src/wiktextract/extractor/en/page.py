@@ -12,6 +12,7 @@ from functools import partial
 from typing import (
     TYPE_CHECKING,
     Any,
+    Iterable,
     Optional,
     Set,
     Union,
@@ -47,7 +48,7 @@ from wiktextract.page import (
 from wiktextract.parts_of_speech import PARTS_OF_SPEECH
 from wiktextract.tags import valid_tags
 from wiktextract.translations import parse_translation_item_text
-from wiktextract.type_utils import SenseData, SoundData, WordData
+from wiktextract.type_utils import SenseData, SoundData, WordData, LinkageData
 from wiktextract.wxr_context import WiktextractContext
 
 from ..ruby import extract_ruby, parse_ruby
@@ -779,7 +780,7 @@ def parse_language(
     # print("parse_language", language)
 
     is_reconstruction = False
-    word = wxr.wtp.title
+    word: str = wxr.wtp.title  # type: ignore[assignment]
     unsupported_prefix = "Unsupported titles/"
     if word.startswith(unsupported_prefix):
         w = word[len(unsupported_prefix) :]
@@ -2189,6 +2190,14 @@ def parse_language(
             parts: list[str] = []
             ruby: list[tuple[str, str]] = []
             urls: list[str] = []
+            # data about link text; this is used to skip splitting on
+            # linkage text items that contain stuff like commas; for
+            # example "Hunde, die bellen, beißen nicht" in article
+            # beißen is split into "Hunde", "die bellen" etc.
+            # We take that link text and use it, eventually,
+            # in split_at_comma_semi to skip splitting on those
+            # commas.
+            links_that_should_not_be_split: list[str] = []
 
             def item_recurse(
                 contents: list[Union[str, WikiNode]], italic=False
@@ -2272,6 +2281,13 @@ def parse_language(
                                     and v[0][0] == ":"
                                 ):
                                     v = [v[0][1:]] + list(v[1:])  # type:ignore
+                                if (
+                                    isinstance(v[0], str)
+                                    and v[0].isalnum() == False
+                                ):
+                                    links_that_should_not_be_split.append(
+                                        "".join(v[0])
+                                    )  # type: ignore
                                 item_recurse(v, italic=italic)
                     elif kind == NodeKind.URL:
                         if len(node.largs) < 2 and node.largs:
@@ -2296,6 +2312,7 @@ def parse_language(
 
             # print("LINKAGE CONTENTS BEFORE ITEM_RECURSE: {!r}"
             #       .format(contents))
+
             item_recurse(contents)
             item = clean_node(wxr, None, parts)
             # print("LINKAGE ITEM CONTENTS:", parts)
@@ -2312,10 +2329,15 @@ def parse_language(
                 ruby,
                 pos_datas,
                 is_reconstruction,
-                urls,
+                urls or None,
+                links_that_should_not_be_split or None,
             )
 
-        def parse_linkage_recurse(contents, field, sense):
+        def parse_linkage_recurse(
+            contents: list[Union[WikiNode, str]],
+            field: str,
+            sense: Optional[str],
+        ) -> None:
             assert isinstance(contents, (list, tuple))
             assert sense is None or isinstance(sense, str)
             nonlocal next_navframe_sense
@@ -2401,14 +2423,19 @@ def parse_language(
                         sortid="page/2196",
                     )
 
-        def linkage_template_fn1(name, ht):
+        def linkage_template_fn1(name: str, ht: TemplateArgs) -> Optional[str]:
             nonlocal have_panel_template
             if is_panel_template(wxr, name):
                 have_panel_template = True
                 return ""
             return None
 
-        def parse_zh_synonyms(parsed, data, hdrs, root_word):
+        def parse_zh_synonyms(
+            parsed: list[Union[WikiNode, str]],
+            data: list[LinkageData],
+            hdrs: list[str],
+            root_word: str,
+        ) -> None:
             """Parses Chinese dialectal synonyms tables"""
             for item in parsed:
                 if isinstance(item, WikiNode):
@@ -2465,7 +2492,12 @@ def parse_language(
                     else:
                         parse_zh_synonyms(item.children, data, hdrs, root_word)
 
-        def parse_zh_synonyms_list(parsed, data, hdrs, root_word):
+        def parse_zh_synonyms_list(
+            parsed: list[Union[WikiNode, str]],
+            data: list[LinkageData],
+            hdrs: list[str],
+            root_word: str,
+        ) -> None:
             """Parses Chinese dialectal synonyms tables (list format)"""
             for item in parsed:
                 if isinstance(item, WikiNode):
@@ -2508,7 +2540,7 @@ def parse_language(
                                     sys.stdout.flush()
 
                             for word in words:
-                                dt = {"word": word.strip()}
+                                dt: LinkageData = {"word": word.strip()}
                                 if tags:
                                     dt["tags"] = tags
                                 if roman is not None:
@@ -2527,7 +2559,9 @@ def parse_language(
                             item.children, data, hdrs, root_word
                         )
 
-        def contains_kind(children, nodekind):
+        def contains_kind(
+            children: list[Union[WikiNode, str]], nodekind: NodeKind
+        ) -> bool:
             assert isinstance(children, list)
             for item in children:
                 if not isinstance(item, WikiNode):
@@ -2544,7 +2578,7 @@ def parse_language(
             text, expand_all=True, template_fn=linkage_template_fn1
         )
         if field == "synonyms" and lang_code == "zh":
-            synonyms = []
+            synonyms: list[LinkageData] = []
             if contains_kind(parsed.children, NodeKind.LIST):
                 parse_zh_synonyms_list(parsed.children, synonyms, [], "")
             else:
@@ -2558,7 +2592,7 @@ def parse_language(
                 if not text.startswith("See "):
                     parse_linkage_item([text], field, None)
 
-    def parse_translations(data, xlatnode):
+    def parse_translations(data: WordData, xlatnode: WikiNode) -> None:
         """Parses translations for a word.  This may also pull in translations
         from separate translation subpages."""
         assert isinstance(data, dict)
@@ -2568,7 +2602,7 @@ def parse_language(
         # print("parse_translations xlatnode={}".format(xlatnode))
         if not wxr.config.capture_translations:
             return
-        sense_parts = []
+        sense_parts: list[Union[WikiNode, str]] = []
         sense = None
 
         def parse_translation_item(contents, lang=None):
@@ -2594,7 +2628,9 @@ def parse_language(
                     sense = sense[:-1].strip()
             translations_from_template = []
 
-            def translation_item_template_fn(name, ht):
+            def translation_item_template_fn(
+                name: str, ht: TemplateArgs
+            ) -> Optional[str]:
                 nonlocal langcode
                 # print("TRANSLATION_ITEM_TEMPLATE_FN:", name, ht)
                 if is_panel_template(wxr, name):
@@ -2688,10 +2724,10 @@ def parse_language(
                         if node.kind == NodeKind.LIST_ITEM:
                             parse_translation_item(node.children, lang=lang)
 
-        def parse_translation_template(node):
+        def parse_translation_template(node: WikiNode) -> None:
             assert isinstance(node, WikiNode)
 
-            def template_fn(name, ht):
+            def template_fn(name: str, ht: TemplateArgs) -> Optional[str]:
                 nonlocal sense_parts
                 nonlocal sense
                 if is_panel_template(wxr, name):
@@ -2754,7 +2790,7 @@ def parse_language(
                         ]
                     else:
                         # seq with sub and pos
-                        pos = wxr.wtp.subsection
+                        pos = wxr.wtp.subsection or "MISSING_SUBSECTION"
                         if pos.lower() not in POS_TITLES:
                             wxr.wtp.debug(
                                 "unhandled see translation subpage: "
@@ -2765,17 +2801,23 @@ def parse_language(
                             )
                         seq = [language, sub, pos, TRANSLATIONS_TITLE]
                     subnode = get_subpage_section(
-                        wxr.wtp.title, TRANSLATIONS_TITLE, seq
+                        wxr.wtp.title or "MISSING_TITLE",
+                        TRANSLATIONS_TITLE,
+                        seq,
                     )
-                    if subnode is not None:
+                    if subnode is not None and isinstance(subnode, WikiNode):
                         parse_translations(data, subnode)
                     else:
                         # Failed to find the normal subpage section
                         seq = [TRANSLATIONS_TITLE]
                         subnode = get_subpage_section(
-                            wxr.wtp.title, TRANSLATIONS_TITLE, seq
+                            wxr.wtp.title or "MISSING_TITLE",
+                            TRANSLATIONS_TITLE,
+                            seq,
                         )
-                        if subnode is not None:
+                        if subnode is not None and isinstance(
+                            subnode, WikiNode
+                        ):
                             parse_translations(data, subnode)
                     return ""
                 if name in (
@@ -2829,7 +2871,7 @@ def parse_language(
                 wxr.wtp.node_to_wikitext(node), template_fn=template_fn
             )
 
-        def parse_translation_recurse(xlatnode):
+        def parse_translation_recurse(xlatnode: WikiNode) -> None:
             nonlocal sense
             nonlocal sense_parts
             for node in xlatnode.children:
@@ -2915,7 +2957,7 @@ def parse_language(
                             "of normal {{see translation subpage|...}}",
                             sortid="page/2595",
                         )
-                        sub = wxr.wtp.subsection
+                        sub = wxr.wtp.subsection or "MISSING_SUBSECTION"
                         if sub.lower() in POS_TITLES:
                             seq = [
                                 language,
@@ -2927,11 +2969,13 @@ def parse_language(
                                 TRANSLATIONS_TITLE,
                                 seq,
                             )
-                            if subnode is not None:
+                            if subnode is not None and isinstance(
+                                subnode, WikiNode
+                            ):
                                 parse_translations(data, subnode)
                         else:
-                            wxr.wtp.errors(
-                                "/translations link outside " "part-of-speech"
+                            wxr.wtp.error(
+                                "/translations link outside part-of-speech"
                             )
 
                     if (
@@ -2958,7 +3002,7 @@ def parse_language(
         # to define at this level and recurse in parse_translation_recurse().
         parse_translation_recurse(xlatnode)
 
-    def parse_etymology(data, node):
+    def parse_etymology(data: WordData, node: WikiNode) -> None:
         """Parses an etymology section."""
         assert isinstance(data, dict)
         assert isinstance(node, WikiNode)
@@ -2970,12 +3014,15 @@ def parse_language(
         # not capture).
         ignore_count = 0
 
-        def etym_template_fn(name, ht):
+        def etym_template_fn(name: str, ht: TemplateArgs) -> Optional[str]:
             nonlocal ignore_count
             if is_panel_template(wxr, name):
                 return ""
             if re.match(ignored_etymology_templates_re, name):
                 ignore_count += 1
+            return None
+
+        # CONTINUE_HERE
 
         def etym_post_template_fn(name, ht, expansion):
             nonlocal ignore_count
@@ -3621,9 +3668,12 @@ def parse_language(
     for data in ret:
         if "senses" not in data:
             continue
-        tags = data.get("tags", ())
+        # WordData should not have a 'tags' field, but if it does, it's
+        # deleted and its contents removed and placed in each sense;
+        # that's why the type ignores.
+        tags: Iterable = data.get("tags", ())  # type: ignore[assignment]
         if "tags" in data:
-            del data["tags"]
+            del data["tags"]  # type: ignore[typeddict-item]
         for sense in data["senses"]:
             data_extend(sense, "tags", tags)
 

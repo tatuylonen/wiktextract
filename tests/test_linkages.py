@@ -36,6 +36,7 @@ class LinkageTests(unittest.TestCase):
         senses=[],
         is_reconstruction=False,
         check_errors=True,
+        links=None,
     ):
         """Runs a test where we expect the parsing to return None.  This
         function returns ``data``."""
@@ -60,6 +61,7 @@ class LinkageTests(unittest.TestCase):
             ruby,
             senses,
             is_reconstruction,
+            links=links or (),
         )
         self.assertIs(ret, None)
         if check_errors:
@@ -1700,6 +1702,50 @@ class LinkageTests(unittest.TestCase):
                     {"tags": ["Latin", "letter"], "word": "y"},
                     {"tags": ["Latin", "letter"], "word": "Z"},
                     {"tags": ["Latin", "letter"], "word": "z"},
+                ]
+            },
+        )
+
+    def test_links1(self):
+        data = self.run_data(
+            "Hunde, die bellen, beißen nicht",
+            links=["Hunde, die bellen, beißen nicht"],
+        )
+        self.assertEqual(
+            data,
+            {
+                "related": [
+                    {"word": "Hunde, die bellen, beißen nicht"},
+                ]
+            },
+        )
+
+    def test_links2(self):
+        data = self.run_data(
+            "Hunde, die bellen, beißen nicht",
+            links=["Hunde, die bellen"],
+        )
+        self.assertEqual(
+            data,
+            {
+                "related": [
+                    {"word": "Hunde, die bellen"},
+                    {"word": "beißen nicht"},
+                ]
+            },
+        )
+
+    def test_links3(self):
+        data = self.run_data(
+            "Hunde, die bellen, beißen nicht",
+            links=["die bellen, beißen nicht"],
+        )
+        self.assertEqual(
+            data,
+            {
+                "related": [
+                    {"word": "Hunde"},
+                    {"word": "die bellen, beißen nicht"},
                 ]
             },
         )
