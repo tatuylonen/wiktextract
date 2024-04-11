@@ -3356,7 +3356,7 @@ def parse_language(
                 if "pos" not in pos_data:
                     pos_data["pos"] = "soft-redirect"
             else:
-                new_page_data = base_data.copy()
+                new_page_data = copy.deepcopy(base_data)
                 new_page_data["redirects"] = redirect_list
                 if "pos" not in new_page_data:
                     new_page_data["pos"] = "soft-redirect"
@@ -3996,7 +3996,7 @@ def process_soft_redirect_template(
         if title != "":
             redirect_pages.append(title)
         return True
-    elif template_node.template_name == "ja-see":
+    elif template_node.template_name in ["ja-see", "ja-see-kango"]:
         # https://en.wiktionary.org/wiki/Template:ja-see
         for key, value in template_node.template_parameters.items():
             if isinstance(key, int):
