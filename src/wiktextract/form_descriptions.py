@@ -1716,7 +1716,7 @@ def add_related(
 
 
 def parse_word_head(
-    wxr, pos, text, data, is_reconstruction, head_group, ruby=[]
+    wxr, pos, text, data, is_reconstruction, head_group, ruby=[], links=[],
 ):
     """Parses the head line for a word for in a particular language and
     part-of-speech, extracting tags and related forms."""
@@ -1803,7 +1803,7 @@ def parse_word_head(
     if m:
         tag, readings = m.groups()
         tag = re.sub(r"\s+", "-", tag)
-        for reading in split_at_comma_semi(readings):
+        for reading in split_at_comma_semi(readings, skipped=links):
             add_related(
                 wxr,
                 data,
@@ -2035,7 +2035,7 @@ def parse_word_head(
         for desc in descriptors:
             new_desc.extend(
                 map_with(
-                    xlat_tags_map, split_at_comma_semi(desc, extra=[", or "])
+                    xlat_tags_map, split_at_comma_semi(desc, extra=[", or "], skipped=links)
                 )
             )
         prev_tags = None
@@ -2388,7 +2388,7 @@ def parse_word_head(
                                 and desc in data["categories"]
                             )
                         ):
-                            for r in split_at_comma_semi(paren, extra=[" or "]):
+                            for r in split_at_comma_semi(paren, extra=[" or "], skipped=links):
                                 add_romanization(
                                     wxr,
                                     data,
@@ -2420,7 +2420,7 @@ def parse_word_head(
             if "or" in titleparts:
                 alts = [related]
             else:
-                alts = split_at_comma_semi(related, separators=[" or "])
+                alts = split_at_comma_semi(related, separators=[" or "], skipped=links)
                 if not alts:
                     alts = [""]
             for related in alts:

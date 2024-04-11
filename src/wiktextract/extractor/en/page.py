@@ -1314,6 +1314,25 @@ def parse_language(
         header_tags: list[str],
     ) -> None:
         ruby = []
+        links: list[str] = []
+        if not word.isalnum():
+            # if the word contains non-letter or -number characters, it might
+            # have something that messes with split-at-semi-comma; we collect
+            # links so that we can skip splitting them.
+            exp = wxr.wtp.parse(
+                wxr.wtp.node_to_wikitext(header_nodes), expand_all=True
+            )
+            link_nodes, _ = recursively_extract(
+                exp.children,
+                lambda x: isinstance(x, WikiNode)
+                and x.kind == NodeKind.LINK
+            )
+            for ln in link_nodes:
+                ltext = "".join(ln.largs[-1])  # type: ignore
+                if not ltext.isalnum():
+                    links.append(ltext)
+            if word not in links:
+                links.append(word)
         if lang_code == "ja":
             exp = wxr.wtp.parse(
                 wxr.wtp.node_to_wikitext(header_nodes), expand_all=True
@@ -1346,6 +1365,7 @@ def parse_language(
             is_reconstruction,
             header_group,
             ruby=ruby,
+            links=links,
         )
         if "tags" in pos_data:
             # pos_data can get "tags" data from some source; type-checkers
@@ -3893,6 +3913,7 @@ def parse_page(
         wxr.wtp.start_section(lang)
 
         # Collect all words from the page.
+        # print(f"{langnode=}")
         datas = parse_language(wxr, langnode, lang, lang_code)
 
         # Propagate fields resulting from top-level templates to this
