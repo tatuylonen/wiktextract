@@ -3913,6 +3913,7 @@ def parse_page(
         wxr.wtp.start_section(lang)
 
         # Collect all words from the page.
+        # print(f"{langnode=}")
         datas = parse_language(wxr, langnode, lang, lang_code)
 
         # Propagate fields resulting from top-level templates to this
