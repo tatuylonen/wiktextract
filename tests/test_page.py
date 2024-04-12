@@ -510,7 +510,6 @@ From cursive script of 車.
             data,
             [
                 {
-                    "etymology_templates": [],
                     "etymology_text": "From cursive script of 車.",
                     "lang": "Chinese",
                     "lang_code": "zh",

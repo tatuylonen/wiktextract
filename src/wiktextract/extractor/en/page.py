@@ -886,6 +886,7 @@ def parse_language(
             and "alt_of" not in sense_data
             and "form_of" not in sense_data
             and "etymology_text" in etym_data
+            and etym_data["etymology_text"] != ""
         ):
             etym = etym_data["etymology_text"]
             etym = etym.split(". ")[0]
@@ -3084,8 +3085,14 @@ def parse_language(
             post_template_fn=etym_post_template_fn,
         )
         # Save the collected information.
-        data["etymology_text"] = text
-        data["etymology_templates"] = templates
+        if text:
+            data["etymology_text"] = text
+        if templates:
+            # Some etymology templates, like Template:root do not generate
+            # text, so they should be added here. Elsewhere, we check
+            # for Template:root and add some text to the expansion to please
+            # the validation.
+            data["etymology_templates"] = templates
 
     def parse_descendants(data, node, is_proto_root_derived_section=False):
         """Parses a Descendants section. Also used on Derived terms and
