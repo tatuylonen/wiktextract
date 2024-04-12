@@ -1328,7 +1328,7 @@ def parse_language(
                 and x.kind == NodeKind.LINK
             )
             for ln in link_nodes:
-                ltext = "".join(ln.largs[-1])  # type: ignore
+                ltext = clean_node(wxr, None, ln.largs[-1])  # type: ignore[union-attr]
                 if not ltext.isalnum():
                     links.append(ltext)
             if word not in links:
