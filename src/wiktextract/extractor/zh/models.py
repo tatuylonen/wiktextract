@@ -26,7 +26,9 @@ class Example(ChineseBaseModel):
         "",
         description="Source of the sentence, like book title and page number",
     )
-    ruby: list[list[str]] = Field([], description="Japanese Kanji and furigana")
+    ruby: list[tuple[str, ...]] = Field(
+        [], description="Japanese Kanji and furigana"
+    )
 
 
 class Sense(ChineseBaseModel):
@@ -36,7 +38,9 @@ class Sense(ChineseBaseModel):
     topics: list[str] = []
     categories: list[str] = []
     examples: list[Example] = []
-    ruby: list[list[str]] = Field([], description="Japanese Kanji and furigana")
+    ruby: list[tuple[str, ...]] = Field(
+        [], description="Japanese Kanji and furigana"
+    )
 
 
 class Form(ChineseBaseModel):
@@ -44,7 +48,9 @@ class Form(ChineseBaseModel):
     tags: list[str] = []
     raw_tags: list[str] = []
     source: str = ""
-    ruby: list[list[str]] = Field([], description="Japanese Kanji and furigana")
+    ruby: list[tuple[str, ...]] = Field(
+        [], description="Japanese Kanji and furigana"
+    )
     hiragana: str = ""
     roman: str = ""
 
@@ -87,7 +93,9 @@ class Linkage(ChineseBaseModel):
     language_variant: Literal["", "zh-Hant", "zh-Hans"] = Field(
         "", description="Chinese character variant"
     )
-    ruby: list[list[str]] = Field([], description="Japanese Kanji and furigana")
+    ruby: list[tuple[str, ...]] = Field(
+        [], description="Japanese Kanji and furigana"
+    )
 
 
 class Descendant(ChineseBaseModel):
@@ -98,7 +106,9 @@ class Descendant(ChineseBaseModel):
     tags: list[str] = []
     raw_tags: list[str] = []
     descendants: list["Descendant"] = []
-    ruby: list[list[str]] = Field([], description="Japanese Kanji and furigana")
+    ruby: list[tuple[str, ...]] = Field(
+        [], description="Japanese Kanji and furigana"
+    )
 
 
 class WordEntry(ChineseBaseModel):

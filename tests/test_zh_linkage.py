@@ -65,7 +65,7 @@ class TestLinkage(TestCase):
             page_data[0].synonyms[0].model_dump(exclude_defaults=True),
             {
                 "roman": "yanushi",
-                "ruby": [["家", "や"], ["主", "ぬし"]],
+                "ruby": [("家", "や"), ("主", "ぬし")],
                 "sense": "房東",
                 "word": "家主",
             },
