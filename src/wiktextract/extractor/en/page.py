@@ -886,6 +886,7 @@ def parse_language(
             and "alt_of" not in sense_data
             and "form_of" not in sense_data
             and "etymology_text" in etym_data
+            and etym_data["etymology_text"] != ""
         ):
             etym = etym_data["etymology_text"]
             etym = etym.split(". ")[0]
@@ -1324,8 +1325,7 @@ def parse_language(
             )
             link_nodes, _ = recursively_extract(
                 exp.children,
-                lambda x: isinstance(x, WikiNode)
-                and x.kind == NodeKind.LINK
+                lambda x: isinstance(x, WikiNode) and x.kind == NodeKind.LINK,
             )
             for ln in link_nodes:
                 ltext = clean_node(wxr, None, ln.largs[-1])  # type: ignore[union-attr]
@@ -3055,9 +3055,19 @@ def parse_language(
             if ignore_count == 0:
                 ht = clean_template_args(wxr, ht)
                 expansion = clean_node(wxr, None, expansion)
-                templates.append(
-                    {"name": name, "args": ht, "expansion": expansion}
-                )
+                if not expansion and name == root:
+                    templates.append(
+                        {
+                            "name": name,
+                            "args": ht,
+                            "expansion": "[Template:root]",
+                        }
+                    )
+
+                else:
+                    templates.append(
+                        {"name": name, "args": ht, "expansion": expansion}
+                    )
             return None
 
         # Remove any subsections
@@ -3075,8 +3085,14 @@ def parse_language(
             post_template_fn=etym_post_template_fn,
         )
         # Save the collected information.
-        data["etymology_text"] = text
-        data["etymology_templates"] = templates
+        if text:
+            data["etymology_text"] = text
+        if templates:
+            # Some etymology templates, like Template:root do not generate
+            # text, so they should be added here. Elsewhere, we check
+            # for Template:root and add some text to the expansion to please
+            # the validation.
+            data["etymology_templates"] = templates
 
     def parse_descendants(data, node, is_proto_root_derived_section=False):
         """Parses a Descendants section. Also used on Derived terms and
@@ -3252,10 +3268,9 @@ def parse_language(
             if not isinstance(node, WikiNode):
                 # print("  X{}".format(repr(node)[:40]))
                 continue
-            if (
-                isinstance(node, TemplateNode)
-                and process_soft_redirect_template(wxr, node, redirect_list)
-            ):
+            if isinstance(
+                node, TemplateNode
+            ) and process_soft_redirect_template(wxr, node, redirect_list):
                 continue
 
             if node.kind not in LEVEL_KINDS:
