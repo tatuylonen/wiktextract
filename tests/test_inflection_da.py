@@ -110,7 +110,7 @@ class InflTests(unittest.TestCase):
         expected = {
             "forms": [
               {
-                "form": "",
+                "form": "no-table-tags",
                 "source": "Inflection",
                 "tags": [
                   "table-tags"
@@ -310,7 +310,7 @@ class InflTests(unittest.TestCase):
         expected = {
            "forms": [
               {
-                "form": "",
+                "form": "no-table-tags",
                 "source": "Inflection",
                 "tags": [
                   "table-tags"
@@ -504,7 +504,7 @@ class InflTests(unittest.TestCase):
         expected = {
             "forms": [
               {
-                "form": "",
+                "form": "no-table-tags",
                 "source": "Inflection",
                 "tags": [
                   "table-tags"
@@ -709,7 +709,7 @@ class InflTests(unittest.TestCase):
         expected = {
             "forms": [
               {
-                "form": "",
+                "form": "no-table-tags",
                 "source": "Inflection",
                 "tags": [
                   "table-tags"

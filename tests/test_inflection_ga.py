@@ -1342,7 +1342,7 @@ class InflTests(unittest.TestCase):
         expected = {
             "forms": [
               {
-                "form": "",
+                "form": "no-table-tags",
                 "source": "Mutation",
                 "tags": [
                   "table-tags"
@@ -1512,7 +1512,7 @@ don <span class="Latn" lang="ga">[[chois#Irish|chois]]</span>
         expected = {
             "forms": [
               {
-                "form": "",
+                "form": "no-table-tags",
                 "source": "Declension",
                 "tags": [
                   "table-tags"
@@ -1591,7 +1591,7 @@ don <span class="Latn" lang="ga">[[chois#Irish|chois]]</span>
                 ]
               },
               {
-                "form": "",
+                "form": "no-table-tags",
                 "source": "Declension",
                 "tags": [
                   "table-tags"
@@ -1779,7 +1779,7 @@ don <span class="Latn" lang="ga">[[chois#Irish|chois]]</span>
         expected = {
             "forms": [
               {
-                "form": "",
+                "form": "no-table-tags",
                 "source": "Declension",
                 "tags": [
                   "table-tags"

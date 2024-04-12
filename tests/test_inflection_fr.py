@@ -484,7 +484,7 @@ class InflTests(unittest.TestCase):
         expected = {
             "forms": [
               {
-                "form": "",
+                "form": "no-table-tags",
                 "source": "Conjugation",
                 "tags": [
                   "table-tags"
@@ -1576,7 +1576,7 @@ One special case is the future stem, used in the future and the conditional. Bef
         expected = {
             "forms": [
               {
-                "form": "",
+                "form": "no-table-tags",
                 "source": "Conjugation",
                 "tags": [
                   "table-tags"
@@ -2793,7 +2793,7 @@ This is a regular verb of the second conjugation, like finir, choisir, and most 
         expected = {
             "forms": [
               {
-                "form": "",
+                "form": "no-table-tags",
                 "source": "Conjugation",
                 "tags": [
                   "table-tags"
