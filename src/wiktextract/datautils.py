@@ -86,7 +86,7 @@ def split_at_comma_semi(
         separators = tuple(separators) + tuple(extra)
     splitters: list[str] = []
     if skipped:
-        splitters.extend(skipped)
+        splitters.extend(re.escape(s) for s in skipped)
     splitters.append(r"[][()]")
     splitters.extend(sorted(separators, key=lambda x: -len(x)))
     split_re = "|".join(splitters)
