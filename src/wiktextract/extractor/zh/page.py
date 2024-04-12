@@ -149,7 +149,7 @@ def process_pos_block(
                 parse_section(wxr, page_data, base_data, child)
         else:
             parse_section(wxr, page_data, base_data, child)
-    if len(page_data[-1].senses) == 0:
+    if len(page_data[-1].senses) == 0 and not node.contain_node(NodeKind.LIST):
         # low quality pages don't put gloss in list
         gloss_text = clean_node(
             wxr, page_data[-1], list(node.invert_find_child(LEVEL_KIND_FLAGS))
