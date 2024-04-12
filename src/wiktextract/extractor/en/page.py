@@ -1324,8 +1324,7 @@ def parse_language(
             )
             link_nodes, _ = recursively_extract(
                 exp.children,
-                lambda x: isinstance(x, WikiNode)
-                and x.kind == NodeKind.LINK
+                lambda x: isinstance(x, WikiNode) and x.kind == NodeKind.LINK,
             )
             for ln in link_nodes:
                 ltext = clean_node(wxr, None, ln.largs[-1])  # type: ignore[union-attr]
@@ -3055,9 +3054,19 @@ def parse_language(
             if ignore_count == 0:
                 ht = clean_template_args(wxr, ht)
                 expansion = clean_node(wxr, None, expansion)
-                templates.append(
-                    {"name": name, "args": ht, "expansion": expansion}
-                )
+                if not expansion and name == root:
+                    templates.append(
+                        {
+                            "name": name,
+                            "args": ht,
+                            "expansion": "[Template:root]",
+                        }
+                    )
+
+                else:
+                    templates.append(
+                        {"name": name, "args": ht, "expansion": expansion}
+                    )
             return None
 
         # Remove any subsections
@@ -3252,10 +3261,9 @@ def parse_language(
             if not isinstance(node, WikiNode):
                 # print("  X{}".format(repr(node)[:40]))
                 continue
-            if (
-                isinstance(node, TemplateNode)
-                and process_soft_redirect_template(wxr, node, redirect_list)
-            ):
+            if isinstance(
+                node, TemplateNode
+            ) and process_soft_redirect_template(wxr, node, redirect_list):
                 continue
 
             if node.kind not in LEVEL_KINDS:
