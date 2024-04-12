@@ -44,7 +44,7 @@ class TestDescendant(TestCase):
                 "lang_code": "ja",
                 "lang": "日語",
                 "roman": "nīhao",
-                "ruby": [["你好", "ニイハオ"]],
+                "ruby": [("你好", "ニイハオ")],
                 "word": "你好",
             },
         )

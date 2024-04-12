@@ -49,7 +49,8 @@ def extract_gloss(
             gloss_text = clean_node(wxr, gloss_data, gloss_nodes)
         new_gloss_data = gloss_data.model_copy(deep=True)
         new_gloss_data.raw_tags.extend(raw_tags)
-        new_gloss_data.glosses.append(gloss_text)
+        if len(gloss_text) > 0:
+            new_gloss_data.glosses.append(gloss_text)
         if len(ruby_data) > 0:
             new_gloss_data.ruby = ruby_data
 
@@ -62,6 +63,6 @@ def extract_gloss(
                 else:  # example list
                     extract_examples(wxr, new_gloss_data, child_node)
 
-        if not has_nested_gloss:
+        if not has_nested_gloss and len(new_gloss_data.glosses) > 0:
             translate_raw_tags(new_gloss_data)
             page_data[-1].senses.append(new_gloss_data)

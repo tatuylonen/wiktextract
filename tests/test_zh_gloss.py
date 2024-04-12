@@ -115,7 +115,7 @@ class TestGloss(TestCase):
                     "lang_code": "zh",
                     "pos": "soft-redirect",
                     "redirects": ["別個"],
-                    'senses': [{'tags': ['no-gloss']}],
+                    "senses": [{"tags": ["no-gloss"]}],
                     "word": "別个",
                 }
             ],
@@ -135,7 +135,7 @@ class TestGloss(TestCase):
                     "lang_code": "ja",
                     "pos": "soft-redirect",
                     "redirects": ["如月", "二月", "更衣", "衣更着"],
-                    'senses': [{'tags': ['no-gloss']}],
+                    "senses": [{"tags": ["no-gloss"]}],
                     "word": "きさらぎ",
                 }
             ],
@@ -243,5 +243,27 @@ class TestGloss(TestCase):
                     ],
                     "topics": ["computing", "internet"],
                 }
+            ],
+        )
+
+    def test_empty_parent_gloss(self):
+        self.wxr.wtp.start_page("bright")
+        self.wxr.wtp.add_page("Template:lb", 10, "({{{2}}})")
+        root = self.wxr.wtp.parse("""# {{lb|en|比喻义}}
+## [[显然]]的，[[显眼]]的
+## {{lb|en|指颜色}} [[鲜亮]]的，[[鲜艳]]的""")
+        page_data = [WordEntry(word="", lang_code="", lang="", pos="")]
+        extract_gloss(self.wxr, page_data, root.children[0], Sense())
+        self.assertEqual(
+            page_data[0].model_dump(exclude_defaults=True)["senses"],
+            [
+                {
+                    "glosses": ["显然的，显眼的"],
+                    "raw_tags": ["比喻义"],
+                },
+                {
+                    "glosses": ["鲜亮的，鲜艳的"],
+                    "raw_tags": ["比喻义", "指颜色"],
+                },
             ],
         )
