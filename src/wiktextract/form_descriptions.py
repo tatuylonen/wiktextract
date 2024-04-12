@@ -845,12 +845,14 @@ slashes_re = re.compile(
 )
 
 # Regexp used to find "words" from word heads and linguistic descriptions
-word_re = re.compile(
+word_pattern = (
     r"[^ ,;()\u200e]+|"
     r"\([^ ,;()\u200e]+\)[^ ,;()\u200e]+|"
     r"[\u2800-\u28ff]|"  # Braille characters
     r"\(([^()]|\([^()]*\))*\)"
 )
+
+word_re_global = re.compile(word_pattern)
 
 
 def distw(titleparts, word):
@@ -1716,7 +1718,14 @@ def add_related(
 
 
 def parse_word_head(
-    wxr, pos, text, data, is_reconstruction, head_group, ruby=[], links=[],
+    wxr,
+    pos,
+    text,
+    data,
+    is_reconstruction,
+    head_group,
+    ruby=[],
+    links=[],
 ):
     """Parses the head line for a word for in a particular language and
     part-of-speech, extracting tags and related forms."""
@@ -1728,6 +1737,15 @@ def parse_word_head(
     assert is_reconstruction in (True, False)
     # print("PARSE_WORD_HEAD: {}: {!r}".format(wxr.wtp.section, text))
     # print(f"PARSE_WORD_HEAD: {data=}")
+
+    if len(links) > 0:
+        # if we have link data (that is, links with stuff like commas and
+        # spaces, replace word_re with a modified local scope pattern
+        word_re = re.compile(
+            r"|".join(sorted(links, key=lambda x: -len(x))) + r"|" + word_pattern
+        )
+    else:
+        word_re = word_re_global
 
     if "Lua execution error" in text or "Lua timeout error" in text:
         return
@@ -2035,7 +2053,8 @@ def parse_word_head(
         for desc in descriptors:
             new_desc.extend(
                 map_with(
-                    xlat_tags_map, split_at_comma_semi(desc, extra=[", or "], skipped=links)
+                    xlat_tags_map,
+                    split_at_comma_semi(desc, extra=[", or "], skipped=links),
                 )
             )
         prev_tags = None
@@ -2388,7 +2407,9 @@ def parse_word_head(
                                 and desc in data["categories"]
                             )
                         ):
-                            for r in split_at_comma_semi(paren, extra=[" or "], skipped=links):
+                            for r in split_at_comma_semi(
+                                paren, extra=[" or "], skipped=links
+                            ):
                                 add_romanization(
                                     wxr,
                                     data,
@@ -2420,7 +2441,9 @@ def parse_word_head(
             if "or" in titleparts:
                 alts = [related]
             else:
-                alts = split_at_comma_semi(related, separators=[" or "], skipped=links)
+                alts = split_at_comma_semi(
+                    related, separators=[" or "], skipped=links
+                )
                 if not alts:
                     alts = [""]
             for related in alts:

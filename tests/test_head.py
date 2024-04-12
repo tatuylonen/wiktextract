@@ -744,5 +744,5 @@ class HeadTests(unittest.TestCase):
         self.assertEqual(
             langret[0]["forms"][0],
             # commas are missing, why?
-            {"tags": ["plural"], "form": "big fat hairy deals"},
+            {"tags": ["plural"], "form": "big, fat, hairy deals"},
         )
