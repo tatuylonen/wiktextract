@@ -2369,7 +2369,7 @@ def parse_simple_table(wxr, tablecontext, word, lang, pos,
               "source": source,
               "tags": ["table-tags"]}
         if dt["form"] == "":
-            "no-table-tags"
+            dt["form"] = "no-table-tags"
         if tablecontext.template_name:
             tn = {"form": tablecontext.template_name,
                   "source": source,
