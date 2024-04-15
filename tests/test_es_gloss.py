@@ -3,7 +3,11 @@ from typing import List
 
 from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
-from wiktextract.extractor.es.gloss import extract_gloss, process_uso_template
+from wiktextract.extractor.es.gloss import (
+    extract_gloss,
+    process_ambito_template,
+    process_uso_template,
+)
 from wiktextract.extractor.es.models import Sense, WordEntry
 from wiktextract.wxr_context import WiktextractContext
 
@@ -104,9 +108,7 @@ class TestESGloss(unittest.TestCase):
             page_data[0].model_dump(exclude_defaults=True)["senses"],
             [
                 {
-                    "glosses": [
-                        "Vehículo para desplazarse por el aire"
-                    ],
+                    "glosses": ["Vehículo para desplazarse por el aire"],
                     "senseid": "1",
                     "topics": ["aeronautics", "vehicles"],
                     "categories": ["ES:Aeronáutica", "ES:Vehículos"],
@@ -120,14 +122,32 @@ class TestESGloss(unittest.TestCase):
         self.wxr.wtp.add_page(
             "Plantilla:uso",
             10,
-            ":*'''Uso:''' coloquial, despectivo[[Categoría:ES:Términos coloquiales|DOMINGO]][[Categoría:ES:Términos despectivos|DOMINGO]]"
+            ":*'''Uso:''' coloquial, despectivo[[Categoría:ES:Términos coloquiales|DOMINGO]][[Categoría:ES:Términos despectivos|DOMINGO]]",
         )
         root = self.wxr.wtp.parse("{{uso|coloquial|despectivo}}")
         process_uso_template(self.wxr, sense, root.children[0])
         self.assertEqual(
             sense.model_dump(exclude_defaults=True),
             {
-                "categories": ["ES:Términos coloquiales", "ES:Términos despectivos"],
-                "tags": ["colloquial", "derogatory"]
-            }
+                "categories": [
+                    "ES:Términos coloquiales",
+                    "ES:Términos despectivos",
+                ],
+                "tags": ["colloquial", "derogatory"],
+            },
+        )
+
+    def test_ambito_template(self):
+        self.wxr.wtp.start_page("domingo")
+        sense = Sense()
+        self.wxr.wtp.add_page(
+            "Plantilla:ámbito",
+            10,
+            ":*'''Ámbito:''' México[[Categoría:ES:México|DOMINGO]]",
+        )
+        root = self.wxr.wtp.parse("{{ámbito|México}}")
+        process_ambito_template(self.wxr, sense, root.children[0])
+        self.assertEqual(
+            sense.model_dump(exclude_defaults=True),
+            {"categories": ["ES:México"], "tags": ["Mexico"]},
         )

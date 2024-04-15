@@ -73,14 +73,39 @@ def extract_gloss(
 def process_uso_template(
     wxr: WiktextractContext, sense: Sense, template: TemplateNode
 ) -> None:
+    # https://es.wiktionary.org/wiki/Plantilla:uso
     from .tags import USO_TAGS
 
     for arg_name, arg_value in template.template_parameters.items():
         if isinstance(arg_name, int):
             arg_value = clean_node(wxr, None, arg_value)
             if arg_value in USO_TAGS:
-                sense.tags.append(USO_TAGS[arg_value])
+                tr_tags = USO_TAGS[arg_value]
+                if isinstance(tr_tags, str):
+                    sense.tags.append(USO_TAGS[arg_value])
+                elif isinstance(tr_tags, list):
+                    sense.tags.extend(USO_TAGS[arg_value])
             else:
                 sense.raw_tags.append(arg_value)
+
+    clean_node(wxr, sense, template)  # save category links
+
+
+def process_ambito_template(
+    wxr: WiktextractContext, sense: Sense, template: TemplateNode
+) -> None:
+    # https://es.wiktionary.org/wiki/Plantilla:ámbito
+    # location data
+    from .tags import AMBITO_TAGS
+
+    for arg_name, arg_value in template.template_parameters.items():
+        if isinstance(arg_name, int):
+            arg_value = clean_node(wxr, None, arg_value)
+            if arg_value in AMBITO_TAGS:
+                tr_tags = AMBITO_TAGS[arg_value]
+                if isinstance(tr_tags, str):
+                    sense.tags.append(AMBITO_TAGS[arg_value])
+                elif isinstance(tr_tags, list):
+                    sense.tags.extend(tr_tags)
 
     clean_node(wxr, sense, template)  # save category links

@@ -12,7 +12,7 @@ from wiktextract.wxr_context import WiktextractContext
 
 from .etymology import process_etymology_block
 from .example import extract_example
-from .gloss import extract_gloss, process_uso_template
+from .gloss import extract_gloss, process_ambito_template, process_uso_template
 from .linkage import extract_linkage, process_linkage_template
 from .models import WordEntry
 from .pronunciation import process_audio_template, process_pron_graf_template
@@ -270,8 +270,7 @@ def process_sense_children(
             elif template_name == "uso":
                 process_uso_template(wxr, page_data[-1].senses[-1], group[0])
             elif template_name == "ámbito":
-                # XXX Extract scope note
-                pass
+                process_ambito_template(wxr, page_data[-1].senses[-1], group[0])
             else:
                 wxr.wtp.debug(
                     f"Found unexpected group specifying a sense: {group},"
