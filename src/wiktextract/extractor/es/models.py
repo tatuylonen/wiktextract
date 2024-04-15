@@ -69,6 +69,7 @@ class Sense(BaseModelWrap):
         description="list of gloss strings for the word sense (usually only one). This has been cleaned, and should be straightforward text with no tagging.",
     )
     tags: list[str] = []
+    topics: list[str] = []
     categories: list[str] = Field(
         default=[],
         description="list of sense-disambiguated category names extracted from (a subset) of the Category links on the page",
