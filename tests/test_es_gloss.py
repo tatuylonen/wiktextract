@@ -85,3 +85,32 @@ class TestESGloss(unittest.TestCase):
                 }
             ],
         )
+
+    def test_gloss_topics(self):
+        self.wxr.wtp.start_page("helicóptero")
+
+        self.wxr.wtp.add_page(
+            "Plantilla:csem",
+            10,
+            "Aeronáutica, vehículos[[Categoría:ES:Aeronáutica|HELICOPTERO]][[Categoría:ES:Vehículos|HELICOPTERO]]",
+        )
+        page_data = [
+            WordEntry(lang_code="es", lang="Español", word="helicóptero")
+        ]
+        root = self.wxr.wtp.parse(
+            ";1 {{csem|aeronáutica|vehículos}}: Vehículo para desplazarse por el aire"
+        )
+        extract_gloss(self.wxr, page_data, root.children[0])
+        self.assertEqual(
+            page_data[0].model_dump(exclude_defaults=True)["senses"],
+            [
+                {
+                    "glosses": [
+                        "Vehículo para desplazarse por el aire"
+                    ],
+                    "senseid": "1",
+                    "topics": ["aeronautics", "vehicles"],
+                    "categories": ["ES:Aeronáutica", "ES:Vehículos"],
+                }
+            ],
+        )

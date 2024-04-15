@@ -7,6 +7,7 @@ from wiktextract.wxr_context import WiktextractContext
 
 from .models import Sense, WordEntry
 from .sense_data import process_sense_data_list
+from .tags import translate_raw_tags
 
 
 def extract_gloss(
@@ -29,16 +30,12 @@ def extract_gloss(
             else:
                 definition.append(node)
 
-        list_item.definition
-
         gloss = clean_node(wxr, gloss_data, definition)
         gloss_data.glosses.append(gloss)
 
         gloss_note = clean_node(wxr, gloss_data, list_item.children)
-
         match = re.match(r"^(\d+)", gloss_note)
-
-        if match:
+        if match is not None:
             gloss_data.senseid = match.group(1)
             tag_string = gloss_note[len(match.group(1)) :].strip()
         else:
@@ -56,9 +53,9 @@ def extract_gloss(
             if tag:
                 gloss_data.raw_tags.append(tag)
 
+        translate_raw_tags(gloss_data)
         page_data[-1].senses.append(gloss_data)
-
-        if other:
+        if len(other) > 0:
             for node in other:
                 if isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
                     process_sense_data_list(
