@@ -12,7 +12,7 @@ from wiktextract.wxr_context import WiktextractContext
 
 from .etymology import process_etymology_block
 from .example import extract_example
-from .gloss import extract_gloss
+from .gloss import extract_gloss, process_uso_template
 from .linkage import extract_linkage, process_linkage_template
 from .models import WordEntry
 from .pronunciation import process_audio_template, process_pron_graf_template
@@ -268,8 +268,7 @@ def process_sense_children(
             elif template_name == "ejemplo":
                 extract_example(wxr, page_data[-1].senses[-1], group)
             elif template_name == "uso":
-                # XXX: Extract usage note
-                pass
+                process_uso_template(wxr, page_data[-1].senses[-1], group[0])
             elif template_name == "ámbito":
                 # XXX Extract scope note
                 pass

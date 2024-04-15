@@ -3,8 +3,8 @@ from typing import List
 
 from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
-from wiktextract.extractor.es.gloss import extract_gloss
-from wiktextract.extractor.es.models import WordEntry
+from wiktextract.extractor.es.gloss import extract_gloss, process_uso_template
+from wiktextract.extractor.es.models import Sense, WordEntry
 from wiktextract.wxr_context import WiktextractContext
 
 
@@ -88,7 +88,6 @@ class TestESGloss(unittest.TestCase):
 
     def test_gloss_topics(self):
         self.wxr.wtp.start_page("helicóptero")
-
         self.wxr.wtp.add_page(
             "Plantilla:csem",
             10,
@@ -113,4 +112,22 @@ class TestESGloss(unittest.TestCase):
                     "categories": ["ES:Aeronáutica", "ES:Vehículos"],
                 }
             ],
+        )
+
+    def test_uso_template(self):
+        self.wxr.wtp.start_page("domingo")
+        sense = Sense()
+        self.wxr.wtp.add_page(
+            "Plantilla:uso",
+            10,
+            ":*'''Uso:''' coloquial, despectivo[[Categoría:ES:Términos coloquiales|DOMINGO]][[Categoría:ES:Términos despectivos|DOMINGO]]"
+        )
+        root = self.wxr.wtp.parse("{{uso|coloquial|despectivo}}")
+        process_uso_template(self.wxr, sense, root.children[0])
+        self.assertEqual(
+            sense.model_dump(exclude_defaults=True),
+            {
+                "categories": ["ES:Términos coloquiales", "ES:Términos despectivos"],
+                "tags": ["colloquial", "derogatory"]
+            }
         )

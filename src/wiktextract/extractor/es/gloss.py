@@ -1,7 +1,7 @@
 import re
 
 from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import WikiNodeChildrenList
+from wikitextprocessor.parser import TemplateNode, WikiNodeChildrenList
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
@@ -68,3 +68,19 @@ def extract_gloss(
                         f"Found nodes that are not part of definition: {node}",
                         sortid="extractor/es/gloss/extract_gloss/46",
                     )
+
+
+def process_uso_template(
+    wxr: WiktextractContext, sense: Sense, template: TemplateNode
+) -> None:
+    from .tags import USO_TAGS
+
+    for arg_name, arg_value in template.template_parameters.items():
+        if isinstance(arg_name, int):
+            arg_value = clean_node(wxr, None, arg_value)
+            if arg_value in USO_TAGS:
+                sense.tags.append(USO_TAGS[arg_value])
+            else:
+                sense.raw_tags.append(arg_value)
+
+    clean_node(wxr, sense, template)  # save category links
