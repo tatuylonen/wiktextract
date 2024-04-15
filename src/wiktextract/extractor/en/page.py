@@ -3055,7 +3055,7 @@ def parse_language(
             if ignore_count == 0:
                 ht = clean_template_args(wxr, ht)
                 expansion = clean_node(wxr, None, expansion)
-                if not expansion and name == root:
+                if not expansion and name == "root":
                     templates.append(
                         {
                             "name": name,
