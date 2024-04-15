@@ -75,6 +75,7 @@ class UtilsTests(unittest.TestCase):
                 "ogg_url": "https://upload.wikimedia.org/wikipedia/commons/transcoded/e/e1/LL-Q150_(fra)-DenisdeShawi-bonjour.wav/LL-Q150_(fra)-DenisdeShawi-bonjour.wav.ogg",
             },
         )
+
         sound_data = create_audio_url_dict("File:Fr-BonjourF.oga")
         self.assertEqual(
             sound_data,
@@ -84,5 +85,16 @@ class UtilsTests(unittest.TestCase):
                 "mp3_url": "https://upload.wikimedia.org/wikipedia/commons/transcoded/b/b9/Fr-BonjourF.oga/Fr-BonjourF.oga.mp3",
             },
         )
+
         sound_data = create_audio_url_dict("Qc-Vancouver.ogv")
         self.assertEqual(sound_data["audio"], "Qc-Vancouver.oga")
+
+        sound_data = create_audio_url_dict("De-Fisch.OGG")
+        self.assertEqual(
+            sound_data,
+            {
+                "audio": "De-Fisch.OGG",
+                "ogg_url": "https://commons.wikimedia.org/wiki/Special:FilePath/De-Fisch.OGG",
+                "mp3_url": "https://upload.wikimedia.org/wikipedia/commons/transcoded/0/0f/De-Fisch.OGG/De-Fisch.OGG.mp3",
+            },
+        )

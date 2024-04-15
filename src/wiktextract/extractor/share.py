@@ -55,8 +55,8 @@ def split_chinese_variants(text: str) -> Iterable[tuple[Optional[str], str]]:
 def create_audio_url_dict(filename: str) -> dict[str, str]:
     # remove white space and left-to-right mark
     filename = filename.strip(" \u200e")
-    file_extension = filename[filename.rfind(".") + 1 :]
-    if file_extension.lower() == "ogv":
+    file_extension = filename[filename.rfind(".") + 1 :].lower()
+    if file_extension == "ogv":
         # ".ogv" pages are redirected to ".oga" pages in Wikipedia Commons
         filename = filename[:filename.rfind(".")] + ".oga"
         file_extension = "oga"
