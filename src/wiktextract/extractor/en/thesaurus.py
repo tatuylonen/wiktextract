@@ -3,7 +3,6 @@
 #
 # Copyright (c) 2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
-import logging
 import re
 from typing import Optional
 
@@ -12,6 +11,7 @@ from wikitextprocessor import NodeKind, Page, WikiNode
 from wikitextprocessor.core import NamespaceDataEntry
 from wiktextract.datautils import ns_title_prefix_tuple
 from wiktextract.form_descriptions import parse_sense_qualifier
+from wiktextract.logging import logger
 from wiktextract.page import LEVEL_KINDS, clean_node
 from wiktextract.thesaurus import ThesaurusTerm
 from wiktextract.wxr_context import WiktextractContext
@@ -131,7 +131,7 @@ def extract_thesaurus_page(
         kind = contents.kind
         if kind == NodeKind.LIST and not contents.contain_node(NodeKind.LIST):
             if lang is None:
-                logging.debug(
+                logger.debug(
                     f"{title=} {lang=} UNEXPECTED LIST WITHOUT LANG: "
                     + str(contents)
                 )
@@ -142,7 +142,7 @@ def extract_thesaurus_page(
                     continue
                 w = clean_node(wxr, None, node.children)
                 if "*" in w:
-                    logging.debug(f"{title=} {lang=} {pos=} STAR IN WORD: {w}")
+                    logger.debug(f"{title=} {lang=} {pos=} STAR IN WORD: {w}")
                 # Check for parenthesized sense at the beginning
                 m = re.match(r"(?s)^\(([^)]*)\):\s*(.*)$", w)
                 if m:
@@ -207,7 +207,7 @@ def extract_thesaurus_page(
                     if w1:
                         lang_code = name_to_code(lang, "en")
                         if lang_code is None:
-                            logging.debug(
+                            logger.debug(
                                 f"Linkage language {lang} not recognized"
                             )
                         thesaurus.append(
@@ -276,7 +276,7 @@ def extract_thesaurus_page(
             # possibly given additional tags
             subtitle_tags = IGNORED_SUBTITLE_TAGS_MAP[subtitle]
             return recurse(contents.children)
-        logging.debug(
+        logger.debug(
             f"{title=} {lang=} {pos=} {sense=} UNHANDLED SUBTITLE: "
             + "subtitle "
             + str(contents.sarg if contents.sarg else contents.largs)

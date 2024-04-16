@@ -2,7 +2,6 @@
 # merged into word linkages in later stages.
 #
 # Copyright (c) 2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
-import logging
 import os
 import sqlite3
 import tempfile
@@ -16,6 +15,7 @@ from typing import List, Optional, Set, TextIO, Tuple
 
 from mediawiki_langcodes import code_to_name
 from wikitextprocessor import Page
+from wiktextract.logging import logger
 
 from .import_utils import import_extractor_module
 from .wxr_context import WiktextractContext
@@ -79,7 +79,7 @@ def extract_thesaurus_data(
     from .wiktionary import init_worker_process
 
     start_t = time.time()
-    logging.info("Extracting thesaurus data")
+    logger.info("Extracting thesaurus data")
     thesaurus_ns_data = wxr.wtp.NAMESPACE_DATA.get("Thesaurus", {})
     thesaurus_ns_id = thesaurus_ns_data.get("id")
 
@@ -91,7 +91,7 @@ def extract_thesaurus_data(
         ):
             if not success:
                 # Print error in parent process - do not remove
-                logging.error(err)
+                logger.error(err)
                 continue
             if terms is not None:
                 for term in terms:
@@ -101,7 +101,7 @@ def extract_thesaurus_data(
     wxr.thesaurus_db_conn.commit()
     num_pages = wxr.wtp.saved_page_nums([thesaurus_ns_id], False)
     total = thesaurus_linkage_number(wxr.thesaurus_db_conn)
-    logging.info(
+    logger.info(
         "Extracted {} linkages from {} thesaurus pages (took {:.1f}s)".format(
             total, num_pages, time.time() - start_t
         )
@@ -229,7 +229,7 @@ def emit_words_in_thesaurus(
     # sometimes.
     from .wiktionary import write_json_data
 
-    logging.info("Emitting words that only occur in thesaurus")
+    logger.info("Emitting words that only occur in thesaurus")
     for entry_id, entry, pos, lang_code, sense in wxr.thesaurus_db_conn.execute(
         "SELECT id, entry, pos, language_code, sense FROM entries "
         "WHERE pos IS NOT NULL AND language_code IS NOT NULL"
@@ -238,13 +238,13 @@ def emit_words_in_thesaurus(
             continue
 
         if None in (entry, lang_code, pos):
-            logging.info(
+            logger.info(
                 f"'None' in entry, lang_code or"
                 f" pos: {entry}, {lang_code}, {pos}"
             )
             continue
 
-        logging.info(
+        logger.info(
             "Emitting thesaurus entry for "
             f"{entry}/{lang_code}/{pos} (not in main)"
         )

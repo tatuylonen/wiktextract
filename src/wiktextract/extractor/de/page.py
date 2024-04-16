@@ -1,10 +1,10 @@
-import logging
 from typing import Any
 
 from mediawiki_langcodes import name_to_code
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import LevelNode, TemplateNode
 from wiktextract.page import clean_node
+from wiktextract.logging import logger
 from wiktextract.wxr_context import WiktextractContext
 
 from .example import extract_examples
@@ -161,7 +161,7 @@ def parse_page(
     wxr: WiktextractContext, page_title: str, page_text: str
 ) -> list[dict[str, Any]]:
     if wxr.config.verbose:
-        logging.info(f"Parsing page: {page_title}")
+        logger.info(f"Parsing page: {page_title}")
 
     wxr.config.word = page_title
     wxr.wtp.start_page(page_title)

@@ -36,6 +36,7 @@ from wiktextract import (
     reprocess_wiktionary,
 )
 from wiktextract.inflection import set_debug_cell_text
+from wiktextract.logging import logger
 from wiktextract.template_override import template_override_fns
 from wiktextract.thesaurus import (
     close_thesaurus_db,
@@ -68,7 +69,7 @@ def process_single_page(
         title = path_or_title
         text = wxr.wtp.get_page_body(title, 0)
         if text is None:
-            logging.error(f"Can't find page '{title}' in the database.")
+            logger.error(f"Can't find page '{title}' in the database.")
             return
 
     # Extract Thesaurus data (this is a bit slow for a single page, but
@@ -107,7 +108,8 @@ def main():
         "--errors", type=str, help="File in which to save error information"
     )
     parser.add_argument(
-        "--dump-file-language-code", "--edition",
+        "--dump-file-language-code",
+        "--edition",
         type=str,
         default="en",
         help="Language code of the dump file.",
@@ -152,7 +154,7 @@ def main():
         default=False,
         help="Skip the (usually lengthy) json data extraction "
         "procedure to do other things, like creating a database "
-        "file or other files."
+        "file or other files.",
     )
     parser.add_argument(
         "--translations",
@@ -304,7 +306,8 @@ def main():
 
     if not args.quiet:
         logging.basicConfig(
-            format="%(asctime)s %(levelname)s: %(message)s", level=logging.DEBUG
+            format="%(asctime)s %(levelname)s: %(message)s",
+            level=logging.DEBUG,
         )
 
     if args.debug_cell_text:
@@ -335,14 +338,14 @@ def main():
         for lang_code in args.language_code:
             lang_name = code_to_name(lang_code, args.dump_file_language_code)
             if lang_name == "":
-                logging.warning(f"Unknown language code: {lang_code}")
+                logger.warning(f"Unknown language code: {lang_code}")
             else:
                 capture_lang_codes.add(lang_code)
     if len(args.language_name) > 0:
         for lang_name in args.language_name:
             lang_code = name_to_code(lang_name, args.dump_file_language_code)
             if lang_code == "":
-                logging.warning(f"Unknown language name: {lang_name}")
+                logger.warning(f"Unknown language name: {lang_name}")
             else:
                 capture_lang_codes.add(lang_code)
     if len(capture_lang_codes) == 0:
@@ -350,9 +353,9 @@ def main():
 
     if args.all_languages:
         capture_lang_codes = None
-        logging.info("Capturing words for all available languages")
+        logger.info("Capturing words for all available languages")
     else:
-        logging.info(f"Capturing words for: {', '.join(capture_lang_codes)}")
+        logger.info(f"Capturing words for: {', '.join(capture_lang_codes)}")
 
     # Open output file.
     out_path = args.out
@@ -458,7 +461,7 @@ def main():
         if args.page and not args.skip_extraction:
             # Parse a single Wiktionary page (extracted using --pages-dir)
             if not args.db_path:
-                logging.warning(
+                logger.warning(
                     "NOTE: you probably want to use --db-path with --page or "
                     "otherwise processing will be very slow."
                 )
@@ -491,7 +494,7 @@ def main():
     if args.templates_file:
         extract_namespace(wxr, "Template", args.templates_file)
     if args.categories_file:
-        logging.info("Extracting category tree")
+        logger.info("Extracting category tree")
         tree = extract_categories(wxr)
         with open(args.categories_file, "w") as f:
             json.dump(tree, f, indent=2, sort_keys=True)

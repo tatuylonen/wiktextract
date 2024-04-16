@@ -6,7 +6,6 @@
 
 import io
 import json
-import logging
 import os
 import re
 import tarfile
@@ -19,6 +18,7 @@ from typing import Optional, TextIO
 
 from wikitextprocessor import Page
 from wikitextprocessor.dumpparser import process_dump
+from wiktextract.logging import logger
 
 from .page import parse_page
 from .thesaurus import (
@@ -61,7 +61,7 @@ def page_handler(page: Page) -> tuple[list[dict], dict]:
                 page_data = parse_page(wxr, title, page.body)
                 dur = time.time() - start_t
                 if dur > 100:
-                    logging.warning(
+                    logger.warning(
                         "====== WARNING: PARSING PAGE TOOK {:.1f}s: {}".format(
                             dur, title
                         )
@@ -99,7 +99,7 @@ def parse_wiktionary(
         for x in capture_language_codes:
             assert isinstance(x, str)
 
-    logging.info("First phase - extracting templates, macros, and pages")
+    logger.info("First phase - extracting templates, macros, and pages")
     if override_folders is not None:
         override_folders = [Path(folder) for folder in override_folders]
     if save_pages_path is not None:
@@ -140,7 +140,7 @@ def estimate_progress(
         estimate_seconds = (
             (current_time - start_time) / processed_pages * remaining_pages
         )
-        logging.info(
+        logger.info(
             "  ... {}/{} pages ({:.1%}) processed, "
             "{:02d}:{:02d}:{:02d} remaining".format(
                 processed_pages,
@@ -518,7 +518,7 @@ def reprocess_wiktionary(
     search_pattern: Optional[str] = None,
 ) -> None:
     """Reprocesses the Wiktionary from the sqlite db."""
-    logging.info("Second phase - processing pages")
+    logger.info("Second phase - processing pages")
 
     # Extract thesaurus data. This iterates over thesaurus pages,
     # but is very fast.
@@ -565,7 +565,7 @@ def reprocess_wiktionary(
             )
     if wxr.config.dump_file_lang_code == "en":
         emit_words_in_thesaurus(wxr, emitted, out_f, human_readable)
-    logging.info("Reprocessing wiktionary complete")
+    logger.info("Reprocessing wiktionary complete")
 
 
 def process_ns_page_title(page: Page, ns_name: str) -> tuple[str, str]:
@@ -585,7 +585,7 @@ def extract_namespace(
 ) -> None:
     """Extracts all pages in the given namespace and writes them to a .tar
     file with the given path."""
-    logging.info(
+    logger.info(
         f"Extracting pages from namespace {namespace} to tar file {path}"
     )
     ns_id = wxr.wtp.NAMESPACE_DATA.get(namespace, {}).get("id")
