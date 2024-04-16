@@ -4,7 +4,6 @@
 
 import copy
 import html
-import logging
 import re
 import sys
 from collections import defaultdict
@@ -39,6 +38,7 @@ from wiktextract.form_descriptions import (
 )
 from wiktextract.inflection import TableContext, parse_inflection_section
 from wiktextract.linkages import parse_linkage_item_text
+from wiktextract.logging import logger
 from wiktextract.page import (
     LEVEL_KINDS,
     clean_node,
@@ -3872,7 +3872,7 @@ def parse_page(
         return []
 
     if wxr.config.verbose:
-        logging.info(f"Parsing page: {word}")
+        logger.info(f"Parsing page: {word}")
 
     wxr.config.word = word
     wxr.wtp.start_page(word)

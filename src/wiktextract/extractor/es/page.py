@@ -1,4 +1,3 @@
-import logging
 import re
 
 from wikitextprocessor import NodeKind, WikiNode
@@ -7,6 +6,7 @@ from wikitextprocessor.parser import (
     TemplateNode,
     WikiNodeChildrenList,
 )
+from wiktextract.logging import logger
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
@@ -311,7 +311,7 @@ def parse_page(
     wxr: WiktextractContext, page_title: str, page_text: str
 ) -> list[dict[str, any]]:
     if wxr.config.verbose:
-        logging.info(f"Parsing page: {page_title}")
+        logger.info(f"Parsing page: {page_title}")
 
     wxr.config.word = page_title
     wxr.wtp.start_page(page_title)

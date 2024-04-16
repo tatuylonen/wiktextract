@@ -1,10 +1,10 @@
-import logging
 from typing import Any, Optional
 
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import LEVEL_KIND_FLAGS, TemplateNode
 from wiktextract.config import POSSubtitleData
 from wiktextract.page import clean_node
+from wiktextract.logging import logger
 from wiktextract.wxr_context import WiktextractContext
 
 from .gloss import extract_gloss
@@ -203,7 +203,7 @@ def parse_page(
     # https://ru.wiktionary.org/wiki/Викисловарь:Правила_оформления_статей
 
     if wxr.config.verbose:
-        logging.info(f"Parsing page: {page_title}")
+        logger.info(f"Parsing page: {page_title}")
 
     wxr.config.word = page_title
     wxr.wtp.start_page(page_title)

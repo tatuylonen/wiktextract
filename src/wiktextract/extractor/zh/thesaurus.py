@@ -1,9 +1,9 @@
-import logging
 import re
 from typing import Optional, Union
 
 from mediawiki_langcodes import name_to_code
 from wikitextprocessor import NodeKind, Page, WikiNode
+from wiktextract.logging import logger
 
 from ...page import clean_node
 from ...thesaurus import ThesaurusTerm
@@ -160,7 +160,7 @@ def recursive_parse(
         lang_name = clean_node(wxr, None, node.largs)
         lang_code = name_to_code(lang_name, "zh")
         if lang_code is None:
-            logging.warning(
+            logger.warning(
                 f"Unrecognized language: {lang_name} in page Thesaurus:{entry}"
             )
         return recursive_parse(
@@ -172,7 +172,7 @@ def recursive_parse(
             return None
         english_pos = POS_TITLES.get(local_pos_name, {}).get("pos")
         if english_pos is None:
-            logging.warning(
+            logger.warning(
                 f"Unrecognized POS subtitle: {local_pos_name} in page "
                 f"Thesaurus:{entry}"
             )
@@ -190,7 +190,7 @@ def recursive_parse(
         local_linkage_name = clean_node(wxr, None, node.largs)
         english_linkage = LINKAGE_TITLES.get(local_linkage_name)
         if english_linkage is None:
-            logging.warning(
+            logger.warning(
                 f"Unrecognized linkage subtitle: {local_linkage_name} in page "
                 f"Thesaurus:{entry}"
             )
