@@ -1742,7 +1742,11 @@ def parse_word_head(
         # if we have link data (that is, links with stuff like commas and
         # spaces, replace word_re with a modified local scope pattern
         word_re = re.compile(
-            r"|".join(sorted(links, key=lambda x: -len(x))) + r"|" + word_pattern
+            r"|".join(
+                sorted((re.escape(s) for s in links), key=lambda x: -len(x))
+            )
+            + r"|"
+            + word_pattern
         )
     else:
         word_re = word_re_global
