@@ -546,6 +546,8 @@ ignored_etymology_templates: list[str] = [
     "cite-video/documentation",
     "Cite-journal",
     "rfe",
+    "catlangname",
+    "cln",
 ]
 # Regexp for matching ignored etymology template names.  This adds certain
 # prefixes to the names listed above.
@@ -558,6 +560,12 @@ ignored_etymology_templates_re = re.compile(
 # Regexp for matching ignored descendants template names. Right now we just
 # copy the ignored etymology templates
 ignored_descendants_templates_re = ignored_etymology_templates_re
+
+EXPANSIONLESS_ETYMOLOGY_TEMPLATES = (
+    "root",
+    "PIE word",
+    "ref",
+)
 
 # Set of template names that are used to define usage examples.  If the usage
 # example contains one of these templates, then it its type is set to
@@ -3055,12 +3063,12 @@ def parse_language(
             if ignore_count == 0:
                 ht = clean_template_args(wxr, ht)
                 expansion = clean_node(wxr, None, expansion)
-                if not expansion and name == "root":
+                if not expansion and name in EXPANSIONLESS_ETYMOLOGY_TEMPLATES:
                     templates.append(
                         {
                             "name": name,
                             "args": ht,
-                            "expansion": "[Template:root]",
+                            "expansion": f"[Template:{name}]",
                         }
                     )
 
