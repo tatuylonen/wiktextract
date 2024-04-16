@@ -3294,7 +3294,9 @@ def parse_language(
             # gets discarded: Search STATISTICS_IMPLEMENTATION
             wxr.config.section_counts[t] += 1
             # print("PROCESS_CHILDREN: T:", repr(t))
-            if t.startswith(PRONUNCIATION_TITLE):
+            if t in IGNORED_TITLES:
+                pass
+            elif t.startswith(PRONUNCIATION_TITLE):
                 if t.startswith(PRONUNCIATION_TITLE + " "):
                     # Pronunciation 1, etc, are used in Chinese Glyphs,
                     # and each of them may have senses under Definition
@@ -3333,8 +3335,6 @@ def parse_language(
             elif t == TRANSLATIONS_TITLE:
                 data = select_data()
                 parse_translations(data, node)
-            elif t in IGNORED_TITLES:
-                pass
             elif t in INFLECTION_TITLES:
                 parse_inflection(node, t, pos)
             else:

@@ -236,7 +236,7 @@ COMPOUNDS_TITLE = "compounds"
 ETYMOLOGY_TITLES: frozenset[str] = frozenset(["etymology", "glyph origin"])
 
 IGNORED_TITLES: frozenset[str] = frozenset(
-    ["anagrams", "further reading", "references", "quotations"]
+    ["anagrams", "further reading", "references", "quotations", "statistics"]
 )
 
 INFLECTION_TITLES: frozenset[str] = frozenset(
