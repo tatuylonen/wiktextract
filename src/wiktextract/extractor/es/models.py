@@ -16,6 +16,7 @@ class Linkage(BaseModelWrap):
     alternative_spelling: str = Field(
         default="", description="Alternative spelling of the word"
     )
+    senseid: str = ""
 
 
 class Translation(BaseModelWrap):
@@ -150,5 +151,6 @@ class WordEntry(BaseModelWrap):
     meronyms: list[Linkage] = []
     related: list[Linkage] = []
     synonyms: list[Linkage] = []
+    proverbs: list[Linkage] = []
     tags: list[str] = []
     extra_sounds: dict[str, str] = {}

@@ -262,9 +262,7 @@ def process_sense_children(
             if template_name == "clear":
                 return
             elif template_name.removesuffix("s") in LINKAGE_TITLES:
-                process_linkage_template(
-                    wxr, page_data[-1].senses[-1], group[0]
-                )
+                process_linkage_template(wxr, page_data[-1], group[0])
             elif template_name == "ejemplo":
                 extract_example(wxr, page_data[-1].senses[-1], group)
             elif template_name == "uso":
@@ -282,7 +280,7 @@ def process_sense_children(
             list_node = group[0]
             # List groups seem to not be followed by string nodes.
             # We, therefore, only process the list_node.
-            process_sense_data_list(wxr, page_data[-1].senses[-1], list_node)
+            process_sense_data_list(wxr, page_data[-1], list_node)
 
         elif (
             isinstance(child, WikiNode)

@@ -64,10 +64,7 @@ class TestESLinkage(unittest.TestCase):
                 "input": "{{sinónimo|automóvil|coche|nota2=España|carro|nota3=Colombia, Estados Unidos, México, Venezuela}}",
                 "expected": [
                     {"word": "automóvil"},
-                    {
-                        "word": "coche",
-                        "note": "España",
-                    },
+                    {"word": "coche", "note": "España"},
                     {
                         "word": "carro",
                         "note": "Colombia, Estados Unidos, México, Venezuela",

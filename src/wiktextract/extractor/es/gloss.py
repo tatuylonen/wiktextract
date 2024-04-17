@@ -59,11 +59,7 @@ def extract_gloss(
         if len(other) > 0:
             for node in other:
                 if isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
-                    process_sense_data_list(
-                        wxr,
-                        page_data[-1].senses[-1],
-                        node,
-                    )
+                    process_sense_data_list(wxr, page_data[-1], node)
                 else:
                     wxr.wtp.debug(
                         f"Found nodes that are not part of definition: {node}",
