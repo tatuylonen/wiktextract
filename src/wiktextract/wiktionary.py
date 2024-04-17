@@ -18,8 +18,8 @@ from typing import Optional, TextIO
 
 from wikitextprocessor import Page
 from wikitextprocessor.dumpparser import process_dump
-from wiktextract.logging import logger
 
+from .logging import logger
 from .page import parse_page
 from .thesaurus import (
     emit_words_in_thesaurus,

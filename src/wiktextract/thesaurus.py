@@ -15,9 +15,9 @@ from typing import List, Optional, Set, TextIO, Tuple
 
 from mediawiki_langcodes import code_to_name
 from wikitextprocessor import Page
-from wiktextract.logging import logger
 
 from .import_utils import import_extractor_module
+from .logging import logger
 from .wxr_context import WiktextractContext
 
 
