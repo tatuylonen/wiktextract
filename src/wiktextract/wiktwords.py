@@ -27,24 +27,24 @@ from mediawiki_langcodes import code_to_name, name_to_code
 from wikitextprocessor import Wtp
 from wikitextprocessor.dumpparser import analyze_and_overwrite_pages
 
-from wiktextract import (
-    WiktionaryConfig,
-    extract_categories,
-    extract_namespace,
-    parse_page,
-    parse_wiktionary,
-    reprocess_wiktionary,
-)
-from wiktextract.inflection import set_debug_cell_text
-from wiktextract.logging import logger
-from wiktextract.template_override import template_override_fns
-from wiktextract.thesaurus import (
+from .categories import extract_categories
+from .config import WiktionaryConfig
+from .inflection import set_debug_cell_text
+from .logging import logger
+from .template_override import template_override_fns
+from .thesaurus import (
     close_thesaurus_db,
     extract_thesaurus_data,
     thesaurus_linkage_number,
 )
-from wiktextract.wiktionary import write_json_data
-from wiktextract.wxr_context import WiktextractContext
+from .wiktionary import (
+    extract_namespace,
+    parse_page,
+    parse_wiktionary,
+    reprocess_wiktionary,
+    write_json_data,
+)
+from .wxr_context import WiktextractContext
 
 
 def process_single_page(
@@ -305,10 +305,7 @@ def main():
     args = parser.parse_args()
 
     if not args.quiet:
-        logging.basicConfig(
-            format="%(asctime)s %(levelname)s: %(message)s",
-            level=logging.DEBUG,
-        )
+        logger.setLevel(logging.DEBUG)
 
     if args.debug_cell_text:
         # importing debug_cell_text from wiktextract.inflection
