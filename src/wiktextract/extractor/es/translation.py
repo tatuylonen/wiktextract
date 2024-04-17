@@ -29,17 +29,17 @@ def extract_translation(
         if key == 1:
             continue  # Skip language code
 
-        value = clean_node(
-            wxr, {}, template_node.template_parameters[key]
-        ).strip()
-
+        value = clean_node(wxr, None, template_node.template_parameters[key])
         if isinstance(key, int):
             if value == ",":
-                if current_translation:
+                if (
+                    current_translation is not None
+                    and len(current_translation.word) > 0
+                ):
                     word_entry.translations.append(current_translation)
 
-                    current_translation = None
-                    senseids = []
+                current_translation = None
+                senseids = []
             elif (
                 value.isdigit()
                 or (value != "," and "," in value)
@@ -98,5 +98,5 @@ def extract_translation(
                     current_translation.roman = value
 
     # Add the last translation if it exists
-    if current_translation:
+    if current_translation is not None and len(current_translation.word) > 0:
         word_entry.translations.append(current_translation)

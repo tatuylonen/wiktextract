@@ -30,6 +30,11 @@ class TestESTranslation(unittest.TestCase):
         # Test cases from https://es.wiktionary.org/wiki/Plantilla:t+
         test_cases = [
             {
+                # https://es.wiktionary.org/wiki/calderón
+                "input": "{{t+|ar|}}",
+                "expected": [],
+            },
+            {
                 "input": "{{t+|af|1|kat}}",
                 "expected": [
                     {
