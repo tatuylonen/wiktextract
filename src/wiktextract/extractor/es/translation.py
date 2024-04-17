@@ -1,7 +1,8 @@
+import itertools
 from typing import Optional
 
 from mediawiki_langcodes import code_to_name
-from wikitextprocessor import WikiNode
+from wikitextprocessor.parser import TemplateNode
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
@@ -10,11 +11,75 @@ from .models import Translation, WordEntry
 
 
 def extract_translation(
-    wxr: WiktextractContext,
-    word_entry: WordEntry,
-    template_node: WikiNode,
+    wxr: WiktextractContext, word_entry: WordEntry, template_node: TemplateNode
 ):
-    # Documentation: https://es.wiktionary.org/wiki/Plantilla:t+
+    if template_node.template_name == "t":
+        process_t_template(wxr, word_entry, template_node)
+    elif template_node.template_name == "t+":
+        process_t_plus_template(wxr, word_entry, template_node)
+
+
+T_GENDERS = {
+    "m": "masculine",
+    "f": "feminine",
+    "mf": ["masculine", "feminine"],
+    "n": "neuter",
+}
+T_NUMBERS = {
+    "s": "singular",
+    "p": "plural",
+    "d": "dual",
+}
+
+
+def process_t_template(
+    wxr: WiktextractContext, word_entry: WordEntry, template_node: TemplateNode
+) -> None:
+    # https://es.wiktionary.org/wiki/Plantilla:t
+    lang_code = template_node.template_parameters.get(1, "")
+    lang_name = code_to_name(lang_code, "es")
+    for tr_index in itertools.count(1):
+        if "t" + str(tr_index) not in template_node.template_parameters:
+            break
+        tr_data = Translation(lang_code=lang_code, lang=lang_name, word="")
+        for param_prefix, field in (
+            ("t", "word"),
+            ("a", "senseids"),
+            ("tl", "roman"),
+            ("nota", "raw_tags"),
+            ("g", "tags"),
+            ("n", "tags"),
+        ):
+            param = param_prefix + str(tr_index)
+            if param not in template_node.template_parameters:
+                continue
+            value = clean_node(
+                wxr, None, template_node.template_parameters[param]
+            )
+            if param_prefix == "g":
+                value = T_GENDERS.get(value)
+            elif param_prefix == "n":
+                value = T_NUMBERS.get(value)
+            if value is None:
+                continue
+
+            pre_value = getattr(tr_data, field)
+            if isinstance(pre_value, list):
+                if isinstance(value, list):
+                    pre_value.extend(value)
+                else:
+                    pre_value.append(value)
+            else:
+                setattr(tr_data, field, value)
+
+        if len(tr_data.word) > 0:
+            word_entry.translations.append(tr_data)
+
+
+def process_t_plus_template(
+    wxr: WiktextractContext, word_entry: WordEntry, template_node: TemplateNode
+) -> None:
+    # obsolete template: https://es.wiktionary.org/wiki/Plantilla:t+
 
     lang_code = template_node.template_parameters.get(1)  # Language code
     lang = code_to_name(lang_code, "es")

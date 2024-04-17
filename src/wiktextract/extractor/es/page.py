@@ -146,13 +146,13 @@ def parse_section(
             process_etymology_block(wxr, base_data, level_node)
         for nested_level_node in level_node.find_child(LEVEL_KIND_FLAGS):
             parse_section(wxr, page_data, base_data, nested_level_node)
-    elif section_title in TRANSLATIONS_TITLES:
-        if wxr.config.capture_translations:
-            for template_node in level_node.find_child_recursively(
-                NodeKind.TEMPLATE
-            ):
-                if template_node.template_name == "t+" and len(page_data) > 0:
-                    extract_translation(wxr, page_data[-1], template_node)
+    elif (
+        section_title in TRANSLATIONS_TITLES and wxr.config.capture_translations
+    ):
+        if len(page_data) == 0:
+            page_data.append(base_data.model_copy(deep=True))
+        for template_node in level_node.find_child(NodeKind.TEMPLATE):
+            extract_translation(wxr, page_data[-1], template_node)
 
     elif section_title in LINKAGE_TITLES:
         if len(page_data) == 0:
