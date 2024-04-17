@@ -30,6 +30,11 @@ class TestESTranslation(unittest.TestCase):
         # Test cases from https://es.wiktionary.org/wiki/Plantilla:t+
         test_cases = [
             {
+                # https://es.wiktionary.org/wiki/calderón
+                "input": "{{t+|ar|}}",
+                "expected": [],
+            },
+            {
                 "input": "{{t+|af|1|kat}}",
                 "expected": [
                     {
@@ -142,3 +147,62 @@ class TestESTranslation(unittest.TestCase):
                     translations,
                     case["expected"],
                 )
+
+    def test_t_roman(self):
+        self.wxr.wtp.start_page("hola")
+        word_entry = WordEntry(word="hola", lang_code="es", lang="Español")
+        root = self.wxr.wtp.parse(
+            "{{t|zh|a1=1|t1=你好|tl1=nĭ hăo|t2=您好|tl2=nín hăo|nota2=formal}}"
+        )
+        extract_translation(self.wxr, word_entry, root.children[0])
+        self.assertEqual(
+            [
+                t.model_dump(exclude_defaults=True)
+                for t in word_entry.translations
+            ],
+            [
+                {
+                    "lang": "chino",
+                    "lang_code": "zh",
+                    "word": "你好",
+                    "senseids": ["1"],
+                    "roman": "nĭ hăo",
+                },
+                {
+                    "lang": "chino",
+                    "lang_code": "zh",
+                    "word": "您好",
+                    "roman": "nín hăo",
+                    "raw_tags": ["formal"],
+                },
+            ],
+        )
+
+    def test_t_gender(self):
+        self.wxr.wtp.start_page("hola")
+        word_entry = WordEntry(word="hola", lang_code="es", lang="Español")
+        root = self.wxr.wtp.parse(
+            "{{t|th|a1=1|t1=สวัสดีครับ|g1=m|t2=สวัสดีค่ะ|g2=f}}"
+        )
+        extract_translation(self.wxr, word_entry, root.children[0])
+        self.assertEqual(
+            [
+                t.model_dump(exclude_defaults=True)
+                for t in word_entry.translations
+            ],
+            [
+                {
+                    "lang": "tailandés",
+                    "lang_code": "th",
+                    "word": "สวัสดีครับ",
+                    "senseids": ["1"],
+                    "tags": ["masculine"],
+                },
+                {
+                    "lang": "tailandés",
+                    "lang_code": "th",
+                    "word": "สวัสดีค่ะ",
+                    "tags": ["feminine"],
+                },
+            ],
+        )

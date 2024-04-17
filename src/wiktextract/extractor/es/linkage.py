@@ -51,7 +51,10 @@ def process_linkage_template(
     for key, value_raw in template_node.template_parameters.items():
         value = clean_node(wxr, None, value_raw)
         if isinstance(key, int):
-            getattr(word_entry, linkage_type).append(Linkage(word=value))
+            linkage_data = Linkage(word=value)
+            if len(word_entry.senses) > 0:
+                linkage_data.senseid = word_entry.senses[-1].get("senseid")
+            getattr(word_entry, linkage_type).append(linkage_data)
         elif isinstance(key, str):
             if key.startswith("nota"):
                 idx = int(key[4:]) - 1 if len(key) > 4 else 0
@@ -79,4 +82,7 @@ def process_linkage_list_children(
         if isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
             word = clean_node(wxr, None, node)
             if len(word) > 0:
-                getattr(word_entry, linkage_type).append(Linkage(word=word))
+                linkage_data = Linkage(word=word)
+                if len(word_entry.senses) > 0:
+                    linkage_data.senseid = word_entry.senses[-1].get("senseid")
+                getattr(word_entry, linkage_type).append(linkage_data)

@@ -31,7 +31,8 @@ def extract_gloss(
                 definition.append(node)
 
         gloss = clean_node(wxr, gloss_data, definition)
-        gloss_data.glosses.append(gloss)
+        if len(gloss) > 0:
+            gloss_data.glosses.append(gloss)
 
         gloss_note = clean_node(wxr, gloss_data, list_item.children)
         match = re.match(r"^(\d+)", gloss_note)
@@ -58,11 +59,7 @@ def extract_gloss(
         if len(other) > 0:
             for node in other:
                 if isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
-                    process_sense_data_list(
-                        wxr,
-                        page_data[-1].senses[-1],
-                        node,
-                    )
+                    process_sense_data_list(wxr, page_data[-1], node)
                 else:
                     wxr.wtp.debug(
                         f"Found nodes that are not part of definition: {node}",

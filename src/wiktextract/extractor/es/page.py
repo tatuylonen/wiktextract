@@ -146,13 +146,13 @@ def parse_section(
             process_etymology_block(wxr, base_data, level_node)
         for nested_level_node in level_node.find_child(LEVEL_KIND_FLAGS):
             parse_section(wxr, page_data, base_data, nested_level_node)
-    elif section_title in TRANSLATIONS_TITLES:
-        if wxr.config.capture_translations:
-            for template_node in level_node.find_child_recursively(
-                NodeKind.TEMPLATE
-            ):
-                if template_node.template_name == "t+" and len(page_data) > 0:
-                    extract_translation(wxr, page_data[-1], template_node)
+    elif (
+        section_title in TRANSLATIONS_TITLES and wxr.config.capture_translations
+    ):
+        if len(page_data) == 0:
+            page_data.append(base_data.model_copy(deep=True))
+        for template_node in level_node.find_child(NodeKind.TEMPLATE):
+            extract_translation(wxr, page_data[-1], template_node)
 
     elif section_title in LINKAGE_TITLES:
         if len(page_data) == 0:
@@ -262,9 +262,7 @@ def process_sense_children(
             if template_name == "clear":
                 return
             elif template_name.removesuffix("s") in LINKAGE_TITLES:
-                process_linkage_template(
-                    wxr, page_data[-1].senses[-1], group[0]
-                )
+                process_linkage_template(wxr, page_data[-1], group[0])
             elif template_name == "ejemplo":
                 extract_example(wxr, page_data[-1].senses[-1], group)
             elif template_name == "uso":
@@ -282,7 +280,7 @@ def process_sense_children(
             list_node = group[0]
             # List groups seem to not be followed by string nodes.
             # We, therefore, only process the list_node.
-            process_sense_data_list(wxr, page_data[-1].senses[-1], list_node)
+            process_sense_data_list(wxr, page_data[-1], list_node)
 
         elif (
             isinstance(child, WikiNode)

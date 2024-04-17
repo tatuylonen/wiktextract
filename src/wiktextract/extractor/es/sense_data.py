@@ -4,15 +4,13 @@ from wiktextract.wxr_context import WiktextractContext
 
 from .example import process_example_list
 from .linkage import process_linkage_list_children
-from .models import Sense
+from .models import WordEntry
 from .section_titles import LINKAGE_TITLES
 
 
 def process_sense_data_list(
-    wxr: WiktextractContext,
-    sense_data: Sense,
-    list_node: WikiNode,
-):
+    wxr: WiktextractContext, word_entry: list[WordEntry], list_node: WikiNode
+) -> None:
     list_marker = list_node.sarg
 
     if list_marker == ":;":
@@ -31,13 +29,10 @@ def process_sense_data_list(
             )
 
             if list_type == "ejemplo":
-                process_example_list(wxr, sense_data, list_item)
+                process_example_list(wxr, word_entry.senses[-1], list_item)
             elif list_type in LINKAGE_TITLES:
                 process_linkage_list_children(
-                    wxr,
-                    sense_data,
-                    children[1:],
-                    LINKAGE_TITLES[list_type],
+                    wxr, word_entry, children[1:], LINKAGE_TITLES[list_type]
                 )
             elif list_type == "ámbito":
                 # XXX: Extract scope tag
@@ -54,7 +49,7 @@ def process_sense_data_list(
     elif list_marker in ["::", ":::"]:
         # E.g. https://es.wiktionary.org/wiki/silepsis
         for list_item in list_node.find_child_recursively(NodeKind.LIST_ITEM):
-            process_example_list(wxr, sense_data, list_item)
+            process_example_list(wxr, word_entry.senses[-1], list_item)
 
     else:
         wxr.wtp.debug(
