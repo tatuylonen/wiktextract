@@ -383,7 +383,7 @@ def parse_translation_item_text(wxr, word, data, item, sense, pos_datas,
             lang = sublang
         elif sublang[0].isupper() and classify_desc(sublang) == "tags":
             # Interpret it as a tag
-            tags.append(sublang)
+            tags.append(sublang.lower().replace(" ", "-"))
         else:
             # We don't recognize this prefix
             wxr.wtp.error("unrecognized prefix (language name?) in "

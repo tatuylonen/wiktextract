@@ -2730,6 +2730,8 @@ uppercase_tags = set([
     "Palladius",
     "PFS",
     "Hanyu Pinyin",
+    "Han",
+    "Hanzi",
 ])
 
 
