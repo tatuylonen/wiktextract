@@ -53,7 +53,7 @@ def process_linkage_template(
         if isinstance(key, int):
             linkage_data = Linkage(word=value)
             if len(word_entry.senses) > 0:
-                linkage_data.senseid = word_entry.senses[-1].get("senseid")
+                linkage_data.senseid = word_entry.senses[-1].senseid
             getattr(word_entry, linkage_type).append(linkage_data)
         elif isinstance(key, str):
             if key.startswith("nota"):
@@ -84,5 +84,5 @@ def process_linkage_list_children(
             if len(word) > 0:
                 linkage_data = Linkage(word=word)
                 if len(word_entry.senses) > 0:
-                    linkage_data.senseid = word_entry.senses[-1].get("senseid")
+                    linkage_data.senseid = word_entry.senses[-1].senseid
                 getattr(word_entry, linkage_type).append(linkage_data)

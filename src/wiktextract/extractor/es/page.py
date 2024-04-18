@@ -14,7 +14,7 @@ from .etymology import process_etymology_block
 from .example import extract_example
 from .gloss import extract_gloss, process_ambito_template, process_uso_template
 from .linkage import extract_linkage, process_linkage_template
-from .models import WordEntry
+from .models import Sense, WordEntry
 from .pronunciation import process_audio_template, process_pron_graf_template
 from .section_titles import (
     ETYMOLOGY_TITLES,
@@ -139,6 +139,7 @@ def parse_section(
         page_data.append(base_data.model_copy(deep=True))
         page_data[-1].pos = pos_type
         page_data[-1].pos_title = section_title
+        page_data[-1].tags.extend(pos_data.get("tags", []))
         process_pos_block(wxr, page_data, level_node)
 
     elif section_title in ETYMOLOGY_TITLES:
@@ -343,4 +344,7 @@ def parse_page(
                 base_data.categories.extend(categories["categories"])
                 parse_entries(wxr, page_data, base_data, level2_node)
 
+    for data in page_data:
+        if len(data.senses) == 0:
+            data.senses.append(Sense(tags=["no-gloss"]))
     return [d.model_dump(exclude_defaults=True) for d in page_data]
