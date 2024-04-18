@@ -14,7 +14,7 @@ from .etymology import process_etymology_block
 from .example import extract_example
 from .gloss import extract_gloss, process_ambito_template, process_uso_template
 from .linkage import extract_linkage, process_linkage_template
-from .models import WordEntry
+from .models import Sense, WordEntry
 from .pronunciation import process_audio_template, process_pron_graf_template
 from .section_titles import (
     ETYMOLOGY_TITLES,
@@ -343,4 +343,7 @@ def parse_page(
                 base_data.categories.extend(categories["categories"])
                 parse_entries(wxr, page_data, base_data, level2_node)
 
+    for data in page_data:
+        if len(data.senses) == 0:
+            data.senses.append(Sense(tags=["no-gloss"]))
     return [d.model_dump(exclude_defaults=True) for d in page_data]
