@@ -3864,9 +3864,9 @@ def parse_page(
     # Remove <noinclude> and similar tags from main pages.  They
     # should not appear there, but at least net/Elfdala has one and it
     # is probably not the only one.
-    text = re.sub(r"(?si)<\s*(/\s*)?noinclude\s*>", "", text)
-    text = re.sub(r"(?si)<\s*(/\s*)?onlyinclude\s*>", "", text)
-    text = re.sub(r"(?si)<\s*(/\s*)?includeonly\s*>", "", text)
+    text = re.sub(r"(?si)<(/)?noinclude\s*>", "", text)
+    text = re.sub(r"(?si)<(/)?onlyinclude\s*>", "", text)
+    text = re.sub(r"(?si)<(/)?includeonly\s*>", "", text)
 
     # Fix up the subtitle hierarchy.  There are hundreds if not thousands of
     # pages that have, for example, Translations section under Linkage, or
