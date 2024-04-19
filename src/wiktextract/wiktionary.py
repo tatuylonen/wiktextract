@@ -246,15 +246,17 @@ def check_str_fields(
         if v is None:
             if mandatory:
                 check_error(wxr, dt, word, lang, pos,
-                            "{!r} should be a non-empty string (it is a "
+                            "{!r} should be a{} string (it is a "
                             "mandatory field): {}"
                             .format(field,
+                                    (" non-empty", "")[empty_ok],
                                     json.dumps(item, sort_keys=True)))
             continue
         if not isinstance(v, str):
             check_error(wxr, dt, word, lang, pos,
-                        "{!r} should be a non-empty string: {}"
+                        "{!r} should be a{} string: {}"
                         .format(field,
+                                (" non-empty", "")[empty_ok],
                                 json.dumps(item, sort_keys=True)))
         if not v and not empty_ok:
             check_error(wxr, dt, word, lang, pos,
@@ -480,7 +482,9 @@ def check_json_data(
             check_str_fields(wxr, dt, word, lang, pos, item, ["name"],
                              mandatory=True)
             check_str_fields(wxr, dt, word, lang, pos, item, ["expansion"],
-                             mandatory=False)
+                             # empty_ok=True because there are some templates
+                             # that generate empty expansions.
+                             mandatory=False, empty_ok=True)
             args = item.get("args")
             if args is None:
                 continue
