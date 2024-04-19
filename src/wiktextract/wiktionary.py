@@ -161,15 +161,10 @@ def init_worker_process(worker_func, wxr: WiktextractContext) -> None:
 
 
 def check_error(
-        wxr: WiktextractContext,
-        dt: dict,
-        word: str,
-        lang: str,
-        pos: str,
-        msg: str
+    wxr: WiktextractContext, dt: dict, word: str, lang: str, pos: str, msg: str
 ) -> None:
     """Formats and outputs an error message about data format checks."""
-    msg += ": " + json.dumps(dt, sort_keys=True)
+    msg += ": " + json.dumps(dt, sort_keys=True, ensure_ascii=False)
     prefix = word or ""
     if lang:
         prefix += "/" + lang
@@ -181,38 +176,54 @@ def check_error(
     config = wxr.config
     if len(config.debugs) > 100000:  # Avoid excessive size
         return
-    dt = { "msg": msg,
-           "trace": "",
-           "title": word,
-           "section": lang,
-           "subsection": pos,
-           "called_from": "XYZunsorted",
-           "path": [] }
+    dt = {
+        "msg": msg,
+        "trace": "",
+        "title": word,
+        "section": lang,
+        "subsection": pos,
+        "called_from": "XYZunsorted",
+        "path": [],
+    }
     config.debugs.append(dt)
 
 
 def check_tags(
-        wxr: WiktextractContext,
-        dt: dict,
-        word: str,
-        lang: str,
-        pos: str,
-        item: dict
+    wxr: WiktextractContext,
+    dt: dict,
+    word: str,
+    lang: str,
+    pos: str,
+    item: dict,
 ) -> None:
     assert isinstance(item, dict)
     tags = item.get("tags")
     if tags is None:
         return
     if not isinstance(tags, (list, tuple)):
-        check_error(wxr, dt, word, lang, pos,
-                    "\"tags\" field value must be a list of strings: {}"
-                    .format(repr(tags)))
+        check_error(
+            wxr,
+            dt,
+            word,
+            lang,
+            pos,
+            '"tags" field value must be a list of strings: {}'.format(
+                repr(tags)
+            ),
+        )
         return
     for tag in tags:
         if not isinstance(tag, str):
-            check_error(wxr, dt, word, lang, pos,
-                        "\"tags\" field should only contain strings: {}"
-                        .format(repr(tag)))
+            check_error(
+                wxr,
+                dt,
+                word,
+                lang,
+                pos,
+                '"tags" field should only contain strings: {}'.format(
+                    repr(tag)
+                ),
+            )
             continue
         # XXX enable the following later (currently too many bogus tags in
         # non-English editions).  Tag values should be standardized across
@@ -221,22 +232,27 @@ def check_tags(
             from .tags import valid_tags
 
             if tag not in valid_tags:
-                check_error(wxr, dt, word, lang, pos,
-                            "invalid tag {} not in valid_tags (or "
-                            "uppercase_tags)"
-                            .format(repr(tag)))
+                check_error(
+                    wxr,
+                    dt,
+                    word,
+                    lang,
+                    pos,
+                    "invalid tag {} not in valid_tags (or "
+                    "uppercase_tags)".format(repr(tag)),
+                )
 
 
 def check_str_fields(
-        wxr: WiktextractContext,
-        dt: dict,
-        word: str,
-        lang: str,
-        pos: str,
-        item: dict,
-        fields: list[str],
-        mandatory: bool = False,
-        empty_ok: bool = False
+    wxr: WiktextractContext,
+    dt: dict,
+    word: str,
+    lang: str,
+    pos: str,
+    item: dict,
+    fields: list[str],
+    mandatory: bool = False,
+    empty_ok: bool = False,
 ) -> None:
     """Checks that each of the listed fields contains a non-empty string.
     Non-existent fields are ok unless ``mandatory`` is True."""
@@ -245,34 +261,54 @@ def check_str_fields(
         v = item.get(field)
         if v is None:
             if mandatory:
-                check_error(wxr, dt, word, lang, pos,
-                            "{!r} should be a{} string (it is a "
-                            "mandatory field): {}"
-                            .format(field,
-                                    (" non-empty", "")[empty_ok],
-                                    json.dumps(item, sort_keys=True)))
+                check_error(
+                    wxr,
+                    dt,
+                    word,
+                    lang,
+                    pos,
+                    "{!r} should be a{} string (it is a "
+                    "mandatory field): {}".format(
+                        field,
+                        "" if empty_ok else " non-empty",
+                        json.dumps(item, sort_keys=True),
+                    ),
+                )
             continue
         if not isinstance(v, str):
-            check_error(wxr, dt, word, lang, pos,
-                        "{!r} should be a{} string: {}"
-                        .format(field,
-                                (" non-empty", "")[empty_ok],
-                                json.dumps(item, sort_keys=True)))
+            check_error(
+                wxr,
+                dt,
+                word,
+                lang,
+                pos,
+                "{!r} should be a{} string: {}".format(
+                    field,
+                    "" if empty_ok else " non-empty",
+                    json.dumps(item, sort_keys=True),
+                ),
+            )
         if not v and not empty_ok:
-            check_error(wxr, dt, word, lang, pos,
-                        "{!r} should contain a non-empty string: {}"
-                        .format(field, json.dumps(item, sort_keys=True)))
-
+            check_error(
+                wxr,
+                dt,
+                word,
+                lang,
+                pos,
+                "{!r} should contain a non-empty string: {}".format(
+                    field, json.dumps(item, sort_keys=True)
+                ),
+            )
 
 
 def check_dict_list_fields(
-        wxr: WiktextractContext,
-        dt: dict,
-        word: str,
-        lang: str,
-        pos: str,
-        item: dict,
-        fields: list[str]
+    wxr: WiktextractContext,
+    dt: dict,
+    word: str,
+    lang: str,
+    pos: str,
+    item: dict,
+    fields: list[str],
 ) -> bool:
     """Checks that each listed field, if present, is a list of dicts."""
     assert isinstance(item, dict)
@@ -281,29 +317,41 @@ def check_dict_list_fields(
         if lst is None:
             continue
         if not isinstance(lst, (list, tuple)):
-            check_error(wxr, dt, word, lang, pos,
-                        "{!r} should be a list of dicts: {}"
-                        .format(field,
-                                json.dumps(lst, sort_keys=True)))
+            check_error(
+                wxr,
+                dt,
+                word,
+                lang,
+                pos,
+                "{!r} should be a list of dicts: {}".format(
+                    field, json.dumps(lst, sort_keys=True)
+                ),
+            )
             return False
         for x in lst:
             if not isinstance(x, dict):
-                check_error(wxr, dt, word, lang, pos,
-                            "{!r} should be a list of dicts: {}"
-                            .format(field,
-                                    json.dumps(lst, sort_keys=True)))
+                check_error(
+                    wxr,
+                    dt,
+                    word,
+                    lang,
+                    pos,
+                    "{!r} should be a list of dicts: {}".format(
+                        field, json.dumps(lst, sort_keys=True)
+                    ),
+                )
                 return False
     return True
 
 
 def check_str_list_fields(
-        wxr: WiktextractContext,
-        dt: dict,
-        word: str,
-        lang: str,
-        pos: str,
-        item: dict,
-        fields: list[str]
+    wxr: WiktextractContext,
+    dt: dict,
+    word: str,
+    lang: str,
+    pos: str,
+    item: dict,
+    fields: list[str],
 ) -> None:
     """Checks that each of the listed fields contains a list of non-empty
     strings or is not present."""
@@ -313,23 +361,33 @@ def check_str_list_fields(
         if lst is None:
             continue
         if not isinstance(lst, (list, tuple)):
-            check_error(wxr, dt, word, lang, pos,
-                        "{!r} should be a list of dicts: {}"
-                        .format(field, json.dumps(item, sort_keys=True)))
+            check_error(
+                wxr,
+                dt,
+                word,
+                lang,
+                pos,
+                "{!r} should be a list of dicts: {}".format(
+                    field, json.dumps(item, sort_keys=True)
+                ),
+            )
             continue
         for x in lst:
             if not isinstance(x, str) or not x:
-                check_error(wxr, dt, word, lang, pos,
-                            "{!r} should be a list of non-empty strings: {}"
-                            .format(field,
-                                    json.dumps(item, sort_keys=True)))
+                check_error(
+                    wxr,
+                    dt,
+                    word,
+                    lang,
+                    pos,
+                    "{!r} should be a list of non-empty strings: {}".format(
+                        field, json.dumps(item, sort_keys=True)
+                    ),
+                )
                 break
 
 
-def check_json_data(
-        wxr: WiktextractContext,
-        dt: dict
-) -> None:
+def check_json_data(wxr: WiktextractContext, dt: dict) -> None:
     """Performs some basic checks on the generated data."""
     word = dt.get("word", dt.get("title"))
     if word is None:
@@ -346,35 +404,50 @@ def check_json_data(
         return  # redirect pages don't have following fields
     lang = dt.get("lang")
     if not lang:
-        check_error(wxr, dt, word, None, None,
-                    "missing \"lang\" field in data")
+        check_error(wxr, dt, word, None, None, 'missing "lang" field in data')
         return
     pos = dt.get("pos")
     if not pos:
-        check_error(wxr, dt, word, lang, pos,
-                    "missing \"pos\" field in data")
+        check_error(wxr, dt, word, lang, pos, 'missing "pos" field in data')
         return
     if not dt.get("lang_code"):
-        check_error(wxr, dt, word, lang, pos,
-                    "missing \"lang_code\" field in data")
+        check_error(
+            wxr, dt, word, lang, pos, 'missing "lang_code" field in data'
+        )
     check_tags(wxr, dt, word, lang, pos, dt)
-    check_str_fields(wxr, dt, word, lang, pos, dt,
-                     ["etymology_text"])
+    check_str_fields(wxr, dt, word, lang, pos, dt, ["etymology_text"])
     num = dt.get("etymology_number")
     if num is not None and not isinstance(num, int):
-        check_error(wxr, dt, word, lang, pos,
-                    "\"etymology_number\" must be an int")
+        check_error(
+            wxr, dt, word, lang, pos, '"etymology_number" must be an int'
+        )
     # Check that certain fields, if present, contain lists of dicts
-    if not check_dict_list_fields(wxr, dt, word, lang, pos, dt,
-                                  ["forms", "senses",
-                                   "synonyms", "antonyms", "hypernyms",
-                                   "holonyms", "meronyms",
-                                   "coordinate_terms", "derived",
-                                   "related",
-                                   "sounds", "translations",
-                                   "descendants", "etymology_templates",
-                                   "head_templates",
-                                   "inflection_templates"]):
+    if not check_dict_list_fields(
+        wxr,
+        dt,
+        word,
+        lang,
+        pos,
+        dt,
+        [
+            "forms",
+            "senses",
+            "synonyms",
+            "antonyms",
+            "hypernyms",
+            "holonyms",
+            "meronyms",
+            "coordinate_terms",
+            "derived",
+            "related",
+            "sounds",
+            "translations",
+            "descendants",
+            "etymology_templates",
+            "head_templates",
+            "inflection_templates",
+        ],
+    ):
         return  # Avoid further processing because it would cause type errors
     # Check the "forms" field
     forms = dt.get("forms") or []
@@ -382,124 +455,240 @@ def check_json_data(
         check_tags(wxr, dt, word, lang, pos, form)
         tags = dt.get("tags")
         if not isinstance(tags, (list, tuple)) or "table-tags" not in tags:
-            check_str_fields(wxr, dt, word, lang, pos, form, ["form"],
-                             mandatory=True)
-    check_str_list_fields(wxr, dt, word, lang, pos, dt,
-                          ["categories", "topics", "wikidata",
-                           "wikipedia"])
+            check_str_fields(
+                wxr, dt, word, lang, pos, form, ["form"], mandatory=True
+            )
+    check_str_list_fields(
+        wxr,
+        dt,
+        word,
+        lang,
+        pos,
+        dt,
+        ["categories", "topics", "wikidata", "wikipedia"],
+    )
     # Check the "senses" field
     senses = dt.get("senses") or []
     if not senses:
-        check_error(wxr, dt, word, lang, pos,
-                    "missing \"senses\" in data (must have at least one "
-                    "sense, add empty sense with \"no-gloss\" tag if none "
-                    "otherwise available)")
+        check_error(
+            wxr,
+            dt,
+            word,
+            lang,
+            pos,
+            'missing "senses" in data (must have at least one '
+            'sense, add empty sense with "no-gloss" tag if none '
+            "otherwise available)",
+        )
         return
     for sense in senses:
-        check_str_list_fields(wxr, dt, word, lang, pos, sense,
-                              ["glosses", "raw_glosses"])
+        check_str_list_fields(
+            wxr, dt, word, lang, pos, sense, ["glosses", "raw_glosses"]
+        )
         # Extra check: should have no-gloss tag if no glosses
         for field in ("glosses", "raw_glosses"):
             glosses = sense.get(field) or []
-            if (not glosses and
-                isinstance(sense.get("tags"), str) and
-                "no-gloss" not in sense.get("tags", "").split()):
-                check_error(wxr, dt, word, lang, pos,
-                            "{!r} should have at least one gloss or "
-                            "\"no-gloss\" in \"tags\""
-                            .format(field))
+            if (
+                not glosses
+                and isinstance(sense.get("tags"), str)
+                and "no-gloss" not in sense.get("tags", "").split()
+            ):
+                check_error(
+                    wxr,
+                    dt,
+                    word,
+                    lang,
+                    pos,
+                    "{!r} should have at least one gloss or "
+                    '"no-gloss" in "tags"'.format(field),
+                )
                 continue
         check_tags(wxr, dt, word, lang, pos, sense)
-        check_str_list_fields(wxr, dt, word, lang, pos, sense,
-                              ["categories", "topics", "wikidata",
-                               "wikipedia"])
-        check_str_fields(wxr, dt, word, lang, pos, sense,
-                         ["english"])
-        if not check_dict_list_fields(wxr, dt, word, lang, pos, sense,
-                                      ["alt_of", "form_of",
-                                       "synonyms", "antonyms", "hypernyms",
-                                       "holonyms", "meronyms",
-                                       "coordinate_terms", "derived",
-                                       "related"]):
+        check_str_list_fields(
+            wxr,
+            dt,
+            word,
+            lang,
+            pos,
+            sense,
+            ["categories", "topics", "wikidata", "wikipedia"],
+        )
+        check_str_fields(wxr, dt, word, lang, pos, sense, ["english"])
+        if not check_dict_list_fields(
+            wxr,
+            dt,
+            word,
+            lang,
+            pos,
+            sense,
+            [
+                "alt_of",
+                "form_of",
+                "synonyms",
+                "antonyms",
+                "hypernyms",
+                "holonyms",
+                "meronyms",
+                "coordinate_terms",
+                "derived",
+                "related",
+            ],
+        ):
             continue
         for field in ("alt_of", "form_of"):
             lst = sense.get(field)
             if lst is None:
                 continue
             for item in lst:
-                check_str_fields(wxr, dt, word, lang, pos, item,
-                                 ["word"], mandatory=True)
-                check_str_fields(wxr, dt, word, lang, pos, item,
-                                 ["extra"], mandatory=False)
+                check_str_fields(
+                    wxr, dt, word, lang, pos, item, ["word"], mandatory=True
+                )
+                check_str_fields(
+                    wxr, dt, word, lang, pos, item, ["extra"], mandatory=False
+                )
 
-        for field in ("synonyms", "antonyms", "hypernyms", "holonyms",
-                      "meronyms", "coordinate_terms", "derived", "related"):
+        for field in (
+            "synonyms",
+            "antonyms",
+            "hypernyms",
+            "holonyms",
+            "meronyms",
+            "coordinate_terms",
+            "derived",
+            "related",
+        ):
             lst = sense.get(field)
             if lst is None:
                 continue
             for item in lst:
-                check_str_fields(wxr, dt, word, lang, pos, item,
-                                 ["word"], mandatory=True)
+                check_str_fields(
+                    wxr, dt, word, lang, pos, item, ["word"], mandatory=True
+                )
                 check_tags(wxr, dt, word, lang, pos, item)
-                check_str_fields(wxr, dt, word, lang, pos, item,
-                                 ["english", "roman", "sense", "taxonomic"],
-                                 mandatory=False, empty_ok=True)
-                check_str_list_fields(wxr, dt, word, lang, pos, item,
-                                      ["topics"])
+                check_str_fields(
+                    wxr,
+                    dt,
+                    word,
+                    lang,
+                    pos,
+                    item,
+                    ["english", "roman", "sense", "taxonomic"],
+                    mandatory=False,
+                    empty_ok=True,
+                )
+                check_str_list_fields(
+                    wxr, dt, word, lang, pos, item, ["topics"]
+                )
     # Check the "sounds" field
     # We will permit having any number of different types (ipa, enpr, etc)
     # in the same sound entry or in different sound entries.
     sounds = dt.get("sounds") or []
     for item in sounds:
-        check_str_fields(wxr, dt, word, lang, pos, item,
-                         ["ipa", "enpr", "audio", "ogg_url", "mp3_url",
-                          "audio-ipa", "text"])
+        check_str_fields(
+            wxr,
+            dt,
+            word,
+            lang,
+            pos,
+            item,
+            ["ipa", "enpr", "audio", "ogg_url", "mp3_url", "audio-ipa", "text"],
+        )
         check_tags(wxr, dt, word, lang, pos, item)
-        check_str_list_fields(wxr, dt, word, lang, pos, item,
-                              ["homophones", "hyphenation"])
+        check_str_list_fields(
+            wxr, dt, word, lang, pos, item, ["homophones", "hyphenation"]
+        )
     # Check the "translations" field
     translations = dt.get("translations") or []
     for item in translations:
-        check_str_fields(wxr, dt, word, lang, pos, item, ["word"],
-                         mandatory=True)
+        check_str_fields(
+            wxr, dt, word, lang, pos, item, ["word"], mandatory=True
+        )
         check_tags(wxr, dt, word, lang, pos, item)
-        check_str_fields(wxr, dt, word, lang, pos, item,
-                         ["alt", "code", "english", "lang", "note", "roman",
-                          "sense", "taxonomic"])
+        check_str_fields(
+            wxr,
+            dt,
+            word,
+            lang,
+            pos,
+            item,
+            [
+                "alt",
+                "code",
+                "english",
+                "lang",
+                "note",
+                "roman",
+                "sense",
+                "taxonomic",
+            ],
+        )
         if not item.get("code") and not item.get("lang"):
-            check_error(wxr, dt, word, lang, pos,
-                        "\"translations\" items must contain at least one "
-                        "of \"code\" and \"lang\" (normally both): {}"
-                        .format(json.dumps(item, sort_keys=True)))
+            check_error(
+                wxr,
+                dt,
+                word,
+                lang,
+                pos,
+                '"translations" items must contain at least one '
+                'of "code" and "lang" (normally both): {}'.format(
+                    json.dumps(item, sort_keys=True)
+                ),
+            )
     # Check the "etymology_templates", "head_templates", and
     # "inflection_templates" fields
-    for field in ["etymology_templates", "head_templates",
-                  "inflection_templates"]:
+    for field in [
+        "etymology_templates",
+        "head_templates",
+        "inflection_templates",
+    ]:
         lst = dt.get(field)
         if lst is None:
             continue
         for item in lst:
-            check_str_fields(wxr, dt, word, lang, pos, item, ["name"],
-                             mandatory=True)
-            check_str_fields(wxr, dt, word, lang, pos, item, ["expansion"],
-                             # empty_ok=True because there are some templates
-                             # that generate empty expansions.
-                             mandatory=False, empty_ok=True)
+            check_str_fields(
+                wxr, dt, word, lang, pos, item, ["name"], mandatory=True
+            )
+            check_str_fields(
+                wxr,
+                dt,
+                word,
+                lang,
+                pos,
+                item,
+                ["expansion"],
+                # empty_ok=True because there are some templates
+                # that generate empty expansions.
+                mandatory=False,
+                empty_ok=True,
+            )
             args = item.get("args")
             if args is None:
                 continue
             if not isinstance(args, dict):
-                check_error(wxr, dt, word, lang, pos,
-                            "{!r} item \"args\" value must be a dict: {}"
-                            .format(field, json.dumps(args, sort_keys=True)))
+                check_error(
+                    wxr,
+                    dt,
+                    word,
+                    lang,
+                    pos,
+                    '{!r} item "args" value must be a dict: {}'.format(
+                        field, json.dumps(args, sort_keys=True)
+                    ),
+                )
                 continue
             for k, v in args.items():
                 if not isinstance(k, str) or not isinstance(v, str):
-                    check_error(wxr, dt, word, lang, pos,
-                                "{!r} item \"args\" must be a dict with "
-                                "string keys and values: {}"
-                                .format(field,
-                                        json.dumps(args, sort_keys=True)))
+                    check_error(
+                        wxr,
+                        dt,
+                        word,
+                        lang,
+                        pos,
+                        '{!r} item "args" must be a dict with '
+                        "string keys and values: {}".format(
+                            field, json.dumps(args, sort_keys=True)
+                        ),
+                    )
                 continue
     # Check the "descendants" field
     descendants = dt.get("descendants") or []
@@ -507,8 +696,14 @@ def check_json_data(
         check_str_fields(wxr, dt, word, lang, pos, item, ["text"])
         depth = item.get("depth")
         if depth is not None and not isinstance(depth, int):
-            check_error(wxr, dt, word, lang, pos,
-                        "\"descentants\" field \"depth\" must be an int")
+            check_error(
+                wxr,
+                dt,
+                word,
+                lang,
+                pos,
+                '"descentants" field "depth" must be an int',
+            )
         check_dict_list_fields(wxr, dt, word, lang, pos, item, ["templates"])
         # XXX should check that they are valid templates, perhaps turn
         # template checking code above into a function

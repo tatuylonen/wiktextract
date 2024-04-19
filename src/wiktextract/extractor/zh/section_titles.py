@@ -127,6 +127,7 @@ POS_TITLES: POSSubtitleData = {
     "歇后语": {"pos": "proverb", "tags": ["xiehouyu"]},
     "歇後語": {"pos": "proverb", "tags": ["xiehouyu"]},
     "汉语拼音": {"pos": "romanization"},
+    "漢語拼音": {"pos": "romanization"},
     "注音符號": {"pos": "character"},
     "漢字": {"pos": "character", "tags": ["han"]},
     "汉字": {"pos": "character", "tags": ["han"]},
