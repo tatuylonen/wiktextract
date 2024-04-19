@@ -169,7 +169,7 @@ def check_error(
         msg: str
 ) -> None:
     """Formats and outputs an error message about data format checks."""
-    msg += ": " + json.dumps(dt, sort_keys=True)
+    msg += ": " + json.dumps(dt, sort_keys=True, ensure_ascii=False)
     prefix = word or ""
     if lang:
         prefix += "/" + lang
