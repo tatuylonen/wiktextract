@@ -561,12 +561,6 @@ ignored_etymology_templates_re = re.compile(
 # copy the ignored etymology templates
 ignored_descendants_templates_re = ignored_etymology_templates_re
 
-EXPANSIONLESS_ETYMOLOGY_TEMPLATES = (
-    "root",
-    "PIE word",
-    "ref",
-)
-
 # Set of template names that are used to define usage examples.  If the usage
 # example contains one of these templates, then it its type is set to
 # "example"
@@ -3063,19 +3057,9 @@ def parse_language(
             if ignore_count == 0:
                 ht = clean_template_args(wxr, ht)
                 expansion = clean_node(wxr, None, expansion)
-                if not expansion and name in EXPANSIONLESS_ETYMOLOGY_TEMPLATES:
-                    templates.append(
-                        {
-                            "name": name,
-                            "args": ht,
-                            "expansion": f"[Template:{name}]",
-                        }
-                    )
-
-                else:
-                    templates.append(
-                        {"name": name, "args": ht, "expansion": expansion}
-                    )
+                templates.append(
+                    {"name": name, "args": ht, "expansion": expansion}
+                )
             return None
 
         # Remove any subsections
