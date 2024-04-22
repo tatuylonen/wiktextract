@@ -238,10 +238,12 @@ class TestGloss(TestCase):
             page_data[0].model_dump(exclude_defaults=True)["senses"],
             [
                 {
+                    "form_of": [{"word": "denial of service"}],
                     "glosses": [
                         "denial of service (“拒絕服務”)之首字母縮略詞。"
                     ],
                     "topics": ["computing", "internet"],
+                    "tags": ["form-of"],
                 }
             ],
         )
@@ -264,6 +266,27 @@ class TestGloss(TestCase):
                 {
                     "glosses": ["鲜亮的，鲜艳的"],
                     "raw_tags": ["比喻义", "指颜色"],
+                },
+            ],
+        )
+
+    def test_form_of_template(self):
+        self.wxr.wtp.start_page("bella")
+        self.wxr.wtp.add_page(
+            "Template:adj form of",
+            10,
+            """<small></small><span class='form-of-definition-link'><i class="Latn mention" lang="es">[[bello#西班牙語|-{bello}-]]</i></span><span class='form-of-definition use-with-mention'> 的[[Appendix:Glossary#gender|陰性]][[Appendix:Glossary#singular_number|單數]]</span>""",
+        )
+        root = self.wxr.wtp.parse("# {{adj form of|es|bello||f|s}}")
+        page_data = [WordEntry(word="", lang_code="", lang="", pos="")]
+        extract_gloss(self.wxr, page_data, root.children[0], Sense())
+        self.assertEqual(
+            page_data[0].model_dump(exclude_defaults=True)["senses"],
+            [
+                {
+                    "form_of": [{"word": "bello"}],
+                    "glosses": ["bello 的陰性單數"],
+                    "tags": ["form-of"],
                 },
             ],
         )
