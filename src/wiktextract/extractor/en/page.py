@@ -3864,9 +3864,9 @@ def parse_page(
     # Remove <noinclude> and similar tags from main pages.  They
     # should not appear there, but at least net/Elfdala has one and it
     # is probably not the only one.
-    text = re.sub(r"(?si)<\s*(/\s*)?noinclude\s*>", "", text)
-    text = re.sub(r"(?si)<\s*(/\s*)?onlyinclude\s*>", "", text)
-    text = re.sub(r"(?si)<\s*(/\s*)?includeonly\s*>", "", text)
+    text = re.sub(r"(?si)<(/)?noinclude\s*>", "", text)
+    text = re.sub(r"(?si)<(/)?onlyinclude\s*>", "", text)
+    text = re.sub(r"(?si)<(/)?includeonly\s*>", "", text)
 
     # Fix up the subtitle hierarchy.  There are hundreds if not thousands of
     # pages that have, for example, Translations section under Linkage, or
@@ -4007,7 +4007,39 @@ def parse_page(
                     sortid="20231101/3582page.py",
                 )
             x["original_title"] = word
+        # validate tag data
+        recursively_separate_raw_tags(wxr, x)
     return ret
+
+
+def recursively_separate_raw_tags(wxr: WiktextractContext, data: dict) -> None:
+    if not isinstance(data, dict):
+        wxr.wtp.error(
+            "'data' is not dict; most probably "
+            "data has a list that contains at least one dict and "
+            "at least one non-dict item",
+            sortid="en/page-4016/20240419",
+        )
+        return
+    new_tags = []
+    raw_tags = data.get("raw_tags", [])
+    for field, val in data.items():
+        if field == "tags":
+            for tag in val:
+                if tag not in valid_tags:
+                    raw_tags.append(tag)
+                else:
+                    new_tags.append(tag)
+        if isinstance(val, list):
+            if len(val) > 0 and isinstance(val[0], dict):
+                for d in val:
+                    recursively_separate_raw_tags(wxr, d)
+    if "tags" in data and not new_tags:
+        del data["tags"]
+    elif new_tags:
+        data["tags"] = new_tags
+    if raw_tags:
+        data["raw_tags"] = raw_tags
 
 
 def process_soft_redirect_template(

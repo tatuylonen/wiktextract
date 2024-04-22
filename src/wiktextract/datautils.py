@@ -4,7 +4,6 @@
 import re
 from collections import defaultdict
 from typing import Any, Iterable, Optional
-from wiktextract.tags import valid_tags
 
 # Keys in ``data`` that can only have string values (a list of them)
 STR_KEYS = frozenset({"tags", "glosses"})
@@ -23,8 +22,9 @@ DICT_KEYS = frozenset(
 )
 
 
-def data_append1(data: Any, key: str, value: Any) -> None:
-    """Helper function for data_append."""
+def data_append(data: Any, key: str, value: Any) -> None:
+    """Appends ``value`` under ``key`` in the dictionary ``data``.  The key
+    is created if it does not exist."""
     assert isinstance(key, str)
 
     if key in STR_KEYS:
@@ -39,22 +39,6 @@ def data_append1(data: Any, key: str, value: Any) -> None:
         setattr(data, key, list_value)
     elif isinstance(data, dict):
         data[key] = list_value
-
-
-def data_append(data: Any, key: str, value: Any) -> None:
-    """Appends ``value`` under ``key`` in the dictionary ``data``.  The key
-    is created if it does not exist. Check validity of value data as tags
-    if ``key`` is `tags`, if not append it to raw_tags instead."""
-    if key == "tags":
-        if value == "":
-            return
-        if value.removeprefix("?") not in valid_tags:
-            data_append1(data, "raw_tags", value)
-        else:
-            data_append1(data, "tags", value)
-
-    else:
-        data_append1(data, key, value)
 
 
 def data_extend(data: Any, key: str, values: Iterable) -> None:
