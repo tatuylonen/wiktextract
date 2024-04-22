@@ -31,6 +31,10 @@ class Example(ChineseBaseModel):
     )
 
 
+class AltForm(ChineseBaseModel):
+    word: str
+
+
 class Sense(ChineseBaseModel):
     glosses: list[str] = []
     tags: list[str] = []
@@ -41,6 +45,8 @@ class Sense(ChineseBaseModel):
     ruby: list[tuple[str, ...]] = Field(
         [], description="Japanese Kanji and furigana"
     )
+    alt_of: list[AltForm] = []
+    form_of: list[AltForm] = []
 
 
 class Form(ChineseBaseModel):
