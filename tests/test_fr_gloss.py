@@ -597,3 +597,34 @@ class TestFrGloss(TestCase):
                 },
             ],
         )
+
+    def test_mutation_de(self):
+        self.wxr.wtp.start_page("hwythnos")
+        self.wxr.wtp.add_page("Modèle:langue", 10, "Gallois")
+        self.wxr.wtp.add_page("Modèle:S", 10, "Forme de nom commun")
+        self.wxr.wtp.add_page(
+            "Modèle:mutation de",
+            10,
+            """''Forme mutée de ''<bdi lang="cy" xml:lang="cy" class="lang-cy">[[wythnos#cy|wythnos]]</bdi>'' par [[Annexe:Mutations en gallois|ajout d’une prothèse h]]''""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "hwythnos",
+            """== {{langue|cy}} ==
+
+=== {{S|nom|cy|flexion}} ===
+'''hwythnos'''
+# {{mutation de|wythnos|h|cy}}.
+""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"],
+            [
+                {
+                    "form_of": [{"word": "wythnos"}],
+                    "glosses": [
+                        "Forme mutée de wythnos par ajout d’une prothèse h."
+                    ],
+                },
+            ],
+        )
