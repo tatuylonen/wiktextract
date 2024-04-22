@@ -275,9 +275,9 @@ def process_low_quality_page(
             process_soft_redirect_template(wxr, template_node, page_data)
     else:
         # only have a gloss text
-        page_data[-1].senses.append(
-            Sense(glosses=[clean_node(wxr, page_data[-1], level_node.children)])
-        )
+        gloss_text = clean_node(wxr, page_data[-1], level_node.children)
+        if len(gloss_text) > 0:
+            page_data[-1].senses.append(Sense(glosses=[gloss_text]))
 
 
 def process_soft_redirect_template(
