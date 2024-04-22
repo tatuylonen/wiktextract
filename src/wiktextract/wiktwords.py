@@ -398,6 +398,7 @@ def main():
         lang_code=args.dump_file_language_code,
         template_override_funcs=template_override_fns,
         extension_tags=conf.allowed_html_tags,
+        quiet=args.quiet,
     )
     wxr = WiktextractContext(wtp, conf)
 
