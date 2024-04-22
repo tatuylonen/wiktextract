@@ -218,9 +218,16 @@ def find_form_of_word(
     gloss_nodes: list[Union[str, WikiNode]],
     gloss_data: Sense,
 ) -> None:
+    # https://fr.wiktionary.org/wiki/Catégorie:Modèles_de_variantes
     form_of = ""
     for node in gloss_nodes:
         if isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
             form_of = clean_node(wxr, None, node)
+        elif isinstance(node, TemplateNode):
+            if node.template_name == "mutation de":
+                # https://fr.wiktionary.org/wiki/Modèle:mutation_de
+                form_of = clean_node(
+                    wxr, None, node.template_parameters.get(1, "")
+                )
     if len(form_of) > 0:
         gloss_data.form_of.append(AltForm(word=form_of))
