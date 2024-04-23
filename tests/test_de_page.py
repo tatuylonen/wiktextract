@@ -119,7 +119,7 @@ class TestDEPage(unittest.TestCase):
             ),
             [
                 {
-                    "lang_code": "",
+                    "lang_code": "unknown",
                     "lang": "Umschrift",
                     "pos": "soft-redirect",
                     "redirects": ["行く", "幾", "𒃷"],
