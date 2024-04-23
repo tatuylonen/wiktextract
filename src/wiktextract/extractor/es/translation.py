@@ -1,7 +1,6 @@
 import itertools
 from typing import Optional
 
-from mediawiki_langcodes import code_to_name
 from wikitextprocessor.parser import TemplateNode
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
@@ -37,7 +36,9 @@ def process_t_template(
 ) -> None:
     # https://es.wiktionary.org/wiki/Plantilla:t
     lang_code = template_node.template_parameters.get(1, "")
-    lang_name = code_to_name(lang_code, "es")
+    template_text = clean_node(wxr, word_entry, template_node)
+    lang_name = template_text[:template_text.find(":")].strip("* ")
+
     for tr_index in itertools.count(1):
         if "t" + str(tr_index) not in template_node.template_parameters:
             break
@@ -81,10 +82,9 @@ def process_t_plus_template(
 ) -> None:
     # obsolete template: https://es.wiktionary.org/wiki/Plantilla:t+
 
-    lang_code = template_node.template_parameters.get(1)  # Language code
-    lang = code_to_name(lang_code, "es")
-    if not lang:
-        lang = f"Unknown({lang_code})"
+    lang_code = template_node.template_parameters.get(1)
+    template_text = clean_node(wxr, word_entry, template_node)
+    lang_name = template_text[:template_text.find(":")].strip("* ")
 
     # Initialize variables
     current_translation: Optional[Translation] = None
@@ -154,7 +154,7 @@ def process_t_plus_template(
                     current_translation = Translation(
                         word=value,
                         lang_code=lang_code,
-                        lang=lang,
+                        lang=lang_name,
                         senseids=list(senseids),
                     )
         elif isinstance(key, str):

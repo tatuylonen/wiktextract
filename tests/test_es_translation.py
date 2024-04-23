@@ -28,6 +28,17 @@ class TestESTranslation(unittest.TestCase):
 
     def test_es_extract_translation(self):
         # Test cases from https://es.wiktionary.org/wiki/Plantilla:t+
+        self.wxr.wtp.add_page(
+            "Plantilla:t+",
+            10,
+            """* {{#switch:{{{1}}}
+| af = afrikáans
+| de = alemán
+| fr = francés
+| hy = armenio
+}}: {{{3}}}"""
+        )
+
         test_cases = [
             {
                 # https://es.wiktionary.org/wiki/calderón
@@ -150,6 +161,11 @@ class TestESTranslation(unittest.TestCase):
 
     def test_t_roman(self):
         self.wxr.wtp.start_page("hola")
+        self.wxr.wtp.add_page(
+            "Plantilla:t",
+            10,
+            "* Chino: &#91;1&#93;&nbsp;[[你好#Chino|你好]] <sup>[[:zh:你好|(zh)]]</sup> “nĭ hăo”[[Categoría:Español-Chino]], [[您好#Chino|您好]] <sup>[[:zh:您好|(zh)]]</sup> “nín hăo”&nbsp;(formal)"
+        )
         word_entry = WordEntry(word="hola", lang_code="es", lang="Español")
         root = self.wxr.wtp.parse(
             "{{t|zh|a1=1|t1=你好|tl1=nĭ hăo|t2=您好|tl2=nín hăo|nota2=formal}}"
@@ -162,14 +178,14 @@ class TestESTranslation(unittest.TestCase):
             ],
             [
                 {
-                    "lang": "chino",
+                    "lang": "Chino",
                     "lang_code": "zh",
                     "word": "你好",
                     "senseids": ["1"],
                     "roman": "nĭ hăo",
                 },
                 {
-                    "lang": "chino",
+                    "lang": "Chino",
                     "lang_code": "zh",
                     "word": "您好",
                     "roman": "nín hăo",
@@ -180,6 +196,11 @@ class TestESTranslation(unittest.TestCase):
 
     def test_t_gender(self):
         self.wxr.wtp.start_page("hola")
+        self.wxr.wtp.add_page(
+            "Plantilla:t",
+            10,
+            "* Tailandés: &#91;1&#93;&nbsp;[[สวัสดีครับ#Tailandés|สวัสดีครับ]] <sup>[[:th:สวัสดีครับ|(th)]]</sup>&nbsp;(''masculino'')[[Categoría:Español-Tailandés]], [[สวัสดีค่ะ#Tailandés|สวัสดีค่ะ]] <sup>[[:th:สวัสดีค่ะ|(th)]]</sup>&nbsp;(''femenino'')"
+        )
         word_entry = WordEntry(word="hola", lang_code="es", lang="Español")
         root = self.wxr.wtp.parse(
             "{{t|th|a1=1|t1=สวัสดีครับ|g1=m|t2=สวัสดีค่ะ|g2=f}}"
@@ -192,14 +213,14 @@ class TestESTranslation(unittest.TestCase):
             ],
             [
                 {
-                    "lang": "tailandés",
+                    "lang": "Tailandés",
                     "lang_code": "th",
                     "word": "สวัสดีครับ",
                     "senseids": ["1"],
                     "tags": ["masculine"],
                 },
                 {
-                    "lang": "tailandés",
+                    "lang": "Tailandés",
                     "lang_code": "th",
                     "word": "สวัสดีค่ะ",
                     "tags": ["feminine"],

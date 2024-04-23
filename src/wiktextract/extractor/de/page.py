@@ -184,11 +184,13 @@ def parse_page(
             if subtitle_template.template_name == "Sprache":
                 lang_name = subtitle_template.template_parameters.get(1, "")
                 lang_code = name_to_code(lang_name, "de")
-                if lang_code == "" and lang_name != "Umschrift":
-                    wxr.wtp.warning(
-                        f"Unknown language: {lang_name}",
-                        sortid="extractor/de/page/parse_page/76",
-                    )
+                if lang_code == "":
+                    lang_code = "unknown"
+                    if lang_name != "Umschrift":
+                        wxr.wtp.warning(
+                            f"Unknown language: {lang_name}",
+                            sortid="extractor/de/page/parse_page/76",
+                        )
                 if (
                     wxr.config.capture_language_codes is not None
                     and lang_code not in wxr.config.capture_language_codes
