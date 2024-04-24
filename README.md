@@ -1,12 +1,13 @@
 # Wiktextract
 
-This is a utility and Python package for for extracing data from Wiktionary.
+This is a utility and Python package for extracting data from Wiktionary.
 
-*2022-06-20: Version 1.99.7 is now on pypi and available for installation using
-  pip (Python3).  Think of it as a beta version for 2.0.0.  There is
-  also a new version of wikitextprocessor.*
+*2024-04-24: Kaikki.org raw download files with newline-separated json
+  object data will be changed at some point in the future to use the
+  suffix `.jsonl` for clarity. This will break download links, so please
+  be aware. For more about `.jsonl`, please see https://jsonlines.org/*
 
-Please report issues on github and I'll try to address them reasonably
+Please report issues on github and we'll try to address them reasonably
 soon.
 
 The current extracted version is available for browsing and download
