@@ -83,7 +83,7 @@ def extract_headword_forms(
 ) -> None:
     current_nodes = []
     for node in form_nodes:
-        if isinstance(node, str) and node.startswith("，"):
+        if isinstance(node, str) and node.startswith(("，", ",")):
             process_forms_text(wxr, page_data, current_nodes)
             current_nodes = [node[1:]]
         else:
@@ -164,8 +164,8 @@ def process_forms_text(
 
 def extract_headword_tags(tags_str: str) -> list[str]:
     tags = []
-    for tag_str in (
-        s.strip() for s in re.split("&|或|和", tags_str) if len(s.strip()) > 0
+    for tag_str in filter(
+        None, (s.strip() for s in re.split("&|或|和", tags_str))
     ):
         tags.append(tag_str)
     return tags
