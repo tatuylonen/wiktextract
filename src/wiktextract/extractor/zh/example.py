@@ -6,17 +6,30 @@ from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
 from ..ruby import extract_ruby
-from .models import Example, Sense
+from .linkage import process_linkage_templates_in_gloss
+from .models import Example, Sense, WordEntry
+
+LINKAGE_TEMPLATES = {
+    "syn": "synonyms",
+    "synonyms": "synonyms",
+    "ant": "antonyms",
+    "antonyms": "antonyms",
+    "hyper": "hypernyms",
+    "hypernyms": "hypernyms",
+    "hypo": "hyponyms",
+    "hyponyms": "hyponyms",
+}
 
 
 def extract_examples(
     wxr: WiktextractContext,
     sense_data: Sense,
     node: Union[WikiNode, list[WikiNode]],
+    page_data: list[WordEntry],
 ) -> None:
     if isinstance(node, list):
         for n in node:
-            extract_examples(wxr, sense_data, n)
+            extract_examples(wxr, sense_data, n, page_data)
     elif isinstance(node, WikiNode):
         if node.kind == NodeKind.LIST_ITEM:
             example_data = Example()
@@ -38,13 +51,23 @@ def extract_examples(
                         extract_template_ux(wxr, child, example_data)
                     elif template_name == "uxi":
                         extract_template_uxi(wxr, child, example_data)
+                    elif template_name in LINKAGE_TEMPLATES:
+                        process_linkage_templates_in_gloss(
+                            wxr,
+                            page_data,
+                            child,
+                            LINKAGE_TEMPLATES[template_name],
+                            sense_data.glosses[0]
+                            if len(sense_data.glosses) > 0
+                            else "",
+                        )
                     else:
                         example_data.texts = [clean_node(wxr, None, child)]
 
             if len(example_data.texts) > 0:
                 sense_data.examples.append(example_data)
         else:
-            extract_examples(wxr, sense_data, node.children)
+            extract_examples(wxr, sense_data, node.children, page_data)
 
 
 def extract_example_list(
