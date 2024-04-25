@@ -290,3 +290,94 @@ class TestGloss(TestCase):
                 },
             ],
         )
+
+    def test_form_of_templates(self):
+        self.wxr.wtp.start_page("linda")
+        self.wxr.wtp.add_page(
+            "Template:inflection of",
+            10,
+            """{{#switch:{{{5}}}
+| acc = {{{2}}} 的不定賓格單數
+| dat = {{{2}}} 的不定與格單數
+}}""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "linda",
+            """==冰島語==
+===名詞===
+
+# {{inflection of|is|[[lindi]]||不定|acc|s}}
+# {{inflection of|is|[[lindi]]||不定|dat|s}}""",
+        )
+        self.assertEqual(
+            page_data,
+            [
+                {
+                    "lang": "冰島語",
+                    "lang_code": "is",
+                    "pos": "noun",
+                    "senses": [
+                        {
+                            "form_of": [{"word": "lindi"}],
+                            "glosses": ["lindi 的不定賓格單數"],
+                            "tags": ["form-of"],
+                        },
+                        {
+                            "form_of": [{"word": "lindi"}],
+                            "glosses": ["lindi 的不定與格單數"],
+                            "tags": ["form-of"],
+                        },
+                    ],
+                    "word": "linda",
+                }
+            ],
+        )
+
+    def test_pt_verb_form_of(self):
+        self.wxr.wtp.start_page("linda")
+        self.wxr.wtp.add_page(
+            "Template:pt-verb form of",
+            10,
+            """<small></small><span class='form-of-definition-link'><i class="Latn mention" lang="pt">[[lindar#葡萄牙語|-{lindar}-]]</i></span><span class='form-of-definition use-with-mention'> 的屈折变化形式：</span>
+## <span class='form-of-definition use-with-mention'>[[Appendix:Glossary#third_person|第三人稱]][[Appendix:Glossary#singular_number|單數]][[Appendix:Glossary#present_tense|現在時]][[Appendix:Glossary#indicative_mood|直陳式]]</span>
+## <span class='form-of-definition use-with-mention'>[[Appendix:Glossary#second_person|第二人稱]][[Appendix:Glossary#singular_number|單數]][[Appendix:Glossary#imperative_mood|命令式]]</span>""",
+        )
+        root = self.wxr.wtp.parse("# {{pt-verb form of|lindar}}")
+        page_data = [WordEntry(word="", lang_code="", lang="", pos="")]
+        extract_gloss(self.wxr, page_data, root.children[0], Sense())
+        self.assertEqual(
+            page_data[0].model_dump(exclude_defaults=True)["senses"],
+            [
+                {
+                    "form_of": [{"word": "lindar"}],
+                    "glosses": [
+                        "lindar 的屈折变化形式：",
+                        "第三人稱單數現在時直陳式",
+                    ],
+                    "tags": ["form-of"],
+                },
+                {
+                    "form_of": [{"word": "lindar"}],
+                    "glosses": [
+                        "lindar 的屈折变化形式：",
+                        "第二人稱單數命令式",
+                    ],
+                    "tags": ["form-of"],
+                },
+            ],
+        )
+
+    def test_linkage_under_in_gloss_list(self):
+        self.wxr.wtp.start_page("linda")
+        self.wxr.wtp.add_page("Template:pt-verb form of", 10, "{{{2}}}")
+        root = self.wxr.wtp.parse("# [[可愛]]的\n#: {{syn|eo|ĉarmeta}}")
+        page_data = [WordEntry(word="", lang_code="", lang="", pos="")]
+        extract_gloss(self.wxr, page_data, root.children[0], Sense())
+        self.assertEqual(
+            [
+                s.model_dump(exclude_defaults=True)
+                for s in page_data[0].synonyms
+            ],
+            [{"word": "ĉarmeta", "sense": "可愛的"}],
+        )
