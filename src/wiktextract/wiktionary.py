@@ -182,7 +182,7 @@ def check_error(
         "title": word,
         "section": lang,
         "subsection": pos,
-        "called_from": "XYZunsorted",
+        "called_from": "wiktionary/179/20240425",
         "path": [],
     }
     config.debugs.append(dt)
