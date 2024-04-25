@@ -16,12 +16,13 @@ def extract_gloss(
     wxr: WiktextractContext,
     page_data: list[WordEntry],
     list_node: WikiNode,
-    gloss_data: Sense,
+    parent_gloss_data: Sense,
 ) -> None:
     lang_code = page_data[-1].lang_code
     for list_item_node in list_node.find_child(NodeKind.LIST_ITEM):
         gloss_nodes = []
         raw_tags = []
+        gloss_data = parent_gloss_data.model_copy(deep=True)
         for node in list_item_node.children:
             if isinstance(node, TemplateNode):
                 raw_tag = clean_node(wxr, None, node)
@@ -49,25 +50,25 @@ def extract_gloss(
         else:
             ruby_data = []
             gloss_text = clean_node(wxr, gloss_data, gloss_nodes)
-        new_gloss_data = gloss_data.model_copy(deep=True)
-        new_gloss_data.raw_tags.extend(raw_tags)
+
+        gloss_data.raw_tags.extend(raw_tags)
         if len(gloss_text) > 0:
-            new_gloss_data.glosses.append(gloss_text)
+            gloss_data.glosses.append(gloss_text)
         if len(ruby_data) > 0:
-            new_gloss_data.ruby = ruby_data
+            gloss_data.ruby = ruby_data
 
         has_nested_gloss = False
         if list_item_node.contain_node(NodeKind.LIST):
             for child_node in list_item_node.find_child(NodeKind.LIST):
                 if child_node.sarg.endswith("#"):  # nested gloss
                     has_nested_gloss = True
-                    extract_gloss(wxr, page_data, child_node, new_gloss_data)
+                    extract_gloss(wxr, page_data, child_node, gloss_data)
                 else:  # example list
-                    extract_examples(wxr, new_gloss_data, child_node)
+                    extract_examples(wxr, gloss_data, child_node)
 
-        if not has_nested_gloss and len(new_gloss_data.glosses) > 0:
-            translate_raw_tags(new_gloss_data)
-            page_data[-1].senses.append(new_gloss_data)
+        if not has_nested_gloss and len(gloss_data.glosses) > 0:
+            translate_raw_tags(gloss_data)
+            page_data[-1].senses.append(gloss_data)
 
 
 def process_form_of_template(

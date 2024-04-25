@@ -290,3 +290,46 @@ class TestGloss(TestCase):
                 },
             ],
         )
+
+    def test_form_of_templates(self):
+        self.wxr.wtp.start_page("linda")
+        self.wxr.wtp.add_page(
+            "Template:inflection of",
+            10,
+            """{{#switch:{{{5}}}
+| acc = {{{2}}} 的不定賓格單數
+| dat = {{{2}}} 的不定與格單數
+}}""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "linda",
+            """==冰島語==
+===名詞===
+
+# {{inflection of|is|[[lindi]]||不定|acc|s}}
+# {{inflection of|is|[[lindi]]||不定|dat|s}}""",
+        )
+        self.assertEqual(
+            page_data,
+            [
+                {
+                    "lang": "冰島語",
+                    "lang_code": "is",
+                    "pos": "noun",
+                    "senses": [
+                        {
+                            "form_of": [{"word": "lindi"}],
+                            "glosses": ["lindi 的不定賓格單數"],
+                            "tags": ["form-of"],
+                        },
+                        {
+                            "form_of": [{"word": "lindi"}],
+                            "glosses": ["lindi 的不定與格單數"],
+                            "tags": ["form-of"],
+                        },
+                    ],
+                    "word": "linda",
+                }
+            ],
+        )
