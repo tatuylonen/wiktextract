@@ -367,3 +367,17 @@ class TestGloss(TestCase):
                 },
             ],
         )
+
+    def test_linkage_under_in_gloss_list(self):
+        self.wxr.wtp.start_page("linda")
+        self.wxr.wtp.add_page("Template:pt-verb form of", 10, "{{{2}}}")
+        root = self.wxr.wtp.parse("# [[可愛]]的\n#: {{syn|eo|ĉarmeta}}")
+        page_data = [WordEntry(word="", lang_code="", lang="", pos="")]
+        extract_gloss(self.wxr, page_data, root.children[0], Sense())
+        self.assertEqual(
+            [
+                s.model_dump(exclude_defaults=True)
+                for s in page_data[0].synonyms
+            ],
+            [{"word": "ĉarmeta", "sense": "可愛的"}],
+        )

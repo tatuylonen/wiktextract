@@ -29,7 +29,7 @@ class TestExample(TestCase):
         """
         self.wxr.wtp.start_page("test")
         node = self.wxr.wtp.parse(wikitext)
-        extract_examples(self.wxr, sense_data, node)
+        extract_examples(self.wxr, sense_data, node, [])
         self.assertEqual(
             sense_data.examples[0].model_dump(exclude_defaults=True),
             {
@@ -49,7 +49,7 @@ translation text""",
         wikitext = "#* {{RQ:Schuster Hepaticae}}"
         self.wxr.wtp.start_page("test")
         node = self.wxr.wtp.parse(wikitext)
-        extract_examples(self.wxr, sense_data, node)
+        extract_examples(self.wxr, sense_data, node, [])
         self.assertEqual(
             sense_data.examples[0].model_dump(exclude_defaults=True),
             {

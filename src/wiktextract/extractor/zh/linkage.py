@@ -1,3 +1,4 @@
+import itertools
 from typing import Optional, Union
 
 from wikitextprocessor import NodeKind, WikiNode
@@ -269,3 +270,25 @@ def process_ja_r_template(
     if len(linkage_data.word) > 0:
         pre_data = getattr(page_data[-1], linkage_type)
         pre_data.append(linkage_data)
+
+
+def process_linkage_templates_in_gloss(
+    wxr: WiktextractContext,
+    page_data: list[WordEntry],
+    template_node: TemplateNode,
+    linkage_type: str,
+    sense: str,
+) -> None:
+    for word_index in itertools.count(2):
+        if word_index not in template_node.template_parameters:
+            break
+        word = clean_node(
+            wxr, None, template_node.template_parameters[word_index]
+        )
+        if len(word) == 0:
+            continue
+        if word.startswith(wxr.wtp.NAMESPACE_DATA["Thesaurus"]["name"] + ":"):
+            continue
+        linkage = Linkage(word=word, sense=sense)
+        pre_data = getattr(page_data[-1], linkage_type)
+        pre_data.append(linkage)

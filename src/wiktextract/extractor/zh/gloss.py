@@ -69,7 +69,7 @@ def extract_gloss(
                     has_nested_gloss = True
                     extract_gloss(wxr, page_data, child_node, gloss_data)
                 else:  # example list
-                    extract_examples(wxr, gloss_data, child_node)
+                    extract_examples(wxr, gloss_data, child_node, page_data)
 
         if not has_nested_gloss and len(gloss_data.glosses) > 0:
             translate_raw_tags(gloss_data)
@@ -85,11 +85,13 @@ def process_form_of_template(
     # Return `True` if template expands to list
     form_of_text = ""
     is_alt_of = template_node.template_name.startswith("alt")
-    for param_key, param_value in template_node.template_parameters.items():
-        if param_key in (1, 2, 3, "alt"):
-            param_value = clean_node(wxr, None, param_value)
-            if len(param_value) > 0:
-                form_of_text = param_value
+    for param_key in (1, 2, 3, "alt"):
+        param_value = clean_node(
+            wxr, None, template_node.template_parameters.get(param_key, "")
+        )
+        if len(param_value) > 0:
+            form_of_text = param_value
+
     for form_of_word in form_of_text.split(","):
         form_of_word = form_of_word.strip()
         if len(form_of_word) > 0:
