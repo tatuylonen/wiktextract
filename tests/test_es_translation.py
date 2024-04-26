@@ -36,7 +36,7 @@ class TestESTranslation(unittest.TestCase):
 | de = alemán
 | fr = francés
 | hy = armenio
-}}: {{{3}}}"""
+}}: {{{3}}}""",
         )
 
         test_cases = [
@@ -164,7 +164,7 @@ class TestESTranslation(unittest.TestCase):
         self.wxr.wtp.add_page(
             "Plantilla:t",
             10,
-            "* Chino: &#91;1&#93;&nbsp;[[你好#Chino|你好]] <sup>[[:zh:你好|(zh)]]</sup> “nĭ hăo”[[Categoría:Español-Chino]], [[您好#Chino|您好]] <sup>[[:zh:您好|(zh)]]</sup> “nín hăo”&nbsp;(formal)"
+            "* Chino: &#91;1&#93;&nbsp;[[你好#Chino|你好]] <sup>[[:zh:你好|(zh)]]</sup> “nĭ hăo”[[Categoría:Español-Chino]], [[您好#Chino|您好]] <sup>[[:zh:您好|(zh)]]</sup> “nín hăo”&nbsp;(formal)",
         )
         word_entry = WordEntry(word="hola", lang_code="es", lang="Español")
         root = self.wxr.wtp.parse(
@@ -199,7 +199,7 @@ class TestESTranslation(unittest.TestCase):
         self.wxr.wtp.add_page(
             "Plantilla:t",
             10,
-            "* Tailandés: &#91;1&#93;&nbsp;[[สวัสดีครับ#Tailandés|สวัสดีครับ]] <sup>[[:th:สวัสดีครับ|(th)]]</sup>&nbsp;(''masculino'')[[Categoría:Español-Tailandés]], [[สวัสดีค่ะ#Tailandés|สวัสดีค่ะ]] <sup>[[:th:สวัสดีค่ะ|(th)]]</sup>&nbsp;(''femenino'')"
+            "* Tailandés: &#91;1&#93;&nbsp;[[สวัสดีครับ#Tailandés|สวัสดีครับ]] <sup>[[:th:สวัสดีครับ|(th)]]</sup>&nbsp;(''masculino'')[[Categoría:Español-Tailandés]], [[สวัสดีค่ะ#Tailandés|สวัสดีค่ะ]] <sup>[[:th:สวัสดีค่ะ|(th)]]</sup>&nbsp;(''femenino'')",
         )
         word_entry = WordEntry(word="hola", lang_code="es", lang="Español")
         root = self.wxr.wtp.parse(

@@ -260,12 +260,15 @@ def process_ja_r_template(
     )
     linkage_data = Linkage(sense=sense)
     for span_node in expanded_node.find_html("span"):
+        span_class = span_node.attrs.get("class", "")
         if "lang" in span_node.attrs:
             ruby_data, no_ruby_nodes = extract_ruby(wxr, span_node)
             linkage_data.word = clean_node(wxr, None, no_ruby_nodes)
             linkage_data.ruby = ruby_data
-        elif "tr" in span_node.attrs.get("class", ""):
+        elif "tr" in span_class:
             linkage_data.roman = clean_node(wxr, None, span_node)
+        elif "mention-gloss" == span_class:
+            linkage_data.sense = clean_node(wxr, None, span_node)
 
     if len(linkage_data.word) > 0:
         pre_data = getattr(page_data[-1], linkage_type)
