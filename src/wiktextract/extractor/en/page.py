@@ -567,6 +567,11 @@ ignored_descendants_templates_re = ignored_etymology_templates_re
 usex_templates: set[str] = {
     "afex",
     "affixusex",
+    "co", # {{collocation}} acts like a example template, specifically for
+          # pairs of combinations of words that are more common than you'd
+          # except would be randomly; hlavní#Czech
+    "coi",
+    "collocation",
     "el-example",
     "el-x",
     "example",

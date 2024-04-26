@@ -1879,7 +1879,7 @@ additional_words = set(
 
 # These words will never be treated as English words (overriding other
 # considerations, not just membership in the set)
-not_english_words = set(
+not_english_words_1 = set(
     [
         # This is a blacklist - these will not be treated as English words
         # even though they are in brown.words().  Adding a word on this list
@@ -1889,13 +1889,11 @@ not_english_words = set(
         "Frans",
         "Germani",
         "Germania",
-        "He",
         "J'habitais",
         "Kina",
         "Mal",
         "Mi",
         "Mihapjungguk",
-        "Ye",
         "al",
         "avec",
         "boo",
@@ -1910,6 +1908,15 @@ not_english_words = set(
         "que",
     ]
 )
+
+potentially_english_words = set(
+    [
+        "He",
+        "Ye",
+    ]
+)
+
+not_english_words = not_english_words_1 | potentially_english_words
 
 # Construct a set of (most) English words.  Multi-word expressions where we
 # do not want to include the components can also be put here space-separated.
