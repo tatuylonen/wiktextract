@@ -339,7 +339,10 @@ def parse_page(
                 lang_name = clean_node(wxr, categories, subtitle_template)
                 wxr.wtp.start_section(lang_name)
                 base_data = WordEntry(
-                    lang=lang_name, lang_code=lang_code, word=wxr.wtp.title
+                    lang=lang_name,
+                    lang_code=lang_code,
+                    word=wxr.wtp.title,
+                    pos="unknown",
                 )
                 base_data.categories.extend(categories["categories"])
                 parse_entries(wxr, page_data, base_data, level2_node)

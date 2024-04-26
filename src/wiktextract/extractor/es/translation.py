@@ -37,7 +37,7 @@ def process_t_template(
     # https://es.wiktionary.org/wiki/Plantilla:t
     lang_code = template_node.template_parameters.get(1, "")
     template_text = clean_node(wxr, word_entry, template_node)
-    lang_name = template_text[:template_text.find(":")].strip("* ")
+    lang_name = template_text[: template_text.find(":")].strip("* ")
 
     for tr_index in itertools.count(1):
         if "t" + str(tr_index) not in template_node.template_parameters:
@@ -84,7 +84,7 @@ def process_t_plus_template(
 
     lang_code = template_node.template_parameters.get(1)
     template_text = clean_node(wxr, word_entry, template_node)
-    lang_name = template_text[:template_text.find(":")].strip("* ")
+    lang_name = template_text[: template_text.find(":")].strip("* ")
 
     # Initialize variables
     current_translation: Optional[Translation] = None
