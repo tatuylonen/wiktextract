@@ -1,5 +1,7 @@
+import itertools
+
 from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import HTMLNode, TemplateNode
+from wikitextprocessor.parser import LEVEL_KIND_FLAGS, HTMLNode, TemplateNode
 from wiktextract.extractor.share import create_audio_url_dict
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
@@ -7,16 +9,46 @@ from wiktextract.wxr_context import WiktextractContext
 from .models import Sound, WordEntry
 
 
+def extract_pronunciation(
+    wxr: WiktextractContext,
+    page_data: list[WordEntry],
+    base_data: WordEntry,
+    level_node: WikiNode,
+) -> None:
+    from .page import parse_section
+
+    # process POS section first
+    for next_level_node in level_node.find_child(LEVEL_KIND_FLAGS):
+        parse_section(wxr, page_data, base_data, next_level_node)
+    for template_node in level_node.find_child(NodeKind.TEMPLATE):
+        process_pron_template(wxr, page_data, template_node)
+    for list_item_node in level_node.find_child_recursively(NodeKind.LIST_ITEM):
+        process_pron_item_list_item(wxr, page_data, list_item_node)
+
+
+def process_pron_item_list_item(
+    wxr: WiktextractContext,
+    page_data: list[WordEntry],
+    list_item_node: WikiNode,
+) -> None:
+    for node in list_item_node.children:
+        if isinstance(node, TemplateNode):
+            process_pron_template(wxr, page_data, node)
+
+
 def process_pron_template(
     wxr: WiktextractContext,
     page_data: list[WordEntry],
     template_node: TemplateNode,
 ):
-    if template_node.template_name == "zh-pron":
-        process_zh_pron(wxr, page_data, template_node)
+    template_name = template_node.template_name
+    if template_name == "zh-pron":
+        process_zh_pron_template(wxr, page_data, template_node)
+    elif template_name == "homophones":
+        process_homophones_template(wxr, page_data, template_node)
 
 
-def process_zh_pron(
+def process_zh_pron_template(
     wxr: WiktextractContext,
     page_data: list[WordEntry],
     template_node: TemplateNode,
@@ -81,9 +113,45 @@ def process_zh_pron_list_item(
                                 zh_pron=zh_pron, raw_tags=current_tags
                             )
                         page_data[-1].sounds.append(sound)
+                elif (
+                    node.tag == "table"
+                    and len(current_tags) > 0
+                    and current_tags[-1] == "同音詞"
+                ):
+                    process_homophones_table(wxr, page_data, node, current_tags)
+
             elif node.kind == NodeKind.LIST:
                 seen_lists.add(node)
                 for next_list_item in node.find_child(NodeKind.LIST_ITEM):
                     process_zh_pron_list_item(
                         wxr, page_data, next_list_item, current_tags, seen_lists
                     )
+
+
+def process_homophones_template(
+    wxr: WiktextractContext,
+    page_data: list[WordEntry],
+    template_node: TemplateNode,
+):
+    # https://zh.wiktionary.org/wiki/Template:homophones
+    for word_index in itertools.count(2):
+        if word_index not in template_node.template_parameters:
+            break
+        homophone = clean_node(
+            wxr, None, template_node.template_parameters.get(word_index, "")
+        )
+        if len(homophone) > 0:
+            page_data[-1].sounds.append(Sound(homophone=homophone))
+
+
+def process_homophones_table(
+    wxr: WiktextractContext,
+    page_data: list[WordEntry],
+    table_node: HTMLNode,
+    raw_tags: list[str],
+) -> None:
+    for span_node in table_node.find_html_recursively("span", attr_name="lang"):
+        sound_data = Sound(
+            homophone=clean_node(wxr, None, span_node), raw_tags=raw_tags
+        )
+        page_data[-1].sounds.append(sound_data)

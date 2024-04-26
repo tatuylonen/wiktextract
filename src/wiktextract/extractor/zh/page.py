@@ -15,7 +15,7 @@ from .inflection import extract_inflections
 from .linkage import extract_linkages
 from .models import Sense, WordEntry
 from .note import extract_note
-from .pronunciation import process_pron_template
+from .pronunciation import extract_pronunciation
 from .section_titles import (
     DESCENDANTS_TITLES,
     ETYMOLOGY_TITLES,
@@ -180,19 +180,6 @@ def extract_etymology(
         append_base_data(page_data, "etymology_text", etymology, base_data)
     if level_node_index != -1:
         parse_section(wxr, page_data, base_data, nodes[level_node_index:])
-
-
-def extract_pronunciation(
-    wxr: WiktextractContext,
-    page_data: list[WordEntry],
-    base_data: WordEntry,
-    level_node: WikiNode,
-) -> None:
-    # process POS section first
-    for next_level_node in level_node.find_child(LEVEL_KIND_FLAGS):
-        parse_section(wxr, page_data, base_data, next_level_node)
-    for template_node in level_node.find_child(NodeKind.TEMPLATE):
-        process_pron_template(wxr, page_data, template_node)
 
 
 def parse_page(
