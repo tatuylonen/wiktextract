@@ -15,7 +15,7 @@ from .inflection import extract_inflections
 from .linkage import extract_linkages
 from .models import Sense, WordEntry
 from .note import extract_note
-from .pronunciation import extract_pronunciation_recursively
+from .pronunciation import process_pron_template
 from .section_titles import (
     DESCENDANTS_TITLES,
     ETYMOLOGY_TITLES,
@@ -98,7 +98,7 @@ def parse_section(
             wxr.config.capture_pronunciation
             and subtitle in PRONUNCIATION_TITLES
         ):
-            extract_pronunciation(wxr, page_data, base_data, node.children)
+            extract_pronunciation(wxr, page_data, base_data, node)
         elif wxr.config.capture_linkages and subtitle in LINKAGE_TITLES:
             extract_linkages(
                 wxr,
@@ -186,21 +186,13 @@ def extract_pronunciation(
     wxr: WiktextractContext,
     page_data: list[WordEntry],
     base_data: WordEntry,
-    nodes: list[Union[WikiNode, str]],
+    level_node: WikiNode,
 ) -> None:
-    lang_code = base_data.lang_code
-    for index, node in enumerate(nodes):
-        if isinstance(node, WikiNode):
-            if node.kind in LEVEL_KIND_FLAGS:
-                parse_section(wxr, page_data, base_data, nodes[index:])
-                return
-            elif node.kind == NodeKind.TEMPLATE:
-                node = wxr.wtp.parse(
-                    wxr.wtp.node_to_wikitext(node), expand_all=True
-                )
-        extract_pronunciation_recursively(
-            wxr, page_data, base_data, lang_code, node, []
-        )
+    # process POS section first
+    for next_level_node in level_node.find_child(LEVEL_KIND_FLAGS):
+        parse_section(wxr, page_data, base_data, next_level_node)
+    for template_node in level_node.find_child(NodeKind.TEMPLATE):
+        process_pron_template(wxr, page_data, template_node)
 
 
 def parse_page(
