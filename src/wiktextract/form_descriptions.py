@@ -23,7 +23,11 @@ from nltk import TweetTokenizer
 from wiktextract.wxr_context import WiktextractContext
 
 from .datautils import data_append, data_extend, split_at_comma_semi
-from .english_words import english_words, not_english_words
+from .english_words import (
+    english_words,
+    not_english_words,
+    potentially_english_words,
+)
 from .form_descriptions_known_firsts import known_firsts
 from .tags import (
     alt_of_tags,
@@ -3198,7 +3202,7 @@ def classify_desc(
         tokens = tokenizer.tokenize(desc1)
         if not tokens:
             return "other"
-        lst = list(
+        lst_bool = list(
             x not in not_english_words
             and
             # not x.isdigit() and
@@ -3262,22 +3266,33 @@ def classify_desc(
             )
             for x in tokens
         )
-        cnt = lst.count(True)
+        print(lst_bool)
+        cnt = lst_bool.count(True)
+        rejected_words = tuple(
+            x for i, x in enumerate(tokens) if not lst_bool[i]
+        )
+        print(f"{rejected_words}")
         if (
             any(
-                lst[i] and x[0].isalpha() and len(x) > 1
+                lst_bool[i] and x[0].isalpha() and len(x) > 1
                 for i, x in enumerate(tokens)
             )
             and not desc.startswith("-")
             and not desc.endswith("-")
             and re.search(r"\w+", desc)
             and (
-                cnt == len(lst)
+                cnt == len(lst_bool)
                 or (
-                    any(lst[i] and len(x) > 3 for i, x in enumerate(tokens))
-                    and cnt >= len(lst) - 1
+                    any(
+                        lst_bool[i] and len(x) > 3 for i, x in enumerate(tokens)
+                    )
+                    and cnt >= len(lst_bool) - 1
                 )
-                or cnt / len(lst) >= 0.8
+                or cnt / len(lst_bool) >= 0.8
+                or (
+                    all(x in potentially_english_words for x in rejected_words)
+                    and cnt / len(lst_bool) >= 0.50
+                )
             )
         ):
             return "english"
