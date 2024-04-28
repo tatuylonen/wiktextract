@@ -88,3 +88,29 @@ translation text""",
                 },
             ],
         )
+
+    def test_zh_x_no_ref(self):
+        self.wxr.wtp.start_page("中文")
+        self.wxr.wtp.add_page(
+            "Template:zh-x",
+            10,
+            """<span lang="zh-Hant" class="Hant">-{<!-- --><b>中文</b>[[授課#漢語|授課]]<!-- -->}-</span> / <span lang="zh-Hans" class="Hans">-{<!-- --><b>中文</b>[[授课#漢語|授课]]<!-- -->}-</span>&nbsp; ―&nbsp; <span lang="Latn" style="color:#404D52"><i><b>zhōngwén</b> shòukè</i></span>&nbsp; ―&nbsp; [[Category:有使用例的官話詞]]""",
+        )
+        sense_data = Sense()
+        root = self.wxr.wtp.parse("#* {{zh-x|中文 授課}}")
+        extract_examples(self.wxr, sense_data, root.children[0], [])
+        self.assertEqual(
+            [e.model_dump(exclude_defaults=True) for e in sense_data.examples],
+            [
+                {
+                    "text": "中文授課",
+                    "tags": ["Traditional Chinese"],
+                    "roman": "zhōngwén shòukè",
+                },
+                {
+                    "text": "中文授课",
+                    "tags": ["Simplified Chinese"],
+                    "roman": "zhōngwén shòukè",
+                },
+            ],
+        )

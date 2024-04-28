@@ -29,6 +29,7 @@ class Example(ChineseBaseModel):
     ruby: list[tuple[str, ...]] = Field(
         [], description="Japanese Kanji and furigana"
     )
+    tags: list[str] = []
     raw_tags: list[str] = []
 
 

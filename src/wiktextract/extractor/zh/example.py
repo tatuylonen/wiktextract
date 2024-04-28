@@ -118,13 +118,13 @@ def extract_template_ja_usex(
     expanded_text = clean_node(wxr, None, node_without_ruby)
     for line_num, expanded_line in enumerate(expanded_text.splitlines()):
         if line_num == 0:
-            key = "texts"
+            key = "text"
         elif line_num == 1:
             key = "roman"
         else:
             key = "translation"
-        if key == "texts":
-            example_data.texts.append(expanded_line)
+        if key == "text":
+            example_data.text = expanded_line
         else:
             setattr(example_data, key, expanded_line)
     if len(ruby_data) > 0:
@@ -137,49 +137,58 @@ def extract_template_zh_x(
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(template_node), expand_all=True
     )
-    expanded_text = clean_node(wxr, None, expanded_node)
-    if "―" in expanded_text:
-        example_data = Example()
-        for index, split_text in enumerate(expanded_text.split("―")):
-            if index == 0:
-                for example_text in split_text.split(" / "):
-                    example_data.texts.append(example_text.strip())
-            elif index == 1:
-                example_data.roman = split_text.strip()
-        if len(example_data.text) > 0:
-            sense.examples.append(example_data)
-    else:
-        for dl_tag in expanded_node.find_html("dl"):
-            ref = ""
-            pinyin = ""
-            translation = ""
-            for dd_tag in dl_tag.find_html("dd"):
-                dd_text = clean_node(wxr, None, dd_tag)
-                if dd_text.startswith("來自："):
-                    ref = dd_text.removeprefix("來自：")
-                else:
-                    is_pinyin = False
-                    for span_tag in dd_tag.find_html(
-                        "span", attr_name="class", attr_value="Latn"
-                    ):
-                        pinyin = dd_text
-                        is_pinyin = True
-                    if not is_pinyin:
-                        translation = dd_text
+    has_dl_tag = False
+    for dl_tag in expanded_node.find_html("dl"):
+        has_dl_tag = True
+        ref = ""
+        pinyin = ""
+        translation = ""
+        for dd_tag in dl_tag.find_html("dd"):
+            dd_text = clean_node(wxr, None, dd_tag)
+            if dd_text.startswith("來自："):
+                ref = dd_text.removeprefix("來自：")
+            else:
+                is_pinyin = False
+                for span_tag in dd_tag.find_html(
+                    "span", attr_name="class", attr_value="Latn"
+                ):
+                    pinyin = dd_text
+                    is_pinyin = True
+                if not is_pinyin:
+                    translation = dd_text
 
-            example_text = ""
-            for span_tag in dl_tag.find_html("span"):
-                span_text = clean_node(wxr, None, span_tag)
-                if span_tag.attrs.get("class", "") in ["Hant", "Hans"]:
-                    example_text = span_text
-                elif len(example_text) > 0:
-                    raw_tag = span_text
-                    example_data = Example(
-                        text=example_text,
-                        roman=pinyin,
-                        ref=ref,
-                        translation=translation,
-                        raw_tags=raw_tag.strip("[]").split("，"),
+        example_text = ""
+        for span_tag in dl_tag.find_html("span"):
+            span_text = clean_node(wxr, None, span_tag)
+            if span_tag.attrs.get("class", "") in ["Hant", "Hans"]:
+                example_text = span_text
+            elif len(example_text) > 0:
+                raw_tag = span_text
+                example_data = Example(
+                    text=example_text,
+                    roman=pinyin,
+                    ref=ref,
+                    translation=translation,
+                    raw_tags=raw_tag.strip("[]").split("，"),
+                )
+                sense.examples.append(example_data)
+
+    if not has_dl_tag:
+        pinyin = ""
+        for span_tag in expanded_node.find_html(
+            "span", attr_name="lang", attr_value="Latn"
+        ):
+            pinyin = clean_node(wxr, None, span_tag)
+        for span_tag in expanded_node.find_html("span"):
+            span_lang = span_tag.attrs.get("lang", "")
+            if span_lang in ["zh-Hant", "zh-Hans"]:
+                example_text = clean_node(wxr, None, span_tag)
+                if len(example_text) > 0:
+                    example_data = Example(text=example_text, roman=pinyin)
+                    example_data.tags.append(
+                        "Traditional Chinese"
+                        if span_lang == "zh-Hant"
+                        else "Simplified Chinese"
                     )
                     sense.examples.append(example_data)
 
@@ -195,7 +204,7 @@ def extract_template_ux(
     lines = expanded_text.splitlines()
     for line_num, expanded_line in enumerate(lines):
         if line_num == 0:
-            key = "texts"
+            key = "text"
         elif line_num == 1:
             if line_num == len(lines) - 1:
                 key = "translation"
@@ -203,8 +212,8 @@ def extract_template_ux(
                 key = "roman"
         else:
             key = "translation"
-        if key == "texts":
-            example_data.texts.append(expanded_line)
+        if key == "text":
+            example_data.text = expanded_line
         else:
             setattr(example_data, key, expanded_line)
 
@@ -222,7 +231,7 @@ def extract_template_uxi_text(
     parts = expanded_text.split(" ― ")
     for index, part in enumerate(parts):
         if index == 0:
-            key = "texts"
+            key = "text"
         elif index == 1:
             if index == len(parts) - 1:
                 key = "translation"
@@ -230,7 +239,7 @@ def extract_template_uxi_text(
                 key = "roman"
         else:
             key = "translation"
-        if key == "texts":
-            example_data.texts.append(part)
+        if key == "text":
+            example_data.text = part
         else:
             setattr(example_data, key, part)
