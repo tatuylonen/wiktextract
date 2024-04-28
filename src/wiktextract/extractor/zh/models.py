@@ -13,8 +13,8 @@ class ChineseBaseModel(BaseModel):
 
 
 class Example(ChineseBaseModel):
-    texts: list[str] = Field(
-        [],
+    text: str = Field(
+        "",
         description="Example usage sentences, some might have have both "
         "Simplified and Traditional Chinese forms",
     )
@@ -29,6 +29,7 @@ class Example(ChineseBaseModel):
     ruby: list[tuple[str, ...]] = Field(
         [], description="Japanese Kanji and furigana"
     )
+    raw_tags: list[str] = []
 
 
 class AltForm(ChineseBaseModel):
