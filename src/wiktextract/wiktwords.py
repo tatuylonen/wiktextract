@@ -38,6 +38,7 @@ from .thesaurus import (
     thesaurus_linkage_number,
 )
 from .wiktionary import (
+    check_json_data,
     extract_namespace,
     parse_page,
     parse_wiktionary,
@@ -84,6 +85,7 @@ def process_single_page(
     # Parse the page
     ret = parse_page(wxr, title, text)
     for data in ret:
+        check_json_data(wxr, data)
         write_json_data(data, out_f, human_readable)
 
 
