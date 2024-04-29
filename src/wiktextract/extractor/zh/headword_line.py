@@ -2,10 +2,10 @@ import re
 from typing import Union
 
 from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import TemplateNode
-from wiktextract.page import clean_node
-from wiktextract.wxr_context import WiktextractContext
+from wikitextprocessor.parser import HTMLNode, TemplateNode
 
+from ...page import clean_node
+from ...wxr_context import WiktextractContext
 from ..ruby import extract_ruby
 from ..share import strip_nodes
 from .models import Form, WordEntry
@@ -28,6 +28,7 @@ def extract_headword_line(
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(node), expand_all=True
     )
+    clean_node(wxr, page_data[-1], expanded_node)
     forms_start_index = 0
     for span_node in expanded_node.find_html(
         "span", attr_name="class", attr_value="headword-line"
@@ -146,6 +147,8 @@ def process_forms_text(
             ):
                 # romanization of the previous form <b> tag
                 page_data[-1].forms[-1].roman = clean_node(wxr, None, node)
+            elif node.tag == "sup" and lang_code == "ja":
+                extract_historical_kana(wxr, page_data, node)
             else:
                 tag_nodes.append(node)
         else:
@@ -158,8 +161,6 @@ def process_forms_text(
         if len(tags_list) > 0:
             page_data[-1].raw_tags.extend(tags_list)
             translate_raw_tags(page_data[-1])
-    else:
-        clean_node(wxr, page_data[-1], tag_nodes)  # find categories
 
 
 def extract_headword_tags(tags_str: str) -> list[str]:
@@ -169,3 +170,23 @@ def extract_headword_tags(tags_str: str) -> list[str]:
     ):
         tags.append(tag_str)
     return tags
+
+
+def extract_historical_kana(
+    wxr: WiktextractContext,
+    page_data: list[WordEntry],
+    sup_node: HTMLNode,
+) -> None:
+    # https://zh.wiktionary.org/wiki/Template:ja-adj
+    # "hist" parameter
+    form = ""
+    roman = ""
+    for strong_node in sup_node.find_html("strong"):
+        form = clean_node(wxr, None, strong_node)
+    for span_node in sup_node.find_html(
+        "span", attr_name="class", attr_value="tr"
+    ):
+        roman = clean_node(wxr, None, span_node).strip("()")
+    if len(form) > 0:
+        form_data = Form(form=form, roman=roman)
+        page_data[-1].forms.append(form_data)
