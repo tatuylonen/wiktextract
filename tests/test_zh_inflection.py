@@ -5,6 +5,7 @@ from wikitextprocessor import Page, Wtp
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.zh.inflection import extract_inflections
 from wiktextract.extractor.zh.models import WordEntry
+from wiktextract.extractor.zh.page import parse_page
 from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.wxr_context import WiktextractContext
 
@@ -12,7 +13,10 @@ from wiktextract.wxr_context import WiktextractContext
 class TestInflection(TestCase):
     def setUp(self) -> None:
         self.wxr = WiktextractContext(
-            Wtp(lang_code="zh"), WiktionaryConfig(dump_file_lang_code="zh")
+            Wtp(lang_code="zh"),
+            WiktionaryConfig(
+                capture_language_codes=None, dump_file_lang_code="zh"
+            ),
         )
 
     def tearDown(self) -> None:
@@ -57,4 +61,20 @@ class TestInflection(TestCase):
                     "raw_tags": ["基本形", "未然形"],
                 },
             ],
+        )
+
+    def test_zh_forms(self):
+        page_data = parse_page(
+            self.wxr,
+            "維基詞典",
+            """==漢語==
+{{zh-forms|s=维基词典|type=22}}
+
+===專有名詞===
+
+# 一個在線的自由多語言[[詞典]]，由維基媒體基金會建立。""",
+        )
+        self.assertEqual(
+            page_data[0]["forms"],
+            [{"form": "维基词典", "tags": ["Simplified Chinese"]}],
         )

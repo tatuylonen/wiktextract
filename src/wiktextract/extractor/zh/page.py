@@ -4,16 +4,16 @@ from typing import Any, Union
 from mediawiki_langcodes import name_to_code
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import LEVEL_KIND_FLAGS, TemplateNode
-from wiktextract.logging import logger
-from wiktextract.page import clean_node
-from wiktextract.wxr_context import WiktextractContext
 
+from ...logging import logger
+from ...page import clean_node
+from ...wxr_context import WiktextractContext
 from .descendant import extract_descendants
 from .gloss import extract_gloss
 from .headword_line import extract_headword_line
 from .inflection import extract_inflections
 from .linkage import extract_linkages
-from .models import Sense, WordEntry
+from .models import Form, Sense, WordEntry
 from .note import extract_note
 from .pronunciation import extract_pronunciation
 from .section_titles import (
@@ -236,6 +236,9 @@ def parse_page(
             parse_section(wxr, page_data, base_data, level3_node)
         if not level2_node.contain_node(NodeKind.LEVEL3):
             process_low_quality_page(wxr, level2_node, page_data)
+        for template_node in level2_node.find_child(NodeKind.TEMPLATE):
+            if template_node.template_name == "zh-forms":
+                process_zh_forms(wxr, page_data, template_node)
 
     for data in page_data:
         if len(data.senses) == 0:
@@ -280,3 +283,17 @@ def process_soft_redirect_template(
 
     if update_pos and page_data[-1].pos == "unknown":
         page_data[-1].pos = "soft-redirect"
+
+
+def process_zh_forms(
+    wxr: WiktextractContext,
+    page_data: list[WordEntry],
+    template_node: TemplateNode,
+) -> None:
+    # https://zh.wiktionary.org/wiki/Template:zh-forms
+    if "s" in template_node.template_parameters:
+        sc_form = clean_node(wxr, None, template_node.template_parameters["s"])
+        if len(sc_form) > 0:
+            form_data = Form(form=sc_form, tags=["Simplified Chinese"])
+            for data in page_data:
+                data.forms.append(form_data)
