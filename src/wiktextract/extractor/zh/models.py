@@ -76,6 +76,7 @@ class Sound(ChineseBaseModel):
     tags: list[str] = []
     raw_tags: list[str] = []
     homophone: str = ""
+    enpr: str = Field("", description="English pronunciation")
 
 
 class Translation(ChineseBaseModel):

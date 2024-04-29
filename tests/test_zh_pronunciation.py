@@ -63,3 +63,25 @@ class TestPronunciation(TestCase):
                 {"homophone": "大谷"},
             ],
         )
+
+    def test_en_pron_list(self):
+        self.wxr.wtp.start_page("hello")
+        self.wxr.wtp.add_page("Template:a", 10, "(美國)")
+        root = self.wxr.wtp.parse(
+            "* {{a|US}} {{enPR|hĕ-lō'|hə-lō'}}、{{IPA|en|/hɛˈloʊ/|/həˈloʊ/|/ˈhɛloʊ/}}"
+        )
+        base_data = WordEntry(
+            word="hello", lang_code="en", lang="英語", pos="intj"
+        )
+        page_data = [base_data.model_copy(deep=True)]
+        extract_pronunciation(self.wxr, page_data, base_data, root)
+        self.assertEqual(
+            [d.model_dump(exclude_defaults=True) for d in page_data[0].sounds],
+            [
+                {"enpr": "hĕ-lō'", "raw_tags": ["美國"]},
+                {"enpr": "hə-lō'", "raw_tags": ["美國"]},
+                {"ipa": "/hɛˈloʊ/", "raw_tags": ["美國"]},
+                {"ipa": "/həˈloʊ/", "raw_tags": ["美國"]},
+                {"ipa": "/ˈhɛloʊ/", "raw_tags": ["美國"]},
+            ],
+        )
