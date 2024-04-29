@@ -103,7 +103,6 @@ class TestHeadword(TestCase):
                 word="-κρατίας", lang_code="grc", lang="古希臘語", pos="suffix"
             )
         ]
-        self.wxr.wtp.title = "-κρατίας"
         extract_headword_line(self.wxr, page_data, root.children[0], "grc")
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in page_data],
@@ -117,6 +116,41 @@ class TestHeadword(TestCase):
                     ],
                     "tags": ["feminine"],
                     "pos": "suffix",
+                }
+            ],
+        )
+
+    def test_ja_noun(self):
+        self.wxr.wtp.start_page("大家")
+        self.wxr.wtp.add_page(
+            "Template:ja-noun",
+            10,
+            '<span class="headword-line"><span id="日語:_おおや" class="senseid"><strong class="Jpan headword" lang="ja">-{<ruby>大<rp>(</rp><rt>[[おおや#日語|-{おお}-]]</rt><rp>)</rp></ruby><ruby>家<rp>(</rp><rt>[[おおや#日語|-{や}-]]</rt><rp>)</rp></ruby>}-</strong></span> [[Wiktionary:日語轉寫|•]] (<span lang="ja-Latn" class="headword-tr tr Latn" dir="ltr">[[ōya#日語|-{ōya}-]]</span>)&nbsp;<sup>←<strong class="Jpan headword" lang="ja">-{[[おほや#日語|-{おほや}-]]}-</strong> <span class="mention-gloss-paren annotation-paren">(</span><span class="tr"><span class="mention-tr tr">ofoya</span><span class="mention-gloss-paren annotation-paren">)</span><sup>[[w:歷史假名遣|?]]</sup></sup><i></i></span>[[Category:日語詞元|おおや]][[Category:日語名詞|おおや]][[Category:有一年級漢字的日語詞|おおや]][[Category:有二年級漢字的日語詞|おおや]][[Category:有兩個漢字的日語詞|おおや]]',
+        )
+        root = self.wxr.wtp.parse("{{ja-noun|おおや|hhira=おほや}}")
+        page_data = [
+            WordEntry(word="大家", lang_code="ja", lang="日語", pos="noun")
+        ]
+        extract_headword_line(self.wxr, page_data, root.children[0], "ja")
+        self.assertEqual(
+            [d.model_dump(exclude_defaults=True) for d in page_data],
+            [
+                {
+                    "categories": [
+                        "日語詞元",
+                        "日語名詞",
+                        "有一年級漢字的日語詞",
+                        "有二年級漢字的日語詞",
+                        "有兩個漢字的日語詞",
+                    ],
+                    "word": "大家",
+                    "lang_code": "ja",
+                    "lang": "日語",
+                    "forms": [
+                        {"form": "ōya", "tags": ["romanization"]},
+                        {"form": "おほや", "roman": "ofoya"},
+                    ],
+                    "pos": "noun",
                 }
             ],
         )

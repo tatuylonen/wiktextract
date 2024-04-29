@@ -93,6 +93,18 @@ def create_transcode_url(filename: str, transcode_suffix: str) -> str:
     )
 
 
+def set_sound_file_url_fields(wxr, filename, pydantic_model):
+    file_data = create_audio_url_dict(filename)
+    for key, value in file_data.items():
+        if hasattr(pydantic_model, key):
+            setattr(pydantic_model, key, value)
+        else:
+            wxr.wtp.warning(
+                f"{key=} not defined in Sound",
+                sortid="extractor.share.set_sound_file_url_fields",
+            )
+
+
 def split_senseids(senseids_str: str) -> list[str]:
     senseids = []
     raw_ids = (

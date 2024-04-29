@@ -2,10 +2,10 @@ import itertools
 
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import LEVEL_KIND_FLAGS, HTMLNode, TemplateNode
-from wiktextract.extractor.share import create_audio_url_dict
-from wiktextract.page import clean_node
-from wiktextract.wxr_context import WiktextractContext
 
+from ...page import clean_node
+from ...wxr_context import WiktextractContext
+from ..share import create_audio_url_dict, set_sound_file_url_fields
 from .models import Sound, WordEntry
 
 
@@ -31,21 +31,31 @@ def process_pron_item_list_item(
     page_data: list[WordEntry],
     list_item_node: WikiNode,
 ) -> None:
-    for node in list_item_node.children:
-        if isinstance(node, TemplateNode):
-            process_pron_template(wxr, page_data, node)
+    raw_tags = []
+    for template_node in list_item_node.find_child(NodeKind.TEMPLATE):
+        process_pron_template(wxr, page_data, template_node, raw_tags)
 
 
 def process_pron_template(
     wxr: WiktextractContext,
     page_data: list[WordEntry],
     template_node: TemplateNode,
+    raw_tags: list[str] = [],
 ):
-    template_name = template_node.template_name
+    template_name = template_node.template_name.lower()
     if template_name == "zh-pron":
         process_zh_pron_template(wxr, page_data, template_node)
-    elif template_name == "homophones":
+    elif template_name in ["homophones", "homophone", "hmp"]:
         process_homophones_template(wxr, page_data, template_node)
+    elif template_name in ["a", "accent"]:
+        # https://zh.wiktionary.org/wiki/Template:Accent
+        raw_tags.append(clean_node(wxr, None, template_node).strip("()"))
+    elif template_name in ["audio", "音"]:
+        process_audio_template(wxr, page_data, template_node, raw_tags)
+    elif template_name == "ipa":
+        process_ipa_template(wxr, page_data, template_node, raw_tags)
+    elif template_name == "enpr":
+        process_enpr_template(wxr, page_data, template_node, raw_tags)
 
 
 def process_zh_pron_template(
@@ -155,3 +165,62 @@ def process_homophones_table(
             homophone=clean_node(wxr, None, span_node), raw_tags=raw_tags
         )
         page_data[-1].sounds.append(sound_data)
+
+
+def process_audio_template(
+    wxr: WiktextractContext,
+    page_data: list[WordEntry],
+    template_node: TemplateNode,
+    raw_tags: list[str],
+) -> None:
+    # https://zh.wiktionary.org/wiki/Template:Audio
+    sound_file = clean_node(
+        wxr, None, template_node.template_parameters.get(2, "")
+    )
+    sound_data = Sound()
+    set_sound_file_url_fields(wxr, sound_file, sound_data)
+    raw_tag = clean_node(
+        wxr, None, template_node.template_parameters.get(3, "")
+    )
+    if len(raw_tag) > 0:
+        sound_data.raw_tags.append(raw_tag)
+    sound_data.raw_tags.extend(raw_tags)
+    page_data[-1].sounds.append(sound_data)
+
+
+def process_ipa_template(
+    wxr: WiktextractContext,
+    page_data: list[WordEntry],
+    template_node: TemplateNode,
+    raw_tags: list[str],
+) -> None:
+    # https://zh.wiktionary.org/wiki/Template:IPA
+    for index in itertools.count(2):
+        if index not in template_node.template_parameters:
+            break
+        sound = Sound(
+            ipa=clean_node(
+                wxr, None, template_node.template_parameters.get(index)
+            ),
+            raw_tags=raw_tags,
+        )
+        page_data[-1].sounds.append(sound)
+
+
+def process_enpr_template(
+    wxr: WiktextractContext,
+    page_data: list[WordEntry],
+    template_node: TemplateNode,
+    raw_tags: list[str],
+) -> None:
+    # https://zh.wiktionary.org/wiki/Template:enPR
+    for index in range(1, 4):
+        if index not in template_node.template_parameters:
+            break
+        sound = Sound(
+            enpr=clean_node(
+                wxr, None, template_node.template_parameters.get(index)
+            ),
+            raw_tags=raw_tags,
+        )
+        page_data[-1].sounds.append(sound)
