@@ -30,6 +30,7 @@ def extract_etymology(
         ):
             for example_data in extract_template_zh_x(wxr, etymology_node):
                 base_data.etymology_examples.append(example_data)
+            clean_node(wxr, page_data[-1], etymology_node)
         else:
             etymology_nodes.append(etymology_node)
 

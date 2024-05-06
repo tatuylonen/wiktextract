@@ -1,4 +1,4 @@
-from typing import Iterable, Union
+from typing import Union
 
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import TemplateNode
@@ -48,6 +48,7 @@ def extract_examples(
                     elif template_name in {"zh-x", "zh-usex"}:
                         for zh_x_example in extract_template_zh_x(wxr, child):
                             sense_data.examples.append(zh_x_example)
+                        clean_node(wxr, sense_data, child)
                     elif template_name in {"ux", "eg", "usex"}:
                         extract_template_ux(wxr, child, example_data)
                     elif template_name == "uxi":
