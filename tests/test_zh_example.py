@@ -10,6 +10,8 @@ from wiktextract.wxr_context import WiktextractContext
 
 
 class TestExample(TestCase):
+    maxDiff = None
+
     def setUp(self) -> None:
         self.wxr = WiktextractContext(
             Wtp(lang_code="zh"), WiktionaryConfig(dump_file_lang_code="zh")
@@ -78,12 +80,14 @@ translation text""",
                     "ref": "《尚書·梓材》",
                     "raw_tags": ["文言文", "繁體"],
                     "text": "王曰：「封，以厥庶民暨厥臣達大家，以厥臣達王惟邦君。」",
+                    "roman": "Wáng yuē: “Fēng, yǐ jué shùmín jì jué chén dá dàjiā, yǐ jué chén dá wáng wéi bāngjūn.”",
                     "translation": "王說：「封啊，從殷的老百姓和他們的官員到卿大夫，從他們的官員到諸侯和國君。」",
                 },
                 {
                     "ref": "《尚書·梓材》",
                     "raw_tags": ["文言文", "簡體"],
                     "text": "王曰：“封，以厥庶民暨厥臣达大家，以厥臣达王惟邦君。”",
+                    "roman": "Wáng yuē: “Fēng, yǐ jué shùmín jì jué chén dá dàjiā, yǐ jué chén dá wáng wéi bāngjūn.”",
                     "translation": "王說：「封啊，從殷的老百姓和他們的官員到卿大夫，從他們的官員到諸侯和國君。」",
                 },
             ],

@@ -128,6 +128,7 @@ class WordEntry(ChineseBaseModel):
     lang: str = Field(description="Localized language name")
     pos: str = Field(description="Part of speech type")
     etymology_text: str = ""
+    etymology_examples: list[Example] = []
     senses: list[Sense] = Field([], description="Sense list")
     forms: list[Form] = Field([], description="Inflection forms list")
     sounds: list[Sound] = []

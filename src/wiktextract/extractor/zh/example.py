@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Iterable, Union
 
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import TemplateNode
@@ -46,7 +46,8 @@ def extract_examples(
                     elif template_name in {"ja-x", "ja-usex"}:
                         extract_template_ja_usex(wxr, child, example_data)
                     elif template_name in {"zh-x", "zh-usex"}:
-                        extract_template_zh_x(wxr, child, sense_data)
+                        for zh_x_example in extract_template_zh_x(wxr, child):
+                            sense_data.examples.append(zh_x_example)
                     elif template_name in {"ux", "eg", "usex"}:
                         extract_template_ux(wxr, child, example_data)
                     elif template_name == "uxi":
@@ -132,13 +133,14 @@ def extract_template_ja_usex(
 
 
 def extract_template_zh_x(
-    wxr: WiktextractContext, template_node: TemplateNode, sense: Sense
-) -> None:
+    wxr: WiktextractContext, template_node: TemplateNode
+) -> list[Example]:
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(template_node), expand_all=True
     )
     has_dl_tag = False
-    for dl_tag in expanded_node.find_html("dl"):
+    results = []
+    for dl_tag in expanded_node.find_html_recursively("dl"):
         has_dl_tag = True
         ref = ""
         pinyin = ""
@@ -149,29 +151,33 @@ def extract_template_zh_x(
                 ref = dd_text.removeprefix("來自：")
             else:
                 is_pinyin = False
-                for span_tag in dd_tag.find_html(
-                    "span", attr_name="class", attr_value="Latn"
+                for span_tag in dd_tag.find_html_recursively(
+                    "span", attr_name="lang", attr_value="Latn"
                 ):
-                    pinyin = dd_text
+                    pinyin = clean_node(wxr, None, span_tag)
                     is_pinyin = True
                 if not is_pinyin:
                     translation = dd_text
 
         example_text = ""
-        for span_tag in dl_tag.find_html("span"):
-            span_text = clean_node(wxr, None, span_tag)
+        last_span_is_exmaple = False
+        for span_tag in dl_tag.find_html_recursively("span"):
             if span_tag.attrs.get("class", "") in ["Hant", "Hans"]:
-                example_text = span_text
-            elif len(example_text) > 0:
-                raw_tag = span_text
-                example_data = Example(
-                    text=example_text,
-                    roman=pinyin,
-                    ref=ref,
-                    translation=translation,
-                    raw_tags=raw_tag.strip("[]").split("，"),
-                )
-                sense.examples.append(example_data)
+                example_text = clean_node(wxr, None, span_tag)
+                last_span_is_exmaple = True
+            elif last_span_is_exmaple:
+                last_span_is_exmaple = False
+                if len(example_text) > 0:
+                    raw_tag = clean_node(wxr, None, span_tag)
+                    results.append(
+                        Example(
+                            text=example_text,
+                            roman=pinyin,
+                            ref=ref,
+                            translation=translation,
+                            raw_tags=raw_tag.strip("[]").split("，"),
+                        )
+                    )
 
     if not has_dl_tag:
         pinyin = ""
@@ -190,7 +196,8 @@ def extract_template_zh_x(
                         if span_lang == "zh-Hant"
                         else "Simplified Chinese"
                     )
-                    sense.examples.append(example_data)
+                    results.append(example_data)
+    return results
 
 
 def extract_template_ux(
