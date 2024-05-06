@@ -22,7 +22,7 @@ from mediawiki_langcodes import get_all_names, name_to_code
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.core import TemplateArgs, TemplateFnCallable
 from wikitextprocessor.parser import GeneralNode, TemplateNode
-from wiktextract.clean import clean_template_args
+from wiktextract.clean import clean_template_args, clean_value
 from wiktextract.datautils import (
     data_append,
     data_extend,
@@ -568,9 +568,9 @@ ignored_descendants_templates_re = ignored_etymology_templates_re
 usex_templates: set[str] = {
     "afex",
     "affixusex",
-    "co", # {{collocation}} acts like a example template, specifically for
-          # pairs of combinations of words that are more common than you'd
-          # except would be randomly; hlavní#Czech
+    "co",  # {{collocation}} acts like a example template, specifically for
+    # pairs of combinations of words that are more common than you'd
+    # except would be randomly; hlavní#Czech
     "coi",
     "collocation",
     "el-example",
@@ -3411,6 +3411,7 @@ def parse_language(
                 if item.kind != NodeKind.LIST_ITEM:
                     continue
                 usex_type = None
+                example_template_args = []
 
                 def usex_template_fn(name, ht):
                     nonlocal usex_type
@@ -3418,6 +3419,7 @@ def parse_language(
                         return ""
                     if name in usex_templates:
                         usex_type = "example"
+                        example_template_args.append(ht)
                     elif name in quotation_templates:
                         usex_type = "quotation"
                     for prefix in template_linkages:
@@ -3451,6 +3453,7 @@ def parse_language(
                 subtext = clean_node(
                     wxr, sense_base, contents, template_fn=usex_template_fn
                 )
+                # print(f"{subtext=}")
                 subtext = re.sub(
                     r"\s*\(please add an English "
                     r"translation of this "
@@ -3489,7 +3492,23 @@ def parse_language(
                 #     print(classify_desc(line))
                 if len(lines) == 1 and lang_code != "en":
                     parts = re.split(r"\s*[―—]+\s*", lines[0])
-                    if len(parts) == 2 and classify_desc(parts[1]) == "english":
+                    if (
+                        len(example_template_args) == 1
+                        and len(example_template_args[0]) == 3
+                        and clean_value(
+                            wxr, example_template_args[0].get(2, "")
+                        ).strip()
+                        == parts[0].strip()
+                        and clean_value(
+                            wxr, example_template_args[0].get(3, "")
+                        ).strip()
+                        == parts[1].strip()
+                    ):
+                        lines = [parts[0].strip()]
+                        tr = parts[1].strip()
+                    elif (
+                        len(parts) == 2 and classify_desc(parts[1]) == "english"
+                    ):
                         lines = [parts[0].strip()]
                         tr = parts[1].strip()
                     elif (
