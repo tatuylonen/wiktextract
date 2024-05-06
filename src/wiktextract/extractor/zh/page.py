@@ -197,6 +197,7 @@ def parse_page(
                 f"Unrecognized language name: {lang_name}",
                 sortid="extractor/zh/page/parse_page/509",
             )
+            lang_code = "unknown"
         if (
             wxr.config.capture_language_codes is not None
             and lang_code not in wxr.config.capture_language_codes
