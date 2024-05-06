@@ -548,6 +548,7 @@ ignored_etymology_templates: list[str] = [
     "rfe",
     "catlangname",
     "cln",
+    "langname-lite",
 ]
 # Regexp for matching ignored etymology template names.  This adds certain
 # prefixes to the names listed above.
