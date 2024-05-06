@@ -161,7 +161,7 @@ class WiktionaryConfig:
             self.errors.extend(ret.get("errors", []))
         if "warnings" in ret and len(self.warnings) < 100_000:
             self.warnings.extend(ret.get("warnings", []))
-        if "debugs" in ret and len(self.debugs) < 300_000:
+        if "debugs" in ret and len(self.debugs) < 600_000:
             self.debugs.extend(ret.get("debugs", []))
 
     def load_edition_settings(self) -> None:
