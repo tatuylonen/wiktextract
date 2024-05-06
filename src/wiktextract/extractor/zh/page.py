@@ -9,6 +9,7 @@ from ...logging import logger
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .descendant import extract_descendants
+from .etymology import extract_etymology
 from .gloss import extract_gloss
 from .headword_line import extract_headword_line
 from .inflection import extract_inflections
@@ -93,7 +94,7 @@ def parse_section(
         elif wxr.config.capture_etymologies and subtitle.startswith(
             tuple(ETYMOLOGY_TITLES)
         ):
-            extract_etymology(wxr, page_data, base_data, node.children)
+            extract_etymology(wxr, page_data, base_data, node)
         elif (
             wxr.config.capture_pronunciation
             and subtitle in PRONUNCIATION_TITLES
@@ -158,28 +159,6 @@ def process_pos_block(
             page_data[-1].senses.append(Sense(glosses=[gloss_text]))
         else:
             page_data[-1].senses.append(Sense(tags=["no-gloss"]))
-
-
-def extract_etymology(
-    wxr: WiktextractContext,
-    page_data: list[WordEntry],
-    base_data: WordEntry,
-    nodes: list[Union[WikiNode, str]],
-) -> None:
-    level_node_index = -1
-    for index, node in enumerate(nodes):
-        if isinstance(node, WikiNode) and node.kind in LEVEL_KIND_FLAGS:
-            level_node_index = index
-            break
-    if level_node_index != -1:
-        etymology = clean_node(wxr, page_data[-1], nodes[:index])
-    else:
-        etymology = clean_node(wxr, page_data[-1], nodes)
-    if len(etymology) > 0:
-        base_data.etymology_text = etymology
-        append_base_data(page_data, "etymology_text", etymology, base_data)
-    if level_node_index != -1:
-        parse_section(wxr, page_data, base_data, nodes[level_node_index:])
 
 
 def parse_page(
