@@ -147,6 +147,11 @@ class TestHeadword(TestCase):
                     "lang_code": "ja",
                     "lang": "日語",
                     "forms": [
+                        {
+                            "form": "大家",
+                            "ruby": [("大", "おお"), ("家", "や")],
+                            "tags": ["canonical"],
+                        },
                         {"form": "ōya", "tags": ["romanization"]},
                         {"form": "おほや", "roman": "ofoya"},
                     ],

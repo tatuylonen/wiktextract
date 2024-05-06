@@ -52,28 +52,41 @@ def extract_headword_line(
                         else:
                             page_data[-1].raw_tags.append(gender)
                             translate_raw_tags(page_data[-1])
+                else:
+                    for strong_node in span_child.find_html(
+                        "strong", attr_name="class", attr_value="headword"
+                    ):
+                        process_ja_headword(wxr, page_data, strong_node)
             elif (
                 span_child.tag == "strong"
                 and "headword" in span_child.attrs.get("class", "")
             ):
                 forms_start_index = index + 1
                 if lang_code == "ja":
-                    ruby_data, node_without_ruby = extract_ruby(wxr, span_child)
-                    page_data[-1].forms.append(
-                        Form(
-                            form=clean_node(
-                                wxr, page_data[-1], node_without_ruby
-                            ),
-                            ruby=ruby_data,
-                            tags=["canonical"],
-                        )
-                    )
+                    process_ja_headword(wxr, page_data, span_child)
             elif span_child.tag == "b":
                 # this is a form <b> tag, already inside form parentheses
                 break
 
         extract_headword_forms(
             wxr, page_data, span_node.children[forms_start_index:]
+        )
+
+
+def process_ja_headword(
+    wxr: WiktextractContext,
+    page_data: list[WordEntry],
+    strong_node: HTMLNode,
+) -> None:
+    ruby_data, node_without_ruby = extract_ruby(wxr, strong_node)
+    form = clean_node(wxr, page_data[-1], node_without_ruby)
+    if len(ruby_data) > 0 or form != page_data[-1].word:
+        page_data[-1].forms.append(
+            Form(
+                form=clean_node(wxr, page_data[-1], node_without_ruby),
+                ruby=ruby_data,
+                tags=["canonical"],
+            )
         )
 
 
