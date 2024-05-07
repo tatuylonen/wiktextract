@@ -3504,11 +3504,18 @@ def parse_language(
                         ).strip()
                         == parts[1].strip()
                     ):
+                        # {{exampletemplate|ex|Foo bar baz|English translation}}
+                        # is a pretty reliable 'heuristic', so we use it here
+                        # before the others. To be extra sure the template
+                        # doesn't do anything weird, we compare the arguments
+                        # and the output to each other.
                         lines = [parts[0].strip()]
                         tr = parts[1].strip()
                     elif (
                         len(parts) == 2 and classify_desc(parts[1]) == "english"
                     ):
+                        # These other branches just do some simple heuristics w/
+                        # the expanded output of the template (if applicable).
                         lines = [parts[0].strip()]
                         tr = parts[1].strip()
                     elif (
