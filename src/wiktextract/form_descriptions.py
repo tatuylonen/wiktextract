@@ -3266,12 +3266,10 @@ def classify_desc(
             )
             for x in tokens
         )
-        print(lst_bool)
         cnt = lst_bool.count(True)
         rejected_words = tuple(
             x for i, x in enumerate(tokens) if not lst_bool[i]
         )
-        print(f"{rejected_words}")
         if (
             any(
                 lst_bool[i] and x[0].isalpha() and len(x) > 1

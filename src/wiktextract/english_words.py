@@ -1874,6 +1874,12 @@ additional_words = set(
         "zealotry",
         "zoospores",
         "zygosperm",
+        "chamomile",
+        "peppermint",
+        "x-axis",
+        "y-axis",
+        "z-axis",
+        "maté",
     ]
 )
 
