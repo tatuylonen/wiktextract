@@ -549,6 +549,7 @@ ignored_etymology_templates: list[str] = [
     "catlangname",
     "cln",
     "langname-lite",
+    "no deprecated lang param usage",
 ]
 # Regexp for matching ignored etymology template names.  This adds certain
 # prefixes to the names listed above.
