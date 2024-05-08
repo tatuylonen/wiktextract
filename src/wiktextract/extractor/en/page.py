@@ -3494,6 +3494,7 @@ def parse_language(
                     parts = re.split(r"\s*[―—]+\s*", lines[0])
                     if (
                         len(example_template_args) == 1
+                        and len(parts) == 2
                         and len(example_template_args[0]) == 3
                         and clean_value(
                             wxr, example_template_args[0].get(2, "")
