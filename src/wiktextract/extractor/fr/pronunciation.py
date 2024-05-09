@@ -1,9 +1,11 @@
+import re
+
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import LEVEL_KIND_FLAGS, TemplateNode
-from wiktextract.extractor.share import create_audio_url_dict
-from wiktextract.page import clean_node
-from wiktextract.wxr_context import WiktextractContext
 
+from ...page import clean_node
+from ...wxr_context import WiktextractContext
+from ..share import set_sound_file_url_fields
 from .models import Sound, WordEntry
 
 
@@ -13,22 +15,25 @@ def extract_pronunciation(
     level_node: WikiNode,
     base_data: WordEntry,
 ) -> None:
-    sound_data = []
+    sounds_list = []
     lang_code = base_data.lang_code
-    for node in level_node.find_child(NodeKind.LIST | LEVEL_KIND_FLAGS):
+    for node in level_node.find_child(
+        NodeKind.LIST | LEVEL_KIND_FLAGS | NodeKind.TEMPLATE
+    ):
         if node.kind == NodeKind.LIST:
             for list_item_node in node.find_child(NodeKind.LIST_ITEM):
-                sound_data.extend(
-                    process_pron_list_item(
-                        wxr, list_item_node, Sound(), lang_code
-                    )
+                sounds_list.extend(
+                    process_pron_list_item(wxr, list_item_node, [], lang_code)
                 )
-        else:
+        elif isinstance(node, TemplateNode):
+            if node.template_name in ["cmn-pron", "zh-cmn-pron"]:
+                sounds_list.extend(process_cmn_pron_template(wxr, node))
+        elif node.kind in LEVEL_KIND_FLAGS:
             from .page import parse_section
 
             parse_section(wxr, page_data, base_data, node)
 
-    if len(sound_data) == 0:
+    if len(sounds_list) == 0:
         return
     if len(page_data) == 0:
         page_data.append(base_data.model_copy(deep=True))
@@ -39,9 +44,9 @@ def extract_pronunciation(
         # Otherwise only add to the last one.
         for sense_data in page_data:
             if sense_data.lang_code == lang_code:
-                sense_data.sounds.extend(sound_data)
+                sense_data.sounds.extend(sounds_list)
     else:
-        page_data[-1].sounds.extend(sound_data)
+        page_data[-1].sounds.extend(sounds_list)
 
 
 PRON_TEMPLATES = frozenset(
@@ -61,55 +66,86 @@ PRON_TEMPLATES = frozenset(
 def process_pron_list_item(
     wxr: WiktextractContext,
     list_item_node: WikiNode,
-    sound_data: Sound,
+    parent_raw_tags: list[str],
     lang_code: str,
 ) -> list[Sound]:
+    current_raw_tags = parent_raw_tags[:]
+    sounds_list = []
     pron_key = "zh_pron" if lang_code == "zh" else "ipa"
+    after_collon = False
+    for child_index, list_item_child in enumerate(list_item_node.children):
+        if isinstance(list_item_child, TemplateNode):
+            if list_item_child.template_name in PRON_TEMPLATES:
+                pron_texts = process_pron_template(wxr, list_item_child)
+                if len(pron_texts) > 0:
+                    use_key = (
+                        "zh_pron"
+                        if list_item_child.template_name == "lang"
+                        else "ipa"
+                    )
+                    prons = set()
+                    for pron_text in re.split(",|，", pron_texts):
+                        pron_text = pron_text.strip()
+                        if len(pron_text) > 0 and pron_text not in prons:
+                            prons.add(pron_text)
+                            sound = Sound()
+                            setattr(sound, use_key, pron_text)
+                            if len(current_raw_tags) > 0:
+                                sound.raw_tags = current_raw_tags[:]
+                            sounds_list.append(sound)
 
-    for template_node in list_item_node.find_child(NodeKind.TEMPLATE):
-        if template_node.template_name in PRON_TEMPLATES:
-            pron_text = process_pron_template(wxr, template_node)
-            if len(pron_text) > 0:
-                setattr(sound_data, pron_key, pron_text)
-        elif template_node.template_name in {"écouter", "audio", "pron-rég"}:
-            process_ecouter_template(wxr, template_node, sound_data)
-        elif template_node.template_name == "pron-rimes":
-            process_pron_rimes_template(wxr, template_node, sound_data)
-
-    if list_item_node.contain_node(NodeKind.LIST):
-        returned_data = []
-        for bold_node in list_item_node.find_child(NodeKind.BOLD):
-            sound_data.raw_tags.append(clean_node(wxr, None, bold_node))
-
-        for nest_list_item in list_item_node.find_child_recursively(
-            NodeKind.LIST_ITEM
-        ):
-            new_sound_data = sound_data.model_copy(deep=True)
-            process_pron_list_item(
-                wxr, nest_list_item, new_sound_data, lang_code
-            )
-            if pron_key in new_sound_data.model_fields_set:
-                returned_data.append(new_sound_data)
-
-        return returned_data
-    elif len(sound_data.model_dump(exclude_defaults=True)) > 0:
-        if pron_key not in sound_data.model_fields_set and any(
-            isinstance(x, str) for x in list_item_node.filter_empty_str_child()
-        ):
-            list_item_text = clean_node(wxr, None, list_item_node.children)
-            split_list = list_item_text.split(": ")
-            if len(split_list) == 2:
-                location, ipa = split_list
-                setattr(
-                    sound_data,
-                    pron_key,
-                    "".join(ipa).strip(),
+            elif list_item_child.template_name in {
+                "écouter",
+                "audio",
+                "pron-rég",
+            }:
+                sounds_list.append(
+                    process_ecouter_template(
+                        wxr, list_item_child, current_raw_tags
+                    )
                 )
-                sound_data.raw_tags.append("".join(location.strip()))
+            elif list_item_child.template_name == "pron-rimes":
+                sounds_list.append(
+                    process_pron_rimes_template(
+                        wxr, list_item_child, current_raw_tags
+                    )
+                )
+            elif not after_collon:  # location
+                raw_tag = clean_node(wxr, None, list_item_child)
+                if len(raw_tag) > 0:
+                    current_raw_tags.append(raw_tag)
+        elif isinstance(list_item_child, WikiNode):
+            if list_item_child.kind == NodeKind.BOLD:
+                current_raw_tags.append(clean_node(wxr, None, list_item_child))
+            elif list_item_child.kind == NodeKind.LINK:
+                for span_tag in list_item_child.find_html_recursively("span"):
+                    sound = Sound(ipa=clean_node(wxr, None, span_tag))
+                    if len(current_raw_tags) > 0:
+                        sound.raw_tags = current_raw_tags[:]
+                    sounds_list.append(sound)
+        elif isinstance(list_item_child, str):
+            if ":" in list_item_child:
+                after_collon = True
+                pron_text = list_item_child[
+                    list_item_child.find(":") + 1 :
+                ].strip()
+                if len(pron_text) > 0:
+                    sound = Sound()
+                    setattr(sound, pron_key, pron_text)
+                    if len(current_raw_tags) > 0:
+                        sound.raw_tags = current_raw_tags[:]
+                    sounds_list.append(sound)
 
-        if len({pron_key, "audio"} & sound_data.model_fields_set) > 0:
-            return [sound_data]
-    return []
+    for nest_list_item in list_item_node.find_child_recursively(
+        NodeKind.LIST_ITEM
+    ):
+        sounds_list.extend(
+            process_pron_list_item(
+                wxr, nest_list_item, current_raw_tags, lang_code
+            )
+        )
+
+    return sounds_list
 
 
 def process_pron_template(
@@ -129,9 +165,10 @@ def process_pron_template(
 def process_ecouter_template(
     wxr: WiktextractContext,
     template_node: TemplateNode,
-    sound_data: Sound,
-) -> None:
+    raw_tags: list[str],
+) -> Sound:
     # sound file template: https://fr.wiktionary.org/wiki/Modèle:écouter
+    sound = Sound()
     location = clean_node(
         wxr, None, template_node.template_parameters.get(1, "")
     )
@@ -147,20 +184,15 @@ def process_ecouter_template(
     audio_file = clean_node(
         wxr, None, template_node.template_parameters.get("audio", "")
     )
+    if len(raw_tags) > 0:
+        sound.raw_tags = raw_tags[:]
     if len(location) > 0:
-        sound_data.raw_tags.append(location)
+        sound.raw_tags.append(location)
     if len(ipa) > 0:
-        sound_data.ipa = ipa
+        sound.ipa = ipa
     if len(audio_file) > 0:
-        audio_data = create_audio_url_dict(audio_file)
-        for key, value in audio_data.items():
-            if key in sound_data.model_fields:
-                setattr(sound_data, key, value)
-            else:
-                wxr.wtp.debug(
-                    f"{key=} not defined in Sound",
-                    sortid="fr.pronunciation/156",
-                )
+        set_sound_file_url_fields(wxr, audio_file, sound)
+    return sound
 
 
 def is_ipa_text(text: str) -> bool:
@@ -177,10 +209,31 @@ def is_ipa_text(text: str) -> bool:
 def process_pron_rimes_template(
     wxr: WiktextractContext,
     template_node: TemplateNode,
-    sound_data: Sound,
-) -> None:
+    raw_tags: list[str],
+) -> Sound:
     # https://fr.wiktionary.org/wiki/Modèle:pron-rimes
-    sound_data.ipa = clean_node(
+    sound = Sound()
+    sound.ipa = clean_node(
         wxr, None, template_node.template_parameters.get(1, "")
     )
+    if len(raw_tags) > 0:
+        sound.raw_tags = raw_tags[:]
     # this templates also has rhyme data, not sure where to put it
+    return sound
+
+
+def process_cmn_pron_template(
+    wxr: WiktextractContext, template_node: TemplateNode
+) -> list[Sound]:
+    # https://fr.wiktionary.org/wiki/Modèle:cmn-pron
+    sounds_list = []
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(template_node),
+        pre_expand=True,
+        additional_expand={template_node.template_name},
+    )
+    for list_node in expanded_node.find_child(NodeKind.LIST):
+        for list_item in list_node.find_child(NodeKind.LIST_ITEM):
+            sounds_list.extend(process_pron_list_item(wxr, list_item, [], "zh"))
+
+    return sounds_list

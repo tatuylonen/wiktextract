@@ -47,12 +47,15 @@ class TestPronunciation(TestCase):
                     "lang": "Français",
                     "sounds": [
                         {
+                            "ipa": "\\bɔ̃.ʒuʁ\\",
+                        },
+                        {
                             "ipa": "bõ.ʒuːʁ",
                             "raw_tags": ["France (Paris)"],
                             "audio": "Fr-bonjour.ogg",
                             "ogg_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Fr-bonjour.ogg",
                             "mp3_url": "https://upload.wikimedia.org/wikipedia/commons/transcoded/b/bc/Fr-bonjour.ogg/Fr-bonjour.ogg.mp3",
-                        }
+                        },
                     ],
                 },
                 {
@@ -61,12 +64,15 @@ class TestPronunciation(TestCase):
                     "lang": "Français",
                     "sounds": [
                         {
+                            "ipa": "\\bɔ̃.ʒuʁ\\",
+                        },
+                        {
                             "ipa": "bõ.ʒuːʁ",
                             "raw_tags": ["France (Paris)"],
                             "audio": "Fr-bonjour.ogg",
                             "ogg_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Fr-bonjour.ogg",
                             "mp3_url": "https://upload.wikimedia.org/wikipedia/commons/transcoded/b/bc/Fr-bonjour.ogg/Fr-bonjour.ogg.mp3",
-                        }
+                        },
                     ],
                 },
             ],
@@ -181,4 +187,65 @@ class TestPronunciation(TestCase):
                 "lang": "Français",
                 "sounds": [{"ipa": "dik.sjɔ.nɛʁ"}],
             },
+        )
+
+    def test_cmn_pron(self):
+        # GH issue 620
+        page_data = []
+        self.wxr.wtp.start_page("作")
+        root = self.wxr.wtp.parse(
+            "=== {{S|prononciation}} ===\n{{cmn-pron|zuō|zuó|zuò}}"
+        )
+        self.wxr.wtp.add_page(
+            "Modèle:pinyin",
+            10,
+            "[[Wiktionnaire:Sinogrammes - Index Pinyin|Pinyin]]",
+        )
+        self.wxr.wtp.add_page("Modèle:EFEO", 10, "[[EFEO|EFEO]]")
+        self.wxr.wtp.add_page("Modèle:Wade", 10, "[[w:Wade-Giles|Wade-Giles]]")
+        self.wxr.wtp.add_page(
+            "Modèle:Yale-zh", 10, "[[w:Romanisation Yale|Yale]]"
+        )
+        self.wxr.wtp.add_page("Modèle:zhuyin", 10, "[[zhuyin|Zhuyin]]")
+        self.wxr.wtp.add_page(
+            "Modèle:lang",
+            10,
+            '<span lang="{{{1}}}" xml:lang="{{{1}}}" class="lang-{{{1}}}"><bdi>{{{2}}}</bdi></span>',
+        )
+        self.wxr.wtp.add_page(
+            "Modèle:cmn-pron",
+            10,
+            """* '''mandarin''' [[Annexe:Prononciation/mandarin|<span class="API" title="Prononciation API">\\t͡su̯ɔ˥\\</span>]], [[Annexe:Prononciation/mandarin|<span class="API" title="Prononciation API">\\t͡su̯ɔ˧˥\\</span>]], [[Annexe:Prononciation/mandarin|<span class="API" title="Prononciation API">\\t͡su̯ɔ˥˩\\</span>]]
+** {{pinyin}} : {{lang|"zh-Latn-pinyin|zuō, zuó, zuò}}
+** {{EFEO}} : {{lang|zh-Latn|tso, tso, tso}}
+** {{Wade}} : {{lang|zh-Latn|tso<sup>1</sup>, tso<sup>2</sup>, tso<sup>4</sup>}}
+** {{Yale-zh}} : {{lang|zh-Latn|dzwō, dzwó, dzwò}}
+** {{zhuyin}} : {{lang|zh-Bopomofo|ㄗㄨㄛ，ㄗㄨㄛˊ，ㄗㄨㄛˋ}}""",
+        )
+        extract_pronunciation(
+            self.wxr,
+            page_data,
+            root.children[0],
+            WordEntry(word="作", lang_code="zh", lang="Chinois"),
+        )
+        self.assertEqual(
+            [s.model_dump(exclude_defaults=True) for s in page_data[0].sounds],
+            [
+                {"ipa": "\\t͡su̯ɔ˥\\", "raw_tags": ["mandarin"]},
+                {"ipa": "\\t͡su̯ɔ˧˥\\", "raw_tags": ["mandarin"]},
+                {"ipa": "\\t͡su̯ɔ˥˩\\", "raw_tags": ["mandarin"]},
+                {"zh_pron": "zuō", "raw_tags": ["mandarin", "Pinyin"]},
+                {"zh_pron": "zuó", "raw_tags": ["mandarin", "Pinyin"]},
+                {"zh_pron": "zuò", "raw_tags": ["mandarin", "Pinyin"]},
+                {"zh_pron": "tso", "raw_tags": ["mandarin", "EFEO"]},
+                {"zh_pron": "tso¹", "raw_tags": ["mandarin", "Wade-Giles"]},
+                {"zh_pron": "tso²", "raw_tags": ["mandarin", "Wade-Giles"]},
+                {"zh_pron": "tso⁴", "raw_tags": ["mandarin", "Wade-Giles"]},
+                {"zh_pron": "dzwō", "raw_tags": ["mandarin", "Yale"]},
+                {"zh_pron": "dzwó", "raw_tags": ["mandarin", "Yale"]},
+                {"zh_pron": "dzwò", "raw_tags": ["mandarin", "Yale"]},
+                {"zh_pron": "ㄗㄨㄛ", "raw_tags": ["mandarin", "Zhuyin"]},
+                {"zh_pron": "ㄗㄨㄛˊ", "raw_tags": ["mandarin", "Zhuyin"]},
+                {"zh_pron": "ㄗㄨㄛˋ", "raw_tags": ["mandarin", "Zhuyin"]},
+            ],
         )
