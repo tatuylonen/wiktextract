@@ -31,9 +31,9 @@ def extract_form_line(
             if node.template_name in IGNORE_TEMPLATES:
                 continue
             elif node.template_name in PRON_TEMPLATES:
-                ipa_text = process_pron_template(wxr, node)
-                if len(ipa_text) > 0:
-                    page_data[-1].sounds.append(Sound(ipa=ipa_text))
+                page_data[-1].sounds.extend(
+                    process_pron_template(wxr, node, [])
+                )
             elif node.template_name == "équiv-pour":
                 process_equiv_pour_template(wxr, node, page_data)
             elif node.template_name.startswith("zh-mot"):

@@ -72,68 +72,34 @@ def process_pron_list_item(
     current_raw_tags = parent_raw_tags[:]
     sounds_list = []
     pron_key = "zh_pron" if lang_code == "zh" else "ipa"
-    after_collon = False
+    after_colon = False
     for child_index, list_item_child in enumerate(list_item_node.children):
         if isinstance(list_item_child, TemplateNode):
-            if list_item_child.template_name in PRON_TEMPLATES:
-                pron_texts = process_pron_template(wxr, list_item_child)
-                if len(pron_texts) > 0:
-                    use_key = (
-                        "zh_pron"
-                        if list_item_child.template_name == "lang"
-                        else "ipa"
-                    )
-                    prons = set()
-                    for pron_text in re.split(",|，", pron_texts):
-                        pron_text = pron_text.strip()
-                        if len(pron_text) > 0 and pron_text not in prons:
-                            prons.add(pron_text)
-                            sound = Sound()
-                            setattr(sound, use_key, pron_text)
-                            if len(current_raw_tags) > 0:
-                                sound.raw_tags = current_raw_tags[:]
-                            sounds_list.append(sound)
-
-            elif list_item_child.template_name in {
-                "écouter",
-                "audio",
-                "pron-rég",
-            }:
-                sounds_list.append(
-                    process_ecouter_template(
-                        wxr, list_item_child, current_raw_tags
-                    )
+            sounds_list.extend(
+                process_sound_list_item_templates(
+                    wxr, list_item_child, current_raw_tags, after_colon
                 )
-            elif list_item_child.template_name == "pron-rimes":
-                sounds_list.append(
-                    process_pron_rimes_template(
-                        wxr, list_item_child, current_raw_tags
-                    )
-                )
-            elif not after_collon:  # location
-                raw_tag = clean_node(wxr, None, list_item_child)
-                if len(raw_tag) > 0:
-                    current_raw_tags.append(raw_tag)
+            )
         elif isinstance(list_item_child, WikiNode):
             if list_item_child.kind == NodeKind.BOLD:
                 current_raw_tags.append(clean_node(wxr, None, list_item_child))
             elif list_item_child.kind == NodeKind.LINK:
                 for span_tag in list_item_child.find_html_recursively("span"):
-                    sound = Sound(ipa=clean_node(wxr, None, span_tag))
-                    if len(current_raw_tags) > 0:
-                        sound.raw_tags = current_raw_tags[:]
-                    sounds_list.append(sound)
+                    sounds_list.append(
+                        Sound(
+                            ipa=clean_node(wxr, None, span_tag),
+                            raw_tags=current_raw_tags[:],
+                        )
+                    )
         elif isinstance(list_item_child, str):
             if ":" in list_item_child:
-                after_collon = True
+                after_colon = True
                 pron_text = list_item_child[
                     list_item_child.find(":") + 1 :
                 ].strip()
                 if len(pron_text) > 0:
-                    sound = Sound()
+                    sound = Sound(raw_tags=current_raw_tags[:])
                     setattr(sound, pron_key, pron_text)
-                    if len(current_raw_tags) > 0:
-                        sound.raw_tags = current_raw_tags[:]
                     sounds_list.append(sound)
 
     for nest_list_item in list_item_node.find_child_recursively(
@@ -148,9 +114,32 @@ def process_pron_list_item(
     return sounds_list
 
 
+def process_sound_list_item_templates(
+    wxr: WiktextractContext,
+    template_node: TemplateNode,
+    raw_tags: list[str],
+    after_colon: bool,
+) -> list[Sound]:
+    if template_node.template_name in PRON_TEMPLATES:
+        return process_pron_template(wxr, template_node, raw_tags)
+    elif template_node.template_name in {
+        "écouter",
+        "audio",
+        "pron-rég",
+    }:
+        return [process_ecouter_template(wxr, template_node, raw_tags)]
+    elif template_node.template_name == "pron-rimes":
+        return [process_pron_rimes_template(wxr, template_node, raw_tags)]
+    elif not after_colon:  # location
+        raw_tag = clean_node(wxr, None, template_node)
+        raw_tags.append(raw_tag)
+
+    return []
+
+
 def process_pron_template(
-    wxr: WiktextractContext, template_node: TemplateNode
-) -> str:
+    wxr: WiktextractContext, template_node: TemplateNode, raw_tags: list[str]
+) -> list[Sound]:
     if (
         template_node.template_name in PRON_TEMPLATES
         and isinstance(template_node.template_parameters.get(1, ""), str)
@@ -158,8 +147,20 @@ def process_pron_template(
     ):
         # some pages don't pass IPA parameter to the "pron" template
         # and expand to an edit link for adding the missing data.
-        return ""
-    return clean_node(wxr, None, template_node)
+        return []
+    sounds_list = []
+    pron_texts = clean_node(wxr, None, template_node)
+    if len(pron_texts) > 0:
+        use_key = "zh_pron" if template_node.template_name == "lang" else "ipa"
+        prons = set()
+        for pron_text in re.split(",|，", pron_texts):
+            pron_text = pron_text.strip()
+            if len(pron_text) > 0 and pron_text not in prons:
+                prons.add(pron_text)
+                sound = Sound(raw_tags=raw_tags[:])
+                setattr(sound, use_key, pron_text)
+                sounds_list.append(sound)
+    return sounds_list
 
 
 def process_ecouter_template(
