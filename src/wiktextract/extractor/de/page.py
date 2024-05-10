@@ -3,10 +3,10 @@ from typing import Any
 from mediawiki_langcodes import name_to_code
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import LevelNode, TemplateNode
-from wiktextract.page import clean_node
-from wiktextract.logging import logger
-from wiktextract.wxr_context import WiktextractContext
 
+from ...logging import logger
+from ...page import clean_node
+from ...wxr_context import WiktextractContext
 from .example import extract_examples
 from .gloss import extract_glosses
 from .linkage import extract_linkages
