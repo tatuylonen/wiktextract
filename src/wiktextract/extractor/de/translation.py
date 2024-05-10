@@ -1,11 +1,11 @@
 import re
 
-from mediawiki_langcodes import name_to_code
+from mediawiki_langcodes import code_to_name, name_to_code
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import TemplateNode
-from wiktextract.page import clean_node
-from wiktextract.wxr_context import WiktextractContext
 
+from ...page import clean_node
+from ...wxr_context import WiktextractContext
 from .models import Translation, WordEntry
 from .tags import translate_raw_tags
 
@@ -51,8 +51,10 @@ def process_u_tabelle_list_item(
     for node in list_item_node.children:
         if isinstance(node, str):
             node = node.strip()
-            if ":" in node:
-                lang_str = node[: node.index(":")]
+            if len(node) == 0:
+                continue
+            elif ":" in node:
+                lang_str = node[: node.index(":")].strip()
                 if len(lang_str) > 0 and len(tr_data.lang) == 0:
                     tr_data.lang = lang_str
                     if len(tr_data.lang_code) == 0:
@@ -60,7 +62,8 @@ def process_u_tabelle_list_item(
                 before_colon = False
             elif node == "," and len(tr_data.word) > 0:
                 tr_data = append_tr_data(word_entry, tr_data)
-        elif before_colon:
+
+        if before_colon and len(tr_data.lang) == 0:
             tr_data.lang = clean_node(wxr, None, node)
             if isinstance(node, TemplateNode):
                 tr_data.lang_code = node.template_name.lower()
@@ -102,6 +105,9 @@ def process_u_template(
         tr_data.lang_code = clean_node(
             wxr, None, u_template.template_parameters.get(1, "")
         )
+    if len(tr_data.lang) == 0:
+        tr_data.lang = code_to_name(tr_data, "de")
+
     tr_data.word = clean_node(
         wxr, None, u_template.template_parameters.get(2, "")
     )

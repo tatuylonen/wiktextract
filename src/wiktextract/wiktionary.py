@@ -631,7 +631,7 @@ def check_json_data(wxr: WiktextractContext, dt: dict) -> None:
                 pos,
                 '"translations" items must contain at least one '
                 'of "code" and "lang" (normally both): {}'.format(
-                    json.dumps(item, sort_keys=True)
+                    json.dumps(item, sort_keys=True, ensure_ascii=False)
                 ),
             )
     # Check the "etymology_templates", "head_templates", and
