@@ -2,11 +2,11 @@ from typing import Any, Optional
 
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import LEVEL_KIND_FLAGS, TemplateNode
-from wiktextract.config import POSSubtitleData
-from wiktextract.page import clean_node
-from wiktextract.logging import logger
-from wiktextract.wxr_context import WiktextractContext
 
+from ...config import POSSubtitleData
+from ...logging import logger
+from ...page import clean_node
+from ...wxr_context import WiktextractContext
 from .gloss import extract_gloss
 from .inflection import extract_inflection
 from .linkage import extract_linkages
@@ -220,6 +220,8 @@ def parse_page(
     for level1_node in tree.find_child(NodeKind.LEVEL1):
         for subtitle_template in level1_node.find_content(NodeKind.TEMPLATE):
             lang_code = subtitle_template.template_name.strip(" -")
+            if lang_code == "":
+                lang_code = "unknown"
             if (
                 wxr.config.capture_language_codes is not None
                 and lang_code not in wxr.config.capture_language_codes
