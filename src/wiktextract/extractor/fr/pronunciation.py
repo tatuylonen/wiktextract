@@ -214,12 +214,19 @@ def process_pron_rimes_template(
 ) -> Sound:
     # https://fr.wiktionary.org/wiki/Modèle:pron-rimes
     sound = Sound()
-    sound.ipa = clean_node(
-        wxr, None, template_node.template_parameters.get(1, "")
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(template_node), expand_all=True
     )
+    for index, span_tag in enumerate(
+        expanded_node.find_html_recursively("span")
+    ):
+        span_text = clean_node(wxr, None, span_tag)
+        if index == 0:
+            sound.ipa = span_text
+        elif index == 1:
+            sound.rhymes = span_text
     if len(raw_tags) > 0:
         sound.raw_tags = raw_tags[:]
-    # this templates also has rhyme data, not sure where to put it
     return sound
 
 
