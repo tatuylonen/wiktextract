@@ -46,6 +46,7 @@ class Sound(FrenchBaseModel):
     flac_url: str = ""
     tags: list[str] = []
     raw_tags: list[str] = []
+    rhymes: str = ""
 
 
 class Translation(FrenchBaseModel):

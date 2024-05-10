@@ -173,6 +173,11 @@ class TestPronunciation(TestCase):
         root = self.wxr.wtp.parse(
             "=== {{S|prononciation}} ===\n* {{pron-rimes|dik.sjɔ.nɛʁ|fr}}"
         )
+        self.wxr.wtp.add_page(
+            "Modèle:pron-rimes",
+            10,
+            'La prononciation <span class="API" title="Prononciation API">\\dik.sjɔ.nɛʁ\\</span> rime avec les [[Annexe:Rimes en français en \\ɛʁ\\|mots qui finissent en <span class="API" title="Prononciation API">\\ɛʁ\\</span>]].[[Catégorie:Rimes en français en \\ɛʁ\\]]',
+        )
         extract_pronunciation(
             self.wxr,
             page_data,
@@ -180,13 +185,8 @@ class TestPronunciation(TestCase):
             WordEntry(word="dictionnaire", lang_code="fr", lang="Français"),
         )
         self.assertEqual(
-            page_data[0].model_dump(exclude_defaults=True),
-            {
-                "word": "dictionnaire",
-                "lang_code": "fr",
-                "lang": "Français",
-                "sounds": [{"ipa": "dik.sjɔ.nɛʁ"}],
-            },
+            [s.model_dump(exclude_defaults=True) for s in page_data[0].sounds],
+            [{"ipa": "\\dik.sjɔ.nɛʁ\\", "rhymes": "\\ɛʁ\\"}],
         )
 
     def test_cmn_pron(self):
