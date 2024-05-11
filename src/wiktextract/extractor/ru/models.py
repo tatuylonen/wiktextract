@@ -72,6 +72,10 @@ class Example(BaseModelWrap):
     )
 
 
+class AltForm(BaseModelWrap):
+    word: str
+
+
 class Sense(BaseModelWrap):
     raw_glosses: list[str] = Field(
         default=[],
@@ -96,6 +100,7 @@ class Sense(BaseModelWrap):
         description="list of sense-disambiguated category names extracted from (a subset) of the Category links on the page",
     )
     examples: list[Example] = Field(default=[], description="List of examples")
+    form_of: list[AltForm] = []
 
 
 class Form(BaseModelWrap):
