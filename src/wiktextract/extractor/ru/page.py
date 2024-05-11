@@ -10,7 +10,7 @@ from ...wxr_context import WiktextractContext
 from .gloss import extract_gloss
 from .inflection import extract_inflection
 from .linkage import extract_linkages
-from .models import Sense, WordEntry
+from .models import AltForm, Sense, Sound, WordEntry
 from .pronunciation import extract_pronunciation
 from .section_titles import LINKAGE_TITLES, POS_TEMPLATE_NAMES, POS_TITLES
 from .translation import extract_translations
@@ -240,53 +240,25 @@ def parse_page(
                 pos="unknown",
             )
             base_data.categories.extend(categories["categories"])
-
-            unprocessed_nodes = []
-            for non_level23_node in level1_node.invert_find_child(
-                NodeKind.LEVEL2 | NodeKind.LEVEL3
-            ):
-                IGNORED_TEMPLATES = [
-                    "wikipedia",
-                    "Омонимы",
-                    "improve",
-                    "Лексема в Викиданных",
-                ]
-                if not (
-                    isinstance(non_level23_node, WikiNode)
-                    and non_level23_node.kind == NodeKind.TEMPLATE
-                    and non_level23_node.template_name in IGNORED_TEMPLATES
-                ):
-                    unprocessed_nodes.append(non_level23_node)
-
-                # XXX: Extract form pages that never reach a level 2 or 3 node
-                # https://ru.wiktionary.org/wiki/Διὸς
-
-            if (
-                len(unprocessed_nodes) > 0
-                and len(clean_node(wxr, None, unprocessed_nodes)) > 0
-            ):
-                wxr.wtp.debug(
-                    f"Unprocessed nodes in level node {level1_node.largs}: "
-                    + str(unprocessed_nodes),
-                    sortid="extractor/es/page/parse_page/80",
-                )
-
             pos_data = get_pos(wxr, level1_node)
             if pos_data is not None:
                 base_data.pos = pos_data["pos"]
                 base_data.tags.extend(pos_data.get("tags", []))
 
             for level2_node in level1_node.find_child(NodeKind.LEVEL2):
-                page_data.append(base_data.model_copy(deep=True))
                 if base_data.pos == "unknown":
                     pos_data = get_pos(wxr, level2_node)
                     if pos_data is not None:
-                        page_data[-1].pos = pos_data["pos"]
-                        page_data[-1].tags.extend(pos_data.get("tags", []))
+                        base_data.pos = pos_data["pos"]
+                        base_data.tags.extend(pos_data.get("tags", []))
+                page_data.append(base_data.model_copy(deep=True))
+                has_level3 = False
                 for level3_node in level2_node.find_child(NodeKind.LEVEL3):
                     parse_section(wxr, page_data, level3_node)
-                if page_data[-1] == base_data:
+                    has_level3 = True
+                if page_data[-1] == base_data or not has_level3:
                     page_data.pop()
+                extract_low_quality_page(wxr, page_data, base_data, level2_node)
 
             for level3_index, level3_node in enumerate(
                 level1_node.find_child(NodeKind.LEVEL3)
@@ -299,8 +271,66 @@ def parse_page(
                 parse_section(wxr, page_data, level3_node)
             if len(page_data) > 0 and page_data[-1] == base_data:
                 page_data.pop()
+            extract_low_quality_page(wxr, page_data, base_data, level1_node)
 
     for d in page_data:
         if len(d.senses) == 0:
             d.senses.append(Sense(tags=["no-gloss"]))
     return [d.model_dump(exclude_defaults=True) for d in page_data]
+
+
+def extract_low_quality_page(
+    wxr: WiktextractContext,
+    page_data: list[WordEntry],
+    base_data: WordEntry,
+    level_node: WikiNode,
+) -> None:
+    for node in level_node.invert_find_child(LEVEL_KIND_FLAGS):
+        if isinstance(node, TemplateNode) and node.template_name.startswith(
+            "Форма-"
+        ):
+            process_form_template(wxr, page_data, base_data, node)
+        elif isinstance(node, WikiNode):
+            for template_node in node.find_child_recursively(NodeKind.TEMPLATE):
+                if template_node.template_name.startswith("Форма-"):
+                    process_form_template(
+                        wxr, page_data, base_data, template_node
+                    )
+
+
+def process_form_template(
+    wxr: WiktextractContext,
+    page_data: list[WordEntry],
+    base_data: WordEntry,
+    template_node: TemplateNode,
+) -> None:
+    # https://ru.wiktionary.org/wiki/Шаблон:Форма-сущ
+    # Шаблон:Форма-гл, "Шаблон:форма-гл en"
+    form_of = clean_node(
+        wxr,
+        None,
+        template_node.template_parameters.get(
+            "база", template_node.template_parameters.get(1, "")
+        ),
+    )
+    ipa = clean_node(
+        wxr, None, template_node.template_parameters.get("МФА", "")
+    )
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(template_node), expand_all=True
+    )
+    current_data = base_data.model_copy(deep=True)
+    for list_item in expanded_node.find_child_recursively(NodeKind.LIST_ITEM):
+        gloss_text = clean_node(wxr, None, list_item.children)
+        if len(gloss_text) > 0:
+            sense = Sense(glosses=[gloss_text])
+            if len(form_of) > 0:
+                sense.form_of.append(AltForm(word=form_of))
+                sense.tags.append("form-of")
+            current_data.senses.append(sense)
+
+    if len(ipa) > 0:
+        current_data.sounds.append(Sound(ipa=ipa))
+    if len(current_data.senses) > 0 or len(current_data.sounds) > 0:
+        clean_node(wxr, current_data, template_node)
+        page_data.append(current_data)

@@ -261,3 +261,41 @@ class TestRUPage(TestCase):
                 },
             ],
         )
+
+    def test_form_of_template(self):
+        self.wxr.wtp.start_page("ними")
+        self.wxr.wtp.add_page("Шаблон:-ru-", 10, "Русский")
+        self.wxr.wtp.add_page(
+            "Шаблон:Форма-мест",
+            10,
+            """<b>ни́<span class="hyph" style="color:lightgreen;">-</span>ми</b> <br/><ul class="transcription" style="margin-left:0; list-style:none;"><li>[[w:Международный фонетический алфавит|МФА]]:&nbsp;&#91;<span class="IPA" style="white-space: nowrap;">ˈnʲimʲɪ</span>&#93;</li></ul>
+
+* форма творительного падежа множественного числа  местоимения&#32;''[[они#Русский|они]]''[[Категория:Формы местоимений/ru]][[Категория:Формы местоимений/ru]][[Категория:Словоформы/ru]]""",
+        )
+        self.assertEqual(
+            parse_page(
+                self.wxr,
+                "ними",
+                """= {{-ru-|nocat}} =
+{{Форма-мест|они|творительного|мн|слоги={{по-слогам|ни́|ми}}|МФА=ˈnʲimʲɪ}}""",
+            ),
+            [
+                {
+                    "categories": ["Формы местоимений/ru", "Словоформы/ru"],
+                    "lang": "Русский",
+                    "lang_code": "ru",
+                    "word": "ними",
+                    "pos": "pron",
+                    "senses": [
+                        {
+                            "glosses": [
+                                "форма творительного падежа множественного числа местоимения они"
+                            ],
+                            "form_of": [{"word": "они"}],
+                            "tags": ["form-of"],
+                        }
+                    ],
+                    "sounds": [{"ipa": "ˈnʲimʲɪ"}],
+                },
+            ],
+        )
