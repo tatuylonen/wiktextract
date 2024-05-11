@@ -306,6 +306,11 @@ def process_form_template(
 ) -> None:
     # https://ru.wiktionary.org/wiki/Шаблон:Форма-сущ
     # Шаблон:Форма-гл, "Шаблон:форма-гл en"
+    pos_data = get_pos_from_template(wxr, template_node)
+    if pos_data is not None:
+        base_data.pos = pos_data["pos"]
+        base_data.tags.extend(pos_data.get("tags", []))
+
     form_of = clean_node(
         wxr,
         None,
