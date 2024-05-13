@@ -1,10 +1,10 @@
-from typing import Union
+from typing import Optional, Union
 
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import TemplateNode
-from wiktextract.page import clean_node
-from wiktextract.wxr_context import WiktextractContext
 
+from ...page import clean_node
+from ...wxr_context import WiktextractContext
 from ..ruby import extract_ruby
 from .linkage import process_linkage_templates_in_gloss
 from .models import Example, Sense, WordEntry
@@ -26,16 +26,20 @@ def extract_examples(
     sense_data: Sense,
     node: Union[WikiNode, list[WikiNode]],
     page_data: list[WordEntry],
+    parent_example: Optional[Example] = None,
 ) -> None:
     if isinstance(node, list):
         for n in node:
             extract_examples(wxr, sense_data, n, page_data)
     elif isinstance(node, WikiNode):
         if node.kind == NodeKind.LIST_ITEM:
-            example_data = Example()
+            example_data = parent_example or Example()
             # example text in the nested list
             # https://zh.wiktionary.org/wiki/%, the second example
-            if node.contain_node(NodeKind.LIST):
+            if node.contain_node(NodeKind.LIST) and not all(
+                isinstance(n, TemplateNode)
+                for n in node.invert_find_child(NodeKind.LIST)
+            ):
                 extract_example_list(wxr, node, example_data)
             else:
                 # parse example templates
@@ -66,7 +70,14 @@ def extract_examples(
                     else:
                         example_data.text = clean_node(wxr, None, child)
 
-            if len(example_data.text) > 0:
+                for list_item in node.find_child_recursively(
+                    NodeKind.LIST_ITEM
+                ):
+                    extract_examples(
+                        wxr, sense_data, list_item, page_data, example_data
+                    )
+
+            if len(example_data.text) > 0 and parent_example is None:
                 sense_data.examples.append(example_data)
         else:
             extract_examples(wxr, sense_data, node.children, page_data)

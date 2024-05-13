@@ -1,8 +1,8 @@
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import TemplateNode
-from wiktextract.page import clean_node
-from wiktextract.wxr_context import WiktextractContext
 
+from ...page import clean_node
+from ...wxr_context import WiktextractContext
 from ..ruby import extract_ruby
 from .example import extract_examples
 from .models import AltForm, Sense, WordEntry
