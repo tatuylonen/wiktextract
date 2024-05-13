@@ -1596,7 +1596,6 @@ def parse_language(
                 "uxi",
                 "usex",
                 "afex",
-                "zh-x",
                 "prefixusex",
                 "ko-usex",
                 "ko-x",
@@ -3540,10 +3539,9 @@ def parse_language(
                             lines = [parts[0].strip()]
                             tr = parts[1].strip()
                 elif len(lines) > 1:
-                    if (
-                        any(re.search(r"[]\d:)]\s*$", x) for x in lines[:-1])
-                        and example_template_names != ["zh-x"]
-                    ):
+                    if any(
+                        re.search(r"[]\d:)]\s*$", x) for x in lines[:-1]
+                    ) and example_template_names in (["zh-x"], ["zh-usex"]):
                         ref = []
                         for i in range(len(lines)):
                             if re.match(r"^[#*]*:+(\s*$|\s+)", lines[i]):
@@ -3635,7 +3633,10 @@ def parse_language(
                                 i -= 1
                             tr = "\n".join(lines[i:])
                             lines = lines[:i]
-                    elif len(lines) > 2 and example_template_names == ["zh-x"]:
+                    elif len(lines) > 2 and example_template_names in (
+                        ["zh-x"],
+                        ["zh-usex"],
+                    ):
                         original_lines = []
                         for i, line in enumerate(lines):
                             if not line:
