@@ -3413,6 +3413,7 @@ def parse_language(
                     continue
                 usex_type = None
                 example_template_args = []
+                example_template_names = []
 
                 def usex_template_fn(name, ht):
                     nonlocal usex_type
@@ -3421,6 +3422,7 @@ def parse_language(
                     if name in usex_templates:
                         usex_type = "example"
                         example_template_args.append(ht)
+                        example_template_names.append(name)
                     elif name in quotation_templates:
                         usex_type = "quotation"
                     for prefix in template_linkages:
@@ -3540,7 +3542,7 @@ def parse_language(
                 elif len(lines) > 1:
                     if (
                         any(re.search(r"[]\d:)]\s*$", x) for x in lines[:-1])
-                        and lang_code != "zh"
+                        and example_template_names != ["zh-x"]
                     ):
                         ref = []
                         for i in range(len(lines)):
@@ -3633,7 +3635,7 @@ def parse_language(
                                 i -= 1
                             tr = "\n".join(lines[i:])
                             lines = lines[:i]
-                    elif len(lines) > 2 and lang_code == "zh":
+                    elif len(lines) > 2 and example_template_names == ["zh-x"]:
                         original_lines = []
                         for i, line in enumerate(lines):
                             if not line:
