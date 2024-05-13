@@ -3538,7 +3538,10 @@ def parse_language(
                             lines = [parts[0].strip()]
                             tr = parts[1].strip()
                 elif len(lines) > 1:
-                    if any(re.search(r"[]\d:)]\s*$", x) for x in lines[:-1]):
+                    if (
+                        any(re.search(r"[]\d:)]\s*$", x) for x in lines[:-1])
+                        and lang_code != "zh"
+                    ):
                         ref = []
                         for i in range(len(lines)):
                             if re.match(r"^[#*]*:+(\s*$|\s+)", lines[i]):
@@ -3630,6 +3633,21 @@ def parse_language(
                                 i -= 1
                             tr = "\n".join(lines[i:])
                             lines = lines[:i]
+                    elif len(lines) > 2 and lang_code == "zh":
+                        original_lines = []
+                        for i, line in enumerate(lines):
+                            if not line:
+                                continue
+                            cl = classify_desc(line.split("[")[0])
+                            if line.startswith("From:"):
+                                ref += line
+                            elif cl == "other":
+                                original_lines.append(i)
+                            elif cl == "romanization":
+                                roman += line
+                            elif cl == "english":
+                                tr += line
+                        lines = [lines[i] for i in original_lines]
 
                 roman = re.sub(r"[ \t\r]+", " ", roman).strip()
                 roman = re.sub(r"\[\s*…\s*\]", "[…]", roman)
