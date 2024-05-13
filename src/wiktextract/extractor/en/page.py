@@ -3828,8 +3828,12 @@ def parse_top_template(wxr, node, data):
 
 def fix_subtitle_hierarchy(wxr: WiktextractContext, text: str) -> str:
     """Fix subtitle hierarchy to be strict Language -> Etymology ->
-    Part-of-Speech -> Translation/Linkage."""
+    Part-of-Speech -> Translation/Linkage. Also merge Etymology sections
+    that are next to each other."""
 
+    # Wiktextract issue #620, Chinese Glyph Origin before an etymology
+    # section get overwritten. In this case, let's just combine the two.
+    
     # Known lowercase PoS names are in part_of_speech_map
     # Known lowercase linkage section names are in linkage_map
 
@@ -3840,12 +3844,16 @@ def fix_subtitle_hierarchy(wxr: WiktextractContext, text: str) -> str:
     parts = []
     npar = 4  # Number of parentheses in above expression
     parts.append(old[0])
+    prev_level = None
+    level = None
+    skip_level_title = False  # When combining etymology sections
     for i in range(1, len(old), npar + 1):
         left = old[i]
         right = old[i + npar - 1]
         # remove Wikilinks in title
         title = re.sub(r"^\[\[", "", old[i + 1])
         title = re.sub(r"\]\]$", "", title)
+        prev_level = level
         level = len(left)
         part = old[i + npar]
         if level != len(right):
@@ -3872,6 +3880,9 @@ def fix_subtitle_hierarchy(wxr: WiktextractContext, text: str) -> str:
                     "etymology section {} at level {}".format(title, level),
                     sortid="page/2917",
                 )
+            if prev_level == 3:  # Two etymology (Glyph Origin + Etymology)
+                # sections cheek-to-cheek
+                skip_level_title = True
             level = 3
         elif lc.startswith(PRONUNCIATION_TITLE):
             level = 3
@@ -3891,8 +3902,12 @@ def fix_subtitle_hierarchy(wxr: WiktextractContext, text: str) -> str:
             level = 5
         else:
             level = 6
-        parts.append("{}{}{}".format("=" * level, title, "=" * level))
-        parts.append(part)
+        if skip_level_title == True:
+            skip_level_title = False
+            parts.append(part)
+        else:
+            parts.append("{}{}{}".format("=" * level, title, "=" * level))
+            parts.append(part)
         # print("=" * level, title)
         # if level != len(left):
         #     print("  FIXED LEVEL OF {} {} -> {}"
