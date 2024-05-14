@@ -821,8 +821,10 @@ def parse_language(
         data_append(base_data, "tags", "reconstruction")
     sense_data: SenseData = {}
     pos_data: WordData = {}  # For a current part-of-speech
+    zh_pron_data: WordData = {}  # Chinese Pronunciation-sections in-between
     etym_data: WordData = {}  # For one etymology
     pos_datas: list[SenseData] = []
+    zh_pron_datas: list[WordData] = []
     etym_datas: list[WordData] = []
     page_datas: list[WordData] = []
     have_etym = False
@@ -934,10 +936,21 @@ def parse_language(
         if wxr.wtp.subsection:
             data: WordData = {"senses": pos_datas}
             merge_base(data, pos_data)
-            etym_datas.append(data)
+            zh_pron_datas.append(data)
         pos_data = {}
         pos_datas = []
         wxr.wtp.start_subsection(None)
+
+    def push_zh_pron_section() -> None:
+        """Starts collecting data for a new etymology."""
+        nonlocal zh_pron_data
+        nonlocal zh_pron_datas
+        push_pos()
+        for data in zh_pron_datas:
+            merge_base(data, zh_pron_data)
+            etym_datas.append(data)
+        zh_pron_data = {}
+        zh_pron_datas = []
 
     def push_etym() -> None:
         """Starts collecting data for a new etymology."""
@@ -945,7 +958,7 @@ def parse_language(
         nonlocal etym_datas
         nonlocal have_etym
         have_etym = True
-        push_pos()
+        push_zh_pron_section()
         for data in etym_datas:
             merge_base(data, etym_data)
             page_datas.append(data)
@@ -1061,7 +1074,7 @@ def parse_language(
                 and x.largs[0][0] in FLOATING_TABLE_TEMPLATES
             ),
         )
-        tempnode = WikiNode(NodeKind.LEVEL5, 0)
+        tempnode = WikiNode(NodeKind.LEVEL6, 0)
         tempnode.largs = [["Inflection"]]
         tempnode.children = floaters
         parse_inflection(tempnode, "Floating Div", pos)
@@ -3305,7 +3318,7 @@ def parse_language(
                 if t.startswith(PRONUNCIATION_TITLE + " "):
                     # Pronunciation 1, etc, are used in Chinese Glyphs,
                     # and each of them may have senses under Definition
-                    push_etym()
+                    push_zh_pron_section()
                     wxr.wtp.start_subsection(None)
                 if wxr.config.capture_pronunciation:
                     data = select_data()
@@ -3848,6 +3861,15 @@ def fix_subtitle_hierarchy(wxr: WiktextractContext, text: str) -> str:
 
     # Wiktextract issue #620, Chinese Glyph Origin before an etymology
     # section get overwritten. In this case, let's just combine the two.
+
+    # In Chinese entries, Pronunciation can be preceded on the
+    # same level 3 by its Etymology *and* Glyph Origin sections:
+    # ===Glyph Origin===
+    # ===Etymology===
+    # ===Pronunciation===
+    # Tatu suggested adding a new 'level' between 3 and 4, so Pronunciation
+    # is now Level 4, POS is shifted to Level 5 and the rest (incl. 'default')
+    # are now level 6
     
     # Known lowercase PoS names are in part_of_speech_map
     # Known lowercase linkage section names are in linkage_map
@@ -3898,27 +3920,28 @@ def fix_subtitle_hierarchy(wxr: WiktextractContext, text: str) -> str:
             if prev_level == 3:  # Two etymology (Glyph Origin + Etymology)
                 # sections cheek-to-cheek
                 skip_level_title = True
+                # Modify the title of previous ("Glyph Origin") section, in
+                # case we have a meaningful title like "Etymology 1"
+                parts[-2] = "{}{}{}".format("=" * level, title, "=" * level)
             level = 3
         elif lc.startswith(PRONUNCIATION_TITLE):
-            if prev_level == 3:
-                level = 4
-            else:
-                level = 3
-            print(f"Pron level is: {level=}")
-        elif lc in POS_TITLES:
+            # Pronunciation is now a level between POS and Etymology, so
+            # we need to shift everything down by one
             level = 4
+        elif lc in POS_TITLES:
+            level = 5
         elif lc == TRANSLATIONS_TITLE:
-            level = 5
+            level = 6
         elif lc in LINKAGE_TITLES or lc == COMPOUNDS_TITLE:
-            level = 5
+            level = 6
         elif lc in INFLECTION_TITLES:
-            level = 5
+            level = 6
         elif lc == DESCENDANTS_TITLE:
-            level = 5
+            level = 6
         elif title in PROTO_ROOT_DERIVED_TITLES:
-            level = 5
+            level = 6
         elif lc in IGNORED_TITLES:
-            level = 5
+            level = 6
         else:
             level = 6
         if skip_level_title == True:
@@ -3927,7 +3950,7 @@ def fix_subtitle_hierarchy(wxr: WiktextractContext, text: str) -> str:
         else:
             parts.append("{}{}{}".format("=" * level, title, "=" * level))
             parts.append(part)
-        print("=" * level, title)
+        # print("=" * level, title)
         # if level != len(left):
         #     print("  FIXED LEVEL OF {} {} -> {}"
         #           .format(title, len(left), level))
