@@ -3548,7 +3548,10 @@ def parse_language(
                 elif len(lines) > 1:
                     if any(
                         re.search(r"[]\d:)]\s*$", x) for x in lines[:-1]
-                    ) and example_template_names in (["zh-x"], ["zh-usex"]):
+                    ) and not (
+                        len(example_template_names) == 1
+                        and example_template_names[0] in ("zh-x", "zh-usex")
+                    ):
                         ref = []
                         for i in range(len(lines)):
                             if re.match(r"^[#*]*:+(\s*$|\s+)", lines[i]):
@@ -3640,9 +3643,14 @@ def parse_language(
                                 i -= 1
                             tr = "\n".join(lines[i:])
                             lines = lines[:i]
-                    elif len(lines) > 2 and example_template_names in (
-                        ["zh-x"],
-                        ["zh-usex"],
+                    elif (
+                        len(lines) > 2
+                        and len(example_template_names)
+                        and example_template_names[0]
+                        in (
+                            "zh-x",
+                            "zh-usex",
+                        )
                     ):
                         original_lines = []
                         for i, line in enumerate(lines):
@@ -3892,7 +3900,11 @@ def fix_subtitle_hierarchy(wxr: WiktextractContext, text: str) -> str:
                 skip_level_title = True
             level = 3
         elif lc.startswith(PRONUNCIATION_TITLE):
-            level = 3
+            if prev_level == 3:
+                level = 4
+            else:
+                level = 3
+            print(f"Pron level is: {level=}")
         elif lc in POS_TITLES:
             level = 4
         elif lc == TRANSLATIONS_TITLE:
@@ -3915,7 +3927,7 @@ def fix_subtitle_hierarchy(wxr: WiktextractContext, text: str) -> str:
         else:
             parts.append("{}{}{}".format("=" * level, title, "=" * level))
             parts.append(part)
-        # print("=" * level, title)
+        print("=" * level, title)
         # if level != len(left):
         #     print("  FIXED LEVEL OF {} {} -> {}"
         #           .format(title, len(left), level))
