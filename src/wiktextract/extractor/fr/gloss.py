@@ -1,4 +1,3 @@
-import re
 from collections import defaultdict
 from typing import Optional, Union
 
@@ -75,14 +74,11 @@ def extract_gloss(
                 and gloss_only_nodes[index].template_name == "note"
             ):
                 note_index = index
-        find_alt_of_form(
+        gloss_text = find_alt_of_form(
             wxr, gloss_only_nodes[:note_index], page_data[-1].pos, gloss_data
         )
         if "form-of" in page_data[-1].tags:
             find_form_of_word(wxr, gloss_only_nodes[:note_index], gloss_data)
-        gloss_text = clean_node(wxr, gloss_data, gloss_only_nodes[:note_index])
-        if not (gloss_text.startswith("(") and gloss_text.endswith(")")):
-            gloss_text = gloss_text.strip(" ()")
         if gloss_text != "":
             gloss_data.glosses.append(gloss_text)
         gloss_data.note = clean_node(
@@ -177,24 +173,45 @@ def find_alt_of_form(
     gloss_nodes: list[Union[str, WikiNode]],
     pos_type: str,
     gloss_data: Sense,
-):
+) -> str:
+    """
+    Return gloss text, remove tag template expanded from "variante *" templates.
+    """
+
     alt_of = ""
-    for template_node in filter(
-        lambda n: isinstance(n, TemplateNode), gloss_nodes
-    ):
+    filtered_gloss_nodes = []
+    for gloss_node in gloss_nodes:
         # https://fr.wiktionary.org/wiki/Modèle:variante_de
         # https://fr.wiktionary.org/wiki/Modèle:variante_kyujitai_de
-        if re.fullmatch(r"variante \w*\s*de", template_node.template_name):
+        if isinstance(
+            gloss_node, TemplateNode
+        ) and gloss_node.template_name.startswith("variante "):
             alt_of = clean_node(
-                wxr, None, template_node.template_parameters.get("dif", "")
+                wxr, None, gloss_node.template_parameters.get("dif", "")
             )
             if len(alt_of) == 0:
                 alt_of = clean_node(
-                    wxr, None, template_node.template_parameters.get(1, "")
+                    wxr, None, gloss_node.template_parameters.get(1, "")
                 )
             if len(alt_of) > 0:
                 gloss_data.alt_of.append(AltForm(word=alt_of))
                 gloss_data.tags.append("alt-of")
+            expanded_template = wxr.wtp.parse(
+                wxr.wtp.node_to_wikitext(gloss_node),
+                pre_expand=True,
+                additional_expand={gloss_node.template_name},
+            )
+            for node in expanded_template.children:
+                if (
+                    isinstance(node, TemplateNode)
+                    and node.template_name == "désuet"
+                ):
+                    raw_tag = clean_node(wxr, gloss_data, node).strip(" ()")
+                    gloss_data.raw_tags.append(raw_tag)
+                else:
+                    filtered_gloss_nodes.append(node)
+        else:
+            filtered_gloss_nodes.append(gloss_node)
 
     if alt_of == "" and pos_type == "typographic variant":
         for gloss_node in filter(
@@ -211,6 +228,17 @@ def find_alt_of_form(
                 alt_of = clean_node(wxr, None, link)
         if len(alt_of) > 0:
             gloss_data.alt_of.append(AltForm(word=alt_of))
+
+    gloss_text = clean_node(wxr, gloss_data, filtered_gloss_nodes)
+    brackets = 0
+    for char in gloss_text:
+        if char == "(":
+            brackets += 1
+        elif char == ")":
+            brackets -= 1
+    if brackets != 0:
+        gloss_text = gloss_text.strip(" ()")
+    return gloss_text
 
 
 def find_form_of_word(
