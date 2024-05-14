@@ -550,6 +550,13 @@ ignored_etymology_templates: list[str] = [
     "cln",
     "langname-lite",
     "no deprecated lang param usage",
+    "mention",
+    "m",
+    "m-self",
+    "link",
+    "l",
+    "ll",
+    "l-self",
 ]
 # Regexp for matching ignored etymology template names.  This adds certain
 # prefixes to the names listed above.
