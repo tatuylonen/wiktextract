@@ -448,7 +448,17 @@ class TestFrGloss(TestCase):
         self.wxr.wtp.add_page(
             "Modèle:variante kyujitai de",
             10,
-            "(Désuet) Orthographe en kyūjitai de 万歳 (« vive ! »)",
+            "{{désuet|ja}} ''Orthographe en [[kyūjitai]] de'' {{lien|{{{1}}}|ja|{{{2|}}}|dif={{{dif|}}}|tr={{{tr|}}}|sens={{{sens|}}}}}",
+        )
+        self.wxr.wtp.add_page(
+            "Modèle:désuet",
+            10,
+            '<span class="emploi"><span id="désuet"></span>''(<span class="texte">[[Annexe:Glossaire grammatical#D|Désuet]]</span>)''</span>[[Catégorie:Termes désuets en japonais]]',
+        )
+        self.wxr.wtp.add_page(
+            "Modèle:lien",
+            10,
+            '<bdi lang="ja" xml:lang="ja" class="lang-ja">[[万歳#ja|万歳]]</bdi> («&nbsp;[[vive#fr-interj|vive]] !&nbsp;»)',
         )
         self.assertEqual(
             parse_page(
@@ -468,9 +478,10 @@ class TestFrGloss(TestCase):
                     "senses": [
                         {
                             "alt_of": [{"word": "万歳"}],
-                            "tags": ["alt-of"],
+                            "categories": ["Termes désuets en japonais"],
+                            "tags": ["alt-of", "obsolete"],
                             "glosses": [
-                                "(Désuet) Orthographe en kyūjitai de 万歳 (« vive ! »)"
+                                "Orthographe en kyūjitai de 万歳 (« vive ! »)"
                             ],
                         }
                     ],
