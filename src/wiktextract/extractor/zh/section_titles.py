@@ -156,7 +156,6 @@ POS_TITLES: POSSubtitleData = {
     "表語": {"pos": "adj", "tags": ["predicative"]},
     "詞綴": {"pos": "affix"},
     "諺語": {"pos": "proverb"},
-    "變位": {"pos": "conj"},
     "词组": {"pos": "phrase"},
     "词缀": {"pos": "affix"},
     "语气助词": {"pos": "particle"},
