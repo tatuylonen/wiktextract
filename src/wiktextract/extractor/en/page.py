@@ -821,13 +821,21 @@ def parse_language(
         data_append(base_data, "tags", "reconstruction")
     sense_data: SenseData = {}
     pos_data: WordData = {}  # For a current part-of-speech
-    zh_pron_data: WordData = {}  # Chinese Pronunciation-sections in-between
+    level_four_data: WordData = {}  # Chinese Pronunciation-sections in-between
     etym_data: WordData = {}  # For one etymology
     pos_datas: list[SenseData] = []
-    zh_pron_datas: list[WordData] = []
+    level_four_datas: list[WordData] = []
     etym_datas: list[WordData] = []
     page_datas: list[WordData] = []
     have_etym = False
+    inside_level_four = False  # This is for checking if the etymology section
+    # or article has a Pronunciation section, for Chinese mostly; because
+    # Chinese articles can have three level three sections (two etymology
+    # sections and pronunciation sections) one after another, we need a kludge
+    # to better keep track of whether we're in a normal "etym" or inside a
+    # "level four" (which is what we've turned the level three Pron sections
+    # into in the fix_subtitle_hierarchy(); all other sections are demoted by
+    # a step.
     stack: list[str] = []  # names of items on the "stack"
 
     def merge_base(data: WordData, base: WordData) -> None:
@@ -936,43 +944,59 @@ def parse_language(
         if wxr.wtp.subsection:
             data: WordData = {"senses": pos_datas}
             merge_base(data, pos_data)
-            zh_pron_datas.append(data)
+            level_four_datas.append(data)
         pos_data = {}
         pos_datas = []
         wxr.wtp.start_subsection(None)
 
-    def push_zh_pron_section() -> None:
-        """Starts collecting data for a new etymology."""
-        nonlocal zh_pron_data
-        nonlocal zh_pron_datas
+    def push_level_four_section() -> None:
+        """Starts collecting data for a new level four sections, which
+        is usually virtual and empty, unless the article has Chinese
+        'Pronunciation' sections that are etymology-section-like but
+        under etymology, and at the same level in the source. We modify
+        the source to demote Pronunciation sections like that to level
+        4, and other sections one step lower."""
+        nonlocal level_four_data
+        nonlocal level_four_datas
+        nonlocal etym_datas
         push_pos()
-        for data in zh_pron_datas:
-            merge_base(data, zh_pron_data)
+        # print(f"======\n{etym_data=}")
+        # print(f"======\n{etym_datas=}")
+        # print(f"======\n{level_four_data=}")
+        # print(f"======\n{level_four_datas=}")
+        for data in level_four_datas:
+            merge_base(data, level_four_data)
             etym_datas.append(data)
-        zh_pron_data = {}
-        zh_pron_datas = []
+        for data in etym_datas:
+            merge_base(data, etym_data)
+            page_datas.append(data)
+        level_four_data = {}
+        level_four_datas = []
+        etym_datas = []
 
     def push_etym() -> None:
         """Starts collecting data for a new etymology."""
         nonlocal etym_data
         nonlocal etym_datas
         nonlocal have_etym
+        nonlocal inside_level_four
         have_etym = True
-        push_zh_pron_section()
-        for data in etym_datas:
-            merge_base(data, etym_data)
-            page_datas.append(data)
+        push_level_four_section()
+        inside_level_four = False
         etym_data = {}
-        etym_datas = []
 
     def select_data() -> WordData:
         """Selects where to store data (pos or etym) based on whether we
         are inside a pos (part-of-speech)."""
+        # print(f"{wxr.wtp.subsection=}")
+        # print(f"{stack=}")
         if wxr.wtp.subsection is not None:
             return pos_data
         if stack[-1] == language:
             return base_data
-        return etym_data
+        if inside_level_four is False:
+            return etym_data
+        return level_four_data
 
     def head_post_template_fn(
         name: str, ht: TemplateArgs, expansion: str
@@ -3267,6 +3291,7 @@ def parse_language(
         """This recurses into a subtree in the parse tree for a page."""
         nonlocal etym_data
         nonlocal pos_data
+        nonlocal inside_level_four
 
         redirect_list: list[str] = []  # for `zh-see` template
 
@@ -3315,10 +3340,15 @@ def parse_language(
             if t in IGNORED_TITLES:
                 pass
             elif t.startswith(PRONUNCIATION_TITLE):
+                # Chinese Pronunciation section kludge; we demote these to
+                # be level 4 instead of 3 so that they're part of a larger
+                # etymology hierarchy; usually the data here is empty and
+                # acts as an inbetween between POS and Etymology data
+                inside_level_four = True
                 if t.startswith(PRONUNCIATION_TITLE + " "):
                     # Pronunciation 1, etc, are used in Chinese Glyphs,
                     # and each of them may have senses under Definition
-                    push_zh_pron_section()
+                    push_level_four_section()
                     wxr.wtp.start_subsection(None)
                 if wxr.config.capture_pronunciation:
                     data = select_data()
