@@ -7,6 +7,7 @@ from wikitextprocessor.parser import LevelNode, TemplateNode
 from ...logging import logger
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from .etymology import extract_etymology
 from .example import extract_examples
 from .gloss import extract_glosses
 from .linkage import extract_linkages
@@ -62,6 +63,8 @@ def parse_section(
             extract_translation(wxr, page_data[-1], level_node)
         elif wxr.config.capture_linkages and section_name in LINKAGE_TITLES:
             extract_linkages(wxr, page_data[-1], level_node)
+        elif wxr.config.capture_etymologies and section_name == "Herkunft":
+            extract_etymology(wxr, page_data[-1], level_node)
 
 
 FORM_POS = {

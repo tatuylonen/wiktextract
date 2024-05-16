@@ -168,3 +168,4 @@ class WordEntry(BaseModelWrap):
     raw_tags: list[str] = []
     categories: list[str] = []
     redirects: list[str] = []
+    etymology_text: str = ""
