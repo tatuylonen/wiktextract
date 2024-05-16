@@ -130,3 +130,50 @@ class TestLinkage(TestCase):
                 },
             ],
         )
+
+    def test_noun_forms_table(self):
+        self.maxDiff = None
+        self.wxr.wtp.add_page(
+            "Шаблон:сущ bg 7",
+            10,
+            """{| class="morfotable ru" cellpadding="3" rules="all"
+! bgcolor="#eef9ff" | [[форма]]
+! bgcolor="#eef9ff" | [[единственное число|ед.&nbsp;ч.]]
+! bgcolor="#eef9ff" | [[множественное число|мн.&nbsp;ч.]]
+|-
+|-
+| bgcolor="#eef9ff" | [[неопределённый|общая]]
+| bgcolor="#ffffff" | публицист
+| bgcolor="#ffffff" | публицисти
+|-
+| bgcolor="#eef9ff" | [[определённый|опред.]]
+| bgcolor="#ffffff" | публициста <br>публицистът
+| bgcolor="#ffffff" | публицистите
+|-
+| bgcolor="#eef9ff" | [[счётная форма|счётн.]]</td>
+| colspan="2" bgcolor="#ffffff"  | публициста
+|-
+| bgcolor="#eef9ff" | [[звательный|зват.]]
+| colspan="2" bgcolor="#ffffff" align="center" | —
+|}[[Категория:Болгарские существительные]]
+<b>публицист</b>
+
+Существительное, мужской род, склонение 7.[[Категория:Болгарские существительные, склонение 7]][[Категория:Мужской род/bg]]]""",
+        )
+        self.wxr.wtp.start_page("публицист")
+        root = self.wxr.wtp.parse("{{сущ bg 7|публицист}}")
+        word_entry = WordEntry(
+            word="публицист", pos="noun", lang_code="bg", lang="Болгарский"
+        )
+        extract_inflection(self.wxr, word_entry, root)
+        self.assertEqual(
+            [f.model_dump(exclude_defaults=True) for f in word_entry.forms],
+            [
+                {"form": "публицист", "tags": ["indefinite", "singular"]},
+                {"form": "публицисти", "tags": ["indefinite", "plural"]},
+                {"form": "публициста", "tags": ["definite", "singular"]},
+                {"form": "публицистът", "tags": ["definite", "singular"]},
+                {"form": "публицистите", "tags": ["definite", "plural"]},
+                {"form": "публициста", "tags": ["count-form", "singular"]},
+            ],
+        )

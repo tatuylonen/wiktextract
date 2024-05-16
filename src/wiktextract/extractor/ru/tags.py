@@ -273,9 +273,24 @@ OTHER_TAGS = {
     "перен.": "figuratively",
     "редк.": "rare",
     # "тж.": "",  # Шаблон:тж.
+    "общая": "indefinite",
+    "опред.": "definite",
+    "счётн.": "count-form",
 }
 
-ALL_TAGS = {**STYLE_TAGS, **GRAMMATICAL_TAGS, **OTHER_TAGS}
+CASE_TAGS = {
+    # Шаблон:сущ ru m a 1a
+    "им.": "nominative",
+    "р.": "genitive",
+    "д.": "dative",
+    "в.": "accusative",
+    "тв.": "instrumental",
+    "пр.": "prepositional",
+    # Шаблон:сущ bg 7
+    "зват.": "vocative",
+}
+
+ALL_TAGS = {**STYLE_TAGS, **GRAMMATICAL_TAGS, **OTHER_TAGS, **CASE_TAGS}
 
 
 def translate_raw_tags(data: WordEntry) -> None:
