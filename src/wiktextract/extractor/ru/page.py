@@ -7,6 +7,7 @@ from ...config import POSSubtitleData
 from ...logging import logger
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from .etymology import extract_etymology
 from .gloss import extract_gloss
 from .inflection import extract_inflection
 from .linkage import extract_linkages
@@ -170,8 +171,7 @@ def parse_section(
         # Word family
         pass
     elif section_title == "этимология" and wxr.config.capture_etymologies:
-        # XXX: Extract etymology
-        pass
+        extract_etymology(wxr, page_data[-1], level3_node)
     elif (
         section_title == "фразеологизмы и устойчивые сочетания"
         and wxr.config.capture_linkages

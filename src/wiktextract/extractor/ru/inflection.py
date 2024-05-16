@@ -134,7 +134,7 @@ def parse_noun_forms_table(
             if table_cell.kind == NodeKind.TABLE_HEADER_CELL:
                 column_headers.append(clean_node(wxr, None, table_cell))
             elif table_cell.kind == NodeKind.TABLE_CELL:
-                if table_cell.attrs.get("bgcolor") == "#eef9ff":
+                if table_cell.attrs.get("bgcolor", "").lower() == "#eef9ff":
                     row_header = clean_node(wxr, None, table_cell)
                 else:
                     cell_text = clean_node(wxr, None, table_cell)
