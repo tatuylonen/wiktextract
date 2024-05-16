@@ -152,3 +152,4 @@ class WordEntry(BaseModelWrap):
         default=[], description="List of coordinate terms"
     )
     holonyms: list[Linkage] = Field(default=[], description="List of holonyms")
+    etymology_text: str = ""
