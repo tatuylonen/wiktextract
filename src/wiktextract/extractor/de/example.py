@@ -1,11 +1,10 @@
-import copy
-
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import LevelNode
-from wiktextract.extractor.de.models import Example, WordEntry
-from wiktextract.extractor.de.utils import find_and_remove_child, match_senseid
-from wiktextract.page import clean_node
-from wiktextract.wxr_context import WiktextractContext
+
+from ...page import clean_node
+from ...wxr_context import WiktextractContext
+from .models import Example, WordEntry
+from .utils import find_and_remove_child, match_senseid
 
 REF_KEY_MAP = {
     "autor": "author",
@@ -60,7 +59,9 @@ def extract_examples(
                 if len(senseid) > 0:
                     for sense in word_entry.senses:
                         if sense.senseid == senseid:
-                            sense.examples.append(copy.deepcopy(example_data))
+                            sense.examples.append(
+                                example_data.model_copy(deep=True)
+                            )
                 else:
                     wxr.wtp.debug(
                         f"Found example data without senseid: {example_data}",

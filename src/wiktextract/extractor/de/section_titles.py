@@ -1,4 +1,4 @@
-from wiktextract.config import POSSubtitleData
+from ...config import POSSubtitleData
 
 # argument of title template https://de.wiktionary.org/wiki/Vorlage:Wortart
 POS_SECTIONS: POSSubtitleData = {

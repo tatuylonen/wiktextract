@@ -2,11 +2,11 @@ import re
 
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import LevelNode
-from wiktextract.extractor.de.models import Linkage, WordEntry
-from wiktextract.extractor.share import split_senseids
-from wiktextract.page import clean_node
-from wiktextract.wxr_context import WiktextractContext
 
+from ...page import clean_node
+from ...wxr_context import WiktextractContext
+from ..share import split_senseids
+from .models import Linkage, WordEntry
 from .section_titles import LINKAGE_TITLES
 
 

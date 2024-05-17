@@ -196,7 +196,27 @@ GENDER_TAGS = {
     "f": "feminine",
 }
 
-GRAMMATICAL_TAGS = {**K_TEMPLATE_TAGS, **GENDER_TAGS}
+NUMBER_TAGS = {
+    # Vorlage:Deutsch Substantiv Übersicht
+    "Singular": "singular",
+    "Plural": "plural",
+}
+
+CASE_TAGS = {
+    # Vorlage:Deutsch Substantiv Übersicht
+    "Nominativ": "nominative",
+    "Genitiv": "genitive",
+    "Dativ": "dative",
+    "Akkusativ": "accusative",
+}
+
+
+GRAMMATICAL_TAGS = {
+    **K_TEMPLATE_TAGS,
+    **GENDER_TAGS,
+    **NUMBER_TAGS,
+    **CASE_TAGS,
+}
 
 
 def translate_raw_tags(data: WordEntry) -> None:

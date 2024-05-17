@@ -130,6 +130,12 @@ class Sound(BaseModelWrap):
     tags: list[str] = []
 
 
+class Form(BaseModelWrap):
+    form: str
+    tags: list[str] = []
+    raw_tags: list[str] = []
+
+
 class WordEntry(BaseModelWrap):
     """
     WordEntry is a dictionary containing lexical information of a single word
@@ -169,3 +175,4 @@ class WordEntry(BaseModelWrap):
     categories: list[str] = []
     redirects: list[str] = []
     etymology_text: str = ""
+    forms: list[Form] = []
