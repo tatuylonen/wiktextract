@@ -290,7 +290,47 @@ CASE_TAGS = {
     "зват.": "vocative",
 }
 
-ALL_TAGS = {**STYLE_TAGS, **GRAMMATICAL_TAGS, **OTHER_TAGS, **CASE_TAGS}
+TENSE_TAGS = {
+    # Шаблон:Гл-блок
+    "наст.": "present",
+    "будущ.": "future",
+    "прош.": "past",
+    "будущее": "future",
+}
+
+MOOD_TAGS = {
+    # Шаблон:Гл-блок
+    "повелит.": "imperative",
+}
+
+PERSON_TAGS = {
+    # Шаблон:Гл-блок
+    "я": ["first-person", "singular"],
+    "ты": ["second-person", "singular"],
+    "он\nона\nоно": ["third-person", "singular"],
+    "мы": ["first-person", "plural"],
+    "вы": ["second-person", "plural"],
+    "они": ["third-person", "plural"],
+}
+
+VOICE_TAGS = {
+    # Шаблон:Гл-блок
+    "пр. действ.": "active",
+    "деепр.": "adverbial",
+    "пр. страд.": "passive",
+}
+
+
+ALL_TAGS = {
+    **STYLE_TAGS,
+    **GRAMMATICAL_TAGS,
+    **OTHER_TAGS,
+    **CASE_TAGS,
+    **TENSE_TAGS,
+    **MOOD_TAGS,
+    **PERSON_TAGS,
+    **VOICE_TAGS,
+}
 
 
 def translate_raw_tags(data: WordEntry) -> None:
