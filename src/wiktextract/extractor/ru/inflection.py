@@ -18,8 +18,8 @@ def extract_inflection(
     for template_node in level_node.find_child(NodeKind.TEMPLATE):
         if template_node.template_name.startswith("прил"):
             parse_adj_forms_table(wxr, word_entry, template_node)
-        elif template_node.template_name.startswith("сущ"):
-            parse_noun_forms_table(wxr, word_entry, template_node)
+        elif template_node.template_name.startswith(("сущ", "гл")):
+            parse_wikitext_forms_table(wxr, word_entry, template_node)
 
 
 @dataclass
@@ -34,6 +34,7 @@ def parse_adj_forms_table(
     word_entry: WordEntry,
     template_node: TemplateNode,
 ):
+    # HTML table
     # https://ru.wiktionary.org/wiki/Шаблон:прил
     expanded_template = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(template_node), expand_all=True
@@ -109,13 +110,14 @@ def parse_adj_forms_table(
             row_headers = updated_row_headers
 
 
-def parse_noun_forms_table(
+def parse_wikitext_forms_table(
     wxr: WiktextractContext,
     word_entry: WordEntry,
     template_node: TemplateNode,
 ) -> None:
     # https://ru.wiktionary.org/wiki/Шаблон:сущ-ru
     # Шаблон:inflection сущ ru
+    # Шаблон:Гл-блок
     expanded_template = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(template_node), expand_all=True
     )
@@ -125,7 +127,7 @@ def parse_noun_forms_table(
     table_node = table_nodes[0]
     column_headers = []
     for table_row in table_node.find_child(NodeKind.TABLE_ROW):
-        row_header = ""
+        row_headers = []
         for col_index, table_cell in enumerate(
             table_row.find_child(
                 NodeKind.TABLE_HEADER_CELL | NodeKind.TABLE_CELL
@@ -134,17 +136,59 @@ def parse_noun_forms_table(
             if table_cell.kind == NodeKind.TABLE_HEADER_CELL:
                 column_headers.append(clean_node(wxr, None, table_cell))
             elif table_cell.kind == NodeKind.TABLE_CELL:
+                cell_text = clean_node(wxr, None, table_cell)
                 if table_cell.attrs.get("bgcolor", "").lower() == "#eef9ff":
-                    row_header = clean_node(wxr, None, table_cell)
+                    for row_header in cell_text.splitlines():
+                        row_headers.append(row_header)
                 else:
-                    cell_text = clean_node(wxr, None, table_cell)
                     for form_text in cell_text.splitlines():
-                        form = Form(form=form_text)
-                        if len(row_header) > 0:
-                            form.raw_tags.append(row_header)
-                        if col_index < len(column_headers):
-                            form.raw_tags.append(column_headers[col_index])
-                        if len(form.form) > 0 and form.form != "—":
-                            translate_raw_tags(form)
-                            word_entry.forms.append(form)
+                        add_form_data(
+                            word_entry,
+                            form_text,
+                            row_headers,
+                            column_headers,
+                            col_index,
+                        )
+
+        # cursed layout from Шаблон:Гл-блок
+        for tr_tag in table_row.find_html("tr"):
+            row_headers = []
+            for td_tag in tr_tag.find_html("td"):
+                if td_tag.contain_node(NodeKind.LINK):
+                    for link_node in td_tag.find_child(NodeKind.LINK):
+                        if td_tag.attrs.get("bgcolor", "").lower() == "#eef9ff":
+                            row_headers.append(clean_node(wxr, None, link_node))
+                        else:
+                            add_form_data(
+                                word_entry,
+                                clean_node(wxr, None, link_node),
+                                row_headers,
+                                [],
+                                0,
+                            )
+                else:
+                    add_form_data(
+                        word_entry,
+                        clean_node(wxr, None, td_tag),
+                        row_headers,
+                        [],
+                        0,
+                    )
+
     clean_node(wxr, word_entry, expanded_template)  # add category links
+
+
+def add_form_data(
+    word_entry: WordEntry,
+    form_text: str,
+    row_headers: list[str],
+    col_headers: list[str],
+    col_index: int,
+) -> None:
+    form = Form(form=form_text)
+    form.raw_tags.extend(row_headers)
+    if col_index < len(col_headers):
+        form.raw_tags.append(col_headers[col_index])
+    if len(form.form) > 0 and form.form != "—":
+        translate_raw_tags(form)
+        word_entry.forms.append(form)
