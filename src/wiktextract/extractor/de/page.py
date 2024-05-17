@@ -10,6 +10,7 @@ from ...wxr_context import WiktextractContext
 from .etymology import extract_etymology
 from .example import extract_examples
 from .gloss import extract_glosses
+from .inflection import extract_forms
 from .linkage import extract_linkages
 from .models import Sense, WordEntry
 from .pronunciation import extract_pronunciation
@@ -129,35 +130,9 @@ def process_pos_section(
     for level_4_node in level_node.find_child(NodeKind.LEVEL4):
         parse_section(wxr, page_data, base_data, level_4_node)
 
-    for non_l4_node in level_node.invert_find_child(NodeKind.LEVEL4):
-        if (
-            isinstance(non_l4_node, WikiNode)
-            and non_l4_node.kind == NodeKind.TEMPLATE
-            and "Übersicht" in non_l4_node.template_name
-        ):
-            # XXX: de: Extract form table templates
-            pass
-        elif (
-            isinstance(non_l4_node, WikiNode)
-            and non_l4_node.kind == NodeKind.TABLE
-            and "inflection-table" in non_l4_node.attrs.get("class", "")
-        ):
-            # XXX: de: Extract html form table
-            pass
-        elif (
-            isinstance(non_l4_node, WikiNode)
-            and non_l4_node.kind == NodeKind.LINK
-            and len(non_l4_node.largs) > 0
-            and len(non_l4_node.largs[0]) > 0
-            and "Kategorie" in non_l4_node.largs[0][0]
-        ):
-            # XXX Process categories
-            pass
-        else:
-            wxr.wtp.debug(
-                f"Unexpected node in pos section: {non_l4_node}",
-                sortid="extractor/de/page/process_pos_section/41",
-            )
+    for template_node in level_node.find_child(NodeKind.TEMPLATE):
+        if template_node.template_name.endswith("Übersicht"):
+            extract_forms(wxr, page_data[-1], template_node)
 
 
 def parse_page(

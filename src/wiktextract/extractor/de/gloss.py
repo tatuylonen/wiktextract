@@ -1,8 +1,8 @@
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import LevelNode, TemplateNode
-from wiktextract.page import clean_node
-from wiktextract.wxr_context import WiktextractContext
 
+from ...page import clean_node
+from ...wxr_context import WiktextractContext
 from .models import Sense, WordEntry
 from .tags import translate_raw_tags
 from .utils import match_senseid
