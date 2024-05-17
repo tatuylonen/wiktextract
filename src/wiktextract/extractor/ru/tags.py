@@ -288,6 +288,11 @@ CASE_TAGS = {
     "пр.": "prepositional",
     # Шаблон:сущ bg 7
     "зват.": "vocative",
+    # Шаблон:сущ de (e)s er ern/n
+    "ном.": "nominative",
+    "ген.": "genitive",
+    "дат.": "dative",
+    "акк.": "accusative",
 }
 
 TENSE_TAGS = {
