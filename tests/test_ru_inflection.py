@@ -8,6 +8,8 @@ from wiktextract.wxr_context import WiktextractContext
 
 
 class TestLinkage(TestCase):
+    maxDiff = None
+
     def setUp(self) -> None:
         self.wxr = WiktextractContext(
             Wtp(lang_code="ru"), WiktionaryConfig(dump_file_lang_code="ru")
@@ -17,7 +19,6 @@ class TestLinkage(TestCase):
         self.wxr.wtp.close_db_conn()
 
     def test_adj_forms_table(self):
-        self.maxDiff = None
         self.wxr.wtp.add_page(
             "Шаблон:прил ru 3aX~",
             10,
@@ -132,7 +133,6 @@ class TestLinkage(TestCase):
         )
 
     def test_noun_forms_table(self):
-        self.maxDiff = None
         self.wxr.wtp.add_page(
             "Шаблон:сущ bg 7",
             10,
@@ -175,5 +175,58 @@ class TestLinkage(TestCase):
                 {"form": "публицистът", "tags": ["definite", "singular"]},
                 {"form": "публицистите", "tags": ["definite", "plural"]},
                 {"form": "публициста", "tags": ["count-form", "singular"]},
+            ],
+        )
+
+    def test_verb_table(self):
+        self.wxr.wtp.add_page(
+            "Шаблон:гл ru 5a-т",
+            10,
+            """{| rules="all" class="morfotable ru"
+! bgcolor="#EEF9FF" | &#160;
+! bgcolor="#EEF9FF" | [[настоящее время|наст.]]
+! bgcolor="#EEF9FF" | [[прошедшее время|прош.]]
+! bgcolor="#EEF9FF" | [[повелительное наклонение|повелит.]]
+|-
+| bgcolor="#EEF9FF" align="right" | [[он|Он]]<br />[[она|Она]]<br />[[оно|Оно]]
+| ви́дит
+| ви́дел<br />ви́дела<br />ви́дело
+| align="center" | —
+|-
+<tr>
+<td bgcolor="#EEF9FF" align="right">[[деепричастие|Деепр.]] [[прошедшее время|прош.]]</td>
+<td colspan="3" align="center">[[видев#ви́дев|ви́дев]], [[видевши#ви́девши|ви́девши]]</td>
+</tr>
+<tr>
+<td bgcolor="#EEF9FF" align="right">[[будущее время|Будущее]]</td>
+<td colspan="3" align="center">буду/будешь… ви́деть</td>
+</tr>
+|}""",
+        )
+        self.wxr.wtp.start_page("видеть")
+        root = self.wxr.wtp.parse("{{гл ru 5a-т}}")
+        word_entry = WordEntry(
+            word="видеть", pos="verb", lang_code="ru", lang="Русский"
+        )
+        extract_inflection(self.wxr, word_entry, root)
+        self.assertEqual(
+            [f.model_dump(exclude_defaults=True) for f in word_entry.forms],
+            [
+                {
+                    "form": "ви́дит",
+                    "tags": ["third-person", "singular", "present"],
+                },
+                {"form": "ви́дел", "tags": ["third-person", "singular", "past"]},
+                {
+                    "form": "ви́дела",
+                    "tags": ["third-person", "singular", "past"],
+                },
+                {
+                    "form": "ви́дело",
+                    "tags": ["third-person", "singular", "past"],
+                },
+                {"form": "ви́дев", "tags": ["adverbial", "past"]},
+                {"form": "ви́девши", "tags": ["adverbial", "past"]},
+                {"form": "буду/будешь… ви́деть", "tags": ["future"]},
             ],
         )

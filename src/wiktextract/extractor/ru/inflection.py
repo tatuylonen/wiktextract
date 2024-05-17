@@ -138,8 +138,7 @@ def parse_wikitext_forms_table(
             elif table_cell.kind == NodeKind.TABLE_CELL:
                 cell_text = clean_node(wxr, None, table_cell)
                 if table_cell.attrs.get("bgcolor", "").lower() == "#eef9ff":
-                    for row_header in cell_text.splitlines():
-                        row_headers.append(row_header)
+                    row_headers.append(cell_text)
                 else:
                     for form_text in cell_text.splitlines():
                         add_form_data(
