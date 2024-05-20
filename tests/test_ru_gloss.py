@@ -9,6 +9,8 @@ from wiktextract.wxr_context import WiktextractContext
 
 
 class TestRUGloss(unittest.TestCase):
+    maxDiff = None
+
     def setUp(self) -> None:
         self.wxr = WiktextractContext(
             Wtp(lang_code="ru"),
@@ -261,6 +263,89 @@ class TestRUGloss(unittest.TestCase):
                             "tags": ["iterative"],
                         }
                     ],
+                },
+            ],
+        )
+
+    def test_meaning_template_under_level4_title(self):
+        self.wxr.wtp.start_page("организм")
+        self.wxr.wtp.add_page("Шаблон:биол.", 10, "биол.")
+        root = self.wxr.wtp.parse("""==== Значение ====
+# {{значение
+|определение=[[совокупность]] [[система органов|систем органов]] как единая работоспособная система
+|пометы={{биол.|ru}}
+|примеры={{пример|Организм человека имеет значительный запас прочности, каждое движение обеспечивается совместной работой различных групп мышц в дублирующем режиме.|Олег Васильев|Художественная йога. Теория и практика|издание=Боевое искусство планеты|2004|источник=НКРЯ}}
+|антонимы=-
+|гипонимы=организм человека, организм животного; кибернетический организм
+|якорь=физиология
+|язык=ru
+}}""")
+        word_entry = WordEntry(
+            word="организм", lang="Русский", lang_code="ru", pos="noun"
+        )
+        extract_gloss(self.wxr, word_entry, root.children[0])
+        data = word_entry.model_dump(exclude_defaults=True)
+        del data["senses"][0]["examples"]
+        self.assertEqual(
+            data,
+            {
+                "lang": "Русский",
+                "lang_code": "ru",
+                "word": "организм",
+                "pos": "noun",
+                "senses": [
+                    {
+                        "glosses": [
+                            "совокупность систем органов как единая работоспособная система"
+                        ],
+                        "topics": ["biology"],
+                    }
+                ],
+                "hyponyms": [
+                    {
+                        "word": "организм человека",
+                        "sense": "совокупность систем органов как единая работоспособная система",
+                    },
+                    {
+                        "word": "организм животного",
+                        "sense": "совокупность систем органов как единая работоспособная система",
+                    },
+                    {
+                        "word": "кибернетический организм",
+                        "sense": "совокупность систем органов как единая работоспособная система",
+                    },
+                ],
+            },
+        )
+        self.assertEqual(len(word_entry.senses[0].examples), 1)
+
+    def test_meaning_template_under_level3_title(self):
+        self.wxr.wtp.add_page("Шаблон:-cmn-", 10, "Китайский (Гуаньхуа)")
+        self.assertEqual(
+            parse_page(
+                self.wxr,
+                "猫",
+                """= {{-cmn-}} =
+=== Морфологические и синтаксические свойства ===
+{{cmn-noun|s|pin=māo|pint=mao1|tra=貓|sim=猫|mw=只|rs=犬09}}
+=== Семантические свойства ===
+# {{значение
+  |определение = [[кот]], [[кошка]]
+  |пометы      = [[зоол.]]
+  |гиперонимы  = [[动物]]
+  |язык        = cmn
+}}""",
+            ),
+            [
+                {
+                    "lang": "Китайский (Гуаньхуа)",
+                    "lang_code": "cmn",
+                    "word": "猫",
+                    "pos": "noun",
+                    "senses": [
+                        {"glosses": ["кот, кошка"], "topics": ["zoology"]}
+                    ],
+                    "hypernyms": [{"word": "动物", "sense": "кот, кошка"}],
                 },
             ],
         )

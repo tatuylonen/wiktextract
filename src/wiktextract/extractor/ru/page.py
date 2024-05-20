@@ -8,7 +8,7 @@ from ...logging import logger
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .etymology import extract_etymology
-from .gloss import extract_gloss
+from .gloss import extract_gloss, process_meaning_template
 from .inflection import extract_inflection
 from .linkage import extract_linkages
 from .models import AltForm, Sense, Sound, WordEntry
@@ -34,19 +34,27 @@ def process_semantic_section(
     page_data: list[WordEntry],
     semantic_level_node: WikiNode,
 ):
-    for level4_node in semantic_level_node.find_child(NodeKind.LEVEL4):
-        section_title = clean_node(wxr, None, level4_node.largs).lower()
-        if section_title == "значение":
-            extract_gloss(wxr, page_data[-1], level4_node)
-
-        elif section_title in LINKAGE_TITLES:
-            linkage_type = LINKAGE_TITLES[section_title]
-            extract_linkages(wxr, page_data[-1], linkage_type, level4_node)
-        else:
-            wxr.wtp.debug(
-                f"Unprocessed section {section_title} in semantic section",
-                sortid="extractor/ru/page/process_semantic_section/35",
-            )
+    for node in semantic_level_node.find_child(NodeKind.LEVEL4 | NodeKind.LIST):
+        if node.kind == NodeKind.LEVEL4:
+            section_title = clean_node(wxr, None, node.largs).lower()
+            if section_title == "значение":
+                extract_gloss(wxr, page_data[-1], node)
+            elif section_title in LINKAGE_TITLES:
+                linkage_type = LINKAGE_TITLES[section_title]
+                extract_linkages(wxr, page_data[-1], linkage_type, node)
+            else:
+                wxr.wtp.debug(
+                    f"Unprocessed section {section_title} in semantic section",
+                    sortid="extractor/ru/page/process_semantic_section/35",
+                )
+        elif node.kind == NodeKind.LIST:
+            for template_node in node.find_child_recursively(NodeKind.TEMPLATE):
+                if template_node.template_name == "значение":
+                    sense = process_meaning_template(
+                        wxr, None, page_data[-1], template_node
+                    )
+                    if len(sense.glosses) > 0:
+                        page_data[-1].senses.append(sense)
 
     # XXX: Process non level4 nodes such as illustration templates "{илл|...}",
     # cf. https://ru.wiktionary.org/wiki/овощ
