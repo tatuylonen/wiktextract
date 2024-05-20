@@ -1,10 +1,18 @@
-from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import LEVEL_KIND_FLAGS, WikiNodeChildrenList
-from wiktextract.page import clean_node
-from wiktextract.wxr_context import WiktextractContext
+import re
+from typing import Optional
 
+from wikitextprocessor import NodeKind, WikiNode
+from wikitextprocessor.parser import (
+    LEVEL_KIND_FLAGS,
+    TemplateNode,
+    WikiNodeChildrenList,
+)
+
+from ...page import clean_node
+from ...wxr_context import WiktextractContext
 from .example import process_example_template
-from .models import Sense, WordEntry
+from .models import Linkage, Sense, WordEntry
+from .section_titles import LINKAGE_TITLES
 from .tags import translate_raw_tags
 
 # Wiktioniary intern templates that can be ignores
@@ -104,7 +112,7 @@ def process_gloss_nodes(
     note_templates: list[WikiNode] = []
 
     for child in gloss_nodes:
-        if isinstance(child, WikiNode) and child.kind == NodeKind.TEMPLATE:
+        if isinstance(child, TemplateNode):
             if child.template_name.lower() in IGNORED_TEMPLATES:
                 continue
             elif child.template_name == "пример":
@@ -135,6 +143,8 @@ def process_gloss_nodes(
                 # Assume node is tag template
                 tag_templates.append(child)
                 raw_gloss_children.append(child)
+            elif child.template_name == "значение":
+                process_meaning_template(wxr, sense, word_entry, child)
         else:
             clean_gloss_children.append(child)
             raw_gloss_children.append(child)
@@ -171,3 +181,57 @@ def remove_obsolete_leading_nodes(nodes: WikiNodeChildrenList):
         and nodes[0].strip() in ["", "и", "или", ",", ".", ";", ":", "\n"]
     ):
         nodes.pop(0)
+
+
+def process_meaning_template(
+    wxr: WiktextractContext,
+    sense: Optional[Sense],
+    word_entry: WordEntry,
+    template_node: TemplateNode,
+) -> Sense:
+    # https://ru.wiktionary.org/wiki/Шаблон:значение
+    if sense is None:
+        sense = Sense()
+
+    gloss = ""
+    for param_name, param_value in template_node.template_parameters.items():
+        if param_name == "определение":
+            gloss = clean_node(wxr, None, param_value)
+            if len(gloss) > 0:
+                sense.glosses.append(gloss)
+        elif param_name == "пометы":
+            raw_tag = clean_node(wxr, None, param_value)
+            if len(raw_tag) > 0:
+                sense.raw_tags.append(raw_tag)
+        elif param_name == "примеры" and isinstance(param_value, list):
+            for t_node in param_value:
+                if isinstance(t_node, TemplateNode):
+                    process_example_template(wxr, sense, t_node)
+        elif param_name in LINKAGE_TITLES:
+            linkage_type = LINKAGE_TITLES[param_name]
+            if isinstance(param_value, str) and len(param_value.strip()) > 0:
+                for linkage_word in re.split(r",|;", param_value):
+                    linkage_word = linkage_word.strip()
+                    if len(linkage_word) > 0 and linkage_word != "-":
+                        linkage_list = getattr(word_entry, linkage_type)
+                        linkage_list.append(
+                            Linkage(word=linkage_word, sense=gloss)
+                        )
+            elif isinstance(param_value, list):
+                for param_node in param_value:
+                    if (
+                        isinstance(param_node, WikiNode)
+                        and param_node.kind == NodeKind.LINK
+                    ):
+                        linkage_word = clean_node(wxr, None, param_node)
+                        if len(linkage_word) > 0:
+                            linkage_list = getattr(word_entry, linkage_type)
+                            linkage_list.append(
+                                Linkage(word=linkage_word, sense=gloss)
+                            )
+
+    if len(sense.glosses) > 0:
+        translate_raw_tags(sense)
+
+    clean_node(wxr, sense, template_node)
+    return sense

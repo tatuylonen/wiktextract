@@ -63,4 +63,5 @@ LINKAGE_TITLES: dict[str, str] = {
     "синонимы": "synonyms",
     "согипонимы": "coordinate_terms",
     "холонимы": "holonyms",
+    "конверсивы": "antonyms",
 }

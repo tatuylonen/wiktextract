@@ -32,6 +32,7 @@ class Linkage(BaseModelWrap):
     word: str = ""
     tags: list[str] = []
     raw_tags: list[str] = []
+    sense: str = ""
 
 
 class Sound(BaseModelWrap):
