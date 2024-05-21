@@ -194,6 +194,10 @@ GENDER_TAGS = {
     "n": "neuter",
     "m": "masculine",
     "f": "feminine",
+    # Vorlage:Deklinationsseite Adjektiv
+    "Maskulinum": "masculine",
+    "Femininum": "feminine",
+    "Neutrum": "neuter",
 }
 
 NUMBER_TAGS = {
@@ -210,12 +214,35 @@ CASE_TAGS = {
     "Akkusativ": "accusative",
 }
 
+COMPARISON_TAGS = {
+    # Vorlage:Deutsch Adjektiv Übersicht
+    # Vorlage:Deklinationsseite Adjektiv
+    "Positiv": "positive",
+    "Komparativ": "comparative",
+    "Superlativ": "superlative",
+}
+
+DECLENSION_TAGS = {
+    # https://en.wikipedia.org/wiki/German_declension
+    # Vorlage:Deklinationsseite Adjektiv
+    "Starke Deklination": "strong",
+    "Schwache Deklination": "weak",
+    "Gemischte Deklination": "mixed",
+}
+
+OTHER_TAGS = {
+    # Vorlage:Deklinationsseite Adjektiv
+    "Prädikativ": "predicative",
+}
 
 GRAMMATICAL_TAGS = {
     **K_TEMPLATE_TAGS,
     **GENDER_TAGS,
     **NUMBER_TAGS,
     **CASE_TAGS,
+    **COMPARISON_TAGS,
+    **DECLENSION_TAGS,
+    **OTHER_TAGS,
 }
 
 
