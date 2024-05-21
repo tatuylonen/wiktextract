@@ -10,6 +10,8 @@ def extract_etymology(
     word_entry: WordEntry,
     level_node: WikiNode,
 ) -> None:
-    word_entry.etymology_text = clean_node(
-        wxr, word_entry, level_node.children
-    ).removeprefix(":")
+    word_entry.etymology_text = (
+        clean_node(wxr, word_entry, level_node.children)
+        .removeprefix(":")
+        .strip()
+    )

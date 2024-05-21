@@ -134,6 +134,7 @@ class Form(BaseModelWrap):
     form: str
     tags: list[str] = []
     raw_tags: list[str] = []
+    source: str = ""
 
 
 class WordEntry(BaseModelWrap):
