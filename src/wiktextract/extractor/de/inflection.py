@@ -1,4 +1,5 @@
 import re
+from dataclasses import dataclass
 
 from wikitextprocessor import NodeKind
 from wikitextprocessor.parser import TemplateNode
@@ -19,6 +20,87 @@ def extract_forms(
         process_noun_table(wxr, word_entry, template_node)
     elif template_node.template_name.endswith("Adjektiv Übersicht"):
         process_adj_table(wxr, word_entry, template_node)
+    elif template_node.template_name.endswith("Verb Übersicht"):
+        process_verb_table(wxr, word_entry, template_node)
+
+
+@dataclass
+class RowspanHeader:
+    text: str
+    index: int
+    span: int
+
+
+def process_verb_table(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    template_node: TemplateNode,
+) -> None:
+    # Vorlage:Deutsch Verb Übersicht
+    expanded_template = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(template_node), expand_all=True
+    )
+    table_nodes = list(expanded_template.find_child(NodeKind.TABLE))
+    if len(table_nodes) == 0:
+        return
+    table_node = table_nodes[0]
+    col_headers = []
+    has_person = False
+    row_headers = []
+    for table_row in table_node.find_child(NodeKind.TABLE_ROW):
+        col_index = 0
+        header_col_index = 0
+        person = ""
+        for table_cell in table_row.find_child(
+            NodeKind.TABLE_HEADER_CELL | NodeKind.TABLE_CELL
+        ):
+            cell_text = clean_node(wxr, None, table_cell)
+            if table_cell.kind == NodeKind.TABLE_HEADER_CELL:
+                if cell_text == "":
+                    continue
+                elif header_col_index == 0:
+                    rowspan = int(table_cell.attrs.get("rowspan", "1"))
+                    row_headers.append(RowspanHeader(cell_text, 0, rowspan))
+                elif cell_text in ("Person", "Wortform"):
+                    has_person = True
+                else:  # new table
+                    col_headers.append(cell_text)
+                    has_person = False
+                    person = ""
+                header_col_index += 1
+            elif table_cell.kind == NodeKind.TABLE_CELL:
+                if has_person and col_index == 0:
+                    if cell_text in ("Singular", "Plural"):
+                        row_headers.append(RowspanHeader(cell_text, 0, 1))
+                    else:
+                        person = cell_text
+                elif cell_text.startswith("All other forms:"):
+                    pass
+                else:
+                    for cell_line in cell_text.splitlines():
+                        cell_line = cell_line.strip()
+                        if cell_line == "":
+                            continue
+                        for p in person.split(","):
+                            p = p.strip()
+                            form_text = cell_line
+                            if p != "":
+                                form_text = p + " " + cell_line
+                            form = Form(form=form_text)
+                            if col_index < len(col_headers):
+                                form.raw_tags.append(col_headers[col_index])
+                            for row_header in row_headers:
+                                form.raw_tags.append(row_header.text)
+                            translate_raw_tags(form)
+                            word_entry.forms.append(form)
+                col_index += 1
+
+        new_row_headers = []
+        for row_header in row_headers:
+            if row_header.span > 1:
+                row_header.span -= 1
+                new_row_headers.append(row_header)
+        row_headers = new_row_headers
 
 
 def process_noun_table(
