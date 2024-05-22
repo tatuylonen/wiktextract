@@ -550,6 +550,13 @@ ignored_etymology_templates: list[str] = [
     "cln",
     "langname-lite",
     "no deprecated lang param usage",
+    "mention",
+    "m",
+    "m-self",
+    "link",
+    "l",
+    "ll",
+    "l-self",
 ]
 # Regexp for matching ignored etymology template names.  This adds certain
 # prefixes to the names listed above.
@@ -814,11 +821,21 @@ def parse_language(
         data_append(base_data, "tags", "reconstruction")
     sense_data: SenseData = {}
     pos_data: WordData = {}  # For a current part-of-speech
+    level_four_data: WordData = {}  # Chinese Pronunciation-sections in-between
     etym_data: WordData = {}  # For one etymology
     pos_datas: list[SenseData] = []
+    level_four_datas: list[WordData] = []
     etym_datas: list[WordData] = []
     page_datas: list[WordData] = []
     have_etym = False
+    inside_level_four = False  # This is for checking if the etymology section
+    # or article has a Pronunciation section, for Chinese mostly; because
+    # Chinese articles can have three level three sections (two etymology
+    # sections and pronunciation sections) one after another, we need a kludge
+    # to better keep track of whether we're in a normal "etym" or inside a
+    # "level four" (which is what we've turned the level three Pron sections
+    # into in the fix_subtitle_hierarchy(); all other sections are demoted by
+    # a step.
     stack: list[str] = []  # names of items on the "stack"
 
     def merge_base(data: WordData, base: WordData) -> None:
@@ -927,32 +944,59 @@ def parse_language(
         if wxr.wtp.subsection:
             data: WordData = {"senses": pos_datas}
             merge_base(data, pos_data)
-            etym_datas.append(data)
+            level_four_datas.append(data)
         pos_data = {}
         pos_datas = []
         wxr.wtp.start_subsection(None)
+
+    def push_level_four_section() -> None:
+        """Starts collecting data for a new level four sections, which
+        is usually virtual and empty, unless the article has Chinese
+        'Pronunciation' sections that are etymology-section-like but
+        under etymology, and at the same level in the source. We modify
+        the source to demote Pronunciation sections like that to level
+        4, and other sections one step lower."""
+        nonlocal level_four_data
+        nonlocal level_four_datas
+        nonlocal etym_datas
+        push_pos()
+        # print(f"======\n{etym_data=}")
+        # print(f"======\n{etym_datas=}")
+        # print(f"======\n{level_four_data=}")
+        # print(f"======\n{level_four_datas=}")
+        for data in level_four_datas:
+            merge_base(data, level_four_data)
+            etym_datas.append(data)
+        for data in etym_datas:
+            merge_base(data, etym_data)
+            page_datas.append(data)
+        level_four_data = {}
+        level_four_datas = []
+        etym_datas = []
 
     def push_etym() -> None:
         """Starts collecting data for a new etymology."""
         nonlocal etym_data
         nonlocal etym_datas
         nonlocal have_etym
+        nonlocal inside_level_four
         have_etym = True
-        push_pos()
-        for data in etym_datas:
-            merge_base(data, etym_data)
-            page_datas.append(data)
+        push_level_four_section()
+        inside_level_four = False
         etym_data = {}
-        etym_datas = []
 
     def select_data() -> WordData:
         """Selects where to store data (pos or etym) based on whether we
         are inside a pos (part-of-speech)."""
+        # print(f"{wxr.wtp.subsection=}")
+        # print(f"{stack=}")
         if wxr.wtp.subsection is not None:
             return pos_data
         if stack[-1] == language:
             return base_data
-        return etym_data
+        if inside_level_four is False:
+            return etym_data
+        return level_four_data
 
     def head_post_template_fn(
         name: str, ht: TemplateArgs, expansion: str
@@ -1054,7 +1098,7 @@ def parse_language(
                 and x.largs[0][0] in FLOATING_TABLE_TEMPLATES
             ),
         )
-        tempnode = WikiNode(NodeKind.LEVEL5, 0)
+        tempnode = WikiNode(NodeKind.LEVEL6, 0)
         tempnode.largs = [["Inflection"]]
         tempnode.children = floaters
         parse_inflection(tempnode, "Floating Div", pos)
@@ -1596,7 +1640,6 @@ def parse_language(
                 "uxi",
                 "usex",
                 "afex",
-                "zh-x",
                 "prefixusex",
                 "ko-usex",
                 "ko-x",
@@ -3248,6 +3291,7 @@ def parse_language(
         """This recurses into a subtree in the parse tree for a page."""
         nonlocal etym_data
         nonlocal pos_data
+        nonlocal inside_level_four
 
         redirect_list: list[str] = []  # for `zh-see` template
 
@@ -3296,10 +3340,15 @@ def parse_language(
             if t in IGNORED_TITLES:
                 pass
             elif t.startswith(PRONUNCIATION_TITLE):
+                # Chinese Pronunciation section kludge; we demote these to
+                # be level 4 instead of 3 so that they're part of a larger
+                # etymology hierarchy; usually the data here is empty and
+                # acts as an inbetween between POS and Etymology data
+                inside_level_four = True
                 if t.startswith(PRONUNCIATION_TITLE + " "):
                     # Pronunciation 1, etc, are used in Chinese Glyphs,
                     # and each of them may have senses under Definition
-                    push_etym()
+                    push_level_four_section()
                     wxr.wtp.start_subsection(None)
                 if wxr.config.capture_pronunciation:
                     data = select_data()
@@ -3413,6 +3462,7 @@ def parse_language(
                     continue
                 usex_type = None
                 example_template_args = []
+                example_template_names = []
 
                 def usex_template_fn(name, ht):
                     nonlocal usex_type
@@ -3421,6 +3471,7 @@ def parse_language(
                     if name in usex_templates:
                         usex_type = "example"
                         example_template_args.append(ht)
+                        example_template_names.append(name)
                     elif name in quotation_templates:
                         usex_type = "quotation"
                     for prefix in template_linkages:
@@ -3538,7 +3589,12 @@ def parse_language(
                             lines = [parts[0].strip()]
                             tr = parts[1].strip()
                 elif len(lines) > 1:
-                    if any(re.search(r"[]\d:)]\s*$", x) for x in lines[:-1]):
+                    if any(
+                        re.search(r"[]\d:)]\s*$", x) for x in lines[:-1]
+                    ) and not (
+                        len(example_template_names) == 1
+                        and example_template_names[0] in ("zh-x", "zh-usex")
+                    ):
                         ref = []
                         for i in range(len(lines)):
                             if re.match(r"^[#*]*:+(\s*$|\s+)", lines[i]):
@@ -3630,6 +3686,29 @@ def parse_language(
                                 i -= 1
                             tr = "\n".join(lines[i:])
                             lines = lines[:i]
+                    elif (
+                        len(lines) > 2
+                        and len(example_template_names)
+                        and example_template_names[0]
+                        in (
+                            "zh-x",
+                            "zh-usex",
+                        )
+                    ):
+                        original_lines = []
+                        for i, line in enumerate(lines):
+                            if not line:
+                                continue
+                            cl = classify_desc(line.split("[")[0])
+                            if line.startswith("From:"):
+                                ref += line
+                            elif cl == "other":
+                                original_lines.append(i)
+                            elif cl == "romanization":
+                                roman += line
+                            elif cl == "english":
+                                tr += line
+                        lines = [lines[i] for i in original_lines]
 
                 roman = re.sub(r"[ \t\r]+", " ", roman).strip()
                 roman = re.sub(r"\[\s*…\s*\]", "[…]", roman)
@@ -3807,8 +3886,21 @@ def parse_top_template(wxr, node, data):
 
 def fix_subtitle_hierarchy(wxr: WiktextractContext, text: str) -> str:
     """Fix subtitle hierarchy to be strict Language -> Etymology ->
-    Part-of-Speech -> Translation/Linkage."""
+    Part-of-Speech -> Translation/Linkage. Also merge Etymology sections
+    that are next to each other."""
 
+    # Wiktextract issue #620, Chinese Glyph Origin before an etymology
+    # section get overwritten. In this case, let's just combine the two.
+
+    # In Chinese entries, Pronunciation can be preceded on the
+    # same level 3 by its Etymology *and* Glyph Origin sections:
+    # ===Glyph Origin===
+    # ===Etymology===
+    # ===Pronunciation===
+    # Tatu suggested adding a new 'level' between 3 and 4, so Pronunciation
+    # is now Level 4, POS is shifted to Level 5 and the rest (incl. 'default')
+    # are now level 6
+    
     # Known lowercase PoS names are in part_of_speech_map
     # Known lowercase linkage section names are in linkage_map
 
@@ -3819,12 +3911,16 @@ def fix_subtitle_hierarchy(wxr: WiktextractContext, text: str) -> str:
     parts = []
     npar = 4  # Number of parentheses in above expression
     parts.append(old[0])
+    prev_level = None
+    level = None
+    skip_level_title = False  # When combining etymology sections
     for i in range(1, len(old), npar + 1):
         left = old[i]
         right = old[i + npar - 1]
         # remove Wikilinks in title
         title = re.sub(r"^\[\[", "", old[i + 1])
         title = re.sub(r"\]\]$", "", title)
+        prev_level = level
         level = len(left)
         part = old[i + npar]
         if level != len(right):
@@ -3851,27 +3947,39 @@ def fix_subtitle_hierarchy(wxr: WiktextractContext, text: str) -> str:
                     "etymology section {} at level {}".format(title, level),
                     sortid="page/2917",
                 )
+            if prev_level == 3:  # Two etymology (Glyph Origin + Etymology)
+                # sections cheek-to-cheek
+                skip_level_title = True
+                # Modify the title of previous ("Glyph Origin") section, in
+                # case we have a meaningful title like "Etymology 1"
+                parts[-2] = "{}{}{}".format("=" * level, title, "=" * level)
             level = 3
         elif lc.startswith(PRONUNCIATION_TITLE):
-            level = 3
-        elif lc in POS_TITLES:
+            # Pronunciation is now a level between POS and Etymology, so
+            # we need to shift everything down by one
             level = 4
+        elif lc in POS_TITLES:
+            level = 5
         elif lc == TRANSLATIONS_TITLE:
-            level = 5
+            level = 6
         elif lc in LINKAGE_TITLES or lc == COMPOUNDS_TITLE:
-            level = 5
+            level = 6
         elif lc in INFLECTION_TITLES:
-            level = 5
+            level = 6
         elif lc == DESCENDANTS_TITLE:
-            level = 5
+            level = 6
         elif title in PROTO_ROOT_DERIVED_TITLES:
-            level = 5
+            level = 6
         elif lc in IGNORED_TITLES:
-            level = 5
+            level = 6
         else:
             level = 6
-        parts.append("{}{}{}".format("=" * level, title, "=" * level))
-        parts.append(part)
+        if skip_level_title == True:
+            skip_level_title = False
+            parts.append(part)
+        else:
+            parts.append("{}{}{}".format("=" * level, title, "=" * level))
+            parts.append(part)
         # print("=" * level, title)
         # if level != len(left):
         #     print("  FIXED LEVEL OF {} {} -> {}"
