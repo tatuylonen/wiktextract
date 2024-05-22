@@ -205,3 +205,63 @@ class TestDeForms(TestCase):
                 },
             ],
         )
+
+    def test_verb_table(self):
+        self.wxr.wtp.start_page("sehen")
+        self.wxr.wtp.add_page(
+            "Vorlage:Deutsch Verb Übersicht",
+            10,
+            """{|
+! style="width: 80px;" |
+! style="width: 62px;" | [[Hilfe:Person|Person]]
+! colspan="3" | Wortform
+|-
+! rowspan="3" | [[Hilfe:Präsens|Präsens]]
+| style="text-align:right" | ich || colspan="3" | [[sehe|sehe]]
+|-
+|  style="text-align:right" |du || colspan="3" | [[siehst|siehst]]
+|-
+| style="text-align:right" | er, sie, es || colspan="3" | [[sieht|sieht]]
+|-
+! [[Hilfe:Präteritum|Präteritum]]
+| style="text-align:right" | ich || colspan="3" | [[sah|sah]]
+|-
+! [[Hilfe:Konjunktiv|Konjunktiv&nbsp;II]]
+| style="text-align:right" | ich || colspan="3" | [[sähe|sähe]]
+|-
+! rowspan="2" | [[Hilfe:Imperativ|Imperativ]]
+| <small>Singular</small> || colspan="3" | [[siehe|siehe]]!<br />[[sieh|sieh]]!
+|-
+| <small>Plural</small> || colspan="3" | [[seht|seht]]!
+|-
+! rowspan="2" | [[Hilfe:Perfekt|Perfekt]] !! colspan="3" | [[Hilfe:Partizip|Partizip&nbsp;II]] ||  style="width: 90px;" | [[Hilfe:Hilfsverb|Hilfsverb]]
+|-
+| style="text-align:right" colspan="3" | [[gesehen|gesehen]]<br />sehen
+| [[haben|haben]]
+|-
+! colspan="5" | <div>''Alle weiteren Formen:'' [[Flexion:sehen|Flexion:sehen]]</div>
+|}""",
+        )
+        root = self.wxr.wtp.parse("{{Deutsch Verb Übersicht}}")
+        word_entry = WordEntry(
+            word="sehen", lang="Deutsch", lang_code="de", pos="verb"
+        )
+        extract_forms(self.wxr, word_entry, root.children[0])
+        self.assertEqual(
+            word_entry.model_dump(exclude_defaults=True)["forms"],
+            [
+                {"form": "ich sehe", "tags": ["present"]},
+                {"form": "du siehst", "tags": ["present"]},
+                {"form": "er sieht", "tags": ["present"]},
+                {"form": "sie sieht", "tags": ["present"]},
+                {"form": "es sieht", "tags": ["present"]},
+                {"form": "ich sah", "tags": ["past"]},
+                {"form": "ich sähe", "tags": ["subjunctive"]},
+                {"form": "siehe!", "tags": ["imperative", "singular"]},
+                {"form": "sieh!", "tags": ["imperative", "singular"]},
+                {"form": "seht!", "tags": ["imperative", "plural"]},
+                {"form": "gesehen", "tags": ["participle", "perfect"]},
+                {"form": "sehen", "tags": ["participle", "perfect"]},
+                {"form": "haben", "tags": ["auxiliary", "perfect"]},
+            ],
+        )

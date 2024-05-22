@@ -235,6 +235,25 @@ OTHER_TAGS = {
     "Prädikativ": "predicative",
 }
 
+TENSE_TAGS = {
+    # Vorlage:Deutsch Verb Übersicht
+    "Präsens": "present",
+    "Präteritum": "past",
+    "Perfekt": "perfect",
+}
+
+MOOD_TAGS = {
+    # Vorlage:Deutsch Verb Übersicht
+    "Konjunktiv II": "subjunctive",
+    "Imperativ": "imperative",
+}
+
+VERB_FORM_TAGS = {
+    # Vorlage:Deutsch Verb Übersicht
+    "Partizip II": "participle",
+    "Hilfsverb": "auxiliary",
+}
+
 GRAMMATICAL_TAGS = {
     **K_TEMPLATE_TAGS,
     **GENDER_TAGS,
@@ -243,6 +262,9 @@ GRAMMATICAL_TAGS = {
     **COMPARISON_TAGS,
     **DECLENSION_TAGS,
     **OTHER_TAGS,
+    **TENSE_TAGS,
+    **MOOD_TAGS,
+    **VERB_FORM_TAGS,
 }
 
 
