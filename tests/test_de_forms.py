@@ -239,7 +239,49 @@ class TestDeForms(TestCase):
 | style="text-align:right" colspan="3" | [[gesehen|gesehen]]<br />sehen
 | [[haben|haben]]
 |-
-! colspan="5" | <div>''Alle weiteren Formen:'' [[Flexion:sehen|Flexion:sehen]]</div>
+! colspan="5" | <div>''All other forms:'' [[Flexion:sehen|Flexion:sehen]]</div>
+|}""",
+        )
+        self.wxr.wtp.add_page(
+            "Flexion:sehen",
+            108,
+            """== sehen (Konjugation) ({{Verbkonjugation|Deutsch}}) ==
+{{Abgeleitete Verben|[[ansehen]], [[aufsehen]], [[umsehen]], [[versehen]]}}
+
+{{Deutsch Verb unregelmäßig|2=seh|3=sah|4=säh|5=gesehen|6=sieh|8=i|vp=ja|zp=ja|gerund=ja
+|Imperativ (du)=sieh!<br />siehe}}""",
+        )
+        self.wxr.wtp.add_page(
+            "Vorlage:Deutsch Verb unregelmäßig",
+            10,
+            """==== Infinitive und Partizipien ====
+{|
+|-
+!colspan="3" bgcolor=#CCCCFF|[[Hilfe:Infinitiv|(nichterweiterte) Infinitive]]
+|-
+|bgcolor=#F4F4F4|
+|bgcolor=#F4F4F4 align=center|'''[[Hilfe:Präsens|Infinitiv Präsens]]'''
+|bgcolor=#F4F4F4 align=center|'''[[Hilfe:Perfekt|Infinitiv Perfekt]]'''
+|-
+|bgcolor=#F4F4F4 align=center|'''[[Hilfe:Aktiv|Aktiv]]'''
+| sehen
+| gesehen haben
+|-
+!colspan="3" bgcolor=#CCCCFF|[[Hilfe:Partizip|Partizipien]]
+|-
+|bgcolor=#F4F4F4|'''[[Hilfe:Präsens|Präsens Aktiv]]'''
+|bgcolor=#F4F4F4|'''[[Hilfe:Perfekt|Perfekt Passiv]]'''
+|bgcolor=#F4F4F4|'''[[Hilfe:Gerundivum|Gerundivum]]'''<br><small>Nur attributive Verwendung</small>
+|-
+| sehend
+| gesehen
+| zu&#32;sehender,<br/>zu&#32;sehende&#32;…
+|-
+!colspan="3" bgcolor=#CCCCFF|[[Hilfe:Verbaladjektiv|Flexion der Verbaladjektive]]
+|-
+| [[Flexion:sehend|Flexion:sehend]]
+| [[Flexion:gesehen#gesehen (Deklination) (Deutsch)|Flexion:gesehen]]
+| [[Flexion:sehen/Gerundivum|Flexion:Gerundivum]]
 |}""",
         )
         root = self.wxr.wtp.parse("{{Deutsch Verb Übersicht}}")
@@ -256,12 +298,42 @@ class TestDeForms(TestCase):
                 {"form": "sie sieht", "tags": ["present"]},
                 {"form": "es sieht", "tags": ["present"]},
                 {"form": "ich sah", "tags": ["past"]},
-                {"form": "ich sähe", "tags": ["subjunctive"]},
+                {"form": "ich sähe", "tags": ["subjunctive-ii"]},
                 {"form": "siehe!", "tags": ["imperative", "singular"]},
                 {"form": "sieh!", "tags": ["imperative", "singular"]},
                 {"form": "seht!", "tags": ["imperative", "plural"]},
-                {"form": "gesehen", "tags": ["participle", "perfect"]},
-                {"form": "sehen", "tags": ["participle", "perfect"]},
+                {"form": "gesehen", "tags": ["participle-2", "perfect"]},
+                {"form": "sehen", "tags": ["participle-2", "perfect"]},
                 {"form": "haben", "tags": ["auxiliary", "perfect"]},
+                {
+                    "form": "sehen",
+                    "tags": ["active", "infinitive", "present"],
+                    "source": "Flexion:sehen",
+                },
+                {
+                    "form": "gesehen haben",
+                    "tags": ["active", "infinitive", "perfect"],
+                    "source": "Flexion:sehen",
+                },
+                {
+                    "form": "sehend",
+                    "tags": ["participle", "present", "active"],
+                    "source": "Flexion:sehen",
+                },
+                {
+                    "form": "gesehen",
+                    "tags": ["participle", "perfect", "passive"],
+                    "source": "Flexion:sehen",
+                },
+                {
+                    "form": "zu sehender",
+                    "tags": ["participle", "gerundive"],
+                    "source": "Flexion:sehen",
+                },
+                {
+                    "form": "zu sehende …",
+                    "tags": ["participle", "gerundive"],
+                    "source": "Flexion:sehen",
+                },
             ],
         )

@@ -372,6 +372,7 @@ IGNORED_TITLES: frozenset[str] = frozenset(
         "易位構詞",
         "外部鏈接",
         "外部链接",
+        "外部連結",
     ]
 )
 

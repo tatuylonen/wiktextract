@@ -233,6 +233,8 @@ DECLENSION_TAGS = {
 OTHER_TAGS = {
     # Vorlage:Deklinationsseite Adjektiv
     "Prädikativ": "predicative",
+    "erweiterte": "extended",
+    "Höflichkeitsform": "honorific",
 }
 
 TENSE_TAGS = {
@@ -240,18 +242,46 @@ TENSE_TAGS = {
     "Präsens": "present",
     "Präteritum": "past",
     "Perfekt": "perfect",
+    "Futur I": "future-i",
+    "Futur II": "future-ii",
 }
 
 MOOD_TAGS = {
     # Vorlage:Deutsch Verb Übersicht
-    "Konjunktiv II": "subjunctive",
+    # Vorlage:Deutsch Verb regelmäßig
+    "Konjunktiv I": "subjunctive-i",
+    "Konjunktiv II": "subjunctive-ii",
     "Imperativ": "imperative",
+    "Imperative": "imperative",
+    "Indikativ": "indicative",
 }
 
 VERB_FORM_TAGS = {
     # Vorlage:Deutsch Verb Übersicht
-    "Partizip II": "participle",
+    "Partizip II": "participle-2",
     "Hilfsverb": "auxiliary",
+    "Infinitive": "infinitive",
+    "Infinitiv": "infinitive",
+    "Partizipien": "participle",
+}
+
+VOICE_TAGS = {
+    # Vorlage:Deutsch Verb unregelmäßig
+    "Aktiv": "active",
+    "Vorgangspassiv": "processual passive",
+    "Zustandspassiv": "statal passive",
+    "Passiv": "passive",
+    "Gerundivum": "gerundive",
+}
+
+PERSON_TAGS = {
+    # Vorlage:Deutsch Verb unregelmäßig
+    "1. Person Singular": ["first-person", "singular"],
+    "1. Person Plural": ["first-person", "plural"],
+    "2. Person Singular": ["second-person", "singular"],
+    "2. Person Plural": ["second-person", "plural"],
+    "3. Person Singular": ["third-person", "singular"],
+    "3. Person Plural": ["third-person", "plural"],
 }
 
 GRAMMATICAL_TAGS = {
@@ -265,6 +295,8 @@ GRAMMATICAL_TAGS = {
     **TENSE_TAGS,
     **MOOD_TAGS,
     **VERB_FORM_TAGS,
+    **VOICE_TAGS,
+    **PERSON_TAGS,
 }
 
 

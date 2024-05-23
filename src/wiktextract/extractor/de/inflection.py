@@ -6,7 +6,7 @@ from wikitextprocessor.parser import TemplateNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
-from .flexion import parse_adj_flexion_page
+from .flexion import parse_flexion_page
 from .models import Form, WordEntry
 from .tags import translate_raw_tags
 
@@ -55,7 +55,14 @@ def process_verb_table(
             NodeKind.TABLE_HEADER_CELL | NodeKind.TABLE_CELL
         ):
             cell_text = clean_node(wxr, None, table_cell)
-            if table_cell.kind == NodeKind.TABLE_HEADER_CELL:
+            if cell_text.startswith("All other forms:"):
+                for link_node in table_cell.find_child_recursively(
+                    NodeKind.LINK
+                ):
+                    parse_flexion_page(
+                        wxr, word_entry, clean_node(wxr, None, link_node)
+                    )
+            elif table_cell.kind == NodeKind.TABLE_HEADER_CELL:
                 if cell_text == "":
                     continue
                 elif header_col_index == 0:
@@ -74,8 +81,6 @@ def process_verb_table(
                         row_headers.append(RowspanHeader(cell_text, 0, 1))
                     else:
                         person = cell_text
-                elif cell_text.startswith("All other forms:"):
-                    pass
                 else:
                     for cell_line in cell_text.splitlines():
                         cell_line = cell_line.strip()
@@ -166,15 +171,15 @@ def process_adj_table(
             )
         ):
             cell_text = clean_node(wxr, None, table_cell)
-            if table_cell.kind == NodeKind.TABLE_HEADER_CELL:
+            # because {{int:}} magic word is not implemented
+            # template "Textbaustein-Intl" expands to English words
+            if cell_text.startswith("All other forms:"):
+                for link_node in table_cell.find_child(NodeKind.LINK):
+                    parse_flexion_page(
+                        wxr, word_entry, clean_node(wxr, None, link_node)
+                    )
+            elif table_cell.kind == NodeKind.TABLE_HEADER_CELL:
                 column_headers.append(cell_text)
-                # because {{int:}} magic word is not implemented
-                # template "Textbaustein-Intl" expands to English words
-                if cell_text.startswith("All other forms:"):
-                    for link_node in table_cell.find_child(NodeKind.LINK):
-                        parse_adj_flexion_page(
-                            wxr, word_entry, clean_node(wxr, None, link_node)
-                        )
             else:
                 for form_text in cell_text.splitlines():
                     if form_text in ("—", ""):
