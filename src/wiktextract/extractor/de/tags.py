@@ -235,6 +235,9 @@ OTHER_TAGS = {
     "Prädikativ": "predicative",
     "erweiterte": "extended",
     "Höflichkeitsform": "honorific",
+    # Vorlage:Deutsch Verb schwach untrennbar reflexiv
+    "nichterweitert": "not-extended",
+    "erweitert": "extended",
 }
 
 TENSE_TAGS = {
@@ -244,6 +247,7 @@ TENSE_TAGS = {
     "Perfekt": "perfect",
     "Futur I": "future-i",
     "Futur II": "future-ii",
+    "Plusquamperfekt": "pluperfect",
 }
 
 MOOD_TAGS = {
@@ -272,6 +276,8 @@ VOICE_TAGS = {
     "Zustandspassiv": "statal passive",
     "Passiv": "passive",
     "Gerundivum": "gerundive",
+    # Vorlage:Deutsch Verb schwach untrennbar reflexiv
+    "Zustandsreflexiv": "statal reflexive",
 }
 
 PERSON_TAGS = {
@@ -282,6 +288,22 @@ PERSON_TAGS = {
     "2. Person Plural": ["second-person", "plural"],
     "3. Person Singular": ["third-person", "singular"],
     "3. Person Plural": ["third-person", "plural"],
+    # Vorlage:Deutsch Verb schwach untrennbar reflexiv
+    "Sg. 1. Pers.": ["first-person", "singular"],
+    "Pl. 1. Pers.": ["first-person", "plural"],
+    "Sg. 2. Pers.": ["second-person", "singular"],
+    "Pl. 2. Pers.": ["second-person", "plural"],
+    "Sg. 3. Pers.": ["third-person", "singular"],
+    "Pl. 3. Pers.": ["third-person", "plural"],
+}
+
+INFLECTION_TABLE_TAGS = {
+    # Vorlage:Deutsch Verb regelmäßig
+    "ungebräuchlich": "uncommon",
+    "veraltet": "archaic",
+    # Vorlage:Deutsch Verb schwach trennbar reflexiv
+    "Nebensatzkonjugation": "subordinate-clause",
+    "Hauptsatzkonjugation": "main-clause",
 }
 
 GRAMMATICAL_TAGS = {
@@ -297,6 +319,7 @@ GRAMMATICAL_TAGS = {
     **VERB_FORM_TAGS,
     **VOICE_TAGS,
     **PERSON_TAGS,
+    **INFLECTION_TABLE_TAGS,
 }
 
 
