@@ -170,9 +170,14 @@ def process_deutsch_verb_template(
                         "Person",
                     ) or cell_text.startswith("Flexion:"):
                         col_index += 1
-                    elif cell.contain_node(NodeKind.BOLD) or (
-                        len(list(cell.find_html("small"))) > 0
-                        and len(list(cell.filter_empty_str_child())) == 1
+                    elif (
+                        cell.contain_node(NodeKind.BOLD)
+                        or (
+                            len(list(cell.find_html("small"))) > 0
+                            and len(list(cell.filter_empty_str_child())) == 1
+                        )
+                        # Vorlage:Deutsch Verb schwach untrennbar reflexiv
+                        or cell.attrs.get("bgcolor", "").lower() == "#f4f4f4"
                     ):  # header in cell
                         colspan = int(cell.attrs.get("colspan", "1"))
                         if is_bold_col_header:
