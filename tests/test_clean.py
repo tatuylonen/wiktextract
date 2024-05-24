@@ -372,3 +372,9 @@ class WiktExtractTests(unittest.TestCase):
             clean_value(self.wxr, "FOO\n{| {| inner table |} |}\nBAR"),
             "FOO\nBAR",
         )
+
+    def test_clean_flexion_ns_link(self):
+        # https://de.wiktionary.org/wiki/Flexion:sehen
+        self.assertEqual(
+            clean_value(self.wxr, "[[Flexion:sehend]]"), "Flexion:sehend"
+        )
