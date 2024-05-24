@@ -235,6 +235,9 @@ OTHER_TAGS = {
     "Prädikativ": "predicative",
     "erweiterte": "extended",
     "Höflichkeitsform": "honorific",
+    # Vorlage:Deutsch Verb schwach untrennbar reflexiv
+    "nichterweitert": "not-extended",
+    "erweitert": "extended",
 }
 
 TENSE_TAGS = {
@@ -298,6 +301,9 @@ INFLECTION_TABLE_TAGS = {
     # Vorlage:Deutsch Verb regelmäßig
     "ungebräuchlich": "uncommon",
     "veraltet": "archaic",
+    # Vorlage:Deutsch Verb schwach trennbar reflexiv
+    "Nebensatzkonjugation": "subordinate-clause",
+    "Hauptsatzkonjugation": "main-clause",
 }
 
 GRAMMATICAL_TAGS = {
