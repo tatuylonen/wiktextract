@@ -153,14 +153,15 @@ def process_deutsch_verb_template(
                     cell.kind == NodeKind.TABLE_HEADER_CELL
                     and cell_text not in ("", "Person")
                 ):
+                    colspan = int(cell.attrs.get("colspan", "1"))
                     col_headers.append(
                         SpanHeader(
                             cell_text,
                             col_header_index,
-                            int(cell.attrs.get("colspan", "1")),
+                            colspan,
                         )
                     )
-                    col_header_index += 1
+                    col_header_index += colspan
                 elif cell.kind == NodeKind.TABLE_CELL:
                     if cell_text in (
                         "",
@@ -169,9 +170,9 @@ def process_deutsch_verb_template(
                         "Person",
                     ) or cell_text.startswith("Flexion:"):
                         col_index += 1
-                    elif (
-                        cell.contain_node(NodeKind.BOLD)
-                        or len(list(cell.find_html("small"))) > 0
+                    elif cell.contain_node(NodeKind.BOLD) or (
+                        len(list(cell.find_html("small"))) > 0
+                        and len(list(cell.filter_empty_str_child())) == 1
                     ):  # header in cell
                         colspan = int(cell.attrs.get("colspan", "1"))
                         if is_bold_col_header:
@@ -189,7 +190,16 @@ def process_deutsch_verb_template(
                     else:
                         for form_text in cell_text.splitlines():
                             form_text = form_text.strip(", ")
-                            form = Form(form=form_text, source=page_tite)
+                            form_raw_tag = ""
+                            if ":" in form_text:
+                                form_raw_tag, form_text = form_text.split(
+                                    ":", 1
+                                )
+                            form = Form(
+                                form=form_text.strip(), source=page_tite
+                            )
+                            if form_raw_tag != "":
+                                form.raw_tags.append(form_raw_tag)
                             if row_header != "":
                                 form.raw_tags.append(row_header)
                             for col_header in col_headers:

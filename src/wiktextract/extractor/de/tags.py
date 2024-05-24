@@ -244,6 +244,7 @@ TENSE_TAGS = {
     "Perfekt": "perfect",
     "Futur I": "future-i",
     "Futur II": "future-ii",
+    "Plusquamperfekt": "pluperfect",
 }
 
 MOOD_TAGS = {
@@ -284,6 +285,12 @@ PERSON_TAGS = {
     "3. Person Plural": ["third-person", "plural"],
 }
 
+INFLECTION_TABLE_TAGS = {
+    # Vorlage:Deutsch Verb regelmäßig
+    "ungebräuchlich": "uncommon",
+    "veraltet": "archaic",
+}
+
 GRAMMATICAL_TAGS = {
     **K_TEMPLATE_TAGS,
     **GENDER_TAGS,
@@ -297,6 +304,7 @@ GRAMMATICAL_TAGS = {
     **VERB_FORM_TAGS,
     **VOICE_TAGS,
     **PERSON_TAGS,
+    **INFLECTION_TABLE_TAGS,
 }
 
 
