@@ -103,8 +103,8 @@ are available.
 
 There is a also download link at the bottom of every page and a button
 to view the JSON produced for each page.  You can download all data,
-data for a specific language, data just a single word, or data for a
-list of related words (e.g., a particular part-of-speech or words
+data for a specific language, data for just a single word, or data for
+a list of related words (e.g., a particular part-of-speech or words
 relating to a particular topic or having a particular inflectional
 form).  All downloads are in [JSON Lines](https://jsonlines.org/) format (each line is a separate JSON
 object).  The bigger downloads are also available in compressed form.
@@ -330,7 +330,7 @@ mode if you want to update both packages' code with `git pull`.
 ### Running tests
 
 This package includes tests written using the `unittest` framework.
-The test dependencies can be installed with command
+The test dependencies can be installed with the command
 `python -m pip install -e .[dev]`.
 
 To run the tests, use the following command in the top-level directory:
@@ -425,7 +425,7 @@ machine-readable)
 While this package has been mostly intended to be used using the
 `wiktwords` command, it is also possible to call this as a library.
 Underneath, this uses the `wikitextprocessor` module. For more usage
-examples please read the [wiktwords.py](https://github.com/tatuylonen/wiktextract/blob/master/wiktextract/wiktwords.py) and [wiktionary.py](https://github.com/tatuylonen/wiktextract/blob/master/wiktextract/wiktionary.py) files.
+examples please read the [wiktwords.py](https://github.com/tatuylonen/wiktextract/blob/master/src/wiktextract/wiktwords.py) and [wiktionary.py](https://github.com/tatuylonen/wiktextract/blob/master/src/wiktextract/wiktionary.py) files.
 
 This code can be called from an application as follows:
 
@@ -576,7 +576,7 @@ or
 wxr = WiktextractContext(wtp, config)
 ```
 
-if it is more conveneint
+if it is more convenient
 ### class WiktionaryConfig(object)
 
 The ``WiktionaryConfig`` object is used for specifying what data to collect
