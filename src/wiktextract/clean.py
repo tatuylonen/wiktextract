@@ -1372,13 +1372,19 @@ def clean_value(
         return " ".join(args[i:])
 
     def repl_link(m: re.Match) -> str:
+        before_colon = m.group(1)
+        after_colon = m.group(3)
         if (
-            m.group(1) is not None
-            and IMAGE_LINK_RE.match(m.group(1)) is not None
+            before_colon is not None
+            and IMAGE_LINK_RE.match(before_colon) is not None
         ):
             return ""
-        v = m.group(3).split("|")
-        return clean_value(wxr, v[0], no_strip=True)
+        if before_colon is not None and before_colon.strip(": ") in ("w", "s"):
+            # Wikipedia or Wikisource link
+            v = after_colon.split("|")[0]
+        else:
+            v = m.group(0).strip("[] ").split("|")[0]
+        return clean_value(wxr, v, no_strip=True)
 
     def repl_link_bars(m: re.Match) -> str:
         link = m.group(1)
