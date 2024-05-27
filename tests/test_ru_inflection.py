@@ -230,3 +230,41 @@ class TestLinkage(TestCase):
                 {"form": "буду/будешь… ви́деть", "tags": ["future"]},
             ],
         )
+
+    def test_падежи_cu(self):
+        self.wxr.wtp.add_page(
+            "Шаблон:сущ cu (-а)",
+            10,
+            """{|
+! bgcolor="#EEF9FF" | [[падеж]]
+! bgcolor="#EEF9FF" | [[единственное число|ед. ч.]]
+! bgcolor="#EEF9FF" | [[двойственное число|дв. ч.]]
+! bgcolor="#EEF9FF" | [[множественное число|мн. ч.]]
+|-
+| bgcolor="#EEF9FF" | [[местный|М.]]
+| lang="cu" | водѣ
+| lang="cu" | водѹ
+| lang="cu" | водахъ
+<tr>
+<td bgcolor="#EEF9FF"> [[звательный|Зв.]]</td>
+<td lang="cu"> водо
+<td align="center"> — </td>
+<td align="center"> — </td>
+</tr>
+|}""",
+        )
+        self.wxr.wtp.start_page("вода")
+        root = self.wxr.wtp.parse("{{сущ cu (-а)}}")
+        word_entry = WordEntry(
+            word="вода", pos="noun", lang_code="cu", lang="Старославянский"
+        )
+        extract_inflection(self.wxr, word_entry, root)
+        self.assertEqual(
+            [f.model_dump(exclude_defaults=True) for f in word_entry.forms],
+            [
+                {"form": "водѣ", "tags": ["locative", "singular"]},
+                {"form": "водѹ", "tags": ["locative", "dual"]},
+                {"form": "водахъ", "tags": ["locative", "plural"]},
+                {"form": "водо", "tags": ["vocative", "singular"]},
+            ],
+        )

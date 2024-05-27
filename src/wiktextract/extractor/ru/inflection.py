@@ -2,7 +2,7 @@ from collections import defaultdict
 from dataclasses import dataclass
 
 from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import TemplateNode
+from wikitextprocessor.parser import HTMLNode, TemplateNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -136,9 +136,24 @@ def parse_wikitext_forms_table(
             if table_cell.kind == NodeKind.TABLE_HEADER_CELL:
                 column_headers.append(clean_node(wxr, None, table_cell))
             elif table_cell.kind == NodeKind.TABLE_CELL:
-                cell_text = clean_node(wxr, None, table_cell)
+                cell_text = clean_node(  # remove cursed <tr> tag
+                    wxr,
+                    None,
+                    [
+                        n
+                        for n in table_cell.children
+                        if not (isinstance(n, HTMLNode) and n.tag == "tr")
+                    ],
+                )
                 if table_cell.attrs.get("bgcolor", "").lower() == "#eef9ff":
-                    row_headers.append(cell_text)
+                    if cell_text == "М." and table_cell.contain_node(
+                        NodeKind.LINK
+                    ):
+                        for link_node in table_cell.find_child(NodeKind.LINK):
+                            row_headers.append(link_node.largs[0][0])
+                            break
+                    else:
+                        row_headers.append(cell_text)
                 else:
                     for form_text in cell_text.splitlines():
                         add_form_data(
@@ -150,9 +165,10 @@ def parse_wikitext_forms_table(
                         )
 
         # cursed layout from Шаблон:Гл-блок
-        for tr_tag in table_row.find_html("tr"):
+        # tr tag could be after or inside table cell node: Шаблон:сущ cu (-а)
+        for tr_tag in table_row.find_html_recursively("tr"):
             row_headers = []
-            for td_tag in tr_tag.find_html("td"):
+            for td_index, td_tag in enumerate(tr_tag.find_html("td")):
                 if td_tag.contain_node(NodeKind.LINK):
                     for link_node in td_tag.find_child(NodeKind.LINK):
                         if td_tag.attrs.get("bgcolor", "").lower() == "#eef9ff":
@@ -162,16 +178,18 @@ def parse_wikitext_forms_table(
                                 word_entry,
                                 clean_node(wxr, None, link_node),
                                 row_headers,
-                                [],
-                                0,
+                                []
+                                if "colspan" in td_tag.attrs
+                                else column_headers,
+                                td_index,
                             )
                 else:
                     add_form_data(
                         word_entry,
                         clean_node(wxr, None, td_tag),
                         row_headers,
-                        [],
-                        0,
+                        [] if "colspan" in td_tag.attrs else column_headers,
+                        td_index,
                     )
 
     clean_node(wxr, word_entry, expanded_template)  # add category links
@@ -184,7 +202,7 @@ def add_form_data(
     col_headers: list[str],
     col_index: int,
 ) -> None:
-    form = Form(form=form_text)
+    form = Form(form=form_text.strip())
     form.raw_tags.extend(row_headers)
     if col_index < len(col_headers):
         form.raw_tags.append(col_headers[col_index])
