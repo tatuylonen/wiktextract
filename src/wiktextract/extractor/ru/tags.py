@@ -293,6 +293,10 @@ CASE_TAGS = {
     "ген.": "genitive",
     "дат.": "dative",
     "акк.": "accusative",
+    # Шаблон:сущ cu (-а)
+    # "м.": "locative",  # conflict with gender tag
+    "местный": "locative",
+    "зв.": "vocative",
 }
 
 TENSE_TAGS = {
@@ -325,6 +329,11 @@ VOICE_TAGS = {
     "пр. страд.": "passive",
 }
 
+NUMBER_TAGS = {
+    # Шаблон:сущ cu (-а)
+    "дв. ч.": "dual",
+}
+
 
 ALL_TAGS = {
     **STYLE_TAGS,
@@ -335,6 +344,7 @@ ALL_TAGS = {
     **MOOD_TAGS,
     **PERSON_TAGS,
     **VOICE_TAGS,
+    **NUMBER_TAGS,
 }
 
 
