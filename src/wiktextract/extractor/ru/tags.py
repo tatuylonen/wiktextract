@@ -334,6 +334,36 @@ NUMBER_TAGS = {
     "дв. ч.": "dual",
 }
 
+TRANSLATION_TAGS = {
+    # Шаблон:перев-блок
+    # https://en.wikipedia.org/wiki/Azerbaijani_alphabet
+    # https://ru.wiktionary.org/wiki/Модуль:languages/data
+    "арабск.": "Arabic",
+    "кир.": "Cyrillic",
+    "лат.": "Latin",
+    "лат": "Latin",
+    "кана": "katakana",
+    "сир.": "Syriac",
+    "иуд.": "Jewish",
+    "центральный": "Central",
+    "демот.": "Demotic Greek",
+    "кафар.": "Katharevousa",
+    "мальдивский": "Maldivian",
+    "традиц.": "traditional",
+    "у": "Wu",
+    "упрощ.": "simplified",
+    "южноминьский": "Min",
+    "курманджи": "Kurmanji",
+    "сорани": "Sorani",
+    "севернокурдский": "Kurmanji",
+    "южнокурдский": "Southern Kurdish",
+    "кириллица": "Cyrillic",
+    "глаголица": "Glagolitic",
+    "араб.": "Arabic",
+    "письменный": "Written-Form",  # italic tag
+    "устный": "colloquial",
+}
+
 
 ALL_TAGS = {
     **STYLE_TAGS,
@@ -345,6 +375,7 @@ ALL_TAGS = {
     **PERSON_TAGS,
     **VOICE_TAGS,
     **NUMBER_TAGS,
+    **TRANSLATION_TAGS,
 }
 
 
