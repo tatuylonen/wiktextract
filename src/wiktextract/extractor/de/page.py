@@ -125,7 +125,7 @@ def process_pos_section(
         else:
             base_data.other_pos.append(pos)
     page_data.append(base_data.model_copy(deep=True))
-    wxr.wtp.start_subsection(clean_node(wxr, None, level_node.largs))
+    wxr.wtp.start_subsection(clean_node(wxr, page_data[-1], level_node.largs))
 
     for level_4_node in level_node.find_child(NodeKind.LEVEL4):
         parse_section(wxr, page_data, base_data, level_4_node)
