@@ -86,6 +86,20 @@ FORM_POS = {
 
 IGNORE_POS = {"Albanisch", "Pseudopartizip", "Ajami"}
 
+GENDER_TEMPLATES = {
+    "n": ["neuter"],
+    "m": ["masculine"],
+    "f": ["feminine"],
+    "mn.": ["masculine", "neuter"],
+    "nm": ["masculine", "neuter"],
+    "nf": ["neuter", "feminine"],
+    "fn": ["neuter", "feminine"],
+    "fm": ["feminine", "masculine"],
+    "mf": ["feminine", "masculine"],
+    "u": ["common-gender"],
+    "un": ["common-gender", "neuter"],
+}
+
 
 def process_pos_section(
     wxr: WiktextractContext,
@@ -110,9 +124,8 @@ def process_pos_section(
                     f"Unknown Wortart template POS argument: {pos_argument}",
                     sortid="extractor/de/page/process_pos_section/55",
                 )
-        elif template_node.template_name != "Geschlecht":
-            # ignore placeholder gender template "Geschlecht"
-            base_data.raw_tags.append(clean_node(wxr, base_data, template_node))
+        elif template_node.template_name in GENDER_TEMPLATES:
+            base_data.tags.extend(GENDER_TEMPLATES[template_node.template_name])
 
     if len(pos_arguments) == 0:
         return

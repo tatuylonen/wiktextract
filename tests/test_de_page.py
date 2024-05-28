@@ -98,7 +98,7 @@ class TestDEPage(unittest.TestCase):
                         }
                     ],
                     "word": "Griechenland",
-                    "raw_tags": ["n"],
+                    "tags": ["neuter"],
                 }
             ],
         )
