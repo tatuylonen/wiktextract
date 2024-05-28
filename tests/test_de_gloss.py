@@ -46,7 +46,7 @@ class TestDEGloss(unittest.TestCase):
                         "das erste Entwicklungsstadium",
                         "erster Trieb einer Pflanze",
                     ],
-                    "raw_tags": ["Botanik"],
+                    "topics": ["botany"],
                     "senseid": "2a",
                 },
                 {
@@ -54,7 +54,7 @@ class TestDEGloss(unittest.TestCase):
                         "das erste Entwicklungsstadium",
                         "befruchtete Eizelle, Embryo",
                     ],
-                    "raw_tags": ["Biologie", "Medizin"],
+                    "topics": ["biology", "medicine"],
                     "senseid": "2b",
                 },
             ],
@@ -77,14 +77,16 @@ class TestDEGloss(unittest.TestCase):
             [s.model_dump(exclude_defaults=True) for s in word_entry.senses],
             [
                 {
-                    "raw_tags": ["fachsprachlich", "Technik"],
+                    "tags": ["jargon"],
+                    "topics": ["technology"],
                     "glosses": [
                         "etwas, was eine Maschine bearbeiten soll, an diese übergeben"
                     ],
                     "senseid": "4",
                 },
                 {
-                    "raw_tags": ["fachsprachlich", "EDV"],
+                    "tags": ["jargon"],
+                    "raw_tags": ["EDV"],
                     "glosses": ["etwas in einen Computer übertragen"],
                     "senseid": "5",
                 },
@@ -110,7 +112,7 @@ class TestDEGloss(unittest.TestCase):
             [s.model_dump(exclude_defaults=True) for s in word_entry.senses],
             [
                 {
-                    "raw_tags": ["juristisch"],
+                    "tags": ["law"],
                     "glosses": [
                         "nur in der Wendung „auf etwas erkennen“: im Rahmen eines Urteils ein benanntes Verbrechen bestätigen"
                     ],
@@ -197,8 +199,7 @@ class TestDEGloss(unittest.TestCase):
                     "senseid": "3",
                 },
                 {
-                    "tags": ["intransitive"],
-                    "raw_tags": ["übertragen"],
+                    "tags": ["intransitive", "figurative"],
                     "glosses": ["sich aufhalten, heimisch sein, zu Hause sein"],
                     "senseid": "4",
                 },
@@ -226,12 +227,12 @@ class TestDEGloss(unittest.TestCase):
                     "raw_tags": [
                         "Deutschland",
                         "Fernsehen",
-                        "umgangssprachlich",
                         "Kurzwort",
                         "Akronym",
                     ],
                     "glosses": ["für das erste Fernsehprogramm der ARD"],
                     "senseid": "2",
+                    "tags": ["colloquial"],
                 },
             ],
         )
