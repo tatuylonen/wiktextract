@@ -56,7 +56,8 @@ def process_gloss_list_item(
                                 gloss_nodes.append(":")
                             elif isinstance(k_arg, int):
                                 raw_tag = clean_node(wxr, None, k_arg_value)
-                                sense_data.raw_tags.append(raw_tag)
+                                if raw_tag != "von":
+                                    sense_data.raw_tags.append(raw_tag)
                         clean_node(wxr, sense_data, gloss_node)
                     elif gloss_node.template_name.endswith("."):
                         raw_tag = clean_node(

@@ -7,6 +7,7 @@ K_TEMPLATE_TAGS = {
     "Abl.": "ablative",
     "Ablativ": "ablative",
     "abw.": "derogatory",
+    "abwertend": "derogatory",
     "AE": "US",
     "AmE": "US",
     "adv.": "adverbial",
@@ -27,6 +28,7 @@ K_TEMPLATE_TAGS = {
     "BrE": "British",
     "Bedva.": "outdated",
     "Bedvatd.": "outdated",
+    "veraltende Bedeutung": "outdated",
     # "bei": "",
     # "bes.": "especially",
     # "besonders": "especially",
@@ -50,6 +52,7 @@ K_TEMPLATE_TAGS = {
     "erzgebirgisch": "Erzgebirgisch",
     "euph.": "euphemistic",
     "fachspr.": "jargon",
+    "fachsprachlich": "jargon",
     "fam.": "familiär",
     "fig": "figurative",
     "fig.": "figurative",
@@ -83,6 +86,7 @@ K_TEMPLATE_TAGS = {
     "klasslat.": "Classical Latin",
     "klassischlateinisch": "Classical Latin",
     "kPl.": "no-plural",
+    "kein Plural": "no-plural",
     "kSg.": "no-singulative",
     "kSt.": "no-comparative",
     "landsch.": "regional",
@@ -126,6 +130,7 @@ K_TEMPLATE_TAGS = {
     "reflexiv": "reflexive",
     # "respektive": "",
     "sal.": "casual",
+    "salopp": "casual",
     "scherzh.": "jocular",
     "schriftspr.": "literary",
     # "schülerspr.": "",
@@ -139,8 +144,9 @@ K_TEMPLATE_TAGS = {
     # "seemannsspr.": "",
     "sein": "auxiliary verb",
     # "sehr": "",  # very
-    # "seltener": "",  # rare
-    # "seltener auch": "",
+    "selten": "rare",
+    "seltener": "rare",
+    "seltener auch": "rare",
     "soldatenspr.": ["military", "slang"],
     # "sonderspr.": "",
     # "sonst": "",
@@ -161,7 +167,9 @@ K_TEMPLATE_TAGS = {
     # "über": "",
     # "überwiegend": "mostly",
     "übertr.": "figurative",
+    "übertragen": "figurative",
     "ugs.": "colloquial",
+    "umgangssprachlich": "colloquial",
     # "und": "",
     "ungebr.": "uncommon",
     "unpers.": "impersonal",
@@ -169,6 +177,7 @@ K_TEMPLATE_TAGS = {
     # "ursprünglich": "",
     "va.": "outdated",
     "vatd.": "outdated",
+    "veraltend": "outdated",
     # "verh.": "",
     "volkst.": "popular",
     # "von": "",
@@ -188,6 +197,17 @@ K_TEMPLATE_TAGS = {
     # "zum Beispiel": "",
     # "zum Teil": "",
     # "zumeist": "",
+    "Kardinalzahl": "cardinal",
+    "Sammelbegriff": "collective",
+    "Fachsprache": "jargon",
+    "formale Sprachen": "formal",
+    "Programmiersprachen": "programming",
+    "Rechnerarchitektur": "programming",
+    "Geografie": "geography",
+    "Geometrie": "geometry",
+    "Finanzwesen": "finance",
+    "juristisch": "law",
+    "Physik": "physics",
 }
 
 GENDER_TAGS = {
@@ -322,6 +342,50 @@ GRAMMATICAL_TAGS = {
     **INFLECTION_TABLE_TAGS,
 }
 
+K_TEMPLATE_TOPICS = {
+    "Biologie": "biology",
+    "Linguistik": "linguistics",
+    "Wortbildung": "morphology",
+    "Behörde": "government",
+    "Astronomie": "astronomy",
+    "Immobilienbranche": "real-estate",
+    "Kunst": "arts",
+    "Informatik": "computing",
+    "Nautik": "nautical",
+    "Sport": "sports",
+    "Schuhwerk": "footwear",
+    "Textilien": "textiles",
+    "Zahlungsmittel": "payment-method",
+    "Ökologie": "ecology",
+    "Internet": "Internet",
+    "Religion": "religion",
+    "Militärsprache": "military",
+    "Systematik": "systematics",
+    "Zoologie": "zoology",
+    "Seefahrt": "seafaring",
+    "Soldatensprache": {"topic": "military", "tag": "slang"},
+    "Botanik": "botany",
+    "Marine": "navy",
+    "Informationstechnologie": "computing",
+    "Betriebswirtschaftslehre": "business",
+    "Recht": "law",
+    "Elektronik": "electronics",
+    "Emotion": "emotion",
+    "Mathematik": "mathematics",
+    "Bürgerliches Recht": "civil-Law",
+    "Militär": "military",
+    "Politik": "politics",
+    "Werkzeug": "tools",
+    "Medizin": "medicine",
+    "Ornithologie": "ornithology",
+    "Technik": "technology",
+    "Waffentechnik": "weaponry",
+    "Anatomie": "anatomy",
+    "Fußball": "football",
+    "Kartenspiel": "card-games",
+    "Theoretische Informatik": "computing",
+}
+
 
 def translate_raw_tags(data: WordEntry) -> None:
     raw_tags = []
@@ -332,6 +396,13 @@ def translate_raw_tags(data: WordEntry) -> None:
                 data.tags.append(tag)
             elif isinstance(tag, list):
                 data.tags.extend(tag)
+        elif raw_tag in K_TEMPLATE_TOPICS and hasattr(data, "topics"):
+            topic = K_TEMPLATE_TOPICS[raw_tag]
+            if isinstance(topic, str):
+                data.topics.append(topic)
+            elif isinstance(topic, dict):
+                data.topics.append(topic.get("topic"))
+                data.tags.append(topic.get("tag"))
         else:
             raw_tags.append(raw_tag)
     data.raw_tags = raw_tags

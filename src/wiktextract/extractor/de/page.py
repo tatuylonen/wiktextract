@@ -177,6 +177,7 @@ def parse_page(
                 base_data = WordEntry(
                     lang=lang_name, lang_code=lang_code, word=page_title
                 )
+                clean_node(wxr, base_data, subtitle_template)
                 for level3_node in level2_node.find_child(NodeKind.LEVEL3):
                     parse_section(wxr, page_data, base_data, level3_node)
                 for template_node in level2_node.find_child(NodeKind.TEMPLATE):

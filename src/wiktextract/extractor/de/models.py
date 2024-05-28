@@ -103,6 +103,7 @@ class Sense(BaseModelWrap):
     senseid: str = Field(
         default="", description="Sense number used in Wiktionary"
     )
+    topics: list[str] = []
 
 
 class Sound(BaseModelWrap):
