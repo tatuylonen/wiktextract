@@ -112,6 +112,7 @@ class Form(BaseModelWrap):
     form: str = ""
     tags: list[str] = []
     raw_tags: list[str] = []
+    row_span: int = Field(1, exclude=True)
 
 
 class WordEntry(BaseModelWrap):

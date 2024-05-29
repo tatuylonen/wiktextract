@@ -671,14 +671,28 @@ CSEM_TOPICS = {
     "óptica": "optics",
 }
 
-INFLECTION_TABLE_TAGS = {
+NUMBER_TAGS = {
     # "inflect.*" templates
     "singular": "singular",
     "plural": "plural",
 }
 
+GENDER_TAGS = {
+    "masculino": "masculine",
+    "femenino": "feminine",
+    "neutro": "neuter",
+}
+
+COMPARISON_TAGS = {
+    "positivo": "positive",
+    "comparativo": "comparative",
+    "superlativo": "superlative",
+}
+
 ALL_TAGS = {
-    **INFLECTION_TABLE_TAGS,
+    **NUMBER_TAGS,
+    **GENDER_TAGS,
+    **COMPARISON_TAGS,
 }
 
 
