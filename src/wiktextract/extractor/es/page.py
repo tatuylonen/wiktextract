@@ -6,13 +6,14 @@ from wikitextprocessor.parser import (
     TemplateNode,
     WikiNodeChildrenList,
 )
-from wiktextract.logging import logger
-from wiktextract.page import clean_node
-from wiktextract.wxr_context import WiktextractContext
 
+from ...logging import logger
+from ...page import clean_node
+from ...wxr_context import WiktextractContext
 from .etymology import process_etymology_block
 from .example import extract_example
 from .gloss import extract_gloss, process_ambito_template, process_uso_template
+from .inflection import extract_inflection
 from .linkage import extract_linkage, process_linkage_template
 from .models import Sense, WordEntry
 from .pronunciation import process_audio_template, process_pron_graf_template
@@ -203,17 +204,11 @@ def process_pos_block(
 
         else:
             # Process nodes before first sense
-            if (
-                isinstance(child, WikiNode)
-                and child.kind == NodeKind.TEMPLATE
-                and (
-                    "inflect" in child.template_name
-                    or "v.conj" in child.template_name
-                )
+            if isinstance(child, TemplateNode) and (
+                "inflect" in child.template_name
+                or "v.conj" in child.template_name
             ):
-                # XXX: Extract forms
-                pass
-
+                extract_inflection(wxr, page_data, child)
             elif (
                 isinstance(child, WikiNode)
                 and child.kind == NodeKind.LINK

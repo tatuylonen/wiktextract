@@ -108,6 +108,12 @@ class Sound(BaseModelWrap):
     homophone: str = ""
 
 
+class Form(BaseModelWrap):
+    form: str = ""
+    tags: list[str] = []
+    raw_tags: list[str] = []
+
+
 class WordEntry(BaseModelWrap):
     """
     WordEntry is a dictionary containing lexical information of a single word extracted from Wiktionary with wiktextract.
@@ -154,3 +160,4 @@ class WordEntry(BaseModelWrap):
     proverbs: list[Linkage] = []
     tags: list[str] = []
     extra_sounds: dict[str, str] = {}
+    forms: list[Form] = []

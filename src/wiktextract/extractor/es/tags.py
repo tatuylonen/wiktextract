@@ -671,12 +671,24 @@ CSEM_TOPICS = {
     "óptica": "optics",
 }
 
+INFLECTION_TABLE_TAGS = {
+    # "inflect.*" templates
+    "singular": "singular",
+    "plural": "plural",
+}
+
+ALL_TAGS = {
+    **INFLECTION_TABLE_TAGS,
+}
+
 
 def translate_raw_tags(data: WordEntry):
     raw_tags = []
     for raw_tag in data.raw_tags:
         lower_raw_tag = raw_tag.lower()
-        if lower_raw_tag in CSEM_TOPICS and hasattr(data, "topics"):
+        if lower_raw_tag in ALL_TAGS:
+            data.tags.append(ALL_TAGS[lower_raw_tag])
+        elif lower_raw_tag in CSEM_TOPICS and hasattr(data, "topics"):
             data.topics.append(CSEM_TOPICS[lower_raw_tag])
         else:
             raw_tags.append(raw_tag)

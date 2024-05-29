@@ -2,9 +2,9 @@ from dataclasses import dataclass
 
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import TemplateNode
-from wiktextract.page import clean_node
-from wiktextract.wxr_context import WiktextractContext
 
+from ...page import clean_node
+from ...wxr_context import WiktextractContext
 from .models import Form, WordEntry
 from .pronunciation import is_ipa_text
 from .tags import translate_raw_tags
