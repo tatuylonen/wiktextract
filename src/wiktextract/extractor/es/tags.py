@@ -671,12 +671,38 @@ CSEM_TOPICS = {
     "óptica": "optics",
 }
 
+NUMBER_TAGS = {
+    # "inflect.*" templates
+    "singular": "singular",
+    "plural": "plural",
+}
+
+GENDER_TAGS = {
+    "masculino": "masculine",
+    "femenino": "feminine",
+    "neutro": "neuter",
+}
+
+COMPARISON_TAGS = {
+    "positivo": "positive",
+    "comparativo": "comparative",
+    "superlativo": "superlative",
+}
+
+ALL_TAGS = {
+    **NUMBER_TAGS,
+    **GENDER_TAGS,
+    **COMPARISON_TAGS,
+}
+
 
 def translate_raw_tags(data: WordEntry):
     raw_tags = []
     for raw_tag in data.raw_tags:
         lower_raw_tag = raw_tag.lower()
-        if lower_raw_tag in CSEM_TOPICS and hasattr(data, "topics"):
+        if lower_raw_tag in ALL_TAGS:
+            data.tags.append(ALL_TAGS[lower_raw_tag])
+        elif lower_raw_tag in CSEM_TOPICS and hasattr(data, "topics"):
             data.topics.append(CSEM_TOPICS[lower_raw_tag])
         else:
             raw_tags.append(raw_tag)
