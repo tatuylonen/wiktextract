@@ -17,6 +17,7 @@ class Linkage(BaseModelWrap):
         default="", description="Alternative spelling of the word"
     )
     senseid: str = ""
+    sense: str = ""
 
 
 class Translation(BaseModelWrap):

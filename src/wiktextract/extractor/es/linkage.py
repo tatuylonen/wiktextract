@@ -1,16 +1,16 @@
 from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import WikiNodeChildrenList
-from wiktextract.page import clean_node
-from wiktextract.wxr_context import WiktextractContext
+from wikitextprocessor.parser import TemplateNode, WikiNodeChildrenList
 
+from ...page import clean_node
+from ...wxr_context import WiktextractContext
 from .models import Linkage, WordEntry
 from .section_titles import LINKAGE_TITLES
 
 
-def extract_linkage(
+def extract_linkage_section(
     wxr: WiktextractContext,
     word_entry: WordEntry,
-    node: WikiNode,
+    title_node: WikiNode,
     linkage_type: str,
 ):
     if linkage_type not in word_entry.model_fields:
@@ -19,17 +19,19 @@ def extract_linkage(
             sortid="extractor/es/linkage/extract_linkage/20",
         )
         return
-
-    for link_node in node.find_child_recursively(NodeKind.LINK):
-        word = clean_node(wxr, None, link_node)
-        if len(word) > 0:
-            getattr(word_entry, linkage_type).append(Linkage(word=word))
-
-    for template_node in node.find_child_recursively(NodeKind.TEMPLATE):
-        if template_node.template_name == "l":
-            word = clean_node(wxr, None, template_node)
-            if len(word) > 0:
-                getattr(word_entry, linkage_type).append(Linkage(word=word))
+    for list_item_node in title_node.find_child_recursively(NodeKind.LIST_ITEM):
+        data = Linkage(word="")
+        sense_nodes = []
+        for node in list_item_node.children:
+            if isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
+                data.word = clean_node(wxr, None, node)
+            elif isinstance(node, TemplateNode) and node.template_name == "l":
+                data.word = clean_node(wxr, None, node)
+            else:
+                sense_nodes.append(node)
+        data.sense = clean_node(wxr, None, sense_nodes).strip(": ")
+        if len(data.word) > 0:
+            getattr(word_entry, linkage_type).append(data)
 
 
 def process_linkage_template(
@@ -72,6 +74,7 @@ def process_linkage_list_children(
     nodes: WikiNodeChildrenList,
     linkage_type: str,
 ):
+    # under gloss list
     if linkage_type not in word_entry.model_fields:
         wxr.wtp.debug(
             f"Linkage type {linkage_type} not found in pydantic model",

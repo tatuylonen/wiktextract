@@ -14,7 +14,7 @@ from .etymology import process_etymology_block
 from .example import extract_example
 from .gloss import extract_gloss, process_ambito_template, process_uso_template
 from .inflection import extract_inflection
-from .linkage import extract_linkage, process_linkage_template
+from .linkage import extract_linkage_section, process_linkage_template
 from .models import Sense, WordEntry
 from .pronunciation import process_audio_template, process_pron_graf_template
 from .section_titles import (
@@ -159,7 +159,7 @@ def parse_section(
     elif section_title in LINKAGE_TITLES:
         if len(page_data) == 0:
             page_data.append(base_data.model_copy(deep=True))
-        extract_linkage(
+        extract_linkage_section(
             wxr, page_data[-1], level_node, LINKAGE_TITLES[section_title]
         )
 

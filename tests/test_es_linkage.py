@@ -3,7 +3,7 @@ import unittest
 from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.es.linkage import (
-    extract_linkage,
+    extract_linkage_section,
     process_linkage_list_children,
     process_linkage_template,
 )
@@ -26,7 +26,7 @@ class TestESLinkage(unittest.TestCase):
             # https://es.wiktionary.org/wiki/Fett
             {
                 "input": "* {{l|de|Fettgewebe}}: ''tejido adiposo''",
-                "expected": [{"word": "Fettgewebe"}],
+                "expected": [{"word": "Fettgewebe", "sense": "tejido adiposo"}],
             },
             # https://es.wiktionary.org/wiki/presunción
             {
@@ -43,7 +43,7 @@ class TestESLinkage(unittest.TestCase):
                 self.wxr.wtp.add_page("Plantilla:l", 10, "Fettgewebe")
                 word_entry = WordEntry(word="", lang_code="", lang="")
                 root = self.wxr.wtp.parse(case["input"])
-                extract_linkage(
+                extract_linkage_section(
                     self.wxr, word_entry, root.children[0], "compounds"
                 )
                 self.assertEqual(
