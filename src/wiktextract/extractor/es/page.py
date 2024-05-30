@@ -10,6 +10,7 @@ from wikitextprocessor.parser import (
 from ...logging import logger
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from .conjugation import extract_conjugation_section
 from .etymology import process_etymology_block
 from .example import extract_example
 from .gloss import extract_gloss, process_ambito_template, process_uso_template
@@ -162,7 +163,8 @@ def parse_section(
         extract_linkage_section(
             wxr, page_data[-1], level_node, LINKAGE_TITLES[section_title]
         )
-
+    elif section_title == "conjugación":
+        extract_conjugation_section(wxr, page_data[-1], level_node)
     else:
         wxr.wtp.debug(
             f"Unprocessed section: {section_title}",

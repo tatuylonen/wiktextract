@@ -689,10 +689,43 @@ COMPARISON_TAGS = {
     "superlativo": "superlative",
 }
 
+PERSON_TAGS = {
+    "primera": "first-person",
+    "segunda": "second-person",
+    "tercera": "third-person",
+}
+
+TENSE_TAGS = {
+    "presente": "present",
+    "pretérito imperfecto": ["past", "imperfect"],
+    "pretérito indefinido": ["indefinite", "preterite"],
+    "futuro": "future",
+    "condicional": "conditional",
+    "pretérito perfecto": ["present", "perfect"],
+    "pretérito pluscuamperfecto": "pluperfect",
+    "pretérito anterior": ["past", "anterior"],
+    "futuro perfecto": ["future", "perfect"],
+    "condicional perfecto": ["conditional", "perfect"],
+}
+
+VERB_FORM_TAGS = {
+    "infinitivo": "infinitive",
+    "gerundio": "gerund",
+    "participio": "participle",
+}
+
+
 ALL_TAGS = {
     **NUMBER_TAGS,
     **GENDER_TAGS,
     **COMPARISON_TAGS,
+    **PERSON_TAGS,
+    **TENSE_TAGS,
+    **VERB_FORM_TAGS,
+    "afirmativo": "affirmative",
+    "negativo": "negative",
+    "simples": "simple",
+    "compuestas": "compound",
 }
 
 
@@ -701,7 +734,11 @@ def translate_raw_tags(data: WordEntry):
     for raw_tag in data.raw_tags:
         lower_raw_tag = raw_tag.lower()
         if lower_raw_tag in ALL_TAGS:
-            data.tags.append(ALL_TAGS[lower_raw_tag])
+            tr_tag = ALL_TAGS[lower_raw_tag]
+            if isinstance(tr_tag, str):
+                data.tags.append(tr_tag)
+            elif isinstance(tr_tag, list):
+                data.tags.extend(tr_tag)
         elif lower_raw_tag in CSEM_TOPICS and hasattr(data, "topics"):
             data.topics.append(CSEM_TOPICS[lower_raw_tag])
         else:
