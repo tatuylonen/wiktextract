@@ -180,6 +180,23 @@ VOICE_TAGS: dict[str, Union[str, list[str]]] = {
     "passif": "passive",
 }
 
+# Module:lexique/data
+LEXIQUE_TAGS = {
+    "hindouisme": "Hinduism",
+    "judaïsme": "Judaism",
+    "marxisme": "Marxism",
+    "nazisme": "Nazism",
+    "physique": "physical",
+    "rhétorique": "rhetoric",
+    "antiquité": "Ancient",
+    "antiquité grecque": "Ancient-Greek",
+    "antiquité romaine": "Ancient-Roman",
+    "bible": "Biblical",
+    "moyen âge": "Middle-Ages",
+    "union européenne": "European-Union",
+    "analyse": "analytic",
+}
+
 GRAMMATICAL_TAGS: dict[str, Union[str, list[str]]] = {
     **GENDER_TAGS,
     **NUMBER_TAGS,
@@ -196,6 +213,7 @@ GRAMMATICAL_TAGS: dict[str, Union[str, list[str]]] = {
     **OTHER_GRAMMATICAL_TAGS,
     **SENSE_TAGS,
     **VOICE_TAGS,
+    **LEXIQUE_TAGS,
 }
 
 
