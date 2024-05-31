@@ -79,7 +79,7 @@ class TestFrPage(TestCase):
                             "glosses": [
                                 "Variété de charbon de terre, à reflet métallique et à combustion lente."
                             ],
-                            "raw_tags": ["Pétrographie"],
+                            "topics": ["petrography"],
                         }
                     ],
                     "etymology_texts": ["(1549) Du latin anthracites."],
