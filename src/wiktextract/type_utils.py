@@ -1,7 +1,9 @@
 from typing import (
     Sequence,
     TypedDict,
+    Union,
 )
+from wikitextprocessor.core import TemplateArgs
 
 
 class AltOf(TypedDict, total=False):
@@ -30,7 +32,7 @@ class ExampleData(TypedDict, total=False):
     note: str
     ref: str
     roman: str
-    ruby: list[Sequence[str]]
+    ruby: Union[list[tuple[str, str]], list[Sequence[str]]]
     text: str
     type: str
 
@@ -45,7 +47,7 @@ LinkData = list[Sequence[str]]
 
 
 class TemplateData(TypedDict, total=False):
-    args: dict[str, str]
+    args: TemplateArgs
     expansion: str
     name: str
 
@@ -53,7 +55,7 @@ class TemplateData(TypedDict, total=False):
 class DescendantData(TypedDict, total=False):
     depth: int
     tags: list[str]
-    templates: TemplateData
+    templates: list[TemplateData]
     text: str
 
 

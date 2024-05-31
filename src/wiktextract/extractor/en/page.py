@@ -12,6 +12,7 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Iterable,
+    Iterator,
     Optional,
     Set,
     Union,
@@ -48,7 +49,15 @@ from wiktextract.page import (
 from wiktextract.parts_of_speech import PARTS_OF_SPEECH
 from wiktextract.tags import valid_tags
 from wiktextract.translations import parse_translation_item_text
-from wiktextract.type_utils import SenseData, SoundData, WordData, LinkageData
+from wiktextract.type_utils import (
+    DescendantData,
+    ExampleData,
+    SenseData,
+    SoundData,
+    WordData,
+    LinkageData,
+    TemplateData,
+)
 from wiktextract.wxr_context import WiktextractContext
 
 from ..ruby import extract_ruby, parse_ruby
@@ -2675,15 +2684,17 @@ def parse_language(
         if not wxr.config.capture_translations:
             return
         sense_parts: list[Union[WikiNode, str]] = []
-        sense = None
+        sense: Optional[str] = None
 
-        def parse_translation_item(contents, lang=None):
+        def parse_translation_item(
+            contents: list[Union[WikiNode, str]], lang: Optional[str] = None
+        ) -> None:
             nonlocal sense
             assert isinstance(contents, list)
             assert lang is None or isinstance(lang, str)
             # print("PARSE_TRANSLATION_ITEM:", contents)
 
-            langcode = None
+            langcode: Optional[str] = None
             if sense is None:
                 sense = clean_node(wxr, data, sense_parts).strip()
                 # print("sense <- clean_node: ", sense)
@@ -2698,7 +2709,7 @@ def parse_language(
                     sense = sense[:-1].strip()
                 if sense.endswith("—"):
                     sense = sense[:-1].strip()
-            translations_from_template = []
+            translations_from_template: list[str] = []
 
             def translation_item_template_fn(
                 name: str, ht: TemplateArgs
@@ -3079,7 +3090,7 @@ def parse_language(
         assert isinstance(data, dict)
         assert isinstance(node, WikiNode)
 
-        templates = []
+        templates: list[TemplateData] = []
 
         # Counter for preventing the capture of etymology templates
         # when we are inside templates that we want to ignore (i.e.,
@@ -3096,7 +3107,9 @@ def parse_language(
 
         # CONTINUE_HERE
 
-        def etym_post_template_fn(name, ht, expansion):
+        def etym_post_template_fn(
+            name: str, ht: TemplateArgs, expansion: str
+        ) -> None:
             nonlocal ignore_count
             if name in wikipedia_templates:
                 parse_wikipedia_template(wxr, data, ht)
@@ -3136,7 +3149,9 @@ def parse_language(
             # the validation.
             data["etymology_templates"] = templates
 
-    def parse_descendants(data, node, is_proto_root_derived_section=False):
+    def parse_descendants(
+        data: WordData, node: WikiNode, is_proto_root_derived_section=False
+    ) -> None:
         """Parses a Descendants section. Also used on Derived terms and
         Extensions sections when we are dealing with a root of a reconstructed
         language (i.e. is_proto_root_derived_section == True), as they use the
@@ -3160,9 +3175,11 @@ def parse_language(
         # be skipped if we didn't handle it specially as it is not part of a
         # LIST, and additionally is in panel_templates. There are probably more
         # such templates that should be added to this...
-        unignored_non_list_templates = ["CJKV"]
+        unignored_non_list_templates: list[str] = ["CJKV"]
 
-        def process_list_item_children(sarg, children):
+        def process_list_item_children(
+            sarg: str, children: list[Union[str, WikiNode]]
+        ) -> None:
             assert isinstance(sarg, str)
             assert isinstance(children, list)
             # The descendants section is a hierarchical bulleted listed. sarg is
@@ -3171,15 +3188,15 @@ def parse_language(
             # thrice-indented. A bare ";" is used to indicate a subtitle-like
             # line with no indentation. ":" at the end of one or more "*"s is
             # used to indicate that the bullet will not be displayed.
-            item_data = {"depth": sarg.count("*")}
-            templates = []
+            item_data: DescendantData = {"depth": sarg.count("*")}
+            templates: list[TemplateData] = []
             is_derived = False
 
             # Counter for preventing the capture of templates when we are inside
             # templates that we want to ignore (i.e., not capture).
             ignore_count = 0
 
-            def desc_template_fn(name, ht):
+            def desc_template_fn(name: str, ht: TemplateArgs) -> Optional[str]:
                 nonlocal ignore_count
                 if (
                     is_panel_template(wxr, name)
@@ -3188,8 +3205,11 @@ def parse_language(
                     return ""
                 if re.match(ignored_descendants_templates_re, name):
                     ignore_count += 1
+                return None
 
-            def desc_post_template_fn(name, ht, expansion):
+            def desc_post_template_fn(
+                name: str, ht: TemplateArgs, expansion: str
+            ) -> None:
                 nonlocal ignore_count
                 if name in wikipedia_templates:
                     parse_wikipedia_template(wxr, data, ht)
@@ -3228,18 +3248,18 @@ def parse_language(
                 item_data["tags"] = ["derived"]
             descendants.append(item_data)
 
-        def node_children(node):
+        def node_children(node: WikiNode) -> Iterator[tuple[int, WikiNode]]:
             for i, child in enumerate(node.children):
                 if isinstance(child, WikiNode):
                     yield (i, child)
 
-        def get_sublist_index(list_item):
+        def get_sublist_index(list_item: WikiNode) -> Optional[int]:
             for i, child in node_children(list_item):
                 if child.kind == NodeKind.LIST:
                     return i
             return None
 
-        def get_descendants(node):
+        def get_descendants(node: WikiNode) -> None:
             """Appends the data for every list item in every list in node
             to descendants."""
             for _, c in node_children(node):
@@ -3272,7 +3292,7 @@ def parse_language(
                     i = get_sublist_index(c)
                     if i is not None:
                         process_list_item_children(c.sarg, c.children[:i])
-                        get_descendants(c.children[i])
+                        get_descendants(c.children[i])  # type: ignore[arg-type]
                     else:
                         process_list_item_children(c.sarg, c.children)
 
@@ -3287,7 +3307,7 @@ def parse_language(
         else:
             data["descendants"] = descendants
 
-    def process_children(treenode, pos):
+    def process_children(treenode: WikiNode, pos: Optional[str]) -> None:
         """This recurses into a subtree in the parse tree for a page."""
         nonlocal etym_data
         nonlocal pos_data
@@ -3295,7 +3315,7 @@ def parse_language(
 
         redirect_list: list[str] = []  # for `zh-see` template
 
-        def skip_template_fn(name, ht):
+        def skip_template_fn(name: str, ht: TemplateArgs) -> Optional[str]:
             """This is called for otherwise unprocessed parts of the page.
             We still expand them so that e.g. Category links get captured."""
             if name in wikipedia_templates:
@@ -3392,7 +3412,7 @@ def parse_language(
                 t_no_number = " ".join(lst).lower()
                 if t_no_number in POS_TITLES:
                     push_pos()
-                    dt = POS_TITLES[t_no_number]
+                    dt = POS_TITLES[t_no_number]  # type:ignore[literal-required]
                     pos = dt["pos"]
                     wxr.wtp.start_subsection(t)
                     if "debug" in dt:
@@ -3445,12 +3465,14 @@ def parse_language(
                     new_page_data["pos"] = "soft-redirect"
                 page_datas.append(new_page_data)
 
-    def extract_examples(others, sense_base):
+    def extract_examples(
+        others: list[WikiNode], sense_base: SenseData
+    ) -> list[ExampleData]:
         """Parses through a list of definitions and quotes to find examples.
         Returns a list of example dicts to be added to sense data. Adds
         meta-data, mostly categories, into sense_base."""
         assert isinstance(others, list)
-        examples = []
+        examples: list[ExampleData] = []
 
         for sub in others:
             if not sub.sarg.endswith((":", "*")):
@@ -3464,7 +3486,9 @@ def parse_language(
                 example_template_args = []
                 example_template_names = []
 
-                def usex_template_fn(name, ht):
+                def usex_template_fn(
+                    name: str, ht: TemplateArgs
+                ) -> Optional[str]:
                     nonlocal usex_type
                     if is_panel_template(wxr, name):
                         return ""
@@ -3482,7 +3506,7 @@ def parse_language(
                     return None
 
                 # bookmark
-                ruby = []
+                ruby: list[tuple[str, str]] = []
                 contents = item.children
                 if lang_code == "ja":
                     # print(contents)
@@ -3499,8 +3523,8 @@ def parse_language(
                     )
                     rub, rest = extract_ruby(wxr, exp.children)
                     if rub:
-                        for r in rub:
-                            ruby.append(r)
+                        for rtup in rub:
+                            ruby.append(rtup)
                         contents = rest
                 subtext = clean_node(
                     wxr, sense_base, contents, template_fn=usex_template_fn
@@ -3595,14 +3619,14 @@ def parse_language(
                         len(example_template_names) == 1
                         and example_template_names[0] in ("zh-x", "zh-usex")
                     ):
-                        ref = []
+                        refs: list[str] = []
                         for i in range(len(lines)):
                             if re.match(r"^[#*]*:+(\s*$|\s+)", lines[i]):
                                 break
-                            ref.append(lines[i].strip())
+                            refs.append(lines[i].strip())
                             if re.search(r"[]\d:)]\s*$", lines[i]):
                                 break
-                        ref = " ".join(ref)
+                        ref = " ".join(refs)
                         lines = lines[i + 1 :]
                         if (
                             lang_code != "en"
@@ -3776,7 +3800,7 @@ def parse_language(
                     subtext = ref
                     ref = ""
                 if subtext:
-                    dt = {"text": subtext}
+                    dt: ExampleData = {"text": subtext}
                     if ref:
                         dt["ref"] = ref
                     if tr:
@@ -3822,27 +3846,35 @@ def parse_language(
     return ret
 
 
-def parse_wikipedia_template(wxr, data, ht):
+def parse_wikipedia_template(
+    wxr: WiktextractContext, data: WordData, ht: TemplateArgs
+) -> None:
     """Helper function for parsing {{wikipedia|...}} and related templates."""
     assert isinstance(wxr, WiktextractContext)
     assert isinstance(data, dict)
     assert isinstance(ht, dict)
     langid = clean_node(wxr, data, ht.get("lang", ()))
-    pagename = clean_node(wxr, data, ht.get(1, ())) or wxr.wtp.title
+    pagename = (
+        clean_node(wxr, data, ht.get(1, ()))
+        or wxr.wtp.title
+        or "MISSING_PAGE_TITLE"
+    )
     if langid:
         data_append(data, "wikipedia", langid + ":" + pagename)
     else:
         data_append(data, "wikipedia", pagename)
 
 
-def parse_top_template(wxr, node, data):
+def parse_top_template(
+    wxr: WiktextractContext, node: WikiNode, data: WordData
+) -> None:
     """Parses a template that occurs on the top-level in a page, before any
     language subtitles."""
     assert isinstance(wxr, WiktextractContext)
     assert isinstance(node, WikiNode)
     assert isinstance(data, dict)
 
-    def top_template_fn(name, ht):
+    def top_template_fn(name: str, ht: TemplateArgs) -> Optional[str]:
         if name in wikipedia_templates:
             parse_wikipedia_template(wxr, data, ht)
             return None
@@ -3900,7 +3932,7 @@ def fix_subtitle_hierarchy(wxr: WiktextractContext, text: str) -> str:
     # Tatu suggested adding a new 'level' between 3 and 4, so Pronunciation
     # is now Level 4, POS is shifted to Level 5 and the rest (incl. 'default')
     # are now level 6
-    
+
     # Known lowercase PoS names are in part_of_speech_map
     # Known lowercase linkage section names are in linkage_map
 
@@ -4027,7 +4059,7 @@ def parse_page(
     # from wikitextprocessor.parser import print_tree
     # print("PAGE PARSE:", print_tree(tree))
 
-    top_data = {}
+    top_data: WordData = {}
 
     # Iterate over top-level titles, which should be languages for normal
     # pages

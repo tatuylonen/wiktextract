@@ -1595,7 +1595,7 @@ def clean_value(
 
 def clean_template_args(
     wxr: WiktextractContext, ht: TemplateArgs, no_strip=False
-) -> dict[str, str]:
+) -> TemplateArgs:
     """Cleans all values in a template argument dictionary and returns the
     cleaned dictionary."""
     assert isinstance(wxr, WiktextractContext)
