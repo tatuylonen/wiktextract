@@ -230,11 +230,34 @@ LABEL_TAGS = {
     "首字母縮略詞": "initialism",
     "駭客語": "Leet Internet",
     "高語域": "honorific",
+    "中醫": "Traditional-Chinese-Medicine",
+    "修辭學": "rhetoric",
+    "印度教": "Hinduism",
+    "摩門教": "Mormonism",
+    "物理": "particle",
+    "猶太教": "Judaism",
+    "納粹主義": "Nazism",
+    "網際網路": "Internet",
+    "耆那教": "Jainism",
+    "聖經": "Biblical",
+    "解剖學": "anatomy",
+    "貴格會": "Quakerism",
+    "錫克教": "Sikhism",
+    "馬克思主義": "Marxism",
     # also from Module:Labels/data, but translated manually
     "喃字": "Chu-Nom",
     "反身代詞": "reflexive",
     "字面意義": "literally",
     "成語": "Chengyu",
+    "及物、不及物": ["transitive", "intransitive"],
+    "集合名詞": "collective",
+    "控制動詞": "control-verb",
+    "省略": "ellipsis",
+    "分數": "fractional",
+    "以雙數形式": "dual",
+    "主要用於否定複數": ["negative", "plural"],
+    "數詞縮寫": ["numeral", "abbreviation"],
+    "主要用於肯定": "positive",
 }
 
 
@@ -246,7 +269,11 @@ def translate_raw_tags(data: WordEntry) -> WordEntry:
     for raw_tag in data.raw_tags:
         for split_raw_tag in re.split(r"(?:,|，)\s*", raw_tag):
             if split_raw_tag in ALL_TAGS:
-                data.tags.append(ALL_TAGS[split_raw_tag])
+                tr_tag = ALL_TAGS[split_raw_tag]
+                if isinstance(tr_tag, str):
+                    data.tags.append(tr_tag)
+                elif isinstance(tr_tag, list):
+                    data.tags.extend(tr_tag)
             elif split_raw_tag in LABEL_TOPICS and hasattr(data, "topics"):
                 data.topics.append(LABEL_TOPICS[split_raw_tag])
             else:
