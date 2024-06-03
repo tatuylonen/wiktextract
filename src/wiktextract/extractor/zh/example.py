@@ -159,8 +159,9 @@ def extract_template_zh_x(
         translation = ""
         for dd_tag in dl_tag.find_html("dd"):
             dd_text = clean_node(wxr, None, dd_tag)
-            if dd_text.startswith("來自："):
-                ref = dd_text.removeprefix("來自：")
+            # Module:Zh-usex uses "出自：" now: https://zh.wiktionary.org/w/index.php?title=Module:Zh-usex&diff=prev&oldid=8430896
+            if dd_text.startswith(("出自：", "來自：")):
+                ref = dd_text.removeprefix("出自：").removeprefix("來自：")
             else:
                 is_pinyin = False
                 for span_tag in dd_tag.find_html_recursively(
