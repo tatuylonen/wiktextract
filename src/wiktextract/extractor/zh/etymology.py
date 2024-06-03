@@ -1,5 +1,9 @@
-from wikitextprocessor import WikiNode
-from wikitextprocessor.parser import LEVEL_KIND_FLAGS, TemplateNode
+from wikitextprocessor.parser import (
+    LEVEL_KIND_FLAGS,
+    NodeKind,
+    TemplateNode,
+    WikiNode,
+)
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -31,6 +35,23 @@ def extract_etymology(
             for example_data in extract_template_zh_x(wxr, etymology_node):
                 base_data.etymology_examples.append(example_data)
             clean_node(wxr, page_data[-1], etymology_node)
+        elif (
+            isinstance(etymology_node, WikiNode)
+            and etymology_node.kind == NodeKind.LIST
+        ):
+            has_zh_x = False
+            for template_node in etymology_node.find_child_recursively(
+                NodeKind.TEMPLATE
+            ):
+                if template_node.template_name == "zh-x":
+                    has_zh_x = True
+                    for example_data in extract_template_zh_x(
+                        wxr, template_node
+                    ):
+                        base_data.etymology_examples.append(example_data)
+                    clean_node(wxr, page_data[-1], template_node)
+            if not has_zh_x:
+                etymology_nodes.append(etymology_node)
         else:
             etymology_nodes.append(etymology_node)
 
