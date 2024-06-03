@@ -78,3 +78,36 @@ class TestInflection(TestCase):
             page_data[0]["forms"],
             [{"form": "维基词典", "tags": ["Simplified Chinese"]}],
         )
+
+    def test_zh_forms_lit(self):
+        page_data = parse_page(
+            self.wxr,
+            "玉石俱焚",
+            """==漢語==
+{{zh-forms|lit=玉和石一起燒成灰}}
+
+===成語===
+
+# 比喻[[好]]的和[[壞]]的一同[[毀滅]]。""",
+        )
+        self.assertEqual(page_data[0]["literal_meaning"], "玉和石一起燒成灰")
+
+    def test_zh_forms_alt(self):
+        page_data = parse_page(
+            self.wxr,
+            "新婦",
+            """==漢語==
+{{zh-forms|alt=新抱-粵語,心抱-粵語,新府-陽江粵語}}
+
+===名詞===
+
+# [[新娘]]""",
+        )
+        self.assertEqual(
+            page_data[0]["forms"],
+            [
+                {"form": "新抱", "raw_tags": ["粵語"]},
+                {"form": "心抱", "raw_tags": ["粵語"]},
+                {"form": "新府", "raw_tags": ["陽江粵語"]},
+            ],
+        )
