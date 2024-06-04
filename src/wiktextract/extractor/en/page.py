@@ -3413,7 +3413,7 @@ def parse_language(
                 if t_no_number in POS_TITLES:
                     push_pos()
                     dt = POS_TITLES[t_no_number]  # type:ignore[literal-required]
-                    pos = dt["pos"]
+                    pos = dt["pos"] or "MISSING_POS"
                     wxr.wtp.start_subsection(t)
                     if "debug" in dt:
                         wxr.wtp.debug(
@@ -4022,9 +4022,7 @@ def fix_subtitle_hierarchy(wxr: WiktextractContext, text: str) -> str:
     return text
 
 
-def parse_page(
-    wxr: WiktextractContext, word: str, text: str
-) -> list[dict[str, Any]]:
+def parse_page(wxr: WiktextractContext, word: str, text: str) -> list[WordData]:
     # Skip translation pages
     if word.endswith("/" + TRANSLATIONS_TITLE):
         return []
@@ -4133,11 +4131,13 @@ def parse_page(
                 )
             x["original_title"] = word
         # validate tag data
-        recursively_separate_raw_tags(wxr, x)
+        recursively_separate_raw_tags(wxr, x)  # type:ignore[arg-type]
     return ret
 
 
-def recursively_separate_raw_tags(wxr: WiktextractContext, data: dict) -> None:
+def recursively_separate_raw_tags(
+    wxr: WiktextractContext, data: dict[str, Any]
+) -> None:
     if not isinstance(data, dict):
         wxr.wtp.error(
             "'data' is not dict; most probably "
@@ -4146,8 +4146,8 @@ def recursively_separate_raw_tags(wxr: WiktextractContext, data: dict) -> None:
             sortid="en/page-4016/20240419",
         )
         return
-    new_tags = []
-    raw_tags = data.get("raw_tags", [])
+    new_tags: list[str] = []
+    raw_tags: list[str] = data.get("raw_tags", [])
     for field, val in data.items():
         if field == "tags":
             for tag in val:
