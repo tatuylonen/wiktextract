@@ -1,7 +1,7 @@
 from wiktextract.config import POSSubtitleData
 
 # Lower case POS titles
-POS_TITLES: POSSubtitleData = {
+POS_TITLES: dict[str, POSSubtitleData] = {
     "abbreviation": {
         "pos": "abbrev",
         "debug": "part-of-speech Abbreviation is proscribed",
