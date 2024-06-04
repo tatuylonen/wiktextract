@@ -4,7 +4,7 @@
 # Copyright (c) 2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 import re
-from typing import Optional
+from typing import Optional, Union
 
 from mediawiki_langcodes import code_to_name, name_to_code
 from wikitextprocessor import NodeKind, Page, WikiNode
@@ -14,6 +14,7 @@ from wiktextract.form_descriptions import parse_sense_qualifier
 from wiktextract.logging import logger
 from wiktextract.page import LEVEL_KINDS, clean_node
 from wiktextract.thesaurus import ThesaurusTerm
+from wiktextract.type_utils import SenseData
 from wiktextract.wxr_context import WiktextractContext
 
 from .section_titles import LINKAGE_TITLES, POS_TITLES
@@ -100,7 +101,7 @@ def extract_thesaurus_page(
     pos = None
     sense = None
     linkage = None
-    subtitle_tags = []
+    subtitle_tags: list[str] = []
     entry_id = -1
     # Some pages don't have a language subtitle, but use
     # {{ws header|lang=xx}}
@@ -108,7 +109,14 @@ def extract_thesaurus_page(
     if m:
         lang = code_to_name(m.group(1), "en")
 
-    def recurse(contents) -> Optional[list[ThesaurusTerm]]:
+    def recurse(
+        contents: Union[
+            list[Union[WikiNode, str]],
+            WikiNode,
+            str,
+            list[list[Union[WikiNode, str]]],
+        ],
+    ) -> Optional[list[ThesaurusTerm]]:
         nonlocal lang
         nonlocal pos
         nonlocal sense
@@ -116,8 +124,8 @@ def extract_thesaurus_page(
         nonlocal subtitle_tags
         nonlocal entry_id
         item_sense = None
-        tags = None
-        topics = None
+        tags: Optional[list[str]] = None
+        topics: Optional[list[str]] = None
 
         if isinstance(contents, (list, tuple)):
             thesaurus = []
@@ -158,7 +166,7 @@ def extract_thesaurus_page(
                 # literal translation, not necessarily the real meaning.
                 english = None
 
-                def engl_fn(m):
+                def engl_fn(m: re.Match) -> str:
                     nonlocal english
                     english = m.group(1)
                     return ""
@@ -169,13 +177,13 @@ def extract_thesaurus_page(
                 tags = []
                 topics = []
 
-                def qual_fn(m):
+                def qual_fn(m: re.Match) -> str:
                     q = m.group(1)
                     if q == item_sense:
                         return ""
                     if "XLITS" in q:
                         return q
-                    dt = {}
+                    dt: SenseData = {}
                     parse_sense_qualifier(wxr, q, dt)
                     tags.extend(dt.get("tags", ()))
                     topics.extend(dt.get("topics", ()))

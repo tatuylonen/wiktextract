@@ -3,7 +3,7 @@
 #
 # Copyright (c) 2020 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
-unsupported_title_map = {
+unsupported_title_map: dict[str, str] = {
     "Ancient Greek dish": "λοπαδο­τεμαχο­σελαχο­γαλεο­κρανιο­λειψανο­δριμυ­ποτριμματο­σιλφιο­καραβο­μελιτο­κατακεχυμενο­κιχλε­πικοσσυφο­φαττο­περιστερα­λεκτρυο­νοπτο­κεφαλλιο­κιγκλο­πελειο­λαγῳο­σιραιο­βαφητραγανοπτερύγων",
     "Australian Aboriginal Flag emoticon": "[-o-]",
     "Australian Aboriginal Flag emoticon alternative": "[-0-]",

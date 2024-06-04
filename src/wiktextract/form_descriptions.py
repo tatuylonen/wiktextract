@@ -20,6 +20,7 @@ from typing import (
 import Levenshtein
 from nltk import TweetTokenizer
 
+from wiktextract.type_utils import SenseData
 from wiktextract.wxr_context import WiktextractContext
 
 from .datautils import data_append, data_extend, split_at_comma_semi
@@ -2573,7 +2574,7 @@ def parse_word_head(
         data["tags"] = list(sorted(set(tags)))
 
 
-def parse_sense_qualifier(wxr, text, data):
+def parse_sense_qualifier(wxr: WiktextractContext, text: str, data: SenseData):
     """Parses tags or topics for a sense or some other data.  The values are
     added into the dictionary ``data``."""
     assert isinstance(wxr, WiktextractContext)
