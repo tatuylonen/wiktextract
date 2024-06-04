@@ -165,7 +165,6 @@ SENSE_TAGS: dict[str, str] = {
     "plus rare": "rare",
     "par extension": "broadly",
     "en particulier": "especially",
-    "informel": "informal",
     "littéraire": "literary",  # Modèle:littéraire
     "poétique": "poetic",  # Modèle:poétique
     # "didactique": "",  # Modèle:didactique
@@ -211,6 +210,41 @@ LEXIQUE_TAGS = {
     "analyse": "analytic",
 }
 
+# Template:cmn-pron
+# https://fr.wiktionary.org/wiki/自由
+ZH_PRON_TAGS = {
+    "pinyin": "Pinyin",
+    "efeo": "EFEO",  # https://en.wikipedia.org/wiki/EFEO_Chinese_transcription
+    "wade-giles": "Wade-Giles",
+    "yale": "Yale",
+    "zhuyin": "bopomofo",
+    "mandarin": "Mandarin",
+    "cantonais": "Cantonese",
+    "cantonais (yue)": "Cantonese",
+    "jyutping": "Jyutping",
+    "hakka": "Hakka",
+    "pha̍k-fa-sṳ": "Phak-fa-su",
+    "meixian, guangdong": ["Meixian", "Guangdong"],
+    "jin": "Jin",
+    "mindong": "Eastern-Min",
+    # https://en.wikipedia.org/wiki/Bàng-uâ-cê
+    "bàng-uâ-cê (fuzhou)": ["Bang-ua-ce", "Fuzhou"],
+    "minnan": "Min",
+    "pe̍h-ōe-jī (hokkien : fujian, taïwan)": [
+        "Peh-oe-ji",
+        "Hokkien",
+        "Fujian",
+        "Taiwan",
+    ],
+    "chaozhou, peng'im": ["Chaozhou", "Peng'im"],
+    "wu": "Wu",
+    "shanghai": "Shanghai",
+    "chinois médiéval": "Medieval-Chinese",
+    "chinois archaïque": "Old-Chinese",
+    "baxter-sagart": "Baxter-Sagart",
+    "zhengzhang": "Zhengzhang",
+}
+
 GRAMMATICAL_TAGS: dict[str, Union[str, list[str]]] = {
     **GENDER_TAGS,
     **NUMBER_TAGS,
@@ -228,6 +262,7 @@ GRAMMATICAL_TAGS: dict[str, Union[str, list[str]]] = {
     **SENSE_TAGS,
     **VOICE_TAGS,
     **LEXIQUE_TAGS,
+    **ZH_PRON_TAGS,
 }
 
 

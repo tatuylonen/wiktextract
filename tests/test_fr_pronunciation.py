@@ -98,7 +98,7 @@ class TestPronunciation(TestCase):
                 sound.model_dump(exclude_defaults=True)
                 for sound in page_data[-1].sounds
             ],
-            [{"raw_tags": ["cantonais", "Yale"], "zh_pron": "nei⁵hou²"}],
+            [{"tags": ["Cantonese", "Yale"], "zh_pron": "nei⁵hou²"}],
         )
 
     def test_no_ipa(self):
@@ -231,21 +231,21 @@ class TestPronunciation(TestCase):
         self.assertEqual(
             [s.model_dump(exclude_defaults=True) for s in page_data[0].sounds],
             [
-                {"ipa": "\\t͡su̯ɔ˥\\", "raw_tags": ["mandarin"]},
-                {"ipa": "\\t͡su̯ɔ˧˥\\", "raw_tags": ["mandarin"]},
-                {"ipa": "\\t͡su̯ɔ˥˩\\", "raw_tags": ["mandarin"]},
-                {"zh_pron": "zuō", "raw_tags": ["mandarin", "Pinyin"]},
-                {"zh_pron": "zuó", "raw_tags": ["mandarin", "Pinyin"]},
-                {"zh_pron": "zuò", "raw_tags": ["mandarin", "Pinyin"]},
-                {"zh_pron": "tso", "raw_tags": ["mandarin", "EFEO"]},
-                {"zh_pron": "tso¹", "raw_tags": ["mandarin", "Wade-Giles"]},
-                {"zh_pron": "tso²", "raw_tags": ["mandarin", "Wade-Giles"]},
-                {"zh_pron": "tso⁴", "raw_tags": ["mandarin", "Wade-Giles"]},
-                {"zh_pron": "dzwō", "raw_tags": ["mandarin", "Yale"]},
-                {"zh_pron": "dzwó", "raw_tags": ["mandarin", "Yale"]},
-                {"zh_pron": "dzwò", "raw_tags": ["mandarin", "Yale"]},
-                {"zh_pron": "ㄗㄨㄛ", "raw_tags": ["mandarin", "Zhuyin"]},
-                {"zh_pron": "ㄗㄨㄛˊ", "raw_tags": ["mandarin", "Zhuyin"]},
-                {"zh_pron": "ㄗㄨㄛˋ", "raw_tags": ["mandarin", "Zhuyin"]},
+                {"ipa": "\\t͡su̯ɔ˥\\", "tags": ["Mandarin"]},
+                {"ipa": "\\t͡su̯ɔ˧˥\\", "tags": ["Mandarin"]},
+                {"ipa": "\\t͡su̯ɔ˥˩\\", "tags": ["Mandarin"]},
+                {"zh_pron": "zuō", "tags": ["Mandarin", "Pinyin"]},
+                {"zh_pron": "zuó", "tags": ["Mandarin", "Pinyin"]},
+                {"zh_pron": "zuò", "tags": ["Mandarin", "Pinyin"]},
+                {"zh_pron": "tso", "tags": ["Mandarin", "EFEO"]},
+                {"zh_pron": "tso¹", "tags": ["Mandarin", "Wade-Giles"]},
+                {"zh_pron": "tso²", "tags": ["Mandarin", "Wade-Giles"]},
+                {"zh_pron": "tso⁴", "tags": ["Mandarin", "Wade-Giles"]},
+                {"zh_pron": "dzwō", "tags": ["Mandarin", "Yale"]},
+                {"zh_pron": "dzwó", "tags": ["Mandarin", "Yale"]},
+                {"zh_pron": "dzwò", "tags": ["Mandarin", "Yale"]},
+                {"zh_pron": "ㄗㄨㄛ", "tags": ["Mandarin", "bopomofo"]},
+                {"zh_pron": "ㄗㄨㄛˊ", "tags": ["Mandarin", "bopomofo"]},
+                {"zh_pron": "ㄗㄨㄛˋ", "tags": ["Mandarin", "bopomofo"]},
             ],
         )

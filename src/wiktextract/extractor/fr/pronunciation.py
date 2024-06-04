@@ -7,6 +7,7 @@ from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from ..share import set_sound_file_url_fields
 from .models import Sound, WordEntry
+from .tags import translate_raw_tags
 
 
 def extract_pronunciation(
@@ -85,12 +86,12 @@ def process_pron_list_item(
                 current_raw_tags.append(clean_node(wxr, None, list_item_child))
             elif list_item_child.kind == NodeKind.LINK:
                 for span_tag in list_item_child.find_html_recursively("span"):
-                    sounds_list.append(
-                        Sound(
-                            ipa=clean_node(wxr, None, span_tag),
-                            raw_tags=current_raw_tags[:],
-                        )
+                    sound = Sound(
+                        ipa=clean_node(wxr, None, span_tag),
+                        raw_tags=current_raw_tags[:],
                     )
+                    translate_raw_tags(sound)
+                    sounds_list.append(sound)
         elif isinstance(list_item_child, str):
             if ":" in list_item_child:
                 after_colon = True
@@ -100,6 +101,7 @@ def process_pron_list_item(
                 if len(pron_text) > 0:
                     sound = Sound(raw_tags=current_raw_tags[:])
                     setattr(sound, pron_key, pron_text)
+                    translate_raw_tags(sound)
                     sounds_list.append(sound)
 
     for nest_list_item in list_item_node.find_child_recursively(
@@ -159,6 +161,7 @@ def process_pron_template(
                 prons.add(pron_text)
                 sound = Sound(raw_tags=raw_tags[:])
                 setattr(sound, use_key, pron_text)
+                translate_raw_tags(sound)
                 sounds_list.append(sound)
     return sounds_list
 
@@ -193,6 +196,7 @@ def process_ecouter_template(
         sound.ipa = ipa
     if len(audio_file) > 0:
         set_sound_file_url_fields(wxr, audio_file, sound)
+    translate_raw_tags(sound)
     return sound
 
 
@@ -227,6 +231,7 @@ def process_pron_rimes_template(
             sound.rhymes = span_text
     if len(raw_tags) > 0:
         sound.raw_tags = raw_tags[:]
+    translate_raw_tags(sound)
     return sound
 
 
