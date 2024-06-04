@@ -453,7 +453,9 @@ class TestFrGloss(TestCase):
         self.wxr.wtp.add_page(
             "Modèle:désuet",
             10,
-            '<span class="emploi"><span id="désuet"></span>''(<span class="texte">[[Annexe:Glossaire grammatical#D|Désuet]]</span>)''</span>[[Catégorie:Termes désuets en japonais]]',
+            '<span class="emploi"><span id="désuet"></span>'
+            '(<span class="texte">[[Annexe:Glossaire grammatical#D|Désuet]]</span>)'
+            "</span>[[Catégorie:Termes désuets en japonais]]",
         )
         self.wxr.wtp.add_page(
             "Modèle:lien",

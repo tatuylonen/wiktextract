@@ -150,6 +150,8 @@ OTHER_GRAMMATICAL_TAGS: dict[str, str] = {
 SENSE_TAGS: dict[str, str] = {
     # https://fr.wiktionary.org/wiki/Modèle:figuré
     # https://fr.wiktionary.org/wiki/Catégorie:Modèles_de_relation_entre_les_définitions
+    # Catégorie:Modèles de genre textuel
+    # Catégorie:Modèles de registre
     "sens figuré": "figuratively",
     "enclise": "enclitic",
     "idiotisme": "idiomatic",
@@ -161,10 +163,21 @@ SENSE_TAGS: dict[str, str] = {
     "argot": "slang",
     "rare": "rare",
     "plus rare": "rare",
-    "familier": "colloquial",
     "par extension": "broadly",
     "en particulier": "especially",
-    "informel": "informal",
+    "littéraire": "literary",  # Modèle:littéraire
+    "poétique": "poetic",  # Modèle:poétique
+    # "didactique": "",  # Modèle:didactique
+    "soutenu": "formal",  # Modèle:soutenu
+    "informel": "informal",  # Modèle:informel
+    "familier": "familiar",  # Modèle:familier
+    "très familier": "very-familiar",  # Modèle:très familier
+    # "populaire": "",  # Modèle:populaire
+    "vulgaire": "vulgar",  # Modèle:vulgaire
+    "langage enfantin": "childish",  # Modèle:enfantin
+    # Catégorie:Modèles de thématique
+    "anglicisme informatique": "Anglicism",
+    "proverbe": "proverb",
 }
 
 # https://en.wikipedia.org/wiki/Voice_(grammar)
@@ -197,6 +210,41 @@ LEXIQUE_TAGS = {
     "analyse": "analytic",
 }
 
+# Template:cmn-pron
+# https://fr.wiktionary.org/wiki/自由
+ZH_PRON_TAGS = {
+    "pinyin": "Pinyin",
+    "efeo": "EFEO",  # https://en.wikipedia.org/wiki/EFEO_Chinese_transcription
+    "wade-giles": "Wade-Giles",
+    "yale": "Yale",
+    "zhuyin": "bopomofo",
+    "mandarin": "Mandarin",
+    "cantonais": "Cantonese",
+    "cantonais (yue)": "Cantonese",
+    "jyutping": "Jyutping",
+    "hakka": "Hakka",
+    "pha̍k-fa-sṳ": "Phak-fa-su",
+    "meixian, guangdong": ["Meixian", "Guangdong"],
+    "jin": "Jin",
+    "mindong": "Eastern-Min",
+    # https://en.wikipedia.org/wiki/Bàng-uâ-cê
+    "bàng-uâ-cê (fuzhou)": ["Bang-ua-ce", "Fuzhou"],
+    "minnan": "Min",
+    "pe̍h-ōe-jī (hokkien : fujian, taïwan)": [
+        "Peh-oe-ji",
+        "Hokkien",
+        "Fujian",
+        "Taiwan",
+    ],
+    "chaozhou, peng'im": ["Chaozhou", "Peng'im"],
+    "wu": "Wu",
+    "shanghai": "Shanghai",
+    "chinois médiéval": "Medieval-Chinese",
+    "chinois archaïque": "Old-Chinese",
+    "baxter-sagart": "Baxter-Sagart",
+    "zhengzhang": "Zhengzhang",
+}
+
 GRAMMATICAL_TAGS: dict[str, Union[str, list[str]]] = {
     **GENDER_TAGS,
     **NUMBER_TAGS,
@@ -214,6 +262,7 @@ GRAMMATICAL_TAGS: dict[str, Union[str, list[str]]] = {
     **SENSE_TAGS,
     **VOICE_TAGS,
     **LEXIQUE_TAGS,
+    **ZH_PRON_TAGS,
 }
 
 
