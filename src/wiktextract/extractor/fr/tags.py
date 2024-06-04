@@ -150,6 +150,8 @@ OTHER_GRAMMATICAL_TAGS: dict[str, str] = {
 SENSE_TAGS: dict[str, str] = {
     # https://fr.wiktionary.org/wiki/Modèle:figuré
     # https://fr.wiktionary.org/wiki/Catégorie:Modèles_de_relation_entre_les_définitions
+    # Catégorie:Modèles de genre textuel
+    # Catégorie:Modèles de registre
     "sens figuré": "figuratively",
     "enclise": "enclitic",
     "idiotisme": "idiomatic",
@@ -161,10 +163,22 @@ SENSE_TAGS: dict[str, str] = {
     "argot": "slang",
     "rare": "rare",
     "plus rare": "rare",
-    "familier": "colloquial",
     "par extension": "broadly",
     "en particulier": "especially",
     "informel": "informal",
+    "littéraire": "literary",  # Modèle:littéraire
+    "poétique": "poetic",  # Modèle:poétique
+    # "didactique": "",  # Modèle:didactique
+    "soutenu": "formal",  # Modèle:soutenu
+    "informel": "informal",  # Modèle:informel
+    "familier": "familiar",  # Modèle:familier
+    "très familier": "very-familiar",  # Modèle:très familier
+    # "populaire": "",  # Modèle:populaire
+    "vulgaire": "vulgar",  # Modèle:vulgaire
+    "langage enfantin": "childish",  # Modèle:enfantin
+    # Catégorie:Modèles de thématique
+    "anglicisme informatique": "Anglicism",
+    "proverbe": "proverb",
 }
 
 # https://en.wikipedia.org/wiki/Voice_(grammar)

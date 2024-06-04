@@ -1,5 +1,6 @@
 # https://fr.wiktionary.org/wiki/Annexe:Glossaire_grammatical
 # https://fr.wiktionary.org/wiki/Module:lexique/data
+# Catégorie:Modèles de thématique
 
 TOPIC_TAGS: dict[str, str] = {
     "botanique": "botany",
@@ -62,6 +63,7 @@ TOPIC_TAGS: dict[str, str] = {
     "chimie": "chemistry",
     "chirurgie": "surgery",
     "christianisme": "Christianity",
+    "cinéma": "film",
     "cirque": "circus",
     "climatologie": "climatology",
     "coiffure": "hairdressing",
@@ -277,4 +279,23 @@ TOPIC_TAGS: dict[str, str] = {
     "boulangerie": "cooking",
     "bourse": "finance",
     "brasserie": "beverages manufacturing",
+    # Catégorie:Modèles de thématique
+    "phycologie": "phycology",
+    "bière": "beer",
+    "chronologie": "chronology",
+    "dialectologie": "dialectology",
+    "média": "media",
+    "état": "state",
+    "mobilier": "furniture",
+    "science": "science",
+    "boisson": "beverages",
+    "vêtement": "clothing",
+    "électronique": "electricity",
+    "carte à jouer": "card-games",
+    "lgbt": "LGBT",
+    "jeu vidéo, minecraft": "video-games",
+    "réseaux": "networking",
+    "science-fiction, univers de star wars": "science-fiction",
+    "textile": "textiles",
+    "transport": "transport",
 }
