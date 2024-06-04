@@ -4117,55 +4117,6 @@ def parse_page(
     # conjugation information to all the words.
     ret = []
     for lang, lang_datas in by_lang.items():
-        # If one of the words coming from this article does not have
-        # conjugation information, but another one for the same
-        # language and a compatible part-of-speech has, use the
-        # information from the other one also for the one without.
-        for data in lang_datas:
-            if "pos" not in data:
-                continue
-            if "conjugation" not in data:
-                pos = data.get("pos")
-                assert pos
-                for dt in datas:
-                    if data.get("lang") != dt.get("lang"):
-                        continue
-                    conjs = dt.get("conjugation", ())
-                    if not conjs:
-                        continue
-                    cpos = dt.get("pos")
-                    if (
-                        pos == cpos
-                        or (pos, cpos)
-                        in (
-                            ("noun", "adj"),
-                            ("noun", "name"),
-                            ("name", "noun"),
-                            ("name", "adj"),
-                            ("adj", "noun"),
-                            ("adj", "name"),
-                        )
-                        or (
-                            pos == "adj"
-                            and cpos == "verb"
-                            and any(
-                                "participle" in s.get("tags", ())
-                                for s in dt.get("senses", ())
-                            )
-                        )
-                    ):
-                        data["conjugation"] = list(conjs)  # Copy list!
-                        break
-        # Add topics from the last sense of a language to its other senses,
-        # marking them inaccurate as they may apply to all or some sense
-        if len(lang_datas) > 1:
-            topics = lang_datas[-1].get("topics", [])
-            for t in topics:
-                t["inaccurate"] = True
-            for data in lang_datas[:-1]:
-                new_topics = data.get("topics", []) + topics
-                if new_topics:
-                    data["topics"] = list(new_topics)  # Copy list!
         ret.extend(lang_datas)
 
     for x in ret:
