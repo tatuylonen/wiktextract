@@ -97,7 +97,7 @@ class TestInflection(TestCase):
             self.wxr,
             "新婦",
             """==漢語==
-{{zh-forms|alt=新抱-粵語,心抱-粵語,新府-陽江粵語}}
+{{zh-forms|alt=新抱-粵語,心抱-粵語,新府-陽江粵語|1=-}}
 
 ===名詞===
 
