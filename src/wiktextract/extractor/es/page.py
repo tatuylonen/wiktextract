@@ -164,6 +164,8 @@ def parse_section(
             wxr, page_data[-1], level_node, LINKAGE_TITLES[section_title]
         )
     elif section_title == "conjugación":
+        if len(page_data) == 0:
+            page_data.append(base_data.model_copy(deep=True))
         extract_conjugation_section(wxr, page_data[-1], level_node)
     else:
         wxr.wtp.debug(
