@@ -273,6 +273,8 @@ def process_zh_forms(
 ) -> None:
     # https://zh.wiktionary.org/wiki/Template:zh-forms
     for p_name, p_value in template_node.template_parameters.items():
+        if not isinstance(p_name, str):
+            continue
         if re.fullmatch(r"s\d*", p_name):
             form_data = Form(
                 form=clean_node(wxr, None, p_value), tags=["Simplified Chinese"]
