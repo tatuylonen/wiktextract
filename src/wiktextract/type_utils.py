@@ -17,7 +17,7 @@ class LinkageData(TypedDict, total=False):
     extra: str
     qualifier: str
     roman: str
-    ruby: list[Sequence[str]]
+    ruby: Union[list[Sequence[str]], list[tuple[str, str]]]
     sense: str
     source: str
     tags: list[str]
@@ -64,7 +64,7 @@ class FormData(TypedDict, total=False):
     head_nr: int
     ipa: str
     roman: str
-    ruby: list[Sequence[str]]
+    ruby: Union[list[tuple[str, str]], list[Sequence[str]]]
     source: str
     tags: list[str]
     topics: list[str]
@@ -129,6 +129,7 @@ class SenseData(TypedDict, total=False):
     senseid: list[str]
     synonyms: list[LinkageData]
     tags: list[str]
+    taxonomic: str
     topics: list[str]
     wikidata: list[str]
     wikipedia: list[str]
