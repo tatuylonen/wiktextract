@@ -154,3 +154,4 @@ class WordEntry(BaseModelWrap):
     )
     holonyms: list[Linkage] = Field(default=[], description="List of holonyms")
     etymology_text: str = ""
+    related: list[Linkage] = []

@@ -10,7 +10,7 @@ from ...wxr_context import WiktextractContext
 from .etymology import extract_etymology
 from .gloss import extract_gloss, process_meaning_template
 from .inflection import extract_inflection
-from .linkage import extract_linkages
+from .linkage import extract_linkages, process_related_block_template
 from .models import AltForm, Sense, Sound, WordEntry
 from .pronunciation import extract_pronunciation
 from .section_titles import LINKAGE_TITLES, POS_TEMPLATE_NAMES, POS_TITLES
@@ -177,7 +177,11 @@ def parse_section(
         extract_gloss(wxr, page_data[-1], level3_node)
     elif section_title == "родственные слова" and wxr.config.capture_linkages:
         # Word family
-        pass
+        for template_node in level3_node.find_child(NodeKind.TEMPLATE):
+            if template_node.template_name == "родств-блок":
+                process_related_block_template(
+                    wxr, page_data[-1], template_node
+                )
     elif section_title == "этимология" and wxr.config.capture_etymologies:
         extract_etymology(wxr, page_data[-1], level3_node)
     elif (
