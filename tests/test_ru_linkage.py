@@ -2,7 +2,10 @@ from unittest import TestCase
 
 from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
-from wiktextract.extractor.ru.linkage import extract_linkages
+from wiktextract.extractor.ru.linkage import (
+    extract_linkages,
+    process_related_block_template,
+)
 from wiktextract.extractor.ru.models import WordEntry
 from wiktextract.wxr_context import WiktextractContext
 
@@ -45,6 +48,37 @@ class TestLinkage(TestCase):
                 {
                     "word": "русня",
                     "raw_tags": ["собирательное", "уничижительное"],
+                },
+            ],
+        )
+
+    def test_related_words_sections(self):
+        word_entry = WordEntry(
+            word="вода", pos="noun", lang_code="ru", lang="Русский"
+        )
+        self.wxr.wtp.start_page("вода")
+        self.wxr.wtp.add_page(
+            "Шаблон:родств-блок",
+            10,
+            """{|
+|class="block-head" | Ближайшее родство
+|-
+| colspan=2 class="block-body"|
+* <span>уменьш.-ласк. формы:</span> [[водичечка]], [[водичка]]
+|}""",
+        )
+        root = self.wxr.wtp.parse("{{родств-блок}}")
+        process_related_block_template(self.wxr, word_entry, root.children[0])
+        self.assertEqual(
+            [r.model_dump(exclude_defaults=True) for r in word_entry.related],
+            [
+                {
+                    "word": "водичечка",
+                    "raw_tags": ["Ближайшее родство", "уменьш.-ласк. формы"],
+                },
+                {
+                    "word": "водичка",
+                    "raw_tags": ["Ближайшее родство", "уменьш.-ласк. формы"],
                 },
             ],
         )

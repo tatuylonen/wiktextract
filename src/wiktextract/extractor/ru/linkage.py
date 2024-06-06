@@ -1,8 +1,7 @@
-from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import TemplateNode
-from wiktextract.page import clean_node
-from wiktextract.wxr_context import WiktextractContext
+from wikitextprocessor.parser import HTMLNode, NodeKind, TemplateNode, WikiNode
 
+from ...page import clean_node
+from ...wxr_context import WiktextractContext
 from .models import Linkage, WordEntry
 
 
@@ -54,3 +53,50 @@ def find_linkage_tag(
             tag = clean_node(wxr, None, span_node)
         if len(tag) > 0:
             linkage.raw_tags.append(tag)
+
+
+def process_related_block_template(
+    wxr: WiktextractContext, word_entry: WordEntry, template_node: TemplateNode
+) -> None:
+    # Шаблон:родств-блок
+    expanded_template = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(template_node), expand_all=True
+    )
+    for table_node in expanded_template.find_child(NodeKind.TABLE):
+        table_header = ""
+        for row in table_node.find_child(NodeKind.TABLE_ROW):
+            row_header = ""
+            for cell in row.find_child(
+                NodeKind.TABLE_HEADER_CELL | NodeKind.TABLE_CELL
+            ):
+                if cell.kind == NodeKind.TABLE_HEADER_CELL:
+                    cell_text = clean_node(wxr, None, cell)
+                    if cell_text.startswith("Список всех слов с корнем"):
+                        table_header = cell_text
+                elif cell.kind == NodeKind.TABLE_CELL:
+                    if "block-head" in cell.attrs.get("class", ""):
+                        table_header = clean_node(wxr, None, cell)
+                    else:
+                        for list_item in cell.find_child_recursively(
+                            NodeKind.LIST_ITEM
+                        ):
+                            for node in list_item.find_child(
+                                NodeKind.HTML | NodeKind.LINK
+                            ):
+                                if (
+                                    isinstance(node, HTMLNode)
+                                    and node.tag == "span"
+                                ):
+                                    row_header = clean_node(
+                                        wxr, None, node
+                                    ).removesuffix(":")
+                                elif node.kind == NodeKind.LINK:
+                                    linkage = Linkage(
+                                        word=clean_node(wxr, None, node)
+                                    )
+                                    if table_header != "":
+                                        linkage.raw_tags.append(table_header)
+                                    if row_header != "":
+                                        linkage.raw_tags.append(row_header)
+                                    if linkage.word != "":
+                                        word_entry.related.append(linkage)
