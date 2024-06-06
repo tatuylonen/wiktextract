@@ -10,7 +10,11 @@ from ...wxr_context import WiktextractContext
 from .etymology import extract_etymology
 from .gloss import extract_gloss, process_meaning_template
 from .inflection import extract_inflection
-from .linkage import extract_linkages, process_related_block_template
+from .linkage import (
+    extract_linkages,
+    extract_phrase_section,
+    process_related_block_template,
+)
 from .models import AltForm, Sense, Sound, WordEntry
 from .pronunciation import extract_pronunciation
 from .section_titles import LINKAGE_TITLES, POS_TEMPLATE_NAMES, POS_TITLES
@@ -188,7 +192,7 @@ def parse_section(
         section_title == "фразеологизмы и устойчивые сочетания"
         and wxr.config.capture_linkages
     ):
-        pass
+        extract_phrase_section(wxr, page_data[-1], level3_node)
     elif section_title == "перевод" and wxr.config.capture_translations:
         extract_translations(wxr, page_data[-1], level3_node)
     elif section_title in ["анаграммы", "метаграммы", "синонимы", "антонимы"]:

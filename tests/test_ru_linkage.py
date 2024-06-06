@@ -4,6 +4,7 @@ from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.ru.linkage import (
     extract_linkages,
+    extract_phrase_section,
     process_related_block_template,
 )
 from wiktextract.extractor.ru.models import WordEntry
@@ -79,6 +80,60 @@ class TestLinkage(TestCase):
                 {
                     "word": "водичка",
                     "raw_tags": ["Ближайшее родство", "уменьш.-ласк. формы"],
+                },
+            ],
+        )
+
+    def test_phrase_section(self):
+        word_entry = WordEntry(
+            word="вода", pos="noun", lang_code="ru", lang="Русский"
+        )
+        self.wxr.wtp.start_page("вода")
+        self.wxr.wtp.add_page("Шаблон:-", 10, " — ")
+        root = self.wxr.wtp.parse("""=== Фразеологизмы и устойчивые сочетания ===
+* [[большая вода]]; [[прибылая вода]] / [[малая вода]]
+
+==== Типичные сочетания ====
+* вода [[литься|льётся]], [[плескаться|плещется]]; [[бить|бьёт]] ([[ключ]]ом, [[фонтан]]ом); [[брызгать|брызгает]]
+* водой (реже{{-}}водою) [[захлёбываться|захлёбываются]]
+
+==== Пословицы и поговорки ====
+* [[обжёгшись на молоке, дуют на воду]]
+** [[обжёгся на молоке, дует и на воду]]""")
+        extract_phrase_section(self.wxr, word_entry, root.children[0])
+        self.assertEqual(
+            [d.model_dump(exclude_defaults=True) for d in word_entry.derived],
+            [
+                {"word": "большая вода"},
+                {"word": "прибылая вода"},
+                {"word": "малая вода"},
+                {
+                    "word": "вода льётся",
+                    "raw_tags": ["Типичные сочетания"],
+                },
+                {
+                    "word": "вода плещется",
+                    "raw_tags": ["Типичные сочетания"],
+                },
+                {
+                    "word": "вода бьёт (ключом, фонтаном)",
+                    "raw_tags": ["Типичные сочетания"],
+                },
+                {
+                    "word": "вода брызгает",
+                    "raw_tags": ["Типичные сочетания"],
+                },
+                {
+                    "word": "водой (реже — водою) захлёбываются",
+                    "raw_tags": ["Типичные сочетания"],
+                },
+                {
+                    "word": "обжёгшись на молоке, дуют на воду",
+                    "raw_tags": ["Пословицы и поговорки"],
+                },
+                {
+                    "word": "обжёгся на молоке, дует и на воду",
+                    "raw_tags": ["Пословицы и поговорки"],
                 },
             ],
         )

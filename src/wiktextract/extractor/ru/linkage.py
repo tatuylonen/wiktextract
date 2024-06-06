@@ -1,4 +1,10 @@
-from wikitextprocessor.parser import HTMLNode, NodeKind, TemplateNode, WikiNode
+from wikitextprocessor.parser import (
+    LEVEL_KIND_FLAGS,
+    HTMLNode,
+    NodeKind,
+    TemplateNode,
+    WikiNode,
+)
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -100,3 +106,62 @@ def process_related_block_template(
                                         linkage.raw_tags.append(row_header)
                                     if linkage.word != "":
                                         word_entry.related.append(linkage)
+
+
+def extract_phrase_section(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    level_node: WikiNode,
+) -> None:
+    # "Фразеологизмы и устойчивые сочетания" section
+    title_text = clean_node(wxr, None, level_node.largs)
+    if title_text == "Фразеологизмы и устойчивые сочетания":
+        title_text = ""
+    for list_node in level_node.find_child(NodeKind.LIST):
+        for list_item in list_node.find_child_recursively(NodeKind.LIST_ITEM):
+            prefix_nodes = []
+            before_link = True
+            word_nodes = []
+            inside_brackets = False
+            for node in list_item.children:
+                if isinstance(node, str) and len(node.strip()) > 0:
+                    if before_link:
+                        prefix_nodes.append(node)
+                    elif node.strip().startswith("("):
+                        inside_brackets = True
+                        word_nodes.append(node)
+                    elif node.strip().startswith(")"):
+                        inside_brackets = False
+                        word_nodes.append(node.strip(",; "))
+                    elif inside_brackets:
+                        word_nodes.append(node)
+
+                    if not inside_brackets and node.strip().endswith(
+                        (",", ";", "/")
+                    ):
+                        word = clean_node(wxr, None, prefix_nodes + word_nodes)
+                        word_nodes.clear()
+                        if len(word) > 0:
+                            linkage = Linkage(word=word)
+                            if title_text != "":
+                                linkage.raw_tags.append(title_text)
+                            word_entry.derived.append(linkage)
+                elif isinstance(node, WikiNode):
+                    if node.kind == NodeKind.LIST:
+                        continue
+                    elif node.kind == NodeKind.LINK:
+                        before_link = False
+                    if before_link:
+                        prefix_nodes.append(node)
+                    else:
+                        word_nodes.append(node)
+
+            word = clean_node(wxr, None, prefix_nodes + word_nodes)
+            if len(word) > 0:
+                linkage = Linkage(word=word)
+                if title_text != "":
+                    linkage.raw_tags.append(title_text)
+                word_entry.derived.append(linkage)
+
+    for next_level in level_node.find_child(LEVEL_KIND_FLAGS):
+        extract_phrase_section(wxr, word_entry, next_level)
