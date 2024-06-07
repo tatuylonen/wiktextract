@@ -6528,7 +6528,7 @@ for tag in form_of_tags - set(valid_tags.keys()):
           .format(tag))
 
 
-def sort_tags(tags):
+def sort_tags(tags: Union[list[str], tuple[str, ...], set[str]]) -> tuple[str, ...]:
     """Sorts tags into presentation order and returns them as a tuple.
     This also removes duplicates."""
     assert isinstance(tags, (list, tuple, set))

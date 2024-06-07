@@ -6,7 +6,7 @@ import re
 import unicodedata
 from wiktextract.wxr_context import WiktextractContext
 from wikitextprocessor import Wtp
-from typing import Dict, List, Union, Optional
+from typing import Dict, List, Sequence, Optional, Union
 from .datautils import split_at_comma_semi, data_append
 from .form_descriptions import (
     classify_desc,
@@ -20,7 +20,7 @@ from .form_descriptions import (
     head_final_re,
 )
 from .tags import linkage_beginning_tags
-from .type_utils import WordData
+from .type_utils import WordData, LinkageData
 
 # Linkage will be ignored if it matches this regexp before splitting
 linkage_pre_split_ignore_re = re.compile(
@@ -523,7 +523,7 @@ def parse_linkage_item_text(
                         and lang not in head_final_numeric_langs
                     )
                 )
-                and not re.search(r"\bor\b", wxr.wtp.title)
+                and not re.search(r"\bor\b", wxr.wtp.title or "MISSING_TITLE")
                 and all(
                     wxr.wtp.title not in x.split(" or ")
                     for x in split_at_comma_semi(item2, skipped=links)
@@ -602,14 +602,14 @@ def parse_linkage_item_text(
 
         # Extract quoted English translations (there are also other
         # kinds of English translations)
-        def english_repl(m):
+        def english_repl(m: re.Match) -> str:
             nonlocal english
             nonlocal qualifier
             v = m.group(1).strip()
             # If v is "tags: sense", handle the tags
-            m = re.match(r"^([a-zA-Z ]+): (.*)$", v)
-            if m:
-                desc, rest = m.groups()
+            m1 = re.match(r"^([a-zA-Z ]+): (.*)$", v)
+            if m1 is not None:
+                desc, rest = m1.groups()
                 if classify_desc(desc, no_unknown_starts=True) == "tags":
                     if qualifier:
                         qualifier += ", " + desc
@@ -848,7 +848,7 @@ def parse_linkage_item_text(
 
             # Parse certain tags at the end of the linked term (unless
             # we are in a letters list)
-            item1, q = parse_head_final_tags(wxr, lang, item1)
+            item1, q = parse_head_final_tags(wxr, lang or "MISSING_LANG", item1)
             if q:
                 if qualifier:
                     qualifier += ", " + ", ".join(q)
@@ -864,7 +864,7 @@ def parse_linkage_item_text(
         if item1 == word:
             continue  # Ignore self-links
 
-        def add(w, r):
+        def add(w: str, r: Optional[str]) -> None:
             assert isinstance(w, str)
             assert r is None or isinstance(r, str)
             nonlocal alt
@@ -920,7 +920,7 @@ def parse_linkage_item_text(
                 alt = r
                 r = None
             # Add the linkage
-            dt = {}
+            dt: LinkageData = {}
             if qualifier:
                 parse_sense_qualifier(wxr, qualifier, dt)
             if sense:
@@ -949,7 +949,7 @@ def parse_linkage_item_text(
                     url.strip() for url in urls if url and isinstance(url, str)
                 ]
             dt["word"] = w
-            for old in data.get(field, ()):
+            for old in data.get(field, ()): # type: ignore[attr-defined]
                 if dt == old:
                     break
             else:
@@ -990,7 +990,7 @@ def parse_linkage_item_text(
                 ):
                     qualifier = "letter"
                 parts = item1.split(". ")
-                extra = ()
+                extra: Sequence[str] = ()
                 if len(parts) > 1:
                     extra = parts[1:]
                     item1 = parts[0]
@@ -1027,7 +1027,7 @@ def parse_linkage_item_text(
                 # characters, others use pairs and some have
                 # 2/3 character names, e.g., "Ng ng".
 
-                rparts = None
+                rparts: Optional[list[Optional[str]]] = None
                 if roman:
                     rparts = list(
                         m.group(0)

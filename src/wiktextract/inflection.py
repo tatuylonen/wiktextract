@@ -498,7 +498,7 @@ def or_tagsets(
                 tagsets.remove(tags2)
                 tags_s = set(tags1) | set(tags2)
                 remove_useless_tags(lang, pos, tags_s)
-                tags_t = tuple(sorted(tags))
+                tags_t = tuple(sorted(tags_s))
                 add_tags(tags_t)  # Could result in further merging
                 return
         # If we could not merge, add to tagsets

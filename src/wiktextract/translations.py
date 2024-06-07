@@ -6,13 +6,19 @@ import re
 import copy
 
 from mediawiki_langcodes import code_to_name, name_to_code
+from typing import Optional
+from wiktextract.type_utils import WordData
 from wiktextract.wxr_context import WiktextractContext
 from wikitextprocessor import MAGIC_FIRST, MAGIC_LAST
 
 from .datautils import split_at_comma_semi, data_append, data_extend
-from .form_descriptions import (classify_desc, decode_tags,
-                                nested_translations_re, tr_note_re,
-                                parse_translation_desc)
+from .form_descriptions import (
+    classify_desc,
+    decode_tags,
+    nested_translations_re,
+    tr_note_re,
+    parse_translation_desc,
+)
 
 
 # Maps language names in translations to actual language names.
@@ -30,137 +36,139 @@ tr_langname_map = {
 # These will not be interpreted as a separate language, but will instead
 # be included under the parent language with the script/dialect as a tag
 # (with spaces replaced by hyphens).
-script_and_dialect_names = set([
-    # Scripts
-    "ALUPEC",
-    "Adlam",
-    "Arabic",  # Script for Kashmiri
-    "Bengali",
-    "Burmese",
-    "Carakan",
-    "CJKV Characters",
-    "Cyrillic",
-    "Devanagari",
-    "Glagolitic",
-    "Gurmukhi",
-    "Hebrew",  # For Aramaic
-    "Jawi",
-    "Khmer",
-    "Latin",
-    "Mongolian",
-    "Roman",
-    "Shahmukhi",
-    "Sinhalese",
-    "Syriac",  # For Aramaic
-    "Classical Syriac",  # For Aramaic
-    "Taraškievica",
-    "Thai",
-    "Uyghurjin",
-    # Chinese dialects/languages
-    "Cantonese",  # Variant of Chinese
-    "Dungan",  # Chinese
-    "Gan",  # Chinese
-    "Hakka",  # Chinese
-    "Hokkien",  # Chinese
-    "Jin",  # Chinese
-    "Mandarin",  # Chinese
-    "Min Bei",  # Chinese
-    "Min Dong",  # Chinese
-    "Min Nan",  # Chinsese
-    "Wu",  # Chinsese
-    "Xiang",  # Chinese
-    "Jianghuai Mandarin",  # Chinese
-    "Jilu Mandarin",  # Chinese
-    "Jin Mandarin",  # Chinese
-    "Northern Mandarin",  # Chinese
-    "Southwestern Mandarin",  # Chinese
-    "Taiwanese Mandarin",  # Chinese
-    "Coastal Min",  # Chinese
-    "Inland Min",  # Chinese
-    "Leizhou Min",  # Chinese
-    "Min",  # Chinese
-    "Puxian Min",  # Chinese
-    "Shanghainese Wu",  # Chinese
-    "Wenzhou Wu",  # Chinese
-    "Wenzhou",  # Chinese
-    "Hsinchu Hokkien",  # Chinese
-    "Jinjiang Hokkien",  # Chinese
-    "Kaohsiung Hokkien",  # Chinsese
-    "Pinghua",  # Chinese
-    "Eastern Punjabi",
-    "Western Punjabi",
-    # Various countries/regions
-    "Alsace",
-    "Bavaria",
-    "Belgium",
-    "Canada",
-    "Central",
-    "Cologne",
-    "Fogo",
-    "Föhr",
-    "Föhr-Amrum",
-    "Hallig",
-    "Helgoland",
-    "Heligoland",
-    "Santiago",
-    "Sylt",
-    "Mooring",
-    "Föhr-Amrum",
-    "Vancouver Island",
-    "Wiedingharde",
-    "Anpezan",  # Variant of Ladin
-    "Badiot",  # Ladin
-    "Fascian",  # Ladin
-    "Fodom",  # Ladin
-    "Gherdëina",  # Ladin
-    "Anbarani",  # Variant of Talysh
-    "Asalemi",  # Variant of Talysh
-    "Alemannic German",  # Variant of German
-    "Rhine Franconian",  # Variant of German
-    "German Low German",  # Variant of Low German
-    "Campidanese",  # Variant of Sardinian
-    "Logudorese",  # Variant of Sardinian
-    "Digor",  # Variant of Ossetian
-    "Iron",  # Variant of Ossetian
-    "Northern Puebla",  # Variant of Nahuatl
-    "Mecayapan",  # Variant of Nathuatl
-    "Egyptian Arabic",  # Variant of Arabic
-    "Gulf Arabic",  # Variant of Arabic
-    "Hijazi Arabic",  # Variant of Arabic
-    "Moroccan Arabic",  # Variant of Arabic
-    "North Levantine Arabic",  # Variant of Arabic
-    "South Levantine Arabic",  # Variant of Arabic
-    "Alviri",  # Variant of Alviri-Vidari
-    "Vidari",  # Variant of Alviri-Vidari
-    "Tashelhit",  # Variant of Berber
-    "Bokmål",  # Variant of Norwegian
-    "Nynorsk",  # Variant of Norwegian
-    "Mycenaean",  # Variant of Greek
-    # Language varieties
-    "Ancient",
-    "Classical",
-    "Draweno-Polabian",
-    "Literary",
-    "Lower",
-    "Manitoba Saulteux",
-    "Modern",
-    "Modern Polabian",
-    "Modified traditional",
-    "Northern",
-    "Northern and Southern",
-    "Old Polabian",
-    "Simplified",
-    "Southern",
-    "Traditional",
-    "Western",
-    "1708",
-    "1918",
-])
+script_and_dialect_names = set(
+    [
+        # Scripts
+        "ALUPEC",
+        "Adlam",
+        "Arabic",  # Script for Kashmiri
+        "Bengali",
+        "Burmese",
+        "Carakan",
+        "CJKV Characters",
+        "Cyrillic",
+        "Devanagari",
+        "Glagolitic",
+        "Gurmukhi",
+        "Hebrew",  # For Aramaic
+        "Jawi",
+        "Khmer",
+        "Latin",
+        "Mongolian",
+        "Roman",
+        "Shahmukhi",
+        "Sinhalese",
+        "Syriac",  # For Aramaic
+        "Classical Syriac",  # For Aramaic
+        "Taraškievica",
+        "Thai",
+        "Uyghurjin",
+        # Chinese dialects/languages
+        "Cantonese",  # Variant of Chinese
+        "Dungan",  # Chinese
+        "Gan",  # Chinese
+        "Hakka",  # Chinese
+        "Hokkien",  # Chinese
+        "Jin",  # Chinese
+        "Mandarin",  # Chinese
+        "Min Bei",  # Chinese
+        "Min Dong",  # Chinese
+        "Min Nan",  # Chinsese
+        "Wu",  # Chinsese
+        "Xiang",  # Chinese
+        "Jianghuai Mandarin",  # Chinese
+        "Jilu Mandarin",  # Chinese
+        "Jin Mandarin",  # Chinese
+        "Northern Mandarin",  # Chinese
+        "Southwestern Mandarin",  # Chinese
+        "Taiwanese Mandarin",  # Chinese
+        "Coastal Min",  # Chinese
+        "Inland Min",  # Chinese
+        "Leizhou Min",  # Chinese
+        "Min",  # Chinese
+        "Puxian Min",  # Chinese
+        "Shanghainese Wu",  # Chinese
+        "Wenzhou Wu",  # Chinese
+        "Wenzhou",  # Chinese
+        "Hsinchu Hokkien",  # Chinese
+        "Jinjiang Hokkien",  # Chinese
+        "Kaohsiung Hokkien",  # Chinsese
+        "Pinghua",  # Chinese
+        "Eastern Punjabi",
+        "Western Punjabi",
+        # Various countries/regions
+        "Alsace",
+        "Bavaria",
+        "Belgium",
+        "Canada",
+        "Central",
+        "Cologne",
+        "Fogo",
+        "Föhr",
+        "Föhr-Amrum",
+        "Hallig",
+        "Helgoland",
+        "Heligoland",
+        "Santiago",
+        "Sylt",
+        "Mooring",
+        "Föhr-Amrum",
+        "Vancouver Island",
+        "Wiedingharde",
+        "Anpezan",  # Variant of Ladin
+        "Badiot",  # Ladin
+        "Fascian",  # Ladin
+        "Fodom",  # Ladin
+        "Gherdëina",  # Ladin
+        "Anbarani",  # Variant of Talysh
+        "Asalemi",  # Variant of Talysh
+        "Alemannic German",  # Variant of German
+        "Rhine Franconian",  # Variant of German
+        "German Low German",  # Variant of Low German
+        "Campidanese",  # Variant of Sardinian
+        "Logudorese",  # Variant of Sardinian
+        "Digor",  # Variant of Ossetian
+        "Iron",  # Variant of Ossetian
+        "Northern Puebla",  # Variant of Nahuatl
+        "Mecayapan",  # Variant of Nathuatl
+        "Egyptian Arabic",  # Variant of Arabic
+        "Gulf Arabic",  # Variant of Arabic
+        "Hijazi Arabic",  # Variant of Arabic
+        "Moroccan Arabic",  # Variant of Arabic
+        "North Levantine Arabic",  # Variant of Arabic
+        "South Levantine Arabic",  # Variant of Arabic
+        "Alviri",  # Variant of Alviri-Vidari
+        "Vidari",  # Variant of Alviri-Vidari
+        "Tashelhit",  # Variant of Berber
+        "Bokmål",  # Variant of Norwegian
+        "Nynorsk",  # Variant of Norwegian
+        "Mycenaean",  # Variant of Greek
+        # Language varieties
+        "Ancient",
+        "Classical",
+        "Draweno-Polabian",
+        "Literary",
+        "Lower",
+        "Manitoba Saulteux",
+        "Modern",
+        "Modern Polabian",
+        "Modified traditional",
+        "Northern",
+        "Northern and Southern",
+        "Old Polabian",
+        "Simplified",
+        "Southern",
+        "Traditional",
+        "Western",
+        "1708",
+        "1918",
+    ]
+)
 
 # These names should be interpreted as tags (as listed in the value
 # space-separated) in second-level translations.
 tr_second_tagmap = {
-    "Föhr-Amrum, Bökingharde" : "Föhr-Amrum Bökingharde",
+    "Föhr-Amrum, Bökingharde": "Föhr-Amrum Bökingharde",
     "Halligen, Goesharde, Karrhard": "Halligen Goesharde Karrhard",
     "Föhr-Amrum and Sylt dialect": "Föhr-Amrum Sylt",
     "Hallig and Mooring": "Hallig Mooring",
@@ -262,27 +270,48 @@ tr_ignore_regexps = [
 # If a translation matches this regexp (with re.search), we print a debug
 # message
 tr_suspicious_re = re.compile(
-    r" [mf][12345]$|" +
-    r" [mfnc]$|" +
-    r" (pf|impf|vir|nvir|anml|anim|inan|sg|pl)$|" +
-    "|".join(re.escape(x) for x in
-             ["; ", "* ", ": ", "[", "]",
-              "{", "}", "／", "^", "literally", "lit.",
-              # XXX check occurrences of ⫽, seems to be used as verb-object
-              # separator but shouldn't really be part of the canonical form.
-              # See e.g. 打工/Chinese
-              "⫽",
-              "also expressed with", "e.g.", "cf.",
-              "used ", "script needed",
-              "please add this translation",
-              "usage "]))
+    r" [mf][12345]$|"
+    + r" [mfnc]$|"
+    + r" (pf|impf|vir|nvir|anml|anim|inan|sg|pl)$|"
+    + "|".join(
+        re.escape(x)
+        for x in [
+            "; ",
+            "* ",
+            ": ",
+            "[",
+            "]",
+            "{",
+            "}",
+            "／",
+            "^",
+            "literally",
+            "lit.",
+            # XXX check occurrences of ⫽, seems to be used as verb-object
+            # separator but shouldn't really be part of the canonical form.
+            # See e.g. 打工/Chinese
+            "⫽",
+            "also expressed with",
+            "e.g.",
+            "cf.",
+            "used ",
+            "script needed",
+            "please add this translation",
+            "usage ",
+        ]
+    )
+)
 
 # Regular expression to be searched from translation (with re.search) to check
 # if it should be ignored.
 tr_ignore_re = re.compile(
-    "^(" + "|".join(re.escape(x) for x in tr_ignore_prefixes) + ")|" +
-    "|".join(re.escape(x) for x in tr_ignore_contains) + "|" +
-    "|".join(tr_ignore_regexps))  # These are not to be escaped
+    "^("
+    + "|".join(re.escape(x) for x in tr_ignore_prefixes)
+    + ")|"
+    + "|".join(re.escape(x) for x in tr_ignore_contains)
+    + "|"
+    + "|".join(tr_ignore_regexps)
+)  # These are not to be escaped
 
 # These English texts get converted to tags in translations
 english_to_tags = {
@@ -293,9 +322,18 @@ english_to_tags = {
 }
 
 
-def parse_translation_item_text(wxr, word, data, item, sense, pos_datas,
-                                lang, langcode, translations_from_template,
-                                is_reconstruction):
+def parse_translation_item_text(
+    wxr: WiktextractContext,
+    word: str,
+    data: WordData,
+    item: str,
+    sense: Optional[str],
+    pos_datas: list[WordData],
+    lang: Optional[str],
+    langcode: Optional[str],
+    translations_from_template: list[str],
+    is_reconstruction: bool,
+) -> None:
     assert isinstance(wxr, WiktextractContext)
     assert isinstance(word, str)
     assert isinstance(data, dict)
@@ -316,15 +354,15 @@ def parse_translation_item_text(wxr, word, data, item, sense, pos_datas,
         return None
 
     # Find and remove nested translations from the item
-    nested = list(m.group(1)
-                  for m in re.finditer(nested_translations_re, item))
+    nested = list(m.group(1) for m in re.finditer(nested_translations_re, item))
     if nested:
         item = re.sub(nested_translations_re, "", item)
 
     if re.search(r"\(\d+\)|\[\d+\]", item) and "numeral:" not in item:
-        wxr.wtp.debug("possible sense number in translation item: {}"
-                  .format(item),
-                  sortid="translations/324")
+        wxr.wtp.debug(
+            "possible sense number in translation item: {}".format(item),
+            sortid="translations/324",
+        )
 
     # Translation items should start with a language name (except
     # some nested translation items don't and rely on the language
@@ -341,15 +379,17 @@ def parse_translation_item_text(wxr, word, data, item, sense, pos_datas,
     tags = []
     if m:
         sublang = m.group(1).strip()
-        language_name_variations = list()
+        language_name_variations: list[str] = list()
         if lang and sublang:
             lang_sublang = lang + " " + sublang
             sublang_lang = sublang + " " + lang
             language_name_variations.extend(
-                (lang_sublang, sublang_lang,
-                 lang_sublang.replace(" ", "-"),
-                 sublang_lang.replace(" ", "-"),
-                 )
+                (
+                    lang_sublang,
+                    sublang_lang,
+                    lang_sublang.replace(" ", "-"),
+                    sublang_lang.replace(" ", "-"),
+                )
             )
         if " " in sublang:
             language_name_variations.append(sublang.replace(" ", "-"))
@@ -360,11 +400,11 @@ def parse_translation_item_text(wxr, word, data, item, sense, pos_datas,
             if sublang == "Note":
                 return None
             lang = sublang
-        elif (lang_sublang and
-                any(name_to_code(captured_lang := lang_comb, "en") != ""
-                    # Python 3.8: catch the value of lang_comb with :=
-                    for lang_comb in language_name_variations)
-              ):
+        elif lang_sublang and any(
+            name_to_code(captured_lang := lang_comb, "en") != ""
+            # Python 3.8: catch the value of lang_comb with :=
+            for lang_comb in language_name_variations
+        ):
             lang = captured_lang
         elif sublang in script_and_dialect_names:
             # If the second-level name is a script name, add it as
@@ -386,12 +426,14 @@ def parse_translation_item_text(wxr, word, data, item, sense, pos_datas,
             tags.append(sublang)
         else:
             # We don't recognize this prefix
-            wxr.wtp.error("unrecognized prefix (language name?) in "
-                      "translation item: {}".format(item),
-                      sortid="translations/369")
+            wxr.wtp.error(
+                "unrecognized prefix (language name?) in "
+                "translation item: {}".format(item),
+                sortid="translations/369",
+            )
             return None
         # Strip the language name/tag from the item
-        item = item[m.end():]
+        item = item[m.end() :]
     elif lang is None:
         # No mathing language prefix.  Try if it is missing colon.
         parts = item.split()
@@ -400,8 +442,10 @@ def parse_translation_item_text(wxr, word, data, item, sense, pos_datas,
             item = " ".join(parts[1:])
         else:
             if "__IGNORE__" not in item:
-                wxr.wtp.error("no language name in translation item: {}"
-                          .format(item), sortid="translations/382")
+                wxr.wtp.error(
+                    "no language name in translation item: {}".format(item),
+                    sortid="translations/382",
+                )
         return None
 
     # Map non-standard language names (e.g., "Apache" -> "Apachean")
@@ -418,16 +462,36 @@ def parse_translation_item_text(wxr, word, data, item, sense, pos_datas,
         extra_langcodes.add(langcode)
         if "-" in langcode:
             extra_langcodes.add(langcode.split("-")[0])
-        if langcode in ("zh", "yue", "cdo", "cmn", "dng", "hak",
-                        "mnp", "nan", "wuu", "zh-min-nan"):
-            extra_langcodes.update([
-                "zh", "yue", "cdo", "cmn", "dng", "hak",
-                "mnp", "nan", "wuu", "zh-min-nan"])
+        if langcode in (
+            "zh",
+            "yue",
+            "cdo",
+            "cmn",
+            "dng",
+            "hak",
+            "mnp",
+            "nan",
+            "wuu",
+            "zh-min-nan",
+        ):
+            extra_langcodes.update(
+                [
+                    "zh",
+                    "yue",
+                    "cdo",
+                    "cmn",
+                    "dng",
+                    "hak",
+                    "mnp",
+                    "nan",
+                    "wuu",
+                    "zh-min-nan",
+                ]
+            )
         elif langcode in ("nn", "nb", "no"):
             extra_langcodes.update(["no", "nn", "nb"])
         for x in extra_langcodes:
-            item = re.sub(r"\s*\^?\({}\)".format(re.escape(x)),
-                          "", item)
+            item = re.sub(r"\s*\^?\({}\)".format(re.escape(x)), "", item)
 
     # Map translations obtained from templates into magic characters
     # before splitting the translations list.  This way, if a comma
@@ -436,9 +500,9 @@ def parse_translation_item_text(wxr, word, data, item, sense, pos_datas,
     # translations after splitting.  This kludge improves robustness
     # of collection translations for phrases whose translations
     # may contain commas.
-    translations_from_template = list(sorted(
-        translations_from_template,
-        key=lambda x: len(x), reverse=True))
+    translations_from_template = list(
+        sorted(translations_from_template, key=lambda x: len(x), reverse=True)
+    )
     tr_mappings = {}
     for i, trt in enumerate(translations_from_template):
         if not trt:
@@ -458,16 +522,17 @@ def parse_translation_item_text(wxr, word, data, item, sense, pos_datas,
         tagsets = []
         topics = []
 
-        for part in split_at_comma_semi(item, extra=[
-                " / ", " ／ ", "／", r"\| furthermore: "]):
+        for part in split_at_comma_semi(
+            item, extra=[" / ", " ／ ", "／", r"\| furthermore: "]
+        ):
             # Substitute the magic characters back to original
             # translations (this is part of dealing with
             # phrasal translations containing commas).
-            part = re.sub(r"[{:c}-{:c}]"
-                          .format(MAGIC_FIRST, MAGIC_LAST),
-                          lambda m: tr_mappings.get(m.group(0),
-                                                    m.group(0)),
-                          part)
+            part = re.sub(
+                r"[{:c}-{:c}]".format(MAGIC_FIRST, MAGIC_LAST),
+                lambda m: tr_mappings.get(m.group(0), m.group(0)),
+                part,
+            )
 
             if part.endswith(":"):  # E.g. "salt of the earth"/Korean
                 part = part[:-1].strip()
@@ -485,8 +550,12 @@ def parse_translation_item_text(wxr, word, data, item, sense, pos_datas,
             if topics:
                 tr["topics"] = list(topics)
             if sense:
-                if sense.startswith(("Translations to be checked",
-                             ":The translations below need to be checked")):
+                if sense.startswith(
+                    (
+                        "Translations to be checked",
+                        ":The translations below need to be checked",
+                    )
+                ):
                     continue  # Skip such translations
                 else:
                     tr["sense"] = sense
@@ -495,7 +564,7 @@ def parse_translation_item_text(wxr, word, data, item, sense, pos_datas,
             m = re.match(r"\(([^)]+)\) ", part)
             if m:
                 par = m.group(1)
-                rest = part[m.end():]
+                rest = part[m.end() :]
                 cls = classify_desc(par, no_unknown_starts=True)
                 if cls == "tags":
                     tagsets2, topics2 = decode_tags(par)
@@ -510,7 +579,7 @@ def parse_translation_item_text(wxr, word, data, item, sense, pos_datas,
             m = re.search(r" +\(([^)]+)\)$", part)
             if m:
                 par = m.group(1)
-                rest = part[:m.start()]
+                rest = part[: m.start()]
                 cls = classify_desc(par, no_unknown_starts=True)
                 if cls == "tags":
                     tagsets2, topics2 = decode_tags(par)
@@ -523,7 +592,7 @@ def parse_translation_item_text(wxr, word, data, item, sense, pos_datas,
             m = re.match(r"([-\w() ]+): ", part)
             if m:
                 par = m.group(1).strip()
-                rest = part[m.end():]
+                rest = part[m.end() :]
                 if par in ("", "see"):
                     part = "rest"
                 else:
@@ -559,27 +628,24 @@ def parse_translation_item_text(wxr, word, data, item, sense, pos_datas,
             # we might put in "note" but that we can actually
             # parse into tags.
             for suffix, t in (
-                    (" with dative", "with-dative"),
-                    (" with genitive", "with-genitive"),
-                    (" with accusative", "with-accusative"),
-                    (" in subjunctive", "with-subjunctive"),
-                    (" and conditional mood", "with-conditional"),
-                    (" - I have - you have",
-                     "first-person second-person singular"),
-                    (" - I have", "first-person singular"),
-                    (" - you have", "second-person singular"),
+                (" with dative", "with-dative"),
+                (" with genitive", "with-genitive"),
+                (" with accusative", "with-accusative"),
+                (" in subjunctive", "with-subjunctive"),
+                (" and conditional mood", "with-conditional"),
+                (" - I have - you have", "first-person second-person singular"),
+                (" - I have", "first-person singular"),
+                (" - you have", "second-person singular"),
             ):
                 if part.endswith(suffix):
-                    part = part[:-len(suffix)]
+                    part = part[: -len(suffix)]
                     data_append(tr, "tags", t)
                     break
 
             # Handle certain prefixes in translations
-            for prefix, t in (
-                    ("subjunctive of ", "with-subjunctive"),
-            ):
+            for prefix, t in (("subjunctive of ", "with-subjunctive"),):
                 if part.startswith(prefix):
-                    part = part[len(prefix):]
+                    part = part[len(prefix) :]
                     data_append(tr, "tags", t)
                     break
 
@@ -589,23 +655,21 @@ def parse_translation_item_text(wxr, word, data, item, sense, pos_datas,
                 continue
 
             if "english" in tr and tr["english"] in english_to_tags:
-                data_extend(tr, "tags",
-                            english_to_tags[tr["english"]].split())
+                data_extend(tr, "tags", english_to_tags[tr["english"]].split())
                 del tr["english"]
 
             # Certain values indicate it is not actually a translation.
             # See definition of tr_ignore_re to adjust.
             m = re.search(tr_ignore_re, part)
-            if (m and (m.start() != 0 or m.end() != len(part) or
-                       len(part.split()) > 1)):
+            if m and (
+                m.start() != 0 or m.end() != len(part) or len(part.split()) > 1
+            ):
                 # This translation will be skipped because it
                 # seems to be some kind of explanatory text.
                 # However, let's put it in the "note" field
                 # instead, unless it is one of the listed fully
                 # ignored ones.
-                if part in (
-                        "please add this translation if you can",
-                ):
+                if part in ("please add this translation if you can",):
                     continue
                 # Save in note field
                 tr["note"] = part
@@ -626,9 +690,11 @@ def parse_translation_item_text(wxr, word, data, item, sense, pos_datas,
                     if not word.isupper():
                         # Likely descriptive text or example because
                         # it is much too long.
-                        wxr.wtp.debug("Translation too long compared to word, so"
-                                  " it is skipped",
-                                  sortid="translations/609-20230504")
+                        wxr.wtp.debug(
+                            "Translation too long compared to word, so"
+                            " it is skipped",
+                            sortid="translations/609-20230504",
+                        )
                         del tr["word"]
                         tr["note"] = w
 
@@ -637,11 +703,14 @@ def parse_translation_item_text(wxr, word, data, item, sense, pos_datas,
             if "word" in tr:
                 m = re.search(tr_suspicious_re, tr["word"])
                 if m and lang not in (
-                        "Bats",  # ^ in tree/English/Tr/Bats
+                    "Bats",  # ^ in tree/English/Tr/Bats
                 ):
-                    wxr.wtp.debug("suspicious translation with {!r}: {}"
-                              .format(m.group(0), tr),
-                              sortid="translations/611")
+                    wxr.wtp.debug(
+                        "suspicious translation with {!r}: {}".format(
+                            m.group(0), tr
+                        ),
+                        sortid="translations/611",
+                    )
 
             if "tags" in tr:
                 tr["tags"] = list(sorted(set(tr["tags"])))

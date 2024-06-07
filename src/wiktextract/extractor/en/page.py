@@ -2007,7 +2007,7 @@ def parse_language(
                 if not dts and tags:
                     data_extend(sense_data, "tags", tags)
                     continue
-                for dt in dts:
+                for dt in dts:  # type:ignore[union-attr]
                     ftags = list(tag for tag in tags if tag != "form-of")
                     if "alt-of" in tags:
                         data_extend(sense_data, "tags", ftags)

@@ -3,6 +3,9 @@
 
 # This dictionary should be assigned with the WTP.set_template_override()
 # setter method; see wiktwords.
+
+from wikitextprocessor.core import TemplateArgs
+
 template_override_fns = {}
 
 # https://stackoverflow.com/a/63071396
@@ -16,17 +19,17 @@ template_override_fns = {}
 # A bit messy conceptually.
 
 
-def reg(template_name):
+def reg(template_name: str) -> Callable[Callable, Callable]:
     """Decorator that takes its input key and the template it decorates,
     and adds them to the template_override_fns dictionary"""
-    def middle(func):
+    def middle(func: Callable) -> Callable:
         template_override_fns[template_name] = func
         return func
     return middle
 
 
 @reg("egy-glyph")
-def egy_glyph(args):
+def egy_glyph(args: TemplateArgs) -> str:
     """Intercept {{egy-glyph}}, which causes problems by creating
     tables and inserting agnostic images that can't be easily parsed
     as text data."""
@@ -41,7 +44,7 @@ def egy_glyph(args):
     return "«" + ret + "»"
 
 @reg("egy-glyph-img")
-def egy_glyph_img(args):
+def egy_glyph_img(args: TemplateArgs) -> str:
     """Intercept {{egy-glyph-img}}, which is turned into an inline
     image that is generally useless to our parser and replaces it
     with its egyptological code."""

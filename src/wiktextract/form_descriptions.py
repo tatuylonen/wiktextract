@@ -1526,7 +1526,7 @@ def add_related(
     origtext: str,
     add_all_canonicals: bool,
     is_reconstruction: bool,
-    head_group: int,
+    head_group: Optional[int],
     ruby_data: Optional[Sequence[tuple[str, str]]] = None,
 ) -> Optional[list[tuple[str, ...]]]:
     """Internal helper function for some post-processing entries for related
@@ -1758,7 +1758,7 @@ def parse_word_head(
     text: str,
     data: WordData,
     is_reconstruction: bool,
-    head_group: int,
+    head_group: Optional[int],
     ruby=None,
     links=None,
 ) -> None:
@@ -2627,7 +2627,7 @@ def parse_word_head(
 
 
 def parse_sense_qualifier(
-    wxr: WiktextractContext, text: str, data: SenseData
+    wxr: WiktextractContext, text: str, data: Union[SenseData, LinkageData]
 ) -> None:
     """Parses tags or topics for a sense or some other data.  The values are
     added into the dictionary ``data``."""
@@ -2949,7 +2949,7 @@ def parse_translation_desc(
 
 
 def parse_alt_or_inflection_of(
-    wxr: WiktextractContext, gloss: str, gloss_template_args: TemplateArgs
+    wxr: WiktextractContext, gloss: str, gloss_template_args: set[str]
 ) -> Optional[tuple[list[str], Optional[list[AltOf]]]]:
     """Tries to parse an inflection-of or alt-of description.  If successful,
     this returns (tags, alt-of/inflection-of-dict).  If the description cannot
@@ -2992,7 +2992,7 @@ alt_infl_disallowed: set[str] = set(
 
 
 def parse_alt_or_inflection_of1(
-    wxr: WiktextractContext, gloss: str, gloss_template_args: TemplateArgs
+    wxr: WiktextractContext, gloss: str, gloss_template_args: set[str]
 ) -> Optional[tuple[list[str], Optional[list[AltOf]]]]:
     """Helper function for parse_alt_or_inflection_of.  This handles a single
     capitalization."""
