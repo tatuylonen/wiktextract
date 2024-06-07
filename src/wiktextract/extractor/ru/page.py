@@ -195,8 +195,10 @@ def parse_section(
         extract_phrase_section(wxr, page_data[-1], level3_node)
     elif section_title == "перевод" and wxr.config.capture_translations:
         extract_translations(wxr, page_data[-1], level3_node)
-    elif section_title in ["анаграммы", "метаграммы", "синонимы", "антонимы"]:
-        pass
+    elif section_title in LINKAGE_TITLES and wxr.config.capture_linkages:
+        extract_linkages(
+            wxr, page_data[-1], LINKAGE_TITLES[section_title], level3_node
+        )
     elif section_title == "библиография":
         pass
     elif section_title in ["латиница (latinça)", "латиница (latinca)"]:
