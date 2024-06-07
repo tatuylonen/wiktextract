@@ -4,8 +4,11 @@
 #
 # Copyright (c) 2021, 2022 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
+# mypy: disable-error-code = literal-required
+
 import re
 from .tags import valid_tags, head_final_numeric_langs
+from typing import TypedDict, Union
 from wiktextract.parts_of_speech import PARTS_OF_SPEECH
 
 # Languages where possessive forms (e.g. pronouns) inflect according to the
@@ -54,7 +57,24 @@ LANGS_WITH_NUMBERED_INFINITIVES = set([
 # Only in scope from handle_wikitext_table() onwards and not stored for anything
 # else.
 
-infl_map = {
+
+InflMapNode = Union[str, list[str], "InflMapNodeDict"]
+
+InflMapNodeDict = TypedDict(
+    "InflMapNodeDict",
+    {
+        "lang": Union[str, set[str], list[str]],
+        "pos": Union[str, set[str], list[str]],
+        "nested-table-depth": Union[int, list[int]],
+        "default": str,
+        "if": str,
+        "then": InflMapNode,
+        "else": InflMapNode,
+    },
+    total=False,
+)
+
+infl_map: dict[str, InflMapNode] = {
     "plural": {
         "default": "plural",
         "if": "possessive",
@@ -6927,7 +6947,7 @@ infl_map = {
 }
 
 
-def check_tags(k, v):
+def check_tags(k: str, v: str) -> None:
     assert isinstance(k, str)
     assert isinstance(v, str)
     for tag in v.split():
@@ -6936,7 +6956,8 @@ def check_tags(k, v):
                   .format(k, tag))
 
 
-def check_v(k, v):
+
+def check_v(k: str, v: Union[str, list[str], dict[str, InflMapNode], InflMapNodeDict]) -> None:
     assert isinstance(k, str)
     if v is None: # or v in ("dummy-reset-headers",):
         return
@@ -6960,7 +6981,7 @@ def check_v(k, v):
                 for vvv in vv:
                     if vvv not in PARTS_OF_SPEECH:
                         print("infl_map[{!r}] contains invalid part-of-speech "
-                              "{!r}".format(k, kk, v[kk]))
+                              "{!r} -- {!r}".format(k, kk, v[kk]))
             elif kk in ("lang",):
                 pass
             elif kk == "nested-table-depth":
