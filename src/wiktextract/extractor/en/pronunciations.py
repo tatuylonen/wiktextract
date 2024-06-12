@@ -2,6 +2,7 @@ import hashlib
 import re
 import urllib
 
+from typing import Iterator, Optional, Union
 from wikitextprocessor import NodeKind, WikiNode
 from wiktextract.datautils import data_append, split_at_comma_semi
 from wiktextract.form_descriptions import (
@@ -11,6 +12,8 @@ from wiktextract.form_descriptions import (
 from wiktextract.page import clean_node, is_panel_template
 from wiktextract.parts_of_speech import part_of_speech_map
 from wiktextract.tags import valid_tags
+from wiktextract.type_utils import SoundData, TemplateArgs, WordData
+from wiktextract.wxr_context import WiktextractContext
 
 from .zh_pron_tags import ZH_PRON_TAGS
 
@@ -42,8 +45,14 @@ pron_romanization_re = re.compile(
 
 
 def parse_pronunciation(
-    wxr, node, data, etym_data, have_etym, base_data, lang_code
-):
+    wxr: WiktextractContext,
+    node: WikiNode,
+    data: WordData,
+    etym_data: WordData,
+    have_etym: bool,
+    base_data: WordData,
+    lang_code: str,
+) -> None:
     """Parses the pronunciation section from a language section on a
     page."""
     assert isinstance(node, WikiNode)
@@ -66,18 +75,18 @@ def parse_pronunciation(
         isinstance(x, WikiNode) and x.kind == NodeKind.LIST for x in contents
     ):
         # expand all templates
-        new_contents = []
+        new_contents: list[Union[str, WikiNode]] = []
         for l in contents:
             if (
                 isinstance(l, WikiNode)
                 and l.kind == NodeKind.TEMPLATE
+                and isinstance(l.largs[0][0], str)
                 and l.largs[0][0].strip() != "zh-pron"
             ):
                 temp = wxr.wtp.node_to_wikitext(l)
                 temp = wxr.wtp.expand(temp)
-                temp = wxr.wtp.parse(temp)
-                temp = temp.children
-                new_contents.extend(temp)
+                temp_parsed = wxr.wtp.parse(temp)
+                new_contents.extend(temp_parsed.children)
             else:
                 new_contents.append(l)
         contents = new_contents
@@ -88,7 +97,9 @@ def parse_pronunciation(
     audios = []
     have_panel_templates = False
 
-    def parse_pronunciation_template_fn(name, ht):
+    def parse_pronunciation_template_fn(
+        name: str, ht: TemplateArgs
+    ) -> Optional[str]:
         nonlocal have_panel_templates
         if is_panel_template(wxr, name):
             have_panel_templates = True
@@ -137,7 +148,7 @@ def parse_pronunciation(
             return "__AUDIO_IGNORE_THIS__" + str(len(audios) - 1) + "__"
         if name == "audio-pron":
             filename = ht.get(2) or ""
-            ipa = ht.get("ipa")
+            ipa = ht.get("ipa") or ""
             dial = ht.get("dial")
             country = ht.get("country")
             audio = {"audio": filename.strip()}
@@ -163,7 +174,9 @@ def parse_pronunciation(
             return "__AUDIO_IGNORE_THIS__" + str(len(audios) - 1) + "__"
         return None
 
-    def parse_pron_post_template_fn(name, ht, text):
+    def parse_pron_post_template_fn(
+        name: str, ht: TemplateArgs, text: str
+    ) -> Optional[str]:
         if is_panel_template(wxr, name):
             return ""
         if name in {
@@ -198,10 +211,15 @@ def parse_pronunciation(
         return text
 
     def parse_expanded_zh_pron(
-        node, parent_hdrs, specific_hdrs, unknown_header_tags
-    ):
-        def generate_pron(v, new_parent_hdrs, new_specific_hdrs):
-            pron = {}
+        node: WikiNode,
+        parent_hdrs: list[str],
+        specific_hdrs: list[str],
+        unknown_header_tags: set[str],
+    ) -> None:
+        def generate_pron(
+            v, new_parent_hdrs: list[str], new_specific_hdrs: list[str]
+        ) -> Optional[SoundData]:
+            pron: SoundData = {}
             pron["tags"] = []
             pron["zh-pron"] = v.strip()
             for hdr in new_parent_hdrs + new_specific_hdrs:
@@ -312,9 +330,9 @@ def parse_pronunciation(
                     v = ":".join(parts[1:])
 
                     #  check for phrases
-                    if ("，" in wxr.wtp.title) and len(v.split(" ")) + v.count(
-                        ","
-                    ) == len(wxr.wtp.title):
+                    if ("，" in (wxr.wtp.title or "")) and len(
+                        v.split(" ")
+                    ) + v.count(",") == len(wxr.wtp.title or ""):
                         # This just captures exact matches where you have
                         # the pronunciation of the whole phrase and nothing
                         # else. Split on spaces, then because we're not
@@ -384,7 +402,10 @@ def parse_pronunciation(
                         x, new_parent_hdrs, specific_hdrs, unknown_header_tags
                     )
 
-    def parse_chinese_pron(contents, unknown_header_tags):
+    def parse_chinese_pron(
+        contents: Union[list[Union[WikiNode, str]], WikiNode, str],
+        unknown_header_tags: set[str],
+    ) -> None:
         if isinstance(contents, list):
             for item in contents:
                 parse_chinese_pron(item, unknown_header_tags)
@@ -410,7 +431,7 @@ def parse_pronunciation(
             return
 
     if lang_code == "zh":
-        unknown_header_tags = set()
+        unknown_header_tags: set[str] = set()
         parse_chinese_pron(contents, unknown_header_tags)
         for hdr in unknown_header_tags:
             wxr.wtp.debug(
@@ -419,12 +440,16 @@ def parse_pronunciation(
                 sortid="pronunciations/296/20230324",
             )
 
-    def flattened_tree(lines):
+    def flattened_tree(
+        lines: list[Union[WikiNode, str]],
+    ) -> Iterator[Union[WikiNode, str]]:
         assert isinstance(lines, list)
         for line in lines:
             yield from flattened_tree1(line)
 
-    def flattened_tree1(node):
+    def flattened_tree1(
+        node: Union[WikiNode, str],
+    ) -> Iterator[Union[WikiNode, str]]:
         assert isinstance(node, (WikiNode, str))
         if isinstance(node, str):
             yield node
@@ -454,7 +479,9 @@ def parse_pronunciation(
 
     # Kludge for templates that generate several lines, but haven't
     # been caught by earlier kludges...
-    def split_cleaned_node_on_newlines(contents):
+    def split_cleaned_node_on_newlines(
+        contents: list[Union[WikiNode, str]],
+    ) -> Iterator[tuple[str, str]]:
         for litem in flattened_tree(contents):
             text = clean_node(
                 wxr, data, litem, template_fn=parse_pronunciation_template_fn
@@ -466,11 +493,11 @@ def parse_pronunciation(
                 yield line, ipaline
 
     # have_pronunciations = False
-    active_pos = None
+    active_pos: Optional[str] = None
 
     for text, ipa_text in split_cleaned_node_on_newlines(contents):
         # print(f"{text=}, {ipa_text=}")
-        prefix = None
+        prefix: Optional[str] = None
         if not text:
             continue
         if not ipa_text:

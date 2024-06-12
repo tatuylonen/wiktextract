@@ -15,6 +15,7 @@ from typing import List, Optional, Set, TextIO, Tuple
 
 from mediawiki_langcodes import code_to_name
 from wikitextprocessor import Page
+from wikitextprocessor.core import CollatedErrorReturnData, NamespaceDataEntry
 
 from .import_utils import import_extractor_module
 from .logging import logger
@@ -38,8 +39,10 @@ class ThesaurusTerm:
 
 def worker_func(
     page: Page,
-) -> Tuple[bool, Optional[List[ThesaurusTerm]], dict, str]:
-    wxr: WiktextractContext = worker_func.wxr
+) -> Tuple[
+    bool, Optional[List[ThesaurusTerm]], CollatedErrorReturnData, Optional[str]
+]:
+    wxr: WiktextractContext = worker_func.wxr  # type:ignore[attr-defined]
     with tempfile.TemporaryDirectory(prefix="wiktextract") as tmpdirname:
         debug_path = "{}/wiktextract-{}".format(tmpdirname, os.getpid())
         with open(debug_path, "w", encoding="utf-8") as f:
@@ -61,7 +64,7 @@ def worker_func(
                 )
                 + "".join(lst)
             )
-            return False, None, {}, msg
+            return False, None, {}, msg  # type:ignore[typeddict-item]
 
 
 def extract_thesaurus_page(
@@ -80,8 +83,11 @@ def extract_thesaurus_data(
 
     start_t = time.time()
     logger.info("Extracting thesaurus data")
-    thesaurus_ns_data = wxr.wtp.NAMESPACE_DATA.get("Thesaurus", {})
-    thesaurus_ns_id = thesaurus_ns_data.get("id")
+    thesaurus_ns_data: NamespaceDataEntry = wxr.wtp.NAMESPACE_DATA.get(
+        "Thesaurus",
+        {},  # type:ignore[typeddict-item]
+    )
+    thesaurus_ns_id = thesaurus_ns_data.get("id", 0)
 
     wxr.remove_unpicklable_objects()
     with Pool(num_processes, init_worker_process, (worker_func, wxr)) as pool:
@@ -95,12 +101,12 @@ def extract_thesaurus_data(
                 continue
             if terms is not None:
                 for term in terms:
-                    insert_thesaurus_term(wxr.thesaurus_db_conn, term)
+                    insert_thesaurus_term(wxr.thesaurus_db_conn, term)  # type:ignore[arg-type]
             wxr.config.merge_return(stats)
 
-    wxr.thesaurus_db_conn.commit()
+    wxr.thesaurus_db_conn.commit()  # type:ignore[union-attr]
     num_pages = wxr.wtp.saved_page_nums([thesaurus_ns_id], False)
-    total = thesaurus_linkage_number(wxr.thesaurus_db_conn)
+    total = thesaurus_linkage_number(wxr.thesaurus_db_conn)  # type:ignore[arg-type]
     logger.info(
         "Extracted {} linkages from {} thesaurus pages (took {:.1f}s)".format(
             total, num_pages, time.time() - start_t
@@ -144,6 +150,7 @@ def init_thesaurus_db(db_path: Path) -> sqlite3.Connection:
 def thesaurus_linkage_number(db_conn: sqlite3.Connection) -> int:
     for (r,) in db_conn.execute("SELECT count(*) FROM terms"):
         return r
+    return 0
 
 
 def search_thesaurus(
@@ -159,7 +166,7 @@ def search_thesaurus(
     FROM terms JOIN entries ON terms.entry_id = entries.id
     WHERE entry = ? AND language_code = ? AND pos = ?
     """
-    query_value = (entry, lang_code, pos)
+    query_value: tuple[str, ...] = (entry, lang_code, pos)
     if linkage_type is not None:
         query_sql += " AND linkage = ?"
         query_value += (linkage_type,)
@@ -230,7 +237,7 @@ def emit_words_in_thesaurus(
     from .wiktionary import write_json_data
 
     logger.info("Emitting words that only occur in thesaurus")
-    for entry_id, entry, pos, lang_code, sense in wxr.thesaurus_db_conn.execute(
+    for entry_id, entry, pos, lang_code, sense in wxr.thesaurus_db_conn.execute(  # type:ignore[union-attr]
         "SELECT id, entry, pos, language_code, sense FROM entries "
         "WHERE pos IS NOT NULL AND language_code IS NOT NULL"
     ):
@@ -261,7 +268,7 @@ def emit_words_in_thesaurus(
             topics,
             roman,
             lang_variant,
-        ) in wxr.thesaurus_db_conn.execute(
+        ) in wxr.thesaurus_db_conn.execute(  # type:ignore[union-attr]
             "SELECT term, linkage, tags, topics, roman, language_variant "
             "FROM terms WHERE entry_id = ?",
             (entry_id,),

@@ -1,20 +1,101 @@
-
 # Language-specific configuration for various aspects of inflection table
 # parsing.
 
 import re
 
+from typing import Optional, TypedDict, Union
 from wiktextract.tags import valid_tags, tag_categories
 from wiktextract.parts_of_speech import PARTS_OF_SPEECH
 
+LangConfDict = TypedDict(
+    "LangConfDict",
+    {
+        "next": str,
+        "hdr_expand_first": set[str],
+        "hdr_expand_cont": set[str],
+        "animate_inanimate_remove": bool,
+        "both_active_passive_remove": bool,
+        "both_strong_weak_remove": bool,
+        "definitenesses": list[str],
+        "empty_row_resets": bool,
+        "form_transformations": list[
+            list[str]
+        ],  # tag extraction, lang_specific_tags()
+        "genders": Optional[list[str]],
+        "imperative_no_tense": bool,
+        "masc_only_animate": bool,  # Slavic special
+        "numbers": list[str],
+        "persons": list[str],
+        "pl_virile_nonvirile": bool,
+        "reuse_cellspan": str,  # stop/skip/reuse
+        "skip_mood_mood": bool,
+        "skip_tense_tense": bool,
+        "stop_non_finite_non_finite": bool,
+        "stop_non_finite_voice": bool,
+        "stop_non_finite_tense": bool,
+        "strengths": list[str],
+        "virile_nonvirile_remove": bool,
+        "voices": list[str],
+        "special_phrase_splits": dict[
+            str, list[Union[list[str], str]]
+        ],  # value: (split phrase, tags)
+        "form_replacements": dict[
+            str, Union[str, list[str]]
+        ],  # value: [replacement, tags]
+        # Greek-style bracket semantics
+        "parentheses_for_informal": bool,
+        "square_brackets_for_rare": bool,
+        "curly_brackets_for_archaic": bool,
+        # Armenian; migrated old data here
+        "lang_tag_mappings": Optional[
+            dict[str, dict[tuple[str, ...], list[str]]]
+        ],
+        # Spanish has a lot of "vos" and "tú" in its tables that look like
+        # references, and they give their form certain tags.
+        # Dict of references ("vos") that point to tag strings "first-person
+        # singular" that *extend* tags.
+        "special_references": Optional[dict[str, str]],
+        # Some languages like Icelandic and Faroese have text cells in the
+        # upper left that we'd like to ignore.
+        "ignore_top_left_text_cell": bool,
+        # Minor regex replacements for cleanup in parse_simple_table()
+        "minor_text_cleanups": Optional[
+            dict[str, str]
+        ],  # dict of {regex: substitution}
+        "articles_in_separate_columns": bool,
+        # Cells to ignore in this language, unless the cell has the key
+        # as a tag.
+        "conditionally_ignored_cells": dict[str, list[str]],
+    },
+    total=False,
+)
 
-lang_specific = {
+lang_specific: dict[str, LangConfDict] = {
     "default": {
-        "hdr_expand_first": set(["number", "mood", "referent", "aspect",
-                                 "tense", "voice", "non-finite", "case",
-                                 "possession"]),
-        "hdr_expand_cont": set(["person", "gender", "number", "degree",
-                                "polarity", "voice", "misc"]),
+        "hdr_expand_first": set(
+            [
+                "number",
+                "mood",
+                "referent",
+                "aspect",
+                "tense",
+                "voice",
+                "non-finite",
+                "case",
+                "possession",
+            ]
+        ),
+        "hdr_expand_cont": set(
+            [
+                "person",
+                "gender",
+                "number",
+                "degree",
+                "polarity",
+                "voice",
+                "misc",
+            ]
+        ),
         "animate_inanimate_remove": True,
         "both_active_passive_remove": True,
         "both_strong_weak_remove": True,
@@ -53,11 +134,11 @@ lang_specific = {
         # upper left that we'd like to ignore.
         "ignore_top_left_text_cell": False,
         # Minor regex replacements for cleanup in parse_simple_table()
-        "minor_text_cleanups": None, # dict of {regex: substitution}
+        "minor_text_cleanups": None,  # dict of {regex: substitution}
         "articles_in_separate_columns": False,
         # Cells to ignore in this language, unless the cell has the key
         # as a tag.
-        "conditionally_ignored_cells": [],
+        "conditionally_ignored_cells": {},
     },
     "austronesian-group": {
         "numbers": ["singular", "dual", "plural"],
@@ -69,8 +150,7 @@ lang_specific = {
         "genders": ["masculine", "feminine", "neuter"],
         "numbers": ["singular", "plural"],
     },
-    "romance-group": {
-    },
+    "romance-group": {},
     "slavic-group": {
         "numbers": ["singular", "plural", "dual"],
         "masc_only_animate": True,
@@ -89,7 +169,7 @@ lang_specific = {
         "next": "germanic-group",
         "articles_in_separate_columns": True,
     },
-    "germanic-group": { # Germanic languages as a whole
+    "germanic-group": {  # Germanic languages as a whole
         "next": "indo-european-group",
     },
     "Akkadian": {
@@ -109,11 +189,19 @@ lang_specific = {
     # },
     "Arabic": {
         "next": "semitic-group",
-        "numbers": ["singular", "dual", "paucal", "plural", "collective", "singulative"],
+        "numbers": [
+            "singular",
+            "dual",
+            "paucal",
+            "plural",
+            "collective",
+            "singulative",
+        ],
         "reuse_cellspan": "reuse",
         "hdr_expand_first": set(["number"]),
-        "hdr_expand_cont": set(["gender", "referent", "misc", "number",
-                                "class"]),
+        "hdr_expand_cont": set(
+            ["gender", "referent", "misc", "number", "class"]
+        ),
     },
     "Aragonese": {
         "next": "romance-group",
@@ -216,21 +304,29 @@ lang_specific = {
         },
         "special_phrase_splits": {
             "I am (’m)/be": [["am (’m)", "be"], "first-person singular"],
-            "we are (’re)/be/been": [["are (’re)", "be", "been"],
-                                     "first-person plural"],
-            "thou art (’rt)/beest": [["art (’rt)", "beest"],
-                                     "second-person singular"],
-            "ye are (’re)/be/been": [["are (’re)", "be", "been"],
-                                     "second-person plural"],
+            "we are (’re)/be/been": [
+                ["are (’re)", "be", "been"],
+                "first-person plural",
+            ],
+            "thou art (’rt)/beest": [
+                ["art (’rt)", "beest"],
+                "second-person singular",
+            ],
+            "ye are (’re)/be/been": [
+                ["are (’re)", "be", "been"],
+                "second-person plural",
+            ],
             "thou be/beest": [["be", "beest"], "second-person singular"],
-            "he/she/it is (’s)/beeth/bes": [["is (’s)", "beeth", "bes"],
-                                            "third-person singular"],
-            "they are (’re)/be/been": [["are (’re)", "be", "been"],
-                                       "third-person plural"],
-            "thou wert/wast": [["wert", "wast"],
-                               "second-person singular"],
-            "thou were/wert": [["were", "wert"],
-                               "second-person singular"],
+            "he/she/it is (’s)/beeth/bes": [
+                ["is (’s)", "beeth", "bes"],
+                "third-person singular",
+            ],
+            "they are (’re)/be/been": [
+                ["are (’re)", "be", "been"],
+                "third-person plural",
+            ],
+            "thou wert/wast": [["wert", "wast"], "second-person singular"],
+            "thou were/wert": [["were", "wert"], "second-person singular"],
             "there has been": [["there has been"], "singular"],
             "there have been": [["there have been"], "plural"],
             "there is ('s)": [["there is", "there's"], "singular"],
@@ -270,18 +366,42 @@ lang_specific = {
             ["verb", "^wir ", "", "first-person plural"],
             ["verb", "^ihr ", "", "second-person plural"],
             ["verb", "^sie ", "", "third-person plural"],
-            ["verb", "^dass ich ", "",
-             "first-person singular subordinate-clause"],
-            ["verb", "^dass du ", "",
-             "second-person singular subordinate-clause"],
-            ["verb", "^dass er ", "",
-             "third-person singular subordinate-clause"],
-            ["verb", "^dass wir ", "",
-             "first-person plural subordinate-clause"],
-            ["verb", "^dass ihr ", "",
-             "second-person plural subordinate-clause"],
-            ["verb", "^dass sie ", "",
-             "third-person plural subordinate-clause"],
+            [
+                "verb",
+                "^dass ich ",
+                "",
+                "first-person singular subordinate-clause",
+            ],
+            [
+                "verb",
+                "^dass du ",
+                "",
+                "second-person singular subordinate-clause",
+            ],
+            [
+                "verb",
+                "^dass er ",
+                "",
+                "third-person singular subordinate-clause",
+            ],
+            [
+                "verb",
+                "^dass wir ",
+                "",
+                "first-person plural subordinate-clause",
+            ],
+            [
+                "verb",
+                "^dass ihr ",
+                "",
+                "second-person plural subordinate-clause",
+            ],
+            [
+                "verb",
+                "^dass sie ",
+                "",
+                "third-person plural subordinate-clause",
+            ],
             ["verb", r" \(du\)$", "", "second-person singular"],
             ["verb", r" \(ihr\)$", "", "second-person plural"],
             ["adj", "^er ist ", "", "masculine singular"],
@@ -291,15 +411,25 @@ lang_specific = {
             ["adj", "^keine ", "keine ", "negative"],
             ["adj", "^keiner ", "keiner ", "negative"],
             ["adj", "^keinen ", "keinen ", "negative"],
-         ],
+        ],
         "conditionally_ignored_cells": {
-            "definite": ["der", "die", "das", "des",
-                         "dem", "den",],
-            "indefinite": ["ein", "eine", "eines", "einer",
-                           "einem", "einen",],
+            "definite": [
+                "der",
+                "die",
+                "das",
+                "des",
+                "dem",
+                "den",
+            ],
+            "indefinite": [
+                "ein",
+                "eine",
+                "eines",
+                "einer",
+                "einem",
+                "einen",
+            ],
         },
-
-
     },
     "German Low German": {
         "next": "German",
@@ -324,7 +454,7 @@ lang_specific = {
         # For greek originally
         "minor_text_cleanups": {
             r"\s+➤\s*$": "",
-        }
+        },
     },
     "Hawaiian": {
         "next": "austronesian-group",
@@ -398,7 +528,7 @@ lang_specific = {
         "next": "romance-group",
     },
     "Lihir": {
-       "numbers": ["singular", "dual", "trial", "paucal", "plural"],
+        "numbers": ["singular", "dual", "trial", "paucal", "plural"],
     },
     "Lingala": {
         "next": "bantu-group",
@@ -443,7 +573,12 @@ lang_specific = {
         "next": "bantu-group",
     },
     "Navajo": {
-        "numbers": ["singular", "plural", "dual", "duoplural",],
+        "numbers": [
+            "singular",
+            "plural",
+            "dual",
+            "duoplural",
+        ],
     },
     "Neapolitan": {
         "next": "romance-group",
@@ -701,6 +836,7 @@ lang_specific = {
 #                 raise AssertionError("{} key {!r} value {!r} is not defined"
 #                                      .format(k, kk, vv))
 
+
 def get_lang_conf(lang, field):
     """Returns the given field from language-specific data or "default"
     if the language is not listed or does not have the field."""
@@ -711,8 +847,7 @@ def get_lang_conf(lang, field):
         if lconfigs is None:
             lang = "default"
         elif lang == "default" and field not in lconfigs:
-            raise RuntimeError("Invalid lang_specific field {!r}"
-                               .format(field))
+            raise RuntimeError("Invalid lang_specific field {!r}".format(field))
         else:
             if field in lconfigs:
                 return lconfigs[field]
@@ -730,14 +865,14 @@ def lang_specific_tags(lang, pos, form):
     assert isinstance(form, str)
     rules = get_lang_conf(lang, "form_transformations")
     for patpos, pattern, dst, tags in rules:
-    #   PoS, regex, replacement, tags; pattern -> dst :: "^ich " > ""
+        #   PoS, regex, replacement, tags; pattern -> dst :: "^ich " > ""
         assert patpos in PARTS_OF_SPEECH
         if pos != patpos:
             continue
         m = re.search(pattern, form)
         if not m:
             continue
-        form = form[:m.start()] + dst + form[m.end():]
+        form = form[: m.start()] + dst + form[m.end() :]
         tags = tags.split()
         for t in tags:
             assert t in valid_tags

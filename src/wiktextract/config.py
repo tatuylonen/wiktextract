@@ -31,6 +31,8 @@ POSSubtitleData = TypedDict(
         "pos": str,
         "debug": str,
         "tags": list[str],
+        "error": str,  # not used
+        "warning": str,  # not used
     },
     total=False,
 )

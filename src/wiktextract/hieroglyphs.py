@@ -1,7 +1,7 @@
 import unicodedata
 import re
 
-hiero_phoneme_map = {
+hiero_phoneme_map: dict[str, str] = {
     "mSa": "A12",
     "xr": "A15",
     "Xrd": "A17",
@@ -407,7 +407,7 @@ hiero_phoneme_map = {
     "qn": "AA8",
 }
 
-hiero_map = {
+hiero_map: dict[str, str] = {
     "H_SPACE" : "\u00a0",
     ".": " ",
     "..": "\u2003",
@@ -436,7 +436,7 @@ for name, g in hiero_phoneme_map.items():
 
     hiero_map[name] = hiero_map[g]
 
-def convert_asterisk(text):
+def convert_asterisk(text: str) -> str:
     tokens = text.split("*")
     print("asterisk tokens:", tokens)
     result = []
@@ -449,7 +449,7 @@ def convert_asterisk(text):
     v = "\U00013431".join(result)
     return v
 
-def convert_colon(text):
+def convert_colon(text: str) -> str:
     tokens = text.split(":")
     print("colon tokens:", tokens)
     result = []
@@ -460,7 +460,7 @@ def convert_colon(text):
         result.append(v)
     return "\U00013430".join(result)
 
-def convert_hiero(text):
+def convert_hiero(text: str) -> str:
     lst = list(m.group(0) for m in re.finditer(
         r"\s+|\s*-\s*|\s*!\s*|[a-zA-Z0-9*:_]+|.", text))
     result = []

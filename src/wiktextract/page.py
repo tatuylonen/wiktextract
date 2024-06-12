@@ -15,12 +15,14 @@ from wikitextprocessor import (
 from wikitextprocessor.core import (
     PostTemplateFnCallable,
     TemplateFnCallable,
+    TemplateArgs,
 )
 from wikitextprocessor.node_expand import NodeHandlerFnCallable
 from wikitextprocessor.parser import (
     GeneralNode,
 )
 
+from wiktextract.type_utils import SenseData
 from wiktextract.wxr_context import WiktextractContext
 
 from .clean import clean_value
@@ -336,14 +338,16 @@ def clean_node(
     """
 
     # print("CLEAN_NODE:", repr(value))
-    def clean_template_fn(name, ht):
+    def clean_template_fn(name: str, ht: TemplateArgs) -> Optional[str]:
         if template_fn is not None:
             return template_fn(name, ht)
         if is_panel_template(wxr, name):
             return ""
         return None
 
-    def clean_node_handler_fn(node):
+    def clean_node_handler_fn(
+        node: WikiNode,
+    ) -> Optional[list[Union[str, WikiNode]]]:
         assert isinstance(node, WikiNode)
         kind = node.kind
         if kind in {
@@ -449,7 +453,7 @@ def clean_node(
     return v
 
 
-def sense_data_has_value(sense_data, name, value):
+def sense_data_has_value(sense_data: SenseData, name: str, value: Any) -> bool:
     """
     Return True if `sense_data` has value in the attribute `name`'s value or
     in the value of key `name` if `sense_date` is dictionary.

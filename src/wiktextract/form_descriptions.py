@@ -9,17 +9,24 @@ import re
 import unicodedata
 from typing import (
     Any,
-    Dict,
-    List,
+    Literal,
     Optional,
-    Set,
-    Tuple,
+    Sequence,
     Union,
 )
 
 import Levenshtein
-from nltk import TweetTokenizer
+from nltk import TweetTokenizer  # type:ignore[import-untyped]
 
+from wikitextprocessor.core import TemplateArgs
+from wiktextract.type_utils import (
+    AltOf,
+    FormData,
+    LinkageData,
+    SenseData,
+    SoundData,
+    WordData,
+)
 from wiktextract.wxr_context import WiktextractContext
 
 from .datautils import data_append, data_extend, split_at_comma_semi
@@ -52,7 +59,7 @@ from .topics import topic_generalize_map, valid_topics
 tokenizer = TweetTokenizer()
 
 # These are ignored as the value of a related form in form head.
-IGNORED_RELATED = set(
+IGNORED_RELATED: set[str] = set(
     [
         "-",
         "־",
@@ -78,7 +85,7 @@ IGNORED_RELATED = set(
 # First words of unicodedata.name() that indicate scripts that cannot be
 # accepted in romanizations or english (i.e., should be considered "other"
 # in classify_desc()).
-non_latin_scripts = [
+non_latin_scripts: list[str] = [
     "ADLAM",
     "ARABIC",
     "ARABIC-INDIC",
@@ -229,7 +236,7 @@ for m in re.finditer(r"(^|[^\\])[(]+", head_split_re_text):
     head_split_re_parens += m.group(0).count("(")
 
 # Parenthesized parts that are ignored in translations
-tr_ignored_parens = set(
+tr_ignored_parens: set[str] = set(
     [
         "please verify",
         "(please verify)",
@@ -252,7 +259,7 @@ tr_ignored_parens_re = re.compile(
 )
 
 # Translations that are ignored
-ignored_translations = set(
+ignored_translations: set[str] = set(
     [
         "[script needed]",
         "please add this translation if you can",
@@ -318,7 +325,7 @@ suspicious_related_re = re.compile(
 # Word forms (head forms, translations, etc) that will be considered ok and
 # silently accepted even if they would otherwise trigger a suspicious
 # form warning.
-ok_suspicious_forms = set(
+ok_suspicious_forms: set[str] = set(
     [
         "but en or",  # "golden goal"/English/Tr/French
         "cœur en or",  # "heart of gold"/Eng/Tr/French
@@ -352,7 +359,7 @@ tokenizer_fixup_re = re.compile(
 )
 
 # Unknown tags starting with these words will be silently ignored.
-ignored_unknown_starts = set(
+ignored_unknown_starts: set[str] = set(
     [
         "originally",
         "e.g.",
@@ -373,7 +380,7 @@ ignored_unknown_starts_re = re.compile(
 
 # If an unknown sequence starts with one of these, it will continue as an
 # unknown sequence until the end, unless it turns out to have a replacement.
-allowed_unknown_starts = set(
+allowed_unknown_starts: set[str] = set(
     [
         "Relating",
         "accompanied",
@@ -419,7 +426,7 @@ allowed_unknown_starts.update(ignored_unknown_starts)
 
 # Full unknown tags that will be ignored in decode_tags()
 # XXX this is unused, ask Tatu where the contents is now
-ignored_unknown_tags: Set[str] = set([])
+ignored_unknown_tags: set[str] = set([])
 
 # Head endings that are mapped to tags
 head_end_map = {
@@ -436,7 +443,7 @@ head_end_re = re.compile(
 )
 
 # Words that can be part of form description
-valid_words = set(["or", "and"])
+valid_words: set[str] = set(["or", "and"])
 for x in valid_tags:
     valid_words.update(x.split(" "))
 for x in xlat_tags_map.keys():
@@ -449,9 +456,11 @@ for x in xlat_tags_map.keys():
 # (rem_tags, add_tags), where ``rem_tags`` can be True to remove all previous
 # tags or a space-separated string of tags to remove, and ``add_tags`` should
 # be a string of tags to add.
-lang_specific_head_map = {
+lang_specific_head_map: dict[
+    str, dict[str, Union[tuple[str, str], tuple[Literal[True], str]]]
+] = {
     "Danish": {
-        # prefix: (rem_tags, add_tags)
+        # prefix: (rem_tags space separate string/True, add_tags s-sep str)
         "c": ("neuter", "common-gender"),
         "n": ("common-gender", "neuter"),
         "pl": ("singular neuter common-gender", "plural"),
@@ -680,14 +689,14 @@ class ValidNode:
     def __init__(
         self,
         end=False,
-        tags: Optional[List[str]] = None,
-        topics: Optional[List[str]] = None,
-        children: Optional[Dict[str, "ValidNode"]] = None,
-    ):
+        tags: Optional[list[str]] = None,
+        topics: Optional[list[str]] = None,
+        children: Optional[dict[str, "ValidNode"]] = None,
+    ) -> None:
         self.end = end
-        self.tags: List[str] = tags or []
-        self.topics: List[str] = topics or []
-        self.children: Dict[str, "ValidNode"] = children or {}
+        self.tags: list[str] = tags or []
+        self.topics: list[str] = topics or []
+        self.children: dict[str, "ValidNode"] = children or {}
 
 
 def add_to_valid_tree(tree: ValidNode, desc: str, v: Optional[str]) -> None:
@@ -735,9 +744,9 @@ def add_to_valid_tree(tree: ValidNode, desc: str, v: Optional[str]) -> None:
 def add_to_valid_tree1(
     tree: ValidNode,
     k: str,
-    v: Union[List[str], Tuple[str, ...], str],
-    valid_values: Union[Set[str], Dict[str, Any]],
-) -> List[str]:
+    v: Union[list[str], tuple[str, ...], str],
+    valid_values: Union[set[str], dict[str, Any]],
+) -> list[str]:
     assert isinstance(tree, ValidNode)
     assert isinstance(k, str)
     assert v is None or isinstance(v, (list, tuple, str))
@@ -760,8 +769,8 @@ def add_to_valid_tree1(
 
 def add_to_valid_tree_mapping(
     tree: ValidNode,
-    mapping: Union[Dict[str, Union[List[str], str]], Dict[str, str]],
-    valid_values: Union[Set[str], Dict[str, Any]],
+    mapping: Union[dict[str, Union[list[str], str]], dict[str, str]],
+    valid_values: Union[set[str], dict[str, Any]],
     recurse: bool,
 ) -> None:
     assert isinstance(tree, ValidNode)
@@ -792,7 +801,7 @@ def add_to_valid_tree_mapping(
 # Tree of sequences considered to be tags (includes sequences that are
 # mapped to something that becomes one or more valid tags)
 valid_sequences = ValidNode()
-sequences_with_slashes: Set[str] = set()
+sequences_with_slashes: set[str] = set()
 for tag in valid_tags:
     # The basic tags used in our tag system; some are a bit weird, but easier
     # to implement this with 'false' positives than filter out stuff no one else
@@ -859,7 +868,7 @@ word_pattern = (
 word_re_global = re.compile(word_pattern)
 
 
-def distw(titleparts, word):
+def distw(titleparts: Sequence[str], word: str) -> float:
     """Computes how distinct ``word`` is from the most similar word in
     ``titleparts``.  Returns 1 if words completely distinct, 0 if
     identical, or otherwise something in between."""
@@ -872,7 +881,10 @@ def distw(titleparts, word):
     return w
 
 
-def map_with(ht, lst):
+def map_with(
+    ht: Union[dict[str, Union[str, list[str]]], dict[str, str]],
+    lst: Sequence[str],
+) -> list[str]:
     """Takes alternatives from ``lst``, maps them using ``ht`` to zero or
     more alternatives each, and returns a combined list of alternatives."""
     assert isinstance(ht, dict)
@@ -892,18 +904,18 @@ def map_with(ht, lst):
     return ret
 
 
-TagList = List[str]
-PosPathStep = Tuple[int, TagList, TagList]
+TagList = list[str]
+PosPathStep = tuple[int, TagList, TagList]
 
 
 def check_unknown(
     from_i: int,
     to_i: int,
     i: int,
-    wordlst,
+    wordlst: Sequence[str],
     allow_any: bool,
     no_unknown_starts: bool,
-) -> List[PosPathStep]:
+) -> list[PosPathStep]:
     """Check if the current section from_i->to_i is actually unknown
     or if it needs some special handling. We already presupposed that
     this is UNKNOWN; this is just called to see what *kind* of UNKNOWN."""
@@ -948,10 +960,10 @@ def add_new1(
     i: int,
     start_i: int,
     last_i: int,
-    new_paths: List[List[PosPathStep]],
-    new_nodes: List[Tuple[ValidNode, int, int]],
-    pos_paths: List[List[List[PosPathStep]]],
-    wordlst: List[str],
+    new_paths: list[list[PosPathStep]],
+    new_nodes: list[tuple[ValidNode, int, int]],
+    pos_paths: list[list[list[PosPathStep]]],
+    wordlst: list[str],
     allow_any: bool,
     no_unknown_starts: bool,
     max_last_i: int,
@@ -989,7 +1001,7 @@ def decode_tags(
     src: str,
     allow_any=False,
     no_unknown_starts=False,
-) -> Tuple[List[Tuple[str, ...]], List[str]]:
+) -> tuple[list[tuple[str, ...]], list[str]]:
     tagsets, topics = decode_tags1(src, allow_any, no_unknown_starts)
 
     # Insert retry-code here that modifies the text source
@@ -1004,7 +1016,7 @@ def decode_tags(
         # feminine" style keys.
         if "/" in src:
             split_parts = re.split(slashes_re, src)
-            new_parts: List[str] = []
+            new_parts: list[str] = []
             if len(split_parts) > 1:
                 for i, s in enumerate(split_parts):
                     if i % 2 == 0:
@@ -1040,15 +1052,15 @@ def decode_tags1(
     src: str,
     allow_any=False,
     no_unknown_starts=False,
-) -> Tuple[List[Tuple[str, ...]], List[str]]:
+) -> tuple[list[tuple[str, ...]], list[str]]:
     """Decodes tags, doing some canonicalizations.  This returns a list of
     lists of tags and a list of topics."""
     assert isinstance(src, str)
 
     # print("decode_tags: src={!r}".format(src))
 
-    pos_paths: List[List[List[PosPathStep]]] = [[[]]]
-    wordlst: List[str] = []
+    pos_paths: list[list[list[PosPathStep]]] = [[[]]]
+    wordlst: list[str] = []
     max_last_i = 0  # pre-initialized here so that it can be used as a ref
 
     add_new = functools.partial(
@@ -1069,12 +1081,12 @@ def decode_tags1(
         if not lst1:
             continue
         wordlst.extend(lst1)
-        cur_nodes: List[Tuple[ValidNode, int, int]] = []  # Currently seen
+        cur_nodes: list[tuple[ValidNode, int, int]] = []  # Currently seen
         for w in lst1:
             i = len(pos_paths) - 1
-            new_nodes: List[Tuple[ValidNode, int, int]] = []
+            new_nodes: list[tuple[ValidNode, int, int]] = []
             # replacement nodes for next loop
-            new_paths: List[List[PosPathStep]] = []
+            new_paths: list[list[PosPathStep]] = []
             # print("ITER i={} w={} max_last_i={} wordlst={}"
             #       .format(i, w, max_last_i, wordlst))
             node: ValidNode
@@ -1165,7 +1177,7 @@ def decode_tags1(
             # or something, but this whole process is one-dimensional
             # and not that complex, so hopefully it works out...
             pw = []
-            path: List[PosPathStep]
+            path: list[PosPathStep]
             for path in new_paths:
                 weight = len(path)
                 if any(x[1] == ["UNKNOWN"] for x in path):
@@ -1237,8 +1249,8 @@ def decode_tags1(
     path = min(pw)[1]
 
     # Convert the best path to tagsets and topics
-    tagsets: List[List[str]] = [[]]
-    topics: List[str] = []
+    tagsets: list[list[str]] = [[]]
+    topics: list[str] = []
     for i, tagspec, topicspec in path:
         if len(tagsets or "") > 16:
             # ctx.error("Too many tagsets! This is probably exponential",
@@ -1280,7 +1292,9 @@ def decode_tags1(
     return ret_tagsets, topics
 
 
-def parse_head_final_tags(wxr, lang, form):
+def parse_head_final_tags(
+    wxr: WiktextractContext, lang: str, form: str
+) -> tuple[str, list[str]]:
     """Parses tags that are allowed at the end of a form head from the end
     of the form.  This can also be used for parsing the final gender etc tags
     from translations and linkages."""
@@ -1306,7 +1320,7 @@ def parse_head_final_tags(wxr, lang, form):
         m = re.search(head_final_bantu_re, form)
         if m is not None:
             tagkeys = m.group(1)
-            if not wxr.wtp.title.endswith(tagkeys):
+            if not wxr.wtp.title.endswith(tagkeys):  # type:ignore[union-attr]
                 form = form[: m.start()]
                 v = head_final_bantu_map[tagkeys]
                 if v.startswith("?"):
@@ -1325,7 +1339,7 @@ def parse_head_final_tags(wxr, lang, form):
         m = re.search(head_final_semitic_re, form)
         if m is not None:
             tagkeys = m.group(1)
-            if not wxr.wtp.title.endswith(tagkeys):
+            if not wxr.wtp.title.endswith(tagkeys):  # type:ignore[union-attr]
                 form = form[: m.start()]
                 v = head_final_semitic_map[tagkeys]
                 if v.startswith("?"):
@@ -1344,7 +1358,7 @@ def parse_head_final_tags(wxr, lang, form):
         m = re.search(head_final_other_re, form)
         if m is not None:
             tagkeys = m.group(1)
-            if not wxr.wtp.title.endswith(tagkeys):
+            if not wxr.wtp.title.endswith(tagkeys):  # type:ignore[union-attr]
                 form = form[: m.start()]
                 tags.extend(head_final_other_map[tagkeys].split(" "))
 
@@ -1361,7 +1375,7 @@ def parse_head_final_tags(wxr, lang, form):
         tagkeys_contains_digit = re.search(r"\d", tagkeys)
         if (
             (not tagkeys_contains_digit or lang in head_final_numeric_langs)
-            and not wxr.wtp.title.endswith(" " + tagkeys)
+            and not wxr.wtp.title.endswith(" " + tagkeys)  # type:ignore[union-attr]
             and
             # XXX the above test does not capture when the whole word is a
             # xlat_head_map key, so I added the below test to complement
@@ -1405,7 +1419,7 @@ def parse_head_final_tags(wxr, lang, form):
     return form, tags
 
 
-def quote_kept_parens(s):
+def quote_kept_parens(s: str) -> str:
     """Changes certain parenthesized expressions so that they won't be
     interpreted as parentheses.  This is used for parts that are kept as
     part of the word, such as "read admiral (upper half)"."""
@@ -1417,7 +1431,16 @@ def quote_kept_parens(s):
     )
 
 
-def quote_kept_ruby(wxr, ruby_tuples, s):
+def quote_kept_ruby(
+    wxr: WiktextractContext,
+    ruby_tuples: list[
+        tuple[
+            str,
+            str,
+        ]
+    ],
+    s: str,
+) -> str:
     if len(ruby_tuples) < 1:
         wxr.wtp.debug(
             "quote_kept_ruby called with no ruby",
@@ -1450,20 +1473,26 @@ def quote_kept_ruby(wxr, ruby_tuples, s):
         )
     )
 
-    def paren_replace(m):
+    def paren_replace(m: re.Match) -> str:
         return re.sub(newm, r"\1__lrub__\2__rrub__", m.group(0))
 
     return re.sub(rub_re, paren_replace, s)
 
 
-def unquote_kept_parens(s):
+def unquote_kept_parens(s: str) -> str:
     """Conerts the quoted parentheses back to normal parentheses."""
     return re.sub(r"__lpar__(.*?)__rpar__", r"(\1)", s)
 
 
 def add_romanization(
-    wxr, data, roman, text, is_reconstruction, head_group, ruby
-):
+    wxr: WiktextractContext,
+    data: WordData,
+    roman: str,
+    text: str,
+    is_reconstruction: bool,
+    head_group: int,
+    ruby: Sequence[tuple[str, str]],
+) -> None:
     tags_lst = ["romanization"]
     m = re.match(r"([^:]+):(.+)", roman)
     # This function's purpose is to intercept broken romanizations,
@@ -1490,16 +1519,16 @@ def add_romanization(
 
 
 def add_related(
-    wxr,
-    data,
-    tags_lst,
-    related,
-    origtext,
-    add_all_canonicals,
-    is_reconstruction,
-    head_group,
-    ruby_data=[],
-):
+    wxr: WiktextractContext,
+    data: WordData,
+    tags_lst: Union[list[str], tuple[str, ...]],
+    related_list: list[str],
+    origtext: str,
+    add_all_canonicals: bool,
+    is_reconstruction: bool,
+    head_group: Optional[int],
+    ruby_data: Optional[Sequence[tuple[str, str]]] = None,
+) -> Optional[list[tuple[str, ...]]]:
     """Internal helper function for some post-processing entries for related
     forms (e.g., in word head).  This returns a list of list of tags to be
     added to following related forms or None (cf. walrus/English word head,
@@ -1508,23 +1537,25 @@ def add_related(
     assert isinstance(tags_lst, (list, tuple))
     for x in tags_lst:
         assert isinstance(x, str)
-    assert isinstance(related, (list, tuple))
+    assert isinstance(related_list, (list, tuple))
     assert isinstance(origtext, str)
     assert add_all_canonicals in (True, False)
-    assert isinstance(ruby_data, (list, tuple))
+    assert isinstance(ruby_data, (list, tuple)) or ruby_data is None
+    if ruby_data is None:
+        ruby_data = []
     # print("add_related: tags_lst={} related={}".format(tags_lst, related))
-    related = " ".join(related)
+    related = " ".join(related_list)
     if related == "[please provide]":
-        return
+        return None
     if related in IGNORED_RELATED:
-        return
+        return None
     if is_reconstruction and related.startswith("*") and len(related) > 1:
         related = related[1:]
 
     # Get title word, with any reconstruction prefix removed
-    titleword = re.sub(r"^Reconstruction:[^/]*/", "", wxr.wtp.title)
+    titleword = re.sub(r"^Reconstruction:[^/]*/", "", wxr.wtp.title)  # type:ignore[arg-type]
 
-    def check_related(related):
+    def check_related(related: str) -> None:
         # Warn about some suspicious related forms
         m = re.search(suspicious_related_re, related)
         if (m and m.group(0) not in titleword) or (
@@ -1558,8 +1589,8 @@ def add_related(
 
     following_tagsets = None  # Tagsets to add to following related forms
     roman = None
-    tagsets1 = [[]]
-    topics1 = []
+    tagsets1: list[tuple[str, ...]] = [tuple()]
+    topics1: list[str] = []
 
     m = re.match(r"\((([^()]|\([^()]*\))*)\)\s+", related)
     if m:
@@ -1595,11 +1626,11 @@ def add_related(
             ),
             sortid="form_descriptions/1177",
         )
-        return  # Likely Wiktionary coding error
+        return None  # Likely Wiktionary coding error
     related = unquote_kept_parens(related)
     # Split related by "/" (e.g., grande/Spanish) superlative in head
     # Do not split if / in word title, see π//Japanese
-    if len(related) > 5 and "/" not in wxr.wtp.title:
+    if len(related) > 5 and "/" not in wxr.wtp.title:  # type:ignore[operator]
         alts = split_at_comma_semi(related, separators=["/"])
     else:
         alts = [related]
@@ -1613,7 +1644,7 @@ def add_related(
             "|".join(ks), "|".join(rs)
         )
     for related in alts:
-        ruby = []
+        ruby: list[tuple[str, str]] = []
         if ruby_data:
             new_related = []
             rub_split = re.split(splitter, related)
@@ -1631,7 +1662,7 @@ def add_related(
             assert isinstance(tags1, (list, tuple))
             for tags2 in tagsets2:
                 assert isinstance(tags1, (list, tuple))
-                dt = {"word": related}
+                dt: LinkageData = {"word": related}
                 if roman:
                     dt["roman"] = roman
                 if ruby:
@@ -1658,7 +1689,7 @@ def add_related(
                     data_extend(data, "topics", topics2)
                     data_append(data, "compound", related)
                 else:
-                    lang = wxr.wtp.section
+                    lang = wxr.wtp.section or "LANG_MISSING"
                     related, final_tags = parse_head_final_tags(
                         wxr, lang, related
                     )
@@ -1667,7 +1698,7 @@ def add_related(
                     #       .format(related, tags1, tags2, final_tags))
                     tags = list(tags1) + list(tags2) + list(final_tags)
                     check_related(related)
-                    form = {"form": related}
+                    form: FormData = {"form": related}
                     if head_group:
                         form["head_nr"] = head_group
                     if roman:
@@ -1722,25 +1753,29 @@ def add_related(
 
 
 def parse_word_head(
-    wxr,
-    pos,
-    text,
-    data,
-    is_reconstruction,
-    head_group,
-    ruby=[],
-    links=[],
-):
+    wxr: WiktextractContext,
+    pos: str,
+    text: str,
+    data: WordData,
+    is_reconstruction: bool,
+    head_group: Optional[int],
+    ruby=None,
+    links=None,
+) -> None:
     """Parses the head line for a word for in a particular language and
     part-of-speech, extracting tags and related forms."""
     assert isinstance(wxr, WiktextractContext)
     assert isinstance(pos, str)
     assert isinstance(text, str)
     assert isinstance(data, dict)
-    assert isinstance(ruby, (list, tuple))
+    assert isinstance(ruby, (list, tuple)) or ruby is None
+    if ruby is None:
+        ruby = []
     assert is_reconstruction in (True, False)
     # print("PARSE_WORD_HEAD: {}: {!r}".format(wxr.wtp.section, text))
     # print(f"PARSE_WORD_HEAD: {data=}")
+    if links is None:
+        links = []
 
     if len(links) > 0:
         # if we have link data (that is, links with stuff like commas and
@@ -1783,8 +1818,13 @@ def parse_word_head(
         text = text[: m.start()] + text[m.end() :]
 
     language = wxr.wtp.section
-    titleword = re.sub(r"^Reconstruction:[^/]*/", "", wxr.wtp.title)
-    titleparts = list(m.group(0) for m in re.finditer(word_re, wxr.wtp.title))
+    titleword = re.sub(
+        r"^Reconstruction:[^/]*/", "", wxr.wtp.title or "MISSING_TITLE"
+    )
+    titleparts = list(
+        m.group(0)
+        for m in re.finditer(word_re, wxr.wtp.title or "MISSING_TITLE")
+    )
     if not titleparts:
         return
 
@@ -1817,6 +1857,7 @@ def parse_word_head(
     # Check for certain endings in head (mostly for compatibility with weird
     # heads, e.g. rata/Romanian "1st conj." at end)
     m = re.search(head_end_re, base)
+    tags: Union[tuple[str, ...], list[str]]
     if m:
         tags = head_end_map[m.group(1).lower()].split()
         data_extend(data, "tags", tags)
@@ -1870,7 +1911,7 @@ def parse_word_head(
     # we do not want so split on "or" or "," when immediately followed by more
     # head-final tags, but otherwise do want to split by them.
     # 20230907 added "or" to this to handle 'true or false', titles with 'or'
-    if "," in wxr.wtp.title or " or " in wxr.wtp.title:
+    if wxr.wtp.title and ("," in wxr.wtp.title or " or " in wxr.wtp.title):
         # A kludge to handle article titles/phrases with commas.
         # Preprocess splits to first capture the title, then handle
         # all the others as usual.
@@ -1885,7 +1926,7 @@ def parse_word_head(
         # Do the normal split; previous only-behavior.
         splits = re.split(head_split_re, base)
     # print("SPLITS:", splits)
-    alts = []
+    alts: list[str] = []
     # print("parse_word_head: splits:", splits,
     # "head_split_re_parens:", head_split_re_parens)
     for i in range(
@@ -1923,8 +1964,8 @@ def parse_word_head(
     # print(f"{base=}")
 
     # Process the head alternatives
-    canonicals = []
-    mode = None
+    canonicals: list[tuple[list[str], list[str]]] = []
+    mode: Optional[str] = None
     for alt_i, alt in enumerate(alts):
         alt = alt.strip()
         if alt.startswith("compound form:"):
@@ -1949,20 +1990,23 @@ def parse_word_head(
         else:
             expanded_alts = map_with(xlat_descs_map, [alt])
         # print("EXPANDED_ALTS:", expanded_alts)
+        tagsets: Optional[list[tuple[str, ...]]]
         for alt in expanded_alts:
             baseparts = list(m.group(0) for m in re.finditer(word_re, alt))
             if alt_i > 0:
                 tagsets, topics = decode_tags(" ".join(baseparts))
                 if not any("error-unknown-tag" in x for x in tagsets):
                     data_extend(data, "topics", topics)
-                    for tags in tagsets:
-                        data_extend(data, "tags", tags)
+                    for tags1 in tagsets:
+                        data_extend(data, "tags", tags1)
                     continue
 
-            alt, tags = parse_head_final_tags(wxr, language, alt)
+            alt, tags = parse_head_final_tags(
+                wxr, language or "MISSING_LANG", alt
+            )
             tags = list(tags)  # Make sure we don't modify anything cached
             tags.append("canonical")
-            if alt_i == 0 and "," in wxr.wtp.title:
+            if alt_i == 0 and "," in wxr.wtp.title:  # type:ignore[operator]
                 # Kludge to handle article titles/phrases with commas.
                 # basepart's regex strips commas, which leads to a
                 # canonical form that is the title phrase without a comma.
@@ -2029,7 +2073,7 @@ def parse_word_head(
 
         # Parse format ", 16 (Japan, Mainland), 17 (Hong Kong, Taiwan) strokes,"
         # in the middle of the parenthesized expression, e.g. 薄
-        def strokes_repl(m):
+        def strokes_repl(m: re.Match) -> str:
             strokes1, tags1, strokes2, tags2 = m.groups()
             for strokes, tags in [[strokes1, tags1], [strokes2, tags2]]:
                 tags = tags.split(", ")
@@ -2065,7 +2109,7 @@ def parse_word_head(
                     split_at_comma_semi(desc, extra=[", or "], skipped=links),
                 )
             )
-        prev_tags = None
+        prev_tags: Union[list[list[str]], list[tuple[str, ...]], None] = None
         following_tags = None  # Added to prev_tags from previous parenthesized
         # part, e.g. walrus/English
         # "(both nonstandard, proscribed, uncommon)"
@@ -2253,9 +2297,9 @@ def parse_word_head(
             m = re.match(r"←\s*|kana\s+", desc)
             if m:
                 if desc.startswith("←"):
-                    t = "historical "
+                    t1 = "historical "
                 else:
-                    t = ""
+                    t1 = ""
                 x = desc[m.end() :]
                 if x.endswith("?"):
                     x = x[:-1]
@@ -2263,9 +2307,9 @@ def parse_word_head(
                 if x:
                     name = unicodedata.name(x[0])
                     if name.startswith("HIRAGANA "):
-                        desc = t + "hiragana " + x
+                        desc = t1 + "hiragana " + x
                     elif name.startswith("KATAKANA "):
-                        desc = t + "katakana " + x
+                        desc = t1 + "katakana " + x
 
             # See if it is "n strokes in Chinese" or similar
             m = re.match(
@@ -2323,14 +2367,15 @@ def parse_word_head(
                 ht = lang_specific_head_map[language]
                 if parts[0] in ht:
                     rem_tags, add_tags = ht[parts[0]]
-                    new_prev_tags = []
-                    for tags in prev_tags or [()]:
+                    new_prev_tags1: list[list[str]] = []
+                    tags2: Union[tuple[str, ...], list[str]]
+                    for tags2 in prev_tags or [()]:
                         if rem_tags is True:  # Remove all old tags
-                            tags = set()
+                            tsets = set()
                         else:
-                            tags = set(tags) - set(rem_tags.split())
-                        tags = tags | set(add_tags.split())
-                        tags = list(sorted(tags))
+                            tsets = set(tags2) - set(rem_tags.split())
+                        tsets = tsets | set(add_tags.split())
+                        tags = list(sorted(tsets))
                         add_related(
                             wxr,
                             data,
@@ -2342,8 +2387,8 @@ def parse_word_head(
                             head_group,
                             ruby,
                         )
-                        new_prev_tags.append(tags)
-                    prev_tags = new_prev_tags
+                        new_prev_tags1.append(tags)
+                    prev_tags = new_prev_tags1
                     following_tags = None
                     continue
 
@@ -2429,7 +2474,7 @@ def parse_word_head(
                                 )
                             have_romanization = True
                             continue
-                        tagsets = [["error-unrecognized-head-form"]]
+                        tagsets = [("error-unrecognized-head-form",)]
                         wxr.wtp.debug(
                             "unrecognized head form: {}".format(desc),
                             sortid="form_descriptions/1698",
@@ -2445,17 +2490,17 @@ def parse_word_head(
                 continue
 
             assert isinstance(related, (list, tuple))
-            related = " ".join(related)
+            related_str = " ".join(related)
             if "or" in titleparts:
-                alts = [related]
+                alts = [related_str]
             else:
                 alts = split_at_comma_semi(
-                    related, separators=[" or "], skipped=links
+                    related_str, separators=[" or "], skipped=links
                 )
                 if not alts:
                     alts = [""]
-            for related in alts:
-                if related:
+            for related_str in alts:
+                if related_str:
                     if prev_tags and (
                         all(
                             all(
@@ -2476,14 +2521,14 @@ def parse_word_head(
                     ):
                         # Merged with previous tags.  Don't update previous
                         # tags here; cf. burn/English/Verb
-                        for tags in tagsets:
+                        for tags_l in tagsets:
                             for ts in prev_tags:
-                                tags1 = list(sorted(set(tags) | set(ts)))
+                                tags_l1 = list(sorted(set(tags_l) | set(ts)))
                                 add_related(
                                     wxr,
                                     data,
-                                    tags1,
-                                    [related],
+                                    tags_l1,
+                                    [related_str],
                                     text,
                                     True,
                                     is_reconstruction,
@@ -2492,15 +2537,17 @@ def parse_word_head(
                                 )
                     else:
                         # Not merged with previous tags
-                        for tags in tagsets:
+                        for tags_l in tagsets:
                             if following_tags is not None:
                                 for ts in following_tags:
-                                    tags1 = list(sorted(set(tags) | set(ts)))
+                                    tags_l1 = list(
+                                        sorted(set(tags_l) | set(ts))
+                                    )
                                     add_related(
                                         wxr,
                                         data,
-                                        tags1,
-                                        [related],
+                                        tags_l1,
+                                        [related_str],
                                         text,
                                         True,
                                         is_reconstruction,
@@ -2511,8 +2558,8 @@ def parse_word_head(
                                 ret = add_related(
                                     wxr,
                                     data,
-                                    tags,
-                                    [related],
+                                    tags_l,
+                                    [related_str],
                                     text,
                                     True,
                                     is_reconstruction,
@@ -2530,12 +2577,12 @@ def parse_word_head(
                         # Interpret it as a standalone form description
                         # in the middle, probably followed by forms or
                         # language-specific descriptors. cf. drikke/Danish
-                        new_prev_tags = []
+                        new_prev_tags2 = []
                         for ts1 in prev_tags or [()]:
                             for ts2 in tagsets:
                                 ts = tuple(sorted(set(ts1) | set(ts2)))
-                                new_prev_tags.append(ts)
-                        prev_tags = new_prev_tags
+                                new_prev_tags2.append(ts)
+                        prev_tags = new_prev_tags2
                         continue
                     for tags in tagsets:
                         data_extend(data, "tags", tags)
@@ -2568,12 +2615,20 @@ def parse_word_head(
             ruby,
         )
 
-    tags = data.get("tags", [])
+    # XXX check if this is actually relevant, tags in word root data
+    # is extremely rare (not sure where they slip through).
+    tags = data.get("tags", [])  # type:ignore
     if tags:
-        data["tags"] = list(sorted(set(tags)))
+        # wxr.wtp.debug(
+        #     f"Tags appear in word root data: {data['tags']=}",  # type:ignore
+        #     sortid="form_descriptions/2620/20240606",
+        # )  # Messes up tests.
+        data["tags"] = list(sorted(set(tags)))  # type:ignore
 
 
-def parse_sense_qualifier(wxr, text, data):
+def parse_sense_qualifier(
+    wxr: WiktextractContext, text: str, data: Union[SenseData, LinkageData]
+) -> None:
     """Parses tags or topics for a sense or some other data.  The values are
     added into the dictionary ``data``."""
     assert isinstance(wxr, WiktextractContext)
@@ -2585,7 +2640,7 @@ def parse_sense_qualifier(wxr, text, data):
     if re.match(r'"[^"]+"$', text):
         text = text[1:-1]
     lst = map_with(xlat_descs_map, [text])
-    sense_tags = []
+    sense_tags: list[str] = []
     for text in lst:
         for semi in split_at_comma_semi(text):
             if not semi:
@@ -2625,7 +2680,9 @@ def parse_sense_qualifier(wxr, text, data):
     data_extend(data, "tags", sense_tags)
 
 
-def parse_pronunciation_tags(wxr, text, data):
+def parse_pronunciation_tags(
+    wxr: WiktextractContext, text: str, data: SoundData
+) -> None:
     assert isinstance(wxr, WiktextractContext)
     assert isinstance(text, str)
     assert isinstance(data, dict)
@@ -2649,7 +2706,9 @@ def parse_pronunciation_tags(wxr, text, data):
         data["note"] = "; ".join(notes)
 
 
-def parse_translation_desc(wxr, lang, text, tr):
+def parse_translation_desc(
+    wxr: WiktextractContext, lang: str, text: str, tr: str
+) -> None:
     assert isinstance(wxr, WiktextractContext)
     assert isinstance(lang, str)  # The language of ``text``
     assert isinstance(text, str)
@@ -2889,7 +2948,9 @@ def parse_translation_desc(wxr, lang, text, tr):
         del tr["roman"]
 
 
-def parse_alt_or_inflection_of(wxr, gloss, gloss_template_args):
+def parse_alt_or_inflection_of(
+    wxr: WiktextractContext, gloss: str, gloss_template_args: set[str]
+) -> Optional[tuple[list[str], Optional[list[AltOf]]]]:
     """Tries to parse an inflection-of or alt-of description.  If successful,
     this returns (tags, alt-of/inflection-of-dict).  If the description cannot
     be parsed, this returns None.  This may also return (tags, None) when the
@@ -2900,8 +2961,8 @@ def parse_alt_or_inflection_of(wxr, gloss, gloss_template_args):
 
     # Never interpret a gloss that is equal to the word itself as a tag
     # (e.g., instrumental/Romanian, instrumental/Spanish).
-    if gloss.lower() == wxr.wtp.title.lower() or (
-        len(gloss) >= 5 and distw([gloss.lower()], wxr.wtp.title.lower()) < 0.2
+    if gloss.lower() == wxr.wtp.title.lower() or (  # type:ignore[union-attr]
+        len(gloss) >= 5 and distw([gloss.lower()], wxr.wtp.title.lower()) < 0.2  # type:ignore[union-attr]
     ):
         return None
 
@@ -2922,7 +2983,7 @@ def parse_alt_or_inflection_of(wxr, gloss, gloss_template_args):
 
 
 # These tags are not allowed in alt-or-inflection-of parsing
-alt_infl_disallowed = set(
+alt_infl_disallowed: set[str] = set(
     [
         "error-unknown-tag",
         "place",  # Not in inflected forms and causes problems e.g. house/English
@@ -2930,7 +2991,9 @@ alt_infl_disallowed = set(
 )
 
 
-def parse_alt_or_inflection_of1(wxr, gloss, gloss_template_args):
+def parse_alt_or_inflection_of1(
+    wxr: WiktextractContext, gloss: str, gloss_template_args: set[str]
+) -> Optional[tuple[list[str], Optional[list[AltOf]]]]:
     """Helper function for parse_alt_or_inflection_of.  This handles a single
     capitalization."""
     if not gloss or not gloss.strip():
@@ -2943,6 +3006,7 @@ def parse_alt_or_inflection_of1(wxr, gloss, gloss_template_args):
     # First try all formats ending with "of" (or other known last words that
     # can end a form description)
     matches = list(re.finditer(r"\b(of|for|by|as|letter|number) ", gloss))
+    m: Optional[re.Match]
     for m in reversed(matches):
         desc = gloss[: m.end()].strip()
         base = gloss[m.end() :].strip()
@@ -2951,19 +3015,20 @@ def parse_alt_or_inflection_of1(wxr, gloss, gloss_template_args):
             not (alt_infl_disallowed & set(ts)) for ts in tagsets
         ):
             # Successfully parsed, including "of" etc.
-            tags = []
+            tags: list[str] = []
             # If you have ("Western-Armenian", ..., "form-of") as your
             # tag set, it's most probable that it's something like
             # "Western Armenian form of խոսել (xosel)", which should
             # get "alt-of" instead of "form-of" (inflection).
             # խօսիլ/Armenian
-            for ts in tagsets:
-                if "form-of" in ts and any(
-                    valid_tags.get(tk) == "dialect" for tk in ts
+            for ts_t in tagsets:
+                if "form-of" in ts_t and any(
+                    valid_tags.get(tk) == "dialect" for tk in ts_t
                 ):
-                    ts = (set(ts) - {"form-of"}) | {"alt-of"}
-                if not (alt_infl_disallowed & set(ts)):
-                    tags.extend(ts)
+                    ts_s = (set(ts_t) - {"form-of"}) | {"alt-of"}
+                else: ts_s = set(ts_t)
+                if not (alt_infl_disallowed & ts_s):
+                    tags.extend(ts_s)
             if (
                 "alt-of" in tags
                 or "form-of" in tags
@@ -3031,8 +3096,8 @@ def parse_alt_or_inflection_of1(wxr, gloss, gloss_template_args):
     if len(lst) >= 3 and lst[-1] in ("case", "case."):
         node = valid_sequences.children.get(lst[-2])
         if node and node.end:
-            for t in node.tags:
-                tags.extend(t.split(" "))
+            for s in node.tags:
+                tags.extend(s.split(" "))
             lst = lst[:-2]
             if lst[-1] == "in" and len(lst) > 1:
                 lst = lst[:-1]
@@ -3106,7 +3171,7 @@ def parse_alt_or_inflection_of1(wxr, gloss, gloss_template_args):
 
     # Split base to alternatives when multiple alternatives provided
     parts = split_at_comma_semi(base, extra=[" / ", "／", r" \+ "])
-    titleword = re.sub(r"^Reconstruction:[^/]*/", "", wxr.wtp.title)
+    titleword = re.sub(r"^Reconstruction:[^/]*/", "", wxr.wtp.title or "")
     if (
         len(parts) <= 1
         or base.startswith("/")
@@ -3122,7 +3187,7 @@ def parse_alt_or_inflection_of1(wxr, gloss, gloss_template_args):
             parts = [pp[0], pp[2]]
 
     # Create form-of/alt-of entries based on the extracted data
-    lst = []
+    dt_lst: list[AltOf] = []
     for p in parts:
         # Check for some suspicious base forms
         m = re.search(r"[.,] |[{}()]", p)
@@ -3133,13 +3198,13 @@ def parse_alt_or_inflection_of1(wxr, gloss, gloss_template_args):
             )
         if p.startswith("*") and len(p) >= 3 and p[1].isalpha():
             p = p[1:]
-        dt = {"word": p}
+        dt: AltOf = {"word": p}
         if extra:
             dt["extra"] = extra
-        lst.append(dt)
+        dt_lst.append(dt)
     # print("alt_or_infl_of returning tags={} lst={} base={!r}"
     #       .format(tags, lst, base))
-    return tags, lst
+    return tags, dt_lst
 
 
 @functools.lru_cache(maxsize=65536)

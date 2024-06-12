@@ -1880,6 +1880,10 @@ additional_words = set(
         "y-axis",
         "z-axis",
         "maté",
+        "Wikimedia",
+        "Wikipedia",
+        "Wiktionary",
+        "jargon",
     ]
 )
 

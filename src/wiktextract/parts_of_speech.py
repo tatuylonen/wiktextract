@@ -5,7 +5,18 @@
 
 # This dictionary maps section titles in articles to parts-of-speech.  There
 # is a lot of variety and misspellings, and this tries to deal with those.
-part_of_speech_map = {
+from typing import TypedDict, Union
+
+POSMap = TypedDict(
+    "POSMap",
+    { 
+        "pos": str,
+        "debug": str,
+        "tags": list[str],
+     },
+    total = False)
+
+part_of_speech_map: dict[str, POSMap] = {
     "abbreviation": {
         "pos": "abbrev",
         "debug": "part-of-speech Abbreviation is proscribed",
