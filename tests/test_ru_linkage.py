@@ -60,7 +60,7 @@ class TestLinkage(TestCase):
                 },
                 {
                     "word": "русня",
-                    "raw_tags": ["собирательное", "уничижительное"],
+                    "tags": ["collective", "derogatory"],
                     "sense_index": 1,
                 },
             ],
