@@ -9,6 +9,7 @@ from wikitextprocessor.parser import (
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .models import Linkage, WordEntry
+from .tags import translate_raw_tags
 
 
 def extract_linkages(
@@ -23,8 +24,11 @@ def extract_linkages(
             sortid="extractor/ru/linkage/extract_linkages/10",
         )
         return
+    sense_index = 0
     for list_item in level_node.find_child_recursively(NodeKind.LIST_ITEM):
-        linkage = Linkage()
+        if list_item.sarg == "#":
+            sense_index += 1
+        linkage = Linkage(sense_index=sense_index)
         for node in list_item.children:
             if isinstance(node, WikiNode):
                 if node.kind == NodeKind.LINK:
@@ -33,15 +37,17 @@ def extract_linkages(
                     find_linkage_tag(wxr, linkage, node)
             elif isinstance(node, str) and node.strip() in (";", ","):
                 if len(linkage.word) > 0:
+                    translate_raw_tags(linkage)
                     getattr(word_entry, linkage_type).append(linkage)
                     tags = linkage.raw_tags
-                    linkage = Linkage()
+                    linkage = Linkage(sense_index=sense_index)
                     if node.strip() == ",":
                         linkage.raw_tags = tags
 
         if len(linkage.word) > 0:
+            translate_raw_tags(linkage)
             getattr(word_entry, linkage_type).append(linkage)
-            linkage = Linkage()
+            linkage = Linkage(sense_index=sense_index)
 
 
 def find_linkage_tag(
@@ -53,10 +59,7 @@ def find_linkage_tag(
         wxr.wtp.node_to_wikitext(template_node), expand_all=True
     )
     for span_node in expanded_template.find_html_recursively("span"):
-        if "title" in span_node.attrs:
-            tag = span_node.attrs["title"]
-        else:
-            tag = clean_node(wxr, None, span_node)
+        tag = clean_node(wxr, None, span_node)
         if len(tag) > 0:
             linkage.raw_tags.append(tag)
 
@@ -64,6 +67,7 @@ def find_linkage_tag(
 def process_related_block_template(
     wxr: WiktextractContext, word_entry: WordEntry, template_node: TemplateNode
 ) -> None:
+    # "Родственные слова" section
     # Шаблон:родств-блок
     expanded_template = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(template_node), expand_all=True
@@ -105,6 +109,7 @@ def process_related_block_template(
                                     if row_header != "":
                                         linkage.raw_tags.append(row_header)
                                     if linkage.word != "":
+                                        translate_raw_tags(linkage)
                                         word_entry.related.append(linkage)
 
 
@@ -145,6 +150,7 @@ def extract_phrase_section(
                             linkage = Linkage(word=word)
                             if title_text != "":
                                 linkage.raw_tags.append(title_text)
+                            translate_raw_tags(linkage)
                             word_entry.derived.append(linkage)
                 elif isinstance(node, WikiNode):
                     if node.kind == NodeKind.LIST:
@@ -161,6 +167,7 @@ def extract_phrase_section(
                 linkage = Linkage(word=word)
                 if title_text != "":
                     linkage.raw_tags.append(title_text)
+                translate_raw_tags(linkage)
                 word_entry.derived.append(linkage)
 
     for next_level in level_node.find_child(LEVEL_KIND_FLAGS):
