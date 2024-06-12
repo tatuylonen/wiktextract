@@ -43,12 +43,25 @@ class TestLinkage(TestCase):
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in word_entry.synonyms],
             [
-                {"word": "кацап", "raw_tags": ["экзоэтнонимы"]},
-                {"word": "москаль", "raw_tags": ["экзоэтнонимы"]},
-                {"word": "шурави", "raw_tags": ["экзоэтнонимы"]},
+                {
+                    "word": "кацап",
+                    "raw_tags": ["экзоэтнонимы"],
+                    "sense_index": 1,
+                },
+                {
+                    "word": "москаль",
+                    "raw_tags": ["экзоэтнонимы"],
+                    "sense_index": 1,
+                },
+                {
+                    "word": "шурави",
+                    "raw_tags": ["экзоэтнонимы"],
+                    "sense_index": 1,
+                },
                 {
                     "word": "русня",
                     "raw_tags": ["собирательное", "уничижительное"],
+                    "sense_index": 1,
                 },
             ],
         )

@@ -23,8 +23,11 @@ def extract_linkages(
             sortid="extractor/ru/linkage/extract_linkages/10",
         )
         return
+    sense_index = 0
     for list_item in level_node.find_child_recursively(NodeKind.LIST_ITEM):
-        linkage = Linkage()
+        if list_item.sarg == "#":
+            sense_index += 1
+        linkage = Linkage(sense_index=sense_index)
         for node in list_item.children:
             if isinstance(node, WikiNode):
                 if node.kind == NodeKind.LINK:
@@ -35,13 +38,13 @@ def extract_linkages(
                 if len(linkage.word) > 0:
                     getattr(word_entry, linkage_type).append(linkage)
                     tags = linkage.raw_tags
-                    linkage = Linkage()
+                    linkage = Linkage(sense_index=sense_index)
                     if node.strip() == ",":
                         linkage.raw_tags = tags
 
         if len(linkage.word) > 0:
             getattr(word_entry, linkage_type).append(linkage)
-            linkage = Linkage()
+            linkage = Linkage(sense_index=sense_index)
 
 
 def find_linkage_tag(
@@ -64,6 +67,7 @@ def find_linkage_tag(
 def process_related_block_template(
     wxr: WiktextractContext, word_entry: WordEntry, template_node: TemplateNode
 ) -> None:
+    # "Родственные слова" section
     # Шаблон:родств-блок
     expanded_template = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(template_node), expand_all=True
