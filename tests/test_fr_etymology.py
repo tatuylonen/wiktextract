@@ -24,7 +24,7 @@ class TestEtymology(TestCase):
         # missing etymology template "ébauche-étym" should be ignored
         self.wxr.wtp.start_page("")
         root = self.wxr.wtp.parse(": {{ébauche-étym|de}}")
-        etymology_data = extract_etymology(self.wxr, root)
+        etymology_data = extract_etymology(self.wxr, root, None)
         self.assertIsNone(etymology_data)
 
     def test_list_etymologies(self):
@@ -37,7 +37,7 @@ class TestEtymology(TestCase):
 * [[#br-nom-2|Nom commun 2 :]]
 :Du vieux breton lenn (« pièce de toile, voile, manteau, rideau »)."""
         )
-        etymology_data = extract_etymology(self.wxr, root)
+        etymology_data = extract_etymology(self.wxr, root, None)
         self.assertEqual(
             etymology_data,
             {
@@ -104,7 +104,7 @@ class TestEtymology(TestCase):
 : {{lien-ancre-étym|fr|Interjection|1}} Abréviation de « [[Notre-Dame]] ! » ou de « dame Dieu ! » (« [[Seigneur Dieu]] ! »).
 """
         )
-        etymology_data = extract_etymology(self.wxr, root)
+        etymology_data = extract_etymology(self.wxr, root, None)
         self.assertEqual(
             etymology_data,
             {
@@ -183,7 +183,7 @@ class TestEtymology(TestCase):
 : (''[[#fr-nom|Nom]]'') Par [[substantivation]] de l’interjection.
 """
         )
-        etymology_data = extract_etymology(self.wxr, root)
+        etymology_data = extract_etymology(self.wxr, root, None)
         self.assertEqual(
             etymology_data,
             {
@@ -197,5 +197,34 @@ class TestEtymology(TestCase):
     def test_no_list_etymology_block(self):
         self.wxr.wtp.start_page("autrice")
         root = self.wxr.wtp.parse("Paragraph 1\nParagraph 2")
-        etymology_data = extract_etymology(self.wxr, root)
+        etymology_data = extract_etymology(self.wxr, root, None)
         self.assertEqual(etymology_data, {"": ["Paragraph 1\nParagraph 2"]})
+
+    def test_etymology_examples(self):
+        self.wxr.wtp.start_page("autrice")
+        self.wxr.wtp.add_page("Modèle:S", 10, "Attestations historiques")
+        self.wxr.wtp.add_page("Modèle:siècle", 10, "(XVᵉ siècle)")
+        root = self.wxr.wtp.parse("""=== {{S|étymologie}} ===
+etymology text
+
+==== {{S|attestations}} ====
+
+* {{siècle|XV}} {{exemple|example text
+|lang=frm
+|source=source text
+|pas-trad=1
+}}""")
+        word_entry = WordEntry(
+            lang="Français", lang_code="fr", word="autrice", pos="noun"
+        )
+        extract_etymology(self.wxr, root, word_entry)
+        self.assertEqual(
+            word_entry.model_dump(exclude_defaults=True)["etymology_examples"],
+            [
+                {
+                    "time": "XVᵉ siècle",
+                    "text": "example text",
+                    "ref": "source text",
+                }
+            ],
+        )

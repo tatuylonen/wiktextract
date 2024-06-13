@@ -139,8 +139,11 @@ def extract_examples(
 
 
 def process_exemple_template(
-    wxr: WiktextractContext, node: TemplateNode, gloss_data: Sense
-) -> None:
+    wxr: WiktextractContext,
+    node: TemplateNode,
+    gloss_data: Optional[Sense],
+    time: str = "",
+) -> Example:
     # https://fr.wiktionary.org/wiki/Modèle:exemple
     # https://fr.wiktionary.org/wiki/Modèle:ja-exemple
     # https://fr.wiktionary.org/wiki/Modèle:zh-exemple
@@ -163,9 +166,11 @@ def process_exemple_template(
         translation=clean_node(wxr, None, translation),
         roman=clean_node(wxr, None, transcription),
         ref=clean_node(wxr, None, source),
+        time=time,
     )
-    if len(example_data.text) > 0:
+    if len(example_data.text) > 0 and isinstance(gloss_data, Sense):
         gloss_data.examples.append(example_data)
+    return example_data
 
 
 def find_alt_of_form(
