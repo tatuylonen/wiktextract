@@ -6,6 +6,7 @@ from wikitextprocessor.parser import LEVEL_KIND_FLAGS, TemplateNode
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
+from ..ruby import extract_ruby
 from .models import Translation, WordEntry
 from .tags import translate_raw_tags
 
@@ -101,14 +102,22 @@ def process_translation_templates(
         # Translation term: https://fr.wiktionary.org/wiki/Modèle:trad
         if 2 not in template_node.template_parameters:  # required parameter
             return
-        translation_term = clean_node(
-            wxr,
-            None,
-            template_node.template_parameters.get(
-                "dif", template_node.template_parameters.get(2)
-            ),
+        translation_data = base_translation_data.model_copy(deep=True)
+        term_nodes = template_node.template_parameters.get(
+            "dif", template_node.template_parameters.get(2)
         )
-        translation_roman = clean_node(
+        if base_translation_data.lang_code == "ja":
+            expanded_term_nodes = wxr.wtp.parse(
+                wxr.wtp.node_to_wikitext(term_nodes), expand_all=True
+            )
+            ruby_data, node_without_ruby = extract_ruby(
+                wxr, expanded_term_nodes.children
+            )
+            translation_data.ruby = ruby_data
+            translation_data.word = clean_node(wxr, None, node_without_ruby)
+        else:
+            translation_data.word = clean_node(wxr, None, term_nodes)
+        translation_data.roman = clean_node(
             wxr,
             None,
             (
@@ -118,17 +127,9 @@ def process_translation_templates(
             ),
         )
         # traditional writing of Chinese and Korean word
-        translation_traditional_writing = clean_node(
+        translation_data.traditional_writing = clean_node(
             wxr, None, template_node.template_parameters.get("tradi", "")
         )
-        translation_data = base_translation_data.model_copy(deep=True)
-        translation_data.word = translation_term
-        if len(translation_roman) > 0:
-            translation_data.roman = translation_roman
-        if len(translation_traditional_writing) > 0:
-            translation_data.traditional_writing = (
-                translation_traditional_writing
-            )
         if 3 in template_node.template_parameters:
             tags = []
             for tag_character in template_node.template_parameters[3]:

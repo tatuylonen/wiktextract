@@ -68,6 +68,9 @@ class Translation(FrenchBaseModel):
     traditional_writing: str = Field(
         "", description="Alternative writting for Chinese, Korean and Mongolian"
     )
+    ruby: list[tuple[str, ...]] = Field(
+        [], description="Japanese Kanji and furigana"
+    )
 
 
 class Linkage(FrenchBaseModel):

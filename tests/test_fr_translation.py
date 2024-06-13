@@ -201,3 +201,33 @@ class TestTranslation(TestCase):
                 }
             ],
         )
+
+    def test_ja_ruby(self):
+        self.wxr.wtp.start_page("autrice")
+        self.wxr.wtp.add_page("Modèle:T", 10, "Japonais")
+        self.wxr.wtp.add_page(
+            "Modèle:Lang",
+            10,
+            """<span lang="ja"><bdi><ruby>女作者<rp> (</rp><rt>おんな さくしゃ</rt><rp>) </rp></ruby></bdi></span>""",
+        )
+        root = self.wxr.wtp.parse(
+            "* {{T|ja}} : {{trad-|ja|女作者|dif={{Lang|ja|{{ruby|女作者|おんな さくしゃ}}}}|tr=onna sakusha}}"
+        )
+        base_data = WordEntry(word="autrice", lang_code="fr", lang="Français")
+        page_data = [base_data.model_copy(deep=True)]
+        extract_translation(self.wxr, page_data, base_data, root)
+        self.assertEqual(
+            [
+                t.model_dump(exclude_defaults=True)
+                for t in page_data[-1].translations
+            ],
+            [
+                {
+                    "lang": "Japonais",
+                    "lang_code": "ja",
+                    "roman": "onna sakusha",
+                    "ruby": [("女作者", "おんな さくしゃ")],
+                    "word": "女作者",
+                }
+            ],
+        )
