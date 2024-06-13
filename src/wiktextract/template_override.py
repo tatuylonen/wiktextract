@@ -3,6 +3,7 @@
 
 # This dictionary should be assigned with the WTP.set_template_override()
 # setter method; see wiktwords.
+from collections.abc import Callable
 
 from wikitextprocessor.core import TemplateArgs
 
@@ -19,7 +20,7 @@ template_override_fns = {}
 # A bit messy conceptually.
 
 
-def reg(template_name: str) -> Callable[Callable, Callable]:
+def reg(template_name: str) -> Callable[[Callable], Callable]:
     """Decorator that takes its input key and the template it decorates,
     and adds them to the template_override_fns dictionary"""
     def middle(func: Callable) -> Callable:
