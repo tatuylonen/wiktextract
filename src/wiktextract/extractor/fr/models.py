@@ -20,6 +20,9 @@ class Example(FrenchBaseModel):
         "",
         description="Source of the sentence, like book title and page number",
     )
+    time: str = Field(
+        "", description="For examples in 'Attestations historiques' section"
+    )
 
 
 class Form(FrenchBaseModel):
@@ -110,6 +113,9 @@ class WordEntry(FrenchBaseModel):
         "", description="Original POS title for matching etymology texts"
     )
     etymology_texts: list[str] = Field([], description="Etymology list")
+    etymology_examples: list[Example] = Field(
+        [], description="Data in 'Attestations historiques' section"
+    )
     senses: list[Sense] = Field([], description="Sense list")
     forms: list[Form] = Field([], description="Inflection forms list")
     sounds: list[Sound] = []

@@ -12,7 +12,7 @@ EtymologyData = dict[str, list[str]]
 
 
 def extract_etymology(
-    wxr: WiktextractContext, level_node: LevelNode
+    wxr: WiktextractContext, level_node: LevelNode, base_data: WordEntry
 ) -> Optional[EtymologyData]:
     etymology_dict: EtymologyData = defaultdict(list)
     pos_title = ""
@@ -22,6 +22,9 @@ def extract_etymology(
     ):
         if node.kind in LEVEL_KIND_FLAGS:
             level_node_index = node_index
+            title_text = clean_node(wxr, None, node.largs)
+            if title_text == "Attestations historiques":
+                extract_etymology_examples(wxr, node, base_data)
         elif node.kind == NodeKind.LIST:
             if node.sarg == "*":
                 pos_title = clean_node(wxr, None, node)
@@ -121,3 +124,23 @@ def insert_etymology_data(
             # POS title
             for sense_data in sense_dict[pos_title.removesuffix(" 1")]:
                 sense_data.etymology_texts = etymology_texts
+
+
+def extract_etymology_examples(
+    wxr: WiktextractContext,
+    level_node: LevelNode,
+    base_data: WordEntry,
+) -> None:
+    from .gloss import process_exemple_template
+
+    for list_item in level_node.find_child_recursively(NodeKind.LIST_ITEM):
+        time = ""
+        for template_node in list_item.find_child(NodeKind.TEMPLATE):
+            if template_node.template_name == "siècle":
+                time = clean_node(wxr, None, template_node).strip("() ")
+            elif template_node.template_name == "exemple":
+                example_data = process_exemple_template(
+                    wxr, template_node, None, time
+                )
+                if example_data.text != "":
+                    base_data.etymology_examples.append(example_data)
