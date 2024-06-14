@@ -11,6 +11,8 @@ from wiktextract.wxr_context import WiktextractContext
 
 
 class TestEtymology(TestCase):
+    maxDiff = None
+
     def setUp(self) -> None:
         self.wxr = WiktextractContext(
             Wtp(lang_code="fr"), WiktionaryConfig(dump_file_lang_code="fr")
@@ -41,11 +43,11 @@ class TestEtymology(TestCase):
         self.assertEqual(
             etymology_data,
             {
-                "Nom commun 1": [
+                ("br-nom-1", "Nom commun 1"): [
                     "Du vieux breton lin (« lac, étang ; liquide, humeur »).",
                     "Du moyen breton lenn.",
                 ],
-                "Nom commun 2": [
+                ("br-nom-2", "Nom commun 2"): [
                     "Du vieux breton lenn (« pièce de toile, voile, manteau, rideau »)."
                 ],
             },
@@ -56,6 +58,7 @@ class TestEtymology(TestCase):
                 lang_code="fr",
                 lang="Français",
                 pos="noun",
+                pos_id="br-nom-1",
                 pos_title="Nom commun 1",
             ),
             WordEntry(
@@ -64,6 +67,7 @@ class TestEtymology(TestCase):
                 lang="Français",
                 pos="noun",
                 pos_title="Nom commun 2",
+                pos_id="br-nom-2",
             ),
         ]
         insert_etymology_data("fr", page_data, etymology_data)
@@ -76,6 +80,7 @@ class TestEtymology(TestCase):
                     "lang": "Français",
                     "pos": "noun",
                     "pos_title": "Nom commun 1",
+                    "pos_id": "br-nom-1",
                     "etymology_texts": [
                         "Du vieux breton lin (« lac, étang ; liquide, humeur »).",
                         "Du moyen breton lenn.",
@@ -87,6 +92,7 @@ class TestEtymology(TestCase):
                     "lang": "Français",
                     "pos": "noun",
                     "pos_title": "Nom commun 2",
+                    "pos_id": "br-nom-2",
                     "etymology_texts": [
                         "Du vieux breton lenn (« pièce de toile, voile, manteau, rideau »)."
                     ],
@@ -97,20 +103,28 @@ class TestEtymology(TestCase):
     def test_indent_etymology_with_pos_template(self):
         # https://fr.wiktionary.org/wiki/dame
         self.wxr.wtp.start_page("dame")
-        self.wxr.wtp.add_page("Modèle:lien-ancre-étym", 10, "({{{2}}} {{{3}}})")
+        self.wxr.wtp.add_page(
+            "Modèle:lien-ancre-étym",
+            10,
+            "''([[#{{{1}}}-{{{2}}}-{{{3}}}|{{#switch:{{{2}}}| nom = Nom commun | interj = Interjection}} {{{3}}}]])''",
+        )
         root = self.wxr.wtp.parse(
-            """: {{lien-ancre-étym|fr|Nom commun|1}} Du latin domina (« maîtresse de maison »).
-: {{lien-ancre-étym|fr|Nom commun|2}} Du moyen néerlandais dam (« digue »).
-: {{lien-ancre-étym|fr|Interjection|1}} Abréviation de « [[Notre-Dame]] ! » ou de « dame Dieu ! » (« [[Seigneur Dieu]] ! »).
+            """: {{lien-ancre-étym|fr|nom|1}} Du latin domina (« maîtresse de maison »).
+: {{lien-ancre-étym|fr|nom|2}} Du moyen néerlandais dam (« digue »).
+: {{lien-ancre-étym|fr|interj|1}} Abréviation de « [[Notre-Dame]] ! » ou de « dame Dieu ! » (« [[Seigneur Dieu]] ! »).
 """
         )
         etymology_data = extract_etymology(self.wxr, root, None)
         self.assertEqual(
             etymology_data,
             {
-                "Nom commun 1": ["Du latin domina (« maîtresse de maison »)."],
-                "Nom commun 2": ["Du moyen néerlandais dam (« digue »)."],
-                "Interjection 1": [
+                ("fr-nom-1", "Nom commun 1"): [
+                    "Du latin domina (« maîtresse de maison »)."
+                ],
+                ("fr-nom-2", "Nom commun 2"): [
+                    "Du moyen néerlandais dam (« digue »)."
+                ],
+                ("fr-interj-1", "Interjection 1"): [
                     "Abréviation de « Notre-Dame ! » ou de « dame Dieu ! » (« Seigneur Dieu ! »)."
                 ],
             },
@@ -122,6 +136,7 @@ class TestEtymology(TestCase):
                 lang="Français",
                 pos="noun",
                 pos_title="Nom commun 1",
+                pos_id="fr-nom-1",
             ),
             WordEntry(
                 word="test",
@@ -129,6 +144,7 @@ class TestEtymology(TestCase):
                 lang="Français",
                 pos="noun",
                 pos_title="Nom commun 2",
+                pos_id="fr-nom-2",
             ),
             WordEntry(
                 word="test",
@@ -136,6 +152,7 @@ class TestEtymology(TestCase):
                 lang="Français",
                 pos="intj",
                 pos_title="Interjection",
+                pos_id="fr-interj-1",
             ),
         ]
         insert_etymology_data("fr", page_data, etymology_data)
@@ -148,6 +165,7 @@ class TestEtymology(TestCase):
                     "lang": "Français",
                     "pos": "noun",
                     "pos_title": "Nom commun 1",
+                    "pos_id": "fr-nom-1",
                     "etymology_texts": [
                         "Du latin domina (« maîtresse de maison »)."
                     ],
@@ -158,6 +176,7 @@ class TestEtymology(TestCase):
                     "lang": "Français",
                     "pos": "noun",
                     "pos_title": "Nom commun 2",
+                    "pos_id": "fr-nom-2",
                     "etymology_texts": [
                         "Du moyen néerlandais dam (« digue »)."
                     ],
@@ -168,6 +187,7 @@ class TestEtymology(TestCase):
                     "lang": "Français",
                     "pos": "intj",
                     "pos_title": "Interjection",
+                    "pos_id": "fr-interj-1",
                     "etymology_texts": [
                         "Abréviation de « Notre-Dame ! » ou de « dame Dieu ! » (« Seigneur Dieu ! »)."
                     ],
@@ -187,18 +207,64 @@ class TestEtymology(TestCase):
         self.assertEqual(
             etymology_data,
             {
-                "Interjection": [
+                ("Interjection", "Interjection"): [
                     "XIIe siècle, elas ; composé de hé et de las, au sens ancien de « malheureux »."
                 ],
-                "Nom commun": ["Par substantivation de l’interjection."],
+                ("fr-nom", "Nom"): ["Par substantivation de l’interjection."],
             },
+        )
+        page_data = [
+            WordEntry(
+                word="hélas",
+                lang_code="fr",
+                lang="Français",
+                pos="intj",
+                pos_title="Interjection",
+                pos_id="fr-interj-1",
+            ),
+            WordEntry(
+                word="hélas",
+                lang_code="fr",
+                lang="Français",
+                pos="noun",
+                pos_title="Nom commun",
+                pos_id="fr-nom-1",
+            ),
+        ]
+        insert_etymology_data("fr", page_data, etymology_data)
+        self.assertEqual(
+            [d.model_dump(exclude_defaults=True) for d in page_data],
+            [
+                {
+                    "word": "hélas",
+                    "lang_code": "fr",
+                    "lang": "Français",
+                    "pos": "intj",
+                    "pos_title": "Interjection",
+                    "pos_id": "fr-interj-1",
+                    "etymology_texts": [
+                        "XIIe siècle, elas ; composé de hé et de las, au sens ancien de « malheureux »."
+                    ],
+                },
+                {
+                    "word": "hélas",
+                    "lang_code": "fr",
+                    "lang": "Français",
+                    "pos": "noun",
+                    "pos_title": "Nom commun",
+                    "pos_id": "fr-nom-1",
+                    "etymology_texts": [
+                        "Par substantivation de l’interjection."
+                    ],
+                },
+            ],
         )
 
     def test_no_list_etymology_block(self):
         self.wxr.wtp.start_page("autrice")
         root = self.wxr.wtp.parse("Paragraph 1\nParagraph 2")
         etymology_data = extract_etymology(self.wxr, root, None)
-        self.assertEqual(etymology_data, {"": ["Paragraph 1\nParagraph 2"]})
+        self.assertEqual(etymology_data, {None: ["Paragraph 1\nParagraph 2"]})
 
     def test_etymology_examples(self):
         self.wxr.wtp.start_page("autrice")

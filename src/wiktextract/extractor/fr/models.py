@@ -115,6 +115,7 @@ class WordEntry(FrenchBaseModel):
     pos_title: str = Field(
         "", description="Original POS title for matching etymology texts"
     )
+    pos_id: str = Field("", description="POS id for matching etymology texts")
     etymology_texts: list[str] = Field([], description="Etymology list")
     etymology_examples: list[Example] = Field(
         [], description="Data in 'Attestations historiques' section"
