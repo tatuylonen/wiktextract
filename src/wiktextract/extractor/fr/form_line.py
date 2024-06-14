@@ -7,7 +7,11 @@ from wiktextract.wxr_context import WiktextractContext
 
 from .conjugation import extract_conjugation
 from .models import Form, Sound, WordEntry
-from .pronunciation import PRON_TEMPLATES, process_pron_template
+from .pronunciation import (
+    ASPIRATED_H_TEMPLATES,
+    PRON_TEMPLATES,
+    process_pron_template,
+)
 from .tags import translate_raw_tags
 
 
@@ -26,13 +30,15 @@ def extract_form_line(
     IGNORE_TEMPLATES = frozenset(["voir-conj"])
 
     pre_template_name = ""
-    for node in nodes:
+    for index, node in enumerate(nodes):
         if isinstance(node, WikiNode) and node.kind == NodeKind.TEMPLATE:
             if node.template_name in IGNORE_TEMPLATES:
                 continue
             elif node.template_name in PRON_TEMPLATES:
                 page_data[-1].sounds.extend(
-                    process_pron_template(wxr, node, [])
+                    process_pron_template(
+                        wxr, node, [], nodes[index - 1 : index]
+                    )
                 )
             elif node.template_name == "équiv-pour":
                 process_equiv_pour_template(wxr, node, page_data)
@@ -45,6 +51,8 @@ def extract_form_line(
                 "conjugaison",
             ) or node.template_name.startswith(("ja-adj-", "ja-verbe")):
                 process_conj_template(wxr, node, page_data)
+            elif node.template_name in ASPIRATED_H_TEMPLATES:
+                continue
             else:
                 raw_tag = clean_node(wxr, page_data[-1], node)
                 expanded_template = wxr.wtp.parse(

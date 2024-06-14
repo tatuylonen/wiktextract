@@ -165,3 +165,21 @@ class TestFormLine(TestCase):
         )
         extract_form_line(self.wxr, page_data, root.children)
         self.assertEqual(page_data[-1].tags, ["uncountable"])
+
+    def test_h_aspiré(self):
+        self.wxr.wtp.start_page("hélas")
+        self.wxr.wtp.add_page("Modèle:pron", 10, body="\\{{{1}}}\\")
+        self.wxr.wtp.add_page(
+            "Modèle:h aspiré",
+            10,
+            body="<sup><small>([[h aspiré]])</small></sup>",
+        )
+        page_data = [WordEntry(word="hélas", lang_code="fr", lang="Français")]
+        root = self.wxr.wtp.parse("'''hélas''' ! {{h aspiré}}{{pron|e.las|fr}}")
+        extract_form_line(self.wxr, page_data, root.children)
+        self.assertEqual(page_data[-1].tags, [])
+        self.assertEqual(page_data[-1].raw_tags, [])
+        self.assertEqual(
+            [s.model_dump(exclude_defaults=True) for s in page_data[-1].sounds],
+            [{"ipa": "^((h aspiré))\\e.las\\"}],
+        )
