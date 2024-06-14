@@ -63,6 +63,14 @@ PRON_TEMPLATES = frozenset(
     ]
 )
 
+ASPIRATED_H_TEMPLATES = frozenset(
+    [
+        "h aspiré",
+        "h",  # redirect to "h aspiré"
+        "h muet",
+    ]
+)
+
 
 def process_pron_list_item(
     wxr: WiktextractContext,
@@ -78,7 +86,11 @@ def process_pron_list_item(
         if isinstance(list_item_child, TemplateNode):
             sounds_list.extend(
                 process_sound_list_item_templates(
-                    wxr, list_item_child, current_raw_tags, after_colon
+                    wxr,
+                    list_item_child,
+                    current_raw_tags,
+                    after_colon,
+                    list_item_node.children[child_index - 1 : child_index],
                 )
             )
         elif isinstance(list_item_child, WikiNode):
@@ -121,9 +133,10 @@ def process_sound_list_item_templates(
     template_node: TemplateNode,
     raw_tags: list[str],
     after_colon: bool,
+    pre_nodes: list[WikiNode],
 ) -> list[Sound]:
     if template_node.template_name in PRON_TEMPLATES:
-        return process_pron_template(wxr, template_node, raw_tags)
+        return process_pron_template(wxr, template_node, raw_tags, pre_nodes)
     elif template_node.template_name in {
         "écouter",
         "audio",
@@ -132,6 +145,8 @@ def process_sound_list_item_templates(
         return [process_ecouter_template(wxr, template_node, raw_tags)]
     elif template_node.template_name == "pron-rimes":
         return [process_pron_rimes_template(wxr, template_node, raw_tags)]
+    elif template_node.template_name in ASPIRATED_H_TEMPLATES:
+        pass
     elif not after_colon:  # location
         raw_tag = clean_node(wxr, None, template_node)
         raw_tags.append(raw_tag)
@@ -140,7 +155,10 @@ def process_sound_list_item_templates(
 
 
 def process_pron_template(
-    wxr: WiktextractContext, template_node: TemplateNode, raw_tags: list[str]
+    wxr: WiktextractContext,
+    template_node: TemplateNode,
+    raw_tags: list[str],
+    previous_nodes: list[WikiNode] = [],
 ) -> list[Sound]:
     if (
         template_node.template_name in PRON_TEMPLATES
@@ -152,6 +170,13 @@ def process_pron_template(
         return []
     sounds_list = []
     pron_texts = clean_node(wxr, None, template_node)
+    # https://en.wikipedia.org/wiki/Aspirated_h
+    # https://fr.wiktionary.org/wiki/Modèle:h_aspiré
+    aspirated_h = ""
+    if len(previous_nodes) > 0 and isinstance(previous_nodes[-1], TemplateNode):
+        if previous_nodes[-1].template_name in ASPIRATED_H_TEMPLATES:
+            aspirated_h = clean_node(wxr, None, previous_nodes[-1])
+
     if len(pron_texts) > 0:
         use_key = "zh_pron" if template_node.template_name == "lang" else "ipa"
         prons = set()
@@ -160,7 +185,7 @@ def process_pron_template(
             if len(pron_text) > 0 and pron_text not in prons:
                 prons.add(pron_text)
                 sound = Sound(raw_tags=raw_tags[:])
-                setattr(sound, use_key, pron_text)
+                setattr(sound, use_key, aspirated_h + pron_text)
                 translate_raw_tags(sound)
                 sounds_list.append(sound)
     return sounds_list

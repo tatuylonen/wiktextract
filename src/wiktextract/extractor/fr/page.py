@@ -136,11 +136,15 @@ def process_pos_block(
     page_data[-1].pos_title = pos_title
     page_data[-1].tags.extend(pos_data.get("tags", []))
     for level_node_template in pos_title_node.find_content(NodeKind.TEMPLATE):
-        if (
-            level_node_template.template_name == "S"
-            and level_node_template.template_parameters.get(3) == "flexion"
-        ):
-            page_data[-1].tags.append("form-of")
+        if level_node_template.template_name == "S":
+            if level_node_template.template_parameters.get(3) == "flexion":
+                page_data[-1].tags.append("form-of")
+            expanded_s = wxr.wtp.parse(
+                wxr.wtp.node_to_wikitext(level_node_template), expand_all=True
+            )
+            for span_tag in expanded_s.find_html("span"):
+                page_data[-1].pos_id = span_tag.attrs.get("id", "")
+                break
     child_nodes = list(pos_title_node.filter_empty_str_child())
     form_line_start = 0  # Ligne de forme
     level_node_index = len(child_nodes)
