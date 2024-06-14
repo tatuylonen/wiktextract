@@ -11,6 +11,12 @@ class AltOf(TypedDict, total=False):
     extra: str
 
 
+class CoincidenceData(TypedDict, total=False):
+    tags: list[str]
+    words: list[str]
+    meaning: str
+
+
 class LinkageData(TypedDict, total=False):
     alt: str
     english: str
@@ -139,6 +145,7 @@ class WordData(TypedDict, total=False):
     abbreviations: list[LinkageData]
     alt_of: list[AltOf]
     antonyms: list[LinkageData]
+    coincidence: CoincidenceData
     categories: list[str]
     coordinate_terms: list[LinkageData]
     derived: list[LinkageData]

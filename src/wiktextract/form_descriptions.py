@@ -18,9 +18,9 @@ from typing import (
 import Levenshtein
 from nltk import TweetTokenizer  # type:ignore[import-untyped]
 
-from wikitextprocessor.core import TemplateArgs
 from wiktextract.type_utils import (
     AltOf,
+    CoincidenceData,
     FormData,
     LinkageData,
     SenseData,
@@ -306,7 +306,8 @@ tr_note_re = re.compile(
     r"form|regular|irregular|alternative)"
     r")($|[) ])|^("
     # Following are only matched at the beginning of the string
-    r"pl|pl\.|see:|pl:|sg:|plurals:|e\.g\.|e\.g\.:|e\.g\.,|cf\.|compare|such as|"
+    r"pl|pl\.|see:|pl:|sg:|plurals:|e\.g\.|"
+    r"e\.g\.:|e\.g\.,|cf\.|compare|such as|"
     r"see|only|often|usually|used|usage:|of|not|in|compare|usu\.|"
     r"as|about|abbrv\.|abbreviation|abbr\.|that:|optionally|"
     r"mainly|from|for|also|also:|acronym|"
@@ -1752,6 +1753,46 @@ def add_related(
     return following_tagsets
 
 
+plusobj_re = re.compile(r"\[\+([^][=]+)( = ([^][]+))?\]")
+
+
+def parse_plusobj_template(
+    match: Union[re.Match, str],
+) -> Optional[CoincidenceData]:
+    """Parse the output of Template:+obj,
+    `[+infinitive or ergative = meaning]`
+    and returns a list of ArgumentData if succesful."""
+    if isinstance(match, str):
+        m = re.search(plusobj_re, match)
+        if not m:
+            return None
+    else:
+        m = match
+
+    codata: CoincidenceData = {"words": [], "tags": []}
+
+    taggers = m.group(1)
+    meaning = m.group(3)
+
+    if meaning:
+        codata["meaning"] = meaning
+
+    for ortags in re.split(r",| or ", taggers):
+        tagsets, _ = decode_tags(ortags)
+        for tagset in tagsets:
+            if "error-unknown-tag" in tagset:
+                codata["words"].extend(ortags.split())
+            else:
+                codata["tags"].extend(tagset)
+    if not codata["words"]:
+        del codata["words"]
+    if not codata["tags"]:
+        del codata["tags"]
+    else:
+        codata["tags"] = sorted(set(codata["tags"]))
+    return codata
+
+
 def parse_word_head(
     wxr: WiktextractContext,
     pos: str,
@@ -1793,6 +1834,20 @@ def parse_word_head(
     if "Lua execution error" in text or "Lua timeout error" in text:
         return
 
+    # 20240613 {{+obj}} templates found in heads take the form
+    # `[+ infinitive or ergative] (maybe sometimes with `= meaning`),
+    # which poisoned forms with an extra canonical. Instead of handling
+    # these cases in the tags or making special forms, we instead create
+    # a new field called 'coincidence' with a dict a
+    # tags, words field, and a meaning field.
+
+    m = re.search(plusobj_re, text)
+    if m:
+        text = text[: m.start()] + text[m.end() :]
+        codata = parse_plusobj_template(m)
+        if codata:
+            data_append(data, "coincidence", codata)
+
     # In Aug 2021, some words had spurious Template:en at the end of head forms
     # due to a Wiktionary error.
     text = re.sub(r"\s+Template:[-a-zA-Z]+\s*$", "", text)
@@ -1818,12 +1873,9 @@ def parse_word_head(
         text = text[: m.start()] + text[m.end() :]
 
     language = wxr.wtp.section
-    titleword = re.sub(
-        r"^Reconstruction:[^/]*/", "", wxr.wtp.title or "MISSING_TITLE"
-    )
+    titleword = re.sub(r"^Reconstruction:[^/]*/", "", wxr.wtp.title or "")
     titleparts = list(
-        m.group(0)
-        for m in re.finditer(word_re, wxr.wtp.title or "MISSING_TITLE")
+        m.group(0) for m in re.finditer(word_re, wxr.wtp.title or "")
     )
     if not titleparts:
         return
@@ -3026,7 +3078,8 @@ def parse_alt_or_inflection_of1(
                     valid_tags.get(tk) == "dialect" for tk in ts_t
                 ):
                     ts_s = (set(ts_t) - {"form-of"}) | {"alt-of"}
-                else: ts_s = set(ts_t)
+                else:
+                    ts_s = set(ts_t)
                 if not (alt_infl_disallowed & ts_s):
                     tags.extend(ts_s)
             if (
