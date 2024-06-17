@@ -52,11 +52,12 @@ from wiktextract.translations import parse_translation_item_text
 from wiktextract.type_utils import (
     DescendantData,
     ExampleData,
+    FormData,
+    LinkageData,
     SenseData,
     SoundData,
-    WordData,
-    LinkageData,
     TemplateData,
+    WordData,
 )
 from wiktextract.wxr_context import WiktextractContext
 
@@ -3331,10 +3332,11 @@ def parse_language(
             if not isinstance(node, WikiNode):
                 # print("  X{}".format(repr(node)[:40]))
                 continue
-            if isinstance(
-                node, TemplateNode
-            ) and process_soft_redirect_template(wxr, node, redirect_list):
-                continue
+            if isinstance(node, TemplateNode):
+                if process_soft_redirect_template(wxr, node, redirect_list):
+                    continue
+                elif node.template_name == "zh-forms":
+                    process_zh_forms_templates(wxr, node, base_data)
 
             if node.kind not in LEVEL_KINDS:
                 # XXX handle e.g. wikipedia links at the top of a language
@@ -4190,3 +4192,46 @@ def process_soft_redirect_template(
                     redirect_pages.append(title)
         return True
     return False
+
+
+def process_zh_forms_templates(
+    wxr: WiktextractContext,
+    template_node: TemplateNode,
+    base_data: WordData,
+) -> None:
+    # https://en.wiktionary.org/wiki/Template:zh-forms
+    if "forms" not in base_data:
+        base_data["forms"] = []
+    for p_name, p_value in template_node.template_parameters.items():
+        if not isinstance(p_name, str):
+            continue
+        if re.fullmatch(r"s\d*", p_name):
+            form_data: FormData = {
+                "form": clean_node(wxr, None, p_value),
+                "tags": ["Simplified Chinese"],
+            }
+            if len(form_data["form"]) > 0:
+                base_data["forms"].append(form_data)
+        elif re.fullmatch(r"t\d+", p_name):
+            form_data: FormData = {
+                "form": clean_node(wxr, None, p_value),
+                "tags": ["Traditional Chinese"],
+            }
+            if len(form_data["form"]) > 0:
+                base_data["forms"].append(form_data)
+        elif p_name == "alt":
+            for form_text in clean_node(wxr, None, p_value).split(","):
+                texts = form_text.split("-")
+                form_data: FormData = {"form": texts[0]}
+                if len(texts) > 1:
+                    # pronunciation data could be added after "-"
+                    # see https://en.wiktionary.org/wiki/新婦
+                    form_data["raw_tags"] = texts[1:]
+                if len(form_data["form"]) > 0:
+                    base_data["forms"].append(form_data)
+        elif p_name == "lit":
+            lit = clean_node(wxr, None, p_value)
+            if lit != "":
+                base_data["literal_meaning"] = lit
+    if len(base_data["forms"]) == 0:
+        del base_data["forms"]
