@@ -63,6 +63,11 @@ from wiktextract.wxr_context import WiktextractContext
 
 from ..ruby import extract_ruby, parse_ruby
 from ..share import strip_nodes
+from .info_templates import (
+    INFO_TEMPLATE_FUNCS,
+    parse_info_template_arguments,
+    parse_info_template_node,
+)
 from .section_titles import (
     COMPOUNDS_TITLE,
     DESCENDANTS_TITLE,
@@ -1379,6 +1384,27 @@ def parse_language(
     ) -> None:
         ruby = []
         links: list[str] = []
+
+        # process template parse nodes here
+        new_nodes = []
+        info_template_data = []
+        for node in header_nodes:
+            info_data, info_out = parse_info_template_node(wxr, node, "head")
+            if info_data or info_out:
+                if info_data:
+                    info_template_data.append(info_data)
+                if info_out:  # including just the original node
+                    new_nodes.append(info_out)
+            else:
+                new_nodes.append(node)
+        header_nodes = new_nodes
+
+        if info_template_data:
+            if "info_templates" not in pos_data:
+                pos_data["info_templates"] = info_template_data
+            else:
+                pos_data["info_templates"].extend(info_template_data)
+
         if not word.isalnum():
             # if the word contains non-letter or -number characters, it might
             # have something that messes with split-at-semi-comma; we collect
@@ -1630,6 +1656,16 @@ def parse_language(
                 return None
             if is_panel_template(wxr, name):
                 return ""
+            if name in INFO_TEMPLATE_FUNCS:
+                info_data, info_exp = parse_info_template_arguments(
+                    wxr, name, ht, "sense"
+                )
+                if info_data or info_exp:
+                    if info_data:
+                        data_append(sense_base, "info_templates", info_data)
+                    if info_exp and isinstance(info_exp, str):
+                        return info_exp
+                    return ""
             if name in ("defdate",):
                 return ""
             if name == "senseid":
@@ -2365,7 +2401,7 @@ def parse_language(
                                     v = [v[0][1:]] + list(v[1:])  # type:ignore
                                 if (
                                     isinstance(v[0], str)
-                                    and v[0].isalnum() == False
+                                    and not v[0].isalnum()
                                 ):
                                     links_that_should_not_be_split.append(
                                         "".join(v[0])
@@ -4008,7 +4044,7 @@ def fix_subtitle_hierarchy(wxr: WiktextractContext, text: str) -> str:
             level = 6
         else:
             level = 6
-        if skip_level_title == True:
+        if skip_level_title:
             skip_level_title = False
             parts.append(part)
         else:
