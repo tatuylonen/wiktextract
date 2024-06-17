@@ -372,6 +372,31 @@ TRANSLATION_TAGS = {
     "устный": "colloquial",
 }
 
+MORPHOLOGICAL_TEMPLATE_TAGS = {
+    # "Шаблон:inflection/ru/noun/text" used in "сущ-ru"
+    "одушевлённое": "animate",
+    "неодушевлённое": "inanimate",
+    "одушевлённое или неодушевлённое": ["animate", "inanimate"],
+    "неодушевлённое или одушевлённое": ["animate", "inanimate"],
+    "мужской род": "masculine",
+    "женский род": "feminine",
+    "средний род": "neuter",
+    "общий род (может согласовываться с другими частями речи как мужского": "common",
+    "мужской или женский род": ["masculine", "feminine"],
+    "мужской или средний род": ["masculine", "neuter"],
+    "женский или мужской род": ["masculine", "feminine"],
+    "женский или средний род": ["feminine", "neuter"],
+    "средний или мужской род": ["masculine", "neuter"],
+    "средний или женский род": ["feminine", "neuter"],
+    "несклоняемое": "indeclinable",
+    "адъективное": "adjective",
+    "местоименное": "pronominal",
+    # https://en.wikipedia.org/wiki/Russian_declension
+    "1-е": "declension-1",
+    "2-е": "declension-2",
+    "3-е": "declension-3",
+    "2-е (5-e)": ["declension-1", "declension-5"],
+}
 
 ALL_TAGS = {
     **STYLE_TAGS,

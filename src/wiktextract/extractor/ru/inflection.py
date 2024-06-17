@@ -2,24 +2,12 @@ from collections import defaultdict
 from dataclasses import dataclass
 
 from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import HTMLNode, TemplateNode
+from wikitextprocessor.parser import HTMLNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .models import Form, WordEntry
 from .tags import translate_raw_tags
-
-
-def extract_inflection(
-    wxr: WiktextractContext,
-    word_entry: WordEntry,
-    level_node: WikiNode,
-) -> None:
-    for template_node in level_node.find_child(NodeKind.TEMPLATE):
-        if template_node.template_name.startswith("прил"):
-            parse_adj_forms_table(wxr, word_entry, template_node)
-        elif template_node.template_name.startswith(("сущ", "гл")):
-            parse_wikitext_forms_table(wxr, word_entry, template_node)
 
 
 @dataclass
@@ -32,13 +20,10 @@ class TableHeader:
 def parse_adj_forms_table(
     wxr: WiktextractContext,
     word_entry: WordEntry,
-    template_node: TemplateNode,
+    expanded_template: WikiNode,
 ):
     # HTML table
     # https://ru.wiktionary.org/wiki/Шаблон:прил
-    expanded_template = wxr.wtp.parse(
-        wxr.wtp.node_to_wikitext(template_node), expand_all=True
-    )
     for table_element in expanded_template.find_html("table"):
         column_headers = []
         row_headers = []
@@ -113,14 +98,11 @@ def parse_adj_forms_table(
 def parse_wikitext_forms_table(
     wxr: WiktextractContext,
     word_entry: WordEntry,
-    template_node: TemplateNode,
+    expanded_template: WikiNode,
 ) -> None:
     # https://ru.wiktionary.org/wiki/Шаблон:сущ-ru
     # Шаблон:inflection сущ ru
     # Шаблон:Гл-блок
-    expanded_template = wxr.wtp.parse(
-        wxr.wtp.node_to_wikitext(template_node), expand_all=True
-    )
     table_nodes = list(expanded_template.find_child(NodeKind.TABLE))
     if len(table_nodes) == 0:
         return
