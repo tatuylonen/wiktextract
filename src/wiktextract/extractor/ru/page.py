@@ -9,7 +9,7 @@ from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .etymology import extract_etymology
 from .gloss import extract_gloss, process_meaning_template
-from .inflection import extract_inflection
+from .inflection import parse_adj_forms_table, parse_wikitext_forms_table
 from .linkage import (
     extract_linkages,
     extract_phrase_section,
@@ -18,6 +18,7 @@ from .linkage import (
 from .models import AltForm, Sense, Sound, WordEntry
 from .pronunciation import extract_pronunciation
 from .section_titles import LINKAGE_TITLES, POS_TEMPLATE_NAMES, POS_TITLES
+from .tags import MORPHOLOGICAL_TEMPLATE_TAGS
 from .translation import extract_translations
 
 # Templates that are used to form panels on pages and that
@@ -87,8 +88,7 @@ MORPH_TEMPLATE_ARGS = {
 
 
 def get_pos_from_template(
-    wxr: WiktextractContext,
-    template_node: TemplateNode,
+    wxr: WiktextractContext, template_node: TemplateNode
 ) -> Optional[POSSubtitleData]:
     # Search for POS in template names
     template_name = template_node.template_name.lower()
@@ -145,6 +145,40 @@ def get_pos(
         return
 
 
+def extract_morphological_section(
+    wxr: WiktextractContext, page_data: list[WordEntry], level_node: WikiNode
+) -> None:
+    pos_data = get_pos(wxr, level_node)
+    if pos_data is not None:
+        page_data[-1].pos = pos_data["pos"]
+        page_data[-1].tags.extend(pos_data.get("tags", []))
+    for child_node in level_node.find_child(
+        NodeKind.TEMPLATE | LEVEL_KIND_FLAGS
+    ):
+        if child_node.kind in LEVEL_KIND_FLAGS:
+            parse_section(wxr, page_data, child_node)
+        elif isinstance(child_node, WikiNode):
+            expanded_template = wxr.wtp.parse(
+                wxr.wtp.node_to_wikitext(child_node), expand_all=True
+            )
+            if child_node.template_name.startswith("прил"):
+                parse_adj_forms_table(wxr, page_data[-1], expanded_template)
+            elif child_node.template_name.startswith(("сущ", "гл")):
+                parse_wikitext_forms_table(
+                    wxr, page_data[-1], expanded_template
+                )
+            for expanded_node in expanded_template.children:
+                if isinstance(expanded_node, str):
+                    for text in expanded_node.split(","):
+                        text = text.strip()
+                        if text in MORPHOLOGICAL_TEMPLATE_TAGS:
+                            tr_tag = MORPHOLOGICAL_TEMPLATE_TAGS[text]
+                            if isinstance(tr_tag, str):
+                                page_data[-1].tags.append(tr_tag)
+                            elif isinstance(tr_tag, list):
+                                page_data[-1].tags.extend(tr_tag)
+
+
 def parse_section(
     wxr: WiktextractContext, page_data: list[WordEntry], level3_node: WikiNode
 ) -> None:
@@ -157,14 +191,7 @@ def parse_section(
         "тип и синтаксические свойства сочетания",
         "тип и свойства сочетания",
     ]:
-        pos_data = get_pos(wxr, level3_node)
-        if pos_data is not None:
-            page_data[-1].pos = pos_data["pos"]
-            page_data[-1].tags.extend(pos_data.get("tags", []))
-        extract_inflection(wxr, page_data[-1], level3_node)
-        for next_level_node in level3_node.find_child(LEVEL_KIND_FLAGS):
-            parse_section(wxr, page_data, next_level_node)
-        # XXX: Extract grammatical tags (gender, etc.) from Russian Wiktionary
+        extract_morphological_section(wxr, page_data, level3_node)
     elif section_title in POS_TITLES:
         pos_data = POS_TITLES[section_title]
         page_data[-1].pos = pos_data["pos"]

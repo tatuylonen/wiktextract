@@ -2,8 +2,8 @@ from unittest import TestCase
 
 from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
-from wiktextract.extractor.ru.inflection import extract_inflection
 from wiktextract.extractor.ru.models import WordEntry
+from wiktextract.extractor.ru.page import extract_morphological_section
 from wiktextract.wxr_context import WiktextractContext
 
 
@@ -57,7 +57,7 @@ class TestLinkage(TestCase):
         word_entry = WordEntry(
             word="русский", pos="adj", lang_code="ru", lang="Русский"
         )
-        extract_inflection(self.wxr, word_entry, root)
+        extract_morphological_section(self.wxr, [word_entry], root)
         self.assertEqual(
             [f.model_dump(exclude_defaults=True) for f in word_entry.forms],
             [
@@ -165,7 +165,7 @@ class TestLinkage(TestCase):
         word_entry = WordEntry(
             word="публицист", pos="noun", lang_code="bg", lang="Болгарский"
         )
-        extract_inflection(self.wxr, word_entry, root)
+        extract_morphological_section(self.wxr, [word_entry], root)
         self.assertEqual(
             [f.model_dump(exclude_defaults=True) for f in word_entry.forms],
             [
@@ -208,7 +208,7 @@ class TestLinkage(TestCase):
         word_entry = WordEntry(
             word="видеть", pos="verb", lang_code="ru", lang="Русский"
         )
-        extract_inflection(self.wxr, word_entry, root)
+        extract_morphological_section(self.wxr, [word_entry], root)
         self.assertEqual(
             [f.model_dump(exclude_defaults=True) for f in word_entry.forms],
             [
@@ -258,7 +258,7 @@ class TestLinkage(TestCase):
         word_entry = WordEntry(
             word="вода", pos="noun", lang_code="cu", lang="Старославянский"
         )
-        extract_inflection(self.wxr, word_entry, root)
+        extract_morphological_section(self.wxr, [word_entry], root)
         self.assertEqual(
             [f.model_dump(exclude_defaults=True) for f in word_entry.forms],
             [
