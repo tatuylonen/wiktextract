@@ -1,8 +1,8 @@
 import hashlib
 import re
 import urllib
-
 from typing import Iterator, Optional, Union
+
 from wikitextprocessor import NodeKind, WikiNode
 from wiktextract.datautils import data_append, split_at_comma_semi
 from wiktextract.form_descriptions import (

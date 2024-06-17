@@ -67,6 +67,7 @@ class FormData(TypedDict, total=False):
     ruby: Union[list[tuple[str, str]], list[Sequence[str]]]
     source: str
     tags: list[str]
+    raw_tags: list[str]
     topics: list[str]
 
 
@@ -157,6 +158,7 @@ class WordData(TypedDict, total=False):
     instances: list[LinkageData]
     lang: str
     lang_code: str
+    literal_meaning: str
     meronyms: list[LinkageData]
     original_title: str
     pos: str
