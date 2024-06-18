@@ -271,6 +271,14 @@ GRAMMATICAL_TAGS = {
     "м./ж.": ["masculine", "feminine"],  # Шаблон:m/f
     "ср./м.": ["neuter", "masculine"],  # Шаблон:n/m
     "сов.": "perfective",  # Шаблон:pf
+    # Шаблон:прил ru 1a^
+    "муж. р.": "masculine",
+    "ср. р.": "neuter",
+    "жен. р.": "feminine",
+    "неод.": "inanimate",
+    "т.": "instrumental",
+    "п.": "prepositional",
+    "кратк. форма": "short-form",
 }
 
 # Прочие сокращения
@@ -396,6 +404,18 @@ MORPHOLOGICAL_TEMPLATE_TAGS = {
     "2-е": "declension-2",
     "3-е": "declension-3",
     "2-е (5-e)": ["declension-1", "declension-5"],
+    # Шаблон:inflection/ru/adj
+    "качественное": "qualitative",
+    "относительное": "relative",
+    "притяжательное": "possessive",
+    # verb tags from "Шаблон:Гл-блок"
+    "совершенный вид": "perfect",
+    "несовершенный вид": "imperfective",
+    "двувидовой": "biaspectual",
+    "непереходный": "intransitive",
+    "переходный": "transitive",
+    "безличный": "impersonal",
+    "возвратный": "reflexive",
 }
 
 ALL_TAGS = {

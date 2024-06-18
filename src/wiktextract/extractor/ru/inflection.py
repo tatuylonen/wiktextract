@@ -35,9 +35,7 @@ def parse_adj_forms_table(
                 for th_element in tr_element.find_html("th"):
                     header_text = ""
                     for header_link in th_element.find_child(NodeKind.LINK):
-                        header_text = clean_node(
-                            wxr, None, header_link.largs[0]
-                        )
+                        header_text = clean_node(wxr, None, header_link)
                     if header_text == "падеж":
                         continue  # ignore top left corner header
                     header_span = int(th_element.attrs.get("colspan", "1"))
@@ -53,9 +51,7 @@ def parse_adj_forms_table(
                         # this is a td tag but contains header text
                         header_text = ""
                         for header_link in td_element.find_child(NodeKind.LINK):
-                            header_text = clean_node(
-                                wxr, None, header_link.largs[0]
-                            )
+                            header_text = clean_node(wxr, None, header_link)
                         header_span = int(td_element.attrs.get("rowspan", "1"))
                         row_headers.append(
                             TableHeader(header_text, 0, header_span)

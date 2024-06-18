@@ -63,71 +63,45 @@ class TestLinkage(TestCase):
             [
                 {
                     "form": "ру́сского",
-                    "raw_tags": [
-                        "единственное число",
-                        "мужской род",
-                        "винительный",
-                        "одушевлённый",
-                    ],
+                    "tags": ["singular", "masculine", "accusative", "animate"],
                 },
                 {
                     "form": "ру́сское",
-                    "raw_tags": [
-                        "единственное число",
-                        "средний род",
-                        "винительный",
-                        "одушевлённый",
-                    ],
+                    "tags": ["singular", "neuter", "accusative", "animate"],
                 },
                 {
                     "form": "ру́сскую",
-                    "raw_tags": [
-                        "единственное число",
-                        "женский род",
-                        "винительный",
-                        "одушевлённый",
+                    "tags": [
+                        "singular",
+                        "feminine",
+                        "accusative",
+                        "animate",
                     ],
                 },
                 {
                     "form": "ру́сских",
-                    "raw_tags": [
-                        "множественное число",
-                        "винительный",
-                        "одушевлённый",
-                    ],
+                    "tags": ["plural", "accusative", "animate"],
                 },
                 {
                     "form": "ру́сский",
-                    "raw_tags": [
-                        "единственное число",
-                        "мужской род",
-                        "винительный",
-                        "неодушевлённый",
+                    "tags": [
+                        "singular",
+                        "masculine",
+                        "accusative",
+                        "inanimate",
                     ],
                 },
                 {
                     "form": "ру́сские",
-                    "raw_tags": [
-                        "множественное число",
-                        "винительный",
-                        "неодушевлённый",
-                    ],
+                    "tags": ["plural", "accusative", "inanimate"],
                 },
                 {
                     "form": "ру́сской",
-                    "raw_tags": [
-                        "единственное число",
-                        "мужской род",
-                        "творительный",
-                    ],
+                    "tags": ["singular", "masculine", "instrumental"],
                 },
                 {
                     "form": "ру́сскою",
-                    "raw_tags": [
-                        "единственное число",
-                        "мужской род",
-                        "творительный",
-                    ],
+                    "tags": ["singular", "masculine", "instrumental"],
                 },
             ],
         )
