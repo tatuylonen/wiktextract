@@ -271,6 +271,14 @@ GRAMMATICAL_TAGS = {
     "м./ж.": ["masculine", "feminine"],  # Шаблон:m/f
     "ср./м.": ["neuter", "masculine"],  # Шаблон:n/m
     "сов.": "perfective",  # Шаблон:pf
+    # Шаблон:прил ru 1a^
+    "муж. р.": "masculine",
+    "ср. р.": "neuter",
+    "жен. р.": "feminine",
+    "неод.": "inanimate",
+    "т.": "instrumental",
+    "п.": "prepositional",
+    "кратк. форма": "short-form",
 }
 
 # Прочие сокращения
