@@ -170,6 +170,8 @@ class TestRUPage(TestCase):
     def test_level_3_pronunciation(self):
         self.wxr.wtp.start_page("wait")
         self.wxr.wtp.add_page("Шаблон:-en-", 10, "Английский")
+        self.wxr.wtp.add_page("Шаблон:гл en reg", 10, "")
+        self.wxr.wtp.add_page("Шаблон:сущ en", 10, "")
         self.assertEqual(
             parse_page(
                 self.wxr,

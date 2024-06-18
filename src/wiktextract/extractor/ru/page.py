@@ -148,6 +148,11 @@ def get_pos(
 def extract_morphological_section(
     wxr: WiktextractContext, page_data: list[WordEntry], level_node: WikiNode
 ) -> None:
+    param_tag_map = {
+        "степень": "comparative",  # Шаблон:inflection/ru/adj
+        "соотв": "perfective",  # Шаблон:Гл-блок
+    }
+
     pos_data = get_pos(wxr, level_node)
     if pos_data is not None:
         page_data[-1].pos = pos_data["pos"]
@@ -167,26 +172,29 @@ def extract_morphological_section(
                 parse_wikitext_forms_table(
                     wxr, page_data[-1], expanded_template
                 )
-            for expanded_node in expanded_template.children:
-                if isinstance(expanded_node, str):
-                    for text in expanded_node.split(","):
-                        text = text.strip()
-                        if text in MORPHOLOGICAL_TEMPLATE_TAGS:
-                            tr_tag = MORPHOLOGICAL_TEMPLATE_TAGS[text]
-                            if isinstance(tr_tag, str):
-                                page_data[-1].tags.append(tr_tag)
-                            elif isinstance(tr_tag, list):
-                                page_data[-1].tags.extend(tr_tag)
-            if "степень" in child_node.template_parameters:
-                forms_text = clean_node(
-                    wxr, None, child_node.template_parameters["степень"]
-                )
-                for form in forms_text.split(","):
-                    form = form.strip()
-                    if form != "":
-                        page_data[-1].forms.append(
-                            Form(form=form, tags=["comparative"])
-                        )
+
+            for node in expanded_template.children:
+                node_text = clean_node(wxr, page_data[-1], node)
+                for text in node_text.split(","):
+                    text = text.strip()
+                    if text in MORPHOLOGICAL_TEMPLATE_TAGS:
+                        tr_tag = MORPHOLOGICAL_TEMPLATE_TAGS[text]
+                        if isinstance(tr_tag, str):
+                            page_data[-1].tags.append(tr_tag)
+                        elif isinstance(tr_tag, list):
+                            page_data[-1].tags.extend(tr_tag)
+
+            for param, tag in param_tag_map.items():
+                if param in child_node.template_parameters:
+                    forms_text = clean_node(
+                        wxr, None, child_node.template_parameters[param]
+                    )
+                    for form in forms_text.split(","):
+                        form = form.strip()
+                        if form != "":
+                            page_data[-1].forms.append(
+                                Form(form=form, tags=[tag])
+                            )
 
 
 def parse_section(

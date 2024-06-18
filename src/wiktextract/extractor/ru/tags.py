@@ -408,6 +408,14 @@ MORPHOLOGICAL_TEMPLATE_TAGS = {
     "качественное": "qualitative",
     "относительное": "relative",
     "притяжательное": "possessive",
+    # verb tags from "Шаблон:Гл-блок"
+    "совершенный вид": "perfect",
+    "несовершенный вид": "imperfective",
+    "двувидовой": "biaspectual",
+    "непереходный": "intransitive",
+    "переходный": "transitive",
+    "безличный": "impersonal",
+    "возвратный": "reflexive",
 }
 
 ALL_TAGS = {

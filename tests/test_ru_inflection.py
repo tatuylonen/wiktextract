@@ -71,7 +71,7 @@ class TestLinkage(TestCase):
                 },
                 {
                     "form": "ру́сскую",
-                    "raw_tags": [
+                    "tags": [
                         "singular",
                         "feminine",
                         "accusative",
