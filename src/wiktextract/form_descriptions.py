@@ -1857,7 +1857,7 @@ def parse_word_head(
     # Check for certain endings in head (mostly for compatibility with weird
     # heads, e.g. rata/Romanian "1st conj." at end)
     m = re.search(head_end_re, base)
-    tags: Union[tuple[str, ...], list[str]]
+    tags: Union[tuple[str, ...], list[str]] = []
     if m:
         tags = head_end_map[m.group(1).lower()].split()
         data_extend(data, "tags", tags)
