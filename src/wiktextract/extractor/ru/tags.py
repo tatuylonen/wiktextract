@@ -396,6 +396,10 @@ MORPHOLOGICAL_TEMPLATE_TAGS = {
     "2-е": "declension-2",
     "3-е": "declension-3",
     "2-е (5-e)": ["declension-1", "declension-5"],
+    # Шаблон:inflection/ru/adj
+    "качественное": "qualitative",
+    "относительное": "relative",
+    "притяжательное": "possessive",
 }
 
 ALL_TAGS = {

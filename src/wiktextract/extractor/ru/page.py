@@ -15,7 +15,7 @@ from .linkage import (
     extract_phrase_section,
     process_related_block_template,
 )
-from .models import AltForm, Sense, Sound, WordEntry
+from .models import AltForm, Form, Sense, Sound, WordEntry
 from .pronunciation import extract_pronunciation
 from .section_titles import LINKAGE_TITLES, POS_TEMPLATE_NAMES, POS_TITLES
 from .tags import MORPHOLOGICAL_TEMPLATE_TAGS
@@ -157,7 +157,7 @@ def extract_morphological_section(
     ):
         if child_node.kind in LEVEL_KIND_FLAGS:
             parse_section(wxr, page_data, child_node)
-        elif isinstance(child_node, WikiNode):
+        elif isinstance(child_node, TemplateNode):
             expanded_template = wxr.wtp.parse(
                 wxr.wtp.node_to_wikitext(child_node), expand_all=True
             )
@@ -177,6 +177,16 @@ def extract_morphological_section(
                                 page_data[-1].tags.append(tr_tag)
                             elif isinstance(tr_tag, list):
                                 page_data[-1].tags.extend(tr_tag)
+            if "степень" in child_node.template_parameters:
+                forms_text = clean_node(
+                    wxr, None, child_node.template_parameters["степень"]
+                )
+                for form in forms_text.split(","):
+                    form = form.strip()
+                    if form != "":
+                        page_data[-1].forms.append(
+                            Form(form=form, tags=["comparative"])
+                        )
 
 
 def parse_section(
