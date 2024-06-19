@@ -131,12 +131,9 @@ def process_translation_templates(
             wxr, None, template_node.template_parameters.get("tradi", "")
         )
         if 3 in template_node.template_parameters:
-            tags = []
             for tag_character in template_node.template_parameters[3]:
                 if tag_character in TRAD_TAGS:
-                    tags.append(TRAD_TAGS[tag_character])
-            if len(tags) > 0:
-                translation_data.tags.append(" ".join(tags))
+                    translation_data.tags.append(TRAD_TAGS[tag_character])
         if translation_data.lang_code == "":
             translation_data.lang_code = template_node.template_parameters.get(
                 1, ""
