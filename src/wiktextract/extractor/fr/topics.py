@@ -279,6 +279,7 @@ TOPIC_TAGS: dict[str, str] = {
     "boulangerie": "cooking",
     "bourse": "finance",
     "brasserie": "beverages manufacturing",
+    "équitation": "equestrianism",
     # Catégorie:Modèles de thématique
     "phycologie": "phycology",
     "bière": "beer",
@@ -298,4 +299,18 @@ TOPIC_TAGS: dict[str, str] = {
     "science-fiction, univers de star wars": "science-fiction",
     "textile": "textiles",
     "transport": "transport",
+}
+
+SLANG_TOPICS = {
+    # https://fr.wiktionary.org/wiki/Modèle:argot
+    "argot scolaire": "school",
+    "argot polytechnicien": "polytechnicien",
+    "argot policier": "police",
+    "argot internet": "Internet",
+    "argot des typographes": "typography",
+    "argot militaire": "military",
+    "argot poilu": "poilu",
+    "argot des voleurs": "thieves",
+    "argot des gadz’arts": "Gadz'Arts",
+    "langage sms": "SMS",
 }

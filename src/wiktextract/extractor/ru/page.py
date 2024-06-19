@@ -140,10 +140,6 @@ def get_pos(
         if pos_string in text.lower():
             return POS_TITLES[pos_string]
 
-    if "форма" in text.lower():
-        # XXX: Decide what to do with form entries
-        return
-
 
 def extract_morphological_section(
     wxr: WiktextractContext, page_data: list[WordEntry], level_node: WikiNode

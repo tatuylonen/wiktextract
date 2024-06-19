@@ -257,7 +257,7 @@ def find_form_of_word(
         if isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
             form_of = clean_node(wxr, None, node)
         elif isinstance(node, TemplateNode):
-            if node.template_name == "mutation de":
+            if node.template_name in ("mutation de", "lien"):
                 # https://fr.wiktionary.org/wiki/Modèle:mutation_de
                 form_of = clean_node(
                     wxr, None, node.template_parameters.get(1, "")

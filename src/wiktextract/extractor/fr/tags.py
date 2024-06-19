@@ -144,6 +144,11 @@ OTHER_GRAMMATICAL_TAGS: dict[str, str] = {
     "anglicisme": "Anglicism",
     "pronominal": "pronominal",
     "diminutif": "diminutive",
+    "réfléchi": "reflexive",  # Modèle:réfl
+    "réciproque": "reciprocal",  # Modèle:réciproque
+    "impersonnel": "impersonal",  # Modèle:impers
+    "transitif": "transitive",  # Modèle:t
+    "intransitif": "intransitive",  # Modèle:i
 }
 
 # template text before gloss
@@ -153,6 +158,18 @@ SENSE_TAGS: dict[str, str] = {
     # Catégorie:Modèles de genre textuel
     # Catégorie:Modèles de registre
     "sens figuré": "figuratively",
+    "sens propre": "literally",
+    "par métonymie": "metonymically",  # Modèle:par métonymie
+    "par hyperbole": "hyperbole",
+    "par extension": "broadly",
+    "par analogie": "analogy",
+    "en particulier": "especially",
+    "par litote": "litotes",
+    "par euphémisme": "euphemism",
+    "spécifiquement": "specifically",
+    "génériquement": "generically",
+    "spécialement": "especially",
+    "généralement": "generally",
     "enclise": "enclitic",
     "idiotisme": "idiomatic",
     "péjoratif": "pejorative",
@@ -163,8 +180,6 @@ SENSE_TAGS: dict[str, str] = {
     "argot": "slang",
     "rare": "rare",
     "plus rare": "rare",
-    "par extension": "broadly",
-    "en particulier": "especially",
     "littéraire": "literary",  # Modèle:littéraire
     "poétique": "poetic",  # Modèle:poétique
     # "didactique": "",  # Modèle:didactique
@@ -245,6 +260,11 @@ ZH_PRON_TAGS = {
     "zhengzhang": "Zhengzhang",
 }
 
+ASPECT_TAGS = {
+    "perfectif": "perfective",  # Modèle:perfectif
+    "imperfectif": "imperfective",  # Modèle:imperfectif
+}
+
 GRAMMATICAL_TAGS: dict[str, Union[str, list[str]]] = {
     **GENDER_TAGS,
     **NUMBER_TAGS,
@@ -263,6 +283,7 @@ GRAMMATICAL_TAGS: dict[str, Union[str, list[str]]] = {
     **VOICE_TAGS,
     **LEXIQUE_TAGS,
     **ZH_PRON_TAGS,
+    **ASPECT_TAGS,
 }
 
 
@@ -271,7 +292,7 @@ def translate_raw_tags(
     table_template_name: str = "",
     tag_dict: dict[str, str] = GRAMMATICAL_TAGS,
 ) -> WordEntry:
-    from .topics import TOPIC_TAGS
+    from .topics import SLANG_TOPICS, TOPIC_TAGS
 
     raw_tags = []
     for raw_tag in data.raw_tags:
@@ -284,6 +305,10 @@ def translate_raw_tags(
                 data.tags.extend(tr_tag)
         elif hasattr(data, "topics") and raw_tag_lower in TOPIC_TAGS:
             data.topics.append(TOPIC_TAGS[raw_tag_lower])
+        elif hasattr(data, "topics") and raw_tag_lower in SLANG_TOPICS:
+            data.topics.append(SLANG_TOPICS[raw_tag_lower])
+            if "slang" not in data.tags:
+                data.tags.append("slang")
         else:
             raw_tags.append(raw_tag)
     data.raw_tags = raw_tags

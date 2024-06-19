@@ -53,6 +53,8 @@ def extract_form_line(
                 process_conj_template(wxr, node, page_data)
             elif node.template_name in ASPIRATED_H_TEMPLATES:
                 continue
+            elif node.template_name == "lien pronominal":
+                process_lien_pronominal(wxr, node, page_data)
             else:
                 raw_tag = clean_node(wxr, page_data[-1], node)
                 expanded_template = wxr.wtp.parse(
@@ -218,3 +220,19 @@ def process_conj_template(
         )
     if len(tag) > 0:
         page_data[-1].raw_tags.append(tag)
+
+
+def process_lien_pronominal(
+    wxr: WiktextractContext,
+    template_node: TemplateNode,
+    page_data: list[WordEntry],
+) -> None:
+    # https://fr.wiktionary.org/wiki/Modèle:lien_pronominal
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(template_node), expand_all=True
+    )
+    for bdi_tag in expanded_node.find_html_recursively("bdi"):
+        form = Form(form=clean_node(wxr, None, bdi_tag), tags=["pronominal"])
+        if form.form != "":
+            page_data[-1].forms.append(form)
+    clean_node(wxr, page_data[-1], expanded_node)
