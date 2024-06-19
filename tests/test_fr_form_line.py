@@ -183,3 +183,21 @@ class TestFormLine(TestCase):
             [s.model_dump(exclude_defaults=True) for s in page_data[-1].sounds],
             [{"ipa": "^((h aspiré))\\e.las\\"}],
         )
+
+    def test_lien_pronominal(self):
+        self.wxr.wtp.start_page("définir")
+        self.wxr.wtp.add_page(
+            "Modèle:lien pronominal",
+            10,
+            body="""(''pronominal'' : '''<bdi lang="fr" xml:lang="fr" class="lang-fr">[[se&nbsp;définir#fr|se&nbsp;définir]]</bdi>''')[[Catégorie:Verbes pronominaux en français]]""",
+        )
+        page_data = [WordEntry(word="définir", lang_code="fr", lang="Français")]
+        root = self.wxr.wtp.parse("'''définir''' {{lien pronominal}}")
+        extract_form_line(self.wxr, page_data, root.children)
+        self.assertEqual(
+            page_data[-1].categories, ["Verbes pronominaux en français"]
+        )
+        self.assertEqual(
+            [f.model_dump(exclude_defaults=True) for f in page_data[-1].forms],
+            [{"form": "se définir", "tags": ["pronominal"]}],
+        )

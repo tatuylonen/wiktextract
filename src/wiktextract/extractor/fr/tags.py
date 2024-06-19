@@ -144,6 +144,11 @@ OTHER_GRAMMATICAL_TAGS: dict[str, str] = {
     "anglicisme": "Anglicism",
     "pronominal": "pronominal",
     "diminutif": "diminutive",
+    "réfléchi": "reflexive",  # Modèle:réfl
+    "réciproque": "reciprocal",  # Modèle:réciproque
+    "impersonnel": "impersonal",  # Modèle:impers
+    "transitif": "transitive",  # Modèle:t
+    "intransitif": "intransitive",  # Modèle:i
 }
 
 # template text before gloss
