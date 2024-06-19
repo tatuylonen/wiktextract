@@ -300,3 +300,17 @@ TOPIC_TAGS: dict[str, str] = {
     "textile": "textiles",
     "transport": "transport",
 }
+
+SLANG_TOPICS = {
+    # https://fr.wiktionary.org/wiki/Modèle:argot
+    "argot scolaire": "school",
+    "argot polytechnicien": "polytechnicien",
+    "argot policier": "police",
+    "argot internet": "Internet",
+    "argot des typographes": "typography",
+    "argot militaire": "military",
+    "argot poilu": "poilu",
+    "argot des voleurs": "thieves",
+    "argot des gadz’arts": "Gadz'Arts",
+    "langage sms": "SMS",
+}

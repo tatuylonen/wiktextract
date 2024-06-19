@@ -292,7 +292,7 @@ def translate_raw_tags(
     table_template_name: str = "",
     tag_dict: dict[str, str] = GRAMMATICAL_TAGS,
 ) -> WordEntry:
-    from .topics import TOPIC_TAGS
+    from .topics import SLANG_TOPICS, TOPIC_TAGS
 
     raw_tags = []
     for raw_tag in data.raw_tags:
@@ -305,6 +305,10 @@ def translate_raw_tags(
                 data.tags.extend(tr_tag)
         elif hasattr(data, "topics") and raw_tag_lower in TOPIC_TAGS:
             data.topics.append(TOPIC_TAGS[raw_tag_lower])
+        elif hasattr(data, "topics") and raw_tag_lower in SLANG_TOPICS:
+            data.topics.append(SLANG_TOPICS[raw_tag_lower])
+            if "slang" not in data.tags:
+                data.tags.append("slang")
         else:
             raw_tags.append(raw_tag)
     data.raw_tags = raw_tags
