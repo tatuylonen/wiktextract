@@ -279,6 +279,7 @@ TOPIC_TAGS: dict[str, str] = {
     "boulangerie": "cooking",
     "bourse": "finance",
     "brasserie": "beverages manufacturing",
+    "équitation": "equestrianism",
     # Catégorie:Modèles de thématique
     "phycologie": "phycology",
     "bière": "beer",

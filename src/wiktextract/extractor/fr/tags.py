@@ -158,6 +158,18 @@ SENSE_TAGS: dict[str, str] = {
     # Catégorie:Modèles de genre textuel
     # Catégorie:Modèles de registre
     "sens figuré": "figuratively",
+    "sens propre": "literally",
+    "par métonymie": "metonymically",  # Modèle:par métonymie
+    "par hyperbole": "hyperbole",
+    "par extension": "broadly",
+    "par analogie": "analogy",
+    "en particulier": "especially",
+    "par litote": "litotes",
+    "par euphémisme": "euphemism",
+    "spécifiquement": "specifically",
+    "génériquement": "generically",
+    "spécialement": "especially",
+    "généralement": "generally",
     "enclise": "enclitic",
     "idiotisme": "idiomatic",
     "péjoratif": "pejorative",
@@ -168,8 +180,6 @@ SENSE_TAGS: dict[str, str] = {
     "argot": "slang",
     "rare": "rare",
     "plus rare": "rare",
-    "par extension": "broadly",
-    "en particulier": "especially",
     "littéraire": "literary",  # Modèle:littéraire
     "poétique": "poetic",  # Modèle:poétique
     # "didactique": "",  # Modèle:didactique
@@ -250,6 +260,11 @@ ZH_PRON_TAGS = {
     "zhengzhang": "Zhengzhang",
 }
 
+ASPECT_TAGS = {
+    "perfectif": "perfective",  # Modèle:perfectif
+    "imperfectif": "imperfective",  # Modèle:imperfectif
+}
+
 GRAMMATICAL_TAGS: dict[str, Union[str, list[str]]] = {
     **GENDER_TAGS,
     **NUMBER_TAGS,
@@ -268,6 +283,7 @@ GRAMMATICAL_TAGS: dict[str, Union[str, list[str]]] = {
     **VOICE_TAGS,
     **LEXIQUE_TAGS,
     **ZH_PRON_TAGS,
+    **ASPECT_TAGS,
 }
 
 
