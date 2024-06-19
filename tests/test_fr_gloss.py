@@ -641,3 +641,31 @@ class TestFrGloss(TestCase):
                 },
             ],
         )
+
+    def test_lien_form_of(self):
+        self.wxr.wtp.start_page("écuyère")
+        self.wxr.wtp.add_page("Modèle:langue", 10, "Français")
+        self.wxr.wtp.add_page("Modèle:S", 10, "Forme d’adjectif")
+        self.wxr.wtp.add_page(
+            "Modèle:lien",
+            10,
+            """<bdi lang="fr" xml:lang="fr" class="lang-fr">[[écuyer#fr-adj|écuyer]]</bdi>""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "écuyère",
+            """== {{langue|fr}} ==
+=== {{S|adjectif|fr|flexion}} ===
+'''écuyères'''
+# ''Féminin pluriel de'' {{lien|écuyer|fr|adj}}.
+""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"],
+            [
+                {
+                    "form_of": [{"word": "écuyer"}],
+                    "glosses": ["Féminin pluriel de écuyer."],
+                },
+            ],
+        )
