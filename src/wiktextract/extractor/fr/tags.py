@@ -149,6 +149,7 @@ OTHER_GRAMMATICAL_TAGS: dict[str, str] = {
     "impersonnel": "impersonal",  # Modèle:impers
     "transitif": "transitive",  # Modèle:t
     "intransitif": "intransitive",  # Modèle:i
+    "invariable": "invariable",  # Modèle:invar
 }
 
 # template text before gloss

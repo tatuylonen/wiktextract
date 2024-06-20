@@ -27,7 +27,7 @@ class TestEtymology(TestCase):
         self.wxr.wtp.start_page("")
         root = self.wxr.wtp.parse(": {{ébauche-étym|de}}")
         etymology_data = extract_etymology(self.wxr, root, None)
-        self.assertIsNone(etymology_data)
+        self.assertEqual(len(etymology_data), 0)
 
     def test_list_etymologies(self):
         # https://fr.wiktionary.org/wiki/lenn
@@ -264,7 +264,9 @@ class TestEtymology(TestCase):
         self.wxr.wtp.start_page("autrice")
         root = self.wxr.wtp.parse("Paragraph 1\nParagraph 2")
         etymology_data = extract_etymology(self.wxr, root, None)
-        self.assertEqual(etymology_data, {None: ["Paragraph 1\nParagraph 2"]})
+        self.assertEqual(
+            etymology_data, {("", ""): ["Paragraph 1\nParagraph 2"]}
+        )
 
     def test_etymology_examples(self):
         self.wxr.wtp.start_page("autrice")
@@ -293,4 +295,25 @@ etymology text
                     "ref": "source text",
                 }
             ],
+        )
+
+    def test_nata(self):
+        self.wxr.wtp.start_page("nata")
+        root = self.wxr.wtp.parse(
+            """: (''[[#fr-nom-1|Nom commun 1]]'') De l’espagnol nata, « crème », d'origine inconnue.
+: (''[[#fr-nom-2|Nom commun 2]]'') {{ébauche-étym|fr}}
+: (''[[#fr-nom-3|Nom commun 3]]'') Du kanak de Maré ou nengone nata (« messager ; celui qui raconte »)
+"""
+        )
+        etymology_data = extract_etymology(self.wxr, root, None)
+        self.assertEqual(
+            etymology_data,
+            {
+                ("fr-nom-1", "Nom commun 1"): [
+                    "De l’espagnol nata, « crème », d'origine inconnue."
+                ],
+                ("fr-nom-3", "Nom commun 3"): [
+                    "Du kanak de Maré ou nengone nata (« messager ; celui qui raconte »)"
+                ],
+            },
         )
