@@ -23,25 +23,36 @@ def extract_translation(
             if level_node_child.kind == NodeKind.TEMPLATE:
                 # get sense from "trad-début" template
                 process_translation_templates(
-                    wxr, level_node_child, page_data, base_translation_data
+                    wxr,
+                    level_node_child,
+                    page_data,
+                    base_translation_data,
+                    None,
                 )
             elif level_node_child.kind == NodeKind.LIST:
                 for list_item_node in level_node_child.find_child(
                     NodeKind.LIST_ITEM
                 ):
                     previous_node = None
+                    translation_data = None
                     for child_node in list_item_node.filter_empty_str_child():
                         if isinstance(child_node, WikiNode):
                             if child_node.kind == NodeKind.TEMPLATE:
-                                process_translation_templates(
-                                    wxr,
-                                    child_node,
-                                    page_data,
-                                    base_translation_data,
+                                translation_data = (
+                                    process_translation_templates(
+                                        wxr,
+                                        child_node,
+                                        page_data,
+                                        base_translation_data,
+                                        translation_data,
+                                    )
                                 )
                             elif child_node.kind == NodeKind.ITALIC:
                                 process_italic_node(
-                                    wxr, child_node, previous_node, page_data
+                                    wxr,
+                                    child_node,
+                                    previous_node,
+                                    translation_data,
                                 )
                             previous_node = child_node
             elif level_node_child.kind in LEVEL_KIND_FLAGS:
@@ -54,7 +65,7 @@ def process_italic_node(
     wxr: WiktextractContext,
     italic_node: WikiNode,
     previous_node: Optional[WikiNode],
-    page_data: list[WordEntry],
+    translation_data: Optional[Translation],
 ) -> None:
     # add italic text after a "trad" template as a tag
     tag = clean_node(wxr, None, italic_node)
@@ -64,12 +75,12 @@ def process_italic_node(
         and previous_node is not None
         and previous_node.kind == NodeKind.TEMPLATE
         and previous_node.template_name.startswith("trad")
-        and len(page_data[-1].translations) > 0
+        and translation_data is not None
     ):
         tag = tag.strip("()")
         if len(tag) > 0:
-            page_data[-1].translations[-1].raw_tags.append(tag)
-            translate_raw_tags(page_data[-1].translations[-1])
+            translation_data.raw_tags.append(tag)
+            translate_raw_tags(translation_data)
 
 
 def process_translation_templates(
@@ -77,7 +88,8 @@ def process_translation_templates(
     template_node: TemplateNode,
     page_data: list[WordEntry],
     base_translation_data: Translation,
-) -> None:
+    translation_data: Optional[Translation],
+) -> Optional[Translation]:
     if template_node.template_name == "trad-fin":
         # ignore translation end template
         return
@@ -144,11 +156,12 @@ def process_translation_templates(
             ).capitalize()
         if len(translation_data.word) > 0:
             page_data[-1].translations.append(translation_data)
-    elif len(page_data[-1].translations) > 0:
+    elif translation_data is not None:
         tag = clean_node(wxr, None, template_node).strip("()")
         if len(tag) > 0:
-            page_data[-1].translations[-1].raw_tags.append(tag)
-            translate_raw_tags(page_data[-1].translations[-1])
+            translation_data.raw_tags.append(tag)
+            translate_raw_tags(translation_data)
+    return translation_data
 
 
 # https://fr.wiktionary.org/wiki/Modèle:trad
