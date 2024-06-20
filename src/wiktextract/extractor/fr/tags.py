@@ -16,16 +16,30 @@ GENDER_TAGS: dict[str, Union[str, list[str]]] = {
     "masculin et féminin identiques": ["masculine", "feminine"],
     # table header: https://fr.wiktionary.org/wiki/Modèle:fr-rég
     "masculin et féminin": ["masculine", "feminine"],
+    # "Modèle:mf ?", "Modèle:fm ?"
+    "masculin ou féminin (l’usage hésite)": ["masculine", "feminine"],
+    "féminin ou masculin (l’usage hésite)": ["feminine", "masculine"],
+    "invariable": "invariable",  # Modèle:invar
 }
 
 # https://en.wikipedia.org/wiki/Grammatical_number
-NUMBER_TAGS: dict[str, str] = {
+NUMBER_TAGS: dict[str, Union[str, list[str]]] = {
     "singulier": "singular",
     "pluriel": "plural",
     "duel": "dual",
     "collectif": "collective",
     "singulatif": "singulative",
     "indénombrable": "uncountable",  # sv-nom-c-ind
+    "au singulier": "singular",
+    "au singulier uniquement": "singular-only",
+    "au pluriel": "plural",
+    "au pluriel uniquement": "plural-only",
+    "singulier et pluriel identiques": ["singular", "plural"],
+    "nom collectif": "collective",
+    # "générique": "",  # Modèle:g
+    # "nom d'unité": "",  # Modèle:nu
+    "généralement indénombrable": "uncountable",
+    "dénombrable": "countable",
 }
 
 # https://en.wikipedia.org/wiki/Grammatical_mood
@@ -149,7 +163,6 @@ OTHER_GRAMMATICAL_TAGS: dict[str, str] = {
     "impersonnel": "impersonal",  # Modèle:impers
     "transitif": "transitive",  # Modèle:t
     "intransitif": "intransitive",  # Modèle:i
-    "invariable": "invariable",  # Modèle:invar
 }
 
 # template text before gloss
@@ -194,6 +207,7 @@ SENSE_TAGS: dict[str, str] = {
     # Catégorie:Modèles de thématique
     "anglicisme informatique": "Anglicism",
     "proverbe": "proverb",
+    "collectivement": "collectively",
 }
 
 # https://en.wikipedia.org/wiki/Voice_(grammar)
