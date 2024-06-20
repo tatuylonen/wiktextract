@@ -27,7 +27,9 @@ def extract_form_line(
     A line of wikitext between pos subtitle and the first gloss, contains IPA,
     gender and inflection forms.
     """
-    IGNORE_TEMPLATES = frozenset(["voir-conj"])
+    IGNORE_TEMPLATES = frozenset(
+        ["voir-conj", "genre ?", "nombre ?", "pluriel ?"]
+    )
 
     pre_template_name = ""
     for index, node in enumerate(nodes):
@@ -78,7 +80,9 @@ def extract_form_line(
                         raw_tag.strip("()")
                     )
                 elif len(raw_tag.strip("()")) > 0:
-                    page_data[-1].raw_tags.append(raw_tag.strip("()"))
+                    if raw_tag.startswith("(") and raw_tag.endswith(")"):
+                        raw_tag = raw_tag.strip("()")
+                    page_data[-1].raw_tags.append(raw_tag)
 
             pre_template_name = node.template_name
         elif isinstance(node, WikiNode) and node.kind == NodeKind.ITALIC:
