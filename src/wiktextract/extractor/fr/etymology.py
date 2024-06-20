@@ -13,7 +13,7 @@ EtymologyData = dict[tuple[str, str], list[str]]
 
 def extract_etymology(
     wxr: WiktextractContext, level_node: LevelNode, base_data: WordEntry
-) -> Optional[EtymologyData]:
+) -> EtymologyData:
     etymology_dict: EtymologyData = defaultdict(list)
     level_node_index = len(level_node.children)
     pos_id = ""
@@ -27,11 +27,6 @@ def extract_etymology(
             if title_text == "Attestations historiques":
                 extract_etymology_examples(wxr, node, base_data)
         elif node.kind == NodeKind.LIST:
-            # ignore missing etymology template "ébauche-étym"
-            for template_node in node.find_child_recursively(NodeKind.TEMPLATE):
-                if template_node.template_name == "ébauche-étym":
-                    return
-
             for etymology_item in node.find_child(NodeKind.LIST_ITEM):
                 etymology_data = find_pos_in_etymology_list(wxr, etymology_item)
                 if etymology_data is not None:
@@ -54,7 +49,11 @@ def extract_etymology(
             wxr, None, level_node.children[:level_node_index]
         )
         if len(etymology_text) > 0:
-            etymology_dict[None].append(etymology_text)
+            etymology_dict[("", "")].append(etymology_text)
+
+    if etymology_dict.get(("", "")) == [" "]:
+        # remove "ébauche-étym" template placeholder
+        del etymology_dict[("", "")]
 
     return etymology_dict
 
@@ -66,6 +65,10 @@ def find_pos_in_etymology_list(
     Return tuple of POS id, title, and etymology text if the passed list item
     node starts with italic POS node or POS template, otherwise return `None`.
     """
+    for template_node in list_item_node.find_child(NodeKind.TEMPLATE):
+        if template_node.template_name == "ébauche-étym":
+            return ("", "", " ")  # missing etymology
+
     for index, node in list_item_node.find_child(
         NodeKind.TEMPLATE | NodeKind.LINK | NodeKind.ITALIC, True
     ):
@@ -129,7 +132,7 @@ def insert_etymology_data(
                 )
 
     for pos_id_title, etymology_texts in etymology_data.items():
-        if pos_id_title is None:  # add to all sense dictionaries
+        if pos_id_title == ("", ""):  # add to all sense dictionaries
             for sense_data_list in sense_dict.values():
                 for sense_data in sense_data_list:
                     sense_data.etymology_texts = etymology_texts

@@ -231,3 +231,36 @@ class TestTranslation(TestCase):
                 }
             ],
         )
+
+    def test_cf_template(self):
+        # cf template shouldn't be added as tag to the previous tr data
+        self.wxr.wtp.start_page("marron")
+        self.wxr.wtp.add_page("Modèle:T", 10, "Norvégien (bokmål)")
+        root = self.wxr.wtp.parse(
+            """{{trad-début|Coup de poing|3}}
+* {{T|nb}} : {{trad-|nb|knyttneveslag|n}}
+{{trad-fin}}
+
+{{trad-début|Marron d’Inde|4}}
+* {{cf|marron d’Inde}}
+{{trad-fin}}"""
+        )
+        base_data = WordEntry(word="marron", lang_code="fr", lang="Français")
+        page_data = [base_data.model_copy(deep=True)]
+        extract_translation(self.wxr, page_data, base_data, root)
+        self.assertEqual(
+            [
+                t.model_dump(exclude_defaults=True)
+                for t in page_data[-1].translations
+            ],
+            [
+                {
+                    "lang": "Norvégien (bokmål)",
+                    "lang_code": "nb",
+                    "sense": "Coup de poing",
+                    "sense_index": 3,
+                    "tags": ["neuter"],
+                    "word": "knyttneveslag",
+                }
+            ],
+        )

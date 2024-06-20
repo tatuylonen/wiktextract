@@ -44,7 +44,7 @@ def parse_section(
     page_data: list[WordEntry],
     base_data: WordEntry,
     level_node: WikiNode,
-) -> Optional[list[EtymologyData]]:
+) -> Optional[EtymologyData]:
     # Page structure: https://fr.wiktionary.org/wiki/Wiktionnaire:Structure_des_pages
     for level_node_template in level_node.find_content(NodeKind.TEMPLATE):
         if level_node_template.template_name == "S":
