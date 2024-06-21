@@ -107,10 +107,10 @@ def process_pos_section(
     base_data: WordEntry,
     level_node: LevelNode,
 ) -> None:
-    pos_arguments = []
+    pos_data_list = []
     for template_node in level_node.find_content(NodeKind.TEMPLATE):
         if template_node.template_name == "Wortart":
-            pos_argument = template_node.template_parameters.get(1, "")
+            pos_argument = template_node.template_parameters.get(1, "").strip()
             if pos_argument in IGNORE_POS:
                 continue
             if pos_argument in FORM_POS:
@@ -118,7 +118,20 @@ def process_pos_section(
                 # at all or redundant with form tables.
                 continue
             if pos_argument in POS_SECTIONS:
-                pos_arguments.append(pos_argument)
+                pos_data_list.append(POS_SECTIONS[pos_argument])
+            elif pos_argument == "Gebundenes Lexem":
+                if wxr.wtp.title.startswith("-") and wxr.wtp.title.endswith(
+                    "-"
+                ):
+                    pos_data_list.append({"pos": "infix", "tags": ["morpheme"]})
+                elif wxr.wtp.title.endswith("-"):
+                    pos_data_list.append(
+                        {"pos": "prefix", "tags": ["morpheme"]}
+                    )
+                elif wxr.wtp.title.startswith("-"):
+                    pos_data_list.append(
+                        {"pos": "suffix", "tags": ["morpheme"]}
+                    )
             else:
                 wxr.wtp.debug(
                     f"Unknown Wortart template POS argument: {pos_argument}",
@@ -127,15 +140,15 @@ def process_pos_section(
         elif template_node.template_name in GENDER_TEMPLATES:
             base_data.tags.extend(GENDER_TEMPLATES[template_node.template_name])
 
-    if len(pos_arguments) == 0:
+    if len(pos_data_list) == 0:
         return
-    for pos_index, pos_argument in enumerate(pos_arguments):
-        pos = POS_SECTIONS[pos_argument]["pos"]
-        pos_tags = POS_SECTIONS[pos_argument].get("tags", [])
+    for pos_index, pos_data in enumerate(pos_data_list):
+        pos = pos_data["pos"]
+        pos_tags = pos_data.get("tags", [])
         base_data.tags.extend(pos_tags)
         if pos_index == 0:
             base_data.pos = pos
-        else:
+        elif pos != base_data.pos:
             base_data.other_pos.append(pos)
     page_data.append(base_data.model_copy(deep=True))
     wxr.wtp.start_subsection(clean_node(wxr, page_data[-1], level_node.largs))
