@@ -81,7 +81,9 @@ def find_pos_in_etymology_list(
             )
             for italic_node in expanded_template.find_child(NodeKind.ITALIC):
                 for link_node in italic_node.find_child(NodeKind.LINK):
-                    if link_node.largs[0][0].startswith("#"):
+                    if isinstance(
+                        link_node.largs[0][0], str
+                    ) and link_node.largs[0][0].startswith("#"):
                         pos_id = link_node.largs[0][0].removeprefix("#")
                         return (
                             pos_id,
@@ -90,7 +92,11 @@ def find_pos_in_etymology_list(
                                 wxr, None, list_item_node.children[index + 1 :]
                             ),
                         )
-        elif node.kind == NodeKind.LINK and node.largs[0][0].startswith("#"):
+        elif (
+            node.kind == NodeKind.LINK
+            and isinstance(node.largs[0][0], str)
+            and node.largs[0][0].startswith("#")
+        ):
             pos_id = node.largs[0][0].removeprefix("#")
             return (
                 pos_id,
@@ -99,7 +105,9 @@ def find_pos_in_etymology_list(
             )
         elif node.kind == NodeKind.ITALIC:
             for link_node in node.find_child(NodeKind.LINK):
-                if link_node.largs[0][0].startswith("#"):
+                if isinstance(link_node.largs[0][0], str) and link_node.largs[
+                    0
+                ][0].startswith("#"):
                     pos_id = link_node.largs[0][0].removeprefix("#")
                     return (
                         pos_id,

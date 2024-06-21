@@ -317,3 +317,16 @@ etymology text
                 ],
             },
         )
+
+    def test_non_str_link_node(self):
+        self.wxr.wtp.start_page("-huzunisha")
+        root = self.wxr.wtp.parse(
+            ": Dérivé du substantif [[''huzuni'']] (« tristesse »)."
+        )
+        etymology_data = extract_etymology(self.wxr, root, None)
+        self.assertEqual(
+            etymology_data,
+            {
+                ("", ""): ["Dérivé du substantif huzuni (« tristesse »)."],
+            },
+        )
