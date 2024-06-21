@@ -211,14 +211,15 @@ def parse_page(
             pos="unknown",
         )
         base_data.categories = categories.get("categories", [])
+        for template_node in level2_node.find_child(NodeKind.TEMPLATE):
+            if template_node.template_name == "zh-forms":
+                process_zh_forms(wxr, base_data, template_node)
+
         page_data.append(base_data.model_copy(deep=True))
         for level3_node in level2_node.find_child(NodeKind.LEVEL3):
             parse_section(wxr, page_data, base_data, level3_node)
         if not level2_node.contain_node(NodeKind.LEVEL3):
             process_low_quality_page(wxr, level2_node, page_data)
-        for template_node in level2_node.find_child(NodeKind.TEMPLATE):
-            if template_node.template_name == "zh-forms":
-                process_zh_forms(wxr, page_data[-1], base_data, template_node)
 
     for data in page_data:
         if len(data.senses) == 0:
@@ -267,7 +268,6 @@ def process_soft_redirect_template(
 
 def process_zh_forms(
     wxr: WiktextractContext,
-    word_entry: WordEntry,
     base_data: WordEntry,
     template_node: TemplateNode,
 ) -> None:
@@ -280,7 +280,6 @@ def process_zh_forms(
                 form=clean_node(wxr, None, p_value), tags=["Simplified Chinese"]
             )
             if len(form_data.form) > 0:
-                word_entry.forms.append(form_data)
                 base_data.forms.append(form_data)
         elif re.fullmatch(r"t\d+", p_name):
             form_data = Form(
@@ -288,16 +287,13 @@ def process_zh_forms(
                 tags=["Traditional Chinese"],
             )
             if len(form_data.form) > 0:
-                word_entry.forms.append(form_data)
                 base_data.forms.append(form_data)
         elif p_name == "alt":
             for form_text in clean_node(wxr, None, p_value).split(","):
                 texts = form_text.split("-")
                 form_data = Form(form=texts[0], raw_tags=texts[1:])
                 if len(form_data.form) > 0:
-                    word_entry.forms.append(form_data)
                     base_data.forms.append(form_data)
         elif p_name == "lit":
             lit = clean_node(wxr, None, p_value)
-            word_entry.literal_meaning = lit
             base_data.literal_meaning = lit
