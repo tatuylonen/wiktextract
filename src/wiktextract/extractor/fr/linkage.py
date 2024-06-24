@@ -97,6 +97,7 @@ def process_linkage_list(
         if sense_index != 0:
             linkage_data.sense_index = sense_index
         pending_tag = ""
+        inside_bracket = False
         for index, child_node in enumerate(  # remove nested lists
             template_or_list_node.invert_find_child(NodeKind.LIST)
         ):
@@ -105,6 +106,7 @@ def process_linkage_list(
             elif (
                 isinstance(child_node, WikiNode)
                 and child_node.kind == NodeKind.LINK
+                and not inside_bracket
             ):
                 linkage_data.word = clean_node(wxr, None, child_node)
             elif (
@@ -122,22 +124,27 @@ def process_linkage_list(
                     if isinstance(child_node, str)
                     else clean_node(wxr, page_data[-1], child_node)
                 )
+                if (
+                    tag_text.strip() in {",", "/", "(ou"}
+                    and linkage_data.word != ""
+                ):
+                    # list item has more than one word
+                    pre_data = getattr(page_data[-1], linkage_type)
+                    pre_data.append(linkage_data)
+                    linkage_data = Linkage(word="")
+                    continue
                 if tag_text.strip().startswith(
                     "("
                 ) and not tag_text.strip().endswith(")"):
                     pending_tag = tag_text
+                    inside_bracket = True
                     continue
                 elif not tag_text.strip().startswith(
                     "("
                 ) and tag_text.strip().endswith(")"):
                     tag_text = pending_tag + tag_text
                     pending_tag = ""
-                elif tag_text.strip() in {",", "/"}:
-                    # list item has more than one word
-                    pre_data = getattr(page_data[-1], linkage_type)
-                    pre_data.append(linkage_data)
-                    linkage_data = Linkage(word="")
-                    continue
+                    inside_bracket = False
                 elif len(pending_tag) > 0:
                     pending_tag += tag_text
                     continue
