@@ -279,3 +279,23 @@ class TestLinkage(TestCase):
                 {"word": "authoress", "tags": ["obsolete", "Anglicism"]},
             ],
         )
+
+    def test_alcool(self):
+        page_data = [WordEntry(word="alcool", lang_code="fr", lang="Français")]
+        self.wxr.wtp.start_page("alcool")
+        root = self.wxr.wtp.parse(
+            """* [[alcoolodépendance]] (ou [[alcoolo-dépendance]])
+* [[syndrome alcoolo-fœtal]] ([[SAF]])"""
+        )
+        extract_linkage(self.wxr, page_data, root, "dérivés")
+        self.assertEqual(
+            [
+                d.model_dump(exclude_defaults=True)
+                for d in page_data[-1].derived
+            ],
+            [
+                {"word": "alcoolodépendance"},
+                {"word": "alcoolo-dépendance"},
+                {"word": "syndrome alcoolo-fœtal", "raw_tags": ["SAF"]},
+            ],
+        )
