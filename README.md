@@ -7,6 +7,9 @@ This is a utility and Python package for extracting data from Wiktionary.
   suffix `.jsonl` for clarity. This will break download links, so please
   be aware. For more about `.jsonl`, please see https://jsonlines.org/*
 
+*2024-06-24: The above change has now been committed, and if the kaikki.org
+  html generation process succeeds we should see changes soon.* 
+
 Please report issues on github and we'll try to address them reasonably
 soon.
 
