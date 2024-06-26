@@ -46,10 +46,20 @@ class FormOf(TypedDict, total=False):
 LinkData = list[Sequence[str]]
 
 
+class PlusObjTemplateData(TypedDict, total=False):
+    tags: list[str]
+    words: list[str]
+    meaning: str
+
+
+ExtraTemplateData = Union[PlusObjTemplateData]
+
+
 class TemplateData(TypedDict, total=False):
     args: TemplateArgs
     expansion: str
     name: str
+    extra: ExtraTemplateData
 
 
 class DescendantData(TypedDict, total=False):
@@ -155,6 +165,7 @@ class WordData(TypedDict, total=False):
     hypernyms: list[LinkageData]
     hyponyms: list[LinkageData]
     inflection_templates: list[TemplateData]
+    info_templates: list[TemplateData]
     instances: list[LinkageData]
     lang: str
     lang_code: str

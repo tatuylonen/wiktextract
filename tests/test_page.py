@@ -676,3 +676,99 @@ foo
                 }
             ],
         )
+
+    @patch(
+        "wikitextprocessor.Wtp.get_page",
+        return_value=Page(
+            title="Template:+obj",
+            namespace_id=10,
+            body="[+accusative blu or ergative = MEANING]",
+        ),
+    )
+    def test_plusobj_template(self, mock_get_page):
+        """Testing info_templates, specifically Template:+obj. If +obj is ever
+        changed, this test won't be able to catch it; it would be handy to have
+        tests that check for this, but it's not feasible to require up-to-date
+        databases for testing.
+
+        GitHub issue #667
+        """
+        data = parse_page(
+            self.wxr,
+            "foo",
+            """
+==Czech==
+
+===Noun===
+foo {{+obj|cs|accusative|blu|or|ergative|means=MEANING}}
+
+# foobar {{+obj|cs|accusative|blu|or|ergative|means=MEANING}}
+""",
+        )
+        # from pprint import pp
+        # pp(data)
+        self.assertEqual(
+            data,
+            [
+                {
+                    "info_templates": [
+                        {
+                            "args": {
+                                "1": "cs",
+                                "2": "accusative",
+                                "3": "blu",
+                                "4": "or",
+                                "5": "ergative",
+                                "means": "MEANING",
+                            },
+                            "expansion": "[+accusative blu or "
+                            "ergative = MEANING]",
+                            "extra_data": {
+                                "meaning": "MEANING",
+                                "tags": ["ergative"],
+                                "words": ["accusative", "blu"],
+                            },
+                            "name": "+obj",
+                        }
+                    ],
+                    "lang": "Czech",
+                    "lang_code": "cs",
+                    "pos": "noun",
+                    "senses": [
+                        {
+                            "glosses": [
+                                "foobar [+accusative blu or "
+                                "ergative = MEANING]",
+                                "foobar",
+                            ],
+                            "info_templates": [
+                                {
+                                    "args": {
+                                        "1": "cs",
+                                        "2": "accusative",
+                                        "3": "blu",
+                                        "4": "or",
+                                        "5": "ergative",
+                                        "means": "MEANING",
+                                    },
+                                    "expansion": "[+accusative blu or "
+                                    "ergative = "
+                                    "MEANING]",
+                                    "extra_data": {
+                                        "meaning": "MEANING",
+                                        "tags": ["ergative"],
+                                        "words": ["accusative", "blu"],
+                                    },
+                                    "name": "+obj",
+                                }
+                            ],
+                            "raw_glosses": [
+                                "foobar [+accusative blu or ergative = "
+                                "MEANING]"
+                            ],
+                        }
+                    ],
+                    "word": "foo",
+                }
+            ],
+        )
