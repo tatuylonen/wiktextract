@@ -6,7 +6,7 @@ from wikitextprocessor.parser import LevelNode, WikiNode, WikiNodeChildrenList
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
-from ..share import create_audio_url_dict
+from ..share import set_sound_file_url_fields
 from .models import Sound, WordEntry
 
 
@@ -174,18 +174,9 @@ def extract_audio_file(
     template_params: dict[str, WikiNode],
     key: Union[str, int],
 ):
-    audio_file = clean_node(wxr, {}, template_params.get(key, ""))
-    if audio_file:
-        audio_url_dict = create_audio_url_dict(audio_file)
-        for dict_key, dict_value in audio_url_dict.items():
-            if dict_value:
-                if dict_key in sound.model_fields:
-                    setattr(sound, dict_key, dict_value)
-                else:
-                    wxr.wtp.debug(
-                        f"Unknown key {dict_key} in audio_url_dict",
-                        sortid="extractor/ru/pronunciation/add_audio_file/123",
-                    )
+    audio_file = clean_node(wxr, None, template_params.get(key, ""))
+    if audio_file != "":
+        set_sound_file_url_fields(wxr, audio_file, sound)
 
 
 def extract_tags(
@@ -245,8 +236,16 @@ def extract_pronunciation(
                 if processor:
                     processor(wxr, word_entry, child)
             elif template_name in ["audio", "аудио", "медиа"]:
-                # XXX: Process simple audio file templates
-                pass
+                audio_file = child.template_parameters.get(1, "").strip()
+                if audio_file != "":
+                    if len(word_entry.sounds) > 0:
+                        set_sound_file_url_fields(
+                            wxr, audio_file, word_entry.sounds[-1]
+                        )
+                    else:
+                        sound = Sound()
+                        set_sound_file_url_fields(wxr, audio_file, sound)
+                        word_entry.sounds.append(sound)
             else:
                 unprocessed_nodes.append(child)
         else:
