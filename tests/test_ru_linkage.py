@@ -8,13 +8,17 @@ from wiktextract.extractor.ru.linkage import (
     process_related_block_template,
 )
 from wiktextract.extractor.ru.models import WordEntry
+from wiktextract.extractor.ru.page import parse_page
 from wiktextract.wxr_context import WiktextractContext
 
 
 class TestLinkage(TestCase):
     def setUp(self) -> None:
         self.wxr = WiktextractContext(
-            Wtp(lang_code="ru"), WiktionaryConfig(dump_file_lang_code="ru")
+            Wtp(lang_code="ru"),
+            WiktionaryConfig(
+                dump_file_lang_code="ru", capture_language_codes=None
+            ),
         )
 
     def tearDown(self) -> None:
@@ -148,5 +152,48 @@ class TestLinkage(TestCase):
                     "word": "обжёгся на молоке, дует и на воду",
                     "raw_tags": ["Пословицы и поговорки"],
                 },
+            ],
+        )
+
+    def test_semantics_template(self):
+        self.wxr.wtp.add_page("Шаблон:-ru-", 10, "Русский")
+        self.assertEqual(
+            parse_page(
+                self.wxr,
+                "красный",
+                """= {{-ru-}} =
+
+=== Морфологические и синтаксические свойства ===
+{{прил ru 1*a/c"
+|основа = кра́сн
+|основа1 = кра́сен
+|основа2 = красн
+|тип=качественное
+}}
+
+=== Семантические свойства ===
+==== Значение ====
+# имеющий [[цвет]] [[кровь|крови]], [[червлёный]] {{семантика
+|синонимы=алый, червонный
+|антонимы=-
+}}
+# то же, что красивый {{семантика|синонимы=красивый}}""",
+            ),
+            [
+                {
+                    "lang": "Русский",
+                    "lang_code": "ru",
+                    "pos": "adj",
+                    "word": "красный",
+                    "senses": [
+                        {"glosses": ["имеющий цвет крови, червлёный"]},
+                        {"glosses": ["то же, что красивый"]},
+                    ],
+                    "synonyms": [
+                        {"word": "алый", "sense_index": 1},
+                        {"word": "червонный", "sense_index": 1},
+                        {"word": "красивый", "sense_index": 2},
+                    ],
+                }
             ],
         )

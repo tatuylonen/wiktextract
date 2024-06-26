@@ -9,6 +9,7 @@ from wikitextprocessor.parser import (
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .models import Linkage, WordEntry
+from .section_titles import LINKAGE_TITLES
 from .tags import translate_raw_tags
 
 
@@ -172,3 +173,20 @@ def extract_phrase_section(
 
     for next_level in level_node.find_child(LEVEL_KIND_FLAGS):
         extract_phrase_section(wxr, word_entry, next_level)
+
+
+def process_semantics_template(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    template_node: TemplateNode,
+    sense_index: int,
+) -> None:
+    # https://ru.wiktionary.org/wiki/Шаблон:семантика
+    for key, value in template_node.template_parameters.items():
+        if key in LINKAGE_TITLES and isinstance(value, str):
+            for word in value.split(","):
+                word = word.strip()
+                if word not in ("", "-"):
+                    getattr(word_entry, LINKAGE_TITLES[key]).append(
+                        Linkage(word=word, sense_index=sense_index)
+                    )
