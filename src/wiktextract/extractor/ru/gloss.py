@@ -11,6 +11,7 @@ from wikitextprocessor.parser import (
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .example import process_example_template
+from .linkage import process_semantics_template
 from .models import Linkage, Sense, WordEntry
 from .section_titles import LINKAGE_TITLES
 from .tags import translate_raw_tags
@@ -87,8 +88,10 @@ def extract_gloss(
     wxr: WiktextractContext, word_entry: WordEntry, level_node: WikiNode
 ) -> None:
     has_gloss_list = False
-    for list_item in level_node.find_child_recursively(NodeKind.LIST_ITEM):
-        process_gloss_nodes(wxr, word_entry, list_item.children)
+    for sense_index, list_item in enumerate(
+        level_node.find_child_recursively(NodeKind.LIST_ITEM), 1
+    ):
+        process_gloss_nodes(wxr, word_entry, list_item.children, sense_index)
         has_gloss_list = True
     if not has_gloss_list:
         # no list or empty list
@@ -96,6 +99,7 @@ def extract_gloss(
             wxr,
             word_entry,
             list(level_node.invert_find_child(LEVEL_KIND_FLAGS)),
+            1,
         )
 
 
@@ -103,6 +107,7 @@ def process_gloss_nodes(
     wxr: WiktextractContext,
     word_entry: WordEntry,
     gloss_nodes: WikiNodeChildrenList,
+    sense_index: int,
 ) -> None:
     sense = Sense()
 
@@ -117,11 +122,8 @@ def process_gloss_nodes(
                 continue
             elif child.template_name == "пример":
                 process_example_template(wxr, sense, child)
-
             elif child.template_name == "семантика":
-                # https://ru.wiktionary.org/wiki/Шаблон:семантика
-                # XXX: Extract semantic templates to linkages
-                continue
+                process_semantics_template(wxr, word_entry, child, sense_index)
             elif child.template_name in NOTE_TEMPLATES:
                 note_templates.append(child)
                 raw_gloss_children.append(child)
