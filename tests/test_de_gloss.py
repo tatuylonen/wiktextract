@@ -2,9 +2,8 @@ import unittest
 
 from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
-from wiktextract.extractor.de.gloss import (
-    extract_glosses,
-)
+from wiktextract.extractor.de.gloss import extract_glosses
+from wiktextract.extractor.de.page import parse_page
 from wiktextract.extractor.es.models import WordEntry
 from wiktextract.wxr_context import WiktextractContext
 
@@ -15,7 +14,9 @@ class TestDEGloss(unittest.TestCase):
     def setUp(self) -> None:
         self.wxr = WiktextractContext(
             Wtp(lang_code="de"),
-            WiktionaryConfig(dump_file_lang_code="de"),
+            WiktionaryConfig(
+                dump_file_lang_code="de", capture_language_codes=None
+            ),
         )
 
     def tearDown(self) -> None:
@@ -234,5 +235,43 @@ class TestDEGloss(unittest.TestCase):
                     "senseid": "2",
                     "tags": ["colloquial"],
                 },
+            ],
+        )
+
+    def test_form_of(self):
+        self.wxr.wtp.add_page("Vorlage:Sprache", 10, "{{{1}}}")
+        self.wxr.wtp.add_page("Vorlage:Wortart", 10, "{{{1}}}")
+        self.assertEqual(
+            parse_page(
+                self.wxr,
+                "konjugierte",
+                """== konjugierte ({{Sprache|Deutsch}}) ==
+=== {{Wortart|Deklinierte Form|Deutsch}} ===
+====Grammatische Merkmale====
+*Nominativ Singular Femininum der starken Flexion des Positivs des Adjektivs '''[[konjugiert]]'''
+*Akkusativ Singular Femininum der starken Flexion des Positivs des Adjektivs '''[[konjugiert]]'''""",
+            ),
+            [
+                {
+                    "lang": "Deutsch",
+                    "lang_code": "de",
+                    "pos": "unknown",
+                    "senses": [
+                        {
+                            "form_of": [{"word": "konjugiert"}],
+                            "glosses": [
+                                "Nominativ Singular Femininum der starken Flexion des Positivs des Adjektivs konjugiert"
+                            ],
+                        },
+                        {
+                            "form_of": [{"word": "konjugiert"}],
+                            "glosses": [
+                                "Akkusativ Singular Femininum der starken Flexion des Positivs des Adjektivs konjugiert"
+                            ],
+                        },
+                    ],
+                    "tags": ["form-of"],
+                    "word": "konjugierte",
+                }
             ],
         )

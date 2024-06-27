@@ -3,7 +3,7 @@ from wikitextprocessor.parser import LevelNode, TemplateNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
-from .models import Sense, WordEntry
+from .models import AltForm, Sense, WordEntry
 from .tags import translate_raw_tags
 from .utils import match_senseid
 
@@ -29,16 +29,29 @@ def process_gloss_list_item(
     word_entry: WordEntry,
     list_node: WikiNode,
     parent_sense: Sense,
-) -> None:
+) -> Sense:
     for list_item_node in list_node.find_child(NodeKind.LIST_ITEM):
         item_type = list_item_node.sarg
-        if item_type == "*":  # only contains modifier template
+        if item_type == "*":
+            # only contains modifier template
             for template in list_item_node.find_child(NodeKind.TEMPLATE):
                 raw_tag = clean_node(wxr, parent_sense, template).removesuffix(
                     ":"
                 )
                 parent_sense = Sense()
                 parent_sense.raw_tags.append(raw_tag)
+            # or form-of word
+            if "form-of" in word_entry.tags:
+                sense = Sense()
+                gloss_text = clean_node(wxr, None, list_item_node.children)
+                for bold_node in list_item_node.find_child(NodeKind.BOLD):
+                    bold_text = clean_node(wxr, None, bold_node)
+                    if bold_text != "":
+                        sense.form_of.append(AltForm(word=bold_text))
+                    break
+                if gloss_text != "":
+                    sense.glosses.append(gloss_text)
+                    word_entry.senses.append(sense)
         elif item_type.endswith(":"):
             sense_data = parent_sense.model_copy(deep=True)
             gloss_nodes = []

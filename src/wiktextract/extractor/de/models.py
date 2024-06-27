@@ -80,6 +80,10 @@ class Example(BaseModelWrap):
     isbn: str = Field(default="", description="ISBN number")
 
 
+class AltForm(BaseModelWrap):
+    word: str
+
+
 class Sense(BaseModelWrap):
     glosses: list[str] = Field(
         default=[],
@@ -104,6 +108,7 @@ class Sense(BaseModelWrap):
         default="", description="Sense number used in Wiktionary"
     )
     topics: list[str] = []
+    form_of: list[AltForm] = []
 
 
 class Sound(BaseModelWrap):
