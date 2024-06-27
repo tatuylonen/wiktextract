@@ -13,6 +13,7 @@ class BaseModelWrap(BaseModel):
 class Linkage(BaseModelWrap):
     word: str
     sense_id: str = ""
+    note: str = ""
 
 
 class Translation(BaseModelWrap):
