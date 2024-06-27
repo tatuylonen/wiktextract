@@ -52,7 +52,7 @@ def parse_section(
                 sortid="extractor/de/page/parse_section/55",
             )
             return
-        if section_name == "Bedeutungen":
+        if section_name in ("Bedeutungen", "Grammatische Merkmale"):
             extract_glosses(wxr, page_data[-1], level_node)
         elif wxr.config.capture_pronunciation and section_name == "Aussprache":
             extract_pronunciation(wxr, page_data[-1], level_node)
@@ -113,11 +113,9 @@ def process_pos_section(
             pos_argument = template_node.template_parameters.get(1, "").strip()
             if pos_argument in IGNORE_POS:
                 continue
-            if pos_argument in FORM_POS:
-                # XXX: Extract form from form pages. Investigate first if this is needed
-                # at all or redundant with form tables.
-                continue
-            if pos_argument in POS_SECTIONS:
+            elif pos_argument in FORM_POS:
+                pos_data_list.append({"pos": "unknown", "tags": ["form-of"]})
+            elif pos_argument in POS_SECTIONS:
                 pos_data_list.append(POS_SECTIONS[pos_argument])
             elif pos_argument == "Gebundenes Lexem":
                 if wxr.wtp.title.startswith("-") and wxr.wtp.title.endswith(
