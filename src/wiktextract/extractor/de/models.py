@@ -134,6 +134,7 @@ class Sound(BaseModelWrap):
         default=[], description="Specifying the variant of the pronunciation"
     )
     tags: list[str] = []
+    rhymes: str = ""
 
 
 class Form(BaseModelWrap):
