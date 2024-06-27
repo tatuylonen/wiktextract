@@ -11,11 +11,11 @@ from wikitextprocessor import NodeKind, Page, WikiNode
 from wikitextprocessor.core import NamespaceDataEntry
 from wiktextract.datautils import ns_title_prefix_tuple
 from wiktextract.form_descriptions import parse_sense_qualifier
-from wiktextract.logging import logger
 from wiktextract.page import LEVEL_KINDS, clean_node
 from wiktextract.thesaurus import ThesaurusTerm
 from wiktextract.type_utils import SenseData
 from wiktextract.wxr_context import WiktextractContext
+from wiktextract.wxr_logging import logger
 
 from .section_titles import LINKAGE_TITLES, POS_TITLES
 

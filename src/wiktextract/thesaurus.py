@@ -18,8 +18,8 @@ from wikitextprocessor import Page
 from wikitextprocessor.core import CollatedErrorReturnData, NamespaceDataEntry
 
 from .import_utils import import_extractor_module
-from .logging import logger
 from .wxr_context import WiktextractContext
+from .wxr_logging import logger
 
 
 @dataclass

@@ -30,7 +30,6 @@ from wikitextprocessor.dumpparser import analyze_and_overwrite_pages
 from .categories import extract_categories
 from .config import WiktionaryConfig
 from .inflection import set_debug_cell_text
-from .logging import logger
 from .template_override import template_override_fns
 from .thesaurus import (
     close_thesaurus_db,
@@ -46,6 +45,7 @@ from .wiktionary import (
     write_json_data,
 )
 from .wxr_context import WiktextractContext
+from .wxr_logging import logger
 
 
 def process_single_page(

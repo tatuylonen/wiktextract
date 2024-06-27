@@ -19,7 +19,6 @@ from typing import Optional, TextIO
 from wikitextprocessor import Page
 from wikitextprocessor.dumpparser import process_dump
 
-from .logging import logger
 from .page import parse_page
 from .thesaurus import (
     emit_words_in_thesaurus,
@@ -27,6 +26,7 @@ from .thesaurus import (
     thesaurus_linkage_number,
 )
 from .wxr_context import WiktextractContext
+from .wxr_logging import logger
 
 
 def page_handler(page: Page) -> tuple[list[dict], dict]:

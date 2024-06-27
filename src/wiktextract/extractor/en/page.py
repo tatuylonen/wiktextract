@@ -39,7 +39,6 @@ from wiktextract.form_descriptions import (
 )
 from wiktextract.inflection import TableContext, parse_inflection_section
 from wiktextract.linkages import parse_linkage_item_text
-from wiktextract.logging import logger
 from wiktextract.page import (
     LEVEL_KINDS,
     clean_node,
@@ -60,6 +59,7 @@ from wiktextract.type_utils import (
     WordData,
 )
 from wiktextract.wxr_context import WiktextractContext
+from wiktextract.wxr_logging import logger
 
 from ..ruby import extract_ruby, parse_ruby
 from ..share import strip_nodes

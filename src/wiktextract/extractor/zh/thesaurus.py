@@ -3,7 +3,7 @@ from typing import Optional, Union
 
 from mediawiki_langcodes import name_to_code
 from wikitextprocessor import NodeKind, Page, WikiNode
-from wiktextract.logging import logger
+from wiktextract.wxr_logging import logger
 
 from ...page import clean_node
 from ...thesaurus import ThesaurusTerm
