@@ -13,6 +13,7 @@ class BaseModelWrap(BaseModel):
 class Linkage(BaseModelWrap):
     word: str
     sense_id: str = ""
+    note: str = ""
 
 
 class Translation(BaseModelWrap):
@@ -134,6 +135,7 @@ class Sound(BaseModelWrap):
         default=[], description="Specifying the variant of the pronunciation"
     )
     tags: list[str] = []
+    rhymes: str = ""
 
 
 class Form(BaseModelWrap):

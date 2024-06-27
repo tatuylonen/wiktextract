@@ -1,8 +1,7 @@
 from typing import Union
 
 from mediawiki_langcodes import code_to_name
-from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import LevelNode
+from wikitextprocessor.parser import LevelNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -51,7 +50,7 @@ def extract_pronunciation(
                 sound_data.append(Sound())
                 process_hoerbeispiele(wxr, sound_data, rest)
             elif head_template.template_name == "Reime":
-                process_rhymes(wxr, sound_data, rest)
+                process_rhymes(wxr, sound_data, rest, word_entry)
             else:
                 wxr.wtp.debug(
                     f"Found unexpected template in pronunciation section: {head_template} with content {rest}",
@@ -149,10 +148,17 @@ def process_audio_template(
 
 
 def process_rhymes(
-    wxr: WiktextractContext, sound_data: list[Sound], nodes: list[WikiNode]
+    wxr: WiktextractContext,
+    sound_data: list[Sound],
+    nodes: list[WikiNode],
+    word_entry: WordEntry,
 ):
-    # XXX: Extract rhymes from the referenced rhymes page
-    pass
+    for node in nodes:
+        if isinstance(node, TemplateNode) and node.template_name == "Reim":
+            # https://de.wiktionary.org/wiki/Vorlage:Reime
+            rhyme = clean_node(wxr, word_entry, node)
+            if rhyme != "":
+                sound_data.append(Sound(rhymes=rhyme))
 
 
 def is_template_node_with_name(node: Union[WikiNode, str], template_name: str):

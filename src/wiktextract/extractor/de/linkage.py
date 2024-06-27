@@ -28,12 +28,14 @@ def extract_linkages(
 
             # Extract links
             if linkage_type == "expressions":
+                after_dash = False
+                note_nodes = []
                 for child in list_item.children:
-                    if isinstance(child, str) and contains_dash(child):
-                        # XXX Capture the part after the dash as an explanatory note to the expression, e.g.:
-                        # https://de.wiktionary.org/wiki/Beispiel
-                        # ":[[ein gutes Beispiel geben]] – als [[Vorbild]] zur [[Nachahmung]] [[dienen]]/[[herausfordern]]"
-                        break
+                    if after_dash:
+                        note_nodes.append(child)
+                    elif isinstance(child, str) and contains_dash(child):
+                        after_dash = True
+                        note_nodes.append(child)
                     elif (
                         isinstance(child, WikiNode)
                         and child.kind == NodeKind.LINK
@@ -41,6 +43,10 @@ def extract_linkages(
                         process_link(
                             wxr, word_entry, linkage_type, senseids, child
                         )
+                note_text = clean_node(wxr, None, note_nodes).strip("–—―‒- ")
+                if len(word_entry.expressions) > 0:
+                    word_entry.expressions[-1].note = note_text
+
             else:
                 for link in list_item.find_child(NodeKind.LINK):
                     process_link(wxr, word_entry, linkage_type, senseids, link)

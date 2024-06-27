@@ -43,7 +43,12 @@ class TestDELinkages(unittest.TestCase):
             {
                 "input": "====Redewendungen====\n:[[ein gutes Beispiel geben|ein gutes ''Beispiel'' geben]] – als [[Vorbild]] zur [[Nachahmung]] [[dienen]]/[[herausfordern]]",
                 "expected": {
-                    "expressions": [{"word": "ein gutes Beispiel geben"}],
+                    "expressions": [
+                        {
+                            "note": "als Vorbild zur Nachahmung dienen/herausfordern",
+                            "word": "ein gutes Beispiel geben",
+                        }
+                    ],
                 },
             },
             # Always places relations in first sense if just one sense.
