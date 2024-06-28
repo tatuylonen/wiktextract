@@ -1,4 +1,3 @@
-import re
 
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import (
@@ -120,13 +119,8 @@ def parse_section(
     for level_node_template in level_node.find_content(NodeKind.TEMPLATE):
         pos_template_name = level_node_template.template_name
 
-    # XXX Handle numbered etymology sections.
-    if re.match(r"etimología \d+", section_title):
-        parse_entries(wxr, page_data, base_data, level_node)
-
-    elif section_title in IGNORED_TITLES:
+    if section_title in IGNORED_TITLES:
         pass
-
     elif pos_template_name in POS_TITLES or section_title in POS_TITLES:
         pos_data = POS_TITLES.get(
             pos_template_name, POS_TITLES.get(section_title)
@@ -138,11 +132,13 @@ def parse_section(
         page_data[-1].tags.extend(pos_data.get("tags", []))
         process_pos_block(wxr, page_data, level_node)
 
-    elif section_title in ETYMOLOGY_TITLES:
+    elif section_title.startswith(ETYMOLOGY_TITLES):
+        new_base_data = base_data
         if wxr.config.capture_etymologies:
-            process_etymology_block(wxr, base_data, level_node)
+            new_base_data = base_data.model_copy(deep=True)
+            process_etymology_block(wxr, new_base_data, level_node)
         for nested_level_node in level_node.find_child(LEVEL_KIND_FLAGS):
-            parse_section(wxr, page_data, base_data, nested_level_node)
+            parse_section(wxr, page_data, new_base_data, nested_level_node)
     elif (
         section_title in TRANSLATIONS_TITLES and wxr.config.capture_translations
     ):

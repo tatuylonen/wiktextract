@@ -12,7 +12,7 @@ def process_etymology_block(
     wxr: WiktextractContext,
     entry: WordEntry,
     level_node: WikiNode,
-):
+) -> None:
     """
     https://es.wiktionary.org/wiki/Plantilla:etimología
     https://es.wiktionary.org/wiki/Plantilla:etimología2
