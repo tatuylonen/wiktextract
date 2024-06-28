@@ -255,19 +255,21 @@ class TestDEGloss(unittest.TestCase):
                 {
                     "lang": "Deutsch",
                     "lang_code": "de",
-                    "pos": "unknown",
+                    "pos": "adj",
                     "senses": [
                         {
                             "form_of": [{"word": "konjugiert"}],
                             "glosses": [
                                 "Nominativ Singular Femininum der starken Flexion des Positivs des Adjektivs konjugiert"
                             ],
+                            "tags": ["nominative", "singular", "feminine"],
                         },
                         {
                             "form_of": [{"word": "konjugiert"}],
                             "glosses": [
                                 "Akkusativ Singular Femininum der starken Flexion des Positivs des Adjektivs konjugiert"
                             ],
+                            "tags": ["accusative", "singular", "feminine"],
                         },
                     ],
                     "tags": ["form-of"],
