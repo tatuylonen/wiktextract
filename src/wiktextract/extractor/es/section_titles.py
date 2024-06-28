@@ -40,6 +40,7 @@ POS_TITLES: POSSubtitleData = {
     "forma adjetiva": {"pos": "adj", "tags": ["form-of"]},
     "forma de participio": {"pos": "participle", "tags": ["form-of"]},
     "forma de sufijo": {"pos": "suffix", "tags": ["form-of"]},
+    "forma flexiva": {"pos": "verb", "tags": ["form-of"]},
     "forma pronominal": {"pos": "pron", "tags": ["form-of"]},
     "forma sustantiva femenina": {
         "pos": "noun",
