@@ -2826,7 +2826,6 @@ def parse_language(
                     data,
                     item,
                     sense,
-                    pos_datas,
                     lang,
                     langcode,
                     translations_from_template,

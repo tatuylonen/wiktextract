@@ -328,18 +328,16 @@ def parse_translation_item_text(
     data: WordData,
     item: str,
     sense: Optional[str],
-    pos_datas: list[WordData],
     lang: Optional[str],
     langcode: Optional[str],
     translations_from_template: list[str],
     is_reconstruction: bool,
-) -> None:
+) -> Optional[str]:
     assert isinstance(wxr, WiktextractContext)
     assert isinstance(word, str)
     assert isinstance(data, dict)
     assert isinstance(item, str)
     assert sense is None or isinstance(sense, str)
-    assert isinstance(pos_datas, list)
     assert lang is None or isinstance(lang, str)  # Parent item language
     assert langcode is None or isinstance(langcode, str)  # Template langcode
     assert isinstance(translations_from_template, list)
