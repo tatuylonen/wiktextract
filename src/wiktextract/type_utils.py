@@ -88,6 +88,7 @@ SoundData = TypedDict(
         "audio-ipa": str,
         "enpr": str,
         "form": str,
+        "hangeul": str,
         "homophone": str,
         "ipa": str,
         "mp3_url": str,

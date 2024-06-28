@@ -569,7 +569,7 @@ def parse_pronunciation(
             continue
 
         # Check if it contains Phonetic hangeul
-        m = re.search(r"(?m)\bPhonetic hangeul: \[([^]]+)\]", text)
+        m = re.search(r"(?m)\bPhonetic hange?ul: \[([^]]+)\]", text)
         if m:
             seen = set()
             for w in m.group(1).split("/"):
