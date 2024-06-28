@@ -61,6 +61,10 @@ class Example(BaseModelWrap):
     example_templates: list[TemplateData] = []
 
 
+class AltForm(BaseModelWrap):
+    word: str
+
+
 class Sense(BaseModelWrap):
     glosses: list[str] = Field(
         default=[],
@@ -83,6 +87,7 @@ class Sense(BaseModelWrap):
     senseid: str = Field(
         default="", description="Sense number used in Wiktionary"
     )
+    form_of: list[AltForm] = []
 
 
 class Sound(BaseModelWrap):

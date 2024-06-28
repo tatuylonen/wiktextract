@@ -139,21 +139,3 @@ def process_pron_graf_text_cell(
             sound.note = clean_node(wxr, None, node.children)
     if len(getattr(sound, field_name)) > 0:
         word_entry.sounds.append(sound)
-
-
-def process_audio_template(
-    wxr: WiktextractContext, word_entry: WordEntry, template_node: WikiNode
-):
-    # https://es.wiktionary.org/wiki/Plantilla:audio
-    sound = Sound()
-    audio = template_node.template_parameters.get(1)
-    if audio:
-        audio_url_dict = create_audio_url_dict(audio)
-        for dict_key, dict_value in audio_url_dict.items():
-            if dict_value and dict_key in sound.model_fields:
-                setattr(sound, dict_key, dict_value)
-
-    # XXX: Extract other parameters from the Spanish audio template
-
-    if len(sound.model_dump(exclude_defaults=True)) > 0:
-        word_entry.sounds.append(sound)

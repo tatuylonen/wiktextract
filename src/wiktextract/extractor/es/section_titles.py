@@ -40,6 +40,7 @@ POS_TITLES: POSSubtitleData = {
     "forma adjetiva": {"pos": "adj", "tags": ["form-of"]},
     "forma de participio": {"pos": "participle", "tags": ["form-of"]},
     "forma de sufijo": {"pos": "suffix", "tags": ["form-of"]},
+    "forma flexiva": {"pos": "verb", "tags": ["form-of"]},
     "forma pronominal": {"pos": "pron", "tags": ["form-of"]},
     "forma sustantiva femenina": {
         "pos": "noun",
@@ -129,7 +130,7 @@ LINKAGE_TITLES: dict[str, str] = {
     "sinónimo": "synonyms",
 }
 
-ETYMOLOGY_TITLES: frozenset[str] = frozenset(["etimología"])
+ETYMOLOGY_TITLES: tuple[str] = ("etimología",)
 
 IGNORED_TITLES: frozenset[str] = frozenset(["véase también"])
 

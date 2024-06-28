@@ -1,5 +1,3 @@
-import re
-
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import (
     LEVEL_KIND_FLAGS,
@@ -17,7 +15,7 @@ from .gloss import extract_gloss, process_ambito_template, process_uso_template
 from .inflection import extract_inflection
 from .linkage import extract_linkage_section, process_linkage_template
 from .models import Sense, WordEntry
-from .pronunciation import process_audio_template, process_pron_graf_template
+from .pronunciation import process_pron_graf_template
 from .section_titles import (
     ETYMOLOGY_TITLES,
     IGNORED_TITLES,
@@ -80,13 +78,7 @@ def parse_entries(
         ):
             # XXX: There might be other uses for this kind of list which are
             # being ignored here
-            for child in node.find_child_recursively(NodeKind.TEMPLATE):
-                if (
-                    child.template_name == "audio"
-                    and wxr.config.capture_pronunciation
-                ):
-                    process_audio_template(wxr, base_data_copy, child)
-
+            continue
         else:
             unexpected_nodes.append(node)
 
@@ -126,13 +118,8 @@ def parse_section(
     for level_node_template in level_node.find_content(NodeKind.TEMPLATE):
         pos_template_name = level_node_template.template_name
 
-    # XXX Handle numbered etymology sections.
-    if re.match(r"etimología \d+", section_title):
-        parse_entries(wxr, page_data, base_data, level_node)
-
-    elif section_title in IGNORED_TITLES:
+    if section_title in IGNORED_TITLES:
         pass
-
     elif pos_template_name in POS_TITLES or section_title in POS_TITLES:
         pos_data = POS_TITLES.get(
             pos_template_name, POS_TITLES.get(section_title)
@@ -143,12 +130,16 @@ def parse_section(
         page_data[-1].pos_title = section_title
         page_data[-1].tags.extend(pos_data.get("tags", []))
         process_pos_block(wxr, page_data, level_node)
-
-    elif section_title in ETYMOLOGY_TITLES:
+        for next_level_node in level_node.find_child(LEVEL_KIND_FLAGS):
+            breakpoint()
+            parse_section(wxr, page_data, base_data, next_level_node)
+    elif section_title.startswith(ETYMOLOGY_TITLES):
+        new_base_data = base_data
         if wxr.config.capture_etymologies:
-            process_etymology_block(wxr, base_data, level_node)
+            new_base_data = base_data.model_copy(deep=True)
+            process_etymology_block(wxr, new_base_data, level_node)
         for nested_level_node in level_node.find_child(LEVEL_KIND_FLAGS):
-            parse_section(wxr, page_data, base_data, nested_level_node)
+            parse_section(wxr, page_data, new_base_data, nested_level_node)
     elif (
         section_title in TRANSLATIONS_TITLES and wxr.config.capture_translations
     ):

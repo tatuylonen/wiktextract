@@ -5,7 +5,7 @@ from wikitextprocessor.parser import TemplateNode, WikiNodeChildrenList
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
-from .models import Sense, WordEntry
+from .models import AltForm, Sense, WordEntry
 from .sense_data import process_sense_data_list
 from .tags import translate_raw_tags
 
@@ -29,6 +29,14 @@ def extract_gloss(
                 other.append(node)
             else:
                 definition.append(node)
+            if isinstance(node, TemplateNode) and node.template_name.startswith(
+                ("f.", "forma ")
+            ):
+                form_of = clean_node(
+                    wxr, None, node.template_parameters.get(1, "")
+                )
+                if form_of != "":
+                    gloss_data.form_of.append(AltForm(word=form_of))
 
         gloss = clean_node(wxr, gloss_data, definition)
         if len(gloss) > 0:

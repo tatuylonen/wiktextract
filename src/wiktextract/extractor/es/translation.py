@@ -1,12 +1,13 @@
 import itertools
-from typing import Optional
+from typing import Any, Optional
 
 from wikitextprocessor.parser import TemplateNode
-from wiktextract.page import clean_node
-from wiktextract.wxr_context import WiktextractContext
 
+from ...page import clean_node
+from ...wxr_context import WiktextractContext
 from ..share import split_senseids
 from .models import Translation, WordEntry
+from .tags import translate_raw_tags
 
 
 def extract_translation(
@@ -16,18 +17,34 @@ def extract_translation(
         process_t_template(wxr, word_entry, template_node)
     elif template_node.template_name == "t+":
         process_t_plus_template(wxr, word_entry, template_node)
+    elif (
+        template_node.template_name.removesuffix(".") in T_GENDERS
+        and len(word_entry.translations) > 0
+    ):
+        # https://es.wiktionary.org/wiki/Categoría:Wikcionario:Abreviaturas
+        # gender template after "t+" template
+        add_t_plus_tags(
+            template_node.template_name.removesuffix("."),
+            T_GENDERS,
+            word_entry.translations[-1],
+        )
 
 
+# https://es.wiktionary.org/wiki/Módulo:t
 T_GENDERS = {
     "m": "masculine",
     "f": "feminine",
     "mf": ["masculine", "feminine"],
     "n": "neuter",
+    "c": "common",
 }
 T_NUMBERS = {
     "s": "singular",
+    "sg": "singular",
     "p": "plural",
+    "pl": "plural",
     "d": "dual",
+    "du": "dual",
 }
 
 
@@ -74,7 +91,23 @@ def process_t_template(
                 setattr(tr_data, field, value)
 
         if len(tr_data.word) > 0:
+            translate_raw_tags(tr_data)
             word_entry.translations.append(tr_data)
+
+
+# https://es.wiktionary.org/wiki/Módulo:t+
+T_PLUS_TAGS = {
+    "s": "noun",
+    "a": "adjective",
+    "v": "verb",
+    "sa": ["noun", "adjective"],
+    "sv": ["noun", "verb"],
+    "av": ["adjective", "verb"],
+    "sav": ["noun", "adjective", "verb"],
+    "adj": "adjective",
+    "sust": "noun",
+    "verb": "verb",
+}
 
 
 def process_t_plus_template(
@@ -90,11 +123,11 @@ def process_t_plus_template(
     current_translation: Optional[Translation] = None
     senseids: list[str] = []
 
-    for key in template_node.template_parameters.keys():
+    for key, p_value in template_node.template_parameters.items():
         if key == 1:
             continue  # Skip language code
 
-        value = clean_node(wxr, None, template_node.template_parameters[key])
+        value = clean_node(wxr, None, p_value)
         if isinstance(key, int):
             if value == ",":
                 if (
@@ -112,19 +145,27 @@ def process_t_plus_template(
             ):
                 # This gives the senseids
                 senseids.extend(split_senseids(value))
-            elif value in [
-                "m",
-                "f",
-                "mf",
-                "n",
-                "c",
-                "p",
-                "adj",
-                "sust",
-                "adj y sust",
-            ]:
-                if current_translation:
-                    current_translation.raw_tags.append(value)
+            elif (
+                value.rstrip(".") in T_GENDERS
+                and current_translation is not None
+            ):
+                add_t_plus_tags(
+                    value.strip("."), T_GENDERS, current_translation
+                )
+            elif (
+                value.rstrip(".") in T_NUMBERS
+                and current_translation is not None
+            ):
+                add_t_plus_tags(
+                    value.strip("."), T_NUMBERS, current_translation
+                )
+            elif (
+                value.rstrip(".") in T_PLUS_TAGS
+                and current_translation is not None
+            ):
+                add_t_plus_tags(
+                    value.strip("."), T_PLUS_TAGS, current_translation
+                )
             elif value in ["nota", "tr", "nl"]:
                 continue
             elif (
@@ -157,11 +198,23 @@ def process_t_plus_template(
                         lang=lang_name,
                         senseids=list(senseids),
                     )
-        elif isinstance(key, str):
-            if key == "tr":
-                if current_translation:
-                    current_translation.roman = value
+        elif (
+            isinstance(key, str)
+            and key == "tr"
+            and current_translation is not None
+        ):
+            current_translation.roman = value
 
     # Add the last translation if it exists
     if current_translation is not None and len(current_translation.word) > 0:
         word_entry.translations.append(current_translation)
+
+
+def add_t_plus_tags(
+    key: str, tag_dict: dict[str, Any], data: Translation
+) -> None:
+    tr_tag = tag_dict[key]
+    if isinstance(tr_tag, str):
+        data.tags.append(tr_tag)
+    elif isinstance(tr_tag, list):
+        data.tags.extend(tr_tag)

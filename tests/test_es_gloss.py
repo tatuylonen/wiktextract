@@ -9,6 +9,7 @@ from wiktextract.extractor.es.gloss import (
     process_uso_template,
 )
 from wiktextract.extractor.es.models import Sense, WordEntry
+from wiktextract.extractor.es.page import parse_page
 from wiktextract.wxr_context import WiktextractContext
 
 
@@ -150,4 +151,37 @@ class TestESGloss(unittest.TestCase):
         self.assertEqual(
             sense.model_dump(exclude_defaults=True),
             {"categories": ["ES:México"], "tags": ["Mexico"]},
+        )
+
+    def test_form_of(self):
+        self.wxr.wtp.add_page("Plantilla:lengua", 10, "Inglés")
+        self.wxr.wtp.add_page(
+            "Plantilla:forma sustantivo plural", 10, "Forma del plural de apple"
+        )
+        self.assertEqual(
+            parse_page(
+                self.wxr,
+                "apples",
+                """== {{lengua|en}} ==
+=== Forma sustantiva ===
+
+;1: {{forma sustantivo plural|leng=en|apple}}.""",
+            ),
+            [
+                {
+                    "lang": "Inglés",
+                    "lang_code": "en",
+                    "pos": "noun",
+                    "pos_title": "forma sustantiva",
+                    "senses": [
+                        {
+                            "glosses": ["Forma del plural de apple."],
+                            "form_of": [{"word": "apple"}],
+                            "senseid": "1",
+                        }
+                    ],
+                    "tags": ["form-of"],
+                    "word": "apples",
+                }
+            ],
         )
