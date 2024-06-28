@@ -4,7 +4,7 @@ from wikitextprocessor.parser import LevelNode, TemplateNode
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .models import AltForm, Sense, WordEntry
-from .tags import translate_raw_tags
+from .tags import GRAMMATICAL_TAGS, translate_raw_tags
 from .utils import match_senseid
 
 
@@ -42,16 +42,7 @@ def process_gloss_list_item(
                 parent_sense.raw_tags.append(raw_tag)
             # or form-of word
             if "form-of" in word_entry.tags:
-                sense = Sense()
-                gloss_text = clean_node(wxr, None, list_item_node.children)
-                for bold_node in list_item_node.find_child(NodeKind.BOLD):
-                    bold_text = clean_node(wxr, None, bold_node)
-                    if bold_text != "":
-                        sense.form_of.append(AltForm(word=bold_text))
-                    break
-                if gloss_text != "":
-                    sense.glosses.append(gloss_text)
-                    word_entry.senses.append(sense)
+                process_form_of_list_item(wxr, word_entry, list_item_node)
         elif item_type.endswith(":"):
             sense_data = parent_sense.model_copy(deep=True)
             gloss_nodes = []
@@ -140,3 +131,47 @@ def process_gloss_list_item(
             )
             continue
     return parent_sense
+
+
+# plain text POS string used in form-of gloss, usually in genitive case
+FORM_OF_POS_STRINGS = {
+    "Adjektivs": {"pos": "adj"},
+    "Verbs": {"pos": "verb"},
+    "Suffixes": {"pos": "suffix", "tags": ["morpheme"]},
+    "Substantivs": {"pos": "noun"},
+}
+
+
+def process_form_of_list_item(
+    wxr: WiktextractContext, word_entry: WordEntry, list_item_node: WikiNode
+) -> None:
+    from .section_titles import POS_SECTIONS
+
+    sense = Sense()
+    gloss_text = clean_node(wxr, None, list_item_node.children)
+    for bold_node in list_item_node.find_child(NodeKind.BOLD):
+        bold_text = clean_node(wxr, None, bold_node)
+        if bold_text != "":
+            sense.form_of.append(AltForm(word=bold_text))
+        break
+    if gloss_text != "":
+        sense.glosses.append(gloss_text)
+        for str_node in list_item_node.children:
+            if isinstance(str_node, str) and len(str_node.strip()) > 0:
+                pos_data = {}
+                for sense_word in str_node.split():
+                    if sense_word in FORM_OF_POS_STRINGS:
+                        pos_data = FORM_OF_POS_STRINGS[sense_word]
+                    elif sense_word in POS_SECTIONS:
+                        pos_data = POS_SECTIONS[sense_word]
+                    elif sense_word in GRAMMATICAL_TAGS:
+                        tr_tag = GRAMMATICAL_TAGS[sense_word]
+                        if isinstance(tr_tag, str):
+                            sense.tags.append(tr_tag)
+                        elif isinstance(tr_tag, list):
+                            sense.tags.extend(tr_tag)
+                if len(pos_data) > 0 and word_entry.pos == "unknown":
+                    word_entry.pos = pos_data["pos"]
+                    word_entry.tags.extend(pos_data.get("tags", []))
+
+        word_entry.senses.append(sense)
