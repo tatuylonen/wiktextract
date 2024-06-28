@@ -17,7 +17,7 @@ from .gloss import extract_gloss, process_ambito_template, process_uso_template
 from .inflection import extract_inflection
 from .linkage import extract_linkage_section, process_linkage_template
 from .models import Sense, WordEntry
-from .pronunciation import process_audio_template, process_pron_graf_template
+from .pronunciation import process_pron_graf_template
 from .section_titles import (
     ETYMOLOGY_TITLES,
     IGNORED_TITLES,
@@ -80,13 +80,7 @@ def parse_entries(
         ):
             # XXX: There might be other uses for this kind of list which are
             # being ignored here
-            for child in node.find_child_recursively(NodeKind.TEMPLATE):
-                if (
-                    child.template_name == "audio"
-                    and wxr.config.capture_pronunciation
-                ):
-                    process_audio_template(wxr, base_data_copy, child)
-
+            continue
         else:
             unexpected_nodes.append(node)
 

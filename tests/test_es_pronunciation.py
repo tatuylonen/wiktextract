@@ -3,10 +3,7 @@ import unittest
 from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.es.models import WordEntry
-from wiktextract.extractor.es.pronunciation import (
-    process_audio_template,
-    process_pron_graf_template,
-)
+from wiktextract.extractor.es.pronunciation import process_pron_graf_template
 from wiktextract.wxr_context import WiktextractContext
 
 
@@ -181,24 +178,5 @@ class TestESPronunciation(unittest.TestCase):
                     "homophone": "paw",
                     "note": "no rótico, sin la fusión horse–hoarse",
                 },
-            ],
-        )
-
-    def test_process_audio_template(self):
-        # https://es.wiktionary.org/wiki/os#Latín
-        self.wxr.wtp.start_page("os")
-        word_entry = WordEntry(word="os", lang="Latín", lang_code="la")
-        root = self.wxr.wtp.parse(
-            "{{audio|la-cls-os-long.ogg|'''Audio''' (clásico)|nb=apr}}"
-        )
-        process_audio_template(self.wxr, word_entry, root.children[0])
-        self.assertEqual(
-            word_entry.model_dump(exclude_defaults=True)["sounds"],
-            [
-                {
-                    "audio": "la-cls-os-long.ogg",
-                    "mp3_url": "https://upload.wikimedia.org/wikipedia/commons/transcoded/1/18/La-cls-os-long.ogg/La-cls-os-long.ogg.mp3",
-                    "ogg_url": "https://commons.wikimedia.org/wiki/Special:FilePath/la-cls-os-long.ogg",
-                }
             ],
         )
