@@ -1,4 +1,3 @@
-
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import (
     LEVEL_KIND_FLAGS,
@@ -132,6 +131,7 @@ def parse_section(
         page_data[-1].tags.extend(pos_data.get("tags", []))
         process_pos_block(wxr, page_data, level_node)
         for next_level_node in level_node.find_child(LEVEL_KIND_FLAGS):
+            breakpoint()
             parse_section(wxr, page_data, base_data, next_level_node)
     elif section_title.startswith(ETYMOLOGY_TITLES):
         new_base_data = base_data
