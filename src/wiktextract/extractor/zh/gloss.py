@@ -83,29 +83,25 @@ def process_form_of_template(
     page_data: list[WordEntry],
 ) -> bool:
     # Return `True` if template expands to list
-    form_of_text = ""
+    # https://en.wiktionary.org/wiki/Category:Form-of_templates_by_language
     is_alt_of = template_node.template_name.startswith("alt")
-    for param_key in (1, 2, 3, "alt"):
-        param_value = clean_node(
-            wxr, None, template_node.template_parameters.get(param_key, "")
-        )
-        if len(param_value) > 0:
-            form_of_text = param_value
-
-    for form_of_word in form_of_text.split(","):
-        form_of_word = form_of_word.strip()
-        if len(form_of_word) > 0:
-            form_of = AltForm(word=form_of_word)
-            if is_alt_of:
-                sense.alt_of.append(form_of)
-            else:
-                sense.form_of.append(form_of)
-
     sense.tags.append("alt-of" if is_alt_of else "form-of")
-
     expanded_template = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(template_node), expand_all=True
     )
+    find_form_of = False
+    for i_tag in expanded_template.find_html_recursively("i"):
+        find_form_of = process_form_of_template_child(
+            wxr, i_tag, sense, is_alt_of
+        )
+        break
+    if not find_form_of:
+        for link_node in expanded_template.find_child_recursively(
+            NodeKind.LINK
+        ):
+            process_form_of_template_child(wxr, link_node, sense, is_alt_of)
+            break
+
     if expanded_template.contain_node(NodeKind.LIST):
         shared_gloss = clean_node(
             wxr, None, list(expanded_template.invert_find_child(NodeKind.LIST))
@@ -122,6 +118,21 @@ def process_form_of_template(
         return True
 
     return False
+
+
+def process_form_of_template_child(
+    wxr: WiktextractContext, node: WikiNode, sense: Sense, is_alt_of: bool
+) -> bool:
+    span_text = clean_node(wxr, None, node)
+    for form_of_word in span_text.split("和"):
+        form_of_word = form_of_word.strip()
+        if form_of_word != "":
+            form_of = AltForm(word=form_of_word)
+            if is_alt_of:
+                sense.alt_of.append(form_of)
+            else:
+                sense.form_of.append(form_of)
+    return span_text != ""
 
 
 # https://zh.wiktionary.org/wiki/Category:/Category:之形式模板
