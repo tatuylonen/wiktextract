@@ -227,7 +227,7 @@ class TestGloss(TestCase):
         self.wxr.wtp.add_page(
             "Template:init of",
             10,
-            "denial of service (“拒絕服務”)之首字母縮略詞。",
+            "<span><i>[[denial]] of [[service]]</i></span> (“拒絕服務”)之首字母縮略詞。",
         )
         root = self.wxr.wtp.parse(
             "# {{lb|en|計算機|網路}} {{init of|en|[[denial]] of [[service]]|t=拒絕服務}}"
@@ -270,7 +270,7 @@ class TestGloss(TestCase):
             ],
         )
 
-    def test_form_of_template(self):
+    def test_adj_form_of_template(self):
         self.wxr.wtp.start_page("bella")
         self.wxr.wtp.add_page(
             "Template:adj form of",
@@ -291,14 +291,14 @@ class TestGloss(TestCase):
             ],
         )
 
-    def test_form_of_templates(self):
+    def test_inflection_of_template(self):
         self.wxr.wtp.start_page("linda")
         self.wxr.wtp.add_page(
             "Template:inflection of",
             10,
-            """{{#switch:{{{5}}}
-| acc = {{{2}}} 的不定賓格單數
-| dat = {{{2}}} 的不定與格單數
+            """<span><i>[[{{{2}}}]]</i></span> {{#switch:{{{5}}}
+| acc = 的不定賓格單數
+| dat = 的不定與格單數
 }}""",
         )
         page_data = parse_page(
@@ -380,4 +380,55 @@ class TestGloss(TestCase):
                 for s in page_data[0].synonyms
             ],
             [{"word": "ĉarmeta", "sense": "可愛的"}],
+        )
+
+    def test_hanja_form_of(self):
+        self.wxr.wtp.start_page("大家")
+        self.wxr.wtp.add_page(
+            "Template:hanja form of",
+            10,
+            """<span class="Kore" lang="ko">[[대가#朝鮮語|-{대가}-]]</span> <span class="mention-gloss-paren annotation-paren">(</span><span lang="ko-Latn" class="tr Latn">daega</span><span class="mention-gloss-paren annotation-paren">)</span><span class="use-with-mention">的漢字<sup>[[附錄:韓字|?]]</sup></span>：[[大師]]；[[名門望族]]。""",
+        )
+        root = self.wxr.wtp.parse(
+            "# {{hanja form of|대가|[[大師]]；[[名門望族]]}}"
+        )
+        page_data = [WordEntry(word="", lang_code="", lang="", pos="")]
+        extract_gloss(self.wxr, page_data, root.children[0], Sense())
+        self.assertEqual(
+            page_data[0].model_dump(exclude_defaults=True)["senses"],
+            [
+                {
+                    "form_of": [{"word": "대가"}],
+                    "glosses": [
+                        "대가 (daega)的漢字：大師；名門望族。",
+                    ],
+                    "tags": ["form-of"],
+                },
+            ],
+        )
+
+    def test_han_tu_form_of(self):
+        self.wxr.wtp.start_page("大家")
+        self.wxr.wtp.add_page(
+            "Template:han tu form of",
+            10,
+            """<span class="use-with-mention"><i class="Latn mention" lang="vi">[[đại gia#越南語|-{đại gia}-]]</i> <span class="mention-gloss-paren annotation-paren">(</span><span class="mention-gloss-double-quote">“</span><span class="mention-gloss">[[富人]]；[[偉人]]</span><span class="mention-gloss-double-quote">”</span><span class="mention-gloss-paren annotation-paren">)</span>的[[漢字]]。</span>[[Category:儒字]]""",
+        )
+        root = self.wxr.wtp.parse(
+            "# {{han tu form of|đại gia|[[富人]]；[[偉人]]}}"
+        )
+        page_data = [WordEntry(word="", lang_code="", lang="", pos="")]
+        extract_gloss(self.wxr, page_data, root.children[0], Sense())
+        self.assertEqual(
+            page_data[0].model_dump(exclude_defaults=True)["senses"],
+            [
+                {
+                    "categories": ["儒字"],
+                    "form_of": [{"word": "đại gia"}],
+                    "glosses": [
+                        "đại gia (“富人；偉人”)的漢字。",
+                    ],
+                    "tags": ["form-of"],
+                },
+            ],
         )
