@@ -517,8 +517,9 @@ def parse_translation_item_text(
     # There may be multiple translations, separated by comma
     nested.append(item)
     for item in nested:
-        tagsets = []
-        topics = []
+        tagsets: list[tuple[str, ...]] = []
+        # This never does anything; it's never updated, so it's always empty
+        # topics: list[str] = []
 
         for part in split_at_comma_semi(
             item, extra=[" / ", " ／ ", "／", r"\| furthermore: "]
@@ -538,15 +539,16 @@ def parse_translation_item_text(
                 continue
 
             # Strip language links
-            tr = {"lang": lang}
+            tr: TranslationData = {"lang": lang}
             if langcode:
                 tr["code"] = langcode
             if tags:
                 tr["tags"] = list(tags)
                 for t in tagsets:
                     tr["tags"].extend(t)
-            if topics:
-                tr["topics"] = list(topics)
+            # topics is never populated, so it's always empty
+            # if topics:
+            #     tr["topics"] = list(topics)
             if sense:
                 if sense.startswith(
                     (
