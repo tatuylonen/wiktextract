@@ -80,7 +80,6 @@ class TestEtymology(TestCase):
                     "lang": "Français",
                     "pos": "noun",
                     "pos_title": "Nom commun 1",
-                    "pos_id": "br-nom-1",
                     "etymology_texts": [
                         "Du vieux breton lin (« lac, étang ; liquide, humeur »).",
                         "Du moyen breton lenn.",
@@ -92,7 +91,6 @@ class TestEtymology(TestCase):
                     "lang": "Français",
                     "pos": "noun",
                     "pos_title": "Nom commun 2",
-                    "pos_id": "br-nom-2",
                     "etymology_texts": [
                         "Du vieux breton lenn (« pièce de toile, voile, manteau, rideau »)."
                     ],
@@ -165,7 +163,6 @@ class TestEtymology(TestCase):
                     "lang": "Français",
                     "pos": "noun",
                     "pos_title": "Nom commun 1",
-                    "pos_id": "fr-nom-1",
                     "etymology_texts": [
                         "Du latin domina (« maîtresse de maison »)."
                     ],
@@ -176,7 +173,6 @@ class TestEtymology(TestCase):
                     "lang": "Français",
                     "pos": "noun",
                     "pos_title": "Nom commun 2",
-                    "pos_id": "fr-nom-2",
                     "etymology_texts": [
                         "Du moyen néerlandais dam (« digue »)."
                     ],
@@ -187,7 +183,6 @@ class TestEtymology(TestCase):
                     "lang": "Français",
                     "pos": "intj",
                     "pos_title": "Interjection",
-                    "pos_id": "fr-interj-1",
                     "etymology_texts": [
                         "Abréviation de « Notre-Dame ! » ou de « dame Dieu ! » (« Seigneur Dieu ! »)."
                     ],
@@ -241,7 +236,6 @@ class TestEtymology(TestCase):
                     "lang": "Français",
                     "pos": "intj",
                     "pos_title": "Interjection",
-                    "pos_id": "fr-interj-1",
                     "etymology_texts": [
                         "XIIe siècle, elas ; composé de hé et de las, au sens ancien de « malheureux »."
                     ],
@@ -252,7 +246,6 @@ class TestEtymology(TestCase):
                     "lang": "Français",
                     "pos": "noun",
                     "pos_title": "Nom commun",
-                    "pos_id": "fr-nom-1",
                     "etymology_texts": [
                         "Par substantivation de l’interjection."
                     ],
