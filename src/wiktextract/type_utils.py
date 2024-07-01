@@ -3,6 +3,7 @@ from typing import (
     TypedDict,
     Union,
 )
+
 from wikitextprocessor.core import TemplateArgs
 
 
@@ -59,7 +60,7 @@ class TemplateData(TypedDict, total=False):
     args: TemplateArgs
     expansion: str
     name: str
-    extra: ExtraTemplateData
+    extra_data: ExtraTemplateData
 
 
 class DescendantData(TypedDict, total=False):

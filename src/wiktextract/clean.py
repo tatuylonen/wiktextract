@@ -6,16 +6,18 @@
 #
 # Copyright (c) 2018-2022 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
-import re
 import html
+import re
 import unicodedata
-from typing import Callable, Optional
-from wikitextprocessor.common import MAGIC_FIRST, MAGIC_LAST
+from typing import Callable, Optional, Union
+
+from wikitextprocessor.common import MAGIC_FIRST, MAGIC_LAST, URL_STARTS
 from wikitextprocessor.core import (
     NamespaceDataEntry,
     TemplateArgs,
 )
-from wikitextprocessor.common import URL_STARTS
+from wikitextprocessor.parser import TemplateParameters
+
 from .wxr_context import WiktextractContext
 
 ######################################################################
@@ -768,7 +770,6 @@ math_map: dict[str, str] = {
     "sqcap": "⊓",
     "sqcup": "⊔",
     "sqint": "⨖",
-    "sqrt": "√",
     "sqrt": "√",  # ∛ ∜ - partly special handling below
     "sqrt[3]": "∛",
     "sqrt[4]": "∜",
@@ -1594,8 +1595,10 @@ def clean_value(
 
 
 def clean_template_args(
-    wxr: WiktextractContext, ht: TemplateArgs, no_strip=False
-) -> TemplateArgs:
+    wxr: WiktextractContext,
+    ht: Union[TemplateArgs, TemplateParameters],
+    no_strip=False,
+) -> dict[Union[str, int], str]:
     """Cleans all values in a template argument dictionary and returns the
     cleaned dictionary."""
     assert isinstance(wxr, WiktextractContext)

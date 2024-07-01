@@ -2,14 +2,15 @@
 #
 # Copyright (c) 2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
-from wikitextprocessor.core import NamespaceDataEntry
 from typing import (
-    Any,
     Optional,
     TypedDict,
-    Union,
 )
+
+from wikitextprocessor.core import NamespaceDataEntry
+
 from wiktextract.wxr_context import WiktextractContext
+
 from .page import clean_node
 
 LUA_CODE = r"""

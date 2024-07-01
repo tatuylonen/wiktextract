@@ -1350,9 +1350,9 @@ def parse_language(
                 process_gloss_header(
                     pre1, pos, head_group, pos_data, header_tags
                 )
-                for l in ls:
+                for ln in ls:
                     # Parse each list associated with this head.
-                    for node in l.children:
+                    for node in ln.children:
                         # Parse nodes in l.children recursively.
                         # The recursion function uses push_sense() to
                         # add stuff into pos_data, and returns True or
@@ -2593,7 +2593,9 @@ def parse_language(
                                             tags.extend(zh_tag_lookup[tag])
                                         else:
                                             print(
-                                                f"MISSING ZH SYNONYM TAG for root {root_word}, word {words}: {tag}"
+                                                f"MISSING ZH SYNONYM TAG for "
+                                                f"root {root_word}, word "
+                                                f"{words}: {tag}"
                                             )
                                             sys.stdout.flush()
 
@@ -2653,7 +2655,9 @@ def parse_language(
                                     roman = tag
                                 else:
                                     print(
-                                        f"MISSING ZH SYNONYM TAG (possibly pinyin) - root {root_word}, word {words}: {tag}"
+                                        f"MISSING ZH SYNONYM TAG "
+                                        f"(possibly pinyin) - root "
+                                        f"{root_word}, word {words}: {tag}"
                                     )
                                     sys.stdout.flush()
 
@@ -2832,9 +2836,10 @@ def parse_language(
                     is_reconstruction,
                 )
 
-                # Handle sublists.  They are frequently used for different scripts
-                # for the language and different variants of the language.  We will
-                # include the lower-level header as a tag in those cases.
+                # Handle sublists.  They are frequently used for different
+                # scripts for the language and different variants of the
+                # language.  We will include the lower-level header as a
+                # tag in those cases.
                 for listnode in sublists:
                     assert listnode.kind == NodeKind.LIST
                     for node in listnode.children:
@@ -2913,7 +2918,8 @@ def parse_language(
                         if pos.lower() not in POS_TITLES:
                             wxr.wtp.debug(
                                 "unhandled see translation subpage: "
-                                "language={} sub={} wxr.wtp.subsection={}".format(
+                                "language={} sub={} wxr.wtp.subsection={}"
+                                .format(
                                     language, sub, wxr.wtp.subsection
                                 ),
                                 sortid="page/2478",
@@ -3256,10 +3262,10 @@ def parse_language(
                 if ignore_count == 0:
                     ht = clean_template_args(wxr, ht)
                     nonlocal is_derived
-                    # If we're in a proto-root Derived terms or Extensions section,
-                    # and the current list item has a link template to a term in the
-                    # same proto-language, then we tag this descendant entry with
-                    # "derived"
+                    # If we're in a proto-root Derived terms or Extensions
+                    # section, and the current list item has a link template
+                    # to a term in the same proto-language, then we tag this
+                    # descendant entry with "derived"
                     is_derived = (
                         is_proto_root_derived_section
                         and (name == "l" or name == "link")
@@ -4248,7 +4254,7 @@ def process_zh_forms_templates(
             if len(form_data["form"]) > 0:
                 base_data["forms"].append(form_data)
         elif re.fullmatch(r"t\d+", p_name):
-            form_data: FormData = {
+            form_data = {
                 "form": clean_node(wxr, None, p_value),
                 "tags": ["Traditional Chinese"],
             }
@@ -4257,7 +4263,7 @@ def process_zh_forms_templates(
         elif p_name == "alt":
             for form_text in clean_node(wxr, None, p_value).split(","):
                 texts = form_text.split("-")
-                form_data: FormData = {"form": texts[0]}
+                form_data = {"form": texts[0]}
                 if len(texts) > 1:
                     # pronunciation data could be added after "-"
                     # see https://en.wiktionary.org/wiki/新婦

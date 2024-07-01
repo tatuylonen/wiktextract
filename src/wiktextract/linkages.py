@@ -4,23 +4,24 @@
 
 import re
 import unicodedata
+from typing import Optional, Sequence
+
 from wiktextract.wxr_context import WiktextractContext
-from wikitextprocessor import Wtp
-from typing import Dict, List, Sequence, Optional, Union
-from .datautils import split_at_comma_semi, data_append
+
+from .datautils import data_append, split_at_comma_semi
 from .form_descriptions import (
     classify_desc,
-    parse_head_final_tags,
-    parse_sense_qualifier,
     head_final_bantu_langs,
     head_final_bantu_re,
+    head_final_numeric_langs,
     head_final_other_langs,
     head_final_other_re,
-    head_final_numeric_langs,
     head_final_re,
+    parse_head_final_tags,
+    parse_sense_qualifier,
 )
 from .tags import linkage_beginning_tags
-from .type_utils import WordData, LinkageData
+from .type_utils import LinkageData, WordData
 
 # Linkage will be ignored if it matches this regexp before splitting
 linkage_pre_split_ignore_re = re.compile(

@@ -2,16 +2,19 @@
 #
 # Copyright (c) 2018-2021 Tatu Ylonen.  See LICENSE and https://ylonen.org
 
-from .wiktionary import (parse_wiktionary, reprocess_wiktionary,
-                         extract_namespace)
+from .categories import extract_categories
 from .config import WiktionaryConfig
-from .wxr_context import WiktextractContext
+from .form_descriptions import valid_tags  # This file adds uppercase tags
 from .page import parse_page
 from .parts_of_speech import PARTS_OF_SPEECH
-from .thesaurus import extract_thesaurus_data
-from .categories import extract_categories
 from .tags import sort_tags, tag_categories
-from .form_descriptions import valid_tags  # This file adds uppercase tags
+from .thesaurus import extract_thesaurus_data
+from .wiktionary import (
+                         extract_namespace,
+                         parse_wiktionary,
+                         reprocess_wiktionary,
+)
+from .wxr_context import WiktextractContext
 
 __all__ = (
     "WiktionaryConfig",

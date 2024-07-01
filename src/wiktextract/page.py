@@ -14,8 +14,8 @@ from wikitextprocessor import (
 )
 from wikitextprocessor.core import (
     PostTemplateFnCallable,
-    TemplateFnCallable,
     TemplateArgs,
+    TemplateFnCallable,
 )
 from wikitextprocessor.node_expand import NodeHandlerFnCallable
 from wikitextprocessor.parser import (

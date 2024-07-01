@@ -20,7 +20,7 @@ InfoNode = Union[str, WikiNode]
 
 InfoReturnTuple = tuple[
     Optional[TemplateData],  # template data field contents or None
-    Union[str, WikiNode, None],  # template output or None if it should
+    Optional[Union[str, WikiNode]],  # template output or None if it should
     # not be expressed (like `+obj` in heads). Return the original
     # WikiNode if nothing special needs to happen.
 ]
@@ -28,6 +28,7 @@ InfoReturnTuple = tuple[
 
 InfoTemplateFunc = Callable[
     [
+        WiktextractContext,
         InfoNode,  # the node being checked
         str,  # location from where this is called
     ],
@@ -101,7 +102,7 @@ INFO_TEMPLATE_FUNCS: dict[str, InfoTemplateFunc] = {
 
 def parse_info_template_node(
     wxr: WiktextractContext, node: Union[str, WikiNode], loc: str
-) -> tuple[Optional[TemplateData], Optional[str]]:
+) -> InfoReturnTuple:
     if not isinstance(node, WikiNode):
         return None, None
     if (
@@ -115,7 +116,7 @@ def parse_info_template_node(
 
 def parse_info_template_arguments(
     wxr: WiktextractContext, name: str, args: TemplateArgs, loc: str
-) -> tuple[Optional[TemplateData], Optional[str]]:
+) -> InfoReturnTuple:
     templ_s = "{{" + name
     zipped = [(str(k), v) for k, v in args.items()]
     for k, v in sorted(zipped):
@@ -126,7 +127,10 @@ def parse_info_template_arguments(
     templ_s += "}}"
     templ_node = wxr.wtp.parse(templ_s)
     if len(templ_node.children) > 0:
-        templ_node = wxr.wtp.parse(templ_s).children[0]
+        tnode = wxr.wtp.parse(templ_s).children[0]
+        if not isinstance(tnode, WikiNode):
+            return None, None
+        templ_node = tnode
     else:
         return None, None
 
