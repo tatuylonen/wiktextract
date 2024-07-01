@@ -17,7 +17,9 @@ class TestESGloss(unittest.TestCase):
     def setUp(self) -> None:
         self.wxr = WiktextractContext(
             Wtp(lang_code="es"),
-            WiktionaryConfig(dump_file_lang_code="es"),
+            WiktionaryConfig(
+                dump_file_lang_code="es", capture_language_codes=None
+            ),
         )
 
     def tearDown(self) -> None:
@@ -182,6 +184,47 @@ class TestESGloss(unittest.TestCase):
                     ],
                     "tags": ["form-of"],
                     "word": "apples",
+                }
+            ],
+        )
+
+    def test_forma_verbo(self):
+        self.wxr.wtp.add_page("Plantilla:lengua", 10, "Español")
+        self.wxr.wtp.add_page(
+            "Plantilla:f.v",
+            10,
+            "Primera persona del singular (yo) del presente de indicativo de amigar o de amigarse",
+        )
+        self.assertEqual(
+            parse_page(
+                self.wxr,
+                "amigo",
+                """== {{lengua|es}} ==
+=== Forma flexiva ===
+
+==== Forma verbal ====
+;1: {{f.v|amigar|yo|presente|indicativo|pronominal=s}}.""",
+            ),
+            [
+                {
+                    "lang": "Español",
+                    "lang_code": "es",
+                    "pos": "verb",
+                    "pos_title": "forma verbal",
+                    "senses": [
+                        {
+                            "glosses": [
+                                "Primera persona del singular (yo) del presente de indicativo de amigar o de amigarse."
+                            ],
+                            "form_of": [
+                                {"word": "amigar"},
+                                {"word": "amigarse"},
+                            ],
+                            "senseid": "1",
+                        }
+                    ],
+                    "tags": ["form-of"],
+                    "word": "amigo",
                 }
             ],
         )
