@@ -32,11 +32,7 @@ def extract_gloss(
             if isinstance(node, TemplateNode) and node.template_name.startswith(
                 ("f.", "forma ")
             ):
-                form_of = clean_node(
-                    wxr, None, node.template_parameters.get(1, "")
-                )
-                if form_of != "":
-                    gloss_data.form_of.append(AltForm(word=form_of))
+                process_forma_template(wxr, gloss_data, node)
 
         gloss = clean_node(wxr, gloss_data, definition)
         if len(gloss) > 0:
@@ -114,3 +110,17 @@ def process_ambito_template(
                     sense.tags.extend(tr_tags)
 
     clean_node(wxr, sense, template)  # save category links
+
+
+def process_forma_template(
+    wxr: WiktextractContext, sense: Sense, template: TemplateNode
+) -> None:
+    # https://es.wiktionary.org/wiki/Plantilla:forma_verbo
+    form_of = clean_node(wxr, None, template.template_parameters.get(1, ""))
+    if form_of != "":
+        sense.form_of.append(AltForm(word=form_of))
+        if (
+            "pronominal" in template.template_parameters
+            or "pronom" in template.template_parameters
+        ):
+            sense.form_of.append(AltForm(word=form_of + "se"))

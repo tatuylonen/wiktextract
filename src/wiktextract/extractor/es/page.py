@@ -125,13 +125,13 @@ def parse_section(
             pos_template_name, POS_TITLES.get(section_title)
         )
         pos_type = pos_data["pos"]
-        page_data.append(base_data.model_copy(deep=True))
-        page_data[-1].pos = pos_type
-        page_data[-1].pos_title = section_title
-        page_data[-1].tags.extend(pos_data.get("tags", []))
-        process_pos_block(wxr, page_data, level_node)
+        if section_title != "forma flexiva":
+            page_data.append(base_data.model_copy(deep=True))
+            page_data[-1].pos = pos_type
+            page_data[-1].pos_title = section_title
+            page_data[-1].tags.extend(pos_data.get("tags", []))
+            process_pos_block(wxr, page_data, level_node)
         for next_level_node in level_node.find_child(LEVEL_KIND_FLAGS):
-            breakpoint()
             parse_section(wxr, page_data, base_data, next_level_node)
     elif section_title.startswith(ETYMOLOGY_TITLES):
         new_base_data = base_data
