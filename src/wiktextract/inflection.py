@@ -739,9 +739,9 @@ def parse_title(
             else:
                 m1 = re.match(title_elemstart_re, elem)
                 if m1:
-                    tags = title_elemstart_map[m.group(1)].split()
+                    tags = title_elemstart_map[m1.group(1)].split()
                     dt = {
-                        "form": elem[m.end() :],
+                        "form": elem[m1.end() :],
                         "source": source,
                         "tags": tags,
                     }
@@ -752,7 +752,7 @@ def parse_title(
         # No parenthesized parts
         m1 = re.search(r"\b(Portuguese) (-.* verb) ", title)
         if m1 is not None:
-            dt = {"form": m.group(2), "tags": ["class"], "source": source}
+            dt = {"form": m1.group(2), "tags": ["class"], "source": source}
             extra_forms.append(dt)
         for elem in title.split(","):
             elem = elem.strip()

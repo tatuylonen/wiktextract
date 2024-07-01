@@ -2,24 +2,24 @@
 #
 # Copyright (c) 2019-2022 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
-import re
 import copy
+import re
+from typing import Optional
 
 from mediawiki_langcodes import code_to_name, name_to_code
-from typing import Optional
-from wiktextract.type_utils import WordData
-from wiktextract.wxr_context import WiktextractContext
 from wikitextprocessor import MAGIC_FIRST, MAGIC_LAST
 
-from .datautils import split_at_comma_semi, data_append, data_extend
+from wiktextract.type_utils import TranslationData, WordData
+from wiktextract.wxr_context import WiktextractContext
+
+from .datautils import data_append, data_extend, split_at_comma_semi
 from .form_descriptions import (
     classify_desc,
     decode_tags,
     nested_translations_re,
-    tr_note_re,
     parse_translation_desc,
+    tr_note_re,
 )
-
 
 # Maps language names in translations to actual language names.
 # E.g., "Apache" is not a language name, but "Apachean" is.
