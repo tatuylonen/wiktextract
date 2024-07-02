@@ -89,18 +89,22 @@ def process_form_of_template(
     expanded_template = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(template_node), expand_all=True
     )
-    find_form_of = False
+    form_of_words = []
     for i_tag in expanded_template.find_html_recursively("i"):
-        find_form_of = process_form_of_template_child(
-            wxr, i_tag, sense, is_alt_of
-        )
-        break
-    if not find_form_of:
+        form_of_words = process_form_of_template_child(wxr, i_tag)
+
+    if len(form_of_words) == 0:
         for link_node in expanded_template.find_child_recursively(
             NodeKind.LINK
         ):
-            process_form_of_template_child(wxr, link_node, sense, is_alt_of)
+            form_of_words = process_form_of_template_child(wxr, link_node)
             break
+    for form_of_word in form_of_words:
+        form_of = AltForm(word=form_of_word)
+        if is_alt_of:
+            sense.alt_of.append(form_of)
+        else:
+            sense.form_of.append(form_of)
 
     if expanded_template.contain_node(NodeKind.LIST):
         shared_gloss = clean_node(
@@ -121,18 +125,15 @@ def process_form_of_template(
 
 
 def process_form_of_template_child(
-    wxr: WiktextractContext, node: WikiNode, sense: Sense, is_alt_of: bool
-) -> bool:
+    wxr: WiktextractContext, node: WikiNode
+) -> list[str]:
+    form_of_words = []
     span_text = clean_node(wxr, None, node)
     for form_of_word in span_text.split("和"):
         form_of_word = form_of_word.strip()
         if form_of_word != "":
-            form_of = AltForm(word=form_of_word)
-            if is_alt_of:
-                sense.alt_of.append(form_of)
-            else:
-                sense.form_of.append(form_of)
-    return span_text != ""
+            form_of_words.append(form_of_word)
+    return form_of_words
 
 
 # https://zh.wiktionary.org/wiki/Category:/Category:之形式模板
