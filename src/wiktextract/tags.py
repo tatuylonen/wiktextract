@@ -3668,6 +3668,7 @@ xlat_tags_map: Dict[str, Union[str, List[str]]] = {
     "masculine/feminine": "masculine feminine",
     "masculine/neuter": "masculine neuter",
     "present/future": "present future",
+    "present/preterite": "present preterite",
     "future/present": "present future",
     "present/aoriest": "present aorist error-misspelling",
     "superlative degree": "superlative",

@@ -17,8 +17,8 @@ from typing import (
 
 import Levenshtein
 from nltk import TweetTokenizer  # type:ignore[import-untyped]
-
 from wikitextprocessor.core import TemplateArgs
+
 from wiktextract.type_utils import (
     AltOf,
     FormData,
@@ -1107,8 +1107,9 @@ def decode_tags1(
                         new_nodes,
                     )
                 if node.end:
-                    # we've hit an end point, the tags and topics have already been
-                    # gathered at some point, don't do anything with the old stuff
+                    # we've hit an end point, the tags and topics have already
+                    # been gathered at some point, don't do anything with the
+                    # old stuff
                     if w in valid_sequences.children:
                         # This starts a *new* possible section
                         max_last_i = add_new(
@@ -3003,6 +3004,8 @@ def parse_alt_or_inflection_of1(
     if re.search(r"(?i)form of address ", gloss):
         return None
 
+    gloss = re.sub(r"only used in [^,]+, ", "", gloss)
+
     # First try all formats ending with "of" (or other known last words that
     # can end a form description)
     matches = list(re.finditer(r"\b(of|for|by|as|letter|number) ", gloss))
@@ -3026,7 +3029,8 @@ def parse_alt_or_inflection_of1(
                     valid_tags.get(tk) == "dialect" for tk in ts_t
                 ):
                     ts_s = (set(ts_t) - {"form-of"}) | {"alt-of"}
-                else: ts_s = set(ts_t)
+                else:
+                    ts_s = set(ts_t)
                 if not (alt_infl_disallowed & ts_s):
                     tags.extend(ts_s)
             if (
