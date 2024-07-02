@@ -432,3 +432,26 @@ class TestGloss(TestCase):
                 },
             ],
         )
+
+    def test_es_verb_form_of(self):
+        self.wxr.wtp.start_page("ababillares")
+        self.wxr.wtp.add_page(
+            "Template:es-verb form of",
+            10,
+            """<small></small><span class='use-with-mention'>僅用於<i class="Latn mention" lang="es">[[te#西班牙語|-{te}-]] [[ababillares#西班牙語|-{ababillares}-]]</i></span>；<span class='form-of-definition-link'><i class="Latn mention" lang="es">[[ababillarse#西班牙語|-{ababillarse}-]]</i></span><span class='form-of-definition use-with-mention'> 的[[Appendix:Glossary#second_person|第二人稱]][[Appendix:Glossary#singular_number|單數]][[Appendix:Glossary#future_tense|將來時]][[Appendix:Glossary#subjunctive_mood|虛擬式]]</span>""",
+        )
+        root = self.wxr.wtp.parse("# {{es-verb form of|ababillarse}}")
+        page_data = [WordEntry(word="", lang_code="", lang="", pos="")]
+        extract_gloss(self.wxr, page_data, root.children[0], Sense())
+        self.assertEqual(
+            page_data[0].model_dump(exclude_defaults=True)["senses"],
+            [
+                {
+                    "form_of": [{"word": "ababillarse"}],
+                    "glosses": [
+                        "僅用於te ababillares；ababillarse 的第二人稱單數將來時虛擬式",
+                    ],
+                    "tags": ["form-of"],
+                },
+            ],
+        )
