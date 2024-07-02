@@ -8,6 +8,7 @@
 
 import nltk
 from nltk.corpus import brown
+
 from .form_descriptions_known_firsts import known_firsts  # w/ our additions
 
 # Download Brown corpus if not already downloaded
@@ -1567,7 +1568,8 @@ additional_words = set(
         "spool",
         "spore",
         "spotnape",
-        "spp",  # Commonly used abbreviation "spp." for subspecies in species names
+        "spp",  # Commonly used abbreviation "spp."
+                # for subspecies in species names
         "sprinkles",
         "sprite",
         "spritsail",

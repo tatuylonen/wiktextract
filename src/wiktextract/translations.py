@@ -2,24 +2,24 @@
 #
 # Copyright (c) 2019-2022 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
-import re
 import copy
+import re
+from typing import Optional
 
 from mediawiki_langcodes import code_to_name, name_to_code
-from typing import Optional
-from wiktextract.type_utils import WordData
-from wiktextract.wxr_context import WiktextractContext
 from wikitextprocessor import MAGIC_FIRST, MAGIC_LAST
 
-from .datautils import split_at_comma_semi, data_append, data_extend
+from wiktextract.type_utils import TranslationData, WordData
+from wiktextract.wxr_context import WiktextractContext
+
+from .datautils import data_append, data_extend, split_at_comma_semi
 from .form_descriptions import (
     classify_desc,
     decode_tags,
     nested_translations_re,
-    tr_note_re,
     parse_translation_desc,
+    tr_note_re,
 )
-
 
 # Maps language names in translations to actual language names.
 # E.g., "Apache" is not a language name, but "Apachean" is.
@@ -328,18 +328,16 @@ def parse_translation_item_text(
     data: WordData,
     item: str,
     sense: Optional[str],
-    pos_datas: list[WordData],
     lang: Optional[str],
     langcode: Optional[str],
     translations_from_template: list[str],
     is_reconstruction: bool,
-) -> None:
+) -> Optional[str]:
     assert isinstance(wxr, WiktextractContext)
     assert isinstance(word, str)
     assert isinstance(data, dict)
     assert isinstance(item, str)
     assert sense is None or isinstance(sense, str)
-    assert isinstance(pos_datas, list)
     assert lang is None or isinstance(lang, str)  # Parent item language
     assert langcode is None or isinstance(langcode, str)  # Template langcode
     assert isinstance(translations_from_template, list)
@@ -519,8 +517,9 @@ def parse_translation_item_text(
     # There may be multiple translations, separated by comma
     nested.append(item)
     for item in nested:
-        tagsets = []
-        topics = []
+        tagsets: list[tuple[str, ...]] = []
+        # This never does anything; it's never updated, so it's always empty
+        # topics: list[str] = []
 
         for part in split_at_comma_semi(
             item, extra=[" / ", " ／ ", "／", r"\| furthermore: "]
@@ -540,15 +539,16 @@ def parse_translation_item_text(
                 continue
 
             # Strip language links
-            tr = {"lang": lang}
+            tr: TranslationData = {"lang": lang}
             if langcode:
                 tr["code"] = langcode
             if tags:
                 tr["tags"] = list(tags)
                 for t in tagsets:
                     tr["tags"].extend(t)
-            if topics:
-                tr["topics"] = list(topics)
+            # topics is never populated, so it's always empty
+            # if topics:
+            #     tr["topics"] = list(topics)
             if sense:
                 if sense.startswith(
                     (

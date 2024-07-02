@@ -2,10 +2,10 @@
 # parsing.
 
 import re
-
 from typing import Optional, TypedDict, Union
-from wiktextract.tags import valid_tags, tag_categories
+
 from wiktextract.parts_of_speech import PARTS_OF_SPEECH
+from wiktextract.tags import valid_tags
 
 LangConfDict = TypedDict(
     "LangConfDict",
@@ -797,7 +797,8 @@ lang_specific: dict[str, LangConfDict] = {
 # def_ls_keys = lang_specific["default"].keys()
 # for k, v in lang_specific.items():
 #     if k[0].isupper() and k not in languages_by_name:
-#         raise AssertionError("key {!r} in lang_specific is not a valid language"
+#         raise AssertionError(
+#            "key {!r} in lang_specific is not a valid language"
 #                              .format(k))
 #     assert isinstance(v, dict)
 #     for kk, vv in v.items():

@@ -1,5 +1,5 @@
-import unicodedata
 import re
+import unicodedata
 
 hiero_phoneme_map: dict[str, str] = {
     "mSa": "A12",

@@ -2,31 +2,35 @@
 #
 # Copyright (c) 2021-2022 Tatu Ylonen.  See file LICENSE and https://ylonen.org.
 
-import re
-import copy
-import html
-import functools
 import collections
+import copy
+import functools
+import html
+import itertools
+import re
 import unicodedata
-from typing import Optional
-from wiktextract.wxr_context import WiktextractContext
-from wikitextprocessor import WikiNode, NodeKind, MAGIC_FIRST
-from wiktextract.tags import valid_tags
-from wiktextract.inflectiondata import infl_map, infl_start_map, infl_start_re
+from typing import Optional, Union
+
+from wikitextprocessor import MAGIC_FIRST, NodeKind, WikiNode
+
+from wiktextract.clean import (
+    clean_value,
+)
 from wiktextract.datautils import data_append, freeze, split_at_comma_semi
 from wiktextract.form_descriptions import (
     classify_desc,
     decode_tags,
-    parse_head_final_tags,
     distw,
+    parse_head_final_tags,
 )
-from wiktextract.clean import (
-    clean_value,
-)
+from wiktextract.inflectiondata import infl_map, infl_start_map, infl_start_re
+from wiktextract.lang_specific_configs import get_lang_conf, lang_specific_tags
 from wiktextract.table_headers_heuristics_data import (
     LANGUAGES_WITH_CELLS_AS_HEADERS,
 )
-from wiktextract.lang_specific_configs import get_lang_conf, lang_specific_tags
+from wiktextract.tags import valid_tags
+from wiktextract.type_utils import FormData
+from wiktextract.wxr_context import WiktextractContext
 
 # --debug-text-cell WORD
 # Command-line parameter for debugging. When parsing inflection tables,
@@ -516,7 +520,12 @@ def or_tagsets(
     return tagsets
 
 
-def and_tagsets(lang, pos, tagsets1, tagsets2):
+def and_tagsets(
+    lang: str,
+    pos: str,
+    tagsets1: list[tuple[str, ...]],
+    tagsets2: list[tuple[str, ...]],
+) -> list[tuple[str, ...]]:
     """Merges tagsets by taking union of all cobinations, without trying
     to determine whether they are compatible."""
     assert isinstance(tagsets1, list) and len(tagsets1) >= 1
@@ -524,6 +533,7 @@ def and_tagsets(lang, pos, tagsets1, tagsets2):
     assert isinstance(tagsets2, list) and len(tagsets2) >= 1
     assert all(isinstance(x, tuple) for x in tagsets1)
     new_tagsets = []
+    tags: Union[set[str], tuple[str, ...]]
     for tags1 in tagsets1:
         for tags2 in tagsets2:
             tags = set(tags1) | set(tags2)
@@ -539,12 +549,13 @@ def and_tagsets(lang, pos, tagsets1, tagsets2):
 
 
 @functools.lru_cache(65536)
-def extract_cell_content(lang, word, col):
+def extract_cell_content(
+    lang: str, word: str, col: str
+) -> tuple[str, list[str], list[tuple[str, str]], list[str]]:
     """Cleans a row/column header for later processing.  This returns
     (cleaned, refs, defs, tags)."""
     # print("EXTRACT_CELL_CONTENT {!r}".format(col))
     hdr_tags = []
-    orig_col = col
     col = re.sub(r"(?s)\s*,\s*$", "", col)
     col = re.sub(r"(?s)\s*•\s*$", "", col)
     col = re.sub(r"\s+", " ", col)
@@ -647,7 +658,7 @@ def extract_cell_content(lang, word, col):
         and col[0].isdigit()
         and not re.match(nondef_re, col)
     ):
-        return "", [], [[col[0], col[2:].strip()]], []
+        return "", [], [(col[0], col[2:].strip())], []
     col = col.strip()
 
     # Extract final "*" reference symbols.  Sometimes there are multiple.
@@ -667,7 +678,9 @@ def extract_cell_content(lang, word, col):
 
 
 @functools.lru_cache(10000)
-def parse_title(title, source):
+def parse_title(
+    title: str, source: str
+) -> tuple[list[str], list[str], list[FormData]]:
     """Parses inflection table title.  This returns (global_tags, table_tags,
     extra_forms), where ``global_tags`` is tags to be added to each inflection
     entry, ``table_tags`` are tags for the word but not to be added to every
@@ -714,7 +727,7 @@ def parse_title(title, source):
         r")\b",
         title,
     ):
-        dt = {"form": m.group(1), "source": source, "tags": ["class"]}
+        dt: FormData = {"form": m.group(1), "source": source, "tags": ["class"]}
         extra_forms.append(dt)
     # Parse parenthesized part from title
     for m in re.finditer(r"\(([^)]*)\)", title):
@@ -724,11 +737,11 @@ def parse_title(title, source):
             if elem in title_elements_map:
                 table_tags.extend(title_elements_map[elem].split())
             else:
-                m = re.match(title_elemstart_re, elem)
-                if m:
-                    tags = title_elemstart_map[m.group(1)].split()
+                m1 = re.match(title_elemstart_re, elem)
+                if m1:
+                    tags = title_elemstart_map[m1.group(1)].split()
                     dt = {
-                        "form": elem[m.end() :],
+                        "form": elem[m1.end() :],
                         "source": source,
                         "tags": tags,
                     }
@@ -737,9 +750,9 @@ def parse_title(title, source):
     # handling to still interpret parts from them
     if "(" not in title:
         # No parenthesized parts
-        m = re.search(r"\b(Portuguese) (-.* verb) ", title)
-        if m is not None:
-            dt = {"form": m.group(2), "tags": ["class"], "source": source}
+        m1 = re.search(r"\b(Portuguese) (-.* verb) ", title)
+        if m1 is not None:
+            dt = {"form": m1.group(2), "tags": ["class"], "source": source}
             extra_forms.append(dt)
         for elem in title.split(","):
             elem = elem.strip()
@@ -752,17 +765,17 @@ def parse_title(title, source):
 
 
 def expand_header(
-    wxr,
-    tablecontext,
-    word,
-    lang,
-    pos,
-    text,
-    base_tags,
+    wxr: WiktextractContext,
+    tablecontext: "TableContext",
+    word: str,
+    lang: str,
+    pos: str,
+    text: str,
+    base_tags: Union[list[str], set[str], tuple[str, ...]],
     silent=False,
     ignore_tags=False,
     depth=0,
-):
+) -> list[tuple[str, ...]]:
     """Expands a cell header to tagset, handling conditional expressions
     in infl_map.  This returns list of tuples of tags, each list element
     describing an alternative interpretation.  ``base_tags`` is combined
@@ -783,7 +796,7 @@ def expand_header(
     # print("EXPAND_HDR: text={!r} base_tags={!r}".format(text, base_tags))
     # First map the text using the inflection map
     text = clean_value(wxr, text)
-    combined_return = []
+    combined_return: list[tuple[str, ...]] = []
     parts = split_at_comma_semi(text, separators=[";"])
     for text in parts:
         if not text:
@@ -843,9 +856,9 @@ def expand_header(
                 for x in v:
                     tags = set(x.split())
                     remove_useless_tags(lang, pos, tags)
-                    tags = tuple(sorted(tags))
-                    if tags not in tagset:
-                        tagset.append(tags)
+                    tags_t = tuple(sorted(tags))
+                    if tags_t not in tagset:
+                        tagset.append(tags_t)
                 break
             # Otherwise the value should be a dictionary describing a
             # conditional expression.
@@ -859,8 +872,8 @@ def expand_header(
                 break
             # Evaluate the conditional expression.
             assert isinstance(v, dict)
-            cond = "default-true"
-            c = ""
+            cond: Union[bool, str] = "default-true"
+            c: Union[str, list[str], set[str]] = ""
             # Handle "lang" condition.  The value must be either a
             # single language or a list of languages, and the
             # condition evaluates to True if the table is one of
@@ -894,12 +907,12 @@ def expand_header(
             # parse_inflection, before parsing and expanding itself
             # has begun.
             if cond and tablecontext and "inflection-template" in v:
-                d = v["inflection-template"]
-                if isinstance(d, str):
-                    cond = d == tablecontext.template_name
+                d1 = v["inflection-template"]
+                if isinstance(d1, str):
+                    cond = d1 == tablecontext.template_name
                 else:
-                    assert isinstance(d, (list, tuple, set))
-                    cond = tablecontext.template_name in d
+                    assert isinstance(d1, (list, tuple, set))
+                    cond = tablecontext.template_name in d1
             # Handle "pos" condition.  The value must be either a single
             # part-of-speech or a list of them, and the condition evaluates to
             # True if the part-of-speech is any of those listed.
@@ -910,9 +923,9 @@ def expand_header(
                 else:
                     assert isinstance(c, (list, tuple, set))
                     cond = pos in c
-            # Handle "if" condition.  The value must be a string containing
-            # a space-separated list of tags.  The condition evaluates to True
-            # if ``base_tags`` contains all of the listed tags.  If the condition
+            # Handle "if" condition.  The value must be a string containing a
+            # space-separated list of tags.  The condition evaluates to True if
+            # ``base_tags`` contains all of the listed tags.  If the condition
             # is of the form "any: ...tags...", then any of the tags will be
             # enough.
             if cond and "if" in v and not ignore_tags:
@@ -946,8 +959,8 @@ def expand_header(
             if cond:
                 v = v.get("then", "")
             else:
-                v = v.get("else")
-                if v is None:
+                v1 = v.get("else")
+                if v1 is None:
                     if default_then:
                         v = default_then
                     else:
@@ -961,6 +974,8 @@ def expand_header(
                                 sortid="inflection/865",
                             )
                         v = "error-unrecognized-form"
+                else:
+                    v = v1
 
         # Merge the resulting tagset from this header part with the other
         # tagsets from the whole header
@@ -972,7 +987,14 @@ def expand_header(
     return combined_return
 
 
-def compute_coltags(lang, pos, hdrspans, start, colspan, celltext):
+def compute_coltags(
+    lang: str,
+    pos: str,
+    hdrspans: list[str],
+    start: int,
+    colspan: int,
+    celltext: int,
+) -> list[tuple[str]]:
     """Computes column tags for a column of the given width based on the
     current header spans."""
     assert isinstance(lang, str)
@@ -1167,8 +1189,11 @@ def compute_coltags(lang, pos, hdrspans, start, colspan, celltext):
                         new_tagsets.append(tags)
                 if celltext == debug_cell_text and new_tagsets != tagsets:
                     print(
-                        "Removed tags that do not appear outside {} -> {}".format(
-                            tagsets, new_tagsets
+                        "Removed tags that do not "
+                        "appear outside {} -> {}".format(
+                            # have_hdr never used?
+                            tagsets,
+                            new_tagsets,
                         )
                     )
                 tagsets = new_tagsets
@@ -1176,7 +1201,8 @@ def compute_coltags(lang, pos, hdrspans, start, colspan, celltext):
         if key in used:
             if celltext == debug_cell_text:
                 print(
-                    "Cellspan already used: start={} colspan={} rownum={} {}".format(
+                    "Cellspan already used: start={} "
+                    "colspan={} rownum={} {}".format(
                         hdrspan.start,
                         hdrspan.colspan,
                         hdrspan.rownum,
@@ -1333,7 +1359,9 @@ def compute_coltags(lang, pos, hdrspans, start, colspan, celltext):
         last_header_row = hdrspan.rownum
     # Merge the final row tagset into coltags
     coltags = and_tagsets(lang, pos, coltags, row_tagsets)
-    # print("HDRSPANS:", list((x.start, x.colspan, x.tagsets) for x in hdrspans))
+    # print(
+    #     "HDRSPANS:", list((x.start, x.colspan, x.tagsets) for x in hdrspans)
+    # )
     if celltext == debug_cell_text:
         print("COMPUTE_COLTAGS {} {}: {}".format(start, colspan, coltags))
     assert isinstance(coltags, list)
@@ -1418,7 +1446,7 @@ def parse_simple_table(
     # after it)
     def_ht = {}
 
-    def add_defs(defs):
+    def add_defs(defs: list[tuple[str, str]]) -> None:
         for ref, d in defs:
             # print("DEF: ref={} d={}".format(ref, d))
             d = d.strip()
@@ -1436,14 +1464,18 @@ def parse_simple_table(
                     # print("Failed: topics={} tags={}"
                     #       .format(topics, tags))
                     continue
-            tags1 = set()
+            tags1_s: set[str] = set()
             for ts in tags:
-                tags1.update(ts)
-            tags1 = tuple(sorted(tags1))
+                tags1_s.update(ts)
+            tags1 = tuple(sorted(tags1_s))
             # print("DEFINED: {} -> {}".format(ref, tags1))
             def_ht[ref] = tags1
 
-    def generate_tags(rowtags, table_tags):
+    def generate_tags(
+        rowtags: list[tuple[str]], table_tags: list[str]
+    ) -> tuple[
+        list[tuple[str, ...]], list[tuple[str, ...]], list[tuple[str, ...]]
+    ]:
         new_coltags = []
         all_hdr_tags = []  # list of tuples
         new_rowtags = []
@@ -1456,8 +1488,11 @@ def parse_simple_table(
                 colspan,
                 col,  # cell_text
             ):
-                base_tags = (
-                    set(rt0) | set(ct0) | set(global_tags) | set(table_tags)
+                base_tags: set[str] = (
+                    set(rt0)
+                    | set(ct0)
+                    | set(global_tags)
+                    | set(itertools.chain.from_iterable(table_tags))
                 )  # Union.
                 alt_tags = expand_header(
                     wxr,
@@ -1473,16 +1508,16 @@ def parse_simple_table(
                 for tt in alt_tags:
                     if tt not in all_hdr_tags:
                         all_hdr_tags.append(tt)
-                    tt = set(tt)
+                    tt_s = set(tt)
                     # Certain tags are always moved to word-level tags
-                    if tt & TAGS_FORCED_WORDTAGS:
-                        table_tags.extend(tt & TAGS_FORCED_WORDTAGS)
-                        tt = tt - TAGS_FORCED_WORDTAGS
+                    if tt_s & TAGS_FORCED_WORDTAGS:
+                        table_tags.extend(tt_s & TAGS_FORCED_WORDTAGS)
+                        tt_s = tt_s - TAGS_FORCED_WORDTAGS
                     # Add tags from referenced footnotes
-                    tt.update(refs_tags)
+                    tt_s.update(refs_tags)
                     # Sort, convert to tuple, and add to set of
                     # alternatives.
-                    tt = tuple(sorted(tt))
+                    tt = tuple(sorted(tt_s))
                     if tt not in new_coltags:
                         new_coltags.append(tt)
                     # Kludge (saprast/Latvian/Verb): ignore row tags
@@ -1498,12 +1533,12 @@ def parse_simple_table(
         return new_rowtags, new_coltags, all_hdr_tags
 
     def add_new_hdrspan(
-        col,
-        hdrspans,
-        store_new_hdrspan,
-        col0_followed_by_nonempty,
-        col0_hdrspan,
-    ):
+        col: str,
+        hdrspans: list[HdrSpan],
+        store_new_hdrspan: bool,
+        col0_followed_by_nonempty: bool,
+        col0_hdrspan: Optional[HdrSpan],
+    ) -> tuple[str, bool, Optional[HdrSpan]]:
         hdrspan = HdrSpan(
             col_idx, colspan, rowspan, rownum, new_coltags, col, all_headers
         )
@@ -1595,7 +1630,7 @@ def parse_simple_table(
                 col0_followed_by_nonempty = False
         return col, col0_followed_by_nonempty, col0_hdrspan
 
-    def split_text_into_alts(col):
+    def split_text_into_alts(col: str) -> tuple[str, list[str], list[str]]:
         # Split the cell text into alternatives
         split_extra_tags = []
         if col and is_superscript(col[0]):
@@ -1685,7 +1720,7 @@ def parse_simple_table(
             alts = new_alts
         return col, alts, split_extra_tags
 
-    def handle_mixed_lines(alts):
+    def handle_mixed_lines(alts: list[str]) -> list[tuple[str, str, str]]:
         # Handle the special case where romanization is given under
         # normal form, e.g. in Russian.  There can be multiple
         # comma-separated forms in each case.  We also handle the case
@@ -1701,7 +1736,7 @@ def parse_simple_table(
                 for x in alts[len2:]
             )
         ):  # In the second half of alts
-            alts = list(
+            nalts = list(
                 (alts[i], "", alts[i + len2])
                 # List of tuples: (base, "", ipa)
                 for i in range(len2)
@@ -1713,7 +1748,7 @@ def parse_simple_table(
             and all(not x.startswith("/") for x in alts[:-1])
         ):
             # Only if the last alt is IPA
-            alts = list((alts[i], "", alts[-1]) for i in range(len(alts) - 1))
+            nalts = list((alts[i], "", alts[-1]) for i in range(len(alts) - 1))
         # base, IPA, IPA, IPA
         elif (
             len(alts) > 2
@@ -1723,7 +1758,7 @@ def parse_simple_table(
             )
         ):
             # First is base and the rest is IPA alternatives
-            alts = list((alts[0], "", alts[i]) for i in range(1, len(alts)))
+            nalts = list((alts[0], "", alts[i]) for i in range(1, len(alts)))
 
         # Check for romanizations, forms first, romanizations under
         elif (
@@ -1757,7 +1792,7 @@ def parse_simple_table(
                 for x in alts[len2:]
             )
         ):
-            alts = list((alts[i], alts[i + len2], "") for i in range(len2))
+            nalts = list((alts[i], alts[i + len2], "") for i in range(len2))
         # Check for romanizations, forms and romanizations alternating
         elif (
             len(alts) % 2 == 0
@@ -1786,7 +1821,7 @@ def parse_simple_table(
             )
         ):
             # odds
-            alts = list(
+            nalts = list(
                 (alts[i], alts[i + 1], "") for i in range(0, len(alts), 2)
             )
             # evens
@@ -1829,11 +1864,11 @@ def parse_simple_table(
                 for x in lst:
                     new_alts.append(x + alt[idx:])
                     # add the end of alt
-            alts = list((x, "", "") for x in new_alts)
+            nalts = list((x, "", "") for x in new_alts)
             # [form, no romz, no ipa]
-        return alts
+        return nalts
 
-    def find_semantic_parens(form):
+    def find_semantic_parens(form: str) -> tuple[str, list[str]]:
         # "Some languages" (=Greek) use brackets to mark things that
         # require tags, like (informality), [rarity] and {archaicity}.
         extra_tags = []
@@ -1868,7 +1903,9 @@ def parse_simple_table(
                 form = form[1:-1]
         return form, extra_tags
 
-    def handle_parens(form, roman, clitic, extra_tags):
+    def handle_parens(
+        form: str, roman: str, clitic: str, extra_tags: list[str]
+    ) -> tuple[str, str, str]:
         if re.match(r"[’'][a-z]([a-z][a-z]?)?$", paren):
             # is there a clitic starting with apostrophe?
             clitic = paren
@@ -1879,7 +1916,7 @@ def parse_simple_table(
             tagsets1, topics1 = decode_tags(paren)
             if not topics1:
                 for ts in tagsets1:
-                    ts = list(x for x in ts if " " not in x)
+                    ts = tuple(x for x in ts if " " not in x)
                     # There are some generated tags containing
                     # spaces; do not let them through here.
                     extra_tags.extend(ts)
@@ -2213,7 +2250,8 @@ def parse_simple_table(
         if "dummy-skip-this" in global_tags:
             return []
         rowtags = [()]
-        have_hdr = False
+        # have_hdr = False
+        # have_hdr never used?
         have_text = False
         samecell_cnt = 0
         col0_hdrspan = None  # col0 or later header (despite its name)
@@ -2232,7 +2270,10 @@ def parse_simple_table(
                 assert samecell_cnt > 0
                 samecell_cnt -= 1
                 continue
-            is_first_row_of_cell = cell_rowcnt[id(cell)] == 0
+
+            # is_first_row_of_cell = cell_rowcnt[id(cell)] == 0
+            # never used?
+
             # defaultdict(int) around line 1900
             cell_rowcnt[id(cell)] += 1
             # => how many cols this spans
@@ -2342,7 +2383,8 @@ def parse_simple_table(
                     # XXX beware of header "—": "" - must not clear on that if
                     # it expands to no tags
                     rowtags = [()]
-                have_hdr = True
+                # have_hdr = True
+                # have_hdr never used?
                 # print("HAVE_HDR: {} rowtags={}".format(col, rowtags))
                 # Update rowtags and coltags
                 has_covering_hdr.add(col_idx)  # col_idx == current column
@@ -2413,7 +2455,7 @@ def parse_simple_table(
             if (
                 col_idx == 0
                 and not first_col_has_text
-                and get_lang_conf(lang, "ignore_top_left_text_cell") == True
+                and get_lang_conf(lang, "ignore_top_left_text_cell") is True
             ):
                 continue  # Skip text at top left, as in Icelandic, Faroese
 
@@ -3058,9 +3100,9 @@ def handle_wikitext_or_html_table(
                 pass
             elif kind in (NodeKind.TABLE_ROW, "tr"):
                 if "vsShow" in node.attrs.get("class", "").split():
-                    # vsShow rows are those that are intially shown in tables that
-                    # have more data.  The hidden data duplicates these rows, so
-                    # we skip it and just process the hidden data.
+                    # vsShow rows are those that are intially shown in tables
+                    # that have more data.  The hidden data duplicates these
+                    # rows, so we skip it and just process the hidden data.
                     continue
 
                 # Parse a table row.
@@ -3092,13 +3134,13 @@ def handle_wikitext_or_html_table(
                         len(row) < len(vertical_still_left)
                         and vertical_still_left[len(row)] > 0
                     ):
-                        # vertical_still_left is [...0, 0, 2...] for each column.
-                        # It is populated at the end of the loop, at the same time
-                        # as col_gap_data.
-                        # This needs to be looped and filled this way because each
-                        # `for col`-looping jumps straight to the next meaningful
-                        # cell; there is no "None" cells, only emptiness between,
-                        # and rowspan and colspan are just to generate the "fill-
+                        # vertical_still_left is [...0, 0, 2...] for each
+                        # column. It is populated at the end of the loop, at the
+                        # same time as col_gap_data. This needs to be looped and
+                        # filled this way because each `for col`-looping jumps
+                        # straight to the next meaningful cell; there is no
+                        # "None" cells, only emptiness between, and rowspan and
+                        # colspan are just to generate the "fill-
                         vertical_still_left[len(row)] -= 1
                         row.append(col_gap_data[len(row)])
 

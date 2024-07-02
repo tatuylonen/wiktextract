@@ -4,9 +4,9 @@ from mediawiki_langcodes import name_to_code
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import LevelNode, TemplateNode
 
-from ...logging import logger
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from ...wxr_logging import logger
 from .etymology import extract_etymology
 from .example import extract_examples
 from .gloss import extract_glosses

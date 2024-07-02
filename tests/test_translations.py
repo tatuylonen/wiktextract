@@ -48,7 +48,6 @@ class TrTests(unittest.TestCase):
             data,
             item,
             sense,
-            pos_datas,
             lang,
             langcode,
             translations_from_template,

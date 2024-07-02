@@ -13,9 +13,10 @@ from wikitextprocessor import (
     WikiNode,
 )
 from wikitextprocessor.core import (
+    NamespaceDataEntry,
     PostTemplateFnCallable,
-    TemplateFnCallable,
     TemplateArgs,
+    TemplateFnCallable,
 )
 from wikitextprocessor.node_expand import NodeHandlerFnCallable
 from wikitextprocessor.parser import (
@@ -163,7 +164,7 @@ def inject_linkages(wxr: WiktextractContext, page_data: list[dict]) -> None:
     # Inject linkages from thesaurus entries
     from .thesaurus import search_thesaurus
 
-    local_thesaurus_ns = wxr.wtp.NAMESPACE_DATA.get("Thesaurus", {}).get("name")
+    local_thesaurus_ns = wxr.wtp.NAMESPACE_DATA.get("Thesaurus", {}).get("name")  # type: ignore[call-overload]
     for data in page_data:
         if "pos" not in data:
             continue
@@ -171,7 +172,10 @@ def inject_linkages(wxr: WiktextractContext, page_data: list[dict]) -> None:
         lang_code = data["lang_code"]
         pos = data["pos"]
         for term in search_thesaurus(
-            wxr.thesaurus_db_conn, word, lang_code, pos
+            wxr.thesaurus_db_conn,  # type:ignore[arg-type]
+            word,
+            lang_code,
+            pos,  # type: ignore[arg-type]
         ):
             for dt in data.get(term.linkage, ()):
                 if dt.get("word") == term.term and (
@@ -261,7 +265,7 @@ def process_categories(
     # Remove category links that start with a language name from entries for
     # different languages
     rhymes_ns_prefix = (
-        wxr.wtp.NAMESPACE_DATA.get("Rhymes", {}).get("name", "") + ":"
+        wxr.wtp.NAMESPACE_DATA.get("Rhymes", {}).get("name", "") + ":"  # type: ignore[call-overload]
     )
     for data in page_data:
         lang_code = data.get("lang_code")
@@ -345,7 +349,7 @@ def clean_node(
             return ""
         return None
 
-    def clean_node_handler_fn(
+    def clean_node_handler_fn_default(
         node: WikiNode,
     ) -> Optional[list[Union[str, WikiNode]]]:
         assert isinstance(node, WikiNode)
@@ -360,6 +364,8 @@ def clean_node(
     if node_handler_fn is not None:
         # override clean_node_handler_fn, the def above can't be accessed
         clean_node_handler_fn = node_handler_fn
+    else:
+        clean_node_handler_fn = clean_node_handler_fn_default
 
     # print("clean_node: value={!r}".format(value))
     v = wxr.wtp.node_to_html(
@@ -373,9 +379,11 @@ def clean_node(
     # Capture categories if sense_data has been given.  We also track
     # Lua execution errors here.
     # If collect_links=True (for glosses), capture links
-    category_ns_data = wxr.wtp.NAMESPACE_DATA.get("Category", {})
-    category_ns_names = {category_ns_data.get("name")} | set(
-        category_ns_data.get("aliases")
+    category_ns_data: NamespaceDataEntry = wxr.wtp.NAMESPACE_DATA.get(
+        "Category", {}  # type: ignore[typeddict-item]
+    )
+    category_ns_names: set[str] = {category_ns_data.get("name")} | set(
+        category_ns_data.get("aliases")  #type:ignore[assignment,arg-type]
     )
     category_names_pattern = rf"(?:{'|'.join(category_ns_names)})"
     if sense_data is not None:
@@ -461,5 +469,5 @@ def sense_data_has_value(sense_data: SenseData, name: str, value: Any) -> bool:
     if hasattr(sense_data, name):
         return value in getattr(sense_data, name)
     elif isinstance(sense_data, dict):
-        return value in sense_data.get(name, ())
+        return value in sense_data.get(name, ())  # type:ignore[operator]
     return False

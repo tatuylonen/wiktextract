@@ -4,9 +4,9 @@ from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import LEVEL_KIND_FLAGS, TemplateNode
 
 from ...config import POSSubtitleData
-from ...logging import logger
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from ...wxr_logging import logger
 from .etymology import extract_etymology
 from .gloss import extract_gloss, process_meaning_template
 from .inflection import parse_adj_forms_table, parse_wikitext_forms_table

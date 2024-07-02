@@ -5,9 +5,9 @@ from mediawiki_langcodes import name_to_code
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import LEVEL_KIND_FLAGS, TemplateNode
 
-from ...logging import logger
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from ...wxr_logging import logger
 from .descendant import extract_descendants
 from .etymology import extract_etymology
 from .gloss import extract_gloss

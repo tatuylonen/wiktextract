@@ -17,7 +17,6 @@ from typing import (
 
 import Levenshtein
 from nltk import TweetTokenizer  # type:ignore[import-untyped]
-from wikitextprocessor.core import TemplateArgs
 
 from wiktextract.type_utils import (
     AltOf,
@@ -1491,7 +1490,7 @@ def add_romanization(
     roman: str,
     text: str,
     is_reconstruction: bool,
-    head_group: int,
+    head_group: Optional[int],
     ruby: Sequence[tuple[str, str]],
 ) -> None:
     tags_lst = ["romanization"]

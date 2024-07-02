@@ -5,9 +5,9 @@ from wikitextprocessor.parser import (
     WikiNodeChildrenList,
 )
 
-from ...logging import logger
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from ...wxr_logging import logger
 from .conjugation import extract_conjugation_section
 from .etymology import process_etymology_block
 from .example import extract_example

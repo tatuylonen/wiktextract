@@ -7,38 +7,44 @@
 # mypy: disable-error-code = literal-required
 
 import re
-from .tags import valid_tags, head_final_numeric_langs
 from typing import TypedDict, Union
+
 from wiktextract.parts_of_speech import PARTS_OF_SPEECH
+
+from .tags import head_final_numeric_langs, valid_tags
 
 # Languages where possessive forms (e.g. pronouns) inflect according to the
 # gender/number of the possessed object(s)
-POSSESSIVE_POSSESSED_LANGS = set([
-    "Azerbaijani",
-    "Danish",
-    "Faroese",
-    "Icelandic",
-    "Kumyk",
-    "Norwegian Bokmål",
-    "Norwegian Nynorsk",
-    "Quechua",
-    "Swedish",
-    "Uyghur",
-    "Turkish",
-])
+POSSESSIVE_POSSESSED_LANGS = set(
+    [
+        "Azerbaijani",
+        "Danish",
+        "Faroese",
+        "Icelandic",
+        "Kumyk",
+        "Norwegian Bokmål",
+        "Norwegian Nynorsk",
+        "Quechua",
+        "Swedish",
+        "Uyghur",
+        "Turkish",
+    ]
+)
 
 # Languages that have numbered infinitives (infinitive-i etc)
-LANGS_WITH_NUMBERED_INFINITIVES = set([
-    "Finnish",
-    "Ingrian",
-    "Veps",
-    "Northern Sami",
-    "Proto-Samic",
-    "Skolt Sami",
-    "Lule Sami",
-    "Inari Sami",
-    "Pite Sami",
-])
+LANGS_WITH_NUMBERED_INFINITIVES = set(
+    [
+        "Finnish",
+        "Ingrian",
+        "Veps",
+        "Northern Sami",
+        "Proto-Samic",
+        "Skolt Sami",
+        "Lule Sami",
+        "Inari Sami",
+        "Pite Sami",
+    ]
+)
 
 
 # Inflection map for parsing headers in tables.
@@ -65,6 +71,7 @@ InflMapNodeDict = TypedDict(
     {
         "lang": Union[str, set[str], list[str]],
         "pos": Union[str, set[str], list[str]],
+        "inflection-template": Union[str, list[str], tuple[str, ...]],
         "nested-table-depth": Union[int, list[int]],
         "default": str,
         "if": str,
@@ -170,9 +177,9 @@ infl_map: dict[str, InflMapNode] = {
     "sublative": "sublative",
     "delative": "delative",
     "non-attributive possessive - singular":
-    "predicative possessive possessed-single",  # XXX check hűtő/Hungarian/Noun
+        "predicative possessive possessed-single",  # XXX hűtő/Hungarian/Noun
     "non-attributive possessive - plural":
-    "predicative possessive possessed-single",
+        "predicative possessive possessed-single",
     "infinitive": "infinitive",
     "prepositional": "prepositional",
     "masculine": {
@@ -218,9 +225,10 @@ infl_map: dict[str, InflMapNode] = {
     "1st person sing.": "first-person singular",
     "2nd person sing.": "second-person singular",
     "2nd person sing. (u)": "second-person singular formal",
-    "2nd person sing. (gij)": ["second-person singular archaic "
-                               "formal majestic",
-                               "second-person singular colloquial Flanders"],
+    "2nd person sing. (gij)": [
+        "second-person singular archaic " "formal majestic",
+        "second-person singular colloquial Flanders",
+    ],
     "3rd person sing.": "third-person singular",
     "2d person sing.": "second-person singular",
     "3d sing. masc.": "third-person singular masculine",
@@ -243,13 +251,15 @@ infl_map: dict[str, InflMapNode] = {
     "present participle/gerund": "present participle",
     "1st person sg": "first-person singular",
     "2nd person sg informal": "second-person singular informal",
-    "3rd person sg 2nd p. sg formal":
-    ["third-person singular",
-     "third-person singular formal second-person-semantically"],
+    "3rd person sg 2nd p. sg formal": [
+        "third-person singular",
+        "third-person singular formal second-person-semantically",
+    ],
     "1st person pl": "first-person plural",
-    "3rd person pl 2nd p. pl formal":
-    ["third-person plural",
-     "third-person plural formal second-person-semantically"],
+    "3rd person pl 2nd p. pl formal": [
+        "third-person plural",
+        "third-person plural formal second-person-semantically",
+    ],
     "Indica­tive mood": "indicative",
     "Pre­sent": "present",
     "Indef.": {
@@ -263,18 +273,13 @@ infl_map: dict[str, InflMapNode] = {
         "else": "definite",
     },
     "2nd-p. o.": "object-second-person",
-    "m verbs conjugated according to third person sg. er":
-    "third-person singular",
-    "m verbs conjugated according to 3nd person sg. er":
-    "third-person singular",
-    "verbs conjugated according to 2nd person pl. ihr":
-    "second-person plural",
-    "verbs conjugated according to 3rd person pl. sie":
-    "second-person plural",
+    "m verbs conjugated according to third person sg. er": "third-person singular",
+    "m verbs conjugated according to 3nd person sg. er": "third-person singular",
+    "verbs conjugated according to 2nd person pl. ihr": "second-person plural",
+    "verbs conjugated according to 3rd person pl. sie": "second-person plural",
     "2nd person plural (familiar)": "second-person plural familiar",
     "2nd person sg. or pl. (polite)": "second-person singular plural polite",
-    "2nd person sg. or pl. (elevated²)":
-    "second-person singular plural polite archaic",
+    "2nd person sg. or pl. (elevated²)": "second-person singular plural polite archaic",
     "Condi­tional mood": "conditional",
     "Sub­junc­tive mood": "subjunctive",
     "Other nonfinite verb forms": {
@@ -333,34 +338,26 @@ infl_map: dict[str, InflMapNode] = {
     "infinitives": "infinitive",
     "conditional": "conditional",
     "pluperfect": "pluperfect",
-
     # XXX These need to be better structured, but I don't know where these
     # are from (see e.g. cois/Irish)
     "Bare forms": "indefinite",
     "Bare forms:": "",
-
     "past": "past",
     "1st": {
         "default": "first-person",
         "lang": LANGS_WITH_NUMBERED_INFINITIVES,
         "if": "infinitive",
         "then": "infinitive-i",
-        "else": {
-            "lang": "Swahili",
-            "then": "first-person"
-        },
+        "else": {"lang": "Swahili", "then": "first-person"},
     },
-    "2nd":  {
+    "2nd": {
         "default": "second-person",
         "lang": LANGS_WITH_NUMBERED_INFINITIVES,
         "if": "infinitive",
         "then": "infinitive-ii",
-        "else": {
-            "lang": "Swahili",
-            "then": "second-person"
-        },
+        "else": {"lang": "Swahili", "then": "second-person"},
     },
-    "3rd":  {
+    "3rd": {
         "default": "third-person",
         "lang": LANGS_WITH_NUMBERED_INFINITIVES,
         "if": "infinitive",
@@ -402,10 +399,10 @@ infl_map: dict[str, InflMapNode] = {
     "Nominal forms": "dummy-reset-headers",  # Reset column inheritance
     "long 1st": "infinitive-i-long",
     "I": {
-         "lang": LANGS_WITH_NUMBERED_INFINITIVES,
-         "if": "infinitive",
-         "then": "infinitive-i",
-         "else": {
+        "lang": LANGS_WITH_NUMBERED_INFINITIVES,
+        "if": "infinitive",
+        "then": "infinitive-i",
+        "else": {
             "lang": "Czech",  # podnikat/Czech
             "then": "first-person singular",
             "else": {
@@ -438,8 +435,7 @@ infl_map: dict[str, InflMapNode] = {
                     },
                 },
             },
-
-          },
+        },
     },
     "long I": {
         "lang": LANGS_WITH_NUMBERED_INFINITIVES,
@@ -585,33 +581,70 @@ infl_map: dict[str, InflMapNode] = {
         "if": "third-person singular",
         "then": "third-person singular",
         "else": {
-            "lang": ["Middle French", "Old Occitan", "Ladin",],
+            "lang": [
+                "Middle French",
+                "Old Occitan",
+                "Ladin",
+            ],
             "pos": "verb",
             "if": "first-person singular",
             "then": "first-person singular",
         },
     },
     "io": {
-        "lang": ["Aromanian", "Interlingua", "Istro-Romanian",
-                 "Italian", "Neapolitan"],
-        "pos":  ["verb", "suffix"],  # -urre/Italian; Added Italian entries
+        "lang": [
+            "Aromanian",
+            "Interlingua",
+            "Istro-Romanian",
+            "Italian",
+            "Neapolitan",
+        ],
+        "pos": ["verb", "suffix"],  # -urre/Italian; Added Italian entries
         "if": "first-person singular",
         "then": "first-person singular",
     },
     "tu": {
-        "lang": ["Aromanian", "Asturian", "Catalan", "French", "Friulian",
-                 "Gallurese",
-                 "Gaulish", "Ido", "Interlingua", "Italian", "Kalasha",
-                 "Kalo Finnish Romani", "Ladino", "Latgalian", "Latin",
-                 "Latvian", "Lithuanian", "Middle French",
-                 "Mirandese", "Neapolitan",
-                 "Northern Kurdish", "Old French",
-                 "Occitan", "Old Irish", "Old Portuguese",
-                 "Phalura", "Portuguese", "Romani", "Romanian",
-                 "Sassarese", "Savi",
-                 "Scottish Gaelic", "Sicilian", "Sinte Romani",
-                 "Sudovian", "Tarantino", "Tocharian A", "Welsh Romani"],
-        "pos":  ["verb", "suffix"],
+        "lang": [
+            "Aromanian",
+            "Asturian",
+            "Catalan",
+            "French",
+            "Friulian",
+            "Gallurese",
+            "Gaulish",
+            "Ido",
+            "Interlingua",
+            "Italian",
+            "Kalasha",
+            "Kalo Finnish Romani",
+            "Ladino",
+            "Latgalian",
+            "Latin",
+            "Latvian",
+            "Lithuanian",
+            "Middle French",
+            "Mirandese",
+            "Neapolitan",
+            "Northern Kurdish",
+            "Old French",
+            "Occitan",
+            "Old Irish",
+            "Old Portuguese",
+            "Phalura",
+            "Portuguese",
+            "Romani",
+            "Romanian",
+            "Sassarese",
+            "Savi",
+            "Scottish Gaelic",
+            "Sicilian",
+            "Sinte Romani",
+            "Sudovian",
+            "Tarantino",
+            "Tocharian A",
+            "Welsh Romani",
+        ],
+        "pos": ["verb", "suffix"],
         "then": "second-person",
         "else": {
             "lang": "Ladin",
@@ -620,87 +653,101 @@ infl_map: dict[str, InflMapNode] = {
     },
     "lui/lei, esso/essa": {
         "lang": "Italian",
-        "pos":  ["verb", "suffix"],
+        "pos": ["verb", "suffix"],
         "if": "third-person singular",
         "then": "third-person singular",
     },
     "lui/lei": {  # calere/Italian
         "lang": "Italian",
-        "pos":  ["verb", "suffix"],
+        "pos": ["verb", "suffix"],
         "if": "third-person singular",
         "then": "third-person singular",
     },
     "noi": {
-        "lang": ["Aromanian", "Corsican", "Gallurese",
-                 "Italian", "Piedmontese", "Romanian", "Sassarese"],
-        "pos":  ["verb", "suffix"],
+        "lang": [
+            "Aromanian",
+            "Corsican",
+            "Gallurese",
+            "Italian",
+            "Piedmontese",
+            "Romanian",
+            "Sassarese",
+        ],
+        "pos": ["verb", "suffix"],
         "if": "first-person plural",
         "then": "first-person plural",
     },
     "voi": {
-        "lang": ["Aromanian", "Corsican", "Gallurese",
-                 "Italian", "Piedmontese", "Romanian", "Sassarese"],
-        "pos":  ["verb", "suffix"],
+        "lang": [
+            "Aromanian",
+            "Corsican",
+            "Gallurese",
+            "Italian",
+            "Piedmontese",
+            "Romanian",
+            "Sassarese",
+        ],
+        "pos": ["verb", "suffix"],
         "if": "second-person plural",
         "then": "second-person plural",
     },
     "loro, essi/esse": {
         "lang": "Italian",
-        "pos":  ["verb", "suffix"],
+        "pos": ["verb", "suffix"],
         "if": "third-person plural",
         "then": "third-person plural",
     },
     "loro": {  # calere/Italian
         "lang": "Italian",
-        "pos":  ["verb", "suffix"],
+        "pos": ["verb", "suffix"],
         "if": "third-person plural",
         "then": "third-person plural",
     },
     "che io": {
         "lang": "Italian",
-        "pos":  ["verb", "suffix"],
+        "pos": ["verb", "suffix"],
         "if": "first-person singular",
         "then": "first-person singular",
     },
     "che tu": {
         "lang": ["Italian", "Ladin"],
-        "pos":  ["verb", "suffix"],
+        "pos": ["verb", "suffix"],
         "if": "second-person singular",
         "then": "second-person singular",
     },
     "che lui/che lei, che esso/che essa": {
         "lang": "Italian",
-        "pos":  ["verb", "suffix"],
+        "pos": ["verb", "suffix"],
         "if": "third-person singular",
         "then": "third-person singular",
     },
     "che lui/che lei": {  # calere/Italian
         "lang": "Italian",
-        "pos":  ["verb", "suffix"],
+        "pos": ["verb", "suffix"],
         "if": "third-person singular",
         "then": "third-person singular",
     },
     "che noi": {
         "lang": "Italian",
-        "pos":  ["verb", "suffix"],
+        "pos": ["verb", "suffix"],
         "if": "first-person plural",
         "then": "first-person plural",
     },
     "che voi": {
         "lang": "Italian",
-        "pos":  ["verb", "suffix"],
+        "pos": ["verb", "suffix"],
         "if": "second-person plural",
         "then": "second-person plural",
     },
     "che loro, che essi/che esse": {
         "lang": "Italian",
-        "pos":  ["verb", "suffix"],
+        "pos": ["verb", "suffix"],
         "if": "third-person plural",
         "then": "third-person plural",
     },
     "che loro": {  # calere/Italian
         "lang": "Italian",
-        "pos":  ["verb", "suffix"],
+        "pos": ["verb", "suffix"],
         "if": "third-person plural",
         "then": "third-person plural",
     },
@@ -771,9 +818,15 @@ infl_map: dict[str, InflMapNode] = {
         "then": "third-person plural",
     },
     "eu": {
-        "lang": ["Galician", "Gallurese",
-                 "Old Occitan", "Old Portuguese", "Portuguese",
-                 "Romanian", "Romansch"],
+        "lang": [
+            "Galician",
+            "Gallurese",
+            "Old Occitan",
+            "Old Portuguese",
+            "Portuguese",
+            "Romanian",
+            "Romansch",
+        ],
         "pos": "verb",
         # ~ "if": "first-person singular",
         "then": "first-person singular",
@@ -815,8 +868,14 @@ infl_map: dict[str, InflMapNode] = {
         "then": "first-person plural",
     },
     "es": {
-        "lang": ["Alemannic German", "Cimbrian", "German", "Hunsrik",
-                 "Pennsylvania German", "Sudovian"],
+        "lang": [
+            "Alemannic German",
+            "Cimbrian",
+            "German",
+            "Hunsrik",
+            "Pennsylvania German",
+            "Sudovian",
+        ],
         "pos": "verb",
         "if": "third-person singular",
         "then": "third-person singular",
@@ -919,7 +978,10 @@ infl_map: dict[str, InflMapNode] = {
         "then": "first-person singular",
     },
     "cu tu": {
-        "lang": ["Neapolitan", "Tarantino",],
+        "lang": [
+            "Neapolitan",
+            "Tarantino",
+        ],
         "pos": "verb",
         "if": "second-person singular",
         "then": "second-person singular",
@@ -931,7 +993,10 @@ infl_map: dict[str, InflMapNode] = {
         "then": "third-person singular",
     },
     "cu nuje": {
-        "lang": ["Neapolitan", "Tarantino",],
+        "lang": [
+            "Neapolitan",
+            "Tarantino",
+        ],
         "pos": "verb",
         "if": "first-person plural",
         "then": "first-person plural",
@@ -973,8 +1038,16 @@ infl_map: dict[str, InflMapNode] = {
         "then": "third-person plural",
     },
     "ja": {
-        "lang": ["Assan", "Guerrero Amuzgo", "Gutnish", "Lower Sorbian",
-                 "Polish", "Serbo-Croatian", "Slovak", "Upper Sorbian"],
+        "lang": [
+            "Assan",
+            "Guerrero Amuzgo",
+            "Gutnish",
+            "Lower Sorbian",
+            "Polish",
+            "Serbo-Croatian",
+            "Slovak",
+            "Upper Sorbian",
+        ],
         "pos": ["verb", "suffix"],
         "if": "first-person singular",
         "then": "first-person singular",
@@ -986,8 +1059,18 @@ infl_map: dict[str, InflMapNode] = {
         },
     },
     "ti": {
-        "lang": ["Albanian", "Galician", "Istriot", "Ligurian", "Piedmontese",
-                 "Romansch", "Serbo-Croatian", "Slovene", "Welsh", "Cumprar",],
+        "lang": [
+            "Albanian",
+            "Galician",
+            "Istriot",
+            "Ligurian",
+            "Piedmontese",
+            "Romansch",
+            "Serbo-Croatian",
+            "Slovene",
+            "Welsh",
+            "Cumprar",
+        ],
         "pos": ["verb", "suffix"],
         # ~ "if": "second-person singular",
         "then": "second-person singular",
@@ -1005,19 +1088,40 @@ infl_map: dict[str, InflMapNode] = {
         },
     },
     "on / ona / ono": {
-        "lang": ["Czech", "Old Czech", "Polish", "Serbo-Croatian", "Slovak",
-                 "Slovene"],
+        "lang": [
+            "Czech",
+            "Old Czech",
+            "Polish",
+            "Serbo-Croatian",
+            "Slovak",
+            "Slovene",
+        ],
         "pos": ["verb", "suffix"],
         "if": "third-person singular",
         "then": "third-person singular",
     },
     "mi": {
-        "lang": ["Bislama", "Esperanto", "Fula", "Ga", "Gaulish",
-                 "Guinea-Bissau Creole", "Jamaican Creole",
-                 "Kabuverdianu", "Ligurian", "Nigerian Pidgin", "Nzadi",
-                 "Önge", "Papiamentu", "Piedmontese", "Pijin",
-                 "Scottish Gaelic", "Sranan Tongo", "Tok Pisin",
-                 "Welsh"],
+        "lang": [
+            "Bislama",
+            "Esperanto",
+            "Fula",
+            "Ga",
+            "Gaulish",
+            "Guinea-Bissau Creole",
+            "Jamaican Creole",
+            "Kabuverdianu",
+            "Ligurian",
+            "Nigerian Pidgin",
+            "Nzadi",
+            "Önge",
+            "Papiamentu",
+            "Piedmontese",
+            "Pijin",
+            "Scottish Gaelic",
+            "Sranan Tongo",
+            "Tok Pisin",
+            "Welsh",
+        ],
         "pos": "verb",
         "if": "first-person singular",
         "then": "first-person singular",
@@ -1047,8 +1151,7 @@ infl_map: dict[str, InflMapNode] = {
         },
     },
     "vi": {
-        "lang": ["Danish", "Norwegian Bokmål", "Norwegian Nynorsk",
-                 "Swedish"],
+        "lang": ["Danish", "Norwegian Bokmål", "Norwegian Nynorsk", "Swedish"],
         "pos": "verb",
         "if": "first-person plural",
         "then": "first-person plural",
@@ -1063,11 +1166,17 @@ infl_map: dict[str, InflMapNode] = {
                 "if": "second-person",  # plural or (formal) singular
                 "then": "second-person",
             },
-        }
+        },
     },
     "oni / one / ona": {
-        "lang": ["Czech", "Old Czech", "Polish", "Serbo-Croatian", "Slovak",
-                 "Slovene"],
+        "lang": [
+            "Czech",
+            "Old Czech",
+            "Polish",
+            "Serbo-Croatian",
+            "Slovak",
+            "Slovene",
+        ],
         "pos": ["verb", "suffix"],
         "if": "third-person plural",
         "then": "third-person plural",
@@ -1113,25 +1222,42 @@ infl_map: dict[str, InflMapNode] = {
         "then": "third-person plural formal second-person-semantically",
     },
     "yo": {
-        "lang": ["Afar", "Aragonese", "Asturian", "Chavacano", "Kristang",
-                 "Ladino", "Spanish"],
+        "lang": [
+            "Afar",
+            "Aragonese",
+            "Asturian",
+            "Chavacano",
+            "Kristang",
+            "Ladino",
+            "Spanish",
+        ],
         "pos": ["verb", "suffix"],
         "if": "first-person singular",
         "then": "first-person singular",
         "else": {
             "lang": "Haitian Creole",
             "pos": "verb",
-            "if" :"third-person plural",
+            "if": "third-person plural",
             "then": "third-person plural",
         },
     },
     "vos": {
-        "lang": ["Interlingua", "Ladino", "Latin", "Old French",
-                 "Old Occitan", "Sardinian", "Lorrain",],
+        "lang": [
+            "Interlingua",
+            "Ladino",
+            "Latin",
+            "Old French",
+            "Old Occitan",
+            "Sardinian",
+            "Lorrain",
+        ],
         "pos": "verb",
         "then": "second-person",
         "else": {
-            "lang": ["Ladin", "Walloon",],
+            "lang": [
+                "Ladin",
+                "Walloon",
+            ],
             "then": "second-person plural",
         },
     },
@@ -1163,10 +1289,10 @@ infl_map: dict[str, InflMapNode] = {
         "lang": "Catalan",
         "pos": "verb",
         "if": "first-person plural",
-         "then": "first-person plural",
+        "then": "first-person plural",
     },
     "vosaltres vós": {
-        "lang":  "Catalan",
+        "lang": "Catalan",
         "pos": "verb",
         "if": "second-person plural",
         "then": "second-person plural",
@@ -1227,76 +1353,119 @@ infl_map: dict[str, InflMapNode] = {
         "lang": "Spanish",
         "pos": ["verb", "suffix"],
         "if": "imperative",
-        "then": ["third-person singular formal second-person-semantically",
-                 "third-person singular"],
+        "then": [
+            "third-person singular formal second-person-semantically",
+            "third-person singular",
+        ],
     },
     "ustedes": {
         "lang": "Spanish",
         "pos": ["verb", "suffix"],
         "if": "imperative",
-        "then": ["third-person plural formal second-person-semantically",
-                 "third-person plural"],
+        "then": [
+            "third-person plural formal second-person-semantically",
+            "third-person plural",
+        ],
     },
-
     "je (j’)": {
         "lang": "French",
-        "pos": ["verb", "suffix",],
+        "pos": [
+            "verb",
+            "suffix",
+        ],
         "then": "first-person singular",
     },
     "il, elle, on": {
         "lang": ["French", "Middle French"],
-        "pos": ["verb", "suffix",],
+        "pos": [
+            "verb",
+            "suffix",
+        ],
         "then": "third-person singular",
     },
     "il, elle": {
         "lang": ["French", "Middle French"],
-        "pos": ["verb", "suffix",],
+        "pos": [
+            "verb",
+            "suffix",
+        ],
         "then": "third-person singular",
     },
     "nous": {
         "lang": ["French", "Middle French"],
-        "pos": ["verb", "suffix",],
+        "pos": [
+            "verb",
+            "suffix",
+        ],
         "then": "first-person plural",
     },
     "vous": {
         "lang": ["French", "Middle French"],
-        "pos": ["verb", "suffix",],
+        "pos": [
+            "verb",
+            "suffix",
+        ],
         "then": "second-person plural",
     },
     "ils, elles": {
         "lang": "French",
-        "pos": ["verb", "suffix",],
+        "pos": [
+            "verb",
+            "suffix",
+        ],
         "then": "third-person plural",
     },
     "que je (j’)": {
         "lang": "French",
-        "pos": ["verb", "suffix",],
+        "pos": [
+            "verb",
+            "suffix",
+        ],
         "then": "first-person singular",
     },
     "que tu": {
-        "lang": ["French", "Middle French", "Old French",
-                 "Lorrain",],
-        "pos": ["verb", "suffix",],
+        "lang": [
+            "French",
+            "Middle French",
+            "Old French",
+            "Lorrain",
+        ],
+        "pos": [
+            "verb",
+            "suffix",
+        ],
         "then": "second-person singular",
     },
     "qu’il, qu’elle": {
         "lang": ["French", "Middle French"],
-        "pos": ["verb", "suffix",],
+        "pos": [
+            "verb",
+            "suffix",
+        ],
         "then": "third-person singular",
     },
     "que nous": {
         "lang": ["French", "Middle French"],
-        "pos": ["verb", "suffix",],
+        "pos": [
+            "verb",
+            "suffix",
+        ],
         "then": "first-person plural",
     },
     "que vous": {
         "lang": ["French", "Middle French"],
-        "pos": ["verb", "suffix",],
+        "pos": [
+            "verb",
+            "suffix",
+        ],
         "then": "second-person plural",
     },
     "qu’ils, qu’elles": {
         "lang": ["French", "Middle French"],
-        "pos": ["verb", "suffix",],
+        "pos": [
+            "verb",
+            "suffix",
+        ],
         "then": "third-person plural",
     },
     "ie (i’)": {
@@ -1310,9 +1479,9 @@ infl_map: dict[str, InflMapNode] = {
         "then": "third-person plural",
     },
     "que ie (i’)": {
-       "lang": "Middle French",
-       "pos": "verb",
-       "then": "first-person singular",
+        "lang": "Middle French",
+        "pos": "verb",
+        "then": "first-person singular",
     },
     "qu’ilz, qu’elles": {
         "lang": "Middle French",
@@ -1325,7 +1494,11 @@ infl_map: dict[str, InflMapNode] = {
         "then": "third-person",
     },
     "nos": {
-        "lang": ["Lorrain", "Old French", "Ladin",],
+        "lang": [
+            "Lorrain",
+            "Old French",
+            "Ladin",
+        ],
         "pos": "verb",
         "then": "first-person plural",
     },
@@ -1348,7 +1521,10 @@ infl_map: dict[str, InflMapNode] = {
         "then": "first-person plural",
     },
     "que vos": {
-        "lang": ["Old French", "Lorrain",],
+        "lang": [
+            "Old French",
+            "Lorrain",
+        ],
         "pos": "verb",
         "if": "second-person plural",
         "then": "second-person plural",
@@ -1414,8 +1590,13 @@ infl_map: dict[str, InflMapNode] = {
         "then": "rare",
     },
     "nós": {
-        "lang": ["Asturian", "Galician", "Indo-Portuguese", "Mirandese",
-                 "Portuguese"],
+        "lang": [
+            "Asturian",
+            "Galician",
+            "Indo-Portuguese",
+            "Mirandese",
+            "Portuguese",
+        ],
         "pos": "verb",
         # ~ "if": "first-person plural",
         "then": "first-person plural",
@@ -1439,16 +1620,16 @@ infl_map: dict[str, InflMapNode] = {
         "then": "first-person singular",
     },
     "tì te": {
-       "lang": ["Lombard", "Western Lombard"],
-       "pos": "verb",
-       "if": "second-person singular",
-       "then": "second-person singular",
+        "lang": ["Lombard", "Western Lombard"],
+        "pos": "verb",
+        "if": "second-person singular",
+        "then": "second-person singular",
     },
     "lù el / lee la": {
-       "lang": ["Lombard", "Western Lombard"],
-       "pos": "verb",
-       "if": "third-person singular",
-       "then": "third-person singular",
+        "lang": ["Lombard", "Western Lombard"],
+        "pos": "verb",
+        "if": "third-person singular",
+        "then": "third-person singular",
     },
     "nun": {
         "lang": ["Lombard", "Western Lombard", "Wolof"],
@@ -1480,49 +1661,49 @@ infl_map: dict[str, InflMapNode] = {
         "if": "third-person singular",
         "then": "third-person singular",
     },
-    "éiu, eu":  {
+    "éiu, eu": {
         "lang": "Sassarese",
         "pos": "verb",
         "if": "first-person singular",
         "then": "first-person singular",
     },
-    "eddu/edda":  {
+    "eddu/edda": {
         "lang": "Sassarese",
         "pos": "verb",
         "if": "third-person singular",
         "then": "third-person singular",
     },
-    "eddi":  {
+    "eddi": {
         "lang": "Sassarese",
         "pos": "verb",
         "if": "third-person plural",
         "then": "third-person plural",
     },
-    "che éiu, chi eu":  {
+    "che éiu, chi eu": {
         "lang": "Sassarese",
         "pos": "verb",
         "if": "first-person singular",
         "then": "first-person singular",
     },
-    "chi eddu/edda":  {
+    "chi eddu/edda": {
         "lang": "Sassarese",
         "pos": "verb",
         "if": "third-person singular",
         "then": "third-person singular",
     },
-    "chi noi":  {
+    "chi noi": {
         "lang": "Sassarese",
         "pos": "verb",
         "if": "first-person plural",
         "then": "first-person plural",
     },
-    "chi voi":  {
+    "chi voi": {
         "lang": "Sassarese",
         "pos": "verb",
         "if": "second-person plural",
         "then": "second-person plural",
     },
-    "chi eddi":  {
+    "chi eddi": {
         "lang": "Sassarese",
         "pos": "verb",
         "if": "third-person plural",
@@ -1604,7 +1785,7 @@ infl_map: dict[str, InflMapNode] = {
         "lang": ["Eastern Lombard", "Irish", "Lombard", "Old Irish"],
         "pos": "verb",
         "if": "first-person singular",
-         "then": "first-person singular",
+        "then": "first-person singular",
     },
     "té": {
         "lang": ["Eastern Lombard", "Lombard"],
@@ -1709,8 +1890,15 @@ infl_map: dict[str, InflMapNode] = {
         "then": "second-person singular",
     },
     "o": {
-        "lang": ["Azerbaijani", "Crimean Tatar", "Fula", "Igbo", "Turkish",
-                 "Welsh", "Zazaki"],
+        "lang": [
+            "Azerbaijani",
+            "Crimean Tatar",
+            "Fula",
+            "Igbo",
+            "Turkish",
+            "Welsh",
+            "Zazaki",
+        ],
         "pos": "verb",
         "if": "third-person singular",
         "then": "third-person singular",
@@ -1720,21 +1908,21 @@ infl_map: dict[str, InflMapNode] = {
             "if": "third-person plural",
             "then": "third-person plural",
             "else": {
-               "lang": "Pnar",
-               "pos": "verb",
-               "if": "first-person singular",
-               "then": "first-person singular",
-               "else": {
-                   "lang": "Yoruba",
-                   "pos": "verb",
-                   "if": "second-person third-person singular",
-                   "then": "second-person third-person singular",
-               },
+                "lang": "Pnar",
+                "pos": "verb",
+                "if": "first-person singular",
+                "then": "first-person singular",
+                "else": {
+                    "lang": "Yoruba",
+                    "pos": "verb",
+                    "if": "second-person third-person singular",
+                    "then": "second-person third-person singular",
+                },
             },
         },
     },
     "biz": {
-        "lang": ["Azerbaijani", "Crimean Tatar", "Turkish","Turkmen"],
+        "lang": ["Azerbaijani", "Crimean Tatar", "Turkish", "Turkmen"],
         "pos": "verb",
         "if": "first-person plural",
         "then": "first-person plural",
@@ -1751,287 +1939,211 @@ infl_map: dict[str, InflMapNode] = {
         "if": "third-person plural",
         "then": "third-person plural",
     },
-    "vossìa": {
-        "lang": "Sicilian",
-        "if": "third-person singular",
-        "then": ""},
-
-    "deo eo": {
-        "lang": "Sardinian",
-        "if": "first-person singular",
-        "then": ""},
-    "tue": {
-        "lang": "Sardinian",
-        "if": "second-person singular",
-        "then": ""},
+    "vossìa": {"lang": "Sicilian", "if": "third-person singular", "then": ""},
+    "deo eo": {"lang": "Sardinian", "if": "first-person singular", "then": ""},
+    "tue": {"lang": "Sardinian", "if": "second-person singular", "then": ""},
     "issu/issa/isse": {
         "lang": "Sardinian",
         "if": "third-person singular",
-        "then": ""},
-    "nois": {
-        "lang": "Sardinian",
-        "if": "first-person plural",
-        "then": ""},
-    "bois": {
-        "lang": "Sardinian",
-        "if": "second-person plural",
-        "then": ""},
+        "then": "",
+    },
+    "nois": {"lang": "Sardinian", "if": "first-person plural", "then": ""},
+    "bois": {"lang": "Sardinian", "if": "second-person plural", "then": ""},
     "issos/issas": {
         "lang": "Sardinian",
         "if": "third-person plural",
-        "then": ""},
+        "then": "",
+    },
     "chi deo chi eo": {
         "lang": "Sardinian",
         "if": "first-person singular",
-        "then": ""},
+        "then": "",
+    },
     "chi tue": {
         "lang": "Sardinian",
         "if": "second-person singular",
-        "then": ""},
+        "then": "",
+    },
     "chi issu/issa/isse": {
         "lang": "Sardinian",
         "if": "third-person singular",
-        "then": ""},
-    "chi nois": {
-        "lang": "Sardinian",
-        "if": "first-person plural",
-        "then": ""},
-    "chi bois": {
-        "lang": "Sardinian",
-        "if": "second-person plural",
-        "then": ""},
+        "then": "",
+    },
+    "chi nois": {"lang": "Sardinian", "if": "first-person plural", "then": ""},
+    "chi bois": {"lang": "Sardinian", "if": "second-person plural", "then": ""},
     "chi issos/issas": {
         "lang": "Sardinian",
         "if": "third-person plural",
-        "then": ""},
+        "then": "",
+    },
     "dego deo": {
         "lang": "Sardinian",
         "if": "first-person singular",
-        "then": ""},
+        "then": "",
+    },
     "issu/issa": {
         "lang": "Sardinian",
         "if": "third-person singular",
-        "then": ""},
+        "then": "",
+    },
     "chi dego chi deo": {
         "lang": "Sardinian",
         "if": "first-person singular",
-        "then": ""},
+        "then": "",
+    },
     "chi issu/issa": {
         "lang": "Sardinian",
         "if": "third-person singular",
-        "then": ""},
-
-    "ieu": {
-        "lang": "Occitan",
-        "if": "first-person singular",
-        "then": ""},
-    "el": {
-        "lang": "Occitan",
-        "if": "third-person singular",
-        "then": ""},
-    "nosautres": {
-        "lang": "Occitan",
-        "if": "first-person plural",
-        "then": ""},
-    "vosautres": {
-        "lang": "Occitan",
-        "if": "second-person plural",
-        "then": ""},
-    "eles": {
-        "lang": "Occitan",
-        "if": "third-person plural",
-        "then": ""},
-    "que ieu": {
-        "lang": "Occitan",
-        "if": "first-person singular",
-        "then": ""},
-    "que el": {
-        "lang": "Occitan",
-        "if": "third-person singular",
-        "then": ""},
+        "then": "",
+    },
+    "ieu": {"lang": "Occitan", "if": "first-person singular", "then": ""},
+    "el": {"lang": "Occitan", "if": "third-person singular", "then": ""},
+    "nosautres": {"lang": "Occitan", "if": "first-person plural", "then": ""},
+    "vosautres": {"lang": "Occitan", "if": "second-person plural", "then": ""},
+    "eles": {"lang": "Occitan", "if": "third-person plural", "then": ""},
+    "que ieu": {"lang": "Occitan", "if": "first-person singular", "then": ""},
+    "que el": {"lang": "Occitan", "if": "third-person singular", "then": ""},
     "que nosautres": {
         "lang": "Occitan",
         "if": "first-person plural",
-        "then": ""},
+        "then": "",
+    },
     "que vosautres": {
         "lang": "Occitan",
         "if": "second-person plural",
-        "then": ""},
-    "que eles": {
-        "lang": "Occitan",
-        "if": "third-person plural",
-        "then": ""},
-
-    "аз": {
-        "lang": "Bulgarian",
-        "if": "first-person singular",
-        "then": ""},
+        "then": "",
+    },
+    "que eles": {"lang": "Occitan", "if": "third-person plural", "then": ""},
+    "аз": {"lang": "Bulgarian", "if": "first-person singular", "then": ""},
     "ти": {
         "lang": ["Bulgarian", "Serbo-Croatian"],
         "if": "second-person singular",
-        "then": ""},
+        "then": "",
+    },
     "той/тя/то": {
         "lang": "Bulgarian",
         "if": "third-person singular",
-        "then": ""},
-    "ние": {
-        "lang": "Bulgarian",
-        "if": "first-person plural",
-        "then": ""},
-    "вие": {
-        "lang": "Bulgarian",
-        "if": "second-person plural",
-        "then": ""},
-    "те": {
-        "lang": "Bulgarian",
-        "if": "third-person plural",
-        "then": ""},
-
+        "then": "",
+    },
+    "ние": {"lang": "Bulgarian", "if": "first-person plural", "then": ""},
+    "вие": {"lang": "Bulgarian", "if": "second-person plural", "then": ""},
+    "те": {"lang": "Bulgarian", "if": "third-person plural", "then": ""},
     "viņš, viņa": {
         "lang": "Latvian",
         "if": "third-person singular",
-        "then": ""},
-    "viņi, viņas": {
-        "lang": "Latvian",
-        "if": "third-person plural",
-        "then": ""},
-
+        "then": "",
+    },
+    "viņi, viņas": {"lang": "Latvian", "if": "third-person plural", "then": ""},
     "el / ela / Vde.": {
         "lang": "Galician",
         # ~ "if": "singular third-person",
         "then": "third-person singular",
-        },
+    },
     "vós": {
         "lang": "Galician",
         # ~ "if": "plural second-person",
         "then": "second-person plural",
-        },
+    },
     "eles / elas / Vdes.": {
         "lang": "Galician",
         # ~ "if": "plural third-person",
         "then": "third-person plural",
-        },
+    },
     "Vde.": {
         "lang": "Galician",
         # ~ "if": "singular third-person",
-        "then": "third-person singular formal"
-        },
+        "then": "third-person singular formal",
+    },
     "Vdes.": {
         "lang": "Galician",
         # ~ "if": "plural third-person",
-        "then": "third-person plural formal"},
-
+        "then": "third-person plural formal",
+    },
     "ⲛ̄ⲧⲟⲕ": {
         "lang": "Coptic",
         "if": "second-person singular masculine",
-        "then": ""},
+        "then": "",
+    },
     "ⲛ̄ⲧⲟ": {
         "lang": "Coptic",
         "if": "second-person singular feminine",
-        "then": ""},
+        "then": "",
+    },
     "ⲛ̄ⲧⲟϥ": {
-    "lang": "Coptic",
+        "lang": "Coptic",
         "if": "third-person singular masculine",
-        "then": ""},
+        "then": "",
+    },
     "ⲛ̄ⲧⲟⲥ": {
         "lang": "Coptic",
         "if": "third-person singular feminine",
-        "then": ""},
-    "ⲛ̄ⲧⲱⲧⲛ̄": {
-        "lang": "Coptic",
-        "if": "second-person plural",
-        "then": ""},
-    "ⲛ̄ⲧⲟⲟⲩ": {
-        "lang": "Coptic",
-        "if": "third-person plural",
-        "then": ""},
+        "then": "",
+    },
+    "ⲛ̄ⲧⲱⲧⲛ̄": {"lang": "Coptic", "if": "second-person plural", "then": ""},
+    "ⲛ̄ⲧⲟⲟⲩ": {"lang": "Coptic", "if": "third-person plural", "then": ""},
     "ⲛ̀ⲑⲟⲕ": {
         "lang": "Coptic",
         "if": "second-person singular masculine",
-        "then": ""},
+        "then": "",
+    },
     "ⲛ̀ⲑⲟ": {
         "lang": "Coptic",
         "if": "second-person singular feminine",
-        "then": ""},
+        "then": "",
+    },
     "ⲛ̀ⲑⲟϥ": {
         "lang": "Coptic",
         "if": "third-person singular masculine",
-        "then": ""},
+        "then": "",
+    },
     "ⲛ̀ⲑⲟⲥ": {
         "lang": "Coptic",
         "if": "third-person singular feminine",
-        "then": ""},
-    "ⲛ̀ⲑⲱⲧⲉⲛ": {
-        "lang": "Coptic",
-        "if": "second-person plural",
-        "then": ""},
-    "ⲛ̀ⲑⲱⲟⲩ": {
-        "lang": "Coptic",
-        "if": "third-person plural",
-        "then": ""},
-    "ñuqa": {
-        "lang": "Quechua",
-        "if": "first-person singular",
-        "then": ""},
-    "qam": {
-        "lang": "Quechua",
-        "if": "second-person singular",
-        "then": ""},
-    "pay": {
-        "lang": "Quechua",
-        "if": "third-person singular",
-        "then": ""},
+        "then": "",
+    },
+    "ⲛ̀ⲑⲱⲧⲉⲛ": {"lang": "Coptic", "if": "second-person plural", "then": ""},
+    "ⲛ̀ⲑⲱⲟⲩ": {"lang": "Coptic", "if": "third-person plural", "then": ""},
+    "ñuqa": {"lang": "Quechua", "if": "first-person singular", "then": ""},
+    "qam": {"lang": "Quechua", "if": "second-person singular", "then": ""},
+    "pay": {"lang": "Quechua", "if": "third-person singular", "then": ""},
     "ñuqanchik": {
         "lang": "Quechua",
         "if": "first-person plural inclusive",
-        "then": ""},
+        "then": "",
+    },
     "ñuqayku": {
         "lang": "Quechua",
         "if": "first-person plural exclusive",
-        "then": ""},
-    "qamkuna": {
-        "lang": "Quechua",
-        "if": "second-person plural",
-        "then": ""},
-    "paykuna": {
-        "lang": "Quechua",
-        "if": "third-person plural",
-        "then": ""},
-
+        "then": "",
+    },
+    "qamkuna": {"lang": "Quechua", "if": "second-person plural", "then": ""},
+    "paykuna": {"lang": "Quechua", "if": "third-person plural", "then": ""},
     "unë": {
         "lang": "Albanian",
         "then": "first-person singular",
-        },
+    },
     "ai/ajo": {
         "lang": "Albanian",
         "then": "third-person singular",
-        },
+    },
     "ne": {
         "lang": "Albanian",
         "then": "first-person plural",
         "else": {
             "lang": "Livonian",
             "then": "third-person plural",
-            },
         },
+    },
     "ju": {
         "lang": "Albanian",
         "then": "second-person plural",
-        },
+    },
     "ata/ato": {
         "lang": "Albanian",
         "then": "third-person plural",
-        },
-
-    "մենք": {
-        "lang": "Armenian",
-        "if": "first-person plural",
-        "then": ""},
-    "նրանք": {
-        "lang": "Armenian",
-        "if": "third-person plural",
-        "then": ""},
-
+    },
+    "մենք": {"lang": "Armenian", "if": "first-person plural", "then": ""},
+    "նրանք": {"lang": "Armenian", "if": "third-person plural", "then": ""},
     "verbal nouns": "noun-from-verb",
     "supine": "supine",
     "past historic": "past historic",
@@ -2113,7 +2225,11 @@ infl_map: dict[str, InflMapNode] = {
     "superlative degree": "superlative",
     "prolative": "prolative",
     "comparative": {
-        "lang": ["Chechen","Mari", "Nivkh",],
+        "lang": [
+            "Chechen",
+            "Mari",
+            "Nivkh",
+        ],
         "pos": "noun",
         "then": "comparative-case",
         "else": "comparative",
@@ -2127,7 +2243,8 @@ infl_map: dict[str, InflMapNode] = {
     "–": {
         "lang": "Nepalese",
         "then": "negative",
-        "else": "dummy-ignore-skipped"},
+        "else": "dummy-ignore-skipped",
+    },
     "m": "masculine",
     "f": "feminine",
     "compound": "multiword-construction",
@@ -2253,8 +2370,7 @@ infl_map: dict[str, InflMapNode] = {
     "Plural (fleirtal)": "plural",
     "Original form": "",  # XXX Latin ['-bo']
     "Derived form": "",  # XXX Latin ['-bo']
-    "Present active indicative (third conjugation)":
-    "present active indicative conjugation-3",
+    "Present active indicative (third conjugation)": "present active indicative conjugation-3",
     "Present active subjunctive": "present active subjunctive",
     "Present passive indicative": "present passive indicative",
     "Present passive subjunctive": "present passive subjunctive",
@@ -2324,30 +2440,36 @@ infl_map: dict[str, InflMapNode] = {
     "all genders": "",
     "number & gender": "",
     "strong declension (without article)": "strong without-article",
-    "weak declension (with definite article)":
-    "weak definite includes-article",
-    "mixed declension (with indefinite article)":
-    "mixed indefinite includes-article",
+    "weak declension (with definite article)": "weak definite includes-article",
+    "mixed declension (with indefinite article)": "mixed indefinite includes-article",
     "inanimate animate": "animate inanimate",
     "Informal": "informal",
     "modern / informal": "informal",
-    "i": {"lang": ["German", "Cimbrian",],
-          "then": "subjunctive subjunctive-i",
-          "else": {
-              "if": "subjunctive",
-              "then": "subjunctive-i",
-              "else": {
+    "i": {
+        "lang": [
+            "German",
+            "Cimbrian",
+        ],
+        "then": "subjunctive subjunctive-i",
+        "else": {
+            "if": "subjunctive",
+            "then": "subjunctive-i",
+            "else": {
                 "lang": ["Tagalog", "Assamese"],
                 "then": "",
-              },
-          },
+            },
+        },
     },
-    "ii": {"lang": ["German", "Cimbrian",],
-           "then": "subjunctive subjunctive-ii",
-           "else": {
-               "if": "subjunctive",
-               "then": "subjunctive-ii",
-           },
+    "ii": {
+        "lang": [
+            "German",
+            "Cimbrian",
+        ],
+        "then": "subjunctive subjunctive-ii",
+        "else": {
+            "if": "subjunctive",
+            "then": "subjunctive-ii",
+        },
     },
     "definite forms": "definite",
     "1ˢᵗ person possessive forms (my)": "possessive first-person",
@@ -2438,8 +2560,7 @@ infl_map: dict[str, InflMapNode] = {
     # ~ "Notes": "dummy-ignore-skipped",
     "postpositions taking a dative case": "postpositional with-dative",
     "postpositions taking a genitive case": "postpositional with-genitive",
-    "postpositions taking an instrumental case":
-    "postpositional with-instrumental",
+    "postpositions taking an instrumental case": "postpositional with-instrumental",
     "postpositions taking an adverbial case": "postpositional with-adverb",
     "Motive": "motive-form",
     "zu-infinitive": "infinitive infinitive-zu",
@@ -2599,8 +2720,10 @@ infl_map: dict[str, InflMapNode] = {
     "present and imperfect": ["present", "imperfect"],
     "future and future in the past": ["future", "future past"],
     "present and past perfect": ["present", "past perfect"],
-    "future perfect and future perfect in the past":
-    ["future perfect", "future past perfect"],
+    "future perfect and future perfect in the past": [
+        "future perfect",
+        "future past perfect",
+    ],
     "dubitative": "dubitative",
     "conclusive": "conclusive",
     "f-s2": "",  # Icelandic ['bölvun', 'létteind', 'dvöl']
@@ -2667,14 +2790,10 @@ infl_map: dict[str, InflMapNode] = {
     "2nd pers. pl.": "second-person plural",
     "3rd pers. pl.": "third-person plural",
     "RENARRATIVE (atstāstījuma izteiksme)": "renarrative",
-    "Present Active 1 (Adj.)":
-    "participle participle-1 present active adjectival",
-    "Present Active 2 (Adv.)":
-    "participle participle-2 present active adverbial",
-    "Present Active 3 (Adv.)":
-    "participle participle-3 present active adverbial",
-    "Present Active 4 (Obj.)":
-    "participle participle-4 present active",
+    "Present Active 1 (Adj.)": "participle participle-1 present active adjectival",
+    "Present Active 2 (Adv.)": "participle participle-2 present active adverbial",
+    "Present Active 3 (Adv.)": "participle participle-3 present active adverbial",
+    "Present Active 4 (Obj.)": "participle participle-4 present active",
     "CONDITIONAL (vēlējuma izteiksme)": "conditional",
     "Past Active": {
         "if": "participle",
@@ -2702,8 +2821,7 @@ infl_map: dict[str, InflMapNode] = {
     "Recently Completive": "completive past past-recent",
     "subject non-past participle": "subjective non-past participle",
     "subject past participle": "subjective past participle",
-    "subject future definite participle":
-    "subjective future definite participle",
+    "subject future definite participle": "subjective future definite participle",
     "non-subject participle": "non-subject participle",
     "general temporal participle": "general temporal participle",
     "participle of intensification": "intensifier participle",
@@ -2804,10 +2922,8 @@ infl_map: dict[str, InflMapNode] = {
     "m-s3": "",
     "3rd person plural (3p) Wiinawaa": "third-person plural",
     "2nd-person plural (2p) Giinawaa": "second-person plural",
-    "1st person plural inclusive (21) Giinawind":
-    "first-person plural inclusive",
-    "1st person plural exclusive (1p) Niinawind":
-    "first-person plural exclusive",
+    "1st person plural inclusive (21) Giinawind": "first-person plural inclusive",
+    "1st person plural exclusive (1p) Niinawind": "first-person plural exclusive",
     "Indefinite (X)": "indefinite",
     "Obviative (3')": "third-person obviative",
     "1st person (1s) Niin": "first-person singular",
@@ -2823,8 +2939,7 @@ infl_map: dict[str, InflMapNode] = {
     "2nd sg for": "second-person singular formal",
     "Mood / Tense": "",
     "hypothetic": "hypothetical",
-    "Indefinite feminine and masculine gender":
-    "indefinite feminine masculine",
+    "Indefinite feminine and masculine gender": "indefinite feminine masculine",
     "contrafactual": "counterfactual",
     "presumptive": "presumptive",
     "habitual": "habitual",
@@ -2876,12 +2991,21 @@ infl_map: dict[str, InflMapNode] = {
     "3ʳᵈ person [sing. and plural]": "third-person singular plural",
     "Actor": {"lang": "Tagalog", "then": "trigger-actor"},
     "Object": {"lang": "Tagalog", "then": "trigger-object"},
-    "Locative": {"lang": "Tagalog", "then": "trigger-locative",
-                 "else": "locative"},
-    "Instrument": {"lang": "Tagalog", "then": "trigger-instrument",
-                   "else": "instrumental"},
-    "Causative": {"lang": "Tagalog", "then": "trigger-causative",
-                  "else": "causative"},
+    "Locative": {
+        "lang": "Tagalog",
+        "then": "trigger-locative",
+        "else": "locative",
+    },
+    "Instrument": {
+        "lang": "Tagalog",
+        "then": "trigger-instrument",
+        "else": "instrumental",
+    },
+    "Causative": {
+        "lang": "Tagalog",
+        "then": "trigger-causative",
+        "else": "causative",
+    },
     "Referential": {"lang": "Tagalog", "then": "trigger-referential"},
     "1ˢᵗ person m": "first-person masculine",
     "1ˢᵗ person f": "first-person feminine",
@@ -3022,7 +3146,7 @@ infl_map: dict[str, InflMapNode] = {
     "Form": "",
     "form": "",
     "Isolated forms": "",
-    "isolated forms": "",  #a ܡܘܙܐ/Assyrian Neo-Aramaic
+    "isolated forms": "",  # a ܡܘܙܐ/Assyrian Neo-Aramaic
     "Possessed": "possessed-form",
     "Unpossessed": "unpossessed-form",
     "past imperfective": "past imperfective",
@@ -3125,13 +3249,15 @@ infl_map: dict[str, InflMapNode] = {
     "Subjunctive Mood": "subjunctive",
     "Conditional Mood": "conditional",
     "Indicative Mood": "indicative",
-    "3rd person pl, 2nd p. pl formal":
-    ["third-person plural",
-     "third-person plural formal second-person-semantically"],
+    "3rd person pl, 2nd p. pl formal": [
+        "third-person plural",
+        "third-person plural formal second-person-semantically",
+    ],
     "2nd person pl informal": "second-person plural informal",
-    "3rd person sg, 2nd p. sg formal":
-          ["third-person singular",
-          "third-person singular formal second-person-semantically"],
+    "3rd person sg, 2nd p. sg formal": [
+        "third-person singular",
+        "third-person singular formal second-person-semantically",
+    ],
     "Participle": "participle",
     "Past tense": "past",
     "Present tense": "present",
@@ -3185,10 +3311,10 @@ infl_map: dict[str, InflMapNode] = {
     "2ⁿᵈ person الْمُخَاطَب": "second-person",
     "3ʳᵈ person الْغَائِب": "third-person",
     "past (perfect) indicative الْمَاضِي": "past perfective indicative",
-    "non-past (imperfect) indicative الْمُضَارِع": # XXX remove me to check if I'm relevant
+    "non-past (imperfect) indicative الْمُضَارِع":  # XXX remove me to check if I'm relevant
     "non-past imperfective indicative",
     # ^ This might have been changed in the wiktionary template:
-    "non-past (imperfect) indicative الْمُضَارِع الْمَرْفُوع": #x تراجع/Arabic
+    "non-past (imperfect) indicative الْمُضَارِع الْمَرْفُوع":  # x تراجع/Arabic
     "non-past imperfective indicative",
     "subjunctive الْمُضَارِع الْمَنْصُوب": "subjunctive",
     "jussive الْمُضَارِع الْمَجْزُوم": "jussive",
@@ -3316,8 +3442,10 @@ infl_map: dict[str, InflMapNode] = {
     "Perfect tense": "perfect",
     "Perfect-continuative tense": "perfect continuative",
     "present indicative/future": "present future indicative",
-    "imperfect (indicative/subjunctive)/ conditional":
-    ["imperfect indicative subjunctive", "conditional"],
+    "imperfect (indicative/subjunctive)/ conditional": [
+        "imperfect indicative subjunctive",
+        "conditional",
+    ],
     "verbal adjectives": "participle",
     "relative (incl. nominal / emphatic) forms": "relative",
     "Passive perfect particple": "passive perfect participle",
@@ -3489,8 +3617,6 @@ infl_map: dict[str, InflMapNode] = {
     # "oblique I": XXX,
     # "NORK (ergative)": "",  # XXX see irakatsi/Basque
     # "NOR (absolutive)": "",  # XXX see irakatsi/Basque
-
-
     # These are headers for columns that contain titles even if not header style
     "noun case": {
         "lang": "Finnish",
@@ -3505,13 +3631,13 @@ infl_map: dict[str, InflMapNode] = {
     "m verbs conjugated according to 3rd person sg. er": {
         "lang": "German",
         "if": "polite",  # du/German
-        "then": "masculine third-person second-person-semantically"
+        "then": "masculine third-person second-person-semantically",
     },
     # This didn't work to replace "second-person": -KJ
     # ~ "2nd person": {
-        # ~ "lang": "German",
-        # ~ "if": "second-person-semantically",  # du/German
-        # ~ "then": ""
+    # ~ "lang": "German",
+    # ~ "if": "second-person-semantically",  # du/German
+    # ~ "then": ""
     # ~ },
     "(without article)": {
         "lang": "German",  # jeglicher/German
@@ -3529,7 +3655,7 @@ infl_map: dict[str, InflMapNode] = {
         "lang": "German",
         "then": "weak mixed plural",  # mehrere/German
     },
-    "Second-person formal": { # Ihr/German
+    "Second-person formal": {  # Ihr/German
         "lang": "German",
         "then": "second-person formal",
     },
@@ -3545,21 +3671,21 @@ infl_map: dict[str, InflMapNode] = {
         "lang": "German",
         "then": "plural weak mixed with-article",
     },
-    "strong (without article)": { # selber/German
+    "strong (without article)": {  # selber/German
         "lang": "German",
         "then": "strong without-article",
     },
-    "weak (with definite article)": { # selber/German
+    "weak (with definite article)": {  # selber/German
         "lang": "German",
         "then": "weak definite with-article",
     },
-    "m./n. plural": { # оба/Russian
+    "m./n. plural": {  # оба/Russian
         "lang": "Russian",
         "then": "masculine neuter plural",
     },
-    "f. plural": { # оба/Russian
+    "f. plural": {  # оба/Russian
         "lang": "Russian",
-        "then": "feminine plural"
+        "then": "feminine plural",
     },
     "sigmatic future": "sigmatic future",  # adiuvo/Latin
     "sigmatic aorist": "sigmatic aorist",  # adiuvo/Latin
@@ -3567,43 +3693,43 @@ infl_map: dict[str, InflMapNode] = {
         "lang": "Japanese",
         "then": "dummy-reset-headers",  # Break column inheritance, 伶俐/Japanese
     },
-    "Informal past": { # 伶俐/Japanese
+    "Informal past": {  # 伶俐/Japanese
         "lang": "Japanese",
         "then": "informal past",
     },
-
-    "Informal negative past": { # 伶俐/Japanese
+    "Informal negative past": {  # 伶俐/Japanese
         "lang": "Japanese",
         "then": "informal negative past",
     },
-
-    "Formal negative": { # 伶俐/Japanese
+    "Formal negative": {  # 伶俐/Japanese
         "lang": "Japanese",
         "then": "formal negative",
     },
-
-    "Formal past": { # 伶俐/Japanese
+    "Formal past": {  # 伶俐/Japanese
         "lang": "Japanese",
         "then": "formal past",
     },
-    "Formal negative past": { # 伶俐/Japanese
+    "Formal negative past": {  # 伶俐/Japanese
         "lang": "Japanese",
         "then": "formal negative past",
     },
-    "Provisional": { # 伶俐/Japanese
+    "Provisional": {  # 伶俐/Japanese
         "lang": "Japanese",
         "then": "past conditional",
     },
-    "Degree": { # 伶俐/Japanese
+    "Degree": {  # 伶俐/Japanese
         "lang": "Japanese",
         "then": "noun-from-adj",  # equivalent to English -ness, needs more
     },
     # in חתול/Hebrew:
     "With possessive pronouns": "possessed-form",
-
     "Person": {
         "default": "person",
-        "lang": ["Hebrew", "Scottish Gaelic", "Old Irish",],
+        "lang": [
+            "Hebrew",
+            "Scottish Gaelic",
+            "Old Irish",
+        ],
         # umpa/Scottish Gaelic, la/Old Irish
         "then": "*",
     },
@@ -3626,7 +3752,7 @@ infl_map: dict[str, InflMapNode] = {
         "lang": "Hebrew",
         "if": "possessed-form",
         "then": "possessed-feminine possessed-single",
-        "else": "feminine singular"
+        "else": "feminine singular",
     },
     "feminine plural": {
         "lang": "Hebrew",
@@ -3634,7 +3760,6 @@ infl_map: dict[str, InflMapNode] = {
         "then": "possessed-feminine possessed-many",
         "else": "feminine plural",
     },
-
     "masculine and neuter": "masculine neuter",  # hannars/Westrobothnian
     "singular masculine": "masculine singular",
     "plural masculine": "masculine plural",
@@ -3642,8 +3767,7 @@ infl_map: dict[str, InflMapNode] = {
     "plural feminine": "feminine plural",
     "singular neuter": "neuter singular",
     "plural neuter": "neuter plural",
-
-    "quantitative": { # vienas/Lithuanian
+    "quantitative": {  # vienas/Lithuanian
         "lang": "Lithuanian",
         "pos": "num",
         "then": "cardinal",
@@ -3681,79 +3805,68 @@ infl_map: dict[str, InflMapNode] = {
         "lang": "Lithuanian",
         "then": "future adverbial",
     },
-
-
-    "1st person (pirmasis asmuo)" : { # -uoti/Lithuanian
+    "1st person (pirmasis asmuo)": {  # -uoti/Lithuanian
         "lang": "Lithuanian",
         "then": "first-person",
     },
-
-    "2nd person(antrasis asmuo)" : {
+    "2nd person(antrasis asmuo)": {
         "lang": "Lithuanian",
         "then": "second-person",
     },
-
-    "3rd person(trečiasis asmuo)" : {
+    "3rd person(trečiasis asmuo)": {
         "lang": "Lithuanian",
         "then": "third-person",
     },
-
-    "present dependent": { # abair/Irish, table for archaic verb paradigm
+    "present dependent": {  # abair/Irish, table for archaic verb paradigm
         "lang": "Irish",
         "then": "present dependent",
     },
-    "past habitual dependent": { # abair/Irish, table for archaic verb paradigm
+    "past habitual dependent": {  # abair/Irish, table for archaic verb paradigm
         "lang": "Irish",
         "then": "past habitual dependent",
     },
-    "future dependent": { # abair/Irish, table for archaic verb paradigm
+    "future dependent": {  # abair/Irish, table for archaic verb paradigm
         "lang": "Irish",
         "then": "future dependent",
     },
-    "conditional dependent": { # abair/Irish, table for archaic verb paradigm
+    "conditional dependent": {  # abair/Irish, table for archaic verb paradigm
         "lang": "Irish",
         "then": "conditional dependent",
     },
-    "conditional independent": { # abair/Irish, table for archaic verb paradigm
+    "conditional independent": {  # abair/Irish, table for archaic verb paradigm
         "lang": "Irish",
         "then": "conditional independent",
     },
-    "future independent": { # faigh/Irish, table for archaic verb paradigm
+    "future independent": {  # faigh/Irish, table for archaic verb paradigm
         "lang": "Irish",
         "then": "future independent",
     },
-    "past independent": { # faigh/Irish, table for archaic verb paradigm
+    "past independent": {  # faigh/Irish, table for archaic verb paradigm
         "lang": "Irish",
         "then": "past independent",
     },
-    "past dependent": { # faigh/Irish, table for archaic verb paradigm
+    "past dependent": {  # faigh/Irish, table for archaic verb paradigm
         "lang": "Irish",
         "then": "past dependent",
     },
-    "present independent": { # faigh/Irish, table for archaic verb paradigm
+    "present independent": {  # faigh/Irish, table for archaic verb paradigm
         "lang": "Irish",
         "then": "present independent",
     },
-    "past habitual independent": { # faigh/Irish, table for archaic verb paradigm
+    "past habitual independent": {  # faigh/Irish, table for archaic verb paradigm
         "lang": "Irish",
         "then": "past habitual independent",
     },
-
     "definite singular": "definite singular",
     "indefinite plural": "indefinite plural",
     "definite plural": "definite plural",
-
-    "masc." : "masculine",  # ща/Bulgarian
+    "masc.": "masculine",  # ща/Bulgarian
     "fem.": "feminine",
     "neut.": "neuter",
-
     "genitive form": "genitive",  # глава/Bulgarian
     "feminine/ neuter": "feminine neuter",  # два/Bulgarian
-
     "future indicative": "future indicative",  # mdlić/Polish
-
     "dummy-ignored-text-cell": "dummy-ignored-text-cell",  # Kludge
-
     "s": {
         "lang": "Finnish",  # erata/Finnish
         "then": "singular",
@@ -3764,7 +3877,6 @@ infl_map: dict[str, InflMapNode] = {
     },
     "pos": "positive",  # erata/Finnish
     "neg": "negative",  # erata/Finnish
-
     "evidential participle": "evidential participle",  # տալ/Armenian
     "future converb 1": "future converb converb-i",  # տալ/Armenian
     "future converb 2": "future converb converb-ii",  # տալ/Armenian
@@ -3777,25 +3889,24 @@ infl_map: dict[str, InflMapNode] = {
         "lang": "Armenian",
         "then": "third-person singular",
     },
-    "անանք": { # տալ/Armenian
+    "անանք": {  # տալ/Armenian
         "lang": "Armenian",
         "then": "third-person plural",
     },
-    "(դուն)": { # տալ/Armenian
+    "(դուն)": {  # տալ/Armenian
         "lang": "Armenian",
         "then": "second-person singular",
     },
-
-    "1 sg." : "first-person singular",  # féin/Old Irish
-    "2 sg." : "second-person singular",  # féin/Old Irish
-    "3 sg." : "third-person singular",  # féin/Old Irish
-    "1 pl." : "first-person plural",  # féin/Old Irish
-    "2 pl." : "second-person plural",  # féin/Old Irish
-    "3 pl." : "third-person plural",  # féin/Old Irish
-    "m./n." : "masculine neuter",  # féin/Old Irish
+    "1 sg.": "first-person singular",  # féin/Old Irish
+    "2 sg.": "second-person singular",  # féin/Old Irish
+    "3 sg.": "third-person singular",  # féin/Old Irish
+    "1 pl.": "first-person plural",  # féin/Old Irish
+    "2 pl.": "second-person plural",  # féin/Old Irish
+    "3 pl.": "third-person plural",  # féin/Old Irish
+    "m./n.": "masculine neuter",  # féin/Old Irish
     "Stressed": "stressed",  # suide/Old irish
     "Unstressed": "unstressed",  # suide/Old Irish
-    "Masculine": { # suide/Old Irish
+    "Masculine": {  # suide/Old Irish
         "default": "masculine",
         "lang": "Old Irish",
         "then": "dummy-reset-headers masculine",
@@ -3818,7 +3929,6 @@ infl_map: dict[str, InflMapNode] = {
     # ~ "Pres.ind.": "present indicative",  # attá/Old Irish
     # Original data has a zero-width space, causing problems
     "Pres.​subj.": "present subjunctive",  # attá/Old Irish
-
     "Active present participle ➤": {  # στρατοπεδεύω/Greek (modern)
         "lang": "Greek",
         "then": "active present participle indeclinable",
@@ -3835,27 +3945,22 @@ infl_map: dict[str, InflMapNode] = {
         "lang": "Greek",
         "then": "perfect participle indeclinable",
     },
-    #https://en.wikipedia.org/wiki/Nonfinite_verb#Modern_Greek
+    # https://en.wikipedia.org/wiki/Nonfinite_verb#Modern_Greek
     "Nonfinite form ➤": {
         "lang": "Greek",
         "then": "infinitive-aorist",
     },
-
     "m·s": "masculine singular",  # καθείς/Greek
     "f·s": "feminine singular",
     "n·s": "neuter singular",
     "m·p": "masculine plural",  # αυτός/Greek
     "f·p": "feminine plural",
     "n·p": "neuter plural",
-
     "Masc./Fem./Neut.": "masculine feminine neuter",  # mille/Latin
     "Reflexive third": "third-person reflexive",  # se/Latin
-
-    "masculine dual": "masculine dual",  #a סוס/Hebrew
-
+    "masculine dual": "masculine dual",  # a סוס/Hebrew
     "his": "third-person singular masculine possessive",  # moj/Serbo-Croatian
     "her": "third-person singular feminine possessive",  # moj/Serbo-Croatian
-
     "1st singular (я (ja))": "first-person singular",  # быць/Serbo-Croatian
     "2nd singular (ты (ty))": "second-person singular",
     "3rd singular (ён (jon)/яна́ (janá)/яно́ (janó))": "third-person singular",
@@ -3866,38 +3971,35 @@ infl_map: dict[str, InflMapNode] = {
     "masculine (я (ja), ты (ty), ён (jon))": "masculine",
     "feminine (я (ja), ты (ty), яна́ (janá))": "feminine",
     "neuter (яно́ (janó))": "neuter",
-
     "adjectival partc.": "adjectival participle",  # доврне/Macedonian
     "adverbial partc.": "adverbial participle",
     # ~ "non-finite forms": {  # доврне/Macedonian  didn't work out
-        # ~ "lang": "Macedonian",
-        # ~ "then": "",
+    # ~ "lang": "Macedonian",
+    # ~ "then": "",
     # ~ },
     # ~ "l-participle": "l-participle",
     # ~ "Compound tenses": {
-        # ~ "lang": "Macedonian",
-        # ~ "pos": "verb",
-        # ~ "then": "dummy-reset-headers",
+    # ~ "lang": "Macedonian",
+    # ~ "pos": "verb",
+    # ~ "then": "dummy-reset-headers",
     # ~ },
-
     "collective": {  # ремен/Macedonian
-        "lang": ["Lithuanian", "Macedonian", "Proto-Indo-European",],
+        "lang": [
+            "Lithuanian",
+            "Macedonian",
+            "Proto-Indo-European",
+        ],
         "pos": ["num", "noun"],
         "then": "collective",
     },
-
     "Nominative/Accusative (Unarticulated)": "nominative accusative indefinite",  # acid caboxilic/Romanian
     "Nominative/Accusative (Definite articulation)": "nominative accusative definite",
     "Genitive/Dative (Definite articulation)": "genitive dative definite",
-
     "present infinitive": "present infinitive",  # фи/Romanian
     "past infinitive": "past infinitive",
-
     # ~ This doesn't want to work - why?
     # ~ "rare but acceptable": "standard",  # soler/Spanish
-
     "genitive (gjinore) (i/e/të/së)": "genitive",  # mjez/Albanian
-
     "participle — present": "present participle",  # afrohet/Albanian
     "participle — perfect": "perfect participle",
     "gerund — present": "present gerund",
@@ -3915,46 +4017,55 @@ infl_map: dict[str, InflMapNode] = {
     "male forms": "masculine",  # Dit/Albanian
     "female forms": "feminine",
     "Base form": {
-        "lang": ["Arabic", "Moroccan Arabic","Maltese","Gulf Arabic",],
+        "lang": [
+            "Arabic",
+            "Moroccan Arabic",
+            "Maltese",
+            "Gulf Arabic",
+        ],
         # "pos": ["noun", "verb", "particle", "prep"],
         "then": "stem",
     },
     "Personal-pronoun- including forms": {
-        "lang": ["Arabic", "Moroccan Arabic","Maltese","Gulf Arabic",],
+        "lang": [
+            "Arabic",
+            "Moroccan Arabic",
+            "Maltese",
+            "Gulf Arabic",
+        ],
         # "pos": ["noun", "verb", "particle", "prep"],
         "then": "dummy-reset-headers",
     },
     # ~ "singular": {
-        # ~ "lang": ["Arabic", "Moroccan Arabic",],
-        # ~ "pos": "prep",
-        # ~ "if": "stem",
-        # ~ "then": "dummy-reset-headers",
+    # ~ "lang": ["Arabic", "Moroccan Arabic",],
+    # ~ "pos": "prep",
+    # ~ "if": "stem",
+    # ~ "then": "dummy-reset-headers",
     # ~ },
-
     "common, neuter": {  # kaj/Serbo-Croatian
         "lang": "Serbo-Croatian",
         "then": "common-gender neuter",
     },
-
     "pres.​indep.​aff.": "present independent affirmative",  # bí/Irish
     "pres.​dep.": "present dependent",
     "pres.​neg.‡": "present negative",  # after ‡ starts working as a footnote
-                                       # character, remove it from here.
+    # character, remove it from here.
     "pres.​hab.": "present habitual",
     "past hab.": "past habitual",
     "past ind.": "past independent",
     "past dep.": "past dependent",
-
     "accusative form": "accusative",  # отец/Bulgarian
     "basic suffix": "suffix",
     "direct object suffix": "direct-object suffix",
     "indirect object suffix": "indirect-object suffix",
-
     "Xemxin": "xemxin-assimilation",  # lil/Maltese
     "Qamrin": "qamrin-unassimilation",
-
     "State": {
-        "lang": ["Aramaic", "Hebrew", "Assyrian Neo-Aramaic",],
+        "lang": [
+            "Aramaic",
+            "Hebrew",
+            "Assyrian Neo-Aramaic",
+        ],
         "pos": "noun",
         "then": "*",
         "else": "",
@@ -3965,8 +4076,7 @@ infl_map: dict[str, InflMapNode] = {
         "then": "*",
         "else": "",
     },
-
-    "Absolute": {  #x חקלא/Aramaic
+    "Absolute": {  # x חקלא/Aramaic
         "lang": "Aramaic",
         "pos": "noun",
         "then": "absolute",
@@ -3976,16 +4086,17 @@ infl_map: dict[str, InflMapNode] = {
         "pos": "noun",
         "then": "emphatic",
     },
-    "emphatic": "emphatic",  #v דלתא/Aramaic
-
-    "3rd f": "third-person feminine",  #umpa/Scottish Gaelic
+    "emphatic": "emphatic",  # v דלתא/Aramaic
+    "3rd f": "third-person feminine",  # umpa/Scottish Gaelic
     "Number": {
         "default": "",
-        #umpa/Scottish Gaelic
-        "lang": ["Hebrew", "Scottish Gaelic",],
+        # umpa/Scottish Gaelic
+        "lang": [
+            "Hebrew",
+            "Scottish Gaelic",
+        ],
         "then": "*",
     },
-
     "Third person f": "third-person feminine",  # an/Scottish Gaelic
     "First sg": "first-person singular",  # an/Scottish Gaelic
     "Second sg": "second-person singular",
@@ -3998,21 +4109,19 @@ infl_map: dict[str, InflMapNode] = {
     "independent": "independent",  # immee/Manx
     "Affirmative Interrogative": "affirmative interrogative",
     "Negative Interrogative": "negative interrogative",
-
     "Affirmative interrogative": "affirmative interrogative",  # thathar/Scottish Gaelic
-    "Relative future": ["with-pronoun future", "with-conjunction future",],
-
+    "Relative future": [
+        "with-pronoun future",
+        "with-conjunction future",
+    ],
     "agent1, 3": "agent participle",  # puhkaa/Finnish
-
     "Unabbreviated form": "unabbreviation alt-of",  # jku/Finnish
     "Abbreviation": "abbreviation",
-
     "nãs/nãsu, nãsã/nãsa, el/elu, ea": {
         "lang": "Aromanian",
         "if": "third-person singular",
         "then": "third-person singular",
     },
-
     "Masculine,Feminine, Neuter": "masculine feminine neuter",
     # tři/Czech, copy-pasted manual table without template...
     "Present Sg": "present singular",  # skrýt/Czech
@@ -4021,33 +4130,21 @@ infl_map: dict[str, InflMapNode] = {
     "Future Pl": "future plural",
     "Past Sg": "past singular",
     "Past Pl": "past plural",
-
     "neuter singular": "neuter singular",  # ony/Czech
-
     # dar éisi/Old Irish, la/Old Irish
-    "3d sing. masc./neut., accusative":
-        "third-person singular masculine neuter accusative",
-    "3d sing. masc./neut., dative":
-        "third-person singular masculine neuter dative",
-    "3d sing. fem., accusative":
-        "third-person singular feminine accusative",
-    "3d sing. fem., dative":
-        "third-person singular feminine dative",
-    "3d person pl., dative":
-        "third-person plural dative",
-    "3d person pl., accusative":
-        "third-person plural accusative",
-
-    "nominative-accusative": "nominative accusative", #stand/Nynorsk
+    "3d sing. masc./neut., accusative": "third-person singular masculine neuter accusative",
+    "3d sing. masc./neut., dative": "third-person singular masculine neuter dative",
+    "3d sing. fem., accusative": "third-person singular feminine accusative",
+    "3d sing. fem., dative": "third-person singular feminine dative",
+    "3d person pl., dative": "third-person plural dative",
+    "3d person pl., accusative": "third-person plural accusative",
+    "nominative-accusative": "nominative accusative",  # stand/Nynorsk
     "compound-genitive": "in-compounds genitive",
-
     "Common": {
         "lang": "Arabic",
         "then": "common-gender",
     },
-
     "Affix": "affix",
-
     # podnikat/Czech
     "you (singular)": "second-person singular",
     "you (polite)": "second-person singular formal",
@@ -4063,7 +4160,6 @@ infl_map: dict[str, InflMapNode] = {
     },
     "Active (Perfect)": "active participle",
     "Masculine, feminine, neuter": "masculine feminine neuter",  # čtyři/Czech
-
     "participle (a7)": "participle",  # hylja/Faroese
     "participle (a8)": "participle",  # lagt/Faroese
     "participle (a34)": "participle",  # falla/Faroese
@@ -4071,8 +4167,6 @@ infl_map: dict[str, InflMapNode] = {
     "participle (a18/a6)": "participle",  # skreiða/Faroese
     "participle (a18)": "participle",  # ýa/Faroese
     "participle (a5 (a39))": "participle",  # skráseta/Faroese
-
-
     # síggjast/Faroese
     "eg": {
         "lang": "Faroese",
@@ -4081,12 +4175,11 @@ infl_map: dict[str, InflMapNode] = {
     "hann/hon/tað": "third-person singular",
     "vit, tit, teir/tær/tey": "plural",
     "mediopassive": "mediopassive",
-
-    "imperfect (indicative/subjunctive)/conditional": {  #de-glicio/Welsh
+    "imperfect (indicative/subjunctive)/conditional": {  # de-glicio/Welsh
         "lang": "Welsh",
         "then": ["imperfect indicative", "conditional"],
     },
-    "imperfect indicative/conditional": {  #gwneud/Welsh
+    "imperfect indicative/conditional": {  # gwneud/Welsh
         "lang": "Welsh",
         "then": ["imperfect indicative", "conditional"],
     },
@@ -4102,7 +4195,6 @@ infl_map: dict[str, InflMapNode] = {
         "lang": "Welsh",
         "then": ["future habitual", "present habitual"],
     },
-
     # ϧⲉⲣϧⲉⲣ/Coptic
     # Bohairic
     "ⲁⲛⲟⲕ": "first-person singular",
@@ -4116,15 +4208,10 @@ infl_map: dict[str, InflMapNode] = {
             "lang": "Assamese",
             "pos": "verb",
             "then": "negative",
-            "else": {
-                "lang": "Old Saxon",
-                "pos": "pron",
-                "then": ""
-                },
+            "else": {"lang": "Old Saxon", "pos": "pron", "then": ""},
         },
     },
     "focalising, precursive": "focalising",
-
     # ⲃⲱⲗ/Coptic, different pronouns in different dialects
     # Sahidic
     # Removed duplicates
@@ -4145,89 +4232,270 @@ infl_map: dict[str, InflMapNode] = {
     "ⲛⲧⲁⲧⲉⲛ": "second-person plural",
     "ⲛⲧⲁⲩ": "third-person plural",
     "circumstantial, focalising": "focalising",
-
     # ignore Tagalog Affix column affixes
     # manghalik/Tagalog
     "Actor-secondary": "actor-secondary",
-    "mang-": {"lang": "Tagalog", "then": "",},
-    "-an": {"lang": "Tagalog", "then": "",},
-    "pang- -an": {"lang": "Tagalog", "then": "",},
-    "ikapang-": {"lang": "Tagalog", "then": "",},
-    "magpa-": {"lang": "Tagalog", "then": "",},
-    "papang- -in": {"lang": "Tagalog", "then": "",},
-    "⁠ pa- -an": {"lang": "Tagalog", "then": "",},
-    "ipagpa-": {"lang": "Tagalog", "then": "",},
-    "ipapang-": {"lang": "Tagalog", "then": "",},
-    "ikapagpapang-": {"lang": "Tagalog", "then": "",},
-    "papang- -an": {"lang": "Tagalog", "then": "",},
-    "makapang-": {"lang": "Tagalog", "then": "",},
-    "ma -an": {"lang": "Tagalog", "then": "",},
-    "maipang-": {"lang": "Tagalog", "then": "",},
-    "maikapang-": {"lang": "Tagalog", "then": "",},
-    "mapang- -an": {"lang": "Tagalog", "then": "",},
-    "makapagpa-": {"lang": "Tagalog", "then": "",},
-    "mapapang-": {"lang": "Tagalog", "then": "",},
-    "maipagpa-": {"lang": "Tagalog", "then": "",},
-    "maipapang-": {"lang": "Tagalog", "then": "",},
-    "maikapagpapang-": {"lang": "Tagalog", "then": "",},
-    "mapapang- -an": {"lang": "Tagalog", "then": "",},
-    "makipang-": {"lang": "Tagalog", "then": "",},
-    "makipagpa-": {"lang": "Tagalog", "then": "",},
+    "mang-": {
+        "lang": "Tagalog",
+        "then": "",
+    },
+    "-an": {
+        "lang": "Tagalog",
+        "then": "",
+    },
+    "pang- -an": {
+        "lang": "Tagalog",
+        "then": "",
+    },
+    "ikapang-": {
+        "lang": "Tagalog",
+        "then": "",
+    },
+    "magpa-": {
+        "lang": "Tagalog",
+        "then": "",
+    },
+    "papang- -in": {
+        "lang": "Tagalog",
+        "then": "",
+    },
+    "⁠ pa- -an": {
+        "lang": "Tagalog",
+        "then": "",
+    },
+    "ipagpa-": {
+        "lang": "Tagalog",
+        "then": "",
+    },
+    "ipapang-": {
+        "lang": "Tagalog",
+        "then": "",
+    },
+    "ikapagpapang-": {
+        "lang": "Tagalog",
+        "then": "",
+    },
+    "papang- -an": {
+        "lang": "Tagalog",
+        "then": "",
+    },
+    "makapang-": {
+        "lang": "Tagalog",
+        "then": "",
+    },
+    "ma -an": {
+        "lang": "Tagalog",
+        "then": "",
+    },
+    "maipang-": {
+        "lang": "Tagalog",
+        "then": "",
+    },
+    "maikapang-": {
+        "lang": "Tagalog",
+        "then": "",
+    },
+    "mapang- -an": {
+        "lang": "Tagalog",
+        "then": "",
+    },
+    "makapagpa-": {
+        "lang": "Tagalog",
+        "then": "",
+    },
+    "mapapang-": {
+        "lang": "Tagalog",
+        "then": "",
+    },
+    "maipagpa-": {
+        "lang": "Tagalog",
+        "then": "",
+    },
+    "maipapang-": {
+        "lang": "Tagalog",
+        "then": "",
+    },
+    "maikapagpapang-": {
+        "lang": "Tagalog",
+        "then": "",
+    },
+    "mapapang- -an": {
+        "lang": "Tagalog",
+        "then": "",
+    },
+    "makipang-": {
+        "lang": "Tagalog",
+        "then": "",
+    },
+    "makipagpa-": {
+        "lang": "Tagalog",
+        "then": "",
+    },
     # ipalinis/Tagalog
-    "mag-": {"lang": "Tagalog", "then": "",},
-    "-in": {"lang": "Tagalog", "then": "",},
-    "\u2060pag- -an": {"lang": "Tagalog", "then": "",},
-    "ipag-": {"lang": "Tagalog", "then": "",},
-    "ipang-": {"lang": "Tagalog", "then": "",},
-    "ikapag-": {"lang": "Tagalog", "then": "",},
-    "pag- -an": {"lang": "Tagalog", "then": "",},
-    "papag- -in": {"lang": "Tagalog", "then": "",},
-    "ipa-": {"lang": "Tagalog", "then": "",},
-    "ikapagpa-": {"lang": "Tagalog", "then": "",},
-    "\u2060pagpa- -an": {"lang": "Tagalog", "then": "",},
-    "\u2060papag- -an": {"lang": "Tagalog", "then": "",},
-    "makapag-": {"lang": "Tagalog", "then": "",},
-    "ma-": {"lang": "Tagalog", "then": "",},
-    "maipag-": {"lang": "Tagalog", "then": "",},
-    "maikapag-": {"lang": "Tagalog", "then": "",},
-    "mapapag-": {"lang": "Tagalog", "then": "",},
-    "maipa-": {"lang": "Tagalog", "then": "",},
-    "maikapagpa-": {"lang": "Tagalog", "then": "",},
-    "mapagpa- -an": {"lang": "Tagalog", "then": "",},
-    "mapapag- -an": {"lang": "Tagalog", "then": "",},
-    "makipag-": {"lang": "Tagalog", "then": "",},
-    "maki-": {"lang": "Tagalog", "then": "",},
+    "mag-": {
+        "lang": "Tagalog",
+        "then": "",
+    },
+    "-in": {
+        "lang": "Tagalog",
+        "then": "",
+    },
+    "\u2060pag- -an": {
+        "lang": "Tagalog",
+        "then": "",
+    },
+    "ipag-": {
+        "lang": "Tagalog",
+        "then": "",
+    },
+    "ipang-": {
+        "lang": "Tagalog",
+        "then": "",
+    },
+    "ikapag-": {
+        "lang": "Tagalog",
+        "then": "",
+    },
+    "pag- -an": {
+        "lang": "Tagalog",
+        "then": "",
+    },
+    "papag- -in": {
+        "lang": "Tagalog",
+        "then": "",
+    },
+    "ipa-": {
+        "lang": "Tagalog",
+        "then": "",
+    },
+    "ikapagpa-": {
+        "lang": "Tagalog",
+        "then": "",
+    },
+    "\u2060pagpa- -an": {
+        "lang": "Tagalog",
+        "then": "",
+    },
+    "\u2060papag- -an": {
+        "lang": "Tagalog",
+        "then": "",
+    },
+    "makapag-": {
+        "lang": "Tagalog",
+        "then": "",
+    },
+    "ma-": {
+        "lang": "Tagalog",
+        "then": "",
+    },
+    "maipag-": {
+        "lang": "Tagalog",
+        "then": "",
+    },
+    "maikapag-": {
+        "lang": "Tagalog",
+        "then": "",
+    },
+    "mapapag-": {
+        "lang": "Tagalog",
+        "then": "",
+    },
+    "maipa-": {
+        "lang": "Tagalog",
+        "then": "",
+    },
+    "maikapagpa-": {
+        "lang": "Tagalog",
+        "then": "",
+    },
+    "mapagpa- -an": {
+        "lang": "Tagalog",
+        "then": "",
+    },
+    "mapapag- -an": {
+        "lang": "Tagalog",
+        "then": "",
+    },
+    "makipag-": {
+        "lang": "Tagalog",
+        "then": "",
+    },
+    "maki-": {
+        "lang": "Tagalog",
+        "then": "",
+    },
     # batikusin/Tagalog
-    "-um-": {"lang": "Tagalog", "then": "",},
-    "i-": {"lang": "Tagalog", "then": "",},
-    "ika-": {"lang": "Tagalog", "then": "",},
-    "pa- -in": {"lang": "Tagalog", "then": "",},
+    "-um-": {
+        "lang": "Tagalog",
+        "then": "",
+    },
+    "i-": {
+        "lang": "Tagalog",
+        "then": "",
+    },
+    "ika-": {
+        "lang": "Tagalog",
+        "then": "",
+    },
+    "pa- -in": {
+        "lang": "Tagalog",
+        "then": "",
+    },
     # umagnas/Tagalog
-    "um-": {"lang": "Tagalog", "then": "",},
+    "um-": {
+        "lang": "Tagalog",
+        "then": "",
+    },
     # baybayin/Tagalog
     "Directional": "directional",
     # madali/Tagalog
     "root": "root",
-    "superiority": {"lang": "Tagalog", "then": "superior",},
-    "inferiority": {"lang": "Tagalog", "then": "inferior",},
-    "equality": {"lang": "Tagalog", "then": "equal",},
+    "superiority": {
+        "lang": "Tagalog",
+        "then": "superior",
+    },
+    "inferiority": {
+        "lang": "Tagalog",
+        "then": "inferior",
+    },
+    "equality": {
+        "lang": "Tagalog",
+        "then": "equal",
+    },
     # sumisid/Tagalog
-    "maka-": {"lang": "Tagalog", "then": "",},
-    "mapa-": {"lang": "Tagalog", "then": "",},
-    "mai-": {"lang": "Tagalog", "then": "",},
-    "maika-": {"lang": "Tagalog", "then": "",},
-    "mapag- -an": {"lang": "Tagalog", "then": "",},
+    "maka-": {
+        "lang": "Tagalog",
+        "then": "",
+    },
+    "mapa-": {
+        "lang": "Tagalog",
+        "then": "",
+    },
+    "mai-": {
+        "lang": "Tagalog",
+        "then": "",
+    },
+    "maika-": {
+        "lang": "Tagalog",
+        "then": "",
+    },
+    "mapag- -an": {
+        "lang": "Tagalog",
+        "then": "",
+    },
     # ipasagot/Tagalog
-    "ma- -an": {"lang": "Tagalog", "then": "",},
+    "ma- -an": {
+        "lang": "Tagalog",
+        "then": "",
+    },
     # ayusin/Tagalog
-    "mapag-": {"lang": "Tagalog", "then": "",},
-
-
+    "mapag-": {
+        "lang": "Tagalog",
+        "then": "",
+    },
     "resultative": "resultative",  # sloniti/Proto-Slavic
     "imperfective aorist": "aorist imperfective",  # byti/Proto-Slavic
-
     "Masculine and feminine": "masculine feminine",  # hwa/Old English
-
     # ufuy/Afar
     "Postpositioned forms": {
         "lang": "Afar",
@@ -4267,7 +4535,6 @@ infl_map: dict[str, InflMapNode] = {
     "past indicative I": "past indicative indicative-i",
     "past indicative II": "past indicative indicative-ii",
     "present potential": "present potential",
-
     "dist. plural": "distributive plural",  # nástro/Navajo
     "duoplural": "duoplural",
     # this separate duoplural number can't simply be broken into dual and plural
@@ -4287,7 +4554,6 @@ infl_map: dict[str, InflMapNode] = {
         "lang": "Navajo",
         "then": "passive",
     },
-
     "Passive B": {
         "lang": "Navajo",
         "then": "passive agentive",
@@ -4306,18 +4572,21 @@ infl_map: dict[str, InflMapNode] = {
     "subjunctive plural": "subjunctive plural",  # been/Middle English
     "Middle Voice": "middle-voice",  # शृणोति/Sanskrit
     "Middle": {
-        "lang": ["Hittite", "Sanskrit", "Pali",],
+        "lang": [
+            "Hittite",
+            "Sanskrit",
+            "Pali",
+        ],
         "then": "middle-voice",  # अवति/Sanskrit
     },
     "Active Voice": "active",
     "Passive Voice": "passive",
-
     "Potential mood / Optative mood": "potential",
     # ვენეციური/Georgian
     "nominative, genitive, instrumental": "nominative genitive instrumental",
     "dative, adverbial": "dative adverbial",
     "negative imperative": "negative imperative",  # აბეზღებს/Georgian
-    #მათ/Georgian
+    # მათ/Georgian
     "third-person": "third-person",
     "personal pronouns": {
         "lang": "Georgian",
@@ -4332,52 +4601,51 @@ infl_map: dict[str, InflMapNode] = {
     "these": "proximal pronoun plural",
     "those": "distal pronoun plural",
     # დაწერს/Georgian
-    "masdar": "noun-from-verb",  #also in Arabic
+    "masdar": "noun-from-verb",  # also in Arabic
     "transitive screeves": "transitive",
     "intransitive screeves": "intransitive",
     "privative participle": "privative participle",
     "მე": {
         "lang": "Georgian",
         "then": "first-person singular",
-        },
+    },
     "შენ": {
         "lang": "Georgian",
         "then": "second-person singular",
-        },
+    },
     "ის": {
         "lang": "Georgian",
         "then": "third-person singular",
-        },
+    },
     "ჩვენ": {
         "lang": "Georgian",
         "then": "first-person plural",
-        },
+    },
     "თქვენ": {
         "lang": "Georgian",
         "then": "second-person plural",
-        },
+    },
     "ისინი": {
         "lang": "Georgian",
         "then": "third-person plural",
-        },
+    },
     "მან": {
         "lang": "Georgian",
         "then": "third-person singular",
-        },
+    },
     "მათ": {
         "lang": "Georgian",
         "then": "third-person plural",
-        },
+    },
     "მას": {
         "lang": "Georgian",
         "then": "third-person singular",
-        },
+    },
     # ~ "": {
-        # ~ "lang": "Georgian",
-        # ~ "then": "",
-        # ~ },
+    # ~ "lang": "Georgian",
+    # ~ "then": "",
+    # ~ },
     "inversion": "inversion",
-
     # maanaadad/Ojibwe
     "singular (0s)": "singular inanimate",
     "obviative singular (0's)": "obviative inanimate singular",
@@ -4385,8 +4653,7 @@ infl_map: dict[str, InflMapNode] = {
     "obviative plural (0'p)": "obviative plural inanimate",
     "singular or plural (0)": "singular plural inanimate",
     "obviative singular or plural (0')": "obviative singular plural inanimate",
-
-    #a ܒܢܓܐ/Classical_Syriac
+    # a ܒܢܓܐ/Classical_Syriac
     "1st c. sg. (my)": "first-person singular common-gender possessive",
     "2nd m. sg. (your)": "second-person singular masculine possessive",
     "2nd f. sg. (your)": "second-person singular feminine possessive",
@@ -4397,14 +4664,15 @@ infl_map: dict[str, InflMapNode] = {
     "2nd f. pl. (your)": "second-person plural feminine possessive",
     "3rd m. pl. (their)": "third-person plural masculine possessive",
     "3rd f. pl. (their)": "third-person plural feminine possessive",
-
     # vágyhat/Hungarian
-    "3rd person sg, 2nd person sg formal":
-        ["third-person singular",
-         "second-person singular formal",],
-    "3rd person pl, 2nd person pl formal":
-        ["third-person plural",
-         "second-person plural formal",],
+    "3rd person sg, 2nd person sg formal": [
+        "third-person singular",
+        "second-person singular formal",
+    ],
+    "3rd person pl, 2nd person pl formal": [
+        "third-person plural",
+        "second-person plural formal",
+    ],
     # ichwane/Zulu
     "Possessive forms": "possessive",
     "Full form": "full-form",
@@ -4415,36 +4683,37 @@ infl_map: dict[str, InflMapNode] = {
         "then": "possessive-substantive",
     },
     "Modifier": {
-        "lang": ["Zulu", "Swazi",],
+        "lang": [
+            "Zulu",
+            "Swazi",
+        ],
         # ~ "if": "possessive",
         "then": "",
         "else": {
-            "lang": "Xhosa",  #magqagala
+            "lang": "Xhosa",  # magqagala
             "then": "attributive",
         },
     },
     "Copulative": "copulative",
-
     "present negative": "present negative",  # hoteti/Slovene
-
     "Construct state": "construct",  # ziqqurratum/Akkadian
     # marāṣum/Akkadian
     "Adjective": "adjective",
-    "1.sg":"first-person singular",
+    "1.sg": "first-person singular",
     "2.sg": "second-person singular",
     "3.sg": "third-person singular",
     "1.pl": "first-person plural",
     "2.pl": "second-person plural",
     "3.pl": "third-person plural",
-
     # pats/Latvian
     "Masculine Singular": "masculine singular",
     "Feminine Singular": "feminine singular",
     "Masculine Plural": "masculine plural",
     "Feminine Plural": "feminine plural",
-
-    "⁠ ka- -an": {"lang": "Tagalog", "then": "",},  # maligaw/Tagalog
-
+    "⁠ ka- -an": {
+        "lang": "Tagalog",
+        "then": "",
+    },  # maligaw/Tagalog
     # AFAICT the following is just the idiosyncracy of a singular editor.
     # No real idea of what "analytical" means in this context. It's not
     # standard terminology for specific forms, but I guess it could
@@ -4453,17 +4722,14 @@ infl_map: dict[str, InflMapNode] = {
         "lang": "Manx",
         "then": "analytic",
     },
-
     # alcun/Old French
     "Subject": "subjective",
-
     # styri/Lower Sorbian
-    "Masculine inanimate/ feminine/neuter":
-        ["masculine inanimate",
-         "feminine neuter",
-        ],
+    "Masculine inanimate/ feminine/neuter": [
+        "masculine inanimate",
+        "feminine neuter",
+    ],
     "Masculine animate": "masculine animate",
-
     # glab/Breton
     "unmutated": "unmutated",
     "hard": {
@@ -4485,26 +4751,21 @@ infl_map: dict[str, InflMapNode] = {
         "pos": "verb",
         "then": "dummy-reset-headers",
     },
-
     # дөрвөл/Mongolian
-    "substantive genitive":
-        "possessive-substantive genitive",
-    "attributive locative":
-        "attributive locative",
-
+    "substantive genitive": "possessive-substantive genitive",
+    "attributive locative": "attributive locative",
     # сэрээх/Mongolian
     "Future participle": "future participle",
     "Confirmative": "confirmative",
     "Resultative": "resultative",
     "Imperfective converb": "imperfective converb",
-    "possessive particle": "possessive particle",  #чи/Mongolian
-
+    "possessive particle": "possessive particle",  # чи/Mongolian
     # কোবোৱা/Assamese
-    "Gerund, Past participle, Agentive":
-        ["gerund",
-         "past participle",
-         "agentive",
-        ],
+    "Gerund, Past participle, Agentive": [
+        "gerund",
+        "past participle",
+        "agentive",
+    ],
     "Progressive participle": "progressive participle",
     "t": {
         "lang": "Assamese",
@@ -4515,88 +4776,87 @@ infl_map: dict[str, InflMapNode] = {
         "lang": "Assamese",
         "pos": "verb",
         "then": "first-person",
-        },
+    },
     "তই toi": {
         "lang": "Assamese",
         "pos": "verb",
         "then": "familiar impolite second-person",
-        },
+    },
     "তুমি tumi": {
         "lang": "Assamese",
         "pos": "verb",
         "then": "familiar second-person",
-        },
+    },
     "আপুনি apuni": {
         "lang": "Assamese",
         "pos": "verb",
         "then": "honorific second-person",
-        },
+    },
     "তেওঁ etc teü͂": {
         "lang": "Assamese",
         "pos": "verb",
         "then": "honorific third-person",
-        },
+    },
     "সি ♂, তাই ♀ etc xi ♂, tai ♀": {
         "lang": "Assamese",
         "pos": "verb",
         "then": "third-person",
-        },
+    },
     "আমি ami": {
         "lang": "Assamese",
         "pos": "verb",
         "then": "first-person",
-        },
+    },
     "তহঁত tohõt": {
         "lang": "Assamese",
         "pos": "verb",
         "then": "familiar impolite second-person",
-        },
+    },
     "তোমালোক tümalük": {
         "lang": "Assamese",
         "pos": "verb",
         "then": "familiar second-person",
-        },
+    },
     "আপোনালোক apünalük": {
         "lang": "Assamese",
         "pos": "verb",
         "then": "honorific second-person",
-        },
+    },
     "তেওঁলোক teü͂lük": {
         "lang": "Assamese",
         "pos": "verb",
         "then": "honorific third-person",
-        },
+    },
     "সিহঁত etc xihõt": {
         "lang": "Assamese",
         "pos": "verb",
         "then": "third-person",
-        },
+    },
     "তহঁতে tohõte": {
         "lang": "Assamese",
         "pos": "verb",
         "then": "familiar impolite second-person",
-        },
+    },
     "তোমালোকে tümalüke": {
         "lang": "Assamese",
         "pos": "verb",
         "then": "familiar second-person",
-        },
+    },
     "আপোনালোকে apünalüke": {
         "lang": "Assamese",
         "pos": "verb",
         "then": "honorific second-person",
-        },
+    },
     "তেওঁলোকে teü͂lüke": {
         "lang": "Assamese",
         "pos": "verb",
         "then": "honorific third-person",
-        },
+    },
     "সিহঁতে etc xihõte": {
         "lang": "Assamese",
         "pos": "verb",
         "then": "third-person",
-        },
-
+    },
     # gözde/Turkish predicative adjective table
     "ben (I am)": "first-person singular",
     "sen (you are)": "second-person singular",
@@ -4620,8 +4880,7 @@ infl_map: dict[str, InflMapNode] = {
     "positive, interrogative": "interrogative",
     "negative, declarative": "negative",
     "negative, interrogative": "negative interrogative",
-
-    #a راتلل/Pashto
+    # a راتلل/Pashto
     "زۀ": "first-person singular",
     "تۀ": {
         "if": "second-person singular masculine",
@@ -4630,9 +4889,8 @@ infl_map: dict[str, InflMapNode] = {
             "if": "second-person singular feminine",
             "then": "second-person singular feminine",
             "else": "second-person singular",
-            },
         },
-
+    },
     "دی / هغه": "third-person singular masculine",
     "دا / هغه": "third-person singular feminine",
     "موږ": "first-person plural",
@@ -4645,14 +4903,13 @@ infl_map: dict[str, InflMapNode] = {
     # new part of the table, it's a Northern Pashto variant, so someone
     # might change it later, unless تاسو is part of the "command"
     # paradigm in general.
-
-    #a ہاوُن/Kashmiri
+    # a ہاوُن/Kashmiri
     "Feminine plural": "feminine plural",
     "Completed": "completive",
     "بہٕ": "first-person singular",
-    'ژٕ': "second-person singular",
+    "ژٕ": "second-person singular",
     "سُہ, سۄ": "third-person singular",
-    'أسؠ': "first-person plural",
+    "أسؠ": "first-person plural",
     "تۄہؠ, تۆہؠ": "second-person plural",
     "تِم, تِمہٕ": "third-person plural",
     "Nominative subject": "with-nominative",
@@ -4663,12 +4920,12 @@ infl_map: dict[str, InflMapNode] = {
     "m or f": "masculine feminine",
     "Simple future": "future",
     # Ergatives
-    'مےٚ': "first-person singular",
-    'ژےٚ': "second-person singular",
-    'تٔمؠ, تَمہِ': "third-person singular",
-    'اَسہِ': "first-person plural",
-    'تۄہہِ': "second-person plural",
-    'تِمَو': "third-person plural",
+    "مےٚ": "first-person singular",
+    "ژےٚ": "second-person singular",
+    "تٔمؠ, تَمہِ": "third-person singular",
+    "اَسہِ": "first-person plural",
+    "تۄہہِ": "second-person plural",
+    "تِمَو": "third-person plural",
     "m sg": "masculine singular",
     "m pl": "masculine plural",
     "f sg": "feminine singular",
@@ -4678,7 +4935,6 @@ infl_map: dict[str, InflMapNode] = {
     "Conditional past continuous": "past continuative conditional",
     "Conditional past perfect": "past perfect conditional",
     # XXX return to Kashmiri after next wiktionary dump
-
     # дрьзнѫти/Old Church Slavonic
     "азъ (azŭ)": "first-person singular",
     "тꙑ (ty)": "second-person singular",
@@ -4689,7 +4945,6 @@ infl_map: dict[str, InflMapNode] = {
     "мꙑ (my)": "first-person plural",
     "вꙑ (vy)": "second-person plural",
     "ти (ti)": "third-person plural",
-
     # əhli-həsəd/Azerbaijani
     "broken plural": "broken-form plural",
     # bədən/Azerbaijani
@@ -4697,19 +4952,17 @@ infl_map: dict[str, InflMapNode] = {
         "lang": "Azerbaijani",
         # ~ "if": "plural",  # doesn't work
         "then": "broken-form plural",
-        },
+    },
     "sound": {
         "lang": "Azerbaijani",
         "then": "",
     },
-
     # 𒉿𒀠𒄴𒍣/Hittite
     "Noun": {
         "lang": "Hittite",
         "pos": "verb",
         "then": "noun-from-verb",
     },
-
     # ampesar/Ladino
     "io / yo": {
         "lang": "Ladino",
@@ -4731,7 +4984,6 @@ infl_map: dict[str, InflMapNode] = {
         "lang": "Ladino",
         "then": "third-person plural",
     },
-
     # চাওয়া/Bengali
     "progressive participle": "progressive participle",
     "habitual participle": "habitual participle",
@@ -4746,17 +4998,13 @@ infl_map: dict[str, InflMapNode] = {
     "এরা (era), ওরা (ora), তারা (tara)": "third-person",
     "আপনি (apni)": "second-person formal",
     "আপনারা (apnara)": "second-person formal",
-    "ইনি (ini), উনি (uni), তিনি (tini)":
-        "third-person formal",
-    "এঁরা (ẽra), ওঁরা (õra), তাঁরা (tãra)":
-        "third-person formal",
-
+    "ইনি (ini), উনি (uni), তিনি (tini)": "third-person formal",
+    "এঁরা (ẽra), ওঁরা (õra), তাঁরা (tãra)": "third-person formal",
     # schlaa/Alemannic German
     "1ˢᵗ person ich, i": "first-person singular",
     "3ʳᵈ person er/si/es": "third-person singular",
     "2ⁿᵈ person ir": "second-person plural",
     # remove duplicates
-
     # natüürlic/Alemannic German
     "Strong inflection": "strong",
     # d/Alemannic German
@@ -4771,9 +5019,12 @@ infl_map: dict[str, InflMapNode] = {
         "then": "first-person singular",
     },
     "ту": {
-        "lang": ["Tajik", "Romanian",],
+        "lang": [
+            "Tajik",
+            "Romanian",
+        ],
         "pos": "verb",
-        "then":  "second-person singular",
+        "then": "second-person singular",
     },
     "ел/я": {
         "lang": "Romanian",
@@ -4790,7 +5041,7 @@ infl_map: dict[str, InflMapNode] = {
         "pos": "verb",
         "then": "second-person plural",
     },
-    "еи/еле":  {
+    "еи/еле": {
         "lang": "Romanian",
         "pos": "verb",
         "then": "third-person plural",
@@ -4799,7 +5050,6 @@ infl_map: dict[str, InflMapNode] = {
         "lang": "Romanian",
         "then": "perfect",
     },
-
     # idealistesch/Luxembourgish
     "attributive and/or after determiner": "attributive with-determiner",
     "independent without determiner": "without-determiner",
@@ -4813,23 +5063,21 @@ infl_map: dict[str, InflMapNode] = {
     "3ʳᵈ person si": "third-person plural",
     "present simple": "present",
     "future simple": "future",
-
     # чӧсмасьны/Komi-Zyrian
     "Direct past tense": "direct past",
     "Reported past tense": "reported past",
     "Imperfect participle": "imperfect participle",
     "Caritive participle": "caritive participle",
     # ~ "^(*)) The impersonal reported past is"\
-     # ~ "expressed using the third singular form."\
-     # ~ " ^(**)) The first person imperative is"\
-     # ~ " expressed using the first person future"\
-     # ~ " form. ^(***)) Any form ending in -ӧй"\
-     # ~ " has an alternative form ending in -ӧ."\
-     # ~ " ^(****)) The imperfect and perfect"\
-     # ~ " participles have alternative forms"\
-     # ~ " with a paragogic -а.":
-    "^(*)) The impersonal reported past is expressed using the third singular form. ^(**)) The first person imperative is expressed using the first person future form. ^(***)) Any form ending in -ӧй has an alternative form ending in -ӧ. ^(****)) The imperfect and perfect participles have alternative forms with a paragogic -а.":
-        "",  #<th> with footnotes that don't refer to anything?
+    # ~ "expressed using the third singular form."\
+    # ~ " ^(**)) The first person imperative is"\
+    # ~ " expressed using the first person future"\
+    # ~ " form. ^(***)) Any form ending in -ӧй"\
+    # ~ " has an alternative form ending in -ӧ."\
+    # ~ " ^(****)) The imperfect and perfect"\
+    # ~ " participles have alternative forms"\
+    # ~ " with a paragogic -а.":
+    "^(*)) The impersonal reported past is expressed using the third singular form. ^(**)) The first person imperative is expressed using the first person future form. ^(***)) Any form ending in -ӧй has an alternative form ending in -ӧ. ^(****)) The imperfect and perfect participles have alternative forms with a paragogic -а.": "",  # <th> with footnotes that don't refer to anything?
     # ми/Komi-Zyrian
     "long dative": "dative",
     "short dative": "dative",
@@ -4838,26 +5086,79 @@ infl_map: dict[str, InflMapNode] = {
     # ehun/Basque
     "anim.": "animate",
     "inanim.": "inanimate",
-
     # erakutsi/Basque
-    "NORK": {"lang": "Basque", "then": "ergative",},
-    "NOR": {"lang": "Basque", "then": "absolutive",},
-    "NORI": {"lang": "Basque", "then": "dative",},
-    "nik": {"lang": "Basque", "then": "first-person singular",},
-    "hik": {"lang": "Basque", "then": "second-person singular informal",},
-    "hark": {"lang": "Basque", "then": "third-person singular",},
-    "guk": {"lang": "Basque", "then": "first-person plural",},
-    "zuk": {"lang": "Basque", "then": "second-person singular",},
-    "zuek": {"lang": "Basque", "then": "second-person plural",},
-    "haiek": {"lang": "Basque", "then": "third-person plural",},
-    "hura": {"lang": "Basque", "then": "third-person singular",},
-    "niri": {"lang": "Basque", "then": "first-person singular",},
-    "hiri": {"lang": "Basque", "then": "second-person singular informal",},
-    "hari": {"lang": "Basque", "then": "third-person singular",},
-    "guri": {"lang": "Basque", "then": "first-person plural",},
-    "zuri": {"lang": "Basque", "then": "second-person singular",},
-    "zuei": {"lang": "Basque", "then": "second-person plural",},
-    "haiei": {"lang": "Basque", "then": "third-person plural",},
+    "NORK": {
+        "lang": "Basque",
+        "then": "ergative",
+    },
+    "NOR": {
+        "lang": "Basque",
+        "then": "absolutive",
+    },
+    "NORI": {
+        "lang": "Basque",
+        "then": "dative",
+    },
+    "nik": {
+        "lang": "Basque",
+        "then": "first-person singular",
+    },
+    "hik": {
+        "lang": "Basque",
+        "then": "second-person singular informal",
+    },
+    "hark": {
+        "lang": "Basque",
+        "then": "third-person singular",
+    },
+    "guk": {
+        "lang": "Basque",
+        "then": "first-person plural",
+    },
+    "zuk": {
+        "lang": "Basque",
+        "then": "second-person singular",
+    },
+    "zuek": {
+        "lang": "Basque",
+        "then": "second-person plural",
+    },
+    "haiek": {
+        "lang": "Basque",
+        "then": "third-person plural",
+    },
+    "hura": {
+        "lang": "Basque",
+        "then": "third-person singular",
+    },
+    "niri": {
+        "lang": "Basque",
+        "then": "first-person singular",
+    },
+    "hiri": {
+        "lang": "Basque",
+        "then": "second-person singular informal",
+    },
+    "hari": {
+        "lang": "Basque",
+        "then": "third-person singular",
+    },
+    "guri": {
+        "lang": "Basque",
+        "then": "first-person plural",
+    },
+    "zuri": {
+        "lang": "Basque",
+        "then": "second-person singular",
+    },
+    "zuei": {
+        "lang": "Basque",
+        "then": "second-person plural",
+    },
+    "haiei": {
+        "lang": "Basque",
+        "then": "third-person plural",
+    },
     "future cons.": "future consequential",
     "past cons.": "past consequential",
     "2nd sg inf": "second-person singular informal",
@@ -4887,19 +5188,16 @@ infl_map: dict[str, InflMapNode] = {
         "then": "",
         "else": "Bokmål",
     },
-
     "Nynorsk f": {
         "lang": "Norwegian Nynorsk",
         "then": "feminine",
         "else": "feminine Nynorsk",
     },
-
     "Nynorsk m": {
         "lang": "Norwegian Nynorsk",
         "then": "masculine",
         "else": "masculine Nynorsk",
     },
-
     "Nynorsk n": {
         "lang": "Norwegian Nynorsk",
         "then": "neuter",
@@ -4915,13 +5213,10 @@ infl_map: dict[str, InflMapNode] = {
         "then": "",
         "else": "Nynorsk",
     },
-
-
     # του/Greek
     "weak": "weak",
     "strong": "strong",
-
-    "infinitive — present)": "present infinitive",  #eh/Albanian
+    "infinitive — present)": "present infinitive",  # eh/Albanian
     "infinitive — perfect)": "perfect infinitive",
     "past perfect I": "past past-i perfect",
     "past perfect II": "past past-ii perfect",
@@ -4929,12 +5224,11 @@ infl_map: dict[str, InflMapNode] = {
     "future II": "future future-ii",
     "future perfect I": "future future-i perfect",
     "future perfect II": "future future-ii perfect",
-    "ato (3rd person feminine plural)": "third-person feminine plural",  #ato/Albanian
-    "ai (3rd person masculine singular)": "third-person masculine singular",  #ai
-    "ti (2nd person singular)": "second-person singular",  #ti
-    "ata (3rd person masculine plural)": "third-person masculine plural",  #ata
-    "ajo (3rd person feminine singular)":" third-person feminine singular",  #ajo
-
+    "ato (3rd person feminine plural)": "third-person feminine plural",  # ato/Albanian
+    "ai (3rd person masculine singular)": "third-person masculine singular",  # ai
+    "ti (2nd person singular)": "second-person singular",  # ti
+    "ata (3rd person masculine plural)": "third-person masculine plural",  # ata
+    "ajo (3rd person feminine singular)": " third-person feminine singular",  # ajo
     # Tagalog small verb tables, like magwahil/Tagalog
     # need something to tag a td-cell with stuff like
     # "actor" or "object" in it, or else it'll cause
@@ -4949,33 +5243,35 @@ infl_map: dict[str, InflMapNode] = {
         "lang": "Tagalog",
         "then": "focus",
     },
-
     # Arabic number paradigm markers decomposed after changes in the parser:
-    #a  ـًى (-an) => ar-infl-an-maksura
-    #a  ـًا (-an) => ar-infl-an-alef
+    # a  ـًى (-an) => ar-infl-an-maksura
+    # a  ـًا (-an) => ar-infl-an-alef
     "basic broken plural diptote": "broken-form plural diptote",
-    "basic broken plural triptote": "broken-form plural triptote",  #a حجرة/Arabic
+    "basic broken plural triptote": "broken-form plural triptote",  # a حجرة/Arabic
     "basic collective triptote": "collective triptote",
     "basic singular diptote": "singular diptote",
     "basic singular triptote": "singular triptote",
-    "broken plural diptote in ـٍ (-in)":  "broken-form plural diptote ar-infl-in",  #a سحلية/Arabic
-    "broken plural in ـًى (-an)": "broken-form plural ar-infl-an-maksura",  #a بلوة/Arabic
-    "broken plural invariable": "broken-form plural invariable",  #a ضحية/Arabic
-    "broken plural triptote in ـَة (-a)": "broken-form plural triptote ar-infl-a",  #a رصيد/Arabic
+    "broken plural diptote in ـٍ (-in)": "broken-form plural diptote ar-infl-in",  # a سحلية/Arabic
+    "broken plural in ـًى (-an)": "broken-form plural ar-infl-an-maksura",  # a بلوة/Arabic
+    "broken plural invariable": "broken-form plural invariable",  # a ضحية/Arabic
+    "broken plural triptote in ـَة (-a)": "broken-form plural triptote ar-infl-a",  # a رصيد/Arabic
     "collective invariable": "collective invariable",
-    "diptote triptote": ["diptote", "triptote",],
+    "diptote triptote": [
+        "diptote",
+        "triptote",
+    ],
     "singular diptote in ـٍ (-in)": "singular diptote ar-infl-in",
-    "singular diptote in ـَاة (-āh)": "singular diptote ar-infl-ah",  #a حماة/Arabic
-    "singular diptote in ـَة (-a)": "singular diptote ar-infl-a",  #a أرمية/Arabic
+    "singular diptote in ـَاة (-āh)": "singular diptote ar-infl-ah",  # a حماة/Arabic
+    "singular diptote in ـَة (-a)": "singular diptote ar-infl-a",  # a أرمية/Arabic
     "singular in ـًا (-an)": "singular ar-infl-an-alef",
-    "singular in ـًى (-an)": "singular ar-infl-an-maksura",  #a مدى/Arabic
+    "singular in ـًى (-an)": "singular ar-infl-an-maksura",  # a مدى/Arabic
     "singular invariable": "singular invariable",
-    "singular long construct": "singular long-construct",  #a ذو الحجة/Arabic
+    "singular long construct": "singular long-construct",  # a ذو الحجة/Arabic
     "singular of irregular noun": "singular irregular",
     "singular triptote in ـٍ (-in)": "singular triptote ar-infl-in",
-    "singular triptote in ـَاة (-āh)": "singular triptote ar-infl-ah", #a قناة السويس/Arabic
-    "singular triptote in ـَة (-a)": "singular triptote ar-infl-a",  #a حاجة/Arabic
-    "singulative triptote in ـَة (-a)": "singulative triptote ar-infl-a",  #a جثجاث/Arabic
+    "singular triptote in ـَاة (-āh)": "singular triptote ar-infl-ah",  # a قناة السويس/Arabic
+    "singular triptote in ـَة (-a)": "singular triptote ar-infl-a",  # a حاجة/Arabic
+    "singulative triptote in ـَة (-a)": "singulative triptote ar-infl-a",  # a جثجاث/Arabic
     "sound feminine paucal": "sound-form feminine paucal",
     "sound feminine plural": "sound-form feminine plural",
     "sound masculine plural": "sound-form masculine plural",
@@ -4997,9 +5293,6 @@ infl_map: dict[str, InflMapNode] = {
     "broken paucal triptote in ـَة (-a)": "broken-form paucal triptote ar-infl-a",
     "singular of irregular pronoun": "singular irregular pronoun",
     "basic broken paucal diptote": "broken-form paucal diptote",
-
-
-
     # teie/Estonian
     "Partitive": "partitive",
     "Inessive": "inessive",
@@ -5010,39 +5303,34 @@ infl_map: dict[str, InflMapNode] = {
     "Essive": "essive",
     "Abessive": "abessive",
     "Comitative": "comitative",
-
     # ащема/Moksha
     "one possession": "possessive possessed-single",
     "one or multiple possessions": "possessive possessed-single possessed-many",
     # XXX the big headers don't express
-
     "Participles➤": "participle",  # άρχω/Greek
     "Active Present ➤": "present",
     "Passive Present ➤": "passive present",
-
     # 알리다/Korean
     "Formal non-polite": "formal",
     "Informal non-polite": "informal",
     "Informal polite": "informal polite",
     "Formal polite": "formal polite",
-
     "Middle/Passive": "middle-voice passive",  # पिबति/Sanskrit
-
-    "Singular base form": "singular base-form",  #a ܒܪܘܢܐ/Assyrian Neo-Aramaic
+    "Singular base form": "singular base-form",  # a ܒܪܘܢܐ/Assyrian Neo-Aramaic
     "Plural base form": "plural base-form",
-
     "substantive": {
-        "lang": ["Chechen", "Ingush",],
+        "lang": [
+            "Chechen",
+            "Ingush",
+        ],
         "pos": "noun",
         "then": "substantive-case",
     },
-
     "similitude": "similitude",  # a ئانا/Uyghur
     "equivalence": "equal",
     "Declension of locative-qualitative form": "locative-qualitative",
     "representative": "representative",
     "Declension of representative form": "representative",
-
     # When copy-pasting headers from Wiktionary with a browser,
     # remember to replace the "downgraded"-superscripts into
     # unicode superscript characters here, if the copy-pasted
@@ -5050,7 +5338,6 @@ infl_map: dict[str, InflMapNode] = {
     # get automatically translated into those in clean.py, and
     # these entries have to match them. If copy-pasting from
     # error messages in the shell, you get the 'correct' characters.
-
     "2ⁿᵈperson singular ordinary": {
         "lang": "Uyghur",
         "pos": "noun",
@@ -5093,7 +5380,6 @@ infl_map: dict[str, InflMapNode] = {
         "then": "first-person singular possessive",
         "else": "first-person singular",
     },
-
     # -raihu/Kikuyu
     # Class [singular class], Class [plural class]
     "Class 1, Class 2": {
@@ -5150,9 +5436,7 @@ infl_map: dict[str, InflMapNode] = {
         "then": "class-15",
         "else": "class-6",
     },
-
     "2nd person f": "second-person feminine",
-
     "ја": {  # THIS IS CYRILLIC!! Not Latin! подразумевати/Serbo-Croatian
         "lang": "Serbo-Croatian",
         "then": "first-person singular",
@@ -5181,14 +5465,12 @@ infl_map: dict[str, InflMapNode] = {
         "lang": "Spanish",
         "then": "",
     },
-    "1ˢᵗ person singular (“my”)": "first-person singular possessive",  #a احساس/Persian
+    "1ˢᵗ person singular (“my”)": "first-person singular possessive",  # a احساس/Persian
     "3ʳᵈ person singular (“his, her, its”)": "third-person singular possessive",
     "1ˢᵗ plural (“our”)": "first-person plural possessive",
     "2ⁿᵈ plural (“your”)": "second-person plural possessive",
     "3ʳᵈ plural (“their”)": "third-person plural possessive",
-
-    "with possessive pronouns": "possessed-form",  #a ܡܘܙܐ/Assyrian Neo-Aramaic
-
+    "with possessive pronouns": "possessed-form",  # a ܡܘܙܐ/Assyrian Neo-Aramaic
     # Talat/Turkish, possessive tables for names
     "benim (my)": "first-person singular",
     "senin (your)": "second-person singular",
@@ -5196,33 +5478,25 @@ infl_map: dict[str, InflMapNode] = {
     "bizim (our)": "first-person plural",
     "sizin (your)": "second-person plural",
     "onların (their)": "third-person plural",
-
     # Alpler/Turkish
     "singular, uncountable (tekil, sayılamaz)": "singular uncountable",
-
     # अकड़ना/Hindi
     "1ˢᵗ मैं": "first-person singular",
     "2ⁿᵈ तू": "second-person singular",
     "3ʳᵈ यह/वह, ये/वो": "third-person singular",
     "2ⁿᵈ तुम": "second-person plural",
     "1ˢᵗ हम": "first-person plural",
-    "3ʳᵈ, 2ⁿᵈ ये/वो/वे, आप":
-        ["third-person plural",
-         "second-person formal"],
-
+    "3ʳᵈ, 2ⁿᵈ ये/वो/वे, आप": ["third-person plural", "second-person formal"],
     # -ra/Basque
     "proximal plural": "proximal plural",
-
-    #a שלאָפֿן/Yiddish
+    # a שלאָפֿן/Yiddish
     # These tables are unparseable due to lack of headers, really
     # ~ "Composed forms": "",
-
     # kalium/Limburgish
     "Root singular": "singular",
     "Root plural": "plural",
     "Diminutive singular": "diminutive singular",
     "Diminutive plural": "diminutive plural",
-
     # tèlle/Limburgish
     "adverb": "adverb",
     "number & tense": "*",
@@ -5235,12 +5509,10 @@ infl_map: dict[str, InflMapNode] = {
     "imperative singular impolite": "imperative singular impolite",
     "imperative singular polite": "imperative singular polite",
     "imperative dual": "imperative dual",
-
     # beer/Limburgish
     "Diminutive": "diminutive",
     "Mutation": "mutation",
     "Diminutive Mutation": "diminutive mutation",
-
     # сядоце/Moksha
     "мон (mon)": "first-person singular",
     "минь (minʹ)": "first-person plural",
@@ -5248,7 +5520,6 @@ infl_map: dict[str, InflMapNode] = {
     "тинь (tinʹ)": "second-person plural",
     "сон (son)": "third-person singular",
     "синь (sinʹ)": "third-person plural",
-
     # улемс/Moksha
     "1ˢᵗ singular — мон (mon)": "first-person singular",
     "2ⁿᵈ singular — тон (ton)": "second-person singular",
@@ -5260,26 +5531,18 @@ infl_map: dict[str, InflMapNode] = {
     "Compound future": "multiword-construction future",
     "agentive / pres. act. part.": "present active participle agentive",
     "present passive participle": "present passive participle",
-
     # содамс/Moksha
     "Past II / subjunctive": "past-ii past subjunctive",
     "Subjunctive of conditional": "subjunctive conditional",
     "ma-infinitive / verbal noun": "noun-from-verb infinitive infinitive-ma",
     "mda-infinitive": "infinitive infinitive-mda",
     "gerund negative": "negative gerund",
-    "1ˢᵗ person singular object — монь (monʹ)":
-        "object-first-person object-singular",
-    "2ⁿᵈ person singular object — тонь (tonʹ)":
-        "object-second-person object-singular",
-    "3ʳᵈ person singular object — сонь (sonʹ)":
-        "object-third-person object-singular",
-    "1ˢᵗ person plural object — минь (minʹ)":
-        "object-first-person object-plural",
-    "2ⁿᵈ person plural object — тинь (tinʹ)":
-        "object-second-person object-plural",
-    "3ʳᵈ person plural object — синь (sinʹ)":
-        "object-third-person object-plural",
-
+    "1ˢᵗ person singular object — монь (monʹ)": "object-first-person object-singular",
+    "2ⁿᵈ person singular object — тонь (tonʹ)": "object-second-person object-singular",
+    "3ʳᵈ person singular object — сонь (sonʹ)": "object-third-person object-singular",
+    "1ˢᵗ person plural object — минь (minʹ)": "object-first-person object-plural",
+    "2ⁿᵈ person plural object — тинь (tinʹ)": "object-second-person object-plural",
+    "3ʳᵈ person plural object — синь (sinʹ)": "object-third-person object-plural",
     # ਪਾਉਣਾ/(Punjabi
     "Singular/Plural": "singular plural",
     "Plural/Formal": "",
@@ -5288,27 +5551,23 @@ infl_map: dict[str, InflMapNode] = {
     "3ʳᵈ ਇਹ/ਉਹ": "third-person singular",
     "2ⁿᵈ familiar ਤੁਸੀਂ": "second-person familiar",
     "1ˢᵗ ਅਸੀਂ": "third-person plural",
-    "2ⁿᵈ formal, 3ʳᵈ ਇਹ/ਉਹ/ਆਪ":
-        ["second-person formal",
-         "third-person plural",
-         ],
+    "2ⁿᵈ formal, 3ʳᵈ ਇਹ/ਉਹ/ਆਪ": [
+        "second-person formal",
+        "third-person plural",
+    ],
     "REG": "",
     "POL": "polite",
-
     # оз/Komi-Zyrian
     "Non-Past tense": "non-past",
-
     # hāi7Namuyi
     "Habitual/Future": "habitual future",
     "Prospective": "prospective",
     "Ingressive": "ingressive",
     "Experiential": "experiential",
     "Premeditated": "premeditated",
-
     # nyanyi/Warlpiri
     "andative": "andative",
     "nomic": "nomic",
-
     # être/Lorrain
     "je (j')": {
         "lang": "Lorrain",
@@ -5328,8 +5587,6 @@ infl_map: dict[str, InflMapNode] = {
     "que je / qu'i": "first-person singular",
     "qu'â (al), qu'ale": "third-person singular",
     "qu'âs, qu'ales": "third-person plural",
-
-
     "ham": {
         "lang": "Fiji Hindi",
         "then": "first-person singular",
@@ -5354,17 +5611,14 @@ infl_map: dict[str, InflMapNode] = {
         "lang": "Fiji Hindi",
         "then": "third-person plural",
     },
-
     # ndu/South Slavey
     "areal": {
         "lang": "South Slavey",
         "then": "locative",
     },
-
     # ave/Tolai
     "1st person exclusive": "first-person exclusive",
     "1st person inclusive": "first-person inclusive",
-
     # mahkwa/Fox
     "Singular Noun": "singular",
     "Plural Noun": "plural",
@@ -5374,10 +5628,7 @@ infl_map: dict[str, InflMapNode] = {
     "Singular Possessive": "possessed-single",
     "Plural Possessive": "possessed-many",
     "First and second person": "first-person second-person",
-
     "perlative": "perlative",  # arnaq/Yup'ik
-
-
     # tōku/Maori
     "singular object": {
         "lang": "Maori",
@@ -5387,57 +5638,52 @@ infl_map: dict[str, InflMapNode] = {
         "lang": "Maori",
         "then": "possessed-many",
     },
-    "A category":  {
+    "A category": {
         "lang": "Maori",
         "then": "alienable",
     },
-    "O category":  {
+    "O category": {
         "lang": "Maori",
         "then": "inalienable",
     },
-    "Neutral":  {
+    "Neutral": {
         "lang": "Maori",
         "then": "",
     },
     "dual subject": "dual",
     "1st person, inclusive": "first-person inclusive",
     "1st person, exclusive": "first-person exclusive",
-
-    "comitative-instrumental": "comitative instrumental",  #тан/Mansi
+    "comitative-instrumental": "comitative instrumental",  # тан/Mansi
     # пыг/Mansi
     "double possession": "possessed-two",
     "multiple possession": "possessed-many",
     "3d person dual": "third-person dual",
     "3d person plural": "third-person plural",
-
     # Tibetan romanizations
     "Wylie": "romanization",
-
     "Basic": {
         "lang": "Udmurt",
         "then": "",
     },
     "Temporal": {
         "lang": "Udmurt",
-        "then":"gerund-temporal gerund",
+        "then": "gerund-temporal gerund",
     },
     "Fourth": {
-        "lang":"Udmurt",
+        "lang": "Udmurt",
         "then": "gerund-iv gerund",
     },
     "Deverbal": {
-        "lang":"Udmurt",
+        "lang": "Udmurt",
         "then": "noun-from-verb",
     },
-
     # тос/Mariupol Greek
     "3rd n": "third-person neuter",
     "clitic": "clitic",
-
     # likkõ/Livonian
     "sa": {
         "lang": "Livonian",
-        "then":"second-person singular",
+        "then": "second-person singular",
     },
     "ta": "third-person singular",
     "mēg": "first-person plural",
@@ -5457,7 +5703,6 @@ infl_map: dict[str, InflMapNode] = {
     "täddõn": "second-person plural",
     "näntõn": "third-person plural",
     "supine abessive": "supine abessive",
-
     # நத்தை/Tamil
     "Genitive 1": "genitive-i genitive",
     "Genitive 2": "genitive-ii genitive",
@@ -5465,7 +5710,6 @@ infl_map: dict[str, InflMapNode] = {
     "Locative 2": "locative-ii locative",
     "Sociative 1": "sociative-i sociative",
     "Sociative 2": "sociative-ii sociative",
-
     # பிடி/Tamil
     "singular affective": "affective singular",
     "third masculine": "third-person masculine",
@@ -5481,9 +5725,10 @@ infl_map: dict[str, InflMapNode] = {
     "future negative": "negative future",
     "plural affective": "affective plural",
     "third epicene": "third-person epicene",
-    "நாம் (inclusive) நாங்கள் (exclusive)":
-                ["first-person plural inclusive",
-                 "first-person plural exclusive",],
+    "நாம் (inclusive) நாங்கள் (exclusive)": [
+        "first-person plural inclusive",
+        "first-person plural exclusive",
+    ],
     "நீங்கள்": "second-person plural",
     "அவர்கள்": "third-person plural epicene",
     "அவை": "third-person plural neuter",
@@ -5494,16 +5739,15 @@ infl_map: dict[str, InflMapNode] = {
     "Form I": {
         "lang": "Tamil",
         "then": "gerund-i gerund",
-        },
+    },
     "Form II": {
         "lang": "Tamil",
         "then": "gerund-ii gerund",
-        },
+    },
     "Form III": {
         "lang": "Tamil",
         "then": "gerund-iii gerund",
-        },
-
+    },
     # bolmak/Turkmen
     "men": "first-person singular",
     "ol": "third-person singular",
@@ -5512,16 +5756,13 @@ infl_map: dict[str, InflMapNode] = {
     "distal": "distal",
     "unwitnessed": "unwitnessed",
     "obligatory": "obligative",
-
     # kanákta/Mohawk
     "Sing.": "singular",
     "Plur.": "plural",
-
     # እግር/Amharic
     "Definite subject": "definite nominative",
     "Definite object": "definite accusative",
     "General object": "accusative",
-
     # sugu/Veps
     "approximative I": "approximative-i approximative",
     "approximative II": "approximative-ii approximative",
@@ -5530,21 +5771,18 @@ infl_map: dict[str, InflMapNode] = {
     "terminative III": "terminative-iii terminative",
     "additive I": "additive-i additive",
     "additive II": "additive-ii additive",
-
-        # duhtadit/Northern Sami
+    # duhtadit/Northern Sami
     "action inessive": "noun-from-verb inessive",
     "action elative": "noun-from-verb elative",
     "agent participle": "agent participle",
     "action comitative": "noun-from-verb comitative",
     "conditional 1": "conditional-i conditional",
     "conditional 2": "conditional-ii conditional",
-
     # 능숙하다/Korean
     "Plain": {
         "lang": "Korean",
         "then": "",
     },
-
     # stupid Interlingua hand-crafted minimal tables, deber/Interlingua
     "Present:": "present",
     "Past:": "past",
@@ -5553,11 +5791,9 @@ infl_map: dict[str, InflMapNode] = {
     "Present participle:": "present participle",
     "Past participle:": "past participle",
     "Imperative:": "imperative",
-
     # уө/Southern Yukaghir
     "short plural": "plural short-form",
     "long plural": "plural long-form",
-
     # aganchaka/Garo
     "Declarative": "",
     '"not yet"': "not-yet-form",
@@ -5565,7 +5801,6 @@ infl_map: dict[str, InflMapNode] = {
     "Intentional": "intentive",
     "Change of state": "perfect",
     "Formal imperative": "imperative formal",
-
     # ಹುಟ್ಟು/Kannada
     "adverbial participles": "adverbial participle",
     "adjectival participles": "adjectival participle",
@@ -5595,7 +5830,6 @@ infl_map: dict[str, InflMapNode] = {
     # ಅದು/Kannada
     '"Objective Singular"': "singular objective",
     "Epicene Plural": "epicene plural",
-
     # цӏехуьл/Lezgi
     "adelative": "adelative",
     "addirective": "addirective",
@@ -5608,7 +5842,6 @@ infl_map: dict[str, InflMapNode] = {
     "inelative": "inelative",
     "superelative": "superelative",
     "superdirective": "superdirective",
-
     # देर/Konkani
     "accusative/dative": "accusative dative",
     # भेड्डो/Konkani
@@ -5616,7 +5849,6 @@ infl_map: dict[str, InflMapNode] = {
     "fem. singular": "feminine singular",
     "masc. plural": "masculine plural",
     "fem. plural": "feminine plural",
-
     # zeuen burua/Basque
     "elkar": "reciprocal",
     "noren burua": "reflexive",
@@ -5628,23 +5860,20 @@ infl_map: dict[str, InflMapNode] = {
     # batzuk/Basque
     "bat": "pronoun",
     "bakoitz": "pronoun",
-
     # veda/Scanian
     "jağ": "first-person singular",
     "dú": "second-person singular",
     "hanð": "third-person singular",
     "ví": "first-person plural",
     "í": "second-person plural",
-    "dé":  "third-person plural",
+    "dé": "third-person plural",
     "present imperative": "present imperative",
-
-    #a ګړندی/Pashto
+    # a ګړندی/Pashto
     "oblique I": "oblique oblique-i",
     "oblique II (dialectal)": "oblique oblique-ii dialectal",
-    #a پخول/Pashto
+    # a پخول/Pashto
     "Present Imperfective Subject Agreement": "present imperfective",
-    "Past Imperfective Object Agreement":
-        "past imperfective object-concord dummy-object-concord",
+    "Past Imperfective Object Agreement": "past imperfective object-concord dummy-object-concord",
     "OBJECT": "",
     "Past Perfective": {
         "default": "past perfective",
@@ -5655,7 +5884,6 @@ infl_map: dict[str, InflMapNode] = {
     "Animate": "animate",
     # just in case
     "Inanimate": "inanimate",
-
     # τα/Greek
     "1-s": "first-person singular",
     "2-s": "second-person singular",
@@ -5667,12 +5895,11 @@ infl_map: dict[str, InflMapNode] = {
     "3-mp": "third-person masculine plural",
     "3-fp": "third-person feminine plural",
     "3-np": "third-person neuter plural",
-
     # angu/Swahili
     "Noun class": {
         "lang": "Swahili",
         "then": "",
-        },
+    },
     "M-wa class": {
         "lang": "Swahili",
         "then": "class-1 class-2",
@@ -5723,7 +5950,7 @@ infl_map: dict[str, InflMapNode] = {
         "else": {
             "lang": "Livonian",
             "then": "first-person singular",
-        }
+        },
     },
     "ki-vi": {
         "lang": "Swahili",
@@ -5752,7 +5979,6 @@ infl_map: dict[str, InflMapNode] = {
     },
     "other classes": "",
     "Consecutive subjunctive": "consecutive subjunctive",
-
     # taka/Swahili sw-conj
     "Polarity": "",
     "Persons": "",
@@ -5785,7 +6011,7 @@ infl_map: dict[str, InflMapNode] = {
         "lang": "Swahili",
         "then": "singular class-1",
     },
-    "Pl. / 2":  {
+    "Pl. / 2": {
         "default": "plural class-2",
         "lang": "Swahili",
         "then": "plural class-2",
@@ -5854,81 +6080,88 @@ infl_map: dict[str, InflMapNode] = {
         "lang": "Swahili",
         "then": "class-18",
     },
-
     "1s": {
         "default": "first-person singular",
         "if": "object-concord",
         "then": "object-first-person object-singular",
         "else": {
             "lang": "Swahili",
-            "then": ["dummy-use-as-coltags first-person singular",
-                     "dummy-use-as-rowtags object-first-person object-singular",
-                    ],
-            },
+            "then": [
+                "dummy-use-as-coltags first-person singular",
+                "dummy-use-as-rowtags object-first-person object-singular",
+            ],
         },
+    },
     "2s": {
         "default": "second-person singular",
         "if": "object-concord",
         "then": "object-second-person object-singular",
         "else": {
             "lang": "Swahili",
-            "then": ["dummy-use-as-coltags second-person singular",
-                    "dummy-use-as-rowtags object-second-person object-singular",
-                    ],
-            },
+            "then": [
+                "dummy-use-as-coltags second-person singular",
+                "dummy-use-as-rowtags object-second-person object-singular",
+            ],
         },
+    },
     "3s": {
         "default": "third-person singular",
         "if": "object-concord",
         "then": "object-third-person object-singular",
         "else": {
             "lang": "Swahili",
-            "then": ["dummy-use-as-coltags third-person singular",
-                     "dummy-use-as-rowtags object-third-person object-singular",
-                    ],
-            },
+            "then": [
+                "dummy-use-as-coltags third-person singular",
+                "dummy-use-as-rowtags object-third-person object-singular",
+            ],
         },
+    },
     "1p": {
         "default": "first-person plural",
         "if": "object-concord",
         "then": "object-first-person object-plural",
         "else": {
             "lang": "Swahili",
-            "then": ["dummy-use-as-coltags first-person plural",
-                     "dummy-use-as-rowtags object-first-person object-plural",
-                    ],
-            },
+            "then": [
+                "dummy-use-as-coltags first-person plural",
+                "dummy-use-as-rowtags object-first-person object-plural",
+            ],
         },
+    },
     "2p": {
         "default": "second-person plural",
         "if": "object-concord",
         "then": "object-second-person object-plural",
         "else": {
             "lang": "Swahili",
-            "then": ["dummy-use-as-coltags second-person plural",
-                    "dummy-use-as-rowtags object-second-person object-plural",
-                    ],
-            },
+            "then": [
+                "dummy-use-as-coltags second-person plural",
+                "dummy-use-as-rowtags object-second-person object-plural",
+            ],
         },
+    },
     "3p": {
         "default": "third-person plural",
         "if": "object-concord",
         "then": "object-third-person object-plural",
         "else": {
             "lang": "Swahili",
-            "then": ["dummy-use-as-coltags third-person plural",
-                     "dummy-use-as-rowtags object-third-person object-plural",
-                    ],
-            },
+            "then": [
+                "dummy-use-as-coltags third-person plural",
+                "dummy-use-as-rowtags object-third-person object-plural",
+            ],
         },
+    },
     "c1": {
         "default": "class-1",
         "if": "object-concord",
         "then": "object-class-1",
         "else": {
             "lang": "Swahili",
-            "then": ["dummy-use-as-coltags class-1",
-                     "dummy-use-as-rowtags object-class-1",]
+            "then": [
+                "dummy-use-as-coltags class-1",
+                "dummy-use-as-rowtags object-class-1",
+            ],
         },
     },
     "c2": {
@@ -5937,8 +6170,10 @@ infl_map: dict[str, InflMapNode] = {
         "then": "object-class-2",
         "else": {
             "lang": "Swahili",
-            "then": ["dummy-use-as-coltags class-2",
-                     "dummy-use-as-rowtags object-class-2",],
+            "then": [
+                "dummy-use-as-coltags class-2",
+                "dummy-use-as-rowtags object-class-2",
+            ],
         },
     },
     "c3": {
@@ -5947,8 +6182,10 @@ infl_map: dict[str, InflMapNode] = {
         "then": "object-class-3",
         "else": {
             "lang": "Swahili",
-            "then": ["dummy-use-as-coltags class-3",
-                     "dummy-use-as-rowtags object-class-3",],
+            "then": [
+                "dummy-use-as-coltags class-3",
+                "dummy-use-as-rowtags object-class-3",
+            ],
         },
     },
     "c4": {
@@ -5957,8 +6194,10 @@ infl_map: dict[str, InflMapNode] = {
         "then": "object-class-4",
         "else": {
             "lang": "Swahili",
-            "then": ["dummy-use-as-coltags class-4",
-                     "dummy-use-as-rowtags object-class-4",],
+            "then": [
+                "dummy-use-as-coltags class-4",
+                "dummy-use-as-rowtags object-class-4",
+            ],
         },
     },
     "c5": {
@@ -5967,8 +6206,10 @@ infl_map: dict[str, InflMapNode] = {
         "then": "object-class-5",
         "else": {
             "lang": "Swahili",
-            "then": ["dummy-use-as-coltags class-5",
-                     "dummy-use-as-rowtags object-class-5",],
+            "then": [
+                "dummy-use-as-coltags class-5",
+                "dummy-use-as-rowtags object-class-5",
+            ],
         },
     },
     "c6": {
@@ -5977,8 +6218,10 @@ infl_map: dict[str, InflMapNode] = {
         "then": "object-class-6",
         "else": {
             "lang": "Swahili",
-            "then": ["dummy-use-as-coltags class-6",
-                     "dummy-use-as-rowtags object-class-6",],
+            "then": [
+                "dummy-use-as-coltags class-6",
+                "dummy-use-as-rowtags object-class-6",
+            ],
         },
     },
     "c7": {
@@ -5987,8 +6230,10 @@ infl_map: dict[str, InflMapNode] = {
         "then": "object-class-7",
         "else": {
             "lang": "Swahili",
-            "then": ["dummy-use-as-coltags class-7",
-                     "dummy-use-as-rowtags object-class-7",],
+            "then": [
+                "dummy-use-as-coltags class-7",
+                "dummy-use-as-rowtags object-class-7",
+            ],
         },
     },
     "c8": {
@@ -5997,8 +6242,10 @@ infl_map: dict[str, InflMapNode] = {
         "then": "object-class-8",
         "else": {
             "lang": "Swahili",
-            "then": ["dummy-use-as-coltags class-8",
-                     "dummy-use-as-rowtags object-class-8",],
+            "then": [
+                "dummy-use-as-coltags class-8",
+                "dummy-use-as-rowtags object-class-8",
+            ],
         },
     },
     "c9": {
@@ -6007,8 +6254,10 @@ infl_map: dict[str, InflMapNode] = {
         "then": "object-class-9",
         "else": {
             "lang": "Swahili",
-            "then": ["dummy-use-as-coltags class-9",
-                     "dummy-use-as-rowtags object-class-9",],
+            "then": [
+                "dummy-use-as-coltags class-9",
+                "dummy-use-as-rowtags object-class-9",
+            ],
         },
     },
     "c10": {
@@ -6017,8 +6266,10 @@ infl_map: dict[str, InflMapNode] = {
         "then": "object-class-10",
         "else": {
             "lang": "Swahili",
-            "then": ["dummy-use-as-coltags class-10",
-                     "dummy-use-as-rowtags object-class-10",],
+            "then": [
+                "dummy-use-as-coltags class-10",
+                "dummy-use-as-rowtags object-class-10",
+            ],
         },
     },
     "c11": {
@@ -6027,8 +6278,10 @@ infl_map: dict[str, InflMapNode] = {
         "then": "object-class-11",
         "else": {
             "lang": "Swahili",
-            "then": ["dummy-use-as-coltags class-11",
-                     "dummy-use-as-rowtags object-class-11",],
+            "then": [
+                "dummy-use-as-coltags class-11",
+                "dummy-use-as-rowtags object-class-11",
+            ],
         },
     },
     "c12": {
@@ -6037,8 +6290,10 @@ infl_map: dict[str, InflMapNode] = {
         "then": "object-class-12",
         "else": {
             "lang": "Swahili",
-            "then": ["dummy-use-as-coltags class-12",
-                     "dummy-use-as-rowtags object-class-12",],
+            "then": [
+                "dummy-use-as-coltags class-12",
+                "dummy-use-as-rowtags object-class-12",
+            ],
         },
     },
     "c13": {
@@ -6047,8 +6302,10 @@ infl_map: dict[str, InflMapNode] = {
         "then": "object-class-13",
         "else": {
             "lang": "Swahili",
-            "then": ["dummy-use-as-coltags class-13",
-                     "dummy-use-as-rowtags object-class-13",],
+            "then": [
+                "dummy-use-as-coltags class-13",
+                "dummy-use-as-rowtags object-class-13",
+            ],
         },
     },
     "c14": {
@@ -6057,8 +6314,10 @@ infl_map: dict[str, InflMapNode] = {
         "then": "object-class-14",
         "else": {
             "lang": "Swahili",
-            "then": ["dummy-use-as-coltags class-14",
-                     "dummy-use-as-rowtags object-class-14",],
+            "then": [
+                "dummy-use-as-coltags class-14",
+                "dummy-use-as-rowtags object-class-14",
+            ],
         },
     },
     "c15": {
@@ -6067,8 +6326,10 @@ infl_map: dict[str, InflMapNode] = {
         "then": "object-class-15",
         "else": {
             "lang": "Swahili",
-            "then": ["dummy-use-as-coltags class-15",
-                     "dummy-use-as-rowtags object-class-15",],
+            "then": [
+                "dummy-use-as-coltags class-15",
+                "dummy-use-as-rowtags object-class-15",
+            ],
         },
     },
     "c16": {
@@ -6077,8 +6338,10 @@ infl_map: dict[str, InflMapNode] = {
         "then": "object-class-16",
         "else": {
             "lang": "Swahili",
-            "then": ["dummy-use-as-coltags class-16",
-                     "dummy-use-as-rowtags object-class-16",],
+            "then": [
+                "dummy-use-as-coltags class-16",
+                "dummy-use-as-rowtags object-class-16",
+            ],
         },
     },
     "c17": {
@@ -6087,8 +6350,10 @@ infl_map: dict[str, InflMapNode] = {
         "then": "object-class-17",
         "else": {
             "lang": "Swahili",
-            "then": ["dummy-use-as-coltags class-17",
-                     "dummy-use-as-rowtags object-class-17",],
+            "then": [
+                "dummy-use-as-coltags class-17",
+                "dummy-use-as-rowtags object-class-17",
+            ],
         },
     },
     "c18": {
@@ -6097,27 +6362,34 @@ infl_map: dict[str, InflMapNode] = {
         "then": "object-class-18",
         "else": {
             "lang": "Swahili",
-            "then": ["dummy-use-as-coltags class-18",
-                     "dummy-use-as-rowtags object-class-18",],
+            "then": [
+                "dummy-use-as-coltags class-18",
+                "dummy-use-as-rowtags object-class-18",
+            ],
         },
     },
-
-    "1s/2s/3s/c1": ["object-first-person object-second-person "
-                    "object-third-person object-singular",
-                    "object-class-1"],
-    "*p/2/3/11/14": ["object-plural object-first-person "
-                     "object-second-person object-third-person",
-                     "object-class-2 object-class-3 object-class-11 "
-                     "object-class-14"],
+    "1s/2s/3s/c1": [
+        "object-first-person object-second-person "
+        "object-third-person object-singular",
+        "object-class-1",
+    ],
+    "*p/2/3/11/14": [
+        "object-plural object-first-person "
+        "object-second-person object-third-person",
+        "object-class-2 object-class-3 object-class-11 " "object-class-14",
+    ],
     "c4/c6/c9": "object-class-4 object-class-6 object-class-9",
-    "2s/2p/15/17": ["object-second-person object-singular object-plural",
-                    "object-class-15 object-class-17"],
-    "2p/3p/c2": ["object-second-person object-third-person object-plural",
-                 "object-class-2"],
+    "2s/2p/15/17": [
+        "object-second-person object-singular object-plural",
+        "object-class-15 object-class-17",
+    ],
+    "2p/3p/c2": [
+        "object-second-person object-third-person object-plural",
+        "object-class-2",
+    ],
     "c3/c11/c14": "object-class-3 object-class-11 object-class-14",
     "c4/c9": "object-class-4 object-class-9",
     "Forms with object concords": "object-concord",
-
     "Past": {
         "default": "past",
         "lang": "Swahili",
@@ -6128,167 +6400,160 @@ infl_map: dict[str, InflMapNode] = {
         "lang": "Swahili",
         "then": "present",
     },
-    "Future": {
-        "default": "future",
-        "lang": "Swahili",
-        "then": "future"
-     },
+    "Future": {"default": "future", "lang": "Swahili", "then": "future"},
     "Subjunctive": {
         "default": "subjunctive",
         "lang": "Swahili",
-        "then": "subjunctive"
-     },
+        "then": "subjunctive",
+    },
     "Present conditional": {
         "default": "present irrealis",
         "lang": "Swahili",
-        "then": "present irrealis"
-     },
+        "then": "present irrealis",
+    },
     "Past conditional": {
         "default": "past irrealis",
         "lang": "Swahili",
-        "then": "past irrealis"
-     },
+        "then": "past irrealis",
+    },
     "Conditional contrary to fact": {
         "default": "conditional counterfactual",
         "lang": "Swahili",
-        "then": "conditional counterfactual"
-     },
+        "then": "conditional counterfactual",
+    },
     "Gnomic": {
         "default": "gnomic",
         "lang": "Swahili",
         "nested-table-depth": [1, 2],
-        "then": "gnomic"
-     },
+        "then": "gnomic",
+    },
     "Perfect": {
         "default": "perfect",
         "lang": "Swahili",
         "nested-table-depth": [1, 2],
-        "then": "perfect"
-     },
+        "then": "perfect",
+    },
     '"Already"': {
         "default": "already-form",
         "lang": "Swahili",
         "nested-table-depth": [1, 2],
-        "then": "already-form"
-     },
+        "then": "already-form",
+    },
     '"Not yet"': {
         "default": "not-yet-form",
         "lang": "Swahili",
         "nested-table-depth": [1, 2],
-        "then": "not-yet-form"
-     },
+        "then": "not-yet-form",
+    },
     '"If/When"': {
         "default": "if-when-form",
         "lang": "Swahili",
         "nested-table-depth": [1, 2],
-        "then": "if-when-form"
-     },
+        "then": "if-when-form",
+    },
     '"If not"': {
         "default": "if-not-form",
         "lang": "Swahili",
         "nested-table-depth": [1, 2],
-        "then": "if-not-form"
-     },
+        "then": "if-not-form",
+    },
     "Consecutive": {
         "default": "consecutive",
         "lang": "Swahili",
         "nested-table-depth": [1, 2],
-        "then": "consecutive"
-     },
+        "then": "consecutive",
+    },
     "General positive": {
         "default": "general-mood positive",
         "lang": "Swahili",
         "nested-table-depth": [1, 2],
-        "then": "general-mood positive"
-     },
+        "then": "general-mood positive",
+    },
     "General negative": {
         "default": "general-mood negative",
         "lang": "Swahili",
         "nested-table-depth": [1, 2],
-        "then": "general-mood negative"
-     },
+        "then": "general-mood negative",
+    },
     "Positive past": {
         "default": "positive past",
         "lang": "Swahili",
         "nested-table-depth": [1, 2],
-        "then": "positive past"
-     },
+        "then": "positive past",
+    },
     "Negative past": {
         "default": "negative past",
         "lang": "Swahili",
         "nested-table-depth": [1, 2],
-        "then": "negative past"
-     },
+        "then": "negative past",
+    },
     "Positive present": {
         "default": "positive present",
         "lang": "Swahili",
         "nested-table-depth": [1, 2],
-        "then": "positive present"
-     },
+        "then": "positive present",
+    },
     "Negative present": {
         "default": "negative present",
         "lang": "Swahili",
         "nested-table-depth": [1, 2],
-        "then": "negative present"
-     },
+        "then": "negative present",
+    },
     "Positive future": {
         "default": "positive future",
         "lang": "Swahili",
         "nested-table-depth": [1, 2],
-        "then": "positive future"
-     },
+        "then": "positive future",
+    },
     "Negative future": {
         "default": "negative future",
         "lang": "Swahili",
         "nested-table-depth": [1, 2],
-        "then": "negative future"
-     },
+        "then": "negative future",
+    },
     "Positive subjunctive": {
         "default": "positive subjunctive",
         "lang": "Swahili",
         "nested-table-depth": [1, 2],
-        "then": "positive subjunctive"
-     },
+        "then": "positive subjunctive",
+    },
     "Negative subjunctive": {
         "default": "negative subjunctive",
         "lang": "Swahili",
         "nested-table-depth": [1, 2],
-        "then": "negative subjunctive"
-     },
+        "then": "negative subjunctive",
+    },
     "Positive present conditional": {
         "default": "positive present irrealis",
         "lang": "Swahili",
         "nested-table-depth": [1, 2],
-        "then": "positive present irrealis"
-     },
+        "then": "positive present irrealis",
+    },
     "Negative present conditional": {
         "default": "negative present irrealis",
         "lang": "Swahili",
         "nested-table-depth": [1, 2],
-        "then": "negative present irrealis"
-     },
+        "then": "negative present irrealis",
+    },
     "Positive past conditional": {
         "default": "positive past irrealis",
         "lang": "Swahili",
         "nested-table-depth": [1, 2],
-        "then": "positive past irrealis"
-     },
+        "then": "positive past irrealis",
+    },
     "Negative past conditional": {
         "default": "negative past irrealis",
         "lang": "Swahili",
         "nested-table-depth": [1, 2],
-        "then": "negative past irrealis"
-     },
-
+        "then": "negative past irrealis",
+    },
     "transgressive": "transgressive",  # darovať/Slovak
     # conocer/Asturian
     "gerundive": "gerund",
-
-    r"case \ number": "",  #δίκυκλο/Greek
-    r"number case \ gender": "",  #απύρωτος/Greek
-    "conditional 2nd form": "conditional conditional-ii",  #costosir/Occitan
-
-    #konyugön/Volapük
+    r"case \ number": "",  # δίκυκλο/Greek
+    r"number case \ gender": "",  # απύρωτος/Greek
+    "conditional 2nd form": "conditional conditional-ii",  # costosir/Occitan
+    # konyugön/Volapük
     "2nd person polite singular": "second-person singular polite",
     "3rd person male singular": "third-person masculine singular",
     "3rd person female singular": "third-person singular feminine",
@@ -6300,17 +6565,14 @@ infl_map: dict[str, InflMapNode] = {
     "reflexive plural": "reflexive plural",
     "reciprocative plural": "reciprocal plural",
     "future in the past perfect": "past perfect future",
-
-    #райҳон/Tajik
+    # райҳон/Tajik
     "bare": "",
     "definite object": "definite direct-object",
-
-    #brestan/Proto-West Germanic
+    # brestan/Proto-West Germanic
     "Genitive infin.": "genitive infinitive",
     "Dative infin.": "dative infinitive",
     "Instrum. infin.": "instrumental infinitive",
-
-    #sberegar/Venetian
+    # sberegar/Venetian
     "eło / eła": "third-person singular",
     "noialtri / noialtre": "first-person plural",
     "voialtri / voialtre": "second-person plural",
@@ -6320,8 +6582,7 @@ infl_map: dict[str, InflMapNode] = {
     "che noialtri / noialtre": "first-person plural subjunctive",
     "che voialtri / voialtre": "second-person plural subjunctive",
     "che łuri / łore": "third-person plural subjunctive",
-
-    #qolmoq/Uzbek
+    # qolmoq/Uzbek
     "1": {
         "default": "first-person",
     },
@@ -6331,19 +6592,15 @@ infl_map: dict[str, InflMapNode] = {
     "cont A": "continuative",
     "cont B": "continuative formal imperfective",
     "cont C": "continuative habitual",
-
-    #taanduma/Estonian
+    # taanduma/Estonian
     "voice": "",
-
-    "singular / indefinite": "singular indefinite",  #Өгэдэй/Mongolian/668
-
+    "singular / indefinite": "singular indefinite",  # Өгэдэй/Mongolian/668
     # Proto-Finnic/munidak
     "passive connegative": "passive connegative",
     "infinitives/nouns": "",
     "infinitive 1": "infinitive infinitive-i",
     "infinitive 2": "infinitive infinitive-ii",
     "gerund/supine": "gerund supine",
-
     # glæþia/Old Swedish
     "þū": {
         "lang": "Old Swedish",
@@ -6369,64 +6626,66 @@ infl_map: dict[str, InflMapNode] = {
         "lang": "Old Swedish",
         "then": "third-person plural",
     },
-
-    "Absolute superlative": "absolute superlative",  #τρανός/Greek
-
+    "Absolute superlative": "absolute superlative",  # τρανός/Greek
     # kolfino/Ternate
     "Inclusive": "inclusive plural",
     "Exclusive": "exclusive plural",
     "Human m": "human-person masculine",
     "Human f": "human-person feminine",
     "Non-human": "non-human",
-
     # ntw/Eqyptian
     "suffix pronouns": "suffix pronoun",
     "stative (‘pseudoparticiple’) endings": "stative",
     "enclitic (‘dependent’) pronouns": "enclitic pronoun",
     "stressed (‘independent’) pronouns": "stressed pronoun",
     "proclitic (‘subject form’) pronouns": "proclitic pronoun",
-
-    #райҳон/Tajik
+    # райҳон/Tajik
     "indefinite, definite relative": "indefinite definite relative",
-
-    "mixed after th": "after-th mutation-mixed",  #wenyn/Cornish
-
-    "feminine gender": "feminine",  #heiße Zitrone/German
-    "masculine gender": "masculine",  #alter Drache/German
-    "specific": "specific",  #পূঁজ/Assamese
-    "not specific": "unspecified",  #পূঁজ/Assamese/163
-
-
-    #навохтан/Tajik
+    "mixed after th": "after-th mutation-mixed",  # wenyn/Cornish
+    "feminine gender": "feminine",  # heiße Zitrone/German
+    "masculine gender": "masculine",  # alter Drache/German
+    "specific": "specific",  # পূঁজ/Assamese
+    "not specific": "unspecified",  # পূঁজ/Assamese/163
+    # навохтан/Tajik
     "ман": "first-person singular",
     "ӯ": "third-person singular",
     "мо": "first-person plural",
-    "шумо": ["second-person plural",
-             "second-person singular polite"],
+    "шумо": ["second-person plural", "second-person singular polite"],
     "онҳо": "third-person plural",
-
-    "минем (“my”)": "first-person singular possessive",  #сез/Tatar
+    "минем (“my”)": "first-person singular possessive",  # сез/Tatar
     "синең (“your”)": "second-person singular possessive",
     "аның (“his/her/it”)": "third-person singular possessive",
     "безнең (“our”)": "first-person plural possessive",
     "сезнең (“your”)": "second-person plural possessive",
     "аларның (“their”)": "third-person plural possessive",
-
-    "Realis mood": "realis",  #weyetun/Mapudungun
-    "singular or plural": ["singular", "plural",],  #aبڑھنا/Urdu
-    "iek": {  #ongelje/Saterland Frisian
+    "Realis mood": "realis",  # weyetun/Mapudungun
+    "singular or plural": [
+        "singular",
+        "plural",
+    ],  # aبڑھنا/Urdu
+    "iek": {  # ongelje/Saterland Frisian
         "lang": "Saterland Frisian",
         "then": "first-person singular",
     },
-
-    #wenschen/Middle Dutch
-    "In genitive": { "lang": "Middle Dutch", "then": "infinitive genitive", },
-    "In dative": { "lang": "Middle Dutch", "then": "infinitive dative", },
+    # wenschen/Middle Dutch
+    "In genitive": {
+        "lang": "Middle Dutch",
+        "then": "infinitive genitive",
+    },
+    "In dative": {
+        "lang": "Middle Dutch",
+        "then": "infinitive dative",
+    },
     # ongelje/Saterland Frisian
     "hie/ju/dät": "third-person singular",
-    "wie": { "lang": "Saterland Frisian", "then": "first-person plural", },
-    "du": { "lang": "Saterland Frisian", "then": "second-person singular", },
-
+    "wie": {
+        "lang": "Saterland Frisian",
+        "then": "first-person plural",
+    },
+    "du": {
+        "lang": "Saterland Frisian",
+        "then": "second-person singular",
+    },
     # यहाँका/Nepali
     "Low": {
         "lang": "Nepali",
@@ -6445,24 +6704,20 @@ infl_map: dict[str, InflMapNode] = {
         "then": "deferential",
     },
     "izofa": "ezafe",  # райҳон/Tajik
-    "ezâfe": "ezafe",  #a دریچه/Persian
-
+    "ezâfe": "ezafe",  # a دریچه/Persian
     "adverbs": "adverb",  # tꜣj/Egyptian
     "Equative": "equative",  # erk/Proto-Turkic
     "Pres. subjunctive": "present subjunctive",  # adkʷiseti/Proto-Celtic
-    "Inclusive Tri-Plural": "inclusive tri-plural",  #aaombiniili'/Chickasaw
-    "1st-person dual": "first-person dual",  #ferkuupe/North Frisian
-    "2nd-person dual": "second-person dual",  #ferkuupe/North Frisian
-
-    #coymaq/Crimean Tatar
+    "Inclusive Tri-Plural": "inclusive tri-plural",  # aaombiniili'/Chickasaw
+    "1st-person dual": "first-person dual",  # ferkuupe/North Frisian
+    "2nd-person dual": "second-person dual",  # ferkuupe/North Frisian
+    # coymaq/Crimean Tatar
     "repeated gerund": "gerund repeated",
     "temporal gerund": "temporal gerund",
     "non-future participle": "present past participle",
-
     # tussenin/Dutch
     "postpositional adv.": "adverb postpositional",
-
-    #védde/Ligurian
+    # védde/Ligurian
     "lê o/a": "third-person singular",
     "noî, niâtri": "first-person plural",
     "voî, viâtri": "second-person plural",
@@ -6472,19 +6727,16 @@ infl_map: dict[str, InflMapNode] = {
     "che noî, che niâtri": "first-person plural subjunctive",
     "che voî, che viâtri": "second-person plural subjunctive",
     "che lô, che liâtri": "second-person plural subjunctive",
-
-    "હું": "first-person singular",  #અવતરવું/Gujarati/92
-    "અમે, આપણે": "first-person plural",  #અવતરવું/Gujarati/184
-    "તું": "second-person singular",  #અવતરવું/Gujarati/184
-    "તમે": "second-person plural",  #અવતરવું/Gujarati/184
-    "તું, આ, આઓ, તે, તેઓ": "third-person",  #અવતરવું/Gujarati/92
-
-    "marked indefinite or relative definite": [   #a دریچه/Persian
+    "હું": "first-person singular",  # અવતરવું/Gujarati/92
+    "અમે, આપણે": "first-person plural",  # અવતરવું/Gujarati/184
+    "તું": "second-person singular",  # અવતરવું/Gujarati/184
+    "તમે": "second-person plural",  # અવતરવું/Gujarati/184
+    "તું, આ, આઓ, તે, તેઓ": "third-person",  # અવતરવું/Gujarati/92
+    "marked indefinite or relative definite": [  # a دریچه/Persian
         "stressed indefinite",
         "relative definite",
     ],
-
-    #delegher/Ladin
+    # delegher/Ladin
     "el / ela": "third-person singular",
     "ei / eles": "third-person plural",
     "che ie": "first-person singular subjunctive",
@@ -6492,19 +6744,15 @@ infl_map: dict[str, InflMapNode] = {
     "che nos": "first-person plural subjunctive",
     "che vos": "second-person plural subjunctive",
     "che ei / eles": "third-person plural subjunctive",
-
-    "preposition": "prepositional",  #daarmede/Dutch
-
-    "Prolative II": "prolative prolative-ii",  #килең/Tuvan
-
+    "preposition": "prepositional",  # daarmede/Dutch
+    "Prolative II": "prolative prolative-ii",  # килең/Tuvan
     # pawjō/Proto-Italic
     "Perfect indicative": "perfect indicative",
     "Present imperative": "present imperative",
     "Future imperative": "future imperative",
     "tu-derivative": "tu-derivative",
     "s-derivative": "s-derivative",
-
-    #weyetun/Mapudungun
+    # weyetun/Mapudungun
     "Tense particles (See particles)": "particle",
     "iñce": "first-person singular",
     "eymi": "second-person singular",
@@ -6515,43 +6763,32 @@ infl_map: dict[str, InflMapNode] = {
     "iñciñ": "first-person plural",
     "eymvn": "second-person plural",
     "feygvn": "third-person plural",
-
-    "attributive": "attributive",  #Өгэдэй/Mongolian/167
-
-    "Active indicative": "indicative active",  #konyugön/Volapük/166
-    "Active subjunctive": "subjunctive active",  #konyugön/Volapük/166
-    "Active optative": "optative active",  #konyugön/Volapük/166
-    "Active interrogative": "interrogative active",  #konyugön/Volapük/166
-    "Active jussive": "jussive active",  #konyugön/Volapük/166
-
-    "definitive direct object": "direct-object definite",  #دریچه/Persian/154
-
-    "preceding noun": "before-noun",  #jenöfik/Volapük/151
-    "separated": "without-noun",  #jenöfik/Volapük/151
-
-    "temp. dist.": "temporal distributive",  #sisässä/Finnish/145
-    "oblique/vocative/instrumental": "oblique vocative instrumental",  #કેટલું/Gujarati
-    "I-stem (Passive)": "passive",  #सोहोर्नु/Nepali/144
-
-    "Passive indicative": "passive indicative",  #konyugön/Volapük
+    "attributive": "attributive",  # Өгэдэй/Mongolian/167
+    "Active indicative": "indicative active",  # konyugön/Volapük/166
+    "Active subjunctive": "subjunctive active",  # konyugön/Volapük/166
+    "Active optative": "optative active",  # konyugön/Volapük/166
+    "Active interrogative": "interrogative active",  # konyugön/Volapük/166
+    "Active jussive": "jussive active",  # konyugön/Volapük/166
+    "definitive direct object": "direct-object definite",  # دریچه/Persian/154
+    "preceding noun": "before-noun",  # jenöfik/Volapük/151
+    "separated": "without-noun",  # jenöfik/Volapük/151
+    "temp. dist.": "temporal distributive",  # sisässä/Finnish/145
+    "oblique/vocative/instrumental": "oblique vocative instrumental",  # કેટલું/Gujarati
+    "I-stem (Passive)": "passive",  # सोहोर्नु/Nepali/144
+    "Passive indicative": "passive indicative",  # konyugön/Volapük
     "Passive subjunctive": "passive subjunctive",
     "Passive optative": "passive optative",
     "Passive interrogative": "passive interrogative",
     "Passive jussive": "passive jussive",
-
-    "unmodified": "without-modifier",  #birciqqo/Sidamo
-    "modified": "with-modifier",  #birciqqo/Sidamo
-
-    "Past/present inchoative": "past present inchoative",  #ganansiya/Cebuano
+    "unmodified": "without-modifier",  # birciqqo/Sidamo
+    "modified": "with-modifier",  # birciqqo/Sidamo
+    "Past/present inchoative": "past present inchoative",  # ganansiya/Cebuano
     "Future/habitual inchoative": "future habitual inchoative",
-
-    "el / ela / Vde": "third-person singular",  #aterecer/Galician
-    "eles / elas / Vdes": "third-person plural",  #aterecer/Galician
-
-    "busatros busatras": "second-person plural",  #foratar/Aragonese
-    "agentive / prospective": "agentive prospective",  #a بڑھنا/Urdu
-
-    "мен": "first-person singular",  #чылгаар/Tuvan
+    "el / ela / Vde": "third-person singular",  # aterecer/Galician
+    "eles / elas / Vdes": "third-person plural",  # aterecer/Galician
+    "busatros busatras": "second-person plural",  # foratar/Aragonese
+    "agentive / prospective": "agentive prospective",  # a بڑھنا/Urdu
+    "мен": "first-person singular",  # чылгаар/Tuvan
     "бис": "first-person plural",
     "силер": "second-person plural",
     "ол": "third-person singular",
@@ -6561,28 +6798,34 @@ infl_map: dict[str, InflMapNode] = {
     "Evidential": "evidential",
     "-тар": "third-person plural",
     "-нар": "third-person plural",
-    "-лер": "third-person plural",  #дээр/Tuvan
+    "-лер": "third-person plural",  # дээр/Tuvan
     "-тер": "third-person plural",
     "-нер": "third-person plural",
-
-    "Grúundfoarme": "",  #ongelje/Saterland Frisian
-
-    #oh-/Choctaw/124
-    "+V": { "lang": "Choctaw",
-            "then": "before-vowel", },
-    "+C": { "lang": "Choctaw",
-            "then": "before-consonant", },
-    "+s": { "lang": "Choctaw",
-            "then": "before-s", },
-    "+C/i": { "lang": "Choctaw",
-            "then": "before-consonant before-front-vowel", },
-    "+a/o": { "lang": "Choctaw",
-            "then": "before-back-vowel", },
+    "Grúundfoarme": "",  # ongelje/Saterland Frisian
+    # oh-/Choctaw/124
+    "+V": {
+        "lang": "Choctaw",
+        "then": "before-vowel",
+    },
+    "+C": {
+        "lang": "Choctaw",
+        "then": "before-consonant",
+    },
+    "+s": {
+        "lang": "Choctaw",
+        "then": "before-s",
+    },
+    "+C/i": {
+        "lang": "Choctaw",
+        "then": "before-consonant before-front-vowel",
+    },
+    "+a/o": {
+        "lang": "Choctaw",
+        "then": "before-back-vowel",
+    },
     # +s 	+C 	+V 	+C/i 	+a/o 	+C 	+V 	+C 	+V 	+C 	+V
-
-    "past subjunctive": "past subjunctive",  #شباهت داشتن/Persian/120
-
-    "vus": "second-person plural",  #cumprar/Romansch/117
+    "past subjunctive": "past subjunctive",  # شباهت داشتن/Persian/120
+    "vus": "second-person plural",  # cumprar/Romansch/117
     "nus": "first-person plural",
     "jeu": "first-person singular",
     "el/ella": "third-person singular",
@@ -6594,42 +6837,36 @@ infl_map: dict[str, InflMapNode] = {
     "ch'el/ch'ella": "third-person singular subjunctive",
     "direct future": "direct future",
     "indirect future": "indirect future",
-
-    "unmarked": "",  #tꜣj/Egyptian/114
-
-    "Conditional mood": "conditional",  #weyetun/Mapudungun/112
-    "Volitive mood": "volitive",  #weyetun/Mapudungun/112
-
-    "distant": "distal",  #тұту/Kazakh/110
-
-    "affirmative commands": "imperative",  #ፈተለ/Tigrinya/110
+    "unmarked": "",  # tꜣj/Egyptian/114
+    "Conditional mood": "conditional",  # weyetun/Mapudungun/112
+    "Volitive mood": "volitive",  # weyetun/Mapudungun/112
+    "distant": "distal",  # тұту/Kazakh/110
+    "affirmative commands": "imperative",  # ፈተለ/Tigrinya/110
     "negative commands": "negative imperative",
-
-    '1st-person ("my, our")': "first-person possessive",  #aaombiniili'/Chickasaw/106
+    '1st-person ("my, our")': "first-person possessive",  # aaombiniili'/Chickasaw/106
     '2nd-person ("thy, your")': "second-person possessive",
     '3rd-person ("his, her, its, their")': "third-person possessive",
-    "je (nos)": "first-person",  #cogier/Norman/104
-    "Agentive": "agentive",  #হাঁঠ/Assamese/102
-    "Middle voice": "middle-voice",  #ḱléwseti/Proto-Indo-European/100
-    "1st-person (I, we)": "first-person",  #chaaha̱ taloowa/Chickasaw/99
+    "je (nos)": "first-person",  # cogier/Norman/104
+    "Agentive": "agentive",  # হাঁঠ/Assamese/102
+    "Middle voice": "middle-voice",  # ḱléwseti/Proto-Indo-European/100
+    "1st-person (I, we)": "first-person",  # chaaha̱ taloowa/Chickasaw/99
     "2nd-person (you, you all)": "second-person",
     "3rd-person (he, she, it, they)": "third-person",
-    "ils": "third-person plural",  #ovrar/Franco-Provençal/98
+    "ils": "third-person plural",  # ovrar/Franco-Provençal/98
     "que je (j')": "first-person singular subjunctive",
     "que te (t')": "second-person singular subjunctive",
     "qu'il/el": "third-person singular subjunctive",
     "qu'ils/els": "third-person plural subjunctive",
     "il/elli": "third-person singular",
-    "Nasal": "mutation-nasal",  #arglwyt/Middle Welsh/98
-    "Present progressive": "present progressive",  #અવતરવું/Gujarati/92
+    "Nasal": "mutation-nasal",  # arglwyt/Middle Welsh/98
+    "Present progressive": "present progressive",  # અવતરવું/Gujarati/92
     "Negative conditional": "negative conditional",
-
-    "pronoun": "pronoun",  #küm-/Maquiritari/88
-    "noun possessor/ series II verb argument":
-        ["possessive",
-         "series-ii-verb-argument",],
-    "series I verb argument":
-         "series-ii-verb-argument",
+    "pronoun": "pronoun",  # küm-/Maquiritari/88
+    "noun possessor/ series II verb argument": [
+        "possessive",
+        "series-ii-verb-argument",
+    ],
+    "series I verb argument": "series-ii-verb-argument",
     "postposition object": "direct-object postpositional",
     "transitive patient": "transitive patient",
     "intransitive patient-like": "intransitive patient-like",
@@ -6639,76 +6876,64 @@ infl_map: dict[str, InflMapNode] = {
     "first person dual exclusive": "first-person dual exclusive",
     "distant past third person": "distant-past past",
     "coreferential/reflexive": "reflexive",
-    "series I verb argument: transitive agent and transitive patient":
-        "transitive agent patient",
+    "series I verb argument: transitive agent and transitive patient": "transitive agent patient",
     "first person > second person": "first-person object-second-person",
-    "first person dual exclusive > second person":
-        "first-person dual exclusive object-second-person",
+    "first person dual exclusive > second person": "first-person dual exclusive object-second-person",
     "second person > first person": "second-person object-first-person",
-    "second person > first person dual exclusive":
-        "second-person object-first-person object-dual object-exclusive",
-    "third person > any person X …or… any person X > third person":
-        ["third-person", "object-third-person"],
-
-    "2nd Person Singular": "second-person singular",  #spigen/Middle Low German
-    "él": "third-person singular",  #foratar/Aragonese
+    "second person > first person dual exclusive": "second-person object-first-person object-dual object-exclusive",
+    "third person > any person X …or… any person X > third person": [
+        "third-person",
+        "object-third-person",
+    ],
+    "2nd Person Singular": "second-person singular",  # spigen/Middle Low German
+    "él": "third-person singular",  # foratar/Aragonese
     "nusatros nusatras": "first-person plural",
     "ellos/els ellas": "third-person plural",
-    "Conjectural": "",  #노타/Middle Korean/85
-    "transgressive present": "present transgressive",  #naposlouchat/Czech
+    "Conjectural": "",  # 노타/Middle Korean/85
+    "transgressive present": "present transgressive",  # naposlouchat/Czech
     "transgressive past": "past transgressive",
     "Verbal adjective": "adjective-from-verb",
-    "je (j’) / i": "first-person singular",  #gizai/Bourguignon/81
-    "je (j') / i": "first-person singular",  #antreprarre/Bourguignon/79
+    "je (j’) / i": "first-person singular",  # gizai/Bourguignon/81
+    "je (j') / i": "first-person singular",  # antreprarre/Bourguignon/79
     "que je (j') / qu'i": "first-person singular subjunctive",
     "que je (j’) / qu'i": "first-person singular subjunctive",
-    "ai (el), ale": "third-person singular",  #gizai/Bourguignon/58
+    "ai (el), ale": "third-person singular",  # gizai/Bourguignon/58
     "ai (el), ales": "third-person plural",
     "qu'ai (el), qu'ale": "third-person singular subjunctive",
     "qu'ai (el), qu'ales": "third-person plural subjunctive",
-
-    "determiners and pronouns": "determiner pronoun",  #tꜣj/Egyptian/76
+    "determiners and pronouns": "determiner pronoun",  # tꜣj/Egyptian/76
     "anaphoric": "anaphoric",
-
-    "regular": "",  #এৱা গাখীৰ/Assamese/74
+    "regular": "",  # এৱা গাখীৰ/Assamese/74
     "very formal": "deferential",
-
-    "infinitive II": "infinitive-ii infinitive",  #ferkuupe/North Frisian
-    "PROGRESSIVE": "progressive",  #yitih/Navajo
-    "past stem": "stem past",  #a شباهت داشتن/Persian
-    "nominative, genitive and instrumental":
-        "nominative genitive instrumental",   #ხმოვანი/Georgian
-
-    "ej (j')": "first-person singular",  #vouloér/Picard
+    "infinitive II": "infinitive-ii infinitive",  # ferkuupe/North Frisian
+    "PROGRESSIVE": "progressive",  # yitih/Navajo
+    "past stem": "stem past",  # a شباهت داشتن/Persian
+    "nominative, genitive and instrumental": "nominative genitive instrumental",  # ხმოვანი/Georgian
+    "ej (j')": "first-person singular",  # vouloér/Picard
     "tu (t')": "second-person singular",
-    "i (il)/ale": "third-person singular",  #vouloér/Picard
-    "i (il)/a (al)": "third-person singular",  #ète/Picard/1
-    "(n)os": "first-person plural",  #vouloér/Picard/60
-    "os": "second-person plural",  #vouloér/Picard
-    "is": "third-person plural",  #vouloér/Picard/31
-    "qu'ej (j')": "first-person singular subjunctive",  #vouloér/Picard/31
+    "i (il)/ale": "third-person singular",  # vouloér/Picard
+    "i (il)/a (al)": "third-person singular",  # ète/Picard/1
+    "(n)os": "first-person plural",  # vouloér/Picard/60
+    "os": "second-person plural",  # vouloér/Picard
+    "is": "third-person plural",  # vouloér/Picard/31
+    "qu'ej (j')": "first-person singular subjunctive",  # vouloér/Picard/31
     "qu'tu (t')": "second-person singular subjunctive",
-    "eq tu (t')": "second-person singular subjunctive",  #ète/Picard/1
-    "qu'i (il)/ale": "third-person singular subjunctive",  #connoéte/Picard/29
-    "qu'i (il)/a (al)": "third-person singular subjunctive",  #vouloér/Picard/2
-    "qu'(n)os": "first-person plural subjunctive",  #connoéte/Picard/29
-    "qu'os": "first-person second-person plural subjunctive",  #vouloér/Picard/33
-    "qu'is": "third-person plural subjunctive",  #vouloér/Picard/31
-
-    "inanimate pronoun": "inanimate pronoun",  #mönsemjo/Maquiritari
+    "eq tu (t')": "second-person singular subjunctive",  # ète/Picard/1
+    "qu'i (il)/ale": "third-person singular subjunctive",  # connoéte/Picard/29
+    "qu'i (il)/a (al)": "third-person singular subjunctive",  # vouloér/Picard/2
+    "qu'(n)os": "first-person plural subjunctive",  # connoéte/Picard/29
+    "qu'os": "first-person second-person plural subjunctive",  # vouloér/Picard/33
+    "qu'is": "third-person plural subjunctive",  # vouloér/Picard/31
+    "inanimate pronoun": "inanimate pronoun",  # mönsemjo/Maquiritari
     "medial": "medial",
-
-    "unmarked (later)": "",  #ntw/Egyptian singular/plural/unmarked
-    "H-prothesis": "prothesis-h",  #arglwyt/Middle Welsh/61
+    "unmarked (later)": "",  # ntw/Egyptian singular/plural/unmarked
+    "H-prothesis": "prothesis-h",  # arglwyt/Middle Welsh/61
     "h-prothesis": "prothesis-h",  # moved here, uncommented
-
-    "distant past": "distant-past past",  #weyetun/Mapudungun/56
-
+    "distant past": "distant-past past",  # weyetun/Mapudungun/56
     # XXX Tatar has a ton of soft hyphens
     "Futu\xadre": "future",  #!! soft hyphen! тыңларга/Tatar
     "Nonfinite verb forms": "",
-
-    "transitory past": "past transitional-past",  #тұту/Kazakh
+    "transitory past": "past transitional-past",  # тұту/Kazakh
     "сен": {
         "lang": "Kazakh",
         "then": "second-person singular informal",
@@ -6722,79 +6947,68 @@ infl_map: dict[str, InflMapNode] = {
     "сендер": "second-person plural informal",
     "сіздер": "second-person plural formal",
     "imperative/hortative": "imperative hortative",
-
-    "gend/num": "",  #vascuenciu/Asturian/54
-
-    "inf": "infinitive",  #হাঁঠ/Assamese/54
-
-    "ca je/i'": "first-person singular subjunctive",  #spantacà/Neapolitan
+    "gend/num": "",  # vascuenciu/Asturian/54
+    "inf": "infinitive",  # হাঁঠ/Assamese/54
+    "ca je/i'": "first-person singular subjunctive",  # spantacà/Neapolitan
     "ca tu": "second-person singular subjunctive",
     "ca nuje": "first-person plural subjunctive",
-
-    "il, alle, nos": "third-person singular",  #cogier/Norman/52
+    "il, alle, nos": "third-person singular",  # cogier/Norman/52
     "il, alles": "third-person plural",
     "qu'il, qu'alle, que nos": "third-person singular subjunctive",
     "que je (que nos)": "first-person plural subjunctive",
     "qu'il, qu'alles": "third-person plural subjunctive",
-
     # Get yourself together, Sardinian
-    "deo": "",  #nochere/Sardinian/52
-    "deo, eo": "",  #tzappare/Sardinian/51
-    "dego, deo": "",  #tzappare/Sardinian/33
-    "isse/issa": "",  #nochere/Sardinian/27
-    "chi deo, chi eo": "",  #tzappare/Sardinian/17
-    "chi deo": "",  #impreare/Sardinian/12
-    "chi dego, chi deo": "",  #tzappare/Sardinian/11
-    "che deo": "",  #nochere/Sardinian/8
-    "che tue": "",  #nochere/Sardinian/8
-    "che isse/issa": "",  #nochere/Sardinian/8
-    "che nois": "",  #nochere/Sardinian/8
-    "che bois": "",  #nochere/Sardinian/8
-    "che issos/issas": "",  #nochere/Sardinian/8
-    "issos/ issas": "",  #finire/Sardinian/4
-    "eo, deo": "",  #finire/Sardinian/3
-    "deu": "",  #essi/Sardinian/3
-    "tui": "",  #essi/Sardinian/3
-    "nosu": "",  #essi/Sardinian/3
-    "bosatrus/bosatras": "",  #essi/Sardinian/3
-    "issus/issas": "",  #essi/Sardinian/3
-    "past/ imperfect": "",  #finire/Sardinian/2
-    "+ past participle": "",  #pòdere/Sardinian/2
-    "isse/ issa": "",  #finire/Sardinian/1
-    "chi deu": "",  #essi/Sardinian/1
-    "chi tui": "",  #essi/Sardinian/1
-    "chi nosu": "",  #essi/Sardinian/1
-    "chi bosatrus/bosatras": "",  #essi/Sardinian/1
-    "chi issus/issas": "",  #essi/Sardinian/1
-
-
-    "Verbs beginning with a consonant.": "",  #chaaha̱ taloowa/Chickasaw/52
-
-    "te": "second-person singular",  #ovrar/Franco-Provençal
-    "nu": "first-person plural",  #legro/Dalmatian
+    "deo": "",  # nochere/Sardinian/52
+    "deo, eo": "",  # tzappare/Sardinian/51
+    "dego, deo": "",  # tzappare/Sardinian/33
+    "isse/issa": "",  # nochere/Sardinian/27
+    "chi deo, chi eo": "",  # tzappare/Sardinian/17
+    "chi deo": "",  # impreare/Sardinian/12
+    "chi dego, chi deo": "",  # tzappare/Sardinian/11
+    "che deo": "",  # nochere/Sardinian/8
+    "che tue": "",  # nochere/Sardinian/8
+    "che isse/issa": "",  # nochere/Sardinian/8
+    "che nois": "",  # nochere/Sardinian/8
+    "che bois": "",  # nochere/Sardinian/8
+    "che issos/issas": "",  # nochere/Sardinian/8
+    "issos/ issas": "",  # finire/Sardinian/4
+    "eo, deo": "",  # finire/Sardinian/3
+    "deu": "",  # essi/Sardinian/3
+    "tui": "",  # essi/Sardinian/3
+    "nosu": "",  # essi/Sardinian/3
+    "bosatrus/bosatras": "",  # essi/Sardinian/3
+    "issus/issas": "",  # essi/Sardinian/3
+    "past/ imperfect": "",  # finire/Sardinian/2
+    "+ past participle": "",  # pòdere/Sardinian/2
+    "isse/ issa": "",  # finire/Sardinian/1
+    "chi deu": "",  # essi/Sardinian/1
+    "chi tui": "",  # essi/Sardinian/1
+    "chi nosu": "",  # essi/Sardinian/1
+    "chi bosatrus/bosatras": "",  # essi/Sardinian/1
+    "chi issus/issas": "",  # essi/Sardinian/1
+    "Verbs beginning with a consonant.": "",  # chaaha̱ taloowa/Chickasaw/52
+    "te": "second-person singular",  # ovrar/Franco-Provençal
+    "nu": "first-person plural",  # legro/Dalmatian
     "vu": "second-person plural",
-    "Perfekta": "perfect",  #sannoa/Ingrian/50
-    "Nouns in vowel-, b-, or p-": "",  #aaombiniili'/Chickasaw/50
-    "subjunctive present": "present subjunctive",  #a متشکر بودن/Persian/48
-
-    "1st Person Singular": "first-person singular",  #spigen/Middle Low German
+    "Perfekta": "perfect",  # sannoa/Ingrian/50
+    "Nouns in vowel-, b-, or p-": "",  # aaombiniili'/Chickasaw/50
+    "subjunctive present": "present subjunctive",  # a متشکر بودن/Persian/48
+    "1st Person Singular": "first-person singular",  # spigen/Middle Low German
     "3rd Person Singular": "third-person singular",
-
     "Rewş": "",  # "case", kerguh/Northern Kurdish
-    "Vde": "third-person singular",  #aterecer/Galician
+    "Vde": "third-person singular",  # aterecer/Galician
     "Vdes": "third-person plural",
-    "IMPF": "imperfect",  #डिलीट होना/Hindi
+    "IMPF": "imperfect",  # डिलीट होना/Hindi
     "frm": "",  # ??? "form"? হাঁঠ/Assamese
-    "focus": "focus",  #issito/Choctaw
-    "singular 1ˢᵗ person": "first-person singular",  #гъэкӏодын/Adyghe
+    "focus": "focus",  # issito/Choctaw
+    "singular 1ˢᵗ person": "first-person singular",  # гъэкӏодын/Adyghe
     "singular 2ˢᵗ person": "second-person singular",
     "singular 3ˢᵗ person": "third-person singular",
     "plural 1ˢᵗ person": "first-person plural",
     "plural 2ˢᵗ person": "second-person plural",
     "plural 3ˢᵗ person": "third-person plural",
-    "Neuter gender": "neuter",  #𒄭𒅔𒃷/Hittite
-
-    "Plain Infinitive": "infinitive",  #spigen/Middle Low German
+    "Neuter gender": "neuter",  # 𒄭𒅔𒃷/Hittite
+    "Plain Infinitive": "infinitive",  # spigen/Middle Low German
     "Full Infinitive (Gerund)": "gerund infinitive",
     "Imperatives": {
         "default": "imperative",
@@ -6817,42 +7031,38 @@ infl_map: dict[str, InflMapNode] = {
         "then": "dummy-section-header relative object-concord",
     },
     "2nd Person Plural": "second-person plural",
-    "free state": "free-state",  #aɣemmar/Tarifit
+    "free state": "free-state",  # aɣemmar/Tarifit
     "construct state": "construct",
-    "dative/instr": "dative instrumental",  #unseraz/Proto-Germanic/39
-
-    "infinitive III": "infinitive infinitive-iii",  #stärwe/North Frisian
-    "determiners": "determiner",  #nꜣyw/Egyptian/38
+    "dative/instr": "dative instrumental",  # unseraz/Proto-Germanic/39
+    "infinitive III": "infinitive infinitive-iii",  # stärwe/North Frisian
+    "determiners": "determiner",  # nꜣyw/Egyptian/38
     "pronouns": "pronoun",
     "proximal to speaker": "proximal-to-speaker",
     "proximal to spoken of": "proximal-to-topic",
     "‘copula’": "copulative",
-    "possessive determiners (used with suffix pronouns)":
-            "possessive determiner",
+    "possessive determiners (used with suffix pronouns)": "possessive determiner",
     "relational pronouns (‘possessive prefixes’)": "possessive pronoun",
     "definite articles": "definite article",
     "indefinite articles": "indefinite article",
-
-    "Aspirate": "mutation-aspirate",  #vynet/Middle Welsh/37
-    "dji (dj')": "first-person singular",  #atchter/Walloon/37
+    "Aspirate": "mutation-aspirate",  # vynet/Middle Welsh/37
+    "dji (dj')": "first-person singular",  # atchter/Walloon/37
     "preterit": "preterite",
     "dji / nos": "first-person plural",
-    "nós nós outros nós outras": "first-person plural",  #prazer/Old Portuguese
+    "nós nós outros nós outras": "first-person plural",  # prazer/Old Portuguese
     "vós vós outros vós outras": "second-person plural",
-
-    "contrastive": "contrastive",  #issito/Choctaw/36
-
-    #espurrire/Leonese
-    "you": { "lang": "Leonese", "then": "first-person singular", },
+    "contrastive": "contrastive",  # issito/Choctaw/36
+    # espurrire/Leonese
+    "you": {
+        "lang": "Leonese",
+        "then": "first-person singular",
+    },
     "él / eilla / eillu / vusté": "third-person singular",
     "nosoutros / nosoutras": "first-person plural",
     "vosoutros / vosoutras": "second-person plural",
     "eillos / eillas / vustedes": "third-person plural",
-
-    "Personal-pronoun including forms": "",  #ܓܘ/Assyrian Neo-Aramaic/36
-    "Non-personal-pronoun-including form": "",  #במו/Hebrew/35
-
-    #pårler/Walloon
+    "Personal-pronoun including forms": "",  # ܓܘ/Assyrian Neo-Aramaic/36
+    "Non-personal-pronoun-including form": "",  # במו/Hebrew/35
+    # pårler/Walloon
     "i (il) / ele": "third-person singular",
     "dji (dj') / nos": "first-person plural",
     "ki dj'": "first-person singular subjunctive",
@@ -6861,13 +7071,11 @@ infl_map: dict[str, InflMapNode] = {
     "ki dj' / ki nos": "first-person plural subjunctive",
     "ki vos": "second-person plural subjunctive",
     "k' i (il)": "third-person plural subjunctive",
-
     # sannoa/Ingrian, rest of these
     "Imperfekta": "imperfect",
     "Pluskvamperfekta": "pluperfect",
     "Infinitivat": "infinitive",
     "Partisipat": "participle",
-
     # f/Slovene
     "nominative imenovȃlnik": "nominative",
     "genitive rodȋlnik": "genitive",
@@ -6876,13 +7084,11 @@ infl_map: dict[str, InflMapNode] = {
     "locative mẹ̑stnik": "locative",
     "instrumental orọ̑dnik": "instrumental",
     "(vocative) (ogȏvorni imenovȃlnik)": "vocative",
-
     # akaka/Choctaw
     "Possession": "possessed-form",
     '("my, our")': "first-person possessive",
     '("thy, your")': "second-person possessive",
     '("his, her, its, their")': "third-person possessive",
-
     # humingi/Tagalog
     # Why is there \u2060 in so many differen tagalog templates like these???
     "\u2060 ma- -an": "",
@@ -6892,8 +7098,6 @@ infl_map: dict[str, InflMapNode] = {
     "\u2060 mapa- -an": "",
     # katayin/Tagalog
     "\u2060mapapag-": "",
-
-
     # -nən/Azerbaijani floating div! Got it to work!
     "preceding vowel": "",
     "A / I / O / U": "back-vowel-harmony",
@@ -6920,13 +7124,11 @@ infl_map: dict[str, InflMapNode] = {
     # tt-suffix-forms Tatar
     "А / Ы / О / У": "back-vowel-harmony",
     "Ә/ Е / Э / Ө / Ү": "front-vowel-harmony",
-
     # wasick/Narragansett
     "unpossessed": {
         "lang": "Narragansett",
         "then": "",
     },
-
     # patika/Swahili new tables!
     "m-wa_((I/II))": "class-1 class-2",
     "m-mi_((III/IV))": "class-3 class-4",
@@ -6937,10 +7139,8 @@ infl_map: dict[str, InflMapNode] = {
     "ku_((XV/XVII))": "class-15 class-17",
     "pa_((XVI))": "class-16",
     "mu_((XVIII))": "class-18",
-
     # ծաղրել/Armenian
     "past future": "future past",
-
     # new Finnish verb table stuff takaisinmallintaa/Finnish
     "plur.": "plural",
     "sing.": "singular",
@@ -6952,14 +7152,14 @@ def check_tags(k: str, v: str) -> None:
     assert isinstance(v, str)
     for tag in v.split():
         if tag not in valid_tags and tag not in ("*",):
-            print("infl_map[{!r}] contains invalid tag {!r}"
-                  .format(k, tag))
+            print("infl_map[{!r}] contains invalid tag {!r}".format(k, tag))
 
 
-
-def check_v(k: str, v: Union[str, list[str], dict[str, InflMapNode], InflMapNodeDict]) -> None:
+def check_v(
+    k: str, v: Union[str, list[str], dict[str, InflMapNode], InflMapNodeDict]
+) -> None:
     assert isinstance(k, str)
-    if v is None: # or v in ("dummy-reset-headers",):
+    if v is None:  # or v in ("dummy-reset-headers",):
         return
     if isinstance(v, str):
         check_tags(k, v)
@@ -6968,37 +7168,47 @@ def check_v(k: str, v: Union[str, list[str], dict[str, InflMapNode], InflMapNode
             check_v(k, item)
     elif isinstance(v, dict):
         for kk in v.keys():
-            if kk in ("if", "then", "else",):
+            if kk in (
+                "if",
+                "then",
+                "else",
+            ):
                 check_v(k, v[kk])
             elif kk == "default":
                 if not isinstance(v[kk], (str, list, tuple)):
-                    print("infl_map[{!r}] contains invalid default value "
-                                  "{!r}".format(k, v[kk]))
+                    print(
+                        "infl_map[{!r}] contains invalid default value "
+                        "{!r}".format(k, v[kk])
+                    )
             elif kk == "pos":
                 vv = v[kk]
                 if isinstance(vv, str):
                     vv = [vv]
                 for vvv in vv:
                     if vvv not in PARTS_OF_SPEECH:
-                        print("infl_map[{!r}] contains invalid part-of-speech "
-                              "{!r} -- {!r}".format(k, kk, v[kk]))
+                        print(
+                            "infl_map[{!r}] contains invalid part-of-speech "
+                            "{!r} -- {!r}".format(k, kk, v[kk])
+                        )
             elif kk in ("lang",):
                 pass
             elif kk == "nested-table-depth":
                 if not isinstance(v[kk], (int, list, tuple)):
-                    print("infl_map[{!r}] contains invalid depth-value "
-                                "{!r}".format(k, v[kk]))
+                    print(
+                        "infl_map[{!r}] contains invalid depth-value "
+                        "{!r}".format(k, v[kk])
+                    )
             elif kk == "inflection-template":
                 if not isinstance(v[kk], (str, list, tuple)):
-                    print("infl_map[{!r}] contains invalid"
-                          "inflection-template value "
-                                "{!r}".format(k, v[kk]))
+                    print(
+                        "infl_map[{!r}] contains invalid"
+                        "inflection-template value "
+                        "{!r}".format(k, v[kk])
+                    )
             else:
-                print("infl_map[{!r}] contains invalid key {!r}"
-                      .format(k, kk))
+                print("infl_map[{!r}] contains invalid key {!r}".format(k, kk))
     else:
-        print("infl_map[{!r}] contains invalid value {!r}"
-              .format(k, v))
+        print("infl_map[{!r}] contains invalid value {!r}".format(k, v))
 
 
 for k, v in infl_map.items():
@@ -7010,20 +7220,14 @@ for k, v in infl_map.items():
 infl_start_map = {
     "with infinitive": "infinitive",
     "with gerund": "gerund",
-    "with informal second-person singular imperative":
-    "informal second-person singular imperative",
+    "with informal second-person singular imperative": "informal second-person singular imperative",
     "with informal second-person singular tú imperative":  # cedular/Spanish
     "informal second-person singular imperative with-tú",
-    "with informal second-person singular vos imperative":
-    "informal second-person singular imperative with-vos",
-    "with formal second-person singular imperative":
-    "formal second-person singular imperative",
-    "with first-person plural imperative":
-    "first-person plural imperative",
-    "with informal second-person plural imperative":
-    "informal second-person plural imperative",
-    "with formal second-person plural imperative":
-    "formal second-person plural imperative",
+    "with informal second-person singular vos imperative": "informal second-person singular imperative with-vos",
+    "with formal second-person singular imperative": "formal second-person singular imperative",
+    "with first-person plural imperative": "first-person plural imperative",
+    "with informal second-person plural imperative": "informal second-person plural imperative",
+    "with formal second-person plural imperative": "formal second-person plural imperative",
     # kaozeal/Breton
     "Soft mutation after": "mutation-soft",
     "Mixed mutation after": "mutation-mixed",
@@ -7034,4 +7238,5 @@ for k, v in infl_start_map.items():
     check_v(k, v)
 
 infl_start_re = re.compile(
-    r"^({}) ".format("|".join(re.escape(x) for x in infl_start_map.keys())))
+    r"^({}) ".format("|".join(re.escape(x) for x in infl_start_map.keys()))
+)

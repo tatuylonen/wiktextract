@@ -19,7 +19,6 @@ from typing import Optional, TextIO
 from wikitextprocessor import Page
 from wikitextprocessor.dumpparser import process_dump
 
-from .logging import logger
 from .page import parse_page
 from .thesaurus import (
     emit_words_in_thesaurus,
@@ -27,13 +26,16 @@ from .thesaurus import (
     thesaurus_linkage_number,
 )
 from .wxr_context import WiktextractContext
+from .wxr_logging import logger
 
 
 def page_handler(page: Page) -> tuple[list[dict], dict]:
     # Make sure there are no newlines or other strange characters in the
     # title.  They could cause security problems at several post-processing
     # steps.
-    wxr: WiktextractContext = page_handler.wxr
+    # We've given the page_handler function an extra wxr attribute previously.
+    # This should never cause an exception, and if it does, we want it to.
+    wxr: WiktextractContext = page_handler.wxr  #  type:ignore[attr-defined]
     # Helps debug extraction hangs. This writes the path of each file being
     # processed into /tmp/wiktextract*/wiktextract-*.  Once a hang
     # has been observed, these files contain page(s) that hang.  They should

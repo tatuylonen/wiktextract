@@ -29,7 +29,8 @@ LEVEL_KINDS = (
 # section
 pron_romanizations = {
     " Revised Romanization ": "romanization revised",
-    " Revised Romanization (translit.) ": "romanization revised transliteration",
+    " Revised Romanization (translit.) ":
+        "romanization revised transliteration",
     " McCune-Reischauer ": "McCune-Reischauer romanization",
     " McCune–Reischauer ": "McCune-Reischauer romanization",
     " Yale Romanization ": "Yale romanization",
@@ -76,19 +77,19 @@ def parse_pronunciation(
     ):
         # expand all templates
         new_contents: list[Union[str, WikiNode]] = []
-        for l in contents:
+        for lst in contents:
             if (
-                isinstance(l, WikiNode)
-                and l.kind == NodeKind.TEMPLATE
-                and isinstance(l.largs[0][0], str)
-                and l.largs[0][0].strip() != "zh-pron"
+                isinstance(lst, WikiNode)
+                and lst.kind == NodeKind.TEMPLATE
+                and isinstance(lst.largs[0][0], str)
+                and lst.largs[0][0].strip() != "zh-pron"
             ):
-                temp = wxr.wtp.node_to_wikitext(l)
+                temp = wxr.wtp.node_to_wikitext(lst)
                 temp = wxr.wtp.expand(temp)
                 temp_parsed = wxr.wtp.parse(temp)
                 new_contents.extend(temp_parsed.children)
             else:
-                new_contents.append(l)
+                new_contents.append(lst)
         contents = new_contents
 
     if have_etym and data is base_data:
@@ -113,7 +114,7 @@ def parse_pronunciation(
             filename = ht.get(2) or ""
             desc = ht.get(3) or ""
             desc = clean_node(wxr, None, [desc])
-            audio = {"audio": filename.strip()}
+            audio: SoundData = {"audio": filename.strip()}
             if desc:
                 audio["text"] = desc
             m = re.search(r"\((([^()]|\([^()]*\))*)\)", desc)
@@ -535,9 +536,9 @@ def parse_pronunciation(
         # special syntax
         m = re.search(r"(?m)\(Tokyo\) +([^ ]+) +\[", text)
         if m:
-            pron = {field: m.group(1)}
+            pron: SoundData = {field: m.group(1)}  # type: ignore[misc]
             if active_pos:
-                pron["pos"] = active_pos
+                pron["pos"] = active_pos  # type: ignore[typeddict-unknown-key]
             data_append(data, "sounds", pron)
             # have_pronunciations = True
             continue
@@ -550,7 +551,7 @@ def parse_pronunciation(
                 if ending:
                     pron = {"rhymes": ending}
                     if active_pos:
-                        pron["pos"] = active_pos
+                        pron["pos"] = active_pos  # type: ignore[typeddict-unknown-key]
                     data_append(data, "sounds", pron)
                     # have_pronunciations = True
             continue
@@ -563,13 +564,13 @@ def parse_pronunciation(
                 if w:
                     pron = {"homophone": w}
                     if active_pos:
-                        pron["pos"] = active_pos
+                        pron["pos"] = active_pos  # type: ignore[typeddict-unknown-key]
                     data_append(data, "sounds", pron)
                     # have_pronunciations = True
             continue
 
         # Check if it contains Phonetic hangeul
-        m = re.search(r"(?m)\bPhonetic hangeul: \[([^]]+)\]", text)
+        m = re.search(r"(?m)\bPhonetic hange?ul: \[([^]]+)\]", text)
         if m:
             seen = set()
             for w in m.group(1).split("/"):
@@ -578,7 +579,7 @@ def parse_pronunciation(
                     seen.add(w)
                     pron = {"hangeul": w}
                     if active_pos:
-                        pron["pos"] = active_pos
+                        pron["pos"] = active_pos  # type: ignore[typeddict-unknown-key]
                     data_append(data, "sounds", pron)
                     # have_pronunciations = True
 
@@ -641,14 +642,14 @@ def parse_pronunciation(
                 if prefix:
                     audios[idx]["form"] = prefix
             else:
-                pron = {field: v}
+                pron = {field: v}  # type: ignore[misc]
                 if active_pos:
-                    pron["pos"] = active_pos
+                    pron["pos"] = active_pos  # type: ignore[typeddict-unknown-key]
                 if prefix:
                     pron["form"] = prefix
                 parse_pronunciation_tags(wxr, tagstext, pron)
                 if active_pos:
-                    pron["pos"] = active_pos
+                    pron["pos"] = active_pos  # type: ignore[typeddict-unknown-key]
                 data_append(data, "sounds", pron)
             # have_pronunciations = True
 
@@ -709,7 +710,7 @@ def parse_pronunciation(
             audio["ogg_url"] = ogg
             audio["mp3_url"] = mp3
             if active_pos:
-                audio["pos"] = active_pos
+                audio["pos"] = active_pos  # type: ignore[typeddict-unknown-key]
         if audio not in data.get("sounds", ()):
             data_append(data, "sounds", audio)
     # if audios:
@@ -721,7 +722,7 @@ def parse_pronunciation(
         pron = {"enpr": enpr}
         parse_pronunciation_tags(wxr, tagstext, pron)
         if active_pos:
-            pron["pos"] = active_pos
+            pron["pos"] = active_pos  # type: ignore[typeddict-unknown-key]
         if pron not in data.get("sounds", ()):
             data_append(data, "sounds", pron)
         # have_pronunciations = True

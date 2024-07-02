@@ -2,9 +2,9 @@ from typing import Any, Optional
 
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import LEVEL_KIND_FLAGS
-from wiktextract.logging import logger
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
+from wiktextract.wxr_logging import logger
 
 from .etymology import EtymologyData, extract_etymology, insert_etymology_data
 from .form_line import extract_form_line

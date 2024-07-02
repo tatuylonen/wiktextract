@@ -5,11 +5,11 @@
 
 # This dictionary maps section titles in articles to parts-of-speech.  There
 # is a lot of variety and misspellings, and this tries to deal with those.
-from typing import TypedDict, Union
+from typing import TypedDict
 
 POSMap = TypedDict(
     "POSMap",
-    { 
+    {
         "pos": str,
         "debug": str,
         "tags": list[str],
