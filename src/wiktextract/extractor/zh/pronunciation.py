@@ -74,6 +74,7 @@ def process_zh_pron_template(
                 process_zh_pron_list_item(
                     wxr, page_data, list_item, [], seen_lists
                 )
+    clean_node(wxr, page_data[-1], expanded_node)
 
 
 def process_zh_pron_list_item(
