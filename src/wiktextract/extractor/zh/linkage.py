@@ -1,11 +1,15 @@
 import itertools
 from typing import Optional, Union
 
-from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import LEVEL_KIND_FLAGS, TemplateNode
-from wiktextract.page import clean_node
-from wiktextract.wxr_context import WiktextractContext
+from wikitextprocessor.parser import (
+    LEVEL_KIND_FLAGS,
+    NodeKind,
+    TemplateNode,
+    WikiNode,
+)
 
+from ...page import clean_node
+from ...wxr_context import WiktextractContext
 from ..ruby import extract_ruby
 from ..share import (
     capture_text_in_parentheses,

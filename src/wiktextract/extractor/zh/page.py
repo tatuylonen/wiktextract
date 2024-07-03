@@ -124,6 +124,9 @@ def parse_section(
                 sortid="extractor/zh/page/parse_section/192",
             )
 
+        for template in node.find_child(NodeKind.TEMPLATE):
+            add_page_end_categories(wxr, page_data, template)
+
 
 def process_pos_block(
     wxr: WiktextractContext,
@@ -297,3 +300,19 @@ def process_zh_forms(
         elif p_name == "lit":
             lit = clean_node(wxr, None, p_value)
             base_data.literal_meaning = lit
+
+
+# https://zh.wiktionary.org/wiki/Template:Zh-cat
+# https://zh.wiktionary.org/wiki/Template:Catlangname
+CATEGORY_TEMPLATES = frozenset(["zh-cat", "cln", "catlangname"])
+
+
+def add_page_end_categories(
+    wxr: WiktextractContext, page_data: list[WordEntry], template: TemplateNode
+) -> None:
+    if template.template_name.lower() in CATEGORY_TEMPLATES:
+        categories = {}
+        clean_node(wxr, categories, template)
+        for data in page_data:
+            if data.lang_code == page_data[-1].lang_code:
+                data.categories.extend(categories.get("categories", []))
