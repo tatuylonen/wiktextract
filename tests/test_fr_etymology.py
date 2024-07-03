@@ -3,6 +3,7 @@ from unittest import TestCase
 from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.fr.etymology import (
+    EtymologyData,
     extract_etymology,
     insert_etymology_data,
 )
@@ -43,13 +44,17 @@ class TestEtymology(TestCase):
         self.assertEqual(
             etymology_data,
             {
-                ("br-nom-1", "Nom commun 1"): [
-                    "Du vieux breton lin (« lac, étang ; liquide, humeur »).",
-                    "Du moyen breton lenn.",
-                ],
-                ("br-nom-2", "Nom commun 2"): [
-                    "Du vieux breton lenn (« pièce de toile, voile, manteau, rideau »)."
-                ],
+                ("br-nom-1", "Nom commun 1"): EtymologyData(
+                    texts=[
+                        "Du vieux breton lin (« lac, étang ; liquide, humeur »).",
+                        "Du moyen breton lenn.",
+                    ]
+                ),
+                ("br-nom-2", "Nom commun 2"): EtymologyData(
+                    texts=[
+                        "Du vieux breton lenn (« pièce de toile, voile, manteau, rideau »)."
+                    ]
+                ),
             },
         )
         page_data = [
@@ -116,15 +121,17 @@ class TestEtymology(TestCase):
         self.assertEqual(
             etymology_data,
             {
-                ("fr-nom-1", "Nom commun 1"): [
-                    "Du latin domina (« maîtresse de maison »)."
-                ],
-                ("fr-nom-2", "Nom commun 2"): [
-                    "Du moyen néerlandais dam (« digue »)."
-                ],
-                ("fr-interj-1", "Interjection 1"): [
-                    "Abréviation de « Notre-Dame ! » ou de « dame Dieu ! » (« Seigneur Dieu ! »)."
-                ],
+                ("fr-nom-1", "Nom commun 1"): EtymologyData(
+                    texts=["Du latin domina (« maîtresse de maison »)."]
+                ),
+                ("fr-nom-2", "Nom commun 2"): EtymologyData(
+                    texts=["Du moyen néerlandais dam (« digue »)."]
+                ),
+                ("fr-interj-1", "Interjection 1"): EtymologyData(
+                    texts=[
+                        "Abréviation de « Notre-Dame ! » ou de « dame Dieu ! » (« Seigneur Dieu ! »)."
+                    ]
+                ),
             },
         )
         page_data = [
@@ -202,10 +209,14 @@ class TestEtymology(TestCase):
         self.assertEqual(
             etymology_data,
             {
-                ("Interjection", "Interjection"): [
-                    "XIIe siècle, elas ; composé de hé et de las, au sens ancien de « malheureux »."
-                ],
-                ("fr-nom", "Nom"): ["Par substantivation de l’interjection."],
+                ("Interjection", "Interjection"): EtymologyData(
+                    texts=[
+                        "XIIe siècle, elas ; composé de hé et de las, au sens ancien de « malheureux »."
+                    ]
+                ),
+                ("fr-nom", "Nom"): EtymologyData(
+                    texts=["Par substantivation de l’interjection."]
+                ),
             },
         )
         page_data = [
@@ -258,7 +269,8 @@ class TestEtymology(TestCase):
         root = self.wxr.wtp.parse("Paragraph 1\nParagraph 2")
         etymology_data = extract_etymology(self.wxr, root, None)
         self.assertEqual(
-            etymology_data, {("", ""): ["Paragraph 1\nParagraph 2"]}
+            etymology_data,
+            {("", ""): EtymologyData(texts=["Paragraph 1\nParagraph 2"])},
         )
 
     def test_etymology_examples(self):
@@ -292,8 +304,13 @@ etymology text
 
     def test_nata(self):
         self.wxr.wtp.start_page("nata")
+        self.wxr.wtp.add_page(
+            "Modèle:étyl",
+            10,
+            """espagnol ''<bdi lang="es" xml:lang="es" class="lang-es">[[nata#es|nata]]</bdi>''[[Catégorie:Mots en français issus d’un mot en espagnol]]""",
+        )
         root = self.wxr.wtp.parse(
-            """: (''[[#fr-nom-1|Nom commun 1]]'') De l’espagnol nata, « crème », d'origine inconnue.
+            """: (''[[#fr-nom-1|Nom commun 1]]'') De l’{{étyl|es|fr|nata}}, « crème », d'origine inconnue.
 : (''[[#fr-nom-2|Nom commun 2]]'') {{ébauche-étym|fr}}
 : (''[[#fr-nom-3|Nom commun 3]]'') Du kanak de Maré ou nengone nata (« messager ; celui qui raconte »)
 """
@@ -302,12 +319,17 @@ etymology text
         self.assertEqual(
             etymology_data,
             {
-                ("fr-nom-1", "Nom commun 1"): [
-                    "De l’espagnol nata, « crème », d'origine inconnue."
-                ],
-                ("fr-nom-3", "Nom commun 3"): [
-                    "Du kanak de Maré ou nengone nata (« messager ; celui qui raconte »)"
-                ],
+                ("fr-nom-1", "Nom commun 1"): EtymologyData(
+                    texts=[
+                        "De l’espagnol nata, « crème », d'origine inconnue."
+                    ],
+                    categories=["Mots en français issus d’un mot en espagnol"],
+                ),
+                ("fr-nom-3", "Nom commun 3"): EtymologyData(
+                    texts=[
+                        "Du kanak de Maré ou nengone nata (« messager ; celui qui raconte »)"
+                    ]
+                ),
             },
         )
 
@@ -320,6 +342,8 @@ etymology text
         self.assertEqual(
             etymology_data,
             {
-                ("", ""): ["Dérivé du substantif huzuni (« tristesse »)."],
+                ("", ""): EtymologyData(
+                    texts=["Dérivé du substantif huzuni (« tristesse »)."]
+                ),
             },
         )
