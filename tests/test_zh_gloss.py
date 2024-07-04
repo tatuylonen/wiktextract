@@ -223,7 +223,11 @@ class TestGloss(TestCase):
 
     def test_two_label_topics(self):
         self.wxr.wtp.start_page("DOS")
-        self.wxr.wtp.add_page("Template:lb", 10, "(計算機, 網路)")
+        self.wxr.wtp.add_page(
+            "Template:lb",
+            10,
+            "(計算機[[Category:英語 計算機|DOS]], 網路[[Category:英語 網路|DOS]])",
+        )
         self.wxr.wtp.add_page(
             "Template:init of",
             10,
@@ -238,6 +242,7 @@ class TestGloss(TestCase):
             page_data[0].model_dump(exclude_defaults=True)["senses"],
             [
                 {
+                    "categories": ["英語 計算機", "英語 網路"],
                     "form_of": [{"word": "denial of service"}],
                     "glosses": [
                         "denial of service (“拒絕服務”)之首字母縮略詞。"
