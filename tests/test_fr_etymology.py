@@ -277,6 +277,11 @@ class TestEtymology(TestCase):
         self.wxr.wtp.start_page("autrice")
         self.wxr.wtp.add_page("Modèle:S", 10, "Attestations historiques")
         self.wxr.wtp.add_page("Modèle:siècle", 10, "(XVᵉ siècle)")
+        self.wxr.wtp.add_page(
+            "Modèle:exemple",
+            10,
+            "[[Catégorie:Exemples en moyen français avec traduction désactivée]][[Catégorie:Exemples en moyen français]]",
+        )
         root = self.wxr.wtp.parse("""=== {{S|étymologie}} ===
 etymology text
 
@@ -291,14 +296,22 @@ etymology text
             lang="Français", lang_code="fr", word="autrice", pos="noun"
         )
         extract_etymology(self.wxr, root, word_entry)
+        data = word_entry.model_dump(exclude_defaults=True)
         self.assertEqual(
-            word_entry.model_dump(exclude_defaults=True)["etymology_examples"],
+            data["etymology_examples"],
             [
                 {
                     "time": "XVᵉ siècle",
                     "text": "example text",
                     "ref": "source text",
                 }
+            ],
+        )
+        self.assertEqual(
+            data["categories"],
+            [
+                "Exemples en moyen français avec traduction désactivée",
+                "Exemples en moyen français",
             ],
         )
 

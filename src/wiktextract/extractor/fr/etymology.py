@@ -202,7 +202,7 @@ def extract_etymology_examples(
                 time = clean_node(wxr, None, template_node).strip("() ")
             elif template_node.template_name == "exemple":
                 example_data = process_exemple_template(
-                    wxr, template_node, None, time
+                    wxr, template_node, base_data, time
                 )
                 if example_data.text != "":
                     base_data.etymology_examples.append(example_data)
