@@ -43,9 +43,13 @@ class TestESExample(unittest.TestCase):
             dump_data,
             [
                 {
-                    "text": "And He has on His robe and on His thigh a name written: KING OF KINGS AND LORD OF LORDS",
-                    "translation": "Y en su vestidura y en su muslo tiene escrito este nombre: REY DE REYES Y SEÑOR DE SEÑORES",
-                    "ref": "Bible Revelation 19:16. Versión: New King James.\nTraducción: Biblia Apocalipsis 19:16. Versión: Reina-Valera 1995.",
+                    "text": "And He has on His robe and on His thigh a name "
+                        "written: KING OF KINGS AND LORD OF LORDS",
+                    "translation": "Y en su vestidura y en su muslo tiene "
+                        "escrito este nombre: REY DE REYES Y SEÑOR DE SEÑORES",
+                    "ref": "Bible Revelation 19:16. Versión: New King James."
+                        "\nTraducción: Biblia Apocalipsis 19:16. "
+                        "Versión: Reina-Valera 1995.",
                 }
             ],
         )
@@ -74,8 +78,10 @@ class TestESExample(unittest.TestCase):
             dump_data,
             [
                 {
-                    "text": "Nos gusta lo oscuro, y por eso triunfa la Necroporra, sea ético o no",
-                    "ref": "https://www.menzig.es/a/necroporra-fantamorto-porra-famosos-muertos/",
+                    "text": "Nos gusta lo oscuro, y por eso triunfa "
+                            "la Necroporra, sea ético o no",
+                    "ref": "https://www.menzig.es/a/necroporra-"
+                            "fantamorto-porra-famosos-muertos/",
                 }
             ],
         )
@@ -101,8 +107,12 @@ class TestESExample(unittest.TestCase):
             dump_data,
             [
                 {
-                    "text": 'Papel: más viejo que Matusalén, pero graduado "cum laude" en eficacia publicitaria',
-                    "ref": "https://www.marketingdirecto.com/marketing-general/publicidad/papel-mas-viejo-matusalen-pero-graduado-cum-laude-eficacia-publicitaria",
+                    "text": 'Papel: más viejo que Matusalén, pero graduado '
+                            '"cum laude" en eficacia publicitaria',
+                    "ref": "https://www.marketingdirecto.com/"
+                            "marketing-general/publicidad/papel-mas-viejo-"
+                            "matusalen-pero-graduado-cum-laude-"
+                            "eficacia-publicitaria",
                 }
             ],
         )
@@ -140,18 +150,22 @@ class TestESExample(unittest.TestCase):
         self.wxr.wtp.add_page(
             "Plantilla:cita libro",
             10,
-            "<cite>Bombal, María Luisa&#32;(2012).&#32;«La Amortajada», <i>La Última Niebla/La Amortajada</i>.&#32;Planeta,&#32;151.</cite>",
+            "<cite>Bombal, María Luisa&#32;(2012).&#32;«La Amortajada», "
+            "<i>La Última Niebla/La Amortajada</i>."
+            "&#32;Planeta,&#32;151.</cite>",
         )
         root = self.wxr.wtp.parse(""":*'''Ejemplo:'''
-::* «Apoyado contra el ''quicio'' de la puerta, adivina, de pronto, a su marido.» {{cita libro|nombre=María Luisa|apellidos=Bombal|título=La Última Niebla/La Amortajada|capítulo=La Amortajada|fecha=2012|editorial=Planeta|páginas=151}}""")
+::* «Apoyado contra el ''quicio'' de la puerta, adivina, de pronto, a su marido.» {{cita libro|nombre=María Luisa|apellidos=Bombal|título=La Última Niebla/La Amortajada|capítulo=La Amortajada|fecha=2012|editorial=Planeta|páginas=151}}""")  # noqa: E501
         sense_data = Sense()
         process_example_list(self.wxr, sense_data, root.children[0].children[0])
         self.assertEqual(
             sense_data.model_dump(exclude_defaults=True)["examples"],
             [
                 {
-                    "text": "«Apoyado contra el quicio de la puerta, adivina, de pronto, a su marido.»",
-                    "ref": "Bombal, María Luisa (2012). «La Amortajada», La Última Niebla/La Amortajada. Planeta, 151.",
+                    "text": "«Apoyado contra el quicio de la puerta, adivina, "
+                            "de pronto, a su marido.»",
+                    "ref": "Bombal, María Luisa (2012). «La Amortajada», "
+                            "La Última Niebla/La Amortajada. Planeta, 151.",
                 }
             ],
         )

@@ -84,6 +84,12 @@ select = [
     "W",  # pycodestyle warning
 ]
 
+[tool.ruff.lint.per-file-ignores]
+"src/wiktextract/taxondata.py" = ["E501"]
+"src/wiktextract/tags.py" = ["E501"]
+"src/wiktextract/table_headers_heuristics_data.py" = ["E501"]
+"tests/*" = ["E501"]
+
 [tool.mypy]
 mypy_path = "typestubs"
 python_version = 3.9

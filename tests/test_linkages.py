@@ -890,19 +890,23 @@ class LinkageTests(unittest.TestCase):
 
     def test_prefix33(self):
         data = self.run_data(
-            '(any member of the suborder (sometimes superfamily) Feliformia or Feloidea): feliform ("cat-like" carnivoran), feloid (compare Caniformia, Canoidea)'
+            '(any member of the suborder (sometimes superfamily) Feliformia '
+            'or Feloidea): feliform ("cat-like" carnivoran), feloid '
+            '(compare Caniformia, Canoidea)'
         )
         self.assertEqual(
             data,
             {
                 "related": [
                     {
-                        "sense": "any member of the suborder (sometimes superfamily) Feliformia or Feloidea",
+                        "sense": "any member of the suborder (sometimes "
+                                "superfamily) Feliformia or Feloidea",
                         "word": "feliform",
                         "english": "cat-like; carnivoran",
                     },
                     {
-                        "sense": "any member of the suborder (sometimes superfamily) Feliformia or Feloidea",
+                        "sense": "any member of the suborder (sometimes "
+                                "superfamily) Feliformia or Feloidea",
                         "word": "feloid",
                         "english": "compare Caniformia, Canoidea",
                     },
@@ -1492,7 +1496,8 @@ class LinkageTests(unittest.TestCase):
 
     def test_script3(self):
         data = self.run_data(
-            "(Variations of letter B):  Ḃḃ  Ḅḅ  Ḇḇ  Ƀƀ  Ɓɓ  Ƃƃ  ᵬ  ᶀ  ʙ  Ｂｂ  ȸ  ℔  Ꞗꞗ"
+            "(Variations of letter B):  Ḃḃ  Ḅḅ  Ḇḇ  Ƀƀ  Ɓɓ  Ƃƃ  "
+            "ᵬ  ᶀ  ʙ  Ｂｂ  ȸ  ℔  Ꞗꞗ"
         )
         self.assertEqual(
             data,

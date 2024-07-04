@@ -341,7 +341,7 @@ class InflTests(unittest.TestCase):
 
 &#42; Indirect relative<br>† Archaic or dialect form
 </div></div></div>[[Category:Irish first-conjugation contract verbs|NIGH]]
-""")
+""")  # noqa: E501
         expected = {
             "forms": [
               {
@@ -1338,7 +1338,7 @@ class InflTests(unittest.TestCase):
 
 
 |}
-""")
+""")  # noqa: E501
         expected = {
             "forms": [
               {
@@ -1508,7 +1508,7 @@ don <span class="Latn" lang="ga">[[chois#Irish|chois]]</span>
 
 |}
 </div></div>[[Category:Irish second-declension nouns|COIS]]
-""")
+""")  # noqa: E501
         expected = {
             "forms": [
               {
@@ -1775,7 +1775,7 @@ don <span class="Latn" lang="ga">[[chois#Irish|chois]]</span>
 ¹ When the preceding noun is lenited and governed by the definite article.<br>
 ² When the preceding noun ends in a slender consonant.
 </div></div>
-""")
+""")  # noqa: E501
         expected = {
             "forms": [
               {

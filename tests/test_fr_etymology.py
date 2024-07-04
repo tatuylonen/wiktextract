@@ -115,7 +115,7 @@ class TestEtymology(TestCase):
             """: {{lien-ancre-étym|fr|nom|1}} Du latin domina (« maîtresse de maison »).
 : {{lien-ancre-étym|fr|nom|2}} Du moyen néerlandais dam (« digue »).
 : {{lien-ancre-étym|fr|interj|1}} Abréviation de « [[Notre-Dame]] ! » ou de « dame Dieu ! » (« [[Seigneur Dieu]] ! »).
-"""
+"""  # noqa:E501
         )
         etymology_data = extract_etymology(self.wxr, root, None)
         self.assertEqual(
@@ -203,7 +203,7 @@ class TestEtymology(TestCase):
         root = self.wxr.wtp.parse(
             """: (''[[#Interjection|Interjection]]'') XIIe siècle, elas ; composé de hé et de las, au sens ancien de « malheureux ».
 : (''[[#fr-nom|Nom]]'') Par [[substantivation]] de l’interjection.
-"""
+"""  # noqa:E501
         )
         etymology_data = extract_etymology(self.wxr, root, None)
         self.assertEqual(
@@ -326,7 +326,7 @@ etymology text
             """: (''[[#fr-nom-1|Nom commun 1]]'') De l’{{étyl|es|fr|nata}}, « crème », d'origine inconnue.
 : (''[[#fr-nom-2|Nom commun 2]]'') {{ébauche-étym|fr}}
 : (''[[#fr-nom-3|Nom commun 3]]'') Du kanak de Maré ou nengone nata (« messager ; celui qui raconte »)
-"""
+"""  # noqa:E501
         )
         etymology_data = extract_etymology(self.wxr, root, None)
         self.assertEqual(

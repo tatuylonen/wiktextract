@@ -209,7 +209,7 @@ class TestNotes(TestCase):
 ! colspan=\"4\" | '''Clefs de constructions'''
 |-
 | '''Neutre négatif''' || <span>[[格好ではない]]<br>[[格好じゃない]]</span> || <span>[[かっこうではない]]<br>[[かっこうじゃない]]</span> || ''kakkou dewa nai<br>kakkou ja nai''
-|}""",
+|}""",  # noqa:E501
         )
         entry = WordEntry(lang_code="ja", lang="Japonais", word="格好")
         extract_conjugation(self.wxr, entry, "Conjugaison:japonais/格好だ")
@@ -280,7 +280,7 @@ class TestNotes(TestCase):
 | <bdi>[[在りません#ja|在りません]]</bdi>
 | <bdi>[[ありません#ja|ありません]]</bdi>
 | ''arimasen\n''
-|}""",
+|}""",  # noqa:E501
         )
         entry = WordEntry(lang_code="ja", lang="Japonais", word="在る")
         extract_conjugation(self.wxr, entry, "Conjugaison:japonais/在る")

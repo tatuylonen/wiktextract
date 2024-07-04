@@ -41,11 +41,14 @@ class TestDELinkages(unittest.TestCase):
             # https://de.wiktionary.org/wiki/Beispiel
             # Cleans explanatory text from expressions.
             {
-                "input": "====Redewendungen====\n:[[ein gutes Beispiel geben|ein gutes ''Beispiel'' geben]] – als [[Vorbild]] zur [[Nachahmung]] [[dienen]]/[[herausfordern]]",
+                "input": "====Redewendungen====\n:[[ein gutes Beispiel geben|"
+                        "ein gutes ''Beispiel'' geben]] – als [[Vorbild]] zur "
+                        "[[Nachahmung]] [[dienen]]/[[herausfordern]]",
                 "expected": {
                     "expressions": [
                         {
-                            "note": "als Vorbild zur Nachahmung dienen/herausfordern",
+                            "note": "als Vorbild zur Nachahmung "
+                                    "dienen/herausfordern",
                             "word": "ein gutes Beispiel geben",
                         }
                     ],

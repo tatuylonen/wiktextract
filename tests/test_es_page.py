@@ -22,7 +22,7 @@ class TestESPage(unittest.TestCase):
         """
         Writes data affecting multiple entries to all affected WordEntry objects.
         https://es.wiktionary.org/wiki/love
-        """
+        """  # noqa:E501
         self.wxr.wtp.add_page(
             "Plantilla:pron-graf",
             10,
@@ -65,7 +65,7 @@ class TestESPage(unittest.TestCase):
 {{etimología|la|*agurium}}, variante del clásico augurium.
 ==== {{sustantivo masculino y femenino|es}} ====
 ;2: Persona originaria de un pueblo amerindio de origen chibcha que habita Honduras.
-""",
+""",  # noqa:E501
         )
         self.assertEqual(
             page_data[0]["etymology_text"],
@@ -74,7 +74,8 @@ class TestESPage(unittest.TestCase):
         self.assertEqual(
             page_data[0]["senses"][0]["glosses"],
             [
-                "Persona originaria de un pueblo amerindio de origen chibcha que habita Honduras."
+                "Persona originaria de un pueblo amerindio de origen "
+                "chibcha que habita Honduras."
             ],
         )
         self.assertEqual(page_data[0]["pos"], "noun")

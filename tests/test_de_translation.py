@@ -58,7 +58,7 @@ class TestDETranslation(unittest.TestCase):
         self.wxr.wtp.start_page("Brot")
         root = self.wxr.wtp.parse("""{{Ü-Tabelle|Ü-Liste=
 *{{el}}: {{Üt|el|ψωμί|psomí}} {{n}}, ''antiquiert, kirchensprachlich:'' {{Üt|el|άρτος|ártos}} {{m}}
-}}""")
+}}""")  # noqa: E501
         word_entry = WordEntry(lang="Deutsch", lang_code="de", word="Brot")
         extract_translation(self.wxr, word_entry, root)
         self.assertEqual(
@@ -155,7 +155,7 @@ class TestDETranslation(unittest.TestCase):
         self.wxr.wtp.start_page("Brot")
         root = self.wxr.wtp.parse("""{{Ü-Tabelle|1|G=[[Mitglied]] einer [[Gruppe]] von [[Person]]en sein|Ü-Liste=
 *{{fr}}: {{Ü|fr|appartenir}}
-}}""")
+}}""")  # noqa: E501
         word_entry = WordEntry(
             lang="Deutsch", lang_code="de", word="dazugehören"
         )

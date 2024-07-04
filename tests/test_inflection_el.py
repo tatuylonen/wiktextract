@@ -265,7 +265,7 @@ class InflTests(unittest.TestCase):
 |}
 </div></div>[[Category:Greek irregular verbs]]
 * <small><templatestyles src="audio%2Fstyles.css"></small><table class="audiotable" style="vertical-align%3A+bottom%3B+display%3Ainline-block%3B+list-style%3Anone%3Bline-height%3A+1em%3B+border-collapse%3Acollapse%3B"><tr><td class="unicode+audiolink" style="padding-right%3A5px%3B+padding-left%3A+0%3B">Audio: present indicative</td><td class="audiofile">[[File:El-είμαι conjugation-present indicative.ogg|noicon|175px]]</td><td class="audiometa" style="font-size%3A+80%25%3B">([[:File:El-είμαι conjugation-present indicative.ogg|file]])</td></tr></table>[[Category:Greek terms with audio links|ΕΙΜΑΙ]] <templatestyles src="audio%2Fstyles.css"><table class="audiotable" style="vertical-align%3A+bottom%3B+display%3Ainline-block%3B+list-style%3Anone%3Bline-height%3A+1em%3B+border-collapse%3Acollapse%3B"><tr><td class="unicode+audiolink" style="padding-right%3A5px%3B+padding-left%3A+0%3B">imperfect</td><td class="audiofile">[[File:El-είμαι-conjugation-imperfect-ήμουν.ogg|noicon|175px]]</td><td class="audiometa" style="font-size%3A+80%25%3B">([[:File:El-είμαι-conjugation-imperfect-ήμουν.ogg|file]])</td></tr></table>[[Category:Greek terms with audio links|ΕΙΜΑΙ]]</small>
-""")
+""")  # noqa: E501
         expected = {
             "forms": [
               {
@@ -639,7 +639,8 @@ class InflTests(unittest.TestCase):
                 ]
               },
               {
-                "form": "Formed using present tense from above with a particle (να, ας).",
+                "form": "Formed using present tense from above "
+                        "with a particle (να, ας).",
                 "source": "Conjugation",
                 "tags": [
                   "active",
@@ -1277,7 +1278,7 @@ class InflTests(unittest.TestCase):
 
 |}
 </div></div>[[Category:Greek verbs conjugating like 'αγαπάω-αγαπώ']]
-""")
+""")  # noqa: E501
         expected = {
             "forms": [
               {
@@ -2591,7 +2592,7 @@ class InflTests(unittest.TestCase):
 
 |}
 </div></div>[[Category:Greek nouns declining like 'δρόμος']]
-""")
+""")  # noqa: E501
         expected = {
             "forms": [
               {

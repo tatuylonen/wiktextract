@@ -32,12 +32,16 @@ class InflTests(unittest.TestCase):
         self.wxr.wtp.start_subsection(pos)
         tree = self.wxr.wtp.parse(text)
         data = {}
-        parse_inflection_section(self.wxr, data, word, lang, pos,
-                                 section, tree)
+        parse_inflection_section(self.wxr, data, word, lang, pos, section, tree)
         return data
 
     def test_Danish_noun1(self):
-        ret = self.xinfl("motorsav", "Danish", "noun", "Inflection", """
+        ret = self.xinfl(
+            "motorsav",
+            "Danish",
+            "noun",
+            "Inflection",
+            """
 <div class="NavFrame">
 <div class="NavHead">Declension of <i class="Latn+mention" lang="da">motorsav</i></div>
 <div class="NavContent">
@@ -106,94 +110,66 @@ class InflTests(unittest.TestCase):
 |}
 
 </div></div>
-""")
+""",  # noqa: E501
+        )  # noqa: E501
         expected = {
             "forms": [
-              {
-                "form": "no-table-tags",
-                "source": "Inflection",
-                "tags": [
-                  "table-tags"
-                ]
-              },
-              {
-                "form": "motorsav",
-                "source": "Inflection",
-                "tags": [
-                  "indefinite",
-                  "nominative",
-                  "singular"
-                ]
-              },
-              {
-                "form": "motorsaven",
-                "source": "Inflection",
-                "tags": [
-                  "definite",
-                  "nominative",
-                  "singular"
-                ]
-              },
-              {
-                "form": "motorsave",
-                "source": "Inflection",
-                "tags": [
-                  "indefinite",
-                  "nominative",
-                  "plural"
-                ]
-              },
-              {
-                "form": "motorsavene",
-                "source": "Inflection",
-                "tags": [
-                  "definite",
-                  "nominative",
-                  "plural"
-                ]
-              },
-              {
-                "form": "motorsavs",
-                "source": "Inflection",
-                "tags": [
-                  "genitive",
-                  "indefinite",
-                  "singular"
-                ]
-              },
-              {
-                "form": "motorsavens",
-                "source": "Inflection",
-                "tags": [
-                  "definite",
-                  "genitive",
-                  "singular"
-                ]
-              },
-              {
-                "form": "motorsaves",
-                "source": "Inflection",
-                "tags": [
-                  "genitive",
-                  "indefinite",
-                  "plural"
-                ]
-              },
-              {
-                "form": "motorsavenes",
-                "source": "Inflection",
-                "tags": [
-                  "definite",
-                  "genitive",
-                  "plural"
-                ]
-              }
+                {
+                    "form": "no-table-tags",
+                    "source": "Inflection",
+                    "tags": ["table-tags"],
+                },
+                {
+                    "form": "motorsav",
+                    "source": "Inflection",
+                    "tags": ["indefinite", "nominative", "singular"],
+                },
+                {
+                    "form": "motorsaven",
+                    "source": "Inflection",
+                    "tags": ["definite", "nominative", "singular"],
+                },
+                {
+                    "form": "motorsave",
+                    "source": "Inflection",
+                    "tags": ["indefinite", "nominative", "plural"],
+                },
+                {
+                    "form": "motorsavene",
+                    "source": "Inflection",
+                    "tags": ["definite", "nominative", "plural"],
+                },
+                {
+                    "form": "motorsavs",
+                    "source": "Inflection",
+                    "tags": ["genitive", "indefinite", "singular"],
+                },
+                {
+                    "form": "motorsavens",
+                    "source": "Inflection",
+                    "tags": ["definite", "genitive", "singular"],
+                },
+                {
+                    "form": "motorsaves",
+                    "source": "Inflection",
+                    "tags": ["genitive", "indefinite", "plural"],
+                },
+                {
+                    "form": "motorsavenes",
+                    "source": "Inflection",
+                    "tags": ["definite", "genitive", "plural"],
+                },
             ],
         }
         self.assertEqual(expected, ret)
 
     def test_Danish_verb1(self):
-        ret = self.xinfl("patte", "Danish", "verb", "Inflection", """
+        ret = self.xinfl(
+            "patte",
+            "Danish",
+            "verb",
+            "Inflection",
+            """
 <div class="NavFrame">
 <div class="NavHead">Inflection of <i class="Latn+mention" lang="da">patte</i></div>
 <div class="NavContent">
@@ -306,117 +282,98 @@ class InflTests(unittest.TestCase):
 
 
 
-""")
+""",  # noqa: E501
+        )  # noqa: E501
         expected = {
-           "forms": [
-              {
-                "form": "no-table-tags",
-                "source": "Inflection",
-                "tags": [
-                  "table-tags"
-                ]
-              },
-             {
-               "form": "patter",
-               "source": "Inflection",
-               "tags": [
-                 "present"
-               ]
-             },
-             {
-               "form": "pattede",
-               "source": "Inflection",
-               "tags": [
-                 "past"
-               ]
-             },
-             {
-               "form": "har pattet",
-               "source": "Inflection",
-               "tags": [
-                 "perfect",
-                 "present"
-               ]
-             },
-             {
-               "form": "havde pattet",
-               "source": "Inflection",
-               "tags": [
-                 "past",
-                 "perfect"
-               ]
-             },
-             {
-               "form": "pattes",
-               "source": "Inflection",
-               "tags": [
-                 "passive",
-                 "present"
-               ]
-             },
-             {'form': '-', 'source': 'Inflection', 'tags': ['passive', 'past']},
-             {
-               "form": "pattende",
-               "source": "Inflection",
-               "tags": [
-                 "participle",
-                 "present"
-               ]
-             },
-             {
-               "form": "pattet",
-               "source": "Inflection",
-               "tags": [
-                 "participle",
-                 "past"
-               ]
-             },
-             {
-               "form": "pat",
-               "source": "Inflection",
-               "tags": [
-                 "imperative",
-                 "present"
-               ]
-             },
-             {'form': '-',
-              'source': 'Inflection',
-              'tags': ['imperative', 'past']},
-             {
-               "form": "patte",
-               "source": "Inflection",
-               "tags": [
-                 "infinitive",
-                 "present"
-               ]
-             },
-             {'form': '-',
-              'source': 'Inflection',
-              'tags': ['infinitive', 'past']},
-             {
-               "form": "have",
-               "source": "Inflection",
-               "tags": [
-                 "auxiliary",
-                 "present"
-               ]
-             },
-             {'form': '-', 'source': 'Inflection', 'tags': ['auxiliary', 'past']},
-             {
-               "form": "patten",
-               "source": "Inflection",
-               "tags": [
-                 "gerund",
-                 "present"
-               ]
-             },
-             {'form': '-', 'source': 'Inflection', 'tags': ['gerund', 'past']}
-           ],
+            "forms": [
+                {
+                    "form": "no-table-tags",
+                    "source": "Inflection",
+                    "tags": ["table-tags"],
+                },
+                {"form": "patter", "source": "Inflection", "tags": ["present"]},
+                {"form": "pattede", "source": "Inflection", "tags": ["past"]},
+                {
+                    "form": "har pattet",
+                    "source": "Inflection",
+                    "tags": ["perfect", "present"],
+                },
+                {
+                    "form": "havde pattet",
+                    "source": "Inflection",
+                    "tags": ["past", "perfect"],
+                },
+                {
+                    "form": "pattes",
+                    "source": "Inflection",
+                    "tags": ["passive", "present"],
+                },
+                {
+                    "form": "-",
+                    "source": "Inflection",
+                    "tags": ["passive", "past"],
+                },
+                {
+                    "form": "pattende",
+                    "source": "Inflection",
+                    "tags": ["participle", "present"],
+                },
+                {
+                    "form": "pattet",
+                    "source": "Inflection",
+                    "tags": ["participle", "past"],
+                },
+                {
+                    "form": "pat",
+                    "source": "Inflection",
+                    "tags": ["imperative", "present"],
+                },
+                {
+                    "form": "-",
+                    "source": "Inflection",
+                    "tags": ["imperative", "past"],
+                },
+                {
+                    "form": "patte",
+                    "source": "Inflection",
+                    "tags": ["infinitive", "present"],
+                },
+                {
+                    "form": "-",
+                    "source": "Inflection",
+                    "tags": ["infinitive", "past"],
+                },
+                {
+                    "form": "have",
+                    "source": "Inflection",
+                    "tags": ["auxiliary", "present"],
+                },
+                {
+                    "form": "-",
+                    "source": "Inflection",
+                    "tags": ["auxiliary", "past"],
+                },
+                {
+                    "form": "patten",
+                    "source": "Inflection",
+                    "tags": ["gerund", "present"],
+                },
+                {
+                    "form": "-",
+                    "source": "Inflection",
+                    "tags": ["gerund", "past"],
+                },
+            ],
         }
         self.assertEqual(expected, ret)
 
     def test_Danish_adj1(self):
-        ret = self.xinfl("kedelig", "Danish", "adj", "Inflection", """
+        ret = self.xinfl(
+            "kedelig",
+            "Danish",
+            "adj",
+            "Inflection",
+            """
 {| class="inflection-table+vsSwitcher" data-toggle-category="inflection" style="border%3A+solid+1px+%23CCCCFF%3B+text-align%3Aleft%3B" cellspacing="1" cellpadding="2"
 
 |- style="background%3A+%23CCCCFF%3B+vertical-align%3A+top%3B"
@@ -500,128 +457,87 @@ class InflTests(unittest.TestCase):
 
 
 |}
-""")
+""",  # noqa: E501
+        )
         expected = {
             "forms": [
-              {
-                "form": "no-table-tags",
-                "source": "Inflection",
-                "tags": [
-                  "table-tags"
-                ]
-              },
-              {
-                "form": "kedelig",
-                "source": "Inflection",
-                "tags": [
-                  "common-gender",
-                  "positive",
-                  "singular"
-                ]
-              },
-              {
-                "form": "kedeligere",
-                "source": "Inflection",
-                "tags": [
-                  "common-gender",
-                  "comparative",
-                  "singular"
-                ]
-              },
-              {
-                "form": "kedeligst",
-                "source": "Inflection",
-                "tags": [
-                  "common-gender",
-                  "singular",
-                  "superlative"
-                ]
-              },
-              {
-                "form": "kedeligt",
-                "source": "Inflection",
-                "tags": [
-                  "neuter",
-                  "positive",
-                  "singular"
-                ]
-              },
-              {
-                "form": "kedeligere",
-                "source": "Inflection",
-                "tags": [
-                  "comparative",
-                  "neuter",
-                  "singular"
-                ]
-              },
-              {
-                "form": "kedeligst",
-                "source": "Inflection",
-                "tags": [
-                  "neuter",
-                  "singular",
-                  "superlative"
-                ]
-              },
-              {
-                "form": "kedelige",
-                "source": "Inflection",
-                "tags": [
-                  "plural",
-                  "positive"
-                ]
-              },
-              {
-                "form": "kedeligere",
-                "source": "Inflection",
-                "tags": [
-                  "comparative",
-                  "plural"
-                ]
-              },
-              {
-                "form": "kedeligst",
-                "source": "Inflection",
-                "tags": [
-                  "plural",
-                  "superlative"
-                ]
-              },
-              {
-                "form": "kedelige",
-                "source": "Inflection",
-                "tags": [
-                  "attributive",
-                  "definite",
-                  "positive"
-                ]
-              },
-              {
-                "form": "kedeligere",
-                "source": "Inflection",
-                "tags": [
-                  "attributive",
-                  "comparative",
-                  "definite"
-                ]
-              },
-              {
-                "form": "kedeligste",
-                "source": "Inflection",
-                "tags": [
-                  "attributive",
-                  "definite",
-                  "superlative"
-                ]
-              }
+                {
+                    "form": "no-table-tags",
+                    "source": "Inflection",
+                    "tags": ["table-tags"],
+                },
+                {
+                    "form": "kedelig",
+                    "source": "Inflection",
+                    "tags": ["common-gender", "positive", "singular"],
+                },
+                {
+                    "form": "kedeligere",
+                    "source": "Inflection",
+                    "tags": ["common-gender", "comparative", "singular"],
+                },
+                {
+                    "form": "kedeligst",
+                    "source": "Inflection",
+                    "tags": ["common-gender", "singular", "superlative"],
+                },
+                {
+                    "form": "kedeligt",
+                    "source": "Inflection",
+                    "tags": ["neuter", "positive", "singular"],
+                },
+                {
+                    "form": "kedeligere",
+                    "source": "Inflection",
+                    "tags": ["comparative", "neuter", "singular"],
+                },
+                {
+                    "form": "kedeligst",
+                    "source": "Inflection",
+                    "tags": ["neuter", "singular", "superlative"],
+                },
+                {
+                    "form": "kedelige",
+                    "source": "Inflection",
+                    "tags": ["plural", "positive"],
+                },
+                {
+                    "form": "kedeligere",
+                    "source": "Inflection",
+                    "tags": ["comparative", "plural"],
+                },
+                {
+                    "form": "kedeligst",
+                    "source": "Inflection",
+                    "tags": ["plural", "superlative"],
+                },
+                {
+                    "form": "kedelige",
+                    "source": "Inflection",
+                    "tags": ["attributive", "definite", "positive"],
+                },
+                {
+                    "form": "kedeligere",
+                    "source": "Inflection",
+                    "tags": ["attributive", "comparative", "definite"],
+                },
+                {
+                    "form": "kedeligste",
+                    "source": "Inflection",
+                    "tags": ["attributive", "definite", "superlative"],
+                },
             ],
         }
         self.assertEqual(expected, ret)
 
     def test_Danish_adj2(self):
         # This also tests having forms identical to a tag/header in the table
-        ret = self.xinfl("negativ", "Danish", "adj", "Inflection", """
+        ret = self.xinfl(
+            "negativ",
+            "Danish",
+            "adj",
+            "Inflection",
+            """
 {| class="inflection-table+vsSwitcher" data-toggle-category="inflection" style="border%3A+solid+1px+%23CCCCFF%3B+text-align%3Aleft%3B" cellspacing="1" cellpadding="2"
 
 |- style="background%3A+%23CCCCFF%3B+vertical-align%3A+top%3B"
@@ -705,121 +621,75 @@ class InflTests(unittest.TestCase):
 
 
 |}
-""")
+""",  # noqa: E501
+        )
         expected = {
             "forms": [
-              {
-                "form": "no-table-tags",
-                "source": "Inflection",
-                "tags": [
-                  "table-tags"
-                ]
-              },
-              {
-                "form": "negativ",
-                "source": "Inflection",
-                "tags": [
-                  "common-gender",
-                  "positive",
-                  "singular"
-                ]
-              },
-              {
-                "form": "mere negativ",
-                "source": "Inflection",
-                "tags": [
-                  "common-gender",
-                  "comparative",
-                  "singular"
-                ]
-              },
-              {
-                "form": "mest negativ",
-                "source": "Inflection",
-                "tags": [
-                  "common-gender",
-                  "singular",
-                  "superlative"
-                ]
-              },
-              {
-                "form": "negativt",
-                "source": "Inflection",
-                "tags": [
-                  "neuter",
-                  "positive",
-                  "singular"
-                ]
-              },
-              {
-                "form": "mere negativ",
-                "source": "Inflection",
-                "tags": [
-                  "comparative",
-                  "neuter",
-                  "singular"
-                ]
-              },
-              {
-                "form": "mest negativ",
-                "source": "Inflection",
-                "tags": [
-                  "neuter",
-                  "singular",
-                  "superlative"
-                ]
-              },
-              {
-                "form": "negative",
-                "source": "Inflection",
-                "tags": [
-                  "plural",
-                  "positive"
-                ]
-              },
-              {
-                "form": "mere negativ",
-                "source": "Inflection",
-                "tags": [
-                  "comparative",
-                  "plural"
-                ]
-              },
-              {
-                "form": "mest negativ",
-                "source": "Inflection",
-                "tags": [
-                  "plural",
-                  "superlative"
-                ]
-              },
-              {
-                "form": "negative",
-                "source": "Inflection",
-                "tags": [
-                  "attributive",
-                  "definite",
-                  "positive"
-                ]
-              },
-              {
-                "form": "mere negativ",
-                "source": "Inflection",
-                "tags": [
-                  "attributive",
-                  "comparative",
-                  "definite"
-                ]
-              },
-              {
-                "form": "mest negative",
-                "source": "Inflection",
-                "tags": [
-                  "attributive",
-                  "definite",
-                  "superlative"
-                ]
-              }
+                {
+                    "form": "no-table-tags",
+                    "source": "Inflection",
+                    "tags": ["table-tags"],
+                },
+                {
+                    "form": "negativ",
+                    "source": "Inflection",
+                    "tags": ["common-gender", "positive", "singular"],
+                },
+                {
+                    "form": "mere negativ",
+                    "source": "Inflection",
+                    "tags": ["common-gender", "comparative", "singular"],
+                },
+                {
+                    "form": "mest negativ",
+                    "source": "Inflection",
+                    "tags": ["common-gender", "singular", "superlative"],
+                },
+                {
+                    "form": "negativt",
+                    "source": "Inflection",
+                    "tags": ["neuter", "positive", "singular"],
+                },
+                {
+                    "form": "mere negativ",
+                    "source": "Inflection",
+                    "tags": ["comparative", "neuter", "singular"],
+                },
+                {
+                    "form": "mest negativ",
+                    "source": "Inflection",
+                    "tags": ["neuter", "singular", "superlative"],
+                },
+                {
+                    "form": "negative",
+                    "source": "Inflection",
+                    "tags": ["plural", "positive"],
+                },
+                {
+                    "form": "mere negativ",
+                    "source": "Inflection",
+                    "tags": ["comparative", "plural"],
+                },
+                {
+                    "form": "mest negativ",
+                    "source": "Inflection",
+                    "tags": ["plural", "superlative"],
+                },
+                {
+                    "form": "negative",
+                    "source": "Inflection",
+                    "tags": ["attributive", "definite", "positive"],
+                },
+                {
+                    "form": "mere negativ",
+                    "source": "Inflection",
+                    "tags": ["attributive", "comparative", "definite"],
+                },
+                {
+                    "form": "mest negative",
+                    "source": "Inflection",
+                    "tags": ["attributive", "definite", "superlative"],
+                },
             ],
         }
         self.assertEqual(expected, ret)

@@ -7,7 +7,7 @@ import unittest
 
 from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
-from wiktextract.inflection import parse_inflection_section, TableContext
+from wiktextract.inflection import TableContext, parse_inflection_section
 from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.wxr_context import WiktextractContext
 
@@ -33,12 +33,25 @@ class InflTests(unittest.TestCase):
         tree = self.wxr.wtp.parse(text)
         data = {}
         tablecontext = TableContext("test-template-name")
-        parse_inflection_section(self.wxr, data, word, lang, pos,
-                                 section, tree, tablecontext=tablecontext)
+        parse_inflection_section(
+            self.wxr,
+            data,
+            word,
+            lang,
+            pos,
+            section,
+            tree,
+            tablecontext=tablecontext,
+        )
         return data
 
     def test_Swedish_noun1(self):
-        ret = self.xinfl("berg", "Swedish", "noun", "Declension", """
+        ret = self.xinfl(
+            "berg",
+            "Swedish",
+            "noun",
+            "Declension",
+            """
 {| class="inflection-table+vsSwitcher" data-toggle-category="inflection" style="border%3A+solid+1px+%23CCCCFF%3B+text-align%3Aleft%3B" cellspacing="1" cellpadding="2"
 
 |- style="background%3A+%23CCCCFF%3B+vertical-align%3A+top%3B"
@@ -66,32 +79,25 @@ class InflTests(unittest.TestCase):
 
 
 |}
-""")
+""",  # noqa: E501
+        )
         expected = {
             "forms": [
-              {
-                "form": "no-table-tags",
-                "source": "Declension",
-                "tags": [
-                  "table-tags"
-                ]
-              },
-              {
-                "form": "test-template-name",
-                "source": "Declension",
-                "tags": [
-                  "inflection-template"
-                ]
-              },
-              {
-                "form": "berg",
-                "source": "Declension",
-                "tags": [
-                  "indefinite",
-                  "nominative",
-                  "singular"
-                ]
-              },
+                {
+                    "form": "no-table-tags",
+                    "source": "Declension",
+                    "tags": ["table-tags"],
+                },
+                {
+                    "form": "test-template-name",
+                    "source": "Declension",
+                    "tags": ["inflection-template"],
+                },
+                {
+                    "form": "berg",
+                    "source": "Declension",
+                    "tags": ["indefinite", "nominative", "singular"],
+                },
             ],
         }
         self.assertEqual(expected, ret)

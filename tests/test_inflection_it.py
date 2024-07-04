@@ -388,7 +388,7 @@ class InflTests(unittest.TestCase):
 
 |}
 </div></div>[[Category:Italian irregular verbs|ESSERE]][[Category:Italian verbs with irregular past participles|ESSERE]]<ref name="essere1" />
-""")
+""")  # noqa: E501
         expected = {
             "forms": [
               {
@@ -1850,7 +1850,7 @@ class InflTests(unittest.TestCase):
 
 |}
 </div></div>
-""")
+""")  # noqa: E501
         expected = {
             "forms": [
               {

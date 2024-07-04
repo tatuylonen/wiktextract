@@ -25,7 +25,7 @@ class TestPronunciation(TestCase):
             10,
             """* [[w:官話|官話]]
 ** <small>([[w:現代標準漢語|現代標準漢語]])</small>
-*** <small>同音詞</small>：<table><tr><th>[展開/摺疊]</th></tr><tr><td><span class="Hani" lang="zh">[[大姑#漢語|大姑]]</span><br><span class="Hani" lang="zh">[[小姑#漢語|小姑]]</span></td></tr></table>""",
+*** <small>同音詞</small>：<table><tr><th>[展開/摺疊]</th></tr><tr><td><span class="Hani" lang="zh">[[大姑#漢語|大姑]]</span><br><span class="Hani" lang="zh">[[小姑#漢語|小姑]]</span></td></tr></table>"""  # noqa: E501,
         )
         root = self.wxr.wtp.parse("{{zh-pron}}")
         base_data = WordEntry(

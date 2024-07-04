@@ -294,7 +294,7 @@ class TestRUGloss(unittest.TestCase):
 |гипонимы=организм человека, организм животного; кибернетический организм
 |якорь=физиология
 |язык=ru
-}}""")
+}}""")  # noqa: E501
         word_entry = WordEntry(
             word="организм", lang="Русский", lang_code="ru", pos="noun"
         )

@@ -17,7 +17,7 @@ class TestZhTranslation(TestCase):
     def tearDown(self) -> None:
         self.wxr.wtp.close_db_conn()
         close_thesaurus_db(
-            self.wxr.thesaurus_db_path, self.wxr.thesaurus_db_conn
+            self.wxr.thesaurus_db_path, self.wxr.thesaurus_db_conn  # type:ignore[arg-type]
         )
 
     def test_t_template(self):
@@ -37,7 +37,7 @@ class TestZhTranslation(TestCase):
         wikitext = """{{trans-top|太陽上層大氣射出的超高速電漿流}}
 * 希伯来语：{{t+|he|רוח השמש|tr=ruakh ha-shemesh}}、{{t+|he|רוח סולרית|f|tr=ruakh solarit}}
 * 塞尔维亚-克罗地亚语：
-*: 西里尔字母：{{qualifier|Ekavian}} {{t+|sh|сунчев ветар|m}}"""
+*: 西里尔字母：{{qualifier|Ekavian}} {{t+|sh|сунчев ветар|m}}"""  # noqa: E501
         node = self.wxr.wtp.parse(wikitext)
         extract_translation(self.wxr, page_data, node)
         self.assertEqual(

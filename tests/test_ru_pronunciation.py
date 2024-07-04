@@ -1,4 +1,5 @@
 import unittest
+from typing import Callable
 
 from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
@@ -31,7 +32,7 @@ class TestRUPronunciation(unittest.TestCase):
     def process_template_and_assert(
         self,
         template: str,
-        process_function: callable,
+        process_function: Callable,
         expected_results: list[dict],
     ):
         self.wxr.wtp.start_page("")

@@ -774,7 +774,7 @@ class InflTests(unittest.TestCase):
 
 |}
 <sup style="color%3A+red">1</sup>At least one rare poetic syncopated perfect form is attested.<br>[[Category:Latin first conjugation verbs|ACCUSO]][[Category:Latin first conjugation verbs with perfect in -av-|ACCUSO]]
-""")
+""")  # noqa: E501
         expected = {
             "forms": [
               {
@@ -2446,7 +2446,7 @@ class InflTests(unittest.TestCase):
 *The ablative singular can be ''marī'' or ''mare''.
 *The genitive plural form *''marium'', although regularly formed for an i-stem noun, is not attested in the corpus of classical texts. ''Marum'' is found only once, in a line from Gnaeus Naevius.
 *The 5th/6th-century grammarian [[w:Priscian|Priscian]] (''Institutiones'' 7) says it is rarely used in the genitive plural, noting Caesar's use of ''maribus'' too. Similarly, the 4th-century grammarian [[w:Flavius Sosipater Charisius|Charisius]] claims it lacks both a genitive plural *''marium'' and a *''maribus'' form (but see the quotation from Julius Caesar above): <blockquote>''"maria" tamen quamvis dicantur pluraliter, attamen nec "marium" nec "maribus" dicemus'' <br>— although ''maria'' can be said in the plural, nevertheless we won't say ''marium'' nor ''maribus'' (''Ars'' 1.11).</blockquote>
-""")
+""")  # noqa: E501
         expected = {
             "forms": [
               {
@@ -2742,7 +2742,7 @@ class InflTests(unittest.TestCase):
 
 
 |}
-""")
+""")  # noqa: E501
         expected = {
             "forms": [
               {

@@ -47,3 +47,4 @@ class TagTests(unittest.TestCase):
     def test_asterisk_doubledot(self):
         r = convert_hiero("x*y:z")
         self.assertEqual(r, '\U00013437𓐍\U00013431𓏭\U00013438\U00013430𓊃')
+
