@@ -184,10 +184,11 @@ class TestPronunciation(TestCase):
             root.children[0],
             WordEntry(word="dictionnaire", lang_code="fr", lang="Français"),
         )
+        data = page_data[0].model_dump(exclude_defaults=True)
         self.assertEqual(
-            [s.model_dump(exclude_defaults=True) for s in page_data[0].sounds],
-            [{"ipa": "\\dik.sjɔ.nɛʁ\\", "rhymes": "\\ɛʁ\\"}],
+            data["sounds"], [{"ipa": "\\dik.sjɔ.nɛʁ\\", "rhymes": "\\ɛʁ\\"}]
         )
+        self.assertEqual(data["categories"], ["Rimes en français en \\ɛʁ\\"])
 
     def test_cmn_pron(self):
         # GH issue 620
