@@ -22,7 +22,7 @@ class TestInflection(TestCase):
     def tearDown(self) -> None:
         self.wxr.wtp.close_db_conn()
         close_thesaurus_db(
-            self.wxr.thesaurus_db_path, self.wxr.thesaurus_db_conn  # type:ignore[arg-type]
+            self.wxr.thesaurus_db_path, self.wxr.thesaurus_db_conn
         )
 
     @patch(
@@ -44,7 +44,7 @@ class TestInflection(TestCase):
     )
     def test_ja_i_template(self, mock_get_page) -> None:
         page_data = [
-            WordEntry(lang="日語", lang_code="ja", word="可笑しい", pos="adj")  # type:ignore[call-arg]
+            WordEntry(lang="日語", lang_code="ja", word="可笑しい", pos="adj")
         ]
         wikitext = "{{ja-i|可笑し|おかし|okashi}}"
         self.wxr.wtp.start_page("可笑しい")
