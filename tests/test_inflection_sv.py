@@ -32,12 +32,16 @@ class InflTests(unittest.TestCase):
         self.wxr.wtp.start_subsection(pos)
         tree = self.wxr.wtp.parse(text)
         data = {}
-        parse_inflection_section(self.wxr, data, word, lang, pos,
-                                 section, tree)
+        parse_inflection_section(self.wxr, data, word, lang, pos, section, tree)
         return data
 
     def test_Swedish_noun1(self):
-        ret = self.xinfl("berg", "Swedish", "noun", "Declension", """
+        ret = self.xinfl(
+            "berg",
+            "Swedish",
+            "noun",
+            "Declension",
+            """
 {| class="inflection-table+vsSwitcher" data-toggle-category="inflection" style="border%3A+solid+1px+%23CCCCFF%3B+text-align%3Aleft%3B" cellspacing="1" cellpadding="2"
 
 |- style="background%3A+%23CCCCFF%3B+vertical-align%3A+top%3B"
@@ -105,94 +109,66 @@ class InflTests(unittest.TestCase):
 
 
 |}
-""")
+""",  # noqa: E501
+        )
         expected = {
             "forms": [
-              {
-                "form": "no-table-tags",
-                "source": "Declension",
-                "tags": [
-                  "table-tags"
-                ]
-              },
-              {
-                "form": "berg",
-                "source": "Declension",
-                "tags": [
-                  "indefinite",
-                  "nominative",
-                  "singular"
-                ]
-              },
-              {
-                "form": "berget",
-                "source": "Declension",
-                "tags": [
-                  "definite",
-                  "nominative",
-                  "singular"
-                ]
-              },
-              {
-                "form": "berg",
-                "source": "Declension",
-                "tags": [
-                  "indefinite",
-                  "nominative",
-                  "plural"
-                ]
-              },
-              {
-                "form": "bergen",
-                "source": "Declension",
-                "tags": [
-                  "definite",
-                  "nominative",
-                  "plural"
-                ]
-              },
-              {
-                "form": "bergs",
-                "source": "Declension",
-                "tags": [
-                  "genitive",
-                  "indefinite",
-                  "singular"
-                ]
-              },
-              {
-                "form": "bergets",
-                "source": "Declension",
-                "tags": [
-                  "definite",
-                  "genitive",
-                  "singular"
-                ]
-              },
-              {
-                "form": "bergs",
-                "source": "Declension",
-                "tags": [
-                  "genitive",
-                  "indefinite",
-                  "plural"
-                ]
-              },
-              {
-                "form": "bergens",
-                "source": "Declension",
-                "tags": [
-                  "definite",
-                  "genitive",
-                  "plural"
-                ]
-              }
+                {
+                    "form": "no-table-tags",
+                    "source": "Declension",
+                    "tags": ["table-tags"],
+                },
+                {
+                    "form": "berg",
+                    "source": "Declension",
+                    "tags": ["indefinite", "nominative", "singular"],
+                },
+                {
+                    "form": "berget",
+                    "source": "Declension",
+                    "tags": ["definite", "nominative", "singular"],
+                },
+                {
+                    "form": "berg",
+                    "source": "Declension",
+                    "tags": ["indefinite", "nominative", "plural"],
+                },
+                {
+                    "form": "bergen",
+                    "source": "Declension",
+                    "tags": ["definite", "nominative", "plural"],
+                },
+                {
+                    "form": "bergs",
+                    "source": "Declension",
+                    "tags": ["genitive", "indefinite", "singular"],
+                },
+                {
+                    "form": "bergets",
+                    "source": "Declension",
+                    "tags": ["definite", "genitive", "singular"],
+                },
+                {
+                    "form": "bergs",
+                    "source": "Declension",
+                    "tags": ["genitive", "indefinite", "plural"],
+                },
+                {
+                    "form": "bergens",
+                    "source": "Declension",
+                    "tags": ["definite", "genitive", "plural"],
+                },
             ],
         }
         self.assertEqual(expected, ret)
 
     def test_Swedish_verb1(self):
-        ret = self.xinfl("kunna", "Swedish", "verb", "Conjugation", """
+        ret = self.xinfl(
+            "kunna",
+            "Swedish",
+            "verb",
+            "Conjugation",
+            """
 <div class="NavFrame" style="width%3A+54em%3B" data-toggle-category="inflection">
 <div class="NavHead">Conjugation of kunna (irregular)</div>
 <div class="NavContent">
@@ -353,145 +329,160 @@ class InflTests(unittest.TestCase):
 
 |}
 </div></div>[[Category:Swedish irregular verbs|KUNNA]]
-""")
+""",# noqa: E501
+        )
         expected = {
             "forms": [
-              {
-                "form": "irregular",
-                "source": "Conjugation",
-                "tags": [
-                  "table-tags"
-                ]
-              },
-              {
-                "form": "kunna",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "infinitive"
-                ]
-              },
-              {'form': '-',
-               'source': 'Conjugation',
-               'tags': ['infinitive', 'passive']},
-              {
-                "form": "kunnat",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "supine"
-                ]
-              },
-              {'form': '-',
-               'source': 'Conjugation',
-               'tags': ['passive', 'supine']},
-              {'form': '-',
-               'source': 'Conjugation',
-               'tags': ['active', 'imperative']},
-              {'form': '-',
-               'source': 'Conjugation',
-               'tags': ['imperative', 'passive']},
-              {'form': '-',
-               'source': 'Conjugation',
-               'tags': ['active', 'archaic', 'imperative', 'plural']},
-              {'form': '-',
-               'source': 'Conjugation',
-               'tags': ['archaic', 'imperative', 'passive', 'plural']},
-              {
-                "form": "kan",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "indicative",
-                  "present"
-                ]
-              },
-              {
-                "form": "kunde",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "indicative",
-                  "past"
-                ]
-              },
-              {'form': '-',
-               'source': 'Conjugation',
-               'tags': ['indicative', 'passive', 'present']},
-              {'form': '-',
-               'source': 'Conjugation',
-               'tags': ['indicative', 'passive', 'past']},
-              {
-                "form": "kunna",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "archaic",
-                  "indicative",
-                  "plural",
-                  "present"
-                ]
-              },
-              {
-                "form": "kunde",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "archaic",
-                  "indicative",
-                  "past",
-                  "plural"
-                ]
-              },
-              {'form': '-',
-               'source': 'Conjugation',
-               'tags': ['archaic', 'indicative', 'passive', 'plural', 'present']},
-              {'form': '-',
-               'source': 'Conjugation',
-               'tags': ['archaic', 'indicative', 'passive', 'past', 'plural']},
-              {
-                "form": "kunne",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "dated",
-                  "present",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "kunde",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "dated",
-                  "past",
-                  "subjunctive"
-                ]
-              },
-              {'form': '-',
-               'source': 'Conjugation',
-               'tags': ['dated', 'passive', 'present', 'subjunctive']},
-              {'form': '-',
-               'source': 'Conjugation',
-               'tags': ['dated', 'passive', 'past', 'subjunctive']},
-              {
-                "form": "kunnande",
-                "source": "Conjugation",
-                "tags": [
-                  "participle",
-                  "present"
-                ]
-              },
-              {'form': '-',
-               'source': 'Conjugation',
-               'tags': ['participle', 'past']}
+                {
+                    "form": "irregular",
+                    "source": "Conjugation",
+                    "tags": ["table-tags"],
+                },
+                {
+                    "form": "kunna",
+                    "source": "Conjugation",
+                    "tags": ["active", "infinitive"],
+                },
+                {
+                    "form": "-",
+                    "source": "Conjugation",
+                    "tags": ["infinitive", "passive"],
+                },
+                {
+                    "form": "kunnat",
+                    "source": "Conjugation",
+                    "tags": ["active", "supine"],
+                },
+                {
+                    "form": "-",
+                    "source": "Conjugation",
+                    "tags": ["passive", "supine"],
+                },
+                {
+                    "form": "-",
+                    "source": "Conjugation",
+                    "tags": ["active", "imperative"],
+                },
+                {
+                    "form": "-",
+                    "source": "Conjugation",
+                    "tags": ["imperative", "passive"],
+                },
+                {
+                    "form": "-",
+                    "source": "Conjugation",
+                    "tags": ["active", "archaic", "imperative", "plural"],
+                },
+                {
+                    "form": "-",
+                    "source": "Conjugation",
+                    "tags": ["archaic", "imperative", "passive", "plural"],
+                },
+                {
+                    "form": "kan",
+                    "source": "Conjugation",
+                    "tags": ["active", "indicative", "present"],
+                },
+                {
+                    "form": "kunde",
+                    "source": "Conjugation",
+                    "tags": ["active", "indicative", "past"],
+                },
+                {
+                    "form": "-",
+                    "source": "Conjugation",
+                    "tags": ["indicative", "passive", "present"],
+                },
+                {
+                    "form": "-",
+                    "source": "Conjugation",
+                    "tags": ["indicative", "passive", "past"],
+                },
+                {
+                    "form": "kunna",
+                    "source": "Conjugation",
+                    "tags": [
+                        "active",
+                        "archaic",
+                        "indicative",
+                        "plural",
+                        "present",
+                    ],
+                },
+                {
+                    "form": "kunde",
+                    "source": "Conjugation",
+                    "tags": [
+                        "active",
+                        "archaic",
+                        "indicative",
+                        "past",
+                        "plural",
+                    ],
+                },
+                {
+                    "form": "-",
+                    "source": "Conjugation",
+                    "tags": [
+                        "archaic",
+                        "indicative",
+                        "passive",
+                        "plural",
+                        "present",
+                    ],
+                },
+                {
+                    "form": "-",
+                    "source": "Conjugation",
+                    "tags": [
+                        "archaic",
+                        "indicative",
+                        "passive",
+                        "past",
+                        "plural",
+                    ],
+                },
+                {
+                    "form": "kunne",
+                    "source": "Conjugation",
+                    "tags": ["active", "dated", "present", "subjunctive"],
+                },
+                {
+                    "form": "kunde",
+                    "source": "Conjugation",
+                    "tags": ["active", "dated", "past", "subjunctive"],
+                },
+                {
+                    "form": "-",
+                    "source": "Conjugation",
+                    "tags": ["dated", "passive", "present", "subjunctive"],
+                },
+                {
+                    "form": "-",
+                    "source": "Conjugation",
+                    "tags": ["dated", "passive", "past", "subjunctive"],
+                },
+                {
+                    "form": "kunnande",
+                    "source": "Conjugation",
+                    "tags": ["participle", "present"],
+                },
+                {
+                    "form": "-",
+                    "source": "Conjugation",
+                    "tags": ["participle", "past"],
+                },
             ],
         }
         self.assertEqual(expected, ret)
 
     def test_Swedish_verb2(self):
-        ret = self.xinfl("simma", "Swedish", "verb", "Conjugation", """
+        ret = self.xinfl(
+            "simma",
+            "Swedish",
+            "verb",
+            "Conjugation",
+            """
 <div class="NavFrame" style="width%3A+54em%3B" data-toggle-category="inflection">
 <div class="NavHead">Conjugation of simma (weak)</div>
 <div class="NavContent">
@@ -812,387 +803,309 @@ class InflTests(unittest.TestCase):
 
 |}
 </div></div>[[Category:Swedish strong verbs|SIMMA]][[Category:Swedish class 3 strong verbs|SIMMA]]
-""")
+""",  # noqa: E501
+        )
         expected = {
             "forms": [
-              {
-                "form": "weak",
-                "source": "Conjugation",
-                "tags": [
-                  "table-tags"
-                ]
-              },
-              {
-                "form": "simma",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "infinitive"
-                ]
-              },
-              {
-                "form": "simmas",
-                "source": "Conjugation",
-                "tags": [
-                  "infinitive",
-                  "passive"
-                ]
-              },
-              {
-                "form": "simmat",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "supine"
-                ]
-              },
-              {
-                "form": "simmats",
-                "source": "Conjugation",
-                "tags": [
-                  "passive",
-                  "supine"
-                ]
-              },
-              {
-                "form": "simma",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperative"
-                ]
-              },
-              {'form': '-',
-               'source': 'Conjugation',
-               'tags': ['imperative', 'passive']},
-              {
-                "form": "simmen",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "archaic",
-                  "imperative",
-                  "plural"
-                ]
-              },
-              {'form': '-',
-               'source': 'Conjugation',
-               'tags': ['archaic', 'imperative', 'passive', 'plural']},
-              {
-                "form": "simmar",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "indicative",
-                  "present"
-                ]
-              },
-              {
-                "form": "simmade",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "indicative",
-                  "past"
-                ]
-              },
-              {
-                "form": "simmas",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "passive",
-                  "present"
-                ]
-              },
-              {
-                "form": "simmades",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "passive",
-                  "past"
-                ]
-              },
-              {
-                "form": "simma",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "archaic",
-                  "indicative",
-                  "plural",
-                  "present"
-                ]
-              },
-              {
-                "form": "simmade",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "archaic",
-                  "indicative",
-                  "past",
-                  "plural"
-                ]
-              },
-              {
-                "form": "simmas",
-                "source": "Conjugation",
-                "tags": [
-                  "archaic",
-                  "indicative",
-                  "passive",
-                  "plural",
-                  "present"
-                ]
-              },
-              {
-                "form": "simmades",
-                "source": "Conjugation",
-                "tags": [
-                  "archaic",
-                  "indicative",
-                  "passive",
-                  "past",
-                  "plural"
-                ]
-              },
-              {
-                "form": "simme",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "dated",
-                  "present",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "simmade",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "dated",
-                  "past",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "simmes",
-                "source": "Conjugation",
-                "tags": [
-                  "dated",
-                  "passive",
-                  "present",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "simmades",
-                "source": "Conjugation",
-                "tags": [
-                  "dated",
-                  "passive",
-                  "past",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "simmande",
-                "source": "Conjugation",
-                "tags": [
-                  "participle",
-                  "present"
-                ]
-              },
-              {
-                "form": "simmad",
-                "source": "Conjugation",
-                "tags": [
-                  "participle",
-                  "past"
-                ]
-              },
-              {
-                "form": "strong",
-                "source": "Conjugation",
-                "tags": [
-                  "table-tags"
-                ]
-              },
-              {
-                "form": "3 strong",
-                "source": "Conjugation",
-                "tags": [
-                  "class"
-                ]
-              },
-              {
-                "form": "simma",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "infinitive"
-                ]
-              },
-              {
-                "form": "simmas",
-                "source": "Conjugation",
-                "tags": [
-                  "infinitive",
-                  "passive"
-                ]
-              },
-              {
-                "form": "summit",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "supine"
-                ]
-              },
-              {
-                "form": "summits",
-                "source": "Conjugation",
-                "tags": [
-                  "passive",
-                  "supine"
-                ]
-              },
-              {
-                "form": "sim",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperative"
-                ]
-              },
-              {'form': '-',
-               'source': 'Conjugation',
-               'tags': ['imperative', 'passive']},
-              {'form': 'simmen',
-               'source': 'Conjugation',
-               'tags': ['active', 'archaic', 'imperative', 'plural']},
-              {'form': '-',
-               'source': 'Conjugation',
-               'tags': ['archaic', 'imperative', 'passive', 'plural']},
-              {
-                "form": "simmer",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "indicative",
-                  "present"
-                ]
-              },
-              {
-                "form": "sam",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "indicative",
-                  "past"
-                ]
-              },
-              {
-                "form": "sims",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "passive",
-                  "present"
-                ]
-              },
-              {
-                "form": "simmes",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "passive",
-                  "present"
-                ]
-              },
-              {
-                "form": "sams",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "passive",
-                  "past"
-                ]
-              },
-              {'form': 'simma',
-               'source': 'Conjugation',
-               'tags': ['active', 'archaic', 'indicative', 'plural', 'present']},
-              {
-                "form": "summo",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "archaic",
-                  "indicative",
-                  "past",
-                  "plural"
-                ]
-              },
-              {'form': 'simmas',
-               'source': 'Conjugation',
-               'tags': ['archaic', 'indicative', 'passive', 'plural', 'present']},
-             {
-                "form": "summos",
-                "source": "Conjugation",
-                "tags": [
-                  "archaic",
-                  "indicative",
-                  "passive",
-                  "past",
-                  "plural"
-                ]
-              },
-              {'form': 'simme',
-               'source': 'Conjugation',
-               'tags': ['active', 'dated', 'present', 'subjunctive']},
-              {
-                "form": "summe",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "dated",
-                  "past",
-                  "subjunctive"
-                ]
-              },
-              {'form': 'simmes',
-               'source': 'Conjugation',
-               'tags': ['dated', 'passive', 'present', 'subjunctive']},
-              {
-                "form": "summes",
-                "source": "Conjugation",
-                "tags": [
-                  "dated",
-                  "passive",
-                  "past",
-                  "subjunctive"
-                ]
-              },
-              {'form': 'simmande',
-               'source': 'Conjugation',
-               'tags': ['participle', 'present']},
-              {
-                "form": "summen",
-                "source": "Conjugation",
-                "tags": [
-                  "participle",
-                  "past"
-                ]
-              }
+                {
+                    "form": "weak",
+                    "source": "Conjugation",
+                    "tags": ["table-tags"],
+                },
+                {
+                    "form": "simma",
+                    "source": "Conjugation",
+                    "tags": ["active", "infinitive"],
+                },
+                {
+                    "form": "simmas",
+                    "source": "Conjugation",
+                    "tags": ["infinitive", "passive"],
+                },
+                {
+                    "form": "simmat",
+                    "source": "Conjugation",
+                    "tags": ["active", "supine"],
+                },
+                {
+                    "form": "simmats",
+                    "source": "Conjugation",
+                    "tags": ["passive", "supine"],
+                },
+                {
+                    "form": "simma",
+                    "source": "Conjugation",
+                    "tags": ["active", "imperative"],
+                },
+                {
+                    "form": "-",
+                    "source": "Conjugation",
+                    "tags": ["imperative", "passive"],
+                },
+                {
+                    "form": "simmen",
+                    "source": "Conjugation",
+                    "tags": ["active", "archaic", "imperative", "plural"],
+                },
+                {
+                    "form": "-",
+                    "source": "Conjugation",
+                    "tags": ["archaic", "imperative", "passive", "plural"],
+                },
+                {
+                    "form": "simmar",
+                    "source": "Conjugation",
+                    "tags": ["active", "indicative", "present"],
+                },
+                {
+                    "form": "simmade",
+                    "source": "Conjugation",
+                    "tags": ["active", "indicative", "past"],
+                },
+                {
+                    "form": "simmas",
+                    "source": "Conjugation",
+                    "tags": ["indicative", "passive", "present"],
+                },
+                {
+                    "form": "simmades",
+                    "source": "Conjugation",
+                    "tags": ["indicative", "passive", "past"],
+                },
+                {
+                    "form": "simma",
+                    "source": "Conjugation",
+                    "tags": [
+                        "active",
+                        "archaic",
+                        "indicative",
+                        "plural",
+                        "present",
+                    ],
+                },
+                {
+                    "form": "simmade",
+                    "source": "Conjugation",
+                    "tags": [
+                        "active",
+                        "archaic",
+                        "indicative",
+                        "past",
+                        "plural",
+                    ],
+                },
+                {
+                    "form": "simmas",
+                    "source": "Conjugation",
+                    "tags": [
+                        "archaic",
+                        "indicative",
+                        "passive",
+                        "plural",
+                        "present",
+                    ],
+                },
+                {
+                    "form": "simmades",
+                    "source": "Conjugation",
+                    "tags": [
+                        "archaic",
+                        "indicative",
+                        "passive",
+                        "past",
+                        "plural",
+                    ],
+                },
+                {
+                    "form": "simme",
+                    "source": "Conjugation",
+                    "tags": ["active", "dated", "present", "subjunctive"],
+                },
+                {
+                    "form": "simmade",
+                    "source": "Conjugation",
+                    "tags": ["active", "dated", "past", "subjunctive"],
+                },
+                {
+                    "form": "simmes",
+                    "source": "Conjugation",
+                    "tags": ["dated", "passive", "present", "subjunctive"],
+                },
+                {
+                    "form": "simmades",
+                    "source": "Conjugation",
+                    "tags": ["dated", "passive", "past", "subjunctive"],
+                },
+                {
+                    "form": "simmande",
+                    "source": "Conjugation",
+                    "tags": ["participle", "present"],
+                },
+                {
+                    "form": "simmad",
+                    "source": "Conjugation",
+                    "tags": ["participle", "past"],
+                },
+                {
+                    "form": "strong",
+                    "source": "Conjugation",
+                    "tags": ["table-tags"],
+                },
+                {
+                    "form": "3 strong",
+                    "source": "Conjugation",
+                    "tags": ["class"],
+                },
+                {
+                    "form": "simma",
+                    "source": "Conjugation",
+                    "tags": ["active", "infinitive"],
+                },
+                {
+                    "form": "simmas",
+                    "source": "Conjugation",
+                    "tags": ["infinitive", "passive"],
+                },
+                {
+                    "form": "summit",
+                    "source": "Conjugation",
+                    "tags": ["active", "supine"],
+                },
+                {
+                    "form": "summits",
+                    "source": "Conjugation",
+                    "tags": ["passive", "supine"],
+                },
+                {
+                    "form": "sim",
+                    "source": "Conjugation",
+                    "tags": ["active", "imperative"],
+                },
+                {
+                    "form": "-",
+                    "source": "Conjugation",
+                    "tags": ["imperative", "passive"],
+                },
+                {
+                    "form": "simmen",
+                    "source": "Conjugation",
+                    "tags": ["active", "archaic", "imperative", "plural"],
+                },
+                {
+                    "form": "-",
+                    "source": "Conjugation",
+                    "tags": ["archaic", "imperative", "passive", "plural"],
+                },
+                {
+                    "form": "simmer",
+                    "source": "Conjugation",
+                    "tags": ["active", "indicative", "present"],
+                },
+                {
+                    "form": "sam",
+                    "source": "Conjugation",
+                    "tags": ["active", "indicative", "past"],
+                },
+                {
+                    "form": "sims",
+                    "source": "Conjugation",
+                    "tags": ["indicative", "passive", "present"],
+                },
+                {
+                    "form": "simmes",
+                    "source": "Conjugation",
+                    "tags": ["indicative", "passive", "present"],
+                },
+                {
+                    "form": "sams",
+                    "source": "Conjugation",
+                    "tags": ["indicative", "passive", "past"],
+                },
+                {
+                    "form": "simma",
+                    "source": "Conjugation",
+                    "tags": [
+                        "active",
+                        "archaic",
+                        "indicative",
+                        "plural",
+                        "present",
+                    ],
+                },
+                {
+                    "form": "summo",
+                    "source": "Conjugation",
+                    "tags": [
+                        "active",
+                        "archaic",
+                        "indicative",
+                        "past",
+                        "plural",
+                    ],
+                },
+                {
+                    "form": "simmas",
+                    "source": "Conjugation",
+                    "tags": [
+                        "archaic",
+                        "indicative",
+                        "passive",
+                        "plural",
+                        "present",
+                    ],
+                },
+                {
+                    "form": "summos",
+                    "source": "Conjugation",
+                    "tags": [
+                        "archaic",
+                        "indicative",
+                        "passive",
+                        "past",
+                        "plural",
+                    ],
+                },
+                {
+                    "form": "simme",
+                    "source": "Conjugation",
+                    "tags": ["active", "dated", "present", "subjunctive"],
+                },
+                {
+                    "form": "summe",
+                    "source": "Conjugation",
+                    "tags": ["active", "dated", "past", "subjunctive"],
+                },
+                {
+                    "form": "simmes",
+                    "source": "Conjugation",
+                    "tags": ["dated", "passive", "present", "subjunctive"],
+                },
+                {
+                    "form": "summes",
+                    "source": "Conjugation",
+                    "tags": ["dated", "passive", "past", "subjunctive"],
+                },
+                {
+                    "form": "simmande",
+                    "source": "Conjugation",
+                    "tags": ["participle", "present"],
+                },
+                {
+                    "form": "summen",
+                    "source": "Conjugation",
+                    "tags": ["participle", "past"],
+                },
             ],
         }
         self.assertEqual(expected, ret)
 
     def test_Swedish_adj1(self):
-        ret = self.xinfl("vacker", "Swedish", "adj", "Declension", """
+        ret = self.xinfl(
+            "vacker",
+            "Swedish",
+            "adj",
+            "Declension",
+            """
 {| class="inflection-table+vsSwitcher" data-toggle-category="inflection" style="border%3A+solid+1px+%23CCCCFF%3B+text-align%3Aleft%3B" cellspacing="1" cellpadding="2"
 
 |- style="background%3A+%23CCCCFF%3B+vertical-align%3A+top%3B"
@@ -1318,193 +1231,151 @@ class InflTests(unittest.TestCase):
 
 
 |}
-""")
+""",  # noqa: E501
+        )
         expected = {
             "forms": [
-              {
-                "form": "no-table-tags",
-                "source": "Declension",
-                "tags": [
-                  "table-tags"
-                ]
-              },
-              {
-                "form": "vacker",
-                "source": "Declension",
-                "tags": [
-                  "common-gender",
-                  "indefinite",
-                  "positive",
-                  "singular"
-                ]
-              },
-              {
-                "form": "vackrare",
-                "source": "Declension",
-                "tags": [
-                  "common-gender",
-                  "comparative",
-                  "indefinite",
-                  "singular"
-                ]
-              },
-              {
-                "form": "vackrast",
-                "source": "Declension",
-                "tags": [
-                  "common-gender",
-                  "indefinite",
-                  "singular",
-                  "superlative"
-                ]
-              },
-              {
-                "form": "vackert",
-                "source": "Declension",
-                "tags": [
-                  "indefinite",
-                  "neuter",
-                  "positive",
-                  "singular"
-                ]
-              },
-              {
-                "form": "vackrare",
-                "source": "Declension",
-                "tags": [
-                  "comparative",
-                  "indefinite",
-                  "neuter",
-                  "singular"
-                ]
-              },
-              {
-                "form": "vackrast",
-                "source": "Declension",
-                "tags": [
-                  "indefinite",
-                  "neuter",
-                  "singular",
-                  "superlative"
-                ]
-              },
-              {
-                "form": "vackra",
-                "source": "Declension",
-                "tags": [
-                  "indefinite",
-                  "plural",
-                  "positive"
-                ]
-              },
-              {
-                "form": "vackrare",
-                "source": "Declension",
-                "tags": [
-                  "comparative",
-                  "indefinite",
-                  "plural"
-                ]
-              },
-              {
-                "form": "vackrast",
-                "source": "Declension",
-                "tags": [
-                  "indefinite",
-                  "plural",
-                  "superlative"
-                ]
-              },
-              {
-                "form": "vackre",
-                "source": "Declension",
-                "tags": [
-                  "indefinite",
-                  "masculine",
-                  "plural",
-                  "positive"
-                ]
-              },
-              {
-                "form": "vackrare",
-                "source": "Declension",
-                "tags": [
-                  "comparative",
-                  "indefinite",
-                  "masculine",
-                  "plural"
-                ]
-              },
-              {
-                "form": "vackrast",
-                "source": "Declension",
-                "tags": [
-                  "indefinite",
-                  "masculine",
-                  "plural",
-                  "superlative"
-                ]
-              },
-              {
-                "form": "vackre",
-                "source": "Declension",
-                "tags": [
-                  "definite",
-                  "masculine",
-                  "positive",
-                  "singular"
-                ]
-              },
-              {
-                "form": "vackrare",
-                "source": "Declension",
-                "tags": [
-                  "comparative",
-                  "definite",
-                  "masculine",
-                  "singular"
-                ]
-              },
-              {
-                "form": "vackraste",
-                "source": "Declension",
-                "tags": [
-                  "definite",
-                  "masculine",
-                  "singular",
-                  "superlative"
-                ]
-              },
-              {
-                "form": "vackra",
-                "source": "Declension",
-                "tags": [
-                  "definite",
-                  "positive"
-                ]
-              },
-              {
-                "form": "vackrare",
-                "source": "Declension",
-                "tags": [
-                  "comparative",
-                  "definite"
-                ]
-              },
-              {
-                "form": "vackraste",
-                "source": "Declension",
-                "tags": [
-                  "definite",
-                  "superlative"
-                ]
-              }
+                {
+                    "form": "no-table-tags",
+                    "source": "Declension",
+                    "tags": ["table-tags"],
+                },
+                {
+                    "form": "vacker",
+                    "source": "Declension",
+                    "tags": [
+                        "common-gender",
+                        "indefinite",
+                        "positive",
+                        "singular",
+                    ],
+                },
+                {
+                    "form": "vackrare",
+                    "source": "Declension",
+                    "tags": [
+                        "common-gender",
+                        "comparative",
+                        "indefinite",
+                        "singular",
+                    ],
+                },
+                {
+                    "form": "vackrast",
+                    "source": "Declension",
+                    "tags": [
+                        "common-gender",
+                        "indefinite",
+                        "singular",
+                        "superlative",
+                    ],
+                },
+                {
+                    "form": "vackert",
+                    "source": "Declension",
+                    "tags": ["indefinite", "neuter", "positive", "singular"],
+                },
+                {
+                    "form": "vackrare",
+                    "source": "Declension",
+                    "tags": ["comparative", "indefinite", "neuter", "singular"],
+                },
+                {
+                    "form": "vackrast",
+                    "source": "Declension",
+                    "tags": ["indefinite", "neuter", "singular", "superlative"],
+                },
+                {
+                    "form": "vackra",
+                    "source": "Declension",
+                    "tags": ["indefinite", "plural", "positive"],
+                },
+                {
+                    "form": "vackrare",
+                    "source": "Declension",
+                    "tags": ["comparative", "indefinite", "plural"],
+                },
+                {
+                    "form": "vackrast",
+                    "source": "Declension",
+                    "tags": ["indefinite", "plural", "superlative"],
+                },
+                {
+                    "form": "vackre",
+                    "source": "Declension",
+                    "tags": ["indefinite", "masculine", "plural", "positive"],
+                },
+                {
+                    "form": "vackrare",
+                    "source": "Declension",
+                    "tags": [
+                        "comparative",
+                        "indefinite",
+                        "masculine",
+                        "plural",
+                    ],
+                },
+                {
+                    "form": "vackrast",
+                    "source": "Declension",
+                    "tags": [
+                        "indefinite",
+                        "masculine",
+                        "plural",
+                        "superlative",
+                    ],
+                },
+                {
+                    "form": "vackre",
+                    "source": "Declension",
+                    "tags": ["definite", "masculine", "positive", "singular"],
+                },
+                {
+                    "form": "vackrare",
+                    "source": "Declension",
+                    "tags": [
+                        "comparative",
+                        "definite",
+                        "masculine",
+                        "singular",
+                    ],
+                },
+                {
+                    "form": "vackraste",
+                    "source": "Declension",
+                    "tags": [
+                        "definite",
+                        "masculine",
+                        "singular",
+                        "superlative",
+                    ],
+                },
+                {
+                    "form": "vackra",
+                    "source": "Declension",
+                    "tags": ["definite", "positive"],
+                },
+                {
+                    "form": "vackrare",
+                    "source": "Declension",
+                    "tags": ["comparative", "definite"],
+                },
+                {
+                    "form": "vackraste",
+                    "source": "Declension",
+                    "tags": ["definite", "superlative"],
+                },
             ],
         }
         self.assertEqual(expected, ret)
 
     def test_Swedish_noun2(self):
-        ret = self.xinfl("mos", "Swedish", "noun", "Declension", """
+        ret = self.xinfl(
+            "mos",
+            "Swedish",
+            "noun",
+            "Declension",
+            """
 {| class="inflection-table+vsSwitcher" data-toggle-category="inflection" style="border%3A+solid+1px+%23CCCCFF%3B+text-align%3Aleft%3B" cellspacing="1" cellpadding="2"
 
 |- style="background%3A+%23CCCCFF%3B+vertical-align%3Atop%3B"
@@ -1573,52 +1444,35 @@ class InflTests(unittest.TestCase):
 
 |}
 [[Category:Swedish nouns]]
-""")
+""",  # noqa: E501
+        )
         expected = {
             "forms": [
-              {
-                "form": "no-table-tags",
-                "source": "Declension",
-                "tags": [
-                  "table-tags"
-                ]
-              },
-              {
-                "form": "mos",
-                "source": "Declension",
-                "tags": [
-                  "indefinite",
-                  "nominative",
-                  "uncountable"
-                ]
-              },
-              {
-                "form": "moset",
-                "source": "Declension",
-                "tags": [
-                  "definite",
-                  "nominative",
-                  "uncountable"
-                ]
-              },
-              {
-                "form": "mos",
-                "source": "Declension",
-                "tags": [
-                  "genitive",
-                  "indefinite",
-                  "uncountable"
-                ]
-              },
-              {
-                "form": "mosets",
-                "source": "Declension",
-                "tags": [
-                  "definite",
-                  "genitive",
-                  "uncountable"
-                ]
-              }
+                {
+                    "form": "no-table-tags",
+                    "source": "Declension",
+                    "tags": ["table-tags"],
+                },
+                {
+                    "form": "mos",
+                    "source": "Declension",
+                    "tags": ["indefinite", "nominative", "uncountable"],
+                },
+                {
+                    "form": "moset",
+                    "source": "Declension",
+                    "tags": ["definite", "nominative", "uncountable"],
+                },
+                {
+                    "form": "mos",
+                    "source": "Declension",
+                    "tags": ["genitive", "indefinite", "uncountable"],
+                },
+                {
+                    "form": "mosets",
+                    "source": "Declension",
+                    "tags": ["definite", "genitive", "uncountable"],
+                },
             ],
         }
         self.assertEqual(expected, ret)

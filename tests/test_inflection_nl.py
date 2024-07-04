@@ -239,7 +239,7 @@ class InflTests(unittest.TestCase):
 
 |}
 [[Category:Dutch class 7 strong verbs|SLAPEN]][[Category:Dutch basic verbs|SLAPEN]]
-""")
+""")  # noqa: E501
         expected = {
             "forms": [
               {
@@ -609,7 +609,7 @@ class InflTests(unittest.TestCase):
 
 
 |}
-""")
+""")  # noqa: E501
         expected = {
             "forms": [
               {

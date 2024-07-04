@@ -129,7 +129,8 @@ class TestFrGloss(TestCase):
                             {
                                 "text": "这匹马很大。",
                                 "translation": "Ce cheval est grand.",
-                                "roman": "Zhè pǐ mǎ hěn dà.\n⠌⠢⠆ ⠏⠊⠄ ⠍⠔⠄ ⠓⠴⠄ ⠙⠔⠆⠐⠆",
+                                "roman": "Zhè pǐ mǎ hěn dà.\n"
+                                        "⠌⠢⠆ ⠏⠊⠄ ⠍⠔⠄ ⠓⠴⠄ ⠙⠔⠆⠐⠆",
                             }
                         ],
                     }
@@ -240,7 +241,7 @@ class TestFrGloss(TestCase):
 #* example 1
 ## [[salive|Salive]].
 ##* nest example
-            """
+            """  # noqa: E501
         )
         page_data = [WordEntry(word="test", lang_code="fr", lang="Français")]
         extract_gloss(self.wxr, page_data, root.children[0])
@@ -254,7 +255,8 @@ class TestFrGloss(TestCase):
                         }
                     ],
                     "glosses": [
-                        "Fluides, sérosités qui se trouvent ou qui se forment dans le corps de l’homme ou de l’animal."
+                        "Fluides, sérosités qui se trouvent ou qui se forment "
+                        "dans le corps de l’homme ou de l’animal."
                     ],
                 },
                 {
@@ -264,7 +266,8 @@ class TestFrGloss(TestCase):
                         }
                     ],
                     "glosses": [
-                        "Fluides, sérosités qui se trouvent ou qui se forment dans le corps de l’homme ou de l’animal.",
+                        "Fluides, sérosités qui se trouvent ou qui se forment "
+                            "dans le corps de l’homme ou de l’animal.",
                         "Salive.",
                     ],
                 },
@@ -290,7 +293,8 @@ class TestFrGloss(TestCase):
             [
                 {
                     "glosses": [
-                        "Autrice, femme qui a créé une œuvre littéraire. Écrivaine."
+                        "Autrice, femme qui a créé une œuvre littéraire. "
+                        "Écrivaine."
                     ],
                     "raw_tags": ["Absolument"],
                     "tags": ["rare"],
@@ -313,7 +317,8 @@ class TestFrGloss(TestCase):
             [
                 {
                     "glosses": ["Génitrice ; ascendante"],
-                    "note": "ce sens n’est plus guère utilisé que sous la forme de la locution « autrice de mes jours »",
+                    "note": "ce sens n’est plus guère utilisé que sous "
+                            "la forme de la locution « autrice de mes jours »",
                     "tags": ["rare"],
                 }
             ],
@@ -341,7 +346,8 @@ class TestFrGloss(TestCase):
             [
                 {
                     "glosses": [
-                        "Orthographe par contrainte typographique par système h de abaĵuro."
+                        "Orthographe par contrainte typographique par système "
+                        "h de abaĵuro."
                     ],
                     "alt_of": [{"word": "abaĵuro"}],
                 }
@@ -413,7 +419,7 @@ class TestFrGloss(TestCase):
                 """== {{langue|fr}} ==
 === {{S|verbe|fr|flexion}} ===
 # ''Première personne du singulier de l’indicatif présent du verbe'' [[diéser]].
-# ''Troisième personne du singulier de l’indicatif présent du verbe'' [[diéser]].""",
+# ''Troisième personne du singulier de l’indicatif présent du verbe'' [[diéser]].""",  # noqa:E501
             ),
             [
                 {
@@ -425,13 +431,15 @@ class TestFrGloss(TestCase):
                         {
                             "form_of": [{"word": "diéser"}],
                             "glosses": [
-                                "Première personne du singulier de l’indicatif présent du verbe diéser."
+                                "Première personne du singulier de "
+                                "l’indicatif présent du verbe diéser."
                             ],
                         },
                         {
                             "form_of": [{"word": "diéser"}],
                             "glosses": [
-                                "Troisième personne du singulier de l’indicatif présent du verbe diéser."
+                                "Troisième personne du singulier de "
+                                "l’indicatif présent du verbe diéser."
                             ],
                         },
                     ],

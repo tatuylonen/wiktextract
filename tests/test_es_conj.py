@@ -68,7 +68,7 @@ segunda conjugación,&nbsp;irregular</span>
 || [[ves|ves]]<sup><sup>tú</sup></sup><br/>[[ves|ves]]<sup><sup>vos</sup></sup>||[[ve|ve]]|| [[vemos]]
 || [[veis|veis]]
 || [[ven|ven]]
-|}""",
+|}""",  # noqa: E501
         )
         root = self.wxr.wtp.parse("{{es.v.conj.ver|v}}")
         word_entry = WordEntry(

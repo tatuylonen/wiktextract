@@ -7,7 +7,7 @@ import unittest
 
 from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
-from wiktextract.inflection import or_tagsets, and_tagsets
+from wiktextract.inflection import and_tagsets, or_tagsets
 from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.wxr_context import WiktextractContext
 

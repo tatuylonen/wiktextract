@@ -5,12 +5,11 @@
 # Copyright (c) 2021-2022 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 import unittest
-
 from unittest.mock import patch
 
 from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
-from wiktextract.inflection import expand_header, TableContext
+from wiktextract.inflection import TableContext, expand_header
 from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.wxr_context import WiktextractContext
 

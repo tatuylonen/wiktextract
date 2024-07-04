@@ -124,7 +124,7 @@ class InflTests(unittest.TestCase):
 
 </div>
 </div>[[Category:Arabic nouns with basic triptote singular|دمقس]]
-""")
+""")  # noqa: E501
         expected = {
             "forms": [
               {
@@ -874,7 +874,7 @@ class InflTests(unittest.TestCase):
 
 </div>
 </div><templatestyles src="Template%3Aar-conj%2Fstyle.css">[[Category:Arabic form-IV verbs|أبلع]][[Category:Arabic sound verbs by conjugation|أبلع]][[Category:Arabic sound form-IV verbs|أبلع]][[Category:Arabic sound verbs|أبلع]][[Category:Arabic verbs with full passive|أبلع]][[Category:Arabic transitive verbs|أبلع]]
-""")
+""")  # noqa: E501
         expected = {
             "forms": [
               {
@@ -2957,7 +2957,7 @@ class InflTests(unittest.TestCase):
 
 </div>
 </div>[[Category:Arabic adjectives with basic triptote singular|جاذب]][[Category:Arabic adjectives with triptote singular in -a|جاذب]][[Category:Arabic adjectives with sound masculine plural|جاذب]][[Category:Arabic adjectives with sound feminine plural|جاذب]][[Category:Arabic adjectives with broken plural|جاذب]][[Category:Arabic adjectives with basic diptote broken plural|جاذب]]
-""")
+""")  # noqa: E501
         expected = {
             "forms": [
               {

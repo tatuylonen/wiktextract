@@ -36,7 +36,7 @@ class TestESGloss(unittest.TestCase):
 
         root = self.wxr.wtp.parse(
             """;1: {{plm|contribuir}} [[esfuerzo]] o [[recurso]]s para la [[realización]] de algo.
-;2: Por antonomasia, [[cooperar]] a que alguno [[salir|salga]] de una [[situación]] [[dificultoso|dificultosa]]"""
+;2: Por antonomasia, [[cooperar]] a que alguno [[salir|salga]] de una [[situación]] [[dificultoso|dificultosa]]"""  # noqa: E501
         )
 
         page_data = self.get_default_page_data()
@@ -48,13 +48,15 @@ class TestESGloss(unittest.TestCase):
             [
                 {
                     "glosses": [
-                        "Contribuir esfuerzo o recursos para la realización de algo."
+                        "Contribuir esfuerzo o recursos para la realización "
+                        "de algo."
                     ],
                     "senseid": "1",
                 },
                 {
                     "glosses": [
-                        "Por antonomasia, cooperar a que alguno salga de una situación dificultosa"
+                        "Por antonomasia, cooperar a que alguno salga"
+                        " de una situación dificultosa"
                     ],
                     "senseid": "2",
                 },
@@ -84,7 +86,8 @@ class TestESGloss(unittest.TestCase):
             [
                 {
                     "glosses": [
-                        "Sentimiento afectivo de atracción, unión y afinidad que se experimenta hacia una persona, animal o cosa"
+                        "Sentimiento afectivo de atracción, unión y afinidad "
+                        "que se experimenta hacia una persona, animal o cosa"
                     ],
                     "senseid": "1",
                     "raw_tags": ["Humanidades"],
@@ -214,7 +217,9 @@ class TestESGloss(unittest.TestCase):
                     "senses": [
                         {
                             "glosses": [
-                                "Primera persona del singular (yo) del presente de indicativo de amigar o de amigarse."
+                                "Primera persona del singular (yo) del "
+                                "presente de indicativo de amigar "
+                                "o de amigarse."
                             ],
                             "form_of": [
                                 {"word": "amigar"},

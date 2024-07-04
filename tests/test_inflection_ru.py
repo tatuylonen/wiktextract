@@ -170,7 +170,7 @@ class InflTests(unittest.TestCase):
 
 |}
 </div></div></div>[[Category:Russian sibilant-stem stem-stressed adjectives|СЛЕДУЮЩИЙ]]
-""")
+""")  # noqa: E501
         expected = {
             "forms": [
               {
@@ -597,7 +597,7 @@ class InflTests(unittest.TestCase):
 
 </div>
 </div>[[Category:Russian class 4 verbs|ПРОИЗНОСИТЬ]][[Category:Russian class 4c verbs|ПРОИЗНОСИТЬ]][[Category:Russian imperfective verbs|ПРОИЗНОСИТЬ]][[Category:Russian transitive verbs|ПРОИЗНОСИТЬ]]
-""")
+""")  # noqa: E501
         expected = {
             "forms": [
               {

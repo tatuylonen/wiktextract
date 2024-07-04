@@ -71,7 +71,7 @@ class TestFrPage(TestCase):
 : Du latin anthracites.
 
 === {{S|nom|en}} ===
-# {{indénombrable|en}} [[anthracite#fr|Anthracite]].""",
+# {{indénombrable|en}} [[anthracite#fr|Anthracite]].""",  # noqa: E501
         )
         self.assertEqual(
             page_data,
@@ -92,7 +92,8 @@ class TestFrPage(TestCase):
                     "senses": [
                         {
                             "glosses": [
-                                "Variété de charbon de terre, à reflet métallique et à combustion lente."
+                                "Variété de charbon de terre, à reflet "
+                                "métallique et à combustion lente."
                             ],
                             "topics": ["petrography"],
                         }
@@ -115,7 +116,8 @@ class TestFrPage(TestCase):
                     "senses": [
                         {
                             "glosses": [
-                                "De couleur anthracite, gris très foncé, du nom de la variété de charbon du même nom."
+                                "De couleur anthracite, gris très foncé, "
+                                "du nom de la variété de charbon du même nom."
                             ]
                         }
                     ],

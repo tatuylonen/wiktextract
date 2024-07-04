@@ -116,7 +116,7 @@ class TestLinkage(TestCase):
 
 ==== Пословицы и поговорки ====
 * [[обжёгшись на молоке, дуют на воду]]
-** [[обжёгся на молоке, дует и на воду]]""")
+** [[обжёгся на молоке, дует и на воду]]""")  # noqa: E501
         extract_phrase_section(self.wxr, word_entry, root.children[0])
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in word_entry.derived],

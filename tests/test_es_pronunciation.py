@@ -37,7 +37,7 @@ class TestESPronunciation(unittest.TestCase):
 |-
 |'''rima'''
 |[[:Categoría:ES:Rimas:i.ɡo|i.ɡo]][[Categoría:ES:Rimas:i.ɡo]]
-|}""",
+|}""",  # noqa:E501
         )
         root = self.wxr.wtp.parse(
             "{{pron-graf|audio=LL-Q1321 (spa)-AdrianAbdulBaha-amigo.wav|aunota=Colombia}}"
@@ -83,7 +83,7 @@ class TestESPronunciation(unittest.TestCase):
         root = self.wxr.wtp.parse("""{{pron-graf|leng=en
 |pron=Reino Unido, Canadá|fono=ˈɒp.ə.zɪt|fono2=ˈɒp.ə.sɪt
 |2pron=EE. UU., Canadá|2fono=ˈɑ.pə.sɪt|2aunota=EE. UU.|2fono2=ˈɑp.sɪt|2fono3=ˈɑ.pə.zɪt
-|g=opposit|gnota=arcaica}}""")
+|g=opposit|gnota=arcaica}}""")  # noqa:E501
         word_entry = WordEntry(word="opposite", lang_code="en", lang="Inglés")
         process_pron_graf_template(self.wxr, word_entry, root.children[0])
         data = word_entry.model_dump(exclude_defaults=True)["sounds"]
@@ -133,7 +133,7 @@ class TestESPronunciation(unittest.TestCase):
 |-
 |'''transliteraciones'''
 |tsuki<ref>sustantivo, acepción 1</ref>,&nbsp;getsu<ref>sustantivo, acepción 2</ref>
-|}""",
+|}""",  # noqa:E501
         )
         root = self.wxr.wtp.parse(
             "{{pron-graf|leng=ja|tl1=tsuki|tlnota1=sustantivo, acepción 1|tl2=getsu|tlnota2=sustantivo, acepción 2}}"
@@ -158,7 +158,7 @@ class TestESPronunciation(unittest.TestCase):
 |-
 |'''homófonos'''
 |[[pour]],&nbsp;[[poor]]<ref>con la fusión pour-poor</ref>,&nbsp;[[paw]]<ref>no rótico, sin la fusión horse–hoarse</ref>
-|}""",
+|}""",  # noqa:E501
         )
         root = self.wxr.wtp.parse(
             """{{pron-graf|leng=en

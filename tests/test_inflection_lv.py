@@ -353,7 +353,7 @@ class InflTests(unittest.TestCase):
 
 |}
 </div></div>[[Category:Latvian first conjugation verbs]][[Category:Latvian first conjugation verbs in -t]][[Category:Latvian a/o/a-s/t type first conjugation verbs]][[Category:Latvian first conjugation verbs in -zt or -st]]
-""")
+""")  # noqa: E501
         expected = {
             "forms": [
               {
@@ -876,7 +876,7 @@ class InflTests(unittest.TestCase):
 
 |}
 </div></div>[[Category:Latvian sixth declension&#32;&#32;nouns]][[Category:Latvian&#32;&#32;noun forms]][[Category:Latvian non-alternating sixth declension&#32;&#32;nouns]]
-""")
+""")  # noqa: E501
         expected = {
             "forms": [
               {
@@ -1172,7 +1172,7 @@ class InflTests(unittest.TestCase):
 
 |}
 </div></div>
-""")
+""")  # noqa: E501
         expected = {
             "forms": [
               {

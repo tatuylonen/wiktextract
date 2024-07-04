@@ -6,8 +6,8 @@ import unittest
 
 from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
-from wiktextract.form_descriptions import parse_word_head
 from wiktextract.extractor.en.page import parse_language
+from wiktextract.form_descriptions import parse_word_head
 from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.wxr_context import WiktextractContext
 
@@ -721,7 +721,6 @@ class HeadTests(unittest.TestCase):
         self.assertTrue(HEAD_TAG_RE.fullmatch("ru-noun+") is not None)
 
     def test_head36(self):
-        data = {}
         self.wxr.wtp.add_page("Template:en-noun", 10,
             "[[big]], [[fat]], [[hairy]] [[deal]], "
             "(plural [[big, fat, hairy deals]])"

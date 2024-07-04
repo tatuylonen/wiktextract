@@ -3,7 +3,9 @@
 # Copyright (c) 2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 import unittest
+
 from wiktextract.form_descriptions import classify_desc
+
 
 class ClassifyTests(unittest.TestCase):
 
@@ -348,7 +350,10 @@ class ClassifyTests(unittest.TestCase):
         self.assertEqual(cls, "english")
 
     def test_classify79(self):
-        cls = classify_desc('merely announcing that the elimination of news programming [on tv channel TQS] will allow it to focus on "the production of quality entertainment and cultural programming"')
+        cls = classify_desc('merely announcing that the elimination of news '
+                            'programming [on tv channel TQS] will allow it to '
+                            'focus on "the production of quality entertainment '
+                            'and cultural programming"')
         self.assertEqual(cls, "english")
 
     def test_classify80(self):
@@ -360,11 +365,13 @@ class ClassifyTests(unittest.TestCase):
         self.assertEqual(cls, "romanization")
 
     def test_classify82(self):
-        cls = classify_desc("Police resort to DNA analysis in order to identify criminals.")
+        cls = classify_desc("Police resort to DNA analysis in order to "
+                            "identify criminals.")
         self.assertEqual(cls, "english")
 
     def test_classify83(self):
-        cls = classify_desc('"She will not be there tomorrow." ―"Oh, too bad, it\'s not important, we\'ll go on without her."')
+        cls = classify_desc('"She will not be there tomorrow." ―"Oh, too bad, '
+                            'it\'s not important, we\'ll go on without her."')
         self.assertEqual(cls, "english")
 
     def test_classify84(self):

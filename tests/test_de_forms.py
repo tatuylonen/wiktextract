@@ -240,7 +240,7 @@ class TestDeForms(TestCase):
 | [[haben|haben]]
 |-
 ! colspan="5" | <div>''All other forms:'' [[Flexion:sehen|Flexion:sehen]]</div>
-|}""",
+|}""",  # noqa: E501
         )
         self.wxr.wtp.add_page(
             "Flexion:sehen",
@@ -249,7 +249,7 @@ class TestDeForms(TestCase):
 {{Abgeleitete Verben|[[ansehen]], [[aufsehen]], [[umsehen]], [[versehen]]}}
 
 {{Deutsch Verb unregelmäßig|2=seh|3=sah|4=säh|5=gesehen|6=sieh|8=i|vp=ja|zp=ja|gerund=ja
-|Imperativ (du)=sieh!<br />siehe}}""",
+|Imperativ (du)=sieh!<br />siehe}}""",  # noqa: E501
         )
         self.wxr.wtp.add_page(
             "Vorlage:Deutsch Verb unregelmäßig",
@@ -282,7 +282,7 @@ class TestDeForms(TestCase):
 | [[Flexion:sehend|Flexion:sehend]]
 | [[Flexion:gesehen#gesehen (Deklination) (Deutsch)|Flexion:gesehen]]
 | [[Flexion:sehen/Gerundivum|Flexion:Gerundivum]]
-|}""",
+|}""",  # noqa: E501
         )
         root = self.wxr.wtp.parse("{{Deutsch Verb Übersicht}}")
         word_entry = WordEntry(

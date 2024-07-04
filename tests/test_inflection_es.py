@@ -494,7 +494,7 @@ class InflTests(unittest.TestCase):
 </div></div>
 </div></div>
 [[Category:Spanish verbs ending in -ir|INTERDECIR]][[Category:Spanish irregular verbs|INTERDECIR]][[Category:Spanish verbs with e-i alternation|INTERDECIR]]
-""")
+""")  # noqa: E501
         expected = {
             "forms": [
               {
@@ -1889,7 +1889,7 @@ class InflTests(unittest.TestCase):
 |}
 </div></div>
 [[Category:Spanish verbs ending in -ar|APOLTRONARSE]][[Category:Spanish reflexive verbs|APOLTRONARSE]]
-""")
+""")  # noqa: E501
         expected = {
             "forms": [
               {

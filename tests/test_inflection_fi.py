@@ -1112,7 +1112,7 @@ class InflTests(unittest.TestCase):
 
 |}
 [[Category:Finnish muistaa-type verbs|ARMAHTAA]]
-""")
+""")  # noqa: E501
         expected = {
             "forms": [
               {
@@ -3137,7 +3137,7 @@ class InflTests(unittest.TestCase):
 
 |}
 [[Category:Finnish kala-type nominals|AAMUPALA]]<templatestyles src="Module%3Afi-nominals%2Fstyle.css">
-""")
+""")  # noqa: E501
         expected = {
             "forms": [
               {

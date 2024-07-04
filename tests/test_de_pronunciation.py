@@ -93,7 +93,7 @@ class TestDEPronunciation(unittest.TestCase):
                 "expected": [
                     {
                         "audio": filename1,
-                        "mp3_url": None,  # None indicates we don't care about the exact value
+                        "mp3_url": None,  # None = we don't care about exact val
                         "ogg_url": None,
                     }
                 ],

@@ -1,7 +1,6 @@
 import unittest
 
 from wikitextprocessor import Wtp
-
 from wiktextract.config import WiktionaryConfig
 from wiktextract.datautils import split_at_comma_semi
 from wiktextract.thesaurus import close_thesaurus_db

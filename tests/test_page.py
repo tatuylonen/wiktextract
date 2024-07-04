@@ -270,7 +270,8 @@ foo
                             "glosses": ["sense 1"],
                             "examples": [
                                 {
-                                    "text": "example 1 causes sense 1 to get pushed"
+                                    "text": "example 1 causes sense "
+                                            "1 to get pushed"
                                 }
                             ],
                         },
@@ -341,7 +342,7 @@ foo
 
 # sense 1
 #: <dl><dd><span class="Jpan" lang="ja"><a href="/wiki/%E3%81%94%E9%A3%AF#Japanese" title="ご飯">ご<ruby>飯<rp>(</rp><rt>はん</rt><rp>)</rp></ruby></a>を<b><ruby>食<rp>(</rp><rt>た</rt><rp>)</rp></ruby>べる</b></span><dl><dd><i>go-han o <b>taberu</b></i></dd><dd>to <b>eat</b> a meal</dd></dl></dd></dl>
-""",
+""",  # noqa: E501
         )
         self.assertEqual(
             lst,
@@ -540,7 +541,7 @@ From cursive script of 車.
 ===Noun===
 {{en-noun|oxen|oxes|pl2qual=nonstandard}} {{catlangname|en|nouns with irregular plurals|two-letter words}}
 
-# An adult castrated male of cattle.""",
+# An adult castrated male of cattle.""",  # noqa: E501
         )
         self.assertEqual(
             data[0].get("senses"),

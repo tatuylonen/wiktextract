@@ -221,7 +221,7 @@ class TestPronunciation(TestCase):
 ** {{EFEO}} : {{lang|zh-Latn|tso, tso, tso}}
 ** {{Wade}} : {{lang|zh-Latn|tso<sup>1</sup>, tso<sup>2</sup>, tso<sup>4</sup>}}
 ** {{Yale-zh}} : {{lang|zh-Latn|dzwō, dzwó, dzwò}}
-** {{zhuyin}} : {{lang|zh-Bopomofo|ㄗㄨㄛ，ㄗㄨㄛˊ，ㄗㄨㄛˋ}}""",
+** {{zhuyin}} : {{lang|zh-Bopomofo|ㄗㄨㄛ，ㄗㄨㄛˊ，ㄗㄨㄛˋ}}""",  # noqa: E501
         )
         extract_pronunciation(
             self.wxr,

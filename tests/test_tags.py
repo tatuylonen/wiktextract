@@ -3,7 +3,9 @@
 # Copyright (c) 2020-2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 import unittest
+
 from wiktextract.form_descriptions import decode_tags
+
 
 class TagTests(unittest.TestCase):
 

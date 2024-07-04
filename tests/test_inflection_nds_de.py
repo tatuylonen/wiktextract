@@ -173,7 +173,7 @@ class InflTests(unittest.TestCase):
 
 |}
 </div></div>[[Category:Low German class 1 strong verbs]]
-""")
+""")  # noqa: E501
         expected = {
             "forms": [
               {

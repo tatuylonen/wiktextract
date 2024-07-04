@@ -133,4 +133,6 @@ class FormOfTests(unittest.TestCase):
         self.assertEqual(self.wxr.wtp.errors, [])
         self.assertEqual(self.wxr.wtp.warnings, [])
         self.assertEqual(self.wxr.wtp.debugs, [])
-        self.assertEqual(ret, (["Western-Armenian", "alt-of"], [{"word": "OK"}]))
+        self.assertEqual(
+            ret, (["Western-Armenian", "alt-of"], [{"word": "OK"}])
+        )

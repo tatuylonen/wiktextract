@@ -155,7 +155,7 @@ class InflTests(unittest.TestCase):
 <div style="display%3Ainline-block%3Btext-align%3Aleft%3Bpadding-left%3A1em%3Bpadding-right%3A1em">
 <strong><sup font-size:large>*</sup></strong>[[Wiktionary:Glossary#archaic|Archaic]] or [[Wiktionary:Glossary#obsolete|obsolete]].
 </div></div></div></div>
-""")
+""")  # noqa: E501
         expected = {
             "forms": [
               {
@@ -772,7 +772,7 @@ class InflTests(unittest.TestCase):
 
 |}
 </div></div>
-""")
+""")  # noqa: E501
         expected = {
             "forms": [
               {
@@ -2283,7 +2283,7 @@ class InflTests(unittest.TestCase):
 * Outside of Standard English, there is some variation in usage of some forms; some dialects, for example, use <i class="Latn+mention" lang="en">is</i> or <i class="Latn+mention" lang="en">’s</i> throughout the present indicative (supplanting, in whole or in part, <i class="Latn+mention" lang="en">am</i> and <i class="Latn+mention" lang="en">are</i>), and/or <i class="Latn+mention" lang="en">was</i> throughout the past indicative and past subjunctive (supplanting <i class="Latn+mention" lang="en">were</i>).
 
 </li>
-""")
+""")  # noqa: E501
         expected = {
             "forms": [
               {
@@ -3448,7 +3448,7 @@ class InflTests(unittest.TestCase):
 
 
 |}
-""")
+""")  # noqa: E501
         expected = {
             "forms": [
               {

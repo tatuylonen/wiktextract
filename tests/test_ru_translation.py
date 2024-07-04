@@ -34,7 +34,7 @@ class TestRUTranslation(unittest.TestCase):
 * [[Китайский]]<sub>zh</sub> (традиц.): <span lang="">''письменный'' [[俄文]] (Éwén), ''устный'' [[俄語]] (Éyǔ)</span>
 * [[Эсперанто]]<sup title='искусственный язык'>и</sup><sub>eo</sub>: <span lang="eo">[[rusa]]</span>
 * [[Латинский]]<sub>la</sub>: <span lang="la">[[lingua Ruthenica]] <i title="форма женского рода">ж.</i>, [[lingua Russica]] <i title="форма женского рода">ж.</i></span>
-|}""",
+|}""",  # noqa: E501
         )
         root = self.wxr.wtp.parse(
             """{{перев-блок|относящийся к России, россиянам

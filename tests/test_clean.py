@@ -14,7 +14,7 @@ class WiktExtractTests(unittest.TestCase):
     def tearDown(self) -> None:
         self.wxr.wtp.close_db_conn()
         close_thesaurus_db(
-            self.wxr.thesaurus_db_path, self.wxr.thesaurus_db_conn
+            self.wxr.thesaurus_db_path, self.wxr.thesaurus_db_conn  # type:ignore[arg-type]
         )
 
     def test_cv_plain(self):
@@ -75,7 +75,8 @@ class WiktExtractTests(unittest.TestCase):
         self.assertEqual(v, "This is a bar.")
 
     def test_cv_link5(self):
-        v = "([[w:Jurchen script|Jurchen script]]: , Image: [[FIle:Da (Jurchen script).png|25px]])"
+        v = ("([[w:Jurchen script|Jurchen script]]: , Image: [[FIle:Da "
+            "(Jurchen script).png|25px]])")
         v = clean_value(self.wxr, v)
         self.assertEqual(v, "(Jurchen script: , Image: )")
 
@@ -302,7 +303,7 @@ class WiktExtractTests(unittest.TestCase):
         self.assertEqual(v, "foo bar")
 
     def test_cv_misc1(self):
-        v = """<span style="font-style: normal;">[</span></span><span title="from Their First Rise and Settlement in the Island of Providence, to the Present Time. With the Remarkable Actions and Adventures of the Two Female Pyrates Mary Read and Anne Bonny; [...] To which is Added. A Short Abstract of the Statute and Civil Law, in Relation to Pyracy">  …\n      \n  </span><span class="q-hellip-b"><span style="font-style: normal;">]</span>"""
+        v = """<span style="font-style: normal;">[</span></span><span title="from Their First Rise and Settlement in the Island of Providence, to the Present Time. With the Remarkable Actions and Adventures of the Two Female Pyrates Mary Read and Anne Bonny; [...] To which is Added. A Short Abstract of the Statute and Civil Law, in Relation to Pyracy">  …\n      \n  </span><span class="q-hellip-b"><span style="font-style: normal;">]</span>"""  # noqa: E501
         v = clean_value(self.wxr, v)
         self.assertEqual(v, "[…]")
 

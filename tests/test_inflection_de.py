@@ -647,7 +647,7 @@ class InflTests(unittest.TestCase):
 
 |}
 </div></div>[[Category:German verbs with red links in their inflection tables|AUSSTEIGEN]]
-""")
+""")  # noqa: E501
         expected = {
             "forms": [
                 {
@@ -2210,7 +2210,7 @@ class InflTests(unittest.TestCase):
 
 |}
 <div style="text-align%3Aleft%3B+font-style%3A+italic%3B"><sup>1</sup>Now uncommon, [[Wiktionary:About German#Dative_singular_-e_in_noun_declension|see notes]]</div></div></div>
-""")
+""")  # noqa: E501
         expected = {
             "forms": [
               {
@@ -2573,7 +2573,7 @@ class InflTests(unittest.TestCase):
 
 |}
 </div></div>
-""")
+""")  # noqa: E501
         expected = {
             "forms": [
               {
@@ -3318,7 +3318,7 @@ class InflTests(unittest.TestCase):
 
 |}
 </div></div>
-""")
+""")  # noqa: E501
         expected = {
           "forms": [
               {

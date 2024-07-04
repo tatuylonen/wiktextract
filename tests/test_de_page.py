@@ -92,7 +92,8 @@ class TestDEPage(unittest.TestCase):
                     "senses": [
                         {
                             "glosses": [
-                                "Staat in Südosteuropa, im Süden der Balkanhalbinsel"
+                                "Staat in Südosteuropa, im Süden der "
+                                "Balkanhalbinsel"
                             ],
                             "senseid": "1",
                         }

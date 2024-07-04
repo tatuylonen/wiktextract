@@ -81,7 +81,8 @@ class TestDEGloss(unittest.TestCase):
                     "tags": ["jargon"],
                     "topics": ["technology"],
                     "glosses": [
-                        "etwas, was eine Maschine bearbeiten soll, an diese übergeben"
+                        "etwas, was eine Maschine bearbeiten soll, "
+                        "an diese übergeben"
                     ],
                     "senseid": "4",
                 },
@@ -98,12 +99,13 @@ class TestDEGloss(unittest.TestCase):
         self.wxr.wtp.add_page(
             "Vorlage:K",
             10,
-            "<i>[[juristisch]],&#32;nur in der Wendung „auf etwas erkennen“&#58;</i>",
+            "<i>[[juristisch]],&#32;nur in der Wendung "
+            "„auf etwas erkennen“&#58;</i>",
         )
         self.wxr.wtp.start_page("erkennen")
         root = self.wxr.wtp.parse(
             """===Bedeutungen===
-:[5] {{K|juristisch|ft=nur in der Wendung „auf etwas erkennen“}} im Rahmen eines Urteils ein benanntes Verbrechen bestätigen"""
+:[5] {{K|juristisch|ft=nur in der Wendung „auf etwas erkennen“}} im Rahmen eines Urteils ein benanntes Verbrechen bestätigen"""  # noqa: E501
         )
         word_entry = WordEntry(
             lang="Deutsch", lang_code="de", word="erkennen", pos="verb"
@@ -115,7 +117,8 @@ class TestDEGloss(unittest.TestCase):
                 {
                     "tags": ["law"],
                     "glosses": [
-                        "nur in der Wendung „auf etwas erkennen“: im Rahmen eines Urteils ein benanntes Verbrechen bestätigen"
+                        "nur in der Wendung „auf etwas erkennen“: im Rahmen "
+                        "eines Urteils ein benanntes Verbrechen bestätigen"
                     ],
                     "senseid": "5",
                 },
@@ -126,12 +129,12 @@ class TestDEGloss(unittest.TestCase):
         self.wxr.wtp.add_page(
             "Vorlage:K",
             10,
-            """<i>[[transitiv]]&#59;&#32;besonders&#32;[[bayrisch]],&#32;[[W:Österreichisches Deutsch|österreichisch]]&#58;</i>[[Kategorie:Verb transitiv&#32;(Deutsch)]][[Kategorie:Österreichisches Deutsch]]""",
+            """<i>[[transitiv]]&#59;&#32;besonders&#32;[[bayrisch]],&#32;[[W:Österreichisches Deutsch|österreichisch]]&#58;</i>[[Kategorie:Verb transitiv&#32;(Deutsch)]][[Kategorie:Österreichisches Deutsch]]""",  # noqa: E501
         )
         self.wxr.wtp.start_page("almen")
         root = self.wxr.wtp.parse(
             """===Bedeutungen===
-:[1] {{K|trans.|t1=;|besonders|t2=_|bayrisch|österr.}} [[Vieh]] auf der Alm halten"""
+:[1] {{K|trans.|t1=;|besonders|t2=_|bayrisch|österr.}} [[Vieh]] auf der Alm halten"""  # noqa: E501
         )
         word_entry = WordEntry(
             lang="Deutsch", lang_code="de", word="almen", pos="verb"
@@ -215,7 +218,7 @@ class TestDEGloss(unittest.TestCase):
         self.wxr.wtp.start_page("ARD")
         root = self.wxr.wtp.parse(
             """===Bedeutungen===
-:[2] {{K|Deutschland|Fernsehen}} {{ugs.}}, ''[[Kurzwort]], [[Akronym]]:'' für das erste Fernsehprogramm der ARD"""
+:[2] {{K|Deutschland|Fernsehen}} {{ugs.}}, ''[[Kurzwort]], [[Akronym]]:'' für das erste Fernsehprogramm der ARD"""  # noqa: E501
         )
         word_entry = WordEntry(
             lang="Deutsch", lang_code="de", word="ARD", pos="noun"
@@ -249,7 +252,7 @@ class TestDEGloss(unittest.TestCase):
 === {{Wortart|Deklinierte Form|Deutsch}} ===
 ====Grammatische Merkmale====
 *Nominativ Singular Femininum der starken Flexion des Positivs des Adjektivs '''[[konjugiert]]'''
-*Akkusativ Singular Femininum der starken Flexion des Positivs des Adjektivs '''[[konjugiert]]'''""",
+*Akkusativ Singular Femininum der starken Flexion des Positivs des Adjektivs '''[[konjugiert]]'''""",  # noqa: E501
             ),
             [
                 {
@@ -260,14 +263,16 @@ class TestDEGloss(unittest.TestCase):
                         {
                             "form_of": [{"word": "konjugiert"}],
                             "glosses": [
-                                "Nominativ Singular Femininum der starken Flexion des Positivs des Adjektivs konjugiert"
+                                "Nominativ Singular Femininum der starken "
+                                "Flexion des Positivs des Adjektivs konjugiert"
                             ],
                             "tags": ["nominative", "singular", "feminine"],
                         },
                         {
                             "form_of": [{"word": "konjugiert"}],
                             "glosses": [
-                                "Akkusativ Singular Femininum der starken Flexion des Positivs des Adjektivs konjugiert"
+                                "Akkusativ Singular Femininum der starken "
+                                "Flexion des Positivs des Adjektivs konjugiert"
                             ],
                             "tags": ["accusative", "singular", "feminine"],
                         },

@@ -97,7 +97,7 @@ class TestInflection(TestCase):
 |-
 | '''<span lang='en' xml:lang='en' class='lang-en'><bdi>ration</bdi></span>'''<br />[[Annexe:Prononciation/anglais|<span>\\ˈɹæʃ.ən\\</span>]]<br /><small>ou</small> [[Annexe:Prononciation/anglais|<span>\\ˈɹeɪʃ.ən\\</span>]]
 |  <bdi lang='en' xml:lang='en' class='lang-en'>[[rations#en-flex-nom|rations]]</bdi><br />[[Annexe:Prononciation/anglais|<span>\\ˈɹæʃ.ənz\\</span>]]<br /><small>ou</small> [[Annexe:Prononciation/anglais|<span>\\ˈɹeɪʃ.ənz\\</span>]]
-|}""",
+|}""",  # noqa: E501
         )
         self.wxr.wtp.start_page("ration")
         root = self.wxr.wtp.parse("{{en-nom-rég|ˈɹæʃ.ən|ˈɹeɪʃ.ən}}")
@@ -126,7 +126,7 @@ class TestInflection(TestCase):
 |-
 ! Infinitif
 | <span lang='en' xml:lang='en' class='lang-en'><bdi>to</bdi></span> '''<span lang='en' xml:lang='en' class='lang-en'><bdi>ration</bdi></span>'''<br />[[Annexe:Prononciation/anglais|<span>\\ˈɹæʃ.ən\\</span>]]<small> ou </small>[[Annexe:Prononciation/anglais|<span>\\ˈɹeɪʃ.ən\\</span>]]
-|}""",
+|}""",  # noqa: E501
         )
         self.wxr.wtp.start_page("ration")
         root = self.wxr.wtp.parse(
@@ -156,7 +156,7 @@ class TestInflection(TestCase):
 |-
 | [[animal]]<span><br /><span>\\<small><span>[//fr.wiktionary.org/w/index.php?title=ration&action=edit Prononciation ?]</span></small>\\</span></span>
 | [[animales]]<span><br /><span>\\<small><span>[//fr.wiktionary.org/w/index.php?title=ration&action=edit Prononciation ?]</span></small>\\</span></span>
-|}""",
+|}""",  # noqa: E501
         )
         self.wxr.wtp.start_page("animal")
         root = self.wxr.wtp.parse(
@@ -182,7 +182,7 @@ class TestInflection(TestCase):
 |-
 ! Traditionnel
 | <bdi lang="zh-Hant" xml:lang="zh-Hant" class="lang-zh-Hant">[[一萬#zh|一萬]]</bdi>
-|}""",
+|}""",  # noqa: E501
         )
         self.wxr.wtp.start_page("一万")
         root = self.wxr.wtp.parse("{{zh-formes|一万|一萬}}")
@@ -279,7 +279,7 @@ class TestInflection(TestCase):
 ! Féminin
 | [[enculée de ma race]]<br/>[[Annexe:Prononciation/français|<span>\\ɑ̃.ky.ˌle.də.ma.ˈʁas\\</span>]]
 | [[enculées de notre race]]<br/>[[Annexe:Prononciation/français|<span>\\ɑ̃.ky.ˌle.də.ma.ˈʁas\\</span>]]
-|}""",
+|}""",  # noqa: E501
         )
         self.wxr.wtp.start_page("enculé de ta race")
         root = self.wxr.wtp.parse(
@@ -334,7 +334,7 @@ class TestInflection(TestCase):
 ! Vocatif
 | colspan=2| <bdi lang="ro" xml:lang="ro" class="lang-ro">[[fenilule#ro-nom|fenilule]]</bdi>
 | colspan=2| <bdi lang="ro" xml:lang="ro" class="lang-ro">[[fenililor#ro-nom|fenililor]]</bdi>
-|}""",
+|}""",  # noqa: E501
         )
         self.wxr.wtp.start_page("fenil")
         root = self.wxr.wtp.parse(
@@ -395,7 +395,7 @@ class TestInflection(TestCase):
 ! Pluriel
 | class="plur-indef" |<bdi lang="sv" xml:lang="sv" class="lang-sv">[[robotar#sv|robotar]]</bdi>
 | class="plur-def" |<bdi lang="sv" xml:lang="sv" class="lang-sv">[[robotarna#sv|robotarna]]</bdi>
-|}""",
+|}""",  # noqa: E501
         )
         self.wxr.wtp.start_page("robot")
         root = self.wxr.wtp.parse("{{sv-nom-c-ar}}")
@@ -424,7 +424,7 @@ class TestInflection(TestCase):
 !scope="row"| Nominatif<nowiki />
 | [[robot#cs-nom|robot''' ''']]<nowiki />
 | [[roboti#cs-flex-nom|robot'''i ''']]<br /><small>''ou''</small> [[robotové#cs-flex-nom|robot'''ové ''']]<nowiki />
-|}""",
+|}""",  # noqa: E501
         )
         self.wxr.wtp.start_page("robot")
         root = self.wxr.wtp.parse("{{cs-décl-nom-ma-dur|rad=robot}}")
@@ -457,7 +457,7 @@ class TestInflection(TestCase):
 |-
 | class="titre" | Superlatif
 | <bdi lang="en" xml:lang="en" class="lang-en">[[newest#en|newest]]</bdi><br />[[Annexe:Prononciation/anglais|<span class="API" title="Prononciation API">\\ˈnu.ɪst\\</span>]]<small> ou </small>[[Annexe:Prononciation/anglais|<span class="API" title="Prononciation API">\\ˈnjuː.ɪst\\</span>]]
-|}""",
+|}""",  # noqa: E501
         )
         extract_inflection(self.wxr, page_data, root.children[0])
         self.assertEqual(

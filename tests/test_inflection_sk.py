@@ -170,7 +170,7 @@ class InflTests(unittest.TestCase):
 <td>—</td>
 </tr>
 </table></div></div>
-""")
+""")  # noqa: E501
         expected = {
             "forms": [
                 {

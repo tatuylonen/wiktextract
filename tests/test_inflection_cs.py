@@ -241,7 +241,7 @@ class InflTests(unittest.TestCase):
 |}
 
 </div></div></div>
-""")
+""")  # noqa: E501
         expected = {
           "forms": [
             {
@@ -840,7 +840,7 @@ class InflTests(unittest.TestCase):
 |}
 
 </div></div>
-""")
+""")  # noqa: E501
         expected = {
             "forms": [
               {
@@ -1216,7 +1216,7 @@ class InflTests(unittest.TestCase):
 
 |}
 </div></div>
-""")
+""")  # noqa: E501
         expected = {
             "forms": [
               {

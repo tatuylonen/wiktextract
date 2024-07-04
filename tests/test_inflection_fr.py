@@ -480,7 +480,7 @@ class InflTests(unittest.TestCase):
 </div>
 </div>
 [[Category:French third group verbs|AVOIR]][[Category:French irregular verbs|AVOIR]]
-""")
+""")  # noqa: E501
         expected = {
             "forms": [
               {
@@ -1572,7 +1572,7 @@ One special case is the future stem, used in the future and the conditional. Bef
 </div>
 </div>
 [[Category:French verbs with conjugation -é-er|BUDGETER]][[Category:French first group verbs|BUDGETER]]
-""")
+""")  # noqa: E501
         expected = {
             "forms": [
               {
@@ -2789,7 +2789,7 @@ This is a regular verb of the second conjugation, like finir, choisir, and most 
 </div>
 </div>
 [[Category:French verbs with conjugation -ir|SAURIR]][[Category:French second group verbs|SAURIR]]
-""")
+""")  # noqa: E501
         expected = {
             "forms": [
               {
