@@ -1,13 +1,13 @@
 from typing import Optional, Union
 
-from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import TemplateNode
+from wikitextprocessor.parser import NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from ..ruby import extract_ruby
 from .linkage import process_linkage_templates_in_gloss
 from .models import Example, Sense, WordEntry
+from .tags import translate_raw_tags
 
 LINKAGE_TEMPLATES = {
     "syn": "synonyms",
@@ -182,16 +182,17 @@ def extract_template_zh_x(
                 last_span_is_exmaple = False
                 if len(example_text) > 0:
                     raw_tag = clean_node(wxr, None, span_tag)
-                    results.append(
-                        Example(
-                            text=example_text,
-                            roman=pinyin,
-                            ref=ref,
-                            translation=translation,
-                            raw_tags=raw_tag.strip("[]").split("，"),
-                        )
+                    example = Example(
+                        text=example_text,
+                        roman=pinyin,
+                        ref=ref,
+                        translation=translation,
+                        raw_tags=raw_tag.strip("[]").split("，"),
                     )
+                    translate_raw_tags(example)
+                    results.append(example)
 
+    # no source, single line example
     if not has_dl_tag:
         pinyin = ""
         for span_tag in expanded_node.find_html(

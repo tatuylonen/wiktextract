@@ -260,8 +260,16 @@ LABEL_TAGS = {
     "主要用於肯定": "positive",
 }
 
+# example sentence template
+# https://zh.wiktionary.org/wiki/Template:Zh-x
+ZH_X_TAGS = {
+    "繁體": "Traditional Chinese",
+    "簡體": "Simplified Chinese",
+    "繁體和簡體": ["Traditional Chinese", "Simplified Chinese"],
+}
 
-ALL_TAGS = {**GRAMMATICAL_TAGS, **LABEL_TAGS}
+
+ALL_TAGS = {**GRAMMATICAL_TAGS, **LABEL_TAGS, **ZH_X_TAGS}
 
 
 def translate_raw_tags(data: WordEntry) -> WordEntry:
