@@ -60,11 +60,8 @@ def parse_section(
             if not isinstance(first_param, str):
                 continue
             section_type = first_param.lower()
-            subtitle = clean_node(
-                wxr,
-                page_data[-1] if len(page_data) > 0 else base_data,
-                level_node.largs,
-            )
+            title_categories = {}
+            subtitle = clean_node(wxr, title_categories, level_node.largs)
             wxr.wtp.start_subsection(subtitle)
             if section_type in IGNORED_SECTIONS:
                 for next_level_node in level_node.find_child(LEVEL_KIND_FLAGS):
@@ -80,6 +77,10 @@ def parse_section(
                     section_type,
                     subtitle,
                 )
+                if len(page_data) > 0:
+                    page_data[-1].categories.extend(
+                        title_categories.get("categories", [])
+                    )
             elif (
                 wxr.config.capture_etymologies
                 and section_type in ETYMOLOGY_SECTIONS

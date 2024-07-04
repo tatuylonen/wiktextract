@@ -37,8 +37,8 @@ class TestFrPage(TestCase):
             10,
             """{{#switch: {{{1}}}
 | étymologie = Étymologie
-| nom = Nom commun
-| adjectif = Adjectif
+| nom = Nom commun[[Catégorie:Noms communs en {{{2}}}]]
+| adjectif = Adjectif[[Catégorie:Adjectifs en {{{2}}}]]
 }}""",
         )
         self.wxr.wtp.add_page("Modèle:roches", 10, "''(Pétrographie)''")
@@ -78,6 +78,7 @@ class TestFrPage(TestCase):
             [
                 {
                     "categories": [
+                        "Noms communs en fr",
                         "Couleurs noires en français",
                         "Adjectifs invariables en français",
                         "Jurons du capitaine Haddock en français",
@@ -100,6 +101,7 @@ class TestFrPage(TestCase):
                 },
                 {
                     "categories": [
+                        "Adjectifs en fr",
                         "Couleurs noires en français",
                         "Adjectifs invariables en français",
                         "Jurons du capitaine Haddock en français",
@@ -120,6 +122,7 @@ class TestFrPage(TestCase):
                     "etymology_texts": ["(1549) Du latin anthracites."],
                 },
                 {
+                    "categories": ["Noms communs en en"],
                     "lang": "Anglais",
                     "lang_code": "en",
                     "pos": "noun",
