@@ -170,6 +170,8 @@ def process_exemple_template(
     )
     if len(example_data.text) > 0 and isinstance(gloss_data, Sense):
         gloss_data.examples.append(example_data)
+    if gloss_data is not None:
+        clean_node(wxr, gloss_data, node)
     return example_data
 
 

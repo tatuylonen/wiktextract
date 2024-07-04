@@ -1,11 +1,15 @@
 from typing import Any, Optional
 
-from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import LEVEL_KIND_FLAGS
-from wiktextract.page import clean_node
-from wiktextract.wxr_context import WiktextractContext
-from wiktextract.wxr_logging import logger
+from wikitextprocessor.parser import (
+    LEVEL_KIND_FLAGS,
+    NodeKind,
+    TemplateNode,
+    WikiNode,
+)
 
+from ...page import clean_node
+from ...wxr_context import WiktextractContext
+from ...wxr_logging import logger
 from .etymology import EtymologyData, extract_etymology, insert_etymology_data
 from .form_line import extract_form_line
 from .gloss import extract_gloss, process_exemple_template
@@ -52,17 +56,16 @@ def parse_section(
             # find the subtitle type by only checking the template parameter.
             # https://fr.wiktionary.org/wiki/Modèle:S
             # https://fr.wiktionary.org/wiki/Wiktionnaire:Liste_des_sections
-            section_type = level_node_template.template_parameters.get(
-                1, ""
-            ).lower()
-            subtitle = clean_node(
-                wxr,
-                page_data[-1] if len(page_data) > 0 else base_data,
-                level_node.largs,
-            )
+            first_param = level_node_template.template_parameters.get(1, "")
+            if not isinstance(first_param, str):
+                continue
+            section_type = first_param.lower()
+            title_categories = {}
+            subtitle = clean_node(wxr, title_categories, level_node.largs)
             wxr.wtp.start_subsection(subtitle)
             if section_type in IGNORED_SECTIONS:
-                pass
+                for next_level_node in level_node.find_child(LEVEL_KIND_FLAGS):
+                    parse_section(wxr, page_data, base_data, next_level_node)
             # POS parameters:
             # https://fr.wiktionary.org/wiki/Wiktionnaire:Liste_des_sections_de_types_de_mots
             elif section_type in POS_SECTIONS:
@@ -74,6 +77,10 @@ def parse_section(
                     section_type,
                     subtitle,
                 )
+                if len(page_data) > 0:
+                    page_data[-1].categories.extend(
+                        title_categories.get("categories", [])
+                    )
             elif (
                 wxr.config.capture_etymologies
                 and section_type in ETYMOLOGY_SECTIONS
@@ -118,6 +125,8 @@ def parse_section(
                 extract_note(wxr, page_data, level_node)
                 if page_data[-1] == base_data:
                     page_data.pop()  # no data was added
+
+    find_bottom_category_links(wxr, page_data, level_node)
 
 
 def process_pos_block(
@@ -245,3 +254,22 @@ def parse_page(
         if len(data.senses) == 0:
             data.senses.append(Sense(tags=["no-gloss"]))
     return [m.model_dump(exclude_defaults=True) for m in page_data]
+
+
+def find_bottom_category_links(
+    wxr: WiktextractContext, page_data: list[WordEntry], level_node: WikiNode
+) -> None:
+    if len(page_data) == 0:
+        return
+    categories = {}
+    for node in level_node.find_child(NodeKind.TEMPLATE | NodeKind.LINK):
+        if isinstance(node, TemplateNode) and node.template_name.endswith(
+            " entrée"
+        ):
+            clean_node(wxr, categories, node)
+        elif isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
+            clean_node(wxr, categories, node)
+
+    for data in page_data:
+        if data.lang_code == page_data[-1].lang_code:
+            data.categories.extend(categories.get("categories", []))

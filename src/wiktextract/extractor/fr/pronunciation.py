@@ -46,8 +46,12 @@ def extract_pronunciation(
         for sense_data in page_data:
             if sense_data.lang_code == lang_code:
                 sense_data.sounds.extend(sounds_list)
+                for sound in sounds_list:
+                    sense_data.categories.extend(sound.categories)
     else:
         page_data[-1].sounds.extend(sounds_list)
+        for sound in sounds_list:
+            page_data[-1].categories.extend(sound.categories)
 
 
 PRON_TEMPLATES = frozenset(
@@ -257,6 +261,7 @@ def process_pron_rimes_template(
     if len(raw_tags) > 0:
         sound.raw_tags = raw_tags[:]
     translate_raw_tags(sound)
+    clean_node(wxr, sound, expanded_node)
     return sound
 
 

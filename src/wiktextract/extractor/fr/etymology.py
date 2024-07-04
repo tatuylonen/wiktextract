@@ -1,4 +1,5 @@
 from collections import defaultdict
+from dataclasses import dataclass, field
 from typing import Optional
 
 from wikitextprocessor import NodeKind, WikiNode
@@ -8,13 +9,20 @@ from wiktextract.wxr_context import WiktextractContext
 
 from .models import WordEntry
 
-EtymologyData = dict[tuple[str, str], list[str]]
+
+@dataclass
+class EtymologyData:
+    texts: list[str] = field(default_factory=list)
+    categories: list[str] = field(default_factory=list)
+
+
+EtymologyDict = dict[tuple[str, str], EtymologyData]
 
 
 def extract_etymology(
     wxr: WiktextractContext, level_node: LevelNode, base_data: WordEntry
-) -> EtymologyData:
-    etymology_dict: EtymologyData = defaultdict(list)
+) -> EtymologyDict:
+    etymology_dict: EtymologyDict = defaultdict(EtymologyData)
     level_node_index = len(level_node.children)
     pos_id = ""
     pos_title = ""
@@ -30,28 +38,43 @@ def extract_etymology(
             for etymology_item in node.find_child(NodeKind.LIST_ITEM):
                 etymology_data = find_pos_in_etymology_list(wxr, etymology_item)
                 if etymology_data is not None:
-                    pos_id, pos_title, etymology_text = etymology_data
-                    if len(etymology_text) > 0:
-                        etymology_dict[(pos_id, pos_title)].append(
-                            etymology_text
-                        )
-                else:
-                    etymology_text = clean_node(
-                        wxr, None, etymology_item.children
+                    pos_id, pos_title, etymology_text, categories = (
+                        etymology_data
                     )
                     if len(etymology_text) > 0:
-                        etymology_dict[(pos_id, pos_title)].append(
+                        etymology_dict[(pos_id, pos_title)].texts.append(
                             etymology_text
+                        )
+                        etymology_dict[(pos_id, pos_title)].categories.extend(
+                            categories
+                        )
+                else:
+                    categories = {}
+                    etymology_text = clean_node(
+                        wxr, categories, etymology_item.children
+                    )
+                    if len(etymology_text) > 0:
+                        etymology_dict[(pos_id, pos_title)].texts.append(
+                            etymology_text
+                        )
+                        etymology_dict[(pos_id, pos_title)].categories.extend(
+                            categories.get("categories", [])
                         )
 
     if len(etymology_dict) == 0:
+        categories = {}
         etymology_text = clean_node(
-            wxr, None, level_node.children[:level_node_index]
+            wxr, categories, level_node.children[:level_node_index]
         )
         if len(etymology_text) > 0:
-            etymology_dict[("", "")].append(etymology_text)
+            etymology_dict[("", "")].texts.append(etymology_text)
+            etymology_dict[(pos_id, pos_title)].categories.extend(
+                categories.get("categories", [])
+            )
 
-    if etymology_dict.get(("", "")) == [" "]:
+    if ("", "") in etymology_dict and etymology_dict.get(("", "")).texts == [
+        " "
+    ]:
         # remove "ébauche-étym" template placeholder
         del etymology_dict[("", "")]
 
@@ -60,14 +83,17 @@ def extract_etymology(
 
 def find_pos_in_etymology_list(
     wxr: WiktextractContext, list_item_node: WikiNode
-) -> Optional[tuple[str, str, str]]:
+) -> Optional[tuple[str, str, str, list[str]]]:
     """
-    Return tuple of POS id, title, and etymology text if the passed list item
-    node starts with italic POS node or POS template, otherwise return `None`.
+    Return tuple of POS id, title, etymology text, categories if the passed
+    list item node starts with italic POS node or POS template, otherwise
+    return `None`.
     """
     for template_node in list_item_node.find_child(NodeKind.TEMPLATE):
         if template_node.template_name == "ébauche-étym":
-            return ("", "", " ")  # missing etymology
+            return ("", "", " ", [])  # missing etymology
+
+    categories = {}
 
     for index, node in list_item_node.find_child(
         NodeKind.TEMPLATE | NodeKind.LINK | NodeKind.ITALIC, True
@@ -89,8 +115,11 @@ def find_pos_in_etymology_list(
                             pos_id,
                             clean_node(wxr, None, link_node).strip(": "),
                             clean_node(
-                                wxr, None, list_item_node.children[index + 1 :]
+                                wxr,
+                                categories,
+                                list_item_node.children[index + 1 :],
                             ),
+                            categories.get("categories", []),
                         )
         elif (
             node.kind == NodeKind.LINK
@@ -101,7 +130,10 @@ def find_pos_in_etymology_list(
             return (
                 pos_id,
                 clean_node(wxr, None, node).strip(": "),
-                clean_node(wxr, None, list_item_node.children[index + 1 :]),
+                clean_node(
+                    wxr, categories, list_item_node.children[index + 1 :]
+                ),
+                categories.get("categories", []),
             )
         elif node.kind == NodeKind.ITALIC:
             for link_node in node.find_child(NodeKind.LINK):
@@ -113,13 +145,16 @@ def find_pos_in_etymology_list(
                         pos_id,
                         clean_node(wxr, None, link_node).strip(": "),
                         clean_node(
-                            wxr, None, list_item_node.children[index + 1 :]
+                            wxr,
+                            categories,
+                            list_item_node.children[index + 1 :],
                         ).lstrip(") "),
+                        categories.get("categories", []),
                     )
 
 
 def insert_etymology_data(
-    lang_code: str, page_data: list[WordEntry], etymology_data: EtymologyData
+    lang_code: str, page_data: list[WordEntry], etymology_dict: EtymologyDict
 ) -> None:
     """
     Insert list of etymology data extracted from the level 3 node to each sense
@@ -139,16 +174,18 @@ def insert_etymology_data(
                     sense_data
                 )
 
-    for pos_id_title, etymology_texts in etymology_data.items():
+    for pos_id_title, etymology_data in etymology_dict.items():
         if pos_id_title == ("", ""):  # add to all sense dictionaries
             for sense_data_list in sense_dict.values():
                 for sense_data in sense_data_list:
-                    sense_data.etymology_texts = etymology_texts
+                    sense_data.etymology_texts = etymology_data.texts
+                    sense_data.categories.extend(etymology_data.categories)
         else:
             for pos_key in pos_id_title:
                 if pos_key in sense_dict:
                     for sense_data in sense_dict[pos_key]:
-                        sense_data.etymology_texts = etymology_texts
+                        sense_data.etymology_texts = etymology_data.texts
+                        sense_data.categories.extend(etymology_data.categories)
 
 
 def extract_etymology_examples(
@@ -165,7 +202,7 @@ def extract_etymology_examples(
                 time = clean_node(wxr, None, template_node).strip("() ")
             elif template_node.template_name == "exemple":
                 example_data = process_exemple_template(
-                    wxr, template_node, None, time
+                    wxr, template_node, base_data, time
                 )
                 if example_data.text != "":
                     base_data.etymology_examples.append(example_data)
