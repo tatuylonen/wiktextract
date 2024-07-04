@@ -1,11 +1,15 @@
 from typing import Any, Optional
 
-from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import LEVEL_KIND_FLAGS
-from wiktextract.page import clean_node
-from wiktextract.wxr_context import WiktextractContext
-from wiktextract.wxr_logging import logger
+from wikitextprocessor.parser import (
+    LEVEL_KIND_FLAGS,
+    NodeKind,
+    TemplateNode,
+    WikiNode,
+)
 
+from ...page import clean_node
+from ...wxr_context import WiktextractContext
+from ...wxr_logging import logger
 from .etymology import EtymologyData, extract_etymology, insert_etymology_data
 from .form_line import extract_form_line
 from .gloss import extract_gloss, process_exemple_template
@@ -63,7 +67,8 @@ def parse_section(
             )
             wxr.wtp.start_subsection(subtitle)
             if section_type in IGNORED_SECTIONS:
-                pass
+                for next_level_node in level_node.find_child(LEVEL_KIND_FLAGS):
+                    parse_section(wxr, page_data, base_data, next_level_node)
             # POS parameters:
             # https://fr.wiktionary.org/wiki/Wiktionnaire:Liste_des_sections_de_types_de_mots
             elif section_type in POS_SECTIONS:
@@ -119,6 +124,8 @@ def parse_section(
                 extract_note(wxr, page_data, level_node)
                 if page_data[-1] == base_data:
                     page_data.pop()  # no data was added
+
+    find_bottom_category_links(wxr, page_data, level_node)
 
 
 def process_pos_block(
@@ -246,3 +253,22 @@ def parse_page(
         if len(data.senses) == 0:
             data.senses.append(Sense(tags=["no-gloss"]))
     return [m.model_dump(exclude_defaults=True) for m in page_data]
+
+
+def find_bottom_category_links(
+    wxr: WiktextractContext, page_data: list[WordEntry], level_node: WikiNode
+) -> None:
+    if len(page_data) == 0:
+        return
+    categories = {}
+    for node in level_node.find_child(NodeKind.TEMPLATE | NodeKind.LINK):
+        if isinstance(node, TemplateNode) and node.template_name.endswith(
+            " entrée"
+        ):
+            clean_node(wxr, categories, node)
+        elif isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
+            clean_node(wxr, categories, node)
+
+    for data in page_data:
+        if data.lang_code == page_data[-1].lang_code:
+            data.categories.extend(categories.get("categories", []))

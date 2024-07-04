@@ -57,6 +57,14 @@ class TestFrPage(TestCase):
 === {{S|adjectif|fr}} ===
 # De couleur anthracite, gris très foncé, du nom de la variété de charbon du même nom.
 
+=== {{S|références}} ===
+* {{Import:DAF8}}
+
+[[Catégorie:Couleurs noires en français]]
+[[Catégorie:Adjectifs invariables en français]]
+[[Catégorie:Jurons du capitaine Haddock en français]]
+[[Catégorie:Couleurs grises en français]]
+
 == {{langue|en}} ==
 
 === {{S|étymologie}} ===
@@ -69,6 +77,12 @@ class TestFrPage(TestCase):
             page_data,
             [
                 {
+                    "categories": [
+                        "Couleurs noires en français",
+                        "Adjectifs invariables en français",
+                        "Jurons du capitaine Haddock en français",
+                        "Couleurs grises en français",
+                    ],
                     "lang": "Français",
                     "lang_code": "fr",
                     "pos": "noun",
@@ -85,6 +99,12 @@ class TestFrPage(TestCase):
                     "etymology_texts": ["(1549) Du latin anthracites."],
                 },
                 {
+                    "categories": [
+                        "Couleurs noires en français",
+                        "Adjectifs invariables en français",
+                        "Jurons du capitaine Haddock en français",
+                        "Couleurs grises en français",
+                    ],
                     "lang": "Français",
                     "lang_code": "fr",
                     "pos": "adj",
