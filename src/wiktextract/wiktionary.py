@@ -14,9 +14,10 @@ import time
 import traceback
 from multiprocessing import Pool, current_process
 from pathlib import Path
-from typing import Optional, TextIO
+from typing import Optional, TextIO, Union
 
 from wikitextprocessor import Page
+from wikitextprocessor.core import CollatedErrorReturnData, ErrorMessageData
 from wikitextprocessor.dumpparser import process_dump
 
 from .page import parse_page
@@ -29,7 +30,9 @@ from .wxr_context import WiktextractContext
 from .wxr_logging import logger
 
 
-def page_handler(page: Page) -> tuple[list[dict], dict]:
+def page_handler(
+    page: Page,
+) -> tuple[list[dict[str, str]], CollatedErrorReturnData]:
     # Make sure there are no newlines or other strange characters in the
     # title.  They could cause security problems at several post-processing
     # steps.
@@ -60,7 +63,7 @@ def page_handler(page: Page) -> tuple[list[dict], dict]:
             else:
                 # XXX Sign gloss pages?
                 start_t = time.time()
-                page_data = parse_page(wxr, title, page.body)
+                page_data = parse_page(wxr, title, page.body)  # type: ignore[arg-type]
                 dur = time.time() - start_t
                 if dur > 100:
                     logger.warning(
@@ -88,9 +91,9 @@ def parse_wiktionary(
     namespace_ids: set[int],
     out_f: TextIO,
     human_readable: bool = False,
-    override_folders: Optional[list[str]] = None,
+    override_folders: Optional[Union[list[str], list[Path]]] = None,
     skip_extract_dump: bool = False,
-    save_pages_path: Optional[str] = None,
+    save_pages_path: Optional[Union[str, Path]] = None,
 ) -> None:
     """Parses Wiktionary from the dump file ``path`` (which should point
     to a "enwiktionary-<date>-pages-articles.xml.bz2" file.  This
@@ -163,7 +166,12 @@ def init_worker_process(worker_func, wxr: WiktextractContext) -> None:
 
 
 def check_error(
-    wxr: WiktextractContext, dt: dict, word: str, lang: str, pos: str, msg: str
+    wxr: WiktextractContext,
+    dt: dict,
+    word: Optional[str],
+    lang: Optional[str],
+    pos: Optional[str],
+    msg: str,
 ) -> None:
     """Formats and outputs an error message about data format checks."""
     msg += ": " + json.dumps(dt, sort_keys=True, ensure_ascii=False)
@@ -178,16 +186,16 @@ def check_error(
     config = wxr.config
     if len(config.debugs) > 100000:  # Avoid excessive size
         return
-    dt = {
+    error_data: ErrorMessageData = {
         "msg": msg,
         "trace": "",
         "title": word,
         "section": lang,
         "subsection": pos,
         "called_from": "wiktionary/179/20240425",
-        "path": [],
+        "path": tuple(),
     }
-    config.debugs.append(dt)
+    config.debugs.append(error_data)
 
 
 def check_tags(
@@ -725,14 +733,14 @@ def reprocess_wiktionary(
     # but is very fast.
     if (
         wxr.config.extract_thesaurus_pages
-        and thesaurus_linkage_number(wxr.thesaurus_db_conn) == 0
+        and thesaurus_linkage_number(wxr.thesaurus_db_conn) == 0  # type: ignore[arg-type]
     ):
         extract_thesaurus_data(wxr, num_processes)
 
     emitted = set()
-    process_ns_ids = list(
+    process_ns_ids: list[int] = list(
         {
-            wxr.wtp.NAMESPACE_DATA.get(ns, {}).get("id", 0)
+            wxr.wtp.NAMESPACE_DATA.get(ns, {}).get("id", 0)  # type: ignore[call-overload]
             for ns in wxr.config.extract_ns_names
         }
     )
@@ -770,7 +778,7 @@ def reprocess_wiktionary(
 
 
 def process_ns_page_title(page: Page, ns_name: str) -> tuple[str, str]:
-    text = page.body if page.body is not None else page.redirect_to
+    text: str = page.body if page.body is not None else page.redirect_to  # type: ignore[assignment]
     title = page.title[page.title.find(":") + 1 :]
     title = re.sub(r"(^|/)\.($|/)", r"\1__dotdot__\2", title)
     title = re.sub(r"(^|/)\.\.($|/)", r"\1__dotdot__\2", title)
@@ -789,17 +797,21 @@ def extract_namespace(
     logger.info(
         f"Extracting pages from namespace {namespace} to tar file {path}"
     )
-    ns_id = wxr.wtp.NAMESPACE_DATA.get(namespace, {}).get("id")
+    ns_id: int = wxr.wtp.NAMESPACE_DATA.get(namespace, {}).get("id")  # type: ignore[assignment, call-overload]
     t = time.time()
     with tarfile.open(path, "w") as tarf:
         for page in wxr.wtp.get_all_pages([ns_id]):
+            text: Union[str, bytes]
             title, text = process_ns_page_title(page, namespace)
             text = text.encode("utf-8")
             f = io.BytesIO(text)
             title += ".txt"
             ti = tarfile.TarInfo(name=title)
             ti.size = len(text)
-            ti.mtime = t
+            # According to documentation, TarInfo.mtime can be int, float,
+            # or even None in newer versions, but mypy can't tell because
+            # it's not annotated and assumes it can only be int
+            ti.mtime = t  # type: ignore[assignment]
             ti.uid = 0
             ti.gid = 0
             ti.type = tarfile.REGTYPE

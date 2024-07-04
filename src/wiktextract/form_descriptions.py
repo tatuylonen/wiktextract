@@ -53,6 +53,7 @@ from .tags import (
 )
 from .taxondata import known_species
 from .topics import topic_generalize_map, valid_topics
+from .type_utils import TranslationData
 
 # Tokenizer for classify_desc()
 tokenizer = TweetTokenizer()
@@ -2707,7 +2708,7 @@ def parse_pronunciation_tags(
 
 
 def parse_translation_desc(
-    wxr: WiktextractContext, lang: str, text: str, tr: str
+    wxr: WiktextractContext, lang: str, text: str, tr: TranslationData
 ) -> None:
     assert isinstance(wxr, WiktextractContext)
     assert isinstance(lang, str)  # The language of ``text``

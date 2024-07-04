@@ -68,7 +68,7 @@ def process_single_page(
     else:
         # Get page content from database
         title = path_or_title
-        text = wxr.wtp.get_page_body(title, 0)
+        text = wxr.wtp.get_page_body(title, 0)  # type: ignore[assignment]
         if text is None:
             logger.error(f"Can't find page '{title}' in the database.")
             return
@@ -79,7 +79,7 @@ def process_single_page(
     if (
         args.use_thesaurus
         and wxr.config.extract_thesaurus_pages
-        and thesaurus_linkage_number(wxr.thesaurus_db_conn) == 0
+        and thesaurus_linkage_number(wxr.thesaurus_db_conn) == 0  # type: ignore[arg-type]
     ):
         extract_thesaurus_data(wxr)
     # Parse the page
