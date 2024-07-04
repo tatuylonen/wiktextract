@@ -25,17 +25,12 @@ class TestGloss(TestCase):
     def tearDown(self) -> None:
         self.wxr.wtp.close_db_conn()
         close_thesaurus_db(
-            self.wxr.thesaurus_db_path, self.wxr.thesaurus_db_conn  # type:ignore[arg-type]
+            self.wxr.thesaurus_db_path, self.wxr.thesaurus_db_conn
         )
 
     def test_example_list(self) -> None:
         page_data = [
-            WordEntry(
-                lang="日語",  # type:ignore[call-arg]
-                lang_code="ja",  # type:ignore[call-arg]
-                word="可笑しい",  # type:ignore[call-arg]
-                pos="adj",  # type:ignore[call-arg]
-            )
+            WordEntry(lang="日語", lang_code="ja", word="可笑しい", pos="adj")
         ]
         wikitext = """# [[好玩]]的：
 ## 有趣的，滑稽的，可笑的
@@ -49,7 +44,7 @@ class TestGloss(TestCase):
         self.wxr.wtp.start_page("可笑しい")
         self.wxr.wtp.add_page("Template:lb", 10, "({{{2|}}})")
         node = self.wxr.wtp.parse(wikitext)
-        extract_gloss(self.wxr, page_data, node.children[0], Sense())  # type:ignore[arg-type, call-arg]
+        extract_gloss(self.wxr, page_data, node.children[0], Sense())
         self.assertEqual(
             [s.model_dump(exclude_defaults=True) for s in page_data[0].senses],
             [
@@ -83,7 +78,7 @@ class TestGloss(TestCase):
         mock_process_pos_block,
     ) -> None:
         node = WikiNode(NodeKind.LEVEL3, 0)
-        base_data = WordEntry(word="", lang_code="", lang="", pos="")  # type:ignore[call-arg]
+        base_data = WordEntry(word="", lang_code="", lang="", pos="")
         parse_section(self.wxr, [base_data], base_data, node)
         mock_process_pos_block.assert_called()
 
@@ -97,7 +92,7 @@ class TestGloss(TestCase):
         mock_process_pos_block,
     ) -> None:
         node = WikiNode(NodeKind.LEVEL3, 0)
-        base_data = WordEntry(word="", lang_code="", lang="", pos="")  # type:ignore[call-arg]
+        base_data = WordEntry(word="", lang_code="", lang="", pos="")
         parse_section(self.wxr, [base_data], base_data, node)
         mock_process_pos_block.assert_called()
 
@@ -223,7 +218,11 @@ class TestGloss(TestCase):
 
     def test_two_label_topics(self):
         self.wxr.wtp.start_page("DOS")
-        self.wxr.wtp.add_page("Template:lb", 10, "(計算機, 網路)")
+        self.wxr.wtp.add_page(
+            "Template:lb",
+            10,
+            "(計算機[[Category:英語 計算機|DOS]], 網路[[Category:英語 網路|DOS]])",
+        )
         self.wxr.wtp.add_page(
             "Template:init of",
             10,
@@ -238,6 +237,7 @@ class TestGloss(TestCase):
             page_data[0].model_dump(exclude_defaults=True)["senses"],
             [
                 {
+                    "categories": ["英語 計算機", "英語 網路"],
                     "form_of": [{"word": "denial of service"}],
                     "glosses": [
                         "denial of service (“拒絕服務”)之首字母縮略詞。"
@@ -341,7 +341,7 @@ class TestGloss(TestCase):
             10,
             """<small></small><span class='form-of-definition-link'><i class="Latn mention" lang="pt">[[lindar#葡萄牙語|-{lindar}-]]</i></span><span class='form-of-definition use-with-mention'> 的屈折变化形式：</span>
 ## <span class='form-of-definition use-with-mention'>[[Appendix:Glossary#third_person|第三人稱]][[Appendix:Glossary#singular_number|單數]][[Appendix:Glossary#present_tense|現在時]][[Appendix:Glossary#indicative_mood|直陳式]]</span>
-## <span class='form-of-definition use-with-mention'>[[Appendix:Glossary#second_person|第二人稱]][[Appendix:Glossary#singular_number|單數]][[Appendix:Glossary#imperative_mood|命令式]]</span>""",  # noqa: E501
+## <span class='form-of-definition use-with-mention'>[[Appendix:Glossary#second_person|第二人稱]][[Appendix:Glossary#singular_number|單數]][[Appendix:Glossary#imperative_mood|命令式]]</span>""",
         )
         root = self.wxr.wtp.parse("# {{pt-verb form of|lindar}}")
         page_data = [WordEntry(word="", lang_code="", lang="", pos="")]
@@ -387,7 +387,7 @@ class TestGloss(TestCase):
         self.wxr.wtp.add_page(
             "Template:hanja form of",
             10,
-            """<span class="Kore" lang="ko">[[대가#朝鮮語|-{대가}-]]</span> <span class="mention-gloss-paren annotation-paren">(</span><span lang="ko-Latn" class="tr Latn">daega</span><span class="mention-gloss-paren annotation-paren">)</span><span class="use-with-mention">的漢字<sup>[[附錄:韓字|?]]</sup></span>：[[大師]]；[[名門望族]]。"""  # noqa: E501,
+            """<span class="Kore" lang="ko">[[대가#朝鮮語|-{대가}-]]</span> <span class="mention-gloss-paren annotation-paren">(</span><span lang="ko-Latn" class="tr Latn">daega</span><span class="mention-gloss-paren annotation-paren">)</span><span class="use-with-mention">的漢字<sup>[[附錄:韓字|?]]</sup></span>：[[大師]]；[[名門望族]]。""",
         )
         root = self.wxr.wtp.parse(
             "# {{hanja form of|대가|[[大師]]；[[名門望族]]}}"
@@ -412,7 +412,7 @@ class TestGloss(TestCase):
         self.wxr.wtp.add_page(
             "Template:han tu form of",
             10,
-            """<span class="use-with-mention"><i class="Latn mention" lang="vi">[[đại gia#越南語|-{đại gia}-]]</i> <span class="mention-gloss-paren annotation-paren">(</span><span class="mention-gloss-double-quote">“</span><span class="mention-gloss">[[富人]]；[[偉人]]</span><span class="mention-gloss-double-quote">”</span><span class="mention-gloss-paren annotation-paren">)</span>的[[漢字]]。</span>[[Category:儒字]]""",  # noqa: E501
+            """<span class="use-with-mention"><i class="Latn mention" lang="vi">[[đại gia#越南語|-{đại gia}-]]</i> <span class="mention-gloss-paren annotation-paren">(</span><span class="mention-gloss-double-quote">“</span><span class="mention-gloss">[[富人]]；[[偉人]]</span><span class="mention-gloss-double-quote">”</span><span class="mention-gloss-paren annotation-paren">)</span>的[[漢字]]。</span>[[Category:儒字]]""",
         )
         root = self.wxr.wtp.parse(
             "# {{han tu form of|đại gia|[[富人]]；[[偉人]]}}"
@@ -438,7 +438,7 @@ class TestGloss(TestCase):
         self.wxr.wtp.add_page(
             "Template:es-verb form of",
             10,
-            """<small></small><span class='use-with-mention'>僅用於<i class="Latn mention" lang="es">[[te#西班牙語|-{te}-]] [[ababillares#西班牙語|-{ababillares}-]]</i></span>；<span class='form-of-definition-link'><i class="Latn mention" lang="es">[[ababillarse#西班牙語|-{ababillarse}-]]</i></span><span class='form-of-definition use-with-mention'> 的[[Appendix:Glossary#second_person|第二人稱]][[Appendix:Glossary#singular_number|單數]][[Appendix:Glossary#future_tense|將來時]][[Appendix:Glossary#subjunctive_mood|虛擬式]]</span>"""  # noqa: E501,
+            """<small></small><span class='use-with-mention'>僅用於<i class="Latn mention" lang="es">[[te#西班牙語|-{te}-]] [[ababillares#西班牙語|-{ababillares}-]]</i></span>；<span class='form-of-definition-link'><i class="Latn mention" lang="es">[[ababillarse#西班牙語|-{ababillarse}-]]</i></span><span class='form-of-definition use-with-mention'> 的[[Appendix:Glossary#second_person|第二人稱]][[Appendix:Glossary#singular_number|單數]][[Appendix:Glossary#future_tense|將來時]][[Appendix:Glossary#subjunctive_mood|虛擬式]]</span>""",
         )
         root = self.wxr.wtp.parse("# {{es-verb form of|ababillarse}}")
         page_data = [WordEntry(word="", lang_code="", lang="", pos="")]

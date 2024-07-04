@@ -26,15 +26,11 @@ class TestHeadword(TestCase):
         self.wxr.wtp.add_page(
             "Template:en-noun",
             10,
-            '<span class="headword-line"><strong class="Latn headword" '
-            'lang="en">-{manga}-</strong> ([[可數|可數]] <small>和</small> '
-            '[[不可數|不可數]]-{}-，複數-{ <b lang="en">'
-            '<strong class="selflink">manga</strong></b> <small>或</small> '
-            '<b>[[mangas#英語|-{mangas}-]]</b>}-)</span>',
+            """<span class="headword-line"><strong class="Latn headword" lang="en">-{manga}-</strong> ([[可數|可數]] <small>和</small> [[不可數|不可數]]-{}-，複數-{ <b lang="en"><strong class="selflink">manga</strong></b> <small>或</small> <b>[[mangas#英語|-{mangas}-]]</b>}-)</span>""",
         )
         root = self.wxr.wtp.parse("{{en-noun|~|manga|s}}")
         page_data = [
-            WordEntry(word="manga", lang_code="en", lang="英語", pos="noun")  # type:ignore[call-arg]
+            WordEntry(word="manga", lang_code="en", lang="英語", pos="noun")
         ]
         self.wxr.wtp.title = "manga"
         extract_headword_line(self.wxr, page_data, root.children[0], "en")
@@ -67,7 +63,7 @@ class TestHeadword(TestCase):
         )
         root = self.wxr.wtp.parse("{{nl-noun|m|-'s|mangaatje}}")
         page_data = [
-            WordEntry(word="manga", lang_code="en", lang="英語", pos="noun")  # type:ignore[call-arg]
+            WordEntry(word="manga", lang_code="en", lang="英語", pos="noun")
         ]
         self.wxr.wtp.title = "manga"
         extract_headword_line(self.wxr, page_data, root.children[0], "nl")
@@ -105,7 +101,7 @@ class TestHeadword(TestCase):
         page_data = [
             WordEntry(
                 word="-κρατίας", lang_code="grc", lang="古希臘語", pos="suffix"
-            )  # type:ignore[call-arg]
+            )
         ]
         extract_headword_line(self.wxr, page_data, root.children[0], "grc")
         self.assertEqual(
