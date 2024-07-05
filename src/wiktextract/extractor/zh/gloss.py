@@ -1,3 +1,5 @@
+import re
+
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import TemplateNode
 
@@ -32,7 +34,7 @@ def extract_gloss(
                     raw_tags.append(raw_tag.strip("〈〉"))
                 elif (
                     node.template_name in FORM_OF_TEMPLATES
-                    or node.template_name.endswith(" of")
+                    or node.template_name.endswith((" of", " form", "-form"))
                 ) and process_form_of_template(
                     wxr, node, gloss_data, page_data
                 ):
@@ -83,8 +85,11 @@ def process_form_of_template(
     page_data: list[WordEntry],
 ) -> bool:
     # Return `True` if template expands to list
+    # https://en.wiktionary.org/wiki/Category:Form-of_templates
     # https://en.wiktionary.org/wiki/Category:Form-of_templates_by_language
-    is_alt_of = template_node.template_name.startswith("alt")
+    is_alt_of = re.search(
+        r"^alt|alt[\s-]|alternative", template_node.template_name.lower()
+    )
     sense.tags.append("alt-of" if is_alt_of else "form-of")
     expanded_template = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(template_node), expand_all=True

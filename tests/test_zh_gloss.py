@@ -455,3 +455,48 @@ class TestGloss(TestCase):
                 },
             ],
         )
+
+    def test_zh_alt_form(self):
+        self.wxr.wtp.start_page("大家")
+        self.wxr.wtp.add_page(
+            "Template:zh-alt-form",
+            10,
+            "<span>-{<!---->[[大姑#漢語|大姑]]<!---->}-</span>的另一種寫法。",
+        )
+        root = self.wxr.wtp.parse(
+            "# 對[[女子]]的[[尊稱]]；{{zh-alt-form|大姑}}"
+        )
+        page_data = [WordEntry(word="", lang_code="", lang="", pos="")]
+        extract_gloss(self.wxr, page_data, root.children[0], Sense())
+        self.assertEqual(
+            page_data[0].model_dump(exclude_defaults=True)["senses"],
+            [
+                {
+                    "alt_of": [{"word": "大姑"}],
+                    "glosses": ["對女子的尊稱；大姑的另一種寫法。"],
+                    "tags": ["alt-of"],
+                },
+            ],
+        )
+
+    def test_nonstandard_form(self):
+        self.wxr.wtp.start_page("солнце")
+        self.wxr.wtp.add_page(
+            "Template:nonstandard form",
+            10,
+            """<span class='form-of-definition-link'><i class="Cyrl mention" lang="mk">[[сонце#馬其頓語|-{сонце}-]]</i>&nbsp;<span class="gender"><abbr title="中性">n</abbr></span> <span class="mention-gloss-paren annotation-paren">(</span><span lang="mk-Latn" class="mention-tr tr Latn">sonce</span><span class="mention-gloss-paren annotation-paren">)</span></span><span class='form-of-definition use-with-mention'>的非標準形式</span>。[[Category:馬其頓語非標準形式|大家]]""",
+        )
+        root = self.wxr.wtp.parse("# {{nonstandard form|mk|сонце|g=n}}")
+        page_data = [WordEntry(word="", lang_code="", lang="", pos="")]
+        extract_gloss(self.wxr, page_data, root.children[0], Sense())
+        self.assertEqual(
+            page_data[0].model_dump(exclude_defaults=True)["senses"],
+            [
+                {
+                    "categories": ["馬其頓語非標準形式"],
+                    "form_of": [{"word": "сонце"}],
+                    "glosses": ["сонце n (sonce)的非標準形式。"],
+                    "tags": ["form-of"],
+                },
+            ],
+        )
