@@ -8,7 +8,6 @@ from wikitextprocessor.parser import (
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .models import WordEntry
-from .util import append_base_data
 
 
 def extract_etymology(
@@ -34,7 +33,7 @@ def extract_etymology(
         ):
             for example_data in extract_template_zh_x(wxr, etymology_node):
                 base_data.etymology_examples.append(example_data)
-            clean_node(wxr, page_data[-1], etymology_node)
+            clean_node(wxr, base_data, etymology_node)
         elif (
             isinstance(etymology_node, WikiNode)
             and etymology_node.kind == NodeKind.LIST
@@ -49,17 +48,15 @@ def extract_etymology(
                         wxr, template_node
                     ):
                         base_data.etymology_examples.append(example_data)
-                    clean_node(wxr, page_data[-1], template_node)
+                    clean_node(wxr, base_data, template_node)
             if not has_zh_x:
                 etymology_nodes.append(etymology_node)
         else:
             etymology_nodes.append(etymology_node)
 
-    etymology_text = clean_node(wxr, page_data[-1], etymology_nodes)
+    etymology_text = clean_node(wxr, base_data, etymology_nodes)
     if len(etymology_text) > 0:
         base_data.etymology_text = etymology_text
-        append_base_data(page_data, "etymology_text", etymology_text, base_data)
-        page_data[-1].etymology_examples = base_data.etymology_examples
 
     if level_node_index < len(level_node.children):
         parse_section(

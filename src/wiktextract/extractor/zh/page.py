@@ -33,7 +33,6 @@ from .section_titles import (
     TRANSLATIONS_TITLES,
 )
 from .translation import extract_translation
-from .util import append_base_data
 
 # Templates that are used to form panels on pages and that
 # should be ignored in various positions
@@ -87,7 +86,7 @@ def parse_section(
     if not isinstance(node, WikiNode):
         return
     if node.kind in LEVEL_KIND_FLAGS:
-        subtitle = clean_node(wxr, page_data[-1], node.largs)
+        subtitle = clean_node(wxr, None, node.largs)
         # remove number suffix from subtitle
         subtitle = re.sub(r"\s*(?:（.+）|\d+)$", "", subtitle)
         wxr.wtp.start_subsection(subtitle)
@@ -115,12 +114,20 @@ def parse_section(
         elif (
             wxr.config.capture_translations and subtitle in TRANSLATIONS_TITLES
         ):
+            if len(page_data) == 0:
+                page_data.append(base_data.model_copy(deep=True))
             extract_translation(wxr, page_data, node)
         elif wxr.config.capture_inflections and subtitle in INFLECTION_TITLES:
+            if len(page_data) == 0:
+                page_data.append(base_data.model_copy(deep=True))
             extract_inflections(wxr, page_data, node)
         elif wxr.config.capture_descendants and subtitle in DESCENDANTS_TITLES:
+            if len(page_data) == 0:
+                page_data.append(base_data.model_copy(deep=True))
             extract_descendants(wxr, node, page_data[-1])
         elif subtitle in NOTES_TITLES:
+            if len(page_data) == 0:
+                page_data.append(base_data.model_copy(deep=True))
             extract_note(wxr, page_data, node)
         else:
             wxr.wtp.debug(
@@ -142,7 +149,7 @@ def process_pos_block(
     pos_data = POS_TITLES[pos_text]
     pos_type = pos_data["pos"]
     base_data.pos = pos_type
-    append_base_data(page_data, "pos", pos_type, base_data)
+    page_data.append(base_data.model_copy(deep=True))
     page_data[-1].tags.extend(pos_data.get("tags", []))
     for index, child in enumerate(node.filter_empty_str_child()):
         if isinstance(child, WikiNode):
@@ -222,10 +229,11 @@ def parse_page(
             if template_node.template_name == "zh-forms":
                 process_zh_forms(wxr, base_data, template_node)
 
-        page_data.append(base_data.model_copy(deep=True))
         for level3_node in level2_node.find_child(NodeKind.LEVEL3):
             parse_section(wxr, page_data, base_data, level3_node)
         if not level2_node.contain_node(NodeKind.LEVEL3):
+            if len(page_data) == 0:
+                page_data.append(base_data.model_copy(deep=True))
             process_low_quality_page(wxr, level2_node, page_data)
 
     for data in page_data:
