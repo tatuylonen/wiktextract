@@ -22,6 +22,9 @@ def extract_pronunciation(
 ) -> tuple[list[Sound], list[str]]:
     from .page import parse_section
 
+    if len(base_data.sounds) > 0:
+        base_data.sounds.clear()
+
     for template_node in level_node.find_child(NodeKind.TEMPLATE):
         new_sounds, new_cats = process_pron_template(wxr, template_node)
         base_data.sounds.extend(new_sounds)
@@ -30,11 +33,6 @@ def extract_pronunciation(
         new_sounds, new_cats = process_pron_item_list_item(wxr, list_item_node)
         base_data.sounds.extend(new_sounds)
         base_data.categories.extend(new_cats)
-
-    for data in page_data:
-        if data.lang_code == base_data.lang_code:
-            data.sounds.extend(base_data.sounds)
-            data.categories.extend(base_data.categories)
 
     for next_level_node in level_node.find_child(LEVEL_KIND_FLAGS):
         parse_section(wxr, page_data, base_data, next_level_node)

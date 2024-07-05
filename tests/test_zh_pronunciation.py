@@ -94,7 +94,7 @@ class TestPronunciation(TestCase):
             ],
         )
 
-    def test_level3_pron(self):
+    def test_level3_pron_level3_pos(self):
         self.wxr.wtp.add_page(
             "Template:zh-pron",
             10,
@@ -166,6 +166,84 @@ class TestPronunciation(TestCase):
                         {"zh_pron": "chōng'ěr", "raw_tags": ["官話", "拼音"]}
                     ],
                     "word": "充耳",
+                },
+            ],
+        )
+
+    def test_level3_pron_level4_pos(self):
+        self.wxr.wtp.add_page(
+            "Template:zh-pron",
+            10,
+            """<div><div>
+* [[w:官話|官話]]
+*:<small>([[w:漢語拼音|拼音]])</small>：<span>[[{{{m}}}]]</span>
+</div></div>""",
+        )
+        self.assertEqual(
+            parse_page(
+                self.wxr,
+                "大家",
+                """==漢語==
+===發音===
+{{zh-pron
+|m=dàjiā, dà'ā
+|cat=n
+}}
+
+====名詞====
+
+# [[眾人]]，某個[[範圍]]中[[所有]]的[[人]]
+
+===發音2===
+{{zh-pron
+|m=dàjiā
+|cat=n
+}}
+
+====名詞====
+
+# [[卿大夫]]之[[家]]
+
+===發音3===
+{{zh-pron
+|m=dàgū
+|cat=n
+}}
+
+====名詞====
+
+# 對[[女子]]的[[尊稱]]""",
+            ),
+            [
+                {
+                    "lang": "漢語",
+                    "lang_code": "zh",
+                    "pos": "noun",
+                    "senses": [{"glosses": ["眾人，某個範圍中所有的人"]}],
+                    "sounds": [
+                        {"zh_pron": "dàjiā, dà'ā", "raw_tags": ["官話", "拼音"]}
+                    ],
+                    "word": "大家",
+                },
+                {
+                    "lang": "漢語",
+                    "lang_code": "zh",
+                    "pos": "noun",
+                    "senses": [{"glosses": ["卿大夫之家"]}],
+                    "sounds": [
+                        {"zh_pron": "dàjiā", "raw_tags": ["官話", "拼音"]}
+                    ],
+                    "word": "大家",
+                },
+                {
+                    "lang": "漢語",
+                    "lang_code": "zh",
+                    "pos": "noun",
+                    "senses": [{"glosses": ["對女子的尊稱"]}],
+                    "sounds": [
+                        {"zh_pron": "dàgū", "raw_tags": ["官話", "拼音"]}
+                    ],
+                    "word": "大家",
                 },
             ],
         )
