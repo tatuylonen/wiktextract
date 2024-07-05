@@ -88,6 +88,8 @@ select = [
 "src/wiktextract/taxondata.py" = ["E501"]
 "src/wiktextract/tags.py" = ["E501"]
 "src/wiktextract/table_headers_heuristics_data.py" = ["E501"]
+# ignore long line rule in tests because spaces before HTML tag are
+# parsed as "preformatted" node
 "tests/*" = ["E501"]
 
 [tool.mypy]
