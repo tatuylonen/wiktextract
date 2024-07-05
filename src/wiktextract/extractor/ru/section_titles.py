@@ -1,6 +1,6 @@
 from wiktextract.config import POSSubtitleData
 
-POS_TITLES: POSSubtitleData = {
+POS_TITLES: dict[str, POSSubtitleData] = {
     "аббревиатура": {"pos": "abbrev"},
     "глагол": {"pos": "verb"},
     "деепричастие": {"pos": "gerund"},
@@ -16,7 +16,7 @@ POS_TITLES: POSSubtitleData = {
     "наречие": {"pos": "adv"},
 }
 
-POS_TEMPLATE_NAMES: POSSubtitleData = {
+POS_TEMPLATE_NAMES: dict[str, POSSubtitleData] = {
     "abbrev": {"pos": "abbrev", "tags": ["abbreviation"]},
     "adv": {"pos": "adv"},
     "affix": {"pos": "affix"},
