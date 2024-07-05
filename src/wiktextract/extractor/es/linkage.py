@@ -39,6 +39,7 @@ def process_linkage_template(
     word_entry: WordEntry,
     template_node: WikiNode,
 ):
+    # https://es.wiktionary.org/wiki/Plantilla:sinónimo
     linkage_type = LINKAGE_TITLES.get(
         template_node.template_name.removesuffix("s")
     )
@@ -49,23 +50,42 @@ def process_linkage_template(
         )
         return
 
-    linkage_list = getattr(word_entry, linkage_type)
-    for key, value_raw in template_node.template_parameters.items():
-        value = clean_node(wxr, None, value_raw)
-        if isinstance(key, int):
-            linkage_data = Linkage(word=value)
-            if len(word_entry.senses) > 0:
-                linkage_data.senseid = word_entry.senses[-1].senseid
-            getattr(word_entry, linkage_type).append(linkage_data)
-        elif isinstance(key, str):
-            if key.startswith("nota"):
-                idx = int(key[4:]) - 1 if len(key) > 4 else 0
-                if len(linkage_list) > idx:
-                    linkage_list[idx].note = value
-            elif key.startswith("alt"):
-                idx = int(key[3:]) - 1 if len(key) > 3 else 0
-                if len(linkage_list) > idx:
-                    linkage_list[idx].alternative_spelling = value
+    for index in range(1, 41):
+        if index not in template_node.template_parameters:
+            break
+        linkage_data = Linkage(
+            word=clean_node(wxr, None, template_node.template_parameters[index])
+        )
+        if len(word_entry.senses) > 0:
+            linkage_data.senseid = word_entry.senses[-1].senseid
+        getattr(word_entry, linkage_type).append(linkage_data)
+        process_linkage_template_parameter(
+            wxr, linkage_data, template_node, f"nota{index}"
+        )
+        process_linkage_template_parameter(
+            wxr, linkage_data, template_node, f"alt{index}"
+        )
+        if index == 1:
+            process_linkage_template_parameter(
+                wxr, linkage_data, template_node, "nota"
+            )
+            process_linkage_template_parameter(
+                wxr, linkage_data, template_node, "alt"
+            )
+
+
+def process_linkage_template_parameter(
+    wxr: WiktextractContext,
+    linkage_data: Linkage,
+    template_node: TemplateNode,
+    param: str,
+) -> None:
+    if param in template_node.template_parameters:
+        value = clean_node(wxr, None, template_node.template_parameters[param])
+        if param.startswith("nota"):
+            linkage_data.note = value
+        elif param.startswith("alt"):
+            linkage_data.alternative_spelling = value
 
 
 def process_linkage_list_children(
