@@ -51,7 +51,7 @@ from .tags import (
     xlat_head_map,
     xlat_tags_map,
 )
-from .taxondata import known_species
+from .taxondata import known_species, known_species_re
 from .topics import topic_generalize_map, valid_topics
 from .type_utils import TranslationData
 
@@ -3258,6 +3258,11 @@ def classify_desc(
             # English
             if have_non_english >= len(lst) - 1 and have_non_english > 0:
                 return "taxonomic"
+
+    # Get rid of taxonomic species names so that they don't mess up
+    # the heuristics for whether something is "English"; you can have
+    # these in English text (and not).
+    desc1 = known_species_re.sub("", desc1)
 
     # If all words are in our English dictionary, interpret as English.
     # [ -~] is regex black magic, "all characters from space to tilde"
