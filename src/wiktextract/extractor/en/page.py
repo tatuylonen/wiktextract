@@ -3506,6 +3506,7 @@ def parse_language(
                 new_page_data["redirects"] = redirect_list
                 if "pos" not in new_page_data:
                     new_page_data["pos"] = "soft-redirect"
+                new_page_data["senses"] = [{"tags": ["no-gloss"]}]
                 page_datas.append(new_page_data)
 
     def extract_examples(
