@@ -36,10 +36,8 @@ def extract_pronunciation(
 
     if len(sounds_list) == 0:
         return
-    if len(page_data) == 0:
-        page_data.append(base_data.model_copy(deep=True))
 
-    if level_node.kind == NodeKind.LEVEL3:
+    if level_node.kind == NodeKind.LEVEL3 and len(page_data) > 0:
         # Add extracted sound data to all sense dictionaries that have the same
         # language code when the prononciation subtitle is a level 3 title node.
         # Otherwise only add to the last one.
@@ -48,10 +46,14 @@ def extract_pronunciation(
                 sense_data.sounds.extend(sounds_list)
                 for sound in sounds_list:
                     sense_data.categories.extend(sound.categories)
-    else:
+    elif len(page_data) > 0:
         page_data[-1].sounds.extend(sounds_list)
         for sound in sounds_list:
             page_data[-1].categories.extend(sound.categories)
+    else:
+        base_data.sounds.extend(sounds_list)
+        for sound in sounds_list:
+            base_data.categories.extend(sound.categories)
 
 
 PRON_TEMPLATES = frozenset(

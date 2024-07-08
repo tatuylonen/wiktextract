@@ -79,7 +79,8 @@ class TestPronunciation(TestCase):
         )
 
     def test_str_pron(self):
-        page_data = []
+        base_data = WordEntry(word="你好", lang_code="zh", lang="Chinois")
+        page_data = [base_data]
         self.wxr.wtp.add_page("Modèle:Yale-zh", 10, body="Yale")
         self.wxr.wtp.start_page("你好")
         root = self.wxr.wtp.parse(
@@ -87,12 +88,7 @@ class TestPronunciation(TestCase):
 * '''cantonais''' {{pron||yue}}
 ** {{Yale-zh}} : nei⁵hou²"""
         )
-        extract_pronunciation(
-            self.wxr,
-            page_data,
-            root.children[0],
-            WordEntry(word="你好", lang_code="zh", lang="Chinois"),
-        )
+        extract_pronunciation(self.wxr, page_data, root.children[0], base_data)
         self.assertEqual(
             [
                 sound.model_dump(exclude_defaults=True)
@@ -107,7 +103,8 @@ class TestPronunciation(TestCase):
         files.
         Test wikitext from https://fr.wiktionary.org/wiki/mars
         """
-        page_data = []
+        base_data = WordEntry(word="mars", lang_code="fr", lang="Français")
+        page_data = [base_data]
         self.wxr.wtp.start_page("mars")
         root = self.wxr.wtp.parse(
             """=== {{S|prononciation}} ===
@@ -119,12 +116,7 @@ class TestPronunciation(TestCase):
             10,
             "<span><span>Suède</span>&nbsp;: écouter «&nbsp;<span>mars</span> <span><span>[<small><span>[//fr.wiktionary.org Prononciation ?]</span></small>]</span></span>&nbsp;» <span>[[File:LL-Q9027 (swe)-Moonhouse-mars.wav]]</span></span>",
         )
-        extract_pronunciation(
-            self.wxr,
-            page_data,
-            root.children[0],
-            WordEntry(word="你好", lang_code="fr", lang="Français"),
-        )
+        extract_pronunciation(self.wxr, page_data, root.children[0], base_data)
         self.assertEqual(
             page_data[-1].sounds[0].model_dump(exclude_defaults=True),
             {
@@ -138,7 +130,8 @@ class TestPronunciation(TestCase):
 
     def test_paronymes_subsection(self):
         # https://fr.wiktionary.org/wiki/wagonnet
-        page_data = []
+        base_data = WordEntry(word="wagonnet", lang_code="fr", lang="Français")
+        page_data = [base_data]
         self.wxr.wtp.add_page("Modèle:pron", 10, body="\\{{{1|}}}\\")
         self.wxr.wtp.start_page("wagonnet")
         root = self.wxr.wtp.parse(
@@ -150,12 +143,7 @@ class TestPronunciation(TestCase):
 * [[wagonnier]]
 """
         )
-        extract_pronunciation(
-            self.wxr,
-            page_data,
-            root.children[0],
-            WordEntry(word="wagonnet", lang_code="fr", lang="Français"),
-        )
+        extract_pronunciation(self.wxr, page_data, root.children[0], base_data)
         self.assertEqual(
             page_data[0].model_dump(exclude_defaults=True),
             {
@@ -168,7 +156,10 @@ class TestPronunciation(TestCase):
         )
 
     def test_pron_prim_template(self):
-        page_data = []
+        base_data = WordEntry(
+            word="dictionnaire", lang_code="fr", lang="Français"
+        )
+        page_data = [base_data]
         self.wxr.wtp.start_page("dictionnaire")
         root = self.wxr.wtp.parse(
             "=== {{S|prononciation}} ===\n* {{pron-rimes|dik.sjɔ.nɛʁ|fr}}"
@@ -178,12 +169,7 @@ class TestPronunciation(TestCase):
             10,
             'La prononciation <span class="API" title="Prononciation API">\\dik.sjɔ.nɛʁ\\</span> rime avec les [[Annexe:Rimes en français en \\ɛʁ\\|mots qui finissent en <span class="API" title="Prononciation API">\\ɛʁ\\</span>]].[[Catégorie:Rimes en français en \\ɛʁ\\]]',
         )
-        extract_pronunciation(
-            self.wxr,
-            page_data,
-            root.children[0],
-            WordEntry(word="dictionnaire", lang_code="fr", lang="Français"),
-        )
+        extract_pronunciation(self.wxr, page_data, root.children[0], base_data)
         data = page_data[0].model_dump(exclude_defaults=True)
         self.assertEqual(
             data["sounds"], [{"ipa": "\\dik.sjɔ.nɛʁ\\", "rhymes": "\\ɛʁ\\"}]
@@ -192,7 +178,8 @@ class TestPronunciation(TestCase):
 
     def test_cmn_pron(self):
         # GH issue 620
-        page_data = []
+        base_data = WordEntry(word="作", lang_code="zh", lang="Chinois")
+        page_data = [base_data]
         self.wxr.wtp.start_page("作")
         root = self.wxr.wtp.parse(
             "=== {{S|prononciation}} ===\n{{cmn-pron|zuō|zuó|zuò}}"
@@ -223,12 +210,7 @@ class TestPronunciation(TestCase):
 ** {{Yale-zh}} : {{lang|zh-Latn|dzwō, dzwó, dzwò}}
 ** {{zhuyin}} : {{lang|zh-Bopomofo|ㄗㄨㄛ，ㄗㄨㄛˊ，ㄗㄨㄛˋ}}""",  # noqa: E501
         )
-        extract_pronunciation(
-            self.wxr,
-            page_data,
-            root.children[0],
-            WordEntry(word="作", lang_code="zh", lang="Chinois"),
-        )
+        extract_pronunciation(self.wxr, page_data, root.children[0], base_data)
         self.assertEqual(
             [s.model_dump(exclude_defaults=True) for s in page_data[0].sounds],
             [
