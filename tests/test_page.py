@@ -490,6 +490,7 @@ foo
                     "lang_code": "zh",
                     "pos": "soft-redirect",
                     "redirects": ["你們", "妳們"],
+                    "senses": [{"tags": ["no-gloss"]}],
                     "word": "你们",
                 }
             ],
@@ -673,6 +674,7 @@ foo
                     "lang_code": "ja",
                     "pos": "soft-redirect",
                     "redirects": ["一人", "独り"],
+                    "senses": [{"tags": ["no-gloss"]}],
                     "word": "ひとり",
                 }
             ],
