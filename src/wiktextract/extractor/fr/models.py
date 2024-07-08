@@ -11,17 +11,20 @@ class FrenchBaseModel(BaseModel):
 
 
 class Example(FrenchBaseModel):
-    text: str = Field("", description="Example usage sentence")
+    text: str = Field(default="", description="Example usage sentence")
     translation: str = Field(
-        "", description="French translation of the example sentence"
+        default="", description="French translation of the example sentence"
     )
-    roman: str = Field("", description="Romanization of the example sentence")
+    roman: str = Field(
+        default="", description="Romanization of the example sentence"
+    )
     ref: str = Field(
-        "",
+        default="",
         description="Source of the sentence, like book title and page number",
     )
     time: str = Field(
-        "", description="For examples in 'Attestations historiques' section"
+        default="",
+        description="For examples in 'Attestations historiques' section",
     )
 
 
@@ -31,16 +34,17 @@ class Form(FrenchBaseModel):
     raw_tags: list[str] = []
     ipas: list[str] = []
     source: str = Field(
-        "", description="Form line template name or Conjugaison page title"
+        default="",
+        description="Form line template name or Conjugaison page title",
     )
     hiragana: str = ""
     roman: str = ""
 
 
 class Sound(FrenchBaseModel):
-    zh_pron: str = Field("", description="Chinese word pronunciation")
-    ipa: str = Field("", description="International Phonetic Alphabet")
-    audio: str = Field("", description="Audio file name")
+    zh_pron: str = Field(default="", description="Chinese word pronunciation")
+    ipa: str = Field(default="", description="International Phonetic Alphabet")
+    audio: str = Field(default="", description="Audio file name")
     wav_url: str = ""
     oga_url: str = ""
     ogg_url: str = ""
@@ -50,27 +54,29 @@ class Sound(FrenchBaseModel):
     tags: list[str] = []
     raw_tags: list[str] = []
     rhymes: str = ""
-    categories: list[str] = Field([], exclude=True)
+    categories: list[str] = Field(default=[], exclude=True)
 
 
 class Translation(FrenchBaseModel):
     lang_code: str = Field(
-        "", description="Wiktionary language code of the translation term"
+        default="",
+        description="Wiktionary language code of the translation term",
     )
-    lang: str = Field("", description="Translation language name")
-    word: str = Field("", description="Translation term")
-    sense: str = Field("", description="Translation gloss")
+    lang: str = Field(default="", description="Translation language name")
+    word: str = Field(default="", description="Translation term")
+    sense: str = Field(default="", description="Translation gloss")
     sense_index: int = Field(
-        0, ge=0, description="Number of the definition, start from 1"
+        default=0, ge=0, description="Number of the definition, start from 1"
     )
     tags: list[str] = []
     raw_tags: list[str] = []
     roman: str = ""
     traditional_writing: str = Field(
-        "", description="Alternative writting for Chinese, Korean and Mongolian"
+        default="",
+        description="Alternative writting for Chinese, Korean and Mongolian",
     )
     ruby: list[tuple[str, ...]] = Field(
-        [], description="Japanese Kanji and furigana"
+        default=[], description="Japanese Kanji and furigana"
     )
 
 
@@ -80,14 +86,14 @@ class Linkage(FrenchBaseModel):
     raw_tags: list[str] = []
     topics: list[str] = []
     roman: str = ""
-    alt: str = Field("", description="Alternative form")
-    translation: str = Field("", description="French translation")
-    sense: str = Field("", description="Definition of the word")
+    alt: str = Field(default="", description="Alternative form")
+    translation: str = Field(default="", description="French translation")
+    sense: str = Field(default="", description="Definition of the word")
     sense_index: int = Field(
-        0, ge=0, description="Number of the definition, start from 1"
+        default=0, ge=0, description="Number of the definition, start from 1"
     )
-    lang: str = Field("", description="Localized language name")
-    lang_code: str = Field("", description="Wiktionary language code")
+    lang: str = Field(default="", description="Localized language name")
+    lang_code: str = Field(default="", description="Wiktionary language code")
 
 
 class AltForm(FrenchBaseModel):
@@ -112,19 +118,22 @@ class WordEntry(FrenchBaseModel):
     word: str = Field(description="Word string")
     lang_code: str = Field(description="Wiktionary language code")
     lang: str = Field(description="Localized language name")
-    pos: str = Field("", description="Part of speech type")
+    pos: str = Field(default="", description="Part of speech type")
     pos_title: str = Field(
-        "", description="Original POS title for matching etymology texts"
+        default="",
+        description="Original POS title for matching etymology texts",
     )
     pos_id: str = Field(
-        "", description="POS id for matching etymology texts", exclude=True
+        default="",
+        description="POS id for matching etymology texts",
+        exclude=True,
     )
-    etymology_texts: list[str] = Field([], description="Etymology list")
+    etymology_texts: list[str] = Field(default=[], description="Etymology list")
     etymology_examples: list[Example] = Field(
-        [], description="Data in 'Attestations historiques' section"
+        default=[], description="Data in 'Attestations historiques' section"
     )
-    senses: list[Sense] = Field([], description="Sense list")
-    forms: list[Form] = Field([], description="Inflection forms list")
+    senses: list[Sense] = Field(default=[], description="Sense list")
+    forms: list[Form] = Field(default=[], description="Inflection forms list")
     sounds: list[Sound] = []
     translations: list[Translation] = []
     antonyms: list[Linkage] = []
@@ -139,8 +148,8 @@ class WordEntry(FrenchBaseModel):
     related: list[Linkage] = []
     abbreviation: list[Linkage] = []
     proverbs: list[Linkage] = []
-    title: str = Field("", description="Redirect page source title")
-    redirect: str = Field("", description="Redirect page target title")
+    title: str = Field(default="", description="Redirect page source title")
+    redirect: str = Field(default="", description="Redirect page target title")
     categories: list[str] = []
     notes: list[str] = []
     tags: list[str] = []
