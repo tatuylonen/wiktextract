@@ -190,3 +190,49 @@ class TestFrPage(TestCase):
                 }
             ],
         )
+
+    def test_level4_etymology_notes_section(self):
+        # shouldn't add no-gloss sense data
+        self.wxr.wtp.add_page("Modèle:langue", 10, "Anglais")
+        self.wxr.wtp.add_page(
+            "Modèle:substantivation de",
+            10,
+            "Substantivation de l’adjectif deutsch",
+        )
+        self.wxr.wtp.add_page(
+            "Modèle:S",
+            10,
+            """{{#switch: {{{1}}}
+| étymologie = Étymologie
+| suffixe = Suffixe
+}} {{{num|}}}""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "-ly",
+            """== {{langue|en}} ==
+=== {{S|étymologie}} ===
+: Du vieil anglais -lich, même sens.
+
+==== {{S|notes}} ====
+note
+
+=== {{S|suffixe|en}} ===
+# gloss""",
+        )
+        self.assertEqual(
+            page_data,
+            [
+                {
+                    "word": "-ly",
+                    "lang": "Anglais",
+                    "lang_code": "en",
+                    "pos": "suffix",
+                    "pos_title": "Suffixe",
+                    "etymology_texts": ["Du vieil anglais -lich, même sens."],
+                    "notes": ["note"],
+                    "tags": ["morpheme"],
+                    "senses": [{"glosses": ["gloss"]}],
+                }
+            ],
+        )

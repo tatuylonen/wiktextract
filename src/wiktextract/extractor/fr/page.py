@@ -120,11 +120,11 @@ def parse_section(
             ):
                 pass
             elif section_type in NOTES_SECTIONS:
-                if len(page_data) == 0:
-                    page_data.append(base_data.model_copy(deep=True))
-                extract_note(wxr, page_data, level_node)
-                if page_data[-1] == base_data:
-                    page_data.pop()  # no data was added
+                extract_note(
+                    wxr,
+                    page_data if len(page_data) > 0 else [base_data],
+                    level_node,
+                )
 
     find_bottom_category_links(wxr, page_data, level_node)
 

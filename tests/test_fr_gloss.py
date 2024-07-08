@@ -130,7 +130,7 @@ class TestFrGloss(TestCase):
                                 "text": "这匹马很大。",
                                 "translation": "Ce cheval est grand.",
                                 "roman": "Zhè pǐ mǎ hěn dà.\n"
-                                        "⠌⠢⠆ ⠏⠊⠄ ⠍⠔⠄ ⠓⠴⠄ ⠙⠔⠆⠐⠆",
+                                "⠌⠢⠆ ⠏⠊⠄ ⠍⠔⠄ ⠓⠴⠄ ⠙⠔⠆⠐⠆",
                             }
                         ],
                     }
@@ -267,7 +267,7 @@ class TestFrGloss(TestCase):
                     ],
                     "glosses": [
                         "Fluides, sérosités qui se trouvent ou qui se forment "
-                            "dans le corps de l’homme ou de l’animal.",
+                        "dans le corps de l’homme ou de l’animal.",
                         "Salive.",
                     ],
                 },
@@ -318,7 +318,7 @@ class TestFrGloss(TestCase):
                 {
                     "glosses": ["Génitrice ; ascendante"],
                     "note": "ce sens n’est plus guère utilisé que sous "
-                            "la forme de la locution « autrice de mes jours »",
+                    "la forme de la locution « autrice de mes jours »",
                     "tags": ["rare"],
                 }
             ],
