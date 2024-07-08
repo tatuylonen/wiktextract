@@ -107,9 +107,12 @@ def parse_section(
                 wxr.config.capture_translations
                 and section_type in TRANSLATION_SECTIONS
             ):
-                if len(page_data) == 0:
-                    page_data.append(base_data.model_copy(deep=True))
-                extract_translation(wxr, page_data, base_data, level_node)
+                extract_translation(
+                    wxr,
+                    page_data if len(page_data) > 0 else [base_data],
+                    base_data,
+                    level_node,
+                )
             elif (
                 wxr.config.capture_inflections
                 and section_type in INFLECTION_SECTIONS
