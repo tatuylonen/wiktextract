@@ -544,8 +544,8 @@ def parse_translation_item_text(
                 tr["code"] = langcode
             if tags:
                 tr["tags"] = list(tags)
-                for t in tagsets:
-                    tr["tags"].extend(t)
+                for ttup in tagsets:
+                    tr["tags"].extend(ttup)
             # topics is never populated, so it's always empty
             # if topics:
             #     tr["topics"] = list(topics)
@@ -568,8 +568,8 @@ def parse_translation_item_text(
                 cls = classify_desc(par, no_unknown_starts=True)
                 if cls == "tags":
                     tagsets2, topics2 = decode_tags(par)
-                    for t in tagsets2:
-                        data_extend(tr, "tags", t)
+                    for ttup in tagsets2:
+                        data_extend(tr, "tags", ttup)
                     data_extend(tr, "topics", topics2)
                     part = rest
 
@@ -583,8 +583,8 @@ def parse_translation_item_text(
                 cls = classify_desc(par, no_unknown_starts=True)
                 if cls == "tags":
                     tagsets2, topics2 = decode_tags(par)
-                    for t in tagsets2:
-                        data_extend(tr, "tags", t)
+                    for ttup in tagsets2:
+                        data_extend(tr, "tags", ttup)
                     data_extend(tr, "topics", topics2)
                     part = rest
 
@@ -600,8 +600,8 @@ def parse_translation_item_text(
                     # print("par={!r} cls={!r}".format(par, cls))
                     if cls == "tags":
                         tagsets2, topics2 = decode_tags(par)
-                        for t in tagsets2:
-                            data_extend(tr, "tags", t)
+                        for ttup in tagsets2:
+                            data_extend(tr, "tags", ttup)
                         data_extend(tr, "topics", topics2)
                         part = rest
                     elif cls == "english":
@@ -661,6 +661,8 @@ def parse_translation_item_text(
             # Certain values indicate it is not actually a translation.
             # See definition of tr_ignore_re to adjust.
             m = re.search(tr_ignore_re, part)
+            w: Optional[str] = None
+
             if m and (
                 m.start() != 0 or m.end() != len(part) or len(part.split()) > 1
             ):
@@ -721,22 +723,23 @@ def parse_translation_item_text(
                 continue
 
             # Split if it contains no spaces
-            alts = [w]
-            if " " not in w:
-                # If no spaces, split by separator
-                alts = re.split(r"/|／", w)
-            # Note: there could be remaining slashes, but they are
-            # sometimes used in ways we cannot resolve programmatically.
-            # Create translations for each alternative.
-            for alt in alts:
-                alt = alt.strip()
-                tr1 = copy.deepcopy(tr)
-                if alt.startswith("*") or alt.startswith(":"):
-                    alt = alt[1:].strip()
-                if not alt:
-                    continue
-                tr1["word"] = alt
-                data_append(data, "translations", tr1)
+            if w:
+                alts = [w]
+                if " " not in w:
+                    # If no spaces, split by separator
+                    alts = re.split(r"/|／", w)
+                # Note: there could be remaining slashes, but they are
+                # sometimes used in ways we cannot resolve programmatically.
+                # Create translations for each alternative.
+                for alt in alts:
+                    alt = alt.strip()
+                    tr1 = copy.deepcopy(tr)
+                    if alt.startswith("*") or alt.startswith(":"):
+                        alt = alt[1:].strip()
+                    if not alt:
+                        continue
+                    tr1["word"] = alt
+                    data_append(data, "translations", tr1)
 
     # Return the language name, in case we have subitems
     return lang

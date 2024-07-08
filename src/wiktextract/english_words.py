@@ -6,8 +6,8 @@
 #
 # Copyright (c) 2020-2022 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
-import nltk
-from nltk.corpus import brown
+import nltk  # type: ignore[import-untyped]
+from nltk.corpus import brown  # type: ignore[import-untyped]
 
 from .form_descriptions_known_firsts import known_firsts  # w/ our additions
 

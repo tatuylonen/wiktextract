@@ -43,7 +43,7 @@ def parse_ruby(
 def extract_ruby(
     wxr: WiktextractContext,
     contents: GeneralNode,
-) -> tuple[list[tuple[str, str]], list[Union[WikiNode, str]]]:
+) -> tuple[list[tuple[str, ...]], list[Union[WikiNode, str]]]:
     # If contents is a list, process each element separately
     extracted = []
     new_contents = []

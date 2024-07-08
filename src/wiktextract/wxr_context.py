@@ -25,8 +25,8 @@ class WiktextractContext:
         self.lang = None
         self.word = None
         self.pos = None
-        self.thesaurus_db_path = wtp.db_path.with_stem(
-            f"{wtp.db_path.stem}_thesaurus"
+        self.thesaurus_db_path = wtp.db_path.with_stem(  # type: ignore[union-attr]
+            f"{wtp.db_path.stem}_thesaurus"  # type: ignore[union-attr]
         )
         self.thesaurus_db_conn = (
             init_thesaurus_db(self.thesaurus_db_path)
@@ -43,17 +43,17 @@ class WiktextractContext:
                 self.thesaurus_db_path, check_same_thread=check_same_thread
             )
         self.wtp.db_conn = sqlite3.connect(
-            self.wtp.db_path, check_same_thread=check_same_thread
+            self.wtp.db_path, check_same_thread=check_same_thread  # type: ignore[arg-type]
         )
 
     def remove_unpicklable_objects(self) -> None:
         # remove these variables before passing the `WiktextractContext` object
         # to worker processes
         if self.config.extract_thesaurus_pages:
-            self.thesaurus_db_conn.close()
+            self.thesaurus_db_conn.close()  # type: ignore[union-attr]
         self.thesaurus_db_conn = None
         self.wtp.db_conn.close()
-        self.wtp.db_conn = None
+        self.wtp.db_conn = None  # type: ignore[assignment]
         self.wtp.lua = None
         self.wtp.lua_invoke = None
         self.wtp.lua_reset_env = None

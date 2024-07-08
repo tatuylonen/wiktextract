@@ -1,7 +1,7 @@
 from wiktextract.config import POSSubtitleData
 
 # some are template names
-POS_TITLES: POSSubtitleData = {
+POS_TITLES: dict[str, POSSubtitleData] = {
     "abreviatura": {"pos": "abbrev"},
     "acrónimo": {"pos": "abbrev"},
     "adjetivo cardinal": {"pos": "num", "tags": ["cardinal"]},

@@ -1148,7 +1148,7 @@ class InflTests(unittest.TestCase):
 |}
 
 </div></div>
-""")  # noqa: E501
+""")  # noqa: E501, W291
         expected = {
         "forms": [
             {

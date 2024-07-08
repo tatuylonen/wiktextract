@@ -1,7 +1,7 @@
 from ...config import POSSubtitleData
 
 # argument of title template https://de.wiktionary.org/wiki/Vorlage:Wortart
-POS_SECTIONS: POSSubtitleData = {
+POS_SECTIONS: dict[str, POSSubtitleData] = {
     "Abkürzung (Deutsch)": {"pos": "abbrev", "tags": ["abbreviation"]},
     "Abkürzung": {"pos": "abbrev", "tags": ["abbreviation"]},
     "Abtönungspartikel": {"pos": "particle"},

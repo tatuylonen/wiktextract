@@ -1,6 +1,6 @@
 from wiktextract.config import POSSubtitleData
 
-POS_TITLES: POSSubtitleData = {
+POS_TITLES: dict[str, POSSubtitleData] = {
     "不及物动词": {"pos": "verb", "tags": ["intransitive"]},
     "不及物動詞": {
         "debug": "part-of-speech Intransitive verb is proscribed",

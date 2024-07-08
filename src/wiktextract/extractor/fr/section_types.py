@@ -3,7 +3,7 @@ from wiktextract.config import POSSubtitleData
 # the keys are the first argument of the `S` template
 # https://fr.wiktionary.org/wiki/Modèle:S
 # https://fr.wiktionary.org/wiki/Wiktionnaire:Liste_des_sections
-POS_SECTIONS: POSSubtitleData = {
+POS_SECTIONS: dict[str, POSSubtitleData] = {
     "adj": {"pos": "adj"},
     "adj-dém": {"pos": "adj", "tags": ["demonstrative"]},
     "adj-excl": {"pos": "adj", "tags": ["exclamatory"]},
