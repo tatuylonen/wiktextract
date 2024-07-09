@@ -151,6 +151,17 @@ def find_pos_in_etymology_list(
                         ).lstrip(") "),
                         categories.get("categories", []),
                     )
+            if index <= 1:  # first node is empty string
+                return (
+                    "",
+                    clean_node(wxr, None, node).strip("() "),
+                    clean_node(
+                        wxr,
+                        categories,
+                        list_item_node.children[index + 1 :],
+                    ),
+                    categories.get("categories", []),
+                )
 
 
 def insert_etymology_data(

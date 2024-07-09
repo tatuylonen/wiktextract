@@ -360,3 +360,16 @@ etymology text
                 ),
             },
         )
+
+    def test_italic_pos_title_no_id(self):
+        self.wxr.wtp.start_page("appel du pied")
+        root = self.wxr.wtp.parse(": ''(Locution nominale 1)'' etymology text.")
+        etymology_data = extract_etymology(self.wxr, root, None)
+        self.assertEqual(
+            etymology_data,
+            {
+                ("", "Locution nominale 1"): EtymologyData(
+                    texts=["etymology text."]
+                )
+            },
+        )
