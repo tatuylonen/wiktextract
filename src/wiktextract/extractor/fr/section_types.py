@@ -3,6 +3,8 @@ from wiktextract.config import POSSubtitleData
 # the keys are the first argument of the `S` template
 # https://fr.wiktionary.org/wiki/Modèle:S
 # https://fr.wiktionary.org/wiki/Wiktionnaire:Liste_des_sections
+# https://fr.wiktionary.org/wiki/Wiktionnaire:Liste_des_sections_de_types_de_mots
+# https://fr.wiktionary.org/wiki/Module:types_de_mots/data
 POS_SECTIONS: dict[str, POSSubtitleData] = {
     "adj": {"pos": "adj"},
     "adj-dém": {"pos": "adj", "tags": ["demonstrative"]},
@@ -90,6 +92,9 @@ POS_SECTIONS: dict[str, POSSubtitleData] = {
     "nom de famille": {"pos": "name", "tags": ["surename"]},
     "nom propre": {"pos": "name"},
     "nom scientifique": {"pos": "name", "tags": ["scientific"]},
+    "nom-sciences": {"pos": "name", "tags": ["scientific"]},
+    "nom science": {"pos": "name", "tags": ["scientific"]},
+    "nom scient": {"pos": "name", "tags": ["scientific"]},
     "nom-fam": {"pos": "name", "tags": ["surename"]},
     "nom-pr": {"pos": "name"},
     "num": {"pos": "num"},
@@ -104,6 +109,7 @@ POS_SECTIONS: dict[str, POSSubtitleData] = {
     "particule num": {"pos": "particle", "tags": ["numeral"]},
     "particule numérale": {"pos": "particle", "tags": ["numeral"]},
     "patronyme": {"pos": "name", "tags": ["surename"]},
+    "phr": {"pos": "phrase"},
     "phrase": {"pos": "phrase"},
     "post": {"pos": "postp"},
     "postpos": {"pos": "postp"},
@@ -166,6 +172,7 @@ POS_SECTIONS: dict[str, POSSubtitleData] = {
         "pos": "typographic variant",
         "tags": ["alt-of"],
     },
+    "verb": {"pos": "verb"},
     "verb pr": {"pos": "verb", "tags": ["pronominal"]},
     "verb-pr": {"pos": "verb", "tags": ["pronominal"]},
     "verbe": {"pos": "verb"},
