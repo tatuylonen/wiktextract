@@ -2399,10 +2399,7 @@ def parse_language(
                                     and v[0][0] == ":"
                                 ):
                                     v = [v[0][1:]] + list(v[1:])  # type:ignore
-                                if (
-                                    isinstance(v[0], str)
-                                    and not v[0].isalnum()
-                                ):
+                                if isinstance(v[0], str) and not v[0].isalnum():
                                     links_that_should_not_be_split.append(
                                         "".join(v[0])
                                     )  # type: ignore
@@ -2918,8 +2915,7 @@ def parse_language(
                         if pos.lower() not in POS_TITLES:
                             wxr.wtp.debug(
                                 "unhandled see translation subpage: "
-                                "language={} sub={} wxr.wtp.subsection={}"
-                                .format(
+                                "language={} sub={} wxr.wtp.subsection={}".format(
                                     language, sub, wxr.wtp.subsection
                                 ),
                                 sortid="page/2478",
@@ -3632,8 +3628,9 @@ def parse_language(
                         # and the output to each other.
                         lines = [parts[0].strip()]
                         tr = parts[1].strip()
-                    elif (
-                        len(parts) == 2 and classify_desc(parts[1]) == "english"
+                    elif len(parts) == 2 and classify_desc(parts[1]) in (
+                        "english",
+                        "taxonomic",
                     ):
                         # These other branches just do some simple heuristics w/
                         # the expanded output of the template (if applicable).
@@ -3643,16 +3640,16 @@ def parse_language(
                         len(parts) == 3
                         and classify_desc(parts[1])
                         in ("romanization", "english")
-                        and classify_desc(parts[2]) == "english"
+                        and classify_desc(parts[2]) in ("english", "taxonomic")
                     ):
                         lines = [parts[0].strip()]
                         roman = parts[1].strip()
                         tr = parts[2].strip()
                     else:
                         parts = re.split(r"\s+-\s+", lines[0])
-                        if (
-                            len(parts) == 2
-                            and classify_desc(parts[1]) == "english"
+                        if len(parts) == 2 and classify_desc(parts[1]) in (
+                            "english",
+                            "taxonomic",
                         ):
                             lines = [parts[0].strip()]
                             tr = parts[1].strip()
@@ -3675,12 +3672,13 @@ def parse_language(
                         if (
                             lang_code != "en"
                             and len(lines) >= 2
-                            and classify_desc(lines[-1]) == "english"
+                            and classify_desc(lines[-1])
+                            in ("english", "taxonomic")
                         ):
                             i = len(lines) - 1
-                            while (
-                                i > 1
-                                and classify_desc(lines[i - 1]) == "english"
+                            while i > 1 and classify_desc(lines[i - 1]) in (
+                                "english",
+                                "taxonomic",
                             ):
                                 i -= 1
                             tr = "\n".join(lines[i:])
@@ -3696,22 +3694,27 @@ def parse_language(
                     elif lang_code != "en" and len(lines) == 2:
                         cls1 = classify_desc(lines[0])
                         cls2 = classify_desc(lines[1])
-                        if cls2 == "english" and cls1 != "english":
+                        if (
+                            cls2 in ("english", "taxonomic")
+                            and cls1 != "english"
+                        ):
                             tr = lines[1]
                             lines = [lines[0]]
-                        elif cls1 == "english" and cls2 != "english":
+                        elif (
+                            cls1 in ("english", "taxonomic")
+                            and cls2 != "english"
+                        ):
                             tr = lines[0]
                             lines = [lines[1]]
-                        elif (
-                            re.match(r"^[#*]*:+", lines[1])
-                            and classify_desc(
-                                re.sub(r"^[#*:]+\s*", "", lines[1])
-                            )
-                            == "english"
-                        ):
+                        elif re.match(r"^[#*]*:+", lines[1]) and classify_desc(
+                            re.sub(r"^[#*:]+\s*", "", lines[1])
+                        ) in ("english", "taxonomic"):
                             tr = re.sub(r"^[#*:]+\s*", "", lines[1])
                             lines = [lines[0]]
-                        elif cls1 == "english" and cls2 == "english":
+                        elif cls1 == "english" and cls2 in (
+                            "english",
+                            "taxonomic",
+                        ):
                             # Both were classified as English, but
                             # presumably one is not.  Assume first is
                             # non-English, as that seems more common.
@@ -3727,7 +3730,7 @@ def parse_language(
                         cls3 = classify_desc(lines[2])
                         if (
                             cls3 == "english"
-                            and cls2 in ["english", "romanization"]
+                            and cls2 in ("english", "romanization")
                             and cls1 != "english"
                         ):
                             tr = lines[2].strip()
@@ -3747,9 +3750,9 @@ def parse_language(
                         cls1 = classify_desc(lines[-1])
                         if cls1 == "english":
                             i = len(lines) - 1
-                            while (
-                                i > 1
-                                and classify_desc(lines[i - 1]) == "english"
+                            while i > 1 and classify_desc(lines[i - 1]) == (
+                                "english",
+                                "taxonomic",
                             ):
                                 i -= 1
                             tr = "\n".join(lines[i:])
@@ -3774,7 +3777,7 @@ def parse_language(
                                 original_lines.append(i)
                             elif cl == "romanization":
                                 roman += line
-                            elif cl == "english":
+                            elif cl in ("english", "taxonomic"):
                                 tr += line
                         lines = [lines[i] for i in original_lines]
 
@@ -3796,14 +3799,16 @@ def parse_language(
                 subtext = "\n".join(x for x in lines if x)
                 if not tr and lang_code != "en":
                     m = re.search(r"([.!?])\s+\(([^)]+)\)\s*$", subtext)
-                    if m and classify_desc(m.group(2)) == "english":
+                    if m and classify_desc(m.group(2)) in (
+                        "english",
+                        "taxonomic",
+                    ):
                         tr = m.group(2)
                         subtext = subtext[: m.start()] + m.group(1)
                     elif lines:
                         parts = re.split(r"\s*[―—]+\s*", lines[0])
-                        if (
-                            len(parts) == 2
-                            and classify_desc(parts[1]) == "english"
+                        if len(parts) == 2 and classify_desc(parts[1]) in (
+                            "english, taxonomic"
                         ):
                             subtext = parts[0].strip()
                             tr = parts[1].strip()
