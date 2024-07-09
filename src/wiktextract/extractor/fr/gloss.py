@@ -84,8 +84,8 @@ def extract_gloss(
         gloss_data.note = clean_node(
             wxr, gloss_data, gloss_only_nodes[note_index + 1 :]
         ).strip(" ().")
-        if len(gloss_data.glosses) > 0:
-            page_data[-1].senses.append(gloss_data)
+        page_data[-1].senses.append(gloss_data)
+
         for nest_gloss_list in list_item_node.find_child(NodeKind.LIST):
             if nest_gloss_list.sarg.endswith("#"):
                 extract_gloss(wxr, page_data, nest_gloss_list, gloss_data)
@@ -93,6 +93,8 @@ def extract_gloss(
                 extract_examples(wxr, gloss_data, nest_gloss_list)
 
         translate_raw_tags(gloss_data)
+        if len(gloss_data.glosses) == 0:
+            gloss_data.tags.append("no-gloss")
 
 
 def extract_examples(

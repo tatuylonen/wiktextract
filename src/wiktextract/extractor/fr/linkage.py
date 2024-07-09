@@ -114,7 +114,12 @@ def process_linkage_list(
                 and child_node.kind == NodeKind.ITALIC
             ):
                 current_sense = clean_node(wxr, None, child_node).strip("()")
-                if current_sense.isdecimal():
+                if (
+                    len(list(template_or_list_node.filter_empty_str_child()))
+                    == 1
+                ):
+                    linkage_data.word = current_sense
+                elif current_sense.isdecimal():
                     linkage_data.sense_index = int(current_sense)
                 else:
                     linkage_data.sense = current_sense

@@ -237,39 +237,20 @@ class TestFrGloss(TestCase):
         self.maxDiff = None
         self.wxr.wtp.start_page("eau")
         root = self.wxr.wtp.parse(
-            """# [[fluide|Fluides]], [[sérosité]]s qui se trouvent ou qui se forment dans le [[corps]] de l’[[homme]] ou de l’[[animal]].
+            """# [[fluide|Fluides]]
 #* example 1
 ## [[salive|Salive]].
-##* nest example
-            """  # noqa: E501
+##* nest example"""
         )
         page_data = [WordEntry(word="test", lang_code="fr", lang="Français")]
         extract_gloss(self.wxr, page_data, root.children[0])
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in page_data[-1].senses],
             [
+                {"examples": [{"text": "example 1"}], "glosses": ["Fluides"]},
                 {
-                    "examples": [
-                        {
-                            "text": "example 1",
-                        }
-                    ],
-                    "glosses": [
-                        "Fluides, sérosités qui se trouvent ou qui se forment "
-                        "dans le corps de l’homme ou de l’animal."
-                    ],
-                },
-                {
-                    "examples": [
-                        {
-                            "text": "nest example",
-                        }
-                    ],
-                    "glosses": [
-                        "Fluides, sérosités qui se trouvent ou qui se forment "
-                        "dans le corps de l’homme ou de l’animal.",
-                        "Salive.",
-                    ],
+                    "examples": [{"text": "nest example"}],
+                    "glosses": ["Fluides", "Salive."],
                 },
             ],
         )
@@ -586,6 +567,7 @@ class TestFrGloss(TestCase):
             ),
             {
                 "senses": [
+                    {"tags": ["no-gloss"], "topics": ["mathematics"]},
                     {
                         "glosses": ["Application affine"],
                         "topics": ["mathematics"],

@@ -59,7 +59,7 @@ def parse_section(
             first_param = level_node_template.template_parameters.get(1, "")
             if not isinstance(first_param, str):
                 continue
-            section_type = first_param.lower()
+            section_type = first_param.strip().lower()
             title_categories = {}
             subtitle = clean_node(wxr, title_categories, level_node.largs)
             wxr.wtp.start_subsection(subtitle)
