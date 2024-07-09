@@ -106,7 +106,7 @@ def parse_section(
         elif wxr.config.capture_linkages and subtitle in LINKAGE_TITLES:
             extract_linkages(
                 wxr,
-                page_data,
+                page_data if len(page_data) > 0 else [base_data],
                 node.children,
                 LINKAGE_TITLES[subtitle],
                 "",
@@ -118,17 +118,17 @@ def parse_section(
                 page_data.append(base_data.model_copy(deep=True))
             extract_translation(wxr, page_data, node)
         elif wxr.config.capture_inflections and subtitle in INFLECTION_TITLES:
-            if len(page_data) == 0:
-                page_data.append(base_data.model_copy(deep=True))
-            extract_inflections(wxr, page_data, node)
+            extract_inflections(
+                wxr, page_data if len(page_data) > 0 else [base_data], node
+            )
         elif wxr.config.capture_descendants and subtitle in DESCENDANTS_TITLES:
-            if len(page_data) == 0:
-                page_data.append(base_data.model_copy(deep=True))
-            extract_descendants(wxr, node, page_data[-1])
+            extract_descendants(
+                wxr, node, page_data[-1] if len(page_data) > 0 else base_data
+            )
         elif subtitle in NOTES_TITLES:
-            if len(page_data) == 0:
-                page_data.append(base_data.model_copy(deep=True))
-            extract_note(wxr, page_data, node)
+            extract_note(
+                wxr, page_data if len(page_data) > 0 else [base_data], node
+            )
         else:
             wxr.wtp.debug(
                 f"Unhandled subtitle: {subtitle}",

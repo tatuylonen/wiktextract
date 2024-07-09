@@ -4,6 +4,7 @@ from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.zh.linkage import extract_linkages
 from wiktextract.extractor.zh.models import Sense, WordEntry
+from wiktextract.extractor.zh.page import parse_page
 from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.wxr_context import WiktextractContext
 
@@ -87,5 +88,35 @@ class TestLinkage(TestCase):
             ],
             [
                 {"tags": ["figuratively"], "word": "沙漠之舟"},
+            ],
+        )
+
+    def test_linkage_above_pos(self):
+        self.wxr.wtp.add_page(
+            "Template:alter",
+            10,
+            '<span class="Latn" lang="en">[[Tec#英語|-{Tec}-]]</span>'
+        )
+        self.assertEqual(
+            parse_page(
+                self.wxr,
+                "'Tec",
+                """==英語==
+===替代形式===
+* {{alter|en|Tec}}
+
+===專有名詞===
+
+# 偵探漫畫""",
+            ),
+            [
+                {
+                    "lang": "英語",
+                    "lang_code": "en",
+                    "pos": "name",
+                    "senses": [{"glosses": ["偵探漫畫"]}],
+                    "synonyms": [{"word": "Tec"}],
+                    "word": "'Tec",
+                }
             ],
         )
