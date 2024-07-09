@@ -408,4 +408,4 @@ TRANSLATIONS_TITLES: frozenset[str] = frozenset(["翻譯", "翻译"])
 
 DESCENDANTS_TITLES: frozenset[str] = frozenset(["派生語彙"])
 
-NOTES_TITLES: frozenset[str] = frozenset(["使用說明"])
+NOTES_TITLES: frozenset[str] = frozenset(["使用說明", "用法說明"])
