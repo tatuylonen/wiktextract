@@ -299,3 +299,22 @@ class TestLinkage(TestCase):
                 {"word": "syndrome alcoolo-fœtal", "raw_tags": ["SAF"]},
             ],
         )
+
+    def test_italic_word(self):
+        page_data = [
+            WordEntry(
+                word="Sus scrofa scrofa",
+                lang_code="conv",
+                lang="Conventions internationales",
+            )
+        ]
+        self.wxr.wtp.start_page("Sus scrofa scrofa")
+        root = self.wxr.wtp.parse("* ''[[Sus scrofa anglicus]]''")
+        extract_linkage(self.wxr, page_data, root, "synonymes")
+        self.assertEqual(
+            [
+                d.model_dump(exclude_defaults=True)
+                for d in page_data[-1].synonyms
+            ],
+            [{"word": "Sus scrofa anglicus"}],
+        )
