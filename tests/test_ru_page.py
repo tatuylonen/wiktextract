@@ -325,3 +325,25 @@ class TestRUPage(TestCase):
         self.assertEqual(
             page_data[0]["tags"], ["inanimate", "feminine", "declension-1"]
         )
+
+    def test_no_level3_title(self):
+        self.wxr.wtp.add_page("Шаблон:-en-", 10, "Английский")
+        page_data = parse_page(
+            self.wxr,
+            "-ful",
+            """= {{-en-}} =
+==== Значение ====
+# gloss""",
+        )
+        self.assertEqual(
+            page_data,
+            [
+                {
+                    "lang": "Английский",
+                    "lang_code": "en",
+                    "pos": "unknown",
+                    "senses": [{"glosses": ["gloss"]}],
+                    "word": "-ful",
+                }
+            ],
+        )
