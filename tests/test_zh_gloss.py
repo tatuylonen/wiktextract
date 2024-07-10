@@ -500,3 +500,26 @@ class TestGloss(TestCase):
                 },
             ],
         )
+
+    def test_low_quality_german_page(self):
+        self.wxr.wtp.add_page(
+            "Template:zhushi", 10, '〈<span title="阳性名词">阳</span>〉'
+        )
+        self.assertEqual(
+            parse_page(
+                self.wxr,
+                "Übergangsbereich",
+                """==德语==
+[[Category:德语名词]]{{zhushi|阳|阳性名词}}  过渡区，连接区""",
+            ),
+            [
+                {
+                    "categories": ["德语名词"],
+                    "lang": "德语",
+                    "lang_code": "de",
+                    "pos": "noun",
+                    "senses": [{"glosses": ["〈阳〉 过渡区，连接区"]}],
+                    "word": "Übergangsbereich",
+                },
+            ],
+        )

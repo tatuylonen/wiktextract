@@ -95,7 +95,7 @@ class TestLinkage(TestCase):
         self.wxr.wtp.add_page(
             "Template:alter",
             10,
-            '<span class="Latn" lang="en">[[Tec#英語|-{Tec}-]]</span>'
+            '<span class="Latn" lang="en">[[Tec#英語|-{Tec}-]]</span>',
         )
         self.assertEqual(
             parse_page(
