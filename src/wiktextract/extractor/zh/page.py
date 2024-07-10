@@ -250,7 +250,7 @@ def process_low_quality_page(
 ) -> None:
     is_soft_redirect = False
     for template_node in level_node.find_child(NodeKind.TEMPLATE):
-        if template_node.template_name in ("ja-see", "zh-see"):
+        if template_node.template_name in ("ja-see", "ja-see-kango", "zh-see"):
             process_soft_redirect_template(wxr, template_node, page_data)
             is_soft_redirect = True
 
@@ -273,20 +273,19 @@ def process_soft_redirect_template(
     page_data: list[WordEntry],
 ) -> None:
     # https://zh.wiktionary.org/wiki/Template:Ja-see
+    # https://zh.wiktionary.org/wiki/Template:Ja-see-kango
     # https://zh.wiktionary.org/wiki/Template:Zh-see
-    update_pos = False
-    if template_node.template_name.lower() == "zh-see":
+    template_name = template_node.template_name.lower()
+    if template_name == "zh-see":
         page_data[-1].redirects.append(
             clean_node(wxr, None, template_node.template_parameters.get(1, ""))
         )
-        update_pos = True
-    elif template_node.template_name.lower() == "ja-see":
+    elif template_name in ("ja-see", "ja-see-kango"):
         for key, value in template_node.template_parameters.items():
             if isinstance(key, int):
                 page_data[-1].redirects.append(clean_node(wxr, None, value))
-        update_pos = True
 
-    if update_pos and page_data[-1].pos == "unknown":
+    if page_data[-1].pos == "unknown":
         page_data[-1].pos = "soft-redirect"
 
 
