@@ -3621,7 +3621,12 @@ def parse_language(
                         ).strip()
                         == parts[0].strip()
                         and clean_value(
-                            wxr, example_template_args[0].get(3, "")
+                            wxr,
+                            (
+                                example_template_args[0].get(3)
+                                or example_template_args[0].get("translation")
+                                or example_template_args[0].get("t", "")
+                            ),
                         ).strip()
                         == parts[1].strip()
                     ):
