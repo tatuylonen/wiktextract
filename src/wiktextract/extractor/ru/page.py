@@ -323,15 +323,15 @@ def parse_page(
                     page_data.pop()
                 extract_low_quality_page(wxr, page_data, base_data, level2_node)
 
-            for level3_index, level3_node in enumerate(
-                level1_node.find_child(NodeKind.LEVEL3)
+            for any_level_index, any_level_node in enumerate(
+                level1_node.find_child(LEVEL_KIND_FLAGS & ~NodeKind.LEVEL2)
             ):
-                if level3_index == 0 and (
+                if any_level_index == 0 and (
                     len(page_data) == 0
                     or page_data[-1].lang_code != base_data.lang_code
                 ):
                     page_data.append(base_data.model_copy(deep=True))
-                parse_section(wxr, page_data, level3_node)
+                parse_section(wxr, page_data, any_level_node)
             if len(page_data) > 0 and page_data[-1] == base_data:
                 page_data.pop()
             extract_low_quality_page(wxr, page_data, base_data, level1_node)
