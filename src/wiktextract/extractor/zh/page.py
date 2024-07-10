@@ -248,13 +248,22 @@ def process_low_quality_page(
     level_node: WikiNode,
     page_data: list[WordEntry],
 ) -> None:
-    if level_node.contain_node(NodeKind.TEMPLATE):
-        for template_node in level_node.find_child(NodeKind.TEMPLATE):
+    is_soft_redirect = False
+    for template_node in level_node.find_child(NodeKind.TEMPLATE):
+        if template_node.template_name in ("ja-see", "zh-see"):
             process_soft_redirect_template(wxr, template_node, page_data)
-    else:
-        # only have a gloss text
+            is_soft_redirect = True
+
+    if not is_soft_redirect:  # only have a gloss text
         gloss_text = clean_node(wxr, page_data[-1], level_node.children)
         if len(gloss_text) > 0:
+            for cat in page_data[-1].categories:
+                cat = cat.removeprefix(page_data[-1].lang).strip()
+                if cat in POS_TITLES:
+                    pos_data = POS_TITLES[cat]
+                    page_data[-1].pos = pos_data["pos"]
+                    page_data[-1].tags.extend(pos_data.get("tags", []))
+                    break
             page_data[-1].senses.append(Sense(glosses=[gloss_text]))
 
 
