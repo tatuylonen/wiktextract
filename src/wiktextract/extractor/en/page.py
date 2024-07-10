@@ -2919,7 +2919,8 @@ def parse_language(
                         if pos.lower() not in POS_TITLES:
                             wxr.wtp.debug(
                                 "unhandled see translation subpage: "
-                                "language={} sub={} wxr.wtp.subsection={}".format(
+                                "language={} sub={} "
+                                "wxr.wtp.subsection={}".format(
                                     language, sub, wxr.wtp.subsection
                                 ),
                                 sortid="page/2478",
@@ -3615,7 +3616,16 @@ def parse_language(
                     if (
                         len(example_template_args) == 1
                         and len(parts) == 2
-                        and len(example_template_args[0]) == 3
+                        and len(example_template_args[0])
+                        - (
+                            # horrible kludge to ignore these arguments
+                            # when calculating how many there are
+                            sum(
+                                s in example_template_args[0]
+                                for s in ("inline", "noenum", "nocat", "sort")
+                            )
+                        )
+                        == 3
                         and clean_value(
                             wxr, example_template_args[0].get(2, "")
                         ).strip()
