@@ -34,7 +34,7 @@ class Linkage(BaseModelWrap):
     raw_tags: list[str] = []
     sense: str = ""
     sense_index: int = Field(
-        0, ge=0, description="Number of the definition, start from 1"
+        default=0, ge=0, description="Number of the definition, start from 1"
     )
 
 
