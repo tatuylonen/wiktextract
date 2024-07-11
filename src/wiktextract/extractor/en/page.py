@@ -3661,6 +3661,18 @@ def parse_language(
                             parts = nparts
                     if (
                         len(example_template_args) == 1
+                        and "lit" in example_template_args[0]
+                    ):
+                        # ugly brute-force kludge in case there's a lit= arg
+                        literally = example_template_args[0].get("lit", "")
+                        if literally:
+                            literally = (
+                                " (literally, “"
+                                + clean_value(wxr, literally)
+                                + "”)"
+                            )
+                    if (
+                        len(example_template_args) == 1
                         and len(parts) == 2
                         and len(example_template_args[0])
                         - (
@@ -3668,13 +3680,19 @@ def parse_language(
                             # when calculating how many there are
                             sum(
                                 s in example_template_args[0]
-                                for s in ("inline", "noenum", "nocat", "sort")
+                                for s in (
+                                    "lit",  # generates text, but we handle it
+                                    "inline",
+                                    "noenum",
+                                    "nocat",
+                                    "sort",
+                                )
                             )
                         )
                         == 3
                         and clean_value(
                             wxr, example_template_args[0].get(2, "")
-                        ).strip()
+                        )
                         == parts[0].strip()
                         and clean_value(
                             wxr,
@@ -3682,8 +3700,9 @@ def parse_language(
                                 example_template_args[0].get(3)
                                 or example_template_args[0].get("translation")
                                 or example_template_args[0].get("t", "")
-                            ),
-                        ).strip()
+                            )
+                            + literally,  # in case there's a lit= argument
+                        )
                         == parts[1].strip()
                     ):
                         # {{exampletemplate|ex|Foo bar baz|English translation}}
