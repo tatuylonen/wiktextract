@@ -3671,6 +3671,8 @@ def parse_language(
                                 + clean_value(wxr, literally)
                                 + "”)"
                             )
+                    else:
+                        literally = ""
                     if (
                         len(example_template_args) == 1
                         and len(parts) == 2
