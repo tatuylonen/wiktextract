@@ -147,6 +147,9 @@ def process_gloss_nodes(
                 raw_gloss_children.append(child)
             elif child.template_name == "значение":
                 process_meaning_template(wxr, sense, word_entry, child)
+            else:
+                clean_gloss_children.append(child)
+                raw_gloss_children.append(child)
         else:
             clean_gloss_children.append(child)
             raw_gloss_children.append(child)
