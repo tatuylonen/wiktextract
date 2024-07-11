@@ -3692,7 +3692,7 @@ def parse_language(
                         == 3
                         and clean_value(
                             wxr, example_template_args[0].get(2, "")
-                        ).strip()
+                        )
                         == parts[0].strip()
                         and clean_value(
                             wxr,
@@ -3702,7 +3702,7 @@ def parse_language(
                                 or example_template_args[0].get("t", "")
                             )
                             + literally,  # in case there's a lit= argument
-                        ).strip()
+                        )
                         == parts[1].strip()
                     ):
                         # {{exampletemplate|ex|Foo bar baz|English translation}}
