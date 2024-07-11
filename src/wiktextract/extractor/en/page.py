@@ -799,6 +799,40 @@ def parse_sense_linkage(
         data_append(data, field, dt)
 
 
+EXAMPLE_SPLITTERS = r"\s*[―—]+\s*"
+example_splitter_re = re.compile(EXAMPLE_SPLITTERS)
+captured_splitters_re = re.compile(r"(" + EXAMPLE_SPLITTERS + r")")
+
+
+def synch_splits_with_args(
+    line: str, targs: TemplateArgs
+) -> Optional[list[str]]:
+    """If it looks like there's something weird with how a line of example
+    text has been split, this function will do the splitting after counting
+    occurences of the splitting regex inside the two main template arguments
+    containing the string data for the original language example and the
+    English translations.
+    """
+    # Previously, we split without capturing groups, but here we want to
+    # keep the original splitting hyphen regex intact.
+    fparts = captured_splitters_re.split(line)
+    new_parts = []
+    # ["First", " – ", "second", " – ", "third..."] from OL argument
+    first = 1 + (2 * len(example_splitter_re.findall(targs.get(2, ""))))
+    new_parts.append("".join(fparts[:first]))
+    # Translation argument
+    tr_arg = targs.get(3) or targs.get("translation") or targs.get("t", "")
+    # +2 = + 1 to skip the "expected" hyphen, + 1 as the `1 +` above.
+    second = first + 2 + (2 * len(example_splitter_re.findall(tr_arg)))
+    new_parts.append("".join(fparts[first + 1 : second]))
+
+    if all(new_parts):  # no empty strings from the above spaghetti
+        new_parts.extend(fparts[second + 1 :: 2])  # skip rest of hyphens
+        return new_parts
+    else:
+        return None
+
+
 def parse_language(
     wxr: WiktextractContext, langnode: WikiNode, language: str, lang_code: str
 ) -> list[WordData]:
@@ -3612,7 +3646,20 @@ def parse_language(
                 #     print("LINE:", repr(line))
                 #     print(classify_desc(line))
                 if len(lines) == 1 and lang_code != "en":
-                    parts = re.split(r"\s*[―—]+\s*", lines[0])
+                    parts = example_splitter_re.split(lines[0])
+                    if (
+                        len(parts) > 2
+                        and len(example_template_args) == 1
+                        and any(
+                            ("―" in s) or ("—" in s)
+                            for s in example_template_args[0].values()
+                        )
+                    ):
+                        if nparts := synch_splits_with_args(
+                            lines[0], example_template_args[0]
+                        ):
+                            parts = nparts
+                    print(parts)
                     if (
                         len(example_template_args) == 1
                         and len(parts) == 2
