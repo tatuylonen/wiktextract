@@ -43,19 +43,11 @@ def process_semantic_section(
     page_data: list[WordEntry],
     semantic_level_node: WikiNode,
 ):
-    for node in semantic_level_node.find_child(NodeKind.LEVEL4 | NodeKind.LIST):
-        if node.kind == NodeKind.LEVEL4:
-            section_title = clean_node(wxr, None, node.largs).lower()
-            if section_title == "значение":
-                extract_gloss(wxr, page_data[-1], node)
-            elif section_title in LINKAGE_TITLES:
-                linkage_type = LINKAGE_TITLES[section_title]
-                extract_linkages(wxr, page_data[-1], linkage_type, node)
-            else:
-                wxr.wtp.debug(
-                    f"Unprocessed section {section_title} in semantic section",
-                    sortid="extractor/ru/page/process_semantic_section/35",
-                )
+    for node in semantic_level_node.find_child(
+        LEVEL_KIND_FLAGS | NodeKind.LIST
+    ):
+        if node.kind in LEVEL_KIND_FLAGS:
+            parse_section(wxr, page_data, node)
         elif node.kind == NodeKind.LIST:
             for template_node in node.find_child_recursively(NodeKind.TEMPLATE):
                 if template_node.template_name == "значение":
@@ -64,9 +56,6 @@ def process_semantic_section(
                     )
                     if len(sense.glosses) > 0:
                         page_data[-1].senses.append(sense)
-
-    # XXX: Process non level4 nodes such as illustration templates "{илл|...}",
-    # cf. https://ru.wiktionary.org/wiki/овощ
 
 
 MORPH_TEMPLATE_ARGS = {
@@ -198,9 +187,9 @@ def extract_morphological_section(
 
 
 def parse_section(
-    wxr: WiktextractContext, page_data: list[WordEntry], level3_node: WikiNode
+    wxr: WiktextractContext, page_data: list[WordEntry], level_node: WikiNode
 ) -> None:
-    section_title = clean_node(wxr, None, level3_node.largs).lower()
+    section_title = clean_node(wxr, None, level_node.largs).lower()
     wxr.wtp.start_subsection(section_title)
     if section_title in [
         # Morphological and syntactic properties
@@ -209,40 +198,40 @@ def parse_section(
         "тип и синтаксические свойства сочетания",
         "тип и свойства сочетания",
     ]:
-        extract_morphological_section(wxr, page_data, level3_node)
+        extract_morphological_section(wxr, page_data, level_node)
     elif section_title in POS_TITLES:
         pos_data = POS_TITLES[section_title]
         page_data[-1].pos = pos_data["pos"]
         page_data[-1].tags.extend(pos_data.get("tags", []))
-        extract_gloss(wxr, page_data[-1], level3_node)
+        extract_gloss(wxr, page_data[-1], level_node)
     elif section_title == "произношение":
         if wxr.config.capture_pronunciation:
-            extract_pronunciation(wxr, page_data[-1], level3_node)
-        for next_level_node in level3_node.find_child(LEVEL_KIND_FLAGS):
+            extract_pronunciation(wxr, page_data[-1], level_node)
+        for next_level_node in level_node.find_child(LEVEL_KIND_FLAGS):
             parse_section(wxr, page_data, next_level_node)
     elif section_title == "семантические свойства":  # Semantic properties
-        process_semantic_section(wxr, page_data, level3_node)
+        process_semantic_section(wxr, page_data, level_node)
     elif section_title in ("значение", "значения"):
-        extract_gloss(wxr, page_data[-1], level3_node)
+        extract_gloss(wxr, page_data[-1], level_node)
     elif section_title == "родственные слова" and wxr.config.capture_linkages:
         # Word family
-        for template_node in level3_node.find_child(NodeKind.TEMPLATE):
+        for template_node in level_node.find_child(NodeKind.TEMPLATE):
             if template_node.template_name == "родств-блок":
                 process_related_block_template(
                     wxr, page_data[-1], template_node
                 )
     elif section_title == "этимология" and wxr.config.capture_etymologies:
-        extract_etymology(wxr, page_data[-1], level3_node)
+        extract_etymology(wxr, page_data[-1], level_node)
     elif (
         section_title == "фразеологизмы и устойчивые сочетания"
         and wxr.config.capture_linkages
     ):
-        extract_phrase_section(wxr, page_data[-1], level3_node)
+        extract_phrase_section(wxr, page_data[-1], level_node)
     elif section_title == "перевод" and wxr.config.capture_translations:
-        extract_translations(wxr, page_data[-1], level3_node)
+        extract_translations(wxr, page_data[-1], level_node)
     elif section_title in LINKAGE_TITLES and wxr.config.capture_linkages:
         extract_linkages(
-            wxr, page_data[-1], LINKAGE_TITLES[section_title], level3_node
+            wxr, page_data[-1], LINKAGE_TITLES[section_title], level_node
         )
     elif section_title == "библиография":
         pass

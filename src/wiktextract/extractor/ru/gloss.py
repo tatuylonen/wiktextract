@@ -66,7 +66,7 @@ GLOSS_TEMPLATES = {
 }
 
 # Templates that specify a note for the gloss
-NOTE_TEMPLATES = {"пример", "помета", "??", "as ru"}
+NOTE_TEMPLATES = {"пример", "помета", "??"}
 
 IGNORED_TEMPLATES = {"нужен перевод"}
 
@@ -147,6 +147,9 @@ def process_gloss_nodes(
                 raw_gloss_children.append(child)
             elif child.template_name == "значение":
                 process_meaning_template(wxr, sense, word_entry, child)
+            else:
+                clean_gloss_children.append(child)
+                raw_gloss_children.append(child)
         else:
             clean_gloss_children.append(child)
             raw_gloss_children.append(child)
