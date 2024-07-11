@@ -66,7 +66,7 @@ GLOSS_TEMPLATES = {
 }
 
 # Templates that specify a note for the gloss
-NOTE_TEMPLATES = {"пример", "помета", "??", "as ru"}
+NOTE_TEMPLATES = {"пример", "помета", "??"}
 
 IGNORED_TEMPLATES = {"нужен перевод"}
 
