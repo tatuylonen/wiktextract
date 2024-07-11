@@ -42,13 +42,13 @@ class TestDELinkages(unittest.TestCase):
             # Cleans explanatory text from expressions.
             {
                 "input": "====Redewendungen====\n:[[ein gutes Beispiel geben|"
-                        "ein gutes ''Beispiel'' geben]] – als [[Vorbild]] zur "
-                        "[[Nachahmung]] [[dienen]]/[[herausfordern]]",
+                "ein gutes ''Beispiel'' geben]] – als [[Vorbild]] zur "
+                "[[Nachahmung]] [[dienen]]/[[herausfordern]]",
                 "expected": {
                     "expressions": [
                         {
                             "note": "als Vorbild zur Nachahmung "
-                                    "dienen/herausfordern",
+                            "dienen/herausfordern",
                             "word": "ein gutes Beispiel geben",
                         }
                     ],

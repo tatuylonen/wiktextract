@@ -3,7 +3,7 @@ from wikitextprocessor.parser import LevelNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
-from .models import Example, WordEntry
+from .models import Example, Sense, WordEntry
 from .utils import find_and_remove_child, match_senseid
 
 REF_KEY_MAP = {
@@ -57,11 +57,15 @@ def extract_examples(
             if len(example_text) > 0:
                 example_data.text = example_text
                 if len(senseid) > 0:
+                    find_sense = False
                     for sense in word_entry.senses:
                         if sense.senseid == senseid:
-                            sense.examples.append(
-                                example_data.model_copy(deep=True)
-                            )
+                            sense.examples.append(example_data)
+                            find_sense = True
+                    if not find_sense:
+                        new_sense = Sense(senseid=senseid, tags=["no-gloss"])
+                        new_sense.examples.append(example_data)
+                        word_entry.senses.append(new_sense)
                 else:
                     wxr.wtp.debug(
                         f"Found example data without senseid: {example_data}",
