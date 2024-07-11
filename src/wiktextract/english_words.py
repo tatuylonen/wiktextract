@@ -1918,6 +1918,17 @@ not_english_words_1 = set(
         "novo",
         "pronto",
         "que",
+        "extortionary",
+        "democracy",
+        "Mrs",
+        "physical",
+        "property",
+        "ransomware",
+        "program",
+        "epiglottis",
+        "laryngeal",
+        "flap",
+        "literally",
     ]
 )
 
