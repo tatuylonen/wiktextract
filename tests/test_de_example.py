@@ -49,6 +49,11 @@ class TestDEExample(unittest.TestCase):
                     "examples": [{"text": "example2"}],
                     "senseid": "2",
                 },
+                {
+                    "examples": [{"text": "example3"}],
+                    "senseid": "3",
+                    "tags": ["no-gloss"],
+                },
             ],
         )
 
@@ -94,8 +99,8 @@ class TestDEExample(unittest.TestCase):
         self.assertEqual(
             example_data.model_dump(exclude_defaults=True),
             {
-                "raw_ref":  "Expanded template, Seite 273. "
-                            "ISBN 978-3-89029-459-9.",
+                "raw_ref": "Expanded template, Seite 273. "
+                "ISBN 978-3-89029-459-9.",
                 "title": "Viva Warszawa",
                 "author": "Steffen Möller",
                 "title_complement": "Polen für Fortgeschrittene",
