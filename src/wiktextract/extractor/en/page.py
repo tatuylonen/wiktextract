@@ -3659,7 +3659,6 @@ def parse_language(
                             lines[0], example_template_args[0]
                         ):
                             parts = nparts
-                    print(parts)
                     if (
                         len(example_template_args) == 1
                         and len(parts) == 2
