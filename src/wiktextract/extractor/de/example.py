@@ -38,39 +38,41 @@ def extract_examples(
     word_entry: WordEntry,
     level_node: LevelNode,
 ) -> None:
-    for list_node in level_node.find_child(NodeKind.LIST):
-        for list_item_node in list_node.find_child(NodeKind.LIST_ITEM):
-            example_data = Example()
+    for list_item_node in level_node.find_child_recursively(NodeKind.LIST_ITEM):
+        if list_item_node.contain_node(NodeKind.LIST):
+            continue
 
-            ref_nodes = find_and_remove_child(
-                list_item_node,
-                NodeKind.HTML,
-                lambda html_node: html_node.tag == "ref",
-            )
-            for ref_node in ref_nodes:
-                extract_reference(wxr, example_data, ref_node)
+        example_data = Example()
 
-            example_text = clean_node(wxr, None, list_item_node.children)
+        ref_nodes = find_and_remove_child(
+            list_item_node,
+            NodeKind.HTML,
+            lambda html_node: html_node.tag == "ref",
+        )
+        for ref_node in ref_nodes:
+            extract_reference(wxr, example_data, ref_node)
 
-            senseid, example_text = match_senseid(example_text)
+        example_text = clean_node(wxr, None, list_item_node.children)
 
-            if len(example_text) > 0:
-                example_data.text = example_text
-                if len(senseid) > 0:
-                    find_sense = False
-                    for sense in word_entry.senses:
-                        if sense.senseid == senseid:
-                            sense.examples.append(example_data)
-                            find_sense = True
-                    if not find_sense:
-                        new_sense = Sense(senseid=senseid, tags=["no-gloss"])
-                        new_sense.examples.append(example_data)
-                        word_entry.senses.append(new_sense)
-                else:
-                    wxr.wtp.debug(
-                        f"Found example data without senseid: {example_data}",
-                        sortid="extractor/de/examples/extract_examples/28",
-                    )
+        senseid, example_text = match_senseid(example_text)
+
+        if len(example_text) > 0:
+            example_data.text = example_text
+            if len(senseid) > 0:
+                find_sense = False
+                for sense in word_entry.senses:
+                    if sense.senseid == senseid:
+                        sense.examples.append(example_data)
+                        find_sense = True
+                if not find_sense:
+                    new_sense = Sense(senseid=senseid, tags=["no-gloss"])
+                    new_sense.examples.append(example_data)
+                    word_entry.senses.append(new_sense)
+            else:
+                wxr.wtp.debug(
+                    f"Found example data without senseid: {example_data}",
+                    sortid="extractor/de/examples/extract_examples/28",
+                )
 
     for non_list_node in level_node.invert_find_child(NodeKind.LIST):
         wxr.wtp.debug(

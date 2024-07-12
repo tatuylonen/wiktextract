@@ -130,3 +130,37 @@ class TestDEExample(unittest.TestCase):
                 "raw_ref": "Expanded template",
             },
         )
+
+    def test_nested_example_list(self):
+        self.wxr.wtp.start_page("auf")
+        root = self.wxr.wtp.parse(""":[1]
+::[1a] Er stand ''auf'' dem Dach.
+::[1b] Er stieg ''aufs'' Dach.""")
+        page_data = [
+            WordEntry(
+                lang="Deutsch",
+                lang_code="de",
+                pos="prep",
+                senses=[
+                    Sense(glosses=["gloss 1a"], senseid="1a"),
+                    Sense(glosses=["gloss 1b"], senseid="1b"),
+                ],
+                word="auf",
+            )
+        ]
+        extract_examples(self.wxr, page_data[-1], root)
+        self.assertEqual(
+            [s.model_dump(exclude_defaults=True) for s in page_data[-1].senses],
+            [
+                {
+                    "examples": [{"text": "Er stand auf dem Dach."}],
+                    "glosses": ["gloss 1a"],
+                    "senseid": "1a",
+                },
+                {
+                    "examples": [{"text": "Er stieg aufs Dach."}],
+                    "glosses": ["gloss 1b"],
+                    "senseid": "1b",
+                },
+            ],
+        )
