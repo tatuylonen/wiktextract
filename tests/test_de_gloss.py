@@ -371,3 +371,27 @@ Indikativ Präsens Aktiv des Verbs '''[[amar]]'''""",
                 }
             ],
         )
+
+    def test_unordered_list(self):
+        self.wxr.wtp.add_page("Vorlage:Sprache", 10, "{{{1}}}")
+        self.wxr.wtp.add_page("Vorlage:Wortart", 10, "{{{1}}}")
+        self.assertEqual(
+            parse_page(
+                self.wxr,
+                "assa",
+                """== assa ({{Sprache|Prußisch}}) ==
+=== {{Wortart|Präposition |Prußisch}} ===
+
+==== Bedeutungen ====
+* Nebenform der Präposition '''[[esse]]'''""",
+            ),
+            [
+                {
+                    "lang": "Prußisch",
+                    "lang_code": "prg",
+                    "pos": "prep",
+                    "senses": [{"glosses": ["Nebenform der Präposition esse"]}],
+                    "word": "assa",
+                }
+            ],
+        )

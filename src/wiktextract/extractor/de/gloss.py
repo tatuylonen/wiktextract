@@ -38,18 +38,26 @@ def process_gloss_list_item(
         item_type = list_item_node.sarg
         if item_type == "*":
             # only contains modifier template
+            has_tag_template = False
             for template in list_item_node.find_child(NodeKind.TEMPLATE):
                 raw_tag = clean_node(wxr, parent_sense, template).removesuffix(
                     ":"
                 )
                 parent_sense = Sense()
                 parent_sense.raw_tags.append(raw_tag)
+                has_tag_template = True
             # or form-of word
             if (
                 "form-of" in word_entry.tags
                 or section_title == "Grammatische Merkmale"
             ):
                 process_form_of_list_item(wxr, word_entry, list_item_node)
+            elif not has_tag_template:
+                new_sense = Sense()
+                gloss_text = clean_node(wxr, new_sense, list_item_node.children)
+                if len(gloss_text) > 0:
+                    new_sense.glosses.append(gloss_text)
+                    word_entry.senses.append(new_sense)
         elif item_type.endswith(":"):
             sense_data = parent_sense.model_copy(deep=True)
             gloss_nodes = []
