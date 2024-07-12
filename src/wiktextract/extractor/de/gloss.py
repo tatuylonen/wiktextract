@@ -149,11 +149,18 @@ def process_form_of_list_item(
 
     sense = Sense()
     gloss_text = clean_node(wxr, None, list_item_node.children)
-    for bold_node in list_item_node.find_child(NodeKind.BOLD):
-        bold_text = clean_node(wxr, None, bold_node)
-        if bold_text != "":
-            sense.form_of.append(AltForm(word=bold_text))
-        break
+    for node in list_item_node.find_child(NodeKind.BOLD | NodeKind.TEMPLATE):
+        if isinstance(node, TemplateNode) and node.template_name == "Ü":
+            # https://de.wiktionary.org/wiki/Vorlage:Ü
+            form_of = clean_node(wxr, None, node.template_parameters.get(2, ""))
+            if len(form_of) > 0:
+                sense.form_of.append(AltForm(word=form_of))
+                break
+        elif node.kind == NodeKind.BOLD:
+            bold_text = clean_node(wxr, None, node)
+            if bold_text != "":
+                sense.form_of.append(AltForm(word=bold_text))
+                break
     if gloss_text != "":
         sense.glosses.append(gloss_text)
         for str_node in list_item_node.children:

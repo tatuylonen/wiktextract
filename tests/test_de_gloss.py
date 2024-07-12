@@ -282,3 +282,33 @@ class TestDEGloss(unittest.TestCase):
                 }
             ],
         )
+
+    def test_no_bedeutungen_section(self):
+        self.wxr.wtp.add_page("Vorlage:Sprache", 10, "{{{1}}}")
+        self.wxr.wtp.add_page("Vorlage:Wortart", 10, "{{{1}}}")
+        self.wxr.wtp.add_page("Vorlage:Ü", 10, "{{{2}}}")
+        self.assertEqual(
+            parse_page(
+                self.wxr,
+                "abakai",
+                """== abakai ({{Sprache|Litauisch}}) ==
+=== {{Wortart|Deklinierte Form|Litauisch}} ===
+* Nominativ Plural von {{Ü|lt|abakas}}""",
+            ),
+            [
+                {
+                    "lang": "Litauisch",
+                    "lang_code": "lt",
+                    "pos": "unknown",
+                    "senses": [
+                        {
+                            "form_of": [{"word": "abakas"}],
+                            "glosses": ["Nominativ Plural von abakas"],
+                            "tags": ["nominative", "plural"],
+                        }
+                    ],
+                    "tags": ["form-of"],
+                    "word": "abakai",
+                }
+            ],
+        )
