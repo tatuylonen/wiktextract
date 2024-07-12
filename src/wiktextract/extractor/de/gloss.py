@@ -36,7 +36,7 @@ def process_gloss_list_item(
 ) -> Sense:
     for list_item_node in list_node.find_child(NodeKind.LIST_ITEM):
         item_type = list_item_node.sarg
-        if item_type == "*":
+        if item_type.endswith("*"):
             # only contains modifier template
             has_tag_template = False
             for template in list_item_node.find_child(NodeKind.TEMPLATE):

@@ -395,3 +395,33 @@ Indikativ Präsens Aktiv des Verbs '''[[amar]]'''""",
                 }
             ],
         )
+
+    def test_description_list_plus_unordered_list(self):
+        self.wxr.wtp.add_page("Vorlage:Sprache", 10, "{{{1}}}")
+        self.wxr.wtp.add_page("Vorlage:Wortart", 10, "{{{1}}}")
+        self.assertEqual(
+            parse_page(
+                self.wxr,
+                "aut",
+                """== aut ({{Sprache|Polnisch}}) ==
+=== {{Wortart|Deklinierte Form|Polnisch}} ===
+====Grammatische Merkmale====
+:* Genitiv Plural des Substantivs '''[[auto#auto (Polnisch)|auto]]'''""",
+            ),
+            [
+                {
+                    "lang": "Polnisch",
+                    "lang_code": "pl",
+                    "pos": "noun",
+                    "senses": [
+                        {
+                            "form_of": [{"word": "auto"}],
+                            "glosses": ["Genitiv Plural des Substantivs auto"],
+                            "tags": ["genitive", "plural"],
+                        }
+                    ],
+                    "tags": ["form-of"],
+                    "word": "aut",
+                }
+            ],
+        )
