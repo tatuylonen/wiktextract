@@ -20,11 +20,11 @@ def extract_glosses(
             wxr, word_entry, list_node, sense, section_title
         )
 
-    for non_list_node in level_node.invert_find_child(NodeKind.LIST):
-        wxr.wtp.debug(
-            f"Found unexpected non-list node in gloss section: {non_list_node}",
-            sortid="extractor/de/gloss/extract_gloss/24",
-        )
+    if not level_node.contain_node(NodeKind.LIST):
+        gloss_text = clean_node(wxr, sense, level_node.children)
+        if len(gloss_text) > 0:
+            sense.glosses.append(gloss_text)
+            word_entry.senses.append(sense)
 
 
 def process_gloss_list_item(

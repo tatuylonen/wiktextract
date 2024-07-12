@@ -344,3 +344,30 @@ class TestDEGloss(unittest.TestCase):
                 }
             ],
         )
+
+    def test_no_gloss_list(self):
+        self.wxr.wtp.add_page("Vorlage:Sprache", 10, "{{{1}}}")
+        self.wxr.wtp.add_page("Vorlage:Wortart", 10, "{{{1}}}")
+        self.assertEqual(
+            parse_page(
+                self.wxr,
+                "ama",
+                """== ama ({{Sprache|Interlingua}}) ==
+=== {{Wortart|Konjugierte Form|Interlingua}} ===
+
+==== Grammatische Merkmale ====
+Indikativ Präsens Aktiv des Verbs '''[[amar]]'''""",
+            ),
+            [
+                {
+                    "lang": "Interlingua",
+                    "lang_code": "ia",
+                    "pos": "unknown",
+                    "senses": [
+                        {"glosses": ["Indikativ Präsens Aktiv des Verbs amar"]}
+                    ],
+                    "tags": ["form-of"],
+                    "word": "ama",
+                }
+            ],
+        )
