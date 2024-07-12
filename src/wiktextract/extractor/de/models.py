@@ -43,9 +43,9 @@ class Translation(BaseModelWrap):
 
 class Example(BaseModelWrap):
     text: str = Field(default="", description="Example usage sentence")
-    # translation: Optional[str] = Field(
-    #     default=None, description="Spanish translation of the example sentence"
-    # )
+    translation: str = Field(
+        default="", description="German translation of the example sentence"
+    )
     raw_ref: str = Field(default="", description="Raw reference string")
     url: str = Field(
         default="", description="A web link. Not necessarily well-formated."

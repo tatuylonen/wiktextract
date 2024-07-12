@@ -38,10 +38,8 @@ def extract_examples(
     word_entry: WordEntry,
     level_node: LevelNode,
 ) -> None:
+    last_example = None
     for list_item_node in level_node.find_child_recursively(NodeKind.LIST_ITEM):
-        if list_item_node.contain_node(NodeKind.LIST):
-            continue
-
         example_data = Example()
 
         ref_nodes = find_and_remove_child(
@@ -52,7 +50,9 @@ def extract_examples(
         for ref_node in ref_nodes:
             extract_reference(wxr, example_data, ref_node)
 
-        example_text = clean_node(wxr, None, list_item_node.children)
+        example_text = clean_node(
+            wxr, None, list(list_item_node.invert_find_child(NodeKind.LIST))
+        )
 
         senseid, example_text = match_senseid(example_text)
 
@@ -68,11 +68,15 @@ def extract_examples(
                     new_sense = Sense(senseid=senseid, tags=["no-gloss"])
                     new_sense.examples.append(example_data)
                     word_entry.senses.append(new_sense)
+                last_example = example_data
+            elif last_example is not None:
+                last_example.translation = example_text
             else:
                 wxr.wtp.debug(
                     f"Found example data without senseid: {example_data}",
                     sortid="extractor/de/examples/extract_examples/28",
                 )
+                last_example = None
 
     for non_list_node in level_node.invert_find_child(NodeKind.LIST):
         wxr.wtp.debug(

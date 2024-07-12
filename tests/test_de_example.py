@@ -164,3 +164,35 @@ class TestDEExample(unittest.TestCase):
                 },
             ],
         )
+
+    def test_example_translation(self):
+        self.wxr.wtp.start_page("bot")
+        root = self.wxr.wtp.parse(""":[1] Un ''bot'' son quinze litres:
+::Ein ''Bot'' (Weinschlauch) hat ca. fünfzehn Liter.""")
+        page_data = [
+            WordEntry(
+                lang="Katalanisch",
+                lang_code="ca",
+                pos="noun",
+                senses=[
+                    Sense(glosses=["gloss 1"], senseid="1"),
+                ],
+                word="bot",
+            )
+        ]
+        extract_examples(self.wxr, page_data[-1], root)
+        self.assertEqual(
+            [s.model_dump(exclude_defaults=True) for s in page_data[-1].senses],
+            [
+                {
+                    "examples": [
+                        {
+                            "text": "Un bot son quinze litres:",
+                            "translation": "Ein Bot (Weinschlauch) hat ca. fünfzehn Liter.",
+                        }
+                    ],
+                    "glosses": ["gloss 1"],
+                    "senseid": "1",
+                },
+            ],
+        )
