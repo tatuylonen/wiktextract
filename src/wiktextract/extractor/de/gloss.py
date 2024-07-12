@@ -14,8 +14,11 @@ def extract_glosses(
     level_node: LevelNode,
 ) -> None:
     sense = Sense()
+    section_title = clean_node(wxr, None, level_node.largs)
     for list_node in level_node.find_child(NodeKind.LIST):
-        sense = process_gloss_list_item(wxr, word_entry, list_node, sense)
+        sense = process_gloss_list_item(
+            wxr, word_entry, list_node, sense, section_title
+        )
 
     for non_list_node in level_node.invert_find_child(NodeKind.LIST):
         wxr.wtp.debug(
@@ -29,6 +32,7 @@ def process_gloss_list_item(
     word_entry: WordEntry,
     list_node: WikiNode,
     parent_sense: Sense,
+    section_title: str,
 ) -> Sense:
     for list_item_node in list_node.find_child(NodeKind.LIST_ITEM):
         item_type = list_item_node.sarg
@@ -41,7 +45,10 @@ def process_gloss_list_item(
                 parent_sense = Sense()
                 parent_sense.raw_tags.append(raw_tag)
             # or form-of word
-            if "form-of" in word_entry.tags:
+            if (
+                "form-of" in word_entry.tags
+                or section_title == "Grammatische Merkmale"
+            ):
                 process_form_of_list_item(wxr, word_entry, list_item_node)
         elif item_type.endswith(":"):
             sense_data = parent_sense.model_copy(deep=True)
@@ -122,6 +129,7 @@ def process_gloss_list_item(
                     word_entry,
                     sub_list_node,
                     sense_data,
+                    section_title,
                 )
 
         else:
@@ -181,4 +189,6 @@ def process_form_of_list_item(
                     word_entry.pos = pos_data["pos"]
                     word_entry.tags.extend(pos_data.get("tags", []))
 
+        if "form-of" not in word_entry.tags:
+            word_entry.tags.append("form-of")
         word_entry.senses.append(sense)

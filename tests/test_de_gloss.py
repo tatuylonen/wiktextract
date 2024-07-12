@@ -312,3 +312,35 @@ class TestDEGloss(unittest.TestCase):
                 }
             ],
         )
+
+    def test_grammatische_merkmale_no_form_of_pos_title(self):
+        self.wxr.wtp.add_page("Vorlage:Sprache", 10, "{{{1}}}")
+        self.assertEqual(
+            parse_page(
+                self.wxr,
+                "abisse",
+                """== abisse ({{Sprache|Latein}}) ==
+=== {{Wortart|Infinitiv|Latein}} ===
+
+==== Grammatische Merkmale ====
+* Infinitiv Perfekt Aktiv des Verbs '''[[abire]]'''""",
+            ),
+            [
+                {
+                    "lang": "Latein",
+                    "lang_code": "la",
+                    "pos": "verb",
+                    "senses": [
+                        {
+                            "form_of": [{"word": "abire"}],
+                            "glosses": [
+                                "Infinitiv Perfekt Aktiv des Verbs abire"
+                            ],
+                            "tags": ["perfect", "active"],
+                        }
+                    ],
+                    "tags": ["form-of"],
+                    "word": "abisse",
+                }
+            ],
+        )
