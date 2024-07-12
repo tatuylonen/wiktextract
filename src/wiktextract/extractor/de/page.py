@@ -158,6 +158,9 @@ def process_pos_section(
         if template_node.template_name.endswith("Übersicht"):
             extract_forms(wxr, page_data[-1], template_node)
 
+    if not level_node.contain_node(NodeKind.LEVEL4):
+        extract_glosses(wxr, page_data[-1], level_node)
+
 
 def parse_page(
     wxr: WiktextractContext, page_title: str, page_text: str

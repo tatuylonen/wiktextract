@@ -14,14 +14,17 @@ def extract_glosses(
     level_node: LevelNode,
 ) -> None:
     sense = Sense()
+    section_title = clean_node(wxr, None, level_node.largs)
     for list_node in level_node.find_child(NodeKind.LIST):
-        sense = process_gloss_list_item(wxr, word_entry, list_node, sense)
-
-    for non_list_node in level_node.invert_find_child(NodeKind.LIST):
-        wxr.wtp.debug(
-            f"Found unexpected non-list node in gloss section: {non_list_node}",
-            sortid="extractor/de/gloss/extract_gloss/24",
+        sense = process_gloss_list_item(
+            wxr, word_entry, list_node, sense, section_title
         )
+
+    if not level_node.contain_node(NodeKind.LIST):
+        gloss_text = clean_node(wxr, sense, level_node.children)
+        if len(gloss_text) > 0:
+            sense.glosses.append(gloss_text)
+            word_entry.senses.append(sense)
 
 
 def process_gloss_list_item(
@@ -29,20 +32,32 @@ def process_gloss_list_item(
     word_entry: WordEntry,
     list_node: WikiNode,
     parent_sense: Sense,
+    section_title: str,
 ) -> Sense:
     for list_item_node in list_node.find_child(NodeKind.LIST_ITEM):
         item_type = list_item_node.sarg
-        if item_type == "*":
+        if item_type.endswith("*"):
             # only contains modifier template
+            has_tag_template = False
             for template in list_item_node.find_child(NodeKind.TEMPLATE):
                 raw_tag = clean_node(wxr, parent_sense, template).removesuffix(
                     ":"
                 )
                 parent_sense = Sense()
                 parent_sense.raw_tags.append(raw_tag)
+                has_tag_template = True
             # or form-of word
-            if "form-of" in word_entry.tags:
+            if (
+                "form-of" in word_entry.tags
+                or section_title == "Grammatische Merkmale"
+            ):
                 process_form_of_list_item(wxr, word_entry, list_item_node)
+            elif not has_tag_template:
+                new_sense = Sense()
+                gloss_text = clean_node(wxr, new_sense, list_item_node.children)
+                if len(gloss_text) > 0:
+                    new_sense.glosses.append(gloss_text)
+                    word_entry.senses.append(new_sense)
         elif item_type.endswith(":"):
             sense_data = parent_sense.model_copy(deep=True)
             gloss_nodes = []
@@ -122,6 +137,7 @@ def process_gloss_list_item(
                     word_entry,
                     sub_list_node,
                     sense_data,
+                    section_title,
                 )
 
         else:
@@ -149,11 +165,18 @@ def process_form_of_list_item(
 
     sense = Sense()
     gloss_text = clean_node(wxr, None, list_item_node.children)
-    for bold_node in list_item_node.find_child(NodeKind.BOLD):
-        bold_text = clean_node(wxr, None, bold_node)
-        if bold_text != "":
-            sense.form_of.append(AltForm(word=bold_text))
-        break
+    for node in list_item_node.find_child(NodeKind.BOLD | NodeKind.TEMPLATE):
+        if isinstance(node, TemplateNode) and node.template_name == "Ü":
+            # https://de.wiktionary.org/wiki/Vorlage:Ü
+            form_of = clean_node(wxr, None, node.template_parameters.get(2, ""))
+            if len(form_of) > 0:
+                sense.form_of.append(AltForm(word=form_of))
+                break
+        elif node.kind == NodeKind.BOLD:
+            bold_text = clean_node(wxr, None, node)
+            if bold_text != "":
+                sense.form_of.append(AltForm(word=bold_text))
+                break
     if gloss_text != "":
         sense.glosses.append(gloss_text)
         for str_node in list_item_node.children:
@@ -174,4 +197,6 @@ def process_form_of_list_item(
                     word_entry.pos = pos_data["pos"]
                     word_entry.tags.extend(pos_data.get("tags", []))
 
+        if "form-of" not in word_entry.tags:
+            word_entry.tags.append("form-of")
         word_entry.senses.append(sense)

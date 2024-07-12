@@ -282,3 +282,146 @@ class TestDEGloss(unittest.TestCase):
                 }
             ],
         )
+
+    def test_no_bedeutungen_section(self):
+        self.wxr.wtp.add_page("Vorlage:Sprache", 10, "{{{1}}}")
+        self.wxr.wtp.add_page("Vorlage:Wortart", 10, "{{{1}}}")
+        self.wxr.wtp.add_page("Vorlage:Ü", 10, "{{{2}}}")
+        self.assertEqual(
+            parse_page(
+                self.wxr,
+                "abakai",
+                """== abakai ({{Sprache|Litauisch}}) ==
+=== {{Wortart|Deklinierte Form|Litauisch}} ===
+* Nominativ Plural von {{Ü|lt|abakas}}""",
+            ),
+            [
+                {
+                    "lang": "Litauisch",
+                    "lang_code": "lt",
+                    "pos": "unknown",
+                    "senses": [
+                        {
+                            "form_of": [{"word": "abakas"}],
+                            "glosses": ["Nominativ Plural von abakas"],
+                            "tags": ["nominative", "plural"],
+                        }
+                    ],
+                    "tags": ["form-of"],
+                    "word": "abakai",
+                }
+            ],
+        )
+
+    def test_grammatische_merkmale_no_form_of_pos_title(self):
+        self.wxr.wtp.add_page("Vorlage:Sprache", 10, "{{{1}}}")
+        self.assertEqual(
+            parse_page(
+                self.wxr,
+                "abisse",
+                """== abisse ({{Sprache|Latein}}) ==
+=== {{Wortart|Infinitiv|Latein}} ===
+
+==== Grammatische Merkmale ====
+* Infinitiv Perfekt Aktiv des Verbs '''[[abire]]'''""",
+            ),
+            [
+                {
+                    "lang": "Latein",
+                    "lang_code": "la",
+                    "pos": "verb",
+                    "senses": [
+                        {
+                            "form_of": [{"word": "abire"}],
+                            "glosses": [
+                                "Infinitiv Perfekt Aktiv des Verbs abire"
+                            ],
+                            "tags": ["perfect", "active"],
+                        }
+                    ],
+                    "tags": ["form-of"],
+                    "word": "abisse",
+                }
+            ],
+        )
+
+    def test_no_gloss_list(self):
+        self.wxr.wtp.add_page("Vorlage:Sprache", 10, "{{{1}}}")
+        self.wxr.wtp.add_page("Vorlage:Wortart", 10, "{{{1}}}")
+        self.assertEqual(
+            parse_page(
+                self.wxr,
+                "ama",
+                """== ama ({{Sprache|Interlingua}}) ==
+=== {{Wortart|Konjugierte Form|Interlingua}} ===
+
+==== Grammatische Merkmale ====
+Indikativ Präsens Aktiv des Verbs '''[[amar]]'''""",
+            ),
+            [
+                {
+                    "lang": "Interlingua",
+                    "lang_code": "ia",
+                    "pos": "unknown",
+                    "senses": [
+                        {"glosses": ["Indikativ Präsens Aktiv des Verbs amar"]}
+                    ],
+                    "tags": ["form-of"],
+                    "word": "ama",
+                }
+            ],
+        )
+
+    def test_unordered_list(self):
+        self.wxr.wtp.add_page("Vorlage:Sprache", 10, "{{{1}}}")
+        self.wxr.wtp.add_page("Vorlage:Wortart", 10, "{{{1}}}")
+        self.assertEqual(
+            parse_page(
+                self.wxr,
+                "assa",
+                """== assa ({{Sprache|Prußisch}}) ==
+=== {{Wortart|Präposition |Prußisch}} ===
+
+==== Bedeutungen ====
+* Nebenform der Präposition '''[[esse]]'''""",
+            ),
+            [
+                {
+                    "lang": "Prußisch",
+                    "lang_code": "prg",
+                    "pos": "prep",
+                    "senses": [{"glosses": ["Nebenform der Präposition esse"]}],
+                    "word": "assa",
+                }
+            ],
+        )
+
+    def test_description_list_plus_unordered_list(self):
+        self.wxr.wtp.add_page("Vorlage:Sprache", 10, "{{{1}}}")
+        self.wxr.wtp.add_page("Vorlage:Wortart", 10, "{{{1}}}")
+        self.assertEqual(
+            parse_page(
+                self.wxr,
+                "aut",
+                """== aut ({{Sprache|Polnisch}}) ==
+=== {{Wortart|Deklinierte Form|Polnisch}} ===
+====Grammatische Merkmale====
+:* Genitiv Plural des Substantivs '''[[auto#auto (Polnisch)|auto]]'''""",
+            ),
+            [
+                {
+                    "lang": "Polnisch",
+                    "lang_code": "pl",
+                    "pos": "noun",
+                    "senses": [
+                        {
+                            "form_of": [{"word": "auto"}],
+                            "glosses": ["Genitiv Plural des Substantivs auto"],
+                            "tags": ["genitive", "plural"],
+                        }
+                    ],
+                    "tags": ["form-of"],
+                    "word": "aut",
+                }
+            ],
+        )
