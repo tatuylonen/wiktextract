@@ -187,18 +187,17 @@ def inject_linkages(wxr: WiktextractContext, page_data: list[dict]) -> None:
                     "word": term.term,
                     "source": f"{local_thesaurus_ns}:{word}",
                 }
-                if term.sense is not None:
+                if len(term.sense) > 0:
                     dt["sense"] = term.sense
-                if term.tags is not None:
-                    dt["tags"] = term.tags.split("|")
-                if term.topics is not None:
-                    dt["topics"] = term.topics.split("|")
-                if term.roman is not None:
+                if len(term.tags) > 0:
+                    dt["tags"] = term.tags
+                if len(term.raw_tags) > 0:
+                    dt["raw_tags"] = term.raw_tags
+                if len(term.topics) > 0:
+                    dt["topics"] = term.topics
+                if len(term.roman) > 0:
                     dt["roman"] = term.roman
-                if term.language_variant is not None:
-                    dt["language_variant"] = term.language_variant
-                if term.linkage is not None:
-                    data_append(data, term.linkage, dt)
+                data_append(data, term.linkage, dt)
 
 
 def process_categories(

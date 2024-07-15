@@ -156,10 +156,17 @@ def extract_saurus_template(
     Extract data from template names end with "-saurus", like "zh-syn-saurus"
     and "zh-ant-saurus". These templates get data from thesaurus pages, search
     the thesaurus database to avoid parse these pages again.
+
+    https://zh.wiktionary.org/wiki/Template:Syn-saurus
     """
     from wiktextract.thesaurus import search_thesaurus
 
-    thesaurus_page_title = node.template_parameters.get(1)
+    if node.template_name in ("zh-syn-saurus", "zh-ant-saurus"):
+        # obsolete templates
+        thesaurus_page_title = node.template_parameters.get(1)
+    else:
+        thesaurus_page_title = node.template_parameters.get(2)
+
     for thesaurus in search_thesaurus(
         wxr.thesaurus_db_conn,
         thesaurus_page_title,
@@ -169,18 +176,13 @@ def extract_saurus_template(
     ):
         if thesaurus.term == wxr.wtp.title:
             continue
-        linkage_data = Linkage(word=thesaurus.term)
-        if thesaurus.roman is not None:
-            linkage_data.roman = thesaurus.roman
-        if thesaurus.tags is not None:
-            linkage_data.raw_tags = thesaurus.tags.split("|")
-        if thesaurus.language_variant is not None:
-            linkage_data.language_variant = thesaurus.language_variant
-        if len(sense) > 0:
-            linkage_data.sense = sense
-        elif thesaurus.sense is not None:
-            linkage_data.sense = thesaurus.sense
-
+        linkage_data = Linkage(
+            word=thesaurus.term,
+            roman=thesaurus.roman,
+            tags=thesaurus.tags,
+            raw_tags=thesaurus.raw_tags,
+            sense=thesaurus.sense,
+        )
         pre_data = getattr(page_data[-1], linkage_type)
         pre_data.append(linkage_data)
 
@@ -257,7 +259,7 @@ def process_ja_r_template(
     template_node: TemplateNode,
     linkage_type: str,
     sense: str,
-) -> None:
+) -> Linkage:
     # https://zh.wiktionary.org/wiki/Template:Ja-r
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(template_node), expand_all=True
@@ -274,9 +276,11 @@ def process_ja_r_template(
         elif "mention-gloss" == span_class:
             linkage_data.sense = clean_node(wxr, None, span_node)
 
-    if len(linkage_data.word) > 0:
+    if len(linkage_data.word) > 0 and len(page_data) > 0:
         pre_data = getattr(page_data[-1], linkage_type)
         pre_data.append(linkage_data)
+
+    return linkage_data
 
 
 def process_linkage_templates_in_gloss(

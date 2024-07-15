@@ -233,3 +233,32 @@ class TestESGloss(unittest.TestCase):
                 }
             ],
         )
+
+    def test_no_list(self):
+        self.wxr.wtp.add_page("Plantilla:lengua", 10, "Bretón")
+        self.wxr.wtp.add_page("Plantilla:sufijo", 10, "Sufijo verbal")
+        self.assertEqual(
+            parse_page(
+                self.wxr,
+                "-fe",
+                """== {{lengua|br}} ==
+==== {{sufijo|br|verbo}} ====
+[[desinencia]] de la tercera persona singular del [[condicional]]""",
+            ),
+            [
+                {
+                    "lang": "Bretón",
+                    "lang_code": "br",
+                    "pos": "suffix",
+                    "pos_title": "sufijo verbal",
+                    "senses": [
+                        {
+                            "glosses": [
+                                "desinencia de la tercera persona singular del condicional"
+                            ],
+                        }
+                    ],
+                    "word": "-fe",
+                }
+            ],
+        )

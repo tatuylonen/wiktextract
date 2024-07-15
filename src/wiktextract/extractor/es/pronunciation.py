@@ -1,8 +1,7 @@
-from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import HTMLNode, TemplateNode
-from wiktextract.page import clean_node
-from wiktextract.wxr_context import WiktextractContext
+from wikitextprocessor.parser import HTMLNode, NodeKind, TemplateNode, WikiNode
 
+from ...page import clean_node
+from ...wxr_context import WiktextractContext
 from ..share import create_audio_url_dict
 from .models import Sound, WordEntry
 

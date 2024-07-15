@@ -1,7 +1,7 @@
 from wikitextprocessor import NodeKind, WikiNode
-from wiktextract.page import clean_node
-from wiktextract.wxr_context import WiktextractContext
 
+from ...page import clean_node
+from ...wxr_context import WiktextractContext
 from .example import process_example_list
 from .linkage import process_linkage_list_children
 from .models import WordEntry

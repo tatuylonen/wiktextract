@@ -1,7 +1,8 @@
-from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import (
     LEVEL_KIND_FLAGS,
+    NodeKind,
     TemplateNode,
+    WikiNode,
     WikiNodeChildrenList,
 )
 
@@ -215,7 +216,15 @@ def process_pos_block(
                     f"Found unexpected node in pos_block: {child}",
                     sortid="extractor/es/page/process_pos_block/184",
                 )
-    process_sense_children(wxr, page_data, sense_children)
+
+    if pos_level_node.contain_node(NodeKind.LIST):
+        process_sense_children(wxr, page_data, sense_children)
+    else:
+        sense = Sense()
+        gloss_text = clean_node(wxr, sense, pos_level_node.children)
+        if len(gloss_text) > 0:
+            sense.glosses.append(gloss_text)
+            page_data[-1].senses.append(sense)
 
 
 def process_sense_children(

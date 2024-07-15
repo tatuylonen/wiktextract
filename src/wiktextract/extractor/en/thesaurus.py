@@ -69,7 +69,7 @@ IGNORED_SUBTITLE_TAGS_MAP: dict[str, list[str]] = {
 
 def extract_thesaurus_page(
     wxr: WiktextractContext, page: Page
-) -> Optional[list[ThesaurusTerm]]:
+) -> list[ThesaurusTerm]:
     """Extracts linkages from the thesaurus pages in Wiktionary."""
 
     thesaurus_ns_data: NamespaceDataEntry
@@ -81,10 +81,10 @@ def extract_thesaurus_page(
     text = page.body
     assert text is not None
     if title.startswith("Thesaurus:Requested entries "):
-        return None
+        return []
     if "/" in title:
         # print("STRANGE TITLE:", title)
-        return None
+        return []
     word = title[len(thesaurus_ns_local_name) + 1 :]
     idx = word.find(":")
     if idx > 0 and idx < 5:
@@ -97,10 +97,10 @@ def extract_thesaurus_page(
     )
     tree = wxr.wtp.parse(expanded, pre_expand=False)
     assert tree.kind == NodeKind.ROOT
-    lang = None
-    pos = None
-    sense = None
-    linkage = None
+    lang = ""
+    pos = ""
+    sense = ""
+    linkage = ""
     subtitle_tags: list[str] = []
     entry_id = -1
     # Some pages don't have a language subtitle, but use
@@ -116,34 +116,32 @@ def extract_thesaurus_page(
             str,
             list[list[Union[WikiNode, str]]],
         ],
-    ) -> Optional[list[ThesaurusTerm]]:
+    ) -> list[ThesaurusTerm]:
         nonlocal lang
         nonlocal pos
         nonlocal sense
         nonlocal linkage
         nonlocal subtitle_tags
         nonlocal entry_id
-        item_sense = None
-        tags: Optional[list[str]] = None
-        topics: Optional[list[str]] = None
+        item_sense = ""
+        tags: list[str] = []
+        topics: list[str] = []
 
         if isinstance(contents, (list, tuple)):
             thesaurus = []
             for x in contents:
-                x_result = recurse(x)
-                if x_result is not None:
-                    thesaurus.extend(x_result)
+                thesaurus.extend(recurse(x))
             return thesaurus
         if not isinstance(contents, WikiNode):
-            return None
+            return []
         kind = contents.kind
         if kind == NodeKind.LIST and not contents.contain_node(NodeKind.LIST):
-            if lang is None:
+            if lang == "":
                 logger.debug(
                     f"{title=} {lang=} UNEXPECTED LIST WITHOUT LANG: "
                     + str(contents)
                 )
-                return None
+                return []
             thesaurus = []
             for node in contents.children:
                 if isinstance(node, str) or node.kind != NodeKind.LIST_ITEM:
@@ -185,8 +183,8 @@ def extract_thesaurus_page(
                         return q
                     dt: SenseData = {}
                     parse_sense_qualifier(wxr, q, dt)
-                    tags.extend(dt.get("tags", ()))
-                    topics.extend(dt.get("topics", ()))
+                    tags.extend(dt.get("tags", []))
+                    topics.extend(dt.get("topics", []))
                     return ""
 
                 w = re.sub(r"\(([^)]*)\)$", qual_fn, w).strip()
@@ -199,22 +197,22 @@ def extract_thesaurus_page(
 
                 # If the word is now empty or separator, skip
                 if not w or w.startswith("---") or w == "\u2014":
-                    return None
+                    return []
                 rel = linkage or "synonyms"
                 for w1 in w.split(","):
                     m = re.match(r"(?s)(.*?)\s*XLITS(.*?)XLITE\s*", w1)
                     if m:
                         w1, xlit = m.groups()
                     else:
-                        xlit = None
+                        xlit = ""
                     w1 = w1.strip()
                     if w1.startswith(ns_title_prefix_tuple(wxr, "Thesaurus")):
                         w1 = w1[10:]
                     w1 = w1.removesuffix(" [⇒ thesaurus]")
 
-                    if w1:
+                    if len(w1) > 0:
                         lang_code = name_to_code(lang, "en")
-                        if lang_code is None:
+                        if lang_code == "":
                             logger.debug(
                                 f"Linkage language {lang} not recognized"
                             )
@@ -225,8 +223,8 @@ def extract_thesaurus_page(
                                 pos=pos,
                                 linkage=rel,
                                 term=w1,
-                                tags="|".join(tags) if tags else None,
-                                topics="|".join(topics) if topics else None,
+                                tags=tags,
+                                topics=topics,
                                 roman=xlit,
                                 sense=item_sense,
                             )
@@ -248,13 +246,13 @@ def extract_thesaurus_page(
         )
         if name_to_code(subtitle, "en") != "":
             lang = subtitle
-            pos = None
-            sense = None
-            linkage = None
+            pos = ""
+            sense = ""
+            linkage = ""
             return recurse(contents.children)
         if subtitle.lower().startswith(SENSE_TITLE_PREFIX):
             sense = subtitle[len(SENSE_TITLE_PREFIX) :]
-            linkage = None
+            linkage = ""
             return recurse(contents.children)
 
         subtitle = subtitle.lower()
@@ -270,14 +268,14 @@ def extract_thesaurus_page(
             "abbreviation",
             "symbol",
         ):
-            return None
+            return []
         if subtitle in LINKAGE_TITLES:
             linkage = LINKAGE_TITLES[subtitle]
             return recurse(contents.children)
         if subtitle in POS_TITLES:
             pos = POS_TITLES[subtitle]["pos"]
-            sense = None
-            linkage = None
+            sense = ""
+            linkage = ""
             return recurse(contents.children)
         if subtitle in IGNORED_SUBTITLE_TAGS_MAP:
             # These subtitles are ignored but children are processed and

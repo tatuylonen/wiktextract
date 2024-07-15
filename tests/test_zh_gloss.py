@@ -523,3 +523,44 @@ class TestGloss(TestCase):
                 },
             ],
         )
+
+    def test_erhua(self):
+        self.wxr.wtp.add_page(
+            "Template:zh-erhua form of",
+            10,
+            '<small><span class="usage-label-sense"><span class="ib-brac">(</span><span class="ib-content">[[w:官话|官話]][[Category:官話漢語|一00曰09儿06]]</span><span class="ib-brac">)</span></span></small> <span class="Hani" lang="zh">-{<!---->[[一會#漢語|一會]]<!---->}-</span>／<span class="Hani" lang="zh">-{<!---->[[一会#漢語|一会]]<!---->}-</span> (<i><span class="tr Latn" lang="la">-{<!---->yīhuì<!---->}-</span></i>) 的[[w:兒化|兒化]]形式。[[Category:官話兒化詞]]',
+        )
+        self.assertEqual(
+            parse_page(
+                self.wxr,
+                "一會兒",
+                """==漢語==
+===副詞===
+# {{zh-erhua form of|}}""",
+            ),
+            [
+                {
+                    "lang": "漢語",
+                    "lang_code": "zh",
+                    "pos": "adv",
+                    "senses": [
+                        {
+                            "categories": ["官話漢語", "官話兒化詞"],
+                            "form_of": [
+                                {
+                                    "word": "一會",
+                                    "tags": ["Traditional Chinese"],
+                                },
+                                {
+                                    "word": "一会",
+                                    "tags": ["Simplified Chinese"],
+                                },
+                            ],
+                            "glosses": ["一會／一会 (yīhuì) 的兒化形式。"],
+                            "tags": ["form-of", "Mandarin", "Erhua"],
+                        }
+                    ],
+                    "word": "一會兒",
+                },
+            ],
+        )

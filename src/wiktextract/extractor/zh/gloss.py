@@ -84,7 +84,8 @@ def process_form_of_template(
     sense: Sense,
     page_data: list[WordEntry],
 ) -> bool:
-    # Return `True` if template expands to list
+    # Return `True` if template expands to list or don't want add gloss again
+    # in `extract_gloss()`
     # https://en.wiktionary.org/wiki/Category:Form-of_templates
     # https://en.wiktionary.org/wiki/Category:Form-of_templates_by_language
     is_alt_of = re.search(
@@ -94,6 +95,10 @@ def process_form_of_template(
     expanded_template = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(template_node), expand_all=True
     )
+    if template_node.template_name.endswith("-erhua form of"):
+        process_erhua_form_of_template(wxr, expanded_template, sense)
+        return True
+
     form_of_words = []
     for i_tag in expanded_template.find_html_recursively("i"):
         form_of_words = process_form_of_template_child(wxr, i_tag)
@@ -139,6 +144,30 @@ def process_form_of_template_child(
         if form_of_word != "":
             form_of_words.append(form_of_word)
     return form_of_words
+
+
+def process_erhua_form_of_template(
+    wxr: WiktextractContext, expanded_node: WikiNode, sense: Sense
+) -> None:
+    # https://zh.wiktionary.org/wiki/Template:Cmn-erhua_form_of
+    for index, span_node in enumerate(
+        expanded_node.find_html("span", attr_name="lang", attr_value="zh")
+    ):
+        span_text = clean_node(wxr, None, span_node)
+        form = AltForm(word=span_text)
+        if index == 0:
+            form.tags.append("Traditional Chinese")
+        else:
+            form.tags.append("Simplified Chinese")
+        if len(form.word) > 0:
+            sense.form_of.append(form)
+    gloss_text = clean_node(wxr, sense, expanded_node)
+    if gloss_text.startswith("(官話)"):
+        gloss_text = gloss_text.removeprefix("(官話)").strip()
+        sense.tags.append("Mandarin")
+    sense.tags.append("Erhua")
+    if len(gloss_text) > 0:
+        sense.glosses.append(gloss_text)
 
 
 # https://zh.wiktionary.org/wiki/Category:/Category:之形式模板

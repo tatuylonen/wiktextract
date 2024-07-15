@@ -1,10 +1,14 @@
 from typing import cast
 
-from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import LEVEL_KIND_FLAGS, TemplateNode
-from wiktextract.page import clean_node
-from wiktextract.wxr_context import WiktextractContext
+from wikitextprocessor.parser import (
+    LEVEL_KIND_FLAGS,
+    NodeKind,
+    TemplateNode,
+    WikiNode,
+)
 
+from ...page import clean_node
+from ...wxr_context import WiktextractContext
 from .models import TemplateData, WordEntry
 
 
@@ -49,7 +53,7 @@ def process_etymology_block(
             "Si puedes, incorpórala: ver cómo.",
             "Préstamo no adaptado.",
             "Este lema en este idioma es ampliable. "
-            "Retira este aviso si la mayor parte de las acepciones ya están incluidas.",
+            "Retira este aviso si la mayor parte de las acepciones ya están incluidas.",  # noqa:E501
         ):
             continue
 
