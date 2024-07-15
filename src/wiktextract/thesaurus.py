@@ -8,10 +8,10 @@ import tempfile
 import time
 import traceback
 from collections.abc import Iterable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from multiprocessing import Pool, current_process
 from pathlib import Path
-from typing import List, Optional, Set, TextIO, Tuple
+from typing import Optional, TextIO
 
 from mediawiki_langcodes import code_to_name
 from wikitextprocessor import Page
@@ -26,22 +26,20 @@ from .wxr_logging import logger
 class ThesaurusTerm:
     entry: str
     language_code: str
-    pos: Optional[str]
+    pos: str
     linkage: str
     term: str
-    tags: Optional[str] = None
-    topics: Optional[str] = None
-    roman: Optional[str] = None
-    language_variant: Optional[str] = None
-    entry_id: Optional[int] = None
-    sense: Optional[str] = None
+    tags: list[str] = field(default_factory=list)
+    raw_tags: list[str] = field(default_factory=list)
+    topics: list[str] = field(default_factory=list)
+    roman: str = ""
+    entry_id: int = 0
+    sense: str = ""
 
 
 def worker_func(
     page: Page,
-) -> Tuple[
-    bool, Optional[List[ThesaurusTerm]], CollatedErrorReturnData, Optional[str]
-]:
+) -> tuple[bool, list[ThesaurusTerm], CollatedErrorReturnData, Optional[str]]:
     wxr: WiktextractContext = worker_func.wxr  # type:ignore[attr-defined]
     with tempfile.TemporaryDirectory(prefix="wiktextract") as tmpdirname:
         debug_path = "{}/wiktextract-{}".format(tmpdirname, os.getpid())
@@ -64,12 +62,12 @@ def worker_func(
                 )
                 + "".join(lst)
             )
-            return False, None, {}, msg  # type:ignore[typeddict-item]
+            return False, [], {}, msg  # type:ignore[typeddict-item]
 
 
 def extract_thesaurus_page(
     wxr: WiktextractContext, page: Page
-) -> Optional[List[ThesaurusTerm]]:
+) -> list[ThesaurusTerm]:
     thesaurus_extractor_mod = import_extractor_module(
         wxr.wtp.lang_code, "thesaurus"
     )
@@ -99,9 +97,8 @@ def extract_thesaurus_data(
                 # Print error in parent process - do not remove
                 logger.error(err)
                 continue
-            if terms is not None:
-                for term in terms:
-                    insert_thesaurus_term(wxr.thesaurus_db_conn, term)  # type:ignore[arg-type]
+            for term in terms:
+                insert_thesaurus_term(wxr.thesaurus_db_conn, term)  # type:ignore[arg-type]
             wxr.config.merge_return(stats)
 
     wxr.thesaurus_db_conn.commit()  # type:ignore[union-attr]
@@ -133,9 +130,9 @@ def init_thesaurus_db(db_path: Path) -> sqlite3.Connection:
         entry_id INTEGER,
         linkage TEXT,  -- Synonyms, Hyponyms
         tags TEXT,
+        raw_tags TEXT,
         topics TEXT,
         roman TEXT,  -- Romanization
-        language_variant TEXT,  -- Traditional/Simplified Chinese
         PRIMARY KEY(term, entry_id),
         FOREIGN KEY(entry_id) REFERENCES entries(id)
         );
@@ -161,8 +158,7 @@ def search_thesaurus(
     linkage_type: Optional[str] = None,
 ) -> Iterable[ThesaurusTerm]:
     query_sql = """
-    SELECT term, entries.id, linkage, tags, topics, roman,
-    language_variant, sense
+    SELECT term, entries.id, linkage, tags, topics, roman, sense, raw_tags
     FROM terms JOIN entries ON terms.entry_id = entries.id
     WHERE entry = ? AND language_code = ? AND pos = ?
     """
@@ -176,14 +172,14 @@ def search_thesaurus(
             term=r[0],
             entry_id=r[1],
             linkage=r[2],
-            tags=r[3],
-            topics=r[4],
+            tags=r[3].split("|") if len(r[3]) > 0 else [],
+            topics=r[4].split("|") if len(r[4]) > 0 else [],
             roman=r[5],
-            language_variant=r[6],
-            sense=r[7],
+            sense=r[6],
             entry=entry,
             pos=pos,
             language_code=lang_code,
+            raw_tags=r[7].split("|") if len(r[7]) > 0 else [],
         )
 
 
@@ -205,16 +201,19 @@ def insert_thesaurus_term(
         ):
             entry_id = old_entry_id
     db_conn.execute(
-        "INSERT OR IGNORE INTO terms (term, entry_id, linkage, tags, topics, "
-        "roman, language_variant) VALUES(?, ?, ?, ?, ?, ?, ?)",
+        """
+        INSERT OR IGNORE INTO terms
+        (term, entry_id, linkage, tags, topics, roman, raw_tags)
+        VALUES(?, ?, ?, ?, ?, ?, ?)
+        """,
         (
             term.term,
             entry_id,
             term.linkage,
-            term.tags,
-            term.topics,
+            "|".join(term.tags),
+            "|".join(term.topics),
             term.roman,
-            term.language_variant,
+            "|".join(term.raw_tags),
         ),
     )
 
@@ -227,7 +226,7 @@ def close_thesaurus_db(db_path: Path, db_conn: sqlite3.Connection) -> None:
 
 def emit_words_in_thesaurus(
     wxr: WiktextractContext,
-    emitted: Set[Tuple[str, str, str]],
+    emitted: set[tuple[str, str, str]],
     out_f: TextIO,
     human_readable: bool,
 ) -> None:
@@ -267,19 +266,21 @@ def emit_words_in_thesaurus(
             tags,
             topics,
             roman,
-            lang_variant,
+            raw_tags,
         ) in wxr.thesaurus_db_conn.execute(  # type:ignore[union-attr]
-            "SELECT term, linkage, tags, topics, roman, language_variant "
-            "FROM terms WHERE entry_id = ?",
+            """
+            SELECT term, linkage, tags, topics, roman, raw_tags
+            FROM terms WHERE entry_id = ?
+            """,
             (entry_id,),
         ):
             relation_dict = {"word": term, "source": f"Thesaurus:{entry}"}
-            if tags is not None:
+            if len(tags) > 0:
                 relation_dict["tags"] = tags.split("|")
-            if topics is not None:
+            if len(topics) > 0:
                 relation_dict["topics"] = topics.split("|")
-            if lang_variant is not None:
-                relation_dict["language_variant"] = lang_variant
+            if len(raw_tags) > 0:
+                relation_dict["raw_tags"] = raw_tags.split("|")
             if linkage not in sense_dict:
                 sense_dict[linkage] = []
             sense_dict[linkage].append(relation_dict)

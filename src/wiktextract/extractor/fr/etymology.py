@@ -2,11 +2,16 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import Optional
 
-from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import LEVEL_KIND_FLAGS, LevelNode, TemplateNode
-from wiktextract.page import clean_node
-from wiktextract.wxr_context import WiktextractContext
+from wikitextprocessor.parser import (
+    LEVEL_KIND_FLAGS,
+    LevelNode,
+    NodeKind,
+    TemplateNode,
+    WikiNode,
+)
 
+from ....wxr_context import WiktextractContext
+from ...page import clean_node
 from .models import WordEntry
 
 
