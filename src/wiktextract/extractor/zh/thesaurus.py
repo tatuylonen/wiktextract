@@ -128,6 +128,14 @@ def process_linkage_template(
         return process_col_template(
             wxr, entry_word, lang_code, pos, sense, linkage_type, template_node
         )
+    elif template_node.template_name.lower() in (
+        "zh-der",
+        "zh-syn-list",
+        "zh-ant-list",
+    ):
+        return process_obsolete_zh_der_template(
+            wxr, entry_word, lang_code, pos, sense, linkage_type, template_node
+        )
 
     return []
 
@@ -188,6 +196,47 @@ def process_col_template(
             data.raw_tags.extend(raw_tags)
             data.roman = roman
             translate_raw_tags(data)
+        term_list.extend(current_data)
+
+    return term_list
+
+
+def process_obsolete_zh_der_template(
+    wxr: WiktextractContext,
+    entry_word: str,
+    lang_code: str,
+    pos: str,
+    sense: str,
+    linkage_type: str,
+    template_node: TemplateNode,
+) -> list[ThesaurusTerm]:
+    # https://zh.wiktionary.org/wiki/Template:Zh-der
+    term_list = []
+    expanded_template = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(template_node), expand_all=True
+    )
+    for list_item_node in expanded_template.find_child_recursively(
+        NodeKind.LIST_ITEM
+    ):
+        current_data = []
+        roman = ""
+        for span_tag in list_item_node.find_html_recursively("span"):
+            if "Latn" in span_tag.attrs.get("class", ""):
+                roman = clean_node(wxr, None, span_tag)
+            elif span_tag.attrs.get("lang", "") != "":
+                term_text = clean_node(wxr, None, span_tag)
+                current_data.append(
+                    ThesaurusTerm(
+                        entry_word,
+                        lang_code,
+                        pos,
+                        linkage_type,
+                        term_text,
+                        sense=sense,
+                    )
+                )
+        for data in current_data:
+            data.roman = roman
         term_list.extend(current_data)
 
     return term_list

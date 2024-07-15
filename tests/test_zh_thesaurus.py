@@ -78,3 +78,51 @@ class TestZhThesaurus(TestCase):
                 ),
             ],
         )
+
+    def test_obsolete_zh_der(self):
+        self.wxr.wtp.add_page("Template:ws sense", 10, "{{{2}}}")
+        self.wxr.wtp.add_page(
+            "Template:zh-syn-list",
+            10,
+            """<span>''([[:Category:成功棄用的模板|棄用的模板用法]])'' <div>
+{|
+|-
+|
+* <span class="Hani" lang="zh">-{<!---->[[認生#漢語|認生]]<!---->}-</span>／<span class="Hani" lang="zh">-{<!---->[[认生#漢語|认生]]<!---->}-</span> (<i><span class="tr Latn" lang="la">-{<!---->rènshēng<!---->}-</span></i>)
+|}</div></span>[[Category:使用不推薦使用的模板的頁面]]""",
+        )
+        page = Page(
+            title="Thesaurus:怕生",
+            namespace_id=110,
+            body="""==漢語==
+
+===動詞===
+
+===={{ws sense|zh|害怕見到陌生人}}====
+
+=====近義詞=====
+{{zh-syn-list|怕生|認生|驚生份;閩南語|怯生}}""",
+        )
+        self.assertEqual(
+            extract_thesaurus_page(self.wxr, page),
+            [
+                ThesaurusTerm(
+                    entry="怕生",
+                    language_code="zh",
+                    pos="verb",
+                    linkage="synonyms",
+                    term="認生",
+                    roman="rènshēng",
+                    sense="害怕見到陌生人",
+                ),
+                ThesaurusTerm(
+                    entry="怕生",
+                    language_code="zh",
+                    pos="verb",
+                    linkage="synonyms",
+                    term="认生",
+                    roman="rènshēng",
+                    sense="害怕見到陌生人",
+                ),
+            ],
+        )
