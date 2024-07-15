@@ -37,6 +37,7 @@ class Example(ChineseBaseModel):
 
 class AltForm(ChineseBaseModel):
     word: str
+    tags: list[str] = []
 
 
 class Sense(ChineseBaseModel):
