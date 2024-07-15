@@ -149,7 +149,40 @@ def process_list_node(
     linkage_type: str,
     list_node: WikiNode,
 ) -> list[ThesaurusTerm]:
-    return []
+    term_list = []
+    for list_item_node in list_node.find_child(NodeKind.LIST_ITEM):
+        current_data = []
+        raw_tags = []
+        for list_child_template in list_item_node.find_child(NodeKind.TEMPLATE):
+            if list_child_template.template_name.lower() in (
+                "qual",
+                "i",
+                "qf",
+                "qualifier",
+            ):
+                for (
+                    param_value
+                ) in list_child_template.template_parameters.values():
+                    raw_tags.append(clean_node(wxr, None, param_value))
+            elif list_child_template.template_name == "ja-r":
+                current_data.append(
+                    process_thesaurus_ja_r_template(
+                        wxr,
+                        entry_word,
+                        lang_code,
+                        pos,
+                        sense,
+                        linkage_type,
+                        list_child_template,
+                    )
+                )
+
+        for data in current_data:
+            data.raw_tags.extend(raw_tags)
+            translate_raw_tags(data)
+        term_list.extend(current_data)
+
+    return term_list
 
 
 def process_col_template(
@@ -240,6 +273,29 @@ def process_obsolete_zh_der_template(
         term_list.extend(current_data)
 
     return term_list
+
+
+def process_thesaurus_ja_r_template(
+    wxr: WiktextractContext,
+    entry_word: str,
+    lang_code: str,
+    pos: str,
+    sense: str,
+    linkage_type: str,
+    template_node: TemplateNode,
+) -> ThesaurusTerm:
+    from .linkage import process_ja_r_template
+
+    linkage_data = process_ja_r_template(wxr, [], template_node, "", "")
+    return ThesaurusTerm(
+        entry_word,
+        lang_code,
+        pos,
+        linkage_type,
+        linkage_data.word,
+        sense=sense,
+        roman=linkage_data.roman,
+    )
 
 
 def extract_thesaurus_page(

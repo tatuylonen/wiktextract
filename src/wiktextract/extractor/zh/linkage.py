@@ -259,7 +259,7 @@ def process_ja_r_template(
     template_node: TemplateNode,
     linkage_type: str,
     sense: str,
-) -> None:
+) -> Linkage:
     # https://zh.wiktionary.org/wiki/Template:Ja-r
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(template_node), expand_all=True
@@ -276,9 +276,11 @@ def process_ja_r_template(
         elif "mention-gloss" == span_class:
             linkage_data.sense = clean_node(wxr, None, span_node)
 
-    if len(linkage_data.word) > 0:
+    if len(linkage_data.word) > 0 and len(page_data) > 0:
         pre_data = getattr(page_data[-1], linkage_type)
         pre_data.append(linkage_data)
+
+    return linkage_data
 
 
 def process_linkage_templates_in_gloss(

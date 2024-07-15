@@ -126,3 +126,42 @@ class TestZhThesaurus(TestCase):
                 ),
             ],
         )
+
+    def test_ja_r(self):
+        self.wxr.wtp.add_page("Template:ws sense", 10, "{{{2}}}")
+        self.wxr.wtp.add_page("Template:qual", 10, "{{{1}}}")
+        self.wxr.wtp.add_page(
+            "Template:ja-r",
+            10,
+            """<span class="Jpan" lang="ja">[[亡くなる#日語|-{<ruby>亡<rp>(</rp><rt>な</rt><rp>)</rp></ruby>くなる}-]]</span> <span class="mention-gloss-paren annotation-paren">(</span><span class="tr">[[naku naru#日語|-{<span class="mention-tr tr">naku naru</span>}-]]</span><span class="mention-gloss-paren annotation-paren">)</span>""",
+        )
+        page = Page(
+            title="Thesaurus:死ぬ",
+            namespace_id=110,
+            body="""
+==日语==
+
+===动词===
+
+===={{ws sense|ja|死亡}}====
+
+=====近义词=====
+{{ws beginlist}}
+* {{qual|礼貌}} {{ja-r|亡くなる|なく なる}}
+{{ws endlist}}""",
+        )
+        self.assertEqual(
+            extract_thesaurus_page(self.wxr, page),
+            [
+                ThesaurusTerm(
+                    entry="死ぬ",
+                    language_code="ja",
+                    pos="verb",
+                    linkage="synonyms",
+                    term="亡くなる",
+                    sense="死亡",
+                    roman="naku naru",
+                    raw_tags=["礼貌"],
+                ),
+            ],
+        )
