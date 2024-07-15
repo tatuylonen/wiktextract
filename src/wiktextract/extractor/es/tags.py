@@ -49,7 +49,8 @@ USO_TAGS = {
     "malsonante": "vulgar",
     #  "mayúscula": "capital letter",
     #  "mayúscula disciplinas": "usually lowercase",
-    #  "mayúscula puntos cardinales": "It is lowercase except when it is part of a proper noun",
+    #  "mayúscula puntos cardinales":
+    #  "It is lowercase except when it is part of a proper noun",
     #  "mayúscula taxones": "taxonomy rules for capitalization",
     "medieval": "Medieval",
     "minúscula": "lower case",
@@ -67,7 +68,8 @@ USO_TAGS = {
     #  "rural": "rural",
     "sebtc": "noun",
     "setc": "noun",
-    #  "sin uso": "The editors have been unable to find any examples of use of this word in published texts or corpus",
+    #  "sin uso": "The editors have been unable to find any examples of use of
+    # this word in published texts or corpus",
     "slang": "slang",
     "soez": "vulgar",
     "sutp": "plural",

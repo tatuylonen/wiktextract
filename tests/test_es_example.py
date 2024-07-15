@@ -44,12 +44,12 @@ class TestESExample(unittest.TestCase):
             [
                 {
                     "text": "And He has on His robe and on His thigh a name "
-                        "written: KING OF KINGS AND LORD OF LORDS",
+                    "written: KING OF KINGS AND LORD OF LORDS",
                     "translation": "Y en su vestidura y en su muslo tiene "
-                        "escrito este nombre: REY DE REYES Y SEÑOR DE SEÑORES",
+                    "escrito este nombre: REY DE REYES Y SEÑOR DE SEÑORES",
                     "ref": "Bible Revelation 19:16. Versión: New King James."
-                        "\nTraducción: Biblia Apocalipsis 19:16. "
-                        "Versión: Reina-Valera 1995.",
+                    "\nTraducción: Biblia Apocalipsis 19:16. "
+                    "Versión: Reina-Valera 1995.",
                 }
             ],
         )
@@ -79,9 +79,9 @@ class TestESExample(unittest.TestCase):
             [
                 {
                     "text": "Nos gusta lo oscuro, y por eso triunfa "
-                            "la Necroporra, sea ético o no",
+                    "la Necroporra, sea ético o no",
                     "ref": "https://www.menzig.es/a/necroporra-"
-                            "fantamorto-porra-famosos-muertos/",
+                    "fantamorto-porra-famosos-muertos/",
                 }
             ],
         )
@@ -107,12 +107,12 @@ class TestESExample(unittest.TestCase):
             dump_data,
             [
                 {
-                    "text": 'Papel: más viejo que Matusalén, pero graduado '
-                            '"cum laude" en eficacia publicitaria',
+                    "text": "Papel: más viejo que Matusalén, pero graduado "
+                    '"cum laude" en eficacia publicitaria',
                     "ref": "https://www.marketingdirecto.com/"
-                            "marketing-general/publicidad/papel-mas-viejo-"
-                            "matusalen-pero-graduado-cum-laude-"
-                            "eficacia-publicitaria",
+                    "marketing-general/publicidad/papel-mas-viejo-"
+                    "matusalen-pero-graduado-cum-laude-"
+                    "eficacia-publicitaria",
                 }
             ],
         )
@@ -163,9 +163,9 @@ class TestESExample(unittest.TestCase):
             [
                 {
                     "text": "«Apoyado contra el quicio de la puerta, adivina, "
-                            "de pronto, a su marido.»",
+                    "de pronto, a su marido.»",
                     "ref": "Bombal, María Luisa (2012). «La Amortajada», "
-                            "La Última Niebla/La Amortajada. Planeta, 151.",
+                    "La Última Niebla/La Amortajada. Planeta, 151.",
                 }
             ],
         )

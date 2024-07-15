@@ -1,5 +1,9 @@
-from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import TemplateNode, WikiNodeChildrenList
+from wikitextprocessor.parser import (
+    NodeKind,
+    TemplateNode,
+    WikiNode,
+    WikiNodeChildrenList,
+)
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext

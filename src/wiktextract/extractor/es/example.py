@@ -1,8 +1,12 @@
-from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import TemplateNode, WikiNodeChildrenList
-from wiktextract.page import clean_node
-from wiktextract.wxr_context import WiktextractContext
+from wikitextprocessor.parser import (
+    NodeKind,
+    TemplateNode,
+    WikiNode,
+    WikiNodeChildrenList,
+)
 
+from ...page import clean_node
+from ...wxr_context import WiktextractContext
 from .models import Example, Sense, TemplateData
 
 

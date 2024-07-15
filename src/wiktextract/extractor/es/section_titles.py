@@ -1,4 +1,4 @@
-from wiktextract.config import POSSubtitleData
+from ...config import POSSubtitleData
 
 # some are template names
 POS_TITLES: dict[str, POSSubtitleData] = {

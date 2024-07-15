@@ -32,7 +32,7 @@ class Translation(BaseModelWrap):
     )
     raw_tags: list[str] = Field(
         default=[],
-        description="Tags specifying the translated term, usually gender information",
+        description="Tags specifying the translated term, usually gender",
     )
     tags: list[str] = []
     notes: list[str] = Field(default=[], description="A list of notes")
@@ -48,7 +48,7 @@ class TemplateData(BaseModelWrap):
     )
     expansion: str = Field(
         default="",
-        description="The result of expanding the template, the final text it outputs.",
+        description="The result of expanding the template.",
     )
 
 
@@ -68,17 +68,14 @@ class AltForm(BaseModelWrap):
 class Sense(BaseModelWrap):
     glosses: list[str] = Field(
         default=[],
-        description="list of gloss strings for the word sense (usually only one). This has been cleaned, and should be straightforward text with no tagging.",
+        description="list of gloss strings for the word sense."
+        "This has been cleaned, and should be no tagging.",
     )
-    raw_tags: list[str] = Field(
-        default=[],
-        description="list of gloss strings for the word sense (usually only one). This has been cleaned, and should be straightforward text with no tagging.",
-    )
+    raw_tags: list[str] = []
     tags: list[str] = []
     topics: list[str] = []
     categories: list[str] = Field(
-        default=[],
-        description="list of sense-disambiguated category names extracted from (a subset) of the Category links on the page",
+        default=[], description="Category links on the page"
     )
     examples: list[Example] = Field(default=[], description="List of examples")
     # subsenses: list["Sense"] = Field(
@@ -124,7 +121,7 @@ class Form(BaseModelWrap):
 class WordEntry(BaseModelWrap):
     """
     WordEntry is a dictionary containing lexical information of a single word extracted from Wiktionary with wiktextract.
-    """
+    """  # noqa:E501
 
     model_config = ConfigDict(title="Spanish Wiktionary")
 
@@ -149,11 +146,13 @@ class WordEntry(BaseModelWrap):
     )
     etymology_templates: list[TemplateData] = Field(
         default=[],
-        description="Templates and their arguments and expansions from the etymology section.",
+        description="Templates and their arguments and expansions from the "
+        "etymology section.",
     )
     etymology_number: int = Field(
         default=0,
-        description="For words with multiple numbered etymologies, this contains the number of the etymology under which this entry appeared.",
+        description="For words with multiple numbered etymologies, this "
+        "contains the number of the etymology under which this entry appeared.",
     )
     antonyms: list[Linkage] = []
     compounds: list[Linkage] = []
