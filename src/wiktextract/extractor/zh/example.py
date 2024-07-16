@@ -50,7 +50,9 @@ def extract_examples(
                     elif template_name in {"ja-x", "ja-usex"}:
                         extract_template_ja_usex(wxr, child, example_data)
                     elif template_name in {"zh-x", "zh-usex"}:
-                        for zh_x_example in extract_template_zh_x(wxr, child):
+                        for zh_x_example in extract_template_zh_x(
+                            wxr, child, example_data
+                        ):
                             sense_data.examples.append(zh_x_example)
                         clean_node(wxr, sense_data, child)
                     elif template_name in {"ux", "eg", "usex"}:
@@ -145,7 +147,9 @@ def extract_template_ja_usex(
 
 
 def extract_template_zh_x(
-    wxr: WiktextractContext, template_node: TemplateNode
+    wxr: WiktextractContext,
+    template_node: TemplateNode,
+    parent_example: Example,
 ) -> list[Example]:
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(template_node), expand_all=True
@@ -182,13 +186,13 @@ def extract_template_zh_x(
                 last_span_is_exmaple = False
                 if len(example_text) > 0:
                     raw_tag = clean_node(wxr, None, span_tag)
-                    example = Example(
-                        text=example_text,
-                        roman=pinyin,
-                        ref=ref,
-                        translation=translation,
-                        raw_tags=raw_tag.strip("[]").split("，"),
-                    )
+                    example = parent_example.model_copy(deep=True)
+                    example.text = example_text
+                    example.roman = pinyin
+                    example.translation = translation
+                    example.raw_tags.extend(raw_tag.strip("[]").split("，"))
+                    if len(ref) > 0:
+                        example.ref = ref
                     translate_raw_tags(example)
                     results.append(example)
 
@@ -204,7 +208,9 @@ def extract_template_zh_x(
             if span_lang in ["zh-Hant", "zh-Hans"]:
                 example_text = clean_node(wxr, None, span_tag)
                 if len(example_text) > 0:
-                    example_data = Example(text=example_text, roman=pinyin)
+                    example_data = parent_example.model_copy(deep=True)
+                    example_data.text = example_text
+                    example_data.roman = pinyin
                     example_data.tags.append(
                         "Traditional Chinese"
                         if span_lang == "zh-Hant"
