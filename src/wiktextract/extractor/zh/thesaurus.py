@@ -5,14 +5,14 @@ from wikitextprocessor import Page
 from wikitextprocessor.parser import (
     LEVEL_KIND_FLAGS,
     NodeKind,
-    WikiNode,
     TemplateNode,
+    WikiNode,
 )
-from ...wxr_logging import logger
 
 from ...page import clean_node
 from ...thesaurus import ThesaurusTerm
 from ...wxr_context import WiktextractContext
+from ...wxr_logging import logger
 from .section_titles import LINKAGE_TITLES, POS_TITLES
 from .tags import translate_raw_tags
 

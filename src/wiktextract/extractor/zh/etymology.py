@@ -7,7 +7,7 @@ from wikitextprocessor.parser import (
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
-from .models import WordEntry
+from .models import Example, WordEntry
 
 
 def extract_etymology(
@@ -31,7 +31,9 @@ def extract_etymology(
             isinstance(etymology_node, TemplateNode)
             and etymology_node.template_name == "zh-x"
         ):
-            for example_data in extract_template_zh_x(wxr, etymology_node):
+            for example_data in extract_template_zh_x(
+                wxr, etymology_node, Example()
+            ):
                 base_data.etymology_examples.append(example_data)
             clean_node(wxr, base_data, etymology_node)
         elif (
@@ -50,7 +52,7 @@ def extract_etymology(
                 if template_node.template_name == "zh-x":
                     has_zh_x = True
                     for example_data in extract_template_zh_x(
-                        wxr, template_node
+                        wxr, template_node, Example()
                     ):
                         base_data.etymology_examples.append(example_data)
                     clean_node(wxr, base_data, template_node)

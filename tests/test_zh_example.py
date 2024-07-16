@@ -162,3 +162,36 @@ translation text""",
                 },
             ],
         )
+
+    def test_quote_book_above_zh_x(self):
+        self.wxr.wtp.start_page("死人")
+        self.wxr.wtp.add_page("Template:quote-book", 10, "ref text")
+        self.wxr.wtp.add_page(
+            "Template:zh-x",
+            10,
+            """<dl class="zhusex"><span lang="zh-Hant" class="Hant">-{<!-- -->[[如果#漢語|如果]][[唔係#漢語|唔係]][[今日#漢語|今日]][[拆穿#漢語|拆穿]][[你#漢語|你]][[槓嘢#漢語|槓野]]，[[畀#漢語|俾]][[你#漢語|你]][[混#漢語|混]][[咗#漢語|左]][[入#漢語|入]][[稅局#漢語|稅局]][[重#漢語|重]][[死人#漢語|死人]][[呀#漢語|呀]]！<!-- -->}-</span> <span>&#91;[[w:廣州話|廣州話]]，[[w:繁体中文|繁體]]&#93;</span><br><span lang="zh-Hans" class="Hans">-{<!-- -->[[如果#漢語|如果]][[唔系#漢語|唔系]][[今日#漢語|今日]][[拆穿#漢語|拆穿]][[你#漢語|你]][[杠嘢#漢語|杠野]]，[[畀#漢語|俾]][[你#漢語|你]][[混#漢語|混]][[咗#漢語|左]][[入#漢語|入]][[税局#漢語|税局]][[重#漢語|重]][[死人#漢語|死人]][[呀#漢語|呀]]！<!-- -->}-</span> <span>&#91;[[w:廣州話|廣州話]]，[[w:简体中文|簡體]]&#93;</span><dd><span lang="zh-Latn"><i>roman</i></span> <span>&#91;[[w:廣州話拼音方案|廣州話拼音]]&#93;</span></dd><dd>如果不是今天揭穿你的老底，給你混進稅務局就更'''糟糕'''了！</dd></dl>[[Category:有使用例的粵語詞]]""",
+        )
+        sense_data = Sense()
+        root = self.wxr.wtp.parse("""#* {{quote-book|zh}}\n#*: {{zh-x}}""")
+        extract_examples(self.wxr, sense_data, root.children[0], [])
+        self.assertEqual(
+            [e.model_dump(exclude_defaults=True) for e in sense_data.examples],
+            [
+                {
+                    "raw_tags": ["廣州話"],
+                    "ref": "ref text",
+                    "text": "如果唔係今日拆穿你槓野，俾你混左入稅局重死人呀！",
+                    "roman": "roman",
+                    "tags": ["Traditional Chinese"],
+                    "translation": "如果不是今天揭穿你的老底，給你混進稅務局就更糟糕了！",
+                },
+                {
+                    "raw_tags": ["廣州話"],
+                    "ref": "ref text",
+                    "text": "如果唔系今日拆穿你杠野，俾你混左入税局重死人呀！",
+                    "roman": "roman",
+                    "tags": ["Simplified Chinese"],
+                    "translation": "如果不是今天揭穿你的老底，給你混進稅務局就更糟糕了！",
+                },
+            ],
+        )
