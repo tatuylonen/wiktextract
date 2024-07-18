@@ -1,0 +1,93 @@
+import itertools
+from typing import Any
+
+from wikitextprocessor.parser import (
+    NodeKind,
+    TemplateNode,
+    WikiNode,
+)
+
+from ...page import clean_node
+from ...wxr_context import WiktextractContext
+from .models import Sense, WordEntry
+from .pos import extract_pos_section
+
+PANEL_TEMPLATES = set()
+PANEL_PREFIXES = set()
+ADDITIONAL_EXPAND_TEMPLATES = set()
+
+
+def parse_section(
+    wxr: WiktextractContext,
+    page_data: list[WordEntry],
+    base_data: WordEntry,
+    level_node: WikiNode,
+) -> None:
+    # https://pl.wiktionary.org/wiki/Kategoria:Szablony_szablonów_haseł
+    title_text = clean_node(wxr, None, level_node.largs)
+    wxr.wtp.start_subsection(title_text)
+    if title_text == "wymowa" and wxr.config.capture_pronunciation:
+        pass
+    elif title_text == "znaczenia":
+        extract_pos_section(wxr, page_data, base_data, level_node)
+    elif title_text == "przykłady":
+        pass  # example
+    elif title_text == "etymologia" and wxr.config.capture_etymologies:
+        pass
+    elif title_text == "tłumaczenia" and wxr.config.capture_translations:
+        pass
+
+
+def parse_page(
+    wxr: WiktextractContext, page_title: str, page_text: str
+) -> list[dict[str, Any]]:
+    # page layout
+    # https://pl.wiktionary.org/wiki/Wikisłownik:Zasady_tworzenia_haseł
+    wxr.wtp.start_page(page_title)
+    tree = wxr.wtp.parse(page_text, pre_expand=True)
+    page_data: list[WordEntry] = []
+    for level2_node in tree.find_child(NodeKind.LEVEL2):
+        after_parenthesis = False
+        lang_code = ""
+        lang_name = ""
+        lang_title_cats = {}
+        for title_content_node in itertools.chain.from_iterable(
+            level2_node.largs
+        ):
+            if isinstance(
+                title_content_node, str
+            ) and title_content_node.strip().endswith("("):
+                after_parenthesis = True
+            elif (
+                isinstance(title_content_node, TemplateNode)
+                and after_parenthesis
+            ):
+                expanded_template = wxr.wtp.parse(
+                    wxr.wtp.node_to_wikitext(title_content_node),
+                    expand_all=True,
+                )
+                for span_tag in expanded_template.find_html("span"):
+                    lang_code = span_tag.attrs.get("id", "")
+                    break
+                lang_name = clean_node(wxr, lang_title_cats, expanded_template)
+                break
+        if (
+            wxr.config.capture_language_codes is not None
+            and lang_code not in wxr.config.capture_language_codes
+        ):
+            continue
+        wxr.wtp.start_section(lang_name)
+        base_data = WordEntry(
+            word=wxr.wtp.title,
+            lang_code=lang_code,
+            lang=lang_name,
+            pos="unknown",
+            categories=lang_title_cats.get("categories", []),
+        )
+        for level3_node in level2_node.find_child(NodeKind.LEVEL3):
+            parse_section(wxr, page_data, base_data, level3_node)
+
+    for data in page_data:
+        if len(data.senses) == 0:
+            data.senses.append(Sense(tags=["no-gloss"]))
+    return [m.model_dump(exclude_defaults=True) for m in page_data]
