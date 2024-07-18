@@ -27,8 +27,10 @@ def extract_conjugation(
         return
     conj_root = wxr.wtp.parse(conj_page)
     for conj_template in conj_root.find_child(NodeKind.TEMPLATE):
-        if conj_template.template_name.startswith("fr-conj-"):
-            process_fr_conj_template(wxr, entry, conj_template, conj_page_title)
+        if conj_template.template_name.endswith("-intro"):
+            continue
+        elif "-conj" in conj_template.template_name:
+            process_conj_template(wxr, entry, conj_template, conj_page_title)
         elif conj_template.template_name == "Onglets conjugaison":
             # https://fr.wiktionary.org/wiki/Modèle:Onglets_conjugaison
             # this template expands to two tabs of tables
@@ -36,7 +38,7 @@ def extract_conjugation(
                 f"contenu{select_template}"
             )
             if selected_template is not None:
-                process_fr_conj_template(
+                process_conj_template(
                     wxr, entry, selected_template, conj_page_title
                 )
         elif conj_template.template_name.startswith(":Conjugaison:"):
@@ -51,7 +53,7 @@ def extract_conjugation(
             proces_ja_conj_template(wxr, entry, conj_template, conj_page_title)
 
 
-def process_fr_conj_template(
+def process_conj_template(
     wxr: WiktextractContext,
     entry: WordEntry,
     template_node: TemplateNode,
