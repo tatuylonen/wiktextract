@@ -9,6 +9,7 @@ from wikitextprocessor.parser import (
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from .example import extract_example_section
 from .models import Sense, WordEntry
 from .pos import extract_pos_section
 
@@ -32,7 +33,7 @@ def parse_section(
     elif title_text == "znaczenia":
         extract_pos_section(wxr, page_data, base_data, level_node)
     elif title_text == "przykłady":
-        pass  # example
+        extract_example_section(wxr, page_data, base_data, level_node)
     elif title_text == "etymologia" and wxr.config.capture_etymologies:
         pass
     elif title_text == "tłumaczenia" and wxr.config.capture_translations:

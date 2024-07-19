@@ -67,7 +67,7 @@ def process_gloss_list_item(
                 continue
             expanded_text = clean_node(wxr, sense, gloss_node)
             if expanded_text.endswith("."):
-                 # https://pl.wiktionary.org/wiki/Pomoc:Skróty_używane_w_Wikisłowniku
+                # https://pl.wiktionary.org/wiki/Pomoc:Skróty_używane_w_Wikisłowniku
                 raw_tags.append(expanded_text)
             else:
                 gloss_nodes.append(expanded_text)
