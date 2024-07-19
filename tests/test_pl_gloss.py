@@ -99,3 +99,30 @@ class TestPlGloss(TestCase):
                 }
             ],
         )
+
+    def test_example(self):
+        self.wxr.wtp.add_page("Szablon:język angielski", 10, "język angielski")
+        page_data = parse_page(
+            self.wxr,
+            "dream",
+            """== dream ({{język angielski}}) ==
+===znaczenia===
+''rzeczownik policzalny''
+: (2.1) [[sen]]
+===przykłady===
+: (2.1) ''[[passionately|Passionately]] [[enamor]]ed [[of]] [[this]] [[shadow]] [[of]] [[a]] [[dream]]''<ref>Washington Irving</ref> → [[gorąco|Gorąco]] [[zakochany]] [[w]] [[cień|cieniu]] [[ze]] '''[[sen|snów]]'''""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"][0],
+            {
+                "examples": [
+                    {
+                        "text": "Passionately enamored of this shadow of a dream",
+                        "ref": "Washington Irving",
+                        "translation": "Gorąco zakochany w cieniu ze snów",
+                    }
+                ],
+                "glosses": ["sen"],
+                "sense_index": "2.1",
+            },
+        )

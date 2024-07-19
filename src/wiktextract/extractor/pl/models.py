@@ -10,6 +10,12 @@ class PolishBaseModel(BaseModel):
     )
 
 
+class Example(PolishBaseModel):
+    text: str = ""
+    translation: str = ""
+    ref: str = ""
+
+
 class Sense(PolishBaseModel):
     glosses: list[str] = []
     tags: list[str] = []
@@ -17,6 +23,7 @@ class Sense(PolishBaseModel):
     topics: list[str] = []
     categories: list[str] = []
     sense_index: str = ""
+    examples: list[Example] = []
 
 
 class WordEntry(PolishBaseModel):
