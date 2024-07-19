@@ -23,6 +23,7 @@ def parse_section(
     base_data: WordEntry,
     level_node: WikiNode,
 ) -> None:
+    # title templates
     # https://pl.wiktionary.org/wiki/Kategoria:Szablony_szablonów_haseł
     title_text = clean_node(wxr, None, level_node.largs)
     wxr.wtp.start_subsection(title_text)
