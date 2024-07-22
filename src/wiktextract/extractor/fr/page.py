@@ -177,7 +177,7 @@ def process_pos_block(
                     form_line_start = index
                 elif template_name.startswith(f"{lang_code}-"):
                     extract_inflection(wxr, page_data, child)
-            elif child.kind == NodeKind.BOLD:
+            elif child.kind == NodeKind.BOLD and form_line_start == 0:
                 form_line_start = index + 1
             elif child.kind == NodeKind.LIST:
                 if index < gloss_start:

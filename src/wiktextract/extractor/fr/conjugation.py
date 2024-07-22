@@ -41,9 +41,11 @@ def extract_conjugation(
                 process_conj_template(
                     wxr, entry, selected_template, conj_page_title
                 )
-        elif conj_template.template_name.startswith(":Conjugaison:"):
+        elif conj_template.template_name.removeprefix(":").startswith(
+            "Conjugaison:"
+        ):
             extract_conjugation(
-                wxr, entry, conj_template.template_name[1:], "2"
+                wxr, entry, conj_template.template_name.removeprefix(":"), "2"
             )
         elif conj_template.template_name.startswith("ja-flx-adj"):
             proces_ja_flx_adj_template(
