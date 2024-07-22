@@ -271,7 +271,7 @@ foo
                             "examples": [
                                 {
                                     "text": "example 1 causes sense "
-                                            "1 to get pushed"
+                                    "1 to get pushed"
                                 }
                             ],
                         },
@@ -772,6 +772,28 @@ foo {{+obj|cs|accusative|blu|or|ergative|means=MEANING}}
                         }
                     ],
                     "word": "foo",
+                }
+            ],
+        )
+
+    def test_zh_see_under_pos_title(self):
+        # GH issue #730
+        self.assertEqual(
+            parse_page(
+                self.wxr,
+                "马",
+                """==Chinese=
+===Definitions===
+{{zh-see|馬}}""",
+            ),
+            [
+                {
+                    "lang": "Chinese",
+                    "lang_code": "zh",
+                    "pos": "character",
+                    "redirects": ["馬"],
+                    "senses": [{"tags": ["no-gloss"]}],
+                    "word": "马",
                 }
             ],
         )

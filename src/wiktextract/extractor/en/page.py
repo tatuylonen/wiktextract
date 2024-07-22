@@ -1242,7 +1242,7 @@ def parse_language(
                 # to identify head templates. Too bad it's None.
 
                 # ignore {{category}}, {{cat}}... etc.
-                if node.largs[0][0] in stop_head_at_these_templates:
+                if node.template_name in stop_head_at_these_templates:
                     # we've reached a template that should be at the end,
                     continue
 
@@ -1251,7 +1251,7 @@ def parse_language(
                 # head parsing quite well.
                 # node.largs[0][0] should always be str, but can't type-check
                 # that.
-                if is_panel_template(wxr, node.largs[0][0]):  # type: ignore[arg-type]
+                if is_panel_template(wxr, node.template_name):
                     continue
                 # skip these templates
                 # if node.largs[0][0] in skip_these_templates_in_head:
@@ -1408,7 +1408,7 @@ def parse_language(
         # If there are no senses extracted, add a dummy sense.  We want to
         # keep tags extracted from the head for the dummy sense.
         push_sense()  # Make sure unfinished data pushed, and start clean sense
-        if not pos_datas:
+        if len(pos_datas) == 0:
             data_extend(sense_data, "tags", header_tags)
             data_append(sense_data, "tags", "no-gloss")
             push_sense()
@@ -1514,11 +1514,15 @@ def parse_language(
         for node in strip_nodes(nodes):
             if isinstance(node, WikiNode):
                 if node.kind == NodeKind.TEMPLATE:
-                    template_name = node.largs[0][0]
-                    if TYPE_CHECKING:
-                        assert isinstance(template_name, str)
-                    if template_name == "head" or template_name.startswith(
-                        f"{lang_code}-"
+                    if node.template_name in (
+                        "zh-see",
+                        "ja-see",
+                        "ja-see-kango",
+                    ):
+                        continue  # soft redirect
+                    elif (
+                        node.template_name == "head"
+                        or node.template_name.startswith(f"{lang_code}-")
                     ):
                         header_nodes.append(node)
                         continue
