@@ -1835,7 +1835,7 @@ def parse_word_head(
             if text.endswith(tp):
                 break
         else:
-            text = re.sub(r"\s+or$", "", text)
+            text = text.removesuffix(" or").rstrip()
 
     # Handle the part of the head that is not in parentheses.  However, certain
     # parenthesized parts are part of word, and those must be handled
@@ -2617,7 +2617,7 @@ def parse_word_head(
     # XXX check if this is actually relevant, tags in word root data
     # is extremely rare (not sure where they slip through).
     tags = data.get("tags", [])  # type:ignore
-    if tags:
+    if len(tags) > 0:
         # wxr.wtp.debug(
         #     f"Tags appear in word root data: {data['tags']=}",  # type:ignore
         #     sortid="form_descriptions/2620/20240606",

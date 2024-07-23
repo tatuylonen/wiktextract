@@ -4,7 +4,7 @@
 # Copyright (c) 2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
 import re
-from typing import Optional, Union
+from typing import Union
 
 from mediawiki_langcodes import code_to_name, name_to_code
 from wikitextprocessor import NodeKind, Page, WikiNode
