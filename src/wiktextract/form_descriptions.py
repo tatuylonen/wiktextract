@@ -1844,10 +1844,8 @@ def parse_word_head(
         text = quote_kept_ruby(wxr, ruby, text)
     base = text
     base = quote_kept_parens(base)
-    base = re.sub(r"\(([^()]|\([^(]*\))*\)($|\s)", r"\2", base)
-    base = re.sub(r"(^|\s)\(([^()]|\([^(]*\))*\)", r"\1", base)
-    base = re.sub(r"(\s?)\^\(([^()]|\([^(]*\))*\)", r"\1", base)
-    base = re.sub(r"\?", " ", base)  # Removes uncertain articles etc
+    base = remove_text_in_parentheses(base)
+    base = base.replace("?", "")  # Removes uncertain articles etc
     base = re.sub(r"\s+", " ", base)
     base = re.sub(r" ([,;])", r"\1", base)
     base = re.sub(r"(.*) •.*", r"\1", base)
@@ -3438,3 +3436,16 @@ def classify_desc(
             return "romanization"
     # Otherwise it is something else, such as hanji version of the word
     return "other"
+
+
+def remove_text_in_parentheses(text: str) -> str:
+    parentheses = 0
+    new_text = ""
+    for c in text:
+        if c == "(":
+            parentheses += 1
+        elif c == ")":
+            parentheses -= 1
+        elif parentheses == 0:
+            new_text += c
+    return new_text
