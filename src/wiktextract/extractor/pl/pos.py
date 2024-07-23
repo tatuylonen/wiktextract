@@ -5,10 +5,12 @@ from wikitextprocessor.parser import NodeKind, TemplateNode, WikiNode
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .models import Sense, WordEntry
+from .tags import translate_raw_tags
 
 POS_DATA = {
     "rzeczownik": {"pos": "noun"},
     "czasownik": {"pos": "verb"},
+    "przyimek": {"pos": "prep"},
     "przymiotnik": {"pos": "adj"},
     "przyrostek": {"pos": "suffix", "tags": ["morpheme"]},
     "wrostek": {"pos": "infix", "tags": ["morpheme"]},
@@ -19,11 +21,13 @@ POS_DATA = {
     "spójnik": {"pos": "conj"},
     "określnik": {"pos": "det"},
     "międzyrostek": {"pos": "interfix", "tags": ["morpheme"]},
+    "morfem": {"pos": "unknown", "tags": ["morpheme"]},
     "wykrzyknik": {"pos": "intj"},
     "symbol": {"pos": "symbol"},
     "liczebnik": {"pos": "num"},
     "partykuła": {"pos": "particle"},
     "skrótowiec": {"pos": "abbrev", "tags": ["abbreviation"]},
+    "zaimek": {"pos": "pron"},
 }
 
 
@@ -83,4 +87,5 @@ def process_gloss_list_item(
         sense.raw_tags = raw_tags
         sense.sense_index = sense_index
         sense.glosses.append(gloss_text)
+        translate_raw_tags(sense)
         word_entry.senses.append(sense)
