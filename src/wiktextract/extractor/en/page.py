@@ -1497,7 +1497,7 @@ def parse_language(
         if "tags" in pos_data:
             # pos_data can get "tags" data from some source; type-checkers
             # doesn't like it, so let's ignore it.
-            header_tags[:] = pos_data["tags"]  # type: ignore[typeddict-item]
+            header_tags.extend(pos_data["tags"])  # type: ignore[typeddict-item]
             del pos_data["tags"]  # type: ignore[typeddict-item]
         else:
             header_tags.clear()

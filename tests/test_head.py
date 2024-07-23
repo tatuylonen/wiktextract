@@ -1,20 +1,24 @@
 # Tests for parse_word_head()
 #
 # Copyright (c) 2021-2022 Tatu Ylonen.  See file LICENSE and https://ylonen.org
-import json
+# import json
 import unittest
 
 from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
-from wiktextract.extractor.en.page import parse_language
+from wiktextract.extractor.en.page import parse_language, parse_page
 from wiktextract.form_descriptions import parse_word_head
 from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.wxr_context import WiktextractContext
 
 
 class HeadTests(unittest.TestCase):
+    maxDiff = None
+
     def setUp(self):
-        self.wxr = WiktextractContext(Wtp(), WiktionaryConfig())
+        self.wxr = WiktextractContext(
+            Wtp(), WiktionaryConfig(capture_language_codes=None)
+        )
         self.wxr.wtp.start_page("testpage")
         self.wxr.wtp.start_section("English")
 
@@ -184,7 +188,7 @@ class HeadTests(unittest.TestCase):
         )
         self.assertEqual(self.wxr.wtp.warnings, [])
         self.assertEqual(self.wxr.wtp.debugs, [])
-        print(data)
+        # print(data)
         self.assertEqual(
             data,
             {
@@ -483,7 +487,7 @@ class HeadTests(unittest.TestCase):
             False,
             None,
         )
-        print(json.dumps(data, indent=2, sort_keys=True))
+        # print(json.dumps(data, indent=2, sort_keys=True))
         self.assertEqual(
             data,
             {
@@ -518,7 +522,7 @@ class HeadTests(unittest.TestCase):
             False,
             None,
         )
-        print(json.dumps(data, indent=2, sort_keys=True))
+        # print(json.dumps(data, indent=2, sort_keys=True))
         self.assertEqual(
             data,
             {
@@ -552,7 +556,7 @@ class HeadTests(unittest.TestCase):
             False,
             None,
         )
-        print(json.dumps(data, indent=2, sort_keys=True))
+        # print(json.dumps(data, indent=2, sort_keys=True))
         self.assertEqual(
             data,
             {
@@ -592,7 +596,7 @@ class HeadTests(unittest.TestCase):
             False,
             None,
         )
-        print(json.dumps(data, indent=2, sort_keys=True))
+        # print(json.dumps(data, indent=2, sort_keys=True))
         self.assertEqual(
             data,
             {
@@ -624,7 +628,7 @@ class HeadTests(unittest.TestCase):
             False,
             None,
         )
-        print(json.dumps(data, indent=2, sort_keys=True))
+        # print(json.dumps(data, indent=2, sort_keys=True))
         self.assertEqual(
             data,
             {
@@ -672,7 +676,7 @@ class HeadTests(unittest.TestCase):
             False,
             None,
         )
-        print(json.dumps(data, indent=2, sort_keys=True))
+        # print(json.dumps(data, indent=2, sort_keys=True))
         self.assertEqual(
             data,
             {
@@ -690,7 +694,7 @@ class HeadTests(unittest.TestCase):
         parse_word_head(
             self.wxr, "noun", "foo or baz (plural)", data, False, None
         )
-        print(json.dumps(data, indent=2, sort_keys=True))
+        # print(json.dumps(data, indent=2, sort_keys=True))
         self.assertEqual(
             data,
             {
@@ -705,7 +709,7 @@ class HeadTests(unittest.TestCase):
         self.wxr.wtp.start_section("Latin")
         self.wxr.wtp.start_subsection("Noun")
         parse_word_head(self.wxr, "noun", "intueor (plural)", data, False, None)
-        print(json.dumps(data, indent=2, sort_keys=True))
+        # print(json.dumps(data, indent=2, sort_keys=True))
         self.assertEqual(
             data,
             {
@@ -721,27 +725,54 @@ class HeadTests(unittest.TestCase):
         self.assertTrue(HEAD_TAG_RE.fullmatch("ru-noun+") is not None)
 
     def test_head36(self):
-        self.wxr.wtp.add_page("Template:en-noun", 10,
+        self.wxr.wtp.add_page(
+            "Template:en-noun",
+            10,
             "[[big]], [[fat]], [[hairy]] [[deal]], "
-            "(plural [[big, fat, hairy deals]])"
+            "(plural [[big, fat, hairy deals]])",
         )
         self.wxr.wtp.start_page("big, fat, hairy deal")
         self.wxr.wtp.start_section("English")
         # self.wxr.wtp.start_subsection("Noun")
         parsed = self.wxr.wtp.parse(
-            "==English==\n"
-            "====Noun====\n"
-            "{{en-noun}}\n\n"
-            "# test gloss"
+            """==English==
+====Noun====
+{{en-noun}}
+
+# test gloss"""
         )
         # print(parsed)
         langret = parse_language(self.wxr, parsed.children[0], "English", "en")
-        print(langret)
+        # print(langret)
         self.assertEqual(self.wxr.wtp.warnings, [])
         self.assertEqual(self.wxr.wtp.debugs, [])
-        print(langret[0]["forms"][0])
+        # print(langret[0]["forms"][0])
         self.assertEqual(
             langret[0]["forms"][0],
             # commas are missing, why?
             {"tags": ["plural"], "form": "big, fat, hairy deals"},
+        )
+
+    def test_two_head_lines(self):
+        # GH issue #732
+        self.wxr.wtp.add_page(
+            "Template:de-noun",
+            10,
+            """{{#switch: {{{1}}}
+| f.sg = <span class="headword-line"><strong class="Latn headword" lang="de">Butter</strong>&nbsp;<span class="gender"><abbr title="feminine gender">f</abbr></span></span>
+| #default = <span class="headword-line"><strong class="Latn headword" lang="de">Butter</strong>&nbsp;<span class="gender"><span class="ib-brac qualifier-brac">(</span><span class="ib-content qualifier-content">dialectal</span><span class="ib-brac qualifier-brac">)</span> <abbr title="masculine gender">m</abbr></span></span>
+}}""",
+        )
+        self.assertEqual(
+            parse_page(
+                self.wxr,
+                "Butter",
+                """==German==
+===Noun===
+{{de-noun|f.sg}} ''or''<br />
+{{de-noun|m[dialectal].sg}}
+
+# [[butter]]""",
+            )[0]["senses"][0]["tags"],
+            ["feminine", "dialectal", "masculine"],
         )
