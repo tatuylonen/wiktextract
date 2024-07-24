@@ -40,3 +40,4 @@ class WordEntry(PolishBaseModel):
     categories: list[str] = []
     tags: list[str] = []
     raw_tags: list[str] = []
+    etymology_texts: list[str] = []
