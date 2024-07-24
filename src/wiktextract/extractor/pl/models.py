@@ -26,6 +26,16 @@ class Sense(PolishBaseModel):
     examples: list[Example] = []
 
 
+class Translation(PolishBaseModel):
+    lang_code: str = ""
+    lang: str = ""
+    word: str = ""
+    sense_index: str = ""
+    tags: list[str] = []
+    raw_tags: list[str] = []
+    roman: str = ""
+
+
 class WordEntry(PolishBaseModel):
     model_config = ConfigDict(title="Polish Wiktionary")
 
@@ -41,3 +51,4 @@ class WordEntry(PolishBaseModel):
     tags: list[str] = []
     raw_tags: list[str] = []
     etymology_texts: list[str] = []
+    translations: list[Translation] = []

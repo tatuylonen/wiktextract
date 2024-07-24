@@ -13,6 +13,7 @@ from .etymology import extract_etymology_section
 from .example import extract_example_section
 from .models import Sense, WordEntry
 from .pos import extract_pos_section
+from .translation import extract_translation_section
 
 PANEL_TEMPLATES = set()
 PANEL_PREFIXES = set()
@@ -38,7 +39,7 @@ def parse_section(
     elif title_text == "etymologia" and wxr.config.capture_etymologies:
         extract_etymology_section(wxr, page_data, base_data, level_node)
     elif title_text == "tłumaczenia" and wxr.config.capture_translations:
-        pass
+        extract_translation_section(wxr, page_data, base_data, level_node)
 
 
 def parse_page(
