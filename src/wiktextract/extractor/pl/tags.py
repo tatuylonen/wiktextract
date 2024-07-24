@@ -18,6 +18,9 @@ TAGS = {
     "brytań.": "British",
     "bułg.": "Bulgarian",
     "bwr.": "Bavarian",
+    # Category:Acronym templates - grammar
+    # https://pl.wiktionary.org/wiki/Kategoria:Szablony_skrótów_-_gramatyka
+    "m": "masculine",
 }
 
 TOPICS = {
