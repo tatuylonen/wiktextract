@@ -1,181 +1,181 @@
 {
   "Szablon:antonimy": {
-    "body": "===antonimy===",
+    "body": "===antonimy===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Szablon:czytania": {
-    "body": "===czytania===",
+    "body": "===czytania===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Szablon:determinatywy": {
-    "body": "===determinatywy===",
+    "body": "===determinatywy===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Szablon:etymologia": {
-    "body": "===etymologia===",
+    "body": "===etymologia===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Szablon:frazeologia": {
-    "body": "===frazeologia===",
+    "body": "===frazeologia===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Szablon:hanja": {
-    "body": "===hanja===",
+    "body": "===hanja===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Szablon:hiperonimy": {
-    "body": "===hiperonimy===",
+    "body": "===hiperonimy===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Szablon:hiponimy": {
-    "body": "===hiponimy===",
+    "body": "===hiponimy===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Szablon:holonimy": {
-    "body": "===holonimy===",
+    "body": "===holonimy===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Szablon:klucz": {
-    "body": "===klucz===",
+    "body": "===klucz===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Szablon:kody": {
-    "body": "===kody===",
+    "body": "===kody===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Szablon:kolejność": {
-    "body": "===kolejność===",
+    "body": "===kolejność===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Szablon:kolokacje": {
-    "body": "===kolokacje===",
+    "body": "===kolokacje===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Szablon:kreski": {
-    "body": "===kreski===",
+    "body": "===kreski===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Szablon:meronimy": {
-    "body": "===meronimy===",
+    "body": "===meronimy===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Szablon:morfologia": {
-    "body": "===morfologia===",
+    "body": "===morfologia===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Szablon:odmiana": {
-    "body": "===odmiana===",
+    "body": "===odmiana===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Szablon:ortografie": {
-    "body": "===ortografie===",
+    "body": "===ortografie===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Szablon:pochodne": {
-    "body": "===pochodne===",
+    "body": "===pochodne===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Szablon:pokrewne": {
-    "body": "===pokrewne===",
+    "body": "===pokrewne===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Szablon:pole": {
-    "body": "===pole===",
+    "body": "===pole===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Szablon:przykłady": {
-    "body": "===przykłady===",
+    "body": "===przykłady===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Szablon:składnia": {
-    "body": "===składnia===",
+    "body": "===składnia===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Szablon:synonimy": {
-    "body": "===synonimy===",
+    "body": "===synonimy===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Szablon:słowniki": {
-    "body": "===słowniki===",
+    "body": "===słowniki===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Szablon:transkrypcja": {
-    "body": "===transkrypcja===",
+    "body": "===transkrypcja===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Szablon:transliteracja": {
-    "body": "===transliteracja===",
+    "body": "===transliteracja===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Szablon:tłumaczenia": {
-    "body": "===tłumaczenia===",
+    "body": "===tłumaczenia===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Szablon:uwagi": {
-    "body": "===uwagi===",
+    "body": "===uwagi===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Szablon:warianty": {
-    "body": "===warianty===",
+    "body": "===warianty===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Szablon:wymowa": {
-    "body": "===wymowa===",
+    "body": "===wymowa===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Szablon:zapis": {
-    "body": "===zapis===",
+    "body": "===zapis===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Szablon:zapis hieroglificzny": {
-    "body": "===zapis hieroglificzny===",
+    "body": "===zapis hieroglificzny===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Szablon:znaczenia": {
-    "body": "===znaczenia===",
+    "body": "===znaczenia===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Szablon:złożenia": {
-    "body": "===złożenia===",
+    "body": "===złożenia===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Szablon:źródła": {
-    "body": "===źródła===",
+    "body": "===źródła===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   }
