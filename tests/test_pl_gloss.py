@@ -58,6 +58,7 @@ class TestPlGloss(TestCase):
                     ],
                     "pos": "noun",
                     "pos_text": "rzeczownik",
+                    "tags": ["masculine", "animate"],
                     "word": "dog",
                 }
             ],
@@ -125,4 +126,60 @@ class TestPlGloss(TestCase):
                 "glosses": ["sen"],
                 "sense_index": "2.1",
             },
+        )
+
+    def test_form_of(self):
+        self.wxr.wtp.add_page(
+            "Szablon:język szwedzki",
+            10,
+            '<span class="lang-code primary-lang-code lang-code-sv" id="sv">[[Słownik języka szwedzkiego|język szwedzki]]</span>[[Kategoria:szwedzki (formy fleksyjne)]]',
+        )
+        self.wxr.wtp.add_page(
+            "Szablon:forma czasownika",
+            10,
+            "<i>czasownik, forma fleksyjna</i>[[Kategoria:Formy czasowników szwedzkich]]",
+        )
+        self.wxr.wtp.add_page(
+            "Szablon:szw-forma czas-przesz",
+            10,
+            "''czas przeszły ([[preteritum#sv|preteritum]]) od'' [[dö#sv|dö]]",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "dog",
+            """== dog ({{język szwedzki}}) ==
+==znaczenia==
+''{{forma czasownika|sv}}''
+: (1.1) {{szw-forma czas-przesz|dö}}""",
+        )
+        self.assertEqual(
+            parse_page(
+                self.wxr,
+                "dog",
+                """== dog ({{język szwedzki}}) ==
+===znaczenia===
+''{{forma czasownika|sv}}''
+: (1.1) {{szw-forma czas-przesz|dö}}""",
+            ),
+            [
+                {
+                    "categories": [
+                        "szwedzki (formy fleksyjne)",
+                        "Formy czasowników szwedzkich",
+                    ],
+                    "lang": "język szwedzki",
+                    "lang_code": "sv",
+                    "senses": [
+                        {
+                            "form_of": [{"word": "dö"}],
+                            "glosses": ["czas przeszły (preteritum) od dö"],
+                            "sense_index": "1.1",
+                        }
+                    ],
+                    "tags": ["form-of"],
+                    "pos": "verb",
+                    "pos_text": "czasownik",
+                    "word": "dog",
+                }
+            ],
         )

@@ -21,6 +21,17 @@ TAGS = {
     # Category:Acronym templates - grammar
     # https://pl.wiktionary.org/wiki/Kategoria:Szablony_skrótów_-_gramatyka
     "m": "masculine",
+    # gender types in POS line
+    "męski": "masculine",
+    "męskozwierzęcy": ["masculine", "animate"],
+    "męskorzeczowy": ["masculine", "inanimate"],
+    "niepoliczalny": "uncountable",
+    "nieżywotny": "inanimate",
+    "nijaki": "neuter",
+    "policzalny": "countable",
+    "przechodni": "transitive",
+    "żeński": "feminine",
+    "żywotny": "animate",
 }
 
 TOPICS = {
