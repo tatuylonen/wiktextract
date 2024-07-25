@@ -4,7 +4,7 @@ from wikitextprocessor.parser import NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
-from .models import Sense, WordEntry
+from .models import AltForm, Sense, WordEntry
 from .tags import translate_raw_tags
 
 POS_DATA = {
@@ -19,12 +19,13 @@ POS_DATA = {
     "partykuła": {"pos": "particle"},
     # Szablon:phrasal verb
     "phrasal verb (czasownik frazowy)": {"pos": "verb", "tags": ["phrase"]},
+    "przedimek": {"pos": "article"},
+    "przedrostek": {"pos": "prefix", "tags": ["morpheme"]},
     "przyimek": {"pos": "prep"},
     "przymiotnik": {"pos": "adj"},
     "przyrostek": {"pos": "suffix", "tags": ["morpheme"]},
-    "przedrostek": {"pos": "prefix", "tags": ["morpheme"]},
     "przysłówek": {"pos": "adv"},
-    "przedimek": {"pos": "article"},
+    "rodzajnik": {"pos": "article", "tags": ["gendered"]},
     "rzeczownik": {"pos": "noun"},
     "skrótowiec": {"pos": "abbrev", "tags": ["abbreviation"]},
     "spójnik": {"pos": "conj"},
@@ -68,7 +69,14 @@ def process_pos_line_italic_node(
     for child in italic_node.children:
         if isinstance(child, TemplateNode):
             child_text = clean_node(wxr, page_data[-1], child)
-            if child_text in POS_DATA:
+            if child.template_name.startswith("forma "):
+                # inflection form header templates
+                # https://pl.wiktionary.org/wiki/Kategoria:Szablony_nagłówków_form_fleksyjnych
+                pos_text = child_text.split(", ")[0]
+                if pos_text in POS_DATA:
+                    update_pos_data(page_data[-1], pos_text, POS_DATA[pos_text])
+                page_data[-1].tags.append("form-of")
+            elif child_text in POS_DATA:
                 update_pos_data(page_data[-1], child_text, POS_DATA[child_text])
             else:
                 is_pos = False
@@ -109,12 +117,15 @@ def process_gloss_list_item(
         if isinstance(gloss_node, TemplateNode):
             if gloss_node.template_name == "wikipedia":
                 continue
-            expanded_text = clean_node(wxr, sense, gloss_node)
+            expanded_node = wxr.wtp.parse(
+                wxr.wtp.node_to_wikitext(gloss_node), expand_all=True
+            )
+            expanded_text = clean_node(wxr, sense, expanded_node.children)
             if expanded_text.endswith("."):
                 # https://pl.wiktionary.org/wiki/Pomoc:Skróty_używane_w_Wikisłowniku
                 raw_tags.append(expanded_text)
             else:
-                gloss_nodes.append(expanded_text)
+                gloss_nodes.extend(expanded_node.children)
         else:
             gloss_nodes.append(gloss_node)
     gloss_text = clean_node(wxr, sense, gloss_nodes)
@@ -123,6 +134,13 @@ def process_gloss_list_item(
     if m is not None:
         sense_index = m.group(0).strip("()")
         gloss_text = gloss_text[m.end() :].strip("=; ")
+    if "form-of" in word_entry.tags:
+        form_of = ""
+        for node in gloss_nodes:
+            if isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
+                form_of = clean_node(wxr, None, node)
+        if len(form_of) > 0:
+            sense.form_of.append(AltForm(word=form_of))
     if len(gloss_text) > 0:
         sense.raw_tags = raw_tags
         sense.sense_index = sense_index

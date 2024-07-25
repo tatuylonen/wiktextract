@@ -25,9 +25,13 @@ TAGS = {
     "męski": "masculine",
     "męskozwierzęcy": ["masculine", "animate"],
     "męskorzeczowy": ["masculine", "inanimate"],
+    "niepoliczalny": "uncountable",
+    "nieżywotny": "inanimate",
+    "nijaki": "neuter",
     "policzalny": "countable",
     "przechodni": "transitive",
     "żeński": "feminine",
+    "żywotny": "animate",
 }
 
 TOPICS = {

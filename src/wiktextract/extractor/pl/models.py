@@ -16,6 +16,10 @@ class Example(PolishBaseModel):
     ref: str = ""
 
 
+class AltForm(PolishBaseModel):
+    word: str
+
+
 class Sense(PolishBaseModel):
     glosses: list[str] = []
     tags: list[str] = []
@@ -24,6 +28,8 @@ class Sense(PolishBaseModel):
     categories: list[str] = []
     sense_index: str = ""
     examples: list[Example] = []
+    alt_of: list[AltForm] = []
+    form_of: list[AltForm] = []
 
 
 class Translation(PolishBaseModel):
