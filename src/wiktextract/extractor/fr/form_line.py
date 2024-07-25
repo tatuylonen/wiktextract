@@ -1,10 +1,9 @@
 from typing import Union
 
-from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import HTMLNode, TemplateNode
-from wiktextract.page import clean_node
-from wiktextract.wxr_context import WiktextractContext
+from wikitextprocessor.parser import HTMLNode, NodeKind, TemplateNode, WikiNode
 
+from ...page import clean_node
+from ...wxr_context import WiktextractContext
 from .conjugation import extract_conjugation
 from .models import Form, Sound, WordEntry
 from .pronunciation import (

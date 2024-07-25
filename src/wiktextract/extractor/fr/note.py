@@ -1,8 +1,7 @@
-from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import TemplateNode
-from wiktextract.page import clean_node
-from wiktextract.wxr_context import WiktextractContext
+from wikitextprocessor.parser import NodeKind, TemplateNode, WikiNode
 
+from ...page import clean_node
+from ...wxr_context import WiktextractContext
 from .models import WordEntry
 
 
