@@ -41,6 +41,8 @@ POS_PREFIXES = {
     "sentencja": {"pos": "phrase"},
 }
 
+IGNORE_POS_LINE_TEXT = frozenset(["rodzaj"])
+
 
 def extract_pos_section(
     wxr: WiktextractContext,
@@ -67,31 +69,34 @@ def process_pos_line_italic_node(
         if isinstance(child, TemplateNode):
             child_text = clean_node(wxr, page_data[-1], child)
             if child_text in POS_DATA:
-                pos_data = POS_DATA[child_text]
-                page_data[-1].pos = pos_data["pos"]
-                page_data[-1].tags.extend(pos_data.get("tags", []))
-                page_data[-1].pos_text = child_text
+                update_pos_data(page_data[-1], child_text, POS_DATA[child_text])
             else:
                 is_pos = False
                 for prefix, pos_data in POS_PREFIXES.items():
                     if child_text.startswith(prefix):
-                        page_data[-1].pos = pos_data["pos"]
-                        page_data[-1].tags.extend(pos_data.get("tags", []))
-                        page_data[-1].pos_text = child_text
+                        update_pos_data(
+                            page_data[-1], child_text, POS_DATA[child_text]
+                        )
                         is_pos = True
                         break
-                if not is_pos:
+                if not is_pos and child_text not in IGNORE_POS_LINE_TEXT:
                     page_data[-1].raw_tags.append(child_text)
         elif isinstance(child, str):
-            child = child.strip(", ")
-            for text in child.split():
+            for text in child.strip(", ").split():
+                text = text.strip(", ")
                 if text in POS_DATA:
-                    pos_data = POS_DATA[text]
-                    page_data[-1].pos = pos_data["pos"]
-                    page_data[-1].tags.extend(pos_data.get("tags", []))
-                    page_data[-1].pos_text = text
-                else:
+                    update_pos_data(page_data[-1], text, POS_DATA[text])
+                elif text not in IGNORE_POS_LINE_TEXT:
                     page_data[-1].raw_tags.append(text)
+    translate_raw_tags(page_data[-1])
+
+
+def update_pos_data(
+    word_entry: WordEntry, pos_text: str, pos_data: dict
+) -> None:
+    word_entry.pos = pos_data["pos"]
+    word_entry.tags.extend(pos_data.get("tags", []))
+    word_entry.pos_text = pos_text
 
 
 def process_gloss_list_item(

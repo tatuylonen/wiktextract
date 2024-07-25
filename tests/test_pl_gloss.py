@@ -58,6 +58,7 @@ class TestPlGloss(TestCase):
                     ],
                     "pos": "noun",
                     "pos_text": "rzeczownik",
+                    "tags": ["masculine", "animate"],
                     "word": "dog",
                 }
             ],
