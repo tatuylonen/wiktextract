@@ -373,3 +373,18 @@ etymology text
                 )
             },
         )
+
+    def test_not_pos_italic_node(self):
+        self.wxr.wtp.start_page("métrifier")
+        root = self.wxr.wtp.parse(
+            ": Composé de ''[[mètre]]'' avec le suffixe ''[[-ifier]]''."
+        )
+        etymology_data = extract_etymology(self.wxr, root, None)
+        self.assertEqual(
+            etymology_data,
+            {
+                ("", ""): EtymologyData(
+                    texts=["Composé de mètre avec le suffixe -ifier."]
+                )
+            },
+        )

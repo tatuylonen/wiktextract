@@ -156,10 +156,15 @@ def find_pos_in_etymology_list(
                         ).lstrip(") "),
                         categories.get("categories", []),
                     )
-            if index <= 1:  # first node is empty string
+            italic_text = clean_node(wxr, None, node)
+            if (
+                index <= 1  # first node is empty string
+                and italic_text.startswith("(")
+                and italic_text.endswith(")")
+            ):
                 return (
                     "",
-                    clean_node(wxr, None, node).strip("() "),
+                    italic_text.strip("() "),
                     clean_node(
                         wxr,
                         categories,
