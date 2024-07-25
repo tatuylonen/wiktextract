@@ -1,4 +1,4 @@
-from wiktextract.config import POSSubtitleData
+from ...config import POSSubtitleData
 
 # the keys are the first argument of the `S` template
 # https://fr.wiktionary.org/wiki/Modèle:S

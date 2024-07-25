@@ -1,8 +1,13 @@
-from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import HTMLNode, TemplateNode
-from wiktextract.page import clean_node
-from wiktextract.wxr_context import WiktextractContext
+from wikitextprocessor.parser import (
+    LEVEL_KIND_FLAGS,
+    HTMLNode,
+    NodeKind,
+    TemplateNode,
+    WikiNode,
+)
 
+from ...page import clean_node
+from ...wxr_context import WiktextractContext
 from .models import Form, WordEntry
 from .tags import translate_raw_tags
 
@@ -66,19 +71,32 @@ def process_conj_template(
     expanded_template = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(template_node), expand_all=True
     )
+    process_expanded_conj_template(
+        wxr, entry, expanded_template, conj_page_title
+    )
+
+
+def process_expanded_conj_template(
+    wxr: WiktextractContext,
+    entry: WordEntry,
+    node: WikiNode,
+    conj_page_title: str,
+) -> None:
     h3_text = ""
-    for node in expanded_template.children:
-        if isinstance(node, WikiNode) and node.kind == NodeKind.HTML:
-            if node.tag == "h3":
-                h3_text = clean_node(wxr, None, node)
-            elif node.tag == "div":
+    for child in node.find_child(NodeKind.HTML | LEVEL_KIND_FLAGS):
+        if child.kind in LEVEL_KIND_FLAGS:
+            process_expanded_conj_template(wxr, entry, child, conj_page_title)
+        elif child.kind == NodeKind.HTML:
+            if child.tag == "h3":
+                h3_text = clean_node(wxr, None, child)
+            elif child.tag == "div":
                 if h3_text == "Modes impersonnels":
                     process_fr_conj_modes_table(
-                        wxr, entry, node, conj_page_title
+                        wxr, entry, child, conj_page_title
                     )
                 else:
                     process_fr_conj_table(
-                        wxr, entry, node, h3_text, conj_page_title
+                        wxr, entry, child, h3_text, conj_page_title
                     )
 
 

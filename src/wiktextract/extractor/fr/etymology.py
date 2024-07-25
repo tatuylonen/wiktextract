@@ -10,8 +10,8 @@ from wikitextprocessor.parser import (
     WikiNode,
 )
 
-from ...wxr_context import WiktextractContext
 from ...page import clean_node
+from ...wxr_context import WiktextractContext
 from .models import WordEntry
 
 
