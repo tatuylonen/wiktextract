@@ -38,11 +38,22 @@ def extract_example_section(
         if len(page_data) == 0:
             page_data.append(base_data.model_copy(deep=True))
         find_sense = False
-        for sense in page_data[-1].senses:
-            if sense.sense_index == sense_index:
-                sense.examples.append(example_data)
-                find_sense = True
+        for data in page_data:
+            if data.lang_code != base_data.lang_code:
+                continue
+            if find_sense:
                 break
+            for sense in data.senses:
+                if sense.sense_index == sense_index:
+                    sense.examples.append(example_data)
+                    find_sense = True
+                    break
         if not find_sense:
-            sense_data = Sense(tags=["no-gloss"], examples=[example_data])
+            sense_data = Sense(
+                tags=["no-gloss"],
+                examples=[example_data],
+                sense_index=sense_index,
+            )
+            if page_data[-1].lang_code != base_data.lang_code:
+                page_data.append(base_data.model_copy(deep=True))
             page_data[-1].senses.append(sense_data)
