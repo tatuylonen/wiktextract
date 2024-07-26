@@ -248,7 +248,7 @@ ZH_PRON_TAGS = {
     "efeo": "EFEO",  # https://en.wikipedia.org/wiki/EFEO_Chinese_transcription
     "wade-giles": "Wade-Giles",
     "yale": "Yale",
-    "zhuyin": "bopomofo",
+    "zhuyin": "Bopomofo",
     "mandarin": "Mandarin",
     "cantonais": "Cantonese",
     "cantonais (yue)": "Cantonese",

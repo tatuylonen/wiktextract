@@ -37,3 +37,13 @@ def extract_sound_section(
                     raw_tags.clear()
             elif template_node.template_name in SOUND_TAG_TEMPLATES:
                 raw_tags.append(clean_node(wxr, None, template_node))
+            elif template_node.template_name in ("pinyin", "zhuyin"):
+                zh_pron = template_node.template_parameters.get(1, "")
+                if isinstance(zh_pron, str) and len(zh_pron) > 0:
+                    sound = Sound(zh_pron=zh_pron, raw_tags=raw_tags)
+                    if template_node.template_name == "pinyin":
+                        sound.tags.append("Pinyin")
+                    elif template_node.template_name == "zhuyin":
+                        sound.tags.append("Bopomofo")
+                    translate_raw_tags(sound)
+                    base_data.sounds.append(sound)
