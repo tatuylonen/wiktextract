@@ -13,6 +13,7 @@ from .etymology import extract_etymology_section
 from .example import extract_example_section
 from .models import Sense, WordEntry
 from .pos import extract_pos_section
+from .sound import extract_sound_section
 from .translation import extract_translation_section
 
 PANEL_TEMPLATES = set()
@@ -31,7 +32,7 @@ def parse_section(
     title_text = clean_node(wxr, None, level_node.largs)
     wxr.wtp.start_subsection(title_text)
     if title_text == "wymowa" and wxr.config.capture_pronunciation:
-        pass
+        extract_sound_section(wxr, base_data, level_node)
     elif title_text == "znaczenia":
         extract_pos_section(wxr, page_data, base_data, level_node)
     elif title_text == "przykłady":

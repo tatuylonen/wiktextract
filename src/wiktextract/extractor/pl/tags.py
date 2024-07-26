@@ -32,6 +32,11 @@ TAGS = {
     "przechodni": "transitive",
     "żeński": "feminine",
     "żywotny": "animate",
+    # sound tags
+    "bryt. (RP)": ["British", "Received-Pronunciation"],
+    "amer.": "US",
+    "lm": "plural",
+    "lp": "singular",
 }
 
 TOPICS = {

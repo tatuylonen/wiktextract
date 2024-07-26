@@ -227,8 +227,8 @@ class TestPronunciation(TestCase):
                 {"zh_pron": "dzwō", "tags": ["Mandarin", "Yale"]},
                 {"zh_pron": "dzwó", "tags": ["Mandarin", "Yale"]},
                 {"zh_pron": "dzwò", "tags": ["Mandarin", "Yale"]},
-                {"zh_pron": "ㄗㄨㄛ", "tags": ["Mandarin", "bopomofo"]},
-                {"zh_pron": "ㄗㄨㄛˊ", "tags": ["Mandarin", "bopomofo"]},
-                {"zh_pron": "ㄗㄨㄛˋ", "tags": ["Mandarin", "bopomofo"]},
+                {"zh_pron": "ㄗㄨㄛ", "tags": ["Mandarin", "Bopomofo"]},
+                {"zh_pron": "ㄗㄨㄛˊ", "tags": ["Mandarin", "Bopomofo"]},
+                {"zh_pron": "ㄗㄨㄛˋ", "tags": ["Mandarin", "Bopomofo"]},
             ],
         )
