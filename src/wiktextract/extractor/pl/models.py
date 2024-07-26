@@ -42,6 +42,20 @@ class Translation(PolishBaseModel):
     roman: str = ""
 
 
+class Sound(PolishBaseModel):
+    zh_pron: str = Field(default="", description="Chinese word pronunciation")
+    ipa: str = Field(default="", description="International Phonetic Alphabet")
+    audio: str = Field(default="", description="Audio file name")
+    wav_url: str = ""
+    oga_url: str = ""
+    ogg_url: str = ""
+    mp3_url: str = ""
+    opus_url: str = ""
+    flac_url: str = ""
+    tags: list[str] = []
+    raw_tags: list[str] = []
+
+
 class WordEntry(PolishBaseModel):
     model_config = ConfigDict(title="Polish Wiktionary")
 
@@ -58,3 +72,4 @@ class WordEntry(PolishBaseModel):
     raw_tags: list[str] = []
     etymology_texts: list[str] = []
     translations: list[Translation] = []
+    sounds: list[Sound] = []

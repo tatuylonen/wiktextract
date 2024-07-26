@@ -192,14 +192,6 @@ class TestPlGloss(TestCase):
             10,
             "''czas przeszły ([[preteritum#sv|preteritum]]) od'' [[dö#sv|dö]]",
         )
-        page_data = parse_page(
-            self.wxr,
-            "dog",
-            """== dog ({{język szwedzki}}) ==
-==znaczenia==
-''{{forma czasownika|sv}}''
-: (1.1) {{szw-forma czas-przesz|dö}}""",
-        )
         self.assertEqual(
             parse_page(
                 self.wxr,
