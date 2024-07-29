@@ -30,6 +30,7 @@ def extract_linkage_section(
     linkages = defaultdict(list)
     for list_item in level_node.find_child_recursively(NodeKind.LIST_ITEM):
         process_linakge_list_item(wxr, list_item, linkages)
+
     for data in page_data:
         if data.lang_code == lang_code:
             for sense in data.senses:
@@ -39,6 +40,7 @@ def extract_linkage_section(
                     )
                     del linkages[sense.sense_index]
             getattr(data, linkage_type).extend(linkages.get("", []))
+
     if "" in linkages:
         del linkages[""]
     for data in page_data:
