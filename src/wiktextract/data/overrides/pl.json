@@ -20,7 +20,7 @@
     "need_pre_expand": true
   },
   "Szablon:frazeologia": {
-    "body": "===frazeologia===\n",
+    "body": "===związki frazeologiczne===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
@@ -95,7 +95,7 @@
     "need_pre_expand": true
   },
   "Szablon:pokrewne": {
-    "body": "===pokrewne===\n",
+    "body": "===wyrazy pokrewne===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },

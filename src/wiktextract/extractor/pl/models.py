@@ -56,6 +56,13 @@ class Sound(PolishBaseModel):
     raw_tags: list[str] = []
 
 
+class Linkage(PolishBaseModel):
+    word: str
+    tags: list[str] = []
+    raw_tags: list[str] = []
+    sense_index: str = ""
+
+
 class WordEntry(PolishBaseModel):
     model_config = ConfigDict(title="Polish Wiktionary")
 
@@ -73,3 +80,11 @@ class WordEntry(PolishBaseModel):
     etymology_texts: list[str] = []
     translations: list[Translation] = []
     sounds: list[Sound] = []
+    antonyms: list[Linkage] = []
+    hypernyms: list[Linkage] = []
+    hyponyms: list[Linkage] = []
+    holonyms: list[Linkage] = []
+    meronyms: list[Linkage] = []
+    related: list[Linkage] = []
+    proverbs: list[Linkage] = []
+    synonyms: list[Linkage] = []
