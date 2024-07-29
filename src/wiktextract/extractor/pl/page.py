@@ -11,6 +11,7 @@ from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .etymology import extract_etymology_section
 from .example import extract_example_section
+from .linkage import LINKAGE_TYPES, extract_linkage_section
 from .models import Sense, WordEntry
 from .pos import extract_pos_section
 from .sound import extract_sound_section
@@ -40,7 +41,17 @@ def parse_section(
     elif title_text == "etymologia" and wxr.config.capture_etymologies:
         extract_etymology_section(wxr, page_data, base_data, level_node)
     elif title_text == "tłumaczenia" and wxr.config.capture_translations:
-        extract_translation_section(wxr, page_data, base_data, level_node)
+        extract_translation_section(
+            wxr, page_data, level_node, base_data.lang_code
+        )
+    elif title_text in LINKAGE_TYPES and wxr.config.capture_inflections:
+        extract_linkage_section(
+            wxr,
+            page_data,
+            level_node,
+            LINKAGE_TYPES[title_text],
+            base_data.lang_code,
+        )
 
 
 def parse_page(
