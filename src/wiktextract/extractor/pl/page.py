@@ -13,6 +13,7 @@ from .etymology import extract_etymology_section
 from .example import extract_example_section
 from .linkage import LINKAGE_TYPES, extract_linkage_section
 from .models import Sense, WordEntry
+from .note import extract_note_section
 from .pos import extract_pos_section
 from .sound import extract_sound_section
 from .translation import extract_translation_section
@@ -52,6 +53,8 @@ def parse_section(
             LINKAGE_TYPES[title_text],
             base_data.lang_code,
         )
+    elif title_text == "uwagi":
+        extract_note_section(wxr, page_data, base_data, level_node)
 
 
 def parse_page(

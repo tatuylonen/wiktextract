@@ -30,6 +30,7 @@ class Sense(PolishBaseModel):
     examples: list[Example] = []
     alt_of: list[AltForm] = []
     form_of: list[AltForm] = []
+    notes: list[str] = []
 
 
 class Translation(PolishBaseModel):
