@@ -13,6 +13,7 @@ LINKAGE_TYPES = {
     "hiperonimy": "hypernyms",
     "hiponimy": "hyponyms",
     "holonimy": "holonyms",
+    "kolokacje": "related",
     "meronimy": "meronyms",
     "synonimy": "synonyms",
     "wyrazy pokrewne": "related",
