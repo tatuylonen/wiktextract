@@ -50,7 +50,7 @@ class TestJaExample(TestCase):
             ),
         )
 
-    def test_one_line(self):
+    def test_one_line_ruby(self):
         self.wxr.wtp.start_page("なきむし")
         self.wxr.wtp.add_page(
             "テンプレート:ふりがな",
@@ -68,5 +68,20 @@ class TestJaExample(TestCase):
                 text="尤も僕は気の毒にも度大島を泣かせては、泣虫泣虫とからかひしものなり。",
                 ref="（芥川龍之介『学校友だち』）〔1925年〕",
                 ruby=[("尤", "もっと"), ("度", "たびたび")],
+            ),
+        )
+
+    def test_one_line_ref_tag(self):
+        self.wxr.wtp.start_page("なきむし")
+        root = self.wxr.wtp.parse(
+            "#* [[春夏]]と並んで、[[候鳥]]の「[[民間]][[伝承]]の[[うた|歌]]」に似たものは、秋の[[なきむし|鳴き虫]]の[[誹諧]]である。 （[[w:折口信夫|折口信夫]]『俳諧歌の研究』）〔1934年〕<ref>昭和9年5月、『続俳句講座』第3巻「特殊研究篇」初出、『折口信夫全集』13巻213ページ所収</ref>"
+        )
+        sense = Sense()
+        extract_example_list_item(self.wxr, sense, root.children[0].children[0])
+        self.assertEqual(
+            sense.examples[0],
+            Example(
+                text="春夏と並んで、候鳥の「民間伝承の歌」に似たものは、秋の鳴き虫の誹諧である。",
+                ref="（折口信夫『俳諧歌の研究』）〔1934年〕 昭和9年5月、『続俳句講座』第3巻「特殊研究篇」初出、『折口信夫全集』13巻213ページ所収",
             ),
         )
