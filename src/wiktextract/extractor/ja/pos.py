@@ -3,6 +3,7 @@ from wikitextprocessor.parser import NodeKind, TemplateNode, WikiNode
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from ..ruby import extract_ruby
+from .example import extract_example_list_item
 from .models import Sense, WordEntry
 from .section_titles import POS_DATA
 
@@ -57,7 +58,10 @@ def process_gloss_list_item(
 
     for nest_gloss_list in list_item_node.find_child(NodeKind.LIST):
         if nest_gloss_list.sarg.endswith(("*", ":")):
-            pass  # example
+            for example_list_item in nest_gloss_list.find_child(
+                NodeKind.LIST_ITEM
+            ):
+                extract_example_list_item(wxr, sense_data, example_list_item)
 
     if len(sense_data.glosses) > 0:
         word_entry.senses.append(sense_data)
