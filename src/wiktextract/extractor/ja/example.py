@@ -37,6 +37,8 @@ def extract_example_list_item(
             ref_start = example.text.rindex("（")
             example.ref = example.text[ref_start:]
             example.text = example.text[:ref_start].strip()
+            for ref_tag in expanded_nodes.find_html_recursively("ref"):
+                example.ref += " " + clean_node(wxr, None, ref_tag.children)
         sense.examples.append(example)
     else:
         list_item_text = clean_node(

@@ -27,6 +27,12 @@ class Sense(JapaneseBaseModel):
     examples: list[Example] = []
 
 
+class Form(JapaneseBaseModel):
+    form: str = ""
+    tags: list[str] = []
+    raw_tags: list[str] = []
+
+
 class WordEntry(JapaneseBaseModel):
     model_config = ConfigDict(title="Japanese Wiktionary")
 
@@ -41,3 +47,4 @@ class WordEntry(JapaneseBaseModel):
     categories: list[str] = []
     tags: list[str] = []
     raw_tags: list[str] = []
+    forms: list[Form] = []

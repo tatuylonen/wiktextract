@@ -4,6 +4,7 @@ from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from ..ruby import extract_ruby
 from .example import extract_example_list_item
+from .header import extract_header_nodes
 from .models import Sense, WordEntry
 from .section_titles import POS_DATA
 
@@ -21,9 +22,15 @@ def parse_pos_section(
     page_data[-1].pos = pos_data["pos"]
     page_data[-1].tags.extend(pos_data.get("tags", []))
 
-    for list_node in level_node.find_child(NodeKind.LIST):
+    gloss_list_start = 0
+    for list_index, list_node in level_node.find_child(NodeKind.LIST, True):
+        if gloss_list_start == 0:
+            gloss_list_start = list_index
         for list_item in list_node.find_child(NodeKind.LIST_ITEM):
             process_gloss_list_item(wxr, page_data[-1], list_item)
+    extract_header_nodes(
+        wxr, page_data[-1], level_node.children[:gloss_list_start]
+    )
 
 
 def process_gloss_list_item(
