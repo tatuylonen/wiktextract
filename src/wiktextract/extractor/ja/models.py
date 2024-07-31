@@ -10,6 +10,13 @@ class JapaneseBaseModel(BaseModel):
     )
 
 
+class Example(JapaneseBaseModel):
+    text: str = ""
+    translation: str = ""
+    ref: str = ""
+    ruby: list[tuple[str, ...]] = []
+
+
 class Sense(JapaneseBaseModel):
     glosses: list[str] = []
     tags: list[str] = []
@@ -17,6 +24,7 @@ class Sense(JapaneseBaseModel):
     topics: list[str] = []
     categories: list[str] = []
     ruby: list[tuple[str, ...]] = []
+    examples: list[Example] = []
 
 
 class WordEntry(JapaneseBaseModel):
