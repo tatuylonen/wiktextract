@@ -384,6 +384,7 @@ def clean_node(
     category_ns_names: set[str] = {category_ns_data.get("name")} | set(
         category_ns_data.get("aliases")  #type:ignore[assignment,arg-type]
     )
+    category_ns_names |= {"Category", "category"}
     category_names_pattern = rf"(?:{'|'.join(category_ns_names)})"
     if sense_data is not None:
         # Check for Lua execution error
