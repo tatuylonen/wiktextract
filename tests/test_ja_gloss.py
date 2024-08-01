@@ -63,10 +63,12 @@ class TestJaGloss(TestCase):
             self.wxr,
             "東京",
             """=={{ja}}==
+[[category:{{ja}}]]
 ==={{name}}===
 #（とうきょう）[[日本]]の事実上の[[首都]]。以下、語源・関連語・訳語は本義のもの。
 ##[[東京二十三区]]。[[東京都]]のうち、[[多摩]]と島嶼部を除いた地域。かつての[[東京市]]。""",
         )
+        self.assertEqual(page_data[0]["categories"], ["日本語"])
         self.assertEqual(
             page_data[0]["senses"],
             [

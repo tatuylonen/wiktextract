@@ -56,6 +56,8 @@ def parse_page(
             lang=lang_name,
             pos="unknown",
         )
+        for link_node in level2_node.find_child(NodeKind.LINK):
+            clean_node(wxr, base_data, link_node)
         for level3_node in level2_node.find_child(NodeKind.LEVEL3):
             parse_section(wxr, page_data, base_data, level3_node)
 
