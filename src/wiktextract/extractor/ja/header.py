@@ -1,4 +1,6 @@
-from wikitextprocessor.parser import HTMLNode, NodeKind, WikiNode
+import re
+
+from wikitextprocessor.parser import HTMLNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -11,8 +13,19 @@ def extract_header_nodes(
     wxr: WiktextractContext, word_entry: WordEntry, nodes: list[WikiNode]
 ) -> None:
     extracted_forms = set()
+    use_nodes = []
+    for node in nodes:
+        if isinstance(node, TemplateNode) and node.template_name in (
+            "jachar",
+            "kochar",
+            "vichar",
+            "zhchar",
+        ):
+            pass
+        else:
+            use_nodes.append(node)
     expanded_nodes = wxr.wtp.parse(
-        wxr.wtp.node_to_wikitext(nodes), expand_all=True
+        wxr.wtp.node_to_wikitext(use_nodes), expand_all=True
     )
     for node in expanded_nodes.find_child_recursively(
         NodeKind.HTML | NodeKind.BOLD
@@ -23,7 +36,28 @@ def extract_header_nodes(
             or "form-of" in node.attrs.get("class", "")
         ):
             continue
-        form_text = clean_node(wxr, None, node).strip("【】")
+        form_text = clean_node(wxr, None, node).strip("（）【】 ")
+        add_form_data(node, form_text, extracted_forms, word_entry)
+    texts = clean_node(wxr, word_entry, expanded_nodes)
+    for form_text in re.findall(r"[（【][^（）【】]+[）】]", texts):
+        add_form_data(
+            expanded_nodes,
+            form_text.strip("（）【】 "),
+            extracted_forms,
+            word_entry,
+        )
+
+
+def add_form_data(
+    node: WikiNode,
+    forms_text: str,
+    extracted_forms: set[str],
+    word_entry: WordEntry,
+) -> None:
+    for form_text in re.split(r"・|、|,", forms_text):
+        form_text = form_text.strip()
+        if word_entry.lang_code in ["ja", "ko", "zh"]:
+            form_text = form_text.replace(" ", "")
         if (
             form_text == word_entry.word
             or len(form_text) == 0
@@ -42,4 +76,3 @@ def extract_header_nodes(
                 if class_name in class_names:
                     form.tags.append(class_name)
         word_entry.forms.append(form)
-    clean_node(wxr, word_entry, expanded_nodes)

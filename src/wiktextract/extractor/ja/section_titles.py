@@ -26,4 +26,6 @@ POS_DATA = {
     # "小詞"
     # "修飾詞"
     # "疑問詞"
+    "和語の漢字表記": {"pos": "unknown", "tags": ["kanji"]},
+    "成句": {"pos": "phrase", "tags": ["idiomatic"]},
 }
