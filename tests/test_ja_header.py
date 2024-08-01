@@ -98,3 +98,10 @@ class TestJaHeader(TestCase):
         root = self.wxr.wtp.parse("'''うつる'''【[[写]]る、[[映]]る】")
         extract_header_nodes(self.wxr, data, root.children)
         self.assertEqual(data.forms, [Form(form="写る"), Form(form="映る")])
+
+    def test_zhchar(self):
+        self.wxr.wtp.start_page("民主")
+        data = WordEntry(lang="中国語", lang_code="zh", word="民主")
+        root = self.wxr.wtp.parse("{{zhchar|民|主}}")
+        extract_header_nodes(self.wxr, data, root.children)
+        self.assertEqual(len(data.forms), 0)

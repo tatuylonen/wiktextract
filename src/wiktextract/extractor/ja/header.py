@@ -1,6 +1,6 @@
 import re
 
-from wikitextprocessor.parser import HTMLNode, NodeKind, WikiNode
+from wikitextprocessor.parser import HTMLNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -13,8 +13,19 @@ def extract_header_nodes(
     wxr: WiktextractContext, word_entry: WordEntry, nodes: list[WikiNode]
 ) -> None:
     extracted_forms = set()
+    use_nodes = []
+    for node in nodes:
+        if isinstance(node, TemplateNode) and node.template_name in (
+            "jachar",
+            "kochar",
+            "vichar",
+            "zhchar",
+        ):
+            pass
+        else:
+            use_nodes.append(node)
     expanded_nodes = wxr.wtp.parse(
-        wxr.wtp.node_to_wikitext(nodes), expand_all=True
+        wxr.wtp.node_to_wikitext(use_nodes), expand_all=True
     )
     for node in expanded_nodes.find_child_recursively(
         NodeKind.HTML | NodeKind.BOLD
