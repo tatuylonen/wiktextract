@@ -1,4 +1,4 @@
-from wikitextprocessor.parser import NodeKind, TemplateNode, WikiNode
+from wikitextprocessor.parser import LevelNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -13,7 +13,7 @@ def parse_pos_section(
     wxr: WiktextractContext,
     page_data: list[WordEntry],
     base_data: WordEntry,
-    level_node: WikiNode,
+    level_node: LevelNode,
     pos_title: str,
 ) -> None:
     page_data.append(base_data.model_copy(deep=True))

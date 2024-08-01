@@ -2,13 +2,11 @@ import re
 from typing import Any
 
 from mediawiki_langcodes import name_to_code
-from wikitextprocessor.parser import (
-    NodeKind,
-    WikiNode,
-)
+from wikitextprocessor.parser import LevelNode, NodeKind
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from .etymology import extract_etymology_section
 from .models import Sense, WordEntry
 from .pos import parse_pos_section
 from .section_titles import POS_DATA
@@ -22,12 +20,15 @@ def parse_section(
     wxr: WiktextractContext,
     page_data: list[WordEntry],
     base_data: WordEntry,
-    level_node: WikiNode,
+    level_node: LevelNode,
 ) -> None:
     title_texts = clean_node(wxr, None, level_node.largs)
     for title_text in re.split(r"：|・", title_texts):
         if title_text in POS_DATA:
             parse_pos_section(wxr, page_data, base_data, level_node, title_text)
+            break
+        elif title_text == "語源":
+            extract_etymology_section(wxr, page_data, base_data, level_node)
             break
 
 
