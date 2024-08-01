@@ -84,3 +84,17 @@ class TestJaHeader(TestCase):
                 Form(form="りょうりする"),
             ],
         )
+
+    def test_plain_text_form(self):
+        self.wxr.wtp.start_page("民主")
+        data = WordEntry(lang="日本語", lang_code="ja", word="民主")
+        root = self.wxr.wtp.parse("'''[[民]] [[主]]'''（みんしゅ）")
+        extract_header_nodes(self.wxr, data, root.children)
+        self.assertEqual(data.forms, [Form(form="みんしゅ")])
+
+    def test_plain_text_forms(self):
+        self.wxr.wtp.start_page("うつる")
+        data = WordEntry(lang="日本語", lang_code="ja", word="うつる")
+        root = self.wxr.wtp.parse("'''うつる'''【[[写]]る、[[映]]る】")
+        extract_header_nodes(self.wxr, data, root.children)
+        self.assertEqual(data.forms, [Form(form="写る"), Form(form="映る")])

@@ -25,9 +25,16 @@ def extract_header_nodes(
             or "form-of" in node.attrs.get("class", "")
         ):
             continue
-        form_text = clean_node(wxr, None, node).strip("【】")
+        form_text = clean_node(wxr, None, node).strip("（）【】 ")
         add_form_data(node, form_text, extracted_forms, word_entry)
-    clean_node(wxr, word_entry, expanded_nodes)
+    texts = clean_node(wxr, word_entry, expanded_nodes)
+    for form_text in re.findall(r"[（【][^（）【】]+[）】]", texts):
+        add_form_data(
+            expanded_nodes,
+            form_text.strip("（）【】 "),
+            extracted_forms,
+            word_entry,
+        )
 
 
 def add_form_data(
@@ -36,7 +43,10 @@ def add_form_data(
     extracted_forms: set[str],
     word_entry: WordEntry,
 ) -> None:
-    for form_text in re.split(r"・|、", forms_text):
+    for form_text in re.split(r"・|、|,", forms_text):
+        form_text = form_text.strip()
+        if word_entry.lang_code in ["ja", "ko", "zh"]:
+            form_text = form_text.replace(" ", "")
         if (
             form_text == word_entry.word
             or len(form_text) == 0
