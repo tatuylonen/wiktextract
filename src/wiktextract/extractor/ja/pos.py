@@ -1,4 +1,4 @@
-from wikitextprocessor.parser import NodeKind, TemplateNode, WikiNode
+from wikitextprocessor.parser import LevelNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -13,7 +13,7 @@ def parse_pos_section(
     wxr: WiktextractContext,
     page_data: list[WordEntry],
     base_data: WordEntry,
-    level_node: WikiNode,
+    level_node: LevelNode,
     pos_title: str,
 ) -> None:
     page_data.append(base_data.model_copy(deep=True))
@@ -37,11 +37,14 @@ def process_gloss_list_item(
     wxr: WiktextractContext,
     word_entry: WordEntry,
     list_item_node: WikiNode,
+    parent_gloss: str = "",
 ) -> None:
     gloss_nodes = list(
         list_item_node.invert_find_child(NodeKind.LIST, include_empty_str=True)
     )
     sense_data = Sense()
+    if len(parent_gloss) > 0:
+        sense_data.glosses.append(parent_gloss)
     gloss_only_nodes = []
     for gloss_node in gloss_nodes:
         if isinstance(
@@ -62,6 +65,7 @@ def process_gloss_list_item(
     sense_data.ruby = ruby
     if len(gloss_text) > 0:
         sense_data.glosses.append(gloss_text)
+        word_entry.senses.append(sense_data)
 
     for nest_gloss_list in list_item_node.find_child(NodeKind.LIST):
         if nest_gloss_list.sarg.endswith(("*", ":")):
@@ -69,6 +73,10 @@ def process_gloss_list_item(
                 NodeKind.LIST_ITEM
             ):
                 extract_example_list_item(wxr, sense_data, example_list_item)
-
-    if len(sense_data.glosses) > 0:
-        word_entry.senses.append(sense_data)
+        elif nest_gloss_list.sarg.endswith("#"):
+            for nest_list_item in nest_gloss_list.find_child(
+                NodeKind.LIST_ITEM
+            ):
+                process_gloss_list_item(
+                    wxr, word_entry, nest_list_item, gloss_text
+                )
