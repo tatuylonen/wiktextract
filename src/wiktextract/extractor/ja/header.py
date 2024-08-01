@@ -1,3 +1,5 @@
+import re
+
 from wikitextprocessor.parser import HTMLNode, NodeKind, WikiNode
 
 from ...page import clean_node
@@ -24,6 +26,17 @@ def extract_header_nodes(
         ):
             continue
         form_text = clean_node(wxr, None, node).strip("【】")
+        add_form_data(node, form_text, extracted_forms, word_entry)
+    clean_node(wxr, word_entry, expanded_nodes)
+
+
+def add_form_data(
+    node: WikiNode,
+    forms_text: str,
+    extracted_forms: set[str],
+    word_entry: WordEntry,
+) -> None:
+    for form_text in re.split(r"・|、", forms_text):
         if (
             form_text == word_entry.word
             or len(form_text) == 0
@@ -42,4 +55,3 @@ def extract_header_nodes(
                 if class_name in class_names:
                     form.tags.append(class_name)
         word_entry.forms.append(form)
-    clean_node(wxr, word_entry, expanded_nodes)

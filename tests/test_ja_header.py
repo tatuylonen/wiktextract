@@ -48,3 +48,39 @@ class TestJaHeader(TestCase):
         extract_header_nodes(self.wxr, data, root.children)
         self.assertEqual(data.categories, ["日本語", "日本語 名詞"])
         self.assertEqual(data.forms, [Form(form="泣き虫", tags=["kanji"])])
+
+    def test_ja_verb(self):
+        self.wxr.wtp.start_page("うつる")
+        self.wxr.wtp.add_page(
+            "テンプレート:ja-verb",
+            10,
+            """<strong class="Jpan headword" lang="ja">うつる</strong><span class="headword-kanji">【<b class="Jpan" lang="ja">[[移る#日本語|移る]]</b>・<b class="Jpan" lang="ja">[[遷る#日本語|遷る]]</b>】</span>""",
+        )
+        data = WordEntry(lang="日本語", lang_code="ja", word="うつる")
+        root = self.wxr.wtp.parse("{{ja-verb|移る|遷る}}")
+        extract_header_nodes(self.wxr, data, root.children)
+        self.assertEqual(
+            data.forms,
+            [
+                Form(form="移る", tags=["kanji"]),
+                Form(form="遷る", tags=["kanji"]),
+            ],
+        )
+
+    def test_ja_verb_suru(self):
+        self.wxr.wtp.start_page("料理")
+        self.wxr.wtp.add_page(
+            "テンプレート:ja-verb-suru",
+            10,
+            """<strong class="Jpan headword" lang="ja">[[料#日本語|料]][[理#日本語|理]][[する#日本語|する]]</strong> (<span class="headword-tr manual-tr tr" dir="ltr">りょうりする</span>)""",
+        )
+        data = WordEntry(lang="日本語", lang_code="ja", word="料理")
+        root = self.wxr.wtp.parse("{{ja-verb-suru|りょうり}}")
+        extract_header_nodes(self.wxr, data, root.children)
+        self.assertEqual(
+            data.forms,
+            [
+                Form(form="料理する", tags=["canonical"]),
+                Form(form="りょうりする"),
+            ],
+        )
