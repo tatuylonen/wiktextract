@@ -58,3 +58,24 @@ class TestJaSound(TestCase):
         )
         self.assertEqual(data.sounds[4].audio, "en-us-puppy.ogg")
         self.assertEqual(data.sounds[4].raw_tags, ["音声 (米)"])
+
+    def test_ja_pron(self):
+        self.wxr.wtp.start_page("日本語")
+        self.wxr.wtp.add_page(
+            "テンプレート:ja-pron",
+            10,
+            """*<span class="ib-brac qualifier-brac">(</span><span class="ib-content qualifier-content">[[w:東京式アクセント|東京式]]</span><span class="ib-brac qualifier-brac">)</span> <span lang="ja" class="Jpan">に<span style="border-top:1px solid black">ほんご</span></span> <span class="Latn"><samp>[nìhóńgó]</samp></span> ([[平板型]] – [0])
+*[[w:国際音声記号|IPA]]<sup>([[付録:日本語の発音表記|?]])</sup>:&#32;<span class="IPA">[ɲ̟ihõ̞ŋɡo̞]</span>[[カテゴリ:日本語 国際音声記号あり|にほんこ にほんご]]
+* <table class="audiotable"><tr><td class="unicode audiolink">音声</td><td class="audiofile">[[Image:Ja-nihongo.ogg|noicon|175px]]</td><td class="audiometa" style="font-size: 80%;">([[:Image:Ja-nihongo.ogg|file]])</td></tr></table>[[Category:日本語 音声リンクがある語句|にほんこ にほんご]]""",
+        )
+        data = WordEntry(lang="日本語", lang_code="ja", word="日本語")
+        root = self.wxr.wtp.parse("{{ja-pron|にほんご|acc=0|a=Ja-nihongo.ogg}}")
+        extract_sound_section(self.wxr, data, root)
+        self.assertEqual(
+            data.sounds[:2],
+            [
+                Sound(roman="[nìhóńgó]", form="にほんご", raw_tags=["東京式"]),
+                Sound(ipa="[ɲ̟ihõ̞ŋɡo̞]"),
+            ],
+        )
+        self.assertEqual(data.sounds[2].audio, "Ja-nihongo.ogg")
