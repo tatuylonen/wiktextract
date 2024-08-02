@@ -33,6 +33,23 @@ class Form(JapaneseBaseModel):
     raw_tags: list[str] = []
 
 
+class Sound(JapaneseBaseModel):
+    zh_pron: str = Field(default="", description="Chinese word pronunciation")
+    ipa: str = Field(default="", description="International Phonetic Alphabet")
+    audio: str = Field(default="", description="Audio file name")
+    wav_url: str = ""
+    oga_url: str = ""
+    ogg_url: str = ""
+    mp3_url: str = ""
+    opus_url: str = ""
+    flac_url: str = ""
+    tags: list[str] = []
+    raw_tags: list[str] = []
+    homophones: list[str] = []
+    form: str = ""
+    roman: str = ""
+
+
 class WordEntry(JapaneseBaseModel):
     model_config = ConfigDict(title="Japanese Wiktionary")
 
@@ -49,3 +66,4 @@ class WordEntry(JapaneseBaseModel):
     raw_tags: list[str] = []
     forms: list[Form] = []
     etymology_texts: list[str] = []
+    sounds: list[Sound] = []

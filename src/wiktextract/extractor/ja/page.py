@@ -10,6 +10,7 @@ from .etymology import extract_etymology_section
 from .models import Sense, WordEntry
 from .pos import parse_pos_section
 from .section_titles import POS_DATA
+from .sound import extract_sound_section
 
 PANEL_TEMPLATES = set()
 PANEL_PREFIXES = set()
@@ -27,8 +28,11 @@ def parse_section(
         if title_text in POS_DATA:
             parse_pos_section(wxr, page_data, base_data, level_node, title_text)
             break
-        elif title_text == "語源":
+        elif title_text == "語源" and wxr.config.capture_etymologies:
             extract_etymology_section(wxr, page_data, base_data, level_node)
+            break
+        elif title_text == "発音" and wxr.config.capture_pronunciation:
+            extract_sound_section(wxr, base_data, level_node)
             break
 
 
