@@ -1303,12 +1303,13 @@ class InflTests(unittest.TestCase):
                 {
                     "form": "vackre",
                     "source": "Declension",
-                    "tags": ["indefinite", "masculine", "plural", "positive"],
+                    "tags": ["archaic", "indefinite", "masculine", "plural", "positive"],
                 },
                 {
                     "form": "vackrare",
                     "source": "Declension",
                     "tags": [
+                        "archaic",
                         "comparative",
                         "indefinite",
                         "masculine",
@@ -1319,6 +1320,7 @@ class InflTests(unittest.TestCase):
                     "form": "vackrast",
                     "source": "Declension",
                     "tags": [
+                        "archaic",
                         "indefinite",
                         "masculine",
                         "plural",

@@ -32,12 +32,16 @@ class InflTests(unittest.TestCase):
         self.wxr.wtp.start_subsection(pos)
         tree = self.wxr.wtp.parse(text)
         data = {}
-        parse_inflection_section(self.wxr, data, word, lang, pos,
-                                 section, tree)
+        parse_inflection_section(self.wxr, data, word, lang, pos, section, tree)
         return data
 
     def test_English_verb1(self):
-        ret = self.xinfl("wander", "English", "verb", "Conjugation", """
+        ret = self.xinfl(
+            "wander",
+            "English",
+            "verb",
+            "Conjugation",
+            """
 <div class="NavFrame" style="width%3A+42em%3B">
 <div class="NavHead">Conjugation of ''wander''</div>
 <div class="NavContent">
@@ -155,174 +159,116 @@ class InflTests(unittest.TestCase):
 <div style="display%3Ainline-block%3Btext-align%3Aleft%3Bpadding-left%3A1em%3Bpadding-right%3A1em">
 <strong><sup font-size:large>*</sup></strong>[[Wiktionary:Glossary#archaic|Archaic]] or [[Wiktionary:Glossary#obsolete|obsolete]].
 </div></div></div></div>
-""")  # noqa: E501
+""",
+        )  # noqa: E501
         expected = {
             "forms": [
-              {
-                "form": "no-table-tags",
-                "source": "Conjugation",
-                "tags": [
-                  "table-tags"
-                ]
-              },
-              {
-                "form": "wander",
-                "source": "Conjugation",
-                "tags": [
-                  "infinitive"
-                ]
-              },
-              {
-                "form": "wander",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "present",
-                  "singular"
-                ]
-              },
-              {
-                "form": "wandered",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "past",
-                  "singular"
-                ]
-              },
-              {
-                "form": "wander",
-                "source": "Conjugation",
-                "tags": [
-                  "present",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "wanderest",
-                "source": "Conjugation",
-                "tags": [
-                  "present",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "wandered",
-                "source": "Conjugation",
-                "tags": [
-                  "past",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "wanderedst",
-                "source": "Conjugation",
-                "tags": [
-                  "past",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "wanders",
-                "source": "Conjugation",
-                "tags": [
-                  "present",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "wandereth",
-                "source": "Conjugation",
-                "tags": [
-                  "present",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "wandered",
-                "source": "Conjugation",
-                "tags": [
-                  "past",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "wander",
-                "source": "Conjugation",
-                "tags": [
-                  "plural",
-                  "present"
-                ]
-              },
-              {
-                "form": "wandered",
-                "source": "Conjugation",
-                "tags": [
-                  "past",
-                  "plural"
-                ]
-              },
-              {
-                "form": "wander",
-                "source": "Conjugation",
-                "tags": [
-                  "present",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "wandered",
-                "source": "Conjugation",
-                "tags": [
-                  "past",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "wander",
-                "source": "Conjugation",
-                "tags": [
-                  "imperative",
-                  "present"
-                ]
-              },
-              {
-                "form": "-",
-                "source": "Conjugation",
-                "tags": [
-                  "imperative",
-                  "past"
-                ]
-              },
-              {
-                "form": "wandering",
-                "source": "Conjugation",
-                "tags": [
-                  "participle",
-                  "present"
-                ]
-              },
-              {
-                "form": "wandered",
-                "source": "Conjugation",
-                "tags": [
-                  "participle",
-                  "past"
-                ]
-              },
+                {
+                    "form": "no-table-tags",
+                    "source": "Conjugation",
+                    "tags": ["table-tags"],
+                },
+                {
+                    "form": "wander",
+                    "source": "Conjugation",
+                    "tags": ["infinitive"],
+                },
+                {
+                    "form": "wander",
+                    "source": "Conjugation",
+                    "tags": ["first-person", "present", "singular"],
+                },
+                {
+                    "form": "wandered",
+                    "source": "Conjugation",
+                    "tags": ["first-person", "past", "singular"],
+                },
+                {
+                    "form": "wander",
+                    "source": "Conjugation",
+                    "tags": ["present", "second-person", "singular"],
+                },
+                {
+                    "form": "wanderest",
+                    "source": "Conjugation",
+                    "tags": ["archaic", "present", "second-person", "singular"],
+                },
+                {
+                    "form": "wandered",
+                    "source": "Conjugation",
+                    "tags": [ "past", "second-person", "singular"],
+                },
+                {
+                    "form": "wanderedst",
+                    "source": "Conjugation",
+                    "tags": ["archaic", "past", "second-person", "singular"],
+                },
+                {
+                    "form": "wanders",
+                    "source": "Conjugation",
+                    "tags": ["present", "singular", "third-person"],
+                },
+                {
+                    "form": "wandereth",
+                    "source": "Conjugation",
+                    "tags": ["archaic", "present", "singular", "third-person"],
+                },
+                {
+                    "form": "wandered",
+                    "source": "Conjugation",
+                    "tags": ["past", "singular", "third-person"],
+                },
+                {
+                    "form": "wander",
+                    "source": "Conjugation",
+                    "tags": ["plural", "present"],
+                },
+                {
+                    "form": "wandered",
+                    "source": "Conjugation",
+                    "tags": ["past", "plural"],
+                },
+                {
+                    "form": "wander",
+                    "source": "Conjugation",
+                    "tags": ["present", "subjunctive"],
+                },
+                {
+                    "form": "wandered",
+                    "source": "Conjugation",
+                    "tags": ["past", "subjunctive"],
+                },
+                {
+                    "form": "wander",
+                    "source": "Conjugation",
+                    "tags": ["imperative", "present"],
+                },
+                {
+                    "form": "-",
+                    "source": "Conjugation",
+                    "tags": ["imperative", "past"],
+                },
+                {
+                    "form": "wandering",
+                    "source": "Conjugation",
+                    "tags": ["participle", "present"],
+                },
+                {
+                    "form": "wandered",
+                    "source": "Conjugation",
+                    "tags": ["participle", "past"],
+                },
             ],
         }
         self.assertEqual(expected, ret)
 
     def test_English_verb2(self):
-        ret = self.xinfl("affect", "English", "verb", "Conjugation", """
+        ret = self.xinfl(
+            "affect",
+            "English",
+            "verb",
+            "Conjugation",
+            """
 <div class="NavFrame" style>
 <div class="NavHead" style>conjugation of ''affect''</div>
 <div class="NavContent">
@@ -772,906 +718,862 @@ class InflTests(unittest.TestCase):
 
 |}
 </div></div>
-""")  # noqa: E501
+""",
+        )  # noqa: E501
         expected = {
             "forms": [
-              {
-                "form": "no-table-tags",
-                "source": "Conjugation",
-                "tags": [
-                  "table-tags"
-                ]
-              },
-              {
-                "form": "affect",
-                "source": "Conjugation",
-                "tags": [
-                  "infinitive"
-                ]
-              },
-              {
-                "form": "affecting",
-                "source": "Conjugation",
-                "tags": [
-                  "participle",
-                  "present"
-                ]
-              },
-              {
-                "form": "affected",
-                "source": "Conjugation",
-                "tags": [
-                  "participle",
-                  "past"
-                ]
-              },
-              {
-                "form": "affect",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "present",
-                  "singular"
-                ]
-              },
-              {
-                "form": "affect",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "plural",
-                  "present"
-                ]
-              },
-              {
-                "form": "am affecting",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "present",
-                  "progressive",
-                  "singular",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "are affecting",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "plural",
-                  "present",
-                  "progressive",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "have affected",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "perfect",
-                  "present",
-                  "singular",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "have affected",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "perfect",
-                  "plural",
-                  "present",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "have been affecting",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "perfect",
-                  "present",
-                  "progressive",
-                  "singular",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "have been affecting",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "perfect",
-                  "plural",
-                  "present",
-                  "progressive",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "affect",
-                "source": "Conjugation",
-                "tags": [
-                  "present",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "are affecting",
-                "source": "Conjugation",
-                "tags": [
-                  "present",
-                  "progressive",
-                  "second-person",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "have affected",
-                "source": "Conjugation",
-                "tags": [
-                  "perfect",
-                  "present",
-                  "second-person",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "have been affecting",
-                "source": "Conjugation",
-                "tags": [
-                  "perfect",
-                  "present",
-                  "progressive",
-                  "second-person",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "affects",
-                "source": "Conjugation",
-                "tags": [
-                  "present",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "affect",
-                "source": "Conjugation",
-                "tags": [
-                  "plural",
-                  "present",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "is affecting",
-                "source": "Conjugation",
-                "tags": [
-                  "present",
-                  "progressive",
-                  "singular",
-                  "third-person",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "are affecting",
-                "source": "Conjugation",
-                "tags": [
-                  "plural",
-                  "present",
-                  "progressive",
-                  "third-person",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "has affected",
-                "source": "Conjugation",
-                "tags": [
-                  "perfect",
-                  "present",
-                  "singular",
-                  "third-person",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "have affected",
-                "source": "Conjugation",
-                "tags": [
-                  "perfect",
-                  "plural",
-                  "present",
-                  "third-person",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "has been affecting",
-                "source": "Conjugation",
-                "tags": [
-                  "perfect",
-                  "present",
-                  "progressive",
-                  "singular",
-                  "third-person",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "have been affecting",
-                "source": "Conjugation",
-                "tags": [
-                  "perfect",
-                  "plural",
-                  "present",
-                  "progressive",
-                  "third-person",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "affected",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "past",
-                  "singular"
-                ]
-              },
-              {
-                "form": "affected",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "past",
-                  "plural"
-                ]
-              },
-              {
-                "form": "was affecting",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "past",
-                  "progressive",
-                  "singular",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "were affecting",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "past",
-                  "plural",
-                  "progressive",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "had affected",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "past",
-                  "perfect",
-                  "singular",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "had affected",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "past",
-                  "perfect",
-                  "plural",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "had been affecting",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "past",
-                  "perfect",
-                  "progressive",
-                  "singular",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "had been affecting",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "past",
-                  "perfect",
-                  "plural",
-                  "progressive",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "affected",
-                "source": "Conjugation",
-                "tags": [
-                  "past",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "were affecting",
-                "source": "Conjugation",
-                "tags": [
-                  "past",
-                  "progressive",
-                  "second-person",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "had affected",
-                "source": "Conjugation",
-                "tags": [
-                  "past",
-                  "perfect",
-                  "second-person",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "had been affecting",
-                "source": "Conjugation",
-                "tags": [
-                  "past",
-                  "perfect",
-                  "progressive",
-                  "second-person",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "affected",
-                "source": "Conjugation",
-                "tags": [
-                  "past",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "affected",
-                "source": "Conjugation",
-                "tags": [
-                  "past",
-                  "plural",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "was affecting",
-                "source": "Conjugation",
-                "tags": [
-                  "past",
-                  "progressive",
-                  "singular",
-                  "third-person",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "were affecting",
-                "source": "Conjugation",
-                "tags": [
-                  "past",
-                  "plural",
-                  "progressive",
-                  "third-person",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "had affected",
-                "source": "Conjugation",
-                "tags": [
-                  "past",
-                  "perfect",
-                  "singular",
-                  "third-person",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "had affected",
-                "source": "Conjugation",
-                "tags": [
-                  "past",
-                  "perfect",
-                  "plural",
-                  "third-person",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "had been affecting",
-                "source": "Conjugation",
-                "tags": [
-                  "past",
-                  "perfect",
-                  "progressive",
-                  "singular",
-                  "third-person",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "had been affecting",
-                "source": "Conjugation",
-                "tags": [
-                  "past",
-                  "perfect",
-                  "plural",
-                  "progressive",
-                  "third-person",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "will affect",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "future",
-                  "singular",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "will affect",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "future",
-                  "plural",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "will be affecting",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "future",
-                  "progressive",
-                  "singular",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "will be affecting",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "future",
-                  "plural",
-                  "progressive",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "will have affected",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "future",
-                  "perfect",
-                  "singular",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "will have affected",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "future",
-                  "perfect",
-                  "plural",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "will have been affecting",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "future",
-                  "perfect",
-                  "progressive",
-                  "singular",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "will have been affecting",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "future",
-                  "perfect",
-                  "plural",
-                  "progressive",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "will affect",
-                "source": "Conjugation",
-                "tags": [
-                  "future",
-                  "second-person",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "will be affecting",
-                "source": "Conjugation",
-                "tags": [
-                  "future",
-                  "progressive",
-                  "second-person",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "will have affected",
-                "source": "Conjugation",
-                "tags": [
-                  "future",
-                  "perfect",
-                  "second-person",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "will have been affecting",
-                "source": "Conjugation",
-                "tags": [
-                  "future",
-                  "perfect",
-                  "progressive",
-                  "second-person",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "will affect",
-                "source": "Conjugation",
-                "tags": [
-                  "future",
-                  "singular",
-                  "third-person",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "will affect",
-                "source": "Conjugation",
-                "tags": [
-                  "future",
-                  "plural",
-                  "third-person",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "will be affecting",
-                "source": "Conjugation",
-                "tags": [
-                  "future",
-                  "progressive",
-                  "singular",
-                  "third-person",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "will be affecting",
-                "source": "Conjugation",
-                "tags": [
-                  "future",
-                  "plural",
-                  "progressive",
-                  "third-person",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "will have affected",
-                "source": "Conjugation",
-                "tags": [
-                  "future",
-                  "perfect",
-                  "singular",
-                  "third-person",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "will have affected",
-                "source": "Conjugation",
-                "tags": [
-                  "future",
-                  "perfect",
-                  "plural",
-                  "third-person",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "will have been affecting",
-                "source": "Conjugation",
-                "tags": [
-                  "future",
-                  "perfect",
-                  "progressive",
-                  "singular",
-                  "third-person",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "will have been affecting",
-                "source": "Conjugation",
-                "tags": [
-                  "future",
-                  "perfect",
-                  "plural",
-                  "progressive",
-                  "third-person",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "would affect",
-                "source": "Conjugation",
-                "tags": [
-                  "conditional",
-                  "first-person",
-                  "singular",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "would affect",
-                "source": "Conjugation",
-                "tags": [
-                  "conditional",
-                  "first-person",
-                  "plural",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "would be affecting",
-                "source": "Conjugation",
-                "tags": [
-                  "conditional",
-                  "first-person",
-                  "progressive",
-                  "singular",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "would be affecting",
-                "source": "Conjugation",
-                "tags": [
-                  "conditional",
-                  "first-person",
-                  "plural",
-                  "progressive",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "would have affected",
-                "source": "Conjugation",
-                "tags": [
-                  "conditional",
-                  "first-person",
-                  "perfect",
-                  "singular",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "would have affected",
-                "source": "Conjugation",
-                "tags": [
-                  "conditional",
-                  "first-person",
-                  "perfect",
-                  "plural",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "would have been affecting",
-                "source": "Conjugation",
-                "tags": [
-                  "conditional",
-                  "first-person",
-                  "perfect",
-                  "progressive",
-                  "singular",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "would have been affecting",
-                "source": "Conjugation",
-                "tags": [
-                  "conditional",
-                  "first-person",
-                  "perfect",
-                  "plural",
-                  "progressive",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "would affect",
-                "source": "Conjugation",
-                "tags": [
-                  "conditional",
-                  "second-person",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "would be affecting",
-                "source": "Conjugation",
-                "tags": [
-                  "conditional",
-                  "progressive",
-                  "second-person",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "would have affected",
-                "source": "Conjugation",
-                "tags": [
-                  "conditional",
-                  "perfect",
-                  "second-person",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "would have been affecting",
-                "source": "Conjugation",
-                "tags": [
-                  "conditional",
-                  "perfect",
-                  "progressive",
-                  "second-person",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "would affect",
-                "source": "Conjugation",
-                "tags": [
-                  "conditional",
-                  "singular",
-                  "third-person",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "would affect",
-                "source": "Conjugation",
-                "tags": [
-                  "conditional",
-                  "plural",
-                  "third-person",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "would be affecting",
-                "source": "Conjugation",
-                "tags": [
-                  "conditional",
-                  "progressive",
-                  "singular",
-                  "third-person",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "would be affecting",
-                "source": "Conjugation",
-                "tags": [
-                  "conditional",
-                  "plural",
-                  "progressive",
-                  "third-person",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "would have affected",
-                "source": "Conjugation",
-                "tags": [
-                  "conditional",
-                  "perfect",
-                  "singular",
-                  "third-person",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "would have affected",
-                "source": "Conjugation",
-                "tags": [
-                  "conditional",
-                  "perfect",
-                  "plural",
-                  "third-person",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "would have been affecting",
-                "source": "Conjugation",
-                "tags": [
-                  "conditional",
-                  "perfect",
-                  "progressive",
-                  "singular",
-                  "third-person",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "would have been affecting",
-                "source": "Conjugation",
-                "tags": [
-                  "conditional",
-                  "perfect",
-                  "plural",
-                  "progressive",
-                  "third-person",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "affect",
-                "source": "Conjugation",
-                "tags": [
-                  "imperative"
-                ]
-              }
+                {
+                    "form": "no-table-tags",
+                    "source": "Conjugation",
+                    "tags": ["table-tags"],
+                },
+                {
+                    "form": "affect",
+                    "source": "Conjugation",
+                    "tags": ["infinitive"],
+                },
+                {
+                    "form": "affecting",
+                    "source": "Conjugation",
+                    "tags": ["participle", "present"],
+                },
+                {
+                    "form": "affected",
+                    "source": "Conjugation",
+                    "tags": ["participle", "past"],
+                },
+                {
+                    "form": "affect",
+                    "source": "Conjugation",
+                    "tags": ["first-person", "present", "singular"],
+                },
+                {
+                    "form": "affect",
+                    "source": "Conjugation",
+                    "tags": ["first-person", "plural", "present"],
+                },
+                {
+                    "form": "am affecting",
+                    "source": "Conjugation",
+                    "tags": [
+                        "first-person",
+                        "present",
+                        "progressive",
+                        "singular",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "are affecting",
+                    "source": "Conjugation",
+                    "tags": [
+                        "first-person",
+                        "plural",
+                        "present",
+                        "progressive",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "have affected",
+                    "source": "Conjugation",
+                    "tags": [
+                        "first-person",
+                        "perfect",
+                        "present",
+                        "singular",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "have affected",
+                    "source": "Conjugation",
+                    "tags": [
+                        "first-person",
+                        "perfect",
+                        "plural",
+                        "present",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "have been affecting",
+                    "source": "Conjugation",
+                    "tags": [
+                        "first-person",
+                        "perfect",
+                        "present",
+                        "progressive",
+                        "singular",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "have been affecting",
+                    "source": "Conjugation",
+                    "tags": [
+                        "first-person",
+                        "perfect",
+                        "plural",
+                        "present",
+                        "progressive",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "affect",
+                    "source": "Conjugation",
+                    "tags": ["present", "second-person"],
+                },
+                {
+                    "form": "are affecting",
+                    "source": "Conjugation",
+                    "tags": [
+                        "present",
+                        "progressive",
+                        "second-person",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "have affected",
+                    "source": "Conjugation",
+                    "tags": [
+                        "perfect",
+                        "present",
+                        "second-person",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "have been affecting",
+                    "source": "Conjugation",
+                    "tags": [
+                        "perfect",
+                        "present",
+                        "progressive",
+                        "second-person",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "affects",
+                    "source": "Conjugation",
+                    "tags": ["present", "singular", "third-person"],
+                },
+                {
+                    "form": "affect",
+                    "source": "Conjugation",
+                    "tags": ["plural", "present", "third-person"],
+                },
+                {
+                    "form": "is affecting",
+                    "source": "Conjugation",
+                    "tags": [
+                        "present",
+                        "progressive",
+                        "singular",
+                        "third-person",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "are affecting",
+                    "source": "Conjugation",
+                    "tags": [
+                        "plural",
+                        "present",
+                        "progressive",
+                        "third-person",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "has affected",
+                    "source": "Conjugation",
+                    "tags": [
+                        "perfect",
+                        "present",
+                        "singular",
+                        "third-person",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "have affected",
+                    "source": "Conjugation",
+                    "tags": [
+                        "perfect",
+                        "plural",
+                        "present",
+                        "third-person",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "has been affecting",
+                    "source": "Conjugation",
+                    "tags": [
+                        "perfect",
+                        "present",
+                        "progressive",
+                        "singular",
+                        "third-person",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "have been affecting",
+                    "source": "Conjugation",
+                    "tags": [
+                        "perfect",
+                        "plural",
+                        "present",
+                        "progressive",
+                        "third-person",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "affected",
+                    "source": "Conjugation",
+                    "tags": ["first-person", "past", "singular"],
+                },
+                {
+                    "form": "affected",
+                    "source": "Conjugation",
+                    "tags": ["first-person", "past", "plural"],
+                },
+                {
+                    "form": "was affecting",
+                    "source": "Conjugation",
+                    "tags": [
+                        "first-person",
+                        "past",
+                        "progressive",
+                        "singular",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "were affecting",
+                    "source": "Conjugation",
+                    "tags": [
+                        "first-person",
+                        "past",
+                        "plural",
+                        "progressive",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "had affected",
+                    "source": "Conjugation",
+                    "tags": [
+                        "first-person",
+                        "past",
+                        "perfect",
+                        "singular",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "had affected",
+                    "source": "Conjugation",
+                    "tags": [
+                        "first-person",
+                        "past",
+                        "perfect",
+                        "plural",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "had been affecting",
+                    "source": "Conjugation",
+                    "tags": [
+                        "first-person",
+                        "past",
+                        "perfect",
+                        "progressive",
+                        "singular",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "had been affecting",
+                    "source": "Conjugation",
+                    "tags": [
+                        "first-person",
+                        "past",
+                        "perfect",
+                        "plural",
+                        "progressive",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "affected",
+                    "source": "Conjugation",
+                    "tags": ["past", "second-person"],
+                },
+                {
+                    "form": "were affecting",
+                    "source": "Conjugation",
+                    "tags": [
+                        "past",
+                        "progressive",
+                        "second-person",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "had affected",
+                    "source": "Conjugation",
+                    "tags": [
+                        "past",
+                        "perfect",
+                        "second-person",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "had been affecting",
+                    "source": "Conjugation",
+                    "tags": [
+                        "past",
+                        "perfect",
+                        "progressive",
+                        "second-person",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "affected",
+                    "source": "Conjugation",
+                    "tags": ["past", "singular", "third-person"],
+                },
+                {
+                    "form": "affected",
+                    "source": "Conjugation",
+                    "tags": ["past", "plural", "third-person"],
+                },
+                {
+                    "form": "was affecting",
+                    "source": "Conjugation",
+                    "tags": [
+                        "past",
+                        "progressive",
+                        "singular",
+                        "third-person",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "were affecting",
+                    "source": "Conjugation",
+                    "tags": [
+                        "past",
+                        "plural",
+                        "progressive",
+                        "third-person",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "had affected",
+                    "source": "Conjugation",
+                    "tags": [
+                        "past",
+                        "perfect",
+                        "singular",
+                        "third-person",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "had affected",
+                    "source": "Conjugation",
+                    "tags": [
+                        "past",
+                        "perfect",
+                        "plural",
+                        "third-person",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "had been affecting",
+                    "source": "Conjugation",
+                    "tags": [
+                        "past",
+                        "perfect",
+                        "progressive",
+                        "singular",
+                        "third-person",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "had been affecting",
+                    "source": "Conjugation",
+                    "tags": [
+                        "past",
+                        "perfect",
+                        "plural",
+                        "progressive",
+                        "third-person",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "will affect",
+                    "source": "Conjugation",
+                    "tags": [
+                        "first-person",
+                        "future",
+                        "singular",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "will affect",
+                    "source": "Conjugation",
+                    "tags": [
+                        "first-person",
+                        "future",
+                        "plural",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "will be affecting",
+                    "source": "Conjugation",
+                    "tags": [
+                        "first-person",
+                        "future",
+                        "progressive",
+                        "singular",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "will be affecting",
+                    "source": "Conjugation",
+                    "tags": [
+                        "first-person",
+                        "future",
+                        "plural",
+                        "progressive",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "will have affected",
+                    "source": "Conjugation",
+                    "tags": [
+                        "first-person",
+                        "future",
+                        "perfect",
+                        "singular",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "will have affected",
+                    "source": "Conjugation",
+                    "tags": [
+                        "first-person",
+                        "future",
+                        "perfect",
+                        "plural",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "will have been affecting",
+                    "source": "Conjugation",
+                    "tags": [
+                        "first-person",
+                        "future",
+                        "perfect",
+                        "progressive",
+                        "singular",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "will have been affecting",
+                    "source": "Conjugation",
+                    "tags": [
+                        "first-person",
+                        "future",
+                        "perfect",
+                        "plural",
+                        "progressive",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "will affect",
+                    "source": "Conjugation",
+                    "tags": [
+                        "future",
+                        "second-person",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "will be affecting",
+                    "source": "Conjugation",
+                    "tags": [
+                        "future",
+                        "progressive",
+                        "second-person",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "will have affected",
+                    "source": "Conjugation",
+                    "tags": [
+                        "future",
+                        "perfect",
+                        "second-person",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "will have been affecting",
+                    "source": "Conjugation",
+                    "tags": [
+                        "future",
+                        "perfect",
+                        "progressive",
+                        "second-person",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "will affect",
+                    "source": "Conjugation",
+                    "tags": [
+                        "future",
+                        "singular",
+                        "third-person",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "will affect",
+                    "source": "Conjugation",
+                    "tags": [
+                        "future",
+                        "plural",
+                        "third-person",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "will be affecting",
+                    "source": "Conjugation",
+                    "tags": [
+                        "future",
+                        "progressive",
+                        "singular",
+                        "third-person",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "will be affecting",
+                    "source": "Conjugation",
+                    "tags": [
+                        "future",
+                        "plural",
+                        "progressive",
+                        "third-person",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "will have affected",
+                    "source": "Conjugation",
+                    "tags": [
+                        "future",
+                        "perfect",
+                        "singular",
+                        "third-person",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "will have affected",
+                    "source": "Conjugation",
+                    "tags": [
+                        "future",
+                        "perfect",
+                        "plural",
+                        "third-person",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "will have been affecting",
+                    "source": "Conjugation",
+                    "tags": [
+                        "future",
+                        "perfect",
+                        "progressive",
+                        "singular",
+                        "third-person",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "will have been affecting",
+                    "source": "Conjugation",
+                    "tags": [
+                        "future",
+                        "perfect",
+                        "plural",
+                        "progressive",
+                        "third-person",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "would affect",
+                    "source": "Conjugation",
+                    "tags": [
+                        "conditional",
+                        "first-person",
+                        "singular",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "would affect",
+                    "source": "Conjugation",
+                    "tags": [
+                        "conditional",
+                        "first-person",
+                        "plural",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "would be affecting",
+                    "source": "Conjugation",
+                    "tags": [
+                        "conditional",
+                        "first-person",
+                        "progressive",
+                        "singular",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "would be affecting",
+                    "source": "Conjugation",
+                    "tags": [
+                        "conditional",
+                        "first-person",
+                        "plural",
+                        "progressive",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "would have affected",
+                    "source": "Conjugation",
+                    "tags": [
+                        "conditional",
+                        "first-person",
+                        "perfect",
+                        "singular",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "would have affected",
+                    "source": "Conjugation",
+                    "tags": [
+                        "conditional",
+                        "first-person",
+                        "perfect",
+                        "plural",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "would have been affecting",
+                    "source": "Conjugation",
+                    "tags": [
+                        "conditional",
+                        "first-person",
+                        "perfect",
+                        "progressive",
+                        "singular",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "would have been affecting",
+                    "source": "Conjugation",
+                    "tags": [
+                        "conditional",
+                        "first-person",
+                        "perfect",
+                        "plural",
+                        "progressive",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "would affect",
+                    "source": "Conjugation",
+                    "tags": [
+                        "conditional",
+                        "second-person",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "would be affecting",
+                    "source": "Conjugation",
+                    "tags": [
+                        "conditional",
+                        "progressive",
+                        "second-person",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "would have affected",
+                    "source": "Conjugation",
+                    "tags": [
+                        "conditional",
+                        "perfect",
+                        "second-person",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "would have been affecting",
+                    "source": "Conjugation",
+                    "tags": [
+                        "conditional",
+                        "perfect",
+                        "progressive",
+                        "second-person",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "would affect",
+                    "source": "Conjugation",
+                    "tags": [
+                        "conditional",
+                        "singular",
+                        "third-person",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "would affect",
+                    "source": "Conjugation",
+                    "tags": [
+                        "conditional",
+                        "plural",
+                        "third-person",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "would be affecting",
+                    "source": "Conjugation",
+                    "tags": [
+                        "conditional",
+                        "progressive",
+                        "singular",
+                        "third-person",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "would be affecting",
+                    "source": "Conjugation",
+                    "tags": [
+                        "conditional",
+                        "plural",
+                        "progressive",
+                        "third-person",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "would have affected",
+                    "source": "Conjugation",
+                    "tags": [
+                        "conditional",
+                        "perfect",
+                        "singular",
+                        "third-person",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "would have affected",
+                    "source": "Conjugation",
+                    "tags": [
+                        "conditional",
+                        "perfect",
+                        "plural",
+                        "third-person",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "would have been affecting",
+                    "source": "Conjugation",
+                    "tags": [
+                        "conditional",
+                        "perfect",
+                        "progressive",
+                        "singular",
+                        "third-person",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "would have been affecting",
+                    "source": "Conjugation",
+                    "tags": [
+                        "conditional",
+                        "perfect",
+                        "plural",
+                        "progressive",
+                        "third-person",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "affect",
+                    "source": "Conjugation",
+                    "tags": ["imperative"],
+                },
             ],
         }
         self.assertEqual(expected, ret)
 
     def test_English_verb3(self):
-        ret = self.xinfl("be", "English", "verb", "Conjugation", """
+        ret = self.xinfl(
+            "be",
+            "English",
+            "verb",
+            "Conjugation",
+            """
 {| class="wikitable%2Bcollapsible%2Bcollapsed" style="text-align%253Acenter"
 
 |-
@@ -2283,975 +2185,897 @@ class InflTests(unittest.TestCase):
 * Outside of Standard English, there is some variation in usage of some forms; some dialects, for example, use <i class="Latn+mention" lang="en">is</i> or <i class="Latn+mention" lang="en">’s</i> throughout the present indicative (supplanting, in whole or in part, <i class="Latn+mention" lang="en">am</i> and <i class="Latn+mention" lang="en">are</i>), and/or <i class="Latn+mention" lang="en">was</i> throughout the past indicative and past subjunctive (supplanting <i class="Latn+mention" lang="en">were</i>).
 
 </li>
-""")  # noqa: E501
+""",
+        )  # noqa: E501
         expected = {
             "forms": [
-              {
-                "form": "no-table-tags",
-                "source": "Conjugation",
-                "tags": [
-                  "table-tags"
-                ]
-              },
-              {
-                "form": "be",
-                "source": "Conjugation",
-                "tags": [
-                  "infinitive"
-                ]
-              },
-              {
-                "form": "being",
-                "source": "Conjugation",
-                "tags": [
-                  "participle",
-                  "present"
-                ]
-              },
-              {
-                "form": "been",
-                "source": "Conjugation",
-                "tags": [
-                  "participle",
-                  "past"
-                ]
-              },
-              {
-                "form": "am",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "indicative",
-                  "present",
-                  "singular"
-                ]
-              },
-              {
-                "form": "’m",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "indicative",
-                  "present",
-                  "singular",
-                  "clitic"
-                ]
-              },
-              {
-                "form": "are",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "indicative",
-                  "plural",
-                  "present"
-                ]
-              },
-              {
-                "form": "’re",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "indicative",
-                  "plural",
-                  "present",
-                  "clitic"
-                ]
-              },
-              {
-                "form": "be",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "present",
-                  "singular",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "be",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "plural",
-                  "present",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "let be",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "imperative",
-                  "present",
-                  "singular",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "let be",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "imperative",
-                  "plural",
-                  "present",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "let's be",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "imperative",
-                  "plural",
-                  "present",
-                  "pronoun-included",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "are",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "present",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "’re",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "present",
-                  "second-person",
-                  "singular",
-                  "clitic"
-                ]
-              },
-              {
-                "form": "are",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "plural",
-                  "present",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "’re",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "plural",
-                  "present",
-                  "second-person",
-                  "clitic"
-                ]
-              },
-              {
-                "form": "be",
-                "source": "Conjugation",
-                "tags": [
-                  "present",
-                  "second-person",
-                  "singular",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "be",
-                "source": "Conjugation",
-                "tags": [
-                  "plural",
-                  "present",
-                  "second-person",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "be",
-                "source": "Conjugation",
-                "tags": [
-                  "imperative",
-                  "present",
-                  "singular"
-                ]
-              },
-              {
-                "form": "be",
-                "source": "Conjugation",
-                "tags": [
-                  "imperative",
-                  "plural",
-                  "present"
-                ]
-              },
-              {
-                "form": "is",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "present",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "’s",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "present",
-                  "singular",
-                  "third-person",
-                  "clitic"
-                ]
-              },
-              {
-                "form": "are",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "plural",
-                  "present",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "’re",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "plural",
-                  "present",
-                  "singular",
-                  "third-person",
-                  "clitic"
-                ]
-              },
-              {
-                "form": "are",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "plural",
-                  "present",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "’re",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "plural",
-                  "present",
-                  "third-person",
-                  "clitic"
-                ]
-              },
-              {
-                "form": "be",
-                "source": "Conjugation",
-                "tags": [
-                  "present",
-                  "singular",
-                  "subjunctive",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "be",
-                "source": "Conjugation",
-                "tags": [
-                  "plural",
-                  "present",
-                  "subjunctive",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "let be",
-                "source": "Conjugation",
-                "tags": [
-                  "imperative",
-                  "present",
-                  "singular",
-                  "third-person",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "let be",
-                "source": "Conjugation",
-                "tags": [
-                  "imperative",
-                  "plural",
-                  "present",
-                  "third-person",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "was",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "indicative",
-                  "preterite",
-                  "singular"
-                ]
-              },
-              {
-                "form": "were",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "indicative",
-                  "plural",
-                  "preterite"
-                ]
-              },
-              {
-                "form": "were",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "preterite",
-                  "singular",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "were",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "plural",
-                  "preterite",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "were",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "preterite",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "were",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "plural",
-                  "preterite",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "were",
-                "source": "Conjugation",
-                "tags": [
-                  "preterite",
-                  "second-person",
-                  "singular",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "were",
-                "source": "Conjugation",
-                "tags": [
-                  "plural",
-                  "preterite",
-                  "second-person",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "was",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "preterite",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "were",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "plural",
-                  "preterite",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "were",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "plural",
-                  "preterite",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "were",
-                "source": "Conjugation",
-                "tags": [
-                  "preterite",
-                  "singular",
-                  "subjunctive",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "were",
-                "source": "Conjugation",
-                "tags": [
-                  "plural",
-                  "preterite",
-                  "subjunctive",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "archaic",
-                "source": "Conjugation",
-                "tags": [
-                  "table-tags"
-                ]
-              },
-              {
-                "form": "be",
-                "source": "Conjugation",
-                "tags": [
-                  "infinitive"
-                ]
-              },
-              {
-                "form": "being",
-                "source": "Conjugation",
-                "tags": [
-                  "participle",
-                  "present"
-                ]
-              },
-              {
-                "form": "been",
-                "source": "Conjugation",
-                "tags": [
-                  "participle",
-                  "past"
-                ]
-              },
-              {
-                "form": "am",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "indicative",
-                  "present",
-                  "singular"
-                ]
-              },
-              {
-                "form": "’m",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "indicative",
-                  "present",
-                  "singular",
-                  "clitic"
-                ]
-              },
-              {
-                "form": "be",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "indicative",
-                  "present",
-                  "singular"
-                ]
-              },
-              {
-                "form": "are",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "indicative",
-                  "plural",
-                  "present"
-                ]
-              },
-              {
-                "form": "’re",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "indicative",
-                  "plural",
-                  "present",
-                  "clitic"
-                ]
-              },
-              {
-                "form": "be",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "indicative",
-                  "plural",
-                  "present"
-                ]
-              },
-              {
-                "form": "been",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "indicative",
-                  "plural",
-                  "present"
-                ]
-              },
-              {
-                "form": "be",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "present",
-                  "singular",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "be",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "plural",
-                  "present",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "-",
-                "source": "Conjugation",
-                "tags": [
-                  "imperative",
-                  "present",
-                  "singular"
-                ]
-              },
-              {
-                "form": "let's be",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "imperative",
-                  "plural",
-                  "present",
-                  "pronoun-included",
-                  "multiword-construction"
-                ]
-              },
-              {
-                "form": "art",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "present",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "’rt",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "present",
-                  "second-person",
-                  "singular",
-                  "clitic"
-                ]
-              },
-              {
-                "form": "beest",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "present",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "are",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "plural",
-                  "present",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "’re",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "plural",
-                  "present",
-                  "second-person",
-                  "clitic"
-                ]
-              },
-              {
-                "form": "be",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "plural",
-                  "present",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "been",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "plural",
-                  "present",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "be",
-                "source": "Conjugation",
-                "tags": [
-                  "present",
-                  "second-person",
-                  "singular",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "beest",
-                "source": "Conjugation",
-                "tags": [
-                  "present",
-                  "second-person",
-                  "singular",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "be",
-                "source": "Conjugation",
-                "tags": [
-                  "plural",
-                  "present",
-                  "second-person",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "be",
-                "source": "Conjugation",
-                "tags": [
-                  "imperative",
-                  "present",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "be",
-                "source": "Conjugation",
-                "tags": [
-                  "imperative",
-                  "plural",
-                  "present",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "is",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "present",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "’s",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "present",
-                  "singular",
-                  "third-person",
-                  "clitic"
-                ]
-              },
-              {
-                "form": "beeth",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "present",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "bes",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "present",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "are",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "plural",
-                  "present",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "’re",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "plural",
-                  "present",
-                  "third-person",
-                  "clitic"
-                ]
-              },
-              {
-                "form": "be",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "plural",
-                  "present",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "been",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "plural",
-                  "present",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "be",
-                "source": "Conjugation",
-                "tags": [
-                  "present",
-                  "singular",
-                  "subjunctive",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "be",
-                "source": "Conjugation",
-                "tags": [
-                  "plural",
-                  "present",
-                  "subjunctive",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "-",
-                "source": "Conjugation",
-                "tags": [
-                  "imperative",
-                  "plural",
-                  "present"
-                ]
-              },
-              {
-                "form": "was",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "indicative",
-                  "preterite",
-                  "singular"
-                ]
-              },
-              {
-                "form": "were",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "indicative",
-                  "plural",
-                  "preterite"
-                ]
-              },
-              {
-                "form": "were",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "preterite",
-                  "singular",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "were",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "plural",
-                  "preterite",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "wert",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "preterite",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "wast",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "preterite",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "were",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "plural",
-                  "preterite",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "were",
-                "source": "Conjugation",
-                "tags": [
-                  "preterite",
-                  "second-person",
-                  "singular",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "wert",
-                "source": "Conjugation",
-                "tags": [
-                  "preterite",
-                  "second-person",
-                  "singular",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "were",
-                "source": "Conjugation",
-                "tags": [
-                  "plural",
-                  "preterite",
-                  "second-person",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "was",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "preterite",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "were",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "plural",
-                  "preterite",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "were",
-                "source": "Conjugation",
-                "tags": [
-                  "preterite",
-                  "singular",
-                  "subjunctive",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "were",
-                "source": "Conjugation",
-                "tags": [
-                  "plural",
-                  "preterite",
-                  "subjunctive",
-                  "third-person"
-                ]
-              }
+                {
+                    "form": "no-table-tags",
+                    "source": "Conjugation",
+                    "tags": ["table-tags"],
+                },
+                {"form": "be", "source": "Conjugation", "tags": ["infinitive"]},
+                {
+                    "form": "being",
+                    "source": "Conjugation",
+                    "tags": ["participle", "present"],
+                },
+                {
+                    "form": "been",
+                    "source": "Conjugation",
+                    "tags": ["participle", "past"],
+                },
+                {
+                    "form": "am",
+                    "source": "Conjugation",
+                    "tags": [
+                        "first-person",
+                        "indicative",
+                        "present",
+                        "singular",
+                    ],
+                },
+                {
+                    "form": "’m",
+                    "source": "Conjugation",
+                    "tags": [
+                        "first-person",
+                        "indicative",
+                        "present",
+                        "singular",
+                        "clitic",
+                    ],
+                },
+                {
+                    "form": "are",
+                    "source": "Conjugation",
+                    "tags": ["first-person", "indicative", "plural", "present"],
+                },
+                {
+                    "form": "’re",
+                    "source": "Conjugation",
+                    "tags": [
+                        "first-person",
+                        "indicative",
+                        "plural",
+                        "present",
+                        "clitic",
+                    ],
+                },
+                {
+                    "form": "be",
+                    "source": "Conjugation",
+                    "tags": [
+                        "first-person",
+                        "present",
+                        "singular",
+                        "subjunctive",
+                    ],
+                },
+                {
+                    "form": "be",
+                    "source": "Conjugation",
+                    "tags": [
+                        "first-person",
+                        "plural",
+                        "present",
+                        "subjunctive",
+                    ],
+                },
+                {
+                    "form": "let be",
+                    "source": "Conjugation",
+                    "tags": [
+                        "first-person",
+                        "imperative",
+                        "present",
+                        "singular",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "let be",
+                    "source": "Conjugation",
+                    "tags": [
+                        "first-person",
+                        "imperative",
+                        "plural",
+                        "present",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "let's be",
+                    "source": "Conjugation",
+                    "tags": [
+                        "first-person",
+                        "imperative",
+                        "plural",
+                        "present",
+                        "pronoun-included",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "are",
+                    "source": "Conjugation",
+                    "tags": [
+                        "indicative",
+                        "present",
+                        "second-person",
+                        "singular",
+                    ],
+                },
+                {
+                    "form": "’re",
+                    "source": "Conjugation",
+                    "tags": [
+                        "indicative",
+                        "present",
+                        "second-person",
+                        "singular",
+                        "clitic",
+                    ],
+                },
+                {
+                    "form": "are",
+                    "source": "Conjugation",
+                    "tags": [
+                        "indicative",
+                        "plural",
+                        "present",
+                        "second-person",
+                    ],
+                },
+                {
+                    "form": "’re",
+                    "source": "Conjugation",
+                    "tags": [
+                        "indicative",
+                        "plural",
+                        "present",
+                        "second-person",
+                        "clitic",
+                    ],
+                },
+                {
+                    "form": "be",
+                    "source": "Conjugation",
+                    "tags": [
+                        "present",
+                        "second-person",
+                        "singular",
+                        "subjunctive",
+                    ],
+                },
+                {
+                    "form": "be",
+                    "source": "Conjugation",
+                    "tags": [
+                        "plural",
+                        "present",
+                        "second-person",
+                        "subjunctive",
+                    ],
+                },
+                {
+                    "form": "be",
+                    "source": "Conjugation",
+                    "tags": ["imperative", "present", "singular"],
+                },
+                {
+                    "form": "be",
+                    "source": "Conjugation",
+                    "tags": ["imperative", "plural", "present"],
+                },
+                {
+                    "form": "is",
+                    "source": "Conjugation",
+                    "tags": [
+                        "indicative",
+                        "present",
+                        "singular",
+                        "third-person",
+                    ],
+                },
+                {
+                    "form": "’s",
+                    "source": "Conjugation",
+                    "tags": [
+                        "indicative",
+                        "present",
+                        "singular",
+                        "third-person",
+                        "clitic",
+                    ],
+                },
+                {
+                    "form": "are",
+                    "source": "Conjugation",
+                    "tags": [
+                        "indicative",
+                        "plural",
+                        "present",
+                        "singular",
+                        "third-person",
+                    ],
+                },
+                {
+                    "form": "’re",
+                    "source": "Conjugation",
+                    "tags": [
+                        "indicative",
+                        "plural",
+                        "present",
+                        "singular",
+                        "third-person",
+                        "clitic",
+                    ],
+                },
+                {
+                    "form": "are",
+                    "source": "Conjugation",
+                    "tags": ["indicative", "plural", "present", "third-person"],
+                },
+                {
+                    "form": "’re",
+                    "source": "Conjugation",
+                    "tags": [
+                        "indicative",
+                        "plural",
+                        "present",
+                        "third-person",
+                        "clitic",
+                    ],
+                },
+                {
+                    "form": "be",
+                    "source": "Conjugation",
+                    "tags": [
+                        "present",
+                        "singular",
+                        "subjunctive",
+                        "third-person",
+                    ],
+                },
+                {
+                    "form": "be",
+                    "source": "Conjugation",
+                    "tags": [
+                        "plural",
+                        "present",
+                        "subjunctive",
+                        "third-person",
+                    ],
+                },
+                {
+                    "form": "let be",
+                    "source": "Conjugation",
+                    "tags": [
+                        "imperative",
+                        "present",
+                        "singular",
+                        "third-person",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "let be",
+                    "source": "Conjugation",
+                    "tags": [
+                        "imperative",
+                        "plural",
+                        "present",
+                        "third-person",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "was",
+                    "source": "Conjugation",
+                    "tags": [
+                        "first-person",
+                        "indicative",
+                        "preterite",
+                        "singular",
+                    ],
+                },
+                {
+                    "form": "were",
+                    "source": "Conjugation",
+                    "tags": [
+                        "first-person",
+                        "indicative",
+                        "plural",
+                        "preterite",
+                    ],
+                },
+                {
+                    "form": "were",
+                    "source": "Conjugation",
+                    "tags": [
+                        "first-person",
+                        "preterite",
+                        "singular",
+                        "subjunctive",
+                    ],
+                },
+                {
+                    "form": "were",
+                    "source": "Conjugation",
+                    "tags": [
+                        "first-person",
+                        "plural",
+                        "preterite",
+                        "subjunctive",
+                    ],
+                },
+                {
+                    "form": "were",
+                    "source": "Conjugation",
+                    "tags": [
+                        "indicative",
+                        "preterite",
+                        "second-person",
+                        "singular",
+                    ],
+                },
+                {
+                    "form": "were",
+                    "source": "Conjugation",
+                    "tags": [
+                        "indicative",
+                        "plural",
+                        "preterite",
+                        "second-person",
+                    ],
+                },
+                {
+                    "form": "were",
+                    "source": "Conjugation",
+                    "tags": [
+                        "preterite",
+                        "second-person",
+                        "singular",
+                        "subjunctive",
+                    ],
+                },
+                {
+                    "form": "were",
+                    "source": "Conjugation",
+                    "tags": [
+                        "plural",
+                        "preterite",
+                        "second-person",
+                        "subjunctive",
+                    ],
+                },
+                {
+                    "form": "was",
+                    "source": "Conjugation",
+                    "tags": [
+                        "indicative",
+                        "preterite",
+                        "singular",
+                        "third-person",
+                    ],
+                },
+                {
+                    "form": "were",
+                    "source": "Conjugation",
+                    "tags": [
+                        "indicative",
+                        "plural",
+                        "preterite",
+                        "singular",
+                        "third-person",
+                    ],
+                },
+                {
+                    "form": "were",
+                    "source": "Conjugation",
+                    "tags": [
+                        "indicative",
+                        "plural",
+                        "preterite",
+                        "third-person",
+                    ],
+                },
+                {
+                    "form": "were",
+                    "source": "Conjugation",
+                    "tags": [
+                        "preterite",
+                        "singular",
+                        "subjunctive",
+                        "third-person",
+                    ],
+                },
+                {
+                    "form": "were",
+                    "source": "Conjugation",
+                    "tags": [
+                        "plural",
+                        "preterite",
+                        "subjunctive",
+                        "third-person",
+                    ],
+                },
+                {
+                    "form": "archaic",
+                    "source": "Conjugation",
+                    "tags": ["table-tags"],
+                },
+                {"form": "be", "source": "Conjugation", "tags": ["infinitive"]},
+                {
+                    "form": "being",
+                    "source": "Conjugation",
+                    "tags": ["participle", "present"],
+                },
+                {
+                    "form": "been",
+                    "source": "Conjugation",
+                    "tags": ["participle", "past"],
+                },
+                {
+                    "form": "am",
+                    "source": "Conjugation",
+                    "tags": [
+                        "first-person",
+                        "indicative",
+                        "present",
+                        "singular",
+                    ],
+                },
+                {
+                    "form": "’m",
+                    "source": "Conjugation",
+                    "tags": [
+                        "first-person",
+                        "indicative",
+                        "present",
+                        "singular",
+                        "clitic",
+                    ],
+                },
+                {
+                    "form": "be",
+                    "source": "Conjugation",
+                    "tags": [
+                        "first-person",
+                        "indicative",
+                        "present",
+                        "singular",
+                    ],
+                },
+                {
+                    "form": "are",
+                    "source": "Conjugation",
+                    "tags": ["first-person", "indicative", "plural", "present"],
+                },
+                {
+                    "form": "’re",
+                    "source": "Conjugation",
+                    "tags": [
+                        "first-person",
+                        "indicative",
+                        "plural",
+                        "present",
+                        "clitic",
+                    ],
+                },
+                {
+                    "form": "be",
+                    "source": "Conjugation",
+                    "tags": ["first-person", "indicative", "plural", "present"],
+                },
+                {
+                    "form": "been",
+                    "source": "Conjugation",
+                    "tags": ["first-person", "indicative", "plural", "present"],
+                },
+                {
+                    "form": "be",
+                    "source": "Conjugation",
+                    "tags": [
+                        "first-person",
+                        "present",
+                        "singular",
+                        "subjunctive",
+                    ],
+                },
+                {
+                    "form": "be",
+                    "source": "Conjugation",
+                    "tags": [
+                        "first-person",
+                        "plural",
+                        "present",
+                        "subjunctive",
+                    ],
+                },
+                {
+                    "form": "-",
+                    "source": "Conjugation",
+                    "tags": ["imperative", "present", "singular"],
+                },
+                {
+                    "form": "let's be",
+                    "source": "Conjugation",
+                    "tags": [
+                        "first-person",
+                        "imperative",
+                        "plural",
+                        "present",
+                        "pronoun-included",
+                        "multiword-construction",
+                    ],
+                },
+                {
+                    "form": "art",
+                    "source": "Conjugation",
+                    "tags": [
+                        "indicative",
+                        "present",
+                        "second-person",
+                        "singular",
+                    ],
+                },
+                {
+                    "form": "’rt",
+                    "source": "Conjugation",
+                    "tags": [
+                        "indicative",
+                        "present",
+                        "second-person",
+                        "singular",
+                        "clitic",
+                    ],
+                },
+                {
+                    "form": "beest",
+                    "source": "Conjugation",
+                    "tags": [
+                        "indicative",
+                        "present",
+                        "second-person",
+                        "singular",
+                    ],
+                },
+                {
+                    "form": "are",
+                    "source": "Conjugation",
+                    "tags": [
+                        "indicative",
+                        "plural",
+                        "present",
+                        "second-person",
+                    ],
+                },
+                {
+                    "form": "’re",
+                    "source": "Conjugation",
+                    "tags": [
+                        "indicative",
+                        "plural",
+                        "present",
+                        "second-person",
+                        "clitic",
+                    ],
+                },
+                {
+                    "form": "be",
+                    "source": "Conjugation",
+                    "tags": [
+                        "indicative",
+                        "plural",
+                        "present",
+                        "second-person",
+                    ],
+                },
+                {
+                    "form": "been",
+                    "source": "Conjugation",
+                    "tags": [
+                        "indicative",
+                        "plural",
+                        "present",
+                        "second-person",
+                    ],
+                },
+                {
+                    "form": "be",
+                    "source": "Conjugation",
+                    "tags": [
+                        "present",
+                        "second-person",
+                        "singular",
+                        "subjunctive",
+                    ],
+                },
+                {
+                    "form": "beest",
+                    "source": "Conjugation",
+                    "tags": [
+                        "present",
+                        "second-person",
+                        "singular",
+                        "subjunctive",
+                    ],
+                },
+                {
+                    "form": "be",
+                    "source": "Conjugation",
+                    "tags": [
+                        "plural",
+                        "present",
+                        "second-person",
+                        "subjunctive",
+                    ],
+                },
+                {
+                    "form": "be",
+                    "source": "Conjugation",
+                    "tags": [
+                        "imperative",
+                        "present",
+                        "second-person",
+                        "singular",
+                    ],
+                },
+                {
+                    "form": "be",
+                    "source": "Conjugation",
+                    "tags": [
+                        "imperative",
+                        "plural",
+                        "present",
+                        "second-person",
+                    ],
+                },
+                {
+                    "form": "is",
+                    "source": "Conjugation",
+                    "tags": [
+                        "indicative",
+                        "present",
+                        "singular",
+                        "third-person",
+                    ],
+                },
+                {
+                    "form": "’s",
+                    "source": "Conjugation",
+                    "tags": [
+                        "indicative",
+                        "present",
+                        "singular",
+                        "third-person",
+                        "clitic",
+                    ],
+                },
+                {
+                    "form": "beeth",
+                    "source": "Conjugation",
+                    "tags": [
+                        "indicative",
+                        "present",
+                        "singular",
+                        "third-person",
+                    ],
+                },
+                {
+                    "form": "bes",
+                    "source": "Conjugation",
+                    "tags": [
+                        "indicative",
+                        "present",
+                        "singular",
+                        "third-person",
+                    ],
+                },
+                {
+                    "form": "are",
+                    "source": "Conjugation",
+                    "tags": ["indicative", "plural", "present", "third-person"],
+                },
+                {
+                    "form": "’re",
+                    "source": "Conjugation",
+                    "tags": [
+                        "indicative",
+                        "plural",
+                        "present",
+                        "third-person",
+                        "clitic",
+                    ],
+                },
+                {
+                    "form": "be",
+                    "source": "Conjugation",
+                    "tags": ["indicative", "plural", "present", "third-person"],
+                },
+                {
+                    "form": "been",
+                    "source": "Conjugation",
+                    "tags": ["indicative", "plural", "present", "third-person"],
+                },
+                {
+                    "form": "be",
+                    "source": "Conjugation",
+                    "tags": [
+                        "present",
+                        "singular",
+                        "subjunctive",
+                        "third-person",
+                    ],
+                },
+                {
+                    "form": "be",
+                    "source": "Conjugation",
+                    "tags": [
+                        "plural",
+                        "present",
+                        "subjunctive",
+                        "third-person",
+                    ],
+                },
+                {
+                    "form": "-",
+                    "source": "Conjugation",
+                    "tags": ["imperative", "plural", "present"],
+                },
+                {
+                    "form": "was",
+                    "source": "Conjugation",
+                    "tags": [
+                        "first-person",
+                        "indicative",
+                        "preterite",
+                        "singular",
+                    ],
+                },
+                {
+                    "form": "were",
+                    "source": "Conjugation",
+                    "tags": [
+                        "first-person",
+                        "indicative",
+                        "plural",
+                        "preterite",
+                    ],
+                },
+                {
+                    "form": "were",
+                    "source": "Conjugation",
+                    "tags": [
+                        "first-person",
+                        "preterite",
+                        "singular",
+                        "subjunctive",
+                    ],
+                },
+                {
+                    "form": "were",
+                    "source": "Conjugation",
+                    "tags": [
+                        "first-person",
+                        "plural",
+                        "preterite",
+                        "subjunctive",
+                    ],
+                },
+                {
+                    "form": "wert",
+                    "source": "Conjugation",
+                    "tags": [
+                        "indicative",
+                        "preterite",
+                        "second-person",
+                        "singular",
+                    ],
+                },
+                {
+                    "form": "wast",
+                    "source": "Conjugation",
+                    "tags": [
+                        "indicative",
+                        "preterite",
+                        "second-person",
+                        "singular",
+                    ],
+                },
+                {
+                    "form": "were",
+                    "source": "Conjugation",
+                    "tags": [
+                        "indicative",
+                        "plural",
+                        "preterite",
+                        "second-person",
+                    ],
+                },
+                {
+                    "form": "were",
+                    "source": "Conjugation",
+                    "tags": [
+                        "preterite",
+                        "second-person",
+                        "singular",
+                        "subjunctive",
+                    ],
+                },
+                {
+                    "form": "wert",
+                    "source": "Conjugation",
+                    "tags": [
+                        "preterite",
+                        "second-person",
+                        "singular",
+                        "subjunctive",
+                    ],
+                },
+                {
+                    "form": "were",
+                    "source": "Conjugation",
+                    "tags": [
+                        "plural",
+                        "preterite",
+                        "second-person",
+                        "subjunctive",
+                    ],
+                },
+                {
+                    "form": "was",
+                    "source": "Conjugation",
+                    "tags": [
+                        "indicative",
+                        "preterite",
+                        "singular",
+                        "third-person",
+                    ],
+                },
+                {
+                    "form": "were",
+                    "source": "Conjugation",
+                    "tags": [
+                        "indicative",
+                        "plural",
+                        "preterite",
+                        "third-person",
+                    ],
+                },
+                {
+                    "form": "were",
+                    "source": "Conjugation",
+                    "tags": [
+                        "preterite",
+                        "singular",
+                        "subjunctive",
+                        "third-person",
+                    ],
+                },
+                {
+                    "form": "were",
+                    "source": "Conjugation",
+                    "tags": [
+                        "plural",
+                        "preterite",
+                        "subjunctive",
+                        "third-person",
+                    ],
+                },
             ],
         }
         self.assertEqual(expected, ret)
 
     def test_English_verb4(self):
-        ret = self.xinfl("wit", "English", "verb", "Conjugation", """
+        ret = self.xinfl(
+            "wit",
+            "English",
+            "verb",
+            "Conjugation",
+            """
 {|
 
 |-
@@ -3448,240 +3272,187 @@ class InflTests(unittest.TestCase):
 
 
 |}
-""")  # noqa: E501
+""",
+        )  # noqa: E501
         expected = {
             "forms": [
-              {
-                "form": "no-table-tags",
-                "source": "Conjugation",
-                "tags": [
-                  "table-tags"
-                ]
-              },
-              {
-                "form": "wit",
-                "source": "Conjugation",
-                "tags": [
-                  "infinitive"
-                ]
-              },
-              {
-                "form": "wit",
-                "source": "Conjugation",
-                "tags": [
-                  "imperative"
-                ]
-              },
-              {
-                "form": "witting",
-                "source": "Conjugation",
-                "tags": [
-                  "participle",
-                  "present"
-                ]
-              },
-              {
-                "form": "wist",
-                "source": "Conjugation",
-                "tags": [
-                  "participle",
-                  "past"
-                ]
-              },
-              {
-                "form": "no-table-tags",
-                "source": "Conjugation",
-                "tags": [
-                  "table-tags"
-                ]
-              },
-              {
-                "form": "wot",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "indicative",
-                  "present",
-                  "singular"
-                ]
-              },
-              {
-                "form": "wist",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "indicative",
-                  "past",
-                  "singular"
-                ]
-              },
-              {
-                "form": "wost",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "present",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "wot",
-                "source": "Conjugation",
-                "tags": [
-                  "archaic",
-                  "indicative",
-                  "present",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "wottest",
-                "source": "Conjugation",
-                "tags": [
-                  "archaic",
-                  "indicative",
-                  "present",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "wist",
-                "source": "Conjugation",
-                "tags": [
-                  "archaic",
-                  "indicative",
-                  "past",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "wistest",
-                "source": "Conjugation",
-                "tags": [
-                  "archaic",
-                  "indicative",
-                  "past",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "wot",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "present",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "wist",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "past",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "wit",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "indicative",
-                  "plural",
-                  "present"
-                ]
-              },
-              {
-                "form": "wite",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "indicative",
-                  "plural",
-                  "present"
-                ]
-              },
-              {
-                "form": "wist",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "indicative",
-                  "past",
-                  "plural"
-                ]
-              },
-              {
-                "form": "wit",
-                "source": "Conjugation",
-                "tags": [
-                  "archaic",
-                  "indicative",
-                  "plural",
-                  "present",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "wite",
-                "source": "Conjugation",
-                "tags": [
-                  "archaic",
-                  "indicative",
-                  "plural",
-                  "present",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "wist",
-                "source": "Conjugation",
-                "tags": [
-                  "archaic",
-                  "indicative",
-                  "past",
-                  "plural",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "wit",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "plural",
-                  "present",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "wite",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "plural",
-                  "present",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "wist",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "past",
-                  "plural",
-                  "third-person"
-                ]
-              }
+                {
+                    "form": "no-table-tags",
+                    "source": "Conjugation",
+                    "tags": ["table-tags"],
+                },
+                {
+                    "form": "wit",
+                    "source": "Conjugation",
+                    "tags": ["infinitive"],
+                },
+                {
+                    "form": "wit",
+                    "source": "Conjugation",
+                    "tags": ["imperative"],
+                },
+                {
+                    "form": "witting",
+                    "source": "Conjugation",
+                    "tags": ["participle", "present"],
+                },
+                {
+                    "form": "wist",
+                    "source": "Conjugation",
+                    "tags": ["participle", "past"],
+                },
+                {
+                    "form": "no-table-tags",
+                    "source": "Conjugation",
+                    "tags": ["table-tags"],
+                },
+                {
+                    "form": "wot",
+                    "source": "Conjugation",
+                    "tags": [
+                        "first-person",
+                        "indicative",
+                        "present",
+                        "singular",
+                    ],
+                },
+                {
+                    "form": "wist",
+                    "source": "Conjugation",
+                    "tags": ["first-person", "indicative", "past", "singular"],
+                },
+                {
+                    "form": "wost",
+                    "source": "Conjugation",
+                    "tags": [
+                        "indicative",
+                        "present",
+                        "second-person",
+                        "singular",
+                    ],
+                },
+                {
+                    "form": "wot",
+                    "source": "Conjugation",
+                    "tags": [
+                        "archaic",
+                        "indicative",
+                        "present",
+                        "second-person",
+                        "singular",
+                    ],
+                },
+                {
+                    "form": "wottest",
+                    "source": "Conjugation",
+                    "tags": [
+                        "archaic",
+                        "indicative",
+                        "present",
+                        "second-person",
+                        "singular",
+                    ],
+                },
+                {
+                    "form": "wist",
+                    "source": "Conjugation",
+                    "tags": [
+                        "archaic",
+                        "indicative",
+                        "past",
+                        "second-person",
+                        "singular",
+                    ],
+                },
+                {
+                    "form": "wistest",
+                    "source": "Conjugation",
+                    "tags": [
+                        "archaic",
+                        "indicative",
+                        "past",
+                        "second-person",
+                        "singular",
+                    ],
+                },
+                {
+                    "form": "wot",
+                    "source": "Conjugation",
+                    "tags": [
+                        "indicative",
+                        "present",
+                        "singular",
+                        "third-person",
+                    ],
+                },
+                {
+                    "form": "wist",
+                    "source": "Conjugation",
+                    "tags": ["indicative", "past", "singular", "third-person"],
+                },
+                {
+                    "form": "wit",
+                    "source": "Conjugation",
+                    "tags": ["first-person", "indicative", "plural", "present"],
+                },
+                {
+                    "form": "wite",
+                    "source": "Conjugation",
+                    "tags": ["first-person", "indicative", "plural", "present"],
+                },
+                {
+                    "form": "wist",
+                    "source": "Conjugation",
+                    "tags": ["first-person", "indicative", "past", "plural"],
+                },
+                {
+                    "form": "wit",
+                    "source": "Conjugation",
+                    "tags": [
+                        "archaic",
+                        "indicative",
+                        "plural",
+                        "present",
+                        "second-person",
+                    ],
+                },
+                {
+                    "form": "wite",
+                    "source": "Conjugation",
+                    "tags": [
+                        "archaic",
+                        "indicative",
+                        "plural",
+                        "present",
+                        "second-person",
+                    ],
+                },
+                {
+                    "form": "wist",
+                    "source": "Conjugation",
+                    "tags": [
+                        "archaic",
+                        "indicative",
+                        "past",
+                        "plural",
+                        "second-person",
+                    ],
+                },
+                {
+                    "form": "wit",
+                    "source": "Conjugation",
+                    "tags": ["indicative", "plural", "present", "third-person"],
+                },
+                {
+                    "form": "wite",
+                    "source": "Conjugation",
+                    "tags": ["indicative", "plural", "present", "third-person"],
+                },
+                {
+                    "form": "wist",
+                    "source": "Conjugation",
+                    "tags": ["indicative", "past", "plural", "third-person"],
+                },
             ],
-}
+        }
         self.assertEqual(expected, ret)
