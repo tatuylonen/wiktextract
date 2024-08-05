@@ -602,33 +602,38 @@ def extract_cell_content(
         r = m.group(1)
         if r.startswith("(") and r.endswith(")"):
             r = r[1:-1]
-        if r == "rare":
-            hdr_tags.append("rare")
-        elif special_references and r in special_references:
-            hdr_tags.extend(special_references[r].split())
-        else:
-            v = m.group(1)
-            if v.startswith("(") and v.endswith(")"):
-                v = v[1:-1]
-            refs.append(v)
+        for r1 in r.split(","):
+            if r1 == "rare":
+                hdr_tags.append("rare")
+            elif special_references and r1 in special_references:
+                hdr_tags.extend(special_references[r1].split())
+            else:
+                # v = m.group(1)
+                if r1.startswith("(") and r1.endswith(")"):
+                    r1 = r1[1:-1]
+                refs.append(unicodedata.normalize("NFKD", r1))
         col = col[: m.start()]
     # See if it is a ref definition
     # print("BEFORE REF CHECK: {!r}".format(col))
-    m = re.match(def_re, col)
-    if m and not re.match(nondef_re, col):
+    m = def_re.match(col)
+    # print(f"Before def_re: {refs=}")
+    if m and not nondef_re.match(col):
         ofs = 0
         ref = None
         deflst = []
         for m in re.finditer(def_re, col):
             if ref:
                 deflst.append((ref, col[ofs : m.start()].strip()))
-            ref = m.group(3) or m.group(5) or m.group(6)
+            ref = unicodedata.normalize(
+                "NFKD", m.group(3) or m.group(5) or m.group(6)
+            )
             ofs = m.end()
         if ref:
             deflst.append((ref, col[ofs:].strip()))
         # print("deflst:", deflst)
         return "", [], deflst, []
     # See if it *looks* like a reference to a definition
+    # print(f"After def_re: {refs=}")
     while col:
         if is_superscript(col[-1]) or col[-1] in ("†",):
             if col.endswith("ʳᵃʳᵉ"):
@@ -646,7 +651,7 @@ def extract_cell_content(
                 if stop_flag:
                     continue  # this while loop
             # Numbers and H/L/N are useful information
-            refs.append(col[-1])
+            refs.append(unicodedata.normalize("NFKD", col[-1]))
             col = col[:-1]
         else:
             break
@@ -665,7 +670,7 @@ def extract_cell_content(
     m = re.search(r"\*+$", col)
     if m is not None:
         col = col[: m.start()]
-        refs.append(m.group(0))
+        refs.append(unicodedata.normalize("NFKD", m.group(0)))
     if col.endswith("(*)"):
         col = col[:-3].strip()
         refs.append("*")

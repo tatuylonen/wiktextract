@@ -1003,6 +1003,7 @@ def decode_tags(
     no_unknown_starts=False,
 ) -> tuple[list[tuple[str, ...]], list[str]]:
     tagsets, topics = decode_tags1(src, allow_any, no_unknown_starts)
+    # print(f"decode_tags: {src=}, {tagsets=}")
 
     # Insert retry-code here that modifies the text source
     if (
@@ -3258,9 +3259,9 @@ def classify_desc(
                 return "taxonomic"
 
     # If all words are in our English dictionary, interpret as English.
-    # [ -~] is regex black magic, "all characters from space to tilde"
+    # [ -~] is regex black magic, "ALL CHARACTERS from space to tilde"
     # in ASCII. Took me a while to figure out.
-    if re.match(r"^[ -~―—“”…'‘’ʹ€]+$", normalized_desc) and len(desc) > 1:
+    if re.match(r"[ -~―—“”…'‘’ʹ€]+$", normalized_desc) and len(desc) > 1:
         if desc in english_words and desc[0].isalpha():
             return "english"  # Handles ones containing whitespace
         desc1 = re.sub(
