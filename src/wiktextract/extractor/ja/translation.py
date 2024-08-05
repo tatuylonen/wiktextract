@@ -38,7 +38,7 @@ def process_translation_list_item(
             after_collon = True
             if lang_name == "":
                 lang_nodes = list_item.children[:node_index]
-                lang_nodes.append(node[:node.index(":")])
+                lang_nodes.append(node[: node.index(":")])
                 lang_name = clean_node(wxr, None, lang_nodes)
                 lang_code = name_to_code(lang_name, "ja")
         elif isinstance(node, TemplateNode):

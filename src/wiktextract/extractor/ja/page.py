@@ -2,7 +2,7 @@ import re
 from typing import Any
 
 from mediawiki_langcodes import name_to_code
-from wikitextprocessor.parser import LevelNode, NodeKind
+from wikitextprocessor.parser import LEVEL_KIND_FLAGS, LevelNode, NodeKind
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -40,6 +40,9 @@ def parse_section(
                 page_data.append(base_data.model_copy(deep=True))
             extract_translation_section(wxr, page_data[-1], level_node)
             break
+
+    for next_level in level_node.find_child(LEVEL_KIND_FLAGS):
+        parse_section(wxr, page_data, base_data, next_level)
 
 
 def parse_page(
