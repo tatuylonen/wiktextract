@@ -109,3 +109,21 @@ class TestJaTransaltion(TestCase):
                 },
             ],
         )
+
+    def test_t_template_tag(self):
+        self.wxr.wtp.start_page("いろ")
+        self.wxr.wtp.add_page("テンプレート:an", 10, "アラゴン語")
+        data = WordEntry(word="いろ", lang="日本語", lang_code="ja", pos="noun")
+        root = self.wxr.wtp.parse("*[[{{an}}]]: {{t|an|color|f}}")
+        extract_translation_section(self.wxr, data, root)
+        self.assertEqual(
+            [t.model_dump(exclude_defaults=True) for t in data.translations],
+            [
+                {
+                    "lang": "アラゴン語",
+                    "lang_code": "an",
+                    "word": "color",
+                    "tags": ["feminine"],
+                }
+            ],
+        )

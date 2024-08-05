@@ -69,6 +69,17 @@ def process_translation_list_item(
                 )
 
 
+T_TAGS = {
+    "m": "masculine",
+    "f": "feminine",
+    "mf": ["masculine", "feminine"],
+    "n": "neuter",
+    "c": "common",
+    "impf": "imperfective",
+    "pf": "perfective",
+}
+
+
 def process_t_template(
     wxr: WiktextractContext,
     word_entry: WordEntry,
@@ -77,10 +88,19 @@ def process_t_template(
     lang_name: str,
     lang_code: str,
 ) -> None:
+    # https://ja.wiktionary.org/wiki/テンプレート:t
     tr_word = clean_node(wxr, None, node.template_parameters.get(2, ""))
     if "alt" in node.template_parameters:
         tr_word = clean_node(wxr, None, node.template_parameters["alt"])
     roman = clean_node(wxr, None, node.template_parameters.get("tr", ""))
+    tags = []
+    if 3 in node.template_parameters:
+        tag_arg = clean_node(wxr, None, node.template_parameters.get(3, ""))
+        tag_value = T_TAGS.get(tag_arg, [])
+        if isinstance(tag_value, str):
+            tags.append(tag_value)
+        elif isinstance(tag_value, list):
+            tags.extend(tag_value)
     if len(tr_word) > 0:
         word_entry.translations.append(
             Translation(
@@ -89,5 +109,6 @@ def process_t_template(
                 sense=sense_text,
                 lang_code=lang_code,
                 lang=lang_name,
+                tags=tags,
             )
         )
