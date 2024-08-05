@@ -11,6 +11,7 @@ from .models import Sense, WordEntry
 from .pos import parse_pos_section
 from .section_titles import POS_DATA
 from .sound import extract_sound_section
+from .translation import extract_translation_section
 
 PANEL_TEMPLATES = set()
 PANEL_PREFIXES = set()
@@ -33,6 +34,11 @@ def parse_section(
             break
         elif title_text == "発音" and wxr.config.capture_pronunciation:
             extract_sound_section(wxr, base_data, level_node)
+            break
+        elif title_text == "翻訳" and wxr.config.capture_translations:
+            if len(page_data) == 0:
+                page_data.append(base_data.model_copy(deep=True))
+            extract_translation_section(wxr, page_data[-1], level_node)
             break
 
 
