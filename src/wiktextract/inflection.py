@@ -1461,6 +1461,7 @@ def parse_simple_table(
             if d.endswith("."):  # catc ".."??
                 d = d[:-1]
             tags, topics = decode_tags(d, no_unknown_starts=True)
+            # print(f"{ref=}, {d=}, {tags=}")
             if topics or any("error-unknown-tag" in ts for ts in tags):
                 d = d[0].lower() + d[1:]
                 tags, topics = decode_tags(d, no_unknown_starts=True)
