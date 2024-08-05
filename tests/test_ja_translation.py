@@ -83,3 +83,29 @@ class TestJaTransaltion(TestCase):
             [t.model_dump(exclude_defaults=True) for t in data.translations],
             [{"lang": "イタリア語", "lang_code": "it", "word": "proteggere"}],
         )
+
+    def test_nested_list(self):
+        self.wxr.wtp.start_page("いろ")
+        self.wxr.wtp.add_page("テンプレート:zh", 10, "中国語")
+        self.wxr.wtp.add_page("テンプレート:yue", 10, "広東語")
+        data = WordEntry(word="いろ", lang="日本語", lang_code="ja", pos="noun")
+        root = self.wxr.wtp.parse("""*[[{{zh}}]]: {{t+|cmn|色|tr=sè|sc=Hani}}
+**[[{{yue}}]]: {{t|yue|色|tr=sik1|sc=Hani}}""")
+        extract_translation_section(self.wxr, data, root)
+        self.assertEqual(
+            [t.model_dump(exclude_defaults=True) for t in data.translations],
+            [
+                {
+                    "lang": "中国語",
+                    "lang_code": "zh",
+                    "word": "色",
+                    "roman": "sè",
+                },
+                {
+                    "lang": "広東語",
+                    "lang_code": "yue",
+                    "word": "色",
+                    "roman": "sik1",
+                },
+            ],
+        )

@@ -18,7 +18,7 @@ def extract_translation_section(
                 wxr, None, node.template_parameters.get(1, "")
             )
         elif node.kind == NodeKind.LIST:
-            for list_item in node.find_child(NodeKind.LIST_ITEM):
+            for list_item in node.find_child_recursively(NodeKind.LIST_ITEM):
                 process_translation_list_item(
                     wxr, word_entry, list_item, sense_text
                 )
