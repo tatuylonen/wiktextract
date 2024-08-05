@@ -50,6 +50,19 @@ class Sound(JapaneseBaseModel):
     roman: str = ""
 
 
+class Translation(JapaneseBaseModel):
+    lang_code: str = Field(
+        default="",
+        description="Wiktionary language code of the translation term",
+    )
+    lang: str = Field(default="", description="Translation language name")
+    word: str = Field(default="", description="Translation term")
+    sense: str = Field(default="", description="Translation gloss")
+    tags: list[str] = []
+    raw_tags: list[str] = []
+    roman: str = ""
+
+
 class WordEntry(JapaneseBaseModel):
     model_config = ConfigDict(title="Japanese Wiktionary")
 
@@ -67,3 +80,4 @@ class WordEntry(JapaneseBaseModel):
     forms: list[Form] = []
     etymology_texts: list[str] = []
     sounds: list[Sound] = []
+    translations: list[Translation] = []

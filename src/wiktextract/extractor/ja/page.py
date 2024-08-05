@@ -2,7 +2,7 @@ import re
 from typing import Any
 
 from mediawiki_langcodes import name_to_code
-from wikitextprocessor.parser import LevelNode, NodeKind
+from wikitextprocessor.parser import LEVEL_KIND_FLAGS, LevelNode, NodeKind
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -11,6 +11,7 @@ from .models import Sense, WordEntry
 from .pos import parse_pos_section
 from .section_titles import POS_DATA
 from .sound import extract_sound_section
+from .translation import extract_translation_section
 
 PANEL_TEMPLATES = set()
 PANEL_PREFIXES = set()
@@ -32,8 +33,16 @@ def parse_section(
             extract_etymology_section(wxr, page_data, base_data, level_node)
             break
         elif title_text == "発音" and wxr.config.capture_pronunciation:
-            extract_sound_section(wxr, base_data, level_node)
+            extract_sound_section(wxr, page_data, base_data, level_node)
             break
+        elif title_text == "翻訳" and wxr.config.capture_translations:
+            if len(page_data) == 0:
+                page_data.append(base_data.model_copy(deep=True))
+            extract_translation_section(wxr, page_data[-1], level_node)
+            break
+
+    for next_level in level_node.find_child(LEVEL_KIND_FLAGS):
+        parse_section(wxr, page_data, base_data, next_level)
 
 
 def parse_page(

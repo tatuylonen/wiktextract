@@ -10,17 +10,30 @@ from .models import Sound, WordEntry
 
 def extract_sound_section(
     wxr: WiktextractContext,
+    page_data: list[WordEntry],
     base_data: WordEntry,
     level_node: LevelNode,
 ) -> None:
+    sounds = []
+    cats = {}
     for template_node in level_node.find_child_recursively(NodeKind.TEMPLATE):
-        process_sound_template(wxr, base_data, template_node)
+        process_sound_template(wxr, template_node, sounds, cats)
+
+    if level_node.kind == NodeKind.LEVEL3:
+        base_data.sounds.extend(sounds)
+        base_data.categories.extend(cats.get("categories", []))
+
+    for data in page_data:
+        if data.lang_code == base_data.lang_code:
+            data.sounds.extend(sounds)
+            data.categories.extend(cats.get("categories", []))
 
 
 def process_sound_template(
     wxr: WiktextractContext,
-    base_data: WordEntry,
     template_node: TemplateNode,
+    sounds: list[Sound],
+    cats: dict[str, list[str]],
 ) -> None:
     if template_node.template_name == "音声":
         audio_file = template_node.template_parameters.get(2, "")
@@ -32,7 +45,7 @@ def process_sound_template(
             if len(raw_tag) > 0:
                 sound.raw_tags.append(raw_tag)
             set_sound_file_url_fields(wxr, audio_file, sound)
-            base_data.sounds.append(sound)
+            sounds.append(sound)
     elif template_node.template_name in ["IPA", "X-SAMPA"]:
         for index in itertools.count(1):
             if index not in template_node.template_parameters:
@@ -42,7 +55,7 @@ def process_sound_template(
                 sound = Sound(ipa=ipa)
                 if template_node.template_name == "X-SAMPA":
                     sound.tags.append("X-SAMPA")
-                base_data.sounds.append(sound)
+                sounds.append(sound)
     elif template_node.template_name == "homophones":
         homophones = []
         for index in itertools.count(1):
@@ -52,17 +65,17 @@ def process_sound_template(
             if len(homophone) > 0:
                 homophones.append(homophone)
         if len(homophones) > 0:
-            base_data.sounds.append(Sound(homophones=homophones))
+            sounds.append(Sound(homophones=homophones))
     elif template_node.template_name == "ja-pron":
-        process_ja_pron_template(wxr, base_data, template_node)
+        process_ja_pron_template(wxr, template_node, sounds)
 
-    clean_node(wxr, base_data, template_node)
+    clean_node(wxr, cats, template_node)
 
 
 def process_ja_pron_template(
     wxr: WiktextractContext,
-    base_data: WordEntry,
     template_node: TemplateNode,
+    sounds: list[Sound],
 ) -> None:
     # https://ja.wiktionary.org/wiki/テンプレート:ja-pron
     expanded_node = wxr.wtp.parse(
@@ -86,11 +99,11 @@ def process_ja_pron_template(
                 elif "Jpan" in span_classes:
                     sound.form = clean_node(wxr, None, span_tag)
             if len(sound.model_dump(exclude_defaults=True)) > 0:
-                base_data.sounds.append(sound)
+                sounds.append(sound)
 
     for arg in ["a", "audio"]:
         audio_file = template_node.template_parameters.get(arg, "")
         if len(audio_file) > 0:
             sound = Sound()
             set_sound_file_url_fields(wxr, audio_file, sound)
-            base_data.sounds.append(sound)
+            sounds.append(sound)

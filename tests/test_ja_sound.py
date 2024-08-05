@@ -3,6 +3,7 @@ from unittest import TestCase
 from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.ja.models import Sound, WordEntry
+from wiktextract.extractor.ja.page import parse_page
 from wiktextract.extractor.ja.sound import extract_sound_section
 from wiktextract.wxr_context import WiktextractContext
 
@@ -40,10 +41,11 @@ class TestJaSound(TestCase):
             '<table class="audiotable"><tr><td class="unicode audiolink" style="padding-right:5px; padding-left: 0;">音声 (米)<td class="audiofile">[[File:en-us-puppy.ogg|noicon|175px]]</td><td class="audiometa" style="font-size: 80%;">([[:File:en-us-puppy.ogg|ファイル]])</td></tr></table>[[カテゴリ:英語 音声リンクがある語句|PUPPY]]',
         )
         data = WordEntry(lang="英語", lang_code="en", word="puppy")
-        root = self.wxr.wtp.parse("""* {{IPA|ˈpə.pi|ˈpʌp.i}}
+        root = self.wxr.wtp.parse("""===発音===
+* {{IPA|ˈpə.pi|ˈpʌp.i}}
 * {{X-SAMPA|"p@.pi|"pVp.i}}
 * {{音声|en|en-us-puppy.ogg|音声 (米)}}""")
-        extract_sound_section(self.wxr, data, root)
+        extract_sound_section(self.wxr, [], data, root.children[0])
         self.assertEqual(
             data.categories, ["国際音声記号あり", "英語 音声リンクがある語句"]
         )
@@ -69,8 +71,9 @@ class TestJaSound(TestCase):
 * <table class="audiotable"><tr><td class="unicode audiolink">音声</td><td class="audiofile">[[Image:Ja-nihongo.ogg|noicon|175px]]</td><td class="audiometa" style="font-size: 80%;">([[:Image:Ja-nihongo.ogg|file]])</td></tr></table>[[Category:日本語 音声リンクがある語句|にほんこ にほんご]]""",
         )
         data = WordEntry(lang="日本語", lang_code="ja", word="日本語")
-        root = self.wxr.wtp.parse("{{ja-pron|にほんご|acc=0|a=Ja-nihongo.ogg}}")
-        extract_sound_section(self.wxr, data, root)
+        root = self.wxr.wtp.parse("""===発音===
+{{ja-pron|にほんご|acc=0|a=Ja-nihongo.ogg}}""")
+        extract_sound_section(self.wxr, [], data, root.children[0])
         self.assertEqual(
             data.sounds[:2],
             [
@@ -79,3 +82,26 @@ class TestJaSound(TestCase):
             ],
         )
         self.assertEqual(data.sounds[2].audio, "Ja-nihongo.ogg")
+
+    def test_sound_under_pos(self):
+        self.wxr.wtp.add_page(
+            "テンプレート:ja-pron",
+            10,
+            '*[[w:国際音声記号|IPA]]<sup>([[付録:日本語の発音表記|?]])</sup>:&#32;<span class="IPA">[iɾo̞]</span>',
+        )
+        data = parse_page(
+            self.wxr,
+            "いろ",
+            """==日本語==
+===名詞===
+# gloss 1
+====発音====
+{{ja-pron|acc=2}}
+
+===動詞===
+# gloss 2""",
+        )
+        self.assertEqual(data[0]["senses"], [{"glosses": ["gloss 1"]}])
+        self.assertEqual(data[0]["sounds"], [{"ipa": "[iɾo̞]"}])
+        self.assertEqual(data[1]["senses"], [{"glosses": ["gloss 2"]}])
+        self.assertTrue("sounds" not in data[1])
