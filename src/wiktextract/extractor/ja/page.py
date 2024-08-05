@@ -33,7 +33,7 @@ def parse_section(
             extract_etymology_section(wxr, page_data, base_data, level_node)
             break
         elif title_text == "発音" and wxr.config.capture_pronunciation:
-            extract_sound_section(wxr, base_data, level_node)
+            extract_sound_section(wxr, page_data, base_data, level_node)
             break
         elif title_text == "翻訳" and wxr.config.capture_translations:
             if len(page_data) == 0:

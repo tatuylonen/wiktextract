@@ -58,9 +58,6 @@ class Translation(JapaneseBaseModel):
     lang: str = Field(default="", description="Translation language name")
     word: str = Field(default="", description="Translation term")
     sense: str = Field(default="", description="Translation gloss")
-    sense_index: int = Field(
-        default=0, ge=0, description="Number of the definition, start from 1"
-    )
     tags: list[str] = []
     raw_tags: list[str] = []
     roman: str = ""
