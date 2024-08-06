@@ -676,6 +676,15 @@ quotation_templates: set[str] = {
     "Wikiquote",
 }
 
+taxonomy_templates = {
+    # argument 1 should be the taxonomic name, frex. "Lupus lupus"
+    "taxfmt",
+    "taxlink",
+    "taxlink2",
+    "taxlinknew",
+    "taxlook",
+}
+
 # Template name component to linkage section listing.  Integer section means
 # default section, starting at that argument.
 # XXX not used anymore, except for the first elements: moved to
@@ -3568,6 +3577,7 @@ def parse_language(
                 usex_type = None
                 example_template_args = []
                 example_template_names = []
+                taxons = set()
 
                 def usex_template_fn(
                     name: str, ht: TemplateArgs
@@ -3581,12 +3591,15 @@ def parse_language(
                         example_template_names.append(name)
                     elif name in quotation_templates:
                         usex_type = "quotation"
+                    elif name in taxonomy_templates:
+                        taxons.update(ht.get(1, "").split())
                     for prefix in template_linkages:
                         if re.search(
                             r"(^|[-/\s]){}($|\b|[0-9])".format(prefix), name
                         ):
                             return ""
                     return None
+
 
                 # bookmark
                 ruby: list[tuple[str, str]] = []
@@ -3612,6 +3625,10 @@ def parse_language(
                 subtext = clean_node(
                     wxr, sense_base, contents, template_fn=usex_template_fn
                 )
+
+                frozen_taxons = frozenset(taxons)
+                classify_desc2 = partial(classify_desc, accepted=frozen_taxons)
+
                 # print(f"{subtext=}")
                 subtext = re.sub(
                     r"\s*\(please add an English "
@@ -3720,7 +3737,7 @@ def parse_language(
                         tr = parts[1].strip()
                     elif (
                         len(parts) == 2
-                        and classify_desc(parts[1]) in ENGLISH_TEXTS
+                        and classify_desc2(parts[1]) in ENGLISH_TEXTS
                     ):
                         # These other branches just do some simple heuristics w/
                         # the expanded output of the template (if applicable).
@@ -3728,9 +3745,9 @@ def parse_language(
                         tr = parts[1].strip()
                     elif (
                         len(parts) == 3
-                        and classify_desc(parts[1])
+                        and classify_desc2(parts[1])
                         in ("romanization", "english")
-                        and classify_desc(parts[2]) in ENGLISH_TEXTS
+                        and classify_desc2(parts[2]) in ENGLISH_TEXTS
                     ):
                         lines = [parts[0].strip()]
                         roman = parts[1].strip()
@@ -3739,7 +3756,7 @@ def parse_language(
                         parts = re.split(r"\s+-\s+", lines[0])
                         if (
                             len(parts) == 2
-                            and classify_desc(parts[1]) in ENGLISH_TEXTS
+                            and classify_desc2(parts[1]) in ENGLISH_TEXTS
                         ):
                             lines = [parts[0].strip()]
                             tr = parts[1].strip()
@@ -3762,18 +3779,19 @@ def parse_language(
                         if (
                             lang_code != "en"
                             and len(lines) >= 2
-                            and classify_desc(lines[-1]) in ENGLISH_TEXTS
+                            and classify_desc2(lines[-1]) in ENGLISH_TEXTS
                         ):
                             i = len(lines) - 1
                             while (
                                 i > 1
-                                and classify_desc(lines[i - 1]) in ENGLISH_TEXTS
+                                and classify_desc2(lines[i - 1])
+                                in ENGLISH_TEXTS
                             ):
                                 i -= 1
                             tr = "\n".join(lines[i:])
                             lines = lines[:i]
                         if len(lines) >= 2:
-                            if classify_desc(lines[-1]) == "romanization":
+                            if classify_desc2(lines[-1]) == "romanization":
                                 roman = lines[-1].strip()
                                 lines = lines[:-1]
 
@@ -3781,8 +3799,8 @@ def parse_language(
                         ref = lines[0]
                         lines = lines[1:]
                     elif lang_code != "en" and len(lines) == 2:
-                        cls1 = classify_desc(lines[0])
-                        cls2 = classify_desc(lines[1])
+                        cls1 = classify_desc2(lines[0])
+                        cls2 = classify_desc2(lines[1])
                         if cls2 in ENGLISH_TEXTS and cls1 != "english":
                             tr = lines[1]
                             lines = [lines[0]]
@@ -3791,7 +3809,7 @@ def parse_language(
                             lines = [lines[1]]
                         elif (
                             re.match(r"^[#*]*:+", lines[1])
-                            and classify_desc(
+                            and classify_desc2(
                                 re.sub(r"^[#*:]+\s*", "", lines[1])
                             )
                             in ENGLISH_TEXTS
@@ -3809,9 +3827,9 @@ def parse_language(
                         and lang_code != "en"
                         and len(lines) == 3
                     ):
-                        cls1 = classify_desc(lines[0])
-                        cls2 = classify_desc(lines[1])
-                        cls3 = classify_desc(lines[2])
+                        cls1 = classify_desc2(lines[0])
+                        cls2 = classify_desc2(lines[1])
+                        cls3 = classify_desc2(lines[2])
                         if (
                             cls3 == "english"
                             and cls2 in ("english", "romanization")
@@ -3827,16 +3845,17 @@ def parse_language(
                     ):
                         # for x in lines:
                         #     print("  LINE: {}: {}"
-                        #           .format(classify_desc(x), x))
+                        #           .format(classify_desc2(x), x))
                         if re.match(r"^[#*]*:+\s*$", lines[1]):
                             ref = lines[0]
                             lines = lines[2:]
-                        cls1 = classify_desc(lines[-1])
+                        cls1 = classify_desc2(lines[-1])
                         if cls1 == "english":
                             i = len(lines) - 1
                             while (
                                 i > 1
-                                and classify_desc(lines[i - 1]) == ENGLISH_TEXTS
+                                and classify_desc2(lines[i - 1])
+                                == ENGLISH_TEXTS
                             ):
                                 i -= 1
                             tr = "\n".join(lines[i:])
@@ -3854,7 +3873,7 @@ def parse_language(
                         for i, line in enumerate(lines):
                             if not line:
                                 continue
-                            cl = classify_desc(line.split("[")[0])
+                            cl = classify_desc2(line.split("[")[0])
                             if line.startswith("From:"):
                                 ref += line
                             elif cl == "other":
@@ -3883,14 +3902,14 @@ def parse_language(
                 subtext = "\n".join(x for x in lines if x)
                 if not tr and lang_code != "en":
                     m = re.search(r"([.!?])\s+\(([^)]+)\)\s*$", subtext)
-                    if m and classify_desc(m.group(2)) in ENGLISH_TEXTS:
+                    if m and classify_desc2(m.group(2)) in ENGLISH_TEXTS:
                         tr = m.group(2)
                         subtext = subtext[: m.start()] + m.group(1)
                     elif lines:
                         parts = re.split(r"\s*[―—]+\s*", lines[0])
                         if (
                             len(parts) == 2
-                            and classify_desc(parts[1]) in ENGLISH_TEXTS
+                            and classify_desc2(parts[1]) in ENGLISH_TEXTS
                         ):
                             subtext = parts[0].strip()
                             tr = parts[1].strip()
@@ -3915,7 +3934,7 @@ def parse_language(
                     and lang_code != "en"
                     and (
                         m.group(1).startswith("with ")
-                        or classify_desc(m.group(1)) == "english"
+                        or classify_desc2(m.group(1)) == "english"
                     )
                 ):
                     note = m.group(1)
