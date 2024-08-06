@@ -1,3 +1,4 @@
+# List of templates
 # https://ja.wiktionary.org/wiki/テンプレートの一覧#品詞表記
 POS_DATA = {
     "名詞": {"pos": "noun"},
@@ -28,4 +29,25 @@ POS_DATA = {
     # "疑問詞"
     "和語の漢字表記": {"pos": "unknown", "tags": ["kanji"]},
     "成句": {"pos": "phrase", "tags": ["idiomatic"]},
+    "縮約形": {"pos": "contraction"},
+    "略語": {"pos": "abbrev", "tags": ["abbreviation"]},
+    "頭字語": {"pos": "abbrev", "tags": ["abbreviation"]},
+    "ことわざ": {"pos": "proverb"},
+}
+
+LINKAGES = {
+    "類義語": "synonyms",
+    "対義語": "antonyms",
+    "上位語": "hypernyms",
+    "下位語": "hyponyms",
+    "全体語": "holonyms",
+    "部分語": "meronyms",
+    "複合語": "derived",
+    "派生語": "derived",
+    "縮約形": "contraction",
+    "略語": "abbreviations",
+    "関連語": "related",
+    "同族語": "coordinate_terms",
+    "熟語": "proverbs",
+    "連語": "collocations",
 }

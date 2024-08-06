@@ -7,9 +7,10 @@ from wikitextprocessor.parser import LEVEL_KIND_FLAGS, LevelNode, NodeKind
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .etymology import extract_etymology_section
+from .linkage import extract_linkage_section
 from .models import Sense, WordEntry
 from .pos import parse_pos_section
-from .section_titles import POS_DATA
+from .section_titles import LINKAGES, POS_DATA
 from .sound import extract_sound_section
 from .translation import extract_translation_section
 
@@ -27,7 +28,10 @@ def parse_section(
     title_texts = clean_node(wxr, None, level_node.largs)
     for title_text in re.split(r"：|・", title_texts):
         if title_text in POS_DATA:
+            pre_len = len(page_data)
             parse_pos_section(wxr, page_data, base_data, level_node, title_text)
+            if len(page_data) == pre_len and title_text in LINKAGES:
+                pass
             break
         elif title_text == "語源" and wxr.config.capture_etymologies:
             extract_etymology_section(wxr, page_data, base_data, level_node)
@@ -39,6 +43,11 @@ def parse_section(
             if len(page_data) == 0:
                 page_data.append(base_data.model_copy(deep=True))
             extract_translation_section(wxr, page_data[-1], level_node)
+            break
+        elif title_text in LINKAGES and wxr.config.capture_linkages:
+            extract_linkage_section(
+                wxr, page_data[-1], level_node, LINKAGES[title_text]
+            )
             break
 
     for next_level in level_node.find_child(LEVEL_KIND_FLAGS):
