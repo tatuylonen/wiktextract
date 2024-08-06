@@ -3212,7 +3212,10 @@ def parse_alt_or_inflection_of1(
 
 @functools.lru_cache(maxsize=65536)
 def classify_desc(
-    desc: str, allow_unknown_tags=False, no_unknown_starts=False
+    desc: str,
+    allow_unknown_tags=False,
+    no_unknown_starts=False,
+    accepted: Union[tuple[str, ...], frozenset[str]] = tuple(),
 ) -> str:
     """Determines whether the given description is most likely tags, english,
     a romanization, or something else.  Returns one of: "tags", "english",
@@ -3279,6 +3282,7 @@ def classify_desc(
                 or x.lower() in english_words
                 or x in known_firsts
                 or x[0].isdigit()
+                or x in accepted
                 or
                 # (x[0].isupper() and x.find("-") < 0 and x.isascii()) or
                 (
