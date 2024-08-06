@@ -14,13 +14,17 @@ def extract_etymology_section(
     etymology_texts = []
     cats = {}
     for list_item in level_node.find_child_recursively(NodeKind.LIST_ITEM):
-        text = clean_node(wxr, cats, list_item.children)
+        text = clean_node(
+            wxr, cats, list(list_item.invert_find_child(NodeKind.LIST))
+        )
         if len(text) > 0:
             etymology_texts.append(text)
     if len(etymology_texts) == 0:
         text = clean_node(wxr, cats, level_node.children)
         if len(text) > 0:
             etymology_texts.append(text)
+    for link in level_node.find_child(NodeKind.LINK):
+        clean_node(wxr, cats, link)
     base_data.etymology_texts = etymology_texts
     base_data.categories.extend(cats.get("categories", []))
     if level_node.kind != NodeKind.LEVEL3:  # under POS section

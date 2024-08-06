@@ -63,6 +63,14 @@ class Translation(JapaneseBaseModel):
     roman: str = ""
 
 
+class Linkage(JapaneseBaseModel):
+    word: str
+    tags: list[str] = []
+    raw_tags: list[str] = []
+    ruby: list[tuple[str, ...]] = []
+    sense: str = ""
+
+
 class WordEntry(JapaneseBaseModel):
     model_config = ConfigDict(title="Japanese Wiktionary")
 
@@ -81,3 +89,16 @@ class WordEntry(JapaneseBaseModel):
     etymology_texts: list[str] = []
     sounds: list[Sound] = []
     translations: list[Translation] = []
+    antonyms: list[Linkage] = []
+    synonyms: list[Linkage] = []
+    hyponyms: list[Linkage] = []
+    hypernyms: list[Linkage] = []
+    holonyms: list[Linkage] = []
+    meronyms: list[Linkage] = []
+    derived: list[Linkage] = []
+    contraction: list[Linkage] = []
+    abbreviations: list[Linkage] = []
+    related: list[Linkage] = []
+    collocations: list[Linkage] = []
+    proverbs: list[Linkage] = []
+    phrases: list[Linkage] = []
