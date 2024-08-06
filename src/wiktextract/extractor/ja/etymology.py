@@ -14,7 +14,9 @@ def extract_etymology_section(
     etymology_texts = []
     cats = {}
     for list_item in level_node.find_child_recursively(NodeKind.LIST_ITEM):
-        text = clean_node(wxr, cats, list_item.children)
+        text = clean_node(
+            wxr, cats, list(list_item.invert_find_child(NodeKind.LIST))
+        )
         if len(text) > 0:
             etymology_texts.append(text)
     if len(etymology_texts) == 0:

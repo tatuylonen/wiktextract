@@ -33,7 +33,7 @@ def parse_section(
             if len(page_data) == pre_len and title_text in LINKAGES:
                 pass
             break
-        elif title_text == "語源" and wxr.config.capture_etymologies:
+        elif title_text in ["語源", "由来"] and wxr.config.capture_etymologies:
             extract_etymology_section(wxr, page_data, base_data, level_node)
             break
         elif title_text == "発音" and wxr.config.capture_pronunciation:
@@ -45,6 +45,8 @@ def parse_section(
             extract_translation_section(wxr, page_data[-1], level_node)
             break
         elif title_text in LINKAGES and wxr.config.capture_linkages:
+            if len(page_data) == 0:
+                page_data.append(base_data.model_copy(deep=True))
             extract_linkage_section(
                 wxr, page_data[-1], level_node, LINKAGES[title_text]
             )
