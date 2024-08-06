@@ -8,7 +8,6 @@ from wiktextract.form_descriptions import classify_desc
 
 
 class ClassifyTests(unittest.TestCase):
-
     def test_empty(self):
         ret = classify_desc("")
         self.assertEqual(ret, "other")
@@ -109,7 +108,7 @@ class ClassifyTests(unittest.TestCase):
         self.assertEqual(cls, "english")
 
     def test_classify21(self):
-        cls = classify_desc('!')
+        cls = classify_desc("!")
         self.assertEqual(cls, "other")
 
     def test_classify22(self):
@@ -346,14 +345,16 @@ class ClassifyTests(unittest.TestCase):
         self.assertEqual(cls, "english")
 
     def test_classify78(self):
-        cls = classify_desc("The cat goes \"meow\".")
+        cls = classify_desc('The cat goes "meow".')
         self.assertEqual(cls, "english")
 
     def test_classify79(self):
-        cls = classify_desc('merely announcing that the elimination of news '
-                            'programming [on tv channel TQS] will allow it to '
-                            'focus on "the production of quality entertainment '
-                            'and cultural programming"')
+        cls = classify_desc(
+            "merely announcing that the elimination of news "
+            "programming [on tv channel TQS] will allow it to "
+            'focus on "the production of quality entertainment '
+            'and cultural programming"'
+        )
         self.assertEqual(cls, "english")
 
     def test_classify80(self):
@@ -365,31 +366,62 @@ class ClassifyTests(unittest.TestCase):
         self.assertEqual(cls, "romanization")
 
     def test_classify82(self):
-        cls = classify_desc("Police resort to DNA analysis in order to "
-                            "identify criminals.")
+        cls = classify_desc(
+            "Police resort to DNA analysis in order to " "identify criminals."
+        )
         self.assertEqual(cls, "english")
 
     def test_classify83(self):
-        cls = classify_desc('"She will not be there tomorrow." ―"Oh, too bad, '
-                            'it\'s not important, we\'ll go on without her."')
+        cls = classify_desc(
+            '"She will not be there tomorrow." ―"Oh, too bad, '
+            "it's not important, we'll go on without her.\""
+        )
         self.assertEqual(cls, "english")
 
     def test_classify84(self):
-        cls = classify_desc('Hardcore pictures.')
+        cls = classify_desc("Hardcore pictures.")
         self.assertEqual(cls, "english")
 
     def test_classify85(self):
-        cls = classify_desc('denʹgám')
+        cls = classify_desc("denʹgám")
         self.assertEqual(cls, "romanization")
 
     def test_classify86(self):
-        cls = classify_desc('dénʹgam')
+        cls = classify_desc("dénʹgam")
         self.assertEqual(cls, "romanization")
 
     def test_classify87(self):
-        cls = classify_desc('proiznosív')
+        cls = classify_desc("proiznosív")
         self.assertEqual(cls, "romanization")
 
     def test_classify88(self):
-        cls = classify_desc('proiznosívši')
+        cls = classify_desc("proiznosívši")
         self.assertEqual(cls, "romanization")
+
+    def test_classify89(self):
+        cls = classify_desc("foo", accepted=("foo",))
+        self.assertEqual(cls, "english")
+
+    def test_classify90(self):
+        cls = classify_desc("foo baz", accepted=("foo",))
+        self.assertEqual(cls, "romanization")
+
+    def test_classify91(self):
+        cls = classify_desc("foo baz", accepted=("foo", "baz"))
+        self.assertEqual(cls, "english")
+
+    def test_classify92(self):
+        cls = classify_desc("foo bar baz", accepted=("foo", "baz"))
+        # because "bar" is already English
+        self.assertEqual(cls, "english")
+
+    def test_classify93(self):
+        cls = classify_desc("foo bar baz fooo", accepted=("foo", "baz"))
+        # due to foooo
+        self.assertEqual(cls, "romanization")
+
+    def test_classify94(self):
+        cls = classify_desc("foo foo bar baz fooo", accepted=("foo", "baz"))
+        # But now that the proportion of "english" is high enough,
+        # the heuristics say it's english again
+        self.assertEqual(cls, "english")
