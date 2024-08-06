@@ -4770,6 +4770,9 @@ xlat_tags_map: Dict[str, Union[str, List[str]]] = {
     # Mapuzugun/Mapudungun
     "Raguileo spelling": "Raguileo-Alphabet",
     "no predicative form": "no-predicative-form",  # diamanten/German
+    "Dialectal or colloquial": "colloquial",
+    "Rare except in very formal contexts": "rare formal",
+    "alternative in würde normally preferred": "",
 }
 
 # This mapping is applied to full descriptions before splitting by comma.

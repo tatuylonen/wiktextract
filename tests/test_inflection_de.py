@@ -842,6 +842,8 @@ class InflTests(unittest.TestCase):
                     "source": "Conjugation",
                     "tags": [
                         "first-person",
+                        "formal",
+                        "rare",
                         "singular",
                         "subjunctive",
                         "subjunctive-ii"
@@ -852,7 +854,9 @@ class InflTests(unittest.TestCase):
                     "source": "Conjugation",
                     "tags": [
                         "first-person",
+                        "formal",
                         "plural",
+                        "rare",
                         "subjunctive",
                         "subjunctive-ii"
                     ]
@@ -881,6 +885,8 @@ class InflTests(unittest.TestCase):
                     "form": "stiegest aus",
                     "source": "Conjugation",
                     "tags": [
+                        "formal",
+                        "rare",
                         "second-person",
                         "singular",
                         "subjunctive",
@@ -891,6 +897,8 @@ class InflTests(unittest.TestCase):
                     "form": "stiegst aus",
                     "source": "Conjugation",
                     "tags": [
+                        "formal",
+                        "rare",
                         "second-person",
                         "singular",
                         "subjunctive",
@@ -901,7 +909,9 @@ class InflTests(unittest.TestCase):
                     "form": "stieget aus",
                     "source": "Conjugation",
                     "tags": [
+                        "formal",
                         "plural",
+                        "rare",
                         "second-person",
                         "subjunctive",
                         "subjunctive-ii"
@@ -911,7 +921,9 @@ class InflTests(unittest.TestCase):
                     "form": "stiegt aus",
                     "source": "Conjugation",
                     "tags": [
+                        "formal",
                         "plural",
+                        "rare",
                         "second-person",
                         "subjunctive",
                         "subjunctive-ii"
@@ -941,6 +953,8 @@ class InflTests(unittest.TestCase):
                     "form": "stiege aus",
                     "source": "Conjugation",
                     "tags": [
+                        "formal",
+                        "rare",
                         "singular",
                         "subjunctive",
                         "subjunctive-ii",
@@ -951,7 +965,9 @@ class InflTests(unittest.TestCase):
                     "form": "stiegen aus",
                     "source": "Conjugation",
                     "tags": [
+                        "formal",
                         "plural",
+                        "rare",
                         "subjunctive",
                         "subjunctive-ii",
                         "third-person"
@@ -1164,6 +1180,8 @@ class InflTests(unittest.TestCase):
                     "source": "Conjugation",
                     "tags": [
                         "first-person",
+                        "formal",
+                        "rare",
                         "singular",
                         "subjunctive",
                         "subjunctive-ii",
@@ -1175,7 +1193,9 @@ class InflTests(unittest.TestCase):
                     "source": "Conjugation",
                     "tags": [
                         "first-person",
+                        "formal",
                         "plural",
+                        "rare",
                         "subjunctive",
                         "subjunctive-ii",
                         "subordinate-clause"
@@ -1207,6 +1227,8 @@ class InflTests(unittest.TestCase):
                     "form": "ausstiegest",
                     "source": "Conjugation",
                     "tags": [
+                        "formal",
+                        "rare",
                         "second-person",
                         "singular",
                         "subjunctive",
@@ -1218,6 +1240,8 @@ class InflTests(unittest.TestCase):
                     "form": "ausstiegst",
                     "source": "Conjugation",
                     "tags": [
+                        "formal",
+                        "rare",
                         "second-person",
                         "singular",
                         "subjunctive",
@@ -1229,7 +1253,9 @@ class InflTests(unittest.TestCase):
                     "form": "ausstieget",
                     "source": "Conjugation",
                     "tags": [
+                        "formal",
                         "plural",
+                        "rare",
                         "second-person",
                         "subjunctive",
                         "subjunctive-ii",
@@ -1240,7 +1266,9 @@ class InflTests(unittest.TestCase):
                     "form": "ausstiegt",
                     "source": "Conjugation",
                     "tags": [
+                        "formal",
                         "plural",
+                        "rare",
                         "second-person",
                         "subjunctive",
                         "subjunctive-ii",
@@ -1273,6 +1301,8 @@ class InflTests(unittest.TestCase):
                     "form": "ausstiege",
                     "source": "Conjugation",
                     "tags": [
+                        "formal",
+                        "rare",
                         "singular",
                         "subjunctive",
                         "subjunctive-ii",
@@ -1284,7 +1314,9 @@ class InflTests(unittest.TestCase):
                     "form": "ausstiegen",
                     "source": "Conjugation",
                     "tags": [
+                        "formal",
                         "plural",
+                        "rare",
                         "subjunctive",
                         "subjunctive-ii",
                         "subordinate-clause",
