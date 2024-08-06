@@ -24,6 +24,8 @@ def parse_pos_section(
 
     gloss_list_start = 0
     for list_index, list_node in level_node.find_child(NodeKind.LIST, True):
+        if not list_node.sarg.endswith("#"):  # linkage list
+            continue
         if gloss_list_start == 0:
             gloss_list_start = list_index
         for list_item in list_node.find_child(NodeKind.LIST_ITEM):
@@ -31,6 +33,8 @@ def parse_pos_section(
     extract_header_nodes(
         wxr, page_data[-1], level_node.children[:gloss_list_start]
     )
+    if gloss_list_start == 0:
+        page_data.pop()
 
 
 def process_gloss_list_item(

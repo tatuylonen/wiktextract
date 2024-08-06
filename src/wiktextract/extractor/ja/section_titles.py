@@ -49,5 +49,6 @@ LINKAGES = {
     "関連語": "related",
     "同族語": "coordinate_terms",
     "熟語": "proverbs",
+    "成句": "phrases",
     "連語": "collocations",
 }

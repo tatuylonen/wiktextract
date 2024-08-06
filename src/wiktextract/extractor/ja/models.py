@@ -101,3 +101,4 @@ class WordEntry(JapaneseBaseModel):
     related: list[Linkage] = []
     collocations: list[Linkage] = []
     proverbs: list[Linkage] = []
+    phrases: list[Linkage] = []

@@ -30,8 +30,14 @@ def parse_section(
         if title_text in POS_DATA:
             pre_len = len(page_data)
             parse_pos_section(wxr, page_data, base_data, level_node, title_text)
-            if len(page_data) == pre_len and title_text in LINKAGES:
-                pass
+            if (
+                len(page_data) == pre_len
+                and title_text in LINKAGES
+                and pre_len > 0
+            ):
+                extract_linkage_section(
+                    wxr, page_data[-1], level_node, LINKAGES[title_text]
+                )
             break
         elif title_text in ["語源", "由来"] and wxr.config.capture_etymologies:
             extract_etymology_section(wxr, page_data, base_data, level_node)

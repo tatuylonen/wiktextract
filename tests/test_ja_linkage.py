@@ -4,6 +4,7 @@ from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.ja.linkage import extract_linkage_section
 from wiktextract.extractor.ja.models import WordEntry
+from wiktextract.extractor.ja.page import parse_page
 from wiktextract.wxr_context import WiktextractContext
 
 
@@ -51,4 +52,32 @@ class TestJaLinkage(TestCase):
         self.assertEqual(
             [s.model_dump(exclude_defaults=True) for s in data.proverbs],
             [{"word": "日本赤蛙", "sense": "生物名"}],
+        )
+
+    def test_phrase(self):
+        # "成句" could also be POS title
+        self.wxr.wtp.add_page("テンプレート:L", 10, "日本語")
+        self.wxr.wtp.add_page("テンプレート:noun", 10, "名詞")
+        self.wxr.wtp.add_page("テンプレート:idiom", 10, "成句")
+        self.assertEqual(
+            parse_page(
+                self.wxr,
+                "青",
+                """=={{L|ja}}==
+==={{noun}}===
+# gloss
+==={{idiom}}===
+*[[青天の霹靂]]""",
+            ),
+            [
+                {
+                    "word": "青",
+                    "pos": "noun",
+                    "pos_title": "名詞",
+                    "lang_code": "ja",
+                    "lang": "日本語",
+                    "senses": [{"glosses": ["gloss"]}],
+                    "phrases": [{"word": "青天の霹靂"}],
+                }
+            ],
         )
