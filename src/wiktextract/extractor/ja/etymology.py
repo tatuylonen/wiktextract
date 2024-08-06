@@ -23,6 +23,8 @@ def extract_etymology_section(
         text = clean_node(wxr, cats, level_node.children)
         if len(text) > 0:
             etymology_texts.append(text)
+    for link in level_node.find_child(NodeKind.LINK):
+        clean_node(wxr, cats, link)
     base_data.etymology_texts = etymology_texts
     base_data.categories.extend(cats.get("categories", []))
     if level_node.kind != NodeKind.LEVEL3:  # under POS section
