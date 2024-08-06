@@ -36,3 +36,19 @@ class TestJaLinkage(TestCase):
             [s.model_dump(exclude_defaults=True) for s in data.synonyms],
             [{"word": "全く", "ruby": [("全", "まった")]}],
         )
+
+    def test_sense(self):
+        self.wxr.wtp.start_page("日本")
+        self.wxr.wtp.add_page(
+            "テンプレート:xlink",
+            10,
+            "<ruby>[[w:ニホンアカガエル|日本赤蛙]]<rp>（</rp><rt>[[日本赤蛙|→作成]]</rt><rp>）</rp></ruby>",
+        )
+        data = WordEntry(word="日本", lang="日本語", lang_code="ja", pos="name")
+        root = self.wxr.wtp.parse("""{{rel-top5|生物名}}
+* {{xlink|日本赤蛙|ニホンアカガエル}}""")
+        extract_linkage_section(self.wxr, data, root, "proverbs")
+        self.assertEqual(
+            [s.model_dump(exclude_defaults=True) for s in data.proverbs],
+            [{"word": "日本赤蛙", "sense": "生物名"}],
+        )

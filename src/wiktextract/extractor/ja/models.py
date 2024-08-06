@@ -68,6 +68,7 @@ class Linkage(JapaneseBaseModel):
     tags: list[str] = []
     raw_tags: list[str] = []
     ruby: list[tuple[str, ...]] = []
+    sense: str = ""
 
 
 class WordEntry(JapaneseBaseModel):
@@ -99,3 +100,4 @@ class WordEntry(JapaneseBaseModel):
     abbreviations: list[Linkage] = []
     related: list[Linkage] = []
     collocations: list[Linkage] = []
+    proverbs: list[Linkage] = []
