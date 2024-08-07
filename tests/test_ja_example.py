@@ -85,3 +85,23 @@ class TestJaExample(TestCase):
                 ref="（折口信夫『俳諧歌の研究』）〔1934年〕 昭和9年5月、『続俳句講座』第3巻「特殊研究篇」初出、『折口信夫全集』13巻213ページ所収",
             ),
         )
+
+    def test_small_tag_ref(self):
+        self.wxr.wtp.start_page("蜂窩生活")
+        self.wxr.wtp.add_page(
+            "テンプレート:Cite book",
+            10,
+            '<cite class="book" style="font-style:normal" id="Reference-[[w:關一|関一]]-1923">[[w:關一|関一]]『[https://dl.ndl.go.jp/pid/971383/1/35 住宅問題と都市計画]』弘文堂書房、1923年8月、53頁。</cite>',
+        )
+        root = self.wxr.wtp.parse(
+            "#* 我々日本人は一日も速に旧式の一家族住ひの小住宅制度を止めて米国の'''蜂窩生活'''に倣ふべきであると教へて居る。<small>――{{Cite book|和書|author=[[w:關一|関一]]|title=住宅問題と都市計画|date=1923-08|publisher=弘文堂書房|page=53|url=https://dl.ndl.go.jp/pid/971383/1/35}}</small>"
+        )
+        sense = Sense()
+        extract_example_list_item(self.wxr, sense, root.children[0].children[0])
+        self.assertEqual(
+            sense.examples[0].model_dump(exclude_defaults=True),
+            {
+                "text": "我々日本人は一日も速に旧式の一家族住ひの小住宅制度を止めて米国の蜂窩生活に倣ふべきであると教へて居る。",
+                "ref": "――関一『住宅問題と都市計画』弘文堂書房、1923年8月、53頁。",
+            },
+        )
