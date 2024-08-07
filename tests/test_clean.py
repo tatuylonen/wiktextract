@@ -14,7 +14,8 @@ class WiktExtractTests(unittest.TestCase):
     def tearDown(self) -> None:
         self.wxr.wtp.close_db_conn()
         close_thesaurus_db(
-            self.wxr.thesaurus_db_path, self.wxr.thesaurus_db_conn  # type:ignore[arg-type]
+            self.wxr.thesaurus_db_path,
+            self.wxr.thesaurus_db_conn,  # type:ignore[arg-type]
         )
 
     def test_cv_plain(self):
@@ -75,8 +76,10 @@ class WiktExtractTests(unittest.TestCase):
         self.assertEqual(v, "This is a bar.")
 
     def test_cv_link5(self):
-        v = ("([[w:Jurchen script|Jurchen script]]: , Image: [[FIle:Da "
-            "(Jurchen script).png|25px]])")
+        v = (
+            "([[w:Jurchen script|Jurchen script]]: , Image: [[FIle:Da "
+            "(Jurchen script).png|25px]])"
+        )
         v = clean_value(self.wxr, v)
         self.assertEqual(v, "(Jurchen script: , Image: )")
 
@@ -378,4 +381,12 @@ class WiktExtractTests(unittest.TestCase):
         # https://de.wiktionary.org/wiki/Flexion:sehen
         self.assertEqual(
             clean_value(self.wxr, "[[Flexion:sehend]]"), "Flexion:sehend"
+        )
+
+    def test_nowiki_in_span_tag(self):
+        # https://pl.wiktionary.org/wiki/pies
+        # from "etym" template
+        self.assertEqual(
+            clean_value(self.wxr, '<span class="a<nowiki/> b">text</span>'),
+            "text",
         )
