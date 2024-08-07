@@ -625,7 +625,7 @@ def extract_cell_content(
             if ref:
                 deflst.append((ref, col[ofs : m.start()].strip()))
             ref = unicodedata.normalize(
-                "NFKD", m.group(3) or m.group(5) or m.group(6)
+                "NFKD", m.group(3) or m.group(5) or m.group(6) or ""
             )
             ofs = m.end()
         if ref:
