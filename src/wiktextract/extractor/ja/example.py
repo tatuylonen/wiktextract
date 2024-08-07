@@ -33,12 +33,17 @@ def extract_example_list_item(
             example.translation = clean_node(wxr, None, tr_list_item.children)
         if len(parent_list_text) > 0:
             example.ref = parent_list_text
-        elif "（" in example.text:
-            ref_start = example.text.rindex("（")
-            example.ref = example.text[ref_start:]
-            example.text = example.text[:ref_start].strip()
-            for ref_tag in expanded_nodes.find_html_recursively("ref"):
-                example.ref += " " + clean_node(wxr, None, ref_tag.children)
+        else:
+            for ref_start_str in ["（", "――"]:
+                if ref_start_str in example.text:
+                    ref_start = example.text.rindex(ref_start_str)
+                    example.ref = example.text[ref_start:]
+                    example.text = example.text[:ref_start].strip()
+                    for ref_tag in expanded_nodes.find_html_recursively("ref"):
+                        example.ref += " " + clean_node(
+                            wxr, None, ref_tag.children
+                        )
+                    break
         sense.examples.append(example)
     else:
         list_item_text = clean_node(
