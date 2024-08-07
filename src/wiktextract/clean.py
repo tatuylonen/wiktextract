@@ -1421,6 +1421,9 @@ def clean_value(
         # Content is preformatted
         return "\n" + m.group(1).strip() + "\n"
 
+    # remove nowiki tag returned from `Wtp.node_to_html()`
+    title = re.sub(r"<nowiki\s*/>", "", title)
+
     # Remove any remaining templates
     # title = re.sub(r"\{\{[^}]+\}\}", "", title)
 
