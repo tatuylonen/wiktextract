@@ -62,6 +62,7 @@ class Linkage(PolishBaseModel):
     tags: list[str] = []
     raw_tags: list[str] = []
     sense_index: str = ""
+    topics: list[str] = []
 
 
 class WordEntry(PolishBaseModel):
