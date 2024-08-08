@@ -685,7 +685,7 @@ foo
         return_value=Page(
             title="Template:+obj",
             namespace_id=10,
-            body="[+accusative blu or ergative = MEANING]",
+            body="[with accusative blu or ergative = MEANING]",
         ),
     )
     def test_plusobj_template(self, mock_get_page):
@@ -695,6 +695,7 @@ foo
         databases for testing.
 
         GitHub issue #667
+        GitHub issue #760
         """
         data = parse_page(
             self.wxr,
@@ -724,7 +725,7 @@ foo {{+obj|cs|accusative|blu|or|ergative|means=MEANING}}
                                 "5": "ergative",
                                 "means": "MEANING",
                             },
-                            "expansion": "[+accusative blu or "
+                            "expansion": "[with accusative blu or "
                             "ergative = MEANING]",
                             "extra_data": {
                                 "meaning": "MEANING",
@@ -740,7 +741,7 @@ foo {{+obj|cs|accusative|blu|or|ergative|means=MEANING}}
                     "senses": [
                         {
                             "glosses": [
-                                "foobar [+accusative blu or "
+                                "foobar [with accusative blu or "
                                 "ergative = MEANING]",
                                 "foobar",
                             ],
@@ -754,7 +755,7 @@ foo {{+obj|cs|accusative|blu|or|ergative|means=MEANING}}
                                         "5": "ergative",
                                         "means": "MEANING",
                                     },
-                                    "expansion": "[+accusative blu or "
+                                    "expansion": "[with accusative blu or "
                                     "ergative = "
                                     "MEANING]",
                                     "extra_data": {
@@ -766,7 +767,7 @@ foo {{+obj|cs|accusative|blu|or|ergative|means=MEANING}}
                                 }
                             ],
                             "raw_glosses": [
-                                "foobar [+accusative blu or ergative = "
+                                "foobar [with accusative blu or ergative = "
                                 "MEANING]"
                             ],
                         }
