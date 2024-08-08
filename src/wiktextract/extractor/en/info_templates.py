@@ -11,7 +11,7 @@ from typing import Callable, Optional, Union
 from wikitextprocessor import WikiNode
 from wikitextprocessor.core import TemplateArgs
 from wikitextprocessor.parser import TemplateNode
-from wiktextract.clean import clean_template_args
+from wiktextract.clean import clean_template_args, clean_value
 from wiktextract.form_descriptions import decode_tags
 from wiktextract.type_utils import PlusObjTemplateData, TemplateData
 from wiktextract.wxr_context import WiktextractContext
@@ -35,7 +35,7 @@ InfoTemplateFunc = Callable[
     InfoReturnTuple,
 ]
 
-PLUSOBJ_RE = re.compile(r"\[\+([^][=]+)( = ([^][]+))?\]")
+PLUSOBJ_RE = re.compile(r"\[with ([^][=]+)( = ([^][]+))?\]")
 
 
 def plusobj_func(
@@ -51,8 +51,9 @@ def plusobj_func(
         )
         return None, None
 
-    text = wxr.wtp.expand(wxr.wtp.node_to_wikitext(node))
-    m = re.search(PLUSOBJ_RE, text)
+    text = clean_value(wxr, wxr.wtp.expand(wxr.wtp.node_to_wikitext(node)))
+    # print(f"cleaned: {text=}")
+    m = PLUSOBJ_RE.search(text)
     if not m:
         wxr.wtp.error(
             f"INFO-TEMPLATES: `Template:+obj` expansion does not "
