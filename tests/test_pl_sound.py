@@ -43,3 +43,16 @@ class TestPlSound(TestCase):
         self.assertEqual(data["sounds"][2]["audio"], "En-us-dog.ogg")
         self.assertEqual(data["sounds"][3]["tags"], ["plural"])
         self.assertEqual(data["sounds"][3]["audio"], "En-us-ne-dog.ogg")
+
+    def test_wikitext_ipa(self):
+        self.wxr.wtp.start_page("polski")
+        root = self.wxr.wtp.parse("* {{AS3|p'''o'''lsʹḱi}}")
+        base_data = WordEntry(
+            word="polski", lang_code="pl", lang="język polski"
+        )
+        extract_sound_section(self.wxr, base_data, root)
+        data = base_data.model_dump(exclude_defaults=True)
+        self.assertEqual(
+            data["sounds"],
+            [{"ipa": "polsʹḱi", "tags": ["Slavic-alphabet"]}],
+        )

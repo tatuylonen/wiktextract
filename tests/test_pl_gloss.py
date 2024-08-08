@@ -52,7 +52,7 @@ class TestPlGloss(TestCase):
                     "senses": [
                         {
                             "glosses": ["nazwa rasy psa"],
-                            "raw_tags": ["kynol."],
+                            "topics": ["cynology"],
                             "sense_index": "1.1",
                         }
                     ],

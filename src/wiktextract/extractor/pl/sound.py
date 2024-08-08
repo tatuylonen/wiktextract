@@ -18,7 +18,9 @@ def extract_sound_section(
         raw_tags = []
         for template_node in list_item.find_child(NodeKind.TEMPLATE):
             if template_node.template_name.startswith(("IPA", "AS", "SAMPA")):
-                ipa = template_node.template_parameters.get(1, "")
+                ipa = clean_node(
+                    wxr, None, template_node.template_parameters.get(1, "")
+                )
                 if isinstance(ipa, str) and len(ipa) > 0:
                     sound = Sound(ipa=ipa, raw_tags=raw_tags)
                     if template_node.template_name.startswith("AS"):

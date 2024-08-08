@@ -64,9 +64,14 @@ def process_linakge_list_item(
             m = re.search(r"\(\d+\.\d+\)", node)
             if m is not None:
                 sense_index = m.group(0).strip("()")
-            if ";" in node or "•" in node:
-                raw_tags.clear()
-                last_linkage = None
+            for sep in [";", "•", ","]:
+                if sep in node:
+                    part_of_word = node[: node.index(sep)].strip()
+                    if len(part_of_word) > 0 and last_linkage is not None:
+                        last_linkage.word += " " + part_of_word
+                    raw_tags.clear()
+                    last_linkage = None
+                    break
         elif isinstance(node, TemplateNode):
             raw_tag = clean_node(wxr, None, node)
             if raw_tag.endswith("."):
