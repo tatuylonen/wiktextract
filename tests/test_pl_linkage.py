@@ -53,9 +53,7 @@ class TestPlLinkage(TestCase):
             page_data[1].synonyms,
             [
                 Linkage(word="pała", sense_index="2.1"),
-                Linkage(
-                    word="policjant", tags=["neutral"], sense_index="2.1"
-                ),
+                Linkage(word="policjant", tags=["neutral"], sense_index="2.1"),
             ],
         )
 
@@ -120,4 +118,25 @@ class TestPlLinkage(TestCase):
                     "tags": ["poetic"],
                 },
             ],
+        )
+
+    def test_wielki(self):
+        self.wxr.wtp.start_page("wielki")
+        root = self.wxr.wtp.parse(": (1.1,2) [[duży]]")
+        page_data = [
+            WordEntry(
+                word="wielki",
+                lang="język polski",
+                lang_code="pl",
+                pos="adj",
+                senses=[Sense(sense_index="1.1")],
+            )
+        ]
+        extract_linkage_section(self.wxr, page_data, root, "synonyms", "pl")
+        self.assertEqual(
+            [
+                r.model_dump(exclude_defaults=True)
+                for r in page_data[0].synonyms
+            ],
+            [{"word": "duży", "sense_index": "1.1,2"}],
         )

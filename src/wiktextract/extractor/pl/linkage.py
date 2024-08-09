@@ -61,7 +61,7 @@ def process_linakge_list_item(
     last_linkage = None
     for node in list_item.children:
         if isinstance(node, str):
-            m = re.search(r"\(\d+\.\d+\)", node)
+            m = re.search(r"\([\d\s,-.]+\)", node)
             if m is not None:
                 sense_index = m.group(0).strip("()")
             for sep in [";", "•", ","]:
