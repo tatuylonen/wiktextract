@@ -42,11 +42,11 @@ def plusobj_func(
     wxr: WiktextractContext, node: InfoNode, loc: str
 ) -> InfoReturnTuple:
     """Parse the output of Template:+obj,
-    `[+infinitive or ergative = meaning]`"""
+    `[with infinitive or ergative = meaning]`"""
 
     if not isinstance(node, TemplateNode):
         wxr.wtp.error(
-            "plusobj_func: node is note a TemplateNode",
+            "INFO-TEMPLATES: plusobj_func: node is not a TemplateNode",
             sortid="info_templates/45",
         )
         return None, None
@@ -58,7 +58,7 @@ def plusobj_func(
         wxr.wtp.error(
             f"INFO-TEMPLATES: `Template:+obj` expansion does not "
             f"match regex: {text}",
-            sortid="info_templates: 78",
+            sortid="info_templates/78",
         )
         return None, None
     taggers = m.group(1)

@@ -741,10 +741,7 @@ foo {{+obj|cs|accusative|blu|or|ergative|means=MEANING}}
                     "senses": [
                         {
                             "glosses": [
-                                "foobar [with accusative blu or "
-                                "ergative = MEANING]",
-                                "foobar",
-                            ],
+                                "foobar",                            ],
                             "info_templates": [
                                 {
                                     "args": {
