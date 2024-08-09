@@ -54,7 +54,7 @@ class TestPlLinkage(TestCase):
             [
                 Linkage(word="pała", sense_index="2.1"),
                 Linkage(
-                    word="policjant", raw_tags=["neutr."], sense_index="2.1"
+                    word="policjant", tags=["neutral"], sense_index="2.1"
                 ),
             ],
         )
@@ -116,7 +116,8 @@ class TestPlLinkage(TestCase):
                 {
                     "word": "sarmacki",
                     "sense_index": "1.1",
-                    "raw_tags": ["żart.", "poet."],
+                    "raw_tags": ["żart."],
+                    "tags": ["poetic"],
                 },
             ],
         )
