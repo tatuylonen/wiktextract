@@ -212,6 +212,9 @@ TAGS = {
     "przechodni": "transitive",
     "żeński": "feminine",
     "żywotny": "animate",
+    "dzierżawczy": "possessive",
+    "niedokonany": "imperfective",
+    "relacyjny": "relational",
     # sound tags
     "bryt. (RP)": ["British", "Received-Pronunciation"],
     "amer.": "US",

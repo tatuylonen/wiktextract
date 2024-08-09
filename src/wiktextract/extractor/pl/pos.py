@@ -7,26 +7,38 @@ from ...wxr_context import WiktextractContext
 from .models import AltForm, Sense, WordEntry
 from .tags import translate_raw_tags
 
+# All POS categories
+# https://pl.wiktionary.org/wiki/Kategoria:Części_mowy_wg_języków
+# Polish POS
+# https://pl.wiktionary.org/wiki/Kategoria:Części_mowy_języka_polskiego
 POS_DATA = {
     "czasownik": {"pos": "verb"},
     # Szablon:szwedzki czasownik frazowy
     "czasownik frazowy (partikelverb)": {"pos": "verb", "tags": ["phrase"]},
+    "fraza": {"pos": "phrase"},
     "klasyfikator": {"pos": "classifier"},
     "liczebnik": {"pos": "num"},
+    "liczebnikowa": {"pos": "num"},
     "międzyrostek": {"pos": "interfix", "tags": ["morpheme"]},
     "morfem": {"pos": "unknown", "tags": ["morpheme"]},
     "określnik": {"pos": "det"},
     "partykuła": {"pos": "particle"},
+    "partykułowa": {"pos": "particle"},
     # Szablon:phrasal verb
     "phrasal verb (czasownik frazowy)": {"pos": "verb", "tags": ["phrase"]},
     "przedimek": {"pos": "article"},
     "przedrostek": {"pos": "prefix", "tags": ["morpheme"]},
     "przyimek": {"pos": "prep"},
+    "przyimkowa": {"pos": "prep_phrase"},
     "przymiotnik": {"pos": "adj"},
+    "przymiotnikowym": {"pos": "adj"},
+    "przymiotnikowa": {"pos": "adj_phrase"},
     "przyrostek": {"pos": "suffix", "tags": ["morpheme"]},
     "przysłówek": {"pos": "adv"},
+    "przysłówkowa": {"pos": "adv_phrase"},
     "rodzajnik": {"pos": "article", "tags": ["gendered"]},
     "rzeczownik": {"pos": "noun"},
+    "rzeczownikowa": {"pos": "noun"},
     "skrótowiec": {"pos": "abbrev", "tags": ["abbreviation"]},
     "spójnik": {"pos": "conj"},
     "symbol": {"pos": "symbol"},
