@@ -1246,7 +1246,7 @@ def parse_language(
                     pre[-1].append(node)
                 else:
                     start_of_paragraph = False
-            elif kind == NodeKind.TEMPLATE:
+            elif isinstance(node, TemplateNode):
                 # XXX Insert code here that disambiguates between
                 # templates that generate word heads and templates
                 # that don't.
@@ -1525,7 +1525,7 @@ def parse_language(
         gloss_nodes: list[Union[str, WikiNode]] = []
         for node in strip_nodes(nodes):
             if isinstance(node, WikiNode):
-                if node.kind == NodeKind.TEMPLATE:
+                if isinstance(node, TemplateNode):
                     if node.template_name in (
                         "zh-see",
                         "ja-see",
