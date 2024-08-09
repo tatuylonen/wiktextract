@@ -841,6 +841,9 @@ def synch_splits_with_args(
     else:
         return None
 
+QUALIFIERS = r"^\((([^()]|\([^()]*\))*)\):?\s*"
+QUALIFIERS_RE = re.compile(QUALIFIERS)
+# (...): ... or (...(...)...): ...
 
 def parse_language(
     wxr: WiktextractContext, langnode: WikiNode, language: str, lang_code: str
@@ -1861,8 +1864,8 @@ def parse_language(
 
         if rawgloss and rawgloss not in sense_base.get("raw_glosses", ()):
             data_append(sense_base, "raw_glosses", subglosses[1])
-        m = re.match(r"\(([^()]+)\):?\s*", rawgloss)
-        # ( ..\1.. ): ... or ( ..\1.. ) ...
+        m = QUALIFIERS_RE.match(rawgloss)
+        # (...): ... or (...(...)...): ...
         if m:
             q = m.group(1)
             rawgloss = rawgloss[m.end() :].strip()
@@ -1987,7 +1990,7 @@ def parse_language(
                     assert k not in ("tags", "categories", "topics")
                     sense_data[k] = v  # type:ignore[literal-required]
             # Parse the gloss for this particular sense
-            m = re.match(r"^\((([^()]|\([^()]*\))*)\):?\s*", gloss)
+            m = QUALIFIERS_RE.match(gloss)
             # (...): ... or (...(...)...): ...
             if m:
                 parse_sense_qualifier(wxr, m.group(1), sense_data)
