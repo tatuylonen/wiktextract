@@ -841,9 +841,11 @@ def synch_splits_with_args(
     else:
         return None
 
+
 QUALIFIERS = r"^\((([^()]|\([^()]*\))*)\):?\s*"
 QUALIFIERS_RE = re.compile(QUALIFIERS)
 # (...): ... or (...(...)...): ...
+
 
 def parse_language(
     wxr: WiktextractContext, langnode: WikiNode, language: str, lang_code: str
@@ -1829,7 +1831,7 @@ def parse_language(
             return False
 
         # remove manually typed ordered list text at the start("1. ")
-        rawgloss = re.sub(r"^\d+\.\s+", "", rawgloss)
+        rawgloss = re.sub(r"^\d+\.\s+", "", rawgloss).strip()
 
         # get stuff like synonyms and categories from "others",
         # maybe examples and quotations
@@ -1845,7 +1847,7 @@ def parse_language(
         strip_ends = [", particularly:"]
         for x in strip_ends:
             if rawgloss.endswith(x):
-                rawgloss = rawgloss[: -len(x)]
+                rawgloss = rawgloss[: -len(x)].strip()
                 break
 
         # The gloss could contain templates that produce more list items.
@@ -1853,7 +1855,7 @@ def parse_language(
         # to parts.  However, e.g. Interlingua generates multiple glosses
         # in HTML directly without Wikitext markup, so we must also split
         # by just newlines.
-        subglosses = re.split(r"(?m)^[#*]*\s*", rawgloss)
+        subglosses = rawgloss.splitlines()
 
         if len(subglosses) == 0:
             return False
@@ -1863,7 +1865,7 @@ def parse_language(
         # parenthesized tags/topics
 
         if rawgloss and rawgloss not in sense_base.get("raw_glosses", ()):
-            data_append(sense_base, "raw_glosses", subglosses[1])
+            data_append(sense_base, "raw_glosses", subglosses[0].strip())
         m = QUALIFIERS_RE.match(rawgloss)
         # (...): ... or (...(...)...): ...
         if m:
@@ -1932,14 +1934,14 @@ def parse_language(
         # Some entries, e.g., "iacebam", have weird sentences in quotes
         # after the gloss, but these sentences don't seem to be intended
         # as glosses.  Skip them.
-        subglosses = list(
-            gl
-            for gl in subglosses
+        indexed_subglosses = list(
+            (i, gl)
+            for i, gl in enumerate(subglosses)
             if gl.strip() and not re.match(r'\s*(\([^)]*\)\s*)?"[^"]*"\s*$', gl)
         )
 
-        if len(subglosses) > 1 and "form_of" not in sense_base:
-            gl = subglosses[0].strip()
+        if len(indexed_subglosses) > 1 and "form_of" not in sense_base:
+            gl = indexed_subglosses[0][1].strip()
             if gl.endswith(":"):
                 gl = gl[:-1].strip()
             parsed = parse_alt_or_inflection_of(wxr, gl, gloss_template_args)
@@ -1950,29 +1952,29 @@ def parse_language(
                     # "inflection of"
                     data_extend(sense_base, "tags", infl_tags)
                     data_extend(sense_base, "form_of", infl_dts)
-                    subglosses = subglosses[1:]
+                    indexed_subglosses = indexed_subglosses[1:]
                 elif not infl_dts:
                     data_extend(sense_base, "tags", infl_tags)
-                    subglosses = subglosses[1:]
+                    indexed_subglosses = indexed_subglosses[1:]
 
         # Create senses for remaining subglosses
-        for gloss_i, gloss in enumerate(subglosses):
+        for i, (gloss_i, gloss) in enumerate(indexed_subglosses):
             gloss = gloss.strip()
-            if not gloss and len(subglosses) > 1:
+            if not gloss and len(indexed_subglosses) > 1:
                 continue
-            if gloss.startswith("; ") and gloss_i > 0:
-                gloss = gloss[1:].strip()
             # Push a new sense (if the last one is not empty)
             if push_sense():
                 added = True
             # if gloss not in sense_data.get("raw_glosses", ()):
             #     data_append(sense_data, "raw_glosses", gloss)
-            if gloss_i == 0 and examples:
+            if i == 0 and examples:
                 # In a multi-line gloss, associate examples
                 # with only one of them.
-                # XXX or you could use gloss_i == len(subglosses)
+                # XXX or you could use gloss_i == len(indexed_subglosses)
                 # to associate examples with the *last* one.
                 data_extend(sense_data, "examples", examples)
+            if gloss.startswith("; ") and gloss_i > 0:
+                gloss = gloss[1:].strip()
             # If the gloss starts with †, mark as obsolete
             if gloss.startswith("^†"):
                 data_append(sense_data, "tags", "obsolete")
