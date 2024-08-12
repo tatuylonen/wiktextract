@@ -13,6 +13,7 @@ from .tags import translate_raw_tags
 # https://pl.wiktionary.org/wiki/Kategoria:Części_mowy_języka_polskiego
 POS_DATA = {
     "czasownik": {"pos": "verb"},
+    "czasownika": {"pos": "verb"},
     # Szablon:szwedzki czasownik frazowy
     "czasownik frazowy (partikelverb)": {"pos": "verb", "tags": ["phrase"]},
     "fraza": {"pos": "phrase"},
@@ -36,6 +37,7 @@ POS_DATA = {
     "przyrostek": {"pos": "suffix", "tags": ["morpheme"]},
     "przysłówek": {"pos": "adv"},
     "przysłówkowa": {"pos": "adv_phrase"},
+    "pytajny": {"pos": "pron", "tags": ["interrogative"]},  # "zaimek pytajny"
     "rodzajnik": {"pos": "article", "tags": ["gendered"]},
     "rzeczownik": {"pos": "noun"},
     "rzeczownikowa": {"pos": "noun"},
@@ -44,7 +46,11 @@ POS_DATA = {
     "symbol": {"pos": "symbol"},
     "wrostek": {"pos": "infix", "tags": ["morpheme"]},
     "wykrzyknik": {"pos": "intj"},
+    "wykrzyknika": {"pos": "intj"},
+    "wykrzyknikowa": {"pos": "intj"},
+    "zaimka": {"pos": "pron"},
     "zaimek": {"pos": "pron"},
+    "zaimkowy": {"pos": "pron"},
 }
 
 # Category:Proverb Templates
@@ -68,6 +74,8 @@ def extract_pos_section(
             process_pos_line_italic_node(wxr, page_data, base_data, node)
         elif node.kind == NodeKind.LIST:
             for list_item in node.find_child(NodeKind.LIST_ITEM):
+                if len(page_data) == 0:
+                    page_data.append(base_data.model_copy(deep=True))
                 process_gloss_list_item(wxr, page_data[-1], list_item)
 
 
@@ -129,6 +137,7 @@ def process_gloss_list_item(
         if isinstance(gloss_node, TemplateNode):
             if gloss_node.template_name == "wikipedia":
                 continue
+            process_form_of_template(wxr, sense, gloss_node)
             expanded_node = wxr.wtp.parse(
                 wxr.wtp.node_to_wikitext(gloss_node), expand_all=True
             )
@@ -146,7 +155,7 @@ def process_gloss_list_item(
     if m is not None:
         sense_index = m.group(0).strip("()")
         gloss_text = gloss_text[m.end() :].strip("=; ")
-    if "form-of" in word_entry.tags:
+    if "form-of" in word_entry.tags and len(sense.form_of) == 0:
         form_of = ""
         for node in gloss_nodes:
             if isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
@@ -159,3 +168,15 @@ def process_gloss_list_item(
         sense.glosses.append(gloss_text)
         translate_raw_tags(sense)
         word_entry.senses.append(sense)
+
+
+def process_form_of_template(
+    wxr: WiktextractContext, sense: Sense, template_node: TemplateNode
+) -> None:
+    if template_node.template_name == "zob-ekwiw-pupr":
+        if "form-of" not in sense.tags:
+            sense.tags.append("form-of")
+        word = clean_node(
+            wxr, None, template_node.template_parameters.get(1, "")
+        )
+        sense.form_of.append(AltForm(word=word))

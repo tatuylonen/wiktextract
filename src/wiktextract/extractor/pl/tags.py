@@ -182,7 +182,6 @@ TAGS = {
     "N.": "instrumental",
     "Ms.": "locative",
     "W.": "vocative",
-    "abl.": "ablative",
     "adess.": "adessive",
     "all.": "allative",
     "ess.": "essive",

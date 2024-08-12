@@ -16,24 +16,28 @@ def extract_translation_section(
     level_node: WikiNode,
     lang_code: str,
 ) -> None:
+    from .page import match_sense_index
+
     translations = defaultdict(list)
     for list_item in level_node.find_child_recursively(NodeKind.LIST_ITEM):
         process_translation_list_item(wxr, list_item, translations)
 
+    matched_indexes = set()
     for data in page_data:
         if data.lang_code == lang_code:
-            for sense in data.senses:
-                if sense.sense_index in translations:
-                    data.translations.extend(translations[sense.sense_index])
-                    del translations[sense.sense_index]
+            for sense_index in translations.keys():
+                if match_sense_index(sense_index, data):
+                    data.translations.extend(translations[sense_index])
+                    matched_indexes.add(sense_index)
             data.translations.extend(translations.get("", []))
 
     if "" in translations:
         del translations[""]
     for data in page_data:
         if data.lang_code == lang_code:
-            for translation_list in translations.values():
-                data.translations.extend(translation_list)
+            for sense_index, translation_list in translations.items():
+                if sense_index not in matched_indexes:
+                    data.translations.extend(translation_list)
             break
 
 

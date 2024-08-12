@@ -140,3 +140,89 @@ class TestPlLinkage(TestCase):
             ],
             [{"word": "duży", "sense_index": "1.1,2"}],
         )
+
+    def test_range_sense_index(self):
+        self.wxr.wtp.start_page("szalony")
+        root = self.wxr.wtp.parse(": (2.1-3) [[szaleniec]]")
+        page_data = [
+            WordEntry(
+                word="szalony",
+                lang="język polski",
+                lang_code="pl",
+                pos="adj",
+                senses=[Sense(sense_index="1.1")],
+            ),
+            WordEntry(
+                word="szalony",
+                lang="język polski",
+                lang_code="pl",
+                pos="noun",
+                senses=[Sense(sense_index="2.1")],
+            ),
+        ]
+        extract_linkage_section(self.wxr, page_data, root, "synonyms", "pl")
+        self.assertEqual(page_data[0].synonyms, [])
+        self.assertEqual(
+            [
+                r.model_dump(exclude_defaults=True)
+                for r in page_data[1].synonyms
+            ],
+            [{"word": "szaleniec", "sense_index": "2.1-3"}],
+        )
+
+    def test_furi(self):
+        self.wxr.wtp.add_page(
+            "Szablon:furi",
+            10,
+            '<span class="furigana-wrapper" lang="ja" xml:lang="ja">[[憎|憎しみ]]<span class="furigana-caption">(にくしみ)</span></span>',
+        )
+        self.wxr.wtp.start_page("愛情")
+        root = self.wxr.wtp.parse(": (1.1) {{furi|憎|にく|しみ}}")
+        page_data = [
+            WordEntry(
+                word="愛情",
+                lang="język japoński",
+                lang_code="ja",
+                pos="noun",
+                senses=[Sense(sense_index="1.1")],
+            ),
+        ]
+        extract_linkage_section(self.wxr, page_data, root, "antonyms", "ja")
+        self.assertEqual(
+            [
+                r.model_dump(exclude_defaults=True)
+                for r in page_data[0].antonyms
+            ],
+            [{"word": "憎しみ", "furigana": "にくしみ", "sense_index": "1.1"}],
+        )
+
+    def test_linkage_translation(self):
+        self.wxr.wtp.start_page("爱情")
+        root = self.wxr.wtp.parse(
+            ": (2.1) 爱情[[故事]] → [[historia]] miłosna • 爱情[[电影]] → [[film]] miłosny"
+        )
+        page_data = [
+            WordEntry(
+                word="爱情",
+                lang="język chiński standardowy",
+                lang_code="zh",
+                pos="adj",
+                senses=[Sense(sense_index="2.1")],
+            ),
+        ]
+        extract_linkage_section(self.wxr, page_data, root, "related", "zh")
+        self.assertEqual(
+            [r.model_dump(exclude_defaults=True) for r in page_data[0].related],
+            [
+                {
+                    "word": "爱情故事",
+                    "translation": "historia miłosna",
+                    "sense_index": "2.1",
+                },
+                {
+                    "word": "爱情电影",
+                    "translation": "film miłosny",
+                    "sense_index": "2.1",
+                },
+            ],
+        )

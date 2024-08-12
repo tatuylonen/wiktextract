@@ -14,6 +14,7 @@ class Example(PolishBaseModel):
     text: str = ""
     translation: str = ""
     ref: str = ""
+    roman: str = ""
 
 
 class AltForm(PolishBaseModel):
@@ -63,6 +64,8 @@ class Linkage(PolishBaseModel):
     raw_tags: list[str] = []
     sense_index: str = ""
     topics: list[str] = []
+    furigana: str = ""
+    translation: str = ""
 
 
 class WordEntry(PolishBaseModel):

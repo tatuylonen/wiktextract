@@ -14,6 +14,8 @@ def extract_note_section(
     base_data: WordEntry,
     level_node: WikiNode,
 ) -> None:
+    from .page import match_sense_index
+
     notes = defaultdict(list)
     for list_item in level_node.find_child_recursively(NodeKind.LIST_ITEM):
         process_note_list_item(wxr, list_item, notes)
@@ -21,8 +23,9 @@ def extract_note_section(
         if data.lang_code == base_data.lang_code:
             for sense in data.senses:
                 sense.notes.extend(notes.get("", []))
-                if sense.sense_index in notes:
-                    sense.notes.extend(notes[sense.sense_index])
+                for sense_index in notes.keys():
+                    if match_sense_index(sense_index, sense):
+                        sense.notes.extend(notes[sense_index])
 
 
 def process_note_list_item(
