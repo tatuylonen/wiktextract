@@ -1,4 +1,5 @@
 import itertools
+import re
 from typing import Any
 
 from wikitextprocessor.parser import (
@@ -110,3 +111,36 @@ def parse_page(
         if len(data.senses) == 0:
             data.senses.append(Sense(tags=["no-gloss"]))
     return [m.model_dump(exclude_defaults=True) for m in page_data]
+
+
+def match_sense_index(sense_index: str, word_entry: WordEntry) -> bool:
+    # return `True` if `WordEntry` has a `Sense` with same POS section
+    # index number, usually the first number before "."
+    if hasattr(word_entry, "senses") and len(word_entry.senses) == 0:
+        return False
+    if hasattr(word_entry, "senses"):
+        sense = word_entry.senses[0]
+    elif isinstance(word_entry, Sense):
+        sense = word_entry
+    pos_index_str = sense.sense_index[: sense_index.find(".")]
+    pos_section_index = 0
+    if pos_index_str.isdigit():
+        pos_section_index = int(pos_index_str)
+    else:
+        return False
+
+    for part_of_index in sense_index.split(","):
+        part_of_index = part_of_index.strip()
+        if (
+            "." in part_of_index
+            and pos_index_str == part_of_index[: part_of_index.find(".")]
+        ):
+            return True
+        elif re.fullmatch(r"\d+-\d+", part_of_index):
+            start_str, end_str = part_of_index.split("-")
+            if int(start_str) <= pos_section_index and pos_section_index <= int(
+                end_str
+            ):
+                return True
+
+    return False

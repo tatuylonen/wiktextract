@@ -28,26 +28,29 @@ def extract_linkage_section(
     linkage_type: str,
     lang_code: str,
 ) -> None:
+    from .page import match_sense_index
+
     linkages = defaultdict(list)
     for list_item in level_node.find_child_recursively(NodeKind.LIST_ITEM):
         process_linakge_list_item(wxr, list_item, linkages)
 
+    matched_indexes = set()
     for data in page_data:
         if data.lang_code == lang_code:
-            for sense in data.senses:
-                if sense.sense_index in linkages:
-                    getattr(data, linkage_type).extend(
-                        linkages[sense.sense_index]
-                    )
-                    del linkages[sense.sense_index]
+            for sense_index in linkages.keys():
+                if match_sense_index(sense_index, data):
+                    getattr(data, linkage_type).extend(linkages[sense_index])
+                    matched_indexes.add(sense_index)
             getattr(data, linkage_type).extend(linkages.get("", []))
 
+    # add not matched data
     if "" in linkages:
         del linkages[""]
     for data in page_data:
         if data.lang_code == lang_code:
-            for linkage_list in linkages.values():
-                getattr(data, linkage_type).extend(linkage_list)
+            for sense_index, linkage_list in linkages.items():
+                if sense_index not in matched_indexes:
+                    getattr(data, linkage_type).extend(linkage_list)
             break
 
 

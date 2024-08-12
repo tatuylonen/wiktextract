@@ -140,3 +140,32 @@ class TestPlLinkage(TestCase):
             ],
             [{"word": "duży", "sense_index": "1.1,2"}],
         )
+
+    def test_range_sense_index(self):
+        self.wxr.wtp.start_page("szalony")
+        root = self.wxr.wtp.parse(": (2.1-3) [[szaleniec]]")
+        page_data = [
+            WordEntry(
+                word="szalony",
+                lang="język polski",
+                lang_code="pl",
+                pos="adj",
+                senses=[Sense(sense_index="1.1")],
+            ),
+            WordEntry(
+                word="szalony",
+                lang="język polski",
+                lang_code="pl",
+                pos="noun",
+                senses=[Sense(sense_index="2.1")],
+            )
+        ]
+        extract_linkage_section(self.wxr, page_data, root, "synonyms", "pl")
+        self.assertEqual(page_data[0].synonyms, [])
+        self.assertEqual(
+            [
+                r.model_dump(exclude_defaults=True)
+                for r in page_data[1].synonyms
+            ],
+            [{"word": "szaleniec", "sense_index": "2.1-3"}],
+        )
