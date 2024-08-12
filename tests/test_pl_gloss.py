@@ -148,3 +148,44 @@ class TestPlGloss(TestCase):
                 }
             ],
         )
+
+    def test_zob_ekwiw_pupr(self):
+        self.wxr.wtp.add_page(
+            "Szablon:język chiński standardowy",
+            10,
+            '<span class="lang-code primary-lang-code lang-code-zh" id="zh">[[:Kategoria:Język chiński standardowy|język chiński standardowy]]</span>',
+        )
+        self.wxr.wtp.add_page(
+            "Szablon:zob-ekwiw-pupr",
+            10,
+            """zobacz ekwiwalent w piśmie uproszczonym: <span class='set-foreign'><span lang="zh" xml:lang="zh">[[爱情]]</span></span>""",
+        )
+        self.assertEqual(
+            parse_page(
+                self.wxr,
+                "愛情",
+                """== {{zh|愛情}} ({{język chiński standardowy}}) ==
+===znaczenia===
+: (1.1) {{zob-ekwiw-pupr|爱情}}
+                """,
+            ),
+            [
+                {
+                    "categories": ["Język chiński standardowy"],
+                    "lang": "język chiński standardowy",
+                    "lang_code": "zh",
+                    "senses": [
+                        {
+                            "form_of": [{"word": "爱情"}],
+                            "glosses": [
+                                "zobacz ekwiwalent w piśmie uproszczonym: 爱情"
+                            ],
+                            "sense_index": "1.1",
+                            "tags": ["form-of"],
+                        }
+                    ],
+                    "pos": "unknown",
+                    "word": "愛情",
+                }
+            ],
+        )

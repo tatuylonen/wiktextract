@@ -158,7 +158,7 @@ class TestPlLinkage(TestCase):
                 lang_code="pl",
                 pos="noun",
                 senses=[Sense(sense_index="2.1")],
-            )
+            ),
         ]
         extract_linkage_section(self.wxr, page_data, root, "synonyms", "pl")
         self.assertEqual(page_data[0].synonyms, [])
