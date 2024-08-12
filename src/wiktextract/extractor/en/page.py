@@ -1883,8 +1883,32 @@ def parse_language(
         elif rawgloss.startswith("inflection of "):
             data_append(sense_base, "tags", "form-of")
         if rawgloss:
-            data_append(sense_base, "glosses", rawgloss)
-            if rawgloss in ("A person:",):
+            # Code duplicating a lot of clean-up operations from later in
+            # this block. We want to clean up the "supergloss" as much as
+            # possible, in almost the same way as a normal gloss.
+            supergloss = rawgloss
+
+            if supergloss.startswith("; "):
+                supergloss = supergloss[1:].strip()
+
+            if supergloss.startswith(("^†", "†")):
+                data_append(sense_base, "tags", "obsolete")
+                supergloss = supergloss[2:].strip()
+            elif supergloss.startswith("^‡"):
+                data_extend(sense_base, "tags", ["obsolete", "historical"])
+                supergloss = supergloss[2:].strip()
+
+            # remove [14th century...] style brackets at the end
+            supergloss = re.sub(r"\s\[[^]]*\]\s*$", "", supergloss)
+
+            if supergloss.startswith((",", ":")):
+                supergloss = supergloss[1:]
+            supergloss = supergloss.strip()
+            if supergloss.startswith("N. of "):
+                supergloss = "Name of " + supergloss[6:]
+                supergloss = supergloss[2:]
+            data_append(sense_base, "glosses", supergloss)
+            if supergloss in ("A person:",):
                 data_append(sense_base, "tags", "g-person")
 
         # The main recursive call (except for the exceptions at the
@@ -2069,11 +2093,13 @@ def parse_language(
             elif gloss != "-" and gloss not in sense_data.get("glosses", []):
                 if (
                     gloss_i == 0
-                    and len(sense_data.get("glosses", tuple())) == 1
+                    and len(sense_data.get("glosses", tuple())) >= 1
                 ):
-                    # If we added a high-level gloss, but this is that same
-                    # gloss_i, add this instead of the raw_gloss from before
-                    sense_data["glosses"] = [gloss]
+                    # If we added a "high-level gloss" from rawgloss, but this
+                    # is that same gloss_i, add this instead of the raw_gloss
+                    # from before if they're different: the rawgloss was not
+                    # cleaned exactly the same as this later gloss
+                    sense_data["glosses"][-1] = gloss
                 else:
                     # Add the gloss for the sense.
                     data_append(sense_data, "glosses", gloss)

@@ -796,3 +796,45 @@ foo {{+obj|cs|accusative|blu|or|ergative|means=MEANING}}
                 }
             ],
         )
+
+    def test_supergloss_clean(self):
+        # PR #764
+        self.assertEqual(
+            parse_page(
+                self.wxr,
+                "test",
+                """==English==
+===Noun===
+
+test
+# † supergloss [removed text]
+## subgloss
+## subgloss2""",
+            ),
+            [
+                {
+                    "lang": "English",
+                    "lang_code": "en",
+                    "pos": "noun",
+                    "senses": [
+                        {
+                            "glosses": ["supergloss", "subgloss"],
+                            "raw_glosses": [
+                                "† supergloss [removed text]",
+                                "subgloss",
+                            ],
+                            "tags": ["obsolete"],
+                        },
+                        {
+                            "glosses": ["supergloss", "subgloss2"],
+                            "raw_glosses": [
+                                "† supergloss [removed text]",
+                                "subgloss2",
+                            ],
+                            "tags": ["obsolete"],
+                        },
+                    ],
+                    "word": "test",
+                }
+            ],
+        )
