@@ -195,3 +195,34 @@ class TestPlLinkage(TestCase):
             ],
             [{"word": "憎しみ", "furigana": "にくしみ", "sense_index": "1.1"}],
         )
+
+    def test_linkage_translation(self):
+        self.wxr.wtp.start_page("爱情")
+        root = self.wxr.wtp.parse(
+            ": (2.1) 爱情[[故事]] → [[historia]] miłosna • 爱情[[电影]] → [[film]] miłosny"
+        )
+        page_data = [
+            WordEntry(
+                word="爱情",
+                lang="język chiński standardowy",
+                lang_code="zh",
+                pos="adj",
+                senses=[Sense(sense_index="2.1")],
+            ),
+        ]
+        extract_linkage_section(self.wxr, page_data, root, "related", "zh")
+        self.assertEqual(
+            [r.model_dump(exclude_defaults=True) for r in page_data[0].related],
+            [
+                {
+                    "word": "爱情故事",
+                    "translation": "historia miłosna",
+                    "sense_index": "2.1",
+                },
+                {
+                    "word": "爱情电影",
+                    "translation": "film miłosny",
+                    "sense_index": "2.1",
+                },
+            ],
+        )

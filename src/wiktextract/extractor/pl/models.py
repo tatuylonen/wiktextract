@@ -65,6 +65,7 @@ class Linkage(PolishBaseModel):
     sense_index: str = ""
     topics: list[str] = []
     furigana: str = ""
+    translation: str = ""
 
 
 class WordEntry(PolishBaseModel):
