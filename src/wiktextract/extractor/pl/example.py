@@ -48,12 +48,14 @@ def process_example_list_item(
     sense_index = ""
     example_data = Example()
     translation_start = 0
+    example_start = 0
     for index, node in enumerate(list_item.children):
         if isinstance(node, str):
             m = re.search(r"\(\d+\.\d+\)", node)
             if m is not None:
                 sense_index = m.group(0).strip("()")
-            elif node.strip() == "→":
+                example_start = index + 1
+            elif "→" in node:
                 translation_start = index + 1
                 break
         elif isinstance(node, WikiNode) and node.kind == NodeKind.ITALIC:
@@ -64,5 +66,13 @@ def process_example_list_item(
         example_data.translation = clean_node(
             wxr, None, list_item.children[translation_start:]
         )
+        if len(example_data.text) == 0:
+            example_data.text = clean_node(
+                wxr, None, list_item.children[example_start:translation_start]
+            ).strip("→ ")
+    if "(" in example_data.text:
+        roman_start = example_data.text.rindex("(")
+        example_data.roman = example_data.text[roman_start:].strip("() ")
+        example_data.text = example_data.text[:roman_start].strip()
     if len(example_data.text) > 0:
         examples[sense_index].append(example_data)
