@@ -13,6 +13,7 @@ from .tags import translate_raw_tags
 # https://pl.wiktionary.org/wiki/Kategoria:Części_mowy_języka_polskiego
 POS_DATA = {
     "czasownik": {"pos": "verb"},
+    "czasownika": {"pos": "verb"},
     # Szablon:szwedzki czasownik frazowy
     "czasownik frazowy (partikelverb)": {"pos": "verb", "tags": ["phrase"]},
     "fraza": {"pos": "phrase"},
@@ -36,6 +37,7 @@ POS_DATA = {
     "przyrostek": {"pos": "suffix", "tags": ["morpheme"]},
     "przysłówek": {"pos": "adv"},
     "przysłówkowa": {"pos": "adv_phrase"},
+    "pytajny": {"pos": "pron", "tags": ["interrogative"]},  # "zaimek pytajny"
     "rodzajnik": {"pos": "article", "tags": ["gendered"]},
     "rzeczownik": {"pos": "noun"},
     "rzeczownikowa": {"pos": "noun"},
@@ -44,7 +46,11 @@ POS_DATA = {
     "symbol": {"pos": "symbol"},
     "wrostek": {"pos": "infix", "tags": ["morpheme"]},
     "wykrzyknik": {"pos": "intj"},
+    "wykrzyknika": {"pos": "intj"},
+    "wykrzyknikowa": {"pos": "intj"},
+    "zaimka": {"pos": "pron"},
     "zaimek": {"pos": "pron"},
+    "zaimkowy": {"pos": "pron"},
 }
 
 # Category:Proverb Templates
