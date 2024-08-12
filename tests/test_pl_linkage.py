@@ -169,3 +169,29 @@ class TestPlLinkage(TestCase):
             ],
             [{"word": "szaleniec", "sense_index": "2.1-3"}],
         )
+
+    def test_furi(self):
+        self.wxr.wtp.add_page(
+            "Szablon:furi",
+            10,
+            '<span class="furigana-wrapper" lang="ja" xml:lang="ja">[[憎|憎しみ]]<span class="furigana-caption">(にくしみ)</span></span>',
+        )
+        self.wxr.wtp.start_page("愛情")
+        root = self.wxr.wtp.parse(": (1.1) {{furi|憎|にく|しみ}}")
+        page_data = [
+            WordEntry(
+                word="愛情",
+                lang="język japoński",
+                lang_code="ja",
+                pos="noun",
+                senses=[Sense(sense_index="1.1")],
+            ),
+        ]
+        extract_linkage_section(self.wxr, page_data, root, "antonyms", "ja")
+        self.assertEqual(
+            [
+                r.model_dump(exclude_defaults=True)
+                for r in page_data[0].antonyms
+            ],
+            [{"word": "憎しみ", "furigana": "にくしみ", "sense_index": "1.1"}],
+        )

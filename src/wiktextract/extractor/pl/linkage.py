@@ -1,5 +1,6 @@
 import re
 from collections import defaultdict
+from typing import Optional
 
 from wikitextprocessor.parser import NodeKind, TemplateNode, WikiNode
 
@@ -32,7 +33,7 @@ def extract_linkage_section(
 
     linkages = defaultdict(list)
     for list_item in level_node.find_child_recursively(NodeKind.LIST_ITEM):
-        process_linakge_list_item(wxr, list_item, linkages)
+        process_linkage_list_item(wxr, list_item, linkages)
 
     matched_indexes = set()
     for data in page_data:
@@ -54,7 +55,7 @@ def extract_linkage_section(
             break
 
 
-def process_linakge_list_item(
+def process_linkage_list_item(
     wxr: WiktextractContext,
     list_item: WikiNode,
     linkages: dict[str, list[Linkage]],
@@ -76,13 +77,9 @@ def process_linakge_list_item(
                     last_linkage = None
                     break
         elif isinstance(node, TemplateNode):
-            raw_tag = clean_node(wxr, None, node)
-            if raw_tag.endswith("."):
-                if last_linkage is None:
-                    raw_tags.append(raw_tag)
-                else:
-                    last_linkage.raw_tags.append(raw_tag)
-                    translate_raw_tags(last_linkage)
+            process_linkage_template(
+                wxr, node, linkages, sense_index, last_linkage, raw_tags
+            )
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
             linkage = Linkage(
                 word=clean_node(wxr, None, node),
@@ -92,3 +89,32 @@ def process_linakge_list_item(
             translate_raw_tags(linkage)
             linkages[sense_index].append(linkage)
             last_linkage = linkage
+
+
+def process_linkage_template(
+    wxr: WiktextractContext,
+    template_node: TemplateNode,
+    linkages: dict[str, list[Linkage]],
+    sense_index: str,
+    last_linkage: Optional[Linkage],
+    raw_tags: list[str],
+) -> None:
+    if template_node.template_name == "furi":
+        expanded_text = clean_node(wxr, None, template_node)
+        if "(" in expanded_text:
+            furigana_start = expanded_text.rindex("(")
+            linkage = Linkage(
+                word=expanded_text[:furigana_start],
+                furigana=expanded_text[furigana_start:].strip("() "),
+                sense_index=sense_index,
+            )
+            linkages[sense_index].append(linkage)
+            last_linkage = linkage
+    else:
+        raw_tag = clean_node(wxr, None, template_node)
+        if raw_tag.endswith("."):
+            if last_linkage is None:
+                raw_tags.append(raw_tag)
+            else:
+                last_linkage.raw_tags.append(raw_tag)
+                translate_raw_tags(last_linkage)
