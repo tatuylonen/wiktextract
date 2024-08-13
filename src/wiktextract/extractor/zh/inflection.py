@@ -1,7 +1,7 @@
 from wikitextprocessor import NodeKind, WikiNode
-from wiktextract.page import clean_node
-from wiktextract.wxr_context import WiktextractContext
 
+from ...page import clean_node
+from ...wxr_context import WiktextractContext
 from .models import Form, WordEntry
 
 # https://zh.wiktionary.org/wiki/Category:日語變格表模板
@@ -27,49 +27,61 @@ def extract_inflections(
     for child in level_node.find_child(NodeKind.TEMPLATE):
         template_name = child.template_name.lower()
         if template_name.startswith(JAPANESE_INFLECTION_TEMPLATE_PREFIXES):
-            expanded_table = wxr.wtp.parse(
+            expanded_template = wxr.wtp.parse(
                 wxr.wtp.node_to_wikitext(level_node), expand_all=True
             )
-            extract_ja_i_template(wxr, page_data, expanded_table, "")
+            for table_node in expanded_template.find_child_recursively(
+                NodeKind.TABLE
+            ):
+                extract_ja_inf_table(wxr, page_data, table_node)
 
 
-def extract_ja_i_template(
+def extract_ja_inf_table(
     wxr: WiktextractContext,
     page_data: list[WordEntry],
-    node: WikiNode,
-    table_header: str,
+    table_node: WikiNode,
 ) -> None:
-    for child in node.children:
-        if isinstance(child, WikiNode):
-            if child.kind == NodeKind.TABLE_ROW:
-                if len(list(child.filter_empty_str_child())) == 1:
-                    table_header = clean_node(wxr, None, child.children)
-                else:
-                    inflection_data = Form(
-                        raw_tags=[table_header], source="inflection"
-                    )
-                    cell_node_index = 0
-                    keys = ["form", "hiragana", "roman"]
-                    for row_child in child.children:
-                        if isinstance(row_child, WikiNode):
-                            if row_child.kind == NodeKind.TABLE_HEADER_CELL:
-                                inflection_data.raw_tags.append(
-                                    clean_node(wxr, None, row_child)
-                                )
-                            elif row_child.kind == NodeKind.TABLE_CELL:
-                                cell_text = clean_node(wxr, None, row_child)
-                                if len(cell_text) == 0:
-                                    continue
-                                if cell_node_index < len(keys):
-                                    key = keys[cell_node_index]
-                                    cell_node_index += 1
-                                    setattr(
-                                        inflection_data,
-                                        key,
-                                        clean_node(wxr, None, row_child),
-                                    )
-                                else:
-                                    break
-                    page_data[-1].forms.append(inflection_data)
-            else:
-                extract_ja_i_template(wxr, page_data, child, table_header)
+    table_header = []
+    for row_node in table_node.find_child(NodeKind.TABLE_ROW):
+        if len(list(row_node.filter_empty_str_child())) == 1:
+            table_header = clean_node(wxr, None, row_node.children)
+        else:
+            form_list = []
+            hiragana_list = []
+            roman_list = []
+            raw_tags = []
+            cell_node_index = 0
+            for row_child in row_node.find_child(
+                NodeKind.TABLE_HEADER_CELL | NodeKind.TABLE_CELL
+            ):
+                if row_child.kind == NodeKind.TABLE_HEADER_CELL:
+                    for line in clean_node(wxr, None, row_child).splitlines():
+                        line = line.strip("（） ")
+                        if len(line) > 0:
+                            raw_tags.append(line)
+                elif row_child.kind == NodeKind.TABLE_CELL:
+                    cell_text = clean_node(wxr, None, row_child)
+                    if len(cell_text) == 0:
+                        continue
+                    if cell_node_index >= 3:
+                        break
+                    for line in cell_text.splitlines():
+                        if cell_node_index == 0:
+                            form_list.append(line)
+                        elif cell_node_index == 1:
+                            hiragana_list.append(line)
+                        elif cell_node_index == 2:
+                            roman_list.append(line)
+                    cell_node_index += 1
+
+            for form, hiragana, roman in zip(
+                form_list, hiragana_list, roman_list
+            ):
+                form_data = Form(
+                    raw_tags=[table_header] + raw_tags,
+                    source="inflection table",
+                    form=form,
+                    hiragana=hiragana,
+                    roman=roman,
+                )
+                page_data[-1].forms.append(form_data)
