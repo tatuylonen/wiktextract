@@ -5,6 +5,7 @@ from wikitextprocessor.parser import NodeKind, TemplateNode, WikiNode
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .models import Form, WordEntry
+from .tags import translate_raw_tags
 
 
 def extract_inflection_section(
@@ -69,6 +70,7 @@ def extract_odmiana_rzeczownik_polski(
                                 form.raw_tags.append(col_headers[col_index])
                             if len(row_header) > 0:
                                 form.raw_tags.append(row_header)
+                            translate_raw_tags(form)
                             forms.append(form)
                     col_index += 1
     return forms

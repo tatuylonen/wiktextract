@@ -53,22 +53,22 @@ class TestPlInflection(TestCase):
             [
                 {
                     "form": "psy",
-                    "raw_tags": ["liczba mnoga", "mianownik"],
+                    "tags": ["plural", "nominative"],
                     "sense_index": "2.1-3",
                 },
                 {
                     "form": "psa",
-                    "raw_tags": ["liczba pojedyncza", "biernik"],
+                    "tags": ["singular", "accusative"],
                     "sense_index": "2.1-3",
                 },
                 {
                     "form": "psy",
-                    "raw_tags": ["liczba mnoga", "biernik"],
+                    "tags": ["plural", "accusative"],
                     "sense_index": "2.1-3",
                 },
                 {
                     "form": "psów",
-                    "raw_tags": ["liczba mnoga", "biernik"],
+                    "tags": ["plural", "accusative"],
                     "sense_index": "2.1-3",
                 },
             ],
