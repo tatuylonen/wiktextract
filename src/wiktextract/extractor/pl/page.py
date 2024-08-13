@@ -12,6 +12,7 @@ from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .etymology import extract_etymology_section
 from .example import extract_example_section
+from .inflection import extract_inflection_section
 from .linkage import LINKAGE_TYPES, extract_linkage_section
 from .models import Sense, WordEntry
 from .note import extract_note_section
@@ -56,6 +57,10 @@ def parse_section(
         )
     elif title_text == "uwagi":
         extract_note_section(wxr, page_data, base_data, level_node)
+    elif title_text == "odmiana" and wxr.config.capture_inflections:
+        extract_inflection_section(
+            wxr, page_data, base_data.lang_code, level_node
+        )
 
 
 def parse_page(
