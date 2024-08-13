@@ -1,7 +1,6 @@
 from unittest import TestCase
-from unittest.mock import patch
 
-from wikitextprocessor import Page, Wtp
+from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.zh.inflection import extract_inflections
 from wiktextract.extractor.zh.models import WordEntry
@@ -25,12 +24,11 @@ class TestInflection(TestCase):
             self.wxr.thesaurus_db_path, self.wxr.thesaurus_db_conn
         )
 
-    @patch(
-        "wikitextprocessor.Wtp.get_page",
-        return_value=Page(
-            title="Template:ja-i",
-            namespace_id=10,
-            body="""{|
+    def test_ja_i_template(self) -> None:
+        self.wxr.wtp.add_page(
+            "Template:ja-i",
+            10,
+            """{|
 |-
 ! 基本形
 |-
@@ -38,11 +36,8 @@ class TestInflection(TestCase):
 | 可笑しかろ
 | おかしかろ
 | okashikaro
-|}
-            """,
-        ),
-    )
-    def test_ja_i_template(self, mock_get_page) -> None:
+|}""",
+        )
         page_data = [
             WordEntry(lang="日語", lang_code="ja", word="可笑しい", pos="adj")
         ]
@@ -57,7 +52,7 @@ class TestInflection(TestCase):
                     "form": "可笑しかろ",
                     "hiragana": "おかしかろ",
                     "roman": "okashikaro",
-                    "source": "inflection",
+                    "source": "inflection table",
                     "raw_tags": ["基本形", "未然形"],
                 },
             ],
@@ -109,5 +104,63 @@ class TestInflection(TestCase):
                 {"form": "新抱", "raw_tags": ["粵語"]},
                 {"form": "心抱", "raw_tags": ["粵語"]},
                 {"form": "新府", "raw_tags": ["陽江粵語"]},
+            ],
+        )
+
+    def test_ja_suru(self):
+        self.wxr.wtp.add_page(
+            "Template:ja-suru",
+            10,
+            """<div>
+{|
+|-
+! colspan="4" | 活用形
+|-
+! 假定形<br/>（<span class="Jpan" lang="ja">[[仮定形#日語|-{仮定形}-]]</span>）
+||<span class="Jpan" lang="ja-Jpan">腐敗すれ</span>
+| | <span class="Jpan" lang="ja-Jpan">ふはいすれ</span>
+| <span class="Latn" lang="ja-Latn">fuhai sure</span>
+|-
+! <span class="Jpan" lang="ja">[[命令形#日語|-{命令形}-]]</span>
+||<span class="Jpan" lang="ja-Jpan">腐敗せよ&sup1;<br/>腐敗しろ&sup2;</span>
+| | <span class="Jpan" lang="ja-Jpan">ふはいせよ&sup1;<br/>ふはいしろ&sup2;</span>
+| <span class="Latn" lang="ja-Latn">fuhai seyo&sup1;<br/>fuhai shiro&sup2;</span>
+|-
+| colspan="5" | <small>&sup1; 書面語</small><br/>
+<small>&sup2; 口語</small>
+|}
+</div>""",
+        )
+        page_data = [
+            WordEntry(lang="日語", lang_code="ja", word="腐敗", pos="verb")
+        ]
+        wikitext = "{{ja-suru|ふはい}}"
+        self.wxr.wtp.start_page("腐敗")
+        node = self.wxr.wtp.parse(wikitext)
+        extract_inflections(self.wxr, page_data, node)
+        self.assertEqual(
+            [d.model_dump(exclude_defaults=True) for d in page_data[0].forms],
+            [
+                {
+                    "form": "腐敗すれ",
+                    "hiragana": "ふはいすれ",
+                    "roman": "fuhai sure",
+                    "source": "inflection table",
+                    "raw_tags": ["活用形", "假定形", "仮定形"],
+                },
+                {
+                    "form": "腐敗せよ",
+                    "hiragana": "ふはいせよ",
+                    "roman": "fuhai seyo",
+                    "source": "inflection table",
+                    "raw_tags": ["活用形", "命令形", "書面語"],
+                },
+                {
+                    "form": "腐敗しろ",
+                    "hiragana": "ふはいしろ",
+                    "roman": "fuhai shiro",
+                    "source": "inflection table",
+                    "raw_tags": ["活用形", "命令形", "口語"],
+                },
             ],
         )
