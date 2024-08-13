@@ -324,7 +324,7 @@ def process_zh_forms(
 
 # https://zh.wiktionary.org/wiki/Template:Zh-cat
 # https://zh.wiktionary.org/wiki/Template:Catlangname
-CATEGORY_TEMPLATES = frozenset(["zh-cat", "cln", "catlangname"])
+CATEGORY_TEMPLATES = frozenset(["zh-cat", "cln", "catlangname", "c", "topics"])
 
 
 def add_page_end_categories(
