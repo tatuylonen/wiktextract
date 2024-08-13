@@ -102,9 +102,7 @@ def process_pos_line_italic_node(
                 is_pos = False
                 for prefix, pos_data in POS_PREFIXES.items():
                     if child_text.startswith(prefix):
-                        update_pos_data(
-                            page_data[-1], child_text, POS_DATA[child_text]
-                        )
+                        update_pos_data(page_data[-1], child_text, pos_data)
                         is_pos = True
                         break
                 if not is_pos and child_text not in IGNORE_POS_LINE_TEXT:
