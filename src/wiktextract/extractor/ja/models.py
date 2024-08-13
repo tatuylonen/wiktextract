@@ -102,3 +102,4 @@ class WordEntry(JapaneseBaseModel):
     collocations: list[Linkage] = []
     proverbs: list[Linkage] = []
     phrases: list[Linkage] = []
+    coordinate_terms: list[Linkage] = []

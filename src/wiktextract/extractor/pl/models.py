@@ -68,6 +68,13 @@ class Linkage(PolishBaseModel):
     translation: str = ""
 
 
+class Form(PolishBaseModel):
+    form: str = ""
+    tags: list[str] = []
+    raw_tags: list[str] = []
+    sense_index: str = ""
+
+
 class WordEntry(PolishBaseModel):
     model_config = ConfigDict(title="Polish Wiktionary")
 
@@ -93,3 +100,4 @@ class WordEntry(PolishBaseModel):
     related: list[Linkage] = []
     proverbs: list[Linkage] = []
     synonyms: list[Linkage] = []
+    forms: list[Form] = []

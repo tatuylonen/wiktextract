@@ -217,6 +217,16 @@ TAGS = {
     # sound tags
     "bryt. (RP)": ["British", "Received-Pronunciation"],
     "amer.": "US",
+    # "odmiana-rzeczownik-polski" template
+    "liczba pojedyncza": "singular",
+    "liczba mnoga": "plural",
+    "mianownik": "nominative",
+    "dopełniacz": "genitive",
+    "celownik": "dative",
+    "biernik": "accusative",
+    "narzędnik": "instrumental",
+    "miejscownik": "locative",
+    "wołacz": "vocative",
 }
 
 TOPICS = {
