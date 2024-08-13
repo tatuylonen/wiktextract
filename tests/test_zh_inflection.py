@@ -116,7 +116,6 @@ class TestInflection(TestCase):
 |-
 ! colspan="4" | 活用形
 |-
-|-
 ! 假定形<br/>（<span class="Jpan" lang="ja">[[仮定形#日語|-{仮定形}-]]</span>）
 ||<span class="Jpan" lang="ja-Jpan">腐敗すれ</span>
 | | <span class="Jpan" lang="ja-Jpan">ふはいすれ</span>
@@ -150,18 +149,18 @@ class TestInflection(TestCase):
                     "raw_tags": ["活用形", "假定形", "仮定形"],
                 },
                 {
-                    "form": "腐敗せよ¹",
-                    "hiragana": "ふはいせよ¹",
-                    "roman": "fuhai seyo¹",
+                    "form": "腐敗せよ",
+                    "hiragana": "ふはいせよ",
+                    "roman": "fuhai seyo",
                     "source": "inflection table",
-                    "raw_tags": ["活用形", "命令形"],
+                    "raw_tags": ["活用形", "命令形", "書面語"],
                 },
                 {
-                    "form": "腐敗しろ²",
-                    "hiragana": "ふはいしろ²",
-                    "roman": "fuhai shiro²",
+                    "form": "腐敗しろ",
+                    "hiragana": "ふはいしろ",
+                    "roman": "fuhai shiro",
                     "source": "inflection table",
-                    "raw_tags": ["活用形", "命令形"],
+                    "raw_tags": ["活用形", "命令形", "口語"],
                 },
             ],
         )
