@@ -50,7 +50,9 @@ def process_sound_template(
         for index in itertools.count(1):
             if index not in template_node.template_parameters:
                 break
-            ipa = template_node.template_parameters[index]
+            ipa = clean_node(
+                wxr, None, template_node.template_parameters[index]
+            )
             if len(ipa) > 0:
                 sound = Sound(ipa=ipa)
                 if template_node.template_name == "X-SAMPA":
@@ -61,7 +63,9 @@ def process_sound_template(
         for index in itertools.count(1):
             if index not in template_node.template_parameters:
                 break
-            homophone = template_node.template_parameters[index]
+            homophone = clean_node(
+                wxr, None, template_node.template_parameters[index]
+            )
             if len(homophone) > 0:
                 homophones.append(homophone)
         if len(homophones) > 0:

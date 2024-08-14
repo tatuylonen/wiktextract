@@ -105,3 +105,13 @@ class TestJaSound(TestCase):
         self.assertEqual(data[0]["sounds"], [{"ipa": "[iɾo̞]"}])
         self.assertEqual(data[1]["senses"], [{"glosses": ["gloss 2"]}])
         self.assertTrue("sounds" not in data[1])
+
+    def test_wiki_link_homophones(self):
+        self.wxr.wtp.start_page("lice")
+        root = self.wxr.wtp.parse("""===発音===
+* {{homophones|lang=fr|[[lis]]/[[lys]]}}""")
+        base_data = WordEntry(word="lice", lang_code="fr", lang="フランス語")
+        page_data = [base_data.model_copy(deep=True)]
+        extract_sound_section(self.wxr, page_data, base_data, root.children[0])
+        data = base_data.model_dump(exclude_defaults=True)
+        self.assertEqual(data["sounds"], [{"homophones": ["lis/lys"]}])
