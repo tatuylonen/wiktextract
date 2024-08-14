@@ -227,6 +227,13 @@ TAGS = {
     "narzędnik": "instrumental",
     "miejscownik": "locative",
     "wołacz": "vocative",
+    # "odmiana-przymiotnik-polski" template
+    "mos/mzw": ["masculine", "animate"],
+    "ż": "feminine",
+    "mos": "masculine",
+    "nmos": "nonvirile",
+    "stopień wyższy": "comparative",
+    "stopień najwyższy": "superlative",
 }
 
 TOPICS = {
@@ -390,10 +397,12 @@ def check_tag(data: WordEntry, raw_tag: str) -> bool:
     # return `True` if found tag or topic
     if raw_tag in TAGS and hasattr(data, "tags"):
         tag = TAGS[raw_tag]
-        if isinstance(tag, str):
+        if isinstance(tag, str) and tag not in data.tags:
             data.tags.append(tag)
         elif isinstance(tag, list):
-            data.tags.extend(tag)
+            for t in tag:
+                if t not in data.tags:
+                    data.tags.append(t)
     elif raw_tag in TOPICS and hasattr(data, "topics"):
         topic = TOPICS[raw_tag]
         if isinstance(topic, str):
