@@ -234,6 +234,25 @@ TAGS = {
     "nmos": "nonvirile",
     "stopień wyższy": "comparative",
     "stopień najwyższy": "superlative",
+    # "odmiana-czasownik-polski" template
+    "1. os.": "first-person",
+    "2. os.": "second-person",
+    "3. os.": "third-person",
+    "bezokolicznik": "infinitive",
+    "czas teraźniejszy": "present",
+    "czas przeszły": "past",
+    "tryb rozkazujący": "imperative",
+    "czas przyszły": "future",
+    "czas zaprzeszły": "pluperfect",
+    "forma bezosobowa": "impersonal",
+    "czasu przeszłego": "past",
+    "tryb przypuszczający": "conditional",
+    "imiesłów przymiotnikowy czynny": ["active", "participle"],
+    "imiesłów przysłówkowy współczesny": [
+        "contemporary",
+        "adverbial",
+        "participle",
+    ],
 }
 
 TOPICS = {
