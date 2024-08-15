@@ -26,24 +26,37 @@ def extract_inflection_section(
                 if m is not None:
                     sense_index = m.group(0).strip("()")
             elif isinstance(node, TemplateNode):
-                if node.template_name == "odmiana-rzeczownik-polski":
-                    forms.extend(
-                        extract_odmiana_rzeczownik_polski(
-                            wxr, node, sense_index
-                        )
-                    )
-                elif node.template_name == "odmiana-przymiotnik-polski":
-                    forms.extend(
-                        extract_odmiana_przymiotnik_polski(
-                            wxr, node, sense_index
-                        )
-                    )
+                forms.extend(
+                    extract_inflection_template(wxr, node, sense_index)
+                )
+    if not level_node.contain_node(NodeKind.LIST):
+        # have to search recursively cuz "preformatted" node
+        for node in level_node.find_child_recursively(NodeKind.TEMPLATE):
+            forms.extend(extract_inflection_template(wxr, node, sense_index))
 
     for data in page_data:
         if data.lang_code == lang_code:
             for form in forms:
-                if match_sense_index(form.sense_index, data):
+                if form.sense_index == "" or match_sense_index(
+                    form.sense_index, data
+                ):
                     data.forms.append(form)
+
+
+def extract_inflection_template(
+    wxr: WiktextractContext, template_node: TemplateNode, sense_index: str
+) -> list[Form]:
+    if template_node.template_name == "odmiana-rzeczownik-polski":
+        return extract_odmiana_rzeczownik_polski(
+            wxr, template_node, sense_index
+        )
+    elif template_node.template_name == "odmiana-przymiotnik-polski":
+        return extract_odmiana_przymiotnik_polski(
+            wxr, template_node, sense_index
+        )
+    elif template_node.template_name == "odmiana-czasownik-polski":
+        return extract_odmiana_czasownik_polski(wxr, template_node, sense_index)
+    return []
 
 
 def extract_odmiana_rzeczownik_polski(
@@ -182,4 +195,104 @@ def extract_odmiana_przymiotnik_polski_table(
                 td_col_index += col_span
                 translate_raw_tags(form)
                 forms.append(form)
+    return forms
+
+
+def extract_odmiana_czasownik_polski(
+    wxr: WiktextractContext, template_node: TemplateNode, sense_index: str
+) -> list[Form]:
+    # verb table
+    # https://pl.wiktionary.org/wiki/Szablon:odmiana-czasownik-polski
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(template_node), expand_all=True
+    )
+    forms = []
+    col_headers = []
+    for table_tag in expanded_node.find_html_recursively("table"):
+        forms.extend(
+            extract_odmiana_czasownik_polski_table(
+                wxr, table_tag, sense_index, col_headers
+            )
+        )
+    return forms
+
+
+def extract_odmiana_czasownik_polski_table(
+    wxr: WiktextractContext,
+    table_tag: WikiNode,
+    sense_index: str,
+    col_headers: list[TableHeader],
+) -> list[Form]:
+    forms = []
+    row_headers = []
+    for row_index, tr_tag in enumerate(table_tag.find_html("tr")):
+        has_td_tag = any(t for t in tr_tag.find_html("td"))
+        th_col_index = 0
+        for th_tag in tr_tag.find_html("th"):
+            th_text = clean_node(wxr, None, th_tag)
+            if th_text in ["forma", "pozostałe formy"]:
+                continue
+            if not has_td_tag and "rowspan" not in th_tag.attrs:
+                col_span = int(th_tag.attrs.get("colspan", "1"))
+                col_headers.append(
+                    TableHeader(th_text, th_col_index, th_col_index + col_span)
+                )
+                th_col_index += col_span
+            else:
+                row_span = int(th_tag.attrs.get("rowspan", "1"))
+                if th_tag.contain_node(NodeKind.LINK):
+                    for link_node in th_tag.find_child(NodeKind.LINK):
+                        row_headers.append(
+                            TableHeader(
+                                clean_node(wxr, None, link_node),
+                                row_index,
+                                row_index + row_span,
+                            )
+                        )
+                else:
+                    row_headers.append(
+                        TableHeader(th_text, row_index, row_index + row_span)
+                    )
+
+    for row_index, tr_tag in enumerate(table_tag.find_html("tr")):
+        td_col_index = 0
+        for td_tag in tr_tag.find_html("td"):
+            if any(t for t in td_tag.find_html("table")):
+                break
+            td_text = clean_node(wxr, None, td_tag)
+            col_span = int(td_tag.attrs.get("colspan", "1"))
+            row_span = int(td_tag.attrs.get("rowspan", "1"))
+            # "Szablon:potencjalnie" uses "{{int:potential-form-tooltip}}"
+            # not implemented magic word
+            is_potential_form = False
+            for span_tag in td_tag.find_html(
+                "span", attr_name="class", attr_value="potential-form"
+            ):
+                is_potential_form = True
+
+            for line in td_text.splitlines():
+                for form_text in line.split(","):
+                    form_text = form_text.strip()
+                    if form_text == "" or form_text == wxr.wtp.title:
+                        continue
+                    form = Form(form=form_text, sense_index=sense_index)
+                    for col_header in col_headers:
+                        if (
+                            col_header.start < td_col_index + col_span
+                            and td_col_index < col_header.end
+                        ):
+                            form.raw_tags.append(col_header.text)
+                    for row_header in row_headers:
+                        if (
+                            row_header.start < row_index + row_span
+                            and row_index < row_header.end
+                        ):
+                            form.raw_tags.append(row_header.text)
+                    translate_raw_tags(form)
+                    if is_potential_form:
+                        form.tags.extend(["potential", "rare"])
+                    forms.append(form)
+
+            td_col_index += col_span
+
     return forms

@@ -155,3 +155,122 @@ class TestPlInflection(TestCase):
                 },
             ],
         )
+
+    def test_odmiana_czasownik_polski(self):
+        self.wxr.wtp.add_page(
+            "Szablon:odmiana-czasownik-polski",
+            10,
+            """<div><div><table><tr><th rowspan="2" colspan="2">[[forma]]</th><th colspan="3">[[liczba pojedyncza]]</th><th colspan="3">[[liczba mnoga]]</th></tr><tr><th>''1.'' <span>[[Aneks:Skróty używane w Wikisłowniku#O|<span><span>os.</span></span>]]</span></th><th>''2.'' <span>[[Aneks:Skróty używane w Wikisłowniku#O|<span><span>os.</span></span>]]</span></th><th>''3.'' <span>[[Aneks:Skróty używane w Wikisłowniku#O|<span><span>os.</span></span>]]</span></th><th >''1.'' <span>[[Aneks:Skróty używane w Wikisłowniku#O|<span><span>os.</span></span>]]</span></th><th>''2.'' <span >[[Aneks:Skróty używane w Wikisłowniku#O|<span><span>os.</span></span>]]</span></th><th >''3.'' <span>[[Aneks:Skróty używane w Wikisłowniku#O|<span><span>os.</span></span>]]</span></th></tr><tr><td><table><tr><th colspan="8">&nbsp;pozostałe formy</th></tr><tr><th colspan="2">[[forma bezosobowa]] [[czas przeszły|czasu przeszłego]]</th><td colspan="6">biegnięto </td></tr><tr><th rowspan="2">[[tryb przypuszczający]]</th><th>''m''</th><td width="14%">biegłbym</td></tr><tr><th>''n''</th><td><span class="potential-form" title="forma potencjalna lub rzadka" tabindex="0">biegłobym,<br/>[[być|byłobym]]  biegło</span></td></tr><tr><th rowspan="3">[[imiesłów przymiotnikowy czynny]]</th></tr><tr><th>''ż''</th><td colspan="3">biegnąca, niebiegnąca </td><td rowspan="2" colspan="3">biegnące, niebiegnące </td></tr><tr><th rowspan="1">''n''</th></tr></table></td></tr></table></div></div>""",
+        )
+        self.wxr.wtp.start_page("biec")
+        root = self.wxr.wtp.parse(
+            "===odmiana===\n {{odmiana-czasownik-polski}}"
+        )
+        page_data = [
+            WordEntry(
+                word="biec",
+                lang="język polski",
+                lang_code="pl",
+                pos="verb",
+                senses=[Sense(sense_index="1.1")],
+            ),
+        ]
+        extract_inflection_section(self.wxr, page_data, "pl", root)
+        self.assertEqual(
+            [f.model_dump(exclude_defaults=True) for f in page_data[0].forms],
+            [
+                {
+                    "form": "biegnięto",
+                    "tags": [
+                        "singular",
+                        "plural",
+                        "first-person",
+                        "second-person",
+                        "third-person",
+                        "impersonal",
+                        "past",
+                    ],
+                },
+                {
+                    "form": "biegłbym",
+                    "tags": [
+                        "singular",
+                        "first-person",
+                        "conditional",
+                        "masculine",
+                    ],
+                },
+                {
+                    "form": "biegłobym",
+                    "tags": [
+                        "singular",
+                        "first-person",
+                        "conditional",
+                        "neuter",
+                        "potential",
+                        "rare",
+                    ],
+                },
+                {
+                    "form": "byłobym biegło",
+                    "tags": [
+                        "singular",
+                        "first-person",
+                        "conditional",
+                        "neuter",
+                        "potential",
+                        "rare",
+                    ],
+                },
+                {
+                    "form": "biegnąca",
+                    "tags": [
+                        "singular",
+                        "first-person",
+                        "second-person",
+                        "third-person",
+                        "active",
+                        "participle",
+                        "feminine",
+                    ],
+                },
+                {
+                    "form": "niebiegnąca",
+                    "tags": [
+                        "singular",
+                        "first-person",
+                        "second-person",
+                        "third-person",
+                        "active",
+                        "participle",
+                        "feminine",
+                    ],
+                },
+                {
+                    "form": "biegnące",
+                    "tags": [
+                        "plural",
+                        "first-person",
+                        "second-person",
+                        "third-person",
+                        "active",
+                        "participle",
+                        "feminine",
+                        "neuter",
+                    ],
+                },
+                {
+                    "form": "niebiegnące",
+                    "tags": [
+                        "plural",
+                        "first-person",
+                        "second-person",
+                        "third-person",
+                        "active",
+                        "participle",
+                        "feminine",
+                        "neuter",
+                    ],
+                },
+            ],
+        )
