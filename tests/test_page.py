@@ -838,3 +838,64 @@ test
                 }
             ],
         )
+
+    @patch(
+        "wikitextprocessor.Wtp.get_page",
+        return_value=Page(
+            title="Template:test-alcance",
+            namespace_id=10,
+            body="""inflection of alcanfoo
+## first/third-person singular present subjunctive
+## third-person singular imperative""",
+        ),
+    )
+    def test_templates_with_subglosses(self, mock_get_page):
+        # PR #771
+        self.assertEqual(
+            parse_page(
+                self.wxr,
+                "alcance",
+                """==Spanish==
+===Verb===
+
+alcance
+# {{test-alcance}}
+""",
+            ),
+            [
+                {
+                    "lang": "Spanish",
+                    "lang_code": "es",
+                    "pos": "verb",
+                    "senses": [
+                        {
+                            "glosses": [
+                                "inflection of alcanfoo",
+                                "first/third-person singular present subjunctive",
+                            ],
+                            "tags": [
+                                "first-person",
+                                "form-of",
+                                "present",
+                                "singular",
+                                "subjunctive",
+                                "third-person",
+                            ],
+                        },
+                        {
+                            "glosses": [
+                                "inflection of alcanfoo",
+                                "third-person singular imperative",
+                            ],
+                            "tags": [
+                                "form-of",
+                                "imperative",
+                                "singular",
+                                "third-person",
+                            ],
+                        },
+                    ],
+                    "word": "alcance",
+                }
+            ],
+        )
