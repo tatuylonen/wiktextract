@@ -193,3 +193,22 @@ class TestJaTransaltion(TestCase):
                 }
             ],
         )
+
+    def test_fallback_to_parent_list_lang(self):
+        self.wxr.wtp.start_page("双魚宮")
+        self.wxr.wtp.add_page("テンプレート:T", 10, "セルビア・クロアチア語")
+        data = WordEntry(
+            word="双魚宮", lang="日本語", lang_code="ja", pos="noun"
+        )
+        root = self.wxr.wtp.parse("*{{T|sh}}:\n*:キリル文字: [[Рибе]]")
+        extract_translation_section(self.wxr, data, root)
+        self.assertEqual(
+            [t.model_dump(exclude_defaults=True) for t in data.translations],
+            [
+                {
+                    "lang": "セルビア・クロアチア語",
+                    "lang_code": "sh",
+                    "word": "Рибе",
+                }
+            ],
+        )
