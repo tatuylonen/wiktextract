@@ -1,6 +1,7 @@
 from unittest import TestCase
 
 from wikitextprocessor import Wtp
+
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.ja.page import parse_page
 from wiktextract.wxr_context import WiktextractContext
@@ -83,5 +84,31 @@ class TestJaGloss(TestCase):
                         "東京二十三区。東京都のうち、多摩と島嶼部を除いた地域。かつての東京市。",
                     ]
                 },
+            ],
+        )
+
+    def test_topic(self):
+        self.wxr.wtp.add_page("テンプレート:L", 10, "日本語")
+        self.wxr.wtp.add_page("テンプレート:noun", 10, "名詞")
+        self.wxr.wtp.add_page(
+            "テンプレート:context", 10, "(占星術[[カテゴリ:日本語 占星術]])"
+        )
+        page_data = parse_page(
+            self.wxr,
+            "東京",
+            """=={{L|ja}}==
+==={{noun}}===
+#{{context|astrology|lang=ja}}[[うお座]]。[[占星術]]における、[[黄道十二星座]]・[[十二宮]]のひとつ。""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"],
+            [
+                {
+                    "categories": ["日本語 占星術"],
+                    "glosses": [
+                        "うお座。占星術における、黄道十二星座・十二宮のひとつ。"
+                    ],
+                    "topics": ["astrology"],
+                }
             ],
         )

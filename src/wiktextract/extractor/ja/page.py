@@ -26,7 +26,7 @@ def parse_section(
     level_node: LevelNode,
 ) -> None:
     title_texts = clean_node(wxr, None, level_node.largs)
-    for title_text in re.split(r"：|・", title_texts):
+    for title_text in re.split(r"：|:|・", title_texts):
         if title_text in POS_DATA:
             pre_len = len(page_data)
             parse_pos_section(wxr, page_data, base_data, level_node, title_text)

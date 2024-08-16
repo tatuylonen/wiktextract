@@ -1,6 +1,7 @@
 from unittest import TestCase
 
 from wikitextprocessor import Wtp
+
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.ja.example import extract_example_list_item
 from wiktextract.extractor.ja.models import Example, Sense

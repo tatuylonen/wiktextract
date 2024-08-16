@@ -1,6 +1,7 @@
 from unittest import TestCase
 
 from wikitextprocessor import Wtp
+
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.pl.models import WordEntry
 from wiktextract.extractor.pl.sound import extract_sound_section

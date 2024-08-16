@@ -1,6 +1,7 @@
 from unittest import TestCase
 
 from wikitextprocessor import Wtp
+
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.ja.linkage import extract_linkage_section
 from wiktextract.extractor.ja.models import WordEntry
