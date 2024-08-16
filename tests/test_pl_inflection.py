@@ -1,6 +1,7 @@
 from unittest import TestCase
 
 from wikitextprocessor import Wtp
+
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.pl.inflection import extract_inflection_section
 from wiktextract.extractor.pl.models import Sense, WordEntry

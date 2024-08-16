@@ -7,6 +7,7 @@ from .example import extract_example_list_item
 from .header import extract_header_nodes
 from .models import Sense, WordEntry
 from .section_titles import POS_DATA
+from .tags import translate_raw_tags
 
 
 def parse_pos_section(
@@ -69,6 +70,7 @@ def process_gloss_list_item(
     sense_data.ruby = ruby
     if len(gloss_text) > 0:
         sense_data.glosses.append(gloss_text)
+        translate_raw_tags(sense_data)
         word_entry.senses.append(sense_data)
 
     for nest_gloss_list in list_item_node.find_child(NodeKind.LIST):
