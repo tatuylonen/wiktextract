@@ -127,3 +127,69 @@ class TestJaTransaltion(TestCase):
                 }
             ],
         )
+
+    def test_archar(self):
+        self.wxr.wtp.start_page("いぬ")
+        self.wxr.wtp.add_page("テンプレート:ar", 10, "アラビア語")
+        self.wxr.wtp.add_page("テンプレート:ARchar", 10, "{{{1}}}")
+        self.wxr.wtp.add_page("テンプレート:m", 10, "男性")
+        data = WordEntry(word="いぬ", lang="日本語", lang_code="ja", pos="noun")
+        root = self.wxr.wtp.parse(
+            "* [[{{ar}}]]: {{ARchar|[[ٌكلب|كَلْب]]}} (kalb) {{m}}"
+        )
+        extract_translation_section(self.wxr, data, root)
+        self.assertEqual(
+            [t.model_dump(exclude_defaults=True) for t in data.translations],
+            [
+                {
+                    "lang": "アラビア語",
+                    "lang_code": "ar",
+                    "word": "كَلْب",
+                    "tags": ["masculine"],
+                }
+            ],
+        )
+
+    def test_t_template_number_tag(self):
+        self.wxr.wtp.start_page("双魚宮")
+        self.wxr.wtp.add_page("テンプレート:T", 10, "ロシア語")
+        data = WordEntry(
+            word="双魚宮", lang="日本語", lang_code="ja", pos="noun"
+        )
+        root = self.wxr.wtp.parse(
+            "*{{T|ru}}: {{t-|ru|Рыбы|f|p|tr=Rýby|sc=Cyrl}}"
+        )
+        extract_translation_section(self.wxr, data, root)
+        self.assertEqual(
+            [t.model_dump(exclude_defaults=True) for t in data.translations],
+            [
+                {
+                    "lang": "ロシア語",
+                    "lang_code": "ru",
+                    "word": "Рыбы",
+                    "roman": "Rýby",
+                    "tags": ["feminine", "plural"],
+                }
+            ],
+        )
+
+    def test_tag_template(self):
+        self.wxr.wtp.start_page("双魚宮")
+        self.wxr.wtp.add_page("テンプレート:T", 10, "アイスランド語")
+        self.wxr.wtp.add_page("テンプレート:npl", 10, "中性/複数")
+        data = WordEntry(
+            word="双魚宮", lang="日本語", lang_code="ja", pos="noun"
+        )
+        root = self.wxr.wtp.parse("*{{T|is}}: [[fiskarnir]] {{npl}}")
+        extract_translation_section(self.wxr, data, root)
+        self.assertEqual(
+            [t.model_dump(exclude_defaults=True) for t in data.translations],
+            [
+                {
+                    "lang": "アイスランド語",
+                    "lang_code": "is",
+                    "word": "fiskarnir",
+                    "tags": ["neuter", "plural"],
+                }
+            ],
+        )
