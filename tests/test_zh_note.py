@@ -2,6 +2,7 @@ from unittest import TestCase
 from unittest.mock import Mock
 
 from wikitextprocessor import Wtp
+
 from wiktextract.extractor.zh.models import WordEntry
 from wiktextract.extractor.zh.note import extract_note
 from wiktextract.thesaurus import close_thesaurus_db
