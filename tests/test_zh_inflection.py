@@ -167,3 +167,41 @@ class TestInflection(TestCase):
                 }
             ],
         )
+
+    def test_ja_verbconj(self):
+        self.wxr.wtp.add_page(
+            "Template:ja-verbconj",
+            10,
+            """<div>
+{|
+|-
+! colspan="4" | '''語幹形態'''
+|-
+! '''未然形'''
+| | <span class="Jpan" lang="ja-Jpan">-</span>
+| <span class="Latn" lang="ja-Latn">-</span>
+|-
+| '''假定形'''
+| | <span class="Jpan" lang="ja-Jpan">ね</span>
+| <span class="Latn" lang="ja-Latn">ne</span>
+|}
+</div>""",
+        )
+        page_data = [
+            WordEntry(lang="日語", lang_code="ja", word="ぬ", pos="suffix")
+        ]
+        wikitext = "{{ja-verbconj|ぬ}}"
+        self.wxr.wtp.start_page("ぬ")
+        node = self.wxr.wtp.parse(wikitext)
+        extract_inflections(self.wxr, page_data, node)
+        self.assertEqual(
+            [d.model_dump(exclude_defaults=True) for d in page_data[0].forms],
+            [
+                {
+                    "form": "ね",
+                    "roman": "ne",
+                    "source": "inflection table",
+                    "raw_tags": ["語幹形態", "假定形"],
+                }
+            ],
+        )
