@@ -74,10 +74,16 @@ def extract_ja_inf_table(
                 elif row_child.kind == NodeKind.TABLE_CELL:
                     if cell_node_index >= 3:
                         break
+                    for bold_node in row_child.find_child(NodeKind.BOLD):
+                        # is row header
+                        raw_tags.append(clean_node(wxr, None, bold_node))
+                        continue
                     for span_tag in row_child.find_html("span"):
                         span_text = clean_node(wxr, None, row_child)
                         span_class = span_tag.attrs.get("class", "")
                         for line in span_text.splitlines():
+                            if line == "-":
+                                continue
                             if line.endswith(("¹", "²")):
                                 if cell_node_index == 0:
                                     small_tags.append(line[-1])
@@ -95,6 +101,8 @@ def extract_ja_inf_table(
             for form, hiragana, roman, small_tag in zip_longest(
                 form_list, hiragana_list, roman_list, small_tags
             ):
+                if form is None:
+                    continue
                 form_data = Form(
                     raw_tags=[table_header] + raw_tags,
                     source="inflection table",
