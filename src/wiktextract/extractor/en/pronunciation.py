@@ -230,21 +230,19 @@ def parse_pronunciation(
 
     if have_etym and data is base_data:
         data = etym_data
-    enprs = []
+    pron_templates: list[tuple[SoundData, list[SoundData]]] = []
     audios = []
     have_panel_templates = False
 
     def parse_pronunciation_template_fn(
         name: str, ht: TemplateArgs
     ) -> Optional[str]:
+        # _template_fn handles templates *before* they are expanded;
+        # this allows for special handling before all the work needed
+        # for expansion is done.
         nonlocal have_panel_templates
         if is_panel_template(wxr, name):
             have_panel_templates = True
-            return ""
-        if name == "enPR":
-            enpr = ht.get(1)
-            if enpr:
-                enprs.append(enpr)
             return ""
         if name == "audio":
             filename = ht.get(2) or ""
@@ -314,6 +312,11 @@ def parse_pronunciation(
     def parse_pron_post_template_fn(
         name: str, ht: TemplateArgs, text: str
     ) -> Optional[str]:
+        # _post_template_fn handles templates *after* the work to expand
+        # them has been done; this is exactly the same as _template_fn,
+        # except with the additional expanded text as an input, and
+        # possible side-effects from the expansion and recursion (like
+        # calling other subtemplates that are handled in _template_fn.
         if is_panel_template(wxr, name):
             return ""
         if name in {
@@ -341,10 +344,14 @@ def parse_pronunciation(
                 # uses {{a|{{l{{vi|...}}}}, and the {{a|...}} will fail
                 # if {{l|...}} returns empty.
                 return "stripped-by-parse_pron_post_template_fn"
-        if name in ("enPR",):
-            # Some enPR pronunciations include slashes.  Strip them so
-            # they don't incorrectly get taken as IPA.
-            return "stripped-by-parse_pron_post_template_fn"
+        if name in ("IPA", "enPR"):
+            # Extract the data from IPA and enPR templates (same underlying
+            # template) and replace them in-text with magical cookie that
+            # can be later used to refer to the data's index inside
+            # pron_templates.
+            if pron_t := extract_pron_template(wxr, name, ht, text):
+                pron_templates.append(pron_t)
+                return f"__PRON_TEMPLATE_{len(pron_templates)-1}__"
         return text
 
     def parse_expanded_zh_pron(
@@ -618,176 +625,187 @@ def parse_pronunciation(
     # been caught by earlier kludges...
     def split_cleaned_node_on_newlines(
         contents: list[Union[WikiNode, str]],
-    ) -> Iterator[tuple[str, str]]:
+    ) -> Iterator[str]:
         for litem in flattened_tree(contents):
-            text = clean_node(
-                wxr, data, litem, template_fn=parse_pronunciation_template_fn
-            )
             ipa_text = clean_node(
-                wxr, data, litem, post_template_fn=parse_pron_post_template_fn
+                wxr,
+                data,
+                litem,
+                template_fn=parse_pronunciation_template_fn,
+                post_template_fn=parse_pron_post_template_fn,
             )
-            for line, ipaline in zip(text.splitlines(), ipa_text.splitlines()):
-                yield line, ipaline
+            for line in ipa_text.splitlines():
+                yield line
 
     # have_pronunciations = False
     active_pos: Optional[str] = None
 
-    for text, ipa_text in split_cleaned_node_on_newlines(contents):
-        print(f"{text=}, {ipa_text=}")
+    for line in split_cleaned_node_on_newlines(contents):
+        # print(f"{line=}")
         prefix: Optional[str] = None
-        if not text:
-            continue
-        if not ipa_text:
-            ipa_text = text
-
-        # Check if the text is just a word or two long, and then
-        # straight up compare it to the keys in part_of_speech_map,
-        # which is the simplest non-`decode_tags()` method I could
-        # think of roughly checking if a line is just something along
-        # the line of "Noun".
-        # active_pos is used to add a temporary "pos"-field to things
-        # added to "sounds", which later are filtered in page/merge_base()
-        # The "pos"-key is also removed at that point, resulting in
-        # pronunciation-sections being divided up if they seem to be
-        # divided along part-of-speech lines.
-        # XXX if necessary, expand on this; either better ways to
-        # detect POS-stuff, or more ways to filter sub-blocks of
-        # Pronunciation-sections.
-
-        # Cleaning up "* " at the start of text.
-        text = re.sub(r"^\**\s*", "", text)
-
-        m = re.match(r"\s*(\w+\s?\w*)", text)
-        if m:
-            if (m_lower := m.group(1).lower()) in part_of_speech_map:
-                active_pos = part_of_speech_map[m_lower]["pos"]
-
-        if "IPA" in text:
-            field = "ipa"
-        else:
-            # This is used for Rhymes, Homophones, etc
-            field = "other"
-
-        # Check if it contains Japanese "Tokyo" pronunciation with
-        # special syntax
-        m = re.search(r"(?m)\(Tokyo\) +([^ ]+) +\[", text)
-        if m:
-            pron: SoundData = {field: m.group(1)}  # type: ignore[misc]
-            if active_pos:
-                pron["pos"] = active_pos  # type: ignore[typeddict-unknown-key]
-            data_append(data, "sounds", pron)
-            # have_pronunciations = True
+        earlier_data: Optional[SoundData] = None
+        if not line:
             continue
 
-        # Check if it contains Rhymes
-        m = re.match(r"\s*Rhymes: (.*)", text)
-        if m:
-            for ending in split_at_comma_semi(m.group(1)):
-                ending = ending.strip()
-                if ending:
-                    pron = {"rhymes": ending}
-                    if active_pos:
-                        pron["pos"] = active_pos  # type: ignore[typeddict-unknown-key]
-                    data_append(data, "sounds", pron)
-                    # have_pronunciations = True
-            continue
-
-        # Check if it contains homophones
-        m = re.search(r"(?m)\bHomophones?: (.*)", text)
-        if m:
-            for w in split_at_comma_semi(m.group(1)):
-                w = w.strip()
-                if w:
-                    pron = {"homophone": w}
-                    if active_pos:
-                        pron["pos"] = active_pos  # type: ignore[typeddict-unknown-key]
-                    data_append(data, "sounds", pron)
-                    # have_pronunciations = True
-            continue
-
-        # Check if it contains Phonetic hangeul
-        m = re.search(r"(?m)\bPhonetic hange?ul: \[([^]]+)\]", text)
-        if m:
-            seen = set()
-            for w in m.group(1).split("/"):
-                w = w.strip()
-                if w and w not in seen:
-                    seen.add(w)
-                    pron = {"hangeul": w}
-                    if active_pos:
-                        pron["pos"] = active_pos  # type: ignore[typeddict-unknown-key]
-                    data_append(data, "sounds", pron)
-                    # have_pronunciations = True
-
-        m = re.search(r"\b(Syllabification|Hyphenation): ([^\s,]*)", text)
-        if m:
-            data_append(data, "hyphenation", m.group(2))
-            # have_pronunciations = True
-
-        # See if it contains a word prefix restricting which forms the
-        # pronunciation applies to (see amica/Latin) and/or parenthesized
-        # tags.
-        m = re.match(r"^[*#\s]*(([-\w]+):\s+)?\((([^()]|\([^()]*\))*?)\)", text)
-        if m:
-            prefix = m.group(2) or ""
-            tagstext = m.group(3)
-            text = text[m.end() :]
-        else:
-            m = re.match(r"^[*#\s]*([-\w]+):\s+", text)
-            if m:
-                prefix = m.group(1)
-                tagstext = ""
-                text = text[m.end() :]
-            else:
-                # Spanish has tags before pronunciations, eg. aceite/Spanish
-                m = re.match(r".*:\s+\(([^)]*)\)\s+(.*)", text)
+        split_templates = re.split(r"__PRON_TEMPLATE_(\d+)__", line)
+        for i, text in enumerate(split_templates):
+            if not text:
+                continue
+            # clean up starts at the start of the line
+            text = re.sub(r"^\**\s*", "", text).strip()
+            if i == 0:
+                # At the start of a line, check for stuff like "Noun:"
+                # for active_pos; active_pos is a temporary data field
+                # given to each saved SoundData entry which is later
+                # used to sort the entries into their respective PoSes.
+                m = re.match(r"\s*(\w+\s?\w*)\s*:?\s*", text)
                 if m:
-                    tagstext = m.group(1)
-                    text = m.group(2)
-                else:
-                    # No prefix.  In this case, we inherit prefix
-                    # from previous entry.  This particularly
-                    # applies for nested Audio files.
-                    tagstext = ""
-
-        # Find romanizations from the pronunciation section (routinely
-        # produced for Korean by {{ko-IPA}})
-        for m in re.finditer(pron_romanization_re, text):
-            prefix = m.group(1)
-            w = m.group(2).strip()
-            tag = pron_romanizations[prefix]
-            form = {"form": w, "tags": tag.split()}
-            data_append(data, "forms", form)
-
-        # Find IPA pronunciations
-        for m in re.finditer(
-            r"(?m)/[^][\n/,]+?/" r"|" r"\[[^]\n0-9,/][^],/]*?\]", ipa_text
-        ):
-            v = m.group(0)
-            # The regexp above can match file links.  Skip them.
-            if v.startswith("[[File:"):
+                    if (m_lower := m.group(1).lower()) in part_of_speech_map:
+                        active_pos = part_of_speech_map[m_lower]["pos"]
+                        text = text[m.end():].strip()
+            if not text:
                 continue
-            if v == "/wiki.local/":
+            if i % 2 == 1:
+                # re.split (with capture groups) splits the lines so that
+                # every even entry is a captured splitter; odd lines are either
+                # empty strings or stuff around the splitters.
+                base_pron_data, first_prons = pron_templates[int(text)]
+                for pr in first_prons:
+                    if active_pos:
+                        pr["pos"] = active_pos  # type: ignore[typeddict-unknown-key]
+                    if pr not in data.get("sounds", ()):
+                        data_append(data, "sounds", pr)
+                # This bit is handled
                 continue
-            if field == "ipa" and "__AUDIO_IGNORE_THIS__" in text:
-                m = re.search(r"__AUDIO_IGNORE_THIS__(\d+)__", text)
-                assert m
-                idx = int(m.group(1))
-                if not audios[idx].get("audio-ipa"):
-                    audios[idx]["audio-ipa"] = v
-                if prefix:
-                    audios[idx]["form"] = prefix
+
+            if "IPA" in text:
+                field = "ipa"
             else:
-                pron = {field: v}  # type: ignore[misc]
-                if active_pos:
-                    pron["pos"] = active_pos  # type: ignore[typeddict-unknown-key]
-                if prefix:
-                    pron["form"] = prefix
-                parse_pronunciation_tags(wxr, tagstext, pron)
+                # This is used for Rhymes, Homophones, etc
+                field = "other"
+
+            # Check if it contains Japanese "Tokyo" pronunciation with
+            # special syntax
+            m = re.search(r"(?m)\(Tokyo\) +([^ ]+) +\[", text)
+            if m:
+                pron: SoundData = {field: m.group(1)}  # type: ignore[misc]
                 if active_pos:
                     pron["pos"] = active_pos  # type: ignore[typeddict-unknown-key]
                 data_append(data, "sounds", pron)
-            # have_pronunciations = True
+                # have_pronunciations = True
+                continue
+
+            # Check if it contains Rhymes
+            m = re.match(r"\s*Rhymes: (.*)", text)
+            if m:
+                for ending in split_at_comma_semi(m.group(1)):
+                    ending = ending.strip()
+                    if ending:
+                        pron = {"rhymes": ending}
+                        if active_pos:
+                            pron["pos"] = active_pos  # type: ignore[typeddict-unknown-key]
+                        data_append(data, "sounds", pron)
+                        # have_pronunciations = True
+                continue
+
+            # Check if it contains homophones
+            m = re.search(r"(?m)\bHomophones?: (.*)", text)
+            if m:
+                for w in split_at_comma_semi(m.group(1)):
+                    w = w.strip()
+                    if w:
+                        pron = {"homophone": w}
+                        if active_pos:
+                            pron["pos"] = active_pos  # type: ignore[typeddict-unknown-key]
+                        data_append(data, "sounds", pron)
+                        # have_pronunciations = True
+                continue
+
+            # Check if it contains Phonetic hangeul
+            m = re.search(r"(?m)\bPhonetic hange?ul: \[([^]]+)\]", text)
+            if m:
+                seen = set()
+                for w in m.group(1).split("/"):
+                    w = w.strip()
+                    if w and w not in seen:
+                        seen.add(w)
+                        pron = {"hangeul": w}
+                        if active_pos:
+                            pron["pos"] = active_pos  # type: ignore[typeddict-unknown-key]
+                        data_append(data, "sounds", pron)
+                        # have_pronunciations = True
+
+            m = re.search(r"\b(Syllabification|Hyphenation): ([^\s,]*)", text)
+            if m:
+                data_append(data, "hyphenation", m.group(2))
+                # have_pronunciations = True
+
+            # See if it contains a word prefix restricting which forms the
+            # pronunciation applies to (see amica/Latin) and/or parenthesized
+            # tags.
+            m = re.match(
+                r"^[*#\s]*(([-\w]+):\s+)?\((([^()]|\([^()]*\))*?)\)", text
+            )
+            if m:
+                prefix = m.group(2) or ""
+                tagstext = m.group(3)
+                text = text[m.end() :]
+            else:
+                m = re.match(r"^[*#\s]*([-\w]+):\s+", text)
+                if m:
+                    prefix = m.group(1)
+                    tagstext = ""
+                    text = text[m.end() :]
+                else:
+                    # Spanish has tags before pronunciations, eg. aceite/Spanish
+                    m = re.match(r".*:\s+\(([^)]*)\)\s+(.*)", text)
+                    if m:
+                        tagstext = m.group(1)
+                        text = m.group(2)
+                    else:
+                        # No prefix.  In this case, we inherit prefix
+                        # from previous entry.  This particularly
+                        # applies for nested Audio files.
+                        tagstext = ""
+
+            # Find romanizations from the pronunciation section (routinely
+            # produced for Korean by {{ko-IPA}})
+            for m in re.finditer(pron_romanization_re, text):
+                prefix = m.group(1)
+                w = m.group(2).strip()
+                tag = pron_romanizations[prefix]
+                form = {"form": w, "tags": tag.split()}
+                data_append(data, "forms", form)
+
+            # Find IPA pronunciations
+            for m in re.finditer(
+                r"(?m)/[^][\n/,]+?/" r"|" r"\[[^]\n0-9,/][^],/]*?\]", text
+            ):
+                v = m.group(0)
+                # The regexp above can match file links.  Skip them.
+                if v.startswith("[[File:"):
+                    continue
+                if v == "/wiki.local/":
+                    continue
+                if field == "ipa" and "__AUDIO_IGNORE_THIS__" in text:
+                    m = re.search(r"__AUDIO_IGNORE_THIS__(\d+)__", text)
+                    assert m
+                    idx = int(m.group(1))
+                    if not audios[idx].get("audio-ipa"):
+                        audios[idx]["audio-ipa"] = v
+                    if prefix:
+                        audios[idx]["form"] = prefix
+                else:
+                    pron = {field: v}  # type: ignore[misc]
+                    if active_pos:
+                        pron["pos"] = active_pos  # type: ignore[typeddict-unknown-key]
+                    if prefix:
+                        pron["form"] = prefix
+                    parse_pronunciation_tags(wxr, tagstext, pron)
+                    if active_pos:
+                        pron["pos"] = active_pos  # type: ignore[typeddict-unknown-key]
+                    data_append(data, "sounds", pron)
+                # have_pronunciations = True
 
         # XXX what about {{hyphenation|...}}, {{hyph|...}}
         # and those used to be stored under "hyphenation"
@@ -830,7 +848,9 @@ def parse_pronunciation(
                     ogg = (
                         "https://upload.wikimedia.org/wikipedia/"
                         "commons/transcoded/"
-                        "{}/{}/{}/{}.ogg".format(digest[:1], digest[:2], qfn, qfn)
+                        "{}/{}/{}/{}.ogg".format(
+                            digest[:1], digest[:2], qfn, qfn
+                        )
                     )
                 if re.search(r"(?i)\.(mp3)$", fn):
                     mp3 = (
@@ -841,7 +861,9 @@ def parse_pronunciation(
                     mp3 = (
                         "https://upload.wikimedia.org/wikipedia/"
                         "commons/transcoded/"
-                        "{}/{}/{}/{}.mp3".format(digest[:1], digest[:2], qfn, qfn)
+                        "{}/{}/{}/{}.mp3".format(
+                            digest[:1], digest[:2], qfn, qfn
+                        )
                     )
                 audio["ogg_url"] = ogg
                 audio["mp3_url"] = mp3
@@ -852,17 +874,6 @@ def parse_pronunciation(
         # if audios:
         #     have_pronunciations = True
         audios = []
-        for enpr in enprs:
-            if re.match(r"/[^/]+/$", enpr):
-                enpr = enpr[1:-1]
-            pron = {"enpr": enpr}
-            parse_pronunciation_tags(wxr, tagstext, pron)
-            if active_pos:
-                pron["pos"] = active_pos  # type: ignore[typeddict-unknown-key]
-            if pron not in data.get("sounds", ()):
-                data_append(data, "sounds", pron)
-            # have_pronunciations = True
-        enprs = []
 
     ## I have commented out the otherwise unused have_pronunciation
     ## toggles; uncomment them to use this debug print
