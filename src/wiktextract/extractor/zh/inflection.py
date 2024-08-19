@@ -72,23 +72,25 @@ def extract_ja_inf_table(
                         if len(line) > 0:
                             raw_tags.append(line)
                 elif row_child.kind == NodeKind.TABLE_CELL:
-                    cell_text = clean_node(wxr, None, row_child)
-                    if len(cell_text) == 0:
-                        continue
                     if cell_node_index >= 3:
                         break
-                    for line in cell_text.splitlines():
-                        if line.endswith(("¹", "²")):
-                            if cell_node_index == 0:
-                                small_tags.append(line[-1])
-                            line = line[:-1]
-                        if cell_node_index == 0:
-                            form_list.append(line)
-                        elif cell_node_index == 1:
-                            hiragana_list.append(line)
-                        elif cell_node_index == 2:
-                            roman_list.append(line)
-                    cell_node_index += 1
+                    for span_tag in row_child.find_html("span"):
+                        span_text = clean_node(wxr, None, row_child)
+                        span_class = span_tag.attrs.get("class", "")
+                        for line in span_text.splitlines():
+                            if line.endswith(("¹", "²")):
+                                if cell_node_index == 0:
+                                    small_tags.append(line[-1])
+                                line = line[:-1]
+                            if span_class == "Latn":
+                                roman_list.append(line)
+                            elif span_class == "Jpan":
+                                if cell_node_index == 0:
+                                    form_list.append(line)
+                                elif cell_node_index == 1:
+                                    hiragana_list.append(line)
+                        cell_node_index += 1
+                        break
 
             for form, hiragana, roman, small_tag in zip_longest(
                 form_list, hiragana_list, roman_list, small_tags
@@ -97,8 +99,8 @@ def extract_ja_inf_table(
                     raw_tags=[table_header] + raw_tags,
                     source="inflection table",
                     form=form,
-                    hiragana=hiragana,
-                    roman=roman,
+                    hiragana=hiragana or "",
+                    roman=roman or "",
                 )
                 if small_tag is not None:
                     form_data.raw_tags.append(small_tag)

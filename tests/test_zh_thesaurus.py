@@ -1,6 +1,7 @@
 from unittest import TestCase
 
 from wikitextprocessor import Page, Wtp
+
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.zh.thesaurus import extract_thesaurus_page
 from wiktextract.thesaurus import ThesaurusTerm, close_thesaurus_db

@@ -1,6 +1,7 @@
 from unittest import TestCase
 
 from wikitextprocessor import Wtp
+
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.zh.models import WordEntry
 from wiktextract.extractor.zh.translation import extract_translation

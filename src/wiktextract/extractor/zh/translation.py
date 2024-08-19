@@ -3,6 +3,7 @@ from typing import Optional, Union
 from mediawiki_langcodes import code_to_name, name_to_code
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import LEVEL_KIND_FLAGS, TemplateNode
+
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 

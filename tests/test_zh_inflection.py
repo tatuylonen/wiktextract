@@ -1,6 +1,7 @@
 from unittest import TestCase
 
 from wikitextprocessor import Wtp
+
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.zh.inflection import extract_inflections
 from wiktextract.extractor.zh.models import WordEntry
@@ -22,40 +23,6 @@ class TestInflection(TestCase):
         self.wxr.wtp.close_db_conn()
         close_thesaurus_db(
             self.wxr.thesaurus_db_path, self.wxr.thesaurus_db_conn
-        )
-
-    def test_ja_i_template(self) -> None:
-        self.wxr.wtp.add_page(
-            "Template:ja-i",
-            10,
-            """{|
-|-
-! 基本形
-|-
-! 未然形
-| 可笑しかろ
-| おかしかろ
-| okashikaro
-|}""",
-        )
-        page_data = [
-            WordEntry(lang="日語", lang_code="ja", word="可笑しい", pos="adj")
-        ]
-        wikitext = "{{ja-i|可笑し|おかし|okashi}}"
-        self.wxr.wtp.start_page("可笑しい")
-        node = self.wxr.wtp.parse(wikitext)
-        extract_inflections(self.wxr, page_data, node)
-        self.assertEqual(
-            [d.model_dump(exclude_defaults=True) for d in page_data[0].forms],
-            [
-                {
-                    "form": "可笑しかろ",
-                    "hiragana": "おかしかろ",
-                    "roman": "okashikaro",
-                    "source": "inflection table",
-                    "raw_tags": ["基本形", "未然形"],
-                },
-            ],
         )
 
     def test_zh_forms(self):
@@ -162,5 +129,41 @@ class TestInflection(TestCase):
                     "source": "inflection table",
                     "raw_tags": ["活用形", "命令形", "口語"],
                 },
+            ],
+        )
+
+    def test_ja_suru_two_columns(self):
+        self.wxr.wtp.add_page(
+            "Template:ja-suru",
+            10,
+            """<div>
+{|
+|-
+! colspan="4" | 活用形
+|-
+! <span class="Jpan" lang="ja">[[未然形#日語|-{未然形}-]]</span>
+||<span class="Jpan" lang="ja-Jpan">あさがえりし</span>
+| <span class="Latn" lang="ja-Latn">asagaeri shi</span>
+|}
+</div>""",
+        )
+        page_data = [
+            WordEntry(
+                lang="日語", lang_code="ja", word="あさがえり", pos="verb"
+            )
+        ]
+        wikitext = "{{ja-suru}}"
+        self.wxr.wtp.start_page("あさがえり")
+        node = self.wxr.wtp.parse(wikitext)
+        extract_inflections(self.wxr, page_data, node)
+        self.assertEqual(
+            [d.model_dump(exclude_defaults=True) for d in page_data[0].forms],
+            [
+                {
+                    "form": "あさがえりし",
+                    "roman": "asagaeri shi",
+                    "source": "inflection table",
+                    "raw_tags": ["活用形", "未然形"],
+                }
             ],
         )
