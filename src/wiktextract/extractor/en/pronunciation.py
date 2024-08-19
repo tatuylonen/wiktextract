@@ -1,10 +1,12 @@
 import hashlib
 import re
 import urllib
+from copy import deepcopy
 from typing import Iterator, Optional, Union
 
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import TemplateNode
+from wiktextract.clean import clean_value
 from wiktextract.datautils import data_append, split_at_comma_semi
 from wiktextract.form_descriptions import (
     classify_desc,
@@ -35,6 +37,149 @@ pron_romanization_re = re.compile(
     )
     + ")([^\n]+)"
 )
+
+IPA_EXTRACT = r"^(\((.+)\) )?(IPA⁽ᵏᵉʸ⁾|enPR): ((.+?)( \(([^(]+)\))?\s*)$"
+IPA_EXTRACT_RE = re.compile(IPA_EXTRACT)
+
+
+def extract_pron_template(
+    wxr: WiktextractContext, tname: str, targs: TemplateArgs, expanded: str
+) -> Optional[tuple[SoundData, list[SoundData]]]:
+    """In post_template_fn, this is used to handle all enPR and IPA templates
+    so that we can leave breadcrumbs in the text that can later be handled
+    there. We return a `base_data`  so that if there are two
+    or more templates on the same line, like this:
+    (Tags for the whole line, really) enPR: foo, IPA(keys): /foo/
+    then we can apply base_data fields to other templates, too, if needed.
+    """
+    cleaned = clean_value(wxr, expanded)
+    # print(f"extract_pron_template input: {cleaned=}")
+    m = IPA_EXTRACT_RE.match(cleaned)
+    if not m:
+        wxr.wtp.error(
+            f"Text cannot match IPA_EXTRACT_RE regex: "
+            f"{cleaned=}, {tname=}, {targs=}",
+            sortid="en/pronunciation/54",
+        )
+        return None
+    # for i, group in enumerate(m.groups()):
+    #     print(i + 1, repr(group))
+    main_qual = m.group(2) or ""
+    if "qq" in targs:
+        # If the template has been given a qualifier that applies to
+        # every entry, but which also happens to appear at the end
+        # which can be confused with the post-qualifier of a single
+        # entry in the style of "... /ipa3/ (foo) (bar)", where foo
+        # might not be present so the bar looks like it only might
+        # apply to `/ipa3/`
+        pron_body = m.group(5)
+        post_qual = m.group(7)
+    else:
+        pron_body = m.group(4)
+        post_qual = ""
+
+    if not pron_body:
+        wxr.wtp.error(
+            f"Regex failed to find 'body' from {cleaned=}",
+            sortid="en/pronunciation/81",
+        )
+        return None
+
+    base_data: SoundData = {}
+    if main_qual:
+        parse_pronunciation_tags(wxr, main_qual, base_data)
+    if post_qual:
+        parse_pronunciation_tags(wxr, post_qual, base_data)
+    # This base_data is used as the base copy for all entries from this
+    # template, but it is also returned so that its contents may be applied
+    # to other templates on the same line.
+    # print(f"{base_data=}")
+
+    sound_datas: list[SoundData] = []
+
+    parts: list[list[str]] = [[]]
+    inside = 0
+    current: list[str] = []
+    for i, p in enumerate(re.split(r"(\s*,|;|\(|\)\s*)", pron_body)):
+        # print(f"   {i=}, {p=}")
+        comp = p.strip()
+        if not p:
+            continue
+        if comp == "(":
+            if not inside and i > 0:
+                if stripped := "".join(current).strip():
+                    parts[-1].append("".join(current).strip())  # type:ignore[arg-type]
+            current = [p]
+            inside += 1
+            continue
+        if comp == ")":
+            inside -= 1
+            if not inside:
+                if stripped := "".join(current).strip():
+                    current.append(p)
+                    parts[-1].append("".join(current).strip())  # type:ignore[arg-type]
+                    current = []
+            continue
+        if not inside and comp in (",", ";"):
+            if stripped := "".join(current).strip():
+                parts[-1].append(stripped)  # type:ignore[arg-type]
+                current = []
+            parts.append([])
+            continue
+        current.append(p)
+    if current:
+        parts[-1].append("".join(current).strip())
+
+    # print(f">>>>>> {parts=}")
+    new_parts: list[list[str]] = []
+    for entry in parts:
+        if not entry:
+            continue
+        new_entry: list[str] = []
+        i1: int = entry[0].startswith("(") and entry[0].endswith(")")
+        if i1:
+            new_entry.append(entry[0][1:-1].strip())
+        else:
+            new_entry.append("")
+        i2: int = (
+            entry[-1].startswith("(")
+            and entry[-1].endswith(")")
+            and len(entry) > 1
+        )
+        if i2 == 0:
+            i2 = len(entry)
+        else:
+            i2 = -1
+        new_entry.append("".join(entry[i1:i2]).strip())
+        if not new_entry[-1]:
+            wxr.wtp.error(
+                f"Missing IPA/enPRO sound data between qualifiers?" f"{entry=}",
+                sortid="en/pronunciation/153",
+            )
+        if i2 == -1:
+            new_entry.append(entry[-1][1:-1].strip())
+        else:
+            new_entry.append("")
+        new_parts.append(new_entry)
+
+    # print(f">>>>> {new_parts=}")
+
+    for part in new_parts:
+        sd = deepcopy(base_data)
+        if part[0]:
+            parse_pronunciation_tags(wxr, part[0], sd)
+        if part[2]:
+            parse_pronunciation_tags(wxr, part[2], sd)
+        if tname == "enPR":
+            sd["enpr"] = part[1]
+        else:
+            sd["ipa"] = part[1]
+        sound_datas.append(sd)
+
+    # print(f"BASE_DATA: {base_data}")
+    # print(f"SOUND_DATAS: {sound_datas=}")
+
+    return base_data, sound_datas
 
 
 def parse_pronunciation(
