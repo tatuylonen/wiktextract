@@ -1,16 +1,17 @@
 import re
 from typing import Optional
 
-from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import (
     LEVEL_KIND_FLAGS,
+    NodeKind,
     TemplateNode,
+    WikiNode,
     WikiNodeChildrenList,
 )
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
-from .example import process_example_template
+from .example import EXAMPLE_TEMPLATES, process_example_template
 from .linkage import process_semantics_template
 from .models import Linkage, Sense, WordEntry
 from .section_titles import LINKAGE_TITLES
@@ -28,7 +29,6 @@ GLOSS_TEMPLATES = {
     "-",
     "=",
     "===",
-    "english surname example",
     "lang",
     "аббр.",
     "выдел",
@@ -120,7 +120,7 @@ def process_gloss_nodes(
         if isinstance(child, TemplateNode):
             if child.template_name.lower() in IGNORED_TEMPLATES:
                 continue
-            elif child.template_name == "пример":
+            elif child.template_name in EXAMPLE_TEMPLATES:
                 process_example_template(wxr, sense, child)
             elif child.template_name == "семантика":
                 process_semantics_template(wxr, word_entry, child, sense_index)

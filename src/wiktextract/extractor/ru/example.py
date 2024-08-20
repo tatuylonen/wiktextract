@@ -1,10 +1,24 @@
-from wikitextprocessor import WikiNode
-from wiktextract.page import clean_node
-from wiktextract.wxr_context import WiktextractContext
+from wikitextprocessor.parser import NodeKind, TemplateNode
 
+from ...page import clean_node
+from ...wxr_context import WiktextractContext
 from .models import Example, Sense
 
-EXAMPLE_TEMPLATE_KEY_MAPPING = {
+EXAMPLE_TEMPLATES = frozenset(["пример", "english surname example"])
+
+
+def process_example_template(
+    wxr: WiktextractContext,
+    sense: Sense,
+    template_node: TemplateNode,
+):
+    if template_node.template_name == "пример":
+        process_пример_template(wxr, sense, template_node)
+    elif template_node.template_name == "english surname example":
+        process_en_surname_example_template(wxr, sense, template_node)
+
+
+ПРИМЕР_TEMPLATE_ARG_MAPPING = {
     "автор": "author",
     "титул": "title",
     "дата": "date",
@@ -21,33 +35,48 @@ EXAMPLE_TEMPLATE_KEY_MAPPING = {
 }
 
 
-def process_example_template(
+def process_пример_template(
     wxr: WiktextractContext,
     sense: Sense,
-    template_node: WikiNode,
+    template_node: TemplateNode,
 ):
     # https://ru.wiktionary.org/wiki/Шаблон:пример
     example = Example()
-    for key, value_raw in template_node.template_parameters.items():
-        value = clean_node(wxr, None, value_raw)
+    for arg_name, arg_value in template_node.template_parameters.items():
+        value = clean_node(wxr, None, arg_value)
         if len(value) == 0:
             continue
-        if isinstance(key, int) and key == 1:
+        if arg_name == 1:
             example.text = value
-        else:
-            if key == "текст":
-                example.text = value
-            elif key == "перевод":
-                example.translation = value
-            elif key in EXAMPLE_TEMPLATE_KEY_MAPPING:
-                field_name = EXAMPLE_TEMPLATE_KEY_MAPPING.get(key, key)
-                if field_name in example.model_fields:
-                    setattr(example, field_name, value)
-                else:
-                    wxr.wtp.debug(
-                        f"Unknown {key=} in example template {template_node}",
-                        sortid="ru/example/process_example_template/54",
-                    )
+        elif arg_name == "текст":
+            example.text = value
+        elif arg_name == "перевод":
+            example.translation = value
+        elif arg_name in ПРИМЕР_TEMPLATE_ARG_MAPPING:
+            field_name = ПРИМЕР_TEMPLATE_ARG_MAPPING[arg_name]
+            if field_name in example.model_fields:
+                setattr(example, field_name, value)
+            else:
+                wxr.wtp.debug(
+                    f"Unknown {arg_name=} in example template {template_node}",
+                    sortid="ru/example/process_example_template/54",
+                )
 
     if len(example.text) > 0:
         sense.examples.append(example)
+
+
+def process_en_surname_example_template(
+    wxr: WiktextractContext,
+    sense: Sense,
+    template_node: TemplateNode,
+) -> None:
+    # https://ru.wiktionary.org/wiki/Шаблон:english_surname_example
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(template_node),
+        additional_expand={"english surname example"},
+        pre_expand=True
+    )
+    for node in expanded_node.find_child(NodeKind.TEMPLATE):
+        if node.template_name == "пример":
+            process_пример_template(wxr, sense, node)

@@ -1,6 +1,7 @@
 import unittest
 
 from wikitextprocessor import Wtp
+
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.ru.gloss import extract_gloss
 from wiktextract.extractor.ru.models import WordEntry
