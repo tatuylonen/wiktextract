@@ -85,6 +85,7 @@ def process_pos_line_italic_node(
     base_data: WordEntry,
     italic_node: WikiNode,
 ) -> None:
+    has_pos = False
     page_data.append(base_data.model_copy(deep=True))
     for child in italic_node.children:
         if isinstance(child, TemplateNode):
@@ -95,9 +96,11 @@ def process_pos_line_italic_node(
                 pos_text = child_text.split(", ")[0]
                 if pos_text in POS_DATA:
                     update_pos_data(page_data[-1], pos_text, POS_DATA[pos_text])
+                    has_pos = True
                 page_data[-1].tags.append("form-of")
             elif child_text in POS_DATA:
                 update_pos_data(page_data[-1], child_text, POS_DATA[child_text])
+                has_pos = True
             else:
                 is_pos = False
                 for prefix, pos_data in POS_PREFIXES.items():
@@ -112,9 +115,12 @@ def process_pos_line_italic_node(
                 text = text.strip(", ")
                 if text in POS_DATA:
                     update_pos_data(page_data[-1], text, POS_DATA[text])
+                    has_pos = True
                 elif text not in IGNORE_POS_LINE_TEXT:
                     page_data[-1].raw_tags.append(text)
     translate_raw_tags(page_data[-1])
+    if not has_pos:
+        page_data.pop()
 
 
 def update_pos_data(

@@ -253,6 +253,8 @@ TAGS = {
         "adverbial",
         "participle",
     ],
+    # pos line
+    "nieprzechodni": "intransitive",
 }
 
 TOPICS = {

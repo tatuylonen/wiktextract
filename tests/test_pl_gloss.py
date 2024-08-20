@@ -190,3 +190,39 @@ class TestPlGloss(TestCase):
                 }
             ],
         )
+
+    def test_two_italic_nodes(self):
+        # shouldn't have no-gloss tag
+        self.wxr.wtp.add_page(
+            "Szablon:język polski",
+            10,
+            '<span class="lang-code primary-lang-code lang-code-pl" id="pl">[[Słownik języka polskiego|język polski]]</span>',
+        )
+        self.assertEqual(
+            parse_page(
+                self.wxr,
+                "płakać",
+                """== płakać ({{język polski}}) ==
+===znaczenia===
+''czasownik nieprzechodni niedokonany'' ({{dk}} ''brak'')
+: (1.1) [[wylewać]] [[łza|łzy]], [[ronić łzy]]""",
+            ),
+            [
+                {
+                    "lang": "język polski",
+                    "lang_code": "pl",
+                    "senses": [
+                        {
+                            "glosses": [
+                                "wylewać łzy, ronić łzy"
+                            ],
+                            "sense_index": "1.1",
+                        }
+                    ],
+                    "pos": "verb",
+                    "pos_text": "czasownik",
+                    "tags": ["intransitive", "imperfective"],
+                    "word": "płakać",
+                }
+            ],
+        )
