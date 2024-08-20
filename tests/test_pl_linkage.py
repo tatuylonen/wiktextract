@@ -227,3 +227,38 @@ class TestPlLinkage(TestCase):
                 },
             ],
         )
+
+    def test_nested_list(self):
+        self.wxr.wtp.add_page("Szablon:rzecz", 10, "rzecz.")
+        self.wxr.wtp.add_page("Szablon:ż", 10, "ż")
+        self.wxr.wtp.add_page("Szablon:zdrobn", 10, "zdrobn.")
+        self.wxr.wtp.add_page("Szablon:n", 10, "n")
+        self.wxr.wtp.start_page("słoń")
+        root = self.wxr.wtp.parse(
+            """: {{rzecz}} [[słoniowacizna]] {{ż}}
+:: {{zdrobn}} [[słoniątko]] {{n}}"""
+        )
+        page_data = [
+            WordEntry(
+                word="słoń",
+                lang="język polski",
+                lang_code="pl",
+                pos="noun",
+            ),
+        ]
+        extract_linkage_section(self.wxr, page_data, root, "related", "pl")
+        self.assertEqual(
+            [r.model_dump(exclude_defaults=True) for r in page_data[0].related],
+            [
+                {
+                    "word": "słoniowacizna",
+                    "raw_tags": ["rzecz."],
+                    "tags": ["feminine"],
+                },
+                {
+                    "word": "słoniątko",
+                    "raw_tags": ["zdrobn."],
+                    "tags": ["neuter"],
+                },
+            ],
+        )

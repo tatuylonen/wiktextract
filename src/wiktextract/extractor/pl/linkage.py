@@ -6,7 +6,7 @@ from wikitextprocessor.parser import NodeKind, TemplateNode, WikiNode
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .models import Linkage, WordEntry
-from .tags import translate_raw_tags
+from .tags import TAGS, translate_raw_tags
 
 LINKAGE_TYPES = {
     "antonimy": "antonyms",
@@ -122,6 +122,8 @@ def process_linkage_list_item(
             )
         elif is_translation:
             translation_nodes.append(node)
+        elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
+            continue
         else:
             word_nodes.append(node)
 
@@ -160,7 +162,7 @@ def process_linkage_template(
             linkages[sense_index].append(linkage)
     else:
         raw_tag = clean_node(wxr, None, template_node)
-        if raw_tag.endswith("."):
+        if raw_tag.endswith(".") or raw_tag in TAGS:
             raw_tags.append(raw_tag)
         elif is_translation:
             tr_nodes.append(raw_tag)
