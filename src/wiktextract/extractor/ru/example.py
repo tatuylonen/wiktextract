@@ -75,7 +75,7 @@ def process_en_surname_example_template(
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(template_node),
         additional_expand={"english surname example"},
-        pre_expand=True
+        pre_expand=True,
     )
     for node in expanded_node.find_child(NodeKind.TEMPLATE):
         if node.template_name == "пример":
