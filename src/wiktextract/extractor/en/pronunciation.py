@@ -53,7 +53,7 @@ def extract_pron_template(
     then we can apply base_data fields to other templates, too, if needed.
     """
     cleaned = clean_value(wxr, expanded)
-    # print(f"extract_pron_template input: {cleaned=}")
+    # print(f"extract_pron_template input: {tname=} {expanded=}-> {cleaned=}")
     m = IPA_EXTRACT_RE.match(cleaned)
     if not m:
         wxr.wtp.error(
@@ -101,6 +101,8 @@ def extract_pron_template(
     inside = 0
     current: list[str] = []
     for i, p in enumerate(re.split(r"(\s*,|;|\(|\)\s*)", pron_body)):
+    # Split the line on commas and semicolons outside of parens.
+    # This gives us lines with "(main-qualifier) /phon/ (post-qualifier, maybe)"
         # print(f"   {i=}, {p=}")
         comp = p.strip()
         if not p:
@@ -672,7 +674,7 @@ def parse_pronunciation(
                 base_pron_data, first_prons = pron_templates[int(text)]
                 if base_pron_data:
                     earlier_base_data = base_pron_data
-                    print(f"Set {earlier_base_data=}")
+                    # print(f"Set {earlier_base_data=}")
                 elif earlier_base_data is not None:
                     # merge data from an earlier iteration of this loop
                     for pr in first_prons:
@@ -716,7 +718,7 @@ def parse_pronunciation(
                 continue
 
             # Check if it contains Rhymes
-            m = re.match(r"\s*Rhymes: (.*)", text)
+            m = re.match(r"\s*Rhymes?: (.*)", text)
             if m:
                 for ending in split_at_comma_semi(m.group(1)):
                     ending = ending.strip()
