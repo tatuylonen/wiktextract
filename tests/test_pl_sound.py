@@ -57,3 +57,13 @@ class TestPlSound(TestCase):
             data["sounds"],
             [{"ipa": "polsʹḱi", "tags": ["Slavic-alphabet"]}],
         )
+
+    def test_no_list(self):
+        self.wxr.wtp.start_page("płakać")
+        root = self.wxr.wtp.parse("===wymowa===\n {{IPA3|ˈpwakaʨ̑}}")
+        base_data = WordEntry(
+            word="płakać", lang_code="pl", lang="język polski"
+        )
+        extract_sound_section(self.wxr, base_data, root.children[0])
+        data = base_data.model_dump(exclude_defaults=True)
+        self.assertEqual(data["sounds"], [{"ipa": "ˈpwakaʨ̑"}])

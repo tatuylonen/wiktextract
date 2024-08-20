@@ -213,9 +213,7 @@ class TestPlGloss(TestCase):
                     "lang_code": "pl",
                     "senses": [
                         {
-                            "glosses": [
-                                "wylewać łzy, ronić łzy"
-                            ],
+                            "glosses": ["wylewać łzy, ronić łzy"],
                             "sense_index": "1.1",
                         }
                     ],
