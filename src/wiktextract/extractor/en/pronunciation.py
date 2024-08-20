@@ -7,7 +7,7 @@ from typing import Iterator, Optional, Union
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import TemplateNode
 from wiktextract.clean import clean_value
-from wiktextract.datautils import data_append, split_at_comma_semi
+from wiktextract.datautils import data_append, data_extend, split_at_comma_semi
 from wiktextract.form_descriptions import (
     classify_desc,
     parse_pronunciation_tags,
@@ -643,7 +643,7 @@ def parse_pronunciation(
     for line in split_cleaned_node_on_newlines(contents):
         # print(f"{line=}")
         prefix: Optional[str] = None
-        earlier_data: Optional[SoundData] = None
+        earlier_base_data: Optional[SoundData] = None
         if not line:
             continue
 
@@ -662,7 +662,7 @@ def parse_pronunciation(
                 if m:
                     if (m_lower := m.group(1).lower()) in part_of_speech_map:
                         active_pos = part_of_speech_map[m_lower]["pos"]
-                        text = text[m.end():].strip()
+                        text = text[m.end() :].strip()
             if not text:
                 continue
             if i % 2 == 1:
@@ -670,6 +670,26 @@ def parse_pronunciation(
                 # every even entry is a captured splitter; odd lines are either
                 # empty strings or stuff around the splitters.
                 base_pron_data, first_prons = pron_templates[int(text)]
+                if base_pron_data:
+                    earlier_base_data = base_pron_data
+                    print(f"Set {earlier_base_data=}")
+                elif earlier_base_data is not None:
+                    # merge data from an earlier iteration of this loop
+                    for pr in first_prons:
+                        if "note" in pr and "note" in earlier_base_data:
+                            pr["note"] += ";" + earlier_base_data.get(
+                                "note", ""
+                            )
+                        elif "note" in earlier_base_data:
+                            pr["note"] = earlier_base_data["note"]
+                        if "topics" in earlier_base_data:
+                            data_extend(
+                                pr, "topics", earlier_base_data["topics"]
+                            )
+                        if "tags" in pr and "tags" in earlier_base_data:
+                            pr["tags"].extend(earlier_base_data["tags"])
+                        elif "tags" in earlier_base_data:
+                            pr["tags"] = sorted(set(earlier_base_data["tags"]))
                 for pr in first_prons:
                     if active_pos:
                         pr["pos"] = active_pos  # type: ignore[typeddict-unknown-key]
@@ -767,6 +787,9 @@ def parse_pronunciation(
                         # from previous entry.  This particularly
                         # applies for nested Audio files.
                         tagstext = ""
+            if tagstext:
+                earlier_base_data = {}
+                parse_pronunciation_tags(wxr, tagstext, earlier_base_data)
 
             # Find romanizations from the pronunciation section (routinely
             # produced for Korean by {{ko-IPA}})
@@ -796,12 +819,15 @@ def parse_pronunciation(
                     if prefix:
                         audios[idx]["form"] = prefix
                 else:
-                    pron = {field: v}  # type: ignore[misc]
+                    if earlier_base_data:
+                        pron = deepcopy(earlier_base_data)
+                        pron[field] = v
+                    else:
+                        pron = {field: v}  # type: ignore[misc]
                     if active_pos:
                         pron["pos"] = active_pos  # type: ignore[typeddict-unknown-key]
                     if prefix:
                         pron["form"] = prefix
-                    parse_pronunciation_tags(wxr, tagstext, pron)
                     if active_pos:
                         pron["pos"] = active_pos  # type: ignore[typeddict-unknown-key]
                     data_append(data, "sounds", pron)
