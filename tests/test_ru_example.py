@@ -1,9 +1,11 @@
 import unittest
 
 from wikitextprocessor import Wtp
+
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.ru.example import process_example_template
-from wiktextract.extractor.ru.models import Sense
+from wiktextract.extractor.ru.gloss import extract_gloss
+from wiktextract.extractor.ru.models import Sense, WordEntry
 from wiktextract.wxr_context import WiktextractContext
 
 
@@ -64,3 +66,33 @@ class TestRUExample(unittest.TestCase):
                     for e in sense_data.examples
                 ]
                 self.assertEqual(examples, case["expected"])
+
+    def test_en_surname(self):
+        self.wxr.wtp.add_page("Шаблон:помета", 10, "{{{1}}}")
+        self.wxr.wtp.add_page("Шаблон:пример", 10, "")
+        self.wxr.wtp.add_page(
+            "Шаблон:english surname example",
+            10,
+            "{{пример|This is Mister {{PAGENAME}}|перевод=Это мистер {{PAGENAME}}}}",
+        )
+        self.wxr.wtp.start_page("Abad")
+        root = self.wxr.wtp.parse(
+            "(английская [[фамилия]]) {{english surname example}}"
+        )
+        word_entry = WordEntry(
+            lang="Английский", lang_code="en", pos="prop", word="Abad"
+        )
+        extract_gloss(self.wxr, word_entry, root)
+        data = word_entry.model_dump(exclude_defaults=True)
+        self.assertEqual(
+            data["senses"][0],
+            {
+                "glosses": ["(английская фамилия)"],
+                "examples": [
+                    {
+                        "text": "This is Mister Abad",
+                        "translation": "Это мистер Abad",
+                    }
+                ],
+            },
+        )

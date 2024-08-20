@@ -72,7 +72,8 @@ class Example(BaseModelWrap):
     translator: str = Field(default="", description="Translator")
     source: str = Field(
         default="",
-        description="Source of reference, corresponds to template parameter 'источник'",
+        description="Source of reference, corresponds to template "
+        "parameter 'источник'",
     )
 
 
@@ -83,11 +84,13 @@ class AltForm(BaseModelWrap):
 class Sense(BaseModelWrap):
     raw_glosses: list[str] = Field(
         default=[],
-        description="Raw gloss string for the word sense. This might contain tags and other markup.",
+        description="Raw gloss string for the word sense. "
+        "This might contain tags and other markup.",
     )
     glosses: list[str] = Field(
         default=[],
-        description="Gloss string for the word sense. This has been cleaned, and should be straightforward text with no tags.",
+        description="Gloss string for the word sense. This has been cleaned, "
+        "and should be straightforward text with no tags.",
     )
     tags: list[str] = Field(
         default=[],
@@ -97,12 +100,9 @@ class Sense(BaseModelWrap):
     topics: list[str] = []
     notes: list[str] = Field(
         default=[],
-        description="List of notes for the word sense. Usually describing usage.",
+        description="Usually describing usage.",
     )
-    categories: list[str] = Field(
-        default=[],
-        description="list of sense-disambiguated category names extracted from (a subset) of the Category links on the page",
-    )
+    categories: list[str] = []
     examples: list[Example] = Field(default=[], description="List of examples")
     form_of: list[AltForm] = []
 

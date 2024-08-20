@@ -1,34 +1,27 @@
 import re
 from typing import Optional
 
-from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import (
     LEVEL_KIND_FLAGS,
+    NodeKind,
     TemplateNode,
+    WikiNode,
     WikiNodeChildrenList,
 )
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
-from .example import process_example_template
+from .example import EXAMPLE_TEMPLATES, process_example_template
 from .linkage import process_semantics_template
 from .models import Linkage, Sense, WordEntry
 from .section_titles import LINKAGE_TITLES
 from .tags import translate_raw_tags
-
-# Wiktioniary intern templates that can be ignores
-META_TEMPLATES = {
-    "помета.",
-    "Нужен перевод",
-    "?",
-}
 
 # Templates that are part of the clean gloss when expanded
 GLOSS_TEMPLATES = {
     "-",
     "=",
     "===",
-    "english surname example",
     "lang",
     "аббр.",
     "выдел",
@@ -65,10 +58,7 @@ GLOSS_TEMPLATES = {
     "элемент",
 }
 
-# Templates that specify a note for the gloss
-NOTE_TEMPLATES = {"пример", "помета", "??"}
-
-IGNORED_TEMPLATES = {"нужен перевод"}
+IGNORED_TEMPLATES = {"нужен перевод", "??", "?", "Нужен перевод"}
 
 TAG_GLOSS_TEMPLATES = {
     "многокр.": "iterative",
@@ -120,17 +110,10 @@ def process_gloss_nodes(
         if isinstance(child, TemplateNode):
             if child.template_name.lower() in IGNORED_TEMPLATES:
                 continue
-            elif child.template_name == "пример":
+            elif child.template_name in EXAMPLE_TEMPLATES:
                 process_example_template(wxr, sense, child)
             elif child.template_name == "семантика":
                 process_semantics_template(wxr, word_entry, child, sense_index)
-            elif child.template_name in NOTE_TEMPLATES:
-                note_templates.append(child)
-                raw_gloss_children.append(child)
-
-            elif child.template_name in META_TEMPLATES:
-                continue
-
             elif child.template_name in GLOSS_TEMPLATES:
                 clean_gloss_children.append(child)
                 raw_gloss_children.append(child)

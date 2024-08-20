@@ -3,6 +3,7 @@ from typing import Union
 
 from wikitextprocessor import NodeKind
 from wikitextprocessor.parser import LevelNode, WikiNode, WikiNodeChildrenList
+
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 

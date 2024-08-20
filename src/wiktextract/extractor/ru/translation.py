@@ -1,6 +1,7 @@
 from mediawiki_langcodes import name_to_code
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.parser import HTMLNode, TemplateNode
+
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 

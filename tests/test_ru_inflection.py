@@ -1,6 +1,7 @@
 from unittest import TestCase
 
 from wikitextprocessor import Wtp
+
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.ru.models import WordEntry
 from wiktextract.extractor.ru.page import extract_morphological_section

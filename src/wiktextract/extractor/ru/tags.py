@@ -348,6 +348,7 @@ VOICE_TAGS = {
 NUMBER_TAGS = {
     # Шаблон:сущ cu (-а)
     "дв. ч.": "dual",
+    "часто мн. ч.": ["often", "plural"],
 }
 
 TRANSLATION_TAGS = {
@@ -389,7 +390,7 @@ MORPHOLOGICAL_TEMPLATE_TAGS = {
     "мужской род": "masculine",
     "женский род": "feminine",
     "средний род": "neuter",
-    "общий род (может согласовываться с другими частями речи как мужского": "common",
+    "общий род (может согласовываться с другими частями речи как мужского": "common",  # noqa: E501
     "мужской или женский род": ["masculine", "feminine"],
     "мужской или средний род": ["masculine", "neuter"],
     "женский или мужской род": ["masculine", "feminine"],

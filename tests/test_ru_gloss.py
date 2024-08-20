@@ -1,6 +1,7 @@
 import unittest
 
 from wikitextprocessor import Wtp
+
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.ru.gloss import extract_gloss
 from wiktextract.extractor.ru.models import WordEntry
@@ -50,13 +51,13 @@ class TestRUGloss(unittest.TestCase):
             {
                 "input": "# {{помета|часто мн}} обобщающее [[название]] растительной пищи, не включающей [[фрукт]]ы ''и'' [[крупа|крупы]]",
                 "expected": {
-                    "notes": ["часто мн. ч."],
                     "glosses": [
                         "обобщающее название растительной пищи, не включающей фрукты и крупы"
                     ],
                     "raw_glosses": [
                         "часто мн. ч. обобщающее название растительной пищи, не включающей фрукты и крупы"
                     ],
+                    "tags": ["often", "plural"],
                 },
             },
         ]
