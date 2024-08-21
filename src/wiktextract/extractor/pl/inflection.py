@@ -64,36 +64,65 @@ def extract_odmiana_rzeczownik_polski(
 ) -> list[Form]:
     # noun table
     # https://pl.wiktionary.org/wiki/Szablon:odmiana-rzeczownik-polski
-    expanded_node = wxr.wtp.parse(
-        wxr.wtp.node_to_wikitext(template_node), expand_all=True
-    )
     forms = []
-    for table_tag in expanded_node.find_html_recursively("table"):
-        col_headers = []
-        for tr_tag in table_tag.find_html("tr"):
-            for th_tag in tr_tag.find_html("th"):
-                th_text = clean_node(wxr, None, th_tag)
-                if th_text != "przypadek":
-                    col_headers.append(th_text)
-            col_index = 0
-            row_header = ""
-            for td_tag in tr_tag.find_html("td"):
-                td_text = clean_node(wxr, None, td_tag)
-                if "forma" == td_tag.attrs.get("class", ""):
-                    row_header = td_text
+    for arg_name, arg_value in template_node.template_parameters.items():
+        if not isinstance(arg_name, str):
+            continue
+        if arg_name.startswith("Forma"):
+            raw_tags = ["depr."] if arg_name.endswith("depr") else ["ndepr."]
+            raw_tags.extend(["M.", "W.", "lm"])
+        else:
+            raw_tags = arg_name.lower().split()
+        if isinstance(arg_value, str):
+            arg_value = [arg_value]
+        if isinstance(arg_value, list):
+            form_nodes = []
+            current_form_raw_tags = []
+            for node in arg_value:
+                if isinstance(node, str) and "/" in node:
+                    slash_index = node.index("/")
+                    form_nodes.append(node[:slash_index])
+                    form_text = clean_node(wxr, None, form_nodes)
+                    if form_text != "" and form_text != wxr.wtp.title:
+                        form = Form(
+                            form=form_text,
+                            sense_index=sense_index,
+                            raw_tags=raw_tags + current_form_raw_tags,
+                        )
+                        translate_raw_tags(form)
+                        forms.append(form)
+                    form_nodes.clear()
+                    current_form_raw_tags.clear()
+                    form_nodes.append(node[slash_index + 1 :])
+                elif isinstance(node, TemplateNode):
+                    node_text = clean_node(wxr, None, node)
+                    if node_text.endswith("."):
+                        current_form_raw_tags.append(node_text)
+                    else:
+                        form_nodes.append(node_text)
                 else:
-                    for form_text in td_text.split("/"):
-                        form_text = form_text.strip()
-                        if form_text != "" and form_text != wxr.wtp.title:
-                            form = Form(form=form_text, sense_index=sense_index)
-                            if col_index < len(col_headers):
-                                form.raw_tags.append(col_headers[col_index])
-                            if len(row_header) > 0:
-                                form.raw_tags.append(row_header)
-                            translate_raw_tags(form)
-                            forms.append(form)
-                    col_index += 1
+                    form_nodes.append(node)
+            if len(form_nodes) > 0:
+                form_text = clean_node(wxr, None, form_nodes)
+                if form_text != "" and form_text != wxr.wtp.title:
+                    form = Form(
+                        form=form_text,
+                        sense_index=sense_index,
+                        raw_tags=raw_tags + current_form_raw_tags,
+                    )
+                    translate_raw_tags(form)
+                    forms.append(form)
     return forms
+
+
+def create_noun_form(
+    form_text: str,
+    sense_idx: str,
+    raw_tags: list[str],
+) -> Form:
+    form = Form(form=form_text, sense_index=sense_idx, raw_tags=raw_tags)
+    translate_raw_tags(form)
+    return form
 
 
 @dataclass

@@ -24,13 +24,10 @@ class TestPlInflection(TestCase):
         self.wxr.wtp.close_db_conn()
 
     def test_odmiana_rzeczownik_polski(self):
-        self.wxr.wtp.add_page(
-            "Szablon:odmiana-rzeczownik-polski",
-            10,
-            """<div><table class="wikitable odmiana"><tr><th class="forma">[[przypadek#pl|przypadek]]</th><th>[[liczba pojedyncza#pl|liczba pojedyncza]]</th><th style="font-weight:normal" >[[liczba mnoga#pl|liczba mnoga]]</th></tr><tr class="forma"><td class="forma">[[mianownik#pl|mianownik]]</td><td class="mianownik" >pies</td><td class="mianownik" >psy</td></tr><tr class="forma"><td class="forma">[[biernik#pl|biernik]]</td><td  >psa</td><td  >psy / psów</td></tr></table></div>""",
-        )
         self.wxr.wtp.start_page("pies")
-        root = self.wxr.wtp.parse(": (2.1-3) {{odmiana-rzeczownik-polski}}")
+        root = self.wxr.wtp.parse(""": (2.1-3) {{odmiana-rzeczownik-polski
+|Biernik lm = psy / psów
+}}""")
         page_data = [
             WordEntry(
                 word="pies",
@@ -54,23 +51,66 @@ class TestPlInflection(TestCase):
             [
                 {
                     "form": "psy",
-                    "tags": ["plural", "nominative"],
-                    "sense_index": "2.1-3",
-                },
-                {
-                    "form": "psa",
-                    "tags": ["singular", "accusative"],
-                    "sense_index": "2.1-3",
-                },
-                {
-                    "form": "psy",
-                    "tags": ["plural", "accusative"],
+                    "tags": ["accusative", "plural"],
                     "sense_index": "2.1-3",
                 },
                 {
                     "form": "psów",
-                    "tags": ["plural", "accusative"],
+                    "tags": ["accusative", "plural"],
                     "sense_index": "2.1-3",
+                },
+            ],
+        )
+
+    def test_tag_template_in_noun_table(self):
+        self.wxr.wtp.start_page("durian")
+        self.wxr.wtp.add_page("Szablon:pot", 10, "pot.")
+        root = self.wxr.wtp.parse(""": (1.1-2) {{odmiana-rzeczownik-polski
+|Biernik lp = durian / {{pot}} duriana
+}}""")
+        page_data = [
+            WordEntry(
+                word="durian",
+                lang="język polski",
+                lang_code="pl",
+                pos="noun",
+                senses=[Sense(sense_index="1.1")],
+            ),
+        ]
+        extract_inflection_section(self.wxr, page_data, "pl", root)
+        self.assertEqual(
+            [f.model_dump(exclude_defaults=True) for f in page_data[0].forms],
+            [
+                {
+                    "form": "duriana",
+                    "tags": ["accusative", "singular", "colloquial"],
+                    "sense_index": "1.1-2",
+                },
+            ],
+        )
+
+    def test_noun_template_forma_arg(self):
+        self.wxr.wtp.start_page("Urban")
+        root = self.wxr.wtp.parse(""": (1.1) {{odmiana-rzeczownik-polski
+|Forma depr = Urbany
+}}""")
+        page_data = [
+            WordEntry(
+                word="Urban",
+                lang="język polski",
+                lang_code="pl",
+                pos="noun",
+                senses=[Sense(sense_index="1.1")],
+            ),
+        ]
+        extract_inflection_section(self.wxr, page_data, "pl", root)
+        self.assertEqual(
+            [f.model_dump(exclude_defaults=True) for f in page_data[0].forms],
+            [
+                {
+                    "form": "Urbany",
+                    "tags": ["depreciative", "nominative", "vocative", "plural"],
+                    "sense_index": "1.1",
                 },
             ],
         )
