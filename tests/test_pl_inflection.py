@@ -109,7 +109,12 @@ class TestPlInflection(TestCase):
             [
                 {
                     "form": "Urbany",
-                    "tags": ["depreciative", "nominative", "vocative", "plural"],
+                    "tags": [
+                        "depreciative",
+                        "nominative",
+                        "vocative",
+                        "plural",
+                    ],
                     "sense_index": "1.1",
                 },
             ],
