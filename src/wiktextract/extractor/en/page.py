@@ -854,7 +854,7 @@ def parse_language(
     defined on the page one at a time.  (Individual word senses for the
     same part-of-speech are typically encoded in the same entry.)"""
     # imported here to avoid circular import
-    from .pronunciations import parse_pronunciation
+    from .pronunciation import parse_pronunciation
 
     assert isinstance(wxr, WiktextractContext)
     assert isinstance(langnode, WikiNode)
