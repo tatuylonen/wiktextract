@@ -320,3 +320,58 @@ class TestPlInflection(TestCase):
                 },
             ],
         )
+
+    def test_eo_noun_table(self):
+        self.wxr.wtp.add_page(
+            "odmiana-rzeczownik-esperanto",
+            10,
+            """<span class="short-container<nowiki/> short-variant1">[[Aneks:Skróty używane w Wikisłowniku#B|<span class="short-wrapper" title="bez liczby mnogiej" data-expanded="bez liczby mnogiej"><span class="short-content">blm</span></span>]]</span>,&nbsp;<div><div>&nbsp;</div><div><table class="wikitable odmiana"><tr><th>&nbsp;</th><th>[[ununombro#eo|ununombro]]</th><th>[[multenombro#eo|multenombro]]&#32;([[virtuala#eo|virtuala]])</th></tr><tr><th>[[nominativo#eo|nominativo]]</th><td>'''neĝo'''</td><td>'''<span class="potential-form" title="forma potencjalna lub rzadka" tabindex="0">neĝoj</span>'''</td></tr><tr><th>[[akuzativo#eo|akuzativo]]</th><td>neĝon</td><td><span class="potential-form" title="forma potencjalna lub rzadka" tabindex="0">neĝojn</span></td></tr></table></div></div>""",
+        )
+        self.wxr.wtp.start_page("neĝo")
+        root = self.wxr.wtp.parse(
+            ": (1.2) {{odmiana-rzeczownik-esperanto|blm}}"
+        )
+        page_data = [
+            WordEntry(
+                word="neĝo",
+                lang="esperanto",
+                lang_code="eo",
+                pos="verb",
+                senses=[Sense(sense_index="1.1")],
+            ),
+        ]
+        extract_inflection_section(self.wxr, page_data, "eo", root)
+        self.assertEqual(
+            [f.model_dump(exclude_defaults=True) for f in page_data[0].forms],
+            [
+                {
+                    "form": "neĝoj",
+                    "sense_index": "1.2",
+                    "tags": [
+                        "no-plural",
+                        "potential",
+                        "rare",
+                        "nominative",
+                        "plural",
+                        "virtual",
+                    ],
+                },
+                {
+                    "form": "neĝon",
+                    "sense_index": "1.2",
+                    "tags": ["no-plural", "accusative", "singular"],
+                },
+                {
+                    "form": "neĝojn",
+                    "sense_index": "1.2",
+                    "tags": [
+                        "no-plural",
+                        "potential",
+                        "rare",
+                        "accusative",
+                        "plural",
+                        "virtual",
+                    ],
+                },
+            ],
+        )
