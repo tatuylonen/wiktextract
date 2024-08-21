@@ -46,7 +46,10 @@ def extract_inflection_section(
 def extract_inflection_template(
     wxr: WiktextractContext, template_node: TemplateNode, sense_index: str
 ) -> list[Form]:
-    if template_node.template_name == "odmiana-rzeczownik-polski":
+    if template_node.template_name in [
+        "odmiana-rzeczownik-polski",
+        "odmiana-rzeczownik-czeski",
+    ]:
         return extract_odmiana_rzeczownik_polski(
             wxr, template_node, sense_index
         )
@@ -56,6 +59,9 @@ def extract_inflection_template(
         )
     elif template_node.template_name == "odmiana-czasownik-polski":
         return extract_odmiana_czasownik_polski(wxr, template_node, sense_index)
+    elif template_node.template_name == "odmiana-rzeczownik-esperanto":
+        return odmiana_rzeczownik_esperanto(wxr, template_node, sense_index)
+
     return []
 
 
@@ -323,5 +329,59 @@ def extract_odmiana_czasownik_polski_table(
                     forms.append(form)
 
             td_col_index += col_span
+
+    return forms
+
+
+def odmiana_rzeczownik_esperanto(
+    wxr: WiktextractContext, template_node: TemplateNode, sense_index: str
+) -> list[Form]:
+    # noun table
+    # https://pl.wiktionary.org/wiki/Szablon:odmiana-rzeczownik-esperanto
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(template_node), expand_all=True
+    )
+    forms = []
+    col_headers = []
+    tags = []
+    for span_tag in expanded_node.find_html_recursively(
+        "span", attr_name="class", attr_value="short-content"
+    ):
+        span_text = clean_node(wxr, None, span_tag)
+        if span_text == "blm":
+            tags.append("no-plural")
+        elif span_text == "blp":
+            tags.append("no-singulative")
+    for table_tag in expanded_node.find_html_recursively("table"):
+        for tr_tag in table_tag.find_html("tr"):
+            is_header_row = not any(t for t in tr_tag.find_html("td"))
+            row_header = ""
+            for th_tag in tr_tag.find_html("th"):
+                th_text = clean_node(wxr, None, th_tag)
+                if th_text == "":
+                    continue
+                if is_header_row:
+                    col_headers.append(th_text)
+                else:
+                    row_header = th_text
+            for td_index, td_tag in enumerate(tr_tag.find_html("td")):
+                form_text = clean_node(wxr, None, td_tag)
+                td_tags = []
+                for _ in td_tag.find_html_recursively(
+                    "span", attr_name="class", attr_value="potential-form"
+                ):
+                    td_tags.extend(["potential", "rare"])
+                if form_text != "" and form_text != wxr.wtp.title:
+                    form = Form(
+                        form=form_text,
+                        sense_index=sense_index,
+                        tags=tags + td_tags,
+                    )
+                    if row_header != "":
+                        form.raw_tags.append(row_header)
+                    if td_index < len(col_headers):
+                        form.raw_tags.append(col_headers[td_index])
+                    translate_raw_tags(form)
+                    forms.append(form)
 
     return forms

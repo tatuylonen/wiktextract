@@ -127,6 +127,13 @@ def match_sense_index(sense_index: str, word_entry: WordEntry) -> bool:
         sense = word_entry.senses[0]
     elif isinstance(word_entry, Sense):
         sense = word_entry
+        # find exact match for index like "1.1"
+        exact_match = not (
+            "," in sense_index or "-" in sense_index or "." not in sense_index
+        )
+        if exact_match:
+            return sense_index == sense.sense_index
+
     pos_index_str = sense.sense_index[: sense_index.find(".")]
     pos_section_index = 0
     if pos_index_str.isdigit():

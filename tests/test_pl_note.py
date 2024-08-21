@@ -36,7 +36,7 @@ class TestPlNote(TestCase):
                 lang="język polski",
                 lang_code="pl",
                 pos="noun",
-                senses=[Sense(sense_index="1.1")],
+                senses=[Sense(sense_index="1.1"), Sense(sense_index="1.2")],
             )
         ]
         extract_note_section(self.wxr, page_data, base_data, root)
@@ -47,3 +47,4 @@ class TestPlNote(TestCase):
                 "zobacz też: Indeks:Polski - Rasy psów",
             ],
         )
+        self.assertEqual(page_data[0].senses[1].notes, [])

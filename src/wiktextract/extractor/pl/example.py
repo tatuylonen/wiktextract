@@ -70,7 +70,7 @@ def process_example_list_item(
             example_data.text = clean_node(
                 wxr, None, list_item.children[example_start:translation_start]
             ).strip("→ ")
-    if "(" in example_data.text:
+    if "(" in example_data.text and "(" not in example_data.translation:
         roman_start = example_data.text.rindex("(")
         example_data.roman = example_data.text[roman_start:].strip("() ")
         example_data.text = example_data.text[:roman_start].strip()

@@ -253,6 +253,12 @@ TAGS = {
         "adverbial",
         "participle",
     ],
+    # "odmiana-rzeczownik-esperanto" template
+    "ununombro": "singular",
+    "multenombro": "plural",
+    "nominativo": "nominative",
+    "akuzativo": "accusative",
+    "multenombro (virtuala)": ["plural", "virtual"],
     # pos line
     "nieprzechodni": "intransitive",
 }
