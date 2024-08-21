@@ -78,7 +78,7 @@ def process_linkage_list_item(
                 translation_nodes.append(node[tr_start + 1 :])
             else:
                 has_sep = False
-                for sep in [";", "•", ","]:
+                for sep in [";", "•", ",", "/"]:
                     if sep in node:
                         has_sep = True
                         sep_index = node.index(sep)
