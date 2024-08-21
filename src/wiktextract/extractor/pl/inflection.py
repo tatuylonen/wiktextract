@@ -46,7 +46,10 @@ def extract_inflection_section(
 def extract_inflection_template(
     wxr: WiktextractContext, template_node: TemplateNode, sense_index: str
 ) -> list[Form]:
-    if template_node.template_name == "odmiana-rzeczownik-polski":
+    if template_node.template_name in [
+        "odmiana-rzeczownik-polski",
+        "odmiana-rzeczownik-czeski",
+    ]:
         return extract_odmiana_rzeczownik_polski(
             wxr, template_node, sense_index
         )
