@@ -128,3 +128,36 @@ class TestPlExample(TestCase):
                 "sense_index": "1.1",
             },
         )
+
+    def test_not_roman(self):
+        self.wxr.wtp.add_page(
+            "Szablon:język czeski",
+            10,
+            '<span class="lang-code primary-lang-code lang-code-cs" id="cs">[[Słownik języka czeskiego|język czeski]]</span>',
+        )
+        self.wxr.wtp.add_page("Szablon:anat", 10, "anat.")
+        page_data = parse_page(
+            self.wxr,
+            "oko",
+            """== oko ({{język czeski}}) ==
+===znaczenia===
+''rzeczownik, rodzaj nijaki''
+: (1.1) {{anat}} [[oko]]
+===przykłady===
+: (1.1) ''[[v|V]] [[jazyk|jazyce]] [[metafora|metafor]] [[být|je]] [[oko]] [[často|nejčastěji]] [[spojovat|spojováno]] [[s]] [[duše|duší]] ([[jakožto]] [[ona|její]] [[okno]]).''<ref>[http://www.souvislosti.cz/201/krato.html z Internetu]</ref> → [[w|W]] [[język]]u [[metafora|metafor]] '''[[oko]]''' [[częsty|najczęściej]] [[łączyć|łączone]] [[być|jest]] [[z]] [[dusza|duszą]] ([[jako]] [[ona|jej]] [[okno]]).""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"][0],
+            {
+                "examples": [
+                    {
+                        "text": "V jazyce metafor je oko nejčastěji spojováno s duší (jakožto její okno).",
+                        "translation": "W języku metafor oko najczęściej łączone jest z duszą (jako jej okno).",
+                        "ref": "z Internetu",
+                    }
+                ],
+                "glosses": ["oko"],
+                "topics": ["anatomy"],
+                "sense_index": "1.1",
+            },
+        )
