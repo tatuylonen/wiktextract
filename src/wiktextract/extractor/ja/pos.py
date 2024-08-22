@@ -53,17 +53,27 @@ def process_gloss_list_item(
         sense_data.glosses.append(parent_gloss)
     gloss_only_nodes = []
     for gloss_node in gloss_nodes:
-        if isinstance(
-            gloss_node, TemplateNode
-        ) and gloss_node.template_name in ("context", "タグ"):
-            # https://ja.wiktionary.org/wiki/テンプレート:context
-            # https://ja.wiktionary.org/wiki/テンプレート:タグ
-            for raw_tag in (
-                clean_node(wxr, sense_data, gloss_node).strip("()").split(",")
-            ):
-                raw_tag = raw_tag.strip()
-                if len(raw_tag) > 0:
-                    sense_data.raw_tags.append(raw_tag)
+        if isinstance(gloss_node, TemplateNode):
+            if gloss_node.template_name in ("context", "タグ"):
+                # https://ja.wiktionary.org/wiki/テンプレート:context
+                # https://ja.wiktionary.org/wiki/テンプレート:タグ
+                for raw_tag in (
+                    clean_node(wxr, sense_data, gloss_node)
+                    .strip("()")
+                    .split(",")
+                ):
+                    raw_tag = raw_tag.strip()
+                    if len(raw_tag) > 0:
+                        sense_data.raw_tags.append(raw_tag)
+            elif gloss_node.template_name == "wikipedia-s":
+                expanded_text = clean_node(wxr, None, gloss_node)
+                gloss_only_nodes.append(
+                    expanded_text.removesuffix("⁽ʷᵖ⁾").strip()
+                )
+            elif gloss_node.template_name == "wp":
+                continue
+            else:
+                gloss_only_nodes.append(gloss_node)
         else:
             gloss_only_nodes.append(gloss_node)
     expanded_gloss = wxr.wtp.parse(

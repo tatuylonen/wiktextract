@@ -180,3 +180,26 @@ class TestJaGloss(TestCase):
                 }
             ],
         )
+
+    def test_wikipedia_s(self):
+        self.wxr.wtp.add_page("テンプレート:L", 10, "英語")
+        self.wxr.wtp.add_page(
+            "テンプレート:wikipedia-s",
+            10,
+            "[[摩擦音]] [[w:摩擦音 | <sup><small>(wp)</small></sup>]]",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "fricative",
+            """=={{L|en}}==
+===形容詞===
+# [[摩擦]]による。{{wikipedia-s|摩擦音}}の。""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"],
+            [
+                {
+                    "glosses": ["摩擦による。摩擦音の。"],
+                }
+            ],
+        )
