@@ -17,6 +17,10 @@ class Example(JapaneseBaseModel):
     ruby: list[tuple[str, ...]] = []
 
 
+class AltForm(JapaneseBaseModel):
+    word: str
+
+
 class Sense(JapaneseBaseModel):
     glosses: list[str] = []
     tags: list[str] = []
@@ -25,6 +29,7 @@ class Sense(JapaneseBaseModel):
     categories: list[str] = []
     ruby: list[tuple[str, ...]] = []
     examples: list[Example] = []
+    form_of: list[AltForm] = []
 
 
 class Form(JapaneseBaseModel):

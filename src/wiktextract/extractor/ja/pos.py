@@ -5,7 +5,7 @@ from ...wxr_context import WiktextractContext
 from ..ruby import extract_ruby
 from .example import extract_example_list_item
 from .header import extract_header_nodes
-from .models import Sense, WordEntry
+from .models import AltForm, Sense, WordEntry
 from .section_titles import POS_DATA
 from .tags import translate_raw_tags
 
@@ -48,18 +48,32 @@ def process_gloss_list_item(
         list_item_node.invert_find_child(NodeKind.LIST, include_empty_str=True)
     )
     sense_data = Sense()
+    find_form_of_data(wxr, word_entry, sense_data, list_item_node)
     if len(parent_gloss) > 0:
         sense_data.glosses.append(parent_gloss)
     gloss_only_nodes = []
     for gloss_node in gloss_nodes:
-        if isinstance(
-            gloss_node, TemplateNode
-        ) and gloss_node.template_name in ("context", "タグ"):
-            # https://ja.wiktionary.org/wiki/テンプレート:context
-            # https://ja.wiktionary.org/wiki/テンプレート:タグ
-            raw_tag = clean_node(wxr, sense_data, gloss_node).strip("()")
-            if len(raw_tag) > 0:
-                sense_data.raw_tags.append(raw_tag)
+        if isinstance(gloss_node, TemplateNode):
+            if gloss_node.template_name in ("context", "タグ"):
+                # https://ja.wiktionary.org/wiki/テンプレート:context
+                # https://ja.wiktionary.org/wiki/テンプレート:タグ
+                for raw_tag in (
+                    clean_node(wxr, sense_data, gloss_node)
+                    .strip("()")
+                    .split(",")
+                ):
+                    raw_tag = raw_tag.strip()
+                    if len(raw_tag) > 0:
+                        sense_data.raw_tags.append(raw_tag)
+            elif gloss_node.template_name == "wikipedia-s":
+                expanded_text = clean_node(wxr, None, gloss_node)
+                gloss_only_nodes.append(
+                    expanded_text.removesuffix("⁽ʷᵖ⁾").strip()
+                )
+            elif gloss_node.template_name == "wp":
+                continue
+            else:
+                gloss_only_nodes.append(gloss_node)
         else:
             gloss_only_nodes.append(gloss_node)
     expanded_gloss = wxr.wtp.parse(
@@ -86,3 +100,29 @@ def process_gloss_list_item(
                 process_gloss_list_item(
                     wxr, word_entry, nest_list_item, gloss_text
                 )
+
+
+def find_form_of_data(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    sense: Sense,
+    list_item_node: WikiNode,
+) -> None:
+    for node in list_item_node.find_child(NodeKind.TEMPLATE):
+        if node.template_name.endswith(" of"):
+            expanded_node = wxr.wtp.parse(
+                wxr.wtp.node_to_wikitext(node), expand_all=True
+            )
+            for link_node in expanded_node.find_child_recursively(
+                NodeKind.LINK
+            ):
+                form_of = clean_node(wxr, None, link_node)
+                if form_of != "":
+                    sense.form_of.append(AltForm(word=form_of))
+                    break
+    if "form-of" in word_entry.tags and len(sense.form_of) == 0:
+        for link_node in list_item_node.find_child(NodeKind.LINK):
+            form_of = clean_node(wxr, None, link_node)
+            if form_of != "":
+                sense.form_of.append(AltForm(word=form_of))
+                break
