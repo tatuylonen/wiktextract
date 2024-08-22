@@ -120,6 +120,33 @@ class TestPlInflection(TestCase):
             ],
         )
 
+    def test_potential_noun(self):
+        self.wxr.wtp.add_page("Szablon:potencjalnie", 10, "{{{1}}}")
+        self.wxr.wtp.start_page("ryż")
+        root = self.wxr.wtp.parse(""": (1.1-3) {{odmiana-rzeczownik-polski
+|Mianownik lm = {{potencjalnie|ryże}}
+}}""")
+        page_data = [
+            WordEntry(
+                word="ryż",
+                lang="język polski",
+                lang_code="pl",
+                pos="noun",
+                senses=[Sense(sense_index="1.1")],
+            ),
+        ]
+        extract_inflection_section(self.wxr, page_data, "pl", root)
+        self.assertEqual(
+            [f.model_dump(exclude_defaults=True) for f in page_data[0].forms],
+            [
+                {
+                    "form": "ryże",
+                    "tags": ["potential", "rare", "nominative", "plural"],
+                    "sense_index": "1.1-3",
+                },
+            ],
+        )
+
     def test_odmiana_przymiotnik_polski(self):
         self.wxr.wtp.add_page(
             "Szablon:odmiana-przymiotnik-polski",

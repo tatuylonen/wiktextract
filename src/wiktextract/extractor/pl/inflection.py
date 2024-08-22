@@ -84,6 +84,7 @@ def extract_odmiana_rzeczownik_polski(
         if isinstance(arg_value, list):
             form_nodes = []
             current_form_raw_tags = []
+            current_form_tags = []
             for node in arg_value:
                 if isinstance(node, str) and "/" in node:
                     slash_index = node.index("/")
@@ -94,11 +95,13 @@ def extract_odmiana_rzeczownik_polski(
                             form=form_text,
                             sense_index=sense_index,
                             raw_tags=raw_tags + current_form_raw_tags,
+                            tags=current_form_tags,
                         )
                         translate_raw_tags(form)
                         forms.append(form)
                     form_nodes.clear()
                     current_form_raw_tags.clear()
+                    current_form_tags.clear()
                     form_nodes.append(node[slash_index + 1 :])
                 elif isinstance(node, TemplateNode):
                     node_text = clean_node(wxr, None, node)
@@ -106,6 +109,8 @@ def extract_odmiana_rzeczownik_polski(
                         current_form_raw_tags.append(node_text)
                     else:
                         form_nodes.append(node_text)
+                    if node.template_name == "potencjalnie":
+                        current_form_tags.extend(["potential", "rare"])
                 elif isinstance(node, str) and "<ref" in node:
                     # remove <ref> tag in "Forma *" args
                     form_nodes.append(node[: node.index("<ref")])
@@ -119,6 +124,7 @@ def extract_odmiana_rzeczownik_polski(
                         form=form_text,
                         sense_index=sense_index,
                         raw_tags=raw_tags + current_form_raw_tags,
+                        tags=current_form_tags,
                     )
                     translate_raw_tags(form)
                     forms.append(form)
