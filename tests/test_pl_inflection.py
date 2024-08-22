@@ -92,7 +92,7 @@ class TestPlInflection(TestCase):
     def test_noun_template_forma_arg(self):
         self.wxr.wtp.start_page("Urban")
         root = self.wxr.wtp.parse(""": (1.1) {{odmiana-rzeczownik-polski
-|Forma depr = Urbany
+|Forma depr = Urbany<ref name="SGJPonline">{{SGJPonline|id=22616|hasło=Urban}}</ref>
 }}""")
         page_data = [
             WordEntry(
