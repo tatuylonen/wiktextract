@@ -224,3 +224,38 @@ class TestPlGloss(TestCase):
                 }
             ],
         )
+
+    def test_not_tag_gloss_template(self):
+        self.wxr.wtp.add_page(
+            "Szablon:język polski",
+            10,
+            '<span class="lang-code primary-lang-code lang-code-pl" id="pl">[[Słownik języka polskiego|język polski]]</span>',
+        )
+        self.wxr.wtp.add_page(
+            "Szablon:bot",
+            10,
+            "bot.",
+        )
+        self.wxr.wtp.add_page(
+            "Szablon:nazwa systematyczna",
+            10,
+            """''[[Oryza|<span title="łacińska nazwa systematyczna">Oryza</span>]]''&#32;<span>[[L.]]</span><ref name="Oryza">ref text</ref>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "ryż",
+            """== ryż ({{język polski}}) ==
+===znaczenia===
+''rzeczownik, rodzaj męskorzeczowy''
+: (1.1) {{bot}} [[roślina]] [[zboże|zbożowa]] {{nazwa systematyczna|Oryza|L.|ref=tak}}, [[z]] [[rodzina|rodziny]] [[trawa|traw]] [[występować|występująca]] [[w]] [[klimat|klimacie]] [[wilgotny]]m; {{wikipedia}}""",
+        )
+        self.assertEqual(
+            data[0]["senses"][0],
+            {
+                "glosses": [
+                    "roślina zbożowa Oryza L., z rodziny traw występująca w klimacie wilgotnym"
+                ],
+                "topics": ["botany"],
+                "sense_index": "1.1",
+            },
+        )

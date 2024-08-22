@@ -146,7 +146,10 @@ def process_gloss_list_item(
                 wxr.wtp.node_to_wikitext(gloss_node), expand_all=True
             )
             expanded_text = clean_node(wxr, sense, expanded_node.children)
-            if expanded_text.endswith("."):
+            if (
+                expanded_text.endswith(".")
+                and len(gloss_node.template_parameters) == 0
+            ):
                 # https://pl.wiktionary.org/wiki/Pomoc:Skróty_używane_w_Wikisłowniku
                 raw_tags.append(expanded_text)
             else:
