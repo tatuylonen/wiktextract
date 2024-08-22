@@ -57,9 +57,12 @@ def process_gloss_list_item(
         ) and gloss_node.template_name in ("context", "タグ"):
             # https://ja.wiktionary.org/wiki/テンプレート:context
             # https://ja.wiktionary.org/wiki/テンプレート:タグ
-            raw_tag = clean_node(wxr, sense_data, gloss_node).strip("()")
-            if len(raw_tag) > 0:
-                sense_data.raw_tags.append(raw_tag)
+            for raw_tag in (
+                clean_node(wxr, sense_data, gloss_node).strip("()").split(",")
+            ):
+                raw_tag = raw_tag.strip()
+                if len(raw_tag) > 0:
+                    sense_data.raw_tags.append(raw_tag)
         else:
             gloss_only_nodes.append(gloss_node)
     expanded_gloss = wxr.wtp.parse(

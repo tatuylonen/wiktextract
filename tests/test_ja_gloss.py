@@ -112,3 +112,29 @@ class TestJaGloss(TestCase):
                 }
             ],
         )
+
+    def test_two_topics(self):
+        self.wxr.wtp.add_page("テンプレート:L", 10, "日本語")
+        self.wxr.wtp.add_page("テンプレート:noun", 10, "名詞")
+        self.wxr.wtp.add_page(
+            "テンプレート:context",
+            10,
+            '<span class="ib-brac"><span class="qualifier-brac"> (</span></span><span class="ib-content"><span class="qualifier-content">野球<span class="ib-comma"><span class="qualifier-comma">,</span></span>&#32;[[カテゴリ:日本語 野球]]ゴルフ[[カテゴリ:日本語 ゴルフ]]</span></span><span class="ib-brac"><span class="qualifier-brac">) </span></span>',
+        )
+        page_data = parse_page(
+            self.wxr,
+            "てんぷら",
+            """=={{L|ja}}==
+==={{noun}}===
+#{{context|baseball|golf|lang=ja}}高く上がりすぎて[[飛距離]]が出ない[[打球]]。""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"],
+            [
+                {
+                    "categories": ["日本語 野球", "日本語 ゴルフ"],
+                    "glosses": ["高く上がりすぎて飛距離が出ない打球。"],
+                    "topics": ["baseball", "golf"],
+                }
+            ],
+        )
