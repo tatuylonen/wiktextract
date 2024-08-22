@@ -138,3 +138,45 @@ class TestJaGloss(TestCase):
                 }
             ],
         )
+
+    def test_link_node_form_of(self):
+        self.wxr.wtp.add_page("テンプレート:ja", 10, "日本語")
+        page_data = parse_page(
+            self.wxr,
+            "天麩羅",
+            """=={{ja}}==
+===和語の漢字表記===
+#「[[てんぷら]]」参照。""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"],
+            [
+                {
+                    "form_of": [{"word": "てんぷら"}],
+                    "glosses": ["「てんぷら」参照。"],
+                }
+            ],
+        )
+
+    def test_wagokanji_of(self):
+        self.wxr.wtp.add_page("テンプレート:L", 10, "日本語")
+        self.wxr.wtp.add_page(
+            "テンプレート:wagokanji of", 10, "'''[[{{{1}}}]]'''の漢字表記。"
+        )
+        self.wxr.wtp.add_page("テンプレート:wago", 10, "和語の漢字表記")
+        page_data = parse_page(
+            self.wxr,
+            "天麩羅",
+            """=={{L|ja}}==
+==={{wago}}===
+#{{wagokanji of|てんぷら}}""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"],
+            [
+                {
+                    "form_of": [{"word": "てんぷら"}],
+                    "glosses": ["てんぷらの漢字表記。"],
+                }
+            ],
+        )
