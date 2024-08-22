@@ -110,13 +110,12 @@ class TestPlLinkage(TestCase):
                 {
                     "word": "lacki",
                     "sense_index": "1.1",
-                    "raw_tags": ["st.pol."],
+                    "tags": ["Old-Polish"],
                 },
                 {
                     "word": "sarmacki",
                     "sense_index": "1.1",
-                    "raw_tags": ["żart."],
-                    "tags": ["poetic"],
+                    "tags": ["humorous", "poetic"],
                 },
             ],
         )
@@ -252,13 +251,11 @@ class TestPlLinkage(TestCase):
             [
                 {
                     "word": "słoniowacizna",
-                    "raw_tags": ["rzecz."],
-                    "tags": ["feminine"],
+                    "tags": ["noun", "feminine"],
                 },
                 {
                     "word": "słoniątko",
-                    "raw_tags": ["zdrobn."],
-                    "tags": ["neuter"],
+                    "tags": ["diminutive", "neuter"],
                 },
             ],
         )
