@@ -108,7 +108,7 @@ def extract_odmiana_rzeczownik_polski(
                         form_nodes.append(node_text)
                 elif isinstance(node, str) and "<ref" in node:
                     # remove <ref> tag in "Forma *" args
-                    form_nodes.append(node[:node.index("<ref")])
+                    form_nodes.append(node[: node.index("<ref")])
                     break
                 else:
                     form_nodes.append(node)

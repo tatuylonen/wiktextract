@@ -79,7 +79,7 @@ class TestPlExample(TestCase):
                     }
                 ],
                 "glosses": ["pies"],
-                "raw_tags": ["zool."],
+                "topics": ["zoology"],
                 "sense_index": "1.1",
             },
         )
