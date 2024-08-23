@@ -128,3 +128,14 @@ class TestJaLinkage(TestCase):
             [s.model_dump(exclude_defaults=True) for s in data.related],
             [{"word": "少陰"}],
         )
+
+    def test_nested_list_change_linkage_type(self):
+        self.wxr.wtp.start_page("太陽")
+        self.wxr.wtp.add_page("テンプレート:syn", 10, "類義語")
+        data = WordEntry(word="太陽", lang="日本語", lang_code="ja", pos="name")
+        root = self.wxr.wtp.parse("* {{syn}}:\n*: [[天日]]")
+        extract_linkage_section(self.wxr, data, root, "related")
+        self.assertEqual(
+            [s.model_dump(exclude_defaults=True) for s in data.synonyms],
+            [{"word": "天日"}],
+        )

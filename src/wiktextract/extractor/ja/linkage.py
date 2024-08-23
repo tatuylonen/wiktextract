@@ -21,7 +21,7 @@ def extract_linkage_section(
             sense = clean_node(wxr, None, node.template_parameters.get(1, ""))
         elif node.kind == NodeKind.LIST:
             for list_item in node.find_child_recursively(NodeKind.LIST_ITEM):
-                process_linkage_list_item(
+                linkage_type = process_linkage_list_item(
                     wxr, word_entry, list_item, linkage_type, sense
                 )
 
@@ -32,7 +32,7 @@ def process_linkage_list_item(
     list_item: WikiNode,
     linkage_type: str,
     sense: str,
-) -> None:
+) -> str:
     after_colon = False
     for node_idx, node in enumerate(list_item.children):
         if isinstance(node, str) and ":" in node and not after_colon:
@@ -61,3 +61,4 @@ def process_linkage_list_item(
                 getattr(word_entry, linkage_type).append(
                     Linkage(word=word, sense=sense)
                 )
+    return linkage_type
