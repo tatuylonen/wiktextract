@@ -82,3 +82,19 @@ class TestJaLinkage(TestCase):
                 }
             ],
         )
+
+    def test_linkage_type_in_list_item(self):
+        self.wxr.wtp.start_page("豆乳")
+        self.wxr.wtp.add_page("テンプレート:prov", 10, "熟語")
+        data = WordEntry(word="豆乳", lang="日本語", lang_code="ja", pos="noun")
+        root = self.wxr.wtp.parse("""* [[うのはな|卯の花]]
+* {{prov}}: [[調製豆乳]]""")
+        extract_linkage_section(self.wxr, data, root, "related")
+        self.assertEqual(
+            [s.model_dump(exclude_defaults=True) for s in data.related],
+            [{"word": "卯の花"}],
+        )
+        self.assertEqual(
+            [s.model_dump(exclude_defaults=True) for s in data.proverbs],
+            [{"word": "調製豆乳"}],
+        )
