@@ -44,7 +44,7 @@ def process_translation_list_item(
             lang_nodes.append(node[: node.index(":")])
             new_lang_name = clean_node(wxr, None, lang_nodes)
             new_lang_code = name_to_code(new_lang_name, "ja")
-            if new_lang_code != "":
+            if new_lang_code != "" or lang_name == "":
                 lang_code = new_lang_code
                 lang_name = new_lang_name
         elif isinstance(node, TemplateNode):
