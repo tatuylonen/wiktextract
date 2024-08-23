@@ -236,7 +236,7 @@ def parse_section(
     elif section_title == "библиография":
         pass
     elif section_title in ["латиница (latinça)", "латиница (latinca)"]:
-        pass
+        parse_roman_section(wxr, page_data[-1], level_node)
     elif section_title == "иноязычные аналоги":
         pass
     elif section_title == "прочее":
@@ -391,3 +391,13 @@ def process_form_template(
     if len(current_data.senses) > 0 or len(current_data.sounds) > 0:
         clean_node(wxr, current_data, template_node)
         page_data.append(current_data)
+
+
+def parse_roman_section(
+    wxr: WiktextractContext, word_entry: WordEntry, level_node: WikiNode
+) -> None:
+    for link_node in level_node.find_child(NodeKind.LINK):
+        form_text = clean_node(wxr, None, link_node)
+        if form_text != "":
+            form = Form(form=form_text, tags=["romanization"])
+            word_entry.forms.append(form)
