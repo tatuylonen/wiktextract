@@ -106,3 +106,13 @@ class TestJaHeader(TestCase):
         root = self.wxr.wtp.parse("{{zhchar|民|主}}")
         extract_header_nodes(self.wxr, data, root.children)
         self.assertEqual(len(data.forms), 0)
+
+    def test_three_bold_nodes(self):
+        # no "canonical" tag
+        self.wxr.wtp.start_page("みそ")
+        data = WordEntry(lang="日本語", lang_code="ja", word="みそ")
+        root = self.wxr.wtp.parse(
+            "'''みそ'''【'''[[味]][[噌]]'''、'''[[未]][[醤]]'''】"
+        )
+        extract_header_nodes(self.wxr, data, root.children)
+        self.assertEqual(data.forms, [Form(form="味噌"), Form(form="未醤")])
