@@ -92,7 +92,9 @@ def process_gloss_list_item(
             for example_list_item in nest_gloss_list.find_child(
                 NodeKind.LIST_ITEM
             ):
-                extract_example_list_item(wxr, sense_data, example_list_item)
+                extract_example_list_item(
+                    wxr, word_entry, sense_data, example_list_item
+                )
         elif nest_gloss_list.sarg.endswith("#"):
             for nest_list_item in nest_gloss_list.find_child(
                 NodeKind.LIST_ITEM

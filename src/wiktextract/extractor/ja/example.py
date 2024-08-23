@@ -3,16 +3,36 @@ from wikitextprocessor.parser import NodeKind, WikiNode
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from ..ruby import extract_ruby
-from .models import Example, Sense
+from .linkage import process_linkage_list_item
+from .models import Example, Sense, WordEntry
+from .section_titles import LINKAGES
 
 
 def extract_example_list_item(
     wxr: WiktextractContext,
+    word_entry: WordEntry,
     sense: Sense,
     list_item: WikiNode,
     parent_list_text: str = "",
 ) -> None:
     # https://ja.wiktionary.org/wiki/Wiktionary:用例#用例を示す形式
+
+    # check if it's linkage data
+    for node_idx, node in enumerate(list_item.children):
+        if isinstance(node, str) and ":" in node:
+            linkage_type_text = clean_node(
+                wxr, None, list_item.children[:node_idx]
+            )
+            if linkage_type_text in LINKAGES:
+                process_linkage_list_item(
+                    wxr,
+                    word_entry,
+                    list_item,
+                    "",
+                    sense.glosses[0] if len(sense.glosses) > 0 else "",
+                )
+                return
+
     if any(
         child.contain_node(NodeKind.BOLD) or child.kind == NodeKind.BOLD
         for child in list_item.children
@@ -55,5 +75,5 @@ def extract_example_list_item(
             NodeKind.LIST_ITEM
         ):
             extract_example_list_item(
-                wxr, sense, next_list_item, list_item_text
+                wxr, word_entry, sense, next_list_item, list_item_text
             )

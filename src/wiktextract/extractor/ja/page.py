@@ -77,6 +77,8 @@ def parse_page(
             for template in level2_node.find_content(NodeKind.TEMPLATE):
                 if template.template_name == "L":
                     lang_code = template.template_parameters.get(1, "")
+                elif re.fullmatch(r"[a-z-]+", template.template_name):
+                    lang_code = template.template_name
         if lang_code == "":
             lang_code = "unknown"
         wxr.wtp.start_section(lang_name)

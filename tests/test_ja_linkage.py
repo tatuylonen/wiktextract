@@ -1,4 +1,5 @@
 from unittest import TestCase
+from unittest.mock import patch
 
 from wikitextprocessor import Wtp
 
@@ -81,4 +82,60 @@ class TestJaLinkage(TestCase):
                     "phrases": [{"word": "青天の霹靂"}],
                 }
             ],
+        )
+
+    def test_linkage_type_in_list_item(self):
+        self.wxr.wtp.start_page("豆乳")
+        self.wxr.wtp.add_page("テンプレート:prov", 10, "熟語")
+        data = WordEntry(word="豆乳", lang="日本語", lang_code="ja", pos="noun")
+        root = self.wxr.wtp.parse("""* [[うのはな|卯の花]]
+* {{prov}}: [[調製豆乳]]""")
+        extract_linkage_section(self.wxr, data, root, "related")
+        self.assertEqual(
+            [s.model_dump(exclude_defaults=True) for s in data.related],
+            [{"word": "卯の花"}],
+        )
+        self.assertEqual(
+            [s.model_dump(exclude_defaults=True) for s in data.proverbs],
+            [{"word": "調製豆乳"}],
+        )
+
+    def test_linkage_under_gloss_list(self):
+        self.wxr.wtp.add_page("テンプレート:L", 10, "日本語")
+        self.wxr.wtp.add_page("テンプレート:noun", 10, "名詞")
+        self.wxr.wtp.add_page("テンプレート:idiom", 10, "成句")
+        data = parse_page(
+            self.wxr,
+            "みそ",
+            """== {{ja}} ==
+=== {{noun}} ===
+# [[失敗]]。
+#*{{idiom}}:[[みそをつける]]""",
+        )
+        self.assertEqual(
+            data[0]["phrases"], [{"word": "みそをつける", "sense": "失敗。"}]
+        )
+
+    # set to None to force using ja edition ns prefixes
+    @patch("wiktextract.clean.IMAGE_LINK_RE", return_value=None)
+    def test_bagua_image(self, mock_re):
+        # no image link
+        self.wxr.wtp.start_page("太陽")
+        data = WordEntry(word="太陽", lang="日本語", lang_code="ja", pos="noun")
+        root = self.wxr.wtp.parse("* [[画像:Shaoyin.png]][[少陰]]")
+        extract_linkage_section(self.wxr, data, root, "related")
+        self.assertEqual(
+            [s.model_dump(exclude_defaults=True) for s in data.related],
+            [{"word": "少陰"}],
+        )
+
+    def test_nested_list_change_linkage_type(self):
+        self.wxr.wtp.start_page("太陽")
+        self.wxr.wtp.add_page("テンプレート:syn", 10, "類義語")
+        data = WordEntry(word="太陽", lang="日本語", lang_code="ja", pos="name")
+        root = self.wxr.wtp.parse("* {{syn}}:\n*: [[天日]]")
+        extract_linkage_section(self.wxr, data, root, "related")
+        self.assertEqual(
+            [s.model_dump(exclude_defaults=True) for s in data.synonyms],
+            [{"word": "天日"}],
         )
