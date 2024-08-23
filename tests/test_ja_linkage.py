@@ -1,4 +1,5 @@
 from unittest import TestCase
+from unittest.mock import patch
 
 from wikitextprocessor import Wtp
 
@@ -113,4 +114,17 @@ class TestJaLinkage(TestCase):
         )
         self.assertEqual(
             data[0]["phrases"], [{"word": "みそをつける", "sense": "失敗。"}]
+        )
+
+    # set to None to force using ja edition ns prefixes
+    @patch("wiktextract.clean.IMAGE_LINK_RE", return_value=None)
+    def test_bagua_image(self, mock_re):
+        # no image link
+        self.wxr.wtp.start_page("太陽")
+        data = WordEntry(word="太陽", lang="日本語", lang_code="ja", pos="noun")
+        root = self.wxr.wtp.parse("* [[画像:Shaoyin.png]][[少陰]]")
+        extract_linkage_section(self.wxr, data, root, "related")
+        self.assertEqual(
+            [s.model_dump(exclude_defaults=True) for s in data.related],
+            [{"word": "少陰"}],
         )
