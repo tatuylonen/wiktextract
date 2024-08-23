@@ -56,10 +56,9 @@ def add_form_data(
 ) -> None:
     for form_text in re.split(r"・|、|,", forms_text):
         form_text = form_text.strip()
-        if word_entry.lang_code in ["ja", "ko", "zh"]:
-            form_text = form_text.replace(" ", "")
         if (
             form_text == word_entry.word
+            or form_text.replace(" ", "") == word_entry.word
             or len(form_text) == 0
             or form_text in extracted_forms
         ):
