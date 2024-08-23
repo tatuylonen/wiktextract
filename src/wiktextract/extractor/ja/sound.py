@@ -72,6 +72,8 @@ def process_sound_template(
             sounds.append(Sound(homophones=homophones))
     elif template_node.template_name == "ja-pron":
         process_ja_pron_template(wxr, template_node, sounds)
+    elif template_node.template_name == "ja-accent-common":
+        process_ja_accent_common_template(wxr, template_node, sounds)
 
     clean_node(wxr, cats, template_node)
 
@@ -111,3 +113,23 @@ def process_ja_pron_template(
             sound = Sound()
             set_sound_file_url_fields(wxr, audio_file, sound)
             sounds.append(sound)
+
+
+def process_ja_accent_common_template(
+    wxr: WiktextractContext,
+    template_node: TemplateNode,
+    sounds: list[Sound],
+) -> None:
+    # https://ja.wiktionary.org/wiki/テンプレート:ja-accent-common
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(template_node), expand_all=True
+    )
+    sound = Sound()
+    for link_node in expanded_node.find_child_recursively(NodeKind.LINK):
+        raw_tag = clean_node(wxr, None, link_node)
+        if raw_tag != "":
+            sound.raw_tags.append(raw_tag)
+    for span_tag in expanded_node.find_html_recursively("span"):
+        sound.form = clean_node(wxr, None, span_tag)
+    if sound.form != "":
+        sounds.append(sound)

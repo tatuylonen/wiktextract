@@ -116,3 +116,20 @@ class TestJaSound(TestCase):
         extract_sound_section(self.wxr, page_data, base_data, root.children[0])
         data = base_data.model_dump(exclude_defaults=True)
         self.assertEqual(data["sounds"], [{"homophones": ["lis/lys"]}])
+
+    def test_ja_pron_template(self):
+        self.wxr.wtp.start_page("豆乳")
+        self.wxr.wtp.add_page(
+            "テンプレート:ja-accent-common",
+            10,
+            """*([[w:京阪式アクセント|京阪式]])&nbsp;<span lang="ja" xml:lang="ja"><span>とーにゅー</span></span>""",
+        )
+        root = self.wxr.wtp.parse("""===発音===
+{{ja-accent-common|region=京阪|h||とーにゅー}}""")
+        base_data = WordEntry(word="豆乳", lang_code="ja", lang="日本語")
+        page_data = [base_data.model_copy(deep=True)]
+        extract_sound_section(self.wxr, page_data, base_data, root.children[0])
+        data = base_data.model_dump(exclude_defaults=True)
+        self.assertEqual(
+            data["sounds"], [{"form": "とーにゅー", "raw_tags": ["京阪式"]}]
+        )
