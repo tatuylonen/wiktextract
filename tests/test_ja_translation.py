@@ -213,3 +213,27 @@ class TestJaTransaltion(TestCase):
                 }
             ],
         )
+
+    def test_zh_ts(self):
+        self.wxr.wtp.start_page("豆乳")
+        self.wxr.wtp.add_page("テンプレート:T", 10, "中国語")
+        data = WordEntry(word="豆乳", lang="日本語", lang_code="ja", pos="noun")
+        root = self.wxr.wtp.parse("*{{T|zh}}: {{zh-ts|[[豆漿]]|[[豆浆]]}}")
+        extract_translation_section(self.wxr, data, root)
+        self.assertEqual(
+            [t.model_dump(exclude_defaults=True) for t in data.translations],
+            [
+                {
+                    "lang": "中国語",
+                    "lang_code": "zh",
+                    "word": "豆漿",
+                    "tags": ["Traditional Chinese"],
+                },
+                {
+                    "lang": "中国語",
+                    "lang_code": "zh",
+                    "word": "豆浆",
+                    "tags": ["Simplified Chinese"],
+                },
+            ],
+        )

@@ -86,6 +86,10 @@ def process_translation_list_item(
             ):
                 last_tr.raw_tags.append(clean_node(wxr, None, node))
                 translate_raw_tags(last_tr)
+            elif node.template_name.lower() == "zh-ts":
+                last_tr = process_zh_ts_template(
+                    wxr, word_entry, node, sense_text, lang_name, lang_code
+                )
         elif (
             isinstance(node, WikiNode)
             and node.kind == NodeKind.LINK
@@ -164,3 +168,29 @@ def process_t_template(
         word_entry.translations.append(tr_data)
         return tr_data
     return None
+
+
+def process_zh_ts_template(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    node: TemplateNode,
+    sense_text: str,
+    lang_name: str,
+    lang_code: str,
+) -> Optional[Translation]:
+    # https://ja.wiktionary.org/wiki/テンプレート:zh-ts
+    tr_data = None
+    for arg in range(1, 3):
+        tr_word = clean_node(wxr, None, node.template_parameters.get(arg, ""))
+        if tr_word != "":
+            tr_data = Translation(
+                word=tr_word,
+                sense=sense_text,
+                lang_code=lang_code,
+                lang=lang_name,
+            )
+            tr_data.tags = (
+                ["Traditional Chinese"] if arg == 1 else ["Simplified Chinese"]
+            )
+            word_entry.translations.append(tr_data)
+    return tr_data
