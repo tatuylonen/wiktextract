@@ -98,3 +98,19 @@ class TestJaLinkage(TestCase):
             [s.model_dump(exclude_defaults=True) for s in data.proverbs],
             [{"word": "調製豆乳"}],
         )
+
+    def test_linkage_under_gloss_list(self):
+        self.wxr.wtp.add_page("テンプレート:L", 10, "日本語")
+        self.wxr.wtp.add_page("テンプレート:noun", 10, "名詞")
+        self.wxr.wtp.add_page("テンプレート:idiom", 10, "成句")
+        data = parse_page(
+            self.wxr,
+            "みそ",
+            """== {{ja}} ==
+=== {{noun}} ===
+# [[失敗]]。
+#*{{idiom}}:[[みそをつける]]""",
+        )
+        self.assertEqual(
+            data[0]["phrases"], [{"word": "みそをつける", "sense": "失敗。"}]
+        )
