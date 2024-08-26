@@ -20,6 +20,7 @@ def extract_translation(
     page_data: list[WordEntry],
     level_node: WikiNode,
     sense: str = "",
+    is_subpage: bool = False,
 ) -> None:
     for child in level_node.find_child(NodeKind.TEMPLATE | NodeKind.LIST):
         if isinstance(child, TemplateNode):
@@ -29,7 +30,10 @@ def extract_translation(
                 and 1 in child.template_parameters
             ):
                 sense = clean_node(wxr, None, child.template_parameters.get(1))
-            elif template_name in {"see translation subpage", "trans-see"}:
+            elif (
+                template_name in {"see translation subpage", "trans-see"}
+                and not is_subpage
+            ):
                 translation_subpage(wxr, page_data, child)
             elif template_name == "multitrans":
                 wikitext = "".join(
@@ -176,7 +180,7 @@ def translation_subpage(
     )
     translation_node = find_subpage_section(wxr, target_section_node)
     if translation_node is not None:
-        extract_translation(wxr, page_data, translation_node)
+        extract_translation(wxr, page_data, translation_node, is_subpage=True)
 
 
 def find_subpage_section(
