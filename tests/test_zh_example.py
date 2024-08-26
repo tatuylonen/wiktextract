@@ -79,16 +79,22 @@ translation text""",
             [
                 {
                     "ref": "《尚書·梓材》",
-                    "raw_tags": ["文言文", "漢語拼音"],
-                    "tags": ["Traditional Chinese"],
+                    "tags": [
+                        "Classical Chinese",
+                        "Traditional Chinese",
+                        "Pinyin",
+                    ],
                     "text": "王曰：「封，以厥庶民暨厥臣達大家，以厥臣達王惟邦君。」",
                     "roman": "Wáng yuē: “Fēng, yǐ jué shùmín jì jué chén dá dàjiā, yǐ jué chén dá wáng wéi bāngjūn.”",
                     "translation": "王說：「封啊，從殷的老百姓和他們的官員到卿大夫，從他們的官員到諸侯和國君。」",
                 },
                 {
                     "ref": "《尚書·梓材》",
-                    "raw_tags": ["文言文", "漢語拼音"],
-                    "tags": ["Simplified Chinese"],
+                    "tags": [
+                        "Classical Chinese",
+                        "Simplified Chinese",
+                        "Pinyin",
+                    ],
                     "text": "王曰：「封，以厥庶民暨厥臣达大家，以厥臣达王惟邦君。」",
                     "roman": "Wáng yuē: “Fēng, yǐ jué shùmín jì jué chén dá dàjiā, yǐ jué chén dá wáng wéi bāngjūn.”",
                     "translation": "王說：「封啊，從殷的老百姓和他們的官員到卿大夫，從他們的官員到諸侯和國君。」",

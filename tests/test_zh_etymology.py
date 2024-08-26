@@ -47,16 +47,22 @@ class TestNote(TestCase):
             [
                 {
                     "ref": "宋．蘇軾《春夜》",
-                    "raw_tags": ["文言文", "漢語拼音"],
-                    "tags": ["Traditional Chinese"],
+                    "tags": [
+                        "Classical Chinese",
+                        "Traditional Chinese",
+                        "Pinyin",
+                    ],
                     "text": "春宵一刻直千金，花有清香月有陰。",
                     "roman": "Chūnxiāo yīkè zhí qiānjīn, huā yǒu qīngxiāng yuè yǒu yīn.",
                     "translation": "春天的夜晚非常寶貴，僅僅一刻卻值得千金價，花朵散發陣陣清香，月光投射出朦朧陰影。",
                 },
                 {
                     "ref": "宋．蘇軾《春夜》",
-                    "raw_tags": ["文言文", "漢語拼音"],
-                    "tags": ["Simplified Chinese"],
+                    "tags": [
+                        "Classical Chinese",
+                        "Simplified Chinese",
+                        "Pinyin",
+                    ],
                     "text": "春宵一刻直千金，花有清香月有阴。",
                     "roman": "Chūnxiāo yīkè zhí qiānjīn, huā yǒu qīngxiāng yuè yǒu yīn.",
                     "translation": "春天的夜晚非常寶貴，僅僅一刻卻值得千金價，花朵散發陣陣清香，月光投射出朦朧陰影。",
@@ -88,16 +94,22 @@ class TestNote(TestCase):
             [
                 {
                     "ref": "813年，韓愈《進學解》",
-                    "raw_tags": ["文言文", "漢語拼音"],
-                    "tags": ["Traditional Chinese"],
+                    "tags": [
+                        "Classical Chinese",
+                        "Traditional Chinese",
+                        "Pinyin",
+                    ],
                     "text": "焚膏油以繼晷，恆兀兀以窮年。",
                     "roman": "Fén gāoyóu yǐ jì guǐ, héng wùwù yǐ qióng nián.",
                     "translation": "燃燒燈油夜以繼日，終年孜孜不倦刻苦用功。",
                 },
                 {
                     "ref": "813年，韓愈《進學解》",
-                    "raw_tags": ["文言文", "漢語拼音"],
-                    "tags": ["Simplified Chinese"],
+                    "tags": [
+                        "Classical Chinese",
+                        "Simplified Chinese",
+                        "Pinyin",
+                    ],
                     "text": "焚膏油以继晷，恒兀兀以穷年。",
                     "roman": "Fén gāoyóu yǐ jì guǐ, héng wùwù yǐ qióng nián.",
                     "translation": "燃燒燈油夜以繼日，終年孜孜不倦刻苦用功。",
