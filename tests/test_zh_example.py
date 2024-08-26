@@ -128,16 +128,17 @@ translation text""",
             ],
         )
 
-    def test_example_under_example(self):
+    def test_example_under_quote_template(self):
         self.wxr.wtp.start_page("英語")
         self.wxr.wtp.add_page("Template:quote-book", 10, "ref text")
         self.wxr.wtp.add_page(
             "Template:ja-usex",
             10,
-            """<span lang="ja" class="Jpan">-{オレの<ruby>日<rp>(</rp><rt>に</rt><rp>)</rp></ruby><ruby>本<rp>(</rp><rt>ほん</rt><rp>)</rp></ruby><ruby>語<rp>(</rp><rt>ご</rt><rp>)</rp></ruby>どう？<ruby>悪<rp>(</rp><rt>わる</rt><rp>)</rp></ruby>くないだろ　<ruby>韓<rp>(</rp><rt>かん</rt><rp>)</rp></ruby><ruby>国<rp>(</rp><rt>こく</rt><rp>)</rp></ruby><ruby>語<rp>(</rp><rt>ご</rt><rp>)</rp></ruby>と'''<ruby>英<rp>(</rp><rt>えい</rt><rp>)</rp></ruby><ruby>語<rp>(</rp><rt>ご</rt><rp>)</rp></ruby>'''も<ruby>話<rp>(</rp><rt>はな</rt><rp>)</rp></ruby>すんだぜ　<ruby>趣<rp>(</rp><rt>しゅ</rt><rp>)</rp></ruby><ruby>味<rp>(</rp><rt>み</rt><rp>)</rp></ruby>だな<ruby>語<rp>(</rp><rt>ご</rt><rp>)</rp></ruby><ruby>学<rp>(</rp><rt>がく</rt><rp>)</rp></ruby>は　<ruby>寝<rp>(</rp><rt>ね</rt><rp>)</rp></ruby><ruby>泊<rp>(</rp><rt>とま</rt><rp>)</rp></ruby>りはどこ？<ruby>近<rp>(</rp><rt>ちか</rt><rp>)</rp></ruby>くのホテル？}-</span><dl><dd><i><span lang="la" class="tr">Ore no Nihongo dō? Waruku naidaro Kankokugo to '''Eigo''' mo hanasunda ze Shumi da na gogaku wa Netomari wa doko? Chikaku no hoteru?</span></i></dd><dd>我的日語怎麼樣？不差吧？我也會講韓語和英語。學習語言很有趣。你在哪裏住？附近的賓館嗎？</dd></dl>[[Category:有使用例的日語詞|廾65弋75]][[Category:有使用例的日語詞|廾65弋75]]""",
+            """<span lang="ja" class="Jpan">-{オレの<ruby>日<rp>(</rp><rt>に</rt><rp>)</rp></ruby><ruby>本<rp>(</rp><rt>ほん</rt><rp>)</rp></ruby><ruby>語<rp>(</rp><rt>ご</rt><rp>)</rp></ruby>どう？<ruby>悪<rp>(</rp><rt>わる</rt><rp>)</rp></ruby>くないだろ　<ruby>韓<rp>(</rp><rt>かん</rt><rp>)</rp></ruby><ruby>国<rp>(</rp><rt>こく</rt><rp>)</rp></ruby><ruby>語<rp>(</rp><rt>ご</rt><rp>)</rp></ruby>と'''<ruby>英<rp>(</rp><rt>えい</rt><rp>)</rp></ruby><ruby>語<rp>(</rp><rt>ご</rt><rp>)</rp></ruby>'''も<ruby>話<rp>(</rp><rt>はな</rt><rp>)</rp></ruby>すんだぜ　<ruby>趣<rp>(</rp><rt>しゅ</rt><rp>)</rp></ruby><ruby>味<rp>(</rp><rt>み</rt><rp>)</rp></ruby>だな<ruby>語<rp>(</rp><rt>ご</rt><rp>)</rp></ruby><ruby>学<rp>(</rp><rt>がく</rt><rp>)</rp></ruby>は　<ruby>寝<rp>(</rp><rt>ね</rt><rp>)</rp></ruby><ruby>泊<rp>(</rp><rt>とま</rt><rp>)</rp></ruby>りはどこ？<ruby>近<rp>(</rp><rt>ちか</rt><rp>)</rp></ruby>くのホテル？}-</span><dl><dd><i><span lang="la" class="tr">Ore no Nihongo dō? Waruku naidaro Kankokugo to '''Eigo''' mo hanasunda ze Shumi da na gogaku wa Netomari wa doko? Chikaku no hoteru?</span></i></dd><dd>我的日語怎麼樣？不差吧？我也會講韓語和英語。學習語言很有趣。你在哪裏住？附近的賓館嗎？</dd></dl>[[Category:有使用例的日語詞|艸05言07]][[Category:有使用例的日語詞|艸05言07]]""",
         )
         sense_data = Sense()
-        root = self.wxr.wtp.parse("""#* {{quote-book|ja}}\n#*: {{ja-usex}}""")
+        root = self.wxr.wtp.parse("""#* {{quote-book|ja}}
+#*: {{ja-usex|オレの日%本%語どう？悪くないだろ　韓%国%語と'''英%語'''も話すんだぜ　趣%味だな語%学は　寝%泊りはどこ？近くのホテル？|^オレ の ^に%ほん%ご どう？ ^わるく ないだろ　^かん%こく%ご と '''^えい%ご''' も はなすんだ ぜ　^しゅ%み だ な ご%がく は　^ね%とまり は どこ？ ^ちかく の ホテル？|我的日語怎麼樣？不差吧？我也會講韓語和英語。學習語言很有趣。你在哪裏住？附近的賓館嗎？}}""")
         extract_examples(self.wxr, sense_data, root.children[0], [])
         self.assertEqual(
             [e.model_dump(exclude_defaults=True) for e in sense_data.examples],
@@ -240,6 +241,35 @@ translation text""",
                     ],
                     "translation": "湯姆叔叔的小屋",
                     "literal_meaning": "黑人奴隸向上天呼告的記錄",
+                },
+            ],
+        )
+
+    def test_ja_usex_literal_meaning(self):
+        self.wxr.wtp.start_page("認識")
+        self.wxr.wtp.add_page(
+            "Template:ja-usex",
+            10,
+            """<span lang="ja" class="Jpan">-{その'''<ruby>認識<rp>(</rp><rt>にんしき</rt><rp>)</rp></ruby>'''で<ruby>正<rp>(</rp><rt>ただ</rt><rp>)</rp></ruby>しいと<ruby>思<rp>(</rp><rt>おも</rt><rp>)</rp></ruby>う。}-</span><dl><dd><i><span lang="la" class="tr">Sono '''ninshiki''' de tadashii to omou.</span></i></dd><dd>我相信你是對的。</dd><dd>(字面意思為「我相信你的'''理解'''是對的。」)</dd></dl>[[Category:有使用例的日語詞|言07言12]][[Category:有使用例的日語詞|言07言12]]""",
+        )
+        sense_data = Sense()
+        root = self.wxr.wtp.parse(
+            "#: {{ja-usex|その'''認識'''で正しいと思う。|その '''にんしき''' で ただし.い と おも.う。|我相信你是對的。|lit=我相信你的'''理解'''是對的。}}"
+        )
+        extract_examples(self.wxr, sense_data, root.children[0], [])
+        self.assertEqual(
+            [e.model_dump(exclude_defaults=True) for e in sense_data.examples],
+            [
+                {
+                    "text": "その認識で正しいと思う。",
+                    "roman": "Sono ninshiki de tadashii to omou.",
+                    "ruby": [
+                        ("認識", "にんしき"),
+                        ("正", "ただ"),
+                        ("思", "おも"),
+                    ],
+                    "translation": "我相信你是對的。",
+                    "literal_meaning": "我相信你的理解是對的。",
                 },
             ],
         )

@@ -49,6 +49,7 @@ def extract_examples(
                         extract_quote_templates(wxr, child, example_data)
                     elif template_name in {"ja-x", "ja-usex"}:
                         extract_template_ja_usex(wxr, child, example_data)
+                        clean_node(wxr, sense_data, child)  # add cat link
                     elif template_name in {"zh-x", "zh-usex", "zh-q"}:
                         sense_data.examples.extend(
                             extract_template_zh_x(wxr, child, example_data)
@@ -123,26 +124,27 @@ def extract_quote_templates(
 
 
 def extract_template_ja_usex(
-    wxr: WiktextractContext, node: WikiNode, example_data: Example
+    wxr: WiktextractContext, node: TemplateNode, example_data: Example
 ) -> None:
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(node), expand_all=True
     )
-    ruby_data, node_without_ruby = extract_ruby(wxr, expanded_node.children)
-    expanded_text = clean_node(wxr, None, node_without_ruby)
-    for line_num, expanded_line in enumerate(expanded_text.splitlines()):
-        if line_num == 0:
-            key = "text"
-        elif line_num == 1:
-            key = "roman"
-        else:
-            key = "translation"
-        if key == "text":
-            example_data.text = expanded_line
-        else:
-            setattr(example_data, key, expanded_line)
-    if len(ruby_data) > 0:
+    for span_tag in expanded_node.find_html(
+        "span", attr_name="class", attr_value="Jpan"
+    ):
+        ruby_data, node_without_ruby = extract_ruby(wxr, span_tag)
+        example_data.text = clean_node(wxr, None, node_without_ruby)
         example_data.ruby = ruby_data
+    for span_tag in expanded_node.find_html_recursively(
+        "span", attr_name="class", attr_value="tr"
+    ):
+        example_data.roman = clean_node(wxr, None, span_tag)
+    example_data.translation = clean_node(
+        wxr, None, node.template_parameters.get(3, "")
+    )
+    example_data.literal_meaning = clean_node(
+        wxr, None, node.template_parameters.get("lit", "")
+    )
 
 
 def extract_template_zh_x(
