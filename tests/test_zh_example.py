@@ -67,7 +67,7 @@ translation text""",
         self.wxr.wtp.add_page(
             "Template:zh-x",
             10,
-            """<dl class="zhusex"><span lang="zh-Hant" class="Hant">-{<!-- -->[[王#漢語|王]][[曰#漢語|曰]]：「[[封#漢語|封]]，[[以#漢語|以]][[厥#漢語|厥]][[庶民#漢語|庶民]][[暨#漢語|暨]][[厥#漢語|厥]][[臣#漢語|臣]][[達#漢語|達]]<b>大家</b>，[[以#漢語|以]][[厥#漢語|厥]][[臣#漢語|臣]][[達#漢語|達]][[王#漢語|王]][[惟#漢語|惟]][[邦君#漢語|邦君]]。」<!-- -->}-</span> <span style="color:darkgreen; font-size:x-small;">&#91;[[w:文言文|文言文]]，[[繁體中文|繁體]]&#93;</span><br><span lang="zh-Hans" class="Hans">-{<!-- -->[[王#漢語|王]][[曰#漢語|曰]]：“[[封#漢語|封]]，[[以#漢語|以]][[厥#漢語|厥]][[庶民#漢語|庶民]][[暨#漢語|暨]][[厥#漢語|厥]][[臣#漢語|臣]][[达#漢語|达]]<b>大家</b>，[[以#漢語|以]][[厥#漢語|厥]][[臣#漢語|臣]][[达#漢語|达]][[王#漢語|王]][[惟#漢語|惟]][[邦君#漢語|邦君]]。”<!-- -->}-</span> <span style="color:darkgreen; font-size:x-small;">&#91;[[w:文言文|文言文]]，[[簡體中文|簡體]]&#93;</span><dd><small>來自：《[[s:尚書/梓材|尚書·梓材]]》</small></dd><dd><span lang="Latn" style="color:#404D52"><i>Wáng yuē: “Fēng, yǐ jué shùmín jì jué chén dá <b>dàjiā</b>, yǐ jué chén dá wáng wéi bāngjūn.”</i></span> <span style="color:darkgreen; font-size:x-small;">&#91;[[w:漢語拼音|漢語拼音]]&#93;</span></dd><dd>王說：「封啊，從殷的老百姓和他們的官員到'''卿大夫'''，從他們的官員到諸侯和國君。」</dd></dl>[[Category:有引文的文言文詞]]""",
+            """<dl class="zhusex"><span lang="zh-Hant" class="Hant">-{<!-- -->[[王#漢語|王]][[曰#漢語|曰]]：「[[封#漢語|封]]，[[以#漢語|以]][[厥#漢語|厥]][[庶民#漢語|庶民]][[暨#漢語|暨]][[厥#漢語|厥]][[臣#漢語|臣]][[達#漢語|達]]<b>大家</b>，[[以#漢語|以]][[厥#漢語|厥]][[臣#漢語|臣]][[達#漢語|達]][[王#漢語|王]][[惟#漢語|惟]][[邦君#漢語|邦君]]。」<!-- -->}-</span> <span style="color:darkgreen; font-size:x-small;">&#91;[[w:文言文|文言文]]，[[w:繁体中文|繁體]]&#93;</span><br><span lang="zh-Hans" class="Hans">-{<!-- -->[[王#漢語|王]][[曰#漢語|曰]]：「[[封#漢語|封]]，[[以#漢語|以]][[厥#漢語|厥]][[庶民#漢語|庶民]][[暨#漢語|暨]][[厥#漢語|厥]][[臣#漢語|臣]][[达#漢語|达]]<b>大家</b>，[[以#漢語|以]][[厥#漢語|厥]][[臣#漢語|臣]][[达#漢語|达]][[王#漢語|王]][[惟#漢語|惟]][[邦君#漢語|邦君]]。」<!-- -->}-</span> <span style="color:darkgreen; font-size:x-small;">&#91;[[w:文言文|文言文]]，[[w:简体中文|簡體]]&#93;</span><dd><small>出自：《[[s:尚書/梓材|尚書·梓材]]》</small></dd><dd><span lang="zh-Latn" style="color:#404D52"><i>Wáng yuē: “Fēng, yǐ jué shùmín jì jué chén dá <b>dàjiā</b>, yǐ jué chén dá wáng wéi bāngjūn.”</i></span> <span style="color:darkgreen; font-size:x-small;">&#91;[[w:漢語拼音|漢語拼音]]&#93;</span></dd><dd>王說：「封啊，從殷的老百姓和他們的官員到'''卿大夫'''，從他們的官員到諸侯和國君。」</dd></dl>[[Category:有引文的文言文詞]]""",
         )
         sense_data = Sense()
         root = self.wxr.wtp.parse(
@@ -79,7 +79,7 @@ translation text""",
             [
                 {
                     "ref": "《尚書·梓材》",
-                    "raw_tags": ["文言文"],
+                    "raw_tags": ["文言文", "漢語拼音"],
                     "tags": ["Traditional Chinese"],
                     "text": "王曰：「封，以厥庶民暨厥臣達大家，以厥臣達王惟邦君。」",
                     "roman": "Wáng yuē: “Fēng, yǐ jué shùmín jì jué chén dá dàjiā, yǐ jué chén dá wáng wéi bāngjūn.”",
@@ -87,9 +87,9 @@ translation text""",
                 },
                 {
                     "ref": "《尚書·梓材》",
-                    "raw_tags": ["文言文"],
+                    "raw_tags": ["文言文", "漢語拼音"],
                     "tags": ["Simplified Chinese"],
-                    "text": "王曰：“封，以厥庶民暨厥臣达大家，以厥臣达王惟邦君。”",
+                    "text": "王曰：「封，以厥庶民暨厥臣达大家，以厥臣达王惟邦君。」",
                     "roman": "Wáng yuē: “Fēng, yǐ jué shùmín jì jué chén dá dàjiā, yǐ jué chén dá wáng wéi bāngjūn.”",
                     "translation": "王說：「封啊，從殷的老百姓和他們的官員到卿大夫，從他們的官員到諸侯和國君。」",
                 },
@@ -179,7 +179,7 @@ translation text""",
             [e.model_dump(exclude_defaults=True) for e in sense_data.examples],
             [
                 {
-                    "raw_tags": ["廣州話"],
+                    "raw_tags": ["廣州話", "廣州話拼音"],
                     "ref": "ref text",
                     "text": "如果唔係今日拆穿你槓野，俾你混左入稅局重死人呀！",
                     "roman": "roman",
@@ -187,7 +187,7 @@ translation text""",
                     "translation": "如果不是今天揭穿你的老底，給你混進稅務局就更糟糕了！",
                 },
                 {
-                    "raw_tags": ["廣州話"],
+                    "raw_tags": ["廣州話", "廣州話拼音"],
                     "ref": "ref text",
                     "text": "如果唔系今日拆穿你杠野，俾你混左入税局重死人呀！",
                     "roman": "roman",
