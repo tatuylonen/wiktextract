@@ -85,7 +85,8 @@ def extract_odmiana_rzeczownik_polski(
             form_nodes = []
             current_form_raw_tags = []
             current_form_tags = []
-            for node in arg_value:
+            parsed_arg = wxr.wtp.parse(wxr.wtp.node_to_wikitext(arg_value))
+            for node in parsed_arg.children:
                 if isinstance(node, str) and "/" in node:
                     slash_index = node.index("/")
                     form_nodes.append(node[:slash_index])
@@ -111,10 +112,6 @@ def extract_odmiana_rzeczownik_polski(
                         form_nodes.append(node_text)
                     if node.template_name == "potencjalnie":
                         current_form_tags.extend(["potential", "rare"])
-                elif isinstance(node, str) and "<ref" in node:
-                    # remove <ref> tag in "Forma *" args
-                    form_nodes.append(node[: node.index("<ref")])
-                    break
                 else:
                     form_nodes.append(node)
             if len(form_nodes) > 0:
