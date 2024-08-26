@@ -21,6 +21,7 @@ class Example(ChineseBaseModel):
     translation: str = Field(
         default="", description="Chinese translation of the example sentence"
     )
+    literal_meaning: str = ""
     roman: str = Field(
         default="", description="Romanization of the example sentence"
     )

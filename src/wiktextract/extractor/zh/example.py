@@ -49,12 +49,12 @@ def extract_examples(
                         extract_quote_templates(wxr, child, example_data)
                     elif template_name in {"ja-x", "ja-usex"}:
                         extract_template_ja_usex(wxr, child, example_data)
-                    elif template_name in {"zh-x", "zh-usex"}:
-                        for zh_x_example in extract_template_zh_x(
-                            wxr, child, example_data
-                        ):
-                            sense_data.examples.append(zh_x_example)
-                        clean_node(wxr, sense_data, child)
+                        clean_node(wxr, sense_data, child)  # add cat link
+                    elif template_name in {"zh-x", "zh-usex", "zh-q"}:
+                        sense_data.examples.extend(
+                            extract_template_zh_x(wxr, child, example_data)
+                        )
+                        clean_node(wxr, sense_data, child)  # add cat link
                     elif template_name in {"ux", "eg", "usex"}:
                         extract_template_ux(wxr, child, example_data)
                     elif template_name == "uxi":
@@ -124,26 +124,27 @@ def extract_quote_templates(
 
 
 def extract_template_ja_usex(
-    wxr: WiktextractContext, node: WikiNode, example_data: Example
+    wxr: WiktextractContext, node: TemplateNode, example_data: Example
 ) -> None:
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(node), expand_all=True
     )
-    ruby_data, node_without_ruby = extract_ruby(wxr, expanded_node.children)
-    expanded_text = clean_node(wxr, None, node_without_ruby)
-    for line_num, expanded_line in enumerate(expanded_text.splitlines()):
-        if line_num == 0:
-            key = "text"
-        elif line_num == 1:
-            key = "roman"
-        else:
-            key = "translation"
-        if key == "text":
-            example_data.text = expanded_line
-        else:
-            setattr(example_data, key, expanded_line)
-    if len(ruby_data) > 0:
+    for span_tag in expanded_node.find_html(
+        "span", attr_name="class", attr_value="Jpan"
+    ):
+        ruby_data, node_without_ruby = extract_ruby(wxr, span_tag)
+        example_data.text = clean_node(wxr, None, node_without_ruby)
         example_data.ruby = ruby_data
+    for span_tag in expanded_node.find_html_recursively(
+        "span", attr_name="class", attr_value="tr"
+    ):
+        example_data.roman = clean_node(wxr, None, span_tag)
+    example_data.translation = clean_node(
+        wxr, None, node.template_parameters.get(3, "")
+    )
+    example_data.literal_meaning = clean_node(
+        wxr, None, node.template_parameters.get("lit", "")
+    )
 
 
 def extract_template_zh_x(
@@ -159,21 +160,27 @@ def extract_template_zh_x(
     for dl_tag in expanded_node.find_html_recursively("dl"):
         has_dl_tag = True
         ref = ""
-        pinyin = ""
+        roman = ""
         translation = ""
+        roman_raw_tags = []
         for dd_tag in dl_tag.find_html("dd"):
             dd_text = clean_node(wxr, None, dd_tag)
-            # Module:Zh-usex uses "出自：" now: https://zh.wiktionary.org/w/index.php?title=Module:Zh-usex&diff=prev&oldid=8430896
-            if dd_text.startswith(("出自：", "來自：")):
-                ref = dd_text.removeprefix("出自：").removeprefix("來自：")
+            if dd_text.startswith("出自："):
+                ref = dd_text.removeprefix("出自：")
             else:
-                is_pinyin = False
+                is_roman = False
                 for span_tag in dd_tag.find_html_recursively(
                     "span", attr_name="lang", attr_value="Latn"
                 ):
-                    pinyin = clean_node(wxr, None, span_tag)
-                    is_pinyin = True
-                if not is_pinyin:
+                    roman = clean_node(wxr, None, span_tag)
+                    is_roman = True
+                    for span_tag in dd_tag.find_html_recursively("span"):
+                        span_text = clean_node(wxr, None, span_tag)
+                        if span_text.startswith("[") and span_text.endswith(
+                            "]"
+                        ):
+                            roman_raw_tags.append(span_text.strip("[]"))
+                if not is_roman:
                     translation = dd_text
 
         example_text = ""
@@ -188,21 +195,33 @@ def extract_template_zh_x(
                     raw_tag = clean_node(wxr, None, span_tag)
                     example = parent_example.model_copy(deep=True)
                     example.text = example_text
-                    example.roman = pinyin
+                    example.roman = roman
                     example.translation = translation
                     example.raw_tags.extend(raw_tag.strip("[]").split("，"))
-                    if len(ref) > 0:
+                    example.raw_tags.extend(roman_raw_tags)
+                    if len(ref) > 0:  # don't override parent quote-* template
                         example.ref = ref
                     translate_raw_tags(example)
                     results.append(example)
 
     # no source, single line example
     if not has_dl_tag:
-        pinyin = ""
+        roman = ""
+        raw_tags = []
         for span_tag in expanded_node.find_html(
             "span", attr_name="lang", attr_value="Latn"
         ):
-            pinyin = clean_node(wxr, None, span_tag)
+            roman = clean_node(wxr, None, span_tag)
+        for span_tag in expanded_node.find_html("span"):
+            span_text = clean_node(wxr, None, span_tag)
+            if span_text.startswith("[") and span_text.endswith("]"):
+                raw_tags.append(span_text.strip("[]"))
+        translation = clean_node(
+            wxr, None, template_node.template_parameters.get(2, "")
+        )
+        literal_meaning = clean_node(
+            wxr, None, template_node.template_parameters.get("lit", "")
+        )
         for span_tag in expanded_node.find_html("span"):
             span_lang = span_tag.attrs.get("lang", "")
             if span_lang in ["zh-Hant", "zh-Hans"]:
@@ -210,12 +229,16 @@ def extract_template_zh_x(
                 if len(example_text) > 0:
                     example_data = parent_example.model_copy(deep=True)
                     example_data.text = example_text
-                    example_data.roman = pinyin
+                    example_data.roman = roman
                     example_data.tags.append(
                         "Traditional Chinese"
                         if span_lang == "zh-Hant"
                         else "Simplified Chinese"
                     )
+                    example_data.translation = translation
+                    example_data.literal_meaning = literal_meaning
+                    example_data.raw_tags.extend(raw_tags)
+                    translate_raw_tags(example_data)
                     results.append(example_data)
     return results
 

@@ -1,12 +1,15 @@
 from typing import Optional, Union
 
 from mediawiki_langcodes import code_to_name, name_to_code
-from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import LEVEL_KIND_FLAGS, TemplateNode
+from wikitextprocessor.parser import (
+    LEVEL_KIND_FLAGS,
+    NodeKind,
+    TemplateNode,
+    WikiNode,
+)
 
-from wiktextract.page import clean_node
-from wiktextract.wxr_context import WiktextractContext
-
+from ...page import clean_node
+from ...wxr_context import WiktextractContext
 from .models import Translation, WordEntry
 from .section_titles import TRANSLATIONS_TITLES
 from .tags import TEMPLATE_TAG_ARGS, translate_raw_tags
@@ -17,6 +20,7 @@ def extract_translation(
     page_data: list[WordEntry],
     level_node: WikiNode,
     sense: str = "",
+    is_subpage: bool = False,
 ) -> None:
     for child in level_node.find_child(NodeKind.TEMPLATE | NodeKind.LIST):
         if isinstance(child, TemplateNode):
@@ -26,7 +30,10 @@ def extract_translation(
                 and 1 in child.template_parameters
             ):
                 sense = clean_node(wxr, None, child.template_parameters.get(1))
-            elif template_name in {"see translation subpage", "trans-see"}:
+            elif (
+                template_name in {"see translation subpage", "trans-see"}
+                and not is_subpage
+            ):
                 translation_subpage(wxr, page_data, child)
             elif template_name == "multitrans":
                 wikitext = "".join(
@@ -173,7 +180,7 @@ def translation_subpage(
     )
     translation_node = find_subpage_section(wxr, target_section_node)
     if translation_node is not None:
-        extract_translation(wxr, page_data, translation_node)
+        extract_translation(wxr, page_data, translation_node, is_subpage=True)
 
 
 def find_subpage_section(

@@ -67,7 +67,7 @@ translation text""",
         self.wxr.wtp.add_page(
             "Template:zh-x",
             10,
-            """<dl class="zhusex"><span lang="zh-Hant" class="Hant">-{<!-- -->[[王#漢語|王]][[曰#漢語|曰]]：「[[封#漢語|封]]，[[以#漢語|以]][[厥#漢語|厥]][[庶民#漢語|庶民]][[暨#漢語|暨]][[厥#漢語|厥]][[臣#漢語|臣]][[達#漢語|達]]<b>大家</b>，[[以#漢語|以]][[厥#漢語|厥]][[臣#漢語|臣]][[達#漢語|達]][[王#漢語|王]][[惟#漢語|惟]][[邦君#漢語|邦君]]。」<!-- -->}-</span> <span style="color:darkgreen; font-size:x-small;">&#91;[[w:文言文|文言文]]，[[繁體中文|繁體]]&#93;</span><br><span lang="zh-Hans" class="Hans">-{<!-- -->[[王#漢語|王]][[曰#漢語|曰]]：“[[封#漢語|封]]，[[以#漢語|以]][[厥#漢語|厥]][[庶民#漢語|庶民]][[暨#漢語|暨]][[厥#漢語|厥]][[臣#漢語|臣]][[达#漢語|达]]<b>大家</b>，[[以#漢語|以]][[厥#漢語|厥]][[臣#漢語|臣]][[达#漢語|达]][[王#漢語|王]][[惟#漢語|惟]][[邦君#漢語|邦君]]。”<!-- -->}-</span> <span style="color:darkgreen; font-size:x-small;">&#91;[[w:文言文|文言文]]，[[簡體中文|簡體]]&#93;</span><dd><small>來自：《[[s:尚書/梓材|尚書·梓材]]》</small></dd><dd><span lang="Latn" style="color:#404D52"><i>Wáng yuē: “Fēng, yǐ jué shùmín jì jué chén dá <b>dàjiā</b>, yǐ jué chén dá wáng wéi bāngjūn.”</i></span> <span style="color:darkgreen; font-size:x-small;">&#91;[[w:漢語拼音|漢語拼音]]&#93;</span></dd><dd>王說：「封啊，從殷的老百姓和他們的官員到'''卿大夫'''，從他們的官員到諸侯和國君。」</dd></dl>[[Category:有引文的文言文詞]]""",
+            """<dl class="zhusex"><span lang="zh-Hant" class="Hant">-{<!-- -->[[王#漢語|王]][[曰#漢語|曰]]：「[[封#漢語|封]]，[[以#漢語|以]][[厥#漢語|厥]][[庶民#漢語|庶民]][[暨#漢語|暨]][[厥#漢語|厥]][[臣#漢語|臣]][[達#漢語|達]]<b>大家</b>，[[以#漢語|以]][[厥#漢語|厥]][[臣#漢語|臣]][[達#漢語|達]][[王#漢語|王]][[惟#漢語|惟]][[邦君#漢語|邦君]]。」<!-- -->}-</span> <span style="color:darkgreen; font-size:x-small;">&#91;[[w:文言文|文言文]]，[[w:繁体中文|繁體]]&#93;</span><br><span lang="zh-Hans" class="Hans">-{<!-- -->[[王#漢語|王]][[曰#漢語|曰]]：「[[封#漢語|封]]，[[以#漢語|以]][[厥#漢語|厥]][[庶民#漢語|庶民]][[暨#漢語|暨]][[厥#漢語|厥]][[臣#漢語|臣]][[达#漢語|达]]<b>大家</b>，[[以#漢語|以]][[厥#漢語|厥]][[臣#漢語|臣]][[达#漢語|达]][[王#漢語|王]][[惟#漢語|惟]][[邦君#漢語|邦君]]。」<!-- -->}-</span> <span style="color:darkgreen; font-size:x-small;">&#91;[[w:文言文|文言文]]，[[w:简体中文|簡體]]&#93;</span><dd><small>出自：《[[s:尚書/梓材|尚書·梓材]]》</small></dd><dd><span lang="zh-Latn" style="color:#404D52"><i>Wáng yuē: “Fēng, yǐ jué shùmín jì jué chén dá <b>dàjiā</b>, yǐ jué chén dá wáng wéi bāngjūn.”</i></span> <span style="color:darkgreen; font-size:x-small;">&#91;[[w:漢語拼音|漢語拼音]]&#93;</span></dd><dd>王說：「封啊，從殷的老百姓和他們的官員到'''卿大夫'''，從他們的官員到諸侯和國君。」</dd></dl>[[Category:有引文的文言文詞]]""",
         )
         sense_data = Sense()
         root = self.wxr.wtp.parse(
@@ -79,17 +79,23 @@ translation text""",
             [
                 {
                     "ref": "《尚書·梓材》",
-                    "raw_tags": ["文言文"],
-                    "tags": ["Traditional Chinese"],
+                    "tags": [
+                        "Classical Chinese",
+                        "Traditional Chinese",
+                        "Pinyin",
+                    ],
                     "text": "王曰：「封，以厥庶民暨厥臣達大家，以厥臣達王惟邦君。」",
                     "roman": "Wáng yuē: “Fēng, yǐ jué shùmín jì jué chén dá dàjiā, yǐ jué chén dá wáng wéi bāngjūn.”",
                     "translation": "王說：「封啊，從殷的老百姓和他們的官員到卿大夫，從他們的官員到諸侯和國君。」",
                 },
                 {
                     "ref": "《尚書·梓材》",
-                    "raw_tags": ["文言文"],
-                    "tags": ["Simplified Chinese"],
-                    "text": "王曰：“封，以厥庶民暨厥臣达大家，以厥臣达王惟邦君。”",
+                    "tags": [
+                        "Classical Chinese",
+                        "Simplified Chinese",
+                        "Pinyin",
+                    ],
+                    "text": "王曰：「封，以厥庶民暨厥臣达大家，以厥臣达王惟邦君。」",
                     "roman": "Wáng yuē: “Fēng, yǐ jué shùmín jì jué chén dá dàjiā, yǐ jué chén dá wáng wéi bāngjūn.”",
                     "translation": "王說：「封啊，從殷的老百姓和他們的官員到卿大夫，從他們的官員到諸侯和國君。」",
                 },
@@ -122,16 +128,17 @@ translation text""",
             ],
         )
 
-    def test_example_under_example(self):
+    def test_example_under_quote_template(self):
         self.wxr.wtp.start_page("英語")
         self.wxr.wtp.add_page("Template:quote-book", 10, "ref text")
         self.wxr.wtp.add_page(
             "Template:ja-usex",
             10,
-            """<span lang="ja" class="Jpan">-{オレの<ruby>日<rp>(</rp><rt>に</rt><rp>)</rp></ruby><ruby>本<rp>(</rp><rt>ほん</rt><rp>)</rp></ruby><ruby>語<rp>(</rp><rt>ご</rt><rp>)</rp></ruby>どう？<ruby>悪<rp>(</rp><rt>わる</rt><rp>)</rp></ruby>くないだろ　<ruby>韓<rp>(</rp><rt>かん</rt><rp>)</rp></ruby><ruby>国<rp>(</rp><rt>こく</rt><rp>)</rp></ruby><ruby>語<rp>(</rp><rt>ご</rt><rp>)</rp></ruby>と'''<ruby>英<rp>(</rp><rt>えい</rt><rp>)</rp></ruby><ruby>語<rp>(</rp><rt>ご</rt><rp>)</rp></ruby>'''も<ruby>話<rp>(</rp><rt>はな</rt><rp>)</rp></ruby>すんだぜ　<ruby>趣<rp>(</rp><rt>しゅ</rt><rp>)</rp></ruby><ruby>味<rp>(</rp><rt>み</rt><rp>)</rp></ruby>だな<ruby>語<rp>(</rp><rt>ご</rt><rp>)</rp></ruby><ruby>学<rp>(</rp><rt>がく</rt><rp>)</rp></ruby>は　<ruby>寝<rp>(</rp><rt>ね</rt><rp>)</rp></ruby><ruby>泊<rp>(</rp><rt>とま</rt><rp>)</rp></ruby>りはどこ？<ruby>近<rp>(</rp><rt>ちか</rt><rp>)</rp></ruby>くのホテル？}-</span><dl><dd><i><span lang="la" class="tr">Ore no Nihongo dō? Waruku naidaro Kankokugo to '''Eigo''' mo hanasunda ze Shumi da na gogaku wa Netomari wa doko? Chikaku no hoteru?</span></i></dd><dd>我的日語怎麼樣？不差吧？我也會講韓語和英語。學習語言很有趣。你在哪裏住？附近的賓館嗎？</dd></dl>[[Category:有使用例的日語詞|廾65弋75]][[Category:有使用例的日語詞|廾65弋75]]""",
+            """<span lang="ja" class="Jpan">-{オレの<ruby>日<rp>(</rp><rt>に</rt><rp>)</rp></ruby><ruby>本<rp>(</rp><rt>ほん</rt><rp>)</rp></ruby><ruby>語<rp>(</rp><rt>ご</rt><rp>)</rp></ruby>どう？<ruby>悪<rp>(</rp><rt>わる</rt><rp>)</rp></ruby>くないだろ　<ruby>韓<rp>(</rp><rt>かん</rt><rp>)</rp></ruby><ruby>国<rp>(</rp><rt>こく</rt><rp>)</rp></ruby><ruby>語<rp>(</rp><rt>ご</rt><rp>)</rp></ruby>と'''<ruby>英<rp>(</rp><rt>えい</rt><rp>)</rp></ruby><ruby>語<rp>(</rp><rt>ご</rt><rp>)</rp></ruby>'''も<ruby>話<rp>(</rp><rt>はな</rt><rp>)</rp></ruby>すんだぜ　<ruby>趣<rp>(</rp><rt>しゅ</rt><rp>)</rp></ruby><ruby>味<rp>(</rp><rt>み</rt><rp>)</rp></ruby>だな<ruby>語<rp>(</rp><rt>ご</rt><rp>)</rp></ruby><ruby>学<rp>(</rp><rt>がく</rt><rp>)</rp></ruby>は　<ruby>寝<rp>(</rp><rt>ね</rt><rp>)</rp></ruby><ruby>泊<rp>(</rp><rt>とま</rt><rp>)</rp></ruby>りはどこ？<ruby>近<rp>(</rp><rt>ちか</rt><rp>)</rp></ruby>くのホテル？}-</span><dl><dd><i><span lang="la" class="tr">Ore no Nihongo dō? Waruku naidaro Kankokugo to '''Eigo''' mo hanasunda ze Shumi da na gogaku wa Netomari wa doko? Chikaku no hoteru?</span></i></dd><dd>我的日語怎麼樣？不差吧？我也會講韓語和英語。學習語言很有趣。你在哪裏住？附近的賓館嗎？</dd></dl>[[Category:有使用例的日語詞|艸05言07]][[Category:有使用例的日語詞|艸05言07]]""",
         )
         sense_data = Sense()
-        root = self.wxr.wtp.parse("""#* {{quote-book|ja}}\n#*: {{ja-usex}}""")
+        root = self.wxr.wtp.parse("""#* {{quote-book|ja}}
+#*: {{ja-usex|オレの日%本%語どう？悪くないだろ　韓%国%語と'''英%語'''も話すんだぜ　趣%味だな語%学は　寝%泊りはどこ？近くのホテル？|^オレ の ^に%ほん%ご どう？ ^わるく ないだろ　^かん%こく%ご と '''^えい%ご''' も はなすんだ ぜ　^しゅ%み だ な ご%がく は　^ね%とまり は どこ？ ^ちかく の ホテル？|我的日語怎麼樣？不差吧？我也會講韓語和英語。學習語言很有趣。你在哪裏住？附近的賓館嗎？}}""")
         extract_examples(self.wxr, sense_data, root.children[0], [])
         self.assertEqual(
             [e.model_dump(exclude_defaults=True) for e in sense_data.examples],
@@ -179,7 +186,7 @@ translation text""",
             [e.model_dump(exclude_defaults=True) for e in sense_data.examples],
             [
                 {
-                    "raw_tags": ["廣州話"],
+                    "raw_tags": ["廣州話", "廣州話拼音"],
                     "ref": "ref text",
                     "text": "如果唔係今日拆穿你槓野，俾你混左入稅局重死人呀！",
                     "roman": "roman",
@@ -187,12 +194,82 @@ translation text""",
                     "translation": "如果不是今天揭穿你的老底，給你混進稅務局就更糟糕了！",
                 },
                 {
-                    "raw_tags": ["廣州話"],
+                    "raw_tags": ["廣州話", "廣州話拼音"],
                     "ref": "ref text",
                     "text": "如果唔系今日拆穿你杠野，俾你混左入税局重死人呀！",
                     "roman": "roman",
                     "tags": ["Simplified Chinese"],
                     "translation": "如果不是今天揭穿你的老底，給你混進稅務局就更糟糕了！",
+                },
+            ],
+        )
+
+    def test_zh_x_literal_meaning(self):
+        self.wxr.wtp.start_page("黑奴")
+        self.wxr.wtp.add_page("Template:w", 10, "{{{1}}}")
+        self.wxr.wtp.add_page(
+            "Template:zh-x",
+            10,
+            """<span lang="zh-Hant" class="Hant">-{<!-- --><b>黑奴</b>[[籲天#漢語|籲天]][[錄#漢語|錄]]<!-- -->}-</span><span lang="zh-Hani" class="Hani">／</span><span lang="zh-Hans" class="Hans">-{<!-- --><b>黑奴</b>[[吁天#漢語|吁天]][[录#漢語|录]]<!-- -->}-</span> <span style="color:darkgreen; font-size:x-small;">&#91;[[w:文言文|文言文]]&#93;</span>&nbsp; ―&nbsp; <span lang="zh-Latn" style="color:#404D52"><i><b>Hēinú</b> Yùtiānlù</i></span> <span style="color:darkgreen; font-size:x-small;">&#91;[[w:漢語拼音|漢語拼音]]&#93;</span>&nbsp; ―&nbsp; [[w:湯姆叔叔的小屋|湯姆叔叔的小屋]]（字面義為“'''黑人奴隸'''向上天呼告的記錄”）[[Category:有使用例的文言文詞]]""",
+        )
+        sense_data = Sense()
+        root = self.wxr.wtp.parse(
+            "#: {{zh-x|^黑奴 ^籲天-錄|{{w|湯姆叔叔的小屋}}|lit='''黑人奴隸'''向上天呼告的記錄|CL}}"
+        )
+        extract_examples(self.wxr, sense_data, root.children[0], [])
+        self.assertEqual(
+            [e.model_dump(exclude_defaults=True) for e in sense_data.examples],
+            [
+                {
+                    "text": "黑奴籲天錄",
+                    "roman": "Hēinú Yùtiānlù",
+                    "tags": [
+                        "Traditional Chinese",
+                        "Classical Chinese",
+                        "Pinyin",
+                    ],
+                    "translation": "湯姆叔叔的小屋",
+                    "literal_meaning": "黑人奴隸向上天呼告的記錄",
+                },
+                {
+                    "text": "黑奴吁天录",
+                    "roman": "Hēinú Yùtiānlù",
+                    "tags": [
+                        "Simplified Chinese",
+                        "Classical Chinese",
+                        "Pinyin",
+                    ],
+                    "translation": "湯姆叔叔的小屋",
+                    "literal_meaning": "黑人奴隸向上天呼告的記錄",
+                },
+            ],
+        )
+
+    def test_ja_usex_literal_meaning(self):
+        self.wxr.wtp.start_page("認識")
+        self.wxr.wtp.add_page(
+            "Template:ja-usex",
+            10,
+            """<span lang="ja" class="Jpan">-{その'''<ruby>認識<rp>(</rp><rt>にんしき</rt><rp>)</rp></ruby>'''で<ruby>正<rp>(</rp><rt>ただ</rt><rp>)</rp></ruby>しいと<ruby>思<rp>(</rp><rt>おも</rt><rp>)</rp></ruby>う。}-</span><dl><dd><i><span lang="la" class="tr">Sono '''ninshiki''' de tadashii to omou.</span></i></dd><dd>我相信你是對的。</dd><dd>(字面意思為「我相信你的'''理解'''是對的。」)</dd></dl>[[Category:有使用例的日語詞|言07言12]][[Category:有使用例的日語詞|言07言12]]""",
+        )
+        sense_data = Sense()
+        root = self.wxr.wtp.parse(
+            "#: {{ja-usex|その'''認識'''で正しいと思う。|その '''にんしき''' で ただし.い と おも.う。|我相信你是對的。|lit=我相信你的'''理解'''是對的。}}"
+        )
+        extract_examples(self.wxr, sense_data, root.children[0], [])
+        self.assertEqual(
+            [e.model_dump(exclude_defaults=True) for e in sense_data.examples],
+            [
+                {
+                    "text": "その認識で正しいと思う。",
+                    "roman": "Sono ninshiki de tadashii to omou.",
+                    "ruby": [
+                        ("認識", "にんしき"),
+                        ("正", "ただ"),
+                        ("思", "おも"),
+                    ],
+                    "translation": "我相信你是對的。",
+                    "literal_meaning": "我相信你的理解是對的。",
                 },
             ],
         )
