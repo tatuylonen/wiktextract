@@ -50,11 +50,10 @@ def extract_examples(
                     elif template_name in {"ja-x", "ja-usex"}:
                         extract_template_ja_usex(wxr, child, example_data)
                     elif template_name in {"zh-x", "zh-usex", "zh-q"}:
-                        for zh_x_example in extract_template_zh_x(
-                            wxr, child, example_data
-                        ):
-                            sense_data.examples.append(zh_x_example)
-                        clean_node(wxr, sense_data, child)
+                        sense_data.examples.extend(
+                            extract_template_zh_x(wxr, child, example_data)
+                        )
+                        clean_node(wxr, sense_data, child)  # add cat link
                     elif template_name in {"ux", "eg", "usex"}:
                         extract_template_ux(wxr, child, example_data)
                     elif template_name == "uxi":
@@ -205,11 +204,22 @@ def extract_template_zh_x(
 
     # no source, single line example
     if not has_dl_tag:
-        pinyin = ""
+        roman = ""
+        raw_tags = []
         for span_tag in expanded_node.find_html(
             "span", attr_name="lang", attr_value="Latn"
         ):
-            pinyin = clean_node(wxr, None, span_tag)
+            roman = clean_node(wxr, None, span_tag)
+        for span_tag in expanded_node.find_html("span"):
+            span_text = clean_node(wxr, None, span_tag)
+            if span_text.startswith("[") and span_text.endswith("]"):
+                raw_tags.append(span_text.strip("[]"))
+        translation = clean_node(
+            wxr, None, template_node.template_parameters.get(2, "")
+        )
+        literal_meaning = clean_node(
+            wxr, None, template_node.template_parameters.get("lit", "")
+        )
         for span_tag in expanded_node.find_html("span"):
             span_lang = span_tag.attrs.get("lang", "")
             if span_lang in ["zh-Hant", "zh-Hans"]:
@@ -217,12 +227,16 @@ def extract_template_zh_x(
                 if len(example_text) > 0:
                     example_data = parent_example.model_copy(deep=True)
                     example_data.text = example_text
-                    example_data.roman = pinyin
+                    example_data.roman = roman
                     example_data.tags.append(
                         "Traditional Chinese"
                         if span_lang == "zh-Hant"
                         else "Simplified Chinese"
                     )
+                    example_data.translation = translation
+                    example_data.literal_meaning = literal_meaning
+                    example_data.raw_tags.extend(raw_tags)
+                    translate_raw_tags(example_data)
                     results.append(example_data)
     return results
 

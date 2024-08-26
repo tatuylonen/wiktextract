@@ -202,3 +202,44 @@ translation text""",
                 },
             ],
         )
+
+    def test_zh_x_literal_meaning(self):
+        self.wxr.wtp.start_page("黑奴")
+        self.wxr.wtp.add_page("Template:w", 10, "{{{1}}}")
+        self.wxr.wtp.add_page(
+            "Template:zh-x",
+            10,
+            """<span lang="zh-Hant" class="Hant">-{<!-- --><b>黑奴</b>[[籲天#漢語|籲天]][[錄#漢語|錄]]<!-- -->}-</span><span lang="zh-Hani" class="Hani">／</span><span lang="zh-Hans" class="Hans">-{<!-- --><b>黑奴</b>[[吁天#漢語|吁天]][[录#漢語|录]]<!-- -->}-</span> <span style="color:darkgreen; font-size:x-small;">&#91;[[w:文言文|文言文]]&#93;</span>&nbsp; ―&nbsp; <span lang="zh-Latn" style="color:#404D52"><i><b>Hēinú</b> Yùtiānlù</i></span> <span style="color:darkgreen; font-size:x-small;">&#91;[[w:漢語拼音|漢語拼音]]&#93;</span>&nbsp; ―&nbsp; [[w:湯姆叔叔的小屋|湯姆叔叔的小屋]]（字面義為“'''黑人奴隸'''向上天呼告的記錄”）[[Category:有使用例的文言文詞]]""",
+        )
+        sense_data = Sense()
+        root = self.wxr.wtp.parse(
+            "#: {{zh-x|^黑奴 ^籲天-錄|{{w|湯姆叔叔的小屋}}|lit='''黑人奴隸'''向上天呼告的記錄|CL}}"
+        )
+        extract_examples(self.wxr, sense_data, root.children[0], [])
+        self.assertEqual(
+            [e.model_dump(exclude_defaults=True) for e in sense_data.examples],
+            [
+                {
+                    "text": "黑奴籲天錄",
+                    "roman": "Hēinú Yùtiānlù",
+                    "tags": [
+                        "Traditional Chinese",
+                        "Classical Chinese",
+                        "Pinyin",
+                    ],
+                    "translation": "湯姆叔叔的小屋",
+                    "literal_meaning": "黑人奴隸向上天呼告的記錄",
+                },
+                {
+                    "text": "黑奴吁天录",
+                    "roman": "Hēinú Yùtiānlù",
+                    "tags": [
+                        "Simplified Chinese",
+                        "Classical Chinese",
+                        "Pinyin",
+                    ],
+                    "translation": "湯姆叔叔的小屋",
+                    "literal_meaning": "黑人奴隸向上天呼告的記錄",
+                },
+            ],
+        )
