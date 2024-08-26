@@ -49,7 +49,7 @@ def extract_examples(
                         extract_quote_templates(wxr, child, example_data)
                     elif template_name in {"ja-x", "ja-usex"}:
                         extract_template_ja_usex(wxr, child, example_data)
-                    elif template_name in {"zh-x", "zh-usex"}:
+                    elif template_name in {"zh-x", "zh-usex", "zh-q"}:
                         for zh_x_example in extract_template_zh_x(
                             wxr, child, example_data
                         ):

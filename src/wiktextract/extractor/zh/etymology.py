@@ -27,10 +27,9 @@ def extract_etymology(
         level_node_index = next_level_index
         break
     for etymology_node in level_node.children[:level_node_index]:
-        if (
-            isinstance(etymology_node, TemplateNode)
-            and etymology_node.template_name == "zh-x"
-        ):
+        if isinstance(
+            etymology_node, TemplateNode
+        ) and etymology_node.template_name in ["zh-x", "zh-q"]:
             for example_data in extract_template_zh_x(
                 wxr, etymology_node, Example()
             ):
@@ -49,7 +48,7 @@ def extract_etymology(
             for template_node in etymology_node.find_child_recursively(
                 NodeKind.TEMPLATE
             ):
-                if template_node.template_name == "zh-x":
+                if template_node.template_name in ["zh-x", "zh-q"]:
                     has_zh_x = True
                     for example_data in extract_template_zh_x(
                         wxr, template_node, Example()
