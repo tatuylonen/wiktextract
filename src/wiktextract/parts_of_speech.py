@@ -13,8 +13,9 @@ POSMap = TypedDict(
         "pos": str,
         "debug": str,
         "tags": list[str],
-     },
-    total = False)
+    },
+    total=False,
+)
 
 part_of_speech_map: dict[str, POSMap] = {
     "abbreviation": {
@@ -121,6 +122,12 @@ part_of_speech_map: dict[str, POSMap] = {
     },
     "counter": {
         "pos": "counter",
+    },
+    "dependent noun": {
+        "pos": "noun",
+        "tags": [
+            "dependent",
+        ],
     },
     "definitions": {
         # This is used under chinese characters
