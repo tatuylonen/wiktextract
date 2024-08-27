@@ -56,6 +56,12 @@ POS_TITLES: dict[str, POSSubtitleData] = {
     "converb": {"pos": "converb"},
     "counter": {"pos": "counter"},
     "definitions": {"pos": "character"},
+    "dependent noun": {
+        "pos": "noun",
+        "tags": [
+            "dependent",
+        ],
+    },
     "determiner": {"pos": "det"},
     "diacritical mark": {"pos": "character", "tags": ["diacritic"]},
     "enclitic": {"pos": "suffix", "tags": ["clitic"]},
