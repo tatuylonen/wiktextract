@@ -258,6 +258,8 @@ def process_obsolete_zh_der_template(
                 roman = clean_node(wxr, None, span_tag)
             elif span_tag.attrs.get("lang", "") != "":
                 term_text = clean_node(wxr, None, span_tag)
+                if term_text == "／":
+                    continue
                 current_data.append(
                     ThesaurusTerm(
                         entry_word,

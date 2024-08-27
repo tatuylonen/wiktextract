@@ -1,9 +1,10 @@
 import re
-from typing import Any, Union
+from typing import Any
 
 from mediawiki_langcodes import name_to_code
 from wikitextprocessor.parser import (
     LEVEL_KIND_FLAGS,
+    LevelNode,
     NodeKind,
     TemplateNode,
     WikiNode,
@@ -17,7 +18,7 @@ from .etymology import extract_etymology
 from .gloss import extract_gloss
 from .headword_line import extract_headword_line
 from .inflection import extract_inflections
-from .linkage import extract_linkages
+from .linkage import extract_linkage_section
 from .models import Form, Sense, WordEntry
 from .note import extract_note
 from .pronunciation import extract_pronunciation
@@ -46,16 +47,6 @@ PANEL_PREFIXES = {}
 # Additional templates to be expanded in the pre-expand phase
 ADDITIONAL_EXPAND_TEMPLATES = frozenset(
     {
-        "col1",
-        "col2",
-        "col3",
-        "col4",
-        "col5",
-        "col1-u",
-        "col2-u",
-        "col3-u",
-        "col4-u",
-        "col5-u",
         "check deprecated lang param usage",
         "deprecated code",
         "ru-verb-alt-ё",
@@ -77,66 +68,56 @@ def parse_section(
     wxr: WiktextractContext,
     page_data: list[WordEntry],
     base_data: WordEntry,
-    node: Union[WikiNode, list[Union[WikiNode, str]]],
+    level_node: LevelNode,
 ) -> None:
-    if isinstance(node, list):
-        for x in node:
-            parse_section(wxr, page_data, base_data, x)
-        return
-    if not isinstance(node, WikiNode):
-        return
-    if node.kind in LEVEL_KIND_FLAGS:
-        subtitle = clean_node(wxr, None, node.largs)
-        # remove number suffix from subtitle
-        subtitle = re.sub(r"\s*(?:（.+）|\d+)$", "", subtitle)
-        wxr.wtp.start_subsection(subtitle)
-        if subtitle in IGNORED_TITLES:
-            pass
-        elif subtitle in POS_TITLES:
-            process_pos_block(wxr, page_data, base_data, node, subtitle)
-        elif wxr.config.capture_etymologies and subtitle.startswith(
-            tuple(ETYMOLOGY_TITLES)
-        ):
-            extract_etymology(wxr, page_data, base_data, node)
-        elif (
-            wxr.config.capture_pronunciation
-            and subtitle in PRONUNCIATION_TITLES
-        ):
-            extract_pronunciation(wxr, page_data, base_data, node)
-        elif wxr.config.capture_linkages and subtitle in LINKAGE_TITLES:
-            extract_linkages(
-                wxr,
-                page_data if len(page_data) > 0 else [base_data],
-                node.children,
-                LINKAGE_TITLES[subtitle],
-                "",
-            )
-        elif (
-            wxr.config.capture_translations and subtitle in TRANSLATIONS_TITLES
-        ):
-            if len(page_data) == 0:
-                page_data.append(base_data.model_copy(deep=True))
-            extract_translation(wxr, page_data, node)
-        elif wxr.config.capture_inflections and subtitle in INFLECTION_TITLES:
-            extract_inflections(
-                wxr, page_data if len(page_data) > 0 else [base_data], node
-            )
-        elif wxr.config.capture_descendants and subtitle in DESCENDANTS_TITLES:
-            extract_descendants(
-                wxr, node, page_data[-1] if len(page_data) > 0 else base_data
-            )
-        elif subtitle in NOTES_TITLES:
-            extract_note(
-                wxr, page_data if len(page_data) > 0 else [base_data], node
-            )
-        else:
-            wxr.wtp.debug(
-                f"Unhandled subtitle: {subtitle}",
-                sortid="extractor/zh/page/parse_section/192",
-            )
+    subtitle = clean_node(wxr, None, level_node.largs)
+    # remove number suffix from subtitle
+    subtitle = re.sub(r"\s*(?:（.+）|\d+)$", "", subtitle)
+    wxr.wtp.start_subsection(subtitle)
+    if subtitle in IGNORED_TITLES:
+        pass
+    elif subtitle in POS_TITLES:
+        process_pos_block(wxr, page_data, base_data, level_node, subtitle)
+    elif wxr.config.capture_etymologies and subtitle.startswith(
+        tuple(ETYMOLOGY_TITLES)
+    ):
+        extract_etymology(wxr, page_data, base_data, level_node)
+    elif wxr.config.capture_pronunciation and subtitle in PRONUNCIATION_TITLES:
+        extract_pronunciation(wxr, page_data, base_data, level_node)
+    elif wxr.config.capture_linkages and subtitle in LINKAGE_TITLES:
+        extract_linkage_section(
+            wxr,
+            page_data if len(page_data) > 0 else [base_data],
+            level_node,
+            LINKAGE_TITLES[subtitle],
+        )
+    elif wxr.config.capture_translations and subtitle in TRANSLATIONS_TITLES:
+        if len(page_data) == 0:
+            page_data.append(base_data.model_copy(deep=True))
+        extract_translation(wxr, page_data, level_node)
+    elif wxr.config.capture_inflections and subtitle in INFLECTION_TITLES:
+        extract_inflections(
+            wxr, page_data if len(page_data) > 0 else [base_data], level_node
+        )
+    elif wxr.config.capture_descendants and subtitle in DESCENDANTS_TITLES:
+        extract_descendants(
+            wxr, level_node, page_data[-1] if len(page_data) > 0 else base_data
+        )
+    elif subtitle in NOTES_TITLES:
+        extract_note(
+            wxr, page_data if len(page_data) > 0 else [base_data], level_node
+        )
+    else:
+        wxr.wtp.debug(
+            f"Unhandled subtitle: {subtitle}",
+            sortid="extractor/zh/page/parse_section/192",
+        )
 
-        for template in node.find_child(NodeKind.TEMPLATE):
-            add_page_end_categories(wxr, page_data, template)
+    for next_level_node in level_node.find_child(LEVEL_KIND_FLAGS):
+        parse_section(wxr, page_data, base_data, next_level_node)
+
+    for template in level_node.find_child(NodeKind.TEMPLATE):
+        add_page_end_categories(wxr, page_data, template)
 
 
 def process_pos_block(
@@ -160,10 +141,7 @@ def process_pos_block(
                 process_soft_redirect_template(wxr, child, page_data)
             elif child.kind == NodeKind.LIST:
                 extract_gloss(wxr, page_data, child, Sense())
-            elif child.kind in LEVEL_KIND_FLAGS:
-                parse_section(wxr, page_data, base_data, child)
-        else:
-            parse_section(wxr, page_data, base_data, child)
+
     if len(page_data[-1].senses) == 0 and not node.contain_node(NodeKind.LIST):
         # low quality pages don't put gloss in list
         gloss_text = clean_node(

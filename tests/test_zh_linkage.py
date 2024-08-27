@@ -3,7 +3,7 @@ from unittest import TestCase
 from wikitextprocessor import Wtp
 
 from wiktextract.config import WiktionaryConfig
-from wiktextract.extractor.zh.linkage import extract_linkages
+from wiktextract.extractor.zh.linkage import extract_linkage_section
 from wiktextract.extractor.zh.models import Sense, WordEntry
 from wiktextract.extractor.zh.page import parse_page
 from wiktextract.thesaurus import close_thesaurus_db
@@ -23,6 +23,11 @@ class TestLinkage(TestCase):
         )
 
     def test_sense_term_list(self):
+        self.wxr.wtp.add_page(
+            "Template:l",
+            10,
+            '<span class="Latn" lang="mul">[[cU#跨語言|-{cU}-]]</span>',
+        )
         page_data = [
             WordEntry(
                 lang="跨語言",
@@ -38,7 +43,7 @@ class TestLinkage(TestCase):
         self.wxr.wtp.db_conn.commit()
         self.wxr.wtp.start_page("%")
         node = self.wxr.wtp.parse(wikitext)
-        extract_linkages(self.wxr, page_data, node.children, "synonyms", "")
+        extract_linkage_section(self.wxr, page_data, node, "synonyms")
         self.assertEqual(
             [
                 s.model_dump(exclude_defaults=True)
@@ -62,7 +67,7 @@ class TestLinkage(TestCase):
         page_data = [
             WordEntry(word="大家", lang_code="zh", lang="漢語", pos="noun")
         ]
-        extract_linkages(self.wxr, page_data, node.children, "synonyms", "")
+        extract_linkage_section(self.wxr, page_data, node, "synonyms")
         self.assertEqual(
             page_data[0].synonyms[0].model_dump(exclude_defaults=True),
             {
@@ -78,10 +83,14 @@ class TestLinkage(TestCase):
             WordEntry(lang="漢語", lang_code="zh", word="駱駝", pos="noun")
         ]
         self.wxr.wtp.add_page("Template:qual", 10, "({{{1}}})")
-        self.wxr.wtp.add_page("Template:zh-l", 10, "{{{1}}}")
+        self.wxr.wtp.add_page(
+            "Template:zh-l",
+            10,
+            '<span class="Hani" lang="zh">-{<!---->[[沙漠之舟#漢語|沙漠之舟]]<!---->}-</span>[[Category:漢語紅鏈/zh-l]]',
+        )
         self.wxr.wtp.start_page("駱駝")
         node = self.wxr.wtp.parse("* {{qual|比喻}} {{zh-l|沙漠之舟}}")
-        extract_linkages(self.wxr, page_data, node.children, "synonyms", "")
+        extract_linkage_section(self.wxr, page_data, node, "synonyms")
         self.assertEqual(
             [
                 s.model_dump(exclude_defaults=True)
@@ -121,3 +130,96 @@ class TestLinkage(TestCase):
                 }
             ],
         )
+
+    def test_zh_l(self):
+        page_data = [
+            WordEntry(lang="漢語", lang_code="zh", word="發音", pos="noun")
+        ]
+        self.wxr.wtp.add_page("Template:qual", 10, "{{{1}}}")
+        self.wxr.wtp.add_page(
+            "Template:zh-l",
+            10,
+            '<span class="Hant" lang="zh-Hant">-{<!---->[[讀音#漢語|讀音]]<!---->}-</span><span class="Hani" lang="zh">-{<!---->／<!---->}-</span><span class="Hans" lang="zh-Hans">-{<!---->[[读音#漢語|读音]]<!---->}-</span> (<i><span class="tr Latn" lang="la">-{<!---->dúyīn<!---->}-</span></i>)',
+        )
+        self.wxr.wtp.start_page("發音")
+        node = self.wxr.wtp.parse("* {{qual|漢字發音}} {{zh-l|讀音}}")
+        extract_linkage_section(self.wxr, page_data, node, "synonyms")
+        self.assertEqual(
+            [
+                s.model_dump(exclude_defaults=True)
+                for s in page_data[0].synonyms
+            ],
+            [
+                {
+                    "raw_tags": ["漢字發音"],
+                    "word": "讀音",
+                    "tags": ["Traditional Chinese"],
+                    "roman": "dúyīn",
+                },
+                {
+                    "raw_tags": ["漢字發音"],
+                    "word": "读音",
+                    "tags": ["Simplified Chinese"],
+                    "roman": "dúyīn",
+                },
+            ],
+        )
+
+    def test_zh_dial(self):
+        page_data = [
+            WordEntry(lang="漢語", lang_code="zh", word="工作", pos="verb")
+        ]
+        self.wxr.wtp.add_page(
+            "Template:zh-dial",
+            10,
+            """	<div><div><span class="Hant" lang="zh">[[職業#漢語|-{職業}-]]</span>的各地方言用詞[[Template:zh-dial-map/職業|<small>&#91;地圖&#93;</small>]]
+</div><div>
+	{| class="wikitable"
+	|-
+	! style="background:#E8ECFA" | 語言
+	! style="background:#E8ECFA" | 地區
+	! style="background:#E8ECFA" | 詞
+|-
+!rowspan=1 colspan=2 style="background:#FAF0F2"| 書面語 <small>([[w:官話白話文|白話文]])</small>
+|style="background:#FAF0F2"| <span class="Hant" lang="zh">[[職業#漢語|-{職業}-]]</span>、<span class="Hani" lang="zh">[[工作#漢語|-{工作}-]]</span>
+|-
+!rowspan=6 style="background:#FAF0F6"| 客家語
+|style="background:#FAF0F6"| [[w:四縣話|屏東（內埔，南四縣腔）]]
+|style="background:#FAF0F6"| <span class="Hant" lang="zh">[[頭路#漢語|-{頭路}-]]</span>
+|-
+!rowspan=7 style="background:#F4F0FA"| 吳語
+|style="background:#F4F0FA"| [[w:上海話|上海]]
+|style="background:#F4F0FA"| <span class="Hani" lang="zh">[[生活#漢語|-{生活}-]]</span>、<span class="Hant" lang="zh">[[飯碗頭#漢語|-{飯碗頭}-]]</span> <span style="font-size:60%">比喻</span>
+|-
+! style="background:#FFF7FB; padding-top:5px; padding-bottom: 5px" | <small>註解</small>
+| colspan=2|<small>GT - 通用臺灣話（無特定地域區分）</small>
+|}</div></div>""",
+        )
+        self.wxr.wtp.start_page("工作")
+        node = self.wxr.wtp.parse("{{zh-dial|職業}}")
+        extract_linkage_section(self.wxr, page_data, node, "synonyms")
+        data = [
+            s.model_dump(exclude_defaults=True) for s in page_data[0].synonyms
+        ]
+        self.assertEqual(
+            data[0],
+            {
+                "raw_tags": ["書面語 (白話文)"],
+                "word": "職業",
+            },
+        )
+        self.assertEqual(data[1]["word"], "頭路")
+        self.assertEqual(
+            set(data[1]["raw_tags"]), {"客家語", "屏東（內埔，南四縣腔）"}
+        )
+        self.assertEqual(
+            data[2],
+            {
+                "raw_tags": ["上海"],
+                "tags": ["Wu"],
+                "word": "生活",
+            },
+        )
+        self.assertEqual(data[3]["word"], "飯碗頭")
+        self.assertEqual(data[3]["raw_tags"], ["上海"])
+        self.assertEqual(set(data[3]["tags"]), {"Wu", "figuratively"})

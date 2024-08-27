@@ -1,5 +1,3 @@
-from typing import Literal
-
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -104,9 +102,6 @@ class Linkage(ChineseBaseModel):
     raw_tags: list[str] = []
     roman: str = ""
     sense: str = ""
-    language_variant: Literal["", "zh-Hant", "zh-Hans"] = Field(
-        default="", description="Chinese character variant"
-    )
     ruby: list[tuple[str, ...]] = Field(
         default=[], description="Japanese Kanji and furigana"
     )

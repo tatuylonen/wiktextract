@@ -29,7 +29,7 @@ def extract_gloss(
             if isinstance(node, TemplateNode):
                 raw_tag = clean_node(wxr, gloss_data, node)
                 if node.template_name in LABEL_TEMPLATES:
-                    raw_tags.append(raw_tag.strip("()"))
+                    raw_tags.extend(raw_tag.strip("()").split("，"))
                 elif raw_tag.startswith("〈") and raw_tag.endswith("〉"):
                     raw_tags.append(raw_tag.strip("〈〉"))
                 elif (

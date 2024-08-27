@@ -17,7 +17,6 @@ def extract_etymology(
     level_node: WikiNode,
 ) -> None:
     from .example import extract_template_zh_x
-    from .page import parse_section
 
     etymology_nodes = []
     level_node_index = len(level_node.children)
@@ -63,8 +62,3 @@ def extract_etymology(
     etymology_text = clean_node(wxr, base_data, etymology_nodes)
     if len(etymology_text) > 0:
         base_data.etymology_text = etymology_text
-
-    if level_node_index < len(level_node.children):
-        parse_section(
-            wxr, page_data, base_data, level_node.children[level_node_index:]
-        )

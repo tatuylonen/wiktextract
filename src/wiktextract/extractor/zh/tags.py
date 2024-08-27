@@ -283,17 +283,16 @@ ALL_TAGS = {**GRAMMATICAL_TAGS, **LABEL_TAGS, **ZH_X_TAGS}
 def translate_raw_tags(data: WordEntry) -> WordEntry:
     raw_tags = []
     for raw_tag in data.raw_tags:
-        for split_raw_tag in re.split(r"(?:,|，)\s*", raw_tag):
-            if split_raw_tag in ALL_TAGS:
-                tr_tag = ALL_TAGS[split_raw_tag]
-                if isinstance(tr_tag, str):
-                    data.tags.append(tr_tag)
-                elif isinstance(tr_tag, list):
-                    data.tags.extend(tr_tag)
-            elif split_raw_tag in LABEL_TOPICS and hasattr(data, "topics"):
-                data.topics.append(LABEL_TOPICS[split_raw_tag])
-            else:
-                raw_tags.append(split_raw_tag)
+        if raw_tag in ALL_TAGS:
+            tr_tag = ALL_TAGS[raw_tag]
+            if isinstance(tr_tag, str):
+                data.tags.append(tr_tag)
+            elif isinstance(tr_tag, list):
+                data.tags.extend(tr_tag)
+        elif raw_tag in LABEL_TOPICS and hasattr(data, "topics"):
+            data.topics.append(LABEL_TOPICS[raw_tag])
+        else:
+            raw_tags.append(raw_tag)
     data.raw_tags = raw_tags
     return data
 
