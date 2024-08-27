@@ -3,7 +3,7 @@ from unittest import TestCase
 from wikitextprocessor import Wtp
 
 from wiktextract.config import WiktionaryConfig
-from wiktextract.extractor.zh.linkage import extract_linkages
+from wiktextract.extractor.zh.linkage import extract_linkage_section
 from wiktextract.extractor.zh.models import Sense, WordEntry
 from wiktextract.extractor.zh.page import parse_page
 from wiktextract.thesaurus import close_thesaurus_db
@@ -23,6 +23,11 @@ class TestLinkage(TestCase):
         )
 
     def test_sense_term_list(self):
+        self.wxr.wtp.add_page(
+            "Template:l",
+            10,
+            '<span class="Latn" lang="mul">[[cU#跨語言|-{cU}-]]</span>',
+        )
         page_data = [
             WordEntry(
                 lang="跨語言",
@@ -38,7 +43,7 @@ class TestLinkage(TestCase):
         self.wxr.wtp.db_conn.commit()
         self.wxr.wtp.start_page("%")
         node = self.wxr.wtp.parse(wikitext)
-        extract_linkages(self.wxr, page_data, node.children, "synonyms", "")
+        extract_linkage_section(self.wxr, page_data, node, "synonyms")
         self.assertEqual(
             [
                 s.model_dump(exclude_defaults=True)
@@ -62,7 +67,7 @@ class TestLinkage(TestCase):
         page_data = [
             WordEntry(word="大家", lang_code="zh", lang="漢語", pos="noun")
         ]
-        extract_linkages(self.wxr, page_data, node.children, "synonyms", "")
+        extract_linkage_section(self.wxr, page_data, node, "synonyms")
         self.assertEqual(
             page_data[0].synonyms[0].model_dump(exclude_defaults=True),
             {
@@ -78,10 +83,14 @@ class TestLinkage(TestCase):
             WordEntry(lang="漢語", lang_code="zh", word="駱駝", pos="noun")
         ]
         self.wxr.wtp.add_page("Template:qual", 10, "({{{1}}})")
-        self.wxr.wtp.add_page("Template:zh-l", 10, "{{{1}}}")
+        self.wxr.wtp.add_page(
+            "Template:zh-l",
+            10,
+            '<span class="Hani" lang="zh">-{<!---->[[沙漠之舟#漢語|沙漠之舟]]<!---->}-</span>[[Category:漢語紅鏈/zh-l]]',
+        )
         self.wxr.wtp.start_page("駱駝")
         node = self.wxr.wtp.parse("* {{qual|比喻}} {{zh-l|沙漠之舟}}")
-        extract_linkages(self.wxr, page_data, node.children, "synonyms", "")
+        extract_linkage_section(self.wxr, page_data, node, "synonyms")
         self.assertEqual(
             [
                 s.model_dump(exclude_defaults=True)
@@ -119,5 +128,39 @@ class TestLinkage(TestCase):
                     "synonyms": [{"word": "Tec"}],
                     "word": "'Tec",
                 }
+            ],
+        )
+
+    def test_zh_l(self):
+        page_data = [
+            WordEntry(lang="漢語", lang_code="zh", word="發音", pos="noun")
+        ]
+        self.wxr.wtp.add_page("Template:qual", 10, "{{{1}}}")
+        self.wxr.wtp.add_page(
+            "Template:zh-l",
+            10,
+            '<span class="Hant" lang="zh-Hant">-{<!---->[[讀音#漢語|讀音]]<!---->}-</span><span class="Hani" lang="zh">-{<!---->／<!---->}-</span><span class="Hans" lang="zh-Hans">-{<!---->[[读音#漢語|读音]]<!---->}-</span> (<i><span class="tr Latn" lang="la">-{<!---->dúyīn<!---->}-</span></i>)',
+        )
+        self.wxr.wtp.start_page("發音")
+        node = self.wxr.wtp.parse("* {{qual|漢字發音}} {{zh-l|讀音}}")
+        extract_linkage_section(self.wxr, page_data, node, "synonyms")
+        self.assertEqual(
+            [
+                s.model_dump(exclude_defaults=True)
+                for s in page_data[0].synonyms
+            ],
+            [
+                {
+                    "raw_tags": ["漢字發音"],
+                    "word": "讀音",
+                    "tags": ["Traditional Chinese"],
+                    "roman": "dúyīn",
+                },
+                {
+                    "raw_tags": ["漢字發音"],
+                    "word": "读音",
+                    "tags": ["Simplified Chinese"],
+                    "roman": "dúyīn",
+                },
             ],
         )

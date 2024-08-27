@@ -2,7 +2,7 @@ import itertools
 from typing import Optional, Union
 
 from wikitextprocessor.parser import (
-    LEVEL_KIND_FLAGS,
+    LevelNode,
     NodeKind,
     TemplateNode,
     WikiNode,
@@ -11,144 +11,89 @@ from wikitextprocessor.parser import (
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from ..ruby import extract_ruby
-from ..share import (
-    capture_text_in_parentheses,
-    split_chinese_variants,
-    strip_nodes,
-)
-from .descendant import DESCENDANT_TEMPLATES, extract_descendant_list_item
 from .models import Linkage, WordEntry
 from .tags import translate_raw_tags
 
 
-def extract_linkages(
+def extract_linkage_section(
     wxr: WiktextractContext,
     page_data: list[WordEntry],
-    nodes: list[Union[WikiNode, str]],
+    level_node: LevelNode,
+    linkage_type: str,
+) -> None:
+    sense = ""
+    for node in level_node.find_child(NodeKind.TEMPLATE | NodeKind.LIST):
+        if node.kind == NodeKind.LIST:
+            for item_node in node.find_child(NodeKind.LIST_ITEM):
+                sense = process_linkage_list_item(
+                    wxr, page_data, item_node, linkage_type, sense
+                )
+        elif isinstance(node, TemplateNode):
+            if node.template_name in ["s", "sense"]:
+                sense = clean_node(wxr, None, node).strip("()： ")
+            elif node.template_name == "zh-dial":
+                extract_zh_dial_template(
+                    wxr, page_data, node, linkage_type, sense
+                )
+            elif node.template_name.endswith("-saurus"):
+                extract_saurus_template(
+                    wxr, page_data, node, linkage_type, sense
+                )
+            elif node.template_name.startswith("col"):
+                process_linkage_col_template(
+                    wxr, page_data, node, linkage_type, sense
+                )
+
+
+def process_linkage_list_item(
+    wxr: WiktextractContext,
+    page_data: list[WordEntry],
+    list_item: WikiNode,
     linkage_type: str,
     sense: str,
-) -> Optional[str]:
-    """
-    Return linkage sense text for `sense` template inside a list item node.
-    """
-    strip_sense_chars = "()（）:："
-    sense_template_names = {"s", "sense"}
-    for node in strip_nodes(nodes):
-        if isinstance(node, str) and len(sense) == 0:
-            sense = node.strip(strip_sense_chars)
-        elif isinstance(node, WikiNode):
-            if node.kind == NodeKind.LIST_ITEM:
-                not_term_indexes = set()
-                filtered_children = list(node.filter_empty_str_child())
-                linkage_data = Linkage()
-                for index, item_child in enumerate(filtered_children):
-                    if (
-                        isinstance(item_child, WikiNode)
-                        and item_child.kind == NodeKind.TEMPLATE
-                    ):
-                        template_name = item_child.template_name
-                        if template_name in sense_template_names:
-                            not_term_indexes.add(index)
-                            sense = clean_node(wxr, None, item_child).strip(
-                                strip_sense_chars
-                            )
-                            if index == len(filtered_children) - 1:
-                                # sense template before entry list
-                                return sense
-                        elif template_name in {"qualifier", "qual"}:
-                            not_term_indexes.add(index)
-                            linkage_data.raw_tags.append(
-                                clean_node(wxr, None, item_child).strip("()")
-                            )
-                            translate_raw_tags(linkage_data)
-                        elif template_name.lower() in DESCENDANT_TEMPLATES:
-                            not_term_indexes.add(index)
-                            extract_descendant_list_item(
-                                wxr, node, page_data[-1]
-                            )
-                            break
-                        elif template_name == "ja-r":
-                            not_term_indexes.add(index)
-                            process_ja_r_template(
-                                wxr, page_data, item_child, linkage_type, sense
-                            )
-
-                if len(not_term_indexes) == len(filtered_children):
-                    continue
-                # sense template before entry and they are inside the same
-                # list item
-                terms = clean_node(
-                    wxr,
-                    None,
-                    [
-                        n
-                        for n_index, n in enumerate(filtered_children)
-                        if n_index not in not_term_indexes
-                    ],
+) -> str:
+    raw_tags = []
+    for item_child in list_item.children:
+        if isinstance(item_child, TemplateNode):
+            if item_child.template_name in ["s", "sense"]:
+                sense = clean_node(wxr, None, item_child).strip("()： ")
+            elif item_child.template_name in ["qualifier", "qual"]:
+                raw_tags.append(clean_node(wxr, None, item_child).strip("()"))
+            elif item_child.template_name == "zh-l":
+                process_zh_l_template(
+                    wxr, page_data, item_child, linkage_type, sense, raw_tags
                 )
-                roman, terms = capture_text_in_parentheses(terms)
-                roman = roman[0] if len(roman) > 0 else None
-                if roman is not None:
-                    linkage_data.roman = roman
-                if len(sense) > 0:
-                    linkage_data.sense = sense
-                for term in terms.split("、"):
-                    for variant_type, variant_term in split_chinese_variants(
-                        term
-                    ):
-                        final_linkage_data = linkage_data.model_copy(deep=True)
-                        final_linkage_data.word = variant_term
-                        if variant_type is not None:
-                            final_linkage_data.language_variant = variant_type
-                        if len(final_linkage_data.word) > 0:
-                            pre_data = getattr(page_data[-1], linkage_type)
-                            pre_data.append(final_linkage_data)
-            elif node.kind == NodeKind.TEMPLATE:
-                template_name = node.template_name.lower()
-                if template_name in sense_template_names:
-                    sense = clean_node(wxr, None, node).strip(strip_sense_chars)
-                elif template_name.endswith("-saurus"):
-                    extract_saurus_template(
-                        wxr, node, page_data, linkage_type, sense
-                    )
-                elif template_name == "zh-dial":
-                    extract_zh_dial_template(
-                        wxr, page_data, node, linkage_type, sense
-                    )
-                else:
-                    expanded_node = wxr.wtp.parse(
-                        wxr.wtp.node_to_wikitext(node), expand_all=True
-                    )
-                    extract_linkages(
-                        wxr, page_data, [expanded_node], linkage_type, sense
-                    )
-            elif node.kind in LEVEL_KIND_FLAGS:
-                from .page import parse_section
-
-                base_data = WordEntry(
-                    lang_code=page_data[-1].lang_code,
-                    lang=page_data[-1].lang,
-                    word=page_data[-1].word,
-                    pos=page_data[-1].pos,
+                raw_tags.clear()
+            elif item_child.template_name == "ja-r":
+                process_ja_r_template(
+                    wxr, page_data, item_child, linkage_type, sense, raw_tags
                 )
-                parse_section(wxr, page_data, base_data, node)
-            elif len(node.children) > 0:
-                returned_sense = extract_linkages(
-                    wxr,
-                    page_data,
-                    node.children,
-                    linkage_type,
-                    sense,
+                raw_tags.clear()
+            elif item_child.template_name in ["l", "link", "alter"]:
+                process_l_template(
+                    wxr, page_data, item_child, linkage_type, sense, raw_tags
                 )
-                if returned_sense is not None:
-                    sense = returned_sense
-    return None
+                raw_tags.clear()
+        elif (
+            isinstance(item_child, WikiNode)
+            and item_child.kind == NodeKind.LINK
+        ):
+            word = clean_node(wxr, None, item_child)
+            if len(word) > 0 and len(page_data) > 0:
+                linkage_data = Linkage(
+                    word=word, sense=sense, raw_tags=raw_tags
+                )
+                pre_data = getattr(page_data[-1], linkage_type)
+                translate_raw_tags(linkage_data)
+                pre_data.append(linkage_data)
+                raw_tags.clear()
+    return sense
 
 
 def extract_saurus_template(
     wxr: WiktextractContext,
-    node: WikiNode,
     page_data: list[WordEntry],
+    node: TemplateNode,
     linkage_type: str,
     sense: str,
 ) -> None:
@@ -190,20 +135,17 @@ def extract_saurus_template(
 def extract_zh_dial_template(
     wxr: WiktextractContext,
     page_data: list[WordEntry],
-    node: Union[WikiNode, str],
+    node: TemplateNode,
     linkage_type: str,
     sense: str,
 ) -> None:
     dial_data = {}
     node = wxr.wtp.parse(wxr.wtp.node_to_wikitext(node), expand_all=True)
     extract_zh_dial_recursively(wxr, node, dial_data, None)
-    for term, tags in dial_data.items():
-        linkage_data = Linkage(word=term)
-        if len(sense) > 0:
-            linkage_data.sense = sense
-        if len(tags) > 0:
-            linkage_data.raw_tags = tags
+    for term, raw_tags in dial_data.items():
+        linkage_data = Linkage(word=term, sense=sense, raw_tags=raw_tags)
         pre_data = getattr(page_data[-1], linkage_type)
+        translate_raw_tags(linkage_data)
         pre_data.append(linkage_data)
 
 
@@ -253,18 +195,60 @@ def extract_zh_dial_recursively(
     return header_lang
 
 
+def process_zh_l_template(
+    wxr: WiktextractContext,
+    page_data: list[WordEntry],
+    template_node: TemplateNode,
+    linkage_type: str,
+    sense: str,
+    raw_tags: list[str] = [],
+) -> None:
+    # https://zh.wiktionary.org/wiki/Template:Zh-l
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(template_node), expand_all=True
+    )
+    roman = ""
+    for i_tag in expanded_node.find_html_recursively(
+        "span", attr_name="class", attr_value="Latn"
+    ):
+        roman = clean_node(wxr, None, i_tag)
+    for span_tag in expanded_node.find_html(
+        "span", attr_name="lang", attr_value="zh"
+    ):
+        linkage_data = Linkage(
+            sense=sense,
+            raw_tags=raw_tags,
+            roman=roman,
+            word=clean_node(wxr, None, span_tag),
+        )
+        lang_attr = span_tag.attrs.get("lang", "")
+        if lang_attr == "zh-Hant":
+            linkage_data.tags.append("Traditional Chinese")
+        elif lang_attr == "zh-Hans":
+            linkage_data.tags.append("Simplified Chinese")
+        if (
+            len(linkage_data.word) > 0
+            and len(page_data) > 0
+            and linkage_data.word != "／"
+        ):
+            pre_data = getattr(page_data[-1], linkage_type)
+            translate_raw_tags(linkage_data)
+            pre_data.append(linkage_data)
+
+
 def process_ja_r_template(
     wxr: WiktextractContext,
     page_data: list[WordEntry],
     template_node: TemplateNode,
     linkage_type: str,
     sense: str,
+    raw_tags: list[str] = [],
 ) -> Linkage:
     # https://zh.wiktionary.org/wiki/Template:Ja-r
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(template_node), expand_all=True
     )
-    linkage_data = Linkage(sense=sense)
+    linkage_data = Linkage(sense=sense, raw_tags=raw_tags)
     for span_node in expanded_node.find_html("span"):
         span_class = span_node.attrs.get("class", "")
         if "lang" in span_node.attrs:
@@ -278,9 +262,54 @@ def process_ja_r_template(
 
     if len(linkage_data.word) > 0 and len(page_data) > 0:
         pre_data = getattr(page_data[-1], linkage_type)
+        translate_raw_tags(linkage_data)
         pre_data.append(linkage_data)
 
     return linkage_data
+
+
+def process_l_template(
+    wxr: WiktextractContext,
+    page_data: list[WordEntry],
+    template_node: TemplateNode,
+    linkage_type: str,
+    sense: str,
+    raw_tags: list[str] = [],
+) -> None:
+    # https://zh.wiktionary.org/wiki/Template:l
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(template_node), expand_all=True
+    )
+    for span_tag in expanded_node.find_html("span", attr_name="lang"):
+        linkage_data = Linkage(
+            sense=sense, raw_tags=raw_tags, word=clean_node(wxr, None, span_tag)
+        )
+        if len(linkage_data.word) > 0 and len(page_data) > 0:
+            pre_data = getattr(page_data[-1], linkage_type)
+            translate_raw_tags(linkage_data)
+            pre_data.append(linkage_data)
+
+
+def process_linkage_col_template(
+    wxr: WiktextractContext,
+    page_data: list[WordEntry],
+    template_node: TemplateNode,
+    linkage_type: str,
+    sense: str,
+) -> None:
+    from .thesaurus import process_col_template
+
+    for data in process_col_template(wxr, "", "", "", "", "", template_node):
+        linkage_data = Linkage(
+            word=data.term,
+            roman=data.roman,
+            tags=data.tags,
+            raw_tags=data.raw_tags,
+            sense=sense,
+        )
+        if len(linkage_data.word) > 0 and len(page_data) > 0:
+            pre_data = getattr(page_data[-1], linkage_type)
+            pre_data.append(linkage_data)
 
 
 def process_linkage_templates_in_gloss(
