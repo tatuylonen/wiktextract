@@ -164,3 +164,62 @@ class TestLinkage(TestCase):
                 },
             ],
         )
+
+    def test_zh_dial(self):
+        page_data = [
+            WordEntry(lang="漢語", lang_code="zh", word="工作", pos="verb")
+        ]
+        self.wxr.wtp.add_page(
+            "Template:zh-dial",
+            10,
+            """	<div><div><span class="Hant" lang="zh">[[職業#漢語|-{職業}-]]</span>的各地方言用詞[[Template:zh-dial-map/職業|<small>&#91;地圖&#93;</small>]]
+</div><div>
+	{| class="wikitable"
+	|-
+	! style="background:#E8ECFA" | 語言
+	! style="background:#E8ECFA" | 地區
+	! style="background:#E8ECFA" | 詞
+|-
+!rowspan=1 colspan=2 style="background:#FAF0F2"| 書面語 <small>([[w:官話白話文|白話文]])</small>
+|style="background:#FAF0F2"| <span class="Hant" lang="zh">[[職業#漢語|-{職業}-]]</span>、<span class="Hani" lang="zh">[[工作#漢語|-{工作}-]]</span>
+|-
+!rowspan=6 style="background:#FAF0F6"| 客家語
+|style="background:#FAF0F6"| [[w:四縣話|屏東（內埔，南四縣腔）]]
+|style="background:#FAF0F6"| <span class="Hant" lang="zh">[[頭路#漢語|-{頭路}-]]</span>
+|-
+!rowspan=7 style="background:#F4F0FA"| 吳語
+|style="background:#F4F0FA"| [[w:上海話|上海]]
+|style="background:#F4F0FA"| <span class="Hani" lang="zh">[[生活#漢語|-{生活}-]]</span>、<span class="Hant" lang="zh">[[飯碗頭#漢語|-{飯碗頭}-]]</span> <span style="font-size:60%">比喻</span>
+|-
+! style="background:#FFF7FB; padding-top:5px; padding-bottom: 5px" | <small>註解</small>
+| colspan=2|<small>GT - 通用臺灣話（無特定地域區分）</small>
+|}</div></div>""",
+        )
+        self.wxr.wtp.start_page("工作")
+        node = self.wxr.wtp.parse("{{zh-dial|職業}}")
+        extract_linkage_section(self.wxr, page_data, node, "synonyms")
+        data = [
+            s.model_dump(exclude_defaults=True) for s in page_data[0].synonyms
+        ]
+        self.assertEqual(
+            data[0],
+            {
+                "raw_tags": ["書面語 (白話文)"],
+                "word": "職業",
+            },
+        )
+        self.assertEqual(data[1]["word"], "頭路")
+        self.assertEqual(
+            set(data[1]["raw_tags"]), {"客家語", "屏東（內埔，南四縣腔）"}
+        )
+        self.assertEqual(
+            data[2],
+            {
+                "raw_tags": ["上海"],
+                "tags": ["Wu"],
+                "word": "生活",
+            },
+        )
+        self.assertEqual(data[3]["word"], "飯碗頭")
+        self.assertEqual(data[3]["raw_tags"], ["上海"])
+        self.assertEqual(set(data[3]["tags"]), {"Wu", "figuratively"})

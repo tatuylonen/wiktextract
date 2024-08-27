@@ -1,4 +1,5 @@
 import itertools
+from collections import defaultdict
 from typing import Optional, Union
 
 from wikitextprocessor.parser import (
@@ -126,7 +127,7 @@ def extract_saurus_template(
             roman=thesaurus.roman,
             tags=thesaurus.tags,
             raw_tags=thesaurus.raw_tags,
-            sense=thesaurus.sense,
+            sense=sense,
         )
         pre_data = getattr(page_data[-1], linkage_type)
         pre_data.append(linkage_data)
@@ -135,64 +136,54 @@ def extract_saurus_template(
 def extract_zh_dial_template(
     wxr: WiktextractContext,
     page_data: list[WordEntry],
-    node: TemplateNode,
+    template_node: TemplateNode,
     linkage_type: str,
     sense: str,
 ) -> None:
-    dial_data = {}
-    node = wxr.wtp.parse(wxr.wtp.node_to_wikitext(node), expand_all=True)
-    extract_zh_dial_recursively(wxr, node, dial_data, None)
-    for term, raw_tags in dial_data.items():
-        linkage_data = Linkage(word=term, sense=sense, raw_tags=raw_tags)
+    dial_data = defaultdict(set)
+    tag_data = defaultdict(set)
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(template_node), expand_all=True
+    )
+    for table_node in expanded_node.find_child_recursively(NodeKind.TABLE):
+        lang_tag = ""
+        region_tag = ""
+        for row_node in table_node.find_child(NodeKind.TABLE_ROW):
+            if not row_node.contain_node(NodeKind.TABLE_CELL):
+                continue  # skip header row
+            for header_node in row_node.find_child(NodeKind.TABLE_HEADER_CELL):
+                lang_tag = clean_node(wxr, None, header_node)
+            if lang_tag == "註解":  # skip last note row
+                continue
+            for cell_node in row_node.find_child(NodeKind.TABLE_CELL):
+                for link_node in cell_node.find_child(NodeKind.LINK):
+                    region_tag = clean_node(wxr, None, link_node)
+                word = ""
+                for span_tag in cell_node.find_html("span"):
+                    span_text = clean_node(wxr, None, span_tag)
+                    if span_text == "":
+                        continue
+                    if (
+                        span_tag.attrs.get("lang", "") == "zh"
+                        and span_text != wxr.wtp.title
+                    ):
+                        word = span_text
+                        if lang_tag != "":
+                            dial_data[span_text].add(lang_tag)
+                        if region_tag != "":
+                            dial_data[span_text].add(region_tag)
+                    elif (
+                        span_tag.attrs.get("style", "") == "font-size:60%"
+                        and word != ""
+                    ):
+                        tag_data[word].add(span_text)
+
+    for term, lang_tags in dial_data.items():
+        linkage_data = Linkage(word=term, sense=sense, raw_tags=list(lang_tags))
+        linkage_data.raw_tags.extend(list(tag_data.get(term, {})))
         pre_data = getattr(page_data[-1], linkage_type)
         translate_raw_tags(linkage_data)
         pre_data.append(linkage_data)
-
-
-def extract_zh_dial_recursively(
-    wxr: WiktextractContext,
-    node: Union[WikiNode, str],
-    dial_data: dict[str, list[str]],
-    header_lang: Optional[str],
-) -> str:
-    if isinstance(node, WikiNode) and node.kind == NodeKind.TABLE_ROW:
-        tags = []
-        for child in node.children:
-            if isinstance(child, WikiNode):
-                if child.kind == NodeKind.TABLE_HEADER_CELL:
-                    header_lang = clean_node(wxr, None, child)
-                    if header_lang == "註解":
-                        return
-                elif child.kind == NodeKind.TABLE_CELL:
-                    tags.append(clean_node(wxr, None, child))
-        if len(tags) < 1:  # table header
-            return
-        terms = tags[-1].removesuffix(" dated")
-        tags = tags[:-1]
-        if header_lang is not None:
-            tags = [header_lang] + tags
-        for term in terms.split("、"):
-            if term == wxr.wtp.title:
-                continue
-            if term.endswith(" 比喻"):
-                term = term.removesuffix(" 比喻")
-                if "比喻" not in tags:
-                    tags.append("比喻")
-            old_tags = dial_data.get(term, [])
-            old_tag_set = set(old_tags)
-            new_tags = old_tags
-            for tag in tags:
-                if tag not in old_tag_set:
-                    new_tags.append(tag)
-            dial_data[term] = new_tags
-    elif isinstance(node, WikiNode):
-        for child in node.children:
-            returned_lang = extract_zh_dial_recursively(
-                wxr, child, dial_data, header_lang
-            )
-            if returned_lang is not None:
-                header_lang = returned_lang
-    return header_lang
 
 
 def process_zh_l_template(
