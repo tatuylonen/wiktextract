@@ -222,7 +222,7 @@ class TestGloss(TestCase):
         self.wxr.wtp.add_page(
             "Template:lb",
             10,
-            "(計算機[[Category:英語 計算機|DOS]], 網路[[Category:英語 網路|DOS]])",
+            '<small><span class="usage-label-sense"><span class="ib-brac">(</span><span class="ib-content">[[計算機]][[Category:英語 計算機|工作]]<span class="ib-comma">，</span>[[網路]][[Category:英語 網路|工作]]</span><span class="ib-brac">)</span></span></small>',
         )
         self.wxr.wtp.add_page(
             "Template:init of",
