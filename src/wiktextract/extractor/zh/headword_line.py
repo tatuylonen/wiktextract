@@ -80,7 +80,7 @@ def process_ja_headword(
 ) -> None:
     ruby_data, node_without_ruby = extract_ruby(wxr, strong_node)
     form = clean_node(wxr, page_data[-1], node_without_ruby)
-    if len(ruby_data) > 0 or form != page_data[-1].word:
+    if (len(ruby_data) > 0 or form != page_data[-1].word) and len(form) > 0:
         page_data[-1].forms.append(
             Form(
                 form=clean_node(wxr, page_data[-1], node_without_ruby),
