@@ -50,6 +50,7 @@ def parse_section(
     level_node: WikiNode,
 ) -> Optional[EtymologyData]:
     # Page structure: https://fr.wiktionary.org/wiki/Wiktionnaire:Structure_des_pages
+    etymology_data = None
     for level_node_template in level_node.find_content(NodeKind.TEMPLATE):
         if level_node_template.template_name == "S":
             # French Wiktionary uses a `S` template for all subtitles, we could
@@ -64,8 +65,7 @@ def parse_section(
             subtitle = clean_node(wxr, title_categories, level_node.largs)
             wxr.wtp.start_subsection(subtitle)
             if section_type in IGNORED_SECTIONS:
-                for next_level_node in level_node.find_child(LEVEL_KIND_FLAGS):
-                    parse_section(wxr, page_data, base_data, next_level_node)
+                pass
             # POS parameters:
             # https://fr.wiktionary.org/wiki/Wiktionnaire:Liste_des_sections_de_types_de_mots
             elif section_type in POS_SECTIONS:
@@ -86,9 +86,6 @@ def parse_section(
                 and section_type in ETYMOLOGY_SECTIONS
             ):
                 etymology_data = extract_etymology(wxr, level_node, base_data)
-                for node in level_node.find_child(LEVEL_KIND_FLAGS):
-                    parse_section(wxr, page_data, base_data, node)
-                return etymology_data
             elif (
                 wxr.config.capture_pronunciation
                 and section_type in PRONUNCIATION_SECTIONS
@@ -126,6 +123,9 @@ def parse_section(
                 )
 
     find_bottom_category_links(wxr, page_data, level_node)
+    for next_level_node in level_node.find_child(LEVEL_KIND_FLAGS):
+        parse_section(wxr, page_data, base_data, next_level_node)
+    return etymology_data
 
 
 def process_pos_block(
@@ -185,9 +185,8 @@ def process_pos_block(
                 extract_gloss(wxr, page_data, child)
                 has_gloss_list = True
             elif child.kind in LEVEL_KIND_FLAGS:
-                parse_section(wxr, page_data, base_data, child)
-                if index < level_node_index:
-                    level_node_index = index
+                level_node_index = index
+                break
 
     form_line_nodes = child_nodes[form_line_start:gloss_start]
     extract_form_line(wxr, page_data, form_line_nodes)
@@ -204,18 +203,9 @@ def parse_page(
 ) -> list[dict[str, Any]]:
     if wxr.config.verbose:
         logger.info(f"Parsing page: {page_title}")
-
     wxr.config.word = page_title
     wxr.wtp.start_page(page_title)
-
-    # Parse the page, pre-expanding those templates that are likely to
-    # influence parsing
-    tree = wxr.wtp.parse(
-        page_text,
-        pre_expand=True,
-        additional_expand=ADDITIONAL_EXPAND_TEMPLATES,
-    )
-
+    tree = wxr.wtp.parse(page_text)
     page_data: list[WordEntry] = []
     for level2_node in tree.find_child(NodeKind.LEVEL2):
         for subtitle_template in level2_node.find_content(NodeKind.TEMPLATE):

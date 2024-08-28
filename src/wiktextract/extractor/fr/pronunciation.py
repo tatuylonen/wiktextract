@@ -1,11 +1,6 @@
 import re
 
-from wikitextprocessor.parser import (
-    LEVEL_KIND_FLAGS,
-    NodeKind,
-    TemplateNode,
-    WikiNode,
-)
+from wikitextprocessor.parser import NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -22,9 +17,7 @@ def extract_pronunciation(
 ) -> None:
     sounds_list = []
     lang_code = base_data.lang_code
-    for node in level_node.find_child(
-        NodeKind.LIST | LEVEL_KIND_FLAGS | NodeKind.TEMPLATE
-    ):
+    for node in level_node.find_child(NodeKind.LIST | NodeKind.TEMPLATE):
         if node.kind == NodeKind.LIST:
             for list_item_node in node.find_child(NodeKind.LIST_ITEM):
                 sounds_list.extend(
@@ -33,10 +26,6 @@ def extract_pronunciation(
         elif isinstance(node, TemplateNode):
             if node.template_name in ["cmn-pron", "zh-cmn-pron"]:
                 sounds_list.extend(process_cmn_pron_template(wxr, node))
-        elif node.kind in LEVEL_KIND_FLAGS:
-            from .page import parse_section
-
-            parse_section(wxr, page_data, base_data, node)
 
     if len(sounds_list) == 0:
         return
