@@ -1,8 +1,10 @@
 from unittest import TestCase
 
 from wikitextprocessor import Wtp
+
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.fr.models import WordEntry
+from wiktextract.extractor.fr.page import parse_page
 from wiktextract.extractor.fr.pronunciation import extract_pronunciation
 from wiktextract.wxr_context import WiktextractContext
 
@@ -12,7 +14,10 @@ class TestPronunciation(TestCase):
 
     def setUp(self) -> None:
         self.wxr = WiktextractContext(
-            Wtp(lang_code="fr"), WiktionaryConfig(dump_file_lang_code="fr")
+            Wtp(lang_code="fr"),
+            WiktionaryConfig(
+                dump_file_lang_code="fr", capture_language_codes=None
+            ),
         )
 
     def tearDown(self) -> None:
@@ -130,30 +135,26 @@ class TestPronunciation(TestCase):
 
     def test_paronymes_subsection(self):
         # https://fr.wiktionary.org/wiki/wagonnet
-        base_data = WordEntry(word="wagonnet", lang_code="fr", lang="Français")
-        page_data = [base_data]
-        self.wxr.wtp.add_page("Modèle:pron", 10, body="\\{{{1|}}}\\")
-        self.wxr.wtp.start_page("wagonnet")
-        root = self.wxr.wtp.parse(
-            """=== {{S|prononciation}} ===
+        self.wxr.wtp.add_page("Modèle:langue", 10, "Français")
+        self.wxr.wtp.add_page("Modèle:pron", 10, "\\{{{1|}}}\\")
+        data = parse_page(
+            self.wxr,
+            "wagonnet",
+            """== {{langue|fr}} ==
+=== {{S|nom|fr}} ===
+# gloss
+
+=== {{S|prononciation}} ===
 * {{pron|va.ɡɔ.nɛ|fr}}
 
 ==== {{S|paronymes}} ====
 * [[wagonnée]]
-* [[wagonnier]]
-"""
+* [[wagonnier]]""",
         )
-        extract_pronunciation(self.wxr, page_data, root.children[0], base_data)
         self.assertEqual(
-            page_data[0].model_dump(exclude_defaults=True),
-            {
-                "word": "wagonnet",
-                "lang_code": "fr",
-                "lang": "Français",
-                "paronyms": [{"word": "wagonnée"}, {"word": "wagonnier"}],
-                "sounds": [{"ipa": "\\va.ɡɔ.nɛ\\"}],
-            },
+            data[0]["paronyms"], [{"word": "wagonnée"}, {"word": "wagonnier"}]
         )
+        self.assertEqual(data[0]["sounds"], [{"ipa": "\\va.ɡɔ.nɛ\\"}])
 
     def test_pron_prim_template(self):
         base_data = WordEntry(

@@ -2,6 +2,7 @@ from unittest import TestCase
 from unittest.mock import patch
 
 from wikitextprocessor import Page, Wtp
+
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.fr.gloss import extract_gloss
 from wiktextract.extractor.fr.models import WordEntry

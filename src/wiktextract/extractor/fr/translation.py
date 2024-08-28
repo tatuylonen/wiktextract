@@ -1,12 +1,7 @@
 from typing import Optional
 
 from mediawiki_langcodes import code_to_name
-from wikitextprocessor.parser import (
-    LEVEL_KIND_FLAGS,
-    NodeKind,
-    TemplateNode,
-    WikiNode,
-)
+from wikitextprocessor.parser import NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -59,10 +54,6 @@ def extract_translation(
                                     translation_data,
                                 )
                             previous_node = child_node
-            elif level_node_child.kind in LEVEL_KIND_FLAGS:
-                from .page import parse_section
-
-                parse_section(wxr, page_data, base_data, level_node_child)
 
 
 def process_italic_node(

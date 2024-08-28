@@ -68,7 +68,7 @@ def parse_page(
     # page layout
     # https://ja.wiktionary.org/wiki/Wiktionary:スタイルマニュアル
     wxr.wtp.start_page(page_title)
-    tree = wxr.wtp.parse(page_text, pre_expand=True)
+    tree = wxr.wtp.parse(page_text)
     page_data: list[WordEntry] = []
     for level2_node in tree.find_child(NodeKind.LEVEL2):
         lang_name = clean_node(wxr, None, level2_node.largs)

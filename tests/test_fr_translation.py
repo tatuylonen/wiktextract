@@ -1,16 +1,23 @@
 from unittest import TestCase
 
 from wikitextprocessor import Wtp
+
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.fr.models import WordEntry
+from wiktextract.extractor.fr.page import parse_page
 from wiktextract.extractor.fr.translation import extract_translation
 from wiktextract.wxr_context import WiktextractContext
 
 
 class TestTranslation(TestCase):
+    maxDiff = None
+
     def setUp(self) -> None:
         self.wxr = WiktextractContext(
-            Wtp(lang_code="fr"), WiktionaryConfig(dump_file_lang_code="fr")
+            Wtp(lang_code="fr"),
+            WiktionaryConfig(
+                dump_file_lang_code="fr", capture_language_codes=None
+            ),
         )
 
     def tearDown(self) -> None:
@@ -135,7 +142,7 @@ class TestTranslation(TestCase):
         )
 
     def test_template_sense_parameter(self):
-        self.wxr.wtp.start_page("masse")
+        self.wxr.wtp.add_page("Modèle:langue", 10, "Français")
         self.wxr.wtp.add_page("Modèle:S", 10, "{{{1}}}")
         self.wxr.wtp.add_page("Modèle:info lex", 10, "(Finance)")
         self.wxr.wtp.add_page(
@@ -147,39 +154,38 @@ class TestTranslation(TestCase):
 }}""",
         )
         self.wxr.wtp.add_page("Modèle:trad+", 10, "masa")
-        root = self.wxr.wtp.parse(
-            """==== {{S|traductions}} ====
+        self.wxr.wtp.add_page("Modèle:langue", 10, "Français")
+        data = parse_page(
+            self.wxr,
+            "masse",
+            """== {{langue|fr}} ==
+=== {{S|nom|fr|num=1}} ===
+# gloss
+
+==== {{S|traductions}} ====
 {{trad-début|{{info lex|finance}}|12}}
 * {{T|hr}} : {{trad+|hr|masa}}
 {{trad-fin}}
 
 ===== {{S|traductions à trier}} =====
-* {{T|af|trier}} : {{trad+|af|massa}}"""
+* {{T|af|trier}} : {{trad+|af|massa}}""",
         )
-        base_data = WordEntry(word="masse", lang_code="fr", lang="Français")
-        page_data = [base_data.model_copy(deep=True)]
-        extract_translation(self.wxr, page_data, base_data, root.children[0])
         self.assertEqual(
-            page_data[-1].model_dump(exclude_defaults=True),
-            {
-                "word": "masse",
-                "lang_code": "fr",
-                "lang": "Français",
-                "translations": [
-                    {
-                        "lang_code": "hr",
-                        "lang": "Croate",
-                        "word": "masa",
-                        "sense": "(Finance)",
-                        "sense_index": 12,
-                    },
-                    {
-                        "lang_code": "af",
-                        "lang": "Afrikaans",
-                        "word": "massa",
-                    },
-                ],
-            },
+            data[0]["translations"],
+            [
+                {
+                    "lang_code": "hr",
+                    "lang": "Croate",
+                    "word": "masa",
+                    "sense": "(Finance)",
+                    "sense_index": 12,
+                },
+                {
+                    "lang_code": "af",
+                    "lang": "Afrikaans",
+                    "word": "massa",
+                },
+            ],
         )
 
     def test_translation_list_without_t_template(self):

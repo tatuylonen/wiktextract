@@ -5,6 +5,7 @@
 from unittest import TestCase
 
 from wikitextprocessor import Wtp
+
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.fr.page import parse_page
 from wiktextract.wxr_context import WiktextractContext

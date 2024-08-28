@@ -1,6 +1,7 @@
 from unittest import TestCase
 
 from wikitextprocessor import Wtp
+
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.fr.linkage import extract_linkage
 from wiktextract.extractor.fr.models import WordEntry
@@ -317,4 +318,30 @@ class TestLinkage(TestCase):
                 for d in page_data[-1].synonyms
             ],
             [{"word": "Sus scrofa anglicus"}],
+        )
+
+    def test_réf_template(self):
+        page_data = [
+            WordEntry(
+                word="chien",
+                lang_code="fr",
+                lang="Français",
+            )
+        ]
+        self.wxr.wtp.start_page("chien")
+        root = self.wxr.wtp.parse(
+            "* [[battre le chien devant le lion]] : Châtier le faible devant le fort pour une faute que l’un ou l’autre a commise{{réf}}"
+        )
+        extract_linkage(self.wxr, page_data, root, "dérivés")
+        self.assertEqual(
+            [
+                d.model_dump(exclude_defaults=True)
+                for d in page_data[-1].derived
+            ],
+            [
+                {
+                    "word": "battre le chien devant le lion",
+                    "sense": "Châtier le faible devant le fort pour une faute que l’un ou l’autre a commise",
+                }
+            ],
         )

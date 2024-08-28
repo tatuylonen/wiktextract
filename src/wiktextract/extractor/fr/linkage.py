@@ -122,6 +122,11 @@ def process_linkage_list(
                     linkage_data.sense_index = int(current_sense)
                 else:
                     linkage_data.sense = current_sense
+            elif (
+                isinstance(child_node, TemplateNode)
+                and child_node.template_name == "réf"
+            ):
+                continue
             else:
                 tag_text = (
                     child_node
@@ -157,6 +162,9 @@ def process_linkage_list(
                     linkage_data.translation = tag_text.strip().removeprefix(
                         "— "
                     )
+                elif tag_text.strip().startswith(":"):
+                    sense_text = tag_text.strip().removeprefix(":").strip()
+                    linkage_data.sense = sense_text
                 else:
                     tags, _ = capture_text_in_parentheses(tag_text)
                     for tag in tags:
