@@ -1,6 +1,5 @@
 import itertools
 from collections import defaultdict
-from typing import Optional, Union
 
 from wikitextprocessor.parser import (
     LevelNode,

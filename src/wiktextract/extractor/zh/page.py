@@ -13,7 +13,7 @@ from wikitextprocessor.parser import (
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from ...wxr_logging import logger
-from .descendant import extract_descendants
+from .descendant import extract_descendant_section
 from .etymology import extract_etymology
 from .gloss import extract_gloss
 from .headword_line import extract_headword_line
@@ -85,12 +85,31 @@ def parse_section(
     elif wxr.config.capture_pronunciation and subtitle in PRONUNCIATION_TITLES:
         extract_pronunciation(wxr, page_data, base_data, level_node)
     elif wxr.config.capture_linkages and subtitle in LINKAGE_TITLES:
-        extract_linkage_section(
-            wxr,
-            page_data if len(page_data) > 0 else [base_data],
-            level_node,
-            LINKAGE_TITLES[subtitle],
-        )
+        is_descendant_section = False
+        if subtitle in DESCENDANTS_TITLES:
+            for t_node in level_node.find_child_recursively(NodeKind.TEMPLATE):
+                if t_node.template_name.lower() in [
+                    "desc",
+                    "descendant",
+                    "desctree",
+                    "descendants tree",
+                    "cjkv",
+                ]:
+                    is_descendant_section = True
+                    break
+        if is_descendant_section and wxr.config.capture_descendants:
+            extract_descendant_section(
+                wxr,
+                level_node,
+                page_data[-1] if len(page_data) > 0 else base_data,
+            )
+        elif not is_descendant_section:
+            extract_linkage_section(
+                wxr,
+                page_data if len(page_data) > 0 else [base_data],
+                level_node,
+                LINKAGE_TITLES[subtitle],
+            )
     elif wxr.config.capture_translations and subtitle in TRANSLATIONS_TITLES:
         if len(page_data) == 0:
             page_data.append(base_data.model_copy(deep=True))
@@ -100,7 +119,7 @@ def parse_section(
             wxr, page_data if len(page_data) > 0 else [base_data], level_node
         )
     elif wxr.config.capture_descendants and subtitle in DESCENDANTS_TITLES:
-        extract_descendants(
+        extract_descendant_section(
             wxr, level_node, page_data[-1] if len(page_data) > 0 else base_data
         )
     elif subtitle in NOTES_TITLES:
