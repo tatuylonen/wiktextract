@@ -319,3 +319,29 @@ class TestLinkage(TestCase):
             ],
             [{"word": "Sus scrofa anglicus"}],
         )
+
+    def test_réf_template(self):
+        page_data = [
+            WordEntry(
+                word="chien",
+                lang_code="fr",
+                lang="Français",
+            )
+        ]
+        self.wxr.wtp.start_page("chien")
+        root = self.wxr.wtp.parse(
+            "* [[battre le chien devant le lion]] : Châtier le faible devant le fort pour une faute que l’un ou l’autre a commise{{réf}}"
+        )
+        extract_linkage(self.wxr, page_data, root, "dérivés")
+        self.assertEqual(
+            [
+                d.model_dump(exclude_defaults=True)
+                for d in page_data[-1].derived
+            ],
+            [
+                {
+                    "word": "battre le chien devant le lion",
+                    "sense": "Châtier le faible devant le fort pour une faute que l’un ou l’autre a commise",
+                }
+            ],
+        )
