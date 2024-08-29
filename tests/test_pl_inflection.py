@@ -5,7 +5,10 @@ from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.pl.inflection import extract_inflection_section
 from wiktextract.extractor.pl.models import Sense, WordEntry
-from wiktextract.extractor.pl.page import extract_zapis_section
+from wiktextract.extractor.pl.page import (
+    extract_zapis_section,
+    extract_transliteracja_section,
+)
 from wiktextract.wxr_context import WiktextractContext
 
 
@@ -417,4 +420,20 @@ class TestPlInflection(TestCase):
         self.assertEqual(
             [f.model_dump(exclude_defaults=True) for f in base_data.forms],
             [{"form": "銀行", "tags": ["Traditional Chinese"]}],
+        )
+
+    def test_transliteracja_section(self):
+        self.wxr.wtp.start_page("開く")
+        root = self.wxr.wtp.parse("""===transliteracja===
+: (1.1) aku""")
+        base_data = WordEntry(
+            word="開く",
+            lang="język japoński",
+            lang_code="ja",
+            pos="verb",
+        )
+        extract_transliteracja_section(self.wxr, base_data, root.children[0])
+        self.assertEqual(
+            [f.model_dump(exclude_defaults=True) for f in base_data.forms],
+            [{"form": "aku", "sense_index": "1.1", "tags": ["romanization"]}],
         )

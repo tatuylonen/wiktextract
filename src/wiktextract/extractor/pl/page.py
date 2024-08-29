@@ -59,6 +59,8 @@ def parse_section(
         )
     elif title_text == "zapis":
         extract_zapis_section(wxr, base_data, level_node)
+    elif title_text == "transliteracja":
+        extract_transliteracja_section(wxr, base_data, level_node)
 
 
 def extract_zapis_section(
@@ -74,6 +76,26 @@ def extract_zapis_section(
                 base_data.forms.append(
                     Form(form=form_text, tags=["Traditional Chinese"])
                 )
+
+
+def extract_transliteracja_section(
+    wxr: WiktextractContext, base_data: WordEntry, level_node: LevelNode
+) -> None:
+    for list_item in level_node.find_child_recursively(NodeKind.LIST_ITEM):
+        for node in list_item.children:
+            if isinstance(node, str):
+                m = re.search(r"\([\d\s,-.]+\)", node)
+                if m is not None:
+                    sense_index = m.group(0).strip("()")
+                    roman = node[m.end() :].strip()
+                    if roman != "":
+                        base_data.forms.append(
+                            Form(
+                                form=roman,
+                                sense_index=sense_index,
+                                tags=["romanization"],
+                            )
+                        )
 
 
 def parse_page(
