@@ -18,6 +18,7 @@ LINKAGE_TYPES = {
     "synonimy": "synonyms",
     "wyrazy pokrewne": "related",
     "związki frazeologiczne": "proverbs",
+    "złożenia": "derived",
 }
 
 
@@ -31,8 +32,24 @@ def extract_linkage_section(
     from .page import match_sense_index
 
     linkages = defaultdict(list)
+    has_list = False
     for list_item in level_node.find_child_recursively(NodeKind.LIST_ITEM):
         process_linkage_list_item(wxr, list_item, linkages)
+        has_list = True
+
+    if not has_list:
+        # get around "preformatted" node
+        for node in level_node.find_child_recursively(
+            NodeKind.LINK | NodeKind.TEMPLATE
+        ):
+            if node.kind == NodeKind.LINK:
+                word = clean_node(wxr, None, node)
+                if word != "":
+                    linkages[""].append(Linkage(word=word))
+            elif isinstance(node, TemplateNode):
+                process_linkage_template(
+                    wxr, node, linkages, "", False, [], [], []
+                )
 
     matched_indexes = set()
     for data in page_data:

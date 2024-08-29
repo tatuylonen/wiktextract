@@ -259,3 +259,48 @@ class TestPlLinkage(TestCase):
                 },
             ],
         )
+
+    def test_no_list_link(self):
+        self.wxr.wtp.start_page("银行")
+        root = self.wxr.wtp.parse("===złożenia===\n [[商业银行]]•[[银行业]]")
+        page_data = [
+            WordEntry(
+                word="银行",
+                lang="język chiński standardowy",
+                lang_code="zh",
+                pos="noun",
+            ),
+        ]
+        extract_linkage_section(
+            self.wxr, page_data, root.children[0], "derived", "zh"
+        )
+        self.assertEqual(
+            [r.model_dump(exclude_defaults=True) for r in page_data[0].derived],
+            [{"word": "商业银行"}, {"word": "银行业"}],
+        )
+
+    def test_no_list_template(self):
+        self.wxr.wtp.start_page("柔道")
+        self.wxr.wtp.add_page(
+            "Szablon:furi",
+            10,
+            '<span class="furigana-wrapper" lang="ja" xml:lang="ja">[[柔道家]]<span class="furigana-caption">(じゅうどうか)</span></span>',
+        )
+        root = self.wxr.wtp.parse(
+            "===złożenia===\n {{furi|柔道家|じゅうどうか}}"
+        )
+        page_data = [
+            WordEntry(
+                word="柔道",
+                lang="język japoński",
+                lang_code="ja",
+                pos="noun",
+            ),
+        ]
+        extract_linkage_section(
+            self.wxr, page_data, root.children[0], "derived", "ja"
+        )
+        self.assertEqual(
+            [r.model_dump(exclude_defaults=True) for r in page_data[0].derived],
+            [{"word": "柔道家", "furigana": "じゅうどうか"}],
+        )
