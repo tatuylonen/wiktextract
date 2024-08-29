@@ -1,5 +1,3 @@
-import re
-
 from .models import WordEntry
 from .topics import LABEL_TOPICS
 
