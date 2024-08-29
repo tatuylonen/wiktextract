@@ -21,6 +21,7 @@ POS_TITLES: dict[str, POSSubtitleData] = {
     "adjective": {"pos": "adj"},
     "adjectuve": {"pos": "adj", "debug": "misspelled subtitle"},
     "adjectives": {"pos": "adj", "debug": "usually used in singular"},
+    "adnominal": {"pos": "adnominal"},
     "adverb": {"pos": "adv"},
     "adverbs": {"pos": "adv", "debug": "usually used in singular"},
     "adverbial phrase": {
