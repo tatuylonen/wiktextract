@@ -39,10 +39,17 @@ def extract_linkage_section(
 
     if not has_list:
         # get around "preformatted" node
-        for link_node in level_node.find_child_recursively(NodeKind.LINK):
-            word = clean_node(wxr, None, link_node)
-            if word != "":
-                linkages[""].append(Linkage(word=word))
+        for node in level_node.find_child_recursively(
+            NodeKind.LINK | NodeKind.TEMPLATE
+        ):
+            if node.kind == NodeKind.LINK:
+                word = clean_node(wxr, None, node)
+                if word != "":
+                    linkages[""].append(Linkage(word=word))
+            elif isinstance(node, TemplateNode):
+                process_linkage_template(
+                    wxr, node, linkages, "", False, [], [], []
+                )
 
     matched_indexes = set()
     for data in page_data:
