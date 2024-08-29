@@ -194,3 +194,46 @@ class TestDescendant(TestCase):
                 }
             ],
         )
+
+    def test_cjvk(self):
+        self.wxr.wtp.start_page("中文")
+        self.wxr.wtp.add_page(
+            "Template:CJKV",
+            10,
+            """<div>[[w:漢字詞|漢字詞]]（-{<!----><span class="Hani" lang="zh">中文</span><!---->}-）：
+* <span class="desc-arr" title="借詞">→</span> 日語: <span class="Jpan" lang="ja">[[中文#日語|-{<ruby>中文<rp>(</rp><rt>ちゅうぶん</rt><rp>)</rp></ruby>}-]]</span> <span class="mention-gloss-paren annotation-paren">(</span><span class="tr"><span class="mention-tr tr">chūbun</span></span><span class="mention-gloss-paren annotation-paren">)</span>
+* <span class="desc-arr" title="借詞">→</span> 朝鮮語: <span class="Kore" lang="ko">[[중문#朝鮮語|-{중문(中文)}-]]</span> <span class="mention-gloss-paren annotation-paren">(</span><span lang="ko-Latn" class="tr Latn">jungmun</span><span class="mention-gloss-paren annotation-paren">)</span>
+* <span class="desc-arr" title="借詞">→</span> 越南語: <span class="Latn" lang="vi">[[Trung văn#越南語|-{Trung văn}-]]</span> <span class="mention-gloss-paren annotation-paren">(</span><span lang="vi-Latn" class="tr Latn"><span class="Hani" lang="vi">[[中文#越南語|-{中文}-]]</span></span><span class="mention-gloss-paren annotation-paren">)</span></div>""",
+        )
+        root = self.wxr.wtp.parse("{{CJKV|中文|ちゅうぶん|중문|Trung văn}}")
+        page_data = WordEntry(
+            word="中文", lang_code="zh", lang="漢語", pos="noun"
+        )
+        extract_descendant_section(self.wxr, root, page_data)
+        self.assertEqual(
+            [
+                d.model_dump(exclude_defaults=True)
+                for d in page_data.descendants
+            ],
+            [
+                {
+                    "lang_code": "ja",
+                    "lang": "日語",
+                    "word": "中文",
+                    "ruby": [("中文", "ちゅうぶん")],
+                    "roman": "chūbun",
+                },
+                {
+                    "lang_code": "ko",
+                    "lang": "朝鮮語",
+                    "word": "중문(中文)",
+                    "roman": "jungmun",
+                },
+                {
+                    "lang_code": "vi",
+                    "lang": "越南語",
+                    "word": "Trung văn",
+                    "roman": "中文",
+                },
+            ],
+        )
