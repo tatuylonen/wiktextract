@@ -4,6 +4,7 @@ from wikitextprocessor import Wtp
 
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.pl.inflection import extract_inflection_section
+from wiktextract.extractor.pl.page import extract_zapis_section
 from wiktextract.extractor.pl.models import Sense, WordEntry
 from wiktextract.wxr_context import WiktextractContext
 
@@ -350,7 +351,7 @@ class TestPlInflection(TestCase):
 
     def test_eo_noun_table(self):
         self.wxr.wtp.add_page(
-            "odmiana-rzeczownik-esperanto",
+            "Szablon:odmiana-rzeczownik-esperanto",
             10,
             """<span class="short-container<nowiki/> short-variant1">[[Aneks:Skróty używane w Wikisłowniku#B|<span class="short-wrapper" title="bez liczby mnogiej" data-expanded="bez liczby mnogiej"><span class="short-content">blm</span></span>]]</span>,&nbsp;<div><div>&nbsp;</div><div><table class="wikitable odmiana"><tr><th>&nbsp;</th><th>[[ununombro#eo|ununombro]]</th><th>[[multenombro#eo|multenombro]]&#32;([[virtuala#eo|virtuala]])</th></tr><tr><th>[[nominativo#eo|nominativo]]</th><td>'''neĝo'''</td><td>'''<span class="potential-form" title="forma potencjalna lub rzadka" tabindex="0">neĝoj</span>'''</td></tr><tr><th>[[akuzativo#eo|akuzativo]]</th><td>neĝon</td><td><span class="potential-form" title="forma potencjalna lub rzadka" tabindex="0">neĝojn</span></td></tr></table></div></div>""",
         )
@@ -401,4 +402,19 @@ class TestPlInflection(TestCase):
                     ],
                 },
             ],
+        )
+
+    def test_ptrad(self):
+        self.wxr.wtp.start_page("银行")
+        root = self.wxr.wtp.parse("===zapis===\n {{ptrad|銀行}}")
+        base_data = WordEntry(
+            word="银行",
+            lang="język chiński standardowy",
+            lang_code="zh",
+            pos="noun",
+        )
+        extract_zapis_section(self.wxr, base_data, root.children[0])
+        self.assertEqual(
+            [f.model_dump(exclude_defaults=True) for f in base_data.forms],
+            [{"form": "銀行", "tags": ["Traditional Chinese"]}],
         )

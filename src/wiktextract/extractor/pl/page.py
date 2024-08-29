@@ -2,11 +2,7 @@ import itertools
 import re
 from typing import Any
 
-from wikitextprocessor.parser import (
-    NodeKind,
-    TemplateNode,
-    WikiNode,
-)
+from wikitextprocessor.parser import LevelNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -14,7 +10,7 @@ from .etymology import extract_etymology_section
 from .example import extract_example_section
 from .inflection import extract_inflection_section
 from .linkage import LINKAGE_TYPES, extract_linkage_section
-from .models import Sense, WordEntry
+from .models import Form, Sense, WordEntry
 from .note import extract_note_section
 from .pos import extract_pos_section
 from .sound import extract_sound_section
@@ -61,6 +57,23 @@ def parse_section(
         extract_inflection_section(
             wxr, page_data, base_data.lang_code, level_node
         )
+    elif title_text == "zapis":
+        extract_zapis_section(wxr, base_data, level_node)
+
+
+def extract_zapis_section(
+    wxr: WiktextractContext, base_data: WordEntry, level_node: LevelNode
+) -> None:
+    # get around "preformatted" node
+    for node in level_node.find_child_recursively(NodeKind.TEMPLATE):
+        if node.template_name == "ptrad":
+            form_text = clean_node(
+                wxr, None, node.template_parameters.get(1, "")
+            )
+            if form_text != "":
+                base_data.forms.append(
+                    Form(form=form_text, tags=["Traditional Chinese"])
+                )
 
 
 def parse_page(
