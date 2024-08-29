@@ -100,5 +100,6 @@ class WordEntry(PolishBaseModel):
     related: list[Linkage] = []
     proverbs: list[Linkage] = []
     synonyms: list[Linkage] = []
+    derived: list[Linkage] = []
     forms: list[Form] = []
     notes: list[str] = []

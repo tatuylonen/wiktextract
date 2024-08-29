@@ -4,8 +4,8 @@ from wikitextprocessor import Wtp
 
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.pl.inflection import extract_inflection_section
-from wiktextract.extractor.pl.page import extract_zapis_section
 from wiktextract.extractor.pl.models import Sense, WordEntry
+from wiktextract.extractor.pl.page import extract_zapis_section
 from wiktextract.wxr_context import WiktextractContext
 
 

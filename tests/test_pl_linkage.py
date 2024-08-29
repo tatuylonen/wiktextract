@@ -259,3 +259,22 @@ class TestPlLinkage(TestCase):
                 },
             ],
         )
+
+    def test_no_list(self):
+        self.wxr.wtp.start_page("银行")
+        root = self.wxr.wtp.parse("===złożenia===\n [[商业银行]]•[[银行业]]")
+        page_data = [
+            WordEntry(
+                word="银行",
+                lang="język chiński standardowy",
+                lang_code="zh",
+                pos="noun",
+            ),
+        ]
+        extract_linkage_section(
+            self.wxr, page_data, root.children[0], "derived", "zh"
+        )
+        self.assertEqual(
+            [r.model_dump(exclude_defaults=True) for r in page_data[0].derived],
+            [{"word": "商业银行"}, {"word": "银行业"}],
+        )
