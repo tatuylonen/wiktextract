@@ -1,6 +1,12 @@
 {
   "analyze_templates": false,
   "extract_thesaurus_pages": true,
-  "save_ns_names": ["Main", "Template", "Module", "Thesaurus"],
+  "save_ns_names": [
+    "Main",
+    "Template",
+    "Module",
+    "Thesaurus",
+    "Appendix"
+  ],
   "extract_ns_names": ["Main"]
 }
