@@ -51,6 +51,9 @@ part_of_speech_map: dict[str, POSMap] = {
         "pos": "adj",
         "debug": "usually used in singular",
     },
+    "adnominal": {
+        "pos": "adnominal",
+    },
     "adverb": {
         "pos": "adv",
     },
