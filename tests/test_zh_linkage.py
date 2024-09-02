@@ -11,9 +11,14 @@ from wiktextract.wxr_context import WiktextractContext
 
 
 class TestLinkage(TestCase):
+    maxDiff = None
+
     def setUp(self):
         self.wxr = WiktextractContext(
-            Wtp(lang_code="zh"), WiktionaryConfig(dump_file_lang_code="zh")
+            Wtp(lang_code="zh"),
+            WiktionaryConfig(
+                capture_language_codes=None, dump_file_lang_code="zh"
+            ),
         )
 
     def tearDown(self):
@@ -223,3 +228,70 @@ class TestLinkage(TestCase):
         self.assertEqual(data[3]["word"], "飯碗頭")
         self.assertEqual(data[3]["raw_tags"], ["上海"])
         self.assertEqual(set(data[3]["tags"]), {"Wu", "figuratively"})
+
+    def test_level_3_linkage_section(self):
+        self.wxr.wtp.add_page(
+            "Template:col3",
+            10,
+            """<div><div><ul><li><span class="Hani" lang="zh">[[愚民政策#漢語|愚民政策]]</span></li></ul></div></div>""",
+        )
+        self.wxr.wtp.add_page(
+            "Template:CJKV",
+            10,
+            """<div>[[w:漢字詞|漢字詞]]（-{<!----><span class="Hani" lang="zh">愚民</span><!---->}-）：
+* <span class="desc-arr" title="借詞">→</span> 日語:<templatestyles src="Module:etymology/style.css"></templatestyles> <span class="Jpan" lang="ja">[[愚民#日語|<ruby>愚<rp>(</rp><rt>ぐ</rt><rp>)</rp></ruby><ruby>民<rp>(</rp><rt>みん</rt><rp>)</rp></ruby>]]</span> <span class="mention-gloss-paren annotation-paren">(</span><span class="tr"><span class="mention-tr tr">gumin</span></span><span class="mention-gloss-paren annotation-paren">)</span></div>""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "愚民",
+            """==漢語==
+===名詞===
+# [[愚昧]]的[[人民]]
+
+===動詞===
+# 使[[人民]][[愚昧]]
+
+====衍生詞====
+{{col3|zh|愚民政策}}
+
+===派生詞===
+{{CJKV||j=愚%民|ぐ%みん}}""",
+        )
+        self.assertEqual(
+            page_data,
+            [
+                {
+                    "descendants": [
+                        {
+                            "lang_code": "ja",
+                            "lang": "日語",
+                            "roman": "gumin",
+                            "ruby": [("愚", "ぐ"), ("民", "みん")],
+                            "word": "愚民",
+                        }
+                    ],
+                    "lang": "漢語",
+                    "lang_code": "zh",
+                    "pos": "noun",
+                    "senses": [{"glosses": ["愚昧的人民"]}],
+                    "word": "愚民",
+                },
+                {
+                    "lang": "漢語",
+                    "lang_code": "zh",
+                    "pos": "verb",
+                    "descendants": [
+                        {
+                            "lang_code": "ja",
+                            "lang": "日語",
+                            "roman": "gumin",
+                            "ruby": [("愚", "ぐ"), ("民", "みん")],
+                            "word": "愚民",
+                        }
+                    ],
+                    "senses": [{"glosses": ["使人民愚昧"]}],
+                    "derived": [{"word": "愚民政策"}],
+                    "word": "愚民",
+                },
+            ],
+        )

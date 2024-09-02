@@ -288,7 +288,7 @@ def process_thesaurus_ja_r_template(
 ) -> ThesaurusTerm:
     from .linkage import process_ja_r_template
 
-    linkage_data = process_ja_r_template(wxr, [], template_node, "", "")
+    linkage_data = process_ja_r_template(wxr, template_node, "")
     return ThesaurusTerm(
         entry_word,
         lang_code,

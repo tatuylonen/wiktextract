@@ -9,25 +9,34 @@ from .tags import translate_raw_tags
 
 
 def extract_descendant_section(
-    wxr: WiktextractContext, level_node: WikiNode, word_entry: WordEntry
+    wxr: WiktextractContext, level_node: WikiNode, page_data: list[WordEntry]
 ) -> None:
+    desc_list = []
     for list_node in level_node.find_child(NodeKind.LIST):
         for list_item in list_node.find_child(NodeKind.LIST_ITEM):
             for data in process_desc_list_item(wxr, list_item, []):
                 if data.word != "":
-                    word_entry.descendants.append(data)
+                    desc_list.append(data)
     for node in level_node.find_child(NodeKind.TEMPLATE):
         if node.template_name.lower() == "cjkv":
-            process_cjkv_template(wxr, node, word_entry)
+            desc_list.extend(process_cjkv_template(wxr, node))
+
+    if level_node.kind == NodeKind.LEVEL3:
+        for data in page_data:
+            if data.lang_code == page_data[-1].lang_code:
+                data.descendants.extend(desc_list)
+    elif len(page_data) > 0:
+        page_data[-1].descendants.extend(desc_list)
 
 
 def process_cjkv_template(
-    wxr: WiktextractContext, template_node: TemplateNode, word_entry: WordEntry
-) -> None:
+    wxr: WiktextractContext, template_node: TemplateNode
+) -> list[Descendant]:
     expanded_template = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(template_node), expand_all=True
     )
     seen_lists = set()
+    desc_list = []
     for list_node in expanded_template.find_child_recursively(NodeKind.LIST):
         if list_node in seen_lists:
             continue
@@ -35,7 +44,8 @@ def process_cjkv_template(
         for list_item in list_node.find_child(NodeKind.LIST_ITEM):
             for data in process_desc_list_item(wxr, list_item, []):
                 if data.word != "":
-                    word_entry.descendants.append(data)
+                    desc_list.append(data)
+    return desc_list
 
 
 def process_desc_list_item(

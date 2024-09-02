@@ -22,37 +22,45 @@ def extract_linkage_section(
     linkage_type: str,
 ) -> None:
     sense = ""
+    linkage_list = []
     for node in level_node.find_child(NodeKind.TEMPLATE | NodeKind.LIST):
         if node.kind == NodeKind.LIST:
             for item_node in node.find_child(NodeKind.LIST_ITEM):
-                sense = process_linkage_list_item(
-                    wxr, page_data, item_node, linkage_type, sense
+                sense, new_linkage_list = process_linkage_list_item(
+                    wxr, item_node, sense
                 )
+                linkage_list.extend(new_linkage_list)
         elif isinstance(node, TemplateNode):
             if node.template_name in ["s", "sense"]:
                 sense = clean_node(wxr, None, node).strip("()： ")
             elif node.template_name == "zh-dial":
-                extract_zh_dial_template(
-                    wxr, page_data, node, linkage_type, sense
-                )
+                linkage_list.extend(extract_zh_dial_template(wxr, node, sense))
             elif node.template_name.endswith("-saurus"):
-                extract_saurus_template(
-                    wxr, page_data, node, linkage_type, sense
+                linkage_list.extend(
+                    extract_saurus_template(
+                        wxr, page_data, node, linkage_type, sense
+                    )
                 )
             elif node.template_name.startswith("col"):
-                process_linkage_col_template(
-                    wxr, page_data, node, linkage_type, sense
+                linkage_list.extend(
+                    process_linkage_col_template(wxr, node, sense)
                 )
+
+    if level_node.kind == NodeKind.LEVEL3:
+        for data in page_data:
+            if data.lang_code == page_data[-1].lang_code:
+                pre_linkage_list = getattr(data, linkage_type)
+                pre_linkage_list.extend(linkage_list)
+    elif len(page_data) > 0:
+        pre_linkage_list = getattr(page_data[-1], linkage_type)
+        pre_linkage_list.extend(linkage_list)
 
 
 def process_linkage_list_item(
-    wxr: WiktextractContext,
-    page_data: list[WordEntry],
-    list_item: WikiNode,
-    linkage_type: str,
-    sense: str,
-) -> str:
+    wxr: WiktextractContext, list_item: WikiNode, sense: str
+) -> tuple[str, list[Linkage]]:
     raw_tags = []
+    linkage_list = []
     for item_child in list_item.children:
         if isinstance(item_child, TemplateNode):
             if item_child.template_name in ["s", "sense"]:
@@ -60,18 +68,18 @@ def process_linkage_list_item(
             elif item_child.template_name in ["qualifier", "qual"]:
                 raw_tags.append(clean_node(wxr, None, item_child).strip("()"))
             elif item_child.template_name == "zh-l":
-                process_zh_l_template(
-                    wxr, page_data, item_child, linkage_type, sense, raw_tags
+                linkage_list.extend(
+                    process_zh_l_template(wxr, item_child, sense, raw_tags)
                 )
                 raw_tags.clear()
             elif item_child.template_name == "ja-r":
-                process_ja_r_template(
-                    wxr, page_data, item_child, linkage_type, sense, raw_tags
+                linkage_list.append(
+                    process_ja_r_template(wxr, item_child, sense, raw_tags)
                 )
                 raw_tags.clear()
             elif item_child.template_name in ["l", "link", "alter"]:
-                process_l_template(
-                    wxr, page_data, item_child, linkage_type, sense, raw_tags
+                linkage_list.extend(
+                    process_l_template(wxr, item_child, sense, raw_tags)
                 )
                 raw_tags.clear()
         elif (
@@ -79,15 +87,14 @@ def process_linkage_list_item(
             and item_child.kind == NodeKind.LINK
         ):
             word = clean_node(wxr, None, item_child)
-            if len(word) > 0 and len(page_data) > 0:
+            if len(word) > 0:
                 linkage_data = Linkage(
                     word=word, sense=sense, raw_tags=raw_tags
                 )
-                pre_data = getattr(page_data[-1], linkage_type)
                 translate_raw_tags(linkage_data)
-                pre_data.append(linkage_data)
+                linkage_list.append(linkage_data)
                 raw_tags.clear()
-    return sense
+    return sense, linkage_list
 
 
 def extract_saurus_template(
@@ -96,7 +103,7 @@ def extract_saurus_template(
     node: TemplateNode,
     linkage_type: str,
     sense: str,
-) -> None:
+) -> list[Linkage]:
     """
     Extract data from template names end with "-saurus", like "zh-syn-saurus"
     and "zh-ant-saurus". These templates get data from thesaurus pages, search
@@ -106,6 +113,7 @@ def extract_saurus_template(
     """
     from wiktextract.thesaurus import search_thesaurus
 
+    linkage_data = []
     if node.template_name in ("zh-syn-saurus", "zh-ant-saurus"):
         # obsolete templates
         thesaurus_page_title = node.template_parameters.get(1)
@@ -121,24 +129,23 @@ def extract_saurus_template(
     ):
         if thesaurus.term == wxr.wtp.title:
             continue
-        linkage_data = Linkage(
-            word=thesaurus.term,
-            roman=thesaurus.roman,
-            tags=thesaurus.tags,
-            raw_tags=thesaurus.raw_tags,
-            sense=sense,
+        linkage_data.append(
+            Linkage(
+                word=thesaurus.term,
+                roman=thesaurus.roman,
+                tags=thesaurus.tags,
+                raw_tags=thesaurus.raw_tags,
+                sense=sense,
+            )
         )
-        pre_data = getattr(page_data[-1], linkage_type)
-        pre_data.append(linkage_data)
+
+    return linkage_data
 
 
 def extract_zh_dial_template(
-    wxr: WiktextractContext,
-    page_data: list[WordEntry],
-    template_node: TemplateNode,
-    linkage_type: str,
-    sense: str,
-) -> None:
+    wxr: WiktextractContext, template_node: TemplateNode, sense: str
+) -> list[Linkage]:
+    linkage_list = []
     dial_data = defaultdict(set)
     tag_data = defaultdict(set)
     expanded_node = wxr.wtp.parse(
@@ -180,24 +187,23 @@ def extract_zh_dial_template(
     for term, lang_tags in dial_data.items():
         linkage_data = Linkage(word=term, sense=sense, raw_tags=list(lang_tags))
         linkage_data.raw_tags.extend(list(tag_data.get(term, {})))
-        pre_data = getattr(page_data[-1], linkage_type)
         translate_raw_tags(linkage_data)
-        pre_data.append(linkage_data)
+        linkage_list.append(linkage_data)
+    return linkage_list
 
 
 def process_zh_l_template(
     wxr: WiktextractContext,
-    page_data: list[WordEntry],
     template_node: TemplateNode,
-    linkage_type: str,
     sense: str,
     raw_tags: list[str] = [],
-) -> None:
+) -> list[Linkage]:
     # https://zh.wiktionary.org/wiki/Template:Zh-l
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(template_node), expand_all=True
     )
     roman = ""
+    linkage_list = []
     for i_tag in expanded_node.find_html_recursively(
         "span", attr_name="class", attr_value="Latn"
     ):
@@ -216,21 +222,15 @@ def process_zh_l_template(
             linkage_data.tags.append("Traditional Chinese")
         elif lang_attr == "zh-Hans":
             linkage_data.tags.append("Simplified Chinese")
-        if (
-            len(linkage_data.word) > 0
-            and len(page_data) > 0
-            and linkage_data.word != "／"
-        ):
-            pre_data = getattr(page_data[-1], linkage_type)
+        if len(linkage_data.word) > 0 and linkage_data.word != "／":
             translate_raw_tags(linkage_data)
-            pre_data.append(linkage_data)
+            linkage_list.append(linkage_data)
+    return linkage_list
 
 
 def process_ja_r_template(
     wxr: WiktextractContext,
-    page_data: list[WordEntry],
     template_node: TemplateNode,
-    linkage_type: str,
     sense: str,
     raw_tags: list[str] = [],
 ) -> Linkage:
@@ -250,19 +250,13 @@ def process_ja_r_template(
         elif "mention-gloss" == span_class:
             linkage_data.sense = clean_node(wxr, None, span_node)
 
-    if len(linkage_data.word) > 0 and len(page_data) > 0:
-        pre_data = getattr(page_data[-1], linkage_type)
-        translate_raw_tags(linkage_data)
-        pre_data.append(linkage_data)
-
+    translate_raw_tags(linkage_data)
     return linkage_data
 
 
 def process_l_template(
     wxr: WiktextractContext,
-    page_data: list[WordEntry],
     template_node: TemplateNode,
-    linkage_type: str,
     sense: str,
     raw_tags: list[str] = [],
 ) -> None:
@@ -270,25 +264,23 @@ def process_l_template(
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(template_node), expand_all=True
     )
+    linkage_list = []
     for span_tag in expanded_node.find_html("span", attr_name="lang"):
         linkage_data = Linkage(
             sense=sense, raw_tags=raw_tags, word=clean_node(wxr, None, span_tag)
         )
-        if len(linkage_data.word) > 0 and len(page_data) > 0:
-            pre_data = getattr(page_data[-1], linkage_type)
+        if len(linkage_data.word) > 0:
             translate_raw_tags(linkage_data)
-            pre_data.append(linkage_data)
+            linkage_list.append(linkage_data)
+    return linkage_list
 
 
 def process_linkage_col_template(
-    wxr: WiktextractContext,
-    page_data: list[WordEntry],
-    template_node: TemplateNode,
-    linkage_type: str,
-    sense: str,
-) -> None:
+    wxr: WiktextractContext, template_node: TemplateNode, sense: str
+) -> list[Linkage]:
     from .thesaurus import process_col_template
 
+    linkage_list = []
     for data in process_col_template(wxr, "", "", "", "", "", template_node):
         linkage_data = Linkage(
             word=data.term,
@@ -297,9 +289,10 @@ def process_linkage_col_template(
             raw_tags=data.raw_tags,
             sense=sense,
         )
-        if len(linkage_data.word) > 0 and len(page_data) > 0:
-            pre_data = getattr(page_data[-1], linkage_type)
-            pre_data.append(linkage_data)
+        if len(linkage_data.word) > 0:
+            translate_raw_tags(linkage_data)
+            linkage_list.append(linkage_data)
+    return linkage_list
 
 
 def process_linkage_templates_in_gloss(

@@ -37,12 +37,12 @@ class TestDescendant(TestCase):
         root = self.wxr.wtp.parse(
             "* {{desc|bor=1|ja|-}} {{ja-r|你好|ニイハオ}}"
         )
-        page_data = WordEntry(
-            word="你好", lang_code="ja", lang="日語", pos="intj"
-        )
+        page_data = [
+            WordEntry(word="你好", lang_code="ja", lang="日語", pos="intj")
+        ]
         extract_descendant_section(self.wxr, root, page_data)
         self.assertEqual(
-            page_data.descendants[0].model_dump(exclude_defaults=True),
+            page_data[0].descendants[0].model_dump(exclude_defaults=True),
             {
                 "lang_code": "ja",
                 "lang": "日語",
@@ -60,12 +60,12 @@ class TestDescendant(TestCase):
             '<span class="desc-arr" title="仿譯詞">→</span> 壯語: <span class="Latn" lang="za">[[mwngz ndei#壯語|-{mwngz ndei}-]]</span> <span class="ib-brac qualifier-brac">(</span><span class="ib-content qualifier-content">仿譯詞</span><span class="ib-brac qualifier-brac">)</span>',
         )
         root = self.wxr.wtp.parse("* {{desc|za|mwngz ndei|cal=1}}")
-        page_data = WordEntry(
-            word="你好", lang_code="zh", lang="漢語", pos="intj"
-        )
+        page_data = [
+            WordEntry(word="你好", lang_code="zh", lang="漢語", pos="intj")
+        ]
         extract_descendant_section(self.wxr, root, page_data)
         self.assertEqual(
-            page_data.descendants[0].model_dump(exclude_defaults=True),
+            page_data[0].descendants[0].model_dump(exclude_defaults=True),
             {
                 "lang_code": "za",
                 "lang": "壯語",
@@ -92,12 +92,12 @@ class TestDescendant(TestCase):
 *:* {{desc|cmn|-|der=1}} {{zh-l|宅男}}
 *:* {{desc|cmn|-|der=1}} {{zh-l|宅女}}"""
         )
-        page_data = WordEntry(
-            word="オタク", lang_code="ja", lang="日語", pos="noun"
-        )
+        page_data = [
+            WordEntry(word="オタク", lang_code="ja", lang="日語", pos="noun")
+        ]
         extract_descendant_section(self.wxr, root, page_data)
         self.assertEqual(
-            page_data.descendants[0].model_dump(exclude_defaults=True),
+            page_data[0].descendants[0].model_dump(exclude_defaults=True),
             {
                 "descendants": [
                     {
@@ -133,14 +133,14 @@ class TestDescendant(TestCase):
             '<span class="Hant" lang="zh-Hant">-{<!---->[[吸貓#漢語|吸貓]]<!---->}-</span><span class="Hani" lang="zh">-{<!---->／<!---->}-</span><span class="Hans" lang="zh-Hans">-{<!---->[[吸猫#漢語|吸猫]]<!---->}-</span> (<i><span class="tr Latn" lang="la">-{<!---->xīmāo<!---->}-</span></i>)',
         )
         root = self.wxr.wtp.parse("* {{desc|zh|-|bor=1}} {{zh-l|吸貓}}")
-        page_data = WordEntry(
-            word="猫吸い", lang_code="ja", lang="日語", pos="noun"
-        )
+        page_data = [
+            WordEntry(word="猫吸い", lang_code="ja", lang="日語", pos="noun")
+        ]
         extract_descendant_section(self.wxr, root, page_data)
         self.assertEqual(
             [
                 d.model_dump(exclude_defaults=True)
-                for d in page_data.descendants
+                for d in page_data[0].descendants
             ],
             [
                 {
@@ -168,14 +168,14 @@ class TestDescendant(TestCase):
             '<span class="desc-arr" title="借詞">→</span> 波斯語: <span class="Arab fa-Arab" lang="fa">[[فرانسه#波斯語|-{فرانسه}-]]</span> <span class="mention-gloss-paren annotation-paren">(</span><span lang="fa-Latn" class="tr Latn">farânse</span><span class="mention-gloss-paren annotation-paren">)</span><ul><li><span class="desc-arr" title="借詞">→</span> 普什圖語: <span class="Arab ps-Arab" lang="ps">[[فرانسه#普什圖語|-{فرانسه}-]]</span> <span class="mention-gloss-paren annotation-paren">(</span><span lang="ps-Latn" class="tr Latn">farānsa</span><span class="mention-gloss-paren annotation-paren">)</span></li></ul>',
         )
         root = self.wxr.wtp.parse("* {{desctree|fa|فرانسه|tr=farânse|bor=1}}")
-        page_data = WordEntry(
-            word="français", lang_code="fr", lang="法語", pos="noun"
-        )
+        page_data = [
+            WordEntry(word="français", lang_code="fr", lang="法語", pos="noun")
+        ]
         extract_descendant_section(self.wxr, root, page_data)
         self.assertEqual(
             [
                 d.model_dump(exclude_defaults=True)
-                for d in page_data.descendants
+                for d in page_data[0].descendants
             ],
             [
                 {
@@ -206,14 +206,14 @@ class TestDescendant(TestCase):
 * <span class="desc-arr" title="借詞">→</span> 越南語: <span class="Latn" lang="vi">[[Trung văn#越南語|-{Trung văn}-]]</span> <span class="mention-gloss-paren annotation-paren">(</span><span lang="vi-Latn" class="tr Latn"><span class="Hani" lang="vi">[[中文#越南語|-{中文}-]]</span></span><span class="mention-gloss-paren annotation-paren">)</span></div>""",
         )
         root = self.wxr.wtp.parse("{{CJKV|中文|ちゅうぶん|중문|Trung văn}}")
-        page_data = WordEntry(
-            word="中文", lang_code="zh", lang="漢語", pos="noun"
-        )
+        page_data = [
+            WordEntry(word="中文", lang_code="zh", lang="漢語", pos="noun")
+        ]
         extract_descendant_section(self.wxr, root, page_data)
         self.assertEqual(
             [
                 d.model_dump(exclude_defaults=True)
-                for d in page_data.descendants
+                for d in page_data[0].descendants
             ],
             [
                 {
