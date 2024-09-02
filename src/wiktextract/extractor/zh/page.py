@@ -101,7 +101,7 @@ def parse_section(
             extract_descendant_section(
                 wxr,
                 level_node,
-                page_data[-1] if len(page_data) > 0 else base_data,
+                page_data if len(page_data) > 0 else [base_data],
             )
         elif not is_descendant_section:
             extract_linkage_section(
@@ -120,7 +120,7 @@ def parse_section(
         )
     elif wxr.config.capture_descendants and subtitle in DESCENDANTS_TITLES:
         extract_descendant_section(
-            wxr, level_node, page_data[-1] if len(page_data) > 0 else base_data
+            wxr, level_node, page_data if len(page_data) > 0 else [base_data]
         )
     elif subtitle in NOTES_TITLES:
         extract_note(
