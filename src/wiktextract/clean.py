@@ -1493,7 +1493,7 @@ def clean_value(
     title = re.sub(r"(?si)<sup\b[^>]*>\s*</sup\s*>", "", title)
     title = re.sub(r"(?si)<sup\b[^>]*>(.*?)</sup\s*>", repl_1_sup, title)
     # Change <sub> ... </sub> to _
-    title = re.sub(r"(?si)<sub\b[^>]*>\s*</sup\s*>", "", title)
+    title = re.sub(r"(?si)<sub\b[^>]*>\s*</sub\s*>", "", title)
     title = re.sub(r"(?si)<sub\b[^>]*>(.*?)</sub\s*>", repl_1_sub, title)
     # Change <chem> ... </chem> using subscripts for digits
     title = re.sub(r"(?si)<chem\b[^>]*>(.*?)</chem\s*>", repl_1_chem, title)
