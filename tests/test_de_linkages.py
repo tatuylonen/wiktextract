@@ -47,7 +47,7 @@ class TestDELinkages(unittest.TestCase):
             ],
         )
 
-    def test_clean_explanatory_text_in_expressions(self):
+    def test_explanatory_text_in_expressions(self):
         self.wxr.wtp.start_page("Beispiel")
         root = self.wxr.wtp.parse("""====Redewendungen====
 :[[ein gutes Beispiel geben|ein gutes ''Beispiel'' geben]] – als [[Vorbild]] zur [[Nachahmung]] [[dienen]]/[[herausfordern]]""")
@@ -66,7 +66,7 @@ class TestDELinkages(unittest.TestCase):
             ],
         )
 
-    def test_ignore_modifiers_of_relations(self):
+    def test_italic_tag(self):
         self.wxr.wtp.start_page("Kokospalme")
         root = self.wxr.wtp.parse("""====Synonyme====
 :[1] [[Kokosnusspalme]], ''wissenschaftlich:'' [[Cocos nucifera]]""")
@@ -81,6 +81,40 @@ class TestDELinkages(unittest.TestCase):
             [d.model_dump(exclude_defaults=True) for d in word_entry.synonyms],
             [
                 {"word": "Kokosnusspalme", "sense_index": "1"},
-                {"word": "Cocos nucifera", "sense_index": "1"},
+                {
+                    "word": "Cocos nucifera",
+                    "sense_index": "1",
+                    "raw_tags": ["wissenschaftlich"],
+                },
+            ],
+        )
+
+    def test_tag_template(self):
+        self.wxr.wtp.start_page("Feber")
+        self.wxr.wtp.add_page("Vorlage:va.", 10, "[[veraltet|''veraltet,'']]")
+        self.wxr.wtp.add_page(
+            "Vorlage:landsch.",
+            10,
+            "[[landschaftlich|''landschaftlich<nowiki>:</nowiki>'']]",
+        )
+        root = self.wxr.wtp.parse(
+            ":[1] {{va.|,}} ''sonst noch'' {{landsch.|:}} [[Hornung]]"
+        )
+        word_entry = WordEntry(
+            word="Feber",
+            lang_code="de",
+            lang="Deutsch",
+            senses=[Sense(sense_index="1")],
+        )
+        extract_linkages(self.wxr, word_entry, root.children[0], "synonyms")
+        self.assertEqual(
+            [d.model_dump(exclude_defaults=True) for d in word_entry.synonyms],
+            [
+                {
+                    "word": "Hornung",
+                    "sense_index": "1",
+                    "tags": ["archaic"],
+                    "raw_tags": ["landschaftlich"],
+                },
             ],
         )

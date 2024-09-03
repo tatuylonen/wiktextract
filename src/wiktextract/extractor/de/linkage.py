@@ -1,11 +1,12 @@
 import re
 from typing import Optional
 
-from wikitextprocessor.parser import LevelNode, NodeKind, WikiNode
+from wikitextprocessor.parser import LevelNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .models import Linkage, WordEntry
+from .tags import translate_raw_tags
 from .utils import extract_sense_index
 
 
@@ -16,57 +17,60 @@ def extract_linkages(
     linkage_type: str,
 ) -> None:
     linkage_list = []
-    for list_node in level_node.find_child(NodeKind.LIST):
-        for list_item in list_node.find_child(NodeKind.LIST_ITEM):
-            sense_idx = ""
-            for child in list_item.children:
-                if isinstance(child, str) and child.startswith("["):
-                    sense_idx, _ = extract_sense_index(child)
-            # Extract links
-            if linkage_type == "expressions":
-                after_dash = False
-                note_nodes = []
-                for child in list_item.children:
-                    if after_dash:
-                        note_nodes.append(child)
-                    elif isinstance(child, str) and contains_dash(child):
-                        after_dash = True
-                        note_nodes.append(child)
-                    elif (
-                        isinstance(child, WikiNode)
-                        and child.kind == NodeKind.LINK
-                    ):
-                        new_data = process_link(wxr, sense_idx, child)
-                        if new_data is not None:
-                            linkage_list.append(new_data)
-                note_text = clean_node(wxr, None, note_nodes).strip("–—―‒- ")
-                if len(linkage_list) > 0:
-                    linkage_list[-1].note = note_text
-            else:
-                for link_node in list_item.find_child(NodeKind.LINK):
-                    new_data = process_link(wxr, sense_idx, link_node)
-                    if new_data is not None:
-                        linkage_list.append(new_data)
-
-            # Check for potentially missed data
-            for non_link in list_item.invert_find_child(NodeKind.LINK):
-                if (
-                    linkage_type == "expressions"
-                    and isinstance(non_link, str)
-                    and contains_dash(non_link)
-                ):
-                    break
-                elif isinstance(non_link, str) and (
-                    non_link.startswith("[") or len(non_link.strip()) <= 3
-                ):
-                    continue
-                wxr.wtp.debug(
-                    f"Unexpected non-link node '{non_link}' in: {list_item}",
-                    sortid="extractor/de/linkages/extract_linkages/84",
-                )
-
+    for list_item in level_node.find_child_recursively(NodeKind.LIST_ITEM):
+        process_linkage_list_item(wxr, list_item, linkage_list, linkage_type)
     pre_list = getattr(word_entry, linkage_type)
     pre_list.extend(linkage_list)
+
+
+def process_linkage_list_item(
+    wxr: WiktextractContext,
+    list_item_node: WikiNode,
+    linkage_list: list[Linkage],
+    linkage_type: str,
+) -> None:
+    sense_idx = ""
+    raw_tags = []
+    after_dash = False
+    note_nodes = []
+    for child in list_item_node.children:
+        if after_dash:
+            note_nodes.append(child)
+        elif isinstance(child, str):
+            if child.startswith("["):
+                sense_idx, _ = extract_sense_index(child)
+            elif "," in child or ";" in child:
+                raw_tags.clear()
+            if linkage_type == "expressions" and contains_dash(child):
+                after_dash = True
+                note_nodes.append(child)
+        elif isinstance(child, WikiNode) and child.kind == NodeKind.ITALIC:
+            raw_tag = clean_node(wxr, None, child)
+            if raw_tag.endswith(":"):
+                raw_tags.append(raw_tag.strip(": "))
+        elif isinstance(child, TemplateNode) and child.template_name.endswith(
+            "."
+        ):
+            raw_tag = clean_node(wxr, None, child)
+            raw_tag = raw_tag.strip(",: ")
+            if raw_tag != "":
+                raw_tags.append(raw_tag)
+        elif isinstance(child, WikiNode) and child.kind == NodeKind.LINK:
+            word = clean_node(wxr, None, child)
+            if not word.startswith("Verzeichnis:") and len(word) > 0:
+                # https://de.wiktionary.org/wiki/Wiktionary:Verzeichnis
+                # Links to this namesapce pages are ignored,
+                # should find what it contains later
+                linkage = Linkage(
+                    word=word, sense_index=sense_idx, raw_tags=raw_tags
+                )
+                translate_raw_tags(linkage)
+                linkage_list.append(linkage)
+
+    if len(note_nodes) > 0:
+        linkage_list[-1].note = clean_node(wxr, None, note_nodes).strip(
+            "–—―‒- "
+        )
 
 
 def process_link(

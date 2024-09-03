@@ -14,6 +14,8 @@ class Linkage(BaseModelWrap):
     word: str
     sense_index: str = ""
     note: str = ""
+    raw_tags: list[str] = []
+    tags: list[str] = []
 
 
 class Translation(BaseModelWrap):
