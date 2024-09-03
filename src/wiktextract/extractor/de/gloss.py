@@ -1,11 +1,10 @@
-from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import LevelNode, TemplateNode
+from wikitextprocessor.parser import LevelNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .models import AltForm, Sense, WordEntry
 from .tags import GRAMMATICAL_TAGS, translate_raw_tags
-from .utils import match_senseid
+from .utils import extract_sense_index
 
 
 def extract_glosses(
@@ -111,15 +110,15 @@ def process_gloss_list_item(
                     gloss_nodes.append(gloss_node)
 
             gloss_text = clean_node(wxr, sense_data, gloss_nodes)
-            senseid, gloss_text = match_senseid(gloss_text)
-            if senseid != "":
+            sense_idx, gloss_text = extract_sense_index(gloss_text)
+            if sense_idx != "":
                 if (
-                    not senseid[0].isnumeric()
+                    not sense_idx[0].isnumeric()
                     and parent_sense is not None
-                    and len(parent_sense.senseid) != ""
+                    and len(parent_sense.sense_index) != ""
                 ):
-                    senseid = parent_sense.senseid + senseid
-                sense_data.senseid = senseid
+                    sense_idx = parent_sense.sense_index + sense_idx
+                sense_data.sense_index = sense_idx
             elif len(gloss_text.strip()) > 0:
                 wxr.wtp.debug(
                     "Failed to extract sense number from gloss node",

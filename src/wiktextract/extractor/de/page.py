@@ -1,8 +1,7 @@
 from typing import Any
 
 from mediawiki_langcodes import name_to_code
-from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import LevelNode, TemplateNode
+from wikitextprocessor.parser import LevelNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -48,7 +47,7 @@ def parse_section(
         wxr.wtp.start_subsection(section_name)
         if not len(page_data) > 0:
             wxr.wtp.debug(
-                f"Reached section without extracting some page data first: {level_node}",
+                f"Reached level 4 section without extracted data: {level_node}",
                 sortid="extractor/de/page/parse_section/55",
             )
             return
@@ -57,13 +56,15 @@ def parse_section(
         elif wxr.config.capture_pronunciation and section_name == "Aussprache":
             extract_pronunciation(wxr, page_data[-1], level_node)
         elif wxr.config.capture_examples and section_name == "Beispiele":
-            extract_examples(wxr, page_data[-1], level_node)
+            extract_examples(wxr, page_data, level_node)
         elif (
             wxr.config.capture_translations and section_name == "Übersetzungen"
         ):
             extract_translation(wxr, page_data[-1], level_node)
         elif wxr.config.capture_linkages and section_name in LINKAGE_TITLES:
-            extract_linkages(wxr, page_data[-1], level_node)
+            extract_linkages(
+                wxr, page_data[-1], level_node, LINKAGE_TITLES[section_name]
+            )
         elif wxr.config.capture_etymologies and section_name == "Herkunft":
             extract_etymology(wxr, page_data[-1], level_node)
 

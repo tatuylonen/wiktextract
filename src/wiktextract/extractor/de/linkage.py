@@ -1,31 +1,27 @@
 import re
+from typing import Optional
 
-from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import LevelNode
+from wikitextprocessor.parser import LevelNode, NodeKind, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
-from ..share import split_senseids
 from .models import Linkage, WordEntry
-from .section_titles import LINKAGE_TITLES
+from .utils import extract_sense_index
 
 
 def extract_linkages(
-    wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
-):
-    linkage_type = LINKAGE_TITLES.get(level_node.largs[0][0])
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    level_node: LevelNode,
+    linkage_type: str,
+) -> None:
+    linkage_list = []
     for list_node in level_node.find_child(NodeKind.LIST):
         for list_item in list_node.find_child(NodeKind.LIST_ITEM):
-            # Get the senseids
-            senseids = (
-                split_senseids(list_item.children[0])
-                if (
-                    len(list_item.children) > 0
-                    and isinstance(list_item.children[0], str)
-                )
-                else []
-            )
-
+            sense_idx = ""
+            for child in list_item.children:
+                if isinstance(child, str) and child.startswith("["):
+                    sense_idx, _ = extract_sense_index(child)
             # Extract links
             if linkage_type == "expressions":
                 after_dash = False
@@ -40,16 +36,17 @@ def extract_linkages(
                         isinstance(child, WikiNode)
                         and child.kind == NodeKind.LINK
                     ):
-                        process_link(
-                            wxr, word_entry, linkage_type, senseids, child
-                        )
+                        new_data = process_link(wxr, sense_idx, child)
+                        if new_data is not None:
+                            linkage_list.append(new_data)
                 note_text = clean_node(wxr, None, note_nodes).strip("–—―‒- ")
-                if len(word_entry.expressions) > 0:
-                    word_entry.expressions[-1].note = note_text
-
+                if len(linkage_list) > 0:
+                    linkage_list[-1].note = note_text
             else:
-                for link in list_item.find_child(NodeKind.LINK):
-                    process_link(wxr, word_entry, linkage_type, senseids, link)
+                for link_node in list_item.find_child(NodeKind.LINK):
+                    new_data = process_link(wxr, sense_idx, link_node)
+                    if new_data is not None:
+                        linkage_list.append(new_data)
 
             # Check for potentially missed data
             for non_link in list_item.invert_find_child(NodeKind.LINK):
@@ -64,34 +61,26 @@ def extract_linkages(
                 ):
                     continue
                 wxr.wtp.debug(
-                    f"Found unexpected non-link node '{non_link}' in: {list_item}",
+                    f"Unexpected non-link node '{non_link}' in: {list_item}",
                     sortid="extractor/de/linkages/extract_linkages/84",
                 )
+
+    pre_list = getattr(word_entry, linkage_type)
+    pre_list.extend(linkage_list)
 
 
 def process_link(
     wxr: WiktextractContext,
-    word_entry: WordEntry,
-    linkage_type: str,
-    sense_ids: list[str],
+    sense_idx: str,
     link_node: WikiNode,
-):
+) -> Optional[Linkage]:
     word = clean_node(wxr, None, link_node)
     if word.startswith("Verzeichnis:") or len(word) == 0:
         # https://de.wiktionary.org/wiki/Wiktionary:Verzeichnis
         # Links to this namesapce pages are ignored,
         # should find what it contains later
-        return
-    if linkage_type in word_entry.model_fields:
-        linkage = Linkage(word=word)
-        if len(sense_ids) > 0:
-            linkage.sense_id = sense_ids[0]
-        getattr(word_entry, linkage_type).append(linkage)
-    else:
-        wxr.wtp.debug(
-            f"Linkage type {linkage_type} not in entry model fields",
-            sortid="extractor/de/linkages/108}",
-        )
+        return None
+    return Linkage(word=word, sense_index=sense_idx)
 
 
 def contains_dash(text: str) -> bool:

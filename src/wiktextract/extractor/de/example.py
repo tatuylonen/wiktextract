@@ -1,10 +1,11 @@
-from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import LevelNode
+import re
+
+from wikitextprocessor.parser import LevelNode, NodeKind, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .models import Example, Sense, WordEntry
-from .utils import find_and_remove_child, match_senseid
+from .utils import extract_sense_index
 
 REF_KEY_MAP = {
     "autor": "author",
@@ -35,37 +36,29 @@ REF_KEY_MAP = {
 
 def extract_examples(
     wxr: WiktextractContext,
-    word_entry: WordEntry,
+    page_data: list[WordEntry],
     level_node: LevelNode,
 ) -> None:
     last_example = None
     for list_item_node in level_node.find_child_recursively(NodeKind.LIST_ITEM):
         example_data = Example()
-
-        ref_nodes = find_and_remove_child(
-            list_item_node,
-            NodeKind.HTML,
-            lambda html_node: html_node.tag == "ref",
-        )
-        for ref_node in ref_nodes:
-            extract_reference(wxr, example_data, ref_node)
-
+        for ref_tag in list_item_node.find_html("ref"):
+            extract_reference(wxr, example_data, ref_tag)
         example_text = clean_node(
             wxr, None, list(list_item_node.invert_find_child(NodeKind.LIST))
         )
-
-        senseid, example_text = match_senseid(example_text)
-
+        sense_idx, example_text = extract_sense_index(example_text)
         if len(example_text) > 0:
             example_data.text = example_text
-            if len(senseid) > 0:
+            if len(sense_idx) > 0:
                 find_sense = False
-                for sense in word_entry.senses:
-                    if sense.senseid == senseid:
-                        sense.examples.append(example_data)
-                        find_sense = True
+                for word_entry in page_data:
+                    for sense in word_entry.senses:
+                        if match_sense_index(sense_idx, sense):
+                            sense.examples.append(example_data)
+                            find_sense = True
                 if not find_sense:
-                    new_sense = Sense(senseid=senseid, tags=["no-gloss"])
+                    new_sense = Sense(sense_index=sense_idx, tags=["no-gloss"])
                     new_sense.examples.append(example_data)
                     word_entry.senses.append(new_sense)
                 last_example = example_data
@@ -94,7 +87,7 @@ def extract_reference(
 
     if len(template_nodes) > 1:
         wxr.wtp.debug(
-            f"Found unexpected number of templates in example: {template_nodes}",
+            f"Unexpected number of templates in example: {template_nodes}",
             sortid="extractor/de/examples/extract_examples/64",
         )
     elif len(template_nodes) == 1:
@@ -118,3 +111,31 @@ def extract_reference(
 
         # XXX: Treat other templates as well.
         # E.g. https://de.wiktionary.org/wiki/Vorlage:Ref-OWID
+
+
+def match_sense_index(sense_idx: str, sense: Sense) -> bool:
+    exact_match = not (
+        "," in sense_idx or "-" in sense_idx or "." not in sense_idx
+    )
+    if exact_match:
+        return sense_idx == sense.sense_index
+
+    if sense_idx == sense.sense_index:
+        return True
+    first_number_str = re.split(r",|\.|-", sense.sense_index, 1)[0]
+    first_number = 0
+    if first_number_str.isdigit():
+        first_number = int(first_number_str)
+    else:
+        return False
+
+    for try_idx in sense_idx.split(","):
+        try_idx = try_idx.strip()
+        if try_idx == sense.sense_index:
+            return True
+        elif re.fullmatch(r"\d+-\d+", try_idx):
+            start_str, end_str = try_idx.split("-")
+            if int(start_str) <= first_number and first_number <= int(end_str):
+                return True
+
+    return False

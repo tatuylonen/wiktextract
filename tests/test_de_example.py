@@ -1,6 +1,7 @@
 import unittest
 
 from wikitextprocessor import Wtp
+
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.de.example import extract_examples, extract_reference
 from wiktextract.extractor.de.models import Example, Sense, WordEntry
@@ -28,9 +29,9 @@ class TestDEExample(unittest.TestCase):
         )
 
         page_data = self.get_default_page_data()
-        page_data[-1].senses = [Sense(senseid="1"), Sense(senseid="2")]
+        page_data[-1].senses = [Sense(sense_index="1"), Sense(sense_index="2")]
 
-        extract_examples(self.wxr, page_data[-1], root)
+        extract_examples(self.wxr, page_data, root)
 
         senses = [
             s.model_dump(exclude_defaults=True) for s in page_data[-1].senses
@@ -43,15 +44,15 @@ class TestDEExample(unittest.TestCase):
                         {"text": "example1A"},
                         {"text": "example1B"},
                     ],
-                    "senseid": "1",
+                    "sense_index": "1",
                 },
                 {
                     "examples": [{"text": "example2"}],
-                    "senseid": "2",
+                    "sense_index": "2",
                 },
                 {
                     "examples": [{"text": "example3"}],
-                    "senseid": "3",
+                    "sense_index": "3",
                     "tags": ["no-gloss"],
                 },
             ],
@@ -62,9 +63,9 @@ class TestDEExample(unittest.TestCase):
         root = self.wxr.wtp.parse(":[1] example1 <ref>ref1A</ref>")
 
         page_data = self.get_default_page_data()
-        page_data[-1].senses = [Sense(senseid="1")]
+        page_data[-1].senses = [Sense(sense_index="1")]
 
-        extract_examples(self.wxr, page_data[-1], root)
+        extract_examples(self.wxr, page_data, root)
 
         senses = [
             s.model_dump(exclude_defaults=True) for s in page_data[-1].senses
@@ -79,7 +80,7 @@ class TestDEExample(unittest.TestCase):
                             "raw_ref": "ref1A",
                         },
                     ],
-                    "senseid": "1",
+                    "sense_index": "1",
                 },
             ],
         )
@@ -142,25 +143,25 @@ class TestDEExample(unittest.TestCase):
                 lang_code="de",
                 pos="prep",
                 senses=[
-                    Sense(glosses=["gloss 1a"], senseid="1a"),
-                    Sense(glosses=["gloss 1b"], senseid="1b"),
+                    Sense(glosses=["gloss 1a"], sense_index="1a"),
+                    Sense(glosses=["gloss 1b"], sense_index="1b"),
                 ],
                 word="auf",
             )
         ]
-        extract_examples(self.wxr, page_data[-1], root)
+        extract_examples(self.wxr, page_data, root)
         self.assertEqual(
             [s.model_dump(exclude_defaults=True) for s in page_data[-1].senses],
             [
                 {
                     "examples": [{"text": "Er stand auf dem Dach."}],
                     "glosses": ["gloss 1a"],
-                    "senseid": "1a",
+                    "sense_index": "1a",
                 },
                 {
                     "examples": [{"text": "Er stieg aufs Dach."}],
                     "glosses": ["gloss 1b"],
-                    "senseid": "1b",
+                    "sense_index": "1b",
                 },
             ],
         )
@@ -175,12 +176,12 @@ class TestDEExample(unittest.TestCase):
                 lang_code="ca",
                 pos="noun",
                 senses=[
-                    Sense(glosses=["gloss 1"], senseid="1"),
+                    Sense(glosses=["gloss 1"], sense_index="1"),
                 ],
                 word="bot",
             )
         ]
-        extract_examples(self.wxr, page_data[-1], root)
+        extract_examples(self.wxr, page_data, root)
         self.assertEqual(
             [s.model_dump(exclude_defaults=True) for s in page_data[-1].senses],
             [
@@ -192,7 +193,47 @@ class TestDEExample(unittest.TestCase):
                         }
                     ],
                     "glosses": ["gloss 1"],
-                    "senseid": "1",
+                    "sense_index": "1",
+                },
+            ],
+        )
+
+    def test_match_two_sense_indexes(self):
+        self.wxr.wtp.start_page("albanische Sprache")
+        root = self.wxr.wtp.parse(":[1, 2] (1874) „Nach den „Beiträgen“ Hahn's")
+        page_data = [
+            WordEntry(
+                lang="Deutsch",
+                lang_code="de",
+                pos="noun",
+                senses=[
+                    Sense(glosses=["gloss 1"], sense_index="1"),
+                    Sense(glosses=["gloss 2"], sense_index="2"),
+                ],
+                word="albanische Sprache",
+            )
+        ]
+        extract_examples(self.wxr, page_data, root)
+        self.assertEqual(
+            [s.model_dump(exclude_defaults=True) for s in page_data[0].senses],
+            [
+                {
+                    "examples": [
+                        {
+                            "text": "(1874) „Nach den „Beiträgen“ Hahn's",
+                        }
+                    ],
+                    "glosses": ["gloss 1"],
+                    "sense_index": "1",
+                },
+                {
+                    "examples": [
+                        {
+                            "text": "(1874) „Nach den „Beiträgen“ Hahn's",
+                        }
+                    ],
+                    "glosses": ["gloss 2"],
+                    "sense_index": "2",
                 },
             ],
         )

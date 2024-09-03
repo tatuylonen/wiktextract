@@ -22,7 +22,7 @@ def process_u_tabelle_template(
     wxr: WiktextractContext, word_entry: WordEntry, template_node: TemplateNode
 ) -> None:
     # https://de.wiktionary.org/wiki/Vorlage:Ü-Tabelle
-    sense_id = clean_node(
+    sense_idx = clean_node(
         wxr, None, template_node.template_parameters.get(1, "")
     )
     sense = clean_node(
@@ -35,7 +35,7 @@ def process_u_tabelle_template(
         tr_list = wxr.wtp.parse(wxr.wtp.node_to_wikitext(list_arg_value))
         for list_item in tr_list.find_child_recursively(NodeKind.LIST_ITEM):
             process_u_tabelle_list_item(
-                wxr, word_entry, list_item, sense, sense_id
+                wxr, word_entry, list_item, sense, sense_idx
             )
 
 
@@ -44,10 +44,10 @@ def process_u_tabelle_list_item(
     word_entry: WordEntry,
     list_item_node: WikiNode,
     sense: str,
-    sense_id: str,
+    sense_idx: str,
 ) -> None:
     before_colon = True
-    tr_data = Translation(sense=sense, sense_id=sense_id)
+    tr_data = Translation(sense=sense, sense_index=sense_idx)
     for node in list_item_node.children:
         if isinstance(node, str):
             node = node.strip()
@@ -90,7 +90,7 @@ def append_tr_data(word_entry: WordEntry, tr_data: Translation) -> Translation:
     word_entry.translations.append(tr_data.model_copy(deep=True))
     return Translation(
         sense=tr_data.sense,
-        sense_id=tr_data.sense_id,
+        sense_index=tr_data.sense_index,
         lang=tr_data.lang,
         lang_code=tr_data.lang_code,
     )

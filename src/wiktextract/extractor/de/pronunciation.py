@@ -40,8 +40,7 @@ def extract_pronunciation(
                 wxr.wtp.debug(
                     f"Found unexpected non-template node in pronunciation "
                     f"section: {head_template}",
-                    sortid="extractor/de/pronunciation/"
-                    "extract_pronunciation/37",
+                    sortid="extractor/de/pronunciation/43",
                 )
                 continue
             if head_template.template_name == "IPA":
@@ -53,8 +52,9 @@ def extract_pronunciation(
                 process_rhymes(wxr, sound_data, rest, word_entry)
             else:
                 wxr.wtp.debug(
-                    f"Found unexpected template in pronunciation section: {head_template} with content {rest}",
-                    sortid="extractor/de/pronunciation/extract_pronunciation/45)",
+                    "Unexpected template in pronunciation section: "
+                    f"{head_template} with content {rest}",
+                    sortid="extractor/de/pronunciation/58)",
                 )
 
         # Remove empty entries
@@ -68,7 +68,8 @@ def extract_pronunciation(
 
     for non_list_node in level_node.invert_find_child(NodeKind.LIST):
         wxr.wtp.debug(
-            f"Found unexpected non-list node in pronunciation section: {non_list_node}",
+            "Unexpected non-list node in pronunciation section: "
+            f"{non_list_node}",
             sortid="extractor/de/pronunciation/extract_pronunciation/64",
         )
 
@@ -192,7 +193,7 @@ def add_sound_data_without_appending_to_existing_properties(
         else:
             wxr.wtp.debug(
                 f"Unexpected key {key} for Sound",
-                sortid="extractor/de/pronunciation/add_sound_data_without_appending_to_existing_properties/167",
+                sortid="extractor/de/pronunciation/196",
             )
 
 

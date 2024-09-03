@@ -1,6 +1,7 @@
 import unittest
 
 from wikitextprocessor import Wtp
+
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.de.gloss import extract_glosses
 from wiktextract.extractor.de.page import parse_page
@@ -40,7 +41,7 @@ class TestDEGloss(unittest.TestCase):
             [
                 {
                     "glosses": ["das erste Entwicklungsstadium"],
-                    "senseid": "2",
+                    "sense_index": "2",
                 },
                 {
                     "glosses": [
@@ -48,7 +49,7 @@ class TestDEGloss(unittest.TestCase):
                         "erster Trieb einer Pflanze",
                     ],
                     "topics": ["botany"],
-                    "senseid": "2a",
+                    "sense_index": "2a",
                 },
                 {
                     "glosses": [
@@ -56,7 +57,7 @@ class TestDEGloss(unittest.TestCase):
                         "befruchtete Eizelle, Embryo",
                     ],
                     "topics": ["biology", "medicine"],
-                    "senseid": "2b",
+                    "sense_index": "2b",
                 },
             ],
         )
@@ -84,13 +85,13 @@ class TestDEGloss(unittest.TestCase):
                         "etwas, was eine Maschine bearbeiten soll, "
                         "an diese übergeben"
                     ],
-                    "senseid": "4",
+                    "sense_index": "4",
                 },
                 {
                     "tags": ["jargon"],
                     "raw_tags": ["EDV"],
                     "glosses": ["etwas in einen Computer übertragen"],
-                    "senseid": "5",
+                    "sense_index": "5",
                 },
             ],
         )
@@ -120,7 +121,7 @@ class TestDEGloss(unittest.TestCase):
                         "nur in der Wendung „auf etwas erkennen“: im Rahmen "
                         "eines Urteils ein benanntes Verbrechen bestätigen"
                     ],
-                    "senseid": "5",
+                    "sense_index": "5",
                 },
             ],
         )
@@ -151,7 +152,7 @@ class TestDEGloss(unittest.TestCase):
                     "tags": ["transitive", "Austrian German"],
                     "raw_tags": ["besonders", "bayrisch"],
                     "glosses": ["Vieh auf der Alm halten"],
-                    "senseid": "1",
+                    "sense_index": "1",
                 },
             ],
         )
@@ -182,30 +183,30 @@ class TestDEGloss(unittest.TestCase):
                 {
                     "tags": ["transitive"],
                     "glosses": ["etwas oft haben, zu haben pflegen"],
-                    "senseid": "1",
+                    "sense_index": "1",
                 },
                 {
                     "tags": ["transitive"],
                     "raw_tags": ["Stadt/Dorf", "aktiv"],
                     "glosses": ["bewohnen, wohnen"],
-                    "senseid": "2.1",
+                    "sense_index": "2.1",
                 },
                 {
                     "tags": ["transitive"],
                     "raw_tags": ["Stadt/Dorf", "passiv"],
                     "glosses": ["bewohnt werden, zum Wohnsitz dienen"],
-                    "senseid": "2.2",
+                    "sense_index": "2.2",
                 },
                 {
                     "tags": ["intransitive"],
                     "raw_tags": ["sich befinden"],
                     "glosses": ["wohnen"],
-                    "senseid": "3",
+                    "sense_index": "3",
                 },
                 {
                     "tags": ["intransitive", "figurative"],
                     "glosses": ["sich aufhalten, heimisch sein, zu Hause sein"],
-                    "senseid": "4",
+                    "sense_index": "4",
                 },
             ],
         )
@@ -235,7 +236,7 @@ class TestDEGloss(unittest.TestCase):
                         "Akronym",
                     ],
                     "glosses": ["für das erste Fernsehprogramm der ARD"],
-                    "senseid": "2",
+                    "sense_index": "2",
                     "tags": ["colloquial"],
                 },
             ],

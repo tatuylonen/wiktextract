@@ -3,6 +3,7 @@
 import unittest
 
 from wikitextprocessor import Wtp
+
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.de.page import parse_page
 from wiktextract.wxr_context import WiktextractContext
@@ -95,7 +96,7 @@ class TestDEPage(unittest.TestCase):
                                 "Staat in Südosteuropa, im Süden der "
                                 "Balkanhalbinsel"
                             ],
-                            "senseid": "1",
+                            "sense_index": "1",
                         }
                     ],
                     "word": "Griechenland",
