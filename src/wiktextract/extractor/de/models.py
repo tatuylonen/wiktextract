@@ -130,6 +130,7 @@ class Form(BaseModelWrap):
     tags: list[str] = []
     raw_tags: list[str] = []
     source: str = ""
+    sense_index: str = ""
 
 
 class WordEntry(BaseModelWrap):

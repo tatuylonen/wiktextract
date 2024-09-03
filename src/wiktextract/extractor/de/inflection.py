@@ -11,7 +11,7 @@ from .models import Form, WordEntry
 from .tags import translate_raw_tags
 
 
-def extract_forms(
+def extract_inf_table_template(
     wxr: WiktextractContext,
     word_entry: WordEntry,
     template_node: TemplateNode,

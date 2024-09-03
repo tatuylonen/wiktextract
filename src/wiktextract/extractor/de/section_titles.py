@@ -98,6 +98,12 @@ LINKAGE_TITLES: dict[str, str] = {
     "Wortbildungen": "derived",
 }
 
-ETYMOLOGY_TITLES: frozenset[str] = frozenset(["Herkunft"])
-
-PRONUNCIATION_TITLES: frozenset[str] = frozenset(["Aussprache"])
+FORM_TITLES = {
+    "Nebenformen": ["variant"],
+    "Weibliche Wortformen": ["feminine"],
+    "Männliche Wortformen": ["masculine"],
+    "Verkleinerungsformen": ["diminutive"],
+    "Vergrößerungsformen": ["augmentative"],
+    "Kurzformen": ["abbreviation"],
+    "Koseformen": ["affective"],
+}

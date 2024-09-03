@@ -8,12 +8,13 @@ from ...wxr_context import WiktextractContext
 from ...wxr_logging import logger
 from .etymology import extract_etymology
 from .example import extract_examples
+from .form import extracrt_form_section
 from .gloss import extract_glosses
-from .inflection import extract_forms
+from .inflection import extract_inf_table_template
 from .linkage import extract_linkages
 from .models import Sense, WordEntry
 from .pronunciation import extract_pronunciation
-from .section_titles import LINKAGE_TITLES, POS_SECTIONS
+from .section_titles import FORM_TITLES, LINKAGE_TITLES, POS_SECTIONS
 from .translation import extract_translation
 
 # Templates that are used to form panels on pages and that should be ignored in
@@ -45,28 +46,48 @@ def parse_section(
     elif level_node.kind == NodeKind.LEVEL4:
         section_name = clean_node(wxr, None, level_node.largs)
         wxr.wtp.start_subsection(section_name)
-        if not len(page_data) > 0:
-            wxr.wtp.debug(
-                f"Reached level 4 section without extracted data: {level_node}",
-                sortid="extractor/de/page/parse_section/55",
-            )
-            return
         if section_name in ("Bedeutungen", "Grammatische Merkmale"):
-            extract_glosses(wxr, page_data[-1], level_node)
+            extract_glosses(
+                wxr,
+                page_data[-1] if len(page_data) > 0 else base_data,
+                level_node,
+            )
         elif wxr.config.capture_pronunciation and section_name == "Aussprache":
-            extract_pronunciation(wxr, page_data[-1], level_node)
+            extract_pronunciation(
+                wxr,
+                page_data[-1] if len(page_data) > 0 else base_data,
+                level_node,
+            )
         elif wxr.config.capture_examples and section_name == "Beispiele":
             extract_examples(wxr, page_data, level_node)
         elif (
             wxr.config.capture_translations and section_name == "Übersetzungen"
         ):
-            extract_translation(wxr, page_data[-1], level_node)
+            extract_translation(
+                wxr,
+                page_data[-1] if len(page_data) > 0 else base_data,
+                level_node,
+            )
         elif wxr.config.capture_linkages and section_name in LINKAGE_TITLES:
             extract_linkages(
-                wxr, page_data[-1], level_node, LINKAGE_TITLES[section_name]
+                wxr,
+                page_data[-1] if len(page_data) > 0 else base_data,
+                level_node,
+                LINKAGE_TITLES[section_name],
             )
         elif wxr.config.capture_etymologies and section_name == "Herkunft":
-            extract_etymology(wxr, page_data[-1], level_node)
+            extract_etymology(
+                wxr,
+                page_data[-1] if len(page_data) > 0 else base_data,
+                level_node,
+            )
+        elif section_name in FORM_TITLES:
+            extracrt_form_section(
+                wxr,
+                page_data[-1] if len(page_data) > 0 else base_data,
+                level_node,
+                FORM_TITLES[section_name],
+            )
 
 
 FORM_POS = {
@@ -157,7 +178,7 @@ def process_pos_section(
 
     for template_node in level_node.find_child(NodeKind.TEMPLATE):
         if template_node.template_name.endswith("Übersicht"):
-            extract_forms(wxr, page_data[-1], template_node)
+            extract_inf_table_template(wxr, page_data[-1], template_node)
 
     if not level_node.contain_node(NodeKind.LEVEL4):
         extract_glosses(wxr, page_data[-1], level_node)
