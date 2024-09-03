@@ -5,6 +5,7 @@ from wikitextprocessor.parser import LevelNode, NodeKind, WikiNode
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .models import Example, Sense, WordEntry
+from .tags import translate_raw_tags
 from .utils import extract_sense_index
 
 REF_KEY_MAP = {
@@ -40,36 +41,47 @@ def extract_examples(
     level_node: LevelNode,
 ) -> None:
     last_example = None
+    raw_tags = []
     for list_item_node in level_node.find_child_recursively(NodeKind.LIST_ITEM):
-        example_data = Example()
-        for ref_tag in list_item_node.find_html("ref"):
-            extract_reference(wxr, example_data, ref_tag)
-        example_text = clean_node(
-            wxr, None, list(list_item_node.invert_find_child(NodeKind.LIST))
-        )
-        sense_idx, example_text = extract_sense_index(example_text)
-        if len(example_text) > 0:
-            example_data.text = example_text
-            if len(sense_idx) > 0:
-                find_sense = False
-                for word_entry in page_data:
-                    for sense in word_entry.senses:
-                        if match_sense_index(sense_idx, sense):
-                            sense.examples.append(example_data)
-                            find_sense = True
-                if not find_sense:
-                    new_sense = Sense(sense_index=sense_idx, tags=["no-gloss"])
-                    new_sense.examples.append(example_data)
-                    word_entry.senses.append(new_sense)
-                last_example = example_data
-            elif last_example is not None:
-                last_example.translation = example_text
-            else:
-                wxr.wtp.debug(
-                    f"Found example data without senseid: {example_data}",
-                    sortid="extractor/de/examples/extract_examples/28",
-                )
-                last_example = None
+        if not list_item_node.sarg.endswith(":"):
+            raw_tags.clear()
+            raw_tag = clean_node(wxr, None, list_item_node.children)
+            raw_tag = raw_tag.strip(": ")
+            if raw_tag != "":
+                raw_tags.append(raw_tag)
+        else:
+            example_data = Example(raw_tags=raw_tags)
+            for ref_tag in list_item_node.find_html("ref"):
+                extract_reference(wxr, example_data, ref_tag)
+            example_text = clean_node(
+                wxr, None, list(list_item_node.invert_find_child(NodeKind.LIST))
+            )
+            sense_idx, example_text = extract_sense_index(example_text)
+            if len(example_text) > 0:
+                translate_raw_tags(example_data)
+                example_data.text = example_text
+                if len(sense_idx) > 0:
+                    find_sense = False
+                    for word_entry in page_data:
+                        for sense in word_entry.senses:
+                            if match_sense_index(sense_idx, sense):
+                                sense.examples.append(example_data)
+                                find_sense = True
+                    if not find_sense:
+                        new_sense = Sense(
+                            sense_index=sense_idx, tags=["no-gloss"]
+                        )
+                        new_sense.examples.append(example_data)
+                        word_entry.senses.append(new_sense)
+                    last_example = example_data
+                elif last_example is not None:
+                    last_example.translation = example_text
+                else:
+                    wxr.wtp.debug(
+                        f"Found example data without senseid: {example_data}",
+                        sortid="extractor/de/examples/extract_examples/28",
+                    )
+                    last_example = None
 
     for non_list_node in level_node.invert_find_child(NodeKind.LIST):
         wxr.wtp.debug(

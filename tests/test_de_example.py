@@ -237,3 +237,35 @@ class TestDEExample(unittest.TestCase):
                 },
             ],
         )
+
+    def test_tag_list(self):
+        self.wxr.wtp.start_page("Feber")
+        root = self.wxr.wtp.parse("""*''[[Deutschland]]:''
+:[1] „Den ganzen ''‚Feber‘'' hörte man lapidar""")
+        page_data = [
+            WordEntry(
+                lang="Deutsch",
+                lang_code="de",
+                pos="noun",
+                senses=[
+                    Sense(glosses=["gloss 1"], sense_index="1"),
+                ],
+                word="albanische Sprache",
+            )
+        ]
+        extract_examples(self.wxr, page_data, root)
+        self.assertEqual(
+            [s.model_dump(exclude_defaults=True) for s in page_data[0].senses],
+            [
+                {
+                    "examples": [
+                        {
+                            "raw_tags": ["Deutschland"],
+                            "text": "„Den ganzen ‚Feber‘ hörte man lapidar",
+                        }
+                    ],
+                    "glosses": ["gloss 1"],
+                    "sense_index": "1",
+                },
+            ],
+        )
