@@ -1,6 +1,7 @@
 import unittest
 
 from wikitextprocessor import Wtp
+
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.de.models import WordEntry
 from wiktextract.extractor.de.translation import extract_translation
@@ -38,7 +39,7 @@ class TestDETranslation(unittest.TestCase):
                     "word": "麵包",
                     "roman": "miànbāo",
                     "sense": "kein Plural",
-                    "sense_id": "1",
+                    "sense_index": "1",
                 },
                 {
                     "lang_code": "zh-cn",
@@ -46,7 +47,7 @@ class TestDETranslation(unittest.TestCase):
                     "word": "面包",
                     "roman": "miànbāo",
                     "sense": "kein Plural",
-                    "sense_id": "1",
+                    "sense_index": "1",
                 },
             ],
         )
@@ -168,7 +169,7 @@ class TestDETranslation(unittest.TestCase):
                     "lang": "Französisch",
                     "word": "appartenir",
                     "sense": "Mitglied einer Gruppe von Personen sein",
-                    "sense_id": "1",
+                    "sense_index": "1",
                 }
             ],
         )

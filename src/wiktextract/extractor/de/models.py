@@ -12,8 +12,10 @@ class BaseModelWrap(BaseModel):
 
 class Linkage(BaseModelWrap):
     word: str
-    sense_id: str = ""
+    sense_index: str = ""
     note: str = ""
+    raw_tags: list[str] = []
+    tags: list[str] = []
 
 
 class Translation(BaseModelWrap):
@@ -32,11 +34,8 @@ class Translation(BaseModelWrap):
     roman: str = Field(
         default="", description="Transliteration to Roman characters"
     )
-    sense_id: str = ""
-    raw_tags: list[str] = Field(
-        default=[],
-        description="Tags specifying the translated term, usually gender information",
-    )
+    sense_index: str = ""
+    raw_tags: list[str] = []
     tags: list[str] = []
     notes: list[str] = Field(default=[], description="A list of notes")
 
@@ -46,6 +45,8 @@ class Example(BaseModelWrap):
     translation: str = Field(
         default="", description="German translation of the example sentence"
     )
+    raw_tags: list[str] = []
+    tags: list[str] = []
     raw_ref: str = Field(default="", description="Raw reference string")
     url: str = Field(
         default="", description="A web link. Not necessarily well-formated."
@@ -73,7 +74,6 @@ class Example(BaseModelWrap):
     )
     date: str = Field(default="", description="Date of publication")
     number: str = Field(default="", description="Issue number")
-    # journal: Optional[str] = Field(default=None, description="Name of journal")
     # chapter: Optional[str] = Field(default=None, description="Chapter name")
     place: str = Field(default="", description="Place of publication")
     # editor: Optional[str] = Field(default=None, description="Editor")
@@ -86,26 +86,17 @@ class AltForm(BaseModelWrap):
 
 
 class Sense(BaseModelWrap):
-    glosses: list[str] = Field(
-        default=[],
-        description="list of gloss strings for the word sense (usually only one). This has been cleaned, and should be straightforward text with no tagging.",
-    )
-    raw_tags: list[str] = Field(
-        default=[],
-        description="list of gloss strings for the word sense (usually only one). This has been cleaned, and should be straightforward text with no tagging.",
-    )
+    glosses: list[str] = []
+    raw_tags: list[str] = []
     tags: list[str] = []
-    categories: list[str] = Field(
-        default=[],
-        description="list of sense-disambiguated category names extracted from (a subset) of the Category links on the page",
-    )
+    categories: list[str] = []
     examples: list["Example"] = Field(
         default=[], description="List of examples"
     )
     # subsenses: list["Sense"] = Field(
     #     default=[], description="List of subsenses"
     # )
-    senseid: str = Field(
+    sense_index: str = Field(
         default="", description="Sense number used in Wiktionary"
     )
     topics: list[str] = []
@@ -143,6 +134,7 @@ class Form(BaseModelWrap):
     tags: list[str] = []
     raw_tags: list[str] = []
     source: str = ""
+    sense_index: str = ""
 
 
 class WordEntry(BaseModelWrap):

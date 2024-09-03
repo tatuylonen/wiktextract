@@ -1,8 +1,10 @@
 from unittest import TestCase
 
 from wikitextprocessor import Wtp
+
 from wiktextract.config import WiktionaryConfig
-from wiktextract.extractor.de.inflection import extract_forms
+from wiktextract.extractor.de.form import extracrt_form_section
+from wiktextract.extractor.de.inflection import extract_inf_table_template
 from wiktextract.extractor.de.models import WordEntry
 from wiktextract.wxr_context import WiktextractContext
 
@@ -40,7 +42,7 @@ class TestDeForms(TestCase):
         word_entry = WordEntry(
             word="Wörterbuch", lang="Deutsch", lang_code="de"
         )
-        extract_forms(self.wxr, word_entry, root.children[0])
+        extract_inf_table_template(self.wxr, word_entry, root.children[0])
         self.assertEqual(
             word_entry.model_dump(exclude_defaults=True)["forms"],
             [
@@ -133,7 +135,7 @@ class TestDeForms(TestCase):
         word_entry = WordEntry(
             word="arm", lang="Deutsch", lang_code="de", pos="adj"
         )
-        extract_forms(self.wxr, word_entry, root.children[0])
+        extract_inf_table_template(self.wxr, word_entry, root.children[0])
         self.assertEqual(
             word_entry.model_dump(exclude_defaults=True)["forms"],
             [
@@ -288,7 +290,7 @@ class TestDeForms(TestCase):
         word_entry = WordEntry(
             word="sehen", lang="Deutsch", lang_code="de", pos="verb"
         )
-        extract_forms(self.wxr, word_entry, root.children[0])
+        extract_inf_table_template(self.wxr, word_entry, root.children[0])
         self.assertEqual(
             word_entry.model_dump(exclude_defaults=True)["forms"],
             [
@@ -334,6 +336,21 @@ class TestDeForms(TestCase):
                     "form": "zu sehende …",
                     "tags": ["participle", "gerundive"],
                     "source": "Flexion:sehen",
+                },
+            ],
+        )
+
+    def test_form_section_italic_tag(self):
+        self.wxr.wtp.start_page("Hahn")
+        base_data = WordEntry(lang="Deutsch", lang_code="de", word="Hahn")
+        root = self.wxr.wtp.parse(":''Schweiz:'' [[Hahnen]]")
+        extracrt_form_section(self.wxr, base_data, root, ["variant"])
+        self.assertEqual(
+            base_data.model_dump(exclude_defaults=True)["forms"],
+            [
+                {
+                    "form": "Hahnen",
+                    "tags": ["variant", "Swiss Standard German"],
                 },
             ],
         )
