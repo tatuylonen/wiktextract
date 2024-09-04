@@ -45,6 +45,7 @@ def process_t_template(
     if lang_name == "":  # in case Lua error
         lang_name = code_to_name(lang_code, "es")
 
+    sense_index = ""
     for tr_index in itertools.count(1):
         if "t" + str(tr_index) not in template_node.template_parameters:
             break
@@ -67,6 +68,8 @@ def process_t_template(
                 value = T_GENDERS.get(value)
             elif param_prefix == "n":
                 value = T_NUMBERS.get(value)
+            elif param_prefix == "a":
+                sense_index = value
             if value is None:
                 continue
 
@@ -78,6 +81,10 @@ def process_t_template(
                     pre_value.append(value)
             else:
                 setattr(tr_data, field, value)
+
+        if tr_data.sense_index == "" and sense_index != "":
+            # usually only first word has index param
+            tr_data.sense_index = sense_index
 
         if len(tr_data.word) > 0:
             translate_raw_tags(tr_data)
