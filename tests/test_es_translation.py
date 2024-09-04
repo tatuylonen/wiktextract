@@ -40,7 +40,7 @@ class TestESTranslation(unittest.TestCase):
                     "lang": "Chino",
                     "lang_code": "zh",
                     "word": "你好",
-                    "senseids": ["1"],
+                    "sense_index": "1",
                     "roman": "nĭ hăo",
                 },
                 {
@@ -75,7 +75,7 @@ class TestESTranslation(unittest.TestCase):
                     "lang": "Tailandés",
                     "lang_code": "th",
                     "word": "สวัสดีครับ",
-                    "senseids": ["1"],
+                    "sense_index": "1",
                     "tags": ["masculine"],
                 },
                 {

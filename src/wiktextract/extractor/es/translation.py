@@ -51,7 +51,7 @@ def process_t_template(
         tr_data = Translation(lang_code=lang_code, lang=lang_name, word="")
         for param_prefix, field in (
             ("t", "word"),
-            ("a", "senseids"),
+            ("a", "sense_index"),
             ("tl", "roman"),
             ("nota", "raw_tags"),
             ("g", "tags"),

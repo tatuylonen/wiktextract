@@ -61,7 +61,7 @@ def process_linkage_template(
             word=clean_node(wxr, None, template_node.template_parameters[index])
         )
         if len(word_entry.senses) > 0:
-            linkage_data.senseid = word_entry.senses[-1].senseid
+            linkage_data.sense_index = word_entry.senses[-1].sense_index
         getattr(word_entry, linkage_type).append(linkage_data)
         process_linkage_template_parameter(
             wxr, linkage_data, template_node, f"nota{index}"
@@ -111,5 +111,5 @@ def process_linkage_list_children(
             if len(word) > 0:
                 linkage_data = Linkage(word=word)
                 if len(word_entry.senses) > 0:
-                    linkage_data.senseid = word_entry.senses[-1].senseid
+                    linkage_data.sense_index = word_entry.senses[-1].sense_index
                 getattr(word_entry, linkage_type).append(linkage_data)

@@ -52,14 +52,14 @@ class TestESGloss(unittest.TestCase):
                         "Contribuir esfuerzo o recursos para la realización "
                         "de algo."
                     ],
-                    "senseid": "1",
+                    "sense_index": "1",
                 },
                 {
                     "glosses": [
                         "Por antonomasia, cooperar a que alguno salga"
                         " de una situación dificultosa"
                     ],
-                    "senseid": "2",
+                    "sense_index": "2",
                 },
             ],
         )
@@ -90,7 +90,7 @@ class TestESGloss(unittest.TestCase):
                         "Sentimiento afectivo de atracción, unión y afinidad "
                         "que se experimenta hacia una persona, animal o cosa"
                     ],
-                    "senseid": "1",
+                    "sense_index": "1",
                     "raw_tags": ["Humanidades"],
                     "categories": ["ES:Sentimientos"],
                 }
@@ -116,7 +116,7 @@ class TestESGloss(unittest.TestCase):
             [
                 {
                     "glosses": ["Vehículo para desplazarse por el aire"],
-                    "senseid": "1",
+                    "sense_index": "1",
                     "topics": ["aeronautics", "vehicles"],
                     "categories": ["ES:Aeronáutica", "ES:Vehículos"],
                 }
@@ -183,7 +183,7 @@ class TestESGloss(unittest.TestCase):
                         {
                             "glosses": ["Forma del plural de apple."],
                             "form_of": [{"word": "apple"}],
-                            "senseid": "1",
+                            "sense_index": "1",
                         }
                     ],
                     "tags": ["form-of"],
@@ -226,7 +226,7 @@ class TestESGloss(unittest.TestCase):
                                 {"word": "amigar"},
                                 {"word": "amigarse"},
                             ],
-                            "senseid": "1",
+                            "sense_index": "1",
                         }
                     ],
                     "tags": ["form-of"],
