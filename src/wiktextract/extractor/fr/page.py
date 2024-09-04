@@ -49,7 +49,6 @@ def parse_section(
     base_data: WordEntry,
     level_node: WikiNode,
 ) -> Optional[EtymologyData]:
-    # Page structure: https://fr.wiktionary.org/wiki/Wiktionnaire:Structure_des_pages
     etymology_data = None
     for level_node_template in level_node.find_content(NodeKind.TEMPLATE):
         if level_node_template.template_name == "S":
@@ -201,6 +200,8 @@ def process_pos_block(
 def parse_page(
     wxr: WiktextractContext, page_title: str, page_text: str
 ) -> list[dict[str, Any]]:
+    # Page structure
+    # https://fr.wiktionary.org/wiki/Convention:Structure_des_pages
     if wxr.config.verbose:
         logger.info(f"Parsing page: {page_title}")
     wxr.config.word = page_title

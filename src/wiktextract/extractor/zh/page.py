@@ -178,6 +178,7 @@ def parse_page(
     # page layout documents
     # https://zh.wiktionary.org/wiki/Wiktionary:佈局解釋
     # https://zh.wiktionary.org/wiki/Wiktionary:体例说明
+    # https://zh.wiktionary.org/wiki/Wiktionary:格式手冊
 
     # skip translation pages
     if page_title.endswith(

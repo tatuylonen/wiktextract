@@ -107,3 +107,24 @@ class TestESLinkage(unittest.TestCase):
                 {"word": "estabilizar"},
             ],
         )
+
+    def test_two_words_in_a_list(self):
+        self.wxr.wtp.start_page("perro")
+        word_entry = WordEntry(word="perro", lang="Español", lang_code="es")
+        root = self.wxr.wtp.parse(
+            "*[[perro caliente]] o [[perrito caliente]]: sándwich de salchicha de Viena"
+        )
+        extract_linkage_section(self.wxr, word_entry, root, "idioms")
+        self.assertEqual(
+            word_entry.model_dump(exclude_defaults=True)["idioms"],
+            [
+                {
+                    "word": "perro caliente",
+                    "sense": "sándwich de salchicha de Viena",
+                },
+                {
+                    "word": "perrito caliente",
+                    "sense": "sándwich de salchicha de Viena",
+                },
+            ],
+        )

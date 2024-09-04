@@ -106,9 +106,6 @@ def parse_section(
     === Etimología ===
     === {{sustantivo masculino|es}} ===
     === Locuciones ===
-
-    See also page structure:
-    https://es.wiktionary.org/wiki/Wikcionario:Estructura
     """
 
     section_title = clean_node(wxr, base_data, level_node.largs).lower()
@@ -304,6 +301,10 @@ def process_sense_children(
 def parse_page(
     wxr: WiktextractContext, page_title: str, page_text: str
 ) -> list[dict[str, any]]:
+    # style guide
+    # https://es.wiktionary.org/wiki/Wikcionario:Guía_de_estilo
+    # entry layout
+    # https://es.wiktionary.org/wiki/Wikcionario:Estructura
     if wxr.config.verbose:
         logger.info(f"Parsing page: {page_title}")
 
