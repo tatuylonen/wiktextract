@@ -1,6 +1,7 @@
 import unittest
 
 from wikitextprocessor import Wtp
+
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.es.example import (
     extract_example,

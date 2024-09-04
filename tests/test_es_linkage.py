@@ -1,6 +1,7 @@
 import unittest
 
 from wikitextprocessor import Wtp
+
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.es.linkage import (
     extract_linkage_section,

@@ -25,7 +25,7 @@ from .section_titles import (
     TRANSLATIONS_TITLES,
 )
 from .sense_data import process_sense_data_list
-from .translation import extract_translation
+from .translation import extract_translation_section
 
 # Templates that are used to form panels on pages and that
 # should be ignored in various positions
@@ -146,9 +146,7 @@ def parse_section(
     ):
         if len(page_data) == 0:
             page_data.append(base_data.model_copy(deep=True))
-        for template_node in level_node.find_child(NodeKind.TEMPLATE):
-            extract_translation(wxr, page_data[-1], template_node)
-
+        extract_translation_section(wxr, page_data[-1], level_node)
     elif section_title in LINKAGE_TITLES:
         if len(page_data) == 0:
             page_data.append(base_data.model_copy(deep=True))
