@@ -1,4 +1,5 @@
 from wikitextprocessor.parser import (
+    LevelNode,
     NodeKind,
     TemplateNode,
     WikiNode,
@@ -14,28 +15,28 @@ from .section_titles import LINKAGE_TITLES
 def extract_linkage_section(
     wxr: WiktextractContext,
     word_entry: WordEntry,
-    title_node: WikiNode,
+    level_node: LevelNode,
     linkage_type: str,
 ):
-    if linkage_type not in word_entry.model_fields:
-        wxr.wtp.debug(
-            f"Linkage type {linkage_type} not found in pydantic model",
-            sortid="extractor/es/linkage/extract_linkage/20",
-        )
-        return
-    for list_item_node in title_node.find_child_recursively(NodeKind.LIST_ITEM):
-        data = Linkage(word="")
+    for list_item_node in level_node.find_child_recursively(NodeKind.LIST_ITEM):
         sense_nodes = []
+        after_colon = False
+        words = []
         for node in list_item_node.children:
-            if isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
-                data.word = clean_node(wxr, None, node)
-            elif isinstance(node, TemplateNode) and node.template_name == "l":
-                data.word = clean_node(wxr, None, node)
-            else:
+            if after_colon:
                 sense_nodes.append(node)
-        data.sense = clean_node(wxr, None, sense_nodes).strip(": ")
-        if len(data.word) > 0:
-            getattr(word_entry, linkage_type).append(data)
+            elif isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
+                words.append(clean_node(wxr, None, node))
+            elif isinstance(node, TemplateNode) and node.template_name == "l":
+                words.append(clean_node(wxr, None, node))
+            elif isinstance(node, str) and ":" in node:
+                after_colon = True
+                sense_nodes.append(node[node.index(":") + 1 :])
+        sense = clean_node(wxr, None, sense_nodes)
+        for word in filter(None, words):
+            getattr(word_entry, linkage_type).append(
+                Linkage(word=word, sense=sense)
+            )
 
 
 def process_linkage_template(
@@ -47,13 +48,6 @@ def process_linkage_template(
     linkage_type = LINKAGE_TITLES.get(
         template_node.template_name.removesuffix("s")
     )
-    if linkage_type not in word_entry.model_fields:
-        wxr.wtp.debug(
-            f"Linkage type {linkage_type} not found in pydantic model",
-            sortid="extractor/es/linkage/process_linkage_template/51",
-        )
-        return
-
     for index in range(1, 41):
         if index not in template_node.template_parameters:
             break
@@ -99,12 +93,6 @@ def process_linkage_list_children(
     linkage_type: str,
 ):
     # under gloss list
-    if linkage_type not in word_entry.model_fields:
-        wxr.wtp.debug(
-            f"Linkage type {linkage_type} not found in pydantic model",
-            sortid="extractor/es/linkage/process_linkage_list_children/89",
-        )
-        return
     for node in nodes:
         if isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
             word = clean_node(wxr, None, node)

@@ -43,10 +43,10 @@ def extract_gloss(
             gloss_data.glosses.append(gloss)
 
         gloss_note = clean_node(wxr, gloss_data, list_item.children)
-        match = re.match(r"^(\d+)", gloss_note)
+        match = re.match(r"\d+", gloss_note)
         if match is not None:
-            gloss_data.sense_index = match.group(1)
-            tag_string = gloss_note[len(match.group(1)) :].strip()
+            gloss_data.sense_index = match.group(0)
+            tag_string = gloss_note[match.end() :].strip()
         else:
             tag_string = gloss_note.strip()
 
