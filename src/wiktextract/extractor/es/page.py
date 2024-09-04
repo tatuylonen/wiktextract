@@ -18,7 +18,6 @@ from .linkage import extract_linkage_section, process_linkage_template
 from .models import Sense, WordEntry
 from .pronunciation import process_pron_graf_template
 from .section_titles import (
-    ETYMOLOGY_TITLES,
     IGNORED_TITLES,
     LINKAGE_TITLES,
     POS_TITLES,
@@ -132,15 +131,11 @@ def parse_section(
             page_data[-1].pos_title = section_title
             page_data[-1].tags.extend(pos_data.get("tags", []))
             process_pos_block(wxr, page_data, level_node)
-        for next_level_node in level_node.find_child(LEVEL_KIND_FLAGS):
-            parse_section(wxr, page_data, base_data, next_level_node)
-    elif section_title.startswith(ETYMOLOGY_TITLES):
-        new_base_data = base_data
-        if wxr.config.capture_etymologies:
-            new_base_data = base_data.model_copy(deep=True)
-            process_etymology_block(wxr, new_base_data, level_node)
-        for nested_level_node in level_node.find_child(LEVEL_KIND_FLAGS):
-            parse_section(wxr, page_data, new_base_data, nested_level_node)
+    elif (
+        section_title.startswith("etimología")
+        and wxr.config.capture_etymologies
+    ):
+        process_etymology_block(wxr, base_data, level_node)
     elif (
         section_title in TRANSLATIONS_TITLES and wxr.config.capture_translations
     ):
@@ -162,6 +157,9 @@ def parse_section(
             f"Unprocessed section: {section_title}",
             sortid="extractor/es/page/parse_section/48",
         )
+
+    for next_level_node in level_node.find_child(LEVEL_KIND_FLAGS):
+        parse_section(wxr, page_data, base_data, next_level_node)
 
 
 def process_pos_block(
