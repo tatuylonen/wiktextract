@@ -1,5 +1,6 @@
 import itertools
 
+from mediawiki_langcodes import code_to_name
 from wikitextprocessor.parser import LevelNode, NodeKind, TemplateNode
 
 from ...page import clean_node
@@ -41,6 +42,8 @@ def process_t_template(
     lang_code = template_node.template_parameters.get(1, "")
     template_text = clean_node(wxr, word_entry, template_node)
     lang_name = template_text[: template_text.find(":")].strip("* ")
+    if lang_name == "":  # in case Lua error
+        lang_name = code_to_name(lang_code, "es")
 
     for tr_index in itertools.count(1):
         if "t" + str(tr_index) not in template_node.template_parameters:
