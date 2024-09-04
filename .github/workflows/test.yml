@@ -27,7 +27,7 @@ jobs:
     if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     strategy:
       matrix:
-        python-version: ['3.10', '3.11', '3.12']
+        python-version: ['3.10', '3.11', '3.12', '3.13']
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -39,17 +39,21 @@ jobs:
           python -m pip install --use-pep517 -e '.[dev]'
       # Enable `sys.monitoring` for 3.12 to improve coverage tests performance
       # See GitHub issue: nedbat/coveragepy#1665
-      - run: echo "COVERAGE_CORE=sysmon" >> $GITHUB_ENV
-        if: matrix.python-version == '3.12'
+      # - run: echo "COVERAGE_CORE=sysmon" >> $GITHUB_ENV
       - run: make test_coverage
+        if: matrix.python-version == '3.11'
+        env:
+          PYTHONWARNINGS: default
+      - run: make test
+        if: matrix.python-version != '3.11'
         env:
           PYTHONWARNINGS: default
       - run: |
           make coverage_report
           make github_pages REPO=${{ github.repository }} SHA=${{ github.sha }}
-        if: github.ref_name == 'master' && matrix.python-version == '3.12'
+        if: github.ref_name == 'master' && matrix.python-version == '3.11'
       - uses: actions/upload-pages-artifact@v3
-        if: github.ref_name == 'master' && matrix.python-version == '3.12'
+        if: github.ref_name == 'master' && matrix.python-version == '3.11'
 
   deploy:
     if: github.ref_name == 'master'
