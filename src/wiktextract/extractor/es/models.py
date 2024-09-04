@@ -16,7 +16,7 @@ class Linkage(BaseModelWrap):
     alternative_spelling: str = Field(
         default="", description="Alternative spelling of the word"
     )
-    senseid: str = ""
+    sense_index: str = ""
     sense: str = ""
 
 
@@ -26,10 +26,7 @@ class Translation(BaseModelWrap):
         description="Wiktionary language code of the translation term"
     )
     lang: str = Field(description="Name of the language of translation")
-    senseids: list[str] = Field(
-        default=[],
-        description="List of senseids where this translation applies",
-    )
+    sense_index: str = ""
     raw_tags: list[str] = Field(
         default=[],
         description="Tags specifying the translated term, usually gender",
@@ -81,7 +78,7 @@ class Sense(BaseModelWrap):
     # subsenses: list["Sense"] = Field(
     #     default=[], description="List of subsenses"
     # )
-    senseid: str = Field(
+    sense_index: str = Field(
         default="", description="Sense number used in Wiktionary"
     )
     form_of: list[AltForm] = []

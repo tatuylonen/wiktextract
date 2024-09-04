@@ -1,6 +1,7 @@
 from unittest import TestCase
 
 from wikitextprocessor import Wtp
+
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.es.conjugation import process_conjugation_template
 from wiktextract.extractor.es.models import WordEntry

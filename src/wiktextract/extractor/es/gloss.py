@@ -45,7 +45,7 @@ def extract_gloss(
         gloss_note = clean_node(wxr, gloss_data, list_item.children)
         match = re.match(r"^(\d+)", gloss_note)
         if match is not None:
-            gloss_data.senseid = match.group(1)
+            gloss_data.sense_index = match.group(1)
             tag_string = gloss_note[len(match.group(1)) :].strip()
         else:
             tag_string = gloss_note.strip()

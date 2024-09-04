@@ -1,16 +1,21 @@
 import unittest
 
 from wikitextprocessor import Wtp
+
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.es.etymology import process_etymology_block
 from wiktextract.extractor.es.models import WordEntry
+from wiktextract.extractor.es.page import parse_page
 from wiktextract.wxr_context import WiktextractContext
 
 
 class TestESEtymology(unittest.TestCase):
     def setUp(self) -> None:
         self.wxr = WiktextractContext(
-            Wtp(lang_code="es"), WiktionaryConfig(dump_file_lang_code="es")
+            Wtp(lang_code="es"),
+            WiktionaryConfig(
+                capture_language_codes=None, dump_file_lang_code="es"
+            ),
         )
         self.wxr.wtp.add_page(
             "Plantilla:etimología",
@@ -86,3 +91,28 @@ class TestESEtymology(unittest.TestCase):
                 self.assertEqual(
                     data.model_dump(exclude_defaults=True), case["expected"]
                 )
+
+    def test_same_level_as_pos(self):
+        self.wxr.wtp.add_page(
+            "Plantilla:etimología",
+            10,
+            "Del griego antiguo [[ἀνθρωποειδής#Griego antiguo|''ἀνθρωποειδής'']]",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "antropoide",
+            """== {{lengua|es}} ==
+=== Etimología ===
+{{etimología|grc|ἀνθρωποειδής}}
+
+=== {{adjetivo|es}} ===
+
+;1: Que recuerda""",
+        )
+        self.assertEqual(
+            page_data[0]["etymology_text"], "Del griego antiguo ἀνθρωποειδής"
+        )
+        self.assertEqual(
+            page_data[0]["senses"],
+            [{"glosses": ["Que recuerda"], "sense_index": "1"}],
+        )

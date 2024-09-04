@@ -1,33 +1,20 @@
 import itertools
-from typing import Any, Optional
 
-from wikitextprocessor.parser import TemplateNode
+from mediawiki_langcodes import code_to_name
+from wikitextprocessor.parser import LevelNode, NodeKind, TemplateNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
-from ..share import split_senseids
 from .models import Translation, WordEntry
 from .tags import translate_raw_tags
 
 
-def extract_translation(
-    wxr: WiktextractContext, word_entry: WordEntry, template_node: TemplateNode
-):
-    if template_node.template_name == "t":
-        process_t_template(wxr, word_entry, template_node)
-    elif template_node.template_name == "t+":
-        process_t_plus_template(wxr, word_entry, template_node)
-    elif (
-        template_node.template_name.removesuffix(".") in T_GENDERS
-        and len(word_entry.translations) > 0
-    ):
-        # https://es.wiktionary.org/wiki/Categoría:Wikcionario:Abreviaturas
-        # gender template after "t+" template
-        add_t_plus_tags(
-            template_node.template_name.removesuffix("."),
-            T_GENDERS,
-            word_entry.translations[-1],
-        )
+def extract_translation_section(
+    wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
+) -> None:
+    for template_node in level_node.find_child(NodeKind.TEMPLATE):
+        if template_node.template_name == "t":
+            process_t_template(wxr, word_entry, template_node)
 
 
 # https://es.wiktionary.org/wiki/Módulo:t
@@ -55,14 +42,17 @@ def process_t_template(
     lang_code = template_node.template_parameters.get(1, "")
     template_text = clean_node(wxr, word_entry, template_node)
     lang_name = template_text[: template_text.find(":")].strip("* ")
+    if lang_name == "":  # in case Lua error
+        lang_name = code_to_name(lang_code, "es")
 
+    sense_index = ""
     for tr_index in itertools.count(1):
         if "t" + str(tr_index) not in template_node.template_parameters:
             break
         tr_data = Translation(lang_code=lang_code, lang=lang_name, word="")
         for param_prefix, field in (
             ("t", "word"),
-            ("a", "senseids"),
+            ("a", "sense_index"),
             ("tl", "roman"),
             ("nota", "raw_tags"),
             ("g", "tags"),
@@ -78,6 +68,8 @@ def process_t_template(
                 value = T_GENDERS.get(value)
             elif param_prefix == "n":
                 value = T_NUMBERS.get(value)
+            elif param_prefix == "a":
+                sense_index = value
             if value is None:
                 continue
 
@@ -90,131 +82,10 @@ def process_t_template(
             else:
                 setattr(tr_data, field, value)
 
+        if tr_data.sense_index == "" and sense_index != "":
+            # usually only first word has index param
+            tr_data.sense_index = sense_index
+
         if len(tr_data.word) > 0:
             translate_raw_tags(tr_data)
             word_entry.translations.append(tr_data)
-
-
-# https://es.wiktionary.org/wiki/Módulo:t+
-T_PLUS_TAGS = {
-    "s": "noun",
-    "a": "adjective",
-    "v": "verb",
-    "sa": ["noun", "adjective"],
-    "sv": ["noun", "verb"],
-    "av": ["adjective", "verb"],
-    "sav": ["noun", "adjective", "verb"],
-    "adj": "adjective",
-    "sust": "noun",
-    "verb": "verb",
-}
-
-
-def process_t_plus_template(
-    wxr: WiktextractContext, word_entry: WordEntry, template_node: TemplateNode
-) -> None:
-    # obsolete template: https://es.wiktionary.org/wiki/Plantilla:t+
-
-    lang_code = template_node.template_parameters.get(1)
-    template_text = clean_node(wxr, word_entry, template_node)
-    lang_name = template_text[: template_text.find(":")].strip("* ")
-
-    # Initialize variables
-    current_translation: Optional[Translation] = None
-    senseids: list[str] = []
-
-    for key, p_value in template_node.template_parameters.items():
-        if key == 1:
-            continue  # Skip language code
-
-        value = clean_node(wxr, None, p_value)
-        if isinstance(key, int):
-            if value == ",":
-                if (
-                    current_translation is not None
-                    and len(current_translation.word) > 0
-                ):
-                    word_entry.translations.append(current_translation)
-
-                current_translation = None
-                senseids = []
-            elif (
-                value.isdigit()
-                or (value != "," and "," in value)
-                or "-" in value
-            ):
-                # This gives the senseids
-                senseids.extend(split_senseids(value))
-            elif (
-                value.rstrip(".") in T_GENDERS
-                and current_translation is not None
-            ):
-                add_t_plus_tags(
-                    value.strip("."), T_GENDERS, current_translation
-                )
-            elif (
-                value.rstrip(".") in T_NUMBERS
-                and current_translation is not None
-            ):
-                add_t_plus_tags(
-                    value.strip("."), T_NUMBERS, current_translation
-                )
-            elif (
-                value.rstrip(".") in T_PLUS_TAGS
-                and current_translation is not None
-            ):
-                add_t_plus_tags(
-                    value.strip("."), T_PLUS_TAGS, current_translation
-                )
-            elif value in ["nota", "tr", "nl"]:
-                continue
-            elif (
-                key > 2
-                and isinstance(
-                    template_node.template_parameters.get(key - 1), str
-                )
-                and template_node.template_parameters.get(key - 1) == "nota"
-            ):
-                if current_translation:
-                    current_translation.notes.append(value)
-            elif (
-                key > 2
-                and isinstance(
-                    template_node.template_parameters.get(key - 1), str
-                )
-                and template_node.template_parameters.get(key - 1) == "tr"
-            ):
-                if current_translation:
-                    current_translation.roman = value
-            elif value != ",":
-                # This is a word
-                if current_translation:
-                    current_translation.word += " " + value
-
-                else:
-                    current_translation = Translation(
-                        word=value,
-                        lang_code=lang_code,
-                        lang=lang_name,
-                        senseids=list(senseids),
-                    )
-        elif (
-            isinstance(key, str)
-            and key == "tr"
-            and current_translation is not None
-        ):
-            current_translation.roman = value
-
-    # Add the last translation if it exists
-    if current_translation is not None and len(current_translation.word) > 0:
-        word_entry.translations.append(current_translation)
-
-
-def add_t_plus_tags(
-    key: str, tag_dict: dict[str, Any], data: Translation
-) -> None:
-    tr_tag = tag_dict[key]
-    if isinstance(tr_tag, str):
-        data.tags.append(tr_tag)
-    elif isinstance(tr_tag, list):
-        data.tags.extend(tr_tag)

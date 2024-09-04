@@ -138,8 +138,6 @@ LINKAGE_TITLES: dict[str, str] = {
     "sinónimo": "synonyms",
 }
 
-ETYMOLOGY_TITLES: tuple[str] = ("etimología",)
-
 IGNORED_TITLES: frozenset[str] = frozenset(["véase también"])
 
 TRANSLATIONS_TITLES: frozenset[str] = frozenset(["traducciones", "traducción"])
