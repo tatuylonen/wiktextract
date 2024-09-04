@@ -309,17 +309,8 @@ def parse_page(
     if wxr.config.verbose:
         logger.info(f"Parsing page: {page_title}")
 
-    wxr.config.word = page_title
     wxr.wtp.start_page(page_title)
-
-    # Parse the page, pre-expanding those templates that are likely to
-    # influence parsing
-    tree = wxr.wtp.parse(
-        page_text,
-        pre_expand=True,
-        additional_expand=ADDITIONAL_EXPAND_TEMPLATES,
-    )
-
+    tree = wxr.wtp.parse(page_text)
     page_data: list[WordEntry] = []
     for level2_node in tree.find_child(NodeKind.LEVEL2):
         for subtitle_template in level2_node.find_content(NodeKind.TEMPLATE):
@@ -338,7 +329,7 @@ def parse_page(
                 base_data = WordEntry(
                     lang=lang_name,
                     lang_code=lang_code,
-                    word=wxr.wtp.title,
+                    word=page_title,
                     pos="unknown",
                 )
                 base_data.categories.extend(categories["categories"])
