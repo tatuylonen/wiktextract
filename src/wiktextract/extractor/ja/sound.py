@@ -36,7 +36,9 @@ def process_sound_template(
     cats: dict[str, list[str]],
 ) -> None:
     if template_node.template_name == "音声":
-        audio_file = template_node.template_parameters.get(2, "")
+        audio_file = clean_node(
+            wxr, None, template_node.template_parameters.get(2, "")
+        )
         if len(audio_file) > 0:
             sound = Sound()
             raw_tag = clean_node(
@@ -108,7 +110,9 @@ def process_ja_pron_template(
                 sounds.append(sound)
 
     for arg in ["a", "audio"]:
-        audio_file = template_node.template_parameters.get(arg, "")
+        audio_file = clean_node(
+            wxr, None, template_node.template_parameters.get(arg, "")
+        )
         if len(audio_file) > 0:
             sound = Sound()
             set_sound_file_url_fields(wxr, audio_file, sound)

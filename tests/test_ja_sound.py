@@ -133,3 +133,12 @@ class TestJaSound(TestCase):
         self.assertEqual(
             data["sounds"], [{"form": "とーにゅー", "raw_tags": ["京阪式"]}]
         )
+
+    def test_magic_word_in_template_param(self):
+        self.wxr.wtp.start_page("Aluminium")
+        root = self.wxr.wtp.parse("""===発音===
+* {{音声|de|De-{{PAGENAME}}.ogg|音声（ドイツ）}}""")
+        base_data = WordEntry(word="Aluminium", lang_code="de", lang="ドイツ語")
+        page_data = [base_data.model_copy(deep=True)]
+        extract_sound_section(self.wxr, page_data, base_data, root.children[0])
+        self.assertEqual(base_data.sounds[0].audio, "De-Aluminium.ogg")
