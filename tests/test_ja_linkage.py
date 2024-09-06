@@ -184,3 +184,38 @@ class TestJaLinkage(TestCase):
                 }
             ],
         )
+
+    def test_cognate_under_etymology(self):
+        self.wxr.wtp.add_page("テンプレート:etyl", 10, "サンスクリット")
+        self.wxr.wtp.add_page(
+            "テンプレート:l",
+            10,
+            """<span class="Deva" lang="sa">[[क्रव्य#サンスクリット|क्रव्य]]</span>&nbsp;<span class="gender">中性</span> <span class="mention-gloss-paren annotation-paren">(</span><span lang="sa-Latn" class="tr Latn">kravya-</span><span class="mention-gloss-paren annotation-paren">)</span><span class="mention-gloss-double-quote">「</span><span class="mention-gloss">生肉</span><span class="mention-gloss-double-quote">」</span>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "krew",
+            """==ポーランド語==
+===語源===
+etymology text
+====同系語====
+* {{etyl|sa|-}}: {{l|sa|क्रव्य|tr=kravya-|g=n||生肉}}
+===名詞===
+# [[ち|血]]。""",
+        )
+        self.assertEqual(len(data), 1)
+        self.assertEqual(
+            data[0]["cognates"],
+            [
+                {
+                    "lang": "サンスクリット",
+                    "lang_code": "sa",
+                    "roman": "kravya-",
+                    "sense": "生肉",
+                    "tags": ["neuter"],
+                    "word": "क्रव्य",
+                }
+            ],
+        )
+        self.assertEqual(data[0]["etymology_texts"], ["etymology text"])
+        self.assertEqual(data[0]["pos"], "noun")

@@ -6,6 +6,7 @@ from ...wxr_context import WiktextractContext
 from ..ruby import extract_ruby
 from .models import Descendant, Linkage, WordEntry
 from .section_titles import LINKAGES
+from .tags import translate_raw_tags
 
 
 def extract_linkage_section(
@@ -118,7 +119,18 @@ def process_desc_list_item(
                 )
                 if arg_value != "":
                     setattr(desc_data, field, arg_value)
+            expanded_node = wxr.wtp.parse(
+                wxr.wtp.node_to_wikitext(child), expand_all=True
+            )
+            for span_tag in expanded_node.find_html(
+                "span", attr_name="class", attr_value="gender"
+            ):
+                raw_tag = clean_node(wxr, None, span_tag)
+                if raw_tag != "":
+                    desc_data.raw_tags.append(raw_tag)
+
             if desc_data.word != "":
+                translate_raw_tags(desc_data)
                 desc_list.append(desc_data)
         elif isinstance(child, WikiNode) and child.kind == NodeKind.LIST:
             for next_list_item in child.find_child(NodeKind.LIST_ITEM):

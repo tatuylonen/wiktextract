@@ -83,6 +83,8 @@ class Descendant(JapaneseBaseModel):
     roman: str = ""
     descendants: list["Descendant"] = []
     sense: str = ""
+    tags: list[str] = []
+    raw_tags: list[str] = []
 
 
 class WordEntry(JapaneseBaseModel):

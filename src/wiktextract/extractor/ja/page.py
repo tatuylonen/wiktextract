@@ -46,15 +46,18 @@ def parse_section(
             extract_sound_section(wxr, page_data, base_data, level_node)
             break
         elif title_text == "翻訳" and wxr.config.capture_translations:
-            if len(page_data) == 0:
-                page_data.append(base_data.model_copy(deep=True))
-            extract_translation_section(wxr, page_data[-1], level_node)
+            extract_translation_section(
+                wxr,
+                page_data[-1] if len(page_data) > 0 else base_data,
+                level_node,
+            )
             break
         elif title_text in LINKAGES and wxr.config.capture_linkages:
-            if len(page_data) == 0:
-                page_data.append(base_data.model_copy(deep=True))
             extract_linkage_section(
-                wxr, page_data[-1], level_node, LINKAGES[title_text]
+                wxr,
+                page_data[-1] if len(page_data) > 0 else base_data,
+                level_node,
+                LINKAGES[title_text],
             )
             break
 
