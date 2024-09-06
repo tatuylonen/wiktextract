@@ -139,3 +139,83 @@ class TestJaLinkage(TestCase):
             [s.model_dump(exclude_defaults=True) for s in data.synonyms],
             [{"word": "天日"}],
         )
+
+    def test_sense_template(self):
+        self.wxr.wtp.start_page("大切")
+        self.wxr.wtp.add_page(
+            "テンプレート:sense",
+            10,
+            '<span class="ib-brac"><span class="qualifier-brac"> (</span></span><span class="ib-content"><span class="qualifier-content">重要だ</span></span><span class="ib-brac"><span class="qualifier-brac">)</span></span><span class="ib-colon"><span class="sense-qualifier-colon">:</span></span>',
+        )
+        data = WordEntry(
+            word="大切", lang="日本語", lang_code="ja", pos="adj_noun"
+        )
+        root = self.wxr.wtp.parse("* {{sense|重要だ}} [[些細]]")
+        extract_linkage_section(self.wxr, data, root, "antonyms")
+        self.assertEqual(
+            [s.model_dump(exclude_defaults=True) for s in data.antonyms],
+            [{"word": "些細", "sense": "重要だ"}],
+        )
+
+    def test_descendant_lists(self):
+        self.wxr.wtp.start_page("color")
+        data = WordEntry(
+            word="color", lang="ラテン語", lang_code="la", pos="noun"
+        )
+        self.wxr.wtp.add_page("テンプレート:roa-opt", 10, "古ポルトガル語")
+        self.wxr.wtp.add_page("テンプレート:pt", 10, "ポルトガル語")
+        root = self.wxr.wtp.parse("""* {{roa-opt}}: {{l|roa-opt|coor}}
+** {{pt}}: {{l|pt|cor}}""")
+        extract_linkage_section(self.wxr, data, root, "descendants")
+        self.assertEqual(
+            [s.model_dump(exclude_defaults=True) for s in data.descendants],
+            [
+                {
+                    "descendants": [
+                        {
+                            "lang": "ポルトガル語",
+                            "lang_code": "pt",
+                            "word": "cor",
+                        }
+                    ],
+                    "lang": "古ポルトガル語",
+                    "lang_code": "roa-opt",
+                    "word": "coor",
+                }
+            ],
+        )
+
+    def test_cognate_under_etymology(self):
+        self.wxr.wtp.add_page("テンプレート:etyl", 10, "サンスクリット")
+        self.wxr.wtp.add_page(
+            "テンプレート:l",
+            10,
+            """<span class="Deva" lang="sa">[[क्रव्य#サンスクリット|क्रव्य]]</span>&nbsp;<span class="gender">中性</span> <span class="mention-gloss-paren annotation-paren">(</span><span lang="sa-Latn" class="tr Latn">kravya-</span><span class="mention-gloss-paren annotation-paren">)</span><span class="mention-gloss-double-quote">「</span><span class="mention-gloss">生肉</span><span class="mention-gloss-double-quote">」</span>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "krew",
+            """==ポーランド語==
+===語源===
+etymology text
+====同系語====
+* {{etyl|sa|-}}: {{l|sa|क्रव्य|tr=kravya-|g=n||生肉}}
+===名詞===
+# [[ち|血]]。""",
+        )
+        self.assertEqual(len(data), 1)
+        self.assertEqual(
+            data[0]["cognates"],
+            [
+                {
+                    "lang": "サンスクリット",
+                    "lang_code": "sa",
+                    "roman": "kravya-",
+                    "sense": "生肉",
+                    "tags": ["neuter"],
+                    "word": "क्रव्य",
+                }
+            ],
+        )
+        self.assertEqual(data[0]["etymology_texts"], ["etymology text"])
+        self.assertEqual(data[0]["pos"], "noun")

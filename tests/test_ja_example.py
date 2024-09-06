@@ -116,3 +116,26 @@ class TestJaExample(TestCase):
                 "ref": "――関一『住宅問題と都市計画』弘文堂書房、1923年8月、53頁。",
             },
         )
+
+    def test_ux_template(self):
+        self.wxr.wtp.start_page("sad")
+        self.wxr.wtp.add_page(
+            "テンプレート:ux",
+            10,
+            """<div class="h-usage-example"><i class="Latn mention e-example" lang="en">She gets '''sad''' when he's away.</i><dl><dd><span class="e-translation">彼がいないと彼女は悲しくなる。</span></dd></dl></div>[[カテゴリ:英語 例文あり|SAD]]""",
+        )
+        root = self.wxr.wtp.parse(
+            "#* {{ux|en|She gets '''sad''' when he's away.|彼がいないと彼女は悲しくなる。}}"
+        )
+        sense = Sense()
+        extract_example_list_item(
+            self.wxr, None, sense, root.children[0].children[0]
+        )
+        self.assertEqual(
+            sense.examples[0].model_dump(exclude_defaults=True),
+            {
+                "text": "She gets sad when he's away.",
+                "translation": "彼がいないと彼女は悲しくなる。",
+            },
+        )
+        self.assertEqual(sense.categories, ["英語 例文あり"])

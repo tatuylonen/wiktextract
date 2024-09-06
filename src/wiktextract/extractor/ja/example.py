@@ -1,4 +1,4 @@
-from wikitextprocessor.parser import NodeKind, WikiNode
+from wikitextprocessor.parser import NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -39,6 +39,14 @@ def extract_example_list_item(
         if isinstance(child, WikiNode) and child.kind != NodeKind.LIST
     ) or not list_item.contain_node(NodeKind.LIST):
         # has bold node or doesn't have list child node
+        has_example_template = False
+        for t_node in list_item.find_child(NodeKind.TEMPLATE):
+            if t_node.template_name in ["ux", "uxi"]:
+                process_ux_template(wxr, t_node, sense)
+                has_example_template = True
+        if has_example_template:
+            return
+
         expanded_nodes = wxr.wtp.parse(
             wxr.wtp.node_to_wikitext(
                 list(list_item.invert_find_child(NodeKind.LIST))
@@ -77,3 +85,20 @@ def extract_example_list_item(
             extract_example_list_item(
                 wxr, word_entry, sense, next_list_item, list_item_text
             )
+
+
+def process_ux_template(
+    wxr: WiktextractContext, template: TemplateNode, sense: Sense
+) -> None:
+    # https://ja.wiktionary.org/wiki/テンプレート:ux
+    # https://ja.wiktionary.org/wiki/テンプレート:uxi
+    example = Example()
+    example.text = clean_node(
+        wxr, None, template.template_parameters.get(2, "")
+    )
+    example.translation = clean_node(
+        wxr, None, template.template_parameters.get(3, "")
+    )
+    if example.text != "":
+        sense.examples.append(example)
+    clean_node(wxr, sense, template)

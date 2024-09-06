@@ -1,4 +1,4 @@
-from wikitextprocessor.parser import LevelNode, NodeKind
+from wikitextprocessor.parser import LEVEL_KIND_FLAGS, LevelNode, NodeKind
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -13,14 +13,18 @@ def extract_etymology_section(
 ) -> None:
     etymology_texts = []
     cats = {}
-    for list_item in level_node.find_child_recursively(NodeKind.LIST_ITEM):
-        text = clean_node(
-            wxr, cats, list(list_item.invert_find_child(NodeKind.LIST))
-        )
-        if len(text) > 0:
-            etymology_texts.append(text)
+    for list_node in level_node.find_child(NodeKind.LIST):
+        # don't use `find_child_recursively` to avoid lists in subsection
+        for list_item in list_node.find_child(NodeKind.LIST_ITEM):
+            text = clean_node(
+                wxr, cats, list(list_item.invert_find_child(NodeKind.LIST))
+            )
+            if len(text) > 0:
+                etymology_texts.append(text)
     if len(etymology_texts) == 0:
-        text = clean_node(wxr, cats, level_node.children)
+        text = clean_node(
+            wxr, cats, list(level_node.invert_find_child(LEVEL_KIND_FLAGS))
+        )
         if len(text) > 0:
             etymology_texts.append(text)
     for link in level_node.find_child(NodeKind.LINK):
