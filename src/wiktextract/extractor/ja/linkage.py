@@ -61,4 +61,7 @@ def process_linkage_list_item(
                 getattr(word_entry, linkage_type).append(
                     Linkage(word=word, sense=sense)
                 )
+        elif isinstance(node, TemplateNode) and node.template_name == "sense":
+            sense = clean_node(wxr, None, node).strip("(): ")
+
     return linkage_type

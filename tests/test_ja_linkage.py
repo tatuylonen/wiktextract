@@ -139,3 +139,20 @@ class TestJaLinkage(TestCase):
             [s.model_dump(exclude_defaults=True) for s in data.synonyms],
             [{"word": "天日"}],
         )
+
+    def test_sense_template(self):
+        self.wxr.wtp.start_page("大切")
+        self.wxr.wtp.add_page(
+            "テンプレート:sense",
+            10,
+            '<span class="ib-brac"><span class="qualifier-brac"> (</span></span><span class="ib-content"><span class="qualifier-content">重要だ</span></span><span class="ib-brac"><span class="qualifier-brac">)</span></span><span class="ib-colon"><span class="sense-qualifier-colon">:</span></span>',
+        )
+        data = WordEntry(
+            word="大切", lang="日本語", lang_code="ja", pos="adj_noun"
+        )
+        root = self.wxr.wtp.parse("* {{sense|重要だ}} [[些細]]")
+        extract_linkage_section(self.wxr, data, root, "antonyms")
+        self.assertEqual(
+            [s.model_dump(exclude_defaults=True) for s in data.antonyms],
+            [{"word": "些細", "sense": "重要だ"}],
+        )
