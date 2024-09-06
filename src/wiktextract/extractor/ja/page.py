@@ -61,6 +61,12 @@ def parse_section(
     for next_level in level_node.find_child(LEVEL_KIND_FLAGS):
         parse_section(wxr, page_data, base_data, next_level)
 
+    for t_node in level_node.find_child(NodeKind.TEMPLATE):
+        if t_node.template_name.endswith("-cat"):
+            clean_node(
+                wxr, page_data[-1] if len(page_data) > 0 else base_data, t_node
+            )
+
 
 def parse_page(
     wxr: WiktextractContext, page_title: str, page_text: str
