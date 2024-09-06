@@ -1,9 +1,10 @@
+from mediawiki_langcodes import code_to_name, name_to_code
 from wikitextprocessor.parser import LevelNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from ..ruby import extract_ruby
-from .models import Linkage, WordEntry
+from .models import Descendant, Linkage, WordEntry
 from .section_titles import LINKAGES
 
 
@@ -13,6 +14,10 @@ def extract_linkage_section(
     level_node: LevelNode,
     linkage_type: str,
 ) -> None:
+    if linkage_type in ["cognates", "descendants"]:
+        extract_descendant_section(wxr, word_entry, level_node, linkage_type)
+        return
+
     sense = ""
     for node in level_node.find_child(NodeKind.LIST | NodeKind.TEMPLATE):
         if isinstance(node, TemplateNode) and node.template_name.startswith(
@@ -65,3 +70,60 @@ def process_linkage_list_item(
             sense = clean_node(wxr, None, node).strip("(): ")
 
     return linkage_type
+
+
+def extract_descendant_section(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    level_node: LevelNode,
+    linkage_type: str,
+) -> None:
+    desc_list = []
+    for list_node in level_node.find_child(NodeKind.LIST):
+        for list_item in list_node.find_child(NodeKind.LIST_ITEM):
+            desc_list.extend(process_desc_list_item(wxr, list_item, []))
+    getattr(word_entry, linkage_type).extend(desc_list)
+
+
+def process_desc_list_item(
+    wxr: WiktextractContext, list_item: WikiNode, parent_list: list[Descendant]
+) -> list[Descendant]:
+    desc_list = []
+    lang_name = ""
+    lang_code = ""
+    for index, child in enumerate(list_item.children):
+        if isinstance(child, str) and ":" in child:
+            lang_name = clean_node(wxr, None, list_item.children[:index])
+            lang_code = name_to_code(lang_name, "ja")
+        elif isinstance(child, TemplateNode) and child.template_name == "l":
+            # https://ja.wiktionary.org/wiki/テンプレート:l
+            l_args = {
+                2: "word",
+                3: "word",
+                4: "sense",
+                "gloss": "sense",
+                "t": "sense",
+                "tr": "roman",
+            }
+            if lang_code == "":
+                lang_code = clean_node(
+                    wxr, None, child.template_parameters.get(1, "")
+                )
+            if lang_name == "":
+                lang_name = code_to_name(lang_code, "ja")
+            desc_data = Descendant(lang=lang_name, lang_code=lang_code)
+            for arg_name, field in l_args.items():
+                arg_value = clean_node(
+                    wxr, None, child.template_parameters.get(arg_name, "")
+                )
+                if arg_value != "":
+                    setattr(desc_data, field, arg_value)
+            if desc_data.word != "":
+                desc_list.append(desc_data)
+        elif isinstance(child, WikiNode) and child.kind == NodeKind.LIST:
+            for next_list_item in child.find_child(NodeKind.LIST_ITEM):
+                process_desc_list_item(wxr, next_list_item, desc_list)
+
+    for p_data in parent_list:
+        p_data.descendants.extend(desc_list)
+    return desc_list

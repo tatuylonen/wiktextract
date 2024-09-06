@@ -76,6 +76,15 @@ class Linkage(JapaneseBaseModel):
     sense: str = ""
 
 
+class Descendant(JapaneseBaseModel):
+    lang_code: str = Field(default="", description="Wiktionary language code")
+    lang: str = Field(default="", description="Language name")
+    word: str = ""
+    roman: str = ""
+    descendants: list["Descendant"] = []
+    sense: str = ""
+
+
 class WordEntry(JapaneseBaseModel):
     model_config = ConfigDict(title="Japanese Wiktionary")
 
@@ -108,3 +117,5 @@ class WordEntry(JapaneseBaseModel):
     proverbs: list[Linkage] = []
     phrases: list[Linkage] = []
     coordinate_terms: list[Linkage] = []
+    cognates: list[Descendant] = []
+    descendants: list[Descendant] = []

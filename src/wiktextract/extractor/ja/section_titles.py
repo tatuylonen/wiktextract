@@ -51,4 +51,6 @@ LINKAGES = {
     "熟語": "proverbs",
     "成句": "phrases",
     "連語": "collocations",
+    "同系語": "cognates",
+    "諸言語への影響": "descendants",
 }

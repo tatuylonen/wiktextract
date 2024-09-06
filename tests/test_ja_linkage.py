@@ -156,3 +156,31 @@ class TestJaLinkage(TestCase):
             [s.model_dump(exclude_defaults=True) for s in data.antonyms],
             [{"word": "些細", "sense": "重要だ"}],
         )
+
+    def test_descendant_lists(self):
+        self.wxr.wtp.start_page("color")
+        data = WordEntry(
+            word="color", lang="ラテン語", lang_code="la", pos="noun"
+        )
+        self.wxr.wtp.add_page("テンプレート:roa-opt", 10, "古ポルトガル語")
+        self.wxr.wtp.add_page("テンプレート:pt", 10, "ポルトガル語")
+        root = self.wxr.wtp.parse("""* {{roa-opt}}: {{l|roa-opt|coor}}
+** {{pt}}: {{l|pt|cor}}""")
+        extract_linkage_section(self.wxr, data, root, "descendants")
+        self.assertEqual(
+            [s.model_dump(exclude_defaults=True) for s in data.descendants],
+            [
+                {
+                    "descendants": [
+                        {
+                            "lang": "ポルトガル語",
+                            "lang_code": "pt",
+                            "word": "cor",
+                        }
+                    ],
+                    "lang": "古ポルトガル語",
+                    "lang_code": "roa-opt",
+                    "word": "coor",
+                }
+            ],
+        )
