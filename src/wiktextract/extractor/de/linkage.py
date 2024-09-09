@@ -48,6 +48,17 @@ def process_linkage_list_item(
             raw_tag = clean_node(wxr, None, child)
             if raw_tag.endswith(":"):
                 raw_tags.append(raw_tag.strip(": "))
+            else:
+                for link_node in child.find_child(NodeKind.LINK):
+                    link_text = clean_node(wxr, None, link_node)
+                    if link_text != "":
+                        linkage = Linkage(
+                            word=link_text,
+                            sense_index=sense_idx,
+                            raw_tags=raw_tags,
+                        )
+                        translate_raw_tags(linkage)
+                        linkage_list.append(linkage)
         elif isinstance(child, TemplateNode) and child.template_name.endswith(
             "."
         ):
@@ -67,7 +78,7 @@ def process_linkage_list_item(
                 translate_raw_tags(linkage)
                 linkage_list.append(linkage)
 
-    if len(note_nodes) > 0:
+    if len(note_nodes) > 0 and len(linkage_list) > 0:
         linkage_list[-1].note = clean_node(wxr, None, note_nodes).strip(
             "–—―‒- "
         )
