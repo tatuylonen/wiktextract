@@ -23,6 +23,7 @@ from mediawiki_langcodes import get_all_names, name_to_code
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.core import TemplateArgs, TemplateFnCallable
 from wikitextprocessor.parser import GeneralNode, TemplateNode
+
 from wiktextract.clean import clean_template_args, clean_value
 from wiktextract.datautils import (
     data_append,
@@ -63,6 +64,7 @@ from wiktextract.wxr_logging import logger
 
 from ..ruby import extract_ruby, parse_ruby
 from ..share import strip_nodes
+from .example import extract_example_list_item
 from .info_templates import (
     INFO_TEMPLATE_FUNCS,
     parse_info_template_arguments,
@@ -3652,6 +3654,11 @@ def parse_language(
                 example_template_args = []
                 example_template_names = []
                 taxons = set()
+
+                new_example_lists = extract_example_list_item(wxr, item, None)
+                if len(new_example_lists) > 0:
+                    examples.extend(new_example_lists)
+                    continue
 
                 def usex_template_fn(
                     name: str, ht: TemplateArgs
