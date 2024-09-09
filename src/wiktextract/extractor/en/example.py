@@ -5,7 +5,7 @@ from wikitextprocessor.parser import NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...tags import valid_tags
-from ...type_utils import ExampleData
+from ...type_utils import ExampleData, SenseData
 from ...wxr_context import WiktextractContext
 from ..ruby import extract_ruby
 
@@ -13,6 +13,7 @@ from ..ruby import extract_ruby
 def extract_example_list_item(
     wxr: WiktextractContext,
     list_item: WikiNode,
+    sense_data: SenseData,
     parent_data: Optional[ExampleData],
 ) -> list[ExampleData]:
     examples = []
@@ -22,6 +23,7 @@ def extract_example_list_item(
                 extract_template_zh_x(
                     wxr,
                     template_node,
+                    sense_data,
                     parent_data
                     if parent_data is not None
                     else ExampleData(raw_tags=[], tags=[]),
@@ -32,13 +34,14 @@ def extract_example_list_item(
                 extract_template_ja_usex(
                     wxr,
                     template_node,
+                    sense_data,
                     parent_data
                     if parent_data is not None
                     else ExampleData(raw_tags=[], tags=[]),
                 )
             )
         elif template_node.template_name.startswith(("quote-", "RQ:")):
-            q_example = extract_quote_templates(wxr, template_node)
+            q_example = extract_quote_templates(wxr, template_node, sense_data)
             if list_item.contain_node(NodeKind.LIST):
                 for next_list_item in list_item.find_child_recursively(
                     NodeKind.LIST_ITEM
@@ -47,7 +50,7 @@ def extract_example_list_item(
                         q_example[key] = []
                     examples.extend(
                         extract_example_list_item(
-                            wxr, next_list_item, q_example
+                            wxr, next_list_item, sense_data, q_example
                         )
                     )
             else:
@@ -57,11 +60,12 @@ def extract_example_list_item(
 
 
 def extract_quote_templates(
-    wxr: WiktextractContext, node: TemplateNode
+    wxr: WiktextractContext, node: TemplateNode, sense_data: SenseData
 ) -> ExampleData:
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(node), expand_all=True
     )
+    clean_node(wxr, sense_data, expanded_node)
     ref = ""
     text = ""
     translation = ""
@@ -77,12 +81,16 @@ def extract_quote_templates(
 
 
 def extract_template_ja_usex(
-    wxr: WiktextractContext, node: TemplateNode, example_data: ExampleData
+    wxr: WiktextractContext,
+    node: TemplateNode,
+    sense_data: SenseData,
+    example_data: ExampleData,
 ) -> ExampleData:
     # https://en.wiktionary.org/wiki/Template:ja-usex
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(node), expand_all=True
     )
+    clean_node(wxr, sense_data, expanded_node)
     for span_tag in expanded_node.find_html(
         "span", attr_name="class", attr_value="Jpan"
     ):
@@ -104,12 +112,14 @@ def extract_template_ja_usex(
 def extract_template_zh_x(
     wxr: WiktextractContext,
     template_node: TemplateNode,
+    sense_data: SenseData,
     parent_example: ExampleData,
 ) -> list[ExampleData]:
     # https://en.wiktionary.org/wiki/Template:zh-x
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(template_node), expand_all=True
     )
+    clean_node(wxr, sense_data, expanded_node)
     has_dl_tag = False
     results = []
     for dl_tag in expanded_node.find_html_recursively("dl"):

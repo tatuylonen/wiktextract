@@ -1849,7 +1849,6 @@ def parse_language(
         if len(subglosses) == 0:
             return False
 
-
         if any(s.startswith("#") for s in subglosses):
             subtree = wxr.wtp.parse(rawgloss)
             # from wikitextprocessor.parser import print_tree
@@ -1858,8 +1857,7 @@ def parse_language(
             new_subentries = [
                 x
                 for x in subtree.children
-                if isinstance(x, WikiNode)
-                and x.kind == NodeKind.LIST
+                if isinstance(x, WikiNode) and x.kind == NodeKind.LIST
             ]
 
             new_others = [
@@ -1895,7 +1893,6 @@ def parse_language(
             if rawgloss.endswith(x):
                 rawgloss = rawgloss[: -len(x)].strip()
                 break
-
 
         # A single gloss, or possibly an outer gloss.
         # Check if the possible outer gloss starts with
@@ -3655,7 +3652,9 @@ def parse_language(
                 example_template_names = []
                 taxons = set()
 
-                new_example_lists = extract_example_list_item(wxr, item, None)
+                new_example_lists = extract_example_list_item(
+                    wxr, item, sense_base, None
+                )
                 if len(new_example_lists) > 0:
                     examples.extend(new_example_lists)
                     continue
