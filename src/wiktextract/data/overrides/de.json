@@ -1,6 +1,16 @@
 {
+  "Vorlage:Abgeleitete Symbole": {
+    "body": "====Abgeleitete Symbole====",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
   "Vorlage:Abkürzungen": {
     "body": "==== Abkürzungen ====",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Vorlage:Ähnlichkeiten": {
+    "body": "====Ähnliche Wörter====",
     "namespace_id": 10,
     "need_pre_expand": true
   },
@@ -44,6 +54,16 @@
     "namespace_id": 10,
     "need_pre_expand": true
   },
+  "Vorlage:Erbwörter": {
+    "body": "====Erbwörter====",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Vorlage:Geflügelte Worte": {
+    "body": "====Geflügelte Worte====",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
   "Vorlage:Gegenwörter": {
     "body": "==== Gegenwörter ====",
     "namespace_id": 10,
@@ -54,8 +74,18 @@
     "namespace_id": 10,
     "need_pre_expand": true
   },
+  "Vorlage:Hanja": {
+    "body": "====Hanja====",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
   "Vorlage:Herkunft": {
     "body": "==== Herkunft ====",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Vorlage:Heteronyme": {
+    "body": "====Heteronyme====",
     "namespace_id": 10,
     "need_pre_expand": true
   },
@@ -64,8 +94,38 @@
     "namespace_id": 10,
     "need_pre_expand": true
   },
+  "Vorlage:in arabischer Schrift": {
+    "body": "====In arabischer Schrift====",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Vorlage:in hebräischer Schrift": {
+    "body": "====In hebräischer Schrift====",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Vorlage:in kanadischer Silbenschrift": {
+    "body": "====In kanadischer Silbenschrift====",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Vorlage:in kyrillischer Schrift": {
+    "body": "====In kyrillischer Schrift====",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Vorlage:in lateinischer Schrift": {
+    "body": "====In lateinischer Schrift====",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
   "Vorlage:Koseformen": {
     "body": "==== Koseformen ====",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Vorlage:Kurzformen": {
+    "body": "====Kurzformen====",
     "namespace_id": 10,
     "need_pre_expand": true
   },
@@ -74,8 +134,18 @@
     "namespace_id": 10,
     "need_pre_expand": true
   },
+  "Vorlage:Männliche Namensvarianten": {
+    "body": "====Männliche Namensvarianten====",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
   "Vorlage:Männliche Wortformen": {
     "body": "==== Männliche Wortformen ====",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Vorlage:Meronyme": {
+    "body": "====Meronyme====",
     "namespace_id": 10,
     "need_pre_expand": true
   },
@@ -129,8 +199,18 @@
     "namespace_id": 10,
     "need_pre_expand": true
   },
+  "Vorlage:Sinnverwandte Redewendungen": {
+    "body": "====Sinnverwandte Redewendungen====",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
   "Vorlage:Sinnverwandte Wörter": {
     "body": "==== Sinnverwandte Wörter ====",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Vorlage:Sinnverwandte Zeichen": {
+    "body": "====Sinnverwandte Zeichen====",
     "namespace_id": 10,
     "need_pre_expand": true
   },
@@ -159,6 +239,16 @@
     "namespace_id": 10,
     "need_pre_expand": true
   },
+  "Vorlage:Verballhornung": {
+    "body": "====Verballhornungen====",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Vorlage:Vergrößerungsformen": {
+    "body": "====Vergrößerungsformen====",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
   "Vorlage:Verkleinerungsformen": {
     "body": "==== Verkleinerungsformen ====",
     "namespace_id": 10,
@@ -166,6 +256,11 @@
   },
   "Vorlage:Vokalisierung": {
     "body": "==== Vokalisierung ====",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Vorlage:Weibliche Namensvarianten": {
+    "body": "====Weibliche Namensvarianten====",
     "namespace_id": 10,
     "need_pre_expand": true
   },

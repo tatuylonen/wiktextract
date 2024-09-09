@@ -118,3 +118,24 @@ class TestDELinkages(unittest.TestCase):
                 },
             ],
         )
+
+    def test_link_in_italic_node(self):
+        self.wxr.wtp.start_page("Abendland")
+        root = self.wxr.wtp.parse("""====Redewendungen====
+:[1] ''[[Morgenland und Abendland]]'' -""")
+        word_entry = WordEntry(
+            word="Abendland",
+            lang_code="de",
+            lang="Deutsch",
+            senses=[Sense(sense_index="1")],
+        )
+        extract_linkages(self.wxr, word_entry, root.children[0], "expressions")
+        self.assertEqual(
+            [
+                d.model_dump(exclude_defaults=True)
+                for d in word_entry.expressions
+            ],
+            [
+                {"word": "Morgenland und Abendland", "sense_index": "1"},
+            ],
+        )

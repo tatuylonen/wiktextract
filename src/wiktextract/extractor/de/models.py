@@ -177,3 +177,4 @@ class WordEntry(BaseModelWrap):
     redirects: list[str] = []
     etymology_text: str = ""
     forms: list[Form] = []
+    meronyms: list[Linkage] = []
