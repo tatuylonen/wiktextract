@@ -39,6 +39,8 @@ def parse_section(
     # Page structure: https://de.wiktionary.org/wiki/Hilfe:Formatvorlage
     # Level 3 headings are used to start POS sections like
     # === {{Wortart|Verb|Deutsch}} ===
+    # title templates:
+    # https://de.wiktionary.org/wiki/Kategorie:Wiktionary:Textbausteine
     if level_node.kind == NodeKind.LEVEL3:
         process_pos_section(wxr, page_data, base_data, level_node)
     # Level 4 headings were introduced by overriding the default templates.
