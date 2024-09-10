@@ -18,7 +18,7 @@ def extract_example_list_item(
 ) -> list[ExampleData]:
     examples = []
     for template_node in list_item.find_child(NodeKind.TEMPLATE):
-        if template_node.template_name == "zh-x":
+        if template_node.template_name in ["zh-x", "zh-q"]:
             examples.extend(
                 extract_template_zh_x(
                     wxr,
@@ -145,15 +145,16 @@ def extract_template_zh_x(
                             "]"
                         ):
                             roman_raw_tags.append(span_text.strip("[]"))
+                    break
 
         example_text = ""
-        last_span_is_exmaple = False
+        last_span_is_example = False
         for span_tag in dl_tag.find_html_recursively("span"):
             if span_tag.attrs.get("class", "") in ["Hant", "Hans"]:
                 example_text = clean_node(wxr, None, span_tag)
-                last_span_is_exmaple = True
-            elif last_span_is_exmaple:
-                last_span_is_exmaple = False
+                last_span_is_example = True
+            elif last_span_is_example:
+                last_span_is_example = False
                 if len(example_text) > 0:
                     example = deepcopy(parent_example)
                     # dialect and character variant tag
@@ -221,10 +222,10 @@ def clean_example_empty_data(data: ExampleData) -> ExampleData:
     raw_tags = data.get("raw_tags", [])
     new_raw_tags = []
     for raw_tag in raw_tags:
-        if raw_tag in valid_tags:
-            data["tags"].append(raw_tag)
-        elif raw_tag in ZH_X_TAGS:
+        if raw_tag in ZH_X_TAGS:
             data["tags"].append(ZH_X_TAGS[raw_tag])
+        elif raw_tag in valid_tags:
+            data["tags"].append(raw_tag)
         else:
             new_raw_tags.append(raw_tag)
     data["raw_tags"] = new_raw_tags
