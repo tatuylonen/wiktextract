@@ -51,15 +51,15 @@ def extract_examples(
                     ):
                         extract_quote_templates(wxr, child, example_data)
                         clean_node(wxr, sense_data, child)  # add cat link
-                    elif template_name in {"ja-x", "ja-usex"}:
+                    elif template_name in ["ja-x", "ja-usex"]:
                         extract_template_ja_usex(wxr, child, example_data)
                         clean_node(wxr, sense_data, child)  # add cat link
-                    elif template_name in {"zh-x", "zh-usex", "zh-q"}:
+                    elif template_name in ["zh-x", "zh-usex", "zh-q"]:
                         sense_data.examples.extend(
                             extract_template_zh_x(wxr, child, example_data)
                         )
                         clean_node(wxr, sense_data, child)  # add cat link
-                    elif template_name in {"ux", "eg", "usex", "uxi"}:
+                    elif template_name in ["ux", "eg", "usex", "uxi", "coi"]:
                         extract_template_ux(wxr, child, example_data)
                         clean_node(wxr, sense_data, child)  # add cat link
                     elif template_name in LINKAGE_TEMPLATES:
