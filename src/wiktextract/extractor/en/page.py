@@ -23,7 +23,6 @@ from mediawiki_langcodes import get_all_names, name_to_code
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.core import TemplateArgs, TemplateFnCallable
 from wikitextprocessor.parser import GeneralNode, TemplateNode
-
 from wiktextract.clean import clean_template_args, clean_value
 from wiktextract.datautils import (
     data_append,
@@ -637,8 +636,6 @@ usex_templates: set[str] = {
     "usex-suffix",
     "ux",
     "uxi",
-    "zh-usex",
-    "zh-x",
 }
 
 stop_head_at_these_templates: set[str] = {
@@ -1751,7 +1748,6 @@ def parse_language(
                 "ja-usex-inline",
                 "ja-x",
                 "quotei",
-                "zh-x",
                 "he-x",
                 "hi-x",
                 "km-x",
@@ -3652,6 +3648,8 @@ def parse_language(
                 example_template_names = []
                 taxons = set()
 
+                # Bypass this function when parsing Chinese, Japanese and
+                # quotation templates.
                 new_example_lists = extract_example_list_item(
                     wxr, item, sense_base, None
                 )
@@ -3684,6 +3682,8 @@ def parse_language(
                 ruby: list[tuple[str, str]] = []
                 contents = item.children
                 if lang_code == "ja":
+                    # Capture ruby contents if this is a Japanese language
+                    # example.
                     # print(contents)
                     if (
                         contents
@@ -3844,7 +3844,6 @@ def parse_language(
                         re.search(r"[]\d:)]\s*$", x) for x in lines[:-1]
                     ) and not (
                         len(example_template_names) == 1
-                        and example_template_names[0] in ("zh-x", "zh-usex")
                     ):
                         refs: list[str] = []
                         for i in range(len(lines)):
@@ -3939,29 +3938,6 @@ def parse_language(
                                 i -= 1
                             tr = "\n".join(lines[i:])
                             lines = lines[:i]
-                    elif (
-                        len(lines) > 2
-                        and len(example_template_names)
-                        and example_template_names[0]
-                        in (
-                            "zh-x",
-                            "zh-usex",
-                        )
-                    ):
-                        original_lines = []
-                        for i, line in enumerate(lines):
-                            if not line:
-                                continue
-                            cl = classify_desc2(line.split("[")[0])
-                            if line.startswith("From:"):
-                                ref += line
-                            elif cl == "other":
-                                original_lines.append(i)
-                            elif cl == "romanization":
-                                roman += line
-                            elif cl in ENGLISH_TEXTS:
-                                tr += line
-                        lines = [lines[i] for i in original_lines]
 
                 roman = re.sub(r"[ \t\r]+", " ", roman).strip()
                 roman = re.sub(r"\[\s*…\s*\]", "[…]", roman)
