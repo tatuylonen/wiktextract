@@ -1,6 +1,6 @@
-from typing import Optional, Union
+from typing import Optional
 
-from wikitextprocessor.parser import NodeKind, TemplateNode, WikiNode
+from wikitextprocessor.parser import HTMLNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -21,85 +21,79 @@ LINKAGE_TEMPLATES = {
 }
 
 
-def extract_examples(
+def extract_example_list_item(
     wxr: WiktextractContext,
     sense_data: Sense,
-    node: Union[WikiNode, list[WikiNode]],
+    list_item: WikiNode,
     page_data: list[WordEntry],
     parent_example: Optional[Example] = None,
 ) -> None:
-    if isinstance(node, list):
-        for n in node:
-            extract_examples(wxr, sense_data, n, page_data)
-    elif isinstance(node, WikiNode):
-        if node.kind == NodeKind.LIST_ITEM:
-            example_data = parent_example or Example()
-            # example text in the nested list
-            # https://zh.wiktionary.org/wiki/%, the second example
-            if node.contain_node(NodeKind.LIST) and not all(
-                isinstance(n, TemplateNode)
-                for n in node.invert_find_child(NodeKind.LIST)
+    example_data = parent_example or Example()
+    if list_item.contain_node(NodeKind.LIST) and not all(
+        isinstance(n, TemplateNode)
+        for n in list_item.invert_find_child(NodeKind.LIST)
+    ):
+        # plain text in the nested list, not using any template
+        # https://zh.wiktionary.org/wiki/%, the second example
+        extract_plain_text_example_list(wxr, list_item, example_data)
+    else:
+        # parse example templates
+        for child in list_item.find_child(NodeKind.TEMPLATE):
+            template_name = child.template_name
+            if (
+                template_name.startswith(("quote-", "RQ:"))
+                or template_name == "quote"
             ):
-                extract_plain_text_example_list(wxr, node, example_data)
+                extract_quote_templates(wxr, child, example_data)
+                clean_node(wxr, sense_data, child)  # add cat link
+            elif template_name in ["ja-x", "ja-usex"]:
+                extract_template_ja_usex(wxr, child, example_data)
+                clean_node(wxr, sense_data, child)  # add cat link
+            elif template_name in ["zh-x", "zh-usex", "zh-q"]:
+                sense_data.examples.extend(
+                    extract_template_zh_x(wxr, child, example_data)
+                )
+                clean_node(wxr, sense_data, child)  # add cat link
+            elif template_name in ["ux", "eg", "usex", "uxi", "coi"]:
+                extract_template_ux(wxr, child, example_data)
+                clean_node(wxr, sense_data, child)  # add cat link
+            elif template_name == "Q":
+                extract_template_Q(wxr, child, example_data)
+                clean_node(wxr, sense_data, child)  # add cat link
+            elif template_name in LINKAGE_TEMPLATES:
+                process_linkage_templates_in_gloss(
+                    wxr,
+                    page_data,
+                    child,
+                    LINKAGE_TEMPLATES[template_name],
+                    sense_data.glosses[0]
+                    if len(sense_data.glosses) > 0
+                    else "",
+                )
             else:
-                # parse example templates
-                for child in node.find_child(NodeKind.TEMPLATE):
-                    template_name = child.template_name
-                    if (
-                        template_name.startswith(("quote-", "RQ:"))
-                        or template_name == "quote"
-                    ):
-                        extract_quote_templates(wxr, child, example_data)
-                        clean_node(wxr, sense_data, child)  # add cat link
-                    elif template_name in ["ja-x", "ja-usex"]:
-                        extract_template_ja_usex(wxr, child, example_data)
-                        clean_node(wxr, sense_data, child)  # add cat link
-                    elif template_name in ["zh-x", "zh-usex", "zh-q"]:
-                        sense_data.examples.extend(
-                            extract_template_zh_x(wxr, child, example_data)
-                        )
-                        clean_node(wxr, sense_data, child)  # add cat link
-                    elif template_name in ["ux", "eg", "usex", "uxi", "coi"]:
-                        extract_template_ux(wxr, child, example_data)
-                        clean_node(wxr, sense_data, child)  # add cat link
-                    elif template_name in LINKAGE_TEMPLATES:
-                        process_linkage_templates_in_gloss(
-                            wxr,
-                            page_data,
-                            child,
-                            LINKAGE_TEMPLATES[template_name],
-                            sense_data.glosses[0]
-                            if len(sense_data.glosses) > 0
-                            else "",
-                        )
-                    else:
-                        example_data.text = clean_node(wxr, None, child)
+                example_data.text = clean_node(wxr, None, child)
 
-                for list_item in node.find_child_recursively(
-                    NodeKind.LIST_ITEM
-                ):
-                    extract_examples(
-                        wxr, sense_data, list_item, page_data, example_data
-                    )
+        for next_list_item in list_item.find_child_recursively(
+            NodeKind.LIST_ITEM
+        ):
+            extract_example_list_item(
+                wxr, sense_data, next_list_item, page_data, example_data
+            )
 
-            if len(example_data.text) > 0 and parent_example is None:
-                sense_data.examples.append(example_data)
-        else:
-            extract_examples(wxr, sense_data, node.children, page_data)
+    if len(example_data.text) > 0 and parent_example is None:
+        sense_data.examples.append(example_data)
 
 
 def extract_plain_text_example_list(
-    wxr: WiktextractContext, node: WikiNode, example_data: Example
+    wxr: WiktextractContext, list_item: WikiNode, example_data: Example
 ) -> None:
-    for index, child_node in enumerate(node.children):
-        if (
-            isinstance(child_node, WikiNode)
-            and child_node.kind == NodeKind.LIST
-        ):
-            example_data.ref = clean_node(wxr, None, node.children[:index])
-            example_data.text = clean_node(
-                wxr, None, child_node.children[0].children
-            )
+    for index, nested_list in list_item.find_child(
+        NodeKind.LIST, with_index=True
+    ):
+        example_data.ref = clean_node(wxr, None, list_item.children[:index])
+        example_data.text = clean_node(
+            wxr, None, nested_list.children[0].children
+        )
 
 
 def extract_quote_templates(
@@ -247,7 +241,7 @@ def extract_template_zh_x(
 
 
 def extract_template_ux(
-    wxr: WiktextractContext, node: WikiNode, example_data: Example
+    wxr: WiktextractContext, node: TemplateNode, example_data: Example
 ) -> None:
     # https://zh.wiktionary.org/wiki/Template:ux
     expanded_node = wxr.wtp.parse(
@@ -270,3 +264,38 @@ def extract_template_ux(
                 clean_node(wxr, None, span_tag).split("、")
             )
     translate_raw_tags(example_data)
+
+
+def extract_template_Q(
+    wxr: WiktextractContext, node: TemplateNode, example_data: Example
+) -> None:
+    # https://zh.wiktionary.org/wiki/Template:Q
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(node), expand_all=True
+    )
+    for div_tag in expanded_node.find_html(
+        "div", attr_name="class", attr_value="wiktQuote"
+    ):
+        ref_nodes = []
+        for child in div_tag.children:
+            if isinstance(child, HTMLNode) and child.tag == "dl":
+                for i_tag in child.find_html_recursively(
+                    "i", attr_name="class", attr_value="e-transliteration"
+                ):
+                    example_data.roman = clean_node(wxr, None, i_tag)
+                break
+            ref_nodes.append(child)
+        ref_text = clean_node(wxr, None, ref_nodes)
+        if len(ref_text) > 0:
+            example_data.ref = ref_text
+        for t_arg, field in (
+            ("quote", "text"),
+            ("t", "translation"),
+            ("trans", "translation"),
+            ("lit", "literal_meaning"),
+        ):
+            value = clean_node(
+                wxr, None, node.template_parameters.get(t_arg, "")
+            )
+            if len(value) > 0:
+                setattr(example_data, field, value)

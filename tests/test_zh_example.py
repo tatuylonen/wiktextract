@@ -3,7 +3,7 @@ from unittest import TestCase
 from wikitextprocessor import Wtp
 
 from wiktextract.config import WiktionaryConfig
-from wiktextract.extractor.zh.example import extract_examples
+from wiktextract.extractor.zh.example import extract_example_list_item
 from wiktextract.extractor.zh.models import Sense
 from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.wxr_context import WiktextractContext
@@ -25,13 +25,13 @@ class TestExample(TestCase):
 
     def test_example_list(self) -> None:
         sense_data = Sense()
-        wikitext = """
-#* ref text
-#*: example text
-        """
+        wikitext = """#* ref text
+#*: example text"""
         self.wxr.wtp.start_page("test")
-        node = self.wxr.wtp.parse(wikitext)
-        extract_examples(self.wxr, sense_data, node, [])
+        root = self.wxr.wtp.parse(wikitext)
+        extract_example_list_item(
+            self.wxr, sense_data, root.children[0].children[0], []
+        )
         self.assertEqual(
             sense_data.examples[0].model_dump(exclude_defaults=True),
             {
@@ -51,7 +51,9 @@ class TestExample(TestCase):
         root = self.wxr.wtp.parse(
             "#* {{zh-x|王 曰：「封，以 厥 庶民 暨 厥 臣 達 大家，以 厥 臣 達 王 惟 邦君。」|王說：「封啊，從殷的老百姓和他們的官員到'''卿大夫'''，從他們的官員到諸侯和國君。」|CL|ref=《[[s:尚書/梓材|尚書·梓材]]》}}"
         )
-        extract_examples(self.wxr, sense_data, root.children[0], [])
+        extract_example_list_item(
+            self.wxr, sense_data, root.children[0].children[0], []
+        )
         self.assertEqual(
             [e.model_dump(exclude_defaults=True) for e in sense_data.examples],
             [
@@ -89,7 +91,9 @@ class TestExample(TestCase):
         )
         sense_data = Sense()
         root = self.wxr.wtp.parse("#* {{zh-x|中文 授課}}")
-        extract_examples(self.wxr, sense_data, root.children[0], [])
+        extract_example_list_item(
+            self.wxr, sense_data, root.children[0].children[0], []
+        )
         self.assertEqual(
             [e.model_dump(exclude_defaults=True) for e in sense_data.examples],
             [
@@ -121,7 +125,9 @@ class TestExample(TestCase):
         sense_data = Sense()
         root = self.wxr.wtp.parse("""#* {{quote-book|ja}}
 #*: {{ja-usex|オレの日%本%語どう？悪くないだろ　韓%国%語と'''英%語'''も話すんだぜ　趣%味だな語%学は　寝%泊りはどこ？近くのホテル？|^オレ の ^に%ほん%ご どう？ ^わるく ないだろ　^かん%こく%ご と '''^えい%ご''' も はなすんだ ぜ　^しゅ%み だ な ご%がく は　^ね%とまり は どこ？ ^ちかく の ホテル？|我的日語怎麼樣？不差吧？我也會講韓語和英語。學習語言很有趣。你在哪裏住？附近的賓館嗎？}}""")
-        extract_examples(self.wxr, sense_data, root.children[0], [])
+        extract_example_list_item(
+            self.wxr, sense_data, root.children[0].children[0], []
+        )
         self.assertEqual(
             [e.model_dump(exclude_defaults=True) for e in sense_data.examples],
             [
@@ -168,7 +174,9 @@ class TestExample(TestCase):
         sense_data = Sense()
         root = self.wxr.wtp.parse("""#* {{quote-book|zh}}
 #*: {{zh-x}}""")
-        extract_examples(self.wxr, sense_data, root.children[0], [])
+        extract_example_list_item(
+            self.wxr, sense_data, root.children[0].children[0], []
+        )
         self.assertEqual(
             [e.model_dump(exclude_defaults=True) for e in sense_data.examples],
             [
@@ -203,7 +211,9 @@ class TestExample(TestCase):
         root = self.wxr.wtp.parse(
             "#: {{zh-x|^黑奴 ^籲天-錄|{{w|湯姆叔叔的小屋}}|lit='''黑人奴隸'''向上天呼告的記錄|CL}}"
         )
-        extract_examples(self.wxr, sense_data, root.children[0], [])
+        extract_example_list_item(
+            self.wxr, sense_data, root.children[0].children[0], []
+        )
         self.assertEqual(
             [e.model_dump(exclude_defaults=True) for e in sense_data.examples],
             [
@@ -243,7 +253,9 @@ class TestExample(TestCase):
         root = self.wxr.wtp.parse(
             "#: {{ja-usex|その'''認識'''で正しいと思う。|その '''にんしき''' で ただし.い と おも.う。|我相信你是對的。|lit=我相信你的'''理解'''是對的。}}"
         )
-        extract_examples(self.wxr, sense_data, root.children[0], [])
+        extract_example_list_item(
+            self.wxr, sense_data, root.children[0].children[0], []
+        )
         self.assertEqual(
             [e.model_dump(exclude_defaults=True) for e in sense_data.examples],
             [
@@ -272,7 +284,9 @@ class TestExample(TestCase):
         root = self.wxr.wtp.parse(
             "#: {{RQ:Qur'an|3|144|passage=وَمَا '''مُحَمَّدٌ''' إِلَّا رَسُولٌ قَدْ خَلَتْ مِنْ قَبْلِهِ الرُّسُلُ|subst=وَمَا/وَ-مَا|translation='''穆罕默德'''只是一個使者，在他之前，有許多使者，確已逝去了。}}"
         )
-        extract_examples(self.wxr, sense_data, root.children[0], [])
+        extract_example_list_item(
+            self.wxr, sense_data, root.children[0].children[0], []
+        )
         self.assertEqual(
             [e.model_dump(exclude_defaults=True) for e in sense_data.examples],
             [
@@ -296,7 +310,9 @@ class TestExample(TestCase):
         root = self.wxr.wtp.parse(
             "#: {{ux|ru|[[в|В]] [[чужо́й]] [[монасты́рь]] [[со]] [[свой|свои́м]] '''уста́вом''' [[не]] [[ходить|хо́дят]]|入鄉隨俗，入境隨俗|lit=你不能用你自己的憲章去另一個寺院|q=諺語}}"
         )
-        extract_examples(self.wxr, sense_data, root.children[0], [])
+        extract_example_list_item(
+            self.wxr, sense_data, root.children[0].children[0], []
+        )
         self.assertEqual(
             [e.model_dump(exclude_defaults=True) for e in sense_data.examples],
             [
@@ -306,6 +322,32 @@ class TestExample(TestCase):
                     "translation": "入鄉隨俗，入境隨俗",
                     "literal_meaning": "你不能用你自己的憲章去另一個寺院",
                     "raw_tags": ["諺語"],
+                },
+            ],
+        )
+
+    def test_Q(self):
+        self.wxr.wtp.start_page("кипяток")
+        self.wxr.wtp.add_page(
+            "Template:Q",
+            10,
+            """<div class="wiktQuote">P. Yershov, ''The Humpback Horse'' 駝背的馬:<dl><dd><span class="Cyrl e-quotation" lang="ru">Я кончаюсь, Горбунок: Царь велит мне в '''кипяток'''!</span><dl><dd><i lang="ru-Latn" class="e-transliteration tr Latn">Ja končajusʹ, Gorbunok&#x3A; Carʹ velit mne v '''kipjatok'''&#x21;</i></dd><dd>我將要完蛋，駝背。國王命令我跳入'''沸水'''中！</dd></dl></dd></dl></div>""",
+        )
+        sense_data = Sense()
+        root = self.wxr.wtp.parse(
+            "#: {{Q|ru|P. Yershov|The Humpback Horse|駝背的馬||quote=Я кончаюсь, Горбунок: Царь велит мне в '''кипяток'''!|trans=我將要完蛋，駝背。國王命令我跳入'''沸水'''中！}}"
+        )
+        extract_example_list_item(
+            self.wxr, sense_data, root.children[0].children[0], []
+        )
+        self.assertEqual(
+            [e.model_dump(exclude_defaults=True) for e in sense_data.examples],
+            [
+                {
+                    "text": "Я кончаюсь, Горбунок: Царь велит мне в кипяток!",
+                    "roman": "Ja končajusʹ, Gorbunok: Carʹ velit mne v kipjatok!",
+                    "translation": "我將要完蛋，駝背。國王命令我跳入沸水中！",
+                    "ref": "P. Yershov, The Humpback Horse 駝背的馬:",
                 },
             ],
         )
