@@ -115,7 +115,7 @@ def extract_quote_templates(
         span_class = span_tag.attrs.get("class", "")
         if "cited-source" == span_class:
             example_data.ref = clean_node(wxr, None, span_tag)
-        elif "cited-passage" in span_class:
+        elif "e-quotation" in span_class:
             example_data.text = clean_node(wxr, None, span_tag)
         elif "e-translation" in span_class:
             example_data.translation = clean_node(wxr, None, span_tag)
