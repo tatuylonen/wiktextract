@@ -36,6 +36,9 @@ class ExampleData(TypedDict, total=False):
     ruby: Union[list[tuple[str, str]], list[Sequence[str]]]
     text: str
     type: str
+    literal_meaning: str
+    tags: list[str]
+    raw_tags: list[str]
 
 
 class FormOf(TypedDict, total=False):
