@@ -86,9 +86,11 @@ def extract_quote_templates(
     ):
         roman = clean_node(wxr, None, i_tag)
         break
-    return ExampleData(
+    example_data = ExampleData(
         text=text, ref=ref, english=translation, roman=roman, type="quote"
     )
+    clean_example_empty_data(example_data)
+    return example_data
 
 
 def extract_template_ja_usex(
@@ -118,6 +120,8 @@ def extract_template_ja_usex(
     example_data["literal_meaning"] = clean_node(
         wxr, None, node.template_parameters.get("lit", "")
     )
+    clean_example_empty_data(example_data)
+    return example_data
 
 
 def extract_template_zh_x(
@@ -229,7 +233,8 @@ ZH_X_TAGS = {
 }
 
 
-def clean_example_empty_data(data: ExampleData) -> ExampleData:
+def clean_example_empty_data(data: ExampleData) -> None:
+    # remove empty data and convert raw tags
     raw_tags = data.get("raw_tags", [])
     new_raw_tags = []
     for raw_tag in raw_tags:
