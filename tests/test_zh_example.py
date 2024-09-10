@@ -284,3 +284,28 @@ class TestExample(TestCase):
                 },
             ],
         )
+
+    def test_ux(self):
+        self.wxr.wtp.start_page("устав")
+        self.wxr.wtp.add_page(
+            "Template:ux",
+            10,
+            """<div class="h-usage-example"><i class="Cyrl mention e-example" lang="ru">[[в#俄語|-{В}-]] [[чужой#俄語|-{чужо́й}-]] [[монастырь#俄語|-{монасты́рь}-]] [[со#俄語|-{со}-]] [[свой#俄語|-{свои́м}-]] '''уста́вом''' [[не#俄語|-{не}-]] [[ходить#俄語|-{хо́дят}-]]</i> <span class="e-qualifier"><span class="ib-brac qualifier-brac">(</span><span class="ib-content qualifier-content">諺語</span><span class="ib-brac qualifier-brac">)</span></span><dl><dd><i lang="ru-Latn" class="e-transliteration tr Latn">V čužój monastýrʹ so svoím '''ustávom''' ne xódjat</i></dd><dd><span class="e-translation">入鄉隨俗，入境隨俗</span></dd><dd>(字面意思是「<span class="e-literally">你不能用你自己的憲章去另一個寺院</span>」)</dd></dl></div>""",
+        )
+        sense_data = Sense()
+        root = self.wxr.wtp.parse(
+            "#: {{ux|ru|[[в|В]] [[чужо́й]] [[монасты́рь]] [[со]] [[свой|свои́м]] '''уста́вом''' [[не]] [[ходить|хо́дят]]|入鄉隨俗，入境隨俗|lit=你不能用你自己的憲章去另一個寺院|q=諺語}}"
+        )
+        extract_examples(self.wxr, sense_data, root.children[0], [])
+        self.assertEqual(
+            [e.model_dump(exclude_defaults=True) for e in sense_data.examples],
+            [
+                {
+                    "text": "В чужо́й монасты́рь со свои́м уста́вом не хо́дят",
+                    "roman": "V čužój monastýrʹ so svoím ustávom ne xódjat",
+                    "translation": "入鄉隨俗，入境隨俗",
+                    "literal_meaning": "你不能用你自己的憲章去另一個寺院",
+                    "raw_tags": ["諺語"],
+                },
+            ],
+        )

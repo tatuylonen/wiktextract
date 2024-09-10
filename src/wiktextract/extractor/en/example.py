@@ -40,7 +40,10 @@ def extract_example_list_item(
                     else ExampleData(raw_tags=[], tags=[]),
                 )
             )
-        elif template_node.template_name.startswith(("quote-", "RQ:")):
+        elif (
+            template_node.template_name.startswith(("quote-", "RQ:"))
+            or template_node.template_name == "quote"
+        ):
             q_example = extract_quote_templates(wxr, template_node, sense_data)
             if list_item.contain_node(NodeKind.LIST):
                 for next_list_item in list_item.find_child_recursively(
