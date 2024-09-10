@@ -1,6 +1,6 @@
 from typing import Optional
 
-from wikitextprocessor.parser import NodeKind, TemplateNode, WikiNode
+from wikitextprocessor.parser import HTMLNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -56,6 +56,9 @@ def extract_example_list_item(
                 clean_node(wxr, sense_data, child)  # add cat link
             elif template_name in ["ux", "eg", "usex", "uxi", "coi"]:
                 extract_template_ux(wxr, child, example_data)
+                clean_node(wxr, sense_data, child)  # add cat link
+            elif template_name == "Q":
+                extract_template_Q(wxr, child, example_data)
                 clean_node(wxr, sense_data, child)  # add cat link
             elif template_name in LINKAGE_TEMPLATES:
                 process_linkage_templates_in_gloss(
@@ -261,3 +264,38 @@ def extract_template_ux(
                 clean_node(wxr, None, span_tag).split("、")
             )
     translate_raw_tags(example_data)
+
+
+def extract_template_Q(
+    wxr: WiktextractContext, node: TemplateNode, example_data: Example
+) -> None:
+    # https://zh.wiktionary.org/wiki/Template:Q
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(node), expand_all=True
+    )
+    for div_tag in expanded_node.find_html(
+        "div", attr_name="class", attr_value="wiktQuote"
+    ):
+        ref_nodes = []
+        for child in div_tag.children:
+            if isinstance(child, HTMLNode) and child.tag == "dl":
+                for i_tag in child.find_html_recursively(
+                    "i", attr_name="class", attr_value="e-transliteration"
+                ):
+                    example_data.roman = clean_node(wxr, None, i_tag)
+                break
+            ref_nodes.append(child)
+        ref_text = clean_node(wxr, None, ref_nodes)
+        if len(ref_text) > 0:
+            example_data.ref = ref_text
+        for t_arg, field in (
+            ("quote", "text"),
+            ("t", "translation"),
+            ("trans", "translation"),
+            ("lit", "literal_meaning"),
+        ):
+            value = clean_node(
+                wxr, None, node.template_parameters.get(t_arg, "")
+            )
+            if len(value) > 0:
+                setattr(example_data, field, value)

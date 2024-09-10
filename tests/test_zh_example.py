@@ -325,3 +325,29 @@ class TestExample(TestCase):
                 },
             ],
         )
+
+    def test_Q(self):
+        self.wxr.wtp.start_page("кипяток")
+        self.wxr.wtp.add_page(
+            "Template:Q",
+            10,
+            """<div class="wiktQuote">P. Yershov, ''The Humpback Horse'' 駝背的馬:<dl><dd><span class="Cyrl e-quotation" lang="ru">Я кончаюсь, Горбунок: Царь велит мне в '''кипяток'''!</span><dl><dd><i lang="ru-Latn" class="e-transliteration tr Latn">Ja končajusʹ, Gorbunok&#x3A; Carʹ velit mne v '''kipjatok'''&#x21;</i></dd><dd>我將要完蛋，駝背。國王命令我跳入'''沸水'''中！</dd></dl></dd></dl></div>""",
+        )
+        sense_data = Sense()
+        root = self.wxr.wtp.parse(
+            "#: {{Q|ru|P. Yershov|The Humpback Horse|駝背的馬||quote=Я кончаюсь, Горбунок: Царь велит мне в '''кипяток'''!|trans=我將要完蛋，駝背。國王命令我跳入'''沸水'''中！}}"
+        )
+        extract_example_list_item(
+            self.wxr, sense_data, root.children[0].children[0], []
+        )
+        self.assertEqual(
+            [e.model_dump(exclude_defaults=True) for e in sense_data.examples],
+            [
+                {
+                    "text": "Я кончаюсь, Горбунок: Царь велит мне в кипяток!",
+                    "roman": "Ja končajusʹ, Gorbunok: Carʹ velit mne v kipjatok!",
+                    "translation": "我將要完蛋，駝背。國王命令我跳入沸水中！",
+                    "ref": "P. Yershov, The Humpback Horse 駝背的馬:",
+                },
+            ],
+        )
