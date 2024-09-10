@@ -6,7 +6,7 @@ from wikitextprocessor.parser import TemplateNode
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from ..ruby import extract_ruby
-from .example import extract_examples
+from .example import extract_example_list_item
 from .models import AltForm, Sense, WordEntry
 from .tags import translate_raw_tags
 
@@ -66,12 +66,15 @@ def extract_gloss(
 
         has_nested_gloss = False
         if list_item_node.contain_node(NodeKind.LIST):
-            for child_node in list_item_node.find_child(NodeKind.LIST):
-                if child_node.sarg.endswith("#"):  # nested gloss
+            for next_list in list_item_node.find_child(NodeKind.LIST):
+                if next_list.sarg.endswith("#"):  # nested gloss
                     has_nested_gloss = True
-                    extract_gloss(wxr, page_data, child_node, gloss_data)
-                else:  # example list
-                    extract_examples(wxr, gloss_data, child_node, page_data)
+                    extract_gloss(wxr, page_data, next_list, gloss_data)
+                else:
+                    for e_list_item in next_list.find_child(NodeKind.LIST_ITEM):
+                        extract_example_list_item(
+                            wxr, gloss_data, e_list_item, page_data
+                        )
 
         if not has_nested_gloss and len(gloss_data.glosses) > 0:
             translate_raw_tags(gloss_data)
