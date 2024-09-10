@@ -40,13 +40,14 @@ def extract_examples(
                 isinstance(n, TemplateNode)
                 for n in node.invert_find_child(NodeKind.LIST)
             ):
-                extract_example_list(wxr, node, example_data)
+                extract_plain_text_example_list(wxr, node, example_data)
             else:
                 # parse example templates
                 for child in node.find_child(NodeKind.TEMPLATE):
                     template_name = child.template_name
                     if template_name.startswith(("quote-", "RQ:")):
                         extract_quote_templates(wxr, child, example_data)
+                        clean_node(wxr, sense_data, child)  # add cat link
                     elif template_name in {"ja-x", "ja-usex"}:
                         extract_template_ja_usex(wxr, child, example_data)
                         clean_node(wxr, sense_data, child)  # add cat link
@@ -57,8 +58,10 @@ def extract_examples(
                         clean_node(wxr, sense_data, child)  # add cat link
                     elif template_name in {"ux", "eg", "usex"}:
                         extract_template_ux(wxr, child, example_data)
+                        clean_node(wxr, sense_data, child)  # add cat link
                     elif template_name == "uxi":
                         extract_template_uxi(wxr, child, example_data)
+                        clean_node(wxr, sense_data, child)  # add cat link
                     elif template_name in LINKAGE_TEMPLATES:
                         process_linkage_templates_in_gloss(
                             wxr,
@@ -85,7 +88,7 @@ def extract_examples(
             extract_examples(wxr, sense_data, node.children, page_data)
 
 
-def extract_example_list(
+def extract_plain_text_example_list(
     wxr: WiktextractContext, node: WikiNode, example_data: Example
 ) -> None:
     for index, child_node in enumerate(node.children):
@@ -103,24 +106,19 @@ def extract_quote_templates(
     wxr: WiktextractContext, node: TemplateNode, example_data: Example
 ) -> None:
     """
-    Process template `quote-book` and "RQ:*".
+    Process `quote-*` and "RQ:*" templates.
     """
-    expanded_text = clean_node(wxr, None, node)
-    for line_num, expanded_line in enumerate(expanded_text.splitlines()):
-        if line_num == 0:
-            key = "ref"
-        elif line_num == 1:
-            key = "text"
-        elif line_num == 2 and "transliteration" in node.template_parameters:
-            key = "roman"
-        else:
-            key = "translation"
-
-        if expanded_line != "（請為本引文添加中文翻譯）":
-            if key == "text":
-                example_data.text = expanded_line
-            else:
-                setattr(example_data, key, expanded_line)
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(node), expand_all=True
+    )
+    for span_tag in expanded_node.find_html_recursively("span"):
+        span_class = span_tag.attrs.get("class", "")
+        if "cited-source" == span_class:
+            example_data.ref = clean_node(wxr, None, span_tag)
+        elif "cited-passage" in span_class:
+            example_data.text = clean_node(wxr, None, span_tag)
+        elif "e-translation" in span_class:
+            example_data.translation = clean_node(wxr, None, span_tag)
 
 
 def extract_template_ja_usex(
@@ -184,13 +182,13 @@ def extract_template_zh_x(
                     translation = dd_text
 
         example_text = ""
-        last_span_is_exmaple = False
+        last_span_is_example = False
         for span_tag in dl_tag.find_html_recursively("span"):
             if span_tag.attrs.get("class", "") in ["Hant", "Hans"]:
                 example_text = clean_node(wxr, None, span_tag)
-                last_span_is_exmaple = True
-            elif last_span_is_exmaple:
-                last_span_is_exmaple = False
+                last_span_is_example = True
+            elif last_span_is_example:
+                last_span_is_example = False
                 if len(example_text) > 0:
                     raw_tag = clean_node(wxr, None, span_tag)
                     example = parent_example.model_copy(deep=True)
