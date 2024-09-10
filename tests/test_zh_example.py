@@ -260,3 +260,27 @@ class TestExample(TestCase):
                 },
             ],
         )
+
+    def test_RQ_Qur_an(self):
+        self.wxr.wtp.start_page("محمد")
+        self.wxr.wtp.add_page(
+            "Template:RQ:Qur'an",
+            10,
+            """<div class="citation-whole"><span class="cited-source">'''<small class='ce-date'>[[Appendix:術語表#CE|公元]]</small> 609年–632年''', <cite><span class="Jpan" lang="und">《[[古蘭經|-{古蘭經}-]]》</span></cite>, <span class="None" lang="und">[https://quran.com/3/144 3&#x3A;144]</span>:</span><dl><dd><div class="h-quotation"><span class="Arab e-quotation cited-passage" lang="ar">وَمَا '''مُحَمَّدٌ''' إِلَّا رَسُولٌ قَدْ خَلَتْ مِنْ قَبْلِهِ الرُّسُلُ</span><dl><dd><i lang="ar-Latn" class="e-transliteration tr Latn">wa-mā '''muḥammadun''' ʔillā rasūlun qad ḵalat min qablihi r-rusulu</i></dd><dd><span class="e-translation">'''穆罕默德'''只是一個使者，在他之前，有許多使者，確已逝去了。</span></dd></dl></div>[[Category:有引文的阿拉伯語詞|FACIES]]</dd></dl></div>""",
+        )
+        sense_data = Sense()
+        root = self.wxr.wtp.parse(
+            "#: {{RQ:Qur'an|3|144|passage=وَمَا '''مُحَمَّدٌ''' إِلَّا رَسُولٌ قَدْ خَلَتْ مِنْ قَبْلِهِ الرُّسُلُ|subst=وَمَا/وَ-مَا|translation='''穆罕默德'''只是一個使者，在他之前，有許多使者，確已逝去了。}}"
+        )
+        extract_examples(self.wxr, sense_data, root.children[0], [])
+        self.assertEqual(
+            [e.model_dump(exclude_defaults=True) for e in sense_data.examples],
+            [
+                {
+                    "text": "وَمَا مُحَمَّدٌ إِلَّا رَسُولٌ قَدْ خَلَتْ مِنْ قَبْلِهِ الرُّسُلُ",
+                    "roman": "wa-mā muḥammadun ʔillā rasūlun qad ḵalat min qablihi r-rusulu",
+                    "translation": "穆罕默德只是一個使者，在他之前，有許多使者，確已逝去了。",
+                    "ref": "公元 609年–632年, 《古蘭經》, 3:144:",
+                },
+            ],
+        )

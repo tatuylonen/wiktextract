@@ -69,6 +69,7 @@ def extract_quote_templates(
     ref = ""
     text = ""
     translation = ""
+    roman = ""
     for span_tag in expanded_node.find_html_recursively("span"):
         span_class = span_tag.attrs.get("class", "")
         if "cited-source" == span_class:
@@ -77,7 +78,14 @@ def extract_quote_templates(
             text = clean_node(wxr, None, span_tag)
         elif "e-translation" in span_class:
             translation = clean_node(wxr, None, span_tag)
-    return ExampleData(text=text, ref=ref, english=translation, type="quote")
+    for i_tag in expanded_node.find_html_recursively(
+        "i", attr_name="class", attr_value="e-transliteration"
+    ):
+        roman = clean_node(wxr, None, i_tag)
+        break
+    return ExampleData(
+        text=text, ref=ref, english=translation, roman=roman, type="quote"
+    )
 
 
 def extract_template_ja_usex(

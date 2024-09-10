@@ -119,6 +119,11 @@ def extract_quote_templates(
             example_data.text = clean_node(wxr, None, span_tag)
         elif "e-translation" in span_class:
             example_data.translation = clean_node(wxr, None, span_tag)
+    for i_tag in expanded_node.find_html_recursively(
+        "i", attr_name="class", attr_value="e-transliteration"
+    ):
+        example_data.roman = clean_node(wxr, None, i_tag)
+        break
 
 
 def extract_template_ja_usex(
