@@ -1,5 +1,4 @@
 from unittest import TestCase
-from unittest.mock import patch
 
 from wikitextprocessor import Wtp
 
@@ -38,27 +37,6 @@ class TestExample(TestCase):
             {
                 "ref": "ref text",
                 "text": "example text",
-            },
-        )
-
-    @patch(
-        "wiktextract.extractor.zh.example.clean_node",
-        return_value="""ref text
-quote text
-translation text""",
-    )
-    def test_quote_example(self, mock_clean_node) -> None:
-        sense_data = Sense()
-        wikitext = "#* {{RQ:Schuster Hepaticae}}"
-        self.wxr.wtp.start_page("test")
-        node = self.wxr.wtp.parse(wikitext)
-        extract_examples(self.wxr, sense_data, node, [])
-        self.assertEqual(
-            sense_data.examples[0].model_dump(exclude_defaults=True),
-            {
-                "ref": "ref text",
-                "text": "quote text",
-                "translation": "translation text",
             },
         )
 
@@ -130,7 +108,11 @@ translation text""",
 
     def test_example_under_quote_template(self):
         self.wxr.wtp.start_page("英語")
-        self.wxr.wtp.add_page("Template:quote-book", 10, "ref text")
+        self.wxr.wtp.add_page(
+            "Template:quote-book",
+            10,
+            """<div class="citation-whole"><span class="cited-source">'''2002年'''3月9日, [[w:堀田由美|堀田 由美]]</span><dl><dd></dd></dl></div>""",
+        )
         self.wxr.wtp.add_page(
             "Template:ja-usex",
             10,
@@ -144,7 +126,7 @@ translation text""",
             [e.model_dump(exclude_defaults=True) for e in sense_data.examples],
             [
                 {
-                    "ref": "ref text",
+                    "ref": "2002年3月9日, 堀田 由美",
                     "text": "オレの日本語どう？悪くないだろ 韓国語と英語も話すんだぜ 趣味だな語学は 寝泊りはどこ？近くのホテル？",
                     "roman": "Ore no Nihongo dō? Waruku naidaro Kankokugo to Eigo mo hanasunda ze Shumi da na gogaku wa Netomari wa doko? Chikaku no hoteru?",
                     "ruby": [
@@ -173,21 +155,26 @@ translation text""",
 
     def test_quote_book_above_zh_x(self):
         self.wxr.wtp.start_page("死人")
-        self.wxr.wtp.add_page("Template:quote-book", 10, "ref text")
+        self.wxr.wtp.add_page(
+            "Template:quote-book",
+            10,
+            """<div class="citation-whole"><span class="cited-source"><span class="None" lang="und">'''1957'''</span>, <span class="Hani" lang="und">[[:w&#x3A;王力|-{王力}-]]</span></span><dl><dd></dd></dl></div>""",
+        )
         self.wxr.wtp.add_page(
             "Template:zh-x",
             10,
             """<dl class="zhusex"><span lang="zh-Hant" class="Hant">-{<!-- -->[[如果#漢語|如果]][[唔係#漢語|唔係]][[今日#漢語|今日]][[拆穿#漢語|拆穿]][[你#漢語|你]][[槓嘢#漢語|槓野]]，[[畀#漢語|俾]][[你#漢語|你]][[混#漢語|混]][[咗#漢語|左]][[入#漢語|入]][[稅局#漢語|稅局]][[重#漢語|重]][[死人#漢語|死人]][[呀#漢語|呀]]！<!-- -->}-</span> <span>&#91;[[w:廣州話|廣州話]]，[[w:繁体中文|繁體]]&#93;</span><br><span lang="zh-Hans" class="Hans">-{<!-- -->[[如果#漢語|如果]][[唔系#漢語|唔系]][[今日#漢語|今日]][[拆穿#漢語|拆穿]][[你#漢語|你]][[杠嘢#漢語|杠野]]，[[畀#漢語|俾]][[你#漢語|你]][[混#漢語|混]][[咗#漢語|左]][[入#漢語|入]][[税局#漢語|税局]][[重#漢語|重]][[死人#漢語|死人]][[呀#漢語|呀]]！<!-- -->}-</span> <span>&#91;[[w:廣州話|廣州話]]，[[w:简体中文|簡體]]&#93;</span><dd><span lang="zh-Latn"><i>roman</i></span> <span>&#91;[[w:廣州話拼音方案|廣州話拼音]]&#93;</span></dd><dd>如果不是今天揭穿你的老底，給你混進稅務局就更'''糟糕'''了！</dd></dl>[[Category:有使用例的粵語詞]]""",
         )
         sense_data = Sense()
-        root = self.wxr.wtp.parse("""#* {{quote-book|zh}}\n#*: {{zh-x}}""")
+        root = self.wxr.wtp.parse("""#* {{quote-book|zh}}
+#*: {{zh-x}}""")
         extract_examples(self.wxr, sense_data, root.children[0], [])
         self.assertEqual(
             [e.model_dump(exclude_defaults=True) for e in sense_data.examples],
             [
                 {
                     "raw_tags": ["廣州話", "廣州話拼音"],
-                    "ref": "ref text",
+                    "ref": "1957, 王力",
                     "text": "如果唔係今日拆穿你槓野，俾你混左入稅局重死人呀！",
                     "roman": "roman",
                     "tags": ["Traditional Chinese"],
@@ -195,7 +182,7 @@ translation text""",
                 },
                 {
                     "raw_tags": ["廣州話", "廣州話拼音"],
-                    "ref": "ref text",
+                    "ref": "1957, 王力",
                     "text": "如果唔系今日拆穿你杠野，俾你混左入税局重死人呀！",
                     "roman": "roman",
                     "tags": ["Simplified Chinese"],
@@ -270,6 +257,55 @@ translation text""",
                     ],
                     "translation": "我相信你是對的。",
                     "literal_meaning": "我相信你的理解是對的。",
+                },
+            ],
+        )
+
+    def test_RQ_Qur_an(self):
+        self.wxr.wtp.start_page("محمد")
+        self.wxr.wtp.add_page(
+            "Template:RQ:Qur'an",
+            10,
+            """<div class="citation-whole"><span class="cited-source">'''<small class='ce-date'>[[Appendix:術語表#CE|公元]]</small> 609年–632年''', <cite><span class="Jpan" lang="und">《[[古蘭經|-{古蘭經}-]]》</span></cite>, <span class="None" lang="und">[https://quran.com/3/144 3&#x3A;144]</span>:</span><dl><dd><div class="h-quotation"><span class="Arab e-quotation cited-passage" lang="ar">وَمَا '''مُحَمَّدٌ''' إِلَّا رَسُولٌ قَدْ خَلَتْ مِنْ قَبْلِهِ الرُّسُلُ</span><dl><dd><i lang="ar-Latn" class="e-transliteration tr Latn">wa-mā '''muḥammadun''' ʔillā rasūlun qad ḵalat min qablihi r-rusulu</i></dd><dd><span class="e-translation">'''穆罕默德'''只是一個使者，在他之前，有許多使者，確已逝去了。</span></dd></dl></div>[[Category:有引文的阿拉伯語詞|FACIES]]</dd></dl></div>""",
+        )
+        sense_data = Sense()
+        root = self.wxr.wtp.parse(
+            "#: {{RQ:Qur'an|3|144|passage=وَمَا '''مُحَمَّدٌ''' إِلَّا رَسُولٌ قَدْ خَلَتْ مِنْ قَبْلِهِ الرُّسُلُ|subst=وَمَا/وَ-مَا|translation='''穆罕默德'''只是一個使者，在他之前，有許多使者，確已逝去了。}}"
+        )
+        extract_examples(self.wxr, sense_data, root.children[0], [])
+        self.assertEqual(
+            [e.model_dump(exclude_defaults=True) for e in sense_data.examples],
+            [
+                {
+                    "text": "وَمَا مُحَمَّدٌ إِلَّا رَسُولٌ قَدْ خَلَتْ مِنْ قَبْلِهِ الرُّسُلُ",
+                    "roman": "wa-mā muḥammadun ʔillā rasūlun qad ḵalat min qablihi r-rusulu",
+                    "translation": "穆罕默德只是一個使者，在他之前，有許多使者，確已逝去了。",
+                    "ref": "公元 609年–632年, 《古蘭經》, 3:144:",
+                },
+            ],
+        )
+
+    def test_ux(self):
+        self.wxr.wtp.start_page("устав")
+        self.wxr.wtp.add_page(
+            "Template:ux",
+            10,
+            """<div class="h-usage-example"><i class="Cyrl mention e-example" lang="ru">[[в#俄語|-{В}-]] [[чужой#俄語|-{чужо́й}-]] [[монастырь#俄語|-{монасты́рь}-]] [[со#俄語|-{со}-]] [[свой#俄語|-{свои́м}-]] '''уста́вом''' [[не#俄語|-{не}-]] [[ходить#俄語|-{хо́дят}-]]</i> <span class="e-qualifier"><span class="ib-brac qualifier-brac">(</span><span class="ib-content qualifier-content">諺語</span><span class="ib-brac qualifier-brac">)</span></span><dl><dd><i lang="ru-Latn" class="e-transliteration tr Latn">V čužój monastýrʹ so svoím '''ustávom''' ne xódjat</i></dd><dd><span class="e-translation">入鄉隨俗，入境隨俗</span></dd><dd>(字面意思是「<span class="e-literally">你不能用你自己的憲章去另一個寺院</span>」)</dd></dl></div>""",
+        )
+        sense_data = Sense()
+        root = self.wxr.wtp.parse(
+            "#: {{ux|ru|[[в|В]] [[чужо́й]] [[монасты́рь]] [[со]] [[свой|свои́м]] '''уста́вом''' [[не]] [[ходить|хо́дят]]|入鄉隨俗，入境隨俗|lit=你不能用你自己的憲章去另一個寺院|q=諺語}}"
+        )
+        extract_examples(self.wxr, sense_data, root.children[0], [])
+        self.assertEqual(
+            [e.model_dump(exclude_defaults=True) for e in sense_data.examples],
+            [
+                {
+                    "text": "В чужо́й монасты́рь со свои́м уста́вом не хо́дят",
+                    "roman": "V čužój monastýrʹ so svoím ustávom ne xódjat",
+                    "translation": "入鄉隨俗，入境隨俗",
+                    "literal_meaning": "你不能用你自己的憲章去另一個寺院",
+                    "raw_tags": ["諺語"],
                 },
             ],
         )

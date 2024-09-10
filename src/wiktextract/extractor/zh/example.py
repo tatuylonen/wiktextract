@@ -40,13 +40,17 @@ def extract_examples(
                 isinstance(n, TemplateNode)
                 for n in node.invert_find_child(NodeKind.LIST)
             ):
-                extract_example_list(wxr, node, example_data)
+                extract_plain_text_example_list(wxr, node, example_data)
             else:
                 # parse example templates
                 for child in node.find_child(NodeKind.TEMPLATE):
                     template_name = child.template_name
-                    if template_name.startswith(("quote-", "RQ:")):
+                    if (
+                        template_name.startswith(("quote-", "RQ:"))
+                        or template_name == "quote"
+                    ):
                         extract_quote_templates(wxr, child, example_data)
+                        clean_node(wxr, sense_data, child)  # add cat link
                     elif template_name in {"ja-x", "ja-usex"}:
                         extract_template_ja_usex(wxr, child, example_data)
                         clean_node(wxr, sense_data, child)  # add cat link
@@ -55,10 +59,9 @@ def extract_examples(
                             extract_template_zh_x(wxr, child, example_data)
                         )
                         clean_node(wxr, sense_data, child)  # add cat link
-                    elif template_name in {"ux", "eg", "usex"}:
+                    elif template_name in {"ux", "eg", "usex", "uxi"}:
                         extract_template_ux(wxr, child, example_data)
-                    elif template_name == "uxi":
-                        extract_template_uxi(wxr, child, example_data)
+                        clean_node(wxr, sense_data, child)  # add cat link
                     elif template_name in LINKAGE_TEMPLATES:
                         process_linkage_templates_in_gloss(
                             wxr,
@@ -85,7 +88,7 @@ def extract_examples(
             extract_examples(wxr, sense_data, node.children, page_data)
 
 
-def extract_example_list(
+def extract_plain_text_example_list(
     wxr: WiktextractContext, node: WikiNode, example_data: Example
 ) -> None:
     for index, child_node in enumerate(node.children):
@@ -103,24 +106,24 @@ def extract_quote_templates(
     wxr: WiktextractContext, node: TemplateNode, example_data: Example
 ) -> None:
     """
-    Process template `quote-book` and "RQ:*".
+    Process `quote-*` and "RQ:*" templates.
     """
-    expanded_text = clean_node(wxr, None, node)
-    for line_num, expanded_line in enumerate(expanded_text.splitlines()):
-        if line_num == 0:
-            key = "ref"
-        elif line_num == 1:
-            key = "text"
-        elif line_num == 2 and "transliteration" in node.template_parameters:
-            key = "roman"
-        else:
-            key = "translation"
-
-        if expanded_line != "（請為本引文添加中文翻譯）":
-            if key == "text":
-                example_data.text = expanded_line
-            else:
-                setattr(example_data, key, expanded_line)
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(node), expand_all=True
+    )
+    for span_tag in expanded_node.find_html_recursively("span"):
+        span_class = span_tag.attrs.get("class", "")
+        if "cited-source" == span_class:
+            example_data.ref = clean_node(wxr, None, span_tag)
+        elif "cited-passage" in span_class:
+            example_data.text = clean_node(wxr, None, span_tag)
+        elif "e-translation" in span_class:
+            example_data.translation = clean_node(wxr, None, span_tag)
+    for i_tag in expanded_node.find_html_recursively(
+        "i", attr_name="class", attr_value="e-transliteration"
+    ):
+        example_data.roman = clean_node(wxr, None, i_tag)
+        break
 
 
 def extract_template_ja_usex(
@@ -184,13 +187,13 @@ def extract_template_zh_x(
                     translation = dd_text
 
         example_text = ""
-        last_span_is_exmaple = False
+        last_span_is_example = False
         for span_tag in dl_tag.find_html_recursively("span"):
             if span_tag.attrs.get("class", "") in ["Hant", "Hans"]:
                 example_text = clean_node(wxr, None, span_tag)
-                last_span_is_exmaple = True
-            elif last_span_is_exmaple:
-                last_span_is_exmaple = False
+                last_span_is_example = True
+            elif last_span_is_example:
+                last_span_is_example = False
                 if len(example_text) > 0:
                     raw_tag = clean_node(wxr, None, span_tag)
                     example = parent_example.model_copy(deep=True)
@@ -246,50 +249,24 @@ def extract_template_zh_x(
 def extract_template_ux(
     wxr: WiktextractContext, node: WikiNode, example_data: Example
 ) -> None:
-    expanded_text = clean_node(wxr, None, node)
-    if " ― " in expanded_text:
-        extract_template_uxi_text(expanded_text, example_data)
-        return
-
-    lines = expanded_text.splitlines()
-    for line_num, expanded_line in enumerate(lines):
-        if line_num == 0:
-            key = "text"
-        elif line_num == 1:
-            if line_num == len(lines) - 1:
-                key = "translation"
-            else:
-                key = "roman"
-        else:
-            key = "translation"
-        if key == "text":
-            example_data.text = expanded_line
-        else:
-            setattr(example_data, key, expanded_line)
-
-
-def extract_template_uxi(
-    wxr: WiktextractContext, node: WikiNode, example_data: Example
-) -> None:
-    expanded_text = clean_node(wxr, None, node)
-    extract_template_uxi_text(expanded_text, example_data)
-
-
-def extract_template_uxi_text(
-    expanded_text: str, example_data: Example
-) -> None:
-    parts = expanded_text.split(" ― ")
-    for index, part in enumerate(parts):
-        if index == 0:
-            key = "text"
-        elif index == 1:
-            if index == len(parts) - 1:
-                key = "translation"
-            else:
-                key = "roman"
-        else:
-            key = "translation"
-        if key == "text":
-            example_data.text = part
-        else:
-            setattr(example_data, key, part)
+    # https://zh.wiktionary.org/wiki/Template:ux
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(node), expand_all=True
+    )
+    for i_tag in expanded_node.find_html_recursively("i"):
+        i_class = i_tag.attrs.get("class", "")
+        if "e-example" in i_class:
+            example_data.text = clean_node(wxr, None, i_tag)
+        elif "e-transliteration" in i_class:
+            example_data.roman = clean_node(wxr, None, i_tag)
+    for span_tag in expanded_node.find_html_recursively("span"):
+        span_class = span_tag.attrs.get("class", "")
+        if "e-translation" in span_class:
+            example_data.translation = clean_node(wxr, None, span_tag)
+        elif "e-literally" in span_class:
+            example_data.literal_meaning = clean_node(wxr, None, span_tag)
+        elif "qualifier-content" in span_class:
+            example_data.raw_tags.extend(
+                clean_node(wxr, None, span_tag).split("、")
+            )
+    translate_raw_tags(example_data)
