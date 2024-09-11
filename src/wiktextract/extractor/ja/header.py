@@ -5,6 +5,7 @@ from wikitextprocessor.parser import HTMLNode, NodeKind, TemplateNode, WikiNode
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .models import Form, WordEntry
+from .tags import translate_raw_tags
 
 FORM_OF_CLASS_TAGS = frozenset(["kanji", "plural"])
 
@@ -14,6 +15,7 @@ def extract_header_nodes(
 ) -> None:
     extracted_forms = set()
     use_nodes = []
+    is_first_bold = True
     for node in nodes:
         if isinstance(node, TemplateNode) and node.template_name in (
             "jachar",
@@ -21,31 +23,37 @@ def extract_header_nodes(
             "vichar",
             "zhchar",
         ):
-            pass
+            is_first_bold = False
         else:
             use_nodes.append(node)
     expanded_nodes = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(use_nodes), expand_all=True
     )
-    is_first_bold = True
+    raw_tags = []
     for node in expanded_nodes.find_child_recursively(
-        NodeKind.HTML | NodeKind.BOLD
+        NodeKind.HTML | NodeKind.BOLD | NodeKind.ITALIC
     ):
         if isinstance(node, HTMLNode) and not (
-            node.tag == "strong"
+            node.tag in ["strong", "small"]
             or "headword" in node.attrs.get("class", "")
             or "form-of" in node.attrs.get("class", "")
         ):
             continue
-        form_text = clean_node(wxr, None, node).strip("（）【】 ")
-        add_form_data(
-            node,
-            form_text,
-            extracted_forms,
-            word_entry,
-            is_canonical=is_first_bold,
-        )
-        is_first_bold = False
+        if isinstance(node, HTMLNode) and node.tag == "small":
+            raw_tags.append(clean_node(wxr, None, node).strip("(): "))
+        else:
+            form_text = clean_node(wxr, None, node).strip("（）【】 ")
+            add_form_data(
+                node,
+                form_text,
+                extracted_forms,
+                word_entry,
+                raw_tags,
+                is_canonical=is_first_bold,
+            )
+            if node.kind == NodeKind.BOLD:
+                is_first_bold = False
+            raw_tags.clear()
     texts = clean_node(wxr, word_entry, expanded_nodes)
     for form_text in re.findall(r"[（【][^（）【】]+[）】]", texts):
         add_form_data(
@@ -53,6 +61,7 @@ def extract_header_nodes(
             form_text.strip("（）【】 "),
             extracted_forms,
             word_entry,
+            [],
         )
 
 
@@ -61,6 +70,7 @@ def add_form_data(
     forms_text: str,
     extracted_forms: set[str],
     word_entry: WordEntry,
+    raw_tags: list[str],
     is_canonical: bool = False,
 ) -> None:
     for form_text in re.split(r"・|、|,", forms_text):
@@ -73,7 +83,7 @@ def add_form_data(
         ):
             continue
         extracted_forms.add(form_text)
-        form = Form(form=form_text)
+        form = Form(form=form_text, raw_tags=raw_tags)
         if (
             node.kind == NodeKind.BOLD
             or (isinstance(node, HTMLNode) and node.tag == "strong")
@@ -85,4 +95,5 @@ def add_form_data(
             for class_name in FORM_OF_CLASS_TAGS:
                 if class_name in class_names:
                     form.tags.append(class_name)
+        translate_raw_tags(form)
         word_entry.forms.append(form)

@@ -116,3 +116,23 @@ class TestJaHeader(TestCase):
         )
         extract_header_nodes(self.wxr, data, root.children)
         self.assertEqual(data.forms, [Form(form="味噌"), Form(form="未醤")])
+
+    def test_en_verb(self):
+        self.wxr.wtp.start_page("debate")
+        self.wxr.wtp.add_page(
+            "テンプレート:en-verb",
+            10,
+            """<strong class="Latn headword" lang="en">debate</strong>
+(<small>三単現: </small>''[[debates]]'')""",
+        )
+        data = WordEntry(lang="英語", lang_code="en", word="debate")
+        root = self.wxr.wtp.parse("{{en-verb|debat|ing}}")
+        extract_header_nodes(self.wxr, data, root.children)
+        self.assertEqual(
+            data.forms,
+            [
+                Form(
+                    form="debates", tags=["third-person", "singular", "present"]
+                )
+            ],
+        )

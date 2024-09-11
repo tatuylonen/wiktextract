@@ -220,6 +220,19 @@ TAGS = {
     "非標準": "uncommon",
     "頭字語": "initialism",
     "首都": "uppercase",
+    # "en-verb" template
+    "三単現": ["third-person", "singular", "present"],
+    "現在分詞": ["present", "participle"],
+    "過去形": "past",
+    "過去分詞": ["past", "participle"],
+    "繁": "Traditional Chinese",
+    "簡": "Simplified Chinese",
+    # zh sound
+    "ピンイン": "Pinyin",
+    "注音符号": "Bopomofo",
+    "広東語": "Cantonese",
+    "閩南語": "Min-Nan",
+    "客家語": "Hakka",
 }
 
 TOPICS = {
