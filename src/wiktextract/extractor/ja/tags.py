@@ -220,6 +220,11 @@ TAGS = {
     "非標準": "uncommon",
     "頭字語": "initialism",
     "首都": "uppercase",
+    # "en-verb" template
+    "三単現": ["third-person", "singular", "present"],
+    "現在分詞": ["present", "participle"],
+    "過去形": "past",
+    "過去分詞": ["past", "participle"],
 }
 
 TOPICS = {
