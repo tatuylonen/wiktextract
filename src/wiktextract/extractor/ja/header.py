@@ -15,6 +15,7 @@ def extract_header_nodes(
 ) -> None:
     extracted_forms = set()
     use_nodes = []
+    is_first_bold = True
     for node in nodes:
         if isinstance(node, TemplateNode) and node.template_name in (
             "jachar",
@@ -22,13 +23,12 @@ def extract_header_nodes(
             "vichar",
             "zhchar",
         ):
-            pass
+            is_first_bold = False
         else:
             use_nodes.append(node)
     expanded_nodes = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(use_nodes), expand_all=True
     )
-    is_first_bold = True
     raw_tags = []
     for node in expanded_nodes.find_child_recursively(
         NodeKind.HTML | NodeKind.BOLD | NodeKind.ITALIC
@@ -40,7 +40,7 @@ def extract_header_nodes(
         ):
             continue
         if isinstance(node, HTMLNode) and node.tag == "small":
-            raw_tags.append(clean_node(wxr, None, node).strip(":"))
+            raw_tags.append(clean_node(wxr, None, node).strip("(): "))
         else:
             form_text = clean_node(wxr, None, node).strip("（）【】 ")
             add_form_data(

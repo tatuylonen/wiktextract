@@ -142,3 +142,20 @@ class TestJaSound(TestCase):
         page_data = [base_data.model_copy(deep=True)]
         extract_sound_section(self.wxr, page_data, base_data, root.children[0])
         self.assertEqual(base_data.sounds[0].audio, "De-Aluminium.ogg")
+
+    def test_zh_sounds(self):
+        self.wxr.wtp.start_page("議論")
+        self.wxr.wtp.add_page("テンプレート:nan", 10, "閩南語")
+        root = self.wxr.wtp.parse("""===発音===
+*注音符号: ㄧˋ　ㄌㄨㄣˋ
+*{{nan}}: gī-lūn""")
+        base_data = WordEntry(word="議論", lang_code="zh", lang="中国語")
+        page_data = [base_data.model_copy(deep=True)]
+        extract_sound_section(self.wxr, page_data, base_data, root.children[0])
+        self.assertEqual(
+            [s.model_dump(exclude_defaults=True) for s in base_data.sounds],
+            [
+                {"zh_pron": "ㄧˋ　ㄌㄨㄣˋ", "tags": ["Bopomofo"]},
+                {"zh_pron": "gī-lūn", "tags": ["Min-Nan"]},
+            ],
+        )

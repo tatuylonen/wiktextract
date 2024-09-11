@@ -225,6 +225,14 @@ TAGS = {
     "現在分詞": ["present", "participle"],
     "過去形": "past",
     "過去分詞": ["past", "participle"],
+    "繁": "Traditional Chinese",
+    "簡": "Simplified Chinese",
+    # zh sound
+    "ピンイン": "Pinyin",
+    "注音符号": "Bopomofo",
+    "広東語": "Cantonese",
+    "閩南語": "Min-Nan",
+    "客家語": "Hakka",
 }
 
 TOPICS = {

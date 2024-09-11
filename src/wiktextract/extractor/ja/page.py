@@ -42,7 +42,7 @@ def parse_section(
         elif title_text in ["語源", "由来"] and wxr.config.capture_etymologies:
             extract_etymology_section(wxr, page_data, base_data, level_node)
             break
-        elif title_text == "発音" and wxr.config.capture_pronunciation:
+        elif title_text.startswith("発音") and wxr.config.capture_pronunciation:
             extract_sound_section(wxr, page_data, base_data, level_node)
             break
         elif title_text == "翻訳" and wxr.config.capture_translations:
