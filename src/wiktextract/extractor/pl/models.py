@@ -42,6 +42,7 @@ class Translation(PolishBaseModel):
     tags: list[str] = []
     raw_tags: list[str] = []
     roman: str = ""
+    ruby: list[tuple[str, ...]] = []
 
 
 class Sound(PolishBaseModel):
