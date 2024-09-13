@@ -136,3 +136,22 @@ class TestJaHeader(TestCase):
                 )
             ],
         )
+
+    def test_ja_noun_small_tag(self):
+        self.wxr.wtp.start_page("金玉")
+        self.wxr.wtp.add_page(
+            "テンプレート:ja-noun",
+            10,
+            """<strong class="Jpan headword" lang="ja">[[金#日本語|金]][[玉#日本語|玉]]</strong> (<span class="headword-tr manual-tr tr" dir="ltr">きんぎょく</span> <i><small><small>又は</small></small></i> <span class="headword-tr manual-tr tr" dir="ltr">きんたま</span> <i><small><small>又は</small></small></i> <span class="headword-tr manual-tr tr" dir="ltr">かねだま</span>)""",
+        )
+        data = WordEntry(lang="日本語", lang_code="ja", word="金玉")
+        root = self.wxr.wtp.parse("{{ja-noun|きんぎょく|きんたま|かねだま}}")
+        extract_header_nodes(self.wxr, data, root.children)
+        self.assertEqual(
+            [f.model_dump(exclude_defaults=True) for f in data.forms],
+            [
+                {"form": "きんぎょく"},
+                {"form": "きんたま"},
+                {"form": "かねだま"},
+            ],
+        )

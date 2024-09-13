@@ -40,7 +40,10 @@ def extract_header_nodes(
         ):
             continue
         if isinstance(node, HTMLNode) and node.tag == "small":
-            raw_tags.append(clean_node(wxr, None, node).strip("(): "))
+            raw_tag = clean_node(wxr, None, node).strip("(): ")
+            if raw_tag != "又は" and raw_tag not in raw_tags:
+                # ignore "又は"(or) in "ja-noun" template
+                raw_tags.append(raw_tag)
         else:
             form_text = clean_node(wxr, None, node).strip("（）【】 ")
             add_form_data(
