@@ -78,7 +78,12 @@ class TestJaSound(TestCase):
         self.assertEqual(
             data.sounds[:2],
             [
-                Sound(roman="[nìhóńgó]", form="にほんご", raw_tags=["東京式"]),
+                Sound(
+                    roman="[nìhóńgó]",
+                    form="にほんご",
+                    raw_tags=["東京式"],
+                    tags=["Heiban"],
+                ),
                 Sound(ipa="[ɲ̟ihõ̞ŋɡo̞]"),
             ],
         )

@@ -86,6 +86,14 @@ def process_sound_template(
     clean_node(wxr, cats, template_node)
 
 
+JA_PRON_ACCENTS = {
+    "中高型": "Nakadaka",
+    "平板型": "Heiban",
+    "頭高型": "Atamadaka",
+    "尾高型": "Odaka",
+}
+
+
 def process_ja_pron_template(
     wxr: WiktextractContext,
     template_node: TemplateNode,
@@ -112,6 +120,10 @@ def process_ja_pron_template(
                     sound.roman = clean_node(wxr, None, span_tag)
                 elif "Jpan" in span_classes:
                     sound.form = clean_node(wxr, None, span_tag)
+            for link_node in list_item.find_child(NodeKind.LINK):
+                link_text = clean_node(wxr, None, link_node)
+                if link_text in JA_PRON_ACCENTS:
+                    sound.tags.append(JA_PRON_ACCENTS[link_text])
             if len(sound.model_dump(exclude_defaults=True)) > 0:
                 sounds.append(sound)
 
