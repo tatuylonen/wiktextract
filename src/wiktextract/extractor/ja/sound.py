@@ -86,6 +86,14 @@ def process_sound_template(
     clean_node(wxr, cats, template_node)
 
 
+JA_PRON_ACCENTS = {
+    "中高型": "Nakadaka",
+    "平板型": "Heiban",
+    "頭高型": "Atamadaka",
+    "尾高型": "Odaka",
+}
+
+
 def process_ja_pron_template(
     wxr: WiktextractContext,
     template_node: TemplateNode,
@@ -112,6 +120,10 @@ def process_ja_pron_template(
                     sound.roman = clean_node(wxr, None, span_tag)
                 elif "Jpan" in span_classes:
                     sound.form = clean_node(wxr, None, span_tag)
+            for link_node in list_item.find_child(NodeKind.LINK):
+                link_text = clean_node(wxr, None, link_node)
+                if link_text in JA_PRON_ACCENTS:
+                    sound.tags.append(JA_PRON_ACCENTS[link_text])
             if len(sound.model_dump(exclude_defaults=True)) > 0:
                 sounds.append(sound)
 
@@ -123,6 +135,14 @@ def process_ja_pron_template(
             sound = Sound()
             set_sound_file_url_fields(wxr, audio_file, sound)
             sounds.append(sound)
+
+
+JA_ACCENT_COMMON_TYPES = {
+    "h": "Heiban",
+    "a": "Atamadaka",
+    "n": "Nakadaka",
+    "o": "Odaka",
+}
 
 
 def process_ja_accent_common_template(
@@ -139,8 +159,17 @@ def process_ja_accent_common_template(
         raw_tag = clean_node(wxr, None, link_node)
         if raw_tag != "":
             sound.raw_tags.append(raw_tag)
+            break
     for span_tag in expanded_node.find_html_recursively("span"):
-        sound.form = clean_node(wxr, None, span_tag)
+        span_text = clean_node(wxr, None, span_tag)
+        if len(span_text) > 0:
+            sound.form = span_text
+            break
+    accent_type = clean_node(
+        wxr, None, template_node.template_parameters.get(1, "")
+    )
+    if accent_type in JA_ACCENT_COMMON_TYPES:
+        sound.tags.append(JA_ACCENT_COMMON_TYPES[accent_type])
     if sound.form != "":
         sounds.append(sound)
 
