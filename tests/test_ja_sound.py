@@ -136,7 +136,14 @@ class TestJaSound(TestCase):
         extract_sound_section(self.wxr, page_data, base_data, root.children[0])
         data = base_data.model_dump(exclude_defaults=True)
         self.assertEqual(
-            data["sounds"], [{"form": "とーにゅー", "raw_tags": ["京阪式"]}]
+            data["sounds"],
+            [
+                {
+                    "form": "とーにゅー",
+                    "tags": ["Heiban"],
+                    "raw_tags": ["京阪式"],
+                }
+            ],
         )
 
     def test_ja_accent_common_template_two_span_tags(self):
@@ -153,7 +160,8 @@ class TestJaSound(TestCase):
         extract_sound_section(self.wxr, page_data, base_data, root.children[0])
         data = base_data.model_dump(exclude_defaults=True)
         self.assertEqual(
-            data["sounds"], [{"form": "まぜる", "raw_tags": ["京阪式"]}]
+            data["sounds"],
+            [{"form": "まぜる", "tags": ["Heiban"], "raw_tags": ["京阪式"]}],
         )
 
     def test_magic_word_in_template_param(self):

@@ -137,6 +137,14 @@ def process_ja_pron_template(
             sounds.append(sound)
 
 
+JA_ACCENT_COMMON_TYPES = {
+    "h": "Heiban",
+    "a": "Atamadaka",
+    "n": "Nakadaka",
+    "o": "Odaka",
+}
+
+
 def process_ja_accent_common_template(
     wxr: WiktextractContext,
     template_node: TemplateNode,
@@ -157,6 +165,11 @@ def process_ja_accent_common_template(
         if len(span_text) > 0:
             sound.form = span_text
             break
+    accent_type = clean_node(
+        wxr, None, template_node.template_parameters.get(1, "")
+    )
+    if accent_type in JA_ACCENT_COMMON_TYPES:
+        sound.tags.append(JA_ACCENT_COMMON_TYPES[accent_type])
     if sound.form != "":
         sounds.append(sound)
 
