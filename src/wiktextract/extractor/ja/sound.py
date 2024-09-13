@@ -151,8 +151,12 @@ def process_ja_accent_common_template(
         raw_tag = clean_node(wxr, None, link_node)
         if raw_tag != "":
             sound.raw_tags.append(raw_tag)
+            break
     for span_tag in expanded_node.find_html_recursively("span"):
-        sound.form = clean_node(wxr, None, span_tag)
+        span_text = clean_node(wxr, None, span_tag)
+        if len(span_text) > 0:
+            sound.form = span_text
+            break
     if sound.form != "":
         sounds.append(sound)
 
