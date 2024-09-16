@@ -7,7 +7,7 @@ from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from ..ruby import extract_ruby
 from .example import extract_example_list_item
-from .models import AltForm, Sense, WordEntry
+from .models import AltForm, Classifier, Sense, WordEntry
 from .tags import translate_raw_tags
 
 # https://zh.wiktionary.org/wiki/Template:Label
@@ -39,6 +39,8 @@ def extract_gloss(
                     wxr, node, gloss_data, page_data
                 ):
                     pass
+                elif node.template_name == "zh-mw":
+                    process_zh_mw_template(wxr, node, gloss_data)
                 else:
                     gloss_nodes.append(node)
             elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
@@ -188,3 +190,39 @@ FORM_OF_TEMPLATES = {
     "stand sp",
     "sup sp",
 }
+
+
+def process_zh_mw_template(
+    wxr: WiktextractContext, node: TemplateNode, sense: Sense
+) -> None:
+    # Chinese inline classifier template
+    # https://zh.wiktionary.org/wiki/Template:分類詞
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(node), expand_all=True
+    )
+    classifiers = []
+    last_word = ""
+    for span_tag in expanded_node.find_html_recursively("span"):
+        span_class = span_tag.attrs.get("class", "")
+        if span_class in ["Hani", "Hant", "Hans"]:
+            word = clean_node(wxr, None, span_tag)
+            if word != "／":
+                classifier = Classifier(classifier=word)
+                if span_class == "Hant":
+                    classifier.tags.append("Traditional Chinese")
+                elif span_class == "Hans":
+                    classifier.tags.append("Simplified Chinese")
+
+                if len(classifiers) > 0 and last_word != "／":
+                    sense.classifiers.extend(classifiers)
+                    classifiers.clear()
+                classifiers.append(classifier)
+            last_word = word
+        elif "title" in span_tag.attrs:
+            raw_tag = clean_node(wxr, None, span_tag.attrs["title"])
+            if len(raw_tag) > 0:
+                for classifier in classifiers:
+                    classifier.raw_tags.append(raw_tag)
+    sense.classifiers.extend(classifiers)
+    for classifier in sense.classifiers:
+        translate_raw_tags(classifier)
