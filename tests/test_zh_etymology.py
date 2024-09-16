@@ -48,9 +48,9 @@ class TestNote(TestCase):
                 {
                     "ref": "宋．蘇軾《春夜》",
                     "tags": [
+                        "Pinyin",
                         "Classical Chinese",
                         "Traditional Chinese",
-                        "Pinyin",
                     ],
                     "text": "春宵一刻直千金，花有清香月有陰。",
                     "roman": "Chūnxiāo yīkè zhí qiānjīn, huā yǒu qīngxiāng yuè yǒu yīn.",
@@ -59,9 +59,9 @@ class TestNote(TestCase):
                 {
                     "ref": "宋．蘇軾《春夜》",
                     "tags": [
+                        "Pinyin",
                         "Classical Chinese",
                         "Simplified Chinese",
-                        "Pinyin",
                     ],
                     "text": "春宵一刻直千金，花有清香月有阴。",
                     "roman": "Chūnxiāo yīkè zhí qiānjīn, huā yǒu qīngxiāng yuè yǒu yīn.",
@@ -95,9 +95,9 @@ class TestNote(TestCase):
                 {
                     "ref": "813年，韓愈《進學解》",
                     "tags": [
+                        "Pinyin",
                         "Classical Chinese",
                         "Traditional Chinese",
-                        "Pinyin",
                     ],
                     "text": "焚膏油以繼晷，恆兀兀以窮年。",
                     "roman": "Fén gāoyóu yǐ jì guǐ, héng wùwù yǐ qióng nián.",
@@ -106,9 +106,9 @@ class TestNote(TestCase):
                 {
                     "ref": "813年，韓愈《進學解》",
                     "tags": [
+                        "Pinyin",
                         "Classical Chinese",
                         "Simplified Chinese",
-                        "Pinyin",
                     ],
                     "text": "焚膏油以继晷，恒兀兀以穷年。",
                     "roman": "Fén gāoyóu yǐ jì guǐ, héng wùwù yǐ qióng nián.",

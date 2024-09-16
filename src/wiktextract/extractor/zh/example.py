@@ -155,68 +155,44 @@ def extract_template_zh_x(
     has_dl_tag = False
     results = []
     for dl_tag in expanded_node.find_html_recursively("dl"):
+        example_data = parent_example.model_copy(deep=True)
         has_dl_tag = True
-        ref = ""
-        roman = ""
-        translation = ""
-        roman_raw_tags = []
         for dd_tag in dl_tag.find_html("dd"):
             dd_text = clean_node(wxr, None, dd_tag)
             if dd_text.startswith("出自："):
-                ref = dd_text.removeprefix("出自：")
+                example_data.ref = dd_text.removeprefix("出自：")
             else:
                 is_roman = False
                 for span_tag in dd_tag.find_html_recursively(
                     "span", attr_name="lang", attr_value="Latn"
                 ):
-                    roman = clean_node(wxr, None, span_tag)
+                    example_data.roman = clean_node(wxr, None, span_tag)
                     is_roman = True
                     for span_tag in dd_tag.find_html_recursively("span"):
                         span_text = clean_node(wxr, None, span_tag)
                         if span_text.startswith("[") and span_text.endswith(
                             "]"
                         ):
-                            roman_raw_tags.append(span_text.strip("[]"))
+                            example_data.raw_tags.append(span_text.strip("[]"))
                 if not is_roman:
-                    translation = dd_text
-
-        example_text = ""
-        last_span_is_example = False
-        for span_tag in dl_tag.find_html_recursively("span"):
-            if span_tag.attrs.get("class", "") in ["Hant", "Hans"]:
-                example_text = clean_node(wxr, None, span_tag)
-                last_span_is_example = True
-            elif last_span_is_example:
-                last_span_is_example = False
-                if len(example_text) > 0:
-                    raw_tag = clean_node(wxr, None, span_tag)
-                    example = parent_example.model_copy(deep=True)
-                    example.text = example_text
-                    example.roman = roman
-                    example.translation = translation
-                    example.raw_tags.extend(raw_tag.strip("[]").split("，"))
-                    example.raw_tags.extend(roman_raw_tags)
-                    if len(ref) > 0:  # don't override parent quote-* template
-                        example.ref = ref
-                    translate_raw_tags(example)
-                    results.append(example)
+                    example_data.translation = dd_text
+        results.extend(extract_zh_x_dl_span_tag(wxr, dl_tag, example_data))
 
     # no source, single line example
     if not has_dl_tag:
-        roman = ""
-        raw_tags = []
+        example_data = parent_example.model_copy(deep=True)
         for span_tag in expanded_node.find_html(
             "span", attr_name="lang", attr_value="Latn"
         ):
-            roman = clean_node(wxr, None, span_tag)
+            example_data.roman = clean_node(wxr, None, span_tag)
         for span_tag in expanded_node.find_html("span"):
             span_text = clean_node(wxr, None, span_tag)
             if span_text.startswith("[") and span_text.endswith("]"):
-                raw_tags.append(span_text.strip("[]"))
-        translation = clean_node(
+                example_data.raw_tags.append(span_text.strip("[]"))
+        example_data.translation = clean_node(
             wxr, None, template_node.template_parameters.get(2, "")
         )
-        literal_meaning = clean_node(
+        example_data.literal_meaning = clean_node(
             wxr, None, template_node.template_parameters.get("lit", "")
         )
         for span_tag in expanded_node.find_html("span"):
@@ -224,19 +200,54 @@ def extract_template_zh_x(
             if span_lang in ["zh-Hant", "zh-Hans"]:
                 example_text = clean_node(wxr, None, span_tag)
                 if len(example_text) > 0:
-                    example_data = parent_example.model_copy(deep=True)
-                    example_data.text = example_text
-                    example_data.roman = roman
-                    example_data.tags.append(
+                    new_example = example_data.model_copy(deep=True)
+                    new_example.text = example_text
+                    new_example.tags.append(
                         "Traditional Chinese"
                         if span_lang == "zh-Hant"
                         else "Simplified Chinese"
                     )
-                    example_data.translation = translation
-                    example_data.literal_meaning = literal_meaning
-                    example_data.raw_tags.extend(raw_tags)
-                    translate_raw_tags(example_data)
-                    results.append(example_data)
+                    translate_raw_tags(new_example)
+                    results.append(new_example)
+    return results
+
+
+def extract_zh_x_dl_span_tag(
+    wxr: WiktextractContext, dl_tag: HTMLNode, example: Example
+) -> list[Example]:
+    # process example text span tag and dialect span tag
+    results = []
+    is_first_hide = True
+    for span_tag in dl_tag.find_html("span"):
+        span_lang = span_tag.attrs.get("lang", "")
+        if span_lang in ["zh-Hant", "zh-Hans"]:
+            new_example = example.model_copy(deep=True)
+            new_example.text = clean_node(wxr, None, span_tag)
+            results.append(new_example)
+        elif "vsHide" in span_tag.attrs.get("class", ""):
+            # template has arg "collapsed=y"
+            results.extend(
+                extract_zh_x_dl_span_tag(
+                    wxr,
+                    span_tag,
+                    results[-1]
+                    if is_first_hide and len(results) > 0
+                    else example,
+                )
+            )
+            is_first_hide = False
+        elif "font-size:x-small" in span_tag.attrs.get("style", ""):
+            for link_node in span_tag.find_child(NodeKind.LINK):
+                raw_tag = clean_node(wxr, None, link_node)
+                if len(raw_tag) > 0:
+                    if len(results) > 0:
+                        results[-1].raw_tags.append(raw_tag)
+                    else:
+                        example.raw_tags.append(raw_tag)
+
+    if dl_tag.tag == "dl":
+        for data in results:
+            translate_raw_tags(data)
     return results
 
 
