@@ -565,3 +565,41 @@ class TestGloss(TestCase):
                 },
             ],
         )
+
+    def test_zh_mw(self):
+        self.wxr.wtp.add_page(
+            "Template:zh-mw",
+            10,
+            '<span><span>(分類詞：<span class="Hani" lang="zh">-{<!---->[[部#漢語|部]]<!---->}-</span> <span title="官話">官</span> <span title="粵語">粵</span>;<span>&nbsp;</span><span class="Hant" lang="zh-Hant">-{<!---->[[臺#漢語|臺]]<!---->}-</span><span class="Hani" lang="zh">-{<!---->／<!---->}-</span><span class="Hans" lang="zh-Hans">-{<!---->[[台#漢語|台]]<!---->}-</span> <span title="官話">官</span> <span title="閩南語">南</span> <span title="吳語">吳</span>)</span></span>',
+        )
+        page_data = parse_page(
+            self.wxr,
+            "電腦",
+            """==漢語==
+===名詞===
+# 原用於數字計算的[[電子計算機]]。{{zh-mw|m,c:部|m,mn,w:臺}}""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"][0]["classifiers"],
+            [
+                {"classifier": "部", "tags": ["Mandarin", "Cantonese"]},
+                {
+                    "classifier": "臺",
+                    "tags": [
+                        "Traditional Chinese",
+                        "Mandarin",
+                        "Southern Min",
+                        "Wu",
+                    ],
+                },
+                {
+                    "classifier": "台",
+                    "tags": [
+                        "Simplified Chinese",
+                        "Mandarin",
+                        "Southern Min",
+                        "Wu",
+                    ],
+                },
+            ],
+        )

@@ -39,6 +39,12 @@ class AltForm(ChineseBaseModel):
     tags: list[str] = []
 
 
+class Classifier(ChineseBaseModel):
+    classifier: str = ""
+    tags: list[str] = []
+    raw_tags: list[str] = []
+
+
 class Sense(ChineseBaseModel):
     glosses: list[str] = []
     tags: list[str] = []
@@ -51,6 +57,7 @@ class Sense(ChineseBaseModel):
     )
     alt_of: list[AltForm] = []
     form_of: list[AltForm] = []
+    classifiers: list[Classifier] = []
 
 
 class Form(ChineseBaseModel):

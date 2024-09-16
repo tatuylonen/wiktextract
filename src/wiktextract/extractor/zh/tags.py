@@ -274,8 +274,23 @@ ZH_X_TAGS = {
     "吳語": "Wu",
 }
 
+# classifier tags
+# https://zh.wiktionary.org/wiki/Template:zh-mw
+# https://zh.wiktionary.org/wiki/Module:Zh/templates
+ZH_TAGS = {
+    "官話": "Mandarin",
+    "贛語": "Gan",
+    "客家話": "Hakka",
+    "晉語": "Jin",
+    "閩北語": "Northern Min",
+    "閩東語": "Eastern Min",
+    "閩南語": "Southern Min",
+    "潮州話": "Teochew",
+    "湘語": "Xiang",
+}
 
-ALL_TAGS = {**GRAMMATICAL_TAGS, **LABEL_TAGS, **ZH_X_TAGS}
+
+ALL_TAGS = {**GRAMMATICAL_TAGS, **LABEL_TAGS, **ZH_X_TAGS, **ZH_TAGS}
 
 
 def translate_raw_tags(data: WordEntry) -> WordEntry:

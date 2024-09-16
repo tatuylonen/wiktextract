@@ -60,9 +60,9 @@ class TestExample(TestCase):
                 {
                     "ref": "《尚書·梓材》",
                     "tags": [
+                        "Pinyin",
                         "Classical Chinese",
                         "Traditional Chinese",
-                        "Pinyin",
                     ],
                     "text": "王曰：「封，以厥庶民暨厥臣達大家，以厥臣達王惟邦君。」",
                     "roman": "Wáng yuē: “Fēng, yǐ jué shùmín jì jué chén dá dàjiā, yǐ jué chén dá wáng wéi bāngjūn.”",
@@ -71,9 +71,9 @@ class TestExample(TestCase):
                 {
                     "ref": "《尚書·梓材》",
                     "tags": [
+                        "Pinyin",
                         "Classical Chinese",
                         "Simplified Chinese",
-                        "Pinyin",
                     ],
                     "text": "王曰：「封，以厥庶民暨厥臣达大家，以厥臣达王惟邦君。」",
                     "roman": "Wáng yuē: “Fēng, yǐ jué shùmín jì jué chén dá dàjiā, yǐ jué chén dá wáng wéi bāngjūn.”",
@@ -169,7 +169,7 @@ class TestExample(TestCase):
         self.wxr.wtp.add_page(
             "Template:zh-x",
             10,
-            """<dl class="zhusex"><span lang="zh-Hant" class="Hant">-{<!-- -->[[如果#漢語|如果]][[唔係#漢語|唔係]][[今日#漢語|今日]][[拆穿#漢語|拆穿]][[你#漢語|你]][[槓嘢#漢語|槓野]]，[[畀#漢語|俾]][[你#漢語|你]][[混#漢語|混]][[咗#漢語|左]][[入#漢語|入]][[稅局#漢語|稅局]][[重#漢語|重]][[死人#漢語|死人]][[呀#漢語|呀]]！<!-- -->}-</span> <span>&#91;[[w:廣州話|廣州話]]，[[w:繁体中文|繁體]]&#93;</span><br><span lang="zh-Hans" class="Hans">-{<!-- -->[[如果#漢語|如果]][[唔系#漢語|唔系]][[今日#漢語|今日]][[拆穿#漢語|拆穿]][[你#漢語|你]][[杠嘢#漢語|杠野]]，[[畀#漢語|俾]][[你#漢語|你]][[混#漢語|混]][[咗#漢語|左]][[入#漢語|入]][[税局#漢語|税局]][[重#漢語|重]][[死人#漢語|死人]][[呀#漢語|呀]]！<!-- -->}-</span> <span>&#91;[[w:廣州話|廣州話]]，[[w:简体中文|簡體]]&#93;</span><dd><span lang="zh-Latn"><i>roman</i></span> <span>&#91;[[w:廣州話拼音方案|廣州話拼音]]&#93;</span></dd><dd>如果不是今天揭穿你的老底，給你混進稅務局就更'''糟糕'''了！</dd></dl>[[Category:有使用例的粵語詞]]""",
+            """<dl class="zhusex"><span lang="zh-Hant" class="Hant">-{<!-- -->[[如果#漢語|如果]][[唔係#漢語|唔係]][[今日#漢語|今日]][[拆穿#漢語|拆穿]][[你#漢語|你]][[槓嘢#漢語|槓野]]，[[畀#漢語|俾]][[你#漢語|你]][[混#漢語|混]][[咗#漢語|左]][[入#漢語|入]][[稅局#漢語|稅局]][[重#漢語|重]][[死人#漢語|死人]][[呀#漢語|呀]]！<!-- -->}-</span> <span style="color:darkgreen; font-size:x-small;">&#91;[[w:廣州話|廣州話]]，[[w:繁体中文|繁體]]&#93;</span><br><span lang="zh-Hans" class="Hans">-{<!-- -->[[如果#漢語|如果]][[唔系#漢語|唔系]][[今日#漢語|今日]][[拆穿#漢語|拆穿]][[你#漢語|你]][[杠嘢#漢語|杠野]]，[[畀#漢語|俾]][[你#漢語|你]][[混#漢語|混]][[咗#漢語|左]][[入#漢語|入]][[税局#漢語|税局]][[重#漢語|重]][[死人#漢語|死人]][[呀#漢語|呀]]！<!-- -->}-</span> <span style="color:darkgreen; font-size:x-small;">&#91;[[w:廣州話|廣州話]]，[[w:简体中文|簡體]]&#93;</span><dd><span lang="zh-Latn"><i>roman</i></span> <span>&#91;[[w:廣州話拼音方案|廣州話拼音]]&#93;</span></dd><dd>如果不是今天揭穿你的老底，給你混進稅務局就更'''糟糕'''了！</dd></dl>[[Category:有使用例的粵語詞]]""",
         )
         sense_data = Sense()
         root = self.wxr.wtp.parse("""#* {{quote-book|zh}}
@@ -181,7 +181,7 @@ class TestExample(TestCase):
             [e.model_dump(exclude_defaults=True) for e in sense_data.examples],
             [
                 {
-                    "raw_tags": ["廣州話", "廣州話拼音"],
+                    "raw_tags": ["廣州話拼音", "廣州話"],
                     "ref": "1957, 王力",
                     "text": "如果唔係今日拆穿你槓野，俾你混左入稅局重死人呀！",
                     "roman": "roman",
@@ -189,7 +189,7 @@ class TestExample(TestCase):
                     "translation": "如果不是今天揭穿你的老底，給你混進稅務局就更糟糕了！",
                 },
                 {
-                    "raw_tags": ["廣州話", "廣州話拼音"],
+                    "raw_tags": ["廣州話拼音", "廣州話"],
                     "ref": "1957, 王力",
                     "text": "如果唔系今日拆穿你杠野，俾你混左入税局重死人呀！",
                     "roman": "roman",
@@ -348,6 +348,38 @@ class TestExample(TestCase):
                     "roman": "Ja končajusʹ, Gorbunok: Carʹ velit mne v kipjatok!",
                     "translation": "我將要完蛋，駝背。國王命令我跳入沸水中！",
                     "ref": "P. Yershov, The Humpback Horse 駝背的馬:",
+                },
+            ],
+        )
+
+    def test_ref_dd_span_tags(self):
+        self.wxr.wtp.start_page("同志")
+        self.wxr.wtp.add_page(
+            "Template:zh-x",
+            10,
+            """<dl class="zhusex"><span lang="zh-Hant" class="Hant">-{<!-- -->[[同樣#漢語|同樣]][[受#漢語|受]][[到#漢語|到]][[歡迎#漢語|歡迎]][[的#漢語|的]]<!-- -->}-</span> <span style="color:darkgreen; font-size:x-small;">&#91;[[w:現代標準漢語|現代標準漢語]]，[[w:繁体中文|繁體]]&#93;</span><br><span lang="zh-Hans" class="Hans">-{<!-- -->[[同样#漢語|同样]][[受#漢語|受]][[到#漢語|到]][[欢迎#漢語|欢迎]][[的#漢語|的]]<!-- -->}-</span> <span style="color:darkgreen; font-size:x-small;">&#91;[[w:現代標準漢語|現代標準漢語]]，[[w:简体中文|簡體]]&#93;</span><dd><small>出自：'''2012'''年，-{<!----><span class="Hant" lang="zh">-{馬嘉蘭}-</span><!---->}-、-{<!----><span class="Hant" lang="zh">-{臺灣文學中的性越界}-</span><!---->}-，編輯-{<!----><span class="Hani" lang="zh">-{廖炳惠}-</span><!---->}-、-{<!----><span class="Hant" lang="zh">-{孫康宜}-</span><!---->}-、-{<!----><span class="Hani" lang="zh">-{王德威}-</span><!---->}-，-{<!----><span class="Hant" lang="zh">-{《臺灣及其脈絡》}-</span><!---->}-[https://books.google.com/books?id=cdCFqwRYNNwC&pg=PA329 第329頁]</small></dd><dd><span lang="zh-Latn" style="color:#404D52"><i>Tóngyàng shòudào huānyíng de</i></span> <span style="color:darkgreen; font-size:x-small;">&#91;[[w:漢語拼音|漢語拼音]]&#93;</span></dd></dl>""",
+        )
+        sense_data = Sense()
+        root = self.wxr.wtp.parse(
+            "#: {{zh-x|同樣 受-到 歡迎 的||ref='''2012'''年，{{lang|zh|馬嘉蘭}}、{{lang|zh|臺灣文學中的性越界}}，編輯{{lang|zh|廖炳惠}}、{{lang|zh|孫康宜}}、{{lang|zh|王德威}}，{{lang|zh|《臺灣及其脈絡》}}[https://books.google.com/books?id=cdCFqwRYNNwC&pg=PA329 第329頁]}}"
+        )
+        extract_example_list_item(
+            self.wxr, sense_data, root.children[0].children[0], []
+        )
+        self.assertEqual(
+            [e.model_dump(exclude_defaults=True) for e in sense_data.examples],
+            [
+                {
+                    "text": "同樣受到歡迎的",
+                    "roman": "Tóngyàng shòudào huānyíng de",
+                    "tags": ['Pinyin', 'Standard Chinese', 'Traditional Chinese'],
+                    "ref": "2012年，馬嘉蘭、臺灣文學中的性越界，編輯廖炳惠、孫康宜、王德威，《臺灣及其脈絡》第329頁",
+                },
+                {
+                    "text": "同样受到欢迎的",
+                    "roman": "Tóngyàng shòudào huānyíng de",
+                    "tags": ['Pinyin', 'Standard Chinese', 'Simplified Chinese'],
+                    "ref": "2012年，馬嘉蘭、臺灣文學中的性越界，編輯廖炳惠、孫康宜、王德威，《臺灣及其脈絡》第329頁",
                 },
             ],
         )
