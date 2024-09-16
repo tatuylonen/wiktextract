@@ -161,3 +161,41 @@ class TestPlExample(TestCase):
                 "sense_index": "1.1",
             },
         )
+
+    def test_literal_meaning(self):
+        self.wxr.wtp.add_page(
+            "Szablon:język chiński standardowy",
+            10,
+            '<span class="lang-code primary-lang-code lang-code-zh" id="zh">[[:Kategoria:Język chiński standardowy|język chiński standardowy]]</span>',
+        )
+        self.wxr.wtp.add_page(
+            "Szablon:dosł",
+            10,
+            '<span class="short-container">[[Aneks:Skróty używane w Wikisłowniku#D|<span class="short-wrapper" title="dosłownie" data-expanded="dosłownie"><span class="short-content">dosł.</span></span>]]</span>',
+        )
+        self.wxr.wtp.start_page("房子")
+        page_data = parse_page(
+            self.wxr,
+            "房子",
+            """== {{zh|房子}} ({{język chiński standardowy}}) ==
+===znaczenia===
+''czasownik''
+: (1.2) [[miejsce]], [[miejscówka]]
+===przykłady===
+: (1.2) [[我]][[讨厌]][[这]][[房子]]，[[跟]][[坟墓]][[差不多]]！(wǒ tǎoyàn zhè fángzi gēn fénmù chàbùduō) → [[nienawidzić|Nienawidzę]] [[to|tego]] '''[[miejsce|miejsca]]''', [[tu]] [[być|jest]] [[jak]] [[w]] [[grobowiec|grobowcu]]! ({{dosł}} …[[być|jest]] [[prawie]] [[grobowiec|grobowcem]]!)""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"][0],
+            {
+                "examples": [
+                    {
+                        "text": "我讨厌这房子，跟坟墓差不多！",
+                        "roman": "wǒ tǎoyàn zhè fángzi gēn fénmù chàbùduō",
+                        "translation": "Nienawidzę tego miejsca, tu jest jak w grobowcu!",
+                        "literal_meaning": "…jest prawie grobowcem!",
+                    }
+                ],
+                "glosses": ["miejsce, miejscówka"],
+                "sense_index": "1.2",
+            },
+        )

@@ -1,7 +1,7 @@
 import re
 from collections import defaultdict
 
-from wikitextprocessor.parser import HTMLNode, NodeKind, WikiNode
+from wikitextprocessor import HTMLNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -63,14 +63,24 @@ def process_example_list_item(
         elif isinstance(node, HTMLNode) and node.tag == "ref":
             example_data.ref = clean_node(wxr, None, node.children)
     if translation_start != 0:
+        lit_start = len(list_item.children)
+        for t_index, node in enumerate(
+            list_item.children[translation_start:], translation_start
+        ):
+            if isinstance(node, TemplateNode) and node.template_name == "dosł":
+                example_data.literal_meaning = clean_node(
+                    wxr, None, list_item.children[t_index + 1 :]
+                ).strip("() ")
+                lit_start = t_index
+                break
         example_data.translation = clean_node(
-            wxr, None, list_item.children[translation_start:]
-        )
+            wxr, None, list_item.children[translation_start:lit_start]
+        ).strip("() ")
         if len(example_data.text) == 0:
             example_data.text = clean_node(
                 wxr, None, list_item.children[example_start:translation_start]
             ).strip("→ ")
-    if "(" in example_data.text and "(" not in example_data.translation:
+    if "(" in example_data.text and example_data.text.endswith(")"):
         roman_start = example_data.text.rindex("(")
         example_data.roman = example_data.text[roman_start:].strip("() ")
         example_data.text = example_data.text[:roman_start].strip()
