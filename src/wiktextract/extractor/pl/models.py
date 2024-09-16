@@ -15,6 +15,7 @@ class Example(PolishBaseModel):
     translation: str = ""
     ref: str = ""
     roman: str = ""
+    literal_meaning: str = ""
 
 
 class AltForm(PolishBaseModel):
