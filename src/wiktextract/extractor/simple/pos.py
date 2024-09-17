@@ -1,15 +1,258 @@
-from typing import Optional
+from typing import Optional, Union
 
-from wikitextprocessor import WikiNode
+from wikitextprocessor import NodeKind, TemplateNode, WikiNode
 from wiktextract import WiktextractContext
+from wiktextract.page import clean_node
+from wiktextract.wxr_logging import logger
 
-from .models import WordEntry
+from .models import Example, Form, Sense, WordEntry
+from .page_utils import recurse_base_data_sections, separate_subsections
+from .section_titles import POS_DATA
+from .table import parse_pos_table
+from .text_utils import POS_STARTS_RE, POS_TEMPLATE_NAMES
+
+
+def remove_duplicate_forms(
+    wxr: WiktextractContext, forms: list[Form]
+) -> list[Form]:
+    if not forms:
+        return []
+    new_forms = []
+    for i, form in enumerate(forms):
+        for comp in forms[i + 1 :]:
+            if (
+                form.form == comp.form
+                and form.tags == comp.tags
+                and form.raw_tags == comp.raw_tags
+            ):
+                break
+                #  basically "continue" in our case, but this will not trigger
+                # the follow else-block
+        else:
+            # No duplicates found in for loop (exited without breaking)
+            new_forms.append(form)
+    if len(forms) > len(new_forms):
+        # wxr.wtp.debug("Found duplicate forms", sortid="simple/pos/32")
+        return new_forms
+    return forms
+
+
+ExOrSense = Union[Sense, Example]
+
+
+def recurse_glosses1(
+    wxr: WiktextractContext,
+    parent_sense: Sense,
+    node: WikiNode,
+) -> list[ExOrSense]:
+    ret: list[ExOrSense] = []
+    found_gloss = False
+    if node.kind == NodeKind.LIST:
+        for child in node.children:
+            if isinstance(child, str):
+                # This should never happen
+                wxr.wtp.error(
+                    f"str {child=} is direct child of NodeKind.LIST",
+                    sortid="simple/pos/44",
+                )
+                continue
+            ret.extend(
+                recurse_glosses1(wxr, parent_sense.copy(deep=True), child)
+            )
+    if node.kind == NodeKind.LIST_ITEM:
+        contents = []
+        for i, c in enumerate(node.children):
+            if isinstance(c, WikiNode) and c.kind == NodeKind.LIST:
+                break
+            contents.append(c)
+        sublists = node.children[i:]
+
+        if node.sarg.endswith(":") and node.sarg != ":":
+            # This is either a quotation or example
+            # != ":" filters out lines that are usually notes or random
+            # stuff not inside gloss lists; see "dare"
+            text = clean_node(
+                wxr, parent_sense, contents
+            )  # clean_node strip()s
+            example = Example(text=text)
+            logger.debug(f"{wxr.wtp.title}/example\n{text}")
+            # We will not bother with subglosses for example entries;
+            # XXX do something about it if it becomes relevant
+            return [example]
+
+        text = clean_node(wxr, parent_sense, contents)
+        if len(text) > 0:
+            found_gloss = True
+            parent_sense.glosses.append(text)
+
+        for sl in sublists:
+            if not (isinstance(sl, WikiNode) and sl.kind == NodeKind.LIST):
+                # Should not happen
+                wxr.wtp.error(
+                    "Sublist is not NodeKind.LIST", sortid="simple/pos/82"
+                )
+                continue
+            for r in recurse_glosses1(wxr, parent_sense.copy(deep=True), sl):
+                print(f"//// {r=}")
+                if isinstance(r, Example):
+                    parent_sense.examples.append(r)
+                else:
+                    ret.append(r)
+
+    if len(ret) > 0:
+        # the recursion returned actual senses from below, so we will
+        # ignore everything else (incl. any example data that might have
+        # been given to parent_sense) and return that instead.
+        # XXX if this becomes relevant, add the example data to a returned
+        # subsense instead?
+        print("===Return ret")
+        return ret
+
+    if found_gloss is True:
+        print("===Return parent_sense")
+        return [parent_sense]
+
+    return []
+
+
+def recurse_glosses(
+    wxr: WiktextractContext, node: WikiNode, data: WordEntry
+) -> list[Sense]:
+    base_sense = Sense()
+    ret = []
+
+    for r in recurse_glosses1(wxr, base_sense, node):
+        if isinstance(r, Example):
+            wxr.wtp.error(
+                f"Example() has bubbled to recurse_glosses: {r.json()}",
+                sortid="simple/pos/glosses",
+            )
+            continue
+        ret.append(r)
+
+    if len(ret) > 0:
+        return ret
+
+    return []
 
 
 def process_pos(
     wxr: WiktextractContext,
-    child: WikiNode,
+    node: WikiNode,
+    data: WordEntry,
+    # the "noun" in "Noun 2"
     pos_title: str,
-    base_data: WordEntry,
+    # the "2" in "Noun 2"
+    pos_num: Optional[int] = None,
 ) -> Optional[list[WordEntry]]:
-    return None
+    """Process a part-of-speech section, like 'Noun'. `base_data` provides basic
+    data common with other POS sections, like pronunciation or etymology."""
+
+    pos_meta = POS_DATA[pos_title]
+    data.pos = pos_meta["pos"]
+    if pos_num is not None:
+        data.pos_num = pos_num
+
+    # Sound data associated with this POS might be coming from a shared
+    # section, in which case we've tried to tag the sound data with its
+    # pos name + number if possible. Filter out stuff that doesn't fit.
+    new_sounds = []
+    for sound in data.sounds:
+        if not sound.pos:
+            # Sound data not tagged with any specific pos section, so add it
+            new_sounds.append(sound)
+        else:
+            m = POS_STARTS_RE.match(sound.pos)
+            assert m is not None  # Should never trigger
+            s_pos = m.group(1).strip().lower()
+            sound_meta = POS_DATA[s_pos]
+            s_pos = sound_meta["pos"]
+            if s_num := m.group(2):
+                s_num = int(s_num.strip())
+            else:
+                s_num = None
+            if s_pos == data.pos and s_num == data.pos_num:
+                new_sounds.append(sound)
+    data.sounds = new_sounds
+
+    pos_contents, subsections = separate_subsections(node)
+
+    # Check for pronunciation and etymology / word parts sections in the
+    # subsections of this POS level node. This should only really happen if
+    # these subsections (pron, etym) appear at the end of the article after the
+    # start of the last POS section, because otherwise the preprocessor would
+    # have inserted a virtual LEVEL 1 heading before them, creating a separate
+    # top-level section.
+    # base_data is a copy passed into this function, so modifying it here
+    # will NOT modify other entries, but as the above says, this *should*
+    # be correct because there *should* not be other POS entries after this
+    # to be modified. `base_data` is being modified in page.py at the top level,
+    # and that propagates, but not here in this edge case.
+    for ssect in subsections:
+        recurse_base_data_sections(wxr, node, data)
+
+    # check POS templates at the start of the section (Simple English specific)
+    template_tags: list[str] = []
+    template_forms: list[Form] = []
+
+    # Typically, a Wiktionary has a word head before glosses, which contains
+    # the main form of the word (usually same as the title of the article)
+    # and common other forms of the word, plus qualifiers and other data
+    # like that; however, for Simple English Wiktionary the format is to
+    # have a table (or two, if there's variations) containing the word's
+    # conjugation or declension, so we don't have to actually parse the
+    # head here.
+    for i, child in enumerate(pos_contents):
+        if isinstance(child, str) and not child.strip():
+            # Ignore whitespace
+            continue
+        # TemplateNode is a subclass of WikiNode; not all kinds of nodes have
+        # a subclass, but TemplateNode is handy.
+        if (
+            isinstance(child, TemplateNode)
+            and child.template_name in POS_TEMPLATE_NAMES
+        ):
+            if child.template_name not in pos_meta["templates"]:
+                wxr.wtp.debug(
+                    f"Template {child.template_name} "
+                    f"found under {pos_title}",
+                    sortid="simple/pos/93",
+                )
+            elif ttags := pos_meta["templates"][child.template_name]:
+                # Some templates have associated tags:
+                # `irrnoun` -> ["irregular"]
+                template_tags.extend(ttags)
+            if forms := parse_pos_table(wxr, child, data):
+                template_forms.extend(forms)
+            else:
+                wxr.wtp.warning(
+                    f"POS template '{child.template_name}' did "
+                    "not have any forms.",
+                    sortid="simple/pos/129",
+                )
+        else:
+            break
+
+    template_tags = list(set(template_tags))
+    data.forms.extend(template_forms)
+    data.forms = remove_duplicate_forms(wxr, data.forms)
+    data.tags.extend(template_tags)
+
+    # parts = []
+    for child in pos_contents[i:]:
+        # Wiktionaries handle glosses the usual way: with numbered lists.
+        # Each list entry is a gloss, sometimes with subglosses, but with
+        # Simple English Wiktionary that seems rare.
+        # logger.debug(f"{child}")
+        if isinstance(child, WikiNode) and child.kind == NodeKind.LIST:
+            senses = recurse_glosses(wxr, child, data)
+            if len(senses) > 0:
+                data.senses.extend(senses)
+        # text = clean_node(wxr, data, child, no_strip=True)
+        # parts.append(text)
+
+    # out = "".join(parts)
+    # if "##" in out:
+    #     logger.debug(f"{wxr.wtp.title}\n{out}")
+
+    return [data]
