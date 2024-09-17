@@ -3651,7 +3651,7 @@ def parse_language(
                 # Bypass this function when parsing Chinese, Japanese and
                 # quotation templates.
                 new_example_lists = extract_example_list_item(
-                    wxr, item, sense_base, None
+                    wxr, item, sense_base, ExampleData(raw_tags=[], tags=[])
                 )
                 if len(new_example_lists) > 0:
                     examples.extend(new_example_lists)

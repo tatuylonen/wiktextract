@@ -174,6 +174,7 @@ def extract_template_zh_x(
                             "]"
                         ):
                             example_data.raw_tags.append(span_text.strip("[]"))
+                    break
                 if not is_roman:
                     example_data.translation = dd_text
         results.extend(extract_zh_x_dl_span_tag(wxr, dl_tag, example_data))
@@ -185,6 +186,7 @@ def extract_template_zh_x(
             "span", attr_name="lang", attr_value="Latn"
         ):
             example_data.roman = clean_node(wxr, None, span_tag)
+            break
         for span_tag in expanded_node.find_html("span"):
             span_text = clean_node(wxr, None, span_tag)
             if span_text.startswith("[") and span_text.endswith("]"):
