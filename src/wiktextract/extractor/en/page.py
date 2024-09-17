@@ -22,7 +22,8 @@ from typing import (
 from mediawiki_langcodes import get_all_names, name_to_code
 from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.core import TemplateArgs, TemplateFnCallable
-from wikitextprocessor.parser import GeneralNode, TemplateNode
+from wikitextprocessor.parser import LEVEL_KIND_FLAGS, GeneralNode, TemplateNode
+
 from wiktextract.clean import clean_template_args, clean_value
 from wiktextract.datautils import (
     data_append,
@@ -63,7 +64,7 @@ from wiktextract.wxr_logging import logger
 
 from ..ruby import extract_ruby, parse_ruby
 from ..share import strip_nodes
-from .example import extract_example_list_item
+from .example import extract_example_list_item, extract_template_zh_x
 from .info_templates import (
     INFO_TEMPLATE_FUNCS,
     parse_info_template_arguments,
@@ -3258,7 +3259,7 @@ def parse_language(
 
         def etym_template_fn(name: str, ht: TemplateArgs) -> Optional[str]:
             nonlocal ignore_count
-            if is_panel_template(wxr, name):
+            if is_panel_template(wxr, name) or name in ["zh-x", "zh-q"]:
                 return ""
             if re.match(ignored_etymology_templates_re, name):
                 ignore_count += 1
@@ -3297,16 +3298,32 @@ def parse_language(
             contents,
             template_fn=etym_template_fn,
             post_template_fn=etym_post_template_fn,
-        )
+        ).strip(": \n")  # remove ":" indent wikitext before zh-x template
         # Save the collected information.
-        if text:
+        if len(text) > 0:
             data["etymology_text"] = text
-        if templates:
+        if len(templates) > 0:
             # Some etymology templates, like Template:root do not generate
             # text, so they should be added here. Elsewhere, we check
             # for Template:root and add some text to the expansion to please
             # the validation.
             data["etymology_templates"] = templates
+
+        for child_node in node.find_child_recursively(
+            LEVEL_KIND_FLAGS | NodeKind.TEMPLATE
+        ):
+            if child_node.kind in LEVEL_KIND_FLAGS:
+                break
+            elif isinstance(
+                child_node, TemplateNode
+            ) and child_node.template_name in ["zh-x", "zh-q"]:
+                if "etymology_examples" not in data:
+                    data["etymology_examples"] = []
+                data["etymology_examples"].extend(
+                    extract_template_zh_x(
+                        wxr, child_node, None, ExampleData(raw_tags=[], tags=[])
+                    )
+                )
 
     def parse_descendants(
         data: WordData, node: WikiNode, is_proto_root_derived_section=False
@@ -3842,9 +3859,7 @@ def parse_language(
                 elif len(lines) > 1:
                     if any(
                         re.search(r"[]\d:)]\s*$", x) for x in lines[:-1]
-                    ) and not (
-                        len(example_template_names) == 1
-                    ):
+                    ) and not (len(example_template_names) == 1):
                         refs: list[str] = []
                         for i in range(len(lines)):
                             if re.match(r"^[#*]*:+(\s*$|\s+)", lines[i]):
