@@ -46,3 +46,15 @@ PANEL_TEMPLATES: set[str] = set(
 # Additional templates to be expanded in the pre-expand phase
 ADDITIONAL_EXPAND_TEMPLATES: set[str] = set()
 
+ETYMOLOGY_TEMPLATES = set(
+    [
+        "ety-affix",
+        "ety-prefix",
+        "ety-suffix",
+        "word parts",
+        "confix",
+        "compound",
+        "multiword term",
+    ]
+)
+

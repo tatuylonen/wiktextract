@@ -37,9 +37,9 @@ POS_DATA: dict[str, POSMap] = {
     "acronym": {
         "pos": "abbrev",
         "tags": ["abbreviation"],
-        "templates": {"acronym": None},
+        "templates": {"acronym": None, "initialism": None},
     },
-    "adjective": {"pos": "adj", "templates": {"adjective": None}},
+    "adjective": {"pos": "adj", "templates": {"adjective": None, "adj": None}},
     "adverb": {"pos": "adv", "templates": {"adverb": None}},
     "determiner": {
         "pos": "det",
@@ -64,7 +64,7 @@ POS_DATA: dict[str, POSMap] = {
     "initialism": {
         "pos": "abbrev",
         "tags": ["abbreviation"],
-        "templates": {"initialism": None},
+        "templates": {"initialism": None, "acronym": None},
     },
     "interjection": {"pos": "intj", "templates": {"interjection": None}},
     "preposition": {"pos": "prep", "templates": {"preposition": None}},

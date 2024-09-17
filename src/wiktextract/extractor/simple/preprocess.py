@@ -20,13 +20,22 @@ def preprocess_text(text: str, page_title="") -> str:
     # Does a POS template have a preceding POS heading; whitespace and
     # other POS templates are allowed between
     after_pos_heading = False
+    skip_lines = False
 
     for line in text.splitlines():
+        if "{{text box end}}" in line:
+            skip_lines = False
+            continue
+        if skip_lines is True:
+            continue
+        if "{{text box start" in line:
+            skip_lines = True
+            continue
         if line.startswith("=") and line.endswith("="):
             heading = HEADING_RE.match(line)
             if heading is not None:
                 if POS_STARTS_RE.match(heading.group(2)):
-                # This heading is for a POS section
+                    # This heading is for a POS section
                     after_pos_heading = True
                 # Start a new heading part
                 parts.append(cur_part)
@@ -94,13 +103,7 @@ def preprocess_text(text: str, page_title="") -> str:
         # Output all level 2 headings that aren't POSes to level 3
         if (
             part[1] == 2  # == Heading ==
-            and part[0].lower() not in POS_DATA  # == Not a POS? ==
-            and not (
-                part[0].endswith(
-                    ("1", "2", "3", "4", "5", "6", "7", "8", "9", "0")
-                )  #  not == Heading 2 ==
-                and POS_STARTS_RE.match(part[0])  #  not == Noun 2 ==
-            )
+            and not POS_STARTS_RE.match(part[0])  #  not == Noun 2 ==
         ):
             ret.append(f"=== {part[0]} ===")
             ret.extend(part[2][1:])
