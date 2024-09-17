@@ -61,11 +61,15 @@ def recurse_glosses1(
             )
     if node.kind == NodeKind.LIST_ITEM:
         contents = []
+        sublists = []
+        broke_out = False
         for i, c in enumerate(node.children):
             if isinstance(c, WikiNode) and c.kind == NodeKind.LIST:
+                broke_out = True
                 break
             contents.append(c)
-        sublists = node.children[i:]
+        if broke_out is True:
+            sublists = node.children[i:]
 
         if node.sarg.endswith(":") and node.sarg != ":":
             # This is either a quotation or example
@@ -75,7 +79,7 @@ def recurse_glosses1(
                 wxr, parent_sense, contents
             )  # clean_node strip()s
             example = Example(text=text)
-            logger.debug(f"{wxr.wtp.title}/example\n{text}")
+            # logger.debug(f"{wxr.wtp.title}/example\n{text}")
             # We will not bother with subglosses for example entries;
             # XXX do something about it if it becomes relevant
             return [example]
@@ -89,11 +93,11 @@ def recurse_glosses1(
             if not (isinstance(sl, WikiNode) and sl.kind == NodeKind.LIST):
                 # Should not happen
                 wxr.wtp.error(
-                    "Sublist is not NodeKind.LIST", sortid="simple/pos/82"
+                    f"Sublist is not NodeKind.LIST: {sublists=!r}",
+                    sortid="simple/pos/82",
                 )
                 continue
             for r in recurse_glosses1(wxr, parent_sense.copy(deep=True), sl):
-                print(f"//// {r=}")
                 if isinstance(r, Example):
                     parent_sense.examples.append(r)
                 else:
@@ -105,11 +109,9 @@ def recurse_glosses1(
         # been given to parent_sense) and return that instead.
         # XXX if this becomes relevant, add the example data to a returned
         # subsense instead?
-        print("===Return ret")
         return ret
 
     if found_gloss is True:
-        print("===Return parent_sense")
         return [parent_sense]
 
     return []
