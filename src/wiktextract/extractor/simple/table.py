@@ -1,3 +1,4 @@
+from itertools import chain
 from typing import Optional, Union
 
 from wikitextprocessor import HTMLNode, NodeKind, TemplateNode, WikiNode
@@ -55,9 +56,15 @@ def parse_pos_table(
     # row-by-row.
     column_hdrs: dict[int, str] = {}
     forms: list[Form] = []
-    for row in tree.find_child_recursively(NodeKind.TABLE_ROW):
+    for row in chain(
+        tree.find_child_recursively(NodeKind.TABLE_ROW),
+        tree.find_html_recursively("tr"),
+    ):
         row_hdr = ""
-        for i, cell in row.find_child(NodeKind.TABLE_CELL, with_index=True):
+        for i, cell in chain(
+            row.find_child(NodeKind.TABLE_CELL, with_index=True),
+            row.find_html("td", with_index=True, attr_name="", attr_value=""),
+        ):
             text = clean_node(
                 wxr, data, cell, node_handler_fn=cell_node_fn
             ).strip()
