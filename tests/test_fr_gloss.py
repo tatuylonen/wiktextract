@@ -104,7 +104,9 @@ class TestFrGloss(TestCase):
         # https://fr.wiktionary.org/wiki/马
         self.wxr.wtp.start_page("马")
         root = self.wxr.wtp.parse(
-            "=== {{S|nom|zh}} ===\n# Cheval.\n{{zh-exemple|这匹'''马'''很大。|Ce cheval est grand.|Zhè pǐ '''mǎ''' hěn dà.<br/>⠌⠢⠆ ⠏⠊⠄ ⠍⠔⠄ ⠓⠴⠄ ⠙⠔⠆⠐⠆}}"
+            """=== {{S|nom|zh}} ===
+# Cheval.
+{{zh-exemple|这匹'''马'''很大。|Ce cheval est grand.|Zhè pǐ '''mǎ''' hěn dà.<br/>⠌⠢⠆ ⠏⠊⠄ ⠍⠔⠄ ⠓⠴⠄ ⠙⠔⠆⠐⠆}}"""
         )
         page_data = []
         process_pos_block(
@@ -659,4 +661,30 @@ class TestFrGloss(TestCase):
                     "glosses": ["Féminin pluriel de écuyer."],
                 },
             ],
+        )
+
+    def test_zh_exemple_template_in_list(self):
+        self.wxr.wtp.start_page("千辛萬苦")
+        root = self.wxr.wtp.parse(
+            """# [[souffrir#fr|Souffrir]] de [[tribulation]]s [[innommable]]s.
+#* {{zh-exemple|之後十年，越南人民吃盡'''千辛萬苦'''|lang=zh|sens=Au cours de la décennie suivante, le peuple vietnamien a beaucoup souffert|source=source}}"""
+        )
+        page_data = [
+            WordEntry(
+                word="千辛萬苦",
+                lang_code="ja",
+                lang="Chinois",
+                pos="verb",
+            )
+        ]
+        extract_gloss(self.wxr, page_data, root.children[0])
+        self.assertEqual(
+            [e.model_dump(exclude_defaults=True) for e in page_data[0].senses[0].examples],
+            [
+                {
+                    "ref": "source",
+                    "text": "之後十年，越南人民吃盡千辛萬苦",
+                    "translation": "Au cours de la décennie suivante, le peuple vietnamien a beaucoup souffert",
+                }
+            ]
         )
