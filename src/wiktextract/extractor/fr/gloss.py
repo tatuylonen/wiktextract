@@ -1,7 +1,7 @@
 from collections import defaultdict
 from typing import Optional, Union
 
-from wikitextprocessor.parser import NodeKind, TemplateNode, WikiNode
+from wikitextprocessor import NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -107,9 +107,8 @@ def extract_examples(
             continue
         first_child = example_node_children[0]
         if (
-            isinstance(first_child, WikiNode)
-            and first_child.kind == NodeKind.TEMPLATE
-            and first_child.template_name == "exemple"
+            isinstance(first_child, TemplateNode)
+            and first_child.template_name.endswith("exemple")
         ):
             process_exemple_template(wxr, first_child, gloss_data)
         else:

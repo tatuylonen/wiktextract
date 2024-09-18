@@ -164,6 +164,9 @@ OTHER_GRAMMATICAL_TAGS: dict[str, str] = {
     "transitif": "transitive",  # Modèle:t
     "intransitif": "intransitive",  # Modèle:i
     "injurieux": "offensive",  # Modèle:injurieux
+    # Modèle:zh-formes
+    "simplifié": "Simplified Chinese",
+    "traditionnel": "Traditional Chinese",
 }
 
 # template text before gloss
