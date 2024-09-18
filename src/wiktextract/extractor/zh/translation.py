@@ -153,7 +153,6 @@ def translation_subpage(
 ) -> None:
     # https://zh.wiktionary.org/wiki/Template:翻譯-見
     # https://zh.wiktionary.org/wiki/Template:See_translation_subpage
-    from .page import ADDITIONAL_EXPAND_TEMPLATES
 
     page_title = wxr.wtp.title
     target_section = None
@@ -168,11 +167,7 @@ def translation_subpage(
     if subpage is None:
         return
 
-    root = wxr.wtp.parse(
-        subpage.body,
-        pre_expand=True,
-        additional_expand=ADDITIONAL_EXPAND_TEMPLATES,
-    )
+    root = wxr.wtp.parse(subpage.body, pre_expand=True)
     target_section_node = (
         root
         if target_section is None

@@ -603,3 +603,18 @@ class TestGloss(TestCase):
                 },
             ],
         )
+
+    def test_low_quality_section_at_page_end(self):
+        page_data = parse_page(
+            self.wxr,
+            "germano",
+            """==因特语==
+===名詞===
+# 德語
+
+==西班牙语==
+德国的""",
+        )
+        self.assertEqual(len(page_data), 2)
+        self.assertEqual(page_data[0]["senses"][0]["glosses"], ["德語"])
+        self.assertEqual(page_data[1]["senses"][0]["glosses"], ["德国的"])

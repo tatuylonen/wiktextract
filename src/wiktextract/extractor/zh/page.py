@@ -44,25 +44,6 @@ PANEL_TEMPLATES = {}
 # be ignored).
 PANEL_PREFIXES = {}
 
-# Additional templates to be expanded in the pre-expand phase
-ADDITIONAL_EXPAND_TEMPLATES = frozenset(
-    {
-        "check deprecated lang param usage",
-        "deprecated code",
-        "ru-verb-alt-ё",
-        "ru-noun-alt-ё",
-        "ru-adj-alt-ё",
-        "ru-proper noun-alt-ё",
-        "ru-pos-alt-ё",
-        "ru-alt-ё",
-        # langhd is needed for pre-expanding language heading templates:
-        # https://zh.wiktionary.org/wiki/Template:-en-
-        "langhd",
-        "zh-der",  # col3 for Chinese
-        "der3",  # redirects to col3
-    }
-)
-
 
 def parse_section(
     wxr: WiktextractContext,
@@ -193,11 +174,7 @@ def parse_page(
 
     # Parse the page, pre-expanding those templates that are likely to
     # influence parsing
-    tree = wxr.wtp.parse(
-        page_text,
-        pre_expand=True,
-        additional_expand=ADDITIONAL_EXPAND_TEMPLATES,
-    )
+    tree = wxr.wtp.parse(page_text, pre_expand=True)
 
     page_data = []
     for level2_node in tree.find_child(NodeKind.LEVEL2):
@@ -230,9 +207,10 @@ def parse_page(
         for level3_node in level2_node.find_child(NodeKind.LEVEL3):
             parse_section(wxr, page_data, base_data, level3_node)
         if not level2_node.contain_node(NodeKind.LEVEL3):
-            if len(page_data) == 0:
-                page_data.append(base_data.model_copy(deep=True))
+            page_data.append(base_data.model_copy(deep=True))
             process_low_quality_page(wxr, level2_node, page_data)
+            if page_data[-1] == base_data:
+                page_data.pop()
 
     for data in page_data:
         if len(data.senses) == 0:
