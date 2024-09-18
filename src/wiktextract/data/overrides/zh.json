@@ -1,4 +1,14 @@
 {
+  "Template:-a-": {
+    "body": "===形容词===\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-adj-": {
+    "body": "===形容词===\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
   "Template:-abbr-": {
     "body": "===缩写===\n",
     "namespace_id": 10,
@@ -6,6 +16,11 @@
   },
   "Template:-adjn-": {
     "body": "===形容動詞===\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-adv-": {
+    "body": "===副词===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
@@ -24,6 +39,11 @@
     "namespace_id": 10,
     "need_pre_expand": true
   },
+  "Template:-conj-": {
+    "body": "===连词===\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
   "Template:-det-": {
     "body": "===限定词===\n",
     "namespace_id": 10,
@@ -34,6 +54,11 @@
     "namespace_id": 10,
     "need_pre_expand": true
   },
+  "Template:-intj-": {
+    "body": "===感叹词===\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
   "Template:-meas-": {
     "body": "===量词===\n",
     "namespace_id": 10,
@@ -41,6 +66,11 @@
   },
   "Template:-n p-": {
     "body": "===專有名詞===\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-n-": {
+    "body": "===名詞===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
@@ -64,13 +94,28 @@
     "namespace_id": 10,
     "need_pre_expand": true
   },
+  "Template:-pn-": {
+    "body": "===專有名詞===\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
   "Template:-prep-": {
     "body": "===介词===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
+  "Template:-pronoun-": {
+    "body": "===代词===\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
   "Template:-sx-": {
     "body": "===缩写===\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-v-": {
+    "body": "===动词===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
@@ -124,11 +169,6 @@
     "namespace_id": 10,
     "need_pre_expand": true
   },
-  "Template:=part=": {
-    "body": "===助词===\n",
-    "namespace_id": 10,
-    "need_pre_expand": true
-  },
   "Template:=v=": {
     "body": "===动词===\n",
     "namespace_id": 10,
@@ -148,17 +188,528 @@
     "namespace_id": 10,
     "need_pre_expand": true
   },
-  "Template:詞類": {
-    "body": "{{{1}}}",
-    "namespace_id": 10
-  },
-  "Template:語言標題": {
-    "body": "=={{{l|{{{語|{{{语|}}}}}}}}}==\n",
-    "namespace_id": 10,
-    "need_pre_expand": true
-  },
   "Template:Dead link": {
     "body": "",
     "namespace_id": 10
+  },
+  "Template:-ja-": {
+    "body": "==日語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:日語": {
+    "body": "==日語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-ia-": {
+    "body": "==因特語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-br-": {
+    "body": "==布列塔尼語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:西班牙語": {
+    "body": "==西班牙語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-es-": {
+    "body": "==西班牙語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:藏語": {
+    "body": "==藏語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-bo-": {
+    "body": "==藏語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:阿拉伯語": {
+    "body": "==阿拉伯語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-ar-": {
+    "body": "==阿拉伯語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:葡萄牙語": {
+    "body": "==葡萄牙語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-pt-": {
+    "body": "==葡萄牙語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-bs-": {
+    "body": "==波斯尼亚语==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-fj-": {
+    "body": "==斐济语==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-et-": {
+    "body": "==爱沙尼亚语==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-af-": {
+    "body": "==南非语==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-co-": {
+    "body": "==科西嘉语==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-cy-": {
+    "body": "==威尔士语==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-gd-": {
+    "body": "==苏格兰盖尔语==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-hr-": {
+    "body": "==克罗地亚语==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:拉丁語": {
+    "body": "==拉丁語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-la-": {
+    "body": "==拉丁語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-lt-": {
+    "body": "==立陶宛語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-lv-": {
+    "body": "==拉脫維亞語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-nn-": {
+    "body": "==新挪威語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-no-": {
+    "body": "==挪威語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:挪威語": {
+    "body": "==挪威語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-ro-": {
+    "body": "==羅馬尼亞語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-sc-": {
+    "body": "==撒丁语==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-scn-": {
+    "body": "==西西里语==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-sk-": {
+    "body": "==斯洛伐克语==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-sl-": {
+    "body": "==斯洛文尼亚语==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-mt-": {
+    "body": "==马尔他语==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:世界語": {
+    "body": "==世界語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-eo-": {
+    "body": "==世界語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-io-": {
+    "body": "==伊多语==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-pl-": {
+    "body": "==波蘭語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:波蘭語": {
+    "body": "==波蘭語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-fi-": {
+    "body": "==芬蘭語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:芬蘭語": {
+    "body": "==芬蘭語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-hu-": {
+    "body": "==匈牙利语==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:梵語": {
+    "body": "==梵語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-sa-": {
+    "body": "==梵語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:烏爾都語": {
+    "body": "==烏爾都語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-ur-": {
+    "body": "==烏爾都語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:波斯語": {
+    "body": "==波斯語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-fa-": {
+    "body": "==波斯語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:希臘語": {
+    "body": "==希臘語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-el-": {
+    "body": "==希臘語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:土耳其語": {
+    "body": "==土耳其語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-tr-": {
+    "body": "==土耳其語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-tl-": {
+    "body": "==他加禄语==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-sq-": {
+    "body": "==阿尔巴尼亚语==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-gl-": {
+    "body": "==加利西亚语==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:緬甸語": {
+    "body": "==緬甸語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-my-": {
+    "body": "==緬甸語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-az-": {
+    "body": "==阿塞拜疆语==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:意大利語": {
+    "body": "==意大利語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-it-": {
+    "body": "==意大利語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:滿語": {
+    "body": "==滿語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-mnc-": {
+    "body": "==滿語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-eu-": {
+    "body": "==巴斯克语==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-sh-": {
+    "body": "==塞爾維亞-克羅地亞語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:塞爾維亞-克羅地亞語": {
+    "body": "==塞爾維亞-克羅地亞語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-vep-": {
+    "body": "==维普斯语==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-krl-": {
+    "body": "==卡累利阿语==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-mg-": {
+    "body": "==馬拉加斯語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-mg-": {
+    "body": "==馬拉加斯語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-oc-": {
+    "body": "==奥克语==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-ast-": {
+    "body": "==阿斯图里亚斯语==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-goh-": {
+    "body": "==古高地德语==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-rom-": {
+    "body": "==罗姆语==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-fro-": {
+    "body": "==古法语==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-nb-": {
+    "body": "==书面挪威语==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-sw-": {
+    "body": "==斯瓦希里语==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-dsb-": {
+    "body": "==下索布语==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-enm-": {
+    "body": "==中古英语==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-odt-": {
+    "body": "==古荷兰语==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-srn-": {
+    "body": "==蘇里南湯加語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-vot-": {
+    "body": "==沃特语==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-uz-": {
+    "body": "==乌兹别克语==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-tk-": {
+    "body": "==土库曼语==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-kl-": {
+    "body": "==格陵兰语==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:低地蘇格蘭語": {
+    "body": "==低地蘇格蘭語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-sco-": {
+    "body": "==低地蘇格蘭語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-cic-": {
+    "body": "==奇卡索语==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-non-": {
+    "body": "==古诺尔斯语==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-mr-": {
+    "body": "==马拉地语==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:白俄羅斯語": {
+    "body": "==白俄羅斯語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-be-": {
+    "body": "==白俄羅斯語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-mn-": {
+    "body": "==蒙古语==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:高棉語": {
+    "body": "==高棉語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-km-": {
+    "body": "==高棉語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:錫伯語": {
+    "body": "==錫伯語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-sjo-": {
+    "body": "==錫伯語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:奧斯曼土耳其語": {
+    "body": "==奧斯曼土耳其語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:阿塞拜疆语": {
+    "body": "==阿塞拜疆语==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:土庫曼語": {
+    "body": "==土庫曼語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:閩南語": {
+    "body": "==閩南語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:古典日語": {
+    "body": "==古典日語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-ojp-": {
+    "body": "==古典日語==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-ba-": {
+    "body": "==巴什基尔语==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-tyv-": {
+    "body": "==图瓦语==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-mnw-": {
+    "body": "==孟语==\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
   }
 }

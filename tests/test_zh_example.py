@@ -372,13 +372,21 @@ class TestExample(TestCase):
                 {
                     "text": "同樣受到歡迎的",
                     "roman": "Tóngyàng shòudào huānyíng de",
-                    "tags": ['Pinyin', 'Standard Chinese', 'Traditional Chinese'],
+                    "tags": [
+                        "Pinyin",
+                        "Standard Chinese",
+                        "Traditional Chinese",
+                    ],
                     "ref": "2012年，馬嘉蘭、臺灣文學中的性越界，編輯廖炳惠、孫康宜、王德威，《臺灣及其脈絡》第329頁",
                 },
                 {
                     "text": "同样受到欢迎的",
                     "roman": "Tóngyàng shòudào huānyíng de",
-                    "tags": ['Pinyin', 'Standard Chinese', 'Simplified Chinese'],
+                    "tags": [
+                        "Pinyin",
+                        "Standard Chinese",
+                        "Simplified Chinese",
+                    ],
                     "ref": "2012年，馬嘉蘭、臺灣文學中的性越界，編輯廖炳惠、孫康宜、王德威，《臺灣及其脈絡》第329頁",
                 },
             ],
