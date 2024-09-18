@@ -90,7 +90,7 @@ class WordEntry(SimpleEnglishBaseModel):
     lang: str = Field(default="", description="Localized language name")
     pos: str = Field(default="", desription="Part of speech type")
     pos_title: str = ""
-    pos_num: Optional[int] = None
+    pos_num: int = -1
     etymology_text: str = Field(
         default="", description="Etymology section as cleaned text."
     )

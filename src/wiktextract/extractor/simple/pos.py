@@ -1,12 +1,12 @@
 from typing import Optional, Union
 
 from wikitextprocessor import NodeKind, TemplateNode, WikiNode
+from wikitextprocessor.parser import LEVEL_KIND_FLAGS
 from wiktextract import WiktextractContext
 from wiktextract.page import clean_node
 from wiktextract.wxr_logging import logger
 
 from .models import Example, Form, Sense, WordEntry
-from .page_utils import recurse_base_data_sections, separate_subsections
 from .section_titles import POS_DATA
 from .table import parse_pos_table
 from .text_utils import POS_STARTS_RE, POS_TEMPLATE_NAMES
@@ -145,15 +145,14 @@ def process_pos(
     # the "noun" in "Noun 2"
     pos_title: str,
     # the "2" in "Noun 2"
-    pos_num: Optional[int] = None,
-) -> Optional[list[WordEntry]]:
+    pos_num: int = -1,
+) -> Optional[WordEntry]:
     """Process a part-of-speech section, like 'Noun'. `base_data` provides basic
     data common with other POS sections, like pronunciation or etymology."""
 
     pos_meta = POS_DATA[pos_title]
     data.pos = pos_meta["pos"]
-    if pos_num is not None:
-        data.pos_num = pos_num
+    data.pos_num = pos_num
 
     # Sound data associated with this POS might be coming from a shared
     # section, in which case we've tried to tag the sound data with its
@@ -172,26 +171,12 @@ def process_pos(
             if s_num := m.group(2):
                 s_num = int(s_num.strip())
             else:
-                s_num = None
+                s_num = -1
             if s_pos == data.pos and s_num == data.pos_num:
                 new_sounds.append(sound)
     data.sounds = new_sounds
 
-    pos_contents, subsections = separate_subsections(node)
-
-    # Check for pronunciation and etymology / word parts sections in the
-    # subsections of this POS level node. This should only really happen if
-    # these subsections (pron, etym) appear at the end of the article after the
-    # start of the last POS section, because otherwise the preprocessor would
-    # have inserted a virtual LEVEL 1 heading before them, creating a separate
-    # top-level section.
-    # base_data is a copy passed into this function, so modifying it here
-    # will NOT modify other entries, but as the above says, this *should*
-    # be correct because there *should* not be other POS entries after this
-    # to be modified. `base_data` is being modified in page.py at the top level,
-    # and that propagates, but not here in this edge case.
-    for ssect in subsections:
-        recurse_base_data_sections(wxr, node, data)
+    pos_contents = list(node.invert_find_child(LEVEL_KIND_FLAGS))
 
     # check POS templates at the start of the section (Simple English specific)
     template_tags: list[str] = []
@@ -257,4 +242,4 @@ def process_pos(
     # if "##" in out:
     #     logger.debug(f"{wxr.wtp.title}\n{out}")
 
-    return [data]
+    return data

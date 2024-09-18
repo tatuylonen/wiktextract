@@ -1,26 +1,18 @@
-import re
 from typing import Any
 
-from wikitextprocessor import (
-    HTMLNode,
-    LevelNode,
-    NodeKind,
-    TemplateNode,
-    WikiNode,
-)
-from wikitextprocessor.parser import print_tree
+from wikitextprocessor.parser import LEVEL_KIND_FLAGS, print_tree
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 from wiktextract.wxr_logging import logger
 
-from .models import Sense, WordEntry
-from .page_utils import recurse_base_data_sections
+from .etymology import process_etym
+from .models import WordEntry
 from .parse_utils import (
     ADDITIONAL_EXPAND_TEMPLATES,
-    PANEL_TEMPLATES,
 )
 from .pos import process_pos
 from .preprocess import preprocess_text
+from .pronunciation import process_pron
 from .text_utils import POS_STARTS_RE
 
 
@@ -31,8 +23,12 @@ def parse_page(
     # Unlike other wiktionaries, Simple Wikt. has a limited scope: only English
     # words. The pages also tend to be much shorter and simpler in structure,
     # which makes parsing them much simpler.
+    # https://simple.wiktionary.org/wiki/Wiktionary:Entry_layout_explained
 
-    if page_title.startswith("Appendix:") or page_title == "Main Page":
+    if page_title.startswith("Appendix:") or page_title in (
+        "Main Page",
+        "Main page",
+    ):
         return []
 
     if wxr.config.verbose:
@@ -92,109 +88,60 @@ def parse_page(
 
     word_datas: list[WordEntry] = []
 
-    for main_level in tree.children:
-        # These are LEVEL1 nodes inserted by the preprocessor in
-        # preprocess_text. Wiktionaries don't usually use LEVEL1s, so it's
-        # sometimes safe to use them as a splitter.
+    flattened_levels = list(tree.find_child_recursively(LEVEL_KIND_FLAGS))
+    headings_of_levels = [
+        clean_node(wxr, None, level.largs[0]).lower()
+        for level in flattened_levels
+    ]
+
+    for i, (heading_title, level) in enumerate(
+        zip(headings_of_levels, flattened_levels)
+    ):
+        # Ignore everything outside of a section with a heading; there shouldn't
+        # be anything there. Previous version of this code looked through that
+        # stuff and would spit out warnings.
 
         # Collect Etymology (Word parts), Pronunciation data.
         # Ignore Description for now. XXX maybe implement something if relevant.
 
-        if isinstance(main_level, str):
-            # This should never happen; we've inserted a LEVEL 1 node at
-            # the start of the page, which makes everything else after it
-            # its child, unless there are other LEVEL 1 nodes present.
-            wxr.wtp.error(  # three levels: `debug`, `warning` and `error`
-                f"Text outside of a main level: {str(main_level)[:255]}...",
-                sortid="page.py/232",
-            )
-            continue
+        # print(f"=== {heading_title=}")
 
-        for child in main_level.children:
-            # Fail early block
-            if isinstance(child, TemplateNode):
-                # Template outside of a proper section, ignore, usually just
-                # panels. These messages are handy if you want to clean up
-                # articles.
-                # Cases where someone has forgotten to add a heading before
-                # a POS template (like {{verb}}) should already be handled
-                # by the preprocessor which inserts a heading before these
-                # orphaned templates.
-                if child.template_name in PANEL_TEMPLATES:
-                    # We just ignore these
-                    continue
-                wxr.wtp.debug(  # "debug": could totally happen, not dangerous
-                    f"Template node outside of a sublevel: "
-                    f"'{str(child)[:255].strip()}'...",
-                    sortid="page.py/232",
-                )
-                continue
-            if isinstance(child, str):
-                # Usually text outside of other nodes can be ignored.
-                if not child.strip():
-                    # An empty line
-                    continue
-                wxr.wtp.debug(
-                    f"Text outside of a sublevel: "
-                    f"'{str(child)[:255].strip()}'...",
-                    sortid="page.py/232",
-                )
-                continue
-
-            if isinstance(child, HTMLNode):
-                if child.sarg == "br":
-                    # newline, ignore
-                    continue
-
-            if child.kind == NodeKind.MAGIC_WORD:
-                # Magic words like `__NOTOC__` that we don't need to handle.
-                continue
-
-            if child.kind == NodeKind.LINK:
-                if child.largs[0][0].startswith("File:"):  # type:ignore[union-attr]
-                    # Ignore image files
-                    continue
-
-            if isinstance(child, WikiNode) and not isinstance(child, LevelNode):
-                # Some lists created with ":"-formatting, some italics nodes
-                # with text content, that sort of stuff usually containing
-                # skippable meta-information. At the time of writing this
-                # code, nothing was worth processing, and if it was, I would
-                # have changed it on the Wiktionary side to a `Usage note`
-                # section or similar.
-                wxr.wtp.debug(
-                    f"Node that is not a heading outside of a sublevel: "
-                    f"'{str(child)[:255].strip()}'...",
-                    sortid="page.py/232",
-                )
-                continue
-
-            ############################
-            # Main processing of headings levels
-
-            heading_title = clean_node(wxr, None, child.largs[0]).lower()
-            # print(f"=== {heading_title=}")
-
-            # POS-sections *should* only appear here, at this level.
-            if m := POS_STARTS_RE.match(heading_title):
-                pos_data = base_data.copy(deep=True)
-                pos = m.group(1).strip()
-                if num := m.group(2):
-                    pos_num = int(num.strip())
-                else:
-                    pos_num = None
-                pos_datas = process_pos(wxr, child, pos_data, pos, pos_num)
-                if pos_datas is not None:
-                    word_datas.extend(pos_datas)
+        if m := POS_STARTS_RE.match(heading_title):
+            pos_data = base_data.copy(deep=True)
+            pos = m.group(1).strip()
+            if num := m.group(2):
+                pos_num = int(num.strip())
             else:
-                # Pronunciation and Etymology sections should all be in this
-                # part of the LEVEL 1 node, because the LEVEL 1 heading should
-                # have been inserted by the preprocessor before these sections.
-                # Only subsections at the end of the article (that is, no other
-                # POS section follows) are children of POS nodes, all others
-                # are children of LEVEL 1 or other subnodes that are children
-                # of LEVEL 1.
-                recurse_base_data_sections(wxr, child, base_data)
+                pos_num = -1
+            new_data = process_pos(wxr, level, pos_data, pos, pos_num)
+            if new_data is not None:
+                word_datas.append(new_data)
+        else:
+            # Process pronunciation and etym sections.
+            # On Simple Wiktionary, almost always these appear as level-3
+            # sections *before* the section they belong to, that is, they
+            # are *not* the children of the section (or sections if no
+            # other pron or etym sections appear later) they modify, but
+            # of root or the *previous* POS section.
+            # HOWEVER, sometimes at the end of the article there *are*
+            # pron and etym sections that can only belong the previous
+            # POS section.
+            if (
+                not any(POS_STARTS_RE.match(t) for t in headings_of_levels[i:])
+                and len(word_datas) > 0
+            ):
+                # If there are no POS sections after this, modify the last
+                # POS data instead of using base_data.
+                target_data = word_datas[-1]
+            else:
+                target_data = base_data
+            if heading_title.startswith("pronunciation"):
+                # Replace sound data in target_data with new data, if applicable
+                process_pron(wxr, level, target_data)
+            elif heading_title.startswith(("etymology", "word parts")):
+                # Replace etymology data in target_data with new data, if
+                # applicable
+                process_etym(wxr, level, target_data)
 
     # Transform pydantic objects to normal dicts so that the old code can
     # handle them.

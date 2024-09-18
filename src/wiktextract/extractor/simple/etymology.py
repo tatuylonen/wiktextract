@@ -2,6 +2,7 @@ from typing import Optional, Union
 
 from wikitextprocessor import WikiNode
 from wikitextprocessor.core import TemplateArgs
+from wikitextprocessor.parser import LEVEL_KIND_FLAGS
 from wiktextract import WiktextractContext
 from wiktextract.clean import clean_value
 from wiktextract.page import clean_node
@@ -13,9 +14,10 @@ from .parse_utils import ETYMOLOGY_TEMPLATES, PANEL_TEMPLATES
 
 def process_etym(
     wxr: WiktextractContext,
-    etym_nodes: list[Union[str, WikiNode]],
+    node: WikiNode,
     target_data: WordEntry,
 ) -> None:
+    etym_nodes = list(node.invert_find_child(LEVEL_KIND_FLAGS))
     etym_templates = []
 
     def post_etym_template_fn(

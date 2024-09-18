@@ -2,6 +2,7 @@ import re
 from typing import Optional, Union
 
 from wikitextprocessor import LevelNode, TemplateArgs, WikiNode
+from wikitextprocessor.parser import LEVEL_KIND_FLAGS
 from wiktextract import WiktextractContext
 from wiktextract.page import clean_node
 from wiktextract.wxr_logging import logger
@@ -17,7 +18,7 @@ REMOVE_HYPHENATION_RE = re.compile(r"(?i)\s*hyphenation\s*,?:?\s*(.+)")
 
 def process_pron(
     wxr: WiktextractContext,
-    pr_nodes: list[Union[str, WikiNode]],
+    node: WikiNode,
     target_data: WordEntry,
 ) -> None:
     """Process a Pronunciation section WikiNode, extracting Sound data entries
@@ -25,6 +26,7 @@ def process_pron(
     can be base_data (used to complete other entries) or an individual POS
     entry."""
 
+    pr_nodes = list(node.invert_find_child(LEVEL_KIND_FLAGS))
     # XXX: figure out a way to collect category here with clean_node so that
     # it can be properly assigned to the right POS WordEntry; currently,
     # clean_node insert the category stuff straight into whatever data object
