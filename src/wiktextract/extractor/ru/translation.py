@@ -1,10 +1,8 @@
 from mediawiki_langcodes import name_to_code
-from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import HTMLNode, TemplateNode
+from wikitextprocessor import HTMLNode, NodeKind, TemplateNode, WikiNode
 
-from wiktextract.page import clean_node
-from wiktextract.wxr_context import WiktextractContext
-
+from ...page import clean_node
+from ...wxr_context import WiktextractContext
 from .models import Translation, WordEntry
 from .tags import translate_raw_tags
 

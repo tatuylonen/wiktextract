@@ -1,4 +1,4 @@
-from wikitextprocessor.parser import NodeKind, TemplateNode
+from wikitextprocessor import NodeKind, TemplateNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext

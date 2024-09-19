@@ -1,4 +1,4 @@
-from wiktextract.config import POSSubtitleData
+from ...config import POSSubtitleData
 
 POS_TITLES: dict[str, POSSubtitleData] = {
     "аббревиатура": {"pos": "abbrev"},
