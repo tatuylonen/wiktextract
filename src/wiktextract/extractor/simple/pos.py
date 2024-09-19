@@ -83,6 +83,8 @@ def recurse_glosses1(
             # We will not bother with subglosses for example entries;
             # XXX do something about it if it becomes relevant
             return [example]
+        elif node.sarg == ":":
+            return []
 
         text = clean_node(wxr, parent_sense, contents)
         if len(text) > 0:

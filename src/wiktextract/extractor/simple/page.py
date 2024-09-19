@@ -9,7 +9,6 @@ from wiktextract.wxr_logging import logger
 from .etymology import process_etym
 from .models import WordEntry
 from .pos import process_pos
-from .preprocess import preprocess_text
 from .pronunciation import process_pron
 from .section_titles import POS_DATA
 
@@ -34,8 +33,6 @@ def parse_page(
 
     wxr.config.word = page_title
     wxr.wtp.start_page(page_title)
-
-    page_text = preprocess_text(page_text, page_title=page_title)
 
     #####
     # Temporary debug print stuff goes into debug_bypass
@@ -67,13 +64,9 @@ def parse_page(
     # Simple English Wiktionary has these sections under Level 3 ("===")
     # headers, which put them in an awkward hierarchy with the main page and
     # Part-of-Speech sections, which are higher; they usually appear before
-    # POS sections, but a few pages have a more complex structure. We handle
-    # this, specifically for Simple, by preprocessing the text (above) so that
-    # the page is divided into one or more Level 1 nodes.
-    # If the preprocessor has encountered a structure where you have something
-    # that looks like the start of a section (like "Pronunciation") which comes
-    # after POS data has already started, *and* is followed by a POS section
-    # down the line, that's where we split the page with a Level 1 section.
+    # POS sections, but a few pages have a more complex structure. This
+    # is handled by simply flattening the parse tree later, and handling
+    # sections in a linear order.
     base_data = WordEntry(
         word=wxr.wtp.title or "ERROR_NO_TITLE",
         # Simple English wiktionary entries are always for English words
