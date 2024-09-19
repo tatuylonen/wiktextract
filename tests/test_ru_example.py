@@ -96,3 +96,20 @@ class TestRUExample(unittest.TestCase):
                 ],
             },
         )
+
+    def test_ref_field(self):
+        self.wxr.wtp.start_page("плыть")
+        self.wxr.wtp.add_page(
+            "Шаблон:пример",
+            10,
+            '<span class="example-fullblock ">&#9670;&nbsp;<span class="example-block" style="color:darkgreen">На красных лапках гусь тяжелый, задумав <span class="example-select" style="background-color: #EDF0FF; font-weight: bold;">плыть</span> по лону вод, ступает бережно на лёд. <span class="example-details" style="font-size:smaller;"> <i>[[w:Пушкин, Александр Сергеевич|А. С. Пушкин]], «Записные книжки», <span class="example-date">1815-1836</span>&nbsp;гг.<span class="citation-source"> <span class="nkrja-source" style="font-size: x-small; ">&#91;[[w:Национальный корпус русского языка|НКРЯ]]&#93;</span></span></i></span></span></span>',
+        )
+        root = self.wxr.wtp.parse(
+            "{{пример|На красных лапках гусь тяжелый, задумав {{выдел|плыть}} по лону вод, ступает бережно на лёд.|Пушкин|Записные книжки|1815-1836|источник=НКРЯ}}"
+        )
+        sense = Sense()
+        process_example_template(self.wxr, sense, root.children[0])
+        self.assertEqual(
+            sense.examples[0].ref,
+            "А. С. Пушкин, «Записные книжки», 1815-1836 гг. [НКРЯ]",
+        )
