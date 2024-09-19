@@ -58,7 +58,11 @@ class Sound(BaseModelWrap):
 class Example(BaseModelWrap):
     text: str = Field(default="", description="Example usage sentence")
     translation: str = Field(
-        default="", description="Spanish translation of the example sentence"
+        default="", description="Russian translation of the example sentence"
+    )
+    ref: str = Field(
+        default="",
+        description="Example reference, combine data like author and title",
     )
     author: str = Field(default="", description="Author's name")
     title: str = Field(default="", description="Title of the reference")

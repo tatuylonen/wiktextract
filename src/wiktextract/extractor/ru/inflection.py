@@ -1,8 +1,7 @@
 from collections import defaultdict
 from dataclasses import dataclass
 
-from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import HTMLNode
+from wikitextprocessor import HTMLNode, NodeKind, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext

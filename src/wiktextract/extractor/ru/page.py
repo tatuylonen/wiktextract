@@ -43,19 +43,16 @@ def process_semantic_section(
     page_data: list[WordEntry],
     semantic_level_node: WikiNode,
 ):
-    for node in semantic_level_node.find_child(
-        LEVEL_KIND_FLAGS | NodeKind.LIST
-    ):
-        if node.kind in LEVEL_KIND_FLAGS:
-            parse_section(wxr, page_data, node)
-        elif node.kind == NodeKind.LIST:
-            for template_node in node.find_child_recursively(NodeKind.TEMPLATE):
-                if template_node.template_name == "значение":
-                    sense = process_meaning_template(
-                        wxr, None, page_data[-1], template_node
-                    )
-                    if len(sense.glosses) > 0:
-                        page_data[-1].senses.append(sense)
+    for list_node in semantic_level_node.find_child(NodeKind.LIST):
+        for template_node in list_node.find_child_recursively(
+            NodeKind.TEMPLATE
+        ):
+            if template_node.template_name == "значение":
+                sense = process_meaning_template(
+                    wxr, None, page_data[-1], template_node
+                )
+                if len(sense.glosses) > 0:
+                    page_data[-1].senses.append(sense)
 
 
 MORPH_TEMPLATE_ARGS = {
@@ -146,44 +143,35 @@ def extract_morphological_section(
     if pos_data is not None:
         page_data[-1].pos = pos_data["pos"]
         page_data[-1].tags.extend(pos_data.get("tags", []))
-    for child_node in level_node.find_child(
-        NodeKind.TEMPLATE | LEVEL_KIND_FLAGS
-    ):
-        if child_node.kind in LEVEL_KIND_FLAGS:
-            parse_section(wxr, page_data, child_node)
-        elif isinstance(child_node, TemplateNode):
-            expanded_template = wxr.wtp.parse(
-                wxr.wtp.node_to_wikitext(child_node), expand_all=True
-            )
-            if child_node.template_name.startswith("прил"):
-                parse_adj_forms_table(wxr, page_data[-1], expanded_template)
-            elif child_node.template_name.startswith(("сущ", "гл")):
-                parse_wikitext_forms_table(
-                    wxr, page_data[-1], expanded_template
+    for child_node in level_node.find_child(NodeKind.TEMPLATE):
+        expanded_template = wxr.wtp.parse(
+            wxr.wtp.node_to_wikitext(child_node), expand_all=True
+        )
+        if child_node.template_name.startswith("прил"):
+            parse_adj_forms_table(wxr, page_data[-1], expanded_template)
+        elif child_node.template_name.startswith(("сущ", "гл")):
+            parse_wikitext_forms_table(wxr, page_data[-1], expanded_template)
+
+        for node in expanded_template.children:
+            node_text = clean_node(wxr, page_data[-1], node)
+            for text in node_text.split(","):
+                text = text.strip()
+                if text in MORPHOLOGICAL_TEMPLATE_TAGS:
+                    tr_tag = MORPHOLOGICAL_TEMPLATE_TAGS[text]
+                    if isinstance(tr_tag, str):
+                        page_data[-1].tags.append(tr_tag)
+                    elif isinstance(tr_tag, list):
+                        page_data[-1].tags.extend(tr_tag)
+
+        for param, tag in param_tag_map.items():
+            if param in child_node.template_parameters:
+                forms_text = clean_node(
+                    wxr, None, child_node.template_parameters[param]
                 )
-
-            for node in expanded_template.children:
-                node_text = clean_node(wxr, page_data[-1], node)
-                for text in node_text.split(","):
-                    text = text.strip()
-                    if text in MORPHOLOGICAL_TEMPLATE_TAGS:
-                        tr_tag = MORPHOLOGICAL_TEMPLATE_TAGS[text]
-                        if isinstance(tr_tag, str):
-                            page_data[-1].tags.append(tr_tag)
-                        elif isinstance(tr_tag, list):
-                            page_data[-1].tags.extend(tr_tag)
-
-            for param, tag in param_tag_map.items():
-                if param in child_node.template_parameters:
-                    forms_text = clean_node(
-                        wxr, None, child_node.template_parameters[param]
-                    )
-                    for form in forms_text.split(","):
-                        form = form.strip()
-                        if form != "":
-                            page_data[-1].forms.append(
-                                Form(form=form, tags=[tag])
-                            )
+                for form in forms_text.split(","):
+                    form = form.strip()
+                    if form != "":
+                        page_data[-1].forms.append(Form(form=form, tags=[tag]))
 
 
 def parse_section(
@@ -204,11 +192,8 @@ def parse_section(
         page_data[-1].pos = pos_data["pos"]
         page_data[-1].tags.extend(pos_data.get("tags", []))
         extract_gloss(wxr, page_data[-1], level_node)
-    elif section_title == "произношение":
-        if wxr.config.capture_pronunciation:
-            extract_pronunciation(wxr, page_data[-1], level_node)
-        for next_level_node in level_node.find_child(LEVEL_KIND_FLAGS):
-            parse_section(wxr, page_data, next_level_node)
+    elif section_title == "произношение" and wxr.config.capture_pronunciation:
+        extract_pronunciation(wxr, page_data[-1], level_node)
     elif section_title == "семантические свойства":  # Semantic properties
         process_semantic_section(wxr, page_data, level_node)
     elif section_title in ("значение", "значения"):
@@ -227,7 +212,10 @@ def parse_section(
         and wxr.config.capture_linkages
     ):
         extract_phrase_section(wxr, page_data[-1], level_node)
-    elif section_title == "перевод" and wxr.config.capture_translations:
+    elif (
+        section_title in ["перевод", "иноязычные аналоги"]
+        and wxr.config.capture_translations
+    ):
         extract_translations(wxr, page_data[-1], level_node)
     elif section_title in LINKAGE_TITLES and wxr.config.capture_linkages:
         extract_linkages(
@@ -237,8 +225,6 @@ def parse_section(
         pass
     elif section_title in ["латиница (latinça)", "латиница (latinca)"]:
         parse_roman_section(wxr, page_data[-1], level_node)
-    elif section_title == "иноязычные аналоги":
-        pass
     elif section_title == "прочее":
         pass
     else:
@@ -246,6 +232,9 @@ def parse_section(
             f"Unprocessed section {section_title}",
             sortid="wixtextract/extractor/ru/page/parse_section/66",
         )
+
+    for next_level_node in level_node.find_child(LEVEL_KIND_FLAGS):
+        parse_section(wxr, page_data, next_level_node)
 
 
 def parse_page(
@@ -259,14 +248,7 @@ def parse_page(
 
     wxr.config.word = page_title
     wxr.wtp.start_page(page_title)
-
-    # Parse the page, pre-expanding those templates that are likely to
-    # influence parsing
-    tree = wxr.wtp.parse(
-        page_text,
-        pre_expand=True,
-        additional_expand=ADDITIONAL_EXPAND_TEMPLATES,
-    )
+    tree = wxr.wtp.parse(page_text)
 
     page_data: list[WordEntry] = []
     for level1_node in tree.find_child(NodeKind.LEVEL1):
@@ -279,16 +261,13 @@ def parse_page(
                 and lang_code not in wxr.config.capture_language_codes
             ):
                 continue
-
             categories = {"categories": []}
-
-            lang = clean_node(wxr, categories, subtitle_template)
-            wxr.wtp.start_section(lang)
-
+            lang_name = clean_node(wxr, categories, subtitle_template)
+            wxr.wtp.start_section(lang_name)
             base_data = WordEntry(
-                lang=lang,
+                lang=lang_name,
                 lang_code=lang_code,
-                word=wxr.wtp.title,
+                word=page_title,
                 pos="unknown",
             )
             base_data.categories.extend(categories["categories"])

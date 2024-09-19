@@ -1,4 +1,4 @@
-from wikitextprocessor.parser import NodeKind, TemplateNode
+from wikitextprocessor import NodeKind, TemplateNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -61,6 +61,15 @@ def process_пример_template(
                     f"Unknown {arg_name=} in example template {template_node}",
                     sortid="ru/example/process_example_template/54",
                 )
+
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(template_node), expand_all=True
+    )
+    for span_node in expanded_node.find_html_recursively(
+        "span", attr_name="class", attr_value="example-details"
+    ):
+        example.ref = clean_node(wxr, None, span_node)
+        break
 
     if len(example.text) > 0:
         sense.examples.append(example)
