@@ -10,6 +10,7 @@ from wiktextract.wxr_logging import logger
 from .models import Sound, WordEntry
 from .parse_utils import PANEL_TEMPLATES
 from .simple_tags import simple_tag_map
+from .tags_utils import convert_tags
 from .text_utils import POS_STARTS_RE
 
 DEPTH_RE = re.compile(r"([*:;]+)\s*(.*)")
@@ -70,10 +71,7 @@ def process_pron(
             desc = clean_node(wxr, None, [desc]).strip()
             audio = Sound(audio=filename.strip())
             if desc:
-                if desc in simple_tag_map:
-                    audio.tags.extend(simple_tag_map[desc])
-                else:
-                    audio.raw_tags.append(desc)
+                audio.raw_tags.append(desc)
             # if current_pos:
             #     audio.pos = current_pos
             sound_templates.append(audio)
@@ -254,15 +252,31 @@ def process_pron(
             depth[-1] = (old_pos, desc, old_tags)
         else:
             pos, desc, _ = depth[-1]
-            for sound_i in re.findall(r"__SOUND_(\d+)__", line):
-                i = int(sound_i)
+            line_raw_tags = []
+            for sound_m in re.findall(r"([^_]*)__SOUND_(\d+)__", line):
+                # desc = sound_m[0]
+                raw_tags = re.findall(r"\(([^()]+)\)", sound_m[0])
+                # logger.debug(f"{wxr.wtp.title}\n/////  {raw_tags}")
+                new_raw_tags = []
+                for s in raw_tags:
+                    for rt in re.split(",|;", s):
+                        rt = rt.strip()
+                        if rt:
+                            new_raw_tags.append(rt)
+                if new_raw_tags:
+                    line_raw_tags = new_raw_tags
+
+                i = int(sound_m[-1])
                 sound = sound_templates[i]
                 sound.pos = pos or ""
-                if desc:
-                    if desc in simple_tag_map:
-                        sound.tags.extend(simple_tag_map[desc])
+
+                for d in line_raw_tags + [desc]:
+                    if not d.strip():
+                        continue
+                    if d in simple_tag_map:
+                        sound.tags.extend(simple_tag_map[d])
                     else:
-                        sound.raw_tags.extend(desc)
+                        sound.raw_tags.append(d)
             # These sound datas are attached to POS data later; for this, we
             # use the sound.pos field.
         # print(f"{line}")
@@ -276,8 +290,10 @@ def process_pron(
 
     # remove duplicate tags
     for st in sound_templates:
-        st.tags = list(set(st.tags))
-        st.raw_tags = list(set(st.raw_tags))
+        legit_tags, raw_tags = convert_tags(st.raw_tags)
+        if len(legit_tags) > 0:
+            st.tags = list(set(st.tags))
+            st.raw_tags = list(set(st.raw_tags))
 
     if len(sound_templates) > 0:
         # completely replace sound data with new

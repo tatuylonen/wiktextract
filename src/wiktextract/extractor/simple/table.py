@@ -9,6 +9,7 @@ from wiktextract.wxr_logging import logger
 
 from .models import Form, WordEntry
 from .simple_tags import simple_tag_map
+from .tags_utils import convert_tags
 
 Node = Union[str, WikiNode]
 
@@ -113,15 +114,9 @@ def parse_pos_table(
     # print(forms)
     # Replace raw_tags with tags if appropriate
     for form in forms:
-        new_raw_tags = []
-        tags = []
-        for raw_tag in form.raw_tags:
-            if raw_tag.strip() in simple_tag_map:
-                tags.extend(simple_tag_map[raw_tag])
-            else:
-                new_raw_tags.append(raw_tag.strip())
-        if tags:
-            form.tags = tags
+        legit_tags, new_raw_tags = convert_tags(form.raw_tags)
+        if legit_tags:
+            form.tags = legit_tags
             form.raw_tags = new_raw_tags
 
     return forms
