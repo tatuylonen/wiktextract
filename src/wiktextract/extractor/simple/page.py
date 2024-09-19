@@ -34,22 +34,28 @@ def parse_page(
     wxr.config.word = page_title
     wxr.wtp.start_page(page_title)
 
-    #####
-    # Temporary debug print stuff goes into debug_bypass
+    #####  Debug printing #####
+    # Temporary debug print stuff without page parsing goes into debug_bypass.
+    # If you're running a full extraction to find data, multiprocessing
+    # *will* sometimes mess up your prints by overlaying some prints
+    # with others. For quick and dirt stuff this might not matter, but if
+    # you really want to be sure to get good prints you need to use
+    # something like the logging package, which here is represented by
+    # `logger`; the only annoyance is that it's not easy to get rid of
+    # the datetime string at the start on the fly, so I just do it crudely
+    # by inserting a `\n` in the message after `f"{wxr.wtp.title}..."`.
 
     # from .debug_bypass import debug_bypass
     # return debug_bypass(wxr, page_title, page_text)
 
     #####
 
-    # Parse the page, pre-expanding those templates that are likely to
-    # influence parsing; these are problematic templates that generate stuff
-    # that "should" be present for the page to parse better
-    tree = wxr.wtp.parse(
+    ##### Main page parse #####
+    page_root = wxr.wtp.parse(
         page_text,
     )
 
-    # print_tree(tree)
+    # print_tree(page_root)
 
     # If this was a normal wiktionary edition, this is where you would split
     # the page into different language entries; "English", "Gaelic", "Swahili",
@@ -77,13 +83,13 @@ def parse_page(
 
     word_datas: list[WordEntry] = []
 
-    for level in tree.find_child_recursively(LEVEL_KIND_FLAGS):
+    for level in page_root.find_child_recursively(LEVEL_KIND_FLAGS):
         # Ignore everything outside of a section with a heading; there shouldn't
         # be anything there. Previous version of this code looked through that
         # stuff and would spit out warnings.
 
-        # Collect Etymology (Word parts), Pronunciation data.
-        # Ignore Description for now. XXX maybe implement something if relevant.
+        # .find_child_recursively() (in contrast with find_child()) yields
+        # a flattened tree, not just direct children of root
 
         # print(f"=== {heading_title=}")
         heading_title = clean_node(wxr, None, level.largs[0]).lower()
