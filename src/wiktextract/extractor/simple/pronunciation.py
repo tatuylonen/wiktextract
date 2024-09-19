@@ -148,7 +148,7 @@ def process_pron(
                 wxr,
                 None,
                 [expanded],
-            ).strip()
+            )  # clean_node strip()s by default
             m = REMOVE_HYPHENATION_RE.match(text)
             if m:
                 text = m.group(1)
