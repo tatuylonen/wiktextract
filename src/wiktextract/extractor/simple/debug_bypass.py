@@ -58,7 +58,7 @@ def debug_bypass(
     # print out the page; this is because stuff like "Word part" seems to
     # indicate that a new section has begun, because it appears (usually)
     # before the main POS section ("== Noun ==")
-    # targets = ["Pronunc", "Etymol", "Word part", "Alterna"]
+    # targets = ["Pronunc", "Etymol", "Word part"]
     # for target in ("= " + s for s in targets):
     #     found = False
     #     k = 0
@@ -77,6 +77,18 @@ def debug_bypass(
     #     if found:
     #         break
 
+    # Find articles with pron or etym sections at the end after POS
+    # targets = ["Pronunc", "Etymol", "Word part"]
+    # for target in ("= " + s for s in targets):
+    #     k = 0
+    #     while (i := page_text[k:].find(target)) > 0:
+    #         if not re.search(r"(?m)^==[^=]", page_text[k + i + 2:]):
+    #             print()
+    #             print(f"//////// {page_title=}")
+    #             print(page_text)
+    #             break
+    #         k += i + len(target)
+
     # Find pages that have links inside headings
     # if re.search(r"(?m)^=+\s*[^\n]*\[[^\n]*\s*=+$", page_text):
     #     print()
@@ -84,29 +96,29 @@ def debug_bypass(
     #     print(page_text)
 
     # Investigate the structure of Pronunciation sections
-    lines = page_text.splitlines()
-    start = None
-    sections: list[tuple[int, int]] = []
-    for i, line in enumerate(lines):
-        if line.startswith("=") and start is not None:
-            sections.append((start, i))
-            start = None
-        if line.startswith("=") and "Pronu" in line:
-            start = i
-    if start is not None:
-        sections.append((start, i + 1))
+    # lines = page_text.splitlines()
+    # start = None
+    # sections: list[tuple[int, int]] = []
+    # for i, line in enumerate(lines):
+    #     if line.startswith("=") and start is not None:
+    #         sections.append((start, i))
+    #         start = None
+    #     if line.startswith("=") and "Pronu" in line:
+    #         start = i
+    # if start is not None:
+    #     sections.append((start, i + 1))
 
-    if sections:
-        print(f"////////  {page_title}")
-        for a, b in sections:
-            t = "\n".join(lines[a: min(b, len(lines)-1)])
-            for dots in re.findall(r"(?m)^[*;#:]+", t):
-                print(dots)
-            for words in re.findall(r"(?m)^\s*[\(\[\w]+", t):
-                # Found none, really
-                print("@@ " + words)
-            for tname in re.findall(r"{{\w+[\|}\s]", t):
-                print(tname)
+    # if sections:
+    #     print(f"////////  {page_title}")
+    #     for a, b in sections:
+    #         t = "\n".join(lines[a: min(b, len(lines)-1)])
+    #         for dots in re.findall(r"(?m)^[*;#:]+", t):
+    #             print(dots)
+    #         for words in re.findall(r"(?m)^\s*[\(\[\w]+", t):
+    #             # Found none, really
+    #             print("@@ " + words)
+    #         for tname in re.findall(r"{{\w+[\|}\s]", t):
+    #             print(tname)
 
 
 
