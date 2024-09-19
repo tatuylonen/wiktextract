@@ -10,7 +10,7 @@ from .etymology import process_etym
 from .models import WordEntry
 from .pos import process_pos
 from .pronunciation import process_pron
-from .section_titles import POS_DATA
+from .section_titles import POS_HEADINGS
 
 
 def parse_page(
@@ -93,14 +93,15 @@ def parse_page(
             heading_title = heading_title[:m.start()]
         else:
             pos_num = -1
-        if heading_title in POS_DATA:
-            pos = POS_DATA[heading_title]["pos"]
+        if heading_title in POS_HEADINGS:
+            pos = POS_HEADINGS[heading_title]["pos"]
             pos_data = base_data.copy(deep=True)
             new_data = process_pos(wxr, level, pos_data, pos, pos_num)
             if new_data is not None:
                 word_datas.append(new_data)
         else:
             # Process pronunciation and etym sections.
+            # Ignore other sections, like 'Description'
             # On Simple Wiktionary, these appear as level-3 nodes under the
             # previous POS node; that's why we flatten everything with the
             # recursive iterator

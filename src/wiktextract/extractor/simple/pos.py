@@ -7,7 +7,7 @@ from wiktextract.page import clean_node
 from wiktextract.wxr_logging import logger
 
 from .models import Example, Form, Sense, WordEntry
-from .section_titles import POS_DATA
+from .section_titles import POS_HEADINGS
 from .table import parse_pos_table
 from .text_utils import POS_STARTS_RE, POS_TEMPLATE_NAMES
 
@@ -152,7 +152,7 @@ def process_pos(
     """Process a part-of-speech section, like 'Noun'. `base_data` provides basic
     data common with other POS sections, like pronunciation or etymology."""
 
-    pos_meta = POS_DATA[pos_title]
+    pos_meta = POS_HEADINGS[pos_title]
     data.pos = pos_meta["pos"]
     data.pos_num = pos_num
 
@@ -168,7 +168,7 @@ def process_pos(
             m = POS_STARTS_RE.match(sound.pos)
             assert m is not None  # Should never trigger
             s_pos = m.group(1).strip().lower()
-            sound_meta = POS_DATA[s_pos]
+            sound_meta = POS_HEADINGS[s_pos]
             s_pos = sound_meta["pos"]
             if s_num := m.group(2):
                 s_num = int(s_num.strip())
