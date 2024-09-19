@@ -7,6 +7,13 @@ from .models import WordEntry
 from .parse_utils import ADDITIONAL_EXPAND_TEMPLATES, PANEL_TEMPLATES
 from .text_utils import POS_STARTS_RE
 
+# Quick regex to find the template name in text
+# TEMPLATE_NAME_RE = re.compile(r"{{\s*((w+\s+)*\w+)\s*(\||}})")
+
+# (==) (Heading text) ==
+# the `&` is for stuff like "Acronym & Initialism"
+# HEADING_RE = re.compile(r"(?m)^(=+)\s*((\w+\s(&\s+)?)*\w+)\s*=+$")
+
 
 def debug_bypass(
     wxr: WiktextractContext, page_title: str, page_text: str
