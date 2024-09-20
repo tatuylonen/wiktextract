@@ -236,6 +236,8 @@ def parse_section(
     for next_level_node in level_node.find_child(LEVEL_KIND_FLAGS):
         parse_section(wxr, page_data, next_level_node)
 
+    extract_section_end_categories(wxr, page_data[-1], level_node)
+
 
 def parse_page(
     wxr: WiktextractContext, page_title: str, page_text: str
@@ -245,64 +247,67 @@ def parse_page(
 
     if wxr.config.verbose:
         logger.info(f"Parsing page: {page_title}")
-
     wxr.config.word = page_title
     wxr.wtp.start_page(page_title)
     tree = wxr.wtp.parse(page_text)
-
     page_data: list[WordEntry] = []
+
     for level1_node in tree.find_child(NodeKind.LEVEL1):
+        lang_code = ""
         for subtitle_template in level1_node.find_content(NodeKind.TEMPLATE):
             lang_code = subtitle_template.template_name.strip(" -")
-            if lang_code == "":
-                lang_code = "unknown"
-            if (
-                wxr.config.capture_language_codes is not None
-                and lang_code not in wxr.config.capture_language_codes
-            ):
-                continue
-            categories = {"categories": []}
-            lang_name = clean_node(wxr, categories, subtitle_template)
-            wxr.wtp.start_section(lang_name)
-            base_data = WordEntry(
-                lang=lang_name,
-                lang_code=lang_code,
-                word=page_title,
-                pos="unknown",
-            )
-            base_data.categories.extend(categories["categories"])
-            pos_data = get_pos(wxr, level1_node)
-            if pos_data is not None:
-                base_data.pos = pos_data["pos"]
-                base_data.tags.extend(pos_data.get("tags", []))
+            break
+        if lang_code == "":
+            lang_code = "unknown"
+        if (
+            wxr.config.capture_language_codes is not None
+            and lang_code not in wxr.config.capture_language_codes
+        ):
+            continue
+        categories = {"categories": []}
+        lang_name = clean_node(wxr, categories, level1_node.largs)
+        wxr.wtp.start_section(lang_name)
+        base_data = WordEntry(
+            lang=lang_name,
+            lang_code=lang_code,
+            word=page_title,
+            pos="unknown",
+        )
+        base_data.categories.extend(categories["categories"])
+        extract_section_end_categories(wxr, base_data, level1_node)
+        pos_data = get_pos(wxr, level1_node)
+        if pos_data is not None:
+            base_data.pos = pos_data["pos"]
+            base_data.tags.extend(pos_data.get("tags", []))
 
-            for level2_node in level1_node.find_child(NodeKind.LEVEL2):
-                if base_data.pos == "unknown":
-                    pos_data = get_pos(wxr, level2_node)
-                    if pos_data is not None:
-                        base_data.pos = pos_data["pos"]
-                        base_data.tags.extend(pos_data.get("tags", []))
-                page_data.append(base_data.model_copy(deep=True))
-                has_level3 = False
-                for level3_node in level2_node.find_child(NodeKind.LEVEL3):
-                    parse_section(wxr, page_data, level3_node)
-                    has_level3 = True
-                if page_data[-1] == base_data or not has_level3:
-                    page_data.pop()
-                extract_low_quality_page(wxr, page_data, base_data, level2_node)
-
-            for any_level_index, any_level_node in enumerate(
-                level1_node.find_child(LEVEL_KIND_FLAGS & ~NodeKind.LEVEL2)
-            ):
-                if any_level_index == 0 and (
-                    len(page_data) == 0
-                    or page_data[-1].lang_code != base_data.lang_code
-                ):
-                    page_data.append(base_data.model_copy(deep=True))
-                parse_section(wxr, page_data, any_level_node)
-            if len(page_data) > 0 and page_data[-1] == base_data:
+        for level2_node in level1_node.find_child(NodeKind.LEVEL2):
+            if base_data.pos == "unknown":
+                pos_data = get_pos(wxr, level2_node)
+                if pos_data is not None:
+                    base_data.pos = pos_data["pos"]
+                    base_data.tags.extend(pos_data.get("tags", []))
+            page_data.append(base_data.model_copy(deep=True))
+            has_level3 = False
+            for level3_node in level2_node.find_child(NodeKind.LEVEL3):
+                parse_section(wxr, page_data, level3_node)
+                has_level3 = True
+            if page_data[-1] == base_data or not has_level3:
                 page_data.pop()
-            extract_low_quality_page(wxr, page_data, base_data, level1_node)
+            extract_low_quality_page(wxr, page_data, base_data, level2_node)
+
+        for any_level_index, any_level_node in enumerate(
+            level1_node.find_child(LEVEL_KIND_FLAGS & ~NodeKind.LEVEL2)
+        ):
+            if any_level_index == 0 and (
+                len(page_data) == 0
+                or page_data[-1].lang_code != base_data.lang_code
+            ):
+                page_data.append(base_data.model_copy(deep=True))
+            parse_section(wxr, page_data, any_level_node)
+
+        if len(page_data) > 0 and page_data[-1] == base_data:
+            page_data.pop()
+        extract_low_quality_page(wxr, page_data, base_data, level1_node)
 
     for d in page_data:
         if len(d.senses) == 0:
@@ -380,3 +385,23 @@ def parse_roman_section(
         if form_text != "":
             form = Form(form=form_text, tags=["romanization"])
             word_entry.forms.append(form)
+
+
+def extract_section_end_categories(
+    wxr: WiktextractContext, word_entry: WordEntry, level_node: WikiNode
+) -> None:
+    # https://ru.wiktionary.org/wiki/Категория:Викисловарь:Шаблоны_категоризации
+    for template_node in level_node.find_child(NodeKind.TEMPLATE):
+        if template_node.template_name in {
+            "-ание",
+            "-атель",
+            "-ация",
+            "-ение",
+            "-ка",
+            "длина слова",
+            "Категория",
+            "Омонимы",
+            "forms",
+            "multilang",
+        }:
+            clean_node(wxr, word_entry, template_node)
