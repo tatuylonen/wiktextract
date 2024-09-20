@@ -4,9 +4,9 @@ from wikitextprocessor import HTMLNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...tags import valid_tags
-from ...type_utils import ExampleData, SenseData
 from ...wxr_context import WiktextractContext
 from ..ruby import extract_ruby
+from .type_utils import ExampleData, SenseData
 
 
 def extract_example_list_item(

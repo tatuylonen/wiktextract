@@ -12,10 +12,7 @@ import unicodedata
 from typing import Callable, Optional, Union
 
 from wikitextprocessor.common import MAGIC_FIRST, MAGIC_LAST, URL_STARTS
-from wikitextprocessor.core import (
-    NamespaceDataEntry,
-    TemplateArgs,
-)
+from wikitextprocessor.core import NamespaceDataEntry, TemplateArgs
 from wikitextprocessor.parser import TemplateParameters
 
 from .wxr_context import WiktextractContext

@@ -4,20 +4,16 @@ import urllib
 from copy import deepcopy
 from typing import Iterator, Optional, Union
 
-from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import TemplateNode
-from wiktextract.clean import clean_value
-from wiktextract.datautils import data_append, data_extend, split_at_comma_semi
-from wiktextract.form_descriptions import (
-    classify_desc,
-    parse_pronunciation_tags,
-)
-from wiktextract.page import LEVEL_KINDS, clean_node, is_panel_template
-from wiktextract.parts_of_speech import part_of_speech_map
-from wiktextract.tags import valid_tags
-from wiktextract.type_utils import SoundData, TemplateArgs, WordData
-from wiktextract.wxr_context import WiktextractContext
+from wikitextprocessor import NodeKind, TemplateNode, WikiNode
 
+from ...clean import clean_value
+from ...datautils import data_append, data_extend, split_at_comma_semi
+from ...page import LEVEL_KINDS, clean_node, is_panel_template
+from ...tags import valid_tags
+from ...wxr_context import WiktextractContext
+from .form_descriptions import classify_desc, parse_pronunciation_tags
+from .parts_of_speech import part_of_speech_map
+from .type_utils import SoundData, TemplateArgs, WordData
 from .zh_pron_tags import ZH_PRON_TAGS
 
 # Prefixes, tags, and regexp for finding romanizations from the pronuncation

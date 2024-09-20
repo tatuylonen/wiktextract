@@ -9,15 +9,15 @@ from typing import Union
 from mediawiki_langcodes import code_to_name, name_to_code
 from wikitextprocessor import NodeKind, Page, WikiNode
 from wikitextprocessor.core import NamespaceDataEntry
-from wiktextract.datautils import ns_title_prefix_tuple
-from wiktextract.form_descriptions import parse_sense_qualifier
-from wiktextract.page import LEVEL_KINDS, clean_node
-from wiktextract.thesaurus import ThesaurusTerm
-from wiktextract.type_utils import SenseData
-from wiktextract.wxr_context import WiktextractContext
-from wiktextract.wxr_logging import logger
 
+from ...datautils import ns_title_prefix_tuple
+from ...page import LEVEL_KINDS, clean_node
+from ...thesaurus import ThesaurusTerm
+from ...wxr_context import WiktextractContext
+from ...wxr_logging import logger
+from .form_descriptions import parse_sense_qualifier
 from .section_titles import LINKAGE_TITLES, POS_TITLES
+from .type_utils import SenseData
 
 SENSE_TITLE_PREFIX = "Sense: "
 
