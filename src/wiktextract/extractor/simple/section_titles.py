@@ -17,7 +17,7 @@ POSMap = TypedDict(
 )
 
 # Main entries for different kinds of POS headings; no aliases
-POS_DATA: dict[str, POSMap] = {
+POS_HEADINGS: dict[str, POSMap] = {
     # "": {"pos": "", "tags": [""], "templates": {"": [""]}},
     "noun": {
         "pos": "noun",
@@ -105,10 +105,6 @@ POS_HEADINGS_MAP = {
     "acronym & initialism": "acronym",
 }
 
-# POS aliases; use this to figure out if a heading is a POS heading
-POS_HEADINGS = { k: v for k, v in POS_DATA.items() }
 
 for k, v in POS_HEADINGS_MAP.items():
-    if k in POS_HEADINGS or v not in POS_DATA:
-        continue
-    POS_HEADINGS[k] = POS_DATA[v]
+    POS_HEADINGS[k] = POS_HEADINGS[v]

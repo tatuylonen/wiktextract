@@ -22,10 +22,7 @@ def parse_page(
     # which makes parsing them much simpler.
     # https://simple.wiktionary.org/wiki/Wiktionary:Entry_layout_explained
 
-    if page_title in (
-        "Main Page",
-        "Main page",
-    ) or page_title.startswith("Appendix:"):
+    if page_title == "Main Page" or page_title.startswith("Appendix:"):
         return []
 
     if wxr.config.verbose:
@@ -74,7 +71,7 @@ def parse_page(
     # is handled by simply flattening the parse tree later, and handling
     # sections in a linear order.
     base_data = WordEntry(
-        word=wxr.wtp.title or "ERROR_NO_TITLE",
+        word=page_title,
         # Simple English wiktionary entries are always for English words
         lang_code="en",
         lang="English",
@@ -94,9 +91,9 @@ def parse_page(
         # print(f"=== {heading_title=}")
         heading_title = clean_node(wxr, None, level.largs[0]).lower()
 
-        if m := re.search(r"\s+\d+h$", heading_title):
+        if m := re.search(r"\s+\d+$", heading_title):
             pos_num = int(m.group(0).strip())
-            heading_title = heading_title[:m.start()]
+            heading_title = heading_title[: m.start()]
         else:
             pos_num = -1
         if heading_title in POS_HEADINGS:
