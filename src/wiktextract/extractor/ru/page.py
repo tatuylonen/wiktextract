@@ -1,3 +1,4 @@
+import re
 from typing import Any, Optional
 
 from wikitextprocessor.parser import (
@@ -236,7 +237,7 @@ def parse_section(
     for next_level_node in level_node.find_child(LEVEL_KIND_FLAGS):
         parse_section(wxr, page_data, next_level_node)
 
-    extract_section_end_categories(wxr, page_data[-1], level_node)
+    extract_section_end_templates(wxr, page_data[-1], level_node)
 
 
 def parse_page(
@@ -274,7 +275,7 @@ def parse_page(
             pos="unknown",
         )
         base_data.categories.extend(categories["categories"])
-        extract_section_end_categories(wxr, base_data, level1_node)
+        extract_section_end_templates(wxr, base_data, level1_node)
         pos_data = get_pos(wxr, level1_node)
         if pos_data is not None:
             base_data.pos = pos_data["pos"]
@@ -387,9 +388,10 @@ def parse_roman_section(
             word_entry.forms.append(form)
 
 
-def extract_section_end_categories(
+def extract_section_end_templates(
     wxr: WiktextractContext, word_entry: WordEntry, level_node: WikiNode
 ) -> None:
+    # category link templates
     # https://ru.wiktionary.org/wiki/Категория:Викисловарь:Шаблоны_категоризации
     for template_node in level_node.find_child(NodeKind.TEMPLATE):
         if template_node.template_name in {
@@ -405,3 +407,33 @@ def extract_section_end_categories(
             "multilang",
         }:
             clean_node(wxr, word_entry, template_node)
+        elif template_node.template_name == "zh-forms":
+            extract_zh_forms_template(wxr, word_entry, template_node)
+
+
+def extract_zh_forms_template(
+    wxr: WiktextractContext,
+    base_data: WordEntry,
+    template_node: TemplateNode,
+) -> None:
+    # https://ru.wiktionary.org/wiki/Шаблон:zh-forms
+    # https://ru.wiktionary.org/wiki/Модуль:zh-forms
+    # similar to en and zh edition template
+    for p_name, p_value in template_node.template_parameters.items():
+        if not isinstance(p_name, str):
+            continue
+        if re.fullmatch(r"s\d*", p_name):
+            form_data = Form(
+                form=clean_node(wxr, None, p_value), tags=["Simplified Chinese"]
+            )
+            if form_data.form not in ["", wxr.wtp.title]:
+                base_data.forms.append(form_data)
+        elif re.fullmatch(r"t\d*", p_name):
+            form_data = Form(
+                form=clean_node(wxr, None, p_value),
+                tags=["Traditional Chinese"],
+            )
+            if form_data.form not in ["", wxr.wtp.title]:
+                base_data.forms.append(form_data)
+        elif p_name == "lit":
+            base_data.literal_meaning = clean_node(wxr, None, p_value)
