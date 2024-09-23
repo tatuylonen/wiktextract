@@ -20,17 +20,34 @@ from typing import (
 )
 
 from mediawiki_langcodes import get_all_names, name_to_code
-from wikitextprocessor import NodeKind, WikiNode
 from wikitextprocessor.core import TemplateArgs, TemplateFnCallable
-from wikitextprocessor.parser import LEVEL_KIND_FLAGS, GeneralNode, TemplateNode
+from wikitextprocessor.parser import (
+    LEVEL_KIND_FLAGS,
+    GeneralNode,
+    NodeKind,
+    TemplateNode,
+    WikiNode,
+)
 
-from wiktextract.clean import clean_template_args, clean_value
-from wiktextract.datautils import (
+from ...clean import clean_template_args, clean_value
+from ...datautils import (
     data_append,
     data_extend,
     ns_title_prefix_tuple,
 )
-from wiktextract.form_descriptions import (
+from ...page import (
+    LEVEL_KINDS,
+    clean_node,
+    is_panel_template,
+    recursively_extract,
+)
+from ...tags import valid_tags
+from ...wxr_context import WiktextractContext
+from ...wxr_logging import logger
+from ..ruby import extract_ruby, parse_ruby
+from ..share import strip_nodes
+from .example import extract_example_list_item, extract_template_zh_x
+from .form_descriptions import (
     classify_desc,
     decode_tags,
     distw,
@@ -38,38 +55,14 @@ from wiktextract.form_descriptions import (
     parse_sense_qualifier,
     parse_word_head,
 )
-from wiktextract.inflection import TableContext, parse_inflection_section
-from wiktextract.linkages import parse_linkage_item_text
-from wiktextract.page import (
-    LEVEL_KINDS,
-    clean_node,
-    is_panel_template,
-    recursively_extract,
-)
-from wiktextract.parts_of_speech import PARTS_OF_SPEECH
-from wiktextract.tags import valid_tags
-from wiktextract.translations import parse_translation_item_text
-from wiktextract.type_utils import (
-    DescendantData,
-    ExampleData,
-    FormData,
-    LinkageData,
-    SenseData,
-    SoundData,
-    TemplateData,
-    WordData,
-)
-from wiktextract.wxr_context import WiktextractContext
-from wiktextract.wxr_logging import logger
-
-from ..ruby import extract_ruby, parse_ruby
-from ..share import strip_nodes
-from .example import extract_example_list_item, extract_template_zh_x
+from .inflection import TableContext, parse_inflection_section
 from .info_templates import (
     INFO_TEMPLATE_FUNCS,
     parse_info_template_arguments,
     parse_info_template_node,
 )
+from .linkages import parse_linkage_item_text
+from .parts_of_speech import PARTS_OF_SPEECH
 from .section_titles import (
     COMPOUNDS_TITLE,
     DESCENDANTS_TITLE,
@@ -81,6 +74,17 @@ from .section_titles import (
     PRONUNCIATION_TITLE,
     PROTO_ROOT_DERIVED_TITLES,
     TRANSLATIONS_TITLE,
+)
+from .translations import parse_translation_item_text
+from .type_utils import (
+    DescendantData,
+    ExampleData,
+    FormData,
+    LinkageData,
+    SenseData,
+    SoundData,
+    TemplateData,
+    WordData,
 )
 from .unsupported_titles import unsupported_title_map
 

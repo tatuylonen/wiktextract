@@ -9,9 +9,8 @@ from typing import (
 
 from wikitextprocessor.core import NamespaceDataEntry
 
-from wiktextract.wxr_context import WiktextractContext
-
 from .page import clean_node
+from .wxr_context import WiktextractContext
 
 LUA_CODE = r"""
 local export = {}

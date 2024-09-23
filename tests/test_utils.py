@@ -5,6 +5,7 @@
 import unittest
 
 from wikitextprocessor import Wtp
+
 from wiktextract.config import WiktionaryConfig
 from wiktextract.datautils import split_slashes
 from wiktextract.extractor.share import create_audio_url_dict

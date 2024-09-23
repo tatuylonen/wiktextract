@@ -7,6 +7,7 @@ from wikitextprocessor.parser import (
     LevelNode,
     TemplateNode,
 )
+
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 

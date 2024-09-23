@@ -29,7 +29,6 @@ from wikitextprocessor.dumpparser import analyze_and_overwrite_pages
 
 from .categories import extract_categories
 from .config import WiktionaryConfig
-from .inflection import set_debug_cell_text
 from .template_override import template_override_fns
 from .thesaurus import (
     close_thesaurus_db,
@@ -317,6 +316,8 @@ def main():
         # whole inflection module and doing wiktextract.inflection
         # .debug_cell_text =, a simple setter function does
         # the same thing.
+        from .extractor.en.inflection import set_debug_cell_text
+
         set_debug_cell_text(args.debug_cell_text)
 
     # The --all option turns on capturing all data types

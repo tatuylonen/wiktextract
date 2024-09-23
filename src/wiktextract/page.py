@@ -8,10 +8,6 @@ from copy import copy
 from typing import Any, Callable, Optional, Union
 
 from mediawiki_langcodes import name_to_code
-from wikitextprocessor import (
-    NodeKind,
-    WikiNode,
-)
 from wikitextprocessor.core import (
     NamespaceDataEntry,
     PostTemplateFnCallable,
@@ -19,16 +15,12 @@ from wikitextprocessor.core import (
     TemplateFnCallable,
 )
 from wikitextprocessor.node_expand import NodeHandlerFnCallable
-from wikitextprocessor.parser import (
-    GeneralNode,
-)
-
-from wiktextract.type_utils import SenseData
-from wiktextract.wxr_context import WiktextractContext
+from wikitextprocessor.parser import GeneralNode, NodeKind, WikiNode
 
 from .clean import clean_value
 from .datautils import data_append, data_extend
 from .import_utils import import_extractor_module
+from .wxr_context import WiktextractContext
 
 # NodeKind values for subtitles
 LEVEL_KINDS = {
@@ -461,7 +453,9 @@ def clean_node(
     return v
 
 
-def sense_data_has_value(sense_data: SenseData, name: str, value: Any) -> bool:
+def sense_data_has_value(
+    sense_data: dict[str, Any], name: str, value: Any
+) -> bool:
     """
     Return True if `sense_data` has value in the attribute `name`'s value or
     in the value of key `name` if `sense_date` is dictionary.

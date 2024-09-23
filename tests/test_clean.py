@@ -1,6 +1,7 @@
 import unittest
 
 from wikitextprocessor import Wtp
+
 from wiktextract.clean import clean_value
 from wiktextract.config import WiktionaryConfig
 from wiktextract.thesaurus import close_thesaurus_db

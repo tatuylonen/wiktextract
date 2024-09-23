@@ -4,6 +4,7 @@ import tempfile
 import unittest
 
 from wikitextprocessor import Wtp
+
 from wiktextract.config import WiktionaryConfig
 from wiktextract.thesaurus import close_thesaurus_db, search_thesaurus
 from wiktextract.wiktionary import parse_wiktionary

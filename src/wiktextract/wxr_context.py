@@ -3,7 +3,7 @@ import sqlite3
 
 from wikitextprocessor import Wtp
 
-from wiktextract.config import WiktionaryConfig
+from .config import WiktionaryConfig
 
 
 class WiktextractContext:

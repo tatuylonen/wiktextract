@@ -2,6 +2,7 @@ from unittest import TestCase
 from unittest.mock import patch
 
 from wikitextprocessor import Page, Wtp
+
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.en.pronunciation import parse_pronunciation
 from wiktextract.wxr_context import WiktextractContext
@@ -267,7 +268,7 @@ class TestPronunciation(TestCase):
         "wikitextprocessor.Wtp.get_page",
         side_effect=test1_pages,
     )
-    def test1(self, mock_get_page):
+    def test_split_args(self, mock_get_page):
         self.wxr.wtp.start_page("foo")
         tree = self.wxr.wtp.parse("""=== Pronunciation ===
 * {{IPA|en|foobar|foobaz (ipa accepts parens)|barbar|barbaz|;|baz|bazfoo|a=RP|aa=US|q=ergative|qq=paucal|q1=note-fodder causes everything to be a note|qq1=singular|a1=Caribbean|aa2=Cajun|q2=note-text|qq2=dual|qq6=singular}}
@@ -339,4 +340,3 @@ class TestPronunciation(TestCase):
                 ]
             },
         )
-

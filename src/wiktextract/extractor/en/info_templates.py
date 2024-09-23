@@ -8,13 +8,13 @@ handle the given node based on where it is called from
 import re
 from typing import Callable, Optional, Union
 
-from wikitextprocessor import WikiNode
+from wikitextprocessor import TemplateNode, WikiNode
 from wikitextprocessor.core import TemplateArgs
-from wikitextprocessor.parser import TemplateNode
-from wiktextract.clean import clean_template_args, clean_value
-from wiktextract.form_descriptions import decode_tags
-from wiktextract.type_utils import PlusObjTemplateData, TemplateData
-from wiktextract.wxr_context import WiktextractContext
+
+from ...clean import clean_template_args, clean_value
+from ...wxr_context import WiktextractContext
+from .form_descriptions import decode_tags
+from .type_utils import PlusObjTemplateData, TemplateData
 
 InfoNode = Union[str, WikiNode]
 
