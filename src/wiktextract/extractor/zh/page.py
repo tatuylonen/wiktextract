@@ -16,7 +16,7 @@ from ...wxr_logging import logger
 from .descendant import extract_descendant_section
 from .etymology import extract_etymology
 from .gloss import extract_gloss
-from .headword_line import extract_headword_line
+from .headword_line import extract_headword_line_template, extract_tlb_template
 from .inflection import extract_inflections
 from .linkage import extract_linkage_section
 from .models import Form, Sense, WordEntry
@@ -124,7 +124,7 @@ def process_pos_block(
     wxr: WiktextractContext,
     page_data: list[WordEntry],
     base_data: WordEntry,
-    node: WikiNode,
+    level_node: LevelNode,
     pos_text: str,
 ):
     pos_data = POS_TITLES[pos_text]
@@ -132,20 +132,28 @@ def process_pos_block(
     base_data.pos = pos_type
     page_data.append(base_data.model_copy(deep=True))
     page_data[-1].tags.extend(pos_data.get("tags", []))
-    for index, child in enumerate(node.filter_empty_str_child()):
+    for index, child in enumerate(level_node.filter_empty_str_child()):
         if isinstance(child, WikiNode):
             if index == 0 and isinstance(child, TemplateNode):
-                extract_headword_line(
+                extract_headword_line_template(
                     wxr, page_data, child, base_data.lang_code
                 )
                 process_soft_redirect_template(wxr, child, page_data)
+            elif (
+                isinstance(child, TemplateNode) and child.template_name == "tlb"
+            ):
+                extract_tlb_template(wxr, child, page_data)
             elif child.kind == NodeKind.LIST:
                 extract_gloss(wxr, page_data, child, Sense())
 
-    if len(page_data[-1].senses) == 0 and not node.contain_node(NodeKind.LIST):
+    if len(page_data[-1].senses) == 0 and not level_node.contain_node(
+        NodeKind.LIST
+    ):
         # low quality pages don't put gloss in list
         gloss_text = clean_node(
-            wxr, page_data[-1], list(node.invert_find_child(LEVEL_KIND_FLAGS))
+            wxr,
+            page_data[-1],
+            list(level_node.invert_find_child(LEVEL_KIND_FLAGS)),
         )
         if len(gloss_text) > 0:
             page_data[-1].senses.append(Sense(glosses=[gloss_text]))

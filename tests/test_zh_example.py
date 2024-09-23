@@ -181,19 +181,17 @@ class TestExample(TestCase):
             [e.model_dump(exclude_defaults=True) for e in sense_data.examples],
             [
                 {
-                    "raw_tags": ["廣州話拼音", "廣州話"],
                     "ref": "1957, 王力",
                     "text": "如果唔係今日拆穿你槓野，俾你混左入稅局重死人呀！",
                     "roman": "roman",
-                    "tags": ["Traditional Chinese"],
+                    "tags": ["Cantonese", "Pinyin", "Traditional Chinese"],
                     "translation": "如果不是今天揭穿你的老底，給你混進稅務局就更糟糕了！",
                 },
                 {
-                    "raw_tags": ["廣州話拼音", "廣州話"],
                     "ref": "1957, 王力",
                     "text": "如果唔系今日拆穿你杠野，俾你混左入税局重死人呀！",
                     "roman": "roman",
-                    "tags": ["Simplified Chinese"],
+                    "tags": ["Cantonese", "Pinyin", "Simplified Chinese"],
                     "translation": "如果不是今天揭穿你的老底，給你混進稅務局就更糟糕了！",
                 },
             ],

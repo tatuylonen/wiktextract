@@ -40,6 +40,7 @@ OTHER_TAGS: dict[str, str] = {
 VERB_TAGS: dict[str, str] = {
     "及物": "transitive",
     "不及物": "intransitive",
+    "动宾结构": "verb-object",
 }
 
 # https://en.wikipedia.org/wiki/Japanese_grammar#Stem_forms
@@ -272,6 +273,7 @@ ZH_X_TAGS = {
     "官話白話文": "Written vernacular Chinese",
     "粵語": "Cantonese",
     "吳語": "Wu",
+    "廣州話": "Cantonese",
 }
 
 # classifier tags
@@ -289,8 +291,35 @@ ZH_TAGS = {
     "湘語": "Xiang",
 }
 
+# https://zh.wiktionary.org/wiki/Template:Zh-pron
+# https://zh.wiktionary.org/wiki/Module:Zh-pron
+ZH_PRON_TAGS = {
+    "拼音": "Pinyin",
+    "注音": "Bopomofo",
+    "潮州話拼音": "Peng'im",
+    "上海": "Shanghai",
+    "吳語學堂拼音": "Wugniu",
+    "通用拼音": "Tongyong-Pinyin",
+    "威妥瑪拼音": "Wade–Giles",
+    "耶魯官話拼音": "Yale",
+    "國語羅馬字": "Gwoyeu-Romatsyh",
+    "西里爾字母轉寫": "Palladius",
+    "漢語國際音標": "Sinological-IPA",
+    "耶魯粵拼": ["Yale", "Jyutping"],
+    "廣州話拼音": ["Cantonese", "Pinyin"],
+    "廣東拼音": "Guangdong-Romanization",
+    "國際音標": "IPA",
+    "模仿白話字": "POJ",
+}
 
-ALL_TAGS = {**GRAMMATICAL_TAGS, **LABEL_TAGS, **ZH_X_TAGS, **ZH_TAGS}
+
+ALL_TAGS = {
+    **GRAMMATICAL_TAGS,
+    **LABEL_TAGS,
+    **ZH_X_TAGS,
+    **ZH_TAGS,
+    **ZH_PRON_TAGS,
+}
 
 
 def translate_raw_tags(data: WordEntry) -> WordEntry:
@@ -298,7 +327,7 @@ def translate_raw_tags(data: WordEntry) -> WordEntry:
     for raw_tag in data.raw_tags:
         if raw_tag in ALL_TAGS:
             tr_tag = ALL_TAGS[raw_tag]
-            if isinstance(tr_tag, str):
+            if isinstance(tr_tag, str) and tr_tag not in data.tags:
                 data.tags.append(tr_tag)
             elif isinstance(tr_tag, list):
                 data.tags.extend(tr_tag)

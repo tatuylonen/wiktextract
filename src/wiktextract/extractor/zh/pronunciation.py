@@ -1,6 +1,7 @@
 import itertools
+import re
 
-from wikitextprocessor.parser import (
+from wikitextprocessor import (
     HTMLNode,
     NodeKind,
     TemplateNode,
@@ -11,6 +12,7 @@ from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from ..share import create_audio_url_dict, set_sound_file_url_fields
 from .models import Sound, WordEntry
+from .tags import translate_raw_tags
 
 
 def extract_pronunciation(
@@ -90,6 +92,8 @@ def process_zh_pron_template(
                     process_zh_pron_list_item(wxr, list_item, [], seen_lists)
                 )
     clean_node(wxr, categories, expanded_node)
+    for sound in sounds:
+        translate_raw_tags(sound)
     return sounds, categories.get("categories", [])
 
 
@@ -123,12 +127,16 @@ def process_zh_pron_list_item(
             elif isinstance(node, HTMLNode):
                 if node.tag == "small":
                     # remove "幫助"(help) <sup> tag
-                    current_tags.append(
+                    raw_tags = re.split(
+                        r"，|：",
                         clean_node(
                             wxr,
                             None,
                             list(node.invert_find_child(NodeKind.HTML)),
-                        ).strip("()")
+                        ).strip("()"),
+                    )
+                    current_tags.extend(
+                        [t.strip() for t in raw_tags if len(t.strip()) > 0]
                     )
                 elif node.tag == "span":
                     zh_pron = clean_node(wxr, None, node)

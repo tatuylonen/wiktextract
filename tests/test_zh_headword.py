@@ -3,7 +3,10 @@ from unittest.mock import Mock
 
 from wikitextprocessor import Wtp
 
-from wiktextract.extractor.zh.headword_line import extract_headword_line
+from wiktextract.extractor.zh.headword_line import (
+    extract_headword_line_template,
+    extract_tlb_template,
+)
 from wiktextract.extractor.zh.models import WordEntry
 from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.wxr_context import WiktextractContext
@@ -34,7 +37,9 @@ class TestHeadword(TestCase):
             WordEntry(word="manga", lang_code="en", lang="英語", pos="noun")
         ]
         self.wxr.wtp.title = "manga"
-        extract_headword_line(self.wxr, page_data, root.children[0], "en")
+        extract_headword_line_template(
+            self.wxr, page_data, root.children[0], "en"
+        )
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in page_data],
             [
@@ -67,7 +72,9 @@ class TestHeadword(TestCase):
             WordEntry(word="manga", lang_code="en", lang="英語", pos="noun")
         ]
         self.wxr.wtp.title = "manga"
-        extract_headword_line(self.wxr, page_data, root.children[0], "nl")
+        extract_headword_line_template(
+            self.wxr, page_data, root.children[0], "nl"
+        )
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in page_data],
             [
@@ -104,7 +111,9 @@ class TestHeadword(TestCase):
                 word="-κρατίας", lang_code="grc", lang="古希臘語", pos="suffix"
             )
         ]
-        extract_headword_line(self.wxr, page_data, root.children[0], "grc")
+        extract_headword_line_template(
+            self.wxr, page_data, root.children[0], "grc"
+        )
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in page_data],
             [
@@ -132,7 +141,9 @@ class TestHeadword(TestCase):
         page_data = [
             WordEntry(word="大家", lang_code="ja", lang="日語", pos="noun")
         ]
-        extract_headword_line(self.wxr, page_data, root.children[0], "ja")
+        extract_headword_line_template(
+            self.wxr, page_data, root.children[0], "ja"
+        )
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in page_data],
             [
@@ -160,3 +171,18 @@ class TestHeadword(TestCase):
                 }
             ],
         )
+
+    def test_tlb(self):
+        self.wxr.wtp.start_page("放鴿子")
+        self.wxr.wtp.add_page(
+            "Template:tlb",
+            10,
+            '<span class="usage-label-sense"><span class="ib-brac">(</span><span class="ib-content">[[Appendix:Glossary#不及物|不及物]][[Category:漢語不及物動詞|攴04鳥06子00]]</span><span class="ib-brac">)</span></span>',
+        )
+        root = self.wxr.wtp.parse("{{tlb|zh|不及物}}")
+        page_data = [
+            WordEntry(word="放鴿子", lang_code="zh", lang="漢語", pos="verb")
+        ]
+        extract_tlb_template(self.wxr, root.children[0], page_data)
+        self.assertEqual(page_data[0].tags, ["intransitive"])
+        self.assertEqual(page_data[0].categories, ["漢語不及物動詞"])
