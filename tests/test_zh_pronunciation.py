@@ -47,11 +47,13 @@ class TestPronunciation(TestCase):
             [
                 {
                     "homophone": "大姑",
-                    "raw_tags": ["官話", "現代標準漢語", "同音詞"],
+                    "tags": ["Mandarin", "Standard Chinese"],
+                    "raw_tags": ["同音詞"],
                 },
                 {
                     "homophone": "小姑",
-                    "raw_tags": ["官話", "現代標準漢語", "同音詞"],
+                    "tags": ["Mandarin", "Standard Chinese"],
+                    "raw_tags": ["同音詞"],
                 },
             ],
         )
@@ -147,7 +149,7 @@ class TestPronunciation(TestCase):
                     "pos": "verb",
                     "senses": [{"glosses": ["塞住耳朵"]}],
                     "sounds": [
-                        {"zh_pron": "chōng'ěr", "raw_tags": ["官話", "拼音"]}
+                        {"zh_pron": "chōng'ěr", "tags": ["Mandarin", "Pinyin"]}
                     ],
                     "word": "充耳",
                 },
@@ -164,7 +166,7 @@ class TestPronunciation(TestCase):
                         {"glosses": ["古冠冕旁的瑱玉，因其下垂及耳，而得名"]}
                     ],
                     "sounds": [
-                        {"zh_pron": "chōng'ěr", "raw_tags": ["官話", "拼音"]}
+                        {"zh_pron": "chōng'ěr", "tags": ["Mandarin", "Pinyin"]}
                     ],
                     "word": "充耳",
                 },
@@ -222,7 +224,10 @@ class TestPronunciation(TestCase):
                     "pos": "noun",
                     "senses": [{"glosses": ["眾人，某個範圍中所有的人"]}],
                     "sounds": [
-                        {"zh_pron": "dàjiā, dà'ā", "raw_tags": ["官話", "拼音"]}
+                        {
+                            "zh_pron": "dàjiā, dà'ā",
+                            "tags": ["Mandarin", "Pinyin"],
+                        }
                     ],
                     "word": "大家",
                 },
@@ -232,7 +237,7 @@ class TestPronunciation(TestCase):
                     "pos": "noun",
                     "senses": [{"glosses": ["卿大夫之家"]}],
                     "sounds": [
-                        {"zh_pron": "dàjiā", "raw_tags": ["官話", "拼音"]}
+                        {"zh_pron": "dàjiā", "tags": ["Mandarin", "Pinyin"]}
                     ],
                     "word": "大家",
                 },
@@ -242,7 +247,7 @@ class TestPronunciation(TestCase):
                     "pos": "noun",
                     "senses": [{"glosses": ["對女子的尊稱"]}],
                     "sounds": [
-                        {"zh_pron": "dàgū", "raw_tags": ["官話", "拼音"]}
+                        {"zh_pron": "dàgū", "tags": ["Mandarin", "Pinyin"]}
                     ],
                     "word": "大家",
                 },

@@ -217,17 +217,12 @@ class TestLinkage(TestCase):
         self.assertEqual(
             set(data[1]["raw_tags"]), {"客家語", "屏東（內埔，南四縣腔）"}
         )
-        self.assertEqual(
-            data[2],
-            {
-                "raw_tags": ["上海"],
-                "tags": ["Wu"],
-                "word": "生活",
-            },
-        )
+        self.assertEqual(data[2]["word"], "生活")
+        self.assertEqual(set(data[2]["tags"]), {"Shanghai", "Wu"})
         self.assertEqual(data[3]["word"], "飯碗頭")
-        self.assertEqual(data[3]["raw_tags"], ["上海"])
-        self.assertEqual(set(data[3]["tags"]), {"Wu", "figuratively"})
+        self.assertEqual(
+            set(data[3]["tags"]), {"Shanghai", "Wu", "figuratively"}
+        )
 
     def test_level_3_linkage_section(self):
         self.wxr.wtp.add_page(
