@@ -40,6 +40,7 @@ OTHER_TAGS: dict[str, str] = {
 VERB_TAGS: dict[str, str] = {
     "及物": "transitive",
     "不及物": "intransitive",
+    "动宾结构": "verb-object",
 }
 
 # https://en.wikipedia.org/wiki/Japanese_grammar#Stem_forms

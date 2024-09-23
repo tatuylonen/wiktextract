@@ -1,8 +1,7 @@
 import re
 from typing import Union
 
-from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import HTMLNode, TemplateNode
+from wikitextprocessor import HTMLNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -12,12 +11,13 @@ from .models import Form, WordEntry
 from .tags import TEMPLATE_TAG_ARGS, translate_raw_tags
 
 
-def extract_headword_line(
+def extract_headword_line_template(
     wxr: WiktextractContext,
     page_data: list[WordEntry],
     node: TemplateNode,
     lang_code: str,
 ) -> None:
+    # handle the first template in header line
     template_name = node.template_name
     if (
         template_name != "head"
@@ -203,3 +203,23 @@ def extract_historical_kana(
     if len(form) > 0:
         form_data = Form(form=form, roman=roman)
         page_data[-1].forms.append(form_data)
+
+
+def extract_tlb_template(
+    wxr: WiktextractContext,
+    template_node: TemplateNode,
+    page_data: list[WordEntry],
+) -> None:
+    # https://zh.wiktionary.org/wiki/Template:Tlb
+    # https://en.wiktionary.org/wiki/Template:term-label
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(template_node), expand_all=True
+    )
+    for span_tag in expanded_node.find_html_recursively(
+        "span", attr_name="class", attr_value="ib-content"
+    ):
+        raw_tag = clean_node(wxr, None, span_tag)
+        if len(raw_tag) > 0:
+            page_data[-1].raw_tags.append(raw_tag)
+    clean_node(wxr, page_data[-1], expanded_node)
+    translate_raw_tags(page_data[-1])
