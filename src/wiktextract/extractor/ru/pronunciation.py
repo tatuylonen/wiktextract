@@ -1,8 +1,12 @@
 import re
 from typing import Union
 
-from wikitextprocessor import NodeKind
-from wikitextprocessor.parser import LevelNode, WikiNode, WikiNodeChildrenList
+from wikitextprocessor.parser import (
+    LevelNode,
+    WikiNode,
+    WikiNodeChildrenList,
+    NodeKind,
+)
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -236,7 +240,9 @@ def extract_pronunciation(
                 if processor:
                     processor(wxr, word_entry, child)
             elif template_name in ["audio", "аудио", "медиа"]:
-                audio_file = child.template_parameters.get(1, "").strip()
+                audio_file = clean_node(
+                    wxr, None, child.template_parameters.get(1, "")
+                ).strip()
                 if audio_file != "":
                     if len(word_entry.sounds) > 0:
                         set_sound_file_url_fields(
