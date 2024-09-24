@@ -23,6 +23,13 @@ simple_tag_map: dict[str, list[str]] = {
     "Third-person singular": ["third-person", "singular"],
     "stressed": ["stressed"],
     "unstressed": ["unstressed"],
+    "UK": ["UK"],
+    "US": ["US"],
+    "United Kingdom": ["UK"],
+    "United States": ["US"],
+    "before a vowel": ["before-vowel"],
+    "before a consonant": ["before-consonant"],
+    "CA": ["California"],
 }
 
 

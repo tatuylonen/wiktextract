@@ -82,10 +82,7 @@ def recurse_list_item(
 
     contents = list(node.invert_find_child(NodeKind.LIST))
 
-    if len(contents) == 1 and isinstance(contents[0], str):
-        text = contents[0].strip()
-    else:
-        text = clean_node(wxr, None, contents).strip()
+    text = clean_node(wxr, None, contents).strip()
 
     if pos_m := POS_ENDING_NUMBER_RE.search(text):
         if text[: pos_m.start()].strip().lower() in POS_HEADINGS:
@@ -112,14 +109,9 @@ def recurse_list_item(
     line_raw_tags = []
     for sound_m in re.findall(r"([^_]*)__SOUND_(\d+)__", text):
         # findall returns a list strings, it's not a re.Match object
-        pre_tags = re.findall(r"\(([^()]+)\)", sound_m[0])
+        new_raw_tags = re.findall(r"\(([^()]+)\)", sound_m[0])
         # logger.debug(f"{wxr.wtp.title}\n/////  {raw_tags}")
-        new_raw_tags = []
-        for s in pre_tags:
-            for rt in re.split(",|;", s):
-                rt = rt.strip()
-                if rt:
-                    new_raw_tags.append(rt)
+
         if new_raw_tags:
             line_raw_tags = new_raw_tags
 
@@ -131,12 +123,13 @@ def recurse_list_item(
         sound.pos = pos or ""
 
         for d in raw_tags + new_tags + line_raw_tags:
-            if not d.strip():
+            if not d.strip(" \t\n,.;:*#-–"):
                 continue
             sound.raw_tags.append(d)
 
 
     this_level_tags = raw_tags + new_tags
+
     for li in node.find_child(NodeKind.LIST):
         new_pos, new_tags2 = recurse_list(
             wxr, li, sound_templates, pos, this_level_tags
@@ -169,7 +162,6 @@ def process_pron(
     can be base_data (used to complete other entries) or an individual POS
     entry."""
 
-    pr_nodes = list(node.invert_find_child(LEVEL_KIND_FLAGS))
     # XXX: figure out a way to collect category here with clean_node so that
     # it can be properly assigned to the right POS WordEntry; currently,
     # clean_node insert the category stuff straight into whatever data object
@@ -321,9 +313,7 @@ def process_pron(
     # even going so far as to leave magic markers in the text that are easily
     # regexable later.
     parts: list[str] = []
-    for i, child in enumerate(pr_nodes):
-        if isinstance(child, LevelNode):
-            break
+    for i, child in enumerate(node.invert_find_child(LEVEL_KIND_FLAGS)):
         parts.append(
             clean_node(
                 wxr,
@@ -360,8 +350,8 @@ def process_pron(
     for st in sound_templates:
         legit_tags, raw_tags = convert_tags(st.raw_tags)
         if len(legit_tags) > 0:
-            st.tags = list(set(st.tags))
-            st.raw_tags = list(set(st.raw_tags))
+            st.tags = list(set(legit_tags))
+            st.raw_tags = list(set(raw_tags))
 
     if len(sound_templates) > 0:
         # completely replace sound data with new
