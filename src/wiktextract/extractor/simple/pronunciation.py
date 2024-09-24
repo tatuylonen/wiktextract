@@ -1,21 +1,163 @@
 import re
+from copy import copy
 from typing import Optional, Union
 
-from wikitextprocessor import LevelNode, TemplateArgs, WikiNode
-from wikitextprocessor.parser import LEVEL_KIND_FLAGS
+from wikitextprocessor import LevelNode, NodeKind, TemplateArgs, WikiNode
+from wikitextprocessor.parser import LEVEL_KIND_FLAGS, print_tree
 from wiktextract import WiktextractContext
 from wiktextract.page import clean_node
 from wiktextract.wxr_logging import logger
 
 from .models import Sound, WordEntry
 from .parse_utils import PANEL_TEMPLATES
-from .simple_tags import simple_tag_map
+from .section_titles import POS_HEADINGS
 from .tags_utils import convert_tags
-from .text_utils import POS_STARTS_RE
+from .text_utils import POS_ENDING_NUMBER_RE
 
-DEPTH_RE = re.compile(r"([*:;]+)\s*(.*)")
+DEPTH_RE = re.compile(r"([*:;]+)\s*(.*)$")
 
 REMOVE_HYPHENATION_RE = re.compile(r"(?i)\s*hyphenation\s*,?:?\s*(.+)")
+
+POS_STARTS_RE = re.compile(r"^(.+)\s+(\d)\s*$")
+
+
+def recurse_list(
+    wxr: WiktextractContext,
+    node: WikiNode,
+    sound_templates: list[Sound],
+    pos: str,
+    raw_tags: list[str],
+) -> tuple[Optional[str], Optional[list[str]]]:
+
+    assert node.kind == NodeKind.LIST
+
+    this_level_tags = raw_tags[:]
+
+    if len(node.children) == 1:
+        ### HACKYHACKHACK ###
+        # ; pos or raw tags
+        # * pron 1
+        # * pron 2
+        # The first line is a typical way Simple English Wiktionary
+        # does tagging for entries "below" it, even though ";" shouldn't
+        # be used to make things bold according to wikitext guidelines
+        # (creates broken HTML5 and breaks screen-readers). The ";" list
+        # is also separate from the "*" list, so they're completely separated
+        # in our parse tree; two different LIST objects!
+        return recurse_list_item(
+            wxr,
+            # Guaranteed LIST_ITEM
+            node.children[0],  # type:ignore[arg-type]
+            sound_templates,
+            pos,
+            this_level_tags
+        )
+    for child in node.children:
+        recurse_list_item(
+            wxr,
+            # We are pretty much guaranteed a LIST will only only have
+            # LIST_ITEM children.
+            child,  # type:ignore[arg-type]
+            sound_templates,
+            pos,
+            this_level_tags)
+
+    return None, None
+
+
+def recurse_list_item(
+    wxr: WiktextractContext,
+    node: WikiNode,
+    sound_templates: list[Sound],
+    pos: str,
+    raw_tags: list[str],
+) -> tuple[Optional[str], Optional[list[str]]]:
+    """Recurse through list and list_item nodes. In some cases, a call might
+    return a tuple of a POS string and list of raw tags, which can be applied
+    to `pos` and `raw_tags` parameters on the same level."""
+
+    # We can trust that contents has only stuff from the beginning of this
+    # list_item because because lists would "consume" the rest.
+    assert node.kind in (NodeKind.LIST_ITEM, NodeKind.ROOT)
+
+    contents = list(node.invert_find_child(NodeKind.LIST))
+
+    if len(contents) == 1 and isinstance(contents[0], str):
+        text = contents[0].strip()
+    else:
+        text = clean_node(wxr, None, contents).strip()
+
+    if pos_m := POS_ENDING_NUMBER_RE.search(text):
+        if text[: pos_m.start()].strip().lower() in POS_HEADINGS:
+            # XXX might be better to separate out the POS-number here
+            pos = text.strip().lower()
+        if len(contents) == len(node.children):
+            # No sublists in this node
+            return pos, []  # return "noun 1"
+
+    new_tags = []
+
+    if "__SOUND" not in text:
+        # This is text without a pronunciation template like {{ipa}}.
+        # Simple Wikt. is pretty consistent with its pron. templates, so
+        # we dismiss the possibility that someone put a stray string of
+        # IPA here, and treat the text as a description or a reference
+        # to a sense.
+        # XXX extract raw tags more gracefully
+        new_tags = [text.strip(": \n.,;")]
+        if len(contents) == len(node.children):
+            # No sublists, no POS detected; send up to be caught into new_tags2
+            return None, new_tags
+
+    line_raw_tags = []
+    for sound_m in re.findall(r"([^_]*)__SOUND_(\d+)__", text):
+        # findall returns a list strings, it's not a re.Match object
+        pre_tags = re.findall(r"\(([^()]+)\)", sound_m[0])
+        # logger.debug(f"{wxr.wtp.title}\n/////  {raw_tags}")
+        new_raw_tags = []
+        for s in pre_tags:
+            for rt in re.split(",|;", s):
+                rt = rt.strip()
+                if rt:
+                    new_raw_tags.append(rt)
+        if new_raw_tags:
+            line_raw_tags = new_raw_tags
+
+        i = int(sound_m[-1])  # (\d+)
+        sound = sound_templates[i]  # the Sound object
+
+        # These sound datas are attached to POS data later; for this, we
+        # use the sound.pos field.
+        sound.pos = pos or ""
+
+        for d in raw_tags + new_tags + line_raw_tags:
+            if not d.strip():
+                continue
+            sound.raw_tags.append(d)
+
+
+    this_level_tags = raw_tags + new_tags
+    for li in node.find_child(NodeKind.LIST):
+        new_pos, new_tags2 = recurse_list(
+            wxr, li, sound_templates, pos, this_level_tags
+        )
+        if new_pos is not None:
+            pos = new_pos
+        if new_tags2 is not None:
+            this_level_tags = raw_tags + new_tags2
+
+    return None, None
+
+
+def recursively_complete_sound_data(
+    wxr: WiktextractContext, node: WikiNode, sound_templates: list[Sound]
+) -> None:
+    """Parse all the lists for pronunciation data recursively."""
+
+    # node should be NodeKind.ROOT
+    recurse_list_item(wxr, node, sound_templates, "", [])
+    return None
+
 
 def process_pron(
     wxr: WiktextractContext,
@@ -194,93 +336,19 @@ def process_pron(
         )
     pron_main = "".join(parts)
 
-    # How deep we are into the list tree/hierarchy; each entry is a 'level'
-    # which is applied to stuff from the later or deeper in the list.
-    # 0 is the applicable part-of-speech, like "noun"; sometimes pronunciation
-    # sections have these in front of parts of their list to show that a
-    # pronunciation only applies to the verb, for example; see 'update'.
-    # 1 is for when we can't figure out what it is, so default it to refering
-    # to a 'sense', or if a sense template is used then we definitely know.
-    # 2 is a list of normal tag strings, if we can extract them.
-    # XXX extract tags
-    depth: list[tuple[str, str, list[str]]] = [("", "", [])]
+    # logger.debug(f"{wxr.wtp.title}\n{pron_main}")
 
-    for line in pron_main.splitlines():
-        line = line.strip()
-        if not line:
-            # An empty line; reset everything to zero
-            depth = [("", "", [])]
-            continue
-        if m := DEPTH_RE.match(line):
-            if (cur_depth := len(m.group(1)) + 1) > len(depth):
-                # We know we're "deeper" into the list hierarchy, so let's
-                # make a new depth level by copying the old one, and later
-                # change it if needed.
-                old_pos, old_sense, old_tags = depth[-1]
-                cur_level = (old_pos, old_sense, old_tags)
-                for i in range(len(depth), cur_depth):
-                    depth.append(cur_level)
-            elif cur_depth < len(depth):
-                depth = depth[:cur_depth]
-        else:
-            wxr.wtp.warning(
-                f"Line outside lists in pronunciation section: "
-                f"'{line[:255]}[...]'",
-                sortid="pronunciation/166",
-            )
-            depth = [("", "", [])]
-            continue
-        # This might be a POS
-        rest = m.group(2).strip()
-        # print(f"{rest=}")
-        if m2 := POS_STARTS_RE.match(rest):
-            # print(f"pos: {m2.group(0)=}")
-            pos = m2.group(0)
-            _, old_sense, old_tags = depth[-1]
-            # Replace currently "active" POS for this level; works also for
-            # level 0 and 1
-            depth[-1] = (pos, old_sense, old_tags)
-        elif "__SOUND" not in line:
-            # This text without a pronunciation template, like {{ipa}};
-            # Simple Wikt. is pretty consistent with its pron. templates, so
-            # we dismiss the possibility that someone put a stray string of
-            # IPA here, and treat the text as a description or a reference
-            # to a sense.
-            desc = m.group(2).strip()
-            # XXX parse for tags
-            old_pos, _, old_tags = depth[-1]
-            depth[-1] = (old_pos, desc, old_tags)
-        else:
-            pos, desc, _ = depth[-1]
-            line_raw_tags = []
-            for sound_m in re.findall(r"([^_]*)__SOUND_(\d+)__", line):
-                # desc = sound_m[0]
-                raw_tags = re.findall(r"\(([^()]+)\)", sound_m[0])
-                # logger.debug(f"{wxr.wtp.title}\n/////  {raw_tags}")
-                new_raw_tags = []
-                for s in raw_tags:
-                    for rt in re.split(",|;", s):
-                        rt = rt.strip()
-                        if rt:
-                            new_raw_tags.append(rt)
-                if new_raw_tags:
-                    line_raw_tags = new_raw_tags
+    # We parse the already expanded and cleaned text; templates have been either
+    # expanded or they've been replaced with something in the _template_fn
+    # handler functions. We're left with a "bare-bones" parse tree that mainly
+    # has list structure.
+    # This is future-proofing, but it's an issue in other extractors: if a
+    # template is used to generate the pronunciation section list, it has
+    # been expanded here and properly parsed.
+    pron_root = wxr.wtp.parse(pron_main)
+    # logger.debug(print_tree(pron_root, indent=2, ret_value=True))
 
-                i = int(sound_m[-1])
-                sound = sound_templates[i]
-                sound.pos = pos or ""
-
-                for d in line_raw_tags + [desc]:
-                    if not d.strip():
-                        continue
-                    if d in simple_tag_map:
-                        sound.tags.extend(simple_tag_map[d])
-                    else:
-                        sound.raw_tags.append(d)
-            # These sound datas are attached to POS data later; for this, we
-            # use the sound.pos field.
-        # print(f"{line}")
-        # print(f"{depth}")
+    recursively_complete_sound_data(wxr, pron_root, sound_templates)
 
     # print(pron_main)
     # for st in sound_templates:
