@@ -1,4 +1,4 @@
-from wiktextract import valid_tags
+from wiktextract.tags import valid_tags
 
 simple_tag_map: dict[str, list[str]] = {
     "comparative": ["comparative"],
@@ -36,5 +36,5 @@ simple_tag_map: dict[str, list[str]] = {
 # Check validity
 for tags in simple_tag_map.values():
     for tag in tags:
-        if tag not in valid_tags:
+        if tag.islower() and tag not in valid_tags:
             assert False, f"Invalid tag in simple_tag_map: {tag}"

@@ -53,7 +53,7 @@ def recurse_list(
             this_level_tags
         )
     for child in node.children:
-        recurse_list_item(
+        new_pos, new_tags = recurse_list_item(
             wxr,
             # We are pretty much guaranteed a LIST will only only have
             # LIST_ITEM children.
@@ -61,6 +61,10 @@ def recurse_list(
             sound_templates,
             pos,
             this_level_tags)
+        if new_pos:
+            pos = new_pos
+        if new_tags:
+            this_level_tags = raw_tags + new_tags
 
     return None, None
 
@@ -84,13 +88,20 @@ def recurse_list_item(
 
     text = clean_node(wxr, None, contents).strip()
 
+    pos_num = ""
     if pos_m := POS_ENDING_NUMBER_RE.search(text):
-        if text[: pos_m.start()].strip().lower() in POS_HEADINGS:
-            # XXX might be better to separate out the POS-number here
-            pos = text.strip().lower()
+        text = text[: pos_m.start()].strip()
+        pos_num = pos_m.group(1)
+    if text.lower() in POS_HEADINGS:
+        # XXX might be better to separate out the POS-number here
+        if pos_num:
+            pos = f"{text.lower()} {pos_num}"
+        else:
+            pos = text.lower()
         if len(contents) == len(node.children):
             # No sublists in this node
             return pos, []  # return "noun 1"
+        text = ""
 
     new_tags = []
 
@@ -113,7 +124,11 @@ def recurse_list_item(
         # logger.debug(f"{wxr.wtp.title}\n/////  {raw_tags}")
 
         if new_raw_tags:
+            # A bunch of "(tag) (tag)" tags
             line_raw_tags = new_raw_tags
+        elif bigtag := sound_m[0].strip(" \t\n,.;:*#"):
+            # Just lump it into one big tag and sort it later
+            line_raw_tags = [bigtag]
 
         i = int(sound_m[-1])  # (\d+)
         sound = sound_templates[i]  # the Sound object
@@ -206,8 +221,6 @@ def process_pron(
             audio = Sound(audio=filename.strip())
             if desc:
                 audio.raw_tags.append(desc)
-            # if current_pos:
-            #     audio.pos = current_pos
             sound_templates.append(audio)
             return "__SOUND_" + str(len(sound_templates) - 1) + "__"
         if lname == "audio-ipa":
