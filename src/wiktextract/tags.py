@@ -6407,6 +6407,8 @@ for tag in form_of_tags - set(valid_tags.keys()):
     print("tags.py:form_of_tags contains invalid tag {}".format(tag))
 
 
+# Don't move this, notify me so that I can change some an import in
+# the kaikki.org regen code
 def sort_tags(
     tags: Union[list[str], tuple[str, ...], set[str]],
 ) -> tuple[str, ...]:
