@@ -98,9 +98,16 @@ def process_linkage_list(
         pending_tag = ""
         inside_bracket = False
         for index, child_node in enumerate(  # remove nested lists
-            template_or_list_node.invert_find_child(NodeKind.LIST)
+            template_or_list_node.invert_find_child(NodeKind.LIST, True)
         ):
-            if index == 0 and isinstance(child_node, TemplateNode):
+            if isinstance(
+                child_node, TemplateNode
+            ) and child_node.template_name in [
+                "l",
+                "lien",
+                "zh-lien",
+                "zh-lien-t",
+            ]:
                 process_linkage_template(wxr, child_node, linkage_data)
             elif (
                 isinstance(child_node, WikiNode)
@@ -158,10 +165,17 @@ def process_linkage_list(
                     pending_tag += tag_text
                     continue
 
-                if tag_text.strip().startswith("— "):
-                    linkage_data.translation = tag_text.strip().removeprefix(
-                        "— "
-                    )
+                if tag_text.strip().startswith("—"):
+                    linkage_data.translation = clean_node(
+                        wxr,
+                        None,
+                        list(
+                            template_or_list_node.invert_find_child(
+                                NodeKind.LIST, True
+                            )
+                        )[index:],
+                    ).strip("— ")
+                    break
                 elif tag_text.strip().startswith(":"):
                     sense_text = tag_text.strip().removeprefix(":").strip()
                     linkage_data.sense = sense_text

@@ -345,3 +345,30 @@ class TestLinkage(TestCase):
                 }
             ],
         )
+
+    def test_zh_lien_link_tr(self):
+        page_data = [
+            WordEntry(
+                word="狗",
+                lang_code="zh",
+                lang="Chinois",
+            )
+        ]
+        self.wxr.wtp.start_page("狗")
+        root = self.wxr.wtp.parse(
+            "* {{zh-lien|饿狗|ègǒu}} — [[chien]] [[affamé]]"
+        )
+        extract_linkage(self.wxr, page_data, root, "dérivés")
+        self.assertEqual(
+            [
+                d.model_dump(exclude_defaults=True)
+                for d in page_data[-1].derived
+            ],
+            [
+                {
+                    "word": "饿狗",
+                    "roman": "ègǒu",
+                    "translation": "chien affamé",
+                }
+            ],
+        )

@@ -106,10 +106,9 @@ def extract_examples(
         if len(example_node_children) == 0:
             continue
         first_child = example_node_children[0]
-        if (
-            isinstance(first_child, TemplateNode)
-            and first_child.template_name.endswith("exemple")
-        ):
+        if isinstance(
+            first_child, TemplateNode
+        ) and first_child.template_name.endswith("exemple"):
             process_exemple_template(wxr, first_child, gloss_data)
         else:
             example_data = Example()
