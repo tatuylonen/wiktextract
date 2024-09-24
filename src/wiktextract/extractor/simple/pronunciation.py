@@ -1,13 +1,12 @@
 import re
-from copy import copy
-from typing import Optional, Union
+from typing import Optional
 
-from wikitextprocessor import LevelNode, NodeKind, TemplateArgs, WikiNode
-from wikitextprocessor.parser import LEVEL_KIND_FLAGS, print_tree
+from wikitextprocessor import NodeKind, TemplateArgs, WikiNode
+from wikitextprocessor.parser import LEVEL_KIND_FLAGS  #, print_tree
 from wiktextract import WiktextractContext
 from wiktextract.page import clean_node
-from wiktextract.wxr_logging import logger
 
+# from wiktextract.wxr_logging import logger
 from .models import Sound, WordEntry
 from .parse_utils import PANEL_TEMPLATES
 from .section_titles import POS_HEADINGS
