@@ -1,3 +1,4 @@
+import re
 from typing import Optional, Union
 
 from wikitextprocessor import NodeKind, TemplateNode, WikiNode
@@ -9,7 +10,7 @@ from wiktextract.wxr_logging import logger
 from .models import Example, Form, Sense, WordEntry
 from .section_titles import POS_HEADINGS
 from .table import parse_pos_table
-from .text_utils import POS_STARTS_RE, POS_TEMPLATE_NAMES
+from .text_utils import POS_ENDING_NUMBER_RE, POS_TEMPLATE_NAMES
 
 
 def remove_duplicate_forms(
@@ -165,15 +166,15 @@ def process_pos(
             # Sound data not tagged with any specific pos section, so add it
             new_sounds.append(sound)
         else:
-            m = POS_STARTS_RE.match(sound.pos)
-            assert m is not None  # Should never trigger
-            s_pos = m.group(1).strip().lower()
+            m = POS_ENDING_NUMBER_RE.search(sound.pos)
+            if m is not None:
+                s_num = int(m.group(1).strip())
+                s_pos = sound.pos[:m.start()].strip().lower()
+            else:
+                s_pos = sound.pos.strip().lower()
+                s_num = -1
             sound_meta = POS_HEADINGS[s_pos]
             s_pos = sound_meta["pos"]
-            if s_num := m.group(2):
-                s_num = int(s_num.strip())
-            else:
-                s_num = -1
             if s_pos == data.pos and s_num == data.pos_num:
                 new_sounds.append(sound)
     data.sounds = new_sounds

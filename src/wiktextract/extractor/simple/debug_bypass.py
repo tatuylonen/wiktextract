@@ -5,7 +5,6 @@ from wiktextract.wxr_logging import logger
 
 from .models import WordEntry
 from .parse_utils import ADDITIONAL_EXPAND_TEMPLATES, PANEL_TEMPLATES
-from .text_utils import POS_STARTS_RE
 
 # Quick regex to find the template name in text
 # TEMPLATE_NAME_RE = re.compile(r"{{\s*((w+\s+)*\w+)\s*(\||}})")

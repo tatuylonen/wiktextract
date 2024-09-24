@@ -11,6 +11,7 @@ from .models import WordEntry
 from .pos import process_pos
 from .pronunciation import process_pron
 from .section_titles import POS_HEADINGS
+from .text_utils import POS_ENDING_NUMBER_RE
 
 
 def parse_page(
@@ -91,7 +92,7 @@ def parse_page(
         # print(f"=== {heading_title=}")
         heading_title = clean_node(wxr, None, level.largs[0]).lower()
 
-        if m := re.search(r"\s+\d+$", heading_title):
+        if m := POS_ENDING_NUMBER_RE.search(heading_title):
             pos_num = int(m.group(0).strip())
             heading_title = heading_title[: m.start()]
         else:
