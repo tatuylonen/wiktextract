@@ -44,3 +44,15 @@ def process_note_template(
         wxr.wtp.node_to_wikitext(template_node), expand_all=True
     )
     extract_note(wxr, page_data, expaned_template)
+
+
+def extract_recognition_rate_section(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    level_node: WikiNode,
+) -> None:
+    for node in level_node.find_child(NodeKind.TEMPLATE):
+        if node.template_name == "nl-taux":
+            # https://fr.wiktionary.org/wiki/Modèle:nl-taux
+            # save Dutch vocabulary recognition rate category links
+            clean_node(wxr, word_entry, node)
