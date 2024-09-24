@@ -30,7 +30,9 @@ class TestPlSound(TestCase):
         self.wxr.wtp.start_page("dog")
         root = self.wxr.wtp.parse(""": {{amer}} {{IPA|dɔɡ}}, {{SAMPA|dOɡ}}
 :: {{lp}} {{audioUS|En-us-dog.ogg|wymowa amerykańska}}, {{lm}} {{audioUS|En-us-ne-dog.ogg}}""")
-        base_data = WordEntry(word="dog", lang_code="en", lang="")
+        base_data = WordEntry(
+            word="dog", lang_code="en", lang="język angielski", pos="unknown"
+        )
         extract_sound_section(self.wxr, base_data, root)
         data = base_data.model_dump(exclude_defaults=True)
         self.assertEqual(
@@ -49,7 +51,7 @@ class TestPlSound(TestCase):
         self.wxr.wtp.start_page("polski")
         root = self.wxr.wtp.parse("* {{AS3|p'''o'''lsʹḱi}}")
         base_data = WordEntry(
-            word="polski", lang_code="pl", lang="język polski"
+            word="polski", lang_code="pl", lang="język polski", pos="unknown"
         )
         extract_sound_section(self.wxr, base_data, root)
         data = base_data.model_dump(exclude_defaults=True)
@@ -62,7 +64,7 @@ class TestPlSound(TestCase):
         self.wxr.wtp.start_page("płakać")
         root = self.wxr.wtp.parse("===wymowa===\n {{IPA3|ˈpwakaʨ̑}}")
         base_data = WordEntry(
-            word="płakać", lang_code="pl", lang="język polski"
+            word="płakać", lang_code="pl", lang="język polski", pos="unknown"
         )
         extract_sound_section(self.wxr, base_data, root.children[0])
         data = base_data.model_dump(exclude_defaults=True)
