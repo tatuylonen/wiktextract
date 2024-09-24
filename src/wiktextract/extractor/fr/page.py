@@ -16,7 +16,7 @@ from .gloss import extract_gloss, process_exemple_template
 from .inflection import extract_inflection
 from .linkage import extract_linkage
 from .models import Sense, WordEntry
-from .note import extract_note
+from .note import extract_note, extract_recognition_rate_section
 from .pronunciation import extract_pronunciation
 from .section_types import (
     ETYMOLOGY_SECTIONS,
@@ -118,6 +118,12 @@ def parse_section(
                 extract_note(
                     wxr,
                     page_data if len(page_data) > 0 else [base_data],
+                    level_node,
+                )
+            elif section_type == "taux de reconnaissance":
+                extract_recognition_rate_section(
+                    wxr,
+                    page_data[-1] if len(page_data) > 0 else base_data,
                     level_node,
                 )
 
