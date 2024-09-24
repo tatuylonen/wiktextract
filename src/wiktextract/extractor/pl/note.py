@@ -1,11 +1,11 @@
 import re
-from collections import defaultdict
+from typing import Optional
 
-from wikitextprocessor.parser import NodeKind, WikiNode
+from wikitextprocessor import NodeKind, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
-from .models import WordEntry
+from .models import Note, WordEntry
 
 
 def extract_note_section(
@@ -16,23 +16,23 @@ def extract_note_section(
 ) -> None:
     from .page import match_sense_index
 
-    notes = defaultdict(list)
+    notes = []
     for list_item in level_node.find_child_recursively(NodeKind.LIST_ITEM):
-        process_note_list_item(wxr, list_item, notes)
+        note = process_note_list_item(wxr, list_item)
+        if note is not None:
+            notes.append(note)
     for data in page_data:
         if data.lang_code == base_data.lang_code:
-            for sense in data.senses:
-                for sense_index in notes.keys():
-                    if sense_index == "":
-                        continue
-                    if match_sense_index(sense_index, sense):
-                        sense.notes.extend(notes[sense_index])
-            data.notes.extend(notes.get("", []))
+            for note in notes:
+                if note.sense_index == "" or match_sense_index(
+                    note.sense_index, data
+                ):
+                    data.notes.append(note)
 
 
 def process_note_list_item(
-    wxr: WiktextractContext, list_item: WikiNode, notes: dict[str, list[str]]
-) -> None:
+    wxr: WiktextractContext, list_item: WikiNode
+) -> Optional[Note]:
     sense_index = ""
     note_nodes = []
     for node in list_item.children:
@@ -47,4 +47,5 @@ def process_note_list_item(
             note_nodes.append(node)
     note_text = clean_node(wxr, None, note_nodes)
     if len(note_text) > 0:
-        notes[sense_index].append(note_text)
+        return Note(sense_index=sense_index, text=note_text)
+    return None

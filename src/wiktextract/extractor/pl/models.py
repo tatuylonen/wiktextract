@@ -32,7 +32,6 @@ class Sense(PolishBaseModel):
     examples: list[Example] = []
     alt_of: list[AltForm] = []
     form_of: list[AltForm] = []
-    notes: list[str] = []
 
 
 class Translation(PolishBaseModel):
@@ -77,13 +76,18 @@ class Form(PolishBaseModel):
     sense_index: str = ""
 
 
+class Note(PolishBaseModel):
+    sense_index: str = ""
+    text: str = Field(min_length=1)
+
+
 class WordEntry(PolishBaseModel):
     model_config = ConfigDict(title="Polish Wiktionary")
 
-    word: str = Field(description="Word string")
-    lang_code: str = Field(description="Wiktionary language code")
-    lang: str = Field(description="Localized language name")
-    pos: str = Field(default="", description="Part of speech type")
+    word: str = Field(description="Word string", min_length=1)
+    lang_code: str = Field(description="Wiktionary language code", min_length=1)
+    lang: str = Field(description="Localized language name", min_length=1)
+    pos: str = Field(description="Part of speech type", min_length=1)
     pos_text: str = ""
     senses: list[Sense] = []
     title: str = Field(default="", description="Redirect page source title")
@@ -104,4 +108,4 @@ class WordEntry(PolishBaseModel):
     synonyms: list[Linkage] = []
     derived: list[Linkage] = []
     forms: list[Form] = []
-    notes: list[str] = []
+    notes: list[Note] = []

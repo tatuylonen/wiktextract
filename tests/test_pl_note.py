@@ -36,15 +36,28 @@ class TestPlNote(TestCase):
                 lang="język polski",
                 lang_code="pl",
                 pos="noun",
-                senses=[Sense(sense_index="1.1"), Sense(sense_index="1.2")],
-            )
+                senses=[Sense(sense_index="1.1")],
+            ),
+            WordEntry(
+                word="pies",
+                lang="język polski",
+                lang_code="pl",
+                pos="noun",
+                senses=[Sense(sense_index="2.1")],
+            ),
         ]
         extract_note_section(self.wxr, page_data, base_data, root)
         self.assertEqual(
-            page_data[0].senses[0].notes,
+            [n.model_dump(exclude_defaults=True) for n in page_data[0].notes],
             [
-                "zobacz też: Indeks:Polski - Ssaki",
-                "zobacz też: Indeks:Polski - Rasy psów",
+                {
+                    "text": "zobacz też: Indeks:Polski - Ssaki",
+                    "sense_index": "1.1",
+                },
+                {
+                    "text": "zobacz też: Indeks:Polski - Rasy psów",
+                    "sense_index": "1.1",
+                },
             ],
         )
-        self.assertEqual(page_data[0].senses[1].notes, [])
+        self.assertEqual(page_data[1].notes, [])
