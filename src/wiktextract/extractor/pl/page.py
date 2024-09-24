@@ -108,8 +108,8 @@ def parse_page(
     page_data: list[WordEntry] = []
     for level2_node in tree.find_child(NodeKind.LEVEL2):
         after_parenthesis = False
-        lang_code = ""
-        lang_name = ""
+        lang_code = "unknown"
+        lang_name = "unknown"
         lang_title_cats = {}
         for title_content_node in itertools.chain.from_iterable(
             level2_node.largs
