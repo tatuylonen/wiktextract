@@ -1,6 +1,6 @@
 import re
 
-from wikitextprocessor.parser import LevelNode, NodeKind, WikiNode
+from wikitextprocessor import LevelNode, NodeKind, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -8,7 +8,7 @@ from .models import Example, Sense, WordEntry
 from .tags import translate_raw_tags
 from .utils import extract_sense_index
 
-REF_KEY_MAP = {
+LITERATUR_TEMPLATE_ARGS = {
     "autor": "author",
     "a": "author",
     "titel": "title",
@@ -93,31 +93,20 @@ def extract_examples(
 def extract_reference(
     wxr: WiktextractContext, example_data: Example, ref_node: WikiNode
 ):
-    example_data.raw_ref = clean_node(wxr, None, ref_node.children)
-
-    template_nodes = list(ref_node.find_child(NodeKind.TEMPLATE))
-
-    if len(template_nodes) > 1:
-        wxr.wtp.debug(
-            f"Unexpected number of templates in example: {template_nodes}",
-            sortid="extractor/de/examples/extract_examples/64",
-        )
-    elif len(template_nodes) == 1:
-        template_node = template_nodes[0]
-
-        # Most reference templates follow the Literatur template and use named
-        # parameters. We extract them here.
-        # https://de.wiktionary.org/wiki/Vorlage:Literatur
-        for key, value in template_node.template_parameters.items():
-            if isinstance(key, str):
-                key_english = REF_KEY_MAP.get(key.lower(), key.lower())
-                if key_english in example_data.model_fields:
-                    setattr(
-                        example_data, key_english, clean_node(wxr, {}, value)
-                    )
-                else:
+    example_data.ref = clean_node(wxr, None, ref_node.children)
+    for template_node in ref_node.find_child(NodeKind.TEMPLATE):
+        if template_node.template_name == "Literatur":
+            # https://de.wiktionary.org/wiki/Vorlage:Literatur
+            for key, value in template_node.template_parameters.items():
+                if key.lower() in LITERATUR_TEMPLATE_ARGS:
+                    field = LITERATUR_TEMPLATE_ARGS[key.lower()]
+                    if field in example_data.model_fields:
+                        setattr(
+                            example_data, field, clean_node(wxr, None, value)
+                        )
+                elif isinstance(key, str):
                     wxr.wtp.debug(
-                        f"Unexpected key in reference: {key_english}",
+                        f"Unexpected key in Literatur template: {key}",
                         sortid="extractor/de/examples/extract_examples/77",
                     )
 
