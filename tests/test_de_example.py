@@ -77,7 +77,7 @@ class TestDEExample(unittest.TestCase):
                     "examples": [
                         {
                             "text": "example1",
-                            "raw_ref": "ref1A",
+                            "ref": "ref1A",
                         },
                     ],
                     "sense_index": "1",
@@ -100,7 +100,7 @@ class TestDEExample(unittest.TestCase):
         self.assertEqual(
             example_data.model_dump(exclude_defaults=True),
             {
-                "raw_ref": "Expanded template, Seite 273. "
+                "ref": "Expanded template, Seite 273. "
                 "ISBN 978-3-89029-459-9.",
                 "title": "Viva Warszawa",
                 "author": "Steffen Möller",
@@ -128,7 +128,7 @@ class TestDEExample(unittest.TestCase):
         self.assertEqual(
             example_data.model_dump(exclude_defaults=True),
             {
-                "raw_ref": "Expanded template",
+                "ref": "Expanded template",
             },
         )
 

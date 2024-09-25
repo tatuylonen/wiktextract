@@ -47,7 +47,7 @@ class Example(BaseModelWrap):
     )
     raw_tags: list[str] = []
     tags: list[str] = []
-    raw_ref: str = Field(default="", description="Raw reference string")
+    ref: str = Field(default="", description="Raw reference string")
     url: str = Field(
         default="", description="A web link. Not necessarily well-formated."
     )
