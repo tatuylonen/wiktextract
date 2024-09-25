@@ -9,6 +9,6 @@ for pos, templates in POS_HEADINGS.items():
     POS_TEMPLATE_NAMES.update({tn: pos for tn in templates["templates"]})
 
 # This is so commonly used that it needs to stop being a magic regex
-POS_ENDING_NUMBER_RE = re.compile(r"\s+(\d+)$")
+POS_ENDING_NUMBER_RE = re.compile(r"\s*(\d+)$")
 
 STRIP_PUNCTUATION = " \t\b,.;:*#-–()[]"

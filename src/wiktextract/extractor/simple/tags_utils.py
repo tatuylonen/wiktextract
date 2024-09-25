@@ -8,7 +8,7 @@ from .text_utils import POS_ENDING_NUMBER_RE, STRIP_PUNCTUATION
 # syntax `(?:...)` to make the group non-capturing. re.split() has the feature
 # of outputting captured "splitters" if they're in a `(group)`, which is very
 # handy but not relevant here; we don't need to keep that data.
-SPLITTER_RE = re.compile(r"\s*(?:,|;|\(|\)|\.)\s*")
+SPLITTER_RE = re.compile(r"\s*(?:,|;|\(|\)|\.|&)\s*")
 
 def convert_tags(raw_tags: list[str]) -> tuple[list[str], list[str], list[str]]:
     """Check if raw tags contain tag strings in `simple_tag_map` and return
