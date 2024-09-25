@@ -23,6 +23,7 @@ class TestESPage(unittest.TestCase):
         """
         Writes data affecting multiple entries to all affected WordEntry objects.
         https://es.wiktionary.org/wiki/love
+        https://es.wiktionary.org/wiki/sorabo
         """  # noqa:E501
         self.wxr.wtp.add_page(
             "Plantilla:pron-graf",
@@ -34,17 +35,35 @@ class TestESPage(unittest.TestCase):
 |[lʌv]<br/>
 |}""",
         )
+        self.wxr.wtp.add_page(
+            "Plantilla:lengua", 10, "Inglés[[Categoría:Inglés]]"
+        )
+        self.wxr.wtp.add_page(
+            "Plantilla:verbo", 10, "Verbo[[Categoría:EN:Verbos]]"
+        )
+        self.wxr.wtp.add_page(
+            "Plantilla:sustantivo", 10, "Sustantivo[[Categoría:EN:Sustantivos]]"
+        )
         page_data = parse_page(
             self.wxr,
             "love",
             """== {{lengua|en}} ==
 {{pron-graf|leng=en|fone=lʌv}}
+[[Categoría:ES:Gentilicios]]
 === {{verbo|en}} ===
 === {{sustantivo|en}} ===
 """,
         )
         self.assertEqual(len(page_data), 2)
         self.assertEqual(page_data[0]["sounds"], page_data[1]["sounds"])
+        self.assertEqual(
+            page_data[0]["categories"],
+            ["Inglés", "ES:Gentilicios", "EN:Verbos"],
+        )
+        self.assertEqual(
+            page_data[1]["categories"],
+            ["Inglés", "ES:Gentilicios", "EN:Sustantivos"],
+        )
 
     def test_gloss_under_etymology_section(self):
         # abnormal layout

@@ -110,7 +110,8 @@ def parse_section(
     === Locuciones ===
     """
 
-    section_title = clean_node(wxr, base_data, level_node.largs).lower()
+    categories = {}
+    section_title = clean_node(wxr, categories, level_node.largs).lower()
     wxr.wtp.start_subsection(section_title)
 
     pos_template_name = ""
@@ -129,6 +130,7 @@ def parse_section(
             page_data[-1].pos = pos_type
             page_data[-1].pos_title = section_title
             page_data[-1].tags.extend(pos_data.get("tags", []))
+            page_data[-1].categories.extend(categories.get("categories", []))
             process_pos_block(wxr, page_data, level_node)
     elif (
         section_title.startswith("etimología")
