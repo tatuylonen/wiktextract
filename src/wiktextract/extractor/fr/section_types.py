@@ -183,6 +183,9 @@ POS_SECTIONS: dict[str, POSSubtitleData] = {
 LINKAGE_SECTIONS: dict[str, str] = {
     "abrév": "abbreviation",
     "abréviations": "abbreviation",
+    "anagrammes": "anagrams",
+    "anagr": "anagrams",
+    "anagramme": "anagrams",
     "antonymes": "antonyms",
     "app": "related",
     "apparentés": "related",
@@ -230,9 +233,6 @@ LINKAGE_SECTIONS: dict[str, str] = {
 
 IGNORED_SECTIONS: frozenset[str] = frozenset(
     [
-        "anagrammes",
-        "anagramme",
-        "anagr",
         "références",
         "référence",
         "réf",

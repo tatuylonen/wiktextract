@@ -1,6 +1,6 @@
 import re
 
-from wikitextprocessor.parser import NodeKind, TemplateNode, WikiNode
+from wikitextprocessor import NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -18,6 +18,13 @@ def extract_linkage(
 ) -> None:
     if section_type == "dérivés autres langues":
         process_derives_autres_list(wxr, page_data, level_node)
+    elif section_type == "anagrammes":
+        for node in level_node.find_child(NodeKind.TEMPLATE):
+            if node.template_name == "voir anagrammes":
+                anagram_list = process_voir_anagrammes_template(wxr, node)
+                for data in page_data:
+                    if data.lang_code == page_data[-1].lang_code:
+                        data.anagrams.extend(anagram_list)
     else:
         process_linkage_list(
             wxr,
@@ -40,13 +47,22 @@ def process_derives_autres_list(
             if isinstance(node, TemplateNode) and node.template_name == "L":
                 lang_code = node.template_parameters.get(1)
                 lang_name = clean_node(wxr, None, node)
-            elif node.kind == NodeKind.LINK or (
-                isinstance(node, TemplateNode) and node.template_name == "lien"
-            ):
+            elif node.kind == NodeKind.LINK:
                 word = clean_node(wxr, None, node)
                 page_data[-1].derived.append(
                     Linkage(lang_code=lang_code, lang=lang_name, word=word)
                 )
+            elif isinstance(node, TemplateNode) and node.template_name in [
+                "l",
+                "lien",
+                "zh-lien",
+                "zh-lien-t",
+            ]:
+                linkage_data = Linkage(
+                    lang_code=lang_code, lang=lang_name, word=""
+                )
+                process_linkage_template(wxr, node, linkage_data)
+                page_data[-1].derived.append(linkage_data)
 
 
 def process_linkage_list(
@@ -198,7 +214,7 @@ def process_linkage_template(
     node: TemplateNode,
     linkage_data: Linkage,
 ) -> None:
-    if node.template_name in {"lien", "l"}:
+    if node.template_name in ["lien", "l"]:
         process_lien_template(wxr, node, linkage_data)
     elif node.template_name.startswith("zh-lien"):
         process_zh_lien_template(wxr, node, linkage_data)
@@ -241,3 +257,19 @@ def process_zh_lien_template(
     )
     if len(traditional_form) > 0:
         linkage_data.alt = traditional_form
+
+
+def process_voir_anagrammes_template(
+    wxr: WiktextractContext, node: TemplateNode
+) -> list[Linkage]:
+    # https://fr.wiktionary.org/wiki/Modèle:voir_anagrammes
+    results = []
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(node), expand_all=True
+    )
+    for list_item in expanded_node.find_child_recursively(NodeKind.LIST_ITEM):
+        for link_node in list_item.find_child(NodeKind.LINK):
+            word = clean_node(wxr, None, link_node)
+            if len(word) > 0:
+                results.append(Linkage(word=word))
+    return results

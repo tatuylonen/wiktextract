@@ -372,3 +372,61 @@ class TestLinkage(TestCase):
                 }
             ],
         )
+
+    def test_dérivés_autres_langues_section_lien_roman(self):
+        page_data = [
+            WordEntry(
+                word="拉麵",
+                lang_code="zh",
+                lang="Chinois",
+            )
+        ]
+        self.wxr.wtp.add_page("Modèle:L", 10, "Japonais")
+        self.wxr.wtp.start_page("拉麵")
+        root = self.wxr.wtp.parse(
+            "* {{L|ja}} : {{lien|ラーメン|ja|tr=ɾaː.meɴ}}"
+        )
+        extract_linkage(self.wxr, page_data, root, "dérivés autres langues")
+        self.assertEqual(
+            [
+                d.model_dump(exclude_defaults=True)
+                for d in page_data[-1].derived
+            ],
+            [
+                {
+                    "lang": "Japonais",
+                    "lang_code": "ja",
+                    "word": "ラーメン",
+                    "roman": "ɾaː.meɴ",
+                }
+            ],
+        )
+
+    def test_voir_anagrammes(self):
+        page_data = [
+            WordEntry(
+                word="chien",
+                lang_code="fr",
+                lang="Français",
+            )
+        ]
+        self.wxr.wtp.add_page(
+            "Modèle:voir anagrammes",
+            10,
+            """→ [[Spécial:EditPage|Modifier]]<div class="boite">
+<div >
+<div >
+<div>
+* [[niche#fr|niche]], [[niché#fr|niché]]
+</div></div><div></div></div></div>""",
+        )
+        self.wxr.wtp.start_page("chien")
+        root = self.wxr.wtp.parse("{{voir anagrammes|fr}}")
+        extract_linkage(self.wxr, page_data, root, "anagrammes")
+        self.assertEqual(
+            [
+                d.model_dump(exclude_defaults=True)
+                for d in page_data[-1].anagrams
+            ],
+            [{"word": "niche"}, {"word": "niché"}],
+        )

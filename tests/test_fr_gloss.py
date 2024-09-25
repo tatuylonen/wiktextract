@@ -303,7 +303,7 @@ class TestFrGloss(TestCase):
                     "glosses": ["Génitrice ; ascendante"],
                     "note": "ce sens n’est plus guère utilisé que sous "
                     "la forme de la locution « autrice de mes jours »",
-                    "tags": ["rare"],
+                    "raw_tags": ["Plus rare"],
                 }
             ],
         )
@@ -679,12 +679,15 @@ class TestFrGloss(TestCase):
         ]
         extract_gloss(self.wxr, page_data, root.children[0])
         self.assertEqual(
-            [e.model_dump(exclude_defaults=True) for e in page_data[0].senses[0].examples],
+            [
+                e.model_dump(exclude_defaults=True)
+                for e in page_data[0].senses[0].examples
+            ],
             [
                 {
                     "ref": "source",
                     "text": "之後十年，越南人民吃盡千辛萬苦",
                     "translation": "Au cours de la décennie suivante, le peuple vietnamien a beaucoup souffert",
                 }
-            ]
+            ],
         )

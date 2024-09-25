@@ -197,7 +197,7 @@ SENSE_TAGS: dict[str, str] = {
     "néologisme": "neologism",
     "argot": "slang",
     "rare": "rare",
-    "plus rare": "rare",
+    # "plus rare": "rare",
     "littéraire": "literary",  # Modèle:littéraire
     "poétique": "poetic",  # Modèle:poétique
     # "didactique": "",  # Modèle:didactique
@@ -212,6 +212,7 @@ SENSE_TAGS: dict[str, str] = {
     "anglicisme informatique": "Anglicism",
     "proverbe": "proverb",
     "collectivement": "collectively",
+    "courant": "common",  # Modèle:courant
 }
 
 # https://en.wikipedia.org/wiki/Voice_(grammar)

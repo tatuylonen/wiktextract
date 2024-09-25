@@ -148,6 +148,7 @@ class WordEntry(FrenchBaseModel):
     related: list[Linkage] = []
     abbreviation: list[Linkage] = []
     proverbs: list[Linkage] = []
+    anagrams: list[Linkage] = []
     title: str = Field(default="", description="Redirect page source title")
     redirect: str = Field(default="", description="Redirect page target title")
     categories: list[str] = []
