@@ -79,6 +79,8 @@ def parse_entries(
             # XXX: There might be other uses for this kind of list which are
             # being ignored here
             continue
+        elif isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
+            clean_node(wxr, base_data_copy, node)
         else:
             unexpected_nodes.append(node)
 
@@ -108,7 +110,8 @@ def parse_section(
     === Locuciones ===
     """
 
-    section_title = clean_node(wxr, base_data, level_node.largs).lower()
+    categories = {}
+    section_title = clean_node(wxr, categories, level_node.largs).lower()
     wxr.wtp.start_subsection(section_title)
 
     pos_template_name = ""
@@ -127,6 +130,7 @@ def parse_section(
             page_data[-1].pos = pos_type
             page_data[-1].pos_title = section_title
             page_data[-1].tags.extend(pos_data.get("tags", []))
+            page_data[-1].categories.extend(categories.get("categories", []))
             process_pos_block(wxr, page_data, level_node)
     elif (
         section_title.startswith("etimología")
@@ -312,27 +316,30 @@ def parse_page(
     tree = wxr.wtp.parse(page_text)
     page_data: list[WordEntry] = []
     for level2_node in tree.find_child(NodeKind.LEVEL2):
+        categories = {}
+        lang_code = "unknown"
+        lang_name = "unknown"
         for subtitle_template in level2_node.find_content(NodeKind.TEMPLATE):
             # https://es.wiktionary.org/wiki/Plantilla:lengua
             # https://es.wiktionary.org/wiki/Apéndice:Códigos_de_idioma
             if subtitle_template.template_name == "lengua":
-                categories = {"categories": []}
                 lang_code = subtitle_template.template_parameters.get(1).lower()
-                if (
-                    wxr.config.capture_language_codes is not None
-                    and lang_code not in wxr.config.capture_language_codes
-                ):
-                    continue
                 lang_name = clean_node(wxr, categories, subtitle_template)
-                wxr.wtp.start_section(lang_name)
-                base_data = WordEntry(
-                    lang=lang_name,
-                    lang_code=lang_code,
-                    word=page_title,
-                    pos="unknown",
-                )
-                base_data.categories.extend(categories["categories"])
-                parse_entries(wxr, page_data, base_data, level2_node)
+                break
+        if (
+            wxr.config.capture_language_codes is not None
+            and lang_code not in wxr.config.capture_language_codes
+        ):
+            continue
+        wxr.wtp.start_section(lang_name)
+        base_data = WordEntry(
+            lang=lang_name,
+            lang_code=lang_code,
+            word=page_title,
+            pos="unknown",
+            categories=categories.get("categories", []),
+        )
+        parse_entries(wxr, page_data, base_data, level2_node)
 
     for data in page_data:
         if len(data.senses) == 0:
