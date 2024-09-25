@@ -1,17 +1,16 @@
 import re
+from copy import copy
 from typing import Optional
 
 from wikitextprocessor import NodeKind, TemplateArgs, WikiNode
-from wikitextprocessor.parser import LEVEL_KIND_FLAGS  #, print_tree
+from wikitextprocessor.parser import LEVEL_KIND_FLAGS  # , print_tree
 from wiktextract import WiktextractContext
 from wiktextract.page import clean_node
 
 # from wiktextract.wxr_logging import logger
 from .models import Sound, WordEntry
 from .parse_utils import PANEL_TEMPLATES
-from .section_titles import POS_HEADINGS
 from .tags_utils import convert_tags
-from .text_utils import POS_ENDING_NUMBER_RE
 
 DEPTH_RE = re.compile(r"([*:;]+)\s*(.*)$")
 
@@ -24,10 +23,9 @@ def recurse_list(
     wxr: WiktextractContext,
     node: WikiNode,
     sound_templates: list[Sound],
-    pos: str,
+    poses: list[str],
     raw_tags: list[str],
-) -> tuple[Optional[str], Optional[list[str]]]:
-
+) -> tuple[Optional[list[str]], Optional[list[str]]]:
     assert node.kind == NodeKind.LIST
 
     this_level_tags = raw_tags[:]
@@ -48,8 +46,8 @@ def recurse_list(
             # Guaranteed LIST_ITEM
             node.children[0],  # type:ignore[arg-type]
             sound_templates,
-            pos,
-            this_level_tags
+            poses,
+            this_level_tags,
         )
     for child in node.children:
         new_pos, new_tags = recurse_list_item(
@@ -58,10 +56,11 @@ def recurse_list(
             # LIST_ITEM children.
             child,  # type:ignore[arg-type]
             sound_templates,
-            pos,
-            this_level_tags)
-        if new_pos:
-            pos = new_pos
+            poses,
+            this_level_tags,
+        )
+        if new_pos is not None:
+            poses = new_pos
         if new_tags:
             this_level_tags = raw_tags + new_tags
 
@@ -72,9 +71,9 @@ def recurse_list_item(
     wxr: WiktextractContext,
     node: WikiNode,
     sound_templates: list[Sound],
-    pos: str,
+    poses: list[str],
     raw_tags: list[str],
-) -> tuple[Optional[str], Optional[list[str]]]:
+) -> tuple[Optional[list[str]], Optional[list[str]]]:
     """Recurse through list and list_item nodes. In some cases, a call might
     return a tuple of a POS string and list of raw tags, which can be applied
     to `pos` and `raw_tags` parameters on the same level."""
@@ -86,23 +85,8 @@ def recurse_list_item(
     contents = list(node.invert_find_child(NodeKind.LIST))
 
     text = clean_node(wxr, None, contents).strip()
-
-    pos_num = ""
-    if pos_m := POS_ENDING_NUMBER_RE.search(text):
-        text = text[: pos_m.start()].strip()
-        pos_num = pos_m.group(1)
-    if text.lower() in POS_HEADINGS:
-        # XXX might be better to separate out the POS-number here
-        if pos_num:
-            pos = f"{text.lower()} {pos_num}"
-        else:
-            pos = text.lower()
-        if len(contents) == len(node.children):
-            # No sublists in this node
-            return pos, []  # return "noun 1"
-        text = ""
-
-    new_tags = []
+    text_raw_tags: list[str] = []
+    text_poses: list[str] = []
 
     if "__SOUND" not in text:
         # This is text without a pronunciation template like {{ipa}}.
@@ -111,45 +95,51 @@ def recurse_list_item(
         # IPA here, and treat the text as a description or a reference
         # to a sense.
         # XXX extract raw tags more gracefully
-        new_tags = [text.strip(": \n.,;")]
-        if len(contents) == len(node.children):
-            # No sublists, no POS detected; send up to be caught into new_tags2
-            return None, new_tags
+        text_tags, text_raw_tags, text_poses = convert_tags([text])
+        text_raw_tags.extend(text_tags)  # let's ignore the normal tags for now
 
-    line_raw_tags = []
+        if len(text_poses) > 0 or len(text_raw_tags) > 0:
+            if len(contents) == len(node.children):
+                # No sublists in this node
+                return (
+                    text_poses or None,
+                    text_raw_tags or None,
+                )  # return "noun 1"
+
+    line_raw_tags: list[str] = []
+    line_poses = []
     for sound_m in re.findall(r"([^_]*)__SOUND_(\d+)__", text):
-        # findall returns a list strings, it's not a re.Match object
-        new_raw_tags = re.findall(r"\(([^()]+)\)", sound_m[0])
-        # logger.debug(f"{wxr.wtp.title}\n/////  {raw_tags}")
-
-        if new_raw_tags:
-            # A bunch of "(tag) (tag)" tags
+        part_tags, new_raw_tags, part_poses = convert_tags([sound_m[0]])
+        new_raw_tags.extend(part_tags)
+        if len(part_poses) > 0:
+            line_poses = part_poses
+        if len(new_raw_tags) > 0:
             line_raw_tags = new_raw_tags
-        elif bigtag := sound_m[0].strip(" \t\n,.;:*#"):
-            # Just lump it into one big tag and sort it later
-            line_raw_tags = [bigtag]
 
         i = int(sound_m[-1])  # (\d+)
         sound = sound_templates[i]  # the Sound object
 
         # These sound datas are attached to POS data later; for this, we
         # use the sound.pos field.
-        sound.pos = pos or ""
+        if len(line_poses) > 0 or len(poses) > 0:
+            sound.poses = line_poses or poses
 
-        for d in raw_tags + new_tags + line_raw_tags:
-            if not d.strip(" \t\n,.;:*#-–"):
-                continue
+        # print(f"{raw_tags=}, {line_raw_tags=}")
+        for d in raw_tags + line_raw_tags:
             sound.raw_tags.append(d)
 
+    this_level_tags = raw_tags + text_raw_tags
 
-    this_level_tags = raw_tags + new_tags
+    if len(text_poses) > 0:
+        poses = copy(poses)
+        poses.extend(text_poses)
 
     for li in node.find_child(NodeKind.LIST):
-        new_pos, new_tags2 = recurse_list(
-            wxr, li, sound_templates, pos, this_level_tags
+        new_poses, new_tags2 = recurse_list(
+            wxr, li, sound_templates, poses, this_level_tags
         )
-        if new_pos is not None:
-            pos = new_pos
+        if new_poses is not None:
+            poses = new_poses
         if new_tags2 is not None:
             this_level_tags = raw_tags + new_tags2
 
@@ -162,7 +152,7 @@ def recursively_complete_sound_data(
     """Parse all the lists for pronunciation data recursively."""
 
     # node should be NodeKind.ROOT
-    recurse_list_item(wxr, node, sound_templates, "", [])
+    recurse_list_item(wxr, node, sound_templates, [], [])
     return None
 
 
@@ -360,10 +350,13 @@ def process_pron(
 
     # remove duplicate tags
     for st in sound_templates:
-        legit_tags, raw_tags = convert_tags(st.raw_tags)
+        legit_tags, raw_tags, poses = convert_tags(st.raw_tags)
         if len(legit_tags) > 0:
             st.tags = list(set(legit_tags))
             st.raw_tags = list(set(raw_tags))
+        if len(poses) > 0:
+            st.poses.extend(poses)
+        st.poses = list(set(st.poses))
 
     if len(sound_templates) > 0:
         # completely replace sound data with new

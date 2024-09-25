@@ -77,8 +77,8 @@ class TestSIMPLEPronunciation(unittest.TestCase):
         target = {
             "word": "foo",
             "sounds": [
-                {"ipa": "/foo/", "pos": "verb"},
-                {"enpr": "föö", "pos": "noun"},
+                {"ipa": "/foo/", "poses": ["verb"]},
+                {"enpr": "föö", "poses": ["noun"]},
             ],
         }
         self.extract_sound(text, target)
@@ -93,8 +93,8 @@ class TestSIMPLEPronunciation(unittest.TestCase):
         target = {
             "word": "foo",
             "sounds": [
-                {"ipa": "/foo/", "pos": "verb 1"},
-                {"enpr": "föö", "pos": "verb 2"},
+                {"ipa": "/foo/", "poses": ["verb 1"]},
+                {"enpr": "föö", "poses": ["verb 2"]},
             ],
         }
         self.extract_sound(text, target)
@@ -109,8 +109,8 @@ class TestSIMPLEPronunciation(unittest.TestCase):
         target = {
             "word": "foo",
             "sounds": [
-                {"ipa": "/foo/", "pos": "verb 1"},
-                {"enpr": "föö", "pos": "verb 2"},
+                {"ipa": "/foo/", "poses": ["verb 1"]},
+                {"enpr": "föö", "poses": ["verb 2"]},
             ],
         }
         self.extract_sound(text, target)
@@ -126,9 +126,9 @@ class TestSIMPLEPronunciation(unittest.TestCase):
         target = {
             "word": "foo",
             "sounds": [
-                {"ipa": "/foo/", "pos": "verb 1"},
-                {"ipa": "/bar/", "pos": "verb 1"},
-                {"enpr": "föö", "pos": "verb 2"},
+                {"ipa": "/foo/", "poses": ["verb 1"]},
+                {"ipa": "/bar/", "poses": ["verb 1"]},
+                {"enpr": "föö", "poses": ["verb 2"]},
             ],
         }
         self.extract_sound(text, target)

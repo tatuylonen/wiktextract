@@ -114,7 +114,13 @@ def parse_pos_table(
     # print(forms)
     # Replace raw_tags with tags if appropriate
     for form in forms:
-        legit_tags, new_raw_tags = convert_tags(form.raw_tags)
+        legit_tags, new_raw_tags, poses = convert_tags(form.raw_tags)
+        # XXX poses are strings like "adj 1", used in pronunciation data
+        # to later associate sound data with the correct pos entry.
+        # Not useful or common here?
+        # if len(poses) > 0:  # This spams the logs
+        #     wxr.wtp.warning(f"convert_tags() returned weird `poses` data for "
+        #                     f"forms: {poses=}", sortid="simple/table/122")
         if legit_tags:
             form.tags = legit_tags
             form.raw_tags = new_raw_tags

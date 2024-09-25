@@ -68,7 +68,7 @@ class Sound(SimpleEnglishBaseModel):
     # text: str = ""  # Use raw_tags instead
     # Temporary field used to sort out different sound data between POSes when
     # they are originally found in one combined pronunciation section
-    pos: str = ""
+    poses: list[str] = []
 
 class TemplateData(SimpleEnglishBaseModel):
     name: str = Field(default="", description="Template's name.")

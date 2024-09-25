@@ -162,21 +162,22 @@ def process_pos(
     # pos name + number if possible. Filter out stuff that doesn't fit.
     new_sounds = []
     for sound in data.sounds:
-        if not sound.pos:
+        if len(sound.poses) == 0:
             # Sound data not tagged with any specific pos section, so add it
             new_sounds.append(sound)
         else:
-            m = POS_ENDING_NUMBER_RE.search(sound.pos)
-            if m is not None:
-                s_num = int(m.group(1).strip())
-                s_pos = sound.pos[:m.start()].strip().lower()
-            else:
-                s_pos = sound.pos.strip().lower()
-                s_num = -1
-            sound_meta = POS_HEADINGS[s_pos]
-            s_pos = sound_meta["pos"]
-            if s_pos == data.pos and s_num == data.pos_num:
-                new_sounds.append(sound)
+            for sound_pos in sound.poses:
+                m = POS_ENDING_NUMBER_RE.search(sound_pos)
+                if m is not None:
+                    s_num = int(m.group(1).strip())
+                    s_pos = sound_pos[:m.start()].strip().lower()
+                else:
+                    s_pos = sound_pos.strip().lower()
+                    s_num = -1
+                sound_meta = POS_HEADINGS[s_pos]
+                s_pos = sound_meta["pos"]
+                if s_pos == data.pos and s_num == data.pos_num:
+                    new_sounds.append(sound)
     data.sounds = new_sounds
 
     pos_contents = list(node.invert_find_child(LEVEL_KIND_FLAGS))

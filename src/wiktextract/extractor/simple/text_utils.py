@@ -10,3 +10,5 @@ for pos, templates in POS_HEADINGS.items():
 
 # This is so commonly used that it needs to stop being a magic regex
 POS_ENDING_NUMBER_RE = re.compile(r"\s+(\d+)$")
+
+STRIP_PUNCTUATION = " \t\b,.;:*#-–()[]"
