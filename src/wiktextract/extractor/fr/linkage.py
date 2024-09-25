@@ -40,13 +40,22 @@ def process_derives_autres_list(
             if isinstance(node, TemplateNode) and node.template_name == "L":
                 lang_code = node.template_parameters.get(1)
                 lang_name = clean_node(wxr, None, node)
-            elif node.kind == NodeKind.LINK or (
-                isinstance(node, TemplateNode) and node.template_name == "lien"
-            ):
+            elif node.kind == NodeKind.LINK:
                 word = clean_node(wxr, None, node)
                 page_data[-1].derived.append(
                     Linkage(lang_code=lang_code, lang=lang_name, word=word)
                 )
+            elif isinstance(node, TemplateNode) and node.template_name in [
+                "l",
+                "lien",
+                "zh-lien",
+                "zh-lien-t",
+            ]:
+                linkage_data = Linkage(
+                    lang_code=lang_code, lang=lang_name, word=""
+                )
+                process_linkage_template(wxr, node, linkage_data)
+                page_data[-1].derived.append(linkage_data)
 
 
 def process_linkage_list(
@@ -198,7 +207,7 @@ def process_linkage_template(
     node: TemplateNode,
     linkage_data: Linkage,
 ) -> None:
-    if node.template_name in {"lien", "l"}:
+    if node.template_name in ["lien", "l"]:
         process_lien_template(wxr, node, linkage_data)
     elif node.template_name.startswith("zh-lien"):
         process_zh_lien_template(wxr, node, linkage_data)
