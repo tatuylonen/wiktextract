@@ -16,7 +16,7 @@ def extract_conjugation(
     wxr: WiktextractContext,
     entry: WordEntry,
     conj_page_title: str,
-    select_template: str = "1",
+    select_tab: str = "1",
 ) -> None:
     """
     Find and extract conjugation page.
@@ -37,20 +37,19 @@ def extract_conjugation(
         elif "-conj" in conj_template.template_name:
             process_conj_template(wxr, entry, conj_template, conj_page_title)
         elif conj_template.template_name == "Onglets conjugaison":
-            # https://fr.wiktionary.org/wiki/Modèle:Onglets_conjugaison
-            # this template expands to two tabs of tables
-            selected_template = conj_template.template_parameters.get(
-                f"contenu{select_template}"
+            process_onglets_conjugaison_template(
+                wxr, entry, conj_template, conj_page_title, select_tab
             )
-            if selected_template is not None:
-                process_conj_template(
-                    wxr, entry, selected_template, conj_page_title
-                )
         elif conj_template.template_name.removeprefix(":").startswith(
             "Conjugaison:"
         ):
             extract_conjugation(
-                wxr, entry, conj_template.template_name.removeprefix(":"), "2"
+                wxr,
+                entry,
+                conj_template.template_name.removeprefix(":"),
+                clean_node(
+                    wxr, None, conj_template.template_parameters.get("sél", "2")
+                ),
             )
         elif conj_template.template_name.startswith("ja-flx-adj"):
             proces_ja_flx_adj_template(
@@ -58,6 +57,38 @@ def extract_conjugation(
             )
         elif conj_template.template_name.startswith("ja-"):
             proces_ja_conj_template(wxr, entry, conj_template, conj_page_title)
+
+
+def process_onglets_conjugaison_template(
+    wxr: WiktextractContext,
+    entry: WordEntry,
+    node: TemplateNode,
+    conj_page_title: str,
+    select_tab: str,
+) -> None:
+    # https://fr.wiktionary.org/wiki/Modèle:Onglets_conjugaison
+    # this template expands to two tabs of tables
+    selected_tabs = []
+    if select_tab != "1" or (
+        select_tab == "1"
+        and clean_node(wxr, None, node.template_parameters.get("onglet1", ""))
+        == "Conjugaison active"
+    ):
+        # don't extract or only extract "Conjugaison pronominale" tab
+        selected_tabs = [select_tab]
+    else:
+        selected_tabs = [str(i) for i in range(1, 7)]
+
+    for tab_index in selected_tabs:
+        arg_name = f"contenu{tab_index}"
+        if arg_name not in node.template_parameters:
+            break
+        for arg_node in node.template_parameters[arg_name]:
+            if (
+                isinstance(arg_node, TemplateNode)
+                and "-conj" in arg_node.template_name
+            ):
+                process_conj_template(wxr, entry, arg_node, conj_page_title)
 
 
 def process_conj_template(
@@ -107,6 +138,8 @@ def process_fr_conj_modes_table(
     conj_page_title: str,
 ) -> None:
     # the first "Modes impersonnels" table
+    added_forms = {f.form for f in entry.forms}
+
     for table_node in div_node.find_child(NodeKind.TABLE):
         for row_index, row in enumerate(
             table_node.find_child(NodeKind.TABLE_ROW)
@@ -131,7 +164,9 @@ def process_fr_conj_modes_table(
                         "Présent" if cell_index == 3 else "Passé"
                     )
                     translate_raw_tags(form)
-                    entry.forms.append(form)
+                    if form.form not in added_forms:
+                        entry.forms.append(form)
+                        added_forms.add(form.form)
                     form_text = ""
                 else:
                     if len(form_text) > 0 and not form_text.endswith("’"):
