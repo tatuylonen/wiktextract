@@ -5,7 +5,6 @@ from wikitextprocessor.parser import (
     LevelNode,
     NodeKind,
     WikiNode,
-    WikiNodeChildrenList,
 )
 
 from ...page import clean_node
@@ -226,39 +225,42 @@ TRANSCRIPTION_TEMPLATE_PROCESSORS = {
 }
 
 
-def extract_pronunciation(
+def extract_pronunciation_section(
     wxr: WiktextractContext,
     word_entry: WordEntry,
     level_node: LevelNode,
-):
-    unprocessed_nodes: WikiNodeChildrenList = []
-    for child in level_node.filter_empty_str_child():
-        if isinstance(child, WikiNode) and child.kind == NodeKind.TEMPLATE:
-            template_name = child.template_name
-            if template_name in TRANSCRIPTION_TEMPLATE_PROCESSORS:
-                processor = TRANSCRIPTION_TEMPLATE_PROCESSORS.get(template_name)
-                if processor:
-                    processor(wxr, word_entry, child)
-            elif template_name in ["audio", "аудио", "медиа"]:
-                audio_file = clean_node(
-                    wxr, None, child.template_parameters.get(1, "")
-                ).strip()
-                if audio_file != "":
-                    if len(word_entry.sounds) > 0:
-                        set_sound_file_url_fields(
-                            wxr, audio_file, word_entry.sounds[-1]
-                        )
-                    else:
-                        sound = Sound()
-                        set_sound_file_url_fields(wxr, audio_file, sound)
-                        word_entry.sounds.append(sound)
-            else:
-                unprocessed_nodes.append(child)
-        else:
-            unprocessed_nodes.append(child)
+) -> None:
+    for child in level_node.find_child(NodeKind.TEMPLATE):
+        template_name = child.template_name
+        if template_name in TRANSCRIPTION_TEMPLATE_PROCESSORS:
+            processor = TRANSCRIPTION_TEMPLATE_PROCESSORS.get(template_name)
+            if processor is not None:
+                processor(wxr, word_entry, child)
+        elif template_name in ["audio", "аудио", "медиа"]:
+            audio_file = clean_node(
+                wxr, None, child.template_parameters.get(1, "")
+            ).strip()
+            if audio_file != "":
+                if len(word_entry.sounds) > 0:
+                    set_sound_file_url_fields(
+                        wxr, audio_file, word_entry.sounds[-1]
+                    )
+                else:
+                    sound = Sound()
+                    set_sound_file_url_fields(wxr, audio_file, sound)
+                    word_entry.sounds.append(sound)
 
-    if unprocessed_nodes and clean_node(wxr, {}, unprocessed_nodes).strip():
-        wxr.wtp.debug(
-            f"Unprocessed nodes in pronunciation section: {unprocessed_nodes}",
-            sortid="extractor/ru/pronunciation/extract_pronunciation/24",
-        )
+
+def extract_homophone_section(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    level_node: LevelNode,
+) -> None:
+    homophones = []
+    for link_node in level_node.find_child_recursively(NodeKind.LINK):
+        homophone = clean_node(wxr, None, link_node)
+        if len(homophone) > 0:
+            homophones.append(homophone)
+    if len(homophones) > 0:
+        sound = Sound(homophones=homophones)
+        word_entry.sounds.append(sound)
