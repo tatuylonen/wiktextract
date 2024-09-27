@@ -21,7 +21,10 @@ from .linkage import (
     process_related_block_template,
 )
 from .models import AltForm, Form, Sense, Sound, WordEntry
-from .pronunciation import extract_pronunciation
+from .pronunciation import (
+    extract_homophone_section,
+    extract_pronunciation_section,
+)
 from .section_titles import LINKAGE_TITLES, POS_TEMPLATE_NAMES, POS_TITLES
 from .tags import MORPHOLOGICAL_TEMPLATE_TAGS
 from .translation import extract_translations
@@ -194,7 +197,7 @@ def parse_section(
         page_data[-1].tags.extend(pos_data.get("tags", []))
         extract_gloss(wxr, page_data[-1], level_node)
     elif section_title == "произношение" and wxr.config.capture_pronunciation:
-        extract_pronunciation(wxr, page_data[-1], level_node)
+        extract_pronunciation_section(wxr, page_data[-1], level_node)
     elif section_title == "семантические свойства":  # Semantic properties
         process_semantic_section(wxr, page_data, level_node)
     elif section_title in ("значение", "значения"):
@@ -234,6 +237,8 @@ def parse_section(
         parse_roman_section(wxr, page_data[-1], level_node)
     elif section_title == "прочее":
         pass
+    elif section_title == "омофоны" and wxr.config.capture_pronunciation:
+        extract_homophone_section(wxr, page_data[-1], level_node)
     else:
         wxr.wtp.debug(
             f"Unprocessed section {section_title}",
