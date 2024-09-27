@@ -163,4 +163,5 @@ class WordEntry(BaseModelWrap):
     etymology_text: str = ""
     related: list[Linkage] = []
     metagrams: list[Linkage] = []
+    proverbs: list[Linkage] = []
     literal_meaning: str = ""

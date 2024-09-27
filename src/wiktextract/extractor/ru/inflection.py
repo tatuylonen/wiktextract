@@ -179,7 +179,7 @@ def add_form_data(
     col_headers: list[str],
     col_index: int,
 ) -> None:
-    form = Form(form=form_text.strip())
+    form = Form(form=form_text.strip(" /"))
     form.raw_tags.extend(row_headers)
     if col_index < len(col_headers):
         form.raw_tags.append(col_headers[col_index])

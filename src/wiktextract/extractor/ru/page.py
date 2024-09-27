@@ -209,10 +209,16 @@ def parse_section(
     elif section_title == "этимология" and wxr.config.capture_etymologies:
         extract_etymology(wxr, page_data[-1], level_node)
     elif (
-        section_title == "фразеологизмы и устойчивые сочетания"
+        section_title
+        in [
+            "фразеологизмы и устойчивые сочетания",
+            "типичные сочетания",
+            "фразеологизмы",
+            "пословицы и поговорки",
+        ]
         and wxr.config.capture_linkages
     ):
-        extract_phrase_section(wxr, page_data[-1], level_node)
+        extract_phrase_section(wxr, page_data[-1], level_node, section_title)
     elif (
         section_title in ["перевод", "иноязычные аналоги"]
         and wxr.config.capture_translations

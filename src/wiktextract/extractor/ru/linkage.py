@@ -1,5 +1,4 @@
-from wikitextprocessor.parser import (
-    LEVEL_KIND_FLAGS,
+from wikitextprocessor import (
     HTMLNode,
     NodeKind,
     TemplateNode,
@@ -118,11 +117,21 @@ def extract_phrase_section(
     wxr: WiktextractContext,
     word_entry: WordEntry,
     level_node: WikiNode,
+    title_text: str,
 ) -> None:
     # "Фразеологизмы и устойчивые сочетания" section
-    title_text = clean_node(wxr, None, level_node.largs)
-    if title_text == "Фразеологизмы и устойчивые сочетания":
-        title_text = ""
+    for t_node in level_node.find_child(NodeKind.TEMPLATE):
+        # a template that adds links to words in list
+        # https://ru.wiktionary.org/wiki/Шаблон:в_три_колонки
+        if t_node.template_name.lower() in ["в три колонки", "фразеологизмы"]:
+            expanded_node = wxr.wtp.parse(
+                wxr.wtp.node_to_wikitext(t_node), expand_all=True
+            )
+            for div_tag in expanded_node.find_html(
+                "div", attr_name="class", attr_value="col3"
+            ):
+                extract_phrase_section(wxr, word_entry, div_tag, title_text)
+
     for list_node in level_node.find_child(NodeKind.LIST):
         for list_item in list_node.find_child_recursively(NodeKind.LIST_ITEM):
             prefix_nodes = []
@@ -149,10 +158,16 @@ def extract_phrase_section(
                         word_nodes.clear()
                         if len(word) > 0:
                             linkage = Linkage(word=word)
-                            if title_text != "":
+                            if title_text not in [
+                                "фразеологизмы и устойчивые сочетания",
+                                "пословицы и поговорки",
+                            ]:
                                 linkage.raw_tags.append(title_text)
                             translate_raw_tags(linkage)
-                            word_entry.derived.append(linkage)
+                            if title_text == "пословицы и поговорки":
+                                word_entry.proverbs.append(linkage)
+                            else:
+                                word_entry.derived.append(linkage)
                 elif isinstance(node, WikiNode):
                     if node.kind == NodeKind.LIST:
                         continue
@@ -166,13 +181,16 @@ def extract_phrase_section(
             word = clean_node(wxr, None, prefix_nodes + word_nodes)
             if len(word) > 0:
                 linkage = Linkage(word=word)
-                if title_text != "":
+                if title_text not in [
+                    "фразеологизмы и устойчивые сочетания",
+                    "пословицы и поговорки",
+                ]:
                     linkage.raw_tags.append(title_text)
                 translate_raw_tags(linkage)
-                word_entry.derived.append(linkage)
-
-    for next_level in level_node.find_child(LEVEL_KIND_FLAGS):
-        extract_phrase_section(wxr, word_entry, next_level)
+                if title_text == "пословицы и поговорки":
+                    word_entry.proverbs.append(linkage)
+                else:
+                    word_entry.derived.append(linkage)
 
 
 def process_semantics_template(
