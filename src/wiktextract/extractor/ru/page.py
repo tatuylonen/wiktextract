@@ -218,7 +218,7 @@ def parse_section(
         ]
         and wxr.config.capture_linkages
     ):
-        extract_phrase_section(wxr, page_data[-1], level_node)
+        extract_phrase_section(wxr, page_data[-1], level_node, section_title)
     elif (
         section_title in ["перевод", "иноязычные аналоги"]
         and wxr.config.capture_translations
