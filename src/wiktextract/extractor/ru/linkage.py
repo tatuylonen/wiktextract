@@ -1,5 +1,4 @@
-from wikitextprocessor.parser import (
-    LEVEL_KIND_FLAGS,
+from wikitextprocessor import (
     HTMLNode,
     NodeKind,
     TemplateNode,
@@ -149,10 +148,13 @@ def extract_phrase_section(
                         word_nodes.clear()
                         if len(word) > 0:
                             linkage = Linkage(word=word)
-                            if title_text != "":
+                            if title_text not in ["", "Пословицы и поговорки"]:
                                 linkage.raw_tags.append(title_text)
                             translate_raw_tags(linkage)
-                            word_entry.derived.append(linkage)
+                            if title_text == "Пословицы и поговорки":
+                                word_entry.proverbs.append(linkage)
+                            else:
+                                word_entry.derived.append(linkage)
                 elif isinstance(node, WikiNode):
                     if node.kind == NodeKind.LIST:
                         continue
@@ -166,13 +168,13 @@ def extract_phrase_section(
             word = clean_node(wxr, None, prefix_nodes + word_nodes)
             if len(word) > 0:
                 linkage = Linkage(word=word)
-                if title_text != "":
+                if title_text not in ["", "Пословицы и поговорки"]:
                     linkage.raw_tags.append(title_text)
                 translate_raw_tags(linkage)
-                word_entry.derived.append(linkage)
-
-    for next_level in level_node.find_child(LEVEL_KIND_FLAGS):
-        extract_phrase_section(wxr, word_entry, next_level)
+                if title_text == "Пословицы и поговорки":
+                    word_entry.proverbs.append(linkage)
+                else:
+                    word_entry.derived.append(linkage)
 
 
 def process_semantics_template(

@@ -5,15 +5,16 @@ from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.ru.linkage import (
     extract_linkages,
-    extract_phrase_section,
     process_related_block_template,
 )
 from wiktextract.extractor.ru.models import WordEntry
-from wiktextract.extractor.ru.page import parse_page
+from wiktextract.extractor.ru.page import parse_page, parse_section
 from wiktextract.wxr_context import WiktextractContext
 
 
 class TestLinkage(TestCase):
+    maxDiff = None
+
     def setUp(self) -> None:
         self.wxr = WiktextractContext(
             Wtp(lang_code="ru"),
@@ -118,7 +119,7 @@ class TestLinkage(TestCase):
 ==== Пословицы и поговорки ====
 * [[обжёгшись на молоке, дуют на воду]]
 ** [[обжёгся на молоке, дует и на воду]]""")  # noqa: E501
-        extract_phrase_section(self.wxr, word_entry, root.children[0])
+        parse_section(self.wxr, [word_entry], root.children[0])
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in word_entry.derived],
             [
@@ -145,13 +146,16 @@ class TestLinkage(TestCase):
                     "word": "водой (реже — водою) захлёбываются",
                     "raw_tags": ["Типичные сочетания"],
                 },
+            ],
+        )
+        self.assertEqual(
+            [d.model_dump(exclude_defaults=True) for d in word_entry.proverbs],
+            [
                 {
                     "word": "обжёгшись на молоке, дуют на воду",
-                    "raw_tags": ["Пословицы и поговорки"],
                 },
                 {
                     "word": "обжёгся на молоке, дует и на воду",
-                    "raw_tags": ["Пословицы и поговорки"],
                 },
             ],
         )

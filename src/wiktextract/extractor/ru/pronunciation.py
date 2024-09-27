@@ -3,9 +3,9 @@ from typing import Union
 
 from wikitextprocessor.parser import (
     LevelNode,
+    NodeKind,
     WikiNode,
     WikiNodeChildrenList,
-    NodeKind,
 )
 
 from ...page import clean_node
