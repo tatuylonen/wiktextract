@@ -1,5 +1,5 @@
 # List of templates
-# https://ja.wiktionary.org/wiki/テンプレートの一覧#品詞表記
+# https://ja.wiktionary.org/wiki/Wiktionary:テンプレートの一覧#品詞表記
 POS_DATA = {
     "名詞": {"pos": "noun"},
     "数詞": {"pos": "num"},
