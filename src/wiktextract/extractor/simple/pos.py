@@ -1,13 +1,14 @@
 import re
 from typing import Optional, Union
 
-from wikitextprocessor import NodeKind, TemplateNode, WikiNode
+from wikitextprocessor import NodeKind, TemplateArgs, TemplateNode, WikiNode
 from wikitextprocessor.parser import LEVEL_KIND_FLAGS
+
 from wiktextract import WiktextractContext
 from wiktextract.page import clean_node
 from wiktextract.wxr_logging import logger
 
-from .models import Example, Form, Sense, WordEntry
+from .models import Example, Form, Linkage, Sense, WordEntry
 from .section_titles import POS_HEADINGS
 from .table import parse_pos_table
 from .text_utils import POS_ENDING_NUMBER_RE, POS_TEMPLATE_NAMES
@@ -48,6 +49,18 @@ def recurse_glosses1(
 ) -> list[ExOrSense]:
     ret: list[ExOrSense] = []
     found_gloss = False
+    synonyms: list[Linkage] = []
+
+    def gloss_template_fn(name: str, ht: TemplateArgs) -> str | None:
+        if name in ("synonyms", "synonym", "syn"):
+            for syn in ht.values():
+                synonyms.append(
+                    Linkage(word=clean_node(wxr, parent_sense, syn))
+                )
+            return ""
+
+        return None
+
     if node.kind == NodeKind.LIST:
         for child in node.children:
             if isinstance(child, str):
@@ -87,7 +100,13 @@ def recurse_glosses1(
         elif node.sarg == ":":
             return []
 
-        text = clean_node(wxr, parent_sense, contents)
+        text = clean_node(
+            wxr, parent_sense, contents, template_fn=gloss_template_fn
+        )
+
+        if len(synonyms) > 0:
+            parent_sense.synonyms = synonyms
+
         if len(text) > 0:
             found_gloss = True
             parent_sense.glosses.append(text)

@@ -31,6 +31,13 @@ class Example(SimpleEnglishBaseModel):
     #     description="Source of reference",
     # )
 
+class Linkage(SimpleEnglishBaseModel):
+    word: str
+    # sense_index: str = ""
+    # note: str = ""
+    # raw_tags: list[str] = []
+    # tags: list[str] = []
+
 class Sense(SimpleEnglishBaseModel):
     glosses: list[str] = []  # "Gloss supercategory", "Specific gloss."
     tags: list[str] = []
@@ -38,6 +45,7 @@ class Sense(SimpleEnglishBaseModel):
     topics: list[str] = []
     categories: list[str] = []
     examples: list[Example] = []
+    synonyms: list[Linkage] = []
     # ruby: list[tuple[str, ...]] = []
 
 class Form(SimpleEnglishBaseModel):
