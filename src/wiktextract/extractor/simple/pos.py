@@ -72,7 +72,7 @@ def recurse_glosses1(
         if broke_out is True:
             sublists = node.children[i:]
 
-        if node.sarg.endswith(":") and node.sarg != ":":
+        if node.sarg.endswith((":", "*")) and node.sarg not in (":", "*"):
             # This is either a quotation or example
             # != ":" filters out lines that are usually notes or random
             # stuff not inside gloss lists; see "dare"
@@ -170,7 +170,7 @@ def process_pos(
                 m = POS_ENDING_NUMBER_RE.search(sound_pos)
                 if m is not None:
                     s_num = int(m.group(1).strip())
-                    s_pos = sound_pos[:m.start()].strip().lower()
+                    s_pos = sound_pos[: m.start()].strip().lower()
                 else:
                     s_pos = sound_pos.strip().lower()
                     s_num = -1
