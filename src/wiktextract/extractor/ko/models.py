@@ -10,12 +10,24 @@ class KoreanBaseModel(BaseModel):
     )
 
 
+class Example(KoreanBaseModel):
+    text: str = ""
+    translation: str = ""
+    ref: str = ""
+    roman: str = ""
+    ruby: list[tuple[str, ...]] = Field(
+        default=[], description="Japanese Kanji and furigana"
+    )
+    tags: list[str] = []
+
+
 class Sense(KoreanBaseModel):
     glosses: list[str] = []
     tags: list[str] = []
     raw_tags: list[str] = []
     topics: list[str] = []
     categories: list[str] = []
+    examples: list[Example] = []
 
 
 class WordEntry(KoreanBaseModel):

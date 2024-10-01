@@ -15,6 +15,18 @@ PANEL_PREFIXES = set()
 ADDITIONAL_EXPAND_TEMPLATES = set()
 
 
+def extract_section_categories(
+    wxr: WiktextractContext,
+    page_data: list[WordEntry],
+    base_data: WordEntry,
+    level_node: LevelNode,
+) -> None:
+    for link_node in level_node.find_child(NodeKind.LINK):
+        clean_node(
+            wxr, page_data[-1] if len(page_data) > 0 else base_data, link_node
+        )
+
+
 def parse_section(
     wxr: WiktextractContext,
     page_data: list[WordEntry],
@@ -29,10 +41,13 @@ def parse_section(
     for next_level in level_node.find_child(LEVEL_KIND_FLAGS):
         parse_section(wxr, page_data, base_data, next_level)
 
+    extract_section_categories(wxr, page_data, base_data, level_node)
+
 
 def parse_language_section(
     wxr: WiktextractContext, page_data: list[WordEntry], level2_node: LevelNode
 ) -> None:
+    pre_data_len = len(page_data)
     lang_name = clean_node(wxr, None, level2_node.largs)
     lang_code = name_to_code(lang_name, "ko")
     if lang_code == "":
@@ -49,11 +64,12 @@ def parse_language_section(
         lang=lang_name,
         pos="unknown",
     )
+    extract_section_categories(wxr, page_data, base_data, level2_node)
     for level3_node in level2_node.find_child(NodeKind.LEVEL3):
         parse_section(wxr, page_data, base_data, level3_node)
 
     # no POS section
-    if not level2_node.contain_node(NodeKind.LEVEL3):
+    if len(page_data) == pre_data_len:
         extract_pos_section(wxr, page_data, base_data, level2_node, "")
 
 
