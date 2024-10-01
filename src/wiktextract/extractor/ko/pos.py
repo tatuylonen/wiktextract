@@ -83,5 +83,9 @@ def extract_unorderd_list_item(
                 new_list_item.children = list_item.children[index + 1 :]
                 extract_gloss_list_item(wxr, word_entry, new_list_item)
                 break
-        elif isinstance(node, str) and node.startswith("어원:"):
-            break  # etymology
+        elif isinstance(node, str) and "어원:" in node:
+            etymology_nodes = []
+            etymology_nodes.append(node[node.index("어원:") + 3 :])
+            etymology_nodes.extend(list_item.children[index + 1 :])
+            word_entry.etymology_text = clean_node(wxr, None, etymology_nodes)
+            break

@@ -50,6 +50,7 @@ class TestKoGloss(TestCase):
 ==== 명사 1 ====
 # 가축으로 많이 기르는 갯과 포유류 동물.
 ==== 명사 2 ====
+* 어원: < [[중세국어|중세 한국어]] 개〮 [H] (분류두공부시언해 초간본(1481)).
 # 강이나 내에 바닷물이 드나드는 곳.""",
         )
         self.assertEqual(data[0]["pos"], "noun")
@@ -61,4 +62,8 @@ class TestKoGloss(TestCase):
         self.assertEqual(
             data[1]["senses"],
             [{"glosses": ["강이나 내에 바닷물이 드나드는 곳."]}],
+        )
+        self.assertEqual(
+            data[1]["etymology_text"],
+            "< 중세 한국어 개〮 [H] (분류두공부시언해 초간본(1481)).",
         )

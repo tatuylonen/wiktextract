@@ -41,3 +41,4 @@ class WordEntry(KoreanBaseModel):
     categories: list[str] = []
     tags: list[str] = []
     raw_tags: list[str] = []
+    etymology_text: str = ""
