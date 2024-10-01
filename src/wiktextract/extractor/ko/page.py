@@ -47,6 +47,7 @@ def parse_section(
 def parse_language_section(
     wxr: WiktextractContext, page_data: list[WordEntry], level2_node: LevelNode
 ) -> None:
+    pre_data_len = len(page_data)
     lang_name = clean_node(wxr, None, level2_node.largs)
     lang_code = name_to_code(lang_name, "ko")
     if lang_code == "":
@@ -68,7 +69,7 @@ def parse_language_section(
         parse_section(wxr, page_data, base_data, level3_node)
 
     # no POS section
-    if not level2_node.contain_node(NodeKind.LEVEL3):
+    if len(page_data) == pre_data_len:
         extract_pos_section(wxr, page_data, base_data, level2_node, "")
 
 

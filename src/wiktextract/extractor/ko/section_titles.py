@@ -8,4 +8,5 @@ POS_DATA = {
     "기호": {"pos": "symbol"},
     "접미사": {"pos": "suffix", "tags": ["morpheme"]},
     "접두사": {"pos": "prefix", "tags": ["morpheme"]},
+    "의미": {"pos": "unknown"},
 }
