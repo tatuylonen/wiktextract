@@ -323,6 +323,8 @@ def clean_node(
     post_template_fn: Optional[PostTemplateFnCallable] = None,
     node_handler_fn: Optional[NodeHandlerFnCallable] = None,
     collect_links: bool = False,
+    no_strip = False,
+    no_html_strip = False,
 ) -> str:
     """
     Expands node or nodes to text, cleaning up HTML tags and duplicate spaces.
@@ -435,7 +437,7 @@ def clean_node(
                     if not sense_data_has_value(sense_data, "links", ltuple):
                         data_append(sense_data, "links", ltuple)
 
-    v = clean_value(wxr, v)
+    v = clean_value(wxr, v, no_strip=no_strip, no_html_strip=no_html_strip)
     # print("After clean_value:", repr(v))
 
     # Strip any unhandled templates and other stuff.  This is mostly intended
