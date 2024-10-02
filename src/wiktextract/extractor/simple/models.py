@@ -46,6 +46,7 @@ class Sense(SimpleEnglishBaseModel):
     categories: list[str] = []
     examples: list[Example] = []
     synonyms: list[Linkage] = []
+    antonyms: list[Linkage] = []
     # ruby: list[tuple[str, ...]] = []
 
 class Form(SimpleEnglishBaseModel):

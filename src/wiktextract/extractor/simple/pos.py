@@ -50,12 +50,19 @@ def recurse_glosses1(
     ret: list[ExOrSense] = []
     found_gloss = False
     synonyms: list[Linkage] = []
+    antonyms: list[Linkage] = []
 
-    def gloss_template_fn(name: str, ht: TemplateArgs) -> str | None:
+    def gloss_template_fn(name: str, ht: TemplateArgs) -> Optional[str]:
         if name in ("synonyms", "synonym", "syn"):
             for syn in ht.values():
                 synonyms.append(
                     Linkage(word=clean_node(wxr, parent_sense, syn))
+                )
+            return ""
+        if name in ("antonyms", "antonym", "ant"):
+            for ant in ht.values():
+                antonyms.append(
+                    Linkage(word=clean_node(wxr, parent_sense, ant))
                 )
             return ""
 
@@ -106,6 +113,9 @@ def recurse_glosses1(
 
         if len(synonyms) > 0:
             parent_sense.synonyms = synonyms
+
+        if len(antonyms) > 0:
+            parent_sense.antonyms = antonyms
 
         if len(text) > 0:
             found_gloss = True
