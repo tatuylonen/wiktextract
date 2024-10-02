@@ -87,7 +87,7 @@ def parse_pos_table(
                     column_hdrs[i] = text
                 else:
                     tags = []
-                    if column_hdrs[i]:
+                    if i in column_hdrs and column_hdrs[i]:
                         tags.append(column_hdrs[i])
                     if row_hdr:
                         tags.append(row_hdr)
