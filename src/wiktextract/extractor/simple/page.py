@@ -2,6 +2,7 @@ import re
 from typing import Any
 
 from wikitextprocessor.parser import LEVEL_KIND_FLAGS, print_tree
+
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 from wiktextract.wxr_logging import logger
