@@ -1529,7 +1529,7 @@ def clean_value(
         # Links may be nested, so keep replacing until there is no more change.
         orig = title
         title = re.sub(
-            rf"(?si)\[\[\s*{category_names_pattern}\s*:\s*([^]]+?)\s*\]\]",
+            rf"(?si)\s*\[\[\s*{category_names_pattern}\s*:\s*([^]]+?)\s*\]\]",
             "",
             title,
         )

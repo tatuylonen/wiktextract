@@ -461,7 +461,7 @@ foo
                     "senses": [
                         {
                             "categories": ["bar"],
-                            "glosses": ["sense 1 , baz"],
+                            "glosses": ["sense 1, baz"],
                             "links": [("baz", "bazlink")],
                         },
                     ],
