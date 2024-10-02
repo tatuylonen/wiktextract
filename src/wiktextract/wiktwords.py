@@ -15,13 +15,9 @@ import logging
 import os
 import pstats
 import sys
+from importlib.resources import files
 from pathlib import Path
 from typing import TextIO
-
-if sys.version_info < (3, 10):
-    from importlib_resources import files
-else:
-    from importlib.resources import files
 
 from mediawiki_langcodes import code_to_name, name_to_code
 from wikitextprocessor import Wtp
