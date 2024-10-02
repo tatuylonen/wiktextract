@@ -8,7 +8,7 @@ from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.wxr_context import WiktextractContext
 
 
-class WiktExtractTests(unittest.TestCase):
+class CleanTests(unittest.TestCase):
     def setUp(self) -> None:
         self.wxr = WiktextractContext(Wtp(), WiktionaryConfig())
 
@@ -138,6 +138,11 @@ class WiktExtractTests(unittest.TestCase):
         v = "[[  File  :Foo.jpg]]Bar"
         v = clean_value(self.wxr, v)
         self.assertEqual(v, "Bar")
+
+    def test_cv_link14(self):
+        v = "foo    \n\n[[Category:Bar]]Bar"
+        v = clean_value(self.wxr, v)
+        self.assertEqual(v, "fooBar")
 
     def test_cv_url1(self):
         v = "This is a [http://ylonen.org test]."
