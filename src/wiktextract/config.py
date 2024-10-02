@@ -5,7 +5,6 @@
 
 import collections
 import json
-import sys
 from importlib.resources import files
 from typing import (
     Iterable,
@@ -61,7 +60,6 @@ class WiktionaryConfig:
         "debugs",
         "redirects",
         "data_folder",
-        "analyze_templates",
         "extract_thesaurus_pages",
         "save_ns_names",
         "extract_ns_names",
@@ -123,22 +121,12 @@ class WiktionaryConfig:
         self.debugs: list[ErrorMessageData] = []
         self.redirects: SoundFileRedirects = {}
         self.data_folder = files("wiktextract") / "data" / dump_file_lang_code
-        self.analyze_templates = True  # find templates that need pre-expand
-        self.extract_thesaurus_pages = True
+        self.extract_thesaurus_pages = False
         # these namespace pages will be copied from the XML dump file and
         # saved to a SQLite db file
-        self.save_ns_names = [
-            "Main",
-            "Category",  # do we use this?
-            "Appendix",
-            "Project",
-            "Thesaurus",
-            "Module",
-            "Template",
-            "Reconstruction",
-        ]
+        self.save_ns_names = ["Main", "Template", "Module"]
         # these are extracted namespaces
-        self.extract_ns_names = ["Main", "Reconstruction"]
+        self.extract_ns_names = ["Main"]
         self.allowed_html_tags: dict[str, HTMLTagData] = {}
         self.load_edition_settings()
 
