@@ -11,7 +11,11 @@ from wiktextract.wxr_logging import logger
 from .models import Example, Form, Linkage, Sense, WordEntry
 from .section_titles import POS_HEADINGS
 from .table import parse_pos_table
-from .text_utils import POS_ENDING_NUMBER_RE, POS_TEMPLATE_NAMES
+from .text_utils import (
+    POS_ENDING_NUMBER_RE,
+    POS_TEMPLATE_NAMES,
+    STRIP_PUNCTUATION,
+)
 
 
 def remove_duplicate_forms(
@@ -41,6 +45,8 @@ def remove_duplicate_forms(
 
 ExOrSense = Union[Sense, Example]
 
+IGNORED_GLOSS_TEMPLATES = ("exstub",)
+
 
 def recurse_glosses1(
     wxr: WiktextractContext,
@@ -64,6 +70,9 @@ def recurse_glosses1(
                 antonyms.append(
                     Linkage(word=clean_node(wxr, parent_sense, ant))
                 )
+            return ""
+
+        if name in IGNORED_GLOSS_TEMPLATES:
             return ""
 
         return None
@@ -107,6 +116,23 @@ def recurse_glosses1(
         elif node.sarg == ":":
             return []
 
+        template_tags: list[str] = []
+        found_template = False
+
+        for i, tnode in enumerate(contents):
+            if isinstance(tnode, str) and tnode.strip(STRIP_PUNCTUATION):
+                break
+            if isinstance(tnode, TemplateNode):
+                tag_text = clean_node(
+                    wxr, parent_sense, tnode, template_fn=gloss_template_fn
+                ).strip(STRIP_PUNCTUATION)
+                if tag_text:
+                    found_template = True
+                    template_tags.append(tag_text)
+
+        if found_template is True:
+            contents = contents[i:]
+
         text = clean_node(
             wxr, parent_sense, contents, template_fn=gloss_template_fn
         )
@@ -120,6 +146,9 @@ def recurse_glosses1(
         if len(text) > 0:
             found_gloss = True
             parent_sense.glosses.append(text)
+
+        if len(template_tags) > 0:
+            parent_sense.raw_tags.extend(template_tags)
 
         for sl in sublists:
             if not (isinstance(sl, WikiNode) and sl.kind == NodeKind.LIST):
