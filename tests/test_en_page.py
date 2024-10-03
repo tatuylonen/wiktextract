@@ -785,7 +785,7 @@ foo {{+obj|cs|accusative|blu|or|ergative|means=MEANING}}
             parse_page(
                 self.wxr,
                 "马",
-                """==Chinese=
+                """==Chinese==
 ===Definitions===
 {{zh-see|馬}}""",
             ),
