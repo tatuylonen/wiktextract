@@ -2,6 +2,7 @@ import unittest
 from unittest.mock import patch
 
 from wikitextprocessor import Page, WikiNode, Wtp
+
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.simple.models import WordEntry
 from wiktextract.extractor.simple.pronunciation import process_pron
