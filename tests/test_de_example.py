@@ -90,7 +90,7 @@ class TestDEExample(unittest.TestCase):
         self.wxr.wtp.start_page("Beispiel")
         self.wxr.wtp.add_page("Vorlage:Literatur", 10, "Expanded template")
         root = self.wxr.wtp.parse(
-            "<ref>{{Literatur|Autor=Steffen Möller|Titel=Viva Warszawa|TitelErg=Polen für Fortgeschrittene|Verlag=Piper|Ort=München/Berlin|Jahr=2015}}, Seite 273. ISBN 978-3-89029-459-9.</ref>"
+            "<ref>{{Literatur|Autor=Steffen Möller|Titel=Viva Warszawa|TitelErg=Polen für Fortgeschrittene|Verlag=Piper|Ort=München/Berlin|Jahr=2015|}}, Seite 273. ISBN 978-3-89029-459-9.</ref>"
         )
 
         example_data = Example()
