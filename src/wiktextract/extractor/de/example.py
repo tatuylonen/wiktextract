@@ -98,6 +98,8 @@ def extract_reference(
         if template_node.template_name == "Literatur":
             # https://de.wiktionary.org/wiki/Vorlage:Literatur
             for key, value in template_node.template_parameters.items():
+                if not isinstance(key, str):
+                    continue
                 if key.lower() in LITERATUR_TEMPLATE_ARGS:
                     field = LITERATUR_TEMPLATE_ARGS[key.lower()]
                     if field in example_data.model_fields:
