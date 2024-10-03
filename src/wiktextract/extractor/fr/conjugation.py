@@ -83,12 +83,19 @@ def process_onglets_conjugaison_template(
         arg_name = f"contenu{tab_index}"
         if arg_name not in node.template_parameters:
             break
-        for arg_node in node.template_parameters[arg_name]:
-            if (
-                isinstance(arg_node, TemplateNode)
-                and "-conj" in arg_node.template_name
-            ):
-                process_conj_template(wxr, entry, arg_node, conj_page_title)
+        arg_value = node.template_parameters[arg_name]
+        if (
+            isinstance(arg_value, TemplateNode)
+            and "-conj" in arg_value.template_name
+        ):
+            process_conj_template(wxr, entry, arg_value, conj_page_title)
+        elif isinstance(arg_value, list):
+            for arg_node in arg_value:
+                if (
+                    isinstance(arg_node, TemplateNode)
+                    and "-conj" in arg_node.template_name
+                ):
+                    process_conj_template(wxr, entry, arg_node, conj_page_title)
 
 
 def process_conj_template(
