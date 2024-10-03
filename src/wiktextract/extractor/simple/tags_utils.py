@@ -12,7 +12,7 @@ SPLITTER_RE = re.compile(r"\s*(?:,|;|\(|\)|\.|&)\s*")
 
 def convert_tags(raw_tags: list[str]) -> tuple[list[str], list[str], list[str]]:
     """Check if raw tags contain tag strings in `simple_tag_map` and return
-    two lists of strings, the newly extract tags and the remaining raw tags.
+    lists of strings: tags, raw_tags and parts of speech.
     """
 
     if not any(s.strip(STRIP_PUNCTUATION) for s in raw_tags):

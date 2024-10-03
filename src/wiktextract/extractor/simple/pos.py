@@ -11,6 +11,7 @@ from wiktextract.wxr_logging import logger
 from .models import Example, Form, Linkage, Sense, WordEntry
 from .section_titles import POS_HEADINGS
 from .table import parse_pos_table
+from .tags_utils import convert_tags
 from .text_utils import (
     POS_ENDING_NUMBER_RE,
     POS_TEMPLATE_NAMES,
@@ -193,6 +194,10 @@ def recurse_glosses(
                 sortid="simple/pos/glosses",
             )
             continue
+        tags, raw_tags, poses = convert_tags(r.raw_tags)
+        r.tags = tags
+        r.raw_tags = raw_tags
+        r.tags.extend(poses)
         ret.append(r)
 
     if len(ret) > 0:
