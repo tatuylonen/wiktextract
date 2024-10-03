@@ -99,7 +99,7 @@ def parse_page(
         else:
             pos_num = -1
         if heading_title in POS_HEADINGS:
-            pos_data = base_data.copy(deep=True)
+            pos_data = base_data.model_copy(deep=True)
             new_data = process_pos(wxr, level, pos_data, heading_title, pos_num)
             if new_data is not None:
                 word_datas.append(new_data)

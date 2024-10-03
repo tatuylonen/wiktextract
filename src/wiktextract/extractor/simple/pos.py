@@ -87,7 +87,7 @@ def recurse_glosses1(
                 )
                 continue
             ret.extend(
-                recurse_glosses1(wxr, parent_sense.copy(deep=True), child)
+                recurse_glosses1(wxr, parent_sense.model_copy(deep=True), child)
             )
     if node.kind == NodeKind.LIST_ITEM:
         contents = []
@@ -158,7 +158,9 @@ def recurse_glosses1(
                     sortid="simple/pos/82",
                 )
                 continue
-            for r in recurse_glosses1(wxr, parent_sense.copy(deep=True), sl):
+            for r in recurse_glosses1(
+                wxr, parent_sense.model_copy(deep=True), sl
+            ):
                 if isinstance(r, Example):
                     parent_sense.examples.append(r)
                 else:
