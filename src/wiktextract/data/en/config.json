@@ -1,0 +1,14 @@
+{
+  "extract_thesaurus_pages": true,
+  "save_ns_names": [
+    "Main",
+    "Category",
+    "Appendix",
+    "Project",
+    "Thesaurus",
+    "Module",
+    "Template",
+    "Reconstruction"
+  ],
+  "extract_ns_names": ["Main", "Reconstruction"]
+}

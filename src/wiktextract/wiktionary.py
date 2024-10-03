@@ -14,12 +14,13 @@ import time
 import traceback
 from multiprocessing import Pool, current_process
 from pathlib import Path
-from typing import Optional, TextIO, Union
+from typing import TextIO
 
 from wikitextprocessor import Page
 from wikitextprocessor.core import CollatedErrorReturnData, ErrorMessageData
 from wikitextprocessor.dumpparser import process_dump
 
+from .import_utils import import_extractor_module
 from .page import parse_page
 from .thesaurus import (
     emit_words_in_thesaurus,
@@ -86,14 +87,14 @@ def page_handler(
 def parse_wiktionary(
     wxr: WiktextractContext,
     dump_path: str,
-    num_processes: Optional[int],
+    num_processes: int | None,
     phase1_only: bool,
     namespace_ids: set[int],
     out_f: TextIO,
     human_readable: bool = False,
-    override_folders: Optional[Union[list[str], list[Path]]] = None,
+    override_folders: list[str] | list[Path] | None = None,
     skip_extract_dump: bool = False,
-    save_pages_path: Optional[Union[str, Path]] = None,
+    save_pages_path: str | Path = None,
 ) -> None:
     """Parses Wiktionary from the dump file ``path`` (which should point
     to a "enwiktionary-<date>-pages-articles.xml.bz2" file.  This
@@ -110,6 +111,9 @@ def parse_wiktionary(
     if save_pages_path is not None:
         save_pages_path = Path(save_pages_path)
 
+    analyze_template_mod = import_extractor_module(
+        wxr.wtp.lang_code, "analyze_template"
+    )
     process_dump(
         wxr.wtp,
         dump_path,
@@ -117,7 +121,9 @@ def parse_wiktionary(
         override_folders,
         skip_extract_dump,
         save_pages_path,
-        not wxr.config.analyze_templates,
+        analyze_template_mod.analyze_template
+        if analyze_template_mod is not None
+        else None,
     )
 
     if not phase1_only:
@@ -168,9 +174,9 @@ def init_worker_process(worker_func, wxr: WiktextractContext) -> None:
 def check_error(
     wxr: WiktextractContext,
     dt: dict,
-    word: Optional[str],
-    lang: Optional[str],
-    pos: Optional[str],
+    word: str | None,
+    lang: str | None,
+    pos: str | None,
     msg: str,
 ) -> None:
     """Formats and outputs an error message about data format checks."""
@@ -721,10 +727,10 @@ def check_json_data(wxr: WiktextractContext, dt: dict) -> None:
 
 def reprocess_wiktionary(
     wxr: WiktextractContext,
-    num_processes: Optional[int],
+    num_processes: int | None,
     out_f: TextIO,
     human_readable: bool = False,
-    search_pattern: Optional[str] = None,
+    search_pattern: str | None = None,
 ) -> None:
     """Reprocesses the Wiktionary from the sqlite db."""
     logger.info("Second phase - processing pages")
@@ -801,7 +807,6 @@ def extract_namespace(
     t = time.time()
     with tarfile.open(path, "w") as tarf:
         for page in wxr.wtp.get_all_pages([ns_id]):
-            text: Union[str, bytes]
             title, text = process_ns_page_title(page, namespace)
             text = text.encode("utf-8")
             f = io.BytesIO(text)

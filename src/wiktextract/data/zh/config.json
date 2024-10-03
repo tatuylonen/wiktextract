@@ -1,5 +1,4 @@
 {
-  "analyze_templates": false,
   "extract_thesaurus_pages": true,
   "save_ns_names": [
     "Main",
@@ -7,6 +6,5 @@
     "Module",
     "Thesaurus",
     "Appendix"
-  ],
-  "extract_ns_names": ["Main"]
+  ]
 }

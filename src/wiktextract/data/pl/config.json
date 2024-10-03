@@ -1,6 +1,0 @@
-{
-  "analyze_templates": false,
-  "extract_thesaurus_pages": false,
-  "save_ns_names": ["Main", "Template", "Module"],
-  "extract_ns_names": ["Main"]
-}

@@ -93,7 +93,3 @@ select = [
 [tool.mypy]
 mypy_path = "typestubs"
 python_version = "3.10"
-
-[[tool.mypy.overrides]]
-module = "importlib_resources.*"
-ignore_missing_imports = true
