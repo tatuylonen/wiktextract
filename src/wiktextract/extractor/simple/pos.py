@@ -1,21 +1,20 @@
-import re
-from typing import Optional, Union
-
 from wikitextprocessor import NodeKind, TemplateArgs, TemplateNode, WikiNode
 from wikitextprocessor.parser import LEVEL_KIND_FLAGS
 
 from wiktextract import WiktextractContext
 from wiktextract.page import clean_node
-from wiktextract.wxr_logging import logger
 
 from .models import Example, Form, Linkage, Sense, WordEntry
 from .section_titles import POS_HEADINGS
 from .table import parse_pos_table
+from .tags_utils import convert_tags_in_sense
 from .text_utils import (
     POS_ENDING_NUMBER_RE,
     POS_TEMPLATE_NAMES,
     STRIP_PUNCTUATION,
 )
+
+# from wiktextract.wxr_logging import logger
 
 
 def remove_duplicate_forms(
@@ -43,30 +42,39 @@ def remove_duplicate_forms(
     return forms
 
 
-ExOrSense = Union[Sense, Example]
+ExOrSense = Sense | Example
 
 IGNORED_GLOSS_TEMPLATES = ("exstub",)
 
 
-def recurse_glosses1(
-    wxr: WiktextractContext,
-    parent_sense: Sense,
-    node: WikiNode,
-) -> list[ExOrSense]:
-    ret: list[ExOrSense] = []
-    found_gloss = False
+def parse_gloss(
+    wxr: WiktextractContext, parent_sense: Sense, contents: list[str | WikiNode]
+) -> bool:
+    """Take what is preferably a line of text and extract tags and a gloss from
+        it. The data is inserted into parent_sense, and for recursion purposes
+        we return a boolean that tells whether there was any gloss text in a
+        lower node."""
+    if len(contents) == 0:
+        return False
+
+    template_tags: list[str] = []
+    found_template = False
     synonyms: list[Linkage] = []
     antonyms: list[Linkage] = []
 
-    def gloss_template_fn(name: str, ht: TemplateArgs) -> Optional[str]:
+    def gloss_template_fn(name: str, ht: TemplateArgs) -> str | None:
         if name in ("synonyms", "synonym", "syn"):
             for syn in ht.values():
+                if not syn:
+                    continue
                 synonyms.append(
                     Linkage(word=clean_node(wxr, parent_sense, syn))
                 )
             return ""
         if name in ("antonyms", "antonym", "ant"):
             for ant in ht.values():
+                if not ant:
+                    continue
                 antonyms.append(
                     Linkage(word=clean_node(wxr, parent_sense, ant))
                 )
@@ -76,6 +84,66 @@ def recurse_glosses1(
             return ""
 
         return None
+
+    for i, tnode in enumerate(contents):
+        if (
+            isinstance(tnode, str)
+            and tnode.strip(STRIP_PUNCTUATION)
+            or not isinstance(tnode, (TemplateNode, str))
+        ):
+            break
+        if isinstance(tnode, TemplateNode):
+            if tnode.template_name == "exstub":
+                parent_sense.raw_tags.append("no-gloss")
+                return False
+            tag_text = clean_node(
+                wxr, parent_sense, tnode, template_fn=gloss_template_fn
+            )
+            if tag_text.endswith((")", "]")):
+                # Simple wiktionary is pretty good at making these templates
+                # have brackets
+                tag_text = tag_text.strip(STRIP_PUNCTUATION)
+                if tag_text:
+                    found_template = True
+                    template_tags.append(tag_text)
+            else:
+                # looks like normal text, so probably something {{plural of}}.
+                break
+    # else for the for loop: if we never break
+    else:
+        # If we never break, that means the last item was a tag.
+        i += 1
+
+    if found_template is True:
+        contents = contents[i:]
+
+    text = clean_node(
+        wxr, parent_sense, contents, template_fn=gloss_template_fn
+    )
+
+    if len(synonyms) > 0:
+        parent_sense.synonyms = synonyms
+
+    if len(antonyms) > 0:
+        parent_sense.antonyms = antonyms
+
+    if len(template_tags) > 0:
+        parent_sense.raw_tags.extend(template_tags)
+
+    if len(text) > 0:
+        parent_sense.glosses.append(text)
+        return True
+
+    return False
+
+
+def recurse_glosses1(
+    wxr: WiktextractContext,
+    parent_sense: Sense,
+    node: WikiNode,
+) -> list[ExOrSense]:
+    ret: list[ExOrSense] = []
+    found_gloss = False
 
     if node.kind == NodeKind.LIST:
         for child in node.children:
@@ -87,7 +155,7 @@ def recurse_glosses1(
                 )
                 continue
             ret.extend(
-                recurse_glosses1(wxr, parent_sense.copy(deep=True), child)
+                recurse_glosses1(wxr, parent_sense.model_copy(deep=True), child)
             )
     if node.kind == NodeKind.LIST_ITEM:
         contents = []
@@ -116,39 +184,7 @@ def recurse_glosses1(
         elif node.sarg == ":":
             return []
 
-        template_tags: list[str] = []
-        found_template = False
-
-        for i, tnode in enumerate(contents):
-            if isinstance(tnode, str) and tnode.strip(STRIP_PUNCTUATION):
-                break
-            if isinstance(tnode, TemplateNode):
-                tag_text = clean_node(
-                    wxr, parent_sense, tnode, template_fn=gloss_template_fn
-                ).strip(STRIP_PUNCTUATION)
-                if tag_text:
-                    found_template = True
-                    template_tags.append(tag_text)
-
-        if found_template is True:
-            contents = contents[i:]
-
-        text = clean_node(
-            wxr, parent_sense, contents, template_fn=gloss_template_fn
-        )
-
-        if len(synonyms) > 0:
-            parent_sense.synonyms = synonyms
-
-        if len(antonyms) > 0:
-            parent_sense.antonyms = antonyms
-
-        if len(text) > 0:
-            found_gloss = True
-            parent_sense.glosses.append(text)
-
-        if len(template_tags) > 0:
-            parent_sense.raw_tags.extend(template_tags)
+        found_gloss = parse_gloss(wxr, parent_sense, contents)
 
         for sl in sublists:
             if not (isinstance(sl, WikiNode) and sl.kind == NodeKind.LIST):
@@ -158,7 +194,9 @@ def recurse_glosses1(
                     sortid="simple/pos/82",
                 )
                 continue
-            for r in recurse_glosses1(wxr, parent_sense.copy(deep=True), sl):
+            for r in recurse_glosses1(
+                wxr, parent_sense.model_copy(deep=True), sl
+            ):
                 if isinstance(r, Example):
                     parent_sense.examples.append(r)
                 else:
@@ -172,7 +210,7 @@ def recurse_glosses1(
         # subsense instead?
         return ret
 
-    if found_gloss is True:
+    if found_gloss is True or "no-gloss" in parent_sense.raw_tags:
         return [parent_sense]
 
     return []
@@ -191,6 +229,7 @@ def recurse_glosses(
                 sortid="simple/pos/glosses",
             )
             continue
+        convert_tags_in_sense(r)
         ret.append(r)
 
     if len(ret) > 0:
@@ -207,7 +246,7 @@ def process_pos(
     pos_title: str,
     # the "2" in "Noun 2"
     pos_num: int = -1,
-) -> Optional[WordEntry]:
+) -> WordEntry | None:
     """Process a part-of-speech section, like 'Noun'. `base_data` provides basic
     data common with other POS sections, like pronunciation or etymology."""
 
@@ -239,6 +278,13 @@ def process_pos(
     data.sounds = new_sounds
 
     pos_contents = list(node.invert_find_child(LEVEL_KIND_FLAGS))
+
+    if len(pos_contents) == 0:
+        wxr.wtp.error(
+            "No body for Part-of-speech section.", sortid="simple/pos/271"
+        )
+        data.senses.append(Sense(tags=["no-gloss"]))
+        return data
 
     # check POS templates at the start of the section (Simple English specific)
     template_tags: list[str] = []
@@ -288,6 +334,8 @@ def process_pos(
     data.tags.extend(template_tags)
 
     # parts = []
+    found_list = False
+    got_senses = False
     for child in pos_contents[i:]:
         # Wiktionaries handle glosses the usual way: with numbered lists.
         # Each list entry is a gloss, sometimes with subglosses, but with
@@ -295,13 +343,28 @@ def process_pos(
         # logger.debug(f"{child}")
         if isinstance(child, WikiNode) and child.kind == NodeKind.LIST:
             senses = recurse_glosses(wxr, child, data)
+            found_list = True
             if len(senses) > 0:
+                got_senses = True
                 data.senses.extend(senses)
-        # text = clean_node(wxr, data, child, no_strip=True)
-        # parts.append(text)
 
-    # out = "".join(parts)
-    # if "##" in out:
-    #     logger.debug(f"{wxr.wtp.title}\n{out}")
+    if not got_senses and found_list:
+        wxr.wtp.error(
+            "POS had a list, but the list did not return senses.",
+            sortid="simple/pos/313",
+        )
+
+    # If there is not list, clump everything into one gloss.
+    if not found_list:
+        sense = Sense()
+        found_gloss = parse_gloss(wxr, sense, pos_contents[i:])
+        if found_gloss is True or len(sense.raw_tags) > 0:
+            convert_tags_in_sense(sense)
+            if len(sense.glosses) == 0 and "no-gloss" not in sense.tags:
+                sense.tags.append("no-gloss")
+            data.senses.append(sense)
+
+    if len(data.senses) == 0:
+        data.senses.append(Sense(tags=["no-gloss"]))
 
     return data

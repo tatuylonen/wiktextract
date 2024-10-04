@@ -43,6 +43,15 @@ def parse_pos_table(
     assert isinstance(tnode, TemplateNode)
     tree = wxr.wtp.parse(wxr.wtp.node_to_wikitext(tnode), expand_all=True)
 
+    # Some debugging code: if wiktwords is passed a --inflection-tables-file
+    # argument, we save tables to a file for debugging purposes, or for just
+    # getting tables that can be used as test data.
+    if wxr.config.expand_tables:
+        with open(wxr.config.expand_tables, "w") as f:
+            f.write(f"{wxr.wtp.title=}\n")
+            text = wxr.wtp.node_to_wikitext(tree)
+            f.write(f"{text}\n")
+
     # Check if there are actually headers, because Simple English Wiktionary
     # doesn't use them in these POS template tables.
     # Headers and non-headers in other editions can be a real headache.
