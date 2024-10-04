@@ -245,7 +245,7 @@ Foo.
             Page(
                 title="Template:comparative",
                 namespace_id=10,
-                body="comparative",
+                body="(comparative)",
             ),
         ],
     )

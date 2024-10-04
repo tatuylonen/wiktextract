@@ -53,19 +53,22 @@ def parse_gloss(
     """ """
     template_tags: list[str] = []
     found_template = False
-    found_gloss = False
     synonyms: list[Linkage] = []
     antonyms: list[Linkage] = []
 
     def gloss_template_fn(name: str, ht: TemplateArgs) -> str | None:
         if name in ("synonyms", "synonym", "syn"):
             for syn in ht.values():
+                if not syn:
+                    continue
                 synonyms.append(
                     Linkage(word=clean_node(wxr, parent_sense, syn))
                 )
             return ""
         if name in ("antonyms", "antonym", "ant"):
             for ant in ht.values():
+                if not ant:
+                    continue
                 antonyms.append(
                     Linkage(word=clean_node(wxr, parent_sense, ant))
                 )
@@ -77,15 +80,29 @@ def parse_gloss(
         return None
 
     for i, tnode in enumerate(contents):
-        if isinstance(tnode, str) and tnode.strip(STRIP_PUNCTUATION):
+        if (
+            isinstance(tnode, str)
+            and tnode.strip(STRIP_PUNCTUATION)
+            or not isinstance(tnode, (TemplateNode, str))
+        ):
             break
         if isinstance(tnode, TemplateNode):
+            if tnode.template_name == "exstub":
+                parent_sense.raw_tags.append("no-gloss")
+                return False
             tag_text = clean_node(
                 wxr, parent_sense, tnode, template_fn=gloss_template_fn
-            ).strip(STRIP_PUNCTUATION)
-            if tag_text:
-                found_template = True
-                template_tags.append(tag_text)
+            )
+            if tag_text.endswith((")", "]")):
+                # Simple wiktionary is pretty good at making these templates
+                # have brackets
+                tag_text = tag_text.strip(STRIP_PUNCTUATION)
+                if tag_text:
+                    found_template = True
+                    template_tags.append(tag_text)
+            else:
+                # looks like normal text, so probably something {{plural of}}.
+                break
 
     if found_template is True:
         contents = contents[i:]
@@ -101,13 +118,12 @@ def parse_gloss(
         parent_sense.antonyms = antonyms
 
     if len(text) > 0:
-        found_gloss = True
+        if len(template_tags) > 0:
+            parent_sense.raw_tags.extend(template_tags)
         parent_sense.glosses.append(text)
+        return True
 
-    if len(template_tags) > 0:
-        parent_sense.raw_tags.extend(template_tags)
-
-    return found_gloss
+    return False
 
 
 def recurse_glosses1(
@@ -183,7 +199,7 @@ def recurse_glosses1(
         # subsense instead?
         return ret
 
-    if found_gloss is True:
+    if found_gloss is True or "no-gloss" in parent_sense.raw_tags:
         return [parent_sense]
 
     return []
@@ -324,9 +340,11 @@ def process_pos(
     if not found_list:
         sense = Sense()
         found_gloss = parse_gloss(wxr, sense, pos_contents[i:])
-        if found_gloss is True:
+        if found_gloss is True or "no-gloss" in sense.raw_tags:
             convert_tags_in_sense(sense)
-
             data.senses.append(sense)
+
+    if len(data.senses) == 0:
+        data.senses.append(Sense(tags=["no-gloss"]))
 
     return data
