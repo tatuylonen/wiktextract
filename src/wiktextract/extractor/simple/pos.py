@@ -53,6 +53,7 @@ def parse_gloss(
     """ """
     template_tags: list[str] = []
     found_template = False
+    found_gloss = False
     synonyms: list[Linkage] = []
     antonyms: list[Linkage] = []
 
