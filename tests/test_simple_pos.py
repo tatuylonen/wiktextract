@@ -1,8 +1,7 @@
 import unittest
 from unittest.mock import patch
 
-from wikitextprocessor import Page, WikiNode, Wtp
-from wikitextprocessor.parser import print_tree
+from wikitextprocessor import Page, Wtp
 
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.simple.models import Form, WordEntry
@@ -27,7 +26,7 @@ class POSTests(unittest.TestCase):
         entry = WordEntry(word="foo")
         root = self.wxr.wtp.parse(text)
         # print_tree(root)
-        process_pos(self.wxr, root.children[0], entry, "noun")
+        process_pos(self.wxr, root.children[0], entry, "noun")  # type: ignore
         # print(entry.model_dump(exclude_defaults=True))
         # print("==========")
         self.assertEqual(entry.model_dump(exclude_defaults=True), should_be)
@@ -35,6 +34,17 @@ class POSTests(unittest.TestCase):
     def test_glosses1(self) -> None:
         pos = """==Noun==
 # Foo.
+"""
+        should_be = {
+            "word": "foo",
+            "pos": "noun",
+            "senses": [{"glosses": ["Foo."]}],
+        }
+        self.process_test(pos, should_be)
+
+    def test_glosses1b(self) -> None:
+        pos = """==Noun==
+Foo.
 """
         should_be = {
             "word": "foo",
@@ -103,6 +113,42 @@ plural<br>
         }
         self.process_test(pos, should_be)
 
+    @patch(
+        "wikitextprocessor.Wtp.get_page",
+        return_value=Page(
+            title="Template:verb",
+            namespace_id=10,
+            body="""{| border="0" width="100%25" class="inflection-table+inflection-noun-run-~-~-~-~-~-~"
+|- 
+| bgcolor="%23e2e2ff" valign="top" width="49%25" style="padding-left%3A1em%3B" |
+singular<br>
+'''[[run]]'''
+| width="0.5%25" |
+| bgcolor="%23e2e2ff" valign="top" width="49%25" style="padding-left%3A1em%3B" |
+plural<br>
+<span class="form-of+plural-form-of-run">'''[[runs]]'''</span>
+| width="0.5%25" |
+|}
+[[Category:Nouns]]""",
+        ),
+    )
+    def test_template1b(self, mock) -> None:
+        # No list ("#")
+        pos = """==Noun==
+{{noun}}
+Foo.
+"""
+        should_be = {
+            "word": "foo",
+            "forms": [
+                {"form": "run", "tags": ["singular"]},
+                {"form": "runs", "tags": ["plural"]},
+            ],
+            "pos": "noun",
+            "senses": [{"glosses": ["Foo."]}],
+        }
+        self.process_test(pos, should_be)
+
     def test_example1(self) -> None:
         pos = """==Noun==
 # Foo.
@@ -131,6 +177,30 @@ plural<br>
     def test_tags1(self, mock) -> None:
         pos = """==Noun==
 # {{comparative}} Foo.
+"""
+        should_be = {
+            "word": "foo",
+            "pos": "noun",
+            "senses": [
+                {
+                    "glosses": ["Foo."],
+                    "tags": ["comparative"],
+                }
+            ],
+        }
+        self.process_test(pos, should_be)
+
+    @patch(
+        "wikitextprocessor.Wtp.get_page",
+        return_value=Page(
+            title="Template:comparative",
+            namespace_id=10,
+            body="""(comparative)""",
+        ),
+    )
+    def test_tags1b(self, mock) -> None:
+        pos = """==Noun==
+{{comparative}} Foo.
 """
         should_be = {
             "word": "foo",

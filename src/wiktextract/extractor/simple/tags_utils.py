@@ -1,5 +1,6 @@
 import re
 
+from .models import Sense
 from .section_titles import POS_HEADINGS
 from .simple_tags import simple_tag_map
 from .text_utils import POS_ENDING_NUMBER_RE, STRIP_PUNCTUATION
@@ -9,6 +10,7 @@ from .text_utils import POS_ENDING_NUMBER_RE, STRIP_PUNCTUATION
 # of outputting captured "splitters" if they're in a `(group)`, which is very
 # handy but not relevant here; we don't need to keep that data.
 SPLITTER_RE = re.compile(r"\s*(?:,|;|\(|\)|\.|&)\s*")
+
 
 def convert_tags(raw_tags: list[str]) -> tuple[list[str], list[str], list[str]]:
     """Check if raw tags contain tag strings in `simple_tag_map` and return
@@ -58,3 +60,10 @@ def convert_tags(raw_tags: list[str]) -> tuple[list[str], list[str], list[str]]:
         return tags, new_raw_tags, poses
 
     return [], [s.strip(STRIP_PUNCTUATION) for s in raw_tags], []
+
+def convert_tags_in_sense (sense: Sense) -> None:
+    tags, raw_tags, poses = convert_tags(sense.raw_tags)
+    sense.tags = tags
+    sense.raw_tags = raw_tags
+    sense.tags.extend(poses)
+
