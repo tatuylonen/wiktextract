@@ -1,6 +1,7 @@
 from wiktextract.tags import uppercase_tags, valid_tags
 
 simple_tag_map: dict[str, list[str]] = {
+    "no-gloss": ["no-gloss"],
     "comparative": ["comparative"],
     "Comparative": ["comparative"],
     "determiner": ["determiner"],

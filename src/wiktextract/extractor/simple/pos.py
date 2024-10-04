@@ -50,7 +50,13 @@ IGNORED_GLOSS_TEMPLATES = ("exstub",)
 def parse_gloss(
     wxr: WiktextractContext, parent_sense: Sense, contents: list[str | WikiNode]
 ) -> bool:
-    """ """
+    """Take what is preferably a line of text and extract tags and a gloss from
+        it. The data is inserted into parent_sense, and for recursion purposes
+        we return a boolean that tells whether there was any gloss text in a
+        lower node."""
+    if len(contents) == 0:
+        return False
+
     template_tags: list[str] = []
     found_template = False
     synonyms: list[Linkage] = []
@@ -103,6 +109,10 @@ def parse_gloss(
             else:
                 # looks like normal text, so probably something {{plural of}}.
                 break
+    # else for the for loop: if we never break
+    else:
+        # If we never break, that means the last item was a tag.
+        i += 1
 
     if found_template is True:
         contents = contents[i:]
@@ -117,9 +127,10 @@ def parse_gloss(
     if len(antonyms) > 0:
         parent_sense.antonyms = antonyms
 
+    if len(template_tags) > 0:
+        parent_sense.raw_tags.extend(template_tags)
+
     if len(text) > 0:
-        if len(template_tags) > 0:
-            parent_sense.raw_tags.extend(template_tags)
         parent_sense.glosses.append(text)
         return True
 
@@ -268,6 +279,13 @@ def process_pos(
 
     pos_contents = list(node.invert_find_child(LEVEL_KIND_FLAGS))
 
+    if len(pos_contents) == 0:
+        wxr.wtp.error(
+            "No body for Part-of-speech section.", sortid="simple/pos/271"
+        )
+        data.senses.append(Sense(tags=["no-gloss"]))
+        return data
+
     # check POS templates at the start of the section (Simple English specific)
     template_tags: list[str] = []
     template_forms: list[Form] = []
@@ -340,8 +358,10 @@ def process_pos(
     if not found_list:
         sense = Sense()
         found_gloss = parse_gloss(wxr, sense, pos_contents[i:])
-        if found_gloss is True or "no-gloss" in sense.raw_tags:
+        if found_gloss is True or len(sense.raw_tags) > 0:
             convert_tags_in_sense(sense)
+            if len(sense.glosses) == 0 and "no-gloss" not in sense.tags:
+                sense.tags.append("no-gloss")
             data.senses.append(sense)
 
     if len(data.senses) == 0:

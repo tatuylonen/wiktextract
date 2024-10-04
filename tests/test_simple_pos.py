@@ -299,9 +299,34 @@ Foo.
             Page(title="Template:syn", namespace_id=10, body=""),
         ],
     )
-    def test_tags5(self, mock) -> None:
+    def test_synonyms1(self, mock) -> None:
         pos = """==Noun==
 # Foo. {{syn|bar|baz}}
+"""
+        should_be = {
+            "word": "foo",
+            "pos": "noun",
+            "senses": [
+                {
+                    "glosses": ["Foo."],
+                    "synonyms": [
+                        {"word": "bar"},
+                        {"word": "baz"},
+                    ],
+                }
+            ],
+        }
+        self.process_test(pos, should_be)
+
+    @patch(
+        "wikitextprocessor.Wtp.get_page",
+        side_effect=[
+            Page(title="Template:syn", namespace_id=10, body=""),
+        ],
+    )
+    def test_synonyms2(self, mock) -> None:
+        pos = """==Noun==
+# Foo. {{syn||bar|baz|}}
 """
         should_be = {
             "word": "foo",
@@ -333,3 +358,54 @@ Foo.
             Form(form="baz"),
         ]
         self.assertEqual(expected, remove_duplicate_forms(self.wxr, input))
+
+    def test_empty_gloss1(self) -> None:
+        pos = """==Noun==
+#
+"""
+        should_be = {
+            "word": "foo",
+            "pos": "noun",
+            "senses": [{"tags": ["no-gloss"]}],
+        }
+        self.process_test(pos, should_be)
+
+    def test_empty_gloss2(self) -> None:
+        pos = """==Noun==
+"""
+        should_be = {
+            "word": "foo",
+            "pos": "noun",
+            "senses": [{"tags": ["no-gloss"]}],
+        }
+        self.process_test(pos, should_be)
+
+    def test_empty_gloss3(self) -> None:
+        pos = """==Noun==
+{{exstub}}
+"""
+        should_be = {
+            "word": "foo",
+            "pos": "noun",
+            "senses": [{"tags": ["no-gloss"]}],
+        }
+        self.process_test(pos, should_be)
+
+    @patch(
+        "wikitextprocessor.Wtp.get_page",
+        return_value=Page(
+            title="Template:comparative",
+            namespace_id=10,
+            body="(comparative)",
+        ),
+    )
+    def test_empty_gloss4(self, mock) -> None:
+        pos = """==Noun==
+{{comparative}}
+"""
+        should_be = {
+            "word": "foo",
+            "pos": "noun",
+            "senses": [{"tags": ["comparative", "no-gloss"]}],
+        }
+        self.process_test(pos, should_be)
