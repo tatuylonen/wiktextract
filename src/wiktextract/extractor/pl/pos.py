@@ -1,6 +1,6 @@
 import re
 
-from wikitextprocessor.parser import NodeKind, TemplateNode, WikiNode
+from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -67,7 +67,7 @@ def extract_pos_section(
     wxr: WiktextractContext,
     page_data: list[WordEntry],
     base_data: WordEntry,
-    level_node: WikiNode,
+    level_node: LevelNode,
 ) -> None:
     for node in level_node.find_child(NodeKind.ITALIC | NodeKind.LIST):
         if node.kind == NodeKind.ITALIC:

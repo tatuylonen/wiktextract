@@ -97,7 +97,7 @@ class WordEntry(SimpleEnglishBaseModel):
     forms: list[Form] = Field(default=[], description="Inflection forms list")
     lang_code: str = Field(default="", description="Wiktionary language code")
     lang: str = Field(default="", description="Localized language name")
-    pos: str = Field(default="", desription="Part of speech type")
+    pos: str = Field(default="", description="Part of speech type")
     pos_title: str = ""
     pos_num: int = -1
     etymology_text: str = Field(
