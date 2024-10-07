@@ -10,11 +10,18 @@ class DutchBaseModel(BaseModel):
     )
 
 
+class Example(DutchBaseModel):
+    text: str = ""
+    translation: str = ""
+    ref: str = ""
+
+
 class Sense(DutchBaseModel):
     glosses: list[str] = []
     tags: list[str] = []
     raw_tags: list[str] = []
     categories: list[str] = []
+    examples: list[Example] = []
 
 
 class WordEntry(DutchBaseModel):
