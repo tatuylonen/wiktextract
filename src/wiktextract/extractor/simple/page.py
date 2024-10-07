@@ -1,7 +1,4 @@
-import re
-from typing import Any
-
-from wikitextprocessor.parser import LEVEL_KIND_FLAGS, print_tree
+from wikitextprocessor.parser import LEVEL_KIND_FLAGS  #, print_tree
 
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
@@ -17,7 +14,7 @@ from .text_utils import POS_ENDING_NUMBER_RE
 
 def parse_page(
     wxr: WiktextractContext, page_title: str, page_text: str
-) -> list[dict[str, Any]]:
+) -> list[dict[str, WordEntry]]:
     """Parse Simple Wiktionary page."""
     # Unlike other wiktionaries, Simple Wikt. has a limited scope: only English
     # words. The pages also tend to be much shorter and simpler in structure,

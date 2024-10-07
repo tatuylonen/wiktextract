@@ -1,8 +1,8 @@
 from itertools import chain
-from typing import Optional, Union
 
 from wikitextprocessor import HTMLNode, NodeKind, TemplateNode, WikiNode
-from wikitextprocessor.parser import print_tree
+
+# from wikitextprocessor.parser import print_tree
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 from wiktextract.wxr_logging import logger
@@ -11,12 +11,12 @@ from .models import Form, WordEntry
 from .simple_tags import simple_tag_map
 from .tags_utils import convert_tags
 
-Node = Union[str, WikiNode]
+Node = str | WikiNode
 
 
 def cell_node_fn(
     node: WikiNode,
-) -> Optional[list[Node]]:
+) -> list[Node] | None:
     assert isinstance(node, WikiNode)
     if node.kind == NodeKind.ITALIC:
         # If we have italicized text 'none', like in `deviate`, turn it to "–"

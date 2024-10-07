@@ -1,9 +1,9 @@
 import re
 from copy import copy
-from typing import Optional
 
 from wikitextprocessor import NodeKind, TemplateArgs, WikiNode
 from wikitextprocessor.parser import LEVEL_KIND_FLAGS  # , print_tree
+
 from wiktextract import WiktextractContext
 from wiktextract.page import clean_node
 
@@ -25,7 +25,7 @@ def recurse_list(
     sound_templates: list[Sound],
     poses: list[str],
     raw_tags: list[str],
-) -> tuple[Optional[list[str]], Optional[list[str]]]:
+) -> tuple[list[str] | None, list[str] | None]:
     assert node.kind == NodeKind.LIST
 
     this_level_tags = raw_tags[:]
@@ -73,7 +73,7 @@ def recurse_list_item(
     sound_templates: list[Sound],
     poses: list[str],
     raw_tags: list[str],
-) -> tuple[Optional[list[str]], Optional[list[str]]]:
+) -> tuple[list[str] | None, list[str] | None]:
     """Recurse through list and list_item nodes. In some cases, a call might
     return a tuple of a POS string and list of raw tags, which can be applied
     to `pos` and `raw_tags` parameters on the same level."""
@@ -199,7 +199,7 @@ def process_pron(
     # it manually, use post_template_fn=
     def parse_pronunciation_template_fn(
         name: str, ht: TemplateArgs
-    ) -> Optional[str]:
+    ) -> str | None:
         lname = name.lower()
         if lname in PANEL_TEMPLATES:
             return ""
@@ -271,7 +271,7 @@ def process_pron(
         name: str,
         ht: TemplateArgs,
         expanded: str,
-    ) -> Optional[str]:
+    ) -> str | None:
         lname = name.lower()
         if lname in PANEL_TEMPLATES:
             return ""

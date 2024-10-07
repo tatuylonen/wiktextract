@@ -1,12 +1,10 @@
-from typing import Optional, Union
-
 from wikitextprocessor import WikiNode
 from wikitextprocessor.core import TemplateArgs
 from wikitextprocessor.parser import LEVEL_KIND_FLAGS
+
 from wiktextract import WiktextractContext
 from wiktextract.clean import clean_value
 from wiktextract.page import clean_node
-from wiktextract.wxr_logging import logger
 
 from .models import TemplateData, WordEntry
 from .parse_utils import ETYMOLOGY_TEMPLATES, PANEL_TEMPLATES
@@ -22,7 +20,7 @@ def process_etym(
 
     def post_etym_template_fn(
         name: str, ht: TemplateArgs, expanded: str
-    ) -> Optional[str]:
+    ) -> str | None:
         lname = name.lower().strip()
         if lname in PANEL_TEMPLATES:
             return ""

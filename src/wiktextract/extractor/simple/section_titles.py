@@ -1,5 +1,5 @@
 # https://simple.wiktionary.org/wiki/Category:Part_of_speech_templates
-from typing import Optional, TypedDict
+from typing import TypedDict
 
 POSMap = TypedDict(
     "POSMap",
@@ -11,7 +11,7 @@ POSMap = TypedDict(
         # SimplEn seems to very consistently use standardized templates
         # for each of its 'official' PoSes, so we can use that as a way
         # to further specify tags to be added
-        "templates": dict[str, Optional[list[str]]],
+        "templates": dict[str, list[str] | None],
     },
     total=False,
 )
