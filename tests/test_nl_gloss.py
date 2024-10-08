@@ -42,6 +42,7 @@ class TestNlGloss(TestCase):
             "hond",
             """{{=nld=}}
 {{-noun-|nld}}
+[A] {{-l-|m}}
 # zoogdier uit de familie van de hondachtigen""",
         )
         self.assertEqual(
@@ -63,6 +64,8 @@ class TestNlGloss(TestCase):
                             ]
                         }
                     ],
+                    "sense_index": "A",
+                    "tags": ["masculine"],
                     "word": "hond",
                 }
             ],

@@ -1,10 +1,6 @@
-from wikitextprocessor.parser import (
-    LEVEL_KIND_FLAGS,
-    LevelNode,
-    NodeKind,
-    TemplateNode,
-    WikiNode,
-)
+import re
+
+from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -30,13 +26,21 @@ def extract_pos_section(
     page_data[-1].pos = pos_data["pos"]
     page_data[-1].tags.extend(pos_data.get("tags", []))
 
-    for node in level_node.find_child(
-        NodeKind.LIST | NodeKind.TEMPLATE | LEVEL_KIND_FLAGS
-    ):
-        if node.kind == NodeKind.LIST and node.sarg.endswith("#"):
+    gloss_list_start = 0
+    for index, node in enumerate(level_node.children):
+        if (
+            isinstance(node, WikiNode)
+            and node.kind == NodeKind.LIST
+            and node.sarg.endswith("#")
+        ):
+            if gloss_list_start == 0:
+                gloss_list_start = index
+                extract_pos_header_line_nodes(
+                    wxr, page_data[-1], level_node.children[:index]
+                )
             for list_item in node.find_child(NodeKind.LIST_ITEM):
                 extract_gloss_list_item(wxr, page_data[-1], list_item)
-        elif node.kind in LEVEL_KIND_FLAGS:
+        elif isinstance(node, LevelNode):
             break
         elif (
             isinstance(node, TemplateNode)
@@ -61,3 +65,33 @@ def extract_gloss_list_item(
     if len(gloss_text) > 0:
         sense.glosses.append(gloss_text)
         word_entry.senses.append(sense)
+
+
+def extract_pos_header_line_nodes(
+    wxr: WiktextractContext, word_entry: WordEntry, nodes: list[WikiNode | str]
+) -> None:
+    for node in nodes:
+        if isinstance(node, str) and word_entry.sense_index == "":
+            m = re.search(r"\[(.+)\]", node.strip())
+            if m is not None:
+                word_entry.sense_index = m.group(1).strip()
+        elif isinstance(node, TemplateNode) and node.template_name == "-l-":
+            extract_l_template(wxr, word_entry, node)
+
+
+def extract_l_template(
+    wxr: WiktextractContext, word_entry: WordEntry, node: TemplateNode
+) -> None:
+    # https://nl.wiktionary.org/wiki/Sjabloon:-l-
+    first_arg = clean_node(wxr, None, node.template_parameters.get(1, ""))
+    gender_args = {
+        "n": "neuter",
+        "m": "masculine",
+        "fm": ["feminine", "masculine"],
+        "p": "plural",
+    }
+    tag = gender_args.get(first_arg, [])
+    if isinstance(tag, str):
+        word_entry.tags.append(tag)
+    elif isinstance(tag, list):
+        word_entry.tags.extend(tag)
