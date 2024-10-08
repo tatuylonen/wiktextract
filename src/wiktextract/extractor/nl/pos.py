@@ -54,14 +54,22 @@ def extract_gloss_list_item(
     wxr: WiktextractContext, word_entry: WordEntry, list_item: WikiNode
 ) -> None:
     sense = Sense()
-    gloss_text = clean_node(
-        wxr, sense, list(list_item.invert_find_child(NodeKind.LIST))
-    )
-    for next_list in list_item.find_child(NodeKind.LIST):
-        if next_list.sarg.endswith("*"):
-            for next_list_item in next_list.find_child(NodeKind.LIST_ITEM):
-                extract_example_list_item(wxr, sense, next_list_item)
+    gloss_nodes = []
+    for child in list_item.children:
+        if isinstance(child, TemplateNode):
+            expanded_text = clean_node(wxr, sense, child)
+            if expanded_text.startswith("(") and expanded_text.endswith(")"):
+                sense.raw_tags.append(expanded_text.strip("() "))
+            else:
+                gloss_nodes.append(expanded_text)
+        elif isinstance(child, WikiNode) and child.kind == NodeKind.LIST:
+            if child.sarg.endswith("*"):
+                for next_list_item in child.find_child(NodeKind.LIST_ITEM):
+                    extract_example_list_item(wxr, sense, next_list_item)
+        else:
+            gloss_nodes.append(child)
 
+    gloss_text = clean_node(wxr, sense, gloss_nodes)
     if len(gloss_text) > 0:
         sense.glosses.append(gloss_text)
         word_entry.senses.append(sense)
