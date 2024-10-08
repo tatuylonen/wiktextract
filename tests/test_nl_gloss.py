@@ -37,12 +37,23 @@ class TestNlGloss(TestCase):
 [[Categorie:Zelfstandig naamwoord in het Nederlands]]""",
             need_pre_expand=True,
         )
+        self.wxr.wtp.add_page(
+            "Sjabloon:roofdieren",
+            10,
+            "<span>([[roofdieren]])</span>[[Categorie:Roofdieren_in_het_Nederlands]][[Categorie:Zoogdieren in het Nederlands]]",
+        )
+        self.wxr.wtp.add_page(
+            "Sjabloon:species",
+            10,
+            "<span>[[:wikispecies:Canis lupus familiaris|<span>''Canis lupus familiaris''</span>]]&nbsp;[[File:WikiSpecies.svg|14px|link=Wikispecies|op Wikispecies]]</span> ",
+        )
         data = parse_page(
             self.wxr,
             "hond",
             """{{=nld=}}
 {{-noun-|nld}}
-# zoogdier uit de familie van de hondachtigen""",
+[A] {{-l-|m}}
+#{{roofdieren|nld}} {{species|Canis lupus familiaris}} zoogdier uit de familie van de hondachtigen""",
         )
         self.assertEqual(
             data,
@@ -58,11 +69,18 @@ class TestNlGloss(TestCase):
                     ],
                     "senses": [
                         {
+                            "categories": [
+                                "Roofdieren_in_het_Nederlands",
+                                "Zoogdieren in het Nederlands",
+                            ],
                             "glosses": [
-                                "zoogdier uit de familie van de hondachtigen"
-                            ]
+                                "Canis lupus familiaris zoogdier uit de familie van de hondachtigen"
+                            ],
+                            "raw_tags": ["roofdieren"],
                         }
                     ],
+                    "sense_index": "A",
+                    "tags": ["masculine"],
                     "word": "hond",
                 }
             ],

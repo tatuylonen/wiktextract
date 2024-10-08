@@ -35,3 +35,4 @@ class WordEntry(DutchBaseModel):
     categories: list[str] = []
     tags: list[str] = []
     raw_tags: list[str] = []
+    sense_index: str = ""
