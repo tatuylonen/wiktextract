@@ -41,6 +41,8 @@ class Sound(KoreanBaseModel):
     flac_url: str = ""
     tags: list[str] = []
     raw_tags: list[str] = []
+    hangul: str = ""
+    roman: str = ""
 
 
 class WordEntry(KoreanBaseModel):

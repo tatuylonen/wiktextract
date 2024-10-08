@@ -9,7 +9,7 @@ from ...wxr_context import WiktextractContext
 from .models import Sense, WordEntry
 from .pos import extract_pos_section
 from .section_titles import POS_DATA
-from .sound import extract_ipa_template, extract_listen_pronunciation_template
+from .sound import SOUND_TEMPLATES, extract_sound_template
 
 PANEL_TEMPLATES = set()
 PANEL_PREFIXES = set()
@@ -67,10 +67,8 @@ def parse_language_section(
     )
     extract_section_categories(wxr, page_data, base_data, level2_node)
     for t_node in level2_node.find_child(NodeKind.TEMPLATE):
-        if t_node.template_name == "발음 듣기":
-            extract_listen_pronunciation_template(wxr, base_data, t_node)
-        elif t_node.template_name == "IPA":
-            extract_ipa_template(wxr, base_data, t_node)
+        if t_node.template_name in SOUND_TEMPLATES:
+            extract_sound_template(wxr, base_data, t_node)
 
     for next_level in level2_node.find_child(LEVEL_KIND_FLAGS):
         parse_section(wxr, page_data, base_data, next_level)
