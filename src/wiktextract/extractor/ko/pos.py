@@ -7,6 +7,7 @@ from ...wxr_context import WiktextractContext
 from .example import extract_example_list_item
 from .models import Sense, WordEntry
 from .section_titles import POS_DATA
+from .sound import SOUND_TEMPLATES, extract_sound_template
 
 
 def extract_pos_section(
@@ -22,6 +23,10 @@ def extract_pos_section(
         pos_data = POS_DATA[pos_title]
         page_data[-1].pos = pos_data["pos"]
         page_data[-1].tags.extend(pos_data.get("tags", []))
+
+    for t_node in level_node.find_child(NodeKind.TEMPLATE):
+        if t_node.template_name in SOUND_TEMPLATES:
+            extract_sound_template(wxr, page_data[-1], t_node)
 
     for list_node in level_node.find_child(NodeKind.LIST):
         for list_item in list_node.find_child(NodeKind.LIST_ITEM):

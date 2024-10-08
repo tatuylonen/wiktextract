@@ -30,6 +30,21 @@ class Sense(KoreanBaseModel):
     examples: list[Example] = []
 
 
+class Sound(KoreanBaseModel):
+    ipa: str = Field(default="", description="International Phonetic Alphabet")
+    audio: str = Field(default="", description="Audio file name")
+    wav_url: str = ""
+    oga_url: str = ""
+    ogg_url: str = ""
+    mp3_url: str = ""
+    opus_url: str = ""
+    flac_url: str = ""
+    tags: list[str] = []
+    raw_tags: list[str] = []
+    hangul: str = ""
+    roman: str = ""
+
+
 class WordEntry(KoreanBaseModel):
     model_config = ConfigDict(title="Korean Wiktionary")
     word: str = Field(description="Word string", min_length=1)
@@ -42,3 +57,4 @@ class WordEntry(KoreanBaseModel):
     tags: list[str] = []
     raw_tags: list[str] = []
     etymology_text: str = ""
+    sounds: list[Sound] = []
