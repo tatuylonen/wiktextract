@@ -11,6 +11,7 @@ from .models import Sense, WordEntry
 from .pos import extract_pos_section
 from .section_titles import LINKAGE_SECTIONS, POS_DATA
 from .sound import SOUND_TEMPLATES, extract_sound_template
+from .translation import extract_translation_section
 
 
 def extract_section_categories(
@@ -39,6 +40,8 @@ def parse_section(
         extract_linkage_section(
             wxr, page_data[-1], level_node, LINKAGE_SECTIONS[title_text]
         )
+    elif title_text == "번역" and len(page_data) > 0:
+        extract_translation_section(wxr, page_data[-1], level_node)
 
     for next_level in level_node.find_child(LEVEL_KIND_FLAGS):
         parse_section(wxr, page_data, base_data, next_level)
