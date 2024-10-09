@@ -48,3 +48,16 @@ class TestKoLinkage(TestCase):
                 },
             ],
         )
+
+    def test_linkage_list_under_gloss_list(self):
+        data = parse_page(
+            self.wxr,
+            "마르다",
+            """== 한국어 ==
+=== 명사 ===
+# 젖은 것에 물기가 없어지다.
+*반의어: [[젖다]]
+{{합성어 상자|마른걸레}}""",
+        )
+        self.assertEqual(data[0]["antonyms"], [{"word": "젖다"}])
+        self.assertEqual(data[0]["derived"], [{"word": "마른걸레"}])

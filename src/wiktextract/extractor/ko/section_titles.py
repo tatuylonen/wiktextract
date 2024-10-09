@@ -17,4 +17,7 @@ LINKAGE_SECTIONS = {
     "속담": "proverbs",
     "합성어": "derived",
     "파생어": "derived",
+    "관련 어휘": "related",
+    "유의어": "synonyms",
+    "반의어": "antonyms",
 }

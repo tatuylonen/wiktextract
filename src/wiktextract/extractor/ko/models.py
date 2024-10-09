@@ -66,3 +66,6 @@ class WordEntry(KoreanBaseModel):
     sounds: list[Sound] = []
     proverbs: list[Linkage] = []
     derived: list[Linkage] = []
+    related: list[Linkage] = []
+    synonyms: list[Linkage] = []
+    antonyms: list[Linkage] = []

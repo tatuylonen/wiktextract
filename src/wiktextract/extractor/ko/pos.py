@@ -1,12 +1,17 @@
 import re
 
-from wikitextprocessor import LevelNode, NodeKind, WikiNode
+from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .example import extract_example_list_item
+from .linkage import (
+    LINKAGE_TEMPLATES,
+    extract_linkage_list_item,
+    extract_linkage_template,
+)
 from .models import Sense, WordEntry
-from .section_titles import POS_DATA
+from .section_titles import LINKAGE_SECTIONS, POS_DATA
 from .sound import SOUND_TEMPLATES, extract_sound_template
 
 
@@ -24,25 +29,27 @@ def extract_pos_section(
         page_data[-1].pos = pos_data["pos"]
         page_data[-1].tags.extend(pos_data.get("tags", []))
 
-    for t_node in level_node.find_child(NodeKind.TEMPLATE):
-        if t_node.template_name in SOUND_TEMPLATES:
-            extract_sound_template(wxr, page_data[-1], t_node)
-
-    for list_node in level_node.find_child(NodeKind.LIST):
-        for list_item in list_node.find_child(NodeKind.LIST_ITEM):
-            if list_node.sarg.endswith("#"):
-                extract_gloss_list_item(wxr, page_data[-1], list_item)
-            elif (
-                list_node.sarg.startswith(":") and len(page_data[-1].senses) > 0
-            ):
-                extract_example_list_item(
-                    wxr,
-                    page_data[-1].senses[-1],
-                    list_item,
-                    base_data.lang_code,
-                )
-            elif list_node.sarg.endswith("*"):
-                extract_unorderd_list_item(wxr, page_data[-1], list_item)
+    for node in level_node.find_child(NodeKind.LIST | NodeKind.TEMPLATE):
+        if isinstance(node, TemplateNode):
+            if node.template_name in SOUND_TEMPLATES:
+                extract_sound_template(wxr, page_data[-1], node)
+            elif node.template_name in LINKAGE_TEMPLATES:
+                extract_linkage_template(wxr, page_data[-1], node)
+        elif node.kind == NodeKind.LIST:
+            for list_item in node.find_child(NodeKind.LIST_ITEM):
+                if node.sarg.endswith("#"):
+                    extract_gloss_list_item(wxr, page_data[-1], list_item)
+                elif (
+                    node.sarg.startswith(":") and len(page_data[-1].senses) > 0
+                ):
+                    extract_example_list_item(
+                        wxr,
+                        page_data[-1].senses[-1],
+                        list_item,
+                        base_data.lang_code,
+                    )
+                elif node.sarg.endswith("*"):
+                    extract_unorderd_list_item(wxr, page_data[-1], list_item)
 
     if len(page_data[-1].senses) == 0:
         page_data.pop()
@@ -104,4 +111,11 @@ def extract_unorderd_list_item(
             sense.note += clean_node(
                 wxr, sense, list_item.children[index + 1 :]
             )
+            break
+        elif (
+            isinstance(node, str)
+            and ":" in node
+            and node[: node.index(":")].strip() in LINKAGE_SECTIONS
+        ):
+            extract_linkage_list_item(wxr, word_entry, list_item, "")
             break
