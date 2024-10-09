@@ -10,4 +10,5 @@ POS_DATA = {
     "접두사": {"pos": "prefix", "tags": ["morpheme"]},
     "의미": {"pos": "unknown"},
     "타동사": {"pos": "verb", "tags": ["transitive"]},
+    "종별사": {"pos": "counter"},
 }

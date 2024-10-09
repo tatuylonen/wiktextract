@@ -28,6 +28,7 @@ class Sense(KoreanBaseModel):
     topics: list[str] = []
     categories: list[str] = []
     examples: list[Example] = []
+    note: str = ""
 
 
 class Sound(KoreanBaseModel):

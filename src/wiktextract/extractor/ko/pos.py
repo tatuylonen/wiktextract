@@ -90,7 +90,18 @@ def extract_unorderd_list_item(
                 break
         elif isinstance(node, str) and "어원:" in node:
             etymology_nodes = []
-            etymology_nodes.append(node[node.index("어원:") + 3 :])
+            etymology_nodes.append(node[node.index(":") + 1 :])
             etymology_nodes.extend(list_item.children[index + 1 :])
             word_entry.etymology_text = clean_node(wxr, None, etymology_nodes)
+            break
+        elif (
+            isinstance(node, str)
+            and ("참고:" in node or "참조:" in node)
+            and len(word_entry.senses) > 0
+        ):
+            sense = word_entry.senses[-1]
+            sense.note = node[node.index(":") + 1 :].strip()
+            sense.note += clean_node(
+                wxr, sense, list_item.children[index + 1 :]
+            )
             break
