@@ -56,9 +56,16 @@ def is_panel_template(wxr: WiktextractContext, template_name: str) -> bool:
     produces an infobox in Wiktionary, but this also recognizes certain other
     templates that we do not wish to expand)."""
     page_extractor_mod = import_extractor_module(wxr.wtp.lang_code, "page")
-    if template_name in page_extractor_mod.PANEL_TEMPLATES:
+    if (
+        hasattr(page_extractor_mod, "PANEL_TEMPLATES")
+        and template_name in page_extractor_mod.PANEL_TEMPLATES
+    ):
         return True
-    return template_name.startswith(tuple(page_extractor_mod.PANEL_PREFIXES))
+    if hasattr(
+        page_extractor_mod, "PANEL_PREFIXES"
+    ) and template_name.startswith(tuple(page_extractor_mod.PANEL_PREFIXES)):
+        return True
+    return False
 
 
 def recursively_extract(
@@ -323,8 +330,8 @@ def clean_node(
     post_template_fn: Optional[PostTemplateFnCallable] = None,
     node_handler_fn: Optional[NodeHandlerFnCallable] = None,
     collect_links: bool = False,
-    no_strip = False,
-    no_html_strip = False,
+    no_strip=False,
+    no_html_strip=False,
 ) -> str:
     """
     Expands node or nodes to text, cleaning up HTML tags and duplicate spaces.
@@ -373,10 +380,11 @@ def clean_node(
     # Lua execution errors here.
     # If collect_links=True (for glosses), capture links
     category_ns_data: NamespaceDataEntry = wxr.wtp.NAMESPACE_DATA.get(
-        "Category", {}  # type: ignore[typeddict-item]
+        "Category",
+        {},  # type: ignore[typeddict-item]
     )
     category_ns_names: set[str] = {category_ns_data.get("name")} | set(
-        category_ns_data.get("aliases")  #type:ignore[assignment,arg-type]
+        category_ns_data.get("aliases")  # type:ignore[assignment,arg-type]
     )
     category_ns_names |= {"Category", "category"}
     category_names_pattern = rf"(?:{'|'.join(category_ns_names)})"

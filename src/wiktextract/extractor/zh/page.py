@@ -35,15 +35,6 @@ from .section_titles import (
 )
 from .translation import extract_translation
 
-# Templates that are used to form panels on pages and that
-# should be ignored in various positions
-PANEL_TEMPLATES = {}
-
-# Template name prefixes used for language-specific panel templates (i.e.,
-# templates that create side boxes or notice boxes or that should generally
-# be ignored).
-PANEL_PREFIXES = {}
-
 
 def parse_section(
     wxr: WiktextractContext,

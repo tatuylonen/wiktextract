@@ -11,10 +11,6 @@ from .pos import extract_pos_section
 from .section_titles import POS_DATA
 from .sound import SOUND_TEMPLATES, extract_sound_template
 
-PANEL_TEMPLATES = set()
-PANEL_PREFIXES = set()
-ADDITIONAL_EXPAND_TEMPLATES = set()
-
 
 def extract_section_categories(
     wxr: WiktextractContext,
