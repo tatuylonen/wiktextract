@@ -13,6 +13,7 @@ from .linkage import (
 from .models import Sense, WordEntry
 from .section_titles import LINKAGE_SECTIONS, POS_DATA
 from .sound import SOUND_TEMPLATES, extract_sound_template
+from .translation import extract_translation_template
 
 
 def extract_pos_section(
@@ -35,6 +36,8 @@ def extract_pos_section(
                 extract_sound_template(wxr, page_data[-1], node)
             elif node.template_name in LINKAGE_TEMPLATES:
                 extract_linkage_template(wxr, page_data[-1], node)
+            elif node.template_name == "외국어":
+                extract_translation_template(wxr, page_data[-1], node)
         elif node.kind == NodeKind.LIST:
             for list_item in node.find_child(NodeKind.LIST_ITEM):
                 if node.sarg.endswith("#"):

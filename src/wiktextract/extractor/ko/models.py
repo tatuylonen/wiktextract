@@ -51,6 +51,16 @@ class Linkage(KoreanBaseModel):
     sense: str = ""
 
 
+class Translation(KoreanBaseModel):
+    lang_code: str = Field(
+        description="Wiktionary language code of the translation term"
+    )
+    lang: str = Field(description="Translation language name")
+    word: str = Field(description="Translation term")
+    roman: str = ""
+    raw_tags: list[str] = []
+
+
 class WordEntry(KoreanBaseModel):
     model_config = ConfigDict(title="Korean Wiktionary")
     word: str = Field(description="Word string", min_length=1)
@@ -69,3 +79,4 @@ class WordEntry(KoreanBaseModel):
     related: list[Linkage] = []
     synonyms: list[Linkage] = []
     antonyms: list[Linkage] = []
+    translations: list[Translation] = []
