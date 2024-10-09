@@ -16,10 +16,6 @@ from .pos import extract_pos_section
 from .sound import extract_sound_section
 from .translation import extract_translation_section
 
-PANEL_TEMPLATES = set()
-PANEL_PREFIXES = set()
-ADDITIONAL_EXPAND_TEMPLATES = set()
-
 
 def parse_section(
     wxr: WiktextractContext,

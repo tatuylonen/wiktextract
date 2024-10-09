@@ -28,6 +28,7 @@ class Sense(KoreanBaseModel):
     topics: list[str] = []
     categories: list[str] = []
     examples: list[Example] = []
+    note: str = ""
 
 
 class Sound(KoreanBaseModel):
@@ -45,6 +46,11 @@ class Sound(KoreanBaseModel):
     roman: str = ""
 
 
+class Linkage(KoreanBaseModel):
+    word: str
+    sense: str = ""
+
+
 class WordEntry(KoreanBaseModel):
     model_config = ConfigDict(title="Korean Wiktionary")
     word: str = Field(description="Word string", min_length=1)
@@ -58,3 +64,8 @@ class WordEntry(KoreanBaseModel):
     raw_tags: list[str] = []
     etymology_text: str = ""
     sounds: list[Sound] = []
+    proverbs: list[Linkage] = []
+    derived: list[Linkage] = []
+    related: list[Linkage] = []
+    synonyms: list[Linkage] = []
+    antonyms: list[Linkage] = []

@@ -26,18 +26,6 @@ from .section_titles import (
 from .sense_data import process_sense_data_list
 from .translation import extract_translation_section
 
-# Templates that are used to form panels on pages and that
-# should be ignored in various positions
-PANEL_TEMPLATES = set()
-
-# Template name prefixes used for language-specific panel templates (i.e.,
-# templates that create side boxes or notice boxes or that should generally
-# be ignored).
-PANEL_PREFIXES = set()
-
-# Additional templates to be expanded in the pre-expand phase
-ADDITIONAL_EXPAND_TEMPLATES = set()
-
 
 def parse_entries(
     wxr: WiktextractContext,

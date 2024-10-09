@@ -6,14 +6,11 @@ from wikitextprocessor.parser import LEVEL_KIND_FLAGS, LevelNode, NodeKind
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from .linkage import extract_linkage_section
 from .models import Sense, WordEntry
 from .pos import extract_pos_section
-from .section_titles import POS_DATA
+from .section_titles import LINKAGE_SECTIONS, POS_DATA
 from .sound import SOUND_TEMPLATES, extract_sound_template
-
-PANEL_TEMPLATES = set()
-PANEL_PREFIXES = set()
-ADDITIONAL_EXPAND_TEMPLATES = set()
 
 
 def extract_section_categories(
@@ -38,6 +35,10 @@ def parse_section(
     title_text = re.sub(r"\s*\d+$", "", title_text)
     if title_text in POS_DATA:
         extract_pos_section(wxr, page_data, base_data, level_node, title_text)
+    elif title_text in LINKAGE_SECTIONS and len(page_data) > 0:
+        extract_linkage_section(
+            wxr, page_data[-1], level_node, LINKAGE_SECTIONS[title_text]
+        )
 
     for next_level in level_node.find_child(LEVEL_KIND_FLAGS):
         parse_section(wxr, page_data, base_data, next_level)

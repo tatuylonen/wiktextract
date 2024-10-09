@@ -10,4 +10,14 @@ POS_DATA = {
     "접두사": {"pos": "prefix", "tags": ["morpheme"]},
     "의미": {"pos": "unknown"},
     "타동사": {"pos": "verb", "tags": ["transitive"]},
+    "종별사": {"pos": "counter"},
+}
+
+LINKAGE_SECTIONS = {
+    "속담": "proverbs",
+    "합성어": "derived",
+    "파생어": "derived",
+    "관련 어휘": "related",
+    "유의어": "synonyms",
+    "반의어": "antonyms",
 }
