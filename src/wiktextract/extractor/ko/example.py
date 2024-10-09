@@ -18,7 +18,7 @@ def extract_example_list_item(
         elif isinstance(node, TemplateNode) and node.template_name.startswith(
             "따옴"
         ):
-            example.ref = clean_node(wxr, None, node)
+            example.ref = clean_node(wxr, None, node).strip("() ")
         elif after_lang_template:
             example.translation += clean_node(wxr, None, node)
         else:

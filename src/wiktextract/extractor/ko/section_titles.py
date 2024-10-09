@@ -12,3 +12,9 @@ POS_DATA = {
     "타동사": {"pos": "verb", "tags": ["transitive"]},
     "종별사": {"pos": "counter"},
 }
+
+LINKAGE_SECTIONS = {
+    "속담": "proverbs",
+    "합성어": "derived",
+    "파생어": "derived",
+}
