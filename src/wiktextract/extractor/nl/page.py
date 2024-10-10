@@ -13,6 +13,7 @@ from ...wxr_context import WiktextractContext
 from .models import Sense, WordEntry
 from .pos import extract_pos_section
 from .section_titles import POS_DATA
+from .sound import extract_sound_section
 
 
 def extract_section_categories(
@@ -34,6 +35,10 @@ def parse_section(
     wxr.wtp.start_subsection(title_text)
     if title_text in POS_DATA:
         extract_pos_section(wxr, page_data, base_data, level_node, title_text)
+    elif title_text == "Uitspraak":
+        extract_sound_section(
+            wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
+        )
 
     for next_level in level_node.find_child(LEVEL_KIND_FLAGS):
         parse_section(wxr, page_data, base_data, next_level)
