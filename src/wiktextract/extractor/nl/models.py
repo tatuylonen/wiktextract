@@ -24,6 +24,30 @@ class Sense(DutchBaseModel):
     examples: list[Example] = []
 
 
+class Sound(DutchBaseModel):
+    ipa: str = Field(default="", description="International Phonetic Alphabet")
+    audio: str = Field(default="", description="Audio file name")
+    wav_url: str = ""
+    oga_url: str = ""
+    ogg_url: str = ""
+    mp3_url: str = ""
+    opus_url: str = ""
+    flac_url: str = ""
+    tags: list[str] = []
+    raw_tags: list[str] = []
+
+
+class Linkage(DutchBaseModel):
+    word: str
+    tags: list[str] = []
+    raw_tags: list[str] = []
+    roman: str = ""
+    sense: str = Field(default="", description="Definition of the word")
+    sense_index: int = Field(
+        default=0, ge=0, description="Number of the definition, start from 1"
+    )
+
+
 class WordEntry(DutchBaseModel):
     model_config = ConfigDict(title="Dutch Wiktionary")
     word: str = Field(description="Word string", min_length=1)
@@ -35,4 +59,18 @@ class WordEntry(DutchBaseModel):
     categories: list[str] = []
     tags: list[str] = []
     raw_tags: list[str] = []
-    sense_index: str = ""
+    etymology_index: str = Field(default="", exclude=True)
+    sounds: list[Sound] = []
+    anagrams: list[Linkage] = []
+    antonyms: list[Linkage] = []
+    derived: list[Linkage] = []
+    proverbs: list[Linkage] = []
+    holonyms: list[Linkage] = []
+    homophones: list[Linkage] = []
+    hypernyms: list[Linkage] = []
+    hyponyms: list[Linkage] = []
+    metonyms: list[Linkage] = []
+    paronyms: list[Linkage] = []
+    related: list[Linkage] = []
+    rhymes: list[Linkage] = []
+    synonyms: list[Linkage] = []
