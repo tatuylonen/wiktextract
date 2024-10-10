@@ -19,6 +19,8 @@ class Example(KoreanBaseModel):
         default=[], description="Japanese Kanji and furigana"
     )
     tags: list[str] = []
+    literal_meaning: str = ""
+    note: str = ""
 
 
 class Sense(KoreanBaseModel):
@@ -44,6 +46,7 @@ class Sound(KoreanBaseModel):
     raw_tags: list[str] = []
     hangul: str = ""
     roman: str = ""
+    other: str = ""
 
 
 class Linkage(KoreanBaseModel):

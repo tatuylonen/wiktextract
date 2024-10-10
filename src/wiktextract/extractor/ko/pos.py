@@ -65,7 +65,7 @@ def extract_gloss_list_item(
     sense = Sense()
     for node in list_item.children:
         if isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
-            if node.sarg.startswith(":"):
+            if ":" in node.sarg:
                 for e_list_item in node.find_child(NodeKind.LIST_ITEM):
                     extract_example_list_item(
                         wxr, sense, e_list_item, word_entry.lang_code

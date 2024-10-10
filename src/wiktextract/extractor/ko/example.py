@@ -1,4 +1,4 @@
-from wikitextprocessor import TemplateNode, WikiNode
+from wikitextprocessor import NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -7,20 +7,32 @@ from .models import Example, Sense
 
 
 def extract_example_list_item(
-    wxr: WiktextractContext, sense: Sense, list_item: WikiNode, lang_code: str
+    wxr: WiktextractContext,
+    sense: Sense,
+    list_item: WikiNode,
+    lang_code: str,
+    parent_example: Example | None = None,
 ) -> None:
-    example = Example()
+    example = Example() if parent_example is None else parent_example
     after_lang_template = False
     for node in list_item.children:
         if isinstance(node, TemplateNode) and node.template_name == "lang":
             after_lang_template = True
             extract_example_lang_template(wxr, example, node, lang_code)
         elif isinstance(node, TemplateNode) and node.template_name.startswith(
-            "따옴"
+            ("따옴", "지봉유설")
         ):
             example.ref = clean_node(wxr, None, node).strip("() ")
+        elif isinstance(node, TemplateNode) and node.template_name in [
+            "예문",
+            "ux",
+        ]:
+            extract_ux_template(wxr, sense, example, node)
+            break
         elif after_lang_template:
             example.translation += clean_node(wxr, None, node)
+        elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
+            break
         else:
             example.text += clean_node(wxr, None, node)
 
@@ -37,6 +49,12 @@ def extract_example_list_item(
                 sense.examples.append(new_example)
         else:
             sense.examples.append(example)
+
+    for nested_list in list_item.find_child(NodeKind.LIST):
+        for nested_list_item in nested_list.find_child(NodeKind.LIST_ITEM):
+            extract_example_list_item(
+                wxr, sense, nested_list_item, lang_code, example
+            )
 
 
 def extract_example_lang_template(
@@ -66,3 +84,43 @@ def extract_example_lang_template(
         roman_start_index = example.text.index("(")
         example.roman = example.text[roman_start_index:].strip("() ")
         example.text = example.text[:roman_start_index].strip()
+
+
+def extract_ux_template(
+    wxr: WiktextractContext,
+    sense: Sense,
+    example: Example,
+    t_node: TemplateNode,
+) -> None:
+    # https://ko.wiktionary.org/wiki/틀:ux
+    lang_code = t_node.template_parameters.get(1, "")
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    if lang_code == "ja":
+        for span_tag in expanded_node.find_html_recursively("span"):
+            span_class = span_tag.attrs.get("class", "")
+            if span_class == "Jpan":
+                example.ruby, no_ruby = extract_ruby(wxr, span_tag)
+                example.text = clean_node(wxr, None, no_ruby)
+            elif span_class == "tr":
+                example.roman = clean_node(wxr, None, span_tag)
+        example.translation = clean_node(
+            wxr, None, t_node.template_parameters.get(4, "")
+        )
+        example.literal_meaning = clean_node(
+            wxr, None, t_node.template_parameters.get("lit", "")
+        )
+    else:
+        example.text = clean_node(
+            wxr, None, t_node.template_parameters.get(2, "")
+        )
+        example.translation = clean_node(
+            wxr, None, t_node.template_parameters.get(3, "")
+        )
+        example.note = clean_node(
+            wxr, None, t_node.template_parameters.get("footer", "")
+        )
+
+    for link_node in expanded_node.find_child(NodeKind.LINK):
+        clean_node(wxr, sense, link_node)
