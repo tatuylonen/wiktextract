@@ -33,11 +33,15 @@ def extract_linkage_section(
     if linkage_type == "proverbs":
         extract_proverb_section(wxr, word_entry, level_node)
     else:
+        from .translation import extract_translation_template
+
         for list_item in level_node.find_child_recursively(NodeKind.LIST_ITEM):
             extract_linkage_list_item(wxr, word_entry, list_item, linkage_type)
 
         for t_node in level_node.find_child(NodeKind.TEMPLATE):
             extract_linkage_template(wxr, word_entry, t_node)
+            if t_node.template_name == "외국어":
+                extract_translation_template(wxr, word_entry, t_node)
 
 
 def extract_linkage_list_item(
