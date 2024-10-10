@@ -7,16 +7,20 @@ from .models import Example, Sense
 
 
 def extract_example_list_item(
-    wxr: WiktextractContext, sense: Sense, list_item: WikiNode, lang_code: str
+    wxr: WiktextractContext,
+    sense: Sense,
+    list_item: WikiNode,
+    lang_code: str,
+    parent_example: Example | None = None,
 ) -> None:
-    example = Example()
+    example = Example() if parent_example is None else parent_example
     after_lang_template = False
     for node in list_item.children:
         if isinstance(node, TemplateNode) and node.template_name == "lang":
             after_lang_template = True
             extract_example_lang_template(wxr, example, node, lang_code)
         elif isinstance(node, TemplateNode) and node.template_name.startswith(
-            "따옴"
+            ("따옴", "지봉유설")
         ):
             example.ref = clean_node(wxr, None, node).strip("() ")
         elif isinstance(node, TemplateNode) and node.template_name in [
@@ -27,6 +31,8 @@ def extract_example_list_item(
             break
         elif after_lang_template:
             example.translation += clean_node(wxr, None, node)
+        elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
+            break
         else:
             example.text += clean_node(wxr, None, node)
 
@@ -43,6 +49,12 @@ def extract_example_list_item(
                 sense.examples.append(new_example)
         else:
             sense.examples.append(example)
+
+    for nested_list in list_item.find_child(NodeKind.LIST):
+        for nested_list_item in nested_list.find_child(NodeKind.LIST_ITEM):
+            extract_example_list_item(
+                wxr, sense, nested_list_item, lang_code, example
+            )
 
 
 def extract_example_lang_template(

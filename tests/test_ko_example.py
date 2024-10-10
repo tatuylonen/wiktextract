@@ -152,3 +152,27 @@ class TestKoExample(TestCase):
         self.assertEqual(
             data[0]["senses"][0]["categories"], ["한국어 용례가 포함된 낱말"]
         )
+
+    def test_jibong_yuseol_template(self):
+        self.wxr.wtp.add_page(
+            "틀:지봉유설",
+            10,
+            """'''1614년''', [[:w:이수광|이수광]], 《[[:s:지봉유설|지봉유설]]》, 〈[[:s:지봉유설/2권|2권 外國 條]]〉""",
+        )
+        data = parse_page(
+            self.wxr,
+            "없다",
+            """== 중국어 ==
+====명사====
+# [[동서]].
+#: {{지봉유설|2|2권 外國 條}}
+#:: {{lang|zh|'''東西'''六十日程}} 동서로 60일이 걸리는 거리이다.""",
+        )
+        self.assertEqual(
+            data[0]["senses"][0]["examples"][0],
+            {
+                "text": "東西六十日程",
+                "translation": "동서로 60일이 걸리는 거리이다.",
+                "ref": "1614년, 이수광, 《지봉유설》, 〈2권 外國 條〉",
+            },
+        )
