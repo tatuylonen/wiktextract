@@ -1,4 +1,4 @@
-from wikitextprocessor import TemplateNode, WikiNode
+from wikitextprocessor import NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -19,6 +19,12 @@ def extract_example_list_item(
             "따옴"
         ):
             example.ref = clean_node(wxr, None, node).strip("() ")
+        elif isinstance(node, TemplateNode) and node.template_name in [
+            "예문",
+            "ux",
+        ]:
+            extract_ux_template(wxr, sense, example, node)
+            break
         elif after_lang_template:
             example.translation += clean_node(wxr, None, node)
         else:
@@ -66,3 +72,43 @@ def extract_example_lang_template(
         roman_start_index = example.text.index("(")
         example.roman = example.text[roman_start_index:].strip("() ")
         example.text = example.text[:roman_start_index].strip()
+
+
+def extract_ux_template(
+    wxr: WiktextractContext,
+    sense: Sense,
+    example: Example,
+    t_node: TemplateNode,
+) -> None:
+    # https://ko.wiktionary.org/wiki/틀:ux
+    lang_code = t_node.template_parameters.get(1, "")
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    if lang_code == "ja":
+        for span_tag in expanded_node.find_html_recursively("span"):
+            span_class = span_tag.attrs.get("class", "")
+            if span_class == "Jpan":
+                example.ruby, no_ruby = extract_ruby(wxr, span_tag)
+                example.text = clean_node(wxr, None, no_ruby)
+            elif span_class == "tr":
+                example.roman = clean_node(wxr, None, span_tag)
+        example.translation = clean_node(
+            wxr, None, t_node.template_parameters.get(4, "")
+        )
+        example.literal_meaning = clean_node(
+            wxr, None, t_node.template_parameters.get("lit", "")
+        )
+    else:
+        example.text = clean_node(
+            wxr, None, t_node.template_parameters.get(2, "")
+        )
+        example.translation = clean_node(
+            wxr, None, t_node.template_parameters.get(3, "")
+        )
+        example.note = clean_node(
+            wxr, None, t_node.template_parameters.get("footer", "")
+        )
+
+    for link_node in expanded_node.find_child(NodeKind.LINK):
+        clean_node(wxr, sense, link_node)

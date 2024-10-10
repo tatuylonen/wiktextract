@@ -19,6 +19,8 @@ class Example(KoreanBaseModel):
         default=[], description="Japanese Kanji and furigana"
     )
     tags: list[str] = []
+    literal_meaning: str = ""
+    note: str = ""
 
 
 class Sense(KoreanBaseModel):

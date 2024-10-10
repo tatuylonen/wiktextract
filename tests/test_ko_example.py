@@ -95,3 +95,60 @@ class TestKoExample(TestCase):
                 "ref": "3세기, 진수,《삼국지》, 〈권30 위서 오환선비동이전 (魏書 烏丸鮮卑東夷傳)〉",
             },
         )
+
+    def test_ja_ux_template(self):
+        self.wxr.wtp.add_page(
+            "틀:예문",
+            10,
+            """<div style="font-size: 120%"><span lang="ja" class="Jpan">'''<ruby>東西<rp>(</rp><rt>とうざい</rt><rp>)</rp></ruby>'''に<ruby>走<rp>(</rp><rt>はし</rt><rp>)</rp></ruby>る<ruby>道<rp>(</rp><rt>どう</rt><rp>)</rp></ruby><ruby>路<rp>(</rp><rt>ろ</rt><rp>)</rp></ruby></span></div><dl><dd><i><span class="tr">'''tōzai''' ni hashiru dōro</span></i></dd><dd>'''동서'''로 달리는 도로</dd><dd>(literally, “lit”)</dd></dl>[[분류:일본어 용례가 포함된 낱말|東西]]""",
+        )
+        data = parse_page(
+            self.wxr,
+            "東西",
+            """== 일본어 ==
+=== 명사 ===
+# [[동서]] ([[동쪽]]과 [[서쪽]])
+#: {{예문|ja|'''東西'''に走る道%路|'''とうざい''' に はしる どう%ろ|'''동서'''로 달리는 도로}}""",
+        )
+        self.assertEqual(
+            data[0]["senses"][0]["examples"][0],
+            {
+                "text": "東西に走る道路",
+                "ruby": [
+                    ("東西", "とうざい"),
+                    ("走", "はし"),
+                    ("道", "どう"),
+                    ("路", "ろ"),
+                ],
+                "roman": "tōzai ni hashiru dōro",
+                "translation": "동서로 달리는 도로",
+            },
+        )
+        self.assertEqual(
+            data[0]["senses"][0]["categories"], ["일본어 용례가 포함된 낱말"]
+        )
+
+    def test_ko_ux_template(self):
+        self.wxr.wtp.add_page(
+            "틀:예문",
+            10,
+            """<div class="h-usage-example"><span class="None" lang="ko"><span style="font-size: 120%25">그녀는 '''없는''' 가정에서 자랐다.</span></span><dl><dd><span class="e-footer">매우 가난하게 살았다.</span></dd></dl></div>[[Category:한국어 용례가 포함된 낱말|없다]][[Category:한국어 용례가 포함된 낱말|없다|없다]]""",
+        )
+        data = parse_page(
+            self.wxr,
+            "없다",
+            """== 한국어 ==
+=== 형용사 ===
+# 궁핍하다.
+#:{{예문|ko|그녀는 '''없는''' 가정에서 자랐다.|footer= 매우 가난하게 살았다.}}""",
+        )
+        self.assertEqual(
+            data[0]["senses"][0]["examples"][0],
+            {
+                "text": "그녀는 없는 가정에서 자랐다.",
+                "note": "매우 가난하게 살았다.",
+            },
+        )
+        self.assertEqual(
+            data[0]["senses"][0]["categories"], ["한국어 용례가 포함된 낱말"]
+        )
