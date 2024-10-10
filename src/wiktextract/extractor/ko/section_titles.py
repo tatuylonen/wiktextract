@@ -11,6 +11,7 @@ POS_DATA = {
     "의미": {"pos": "unknown"},
     "타동사": {"pos": "verb", "tags": ["transitive"]},
     "종별사": {"pos": "counter"},
+    "감탄사": {"pos": "intj"},
 }
 
 LINKAGE_SECTIONS = {

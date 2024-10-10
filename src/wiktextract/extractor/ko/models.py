@@ -44,6 +44,7 @@ class Sound(KoreanBaseModel):
     raw_tags: list[str] = []
     hangul: str = ""
     roman: str = ""
+    other: str = ""
 
 
 class Linkage(KoreanBaseModel):

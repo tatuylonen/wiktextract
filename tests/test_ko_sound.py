@@ -75,3 +75,37 @@ class TestKoSound(TestCase):
         self.assertEqual(
             data[0]["categories"], ["한국어 IPA 발음이 포함된 낱말"]
         )
+
+    def test_ja_pron(self):
+        self.wxr.wtp.add_page(
+            "틀:ja-pron",
+            10,
+            """<ul><li><span class="usage-label-accent"><span class="ib-brac">(</span><span class="ib-content">[[w:도쿄 방언|도쿄]]</span><span class="ib-brac">)</span></span> <span lang="ja" class="Jpan"><span>と<span></span></span>ーざい</span></span> <span class="Latn"><samp>[tóꜜòzàì]</samp></span> ([[頭高型|두고형]] – [1])</li><li>[[w:국제 음성 기호|IPA]]<sup>([[부록:일본어 발음|표기]])</sup>:&#32;<span class="IPA">[to̞ːza̠i]</span>[[Category:일본어 IPA 발음이 포함된 낱말|とうざい]][[Category:일본어 중복되지 않는 수동 정렬 키를 포함하는 낱말|東西]]</li></ul>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "東西",
+            """== 일본어 ==
+=== 발음 ===
+* {{ja-pron|とうざい|acc=1|acc_ref=DJR,NHK}}
+=== 명사 ===
+# [[동서]] ([[동쪽]]과 [[서쪽]])""",
+        )
+        self.assertEqual(
+            data[0]["sounds"],
+            [
+                {
+                    "roman": "[tóꜜòzàì]",
+                    "other": "とーざい",
+                    "raw_tags": ["도쿄"],
+                },
+                {"ipa": "[to̞ːza̠i]"},
+            ],
+        )
+        self.assertEqual(
+            data[0]["categories"],
+            [
+                "일본어 IPA 발음이 포함된 낱말",
+                "일본어 중복되지 않는 수동 정렬 키를 포함하는 낱말",
+            ],
+        )
