@@ -79,10 +79,10 @@ def extract_pos_header_line_nodes(
     wxr: WiktextractContext, word_entry: WordEntry, nodes: list[WikiNode | str]
 ) -> None:
     for node in nodes:
-        if isinstance(node, str) and word_entry.sense_index == "":
+        if isinstance(node, str) and word_entry.etymology_index == "":
             m = re.search(r"\[(.+)\]", node.strip())
             if m is not None:
-                word_entry.sense_index = m.group(1).strip()
+                word_entry.etymology_index = m.group(1).strip()
         elif isinstance(node, TemplateNode) and node.template_name == "-l-":
             extract_l_template(wxr, word_entry, node)
 

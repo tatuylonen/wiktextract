@@ -47,3 +47,23 @@ POS_DATA = {
     "Symbool": {"pos": "symbol"},
     "Werkwoord": {"pos": "verb"},
 }
+
+
+LINKAGE_SECTIONS = {
+    "Anagrammen": "anagrams",
+    "Antoniemen": "antonyms",
+    "Afgeleide begrippen": "derived",
+    "Uitdrukkingen en gezegden": "proverbs",
+    "Holoniemen": "holonyms",
+    "Gelijkklinkende woorden": "homophones",
+    "Hyperoniemen": "hypernyms",
+    "Hyponiemen": "hyponyms",
+    "Hyponiemen (in taxonomische zin)": "hyponyms",
+    "Meroniemen": "metonyms",
+    "Paroniemen": "paronyms",
+    "Spreekwoorden": "proverbs",
+    "Verwante begrippen": "related",
+    "Rijmwoorden": "rhymes",
+    "Synoniemen": "synonyms",
+    "Typische woordcombinaties": "derived",
+}

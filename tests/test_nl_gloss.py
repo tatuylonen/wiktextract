@@ -79,7 +79,6 @@ class TestNlGloss(TestCase):
                             "raw_tags": ["roofdieren"],
                         }
                     ],
-                    "sense_index": "A",
                     "tags": ["masculine"],
                     "word": "hond",
                 }
