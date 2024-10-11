@@ -172,7 +172,7 @@ def recurse_glosses1(
 
     if node.kind == NodeKind.LIST:
         for child in node.children:
-            if isinstance(child, str) or node.kind != NodeKind.LIST_ITEM:
+            if isinstance(child, str) or child.kind != NodeKind.LIST_ITEM:
                 # This should never happen
                 wxr.wtp.error(
                     f"{child=} is direct child of NodeKind.LIST",
