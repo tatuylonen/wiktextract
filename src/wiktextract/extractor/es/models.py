@@ -164,3 +164,4 @@ class WordEntry(BaseModelWrap):
     tags: list[str] = []
     extra_sounds: dict[str, str] = {}
     forms: list[Form] = []
+    hyphenation: str = ""

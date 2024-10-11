@@ -12,14 +12,9 @@ class TestESPronunciation(unittest.TestCase):
     maxDiff = None
 
     def setUp(self) -> None:
+        conf = WiktionaryConfig(dump_file_lang_code="es")
         self.wxr = WiktextractContext(
-            Wtp(
-                lang_code="es",
-                extension_tags={
-                    "phonos": {"parents": ["phrasing"], "content": ["flow"]}
-                },
-            ),
-            WiktionaryConfig(dump_file_lang_code="es"),
+            Wtp(lang_code="es", extension_tags=conf.allowed_html_tags), conf
         )
 
     def tearDown(self) -> None:
@@ -181,3 +176,27 @@ class TestESPronunciation(unittest.TestCase):
                 },
             ],
         )
+
+    def test_pron_graf_hyphenation(self):
+        self.wxr.wtp.start_page("perro")
+        self.wxr.wtp.add_page(
+            "Plantilla:pron-graf",
+            10,
+            """{|class="pron-graf toccolours"|<span>perro</span>
+|-
+|'''silabación'''
+|pe-rro
+|-
+|'''rima'''
+|[[:Categoría:ES:Rimas:e.ro|e.ro]][[Categoría:ES:Rimas:e.ro]]
+|}""",
+        )
+        root = self.wxr.wtp.parse("{{pron-graf}}")
+        word_entry = WordEntry(word="perro", lang_code="es", lang="Español")
+        process_pron_graf_template(self.wxr, word_entry, root.children[0])
+        self.assertEqual(
+            word_entry.model_dump(exclude_defaults=True)["sounds"],
+            [{"rhymes": "e.ro"}],
+        )
+        self.assertEqual(word_entry.hyphenation, "pe-rro")
+        self.assertEqual(word_entry.categories, ["ES:Rimas:e.ro"])

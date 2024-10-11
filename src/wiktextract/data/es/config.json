@@ -1,5 +1,5 @@
 {
   "allowed_html_tags": {
-    "phonos": {"parents": ["phrasing"], "content": ["flow"]}
+    "phonos": {"parents": ["*"], "content": ["*"]}
   }
 }
