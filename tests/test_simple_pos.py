@@ -110,6 +110,7 @@ plural<br>
             ],
             "pos": "noun",
             "senses": [{"glosses": ["Foo."]}],
+            "head_templates": [ { "name": "noun", "expansion": "[POS TABLE]" } ]
         }
         self.process_test(pos, should_be)
 
@@ -146,6 +147,7 @@ Foo.
             ],
             "pos": "noun",
             "senses": [{"glosses": ["Foo."]}],
+            "head_templates": [ { "name": "noun", "expansion": "[POS TABLE]" } ]
         }
         self.process_test(pos, should_be)
 
