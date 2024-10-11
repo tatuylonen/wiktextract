@@ -24,6 +24,19 @@ def extract_linkage_section(
                 s_index_str = node.template_parameters.get(2, "").strip()
                 if re.fullmatch(r"\d+", s_index_str):
                     sense_index = int(s_index_str)
+            elif node.template_name == "L-top":
+                second_arg = clean_node(
+                    wxr, None, node.template_parameters.get(2, "")
+                )
+                m = re.search(r"\[(\d+)\]", second_arg)
+                if m is not None:
+                    sense_index = int(m.group(1))
+                    sense = second_arg[m.end() :].strip()
+                else:
+                    sense = second_arg
+            elif node.template_name == "L-bottom":
+                sense = ""
+                sense_index = 0
         elif isinstance(node, WikiNode):
             if node.kind == NodeKind.LINK:
                 word = clean_node(wxr, None, node)

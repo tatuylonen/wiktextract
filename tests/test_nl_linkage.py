@@ -32,7 +32,11 @@ class TestNlLinkage(TestCase):
 =====Hyponiemen=====
 {{intens|nld|1}} [[superhond]]
 {{intens|nld|2}} [[kankerhond]], [[tyfushond]]
-*[1] [[reu]]""",
+*[1] [[reu]]
+{{L-top|01|[1] honden naar de rol de ze vervullen}}
+*[[asielhond]]
+{{L-bottom|01}}
+*[2] [[christenhond]]""",
         )
         self.assertEqual(
             data[0]["hyponyms"],
@@ -53,5 +57,11 @@ class TestNlLinkage(TestCase):
                     "raw_tags": ["intensivering"],
                 },
                 {"word": "reu", "sense_index": 1},
+                {
+                    "word": "asielhond",
+                    "sense_index": 1,
+                    "sense": "honden naar de rol de ze vervullen",
+                },
+                {"word": "christenhond", "sense_index": 2},
             ],
         )
