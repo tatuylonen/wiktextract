@@ -153,8 +153,3 @@ def parse_pos_table(
             form.raw_tags = new_raw_tags
 
     return forms
-
-
-def extract_cells(wxr: WiktextractContext, table: HTMLNode) -> list[Node]:
-    assert table.sarg == "table"
-    return []

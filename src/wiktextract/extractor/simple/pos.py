@@ -182,7 +182,7 @@ def recurse_glosses1(
             ret.extend(
                 recurse_glosses1(wxr, parent_sense.model_copy(deep=True), child)
             )
-    if node.kind == NodeKind.LIST_ITEM:
+    elif node.kind == NodeKind.LIST_ITEM:
         contents = []
         sublists = []
         broke_out = False
@@ -211,6 +211,10 @@ def recurse_glosses1(
             # XXX do something about it if it becomes relevant.
             return [example]
         elif node.sarg in (":", "*"):
+            wxr.wtp.debug(
+                f"Gloss item line starts with {node.sarg=}.",
+                sortid="simple/pos/214",
+            )
             return []
 
         found_gloss = parse_gloss(wxr, parent_sense, contents)
