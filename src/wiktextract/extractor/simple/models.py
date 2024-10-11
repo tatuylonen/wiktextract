@@ -137,3 +137,4 @@ class WordEntry(SimpleEnglishBaseModel):
     tags: list[str] = []
     raw_tags: list[str] = []
     hyphenation: str = ""  # Should be a list `hyphenations`.
+    head_templates: list[TemplateData] = []

@@ -4,7 +4,7 @@ from wikitextprocessor.parser import LEVEL_KIND_FLAGS
 from wiktextract import WiktextractContext
 from wiktextract.page import clean_node
 
-from .models import Example, Form, Linkage, Sense, WordEntry
+from .models import Example, Form, Linkage, Sense, TemplateData, WordEntry
 from .section_titles import POS_HEADINGS
 from .table import parse_pos_table
 from .tags_utils import convert_tags_in_sense
@@ -332,6 +332,7 @@ def process_pos(
     # Check POS templates at the start of the section (Simple English specific).
     template_tags: list[str] = []
     template_forms: list[Form] = []
+    head_templates: list[TemplateData] = []
 
     # Typically, a Wiktionary has a word head before glosses, which contains
     # the main form of the word (usually same as the title of the article)
@@ -368,6 +369,18 @@ def process_pos(
                     "not have any forms.",
                     sortid="simple/pos/129",
                 )
+            head_templates.append(
+                TemplateData(
+                    name=child.template_name,
+                    args={
+                        str(k): clean_node(wxr, None, v)
+                        for k, v in child.template_parameters.items()
+                    },
+                    expansion="[POS TABLE]"
+                    # Clean node returns an empty string for a table.
+                    # expansion = clean_node(wxr, None, child)
+                )
+            )
         else:
             break
 
@@ -375,6 +388,7 @@ def process_pos(
     data.forms.extend(template_forms)
     data.forms = remove_duplicate_forms(wxr, data.forms)
     data.tags.extend(template_tags)
+    data.head_templates.extend(head_templates)
 
     # parts = []
     found_list = False
