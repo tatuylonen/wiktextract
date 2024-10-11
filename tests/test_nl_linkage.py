@@ -93,3 +93,23 @@ class TestNlLinkage(TestCase):
                 }
             ],
         )
+
+    def test_expr_template(self):
+        data = parse_page(
+            self.wxr,
+            "hond",
+            """==Nederlands==
+====Zelfstandig naamwoord====
+# zoogdier
+=====Spreekwoorden=====
+{{expr|De '''hond''' zit hem op de tas.|Hij is gierig, hij is een vrek.}}""",
+        )
+        self.assertEqual(
+            data[0]["proverbs"],
+            [
+                {
+                    "sense": "Hij is gierig, hij is een vrek.",
+                    "word": "De hond zit hem op de tas.",
+                }
+            ],
+        )

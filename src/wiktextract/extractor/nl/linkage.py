@@ -39,6 +39,8 @@ def extract_linkage_section(
                 sense_index = 0
             elif node.template_name.startswith("nld-"):
                 extract_nld_template(wxr, word_entry, node, linkage_type)
+            elif node.template_name == "expr":
+                extract_expr_template(wxr, word_entry, node, linkage_type)
         elif isinstance(node, WikiNode):
             if node.kind == NodeKind.LINK:
                 word = clean_node(wxr, None, node)
@@ -113,3 +115,22 @@ def extract_nld_template(
                 getattr(word_entry, linkage_type).append(
                     Linkage(word=word, sense_index=sense_index, sense=sense)
                 )
+
+
+def extract_expr_template(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    t_node: TemplateNode,
+    linkage_type: str,
+) -> None:
+    # https://nl.wiktionary.org/wiki/Sjabloon:expr
+    sense_index_str = t_node.template_parameters.get("n", "")
+    sense_index = 0
+    if re.fullmatch(r"\d+", sense_index_str) is not None:
+        sense_index = int(sense_index_str)
+    sense = clean_node(wxr, None, t_node.template_parameters.get(2, ""))
+    word = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
+    if word != "":
+        getattr(word_entry, linkage_type).append(
+            Linkage(word=word, sense=sense, sense_index=sense_index)
+        )
