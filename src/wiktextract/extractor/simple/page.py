@@ -37,8 +37,8 @@ from .text_utils import POS_ENDING_NUMBER_RE
 
 # WordEntries are composed of smaller data sections, like lists of Senses,
 # Sounds and Etymology data. Your extractor does not need to handle everything,
-# and there is rarely any need to add more fields (because often they already
-# exist in the English extractor), but it is possible to add fields if needed;
+# and there is rarely any need to add new fields (because often they already
+# exist in the English extractor), but it is possible to add them if needed;
 # please check first with an issue to keep everyone in synch.
 
 def parse_page(
@@ -47,7 +47,7 @@ def parse_page(
     """Parse Simple English Wiktionary page."""
     # Unlike other wiktionaries, Simple Wikt. has a limited scope: only English
     # words. The pages also tend to be much shorter and simpler in structure,
-    # which makes parsing them much simpler.
+    # which makes parsing them much easier.
     # https://simple.wiktionary.org/wiki/Wiktionary:Entry_layout_explained
 
     # Usually things like this are handled by checking a page's namespace
@@ -56,9 +56,13 @@ def parse_page(
     if page_title == "Main Page" or page_title.startswith("Appendix:"):
         return []
 
+    # "Parsing page: " is the only place wxr.config.verbose appears.
+    # XXX use wxr.config.verbose more often!
     if wxr.config.verbose:
         logger.info(f"Parsing page: {page_title}")
 
+    # In a larger edition, we might need to handle more complex titles that have
+    # been changed due to the restrictions of WikiMedia article names.
     wxr.config.word = page_title
     wxr.wtp.start_page(page_title)
 
@@ -107,15 +111,21 @@ def parse_page(
     # POS sections, but a few pages have a more complex structure. This
     # is handled by simply flattening the parse tree later, and handling
     # sections in a linear order.
+    #  ║ Noun Section
+    #  ╚═ Etymology Data For Next Section
+    #  ║ Next section
+    #  ╚═Pronunciation data for third section
+    #  ║ Third section.
     base_data = WordEntry(
         word=page_title,
-        # Simple English wiktionary entries are always for English words
+        # Simple English wiktionary entries are only for English words,
+        # so it's atypical in that way.
         lang_code="en",
         lang="English",
         pos="ERROR_UNKNOWN_POS",
     )
 
-    # This is our ret.
+    # This is our return list.
     word_datas: list[WordEntry] = []
 
     for level in page_root.find_child_recursively(LEVEL_KIND_FLAGS):
@@ -138,7 +148,7 @@ def parse_page(
         heading_title = clean_node(wxr, None, level.largs[0]).lower()
         # print(f"=== {heading_title=}")
 
-        # Sometimes headings in SWE have a number at the end ("Noun 2")
+        # Sometimes headings in SEW have a number at the end ("Noun 2")
         if m := POS_ENDING_NUMBER_RE.search(heading_title):
             pos_num = int(m.group(0).strip())
             heading_title = heading_title[: m.start()]

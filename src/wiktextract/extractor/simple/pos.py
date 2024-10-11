@@ -32,8 +32,8 @@ def remove_duplicate_forms(
                 and form.raw_tags == comp.raw_tags
             ):
                 break
-                #  basically "continue" in our case, but this will not trigger
-                # the following else-block
+                # basically "continue" for the outer for block in this case,
+                # but this will not trigger the following else-block
         else:
             # No duplicates found in for loop (exited without breaking)
             new_forms.append(form)
@@ -64,10 +64,12 @@ def parse_gloss(
     antonyms: list[Linkage] = []
 
     # We define this subfunction here to use closure with synonyms and antonyms;
-    # this is the usual way to do it with these kinds of _fn's in the main
+    # this is the usual way we do it with these kinds of _fn's in the main
     # extractor. You could also make a wrapper function that takes the
     # variables you want to enclose and returns a _fn function with those
-    # enclosed, although I don't know if that is any more efficient.
+    # enclosed, although I don't know if that is more or less efficient;
+    # if you need to use the same _fn code in two places, this is the
+    # way to go.
     # There's a more detailed explanation about using template_fn in
     # pronunciation.py.
     def gloss_template_fn(name: str, ht: TemplateArgs) -> str | None:
@@ -84,7 +86,7 @@ def parse_gloss(
                     )
                 )
             # Returning a string means replacing the 'expansion' that would
-            # have otherwise appeared there with it; None leaves things alone.
+            # have otherwise appeared there with it; `None` leaves things alone.
             return ""
         if name in ("antonyms", "antonym", "ant"):
             for ant in ht.values():
@@ -173,7 +175,7 @@ def recurse_glosses1(
             if isinstance(child, str) or node.kind != NodeKind.LIST_ITEM:
                 # This should never happen
                 wxr.wtp.error(
-                    f"str {child=} is direct child of NodeKind.LIST",
+                    f"{child=} is direct child of NodeKind.LIST",
                     sortid="simple/pos/44",
                 )
                 continue
@@ -193,12 +195,12 @@ def recurse_glosses1(
         if broke_out is True:
             sublists = node.children[i:]
 
-        # A LIST and LIST_ITEM sarg is basically the prefix of the line, like
-        # `#` or `##:`: What appears at the very start that is used to parse
-        # the depth and structure of lists.
+        # A LIST and LIST_ITEM `sarg` is basically the prefix of the line, like
+        # `#` or `##:`: the token that appears at the very start of a line that
+        # is used to parse the depth and structure of lists.
         if node.sarg.endswith((":", "*")) and node.sarg not in (":", "*"):
             # This is either a quotation or example.
-            # `not in` filters out lines that are usually notes or random
+            # The `not in` filters out lines that are usually notes or random
             # stuff not inside gloss lists; see "dare".
             text = clean_node(
                 wxr, parent_sense, contents
@@ -278,9 +280,10 @@ def process_pos(
     """Process a part-of-speech section, like 'Noun'. `data` provides basic
     data common with other POS sections, like pronunciation or etymology."""
 
+    # Metadata for different part-of-speech kinds.
     pos_meta = POS_HEADINGS[pos_title]
-    data.pos = pos_meta["pos"]
-    data.pos_num = pos_num
+    data.pos = pos_meta["pos"]  # the internal/translated name for the POS
+    data.pos_num = pos_num  # SEW uses "Noun 1", "Noun 2" style headings.
 
     # Sound data associated with this POS might be coming from a shared
     # section, in which case we've tried to tag the sound data with its
@@ -288,8 +291,8 @@ def process_pos(
     new_sounds = []
     for sound in data.sounds:
         if len(sound.poses) == 0:
-            # This sound data not tagged with any specific pos section, so we
-            # add it
+            # This sound data wasn't tagged with any specific pos section(s), so
+            # we add it to everything; this is basically the default behavior.
             new_sounds.append(sound)
         else:
             for sound_pos in sound.poses:

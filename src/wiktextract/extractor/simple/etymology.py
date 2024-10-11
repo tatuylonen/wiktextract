@@ -15,6 +15,8 @@ def process_etym(
     node: WikiNode,
     target_data: WordEntry,
 ) -> None:
+    """Extract etymological data from section."""
+    # Get everything except subsections.
     etym_nodes = list(node.invert_find_child(LEVEL_KIND_FLAGS))
     etym_templates = []
 
