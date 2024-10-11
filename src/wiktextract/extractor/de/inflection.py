@@ -1,8 +1,7 @@
 import re
 from dataclasses import dataclass
 
-from wikitextprocessor import NodeKind
-from wikitextprocessor.parser import TemplateNode
+from wikitextprocessor import NodeKind, TemplateNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext

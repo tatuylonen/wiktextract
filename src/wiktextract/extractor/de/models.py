@@ -178,3 +178,4 @@ class WordEntry(BaseModelWrap):
     etymology_text: str = ""
     forms: list[Form] = []
     meronyms: list[Linkage] = []
+    hyphenation: str = ""
