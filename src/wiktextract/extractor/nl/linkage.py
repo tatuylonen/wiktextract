@@ -37,6 +37,8 @@ def extract_linkage_section(
             elif node.template_name == "L-bottom":
                 sense = ""
                 sense_index = 0
+            elif node.template_name.startswith("nld-"):
+                extract_nld_template(wxr, word_entry, node, linkage_type)
         elif isinstance(node, WikiNode):
             if node.kind == NodeKind.LINK:
                 word = clean_node(wxr, None, node)
@@ -79,4 +81,35 @@ def extract_linkage_list_item(
             if word != "":
                 getattr(word_entry, linkage_type).append(
                     Linkage(word=word, sense=sense, sense_index=sense_index)
+                )
+
+
+def extract_nld_template(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    t_node: TemplateNode,
+    linkage_type: str,
+) -> None:
+    # https://nl.wiktionary.org/wiki/Sjabloon:nld-rashonden
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    sense_index_str = clean_node(
+        wxr, None, t_node.template_parameters.get(1, "")
+    )
+    sense_index = 0
+    if re.fullmatch(r"\d+", sense_index_str):
+        sense_index = int(sense_index_str)
+    sense = ""
+    for italic_node in expanded_node.find_child_recursively(NodeKind.ITALIC):
+        for link_node in italic_node.find_child(NodeKind.LINK):
+            sense = clean_node(wxr, None, link_node)
+        break
+
+    for list_item in expanded_node.find_child_recursively(NodeKind.LIST_ITEM):
+        for link_node in list_item.find_child(NodeKind.LINK):
+            word = clean_node(wxr, None, link_node)
+            if word != "":
+                getattr(word_entry, linkage_type).append(
+                    Linkage(word=word, sense_index=sense_index, sense=sense)
                 )

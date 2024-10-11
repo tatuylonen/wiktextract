@@ -65,3 +65,31 @@ class TestNlLinkage(TestCase):
                 {"word": "christenhond", "sense_index": 2},
             ],
         )
+
+    def test_nld_template(self):
+        self.wxr.wtp.add_page(
+            "Sjabloon:nld-rashonden",
+            10,
+            """<div><div>''<span>[1]</span>&#32;[[hondenrassen]]:''</div><div>
+* &#160;[[Amerikaanse cockerspaniël&#35;Nederlands|Amerikaanse cockerspaniël]]&#32;&#160;
+</div></div>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "hond",
+            """==Nederlands==
+====Zelfstandig naamwoord====
+# zoogdier
+=====Hyponiemen=====
+{{nld-rashonden|1}}""",
+        )
+        self.assertEqual(
+            data[0]["hyponyms"],
+            [
+                {
+                    "sense": "hondenrassen",
+                    "sense_index": 1,
+                    "word": "Amerikaanse cockerspaniël",
+                }
+            ],
+        )
