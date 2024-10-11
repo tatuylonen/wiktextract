@@ -18,10 +18,6 @@ from .section_titles import FORM_TITLES, LINKAGE_TITLES, POS_SECTIONS
 from .translation import extract_translation
 
 
-# Additional templates to be expanded in the pre-expand phase
-ADDITIONAL_EXPAND_TEMPLATES = {"NoCat"}
-
-
 def parse_section(
     wxr: WiktextractContext,
     page_data: list[WordEntry],
@@ -81,6 +77,12 @@ def parse_section(
                 page_data[-1] if len(page_data) > 0 else base_data,
                 level_node,
                 FORM_TITLES[section_name],
+            )
+        elif section_name == "Worttrennung":
+            extract_hyphenation_section(
+                wxr,
+                page_data[-1] if len(page_data) > 0 else base_data,
+                level_node,
             )
 
 
@@ -186,14 +188,7 @@ def parse_page(
 
     wxr.config.word = page_title
     wxr.wtp.start_page(page_title)
-
-    # Parse the page, pre-expanding those templates that are likely to
-    # influence parsing
-    tree = wxr.wtp.parse(
-        page_text,
-        pre_expand=True,
-        additional_expand=ADDITIONAL_EXPAND_TEMPLATES,
-    )
+    tree = wxr.wtp.parse(page_text, pre_expand=True)
 
     page_data: list[WordEntry] = []
     for level2_node in tree.find_child(NodeKind.LEVEL2):
@@ -256,3 +251,16 @@ def process_umschrift_template(
                 data.redirects.append(redirect_page)
     if len(data.redirects) > 0:
         page_data.append(data)
+
+
+def extract_hyphenation_section(
+    wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
+) -> None:
+    for list_item in level_node.find_child_recursively(NodeKind.LIST_ITEM):
+        for node in list_item.children:
+            if isinstance(node, str):
+                if "," in node:
+                    word_entry.hyphenation = node[: node.index(",")].strip()
+                    break
+                else:
+                    word_entry.hyphenation += node.strip()

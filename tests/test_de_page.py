@@ -10,6 +10,8 @@ from wiktextract.wxr_context import WiktextractContext
 
 
 class TestDEPage(unittest.TestCase):
+    maxDiff = None
+
     def setUp(self):
         self.wxr = WiktextractContext(
             Wtp(lang_code="de"),
@@ -130,3 +132,30 @@ class TestDEPage(unittest.TestCase):
                 }
             ],
         )
+
+    def test_hyphenation_section(self):
+        self.wxr.wtp.add_page("Vorlage:Sprache", 10, "{{{1}}}")
+        data = parse_page(
+            self.wxr,
+            "Diktionär",
+            """== Diktionär ({{Sprache|Deutsch}}) ==
+=== {{Wortart|Substantiv|Deutsch}}, {{nm}} ===
+====Worttrennung====
+:Dik·ti·o·när, {{Pl.}} Dik·ti·o·nä·re
+====Bedeutungen====
+:[1] {{K|veraltend}} Buch""",
+        )
+        self.assertEqual(data[0]["hyphenation"], "Dik·ti·o·när")
+
+        data = parse_page(
+            self.wxr,
+            "Hunde",
+            """== Hunde ({{Sprache|Deutsch}}) ==
+=== {{Wortart|Deklinierte Form|Deutsch}} ===
+====Worttrennung====
+:Hun·de
+====Grammatische Merkmale====
+*{{Dativ-e}} Dativ Singular des Substantivs '''[[Hund]]'''
+            """,
+        )
+        self.assertEqual(data[0]["hyphenation"], "Hun·de")
