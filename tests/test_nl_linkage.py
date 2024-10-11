@@ -32,7 +32,11 @@ class TestNlLinkage(TestCase):
 =====Hyponiemen=====
 {{intens|nld|1}} [[superhond]]
 {{intens|nld|2}} [[kankerhond]], [[tyfushond]]
-*[1] [[reu]]""",
+*[1] [[reu]]
+{{L-top|01|[1] honden naar de rol de ze vervullen}}
+*[[asielhond]]
+{{L-bottom|01}}
+*[2] [[christenhond]]""",
         )
         self.assertEqual(
             data[0]["hyponyms"],
@@ -53,5 +57,59 @@ class TestNlLinkage(TestCase):
                     "raw_tags": ["intensivering"],
                 },
                 {"word": "reu", "sense_index": 1},
+                {
+                    "word": "asielhond",
+                    "sense_index": 1,
+                    "sense": "honden naar de rol de ze vervullen",
+                },
+                {"word": "christenhond", "sense_index": 2},
+            ],
+        )
+
+    def test_nld_template(self):
+        self.wxr.wtp.add_page(
+            "Sjabloon:nld-rashonden",
+            10,
+            """<div><div>''<span>[1]</span>&#32;[[hondenrassen]]:''</div><div>
+* &#160;[[Amerikaanse cockerspaniël&#35;Nederlands|Amerikaanse cockerspaniël]]&#32;&#160;
+</div></div>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "hond",
+            """==Nederlands==
+====Zelfstandig naamwoord====
+# zoogdier
+=====Hyponiemen=====
+{{nld-rashonden|1}}""",
+        )
+        self.assertEqual(
+            data[0]["hyponyms"],
+            [
+                {
+                    "sense": "hondenrassen",
+                    "sense_index": 1,
+                    "word": "Amerikaanse cockerspaniël",
+                }
+            ],
+        )
+
+    def test_expr_template(self):
+        data = parse_page(
+            self.wxr,
+            "hond",
+            """==Nederlands==
+====Zelfstandig naamwoord====
+# zoogdier
+=====Spreekwoorden=====
+{{expr|De '''hond''' zit hem op de tas.|Hij is gierig, hij is een vrek.}}""",
+        )
+        self.assertEqual(
+            data[0]["proverbs"],
+            [
+                {
+                    "sense": "Hij is gierig, hij is een vrek.",
+                    "word": "De hond zit hem op de tas.",
+                }
             ],
         )
