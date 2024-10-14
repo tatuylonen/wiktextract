@@ -1,8 +1,10 @@
-from typing import Optional
-
 from pydantic import BaseModel, ConfigDict, Field
 
+# Pydantic models are basically classes that take the place of the dicts
+# used in the main English extractor. They use more resources, but also do
+# a lot of validation work and are easier for the type-checker.
 
+# Pydantic config stuff.
 class SimpleEnglishBaseModel(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
@@ -14,10 +16,13 @@ class SimpleEnglishBaseModel(BaseModel):
         validate_default=True,
     )
 
+# Not an example, this is for example entries next to glosses.
 class Example(SimpleEnglishBaseModel):
     text: str = Field(default="", description="Example usage sentence")
     author: str = Field(default="", description="Author's name")
     title: str = Field(default="", description="Title of the reference")
+    # SEW example templates are simple and don't seem to have these
+    # latter datas.
     # date: str = Field(default="", description="Original date")
     # date_published: str = Field(default="", description="Date of publication")
     # collection: str = Field(
@@ -31,6 +36,9 @@ class Example(SimpleEnglishBaseModel):
     #     description="Source of reference",
     # )
 
+# General glass for "link to another related word", like synonym, antonym, etc.
+# Instead of having classes for each, we have differnet fields of list[Linkage],
+# like `synonyms: list[Linkage] = []`.
 class Linkage(SimpleEnglishBaseModel):
     word: str
     # sense_index: str = ""
@@ -38,17 +46,20 @@ class Linkage(SimpleEnglishBaseModel):
     # raw_tags: list[str] = []
     # tags: list[str] = []
 
+# Basically a line or lines of gloss, a meaning of a word. These are collected
+# under the POS as a list.
 class Sense(SimpleEnglishBaseModel):
-    glosses: list[str] = []  # "Gloss supercategory", "Specific gloss."
+    glosses: list[str] = []  # ["Gloss supercategory", "Specific gloss."]
     tags: list[str] = []
     raw_tags: list[str] = []
-    topics: list[str] = []
-    categories: list[str] = []
+    # topics: list[str] = []  # XXX do these.
+    categories: list[str] = []  # Wikipedia category link data; not printed.
     examples: list[Example] = []
     synonyms: list[Linkage] = []
     antonyms: list[Linkage] = []
     # ruby: list[tuple[str, ...]] = []
 
+# An inflected form of the word, like `{ form: "bats", tags: ["plural"] }`
 class Form(SimpleEnglishBaseModel):
     form: str = ""
     tags: list[str] = []
@@ -56,6 +67,8 @@ class Form(SimpleEnglishBaseModel):
     # sense_index: str = ""
 
 
+# A pronunciation or audio file. If you have a string of IPA or SAMPA or
+# something else, that is extracted as its own Sound entry.
 class Sound(SimpleEnglishBaseModel):
     ipa: str = Field(default="", description="International Phonetic Alphabet")
     enpr: str = Field(default="", description="American Heritage Dictionary")
@@ -75,10 +88,12 @@ class Sound(SimpleEnglishBaseModel):
     rhymes: list[str] = []
     homophones: list[str] = []
     # text: str = ""  # Use raw_tags instead
-    # Temporary field used to sort out different sound data between POSes when
+    # "Temporary" field used to sort out different sound data between POSes when
     # they are originally found in one combined pronunciation section
     poses: list[str] = []
 
+# Sometimes we collect raw template arguments separately, like in the main
+# line English extractor where we keep data from etymology templates.
 class TemplateData(SimpleEnglishBaseModel):
     name: str = Field(default="", description="Template's name.")
     args: dict[str, str] = Field(
@@ -89,17 +104,22 @@ class TemplateData(SimpleEnglishBaseModel):
         description="The result of expanding the template.",
     )
 
+# The highest level entry: This is returned from the program as a JSON object
+# in the JSONL output.
 class WordEntry(SimpleEnglishBaseModel):
     model_config = ConfigDict(title="Simple English Wiktionary")
 
     word: str = Field(description="Word string")
     # For Simple English, the language is always English
     forms: list[Form] = Field(default=[], description="Inflection forms list")
+    # We do not use "en" as the default value here, because we also
+    # remove all default values so that we don't have empty or meaningless
+    # fields in the output.
     lang_code: str = Field(default="", description="Wiktionary language code")
     lang: str = Field(default="", description="Localized language name")
     pos: str = Field(default="", description="Part of speech type")
-    pos_title: str = ""
-    pos_num: int = -1
+    pos_title: str = ""  # `==Noun==`
+    pos_num: int = -1  # `==Noun 2==` Default -1 gets removed.
     etymology_text: str = Field(
         default="", description="Etymology section as cleaned text."
     )
@@ -116,4 +136,5 @@ class WordEntry(SimpleEnglishBaseModel):
     sounds: list[Sound] = []
     tags: list[str] = []
     raw_tags: list[str] = []
-    hyphenation: str = ""
+    hyphenation: str = ""  # Should be a list `hyphenations`.
+    head_templates: list[TemplateData] = []

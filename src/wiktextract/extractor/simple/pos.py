@@ -4,7 +4,7 @@ from wikitextprocessor.parser import LEVEL_KIND_FLAGS
 from wiktextract import WiktextractContext
 from wiktextract.page import clean_node
 
-from .models import Example, Form, Linkage, Sense, WordEntry
+from .models import Example, Form, Linkage, Sense, TemplateData, WordEntry
 from .section_titles import POS_HEADINGS
 from .table import parse_pos_table
 from .tags_utils import convert_tags_in_sense
@@ -20,6 +20,7 @@ from .text_utils import (
 def remove_duplicate_forms(
     wxr: WiktextractContext, forms: list[Form]
 ) -> list[Form]:
+    """Check for identical forms and remove duplicates."""
     if not forms:
         return []
     new_forms = []
@@ -31,8 +32,8 @@ def remove_duplicate_forms(
                 and form.raw_tags == comp.raw_tags
             ):
                 break
-                #  basically "continue" in our case, but this will not trigger
-                # the follow else-block
+                # basically "continue" for the outer for block in this case,
+                # but this will not trigger the following else-block
         else:
             # No duplicates found in for loop (exited without breaking)
             new_forms.append(form)
@@ -51,9 +52,9 @@ def parse_gloss(
     wxr: WiktextractContext, parent_sense: Sense, contents: list[str | WikiNode]
 ) -> bool:
     """Take what is preferably a line of text and extract tags and a gloss from
-        it. The data is inserted into parent_sense, and for recursion purposes
-        we return a boolean that tells whether there was any gloss text in a
-        lower node."""
+    it. The data is inserted into parent_sense, and for recursion purposes
+    we return a boolean that tells whether there was any gloss text in a
+    lower node."""
     if len(contents) == 0:
         return False
 
@@ -62,27 +63,48 @@ def parse_gloss(
     synonyms: list[Linkage] = []
     antonyms: list[Linkage] = []
 
+    # We define this subfunction here to use closure with synonyms and antonyms;
+    # this is the usual way we do it with these kinds of _fn's in the main
+    # extractor. You could also make a wrapper function that takes the
+    # variables you want to enclose and returns a _fn function with those
+    # enclosed, although I don't know if that is more or less efficient;
+    # if you need to use the same _fn code in two places, this is the
+    # way to go.
+    # There's a more detailed explanation about using template_fn in
+    # pronunciation.py.
     def gloss_template_fn(name: str, ht: TemplateArgs) -> str | None:
         if name in ("synonyms", "synonym", "syn"):
-            for syn in ht.values():
+            for syn in ht.values():  # ht for 'hashtable'. Tatu comes from C.
+                # The template parameters of `synonyms` is simple: just a list.
                 if not syn:
                     continue
                 synonyms.append(
-                    Linkage(word=clean_node(wxr, parent_sense, syn))
+                    Linkage(
+                        word=clean_node(
+                            wxr, parent_sense, clean_node(wxr, None, syn)
+                        )
+                    )
                 )
+            # Returning a string means replacing the 'expansion' that would
+            # have otherwise appeared there with it; `None` leaves things alone.
             return ""
         if name in ("antonyms", "antonym", "ant"):
             for ant in ht.values():
                 if not ant:
                     continue
                 antonyms.append(
-                    Linkage(word=clean_node(wxr, parent_sense, ant))
+                    Linkage(
+                        word=clean_node(
+                            wxr, parent_sense, clean_node(wxr, None, ant)
+                        )
+                    )
                 )
             return ""
 
         if name in IGNORED_GLOSS_TEMPLATES:
             return ""
 
+        # Don't handle other templates here.
         return None
 
     for i, tnode in enumerate(contents):
@@ -91,6 +113,8 @@ def parse_gloss(
             and tnode.strip(STRIP_PUNCTUATION)
             or not isinstance(tnode, (TemplateNode, str))
         ):
+            # When we encounter the first naked string that isn't just
+            # whitespace or the first WikiNode that isn't a template.
             break
         if isinstance(tnode, TemplateNode):
             if tnode.template_name == "exstub":
@@ -142,26 +166,28 @@ def recurse_glosses1(
     parent_sense: Sense,
     node: WikiNode,
 ) -> list[ExOrSense]:
+    """Helper function for recurse_glosses"""
     ret: list[ExOrSense] = []
     found_gloss = False
 
     if node.kind == NodeKind.LIST:
         for child in node.children:
-            if isinstance(child, str):
+            if isinstance(child, str) or child.kind != NodeKind.LIST_ITEM:
                 # This should never happen
                 wxr.wtp.error(
-                    f"str {child=} is direct child of NodeKind.LIST",
+                    f"{child=} is direct child of NodeKind.LIST",
                     sortid="simple/pos/44",
                 )
                 continue
             ret.extend(
                 recurse_glosses1(wxr, parent_sense.model_copy(deep=True), child)
             )
-    if node.kind == NodeKind.LIST_ITEM:
+    elif node.kind == NodeKind.LIST_ITEM:
         contents = []
         sublists = []
         broke_out = False
         for i, c in enumerate(node.children):
+            # The contents ends when a new sublist begins.
             if isinstance(c, WikiNode) and c.kind == NodeKind.LIST:
                 broke_out = True
                 break
@@ -169,19 +195,26 @@ def recurse_glosses1(
         if broke_out is True:
             sublists = node.children[i:]
 
+        # A LIST and LIST_ITEM `sarg` is basically the prefix of the line, like
+        # `#` or `##:`: the token that appears at the very start of a line that
+        # is used to parse the depth and structure of lists.
         if node.sarg.endswith((":", "*")) and node.sarg not in (":", "*"):
-            # This is either a quotation or example
-            # != ":" filters out lines that are usually notes or random
-            # stuff not inside gloss lists; see "dare"
+            # This is either a quotation or example.
+            # The `not in` filters out lines that are usually notes or random
+            # stuff not inside gloss lists; see "dare".
             text = clean_node(
                 wxr, parent_sense, contents
-            )  # clean_node strip()s
+            )  # clean_node strip()s already so no need to .strip() here.
             example = Example(text=text)
             # logger.debug(f"{wxr.wtp.title}/example\n{text}")
             # We will not bother with subglosses for example entries;
-            # XXX do something about it if it becomes relevant
+            # XXX do something about it if it becomes relevant.
             return [example]
-        elif node.sarg == ":":
+        elif node.sarg in (":", "*"):
+            wxr.wtp.debug(
+                f"Gloss item line starts with {node.sarg=}.",
+                sortid="simple/pos/214",
+            )
             return []
 
         found_gloss = parse_gloss(wxr, parent_sense, contents)
@@ -219,6 +252,7 @@ def recurse_glosses1(
 def recurse_glosses(
     wxr: WiktextractContext, node: WikiNode, data: WordEntry
 ) -> list[Sense]:
+    """Recurse through WikiNodes to find glosses and sense-related data."""
     base_sense = Sense()
     ret = []
 
@@ -247,12 +281,13 @@ def process_pos(
     # the "2" in "Noun 2"
     pos_num: int = -1,
 ) -> WordEntry | None:
-    """Process a part-of-speech section, like 'Noun'. `base_data` provides basic
+    """Process a part-of-speech section, like 'Noun'. `data` provides basic
     data common with other POS sections, like pronunciation or etymology."""
 
+    # Metadata for different part-of-speech kinds.
     pos_meta = POS_HEADINGS[pos_title]
-    data.pos = pos_meta["pos"]
-    data.pos_num = pos_num
+    data.pos = pos_meta["pos"]  # the internal/translated name for the POS
+    data.pos_num = pos_num  # SEW uses "Noun 1", "Noun 2" style headings.
 
     # Sound data associated with this POS might be coming from a shared
     # section, in which case we've tried to tag the sound data with its
@@ -260,7 +295,8 @@ def process_pos(
     new_sounds = []
     for sound in data.sounds:
         if len(sound.poses) == 0:
-            # Sound data not tagged with any specific pos section, so add it
+            # This sound data wasn't tagged with any specific pos section(s), so
+            # we add it to everything; this is basically the default behavior.
             new_sounds.append(sound)
         else:
             for sound_pos in sound.poses:
@@ -277,18 +313,26 @@ def process_pos(
                     new_sounds.append(sound)
     data.sounds = new_sounds
 
+    # Get child nodes except headings (= LEVEL).
     pos_contents = list(node.invert_find_child(LEVEL_KIND_FLAGS))
 
-    if len(pos_contents) == 0:
+    if len(pos_contents) == 0 or (
+        len(pos_contents) == 1
+        and isinstance(pos_contents[0], str)
+        # Just a single newline or whitespace after heading.
+        and not pos_contents[0].strip()
+    ):
+        # Most probably a bad article.
         wxr.wtp.error(
             "No body for Part-of-speech section.", sortid="simple/pos/271"
         )
         data.senses.append(Sense(tags=["no-gloss"]))
         return data
 
-    # check POS templates at the start of the section (Simple English specific)
+    # Check POS templates at the start of the section (Simple English specific).
     template_tags: list[str] = []
     template_forms: list[Form] = []
+    head_templates: list[TemplateData] = []
 
     # Typically, a Wiktionary has a word head before glosses, which contains
     # the main form of the word (usually same as the title of the article)
@@ -325,6 +369,18 @@ def process_pos(
                     "not have any forms.",
                     sortid="simple/pos/129",
                 )
+            head_templates.append(
+                TemplateData(
+                    name=child.template_name,
+                    args={
+                        str(k): clean_node(wxr, None, v)
+                        for k, v in child.template_parameters.items()
+                    },
+                    expansion="[POS TABLE]"
+                    # Clean node returns an empty string for a table.
+                    # expansion = clean_node(wxr, None, child)
+                )
+            )
         else:
             break
 
@@ -332,6 +388,7 @@ def process_pos(
     data.forms.extend(template_forms)
     data.forms = remove_duplicate_forms(wxr, data.forms)
     data.tags.extend(template_tags)
+    data.head_templates.extend(head_templates)
 
     # parts = []
     found_list = False

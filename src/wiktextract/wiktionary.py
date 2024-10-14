@@ -94,7 +94,7 @@ def parse_wiktionary(
     human_readable: bool = False,
     override_folders: list[str] | list[Path] | None = None,
     skip_extract_dump: bool = False,
-    save_pages_path: str | Path = None,
+    save_pages_path: str | Path | None = None,
 ) -> None:
     """Parses Wiktionary from the dump file ``path`` (which should point
     to a "enwiktionary-<date>-pages-articles.xml.bz2" file.  This

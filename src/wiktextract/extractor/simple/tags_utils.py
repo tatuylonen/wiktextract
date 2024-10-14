@@ -22,6 +22,7 @@ def convert_tags(raw_tags: list[str]) -> tuple[list[str], list[str], list[str]]:
 
     tags = []
     new_raw_tags = []
+    # Parts-of-speech-es
     poses = []
     for tag in raw_tags:
         if not tag.strip():
@@ -31,10 +32,10 @@ def convert_tags(raw_tags: list[str]) -> tuple[list[str], list[str], list[str]]:
         pposes = []
         for s in SPLITTER_RE.split(tag):
             s = s.strip(STRIP_PUNCTUATION)
-            pos_num = -1
-            pos = ""
             if not s:
                 continue
+            pos = ""
+            pos_num = -1
             if m := POS_ENDING_NUMBER_RE.search(s):
                 s = s[: m.start()].strip()
                 pos_num = int(m.group(1))
