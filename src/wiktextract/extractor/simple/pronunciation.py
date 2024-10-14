@@ -12,12 +12,7 @@ from .models import Sound, WordEntry
 from .parse_utils import PANEL_TEMPLATES
 from .tags_utils import convert_tags
 
-DEPTH_RE = re.compile(r"([*:;]+)\s*(.*)$")
-
 REMOVE_HYPHENATION_RE = re.compile(r"(?i)\s*hyphenation\s*,?:?\s*(.+)")
-
-POS_STARTS_RE = re.compile(r"^(.+)\s+(\d)\s*$")
-
 
 def recurse_list(
     wxr: WiktextractContext,
@@ -35,8 +30,8 @@ def recurse_list(
         # ; pos or raw tags
         # * pron 1
         # * pron 2
-        # The first line is a typical way Simple English Wiktionary
-        # does tagging for entries "below" it, even though ";" shouldn't
+        # The first line is typically used in Simple English Wiktionary
+        # for tagging entries "below" it, even though ";" shouldn't
         # be used to make things bold according to wikitext guidelines
         # (creates broken HTML5 and breaks screen-readers). The ";" list
         # is also separate from the "*" list, so they're completely separated

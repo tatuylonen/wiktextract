@@ -1,6 +1,6 @@
 from itertools import chain
 
-from wikitextprocessor import HTMLNode, NodeKind, TemplateNode, WikiNode
+from wikitextprocessor import NodeKind, TemplateNode, WikiNode
 
 # from wikitextprocessor.parser import print_tree
 from wiktextract.page import clean_node
@@ -11,15 +11,23 @@ from .models import Form, WordEntry
 from .simple_tags import simple_tag_map
 from .tags_utils import convert_tags
 
+# Shorthand for this file. Could be an import, but it's so simple...
 Node = str | WikiNode
 
 
+
+# node_fns are different from template_fns. template_fns are functions that
+# are used to handle how to expand (and otherwise process) templates, while
+# node functions are used when turning parsed nodes into strings.
 def cell_node_fn(
     node: WikiNode,
 ) -> list[Node] | None:
+    """Handle nodes in the parse_tree specially. Currently: check for italics
+    containing the string 'none' and replace with hyphen."""
     assert isinstance(node, WikiNode)
     if node.kind == NodeKind.ITALIC:
         # If we have italicized text 'none', like in `deviate`, turn it to "–"
+        # XXX 'None' without italics...
         if (
             len(node.children) == 1
             and isinstance(node.children[0], str)

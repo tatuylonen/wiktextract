@@ -44,6 +44,8 @@ PANEL_TEMPLATES: set[str] = set(
 # PANEL_PREFIXES: set[str] = set()
 
 # Additional templates to be expanded in the pre-expand phase
+# XXX nothing here yet, add as needed if some template turns out to be
+# problematic when unexpanded.
 ADDITIONAL_EXPAND_TEMPLATES: set[str] = set()
 
 ETYMOLOGY_TEMPLATES = set(

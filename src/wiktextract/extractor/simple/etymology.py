@@ -20,6 +20,11 @@ def process_etym(
     etym_nodes = list(node.invert_find_child(LEVEL_KIND_FLAGS))
     etym_templates = []
 
+    # A post-template_fn already has the expanded string from the template.
+    # If we'd want to suppress something without bothering to expand it,
+    # we can use a normal template_fn and return an empty string there.
+    # But returning an empty string here will also do the same thing.
+    # Returning None means "use whatever we expanded", default behavior.
     def post_etym_template_fn(
         name: str, ht: TemplateArgs, expanded: str
     ) -> str | None:
@@ -27,6 +32,8 @@ def process_etym(
         if lname in PANEL_TEMPLATES:
             return ""
         if lname in ETYMOLOGY_TEMPLATES:
+            # there are a bunch of clean_ functions: clean_value is to remove
+            # italics and html tags and stuff like that from strings.
             expanded = clean_value(wxr, expanded)
             new_args = {}
             for k, v in ht.items():
