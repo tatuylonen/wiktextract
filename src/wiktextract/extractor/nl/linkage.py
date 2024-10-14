@@ -39,7 +39,7 @@ def extract_linkage_section(
                 sense_index = 0
             elif node.template_name.startswith("nld-"):
                 extract_nld_template(wxr, word_entry, node, linkage_type)
-            elif node.template_name == "expr":
+            elif node.template_name in ["expr", "fras"]:
                 extract_expr_template(wxr, word_entry, node, linkage_type)
         elif isinstance(node, WikiNode):
             if node.kind == NodeKind.LINK:
@@ -78,6 +78,11 @@ def extract_linkage_list_item(
             m = re.search(r"\[(\d+)\]", node)
             if m is not None:
                 sense_index = int(m.group(1))
+            elif node.strip().startswith("="):
+                sense = node.strip().removeprefix("=").strip()
+                linkage_list = getattr(word_entry, linkage_type)
+                if len(linkage_list) > 0:
+                    linkage_list[-1].sense = sense
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
             word = clean_node(wxr, None, node)
             if word != "":
@@ -124,12 +129,19 @@ def extract_expr_template(
     linkage_type: str,
 ) -> None:
     # https://nl.wiktionary.org/wiki/Sjabloon:expr
+    # https://nl.wiktionary.org/wiki/Sjabloon:fras
     sense_index_str = t_node.template_parameters.get("n", "")
     sense_index = 0
     if re.fullmatch(r"\d+", sense_index_str) is not None:
         sense_index = int(sense_index_str)
-    sense = clean_node(wxr, None, t_node.template_parameters.get(2, ""))
-    word = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
+    sense_arg = 2 if t_node.template_name == "expr" else 3
+    word_arg = 1 if t_node.template_name == "expr" else 2
+    sense = clean_node(wxr, None, t_node.template_parameters.get(sense_arg, ""))
+    word = clean_node(wxr, None, t_node.template_parameters.get(word_arg, ""))
+    m = re.match(r"\[?(\d+)\]?", word)
+    if m is not None:  # should use "n" arg
+        sense_index = int(m.group(1))
+        word = word[m.end() :].strip()
     if word != "":
         getattr(word_entry, linkage_type).append(
             Linkage(word=word, sense=sense, sense_index=sense_index)

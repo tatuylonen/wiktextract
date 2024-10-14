@@ -48,3 +48,15 @@ class TestNlSound(TestCase):
             data[0]["sounds"][2],
             {"ipa": "/ˈɦɔnt/", "raw_tags": ["Vlaanderen", "Brabant"]},
         )
+
+    def test_hyphenation(self):
+        data = parse_page(
+            self.wxr,
+            "lopen",
+            """==Nederlands==
+=====Woordafbreking=====
+*lo·pen
+====Werkwoord====
+# stappen""",
+        )
+        self.assertEqual(data[0]["hyphenation"], "lo·pen")

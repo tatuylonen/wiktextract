@@ -96,3 +96,4 @@ class WordEntry(DutchBaseModel):
     rhymes: list[Linkage] = []
     synonyms: list[Linkage] = []
     translations: list[Translation] = []
+    hyphenation: str = ""

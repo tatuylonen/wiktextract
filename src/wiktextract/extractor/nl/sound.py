@@ -57,3 +57,11 @@ def extract_pron_reg_template(
     )
     for link_node in expanded_node.find_child_recursively(NodeKind.LINK):
         sound.raw_tags.append(clean_node(wxr, None, link_node))
+
+
+def extract_hyphenation_section(
+    wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
+) -> None:
+    for list_item in level_node.find_child_recursively(NodeKind.LIST_ITEM):
+        word_entry.hyphenation = clean_node(wxr, None, list_item.children)
+        break

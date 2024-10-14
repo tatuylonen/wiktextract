@@ -113,3 +113,38 @@ class TestNlLinkage(TestCase):
                 }
             ],
         )
+
+        data = parse_page(
+            self.wxr,
+            "lopen",
+            """==Nederlands==
+====Werkwoord====
+# stappen
+=====Uitdrukkingen en gezegden=====
+{{expr|[1] Tegen de lamp '''lopen'''|betrapt/gesnapt worden}}""",
+        )
+        self.assertEqual(
+            data[0]["proverbs"],
+            [
+                {
+                    "sense": "betrapt/gesnapt worden",
+                    "sense_index": 1,
+                    "word": "Tegen de lamp lopen",
+                }
+            ],
+        )
+
+    def test_sense_text_after_link(self):
+        data = parse_page(
+            self.wxr,
+            "lopen",
+            """==Nederlands==
+====Werkwoord====
+# stappen
+=====Verwante begrippen=====
+*[[benen]] = met grote passen lopen""",
+        )
+        self.assertEqual(
+            data[0]["related"],
+            [{"sense": "met grote passen lopen", "word": "benen"}],
+        )

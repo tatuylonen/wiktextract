@@ -132,3 +132,26 @@ class TestNlGloss(TestCase):
                 "tags": ["form-of", "plural"],
             },
         )
+
+    def test_italic_tag(self):
+        self.wxr.wtp.add_page(
+            "Sjabloon:erga",
+            10,
+            """<span>[[WikiWoordenboek:Werkwoord#Ergativiteit|ergatief]]</span>[[Categorie:Ergatief werkwoord in het Nederlands]] """,
+        )
+        data = parse_page(
+            self.wxr,
+            "lopen",
+            """==Nederlands==
+====Werkwoord====
+#''(Noord-Nederlands)'' {{erga|nld}} stappen, gaan, wandelen""",
+        )
+        self.assertEqual(
+            data[0]["senses"][0],
+            {
+                "categories": ["Ergatief werkwoord in het Nederlands"],
+                "tags": ["ergative"],
+                "raw_tags": ["Noord-Nederlands"],
+                "glosses": ["stappen, gaan, wandelen"],
+            },
+        )
