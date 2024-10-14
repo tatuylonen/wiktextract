@@ -133,3 +133,18 @@ class TestNlLinkage(TestCase):
                 }
             ],
         )
+
+    def test_sense_text_after_link(self):
+        data = parse_page(
+            self.wxr,
+            "lopen",
+            """==Nederlands==
+====Werkwoord====
+# stappen
+=====Verwante begrippen=====
+*[[benen]] = met grote passen lopen""",
+        )
+        self.assertEqual(
+            data[0]["related"],
+            [{"sense": "met grote passen lopen", "word": "benen"}],
+        )

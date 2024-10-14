@@ -78,6 +78,11 @@ def extract_linkage_list_item(
             m = re.search(r"\[(\d+)\]", node)
             if m is not None:
                 sense_index = int(m.group(1))
+            elif node.strip().startswith("="):
+                sense = node.strip().removeprefix("=").strip()
+                linkage_list = getattr(word_entry, linkage_type)
+                if len(linkage_list) > 0:
+                    linkage_list[-1].sense = sense
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
             word = clean_node(wxr, None, node)
             if word != "":
