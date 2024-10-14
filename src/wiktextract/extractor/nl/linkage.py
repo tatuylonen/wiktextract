@@ -130,6 +130,10 @@ def extract_expr_template(
         sense_index = int(sense_index_str)
     sense = clean_node(wxr, None, t_node.template_parameters.get(2, ""))
     word = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
+    m = re.match(r"\[?(\d+)\]?", word)
+    if m is not None:  # should use "n" arg
+        sense_index = int(m.group(1))
+        word = word[m.end():].strip()
     if word != "":
         getattr(word_entry, linkage_type).append(
             Linkage(word=word, sense=sense, sense_index=sense_index)
