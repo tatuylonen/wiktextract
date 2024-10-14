@@ -16,12 +16,17 @@ class Example(DutchBaseModel):
     ref: str = ""
 
 
+class AltForm(DutchBaseModel):
+    word: str
+
+
 class Sense(DutchBaseModel):
     glosses: list[str] = []
     tags: list[str] = []
     raw_tags: list[str] = []
     categories: list[str] = []
     examples: list[Example] = []
+    form_of: list[AltForm] = []
 
 
 class Sound(DutchBaseModel):

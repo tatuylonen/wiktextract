@@ -9,8 +9,10 @@ from .example import (
     extract_example_list_item,
     extract_example_template,
 )
-from .models import Sense, WordEntry
+from .models import AltForm, Sense, WordEntry
 from .section_titles import POS_DATA
+
+FORM_OF_TEMPLATES = frozenset(["noun-pl", "noun-form"])
 
 
 def extract_pos_section(
@@ -48,6 +50,11 @@ def extract_pos_section(
             and len(page_data[-1].senses) > 0
         ):
             extract_example_template(wxr, page_data[-1].senses[-1], node)
+        elif (
+            isinstance(node, TemplateNode)
+            and node.template_name in FORM_OF_TEMPLATES
+        ):
+            extract_form_of_template(wxr, page_data[-1], node)
 
 
 def extract_gloss_list_item(
@@ -103,3 +110,59 @@ def extract_l_template(
         word_entry.tags.append(tag)
     elif isinstance(tag, list):
         word_entry.tags.extend(tag)
+
+
+# https://nl.wiktionary.org/wiki/Sjabloon:noun-pl
+# https://nl.wiktionary.org/wiki/Sjabloon:noun-form
+# "getal" and "gesl" args
+NOUN_FORM_OF_TEMPLATE_NUM_TAGS = {
+    "s": "singular",
+    "p": "plural",
+    "d": "dual",
+    "c": "collective",
+}
+NOUN_FORM_OF_TEMPLATE_GENDER_TAGS = {
+    "m": "masculine",
+    "f": "feminine",
+    "n": "neuter",
+    "c": "common",
+    "fm": ["feminine", "masculine"],
+    "mf": ["feminine", "masculine"],
+    "mn": ["masculine", "neuter"],
+}
+
+
+def extract_form_of_template(
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+) -> None:
+    if t_node.template_name in ["noun-pl", "noun-form"]:
+        sense = Sense(tags=["form-of"])
+        if t_node.template_name == "noun-pl":
+            sense.tags.append("plural")
+        else:
+            num_arg = t_node.template_parameters.get("getal", "")
+            if num_arg in NOUN_FORM_OF_TEMPLATE_NUM_TAGS:
+                sense.tags.append(NOUN_FORM_OF_TEMPLATE_NUM_TAGS[num_arg])
+
+        gender_arg = t_node.template_parameters.get("gesl", "")
+        if gender_arg in NOUN_FORM_OF_TEMPLATE_GENDER_TAGS:
+            gender_tag = NOUN_FORM_OF_TEMPLATE_GENDER_TAGS[gender_arg]
+            if isinstance(gender_tag, str):
+                sense.tags.append(gender_tag)
+            elif isinstance(gender_tag, list):
+                sense.tags.extend(gender_tag)
+
+        form_of = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
+        if form_of != "":
+            sense.form_of.append(AltForm(word=form_of))
+
+        expanded_node = wxr.wtp.parse(
+            wxr.wtp.node_to_wikitext(t_node), expand_all=True
+        )
+        for list_item in expanded_node.find_child_recursively(
+            NodeKind.LIST_ITEM
+        ):
+            sense.glosses.append(clean_node(wxr, None, list_item.children))
+            break
+        clean_node(wxr, sense, expanded_node)
+        word_entry.senses.append(sense)

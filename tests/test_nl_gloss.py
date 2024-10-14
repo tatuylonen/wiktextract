@@ -84,3 +84,51 @@ class TestNlGloss(TestCase):
                 }
             ],
         )
+
+    def test_noun_pl(self):
+        self.wxr.wtp.add_page(
+            "Sjabloon:noun-pl",
+            10,
+            """de&ensp;'''honden'''&ensp;[[WikiWoordenboek:Meervoud|<span>mv</span>]]
+#meervoud van het zelfstandig naamwoord [[hond|hond]][[Categorie:Zelfstandignaamwoordsvorm in het Nederlands]]""",
+        )
+        data = parse_page(
+            self.wxr,
+            "honden",
+            """==Nederlands==
+====Zelfstandig naamwoord====
+{{noun-pl|hond}}""",
+        )
+        self.assertEqual(
+            data[0]["senses"][0],
+            {
+                "categories": ["Zelfstandignaamwoordsvorm in het Nederlands"],
+                "glosses": ["meervoud van het zelfstandig naamwoord hond"],
+                "form_of": [{"word": "hond"}],
+                "tags": ["form-of", "plural"],
+            },
+        )
+
+    def test_noun_form(self):
+        self.wxr.wtp.add_page(
+            "Sjabloon:noun-form",
+            10,
+            """'''honden''' <br>
+# <i> meervoud</i> van [[hond#Drents|hond]][[Categorie:Zelfstandignaamwoordsvorm in het Drents]]""",
+        )
+        data = parse_page(
+            self.wxr,
+            "honden",
+            """==Drents==
+====Zelfstandig naamwoord====
+{{noun-form|hond|drt|getal=p}}""",
+        )
+        self.assertEqual(
+            data[0]["senses"][0],
+            {
+                "categories": ["Zelfstandignaamwoordsvorm in het Drents"],
+                "glosses": ["meervoud van hond"],
+                "form_of": [{"word": "hond"}],
+                "tags": ["form-of", "plural"],
+            },
+        )
