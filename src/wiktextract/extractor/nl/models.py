@@ -48,6 +48,22 @@ class Linkage(DutchBaseModel):
     )
 
 
+class Translation(DutchBaseModel):
+    lang_code: str = Field(
+        default="",
+        description="Wiktionary language code of the translation term",
+    )
+    lang: str = Field(default="", description="Translation language name")
+    word: str = Field(default="", description="Translation term")
+    sense: str = Field(default="", description="Translation gloss")
+    sense_index: int = Field(
+        default=0, ge=0, description="Number of the definition, start from 1"
+    )
+    tags: list[str] = []
+    raw_tags: list[str] = []
+    roman: str = ""
+
+
 class WordEntry(DutchBaseModel):
     model_config = ConfigDict(title="Dutch Wiktionary")
     word: str = Field(description="Word string", min_length=1)
@@ -74,3 +90,4 @@ class WordEntry(DutchBaseModel):
     related: list[Linkage] = []
     rhymes: list[Linkage] = []
     synonyms: list[Linkage] = []
+    translations: list[Translation] = []
