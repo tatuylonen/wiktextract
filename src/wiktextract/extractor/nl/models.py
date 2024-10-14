@@ -16,12 +16,17 @@ class Example(DutchBaseModel):
     ref: str = ""
 
 
+class AltForm(DutchBaseModel):
+    word: str
+
+
 class Sense(DutchBaseModel):
     glosses: list[str] = []
     tags: list[str] = []
     raw_tags: list[str] = []
     categories: list[str] = []
     examples: list[Example] = []
+    form_of: list[AltForm] = []
 
 
 class Sound(DutchBaseModel):
@@ -46,6 +51,22 @@ class Linkage(DutchBaseModel):
     sense_index: int = Field(
         default=0, ge=0, description="Number of the definition, start from 1"
     )
+
+
+class Translation(DutchBaseModel):
+    lang_code: str = Field(
+        default="",
+        description="Wiktionary language code of the translation term",
+    )
+    lang: str = Field(default="", description="Translation language name")
+    word: str = Field(default="", description="Translation term")
+    sense: str = Field(default="", description="Translation gloss")
+    sense_index: int = Field(
+        default=0, ge=0, description="Number of the definition, start from 1"
+    )
+    tags: list[str] = []
+    raw_tags: list[str] = []
+    roman: str = ""
 
 
 class WordEntry(DutchBaseModel):
@@ -74,3 +95,4 @@ class WordEntry(DutchBaseModel):
     related: list[Linkage] = []
     rhymes: list[Linkage] = []
     synonyms: list[Linkage] = []
+    translations: list[Translation] = []
