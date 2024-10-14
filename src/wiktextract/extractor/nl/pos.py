@@ -11,6 +11,7 @@ from .example import (
 )
 from .models import AltForm, Sense, WordEntry
 from .section_titles import POS_DATA
+from .tags import translate_raw_tags
 
 FORM_OF_TEMPLATES = frozenset(["noun-pl", "noun-form"])
 
@@ -57,6 +58,11 @@ def extract_pos_section(
             extract_form_of_template(wxr, page_data[-1], node)
 
 
+# https://nl.wiktionary.org/wiki/Categorie:Lemmasjablonen
+# https://nl.wiktionary.org/wiki/Categorie:Werkwoordsjablonen
+GLOSS_TAG_TEMPLATES = frozenset(["auxl", "erga", "inerg"])
+
+
 def extract_gloss_list_item(
     wxr: WiktextractContext, word_entry: WordEntry, list_item: WikiNode
 ) -> None:
@@ -64,21 +70,33 @@ def extract_gloss_list_item(
     gloss_nodes = []
     for child in list_item.children:
         if isinstance(child, TemplateNode):
-            expanded_text = clean_node(wxr, sense, child)
-            if expanded_text.startswith("(") and expanded_text.endswith(")"):
-                sense.raw_tags.append(expanded_text.strip("() "))
+            if child.template_name in GLOSS_TAG_TEMPLATES:
+                sense.raw_tags.append(clean_node(wxr, sense, child))
             else:
-                gloss_nodes.append(expanded_text)
+                expanded_text = clean_node(wxr, sense, child)
+                if expanded_text.startswith("(") and expanded_text.endswith(
+                    ")"
+                ):
+                    sense.raw_tags.append(expanded_text.strip("() "))
+                else:
+                    gloss_nodes.append(expanded_text)
         elif isinstance(child, WikiNode) and child.kind == NodeKind.LIST:
             if child.sarg.endswith("*"):
                 for next_list_item in child.find_child(NodeKind.LIST_ITEM):
                     extract_example_list_item(wxr, sense, next_list_item)
+        elif isinstance(child, WikiNode) and child.kind == NodeKind.ITALIC:
+            italic_text = clean_node(wxr, sense, child)
+            if italic_text.startswith("(") and italic_text.endswith(")"):
+                sense.raw_tags.append(italic_text.strip("() "))
+            else:
+                gloss_nodes.append(italic_text)
         else:
             gloss_nodes.append(child)
 
     gloss_text = clean_node(wxr, sense, gloss_nodes)
     if len(gloss_text) > 0:
         sense.glosses.append(gloss_text)
+        translate_raw_tags(sense)
         word_entry.senses.append(sense)
 
 
