@@ -429,6 +429,12 @@ lang_specific: dict[str, LangConfDict] = {
                 "einem",
                 "einen",
             ],
+            "negative": [
+                "kein",
+                "keine",
+                "keiner",
+                "keinen",
+            ],
         },
     },
     "German Low German": {
