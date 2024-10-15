@@ -21,17 +21,24 @@ def extract_translation_template(
     wxr: WiktextractContext,
     word_entry: WordEntry,
     t_node: TemplateNode,
+    sense: str = "",
 ) -> None:
     # https://ko.wiktionary.org/wiki/틀:외국어
+    t_sense = clean_node(wxr, None, t_node.template_parameters.get("덧", ""))
+    if t_sense != "":
+        sense = t_sense
     for key in [1, 2]:
         arg_value = t_node.template_parameters.get(key, [])
         parse_arg = wxr.wtp.parse(wxr.wtp.node_to_wikitext(arg_value))
         for list_item in parse_arg.find_child_recursively(NodeKind.LIST_ITEM):
-            extract_translation_list_item(wxr, word_entry, list_item)
+            extract_translation_list_item(wxr, word_entry, list_item, sense)
 
 
 def extract_translation_list_item(
-    wxr: WiktextractContext, word_entry: WordEntry, list_item: WikiNode
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    list_item: WikiNode,
+    sense: str,
 ) -> None:
     lang_code = "unknown"
     lang_name = "unknown"
@@ -45,7 +52,12 @@ def extract_translation_list_item(
             word = clean_node(wxr, None, node)
             if word != "":
                 word_entry.translations.append(
-                    Translation(lang=lang_name, lang_code=lang_code, word=word)
+                    Translation(
+                        lang=lang_name,
+                        lang_code=lang_code,
+                        word=word,
+                        sense=sense,
+                    )
                 )
         elif isinstance(node, str) and "(" in node and ")" in node:
             text = ""

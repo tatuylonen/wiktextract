@@ -38,8 +38,17 @@ def parse_section(
 ) -> None:
     title_text = clean_node(wxr, None, level_node.largs)
     title_text = re.sub(r"\s*\d+$", "", title_text)
-    if title_text in POS_DATA:
+    if title_text.removeprefix("보조 ").strip() in POS_DATA:
+        orig_page_data_len = len(page_data)
         extract_pos_section(wxr, page_data, base_data, level_node, title_text)
+        if (
+            len(page_data) == orig_page_data_len
+            and title_text in LINKAGE_SECTIONS
+            and len(page_data) > 0
+        ):  # try extract as linkage section
+            extract_linkage_section(
+                wxr, page_data[-1], level_node, LINKAGE_SECTIONS[title_text]
+            )
     elif title_text in LINKAGE_SECTIONS and len(page_data) > 0:
         extract_linkage_section(
             wxr, page_data[-1], level_node, LINKAGE_SECTIONS[title_text]
@@ -62,6 +71,8 @@ def parse_language_section(
 ) -> None:
     pre_data_len = len(page_data)
     lang_name = clean_node(wxr, None, level2_node.largs)
+    if lang_name == "":
+        lang_name = "unknown"
     lang_code = name_to_code(lang_name, "ko")
     if lang_code == "":
         lang_code = "unknown"

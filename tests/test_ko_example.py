@@ -132,21 +132,22 @@ class TestKoExample(TestCase):
         self.wxr.wtp.add_page(
             "틀:예문",
             10,
-            """<div class="h-usage-example"><span class="None" lang="ko"><span style="font-size: 120%25">그녀는 '''없는''' 가정에서 자랐다.</span></span><dl><dd><span class="e-footer">매우 가난하게 살았다.</span></dd></dl></div>[[Category:한국어 용례가 포함된 낱말|없다]][[Category:한국어 용례가 포함된 낱말|없다|없다]]""",
+            """<div class="h-usage-example"><span class="None" lang="ko"><span style="font-size: 120%25">미리 밝혀둘 것도 없이 마크 로스코와 나는 아무 관계도 '''없다'''</span></span><dl><dd>(<span class="e-source">한강의 시, 〈마크 로스코와 나〉</span>)</dd><dd><span class="e-footer">화자와 마크 로스크는 서로 관계가 없음</span></dd></dl></div>[[Category:한국어 용례가 포함된 낱말|없다]]""",
         )
         data = parse_page(
             self.wxr,
             "없다",
             """== 한국어 ==
 === 형용사 ===
-# 궁핍하다.
-#:{{예문|ko|그녀는 '''없는''' 가정에서 자랐다.|footer= 매우 가난하게 살았다.}}""",
+# 무엇이 그러하지 않다.
+#:{{예문|ko|미리 밝혀둘 것도 없이 마크 로스코와 나는 아무 관계도 '''없다'''|footer=화자와 마크 로스크는 서로 관계가 없음|출처 = 한강의 시, 〈마크 로스코와 나〉}}""",
         )
         self.assertEqual(
             data[0]["senses"][0]["examples"][0],
             {
-                "text": "그녀는 없는 가정에서 자랐다.",
-                "note": "매우 가난하게 살았다.",
+                "text": "미리 밝혀둘 것도 없이 마크 로스코와 나는 아무 관계도 없다",
+                "note": "화자와 마크 로스크는 서로 관계가 없음",
+                "ref": "한강의 시, 〈마크 로스코와 나〉",
             },
         )
         self.assertEqual(
