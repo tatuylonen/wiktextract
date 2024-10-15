@@ -27,6 +27,7 @@ class Sense(DutchBaseModel):
     categories: list[str] = []
     examples: list[Example] = []
     form_of: list[AltForm] = []
+    topics: list[str] = []
 
 
 class Sound(DutchBaseModel):

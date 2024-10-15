@@ -212,3 +212,36 @@ class TestNlGloss(TestCase):
         self.assertEqual(
             data[0]["categories"], ["Werkwoordsvorm in het Nederlands"]
         )
+
+    def test_two_tag_templates(self):
+        self.wxr.wtp.add_page(
+            "Sjabloon:figuurlijk",
+            10,
+            """<span>([[figuurlijk]])</span>[[Categorie:Figuurlijk_in_het_Nederlands]]""",
+        )
+        self.wxr.wtp.add_page(
+            "Sjabloon:anatomie",
+            10,
+            """<span>([[anatomie]])</span>[[Categorie:Anatomie_in_het_Nederlands]] """,
+        )
+        data = parse_page(
+            self.wxr,
+            "staart",
+            """==Nederlands==
+====Zelfstandig naamwoord====
+#{{figuurlijk|nld}}, {{anatomie|nld}} een bundel lang haar""",
+        )
+        self.assertEqual(
+            data[0]["senses"],
+            [
+                {
+                    "categories": [
+                        "Figuurlijk_in_het_Nederlands",
+                        "Anatomie_in_het_Nederlands",
+                    ],
+                    "glosses": ["een bundel lang haar"],
+                    "tags": ["figuratively"],
+                    "topics": ["anatomy"],
+                }
+            ],
+        )

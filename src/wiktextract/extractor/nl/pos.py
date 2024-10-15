@@ -103,6 +103,8 @@ def extract_gloss_list_item(
             gloss_nodes.append(child)
 
     gloss_text = clean_node(wxr, sense, gloss_nodes)
+    if gloss_text.startswith(","):  # between qualifier templates
+        gloss_text = gloss_text.removeprefix(",").strip()
     m = re.match(r"\(([^()]+)\)", gloss_text)
     if m is not None:  # expanded "verouderd" template in "2ps" template
         gloss_text = gloss_text[m.end() :].strip()
