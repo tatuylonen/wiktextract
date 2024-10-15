@@ -93,6 +93,7 @@ def extract_ux_template(
     t_node: TemplateNode,
 ) -> None:
     # https://ko.wiktionary.org/wiki/틀:ux
+    # https://ko.wiktionary.org/wiki/모듈:usex/templates
     lang_code = t_node.template_parameters.get(1, "")
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(t_node), expand_all=True
@@ -111,6 +112,10 @@ def extract_ux_template(
         example.literal_meaning = clean_node(
             wxr, None, t_node.template_parameters.get("lit", "")
         )
+        if example.ref == "":
+            example.ref = clean_node(
+                wxr, None, t_node.template_parameters.get("ref", "")
+            )
     else:
         example.text = clean_node(
             wxr, None, t_node.template_parameters.get(2, "")
@@ -121,6 +126,14 @@ def extract_ux_template(
         example.note = clean_node(
             wxr, None, t_node.template_parameters.get("footer", "")
         )
+        if example.ref == "":
+            example.ref = clean_node(
+                wxr, None, t_node.template_parameters.get("출처", "")
+            )
+        if example.ref == "":
+            example.ref = clean_node(
+                wxr, None, t_node.template_parameters.get("source", "")
+            )
 
     for link_node in expanded_node.find_child(NodeKind.LINK):
         clean_node(wxr, sense, link_node)
