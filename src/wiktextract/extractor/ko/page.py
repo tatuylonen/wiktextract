@@ -38,11 +38,11 @@ def parse_section(
 ) -> None:
     title_text = clean_node(wxr, None, level_node.largs)
     title_text = re.sub(r"\s*\d+$", "", title_text)
-    if title_text in POS_DATA:
-        orig_len = len(page_data)
+    if title_text.removeprefix("보조 ").strip() in POS_DATA:
+        orig_page_data_len = len(page_data)
         extract_pos_section(wxr, page_data, base_data, level_node, title_text)
         if (
-            len(page_data) == orig_len
+            len(page_data) == orig_page_data_len
             and title_text in LINKAGE_SECTIONS
             and len(page_data) > 0
         ):  # try extract as linkage section

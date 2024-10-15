@@ -24,11 +24,18 @@ def extract_pos_section(
     pos_title: str,
 ) -> None:
     page_data.append(base_data.model_copy(deep=True))
+    orig_title = pos_title
+    pos_title = pos_title.removeprefix("보조 ").strip()
     if pos_title in POS_DATA:
-        page_data[-1].pos_title = pos_title
+        page_data[-1].pos_title = orig_title
         pos_data = POS_DATA[pos_title]
         page_data[-1].pos = pos_data["pos"]
         page_data[-1].tags.extend(pos_data.get("tags", []))
+        if (
+            orig_title.startswith("보조 ")
+            and "auxiliary" not in page_data[-1].tags
+        ):
+            page_data[-1].tags.append("auxiliary")
 
     for node in level_node.find_child(NodeKind.LIST | NodeKind.TEMPLATE):
         if isinstance(node, TemplateNode):
