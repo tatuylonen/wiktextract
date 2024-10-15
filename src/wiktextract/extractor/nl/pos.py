@@ -13,8 +13,6 @@ from .models import AltForm, Sense, WordEntry
 from .section_titles import POS_DATA
 from .tags import translate_raw_tags
 
-FORM_OF_TEMPLATES = frozenset(["noun-pl", "noun-form"])
-
 
 def extract_pos_section(
     wxr: WiktextractContext,
@@ -28,7 +26,14 @@ def extract_pos_section(
     pos_data = POS_DATA[pos_title]
     page_data[-1].pos = pos_data["pos"]
     page_data[-1].tags.extend(pos_data.get("tags", []))
+    extract_pos_section_nodes(wxr, page_data, level_node)
 
+
+def extract_pos_section_nodes(
+    wxr: WiktextractContext,
+    page_data: list[WordEntry],
+    level_node: LevelNode,
+) -> None:
     gloss_list_start = 0
     for index, node in enumerate(level_node.children):
         if (
@@ -51,11 +56,15 @@ def extract_pos_section(
             and len(page_data[-1].senses) > 0
         ):
             extract_example_template(wxr, page_data[-1].senses[-1], node)
-        elif (
-            isinstance(node, TemplateNode)
-            and node.template_name in FORM_OF_TEMPLATES
+        elif isinstance(node, TemplateNode) and node.template_name in [
+            "noun-pl",
+            "noun-form",
+        ]:
+            extract_noun_form_of_template(wxr, page_data[-1], node)
+        elif isinstance(node, TemplateNode) and node.template_name.startswith(
+            ("1ps", "2ps", "aanv-w", "onv-d", "ott-", "ovt-", "tps", "volt-d")
         ):
-            extract_form_of_template(wxr, page_data[-1], node)
+            extract_verb_form_of_template(wxr, page_data[-1], node)
 
 
 # https://nl.wiktionary.org/wiki/Categorie:Lemmasjablonen
@@ -94,6 +103,12 @@ def extract_gloss_list_item(
             gloss_nodes.append(child)
 
     gloss_text = clean_node(wxr, sense, gloss_nodes)
+    if gloss_text.startswith(","):  # between qualifier templates
+        gloss_text = gloss_text.removeprefix(",").strip()
+    m = re.match(r"\(([^()]+)\)", gloss_text)
+    if m is not None:  # expanded "verouderd" template in "2ps" template
+        gloss_text = gloss_text[m.end() :].strip()
+        sense.raw_tags.append(m.group(1))
     if len(gloss_text) > 0:
         sense.glosses.append(gloss_text)
         translate_raw_tags(sense)
@@ -150,37 +165,53 @@ NOUN_FORM_OF_TEMPLATE_GENDER_TAGS = {
 }
 
 
-def extract_form_of_template(
+def extract_noun_form_of_template(
     wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
 ) -> None:
-    if t_node.template_name in ["noun-pl", "noun-form"]:
-        sense = Sense(tags=["form-of"])
-        if t_node.template_name == "noun-pl":
-            sense.tags.append("plural")
-        else:
-            num_arg = t_node.template_parameters.get("getal", "")
-            if num_arg in NOUN_FORM_OF_TEMPLATE_NUM_TAGS:
-                sense.tags.append(NOUN_FORM_OF_TEMPLATE_NUM_TAGS[num_arg])
+    sense = Sense(tags=["form-of"])
+    if t_node.template_name == "noun-pl":
+        sense.tags.append("plural")
+    else:
+        num_arg = t_node.template_parameters.get("getal", "")
+        if num_arg in NOUN_FORM_OF_TEMPLATE_NUM_TAGS:
+            sense.tags.append(NOUN_FORM_OF_TEMPLATE_NUM_TAGS[num_arg])
 
-        gender_arg = t_node.template_parameters.get("gesl", "")
-        if gender_arg in NOUN_FORM_OF_TEMPLATE_GENDER_TAGS:
-            gender_tag = NOUN_FORM_OF_TEMPLATE_GENDER_TAGS[gender_arg]
-            if isinstance(gender_tag, str):
-                sense.tags.append(gender_tag)
-            elif isinstance(gender_tag, list):
-                sense.tags.extend(gender_tag)
+    gender_arg = t_node.template_parameters.get("gesl", "")
+    if gender_arg in NOUN_FORM_OF_TEMPLATE_GENDER_TAGS:
+        gender_tag = NOUN_FORM_OF_TEMPLATE_GENDER_TAGS[gender_arg]
+        if isinstance(gender_tag, str):
+            sense.tags.append(gender_tag)
+        elif isinstance(gender_tag, list):
+            sense.tags.extend(gender_tag)
 
-        form_of = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
+    form_of = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
+    if form_of != "":
+        sense.form_of.append(AltForm(word=form_of))
+
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for list_item in expanded_node.find_child_recursively(NodeKind.LIST_ITEM):
+        sense.glosses.append(clean_node(wxr, None, list_item.children))
+        break
+    clean_node(wxr, sense, expanded_node)
+    word_entry.senses.append(sense)
+
+
+def extract_verb_form_of_template(
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+) -> None:
+    # https://nl.wiktionary.org/wiki/Categorie:Werkwoordsvormsjablonen_voor_het_Nederlands
+    from .page import extract_section_categories
+
+    pre_expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    extract_pos_section_nodes(wxr, [word_entry], pre_expanded_node)
+    form_of = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
+    for sense in word_entry.senses:
+        sense.tags.append("form-of")
         if form_of != "":
             sense.form_of.append(AltForm(word=form_of))
-
-        expanded_node = wxr.wtp.parse(
-            wxr.wtp.node_to_wikitext(t_node), expand_all=True
-        )
-        for list_item in expanded_node.find_child_recursively(
-            NodeKind.LIST_ITEM
-        ):
-            sense.glosses.append(clean_node(wxr, None, list_item.children))
-            break
-        clean_node(wxr, sense, expanded_node)
-        word_entry.senses.append(sense)
+    extract_section_categories(wxr, word_entry, pre_expanded_node)
+    word_entry.tags.append("form-of")

@@ -10,8 +10,14 @@ EXAMPLE_TEMPLATES = frozenset({"bijv-1", "bijv-2", "citeer"})
 def extract_example_list_item(
     wxr: WiktextractContext, sense: Sense, list_item: WikiNode
 ) -> None:
+    has_template = False
     for t_node in list_item.find_child(NodeKind.TEMPLATE):
         extract_example_template(wxr, sense, t_node)
+        has_template = True
+    if not has_template:
+        example_text = clean_node(wxr, None, list_item.children)
+        if example_text != "":
+            sense.examples.append(Example(text=example_text))
 
 
 def extract_example_template(

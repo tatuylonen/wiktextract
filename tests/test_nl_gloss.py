@@ -137,7 +137,7 @@ class TestNlGloss(TestCase):
         self.wxr.wtp.add_page(
             "Sjabloon:erga",
             10,
-            """<span>[[WikiWoordenboek:Werkwoord#Ergativiteit|ergatief]]</span>[[Categorie:Ergatief werkwoord in het Nederlands]] """,
+            """<span>[[WikiWoordenboek:Werkwoord#Ergativiteit|ergatief]]</span>[[Categorie:Ergatief werkwoord in het Nederlands]]""",
         )
         data = parse_page(
             self.wxr,
@@ -154,4 +154,94 @@ class TestNlGloss(TestCase):
                 "raw_tags": ["Noord-Nederlands"],
                 "glosses": ["stappen, gaan, wandelen"],
             },
+        )
+
+    def test_2ps(self):
+        self.wxr.wtp.add_page(
+            "Sjabloon:2ps",
+            10,
+            """{| class="infobox"
+! vervoeging van
+|-
+|[[staren/vervoeging|staren]]
+|}
+'''staart'''
+#tweede persoon enkelvoud tegenwoordige tijd van  [[staren]]<br>
+#:*''<nowiki></nowiki>Jij '''staart'''.<nowiki></nowiki>''&#160;
+#derde persoon enkelvoud tegenwoordige tijd van  [[staren]]<br>
+#:*''<nowiki></nowiki>Hij '''staart'''.<nowiki></nowiki>''&#160;
+#<span>([[verouderd]])</span>[[Categorie:Verouderd_in_het_Nederlands]] gebiedende wijs meervoud van  [[staren]]<br>
+#:*''<nowiki></nowiki>'''Staart'''!<nowiki></nowiki>''&#160;
+[[Categorie:Werkwoordsvorm in het Nederlands]]""",
+        )
+        data = parse_page(
+            self.wxr,
+            "staart",
+            """==Nederlands==
+====Werkwoord====
+{{2ps|staren}}""",
+        )
+        self.assertEqual(
+            data[0]["senses"],
+            [
+                {
+                    "glosses": [
+                        "tweede persoon enkelvoud tegenwoordige tijd van staren"
+                    ],
+                    "tags": ["form-of"],
+                    "form_of": [{"word": "staren"}],
+                    "examples": [{"text": "Jij staart."}],
+                },
+                {
+                    "glosses": [
+                        "derde persoon enkelvoud tegenwoordige tijd van staren"
+                    ],
+                    "tags": ["form-of"],
+                    "form_of": [{"word": "staren"}],
+                    "examples": [{"text": "Hij staart."}],
+                },
+                {
+                    "categories": ["Verouderd_in_het_Nederlands"],
+                    "glosses": ["gebiedende wijs meervoud van staren"],
+                    "tags": ["obsolete", "form-of"],
+                    "form_of": [{"word": "staren"}],
+                    "examples": [{"text": "Staart!"}],
+                },
+            ],
+        )
+        self.assertEqual(
+            data[0]["categories"], ["Werkwoordsvorm in het Nederlands"]
+        )
+
+    def test_two_tag_templates(self):
+        self.wxr.wtp.add_page(
+            "Sjabloon:figuurlijk",
+            10,
+            """<span>([[figuurlijk]])</span>[[Categorie:Figuurlijk_in_het_Nederlands]]""",
+        )
+        self.wxr.wtp.add_page(
+            "Sjabloon:anatomie",
+            10,
+            """<span>([[anatomie]])</span>[[Categorie:Anatomie_in_het_Nederlands]] """,
+        )
+        data = parse_page(
+            self.wxr,
+            "staart",
+            """==Nederlands==
+====Zelfstandig naamwoord====
+#{{figuurlijk|nld}}, {{anatomie|nld}} een bundel lang haar""",
+        )
+        self.assertEqual(
+            data[0]["senses"],
+            [
+                {
+                    "categories": [
+                        "Figuurlijk_in_het_Nederlands",
+                        "Anatomie_in_het_Nederlands",
+                    ],
+                    "glosses": ["een bundel lang haar"],
+                    "tags": ["figuratively"],
+                    "topics": ["anatomy"],
+                }
+            ],
         )
