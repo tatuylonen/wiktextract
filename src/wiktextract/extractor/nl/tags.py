@@ -6,7 +6,12 @@ VERB_TAGS = {
     "hulpwerkwoord": "auxiliary",  # Sjabloon:auxl
 }
 
-TAGS = {**VERB_TAGS}
+GLOSS_TAGS = {
+    "verouderd": "obsolete",  # Sjabloon:verouderd
+}
+
+
+TAGS = {**VERB_TAGS, **GLOSS_TAGS}
 
 
 def translate_raw_tags(data: WordEntry) -> None:
