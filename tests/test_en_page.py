@@ -873,6 +873,7 @@ alcance
                     "pos": "verb",
                     "senses": [
                         {
+                            "form_of": [{"word": "alcanfoo"}],
                             "glosses": [
                                 "inflection of alcanfoo",
                                 "first/third-person singular present subjunctive",
@@ -887,6 +888,7 @@ alcance
                             ],
                         },
                         {
+                            "form_of": [{"word": "alcanfoo"}],
                             "glosses": [
                                 "inflection of alcanfoo",
                                 "third-person singular imperative",

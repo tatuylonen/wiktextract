@@ -1875,9 +1875,6 @@ def parse_language(
                 if not isinstance(x, WikiNode) or x.kind != NodeKind.LIST
             ]
 
-            # print(f"{new_subentries}")
-            # print(f"{new_others}")
-            # print(f"{new_contents}")
             subentries = subentries or new_subentries
             others = others or new_others
             subglosses = new_contents
@@ -1916,7 +1913,17 @@ def parse_language(
         elif rawgloss == "Technical or specialized senses.":
             rawgloss = ""
         elif rawgloss.startswith("inflection of "):
-            data_append(sense_base, "tags", "form-of")
+            parsed  = parse_alt_or_inflection_of(wxr, rawgloss, set())
+            if parsed is not None:
+                tags, origins = parsed
+                if origins is not None:
+                    data_extend(sense_base, "form_of", origins)
+                if tags is not None:
+                    data_extend(sense_base, "tags", tags)
+                else:
+                    data_append(sense_base, "tags", "form-of")
+            else:
+                data_append(sense_base, "tags", "form-of")
         if rawgloss:
             # Code duplicating a lot of clean-up operations from later in
             # this block. We want to clean up the "supergloss" as much as
