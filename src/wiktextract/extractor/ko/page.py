@@ -71,6 +71,8 @@ def parse_language_section(
 ) -> None:
     pre_data_len = len(page_data)
     lang_name = clean_node(wxr, None, level2_node.largs)
+    if lang_name == "":
+        lang_name = "unknown"
     lang_code = name_to_code(lang_name, "ko")
     if lang_code == "":
         lang_code = "unknown"

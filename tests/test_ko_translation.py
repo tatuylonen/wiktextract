@@ -55,3 +55,26 @@ class TestKoTranslation(TestCase):
                 },
             ],
         )
+
+    def test_tr_after_gloss_list(self):
+        data = parse_page(
+            self.wxr,
+            "하다",
+            """== 한국어 ==
+=== 동사 ===
+# 사람이나 동물 또는 물체가 행동하거나 작용을 이루다.
+{{외국어|
+* 네덜란드어(nl): [[doen]]
+}}""",
+        )
+        self.assertEqual(
+            data[0]["translations"],
+            [
+                {
+                    "word": "doen",
+                    "lang": "네덜란드어",
+                    "lang_code": "nl",
+                    "sense": "사람이나 동물 또는 물체가 행동하거나 작용을 이루다.",
+                }
+            ],
+        )

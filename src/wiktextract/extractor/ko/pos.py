@@ -44,7 +44,14 @@ def extract_pos_section(
             elif node.template_name in LINKAGE_TEMPLATES:
                 extract_linkage_template(wxr, page_data[-1], node)
             elif node.template_name == "외국어":
-                extract_translation_template(wxr, page_data[-1], node)
+                extract_translation_template(
+                    wxr,
+                    page_data[-1],
+                    node,
+                    page_data[-1].senses[-1].glosses[-1]
+                    if len(page_data[-1].senses) > 0
+                    else "",
+                )
         elif node.kind == NodeKind.LIST:
             for list_item in node.find_child(NodeKind.LIST_ITEM):
                 if node.sarg.endswith("#"):

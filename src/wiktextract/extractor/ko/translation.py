@@ -21,9 +21,12 @@ def extract_translation_template(
     wxr: WiktextractContext,
     word_entry: WordEntry,
     t_node: TemplateNode,
+    sense: str = "",
 ) -> None:
     # https://ko.wiktionary.org/wiki/틀:외국어
-    sense = clean_node(wxr, None, t_node.template_parameters.get("덧", ""))
+    t_sense = clean_node(wxr, None, t_node.template_parameters.get("덧", ""))
+    if t_sense != "":
+        sense = t_sense
     for key in [1, 2]:
         arg_value = t_node.template_parameters.get(key, [])
         parse_arg = wxr.wtp.parse(wxr.wtp.node_to_wikitext(arg_value))
