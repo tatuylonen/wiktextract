@@ -39,7 +39,16 @@ def parse_section(
     title_text = clean_node(wxr, None, level_node.largs)
     title_text = re.sub(r"\s*\d+$", "", title_text)
     if title_text in POS_DATA:
+        orig_len = len(page_data)
         extract_pos_section(wxr, page_data, base_data, level_node, title_text)
+        if (
+            len(page_data) == orig_len
+            and title_text in LINKAGE_SECTIONS
+            and len(page_data) > 0
+        ):  # try extract as linkage section
+            extract_linkage_section(
+                wxr, page_data[-1], level_node, LINKAGE_SECTIONS[title_text]
+            )
     elif title_text in LINKAGE_SECTIONS and len(page_data) > 0:
         extract_linkage_section(
             wxr, page_data[-1], level_node, LINKAGE_SECTIONS[title_text]

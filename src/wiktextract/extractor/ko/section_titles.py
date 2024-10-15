@@ -21,4 +21,5 @@ LINKAGE_SECTIONS = {
     "관련 어휘": "related",
     "유의어": "synonyms",
     "반의어": "antonyms",
+    "관용구": "proverbs",
 }
