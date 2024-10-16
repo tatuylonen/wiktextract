@@ -69,8 +69,8 @@ def parse_section(
         extract_etymology_section(
             wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
         )
-    elif title_text in ["참고 문헌"]:
-        pass
+    elif title_text in ["참고 문헌", "독음", "자원"]:
+        pass  # ignore
     else:
         wxr.wtp.debug(f"unknown title: {title_text}", sortid="ko/page/63")
 
