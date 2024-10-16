@@ -76,7 +76,6 @@ class WordEntry(KoreanBaseModel):
     categories: list[str] = []
     tags: list[str] = []
     raw_tags: list[str] = []
-    etymology_text: str = ""
     sounds: list[Sound] = []
     proverbs: list[Linkage] = []
     derived: list[Linkage] = []
@@ -84,3 +83,4 @@ class WordEntry(KoreanBaseModel):
     synonyms: list[Linkage] = []
     antonyms: list[Linkage] = []
     translations: list[Translation] = []
+    etymology_texts: list[str] = []

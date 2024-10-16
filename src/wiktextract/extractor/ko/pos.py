@@ -116,7 +116,9 @@ def extract_unorderd_list_item(
             etymology_nodes = []
             etymology_nodes.append(node[node.index(":") + 1 :])
             etymology_nodes.extend(list_item.children[index + 1 :])
-            word_entry.etymology_text = clean_node(wxr, None, etymology_nodes)
+            e_text = clean_node(wxr, None, etymology_nodes)
+            if len(e_text) > 0:
+                word_entry.etymology_texts.append(e_text)
             break
         elif (
             isinstance(node, str)
