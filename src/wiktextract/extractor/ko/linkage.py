@@ -21,7 +21,14 @@ def extract_linkage_template(
                 break
             word = clean_node(wxr, None, node.template_parameters[key])
             if word != "":
-                word_entry.derived.append(Linkage(word=word))
+                word_entry.derived.append(
+                    Linkage(
+                        word=word,
+                        sense=word_entry.senses[-1].glosses[-1]
+                        if len(word_entry.senses) > 0
+                        else "",
+                    )
+                )
 
 
 def extract_linkage_section(
@@ -59,7 +66,14 @@ def extract_linkage_list_item(
     for link_node in list_item.find_child(NodeKind.LINK):
         word = clean_node(wxr, None, link_node)
         if word != "":
-            getattr(word_entry, linkage_type).append(Linkage(word=word))
+            getattr(word_entry, linkage_type).append(
+                Linkage(
+                    word=word,
+                    sense=word_entry.senses[-1].glosses[-1]
+                    if len(word_entry.senses) > 0
+                    else "",
+                )
+            )
 
 
 def extract_proverb_section(

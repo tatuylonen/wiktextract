@@ -59,5 +59,30 @@ class TestKoLinkage(TestCase):
 *반의어: [[젖다]]
 {{합성어 상자|마른걸레}}""",
         )
-        self.assertEqual(data[0]["antonyms"], [{"word": "젖다"}])
-        self.assertEqual(data[0]["derived"], [{"word": "마른걸레"}])
+        self.assertEqual(
+            data[0]["antonyms"],
+            [{"word": "젖다", "sense": "젖은 것에 물기가 없어지다."}],
+        )
+        self.assertEqual(
+            data[0]["derived"],
+            [{"word": "마른걸레", "sense": "젖은 것에 물기가 없어지다."}],
+        )
+
+    def test_colon_linkage_list(self):
+        data = parse_page(
+            self.wxr,
+            "한글",
+            """== 한국어 ==
+=== 명사 ===
+# 한국 고유의 글자이자 문자.
+:* '''한글'''은 창제 당시 총 28개의 자모가 있었지만 지금은 24개만 사용한다.
+:유의어: [[훈민정음]]""",
+        )
+        self.assertEqual(
+            data[0]["synonyms"],
+            [{"word": "훈민정음", "sense": "한국 고유의 글자이자 문자."}],
+        )
+        self.assertEqual(
+            data[0]["senses"][0]["examples"],
+            [{"text": "한글은 창제 당시 총 28개의 자모가 있었지만 지금은 24개만 사용한다."}]
+        )

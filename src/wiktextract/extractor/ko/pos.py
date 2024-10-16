@@ -54,18 +54,9 @@ def extract_pos_section(
                 )
         elif node.kind == NodeKind.LIST:
             for list_item in node.find_child(NodeKind.LIST_ITEM):
-                if node.sarg.endswith("#"):
+                if node.sarg.startswith("#"):
                     extract_gloss_list_item(wxr, page_data[-1], list_item)
-                elif (
-                    node.sarg.startswith(":") and len(page_data[-1].senses) > 0
-                ):
-                    extract_example_list_item(
-                        wxr,
-                        page_data[-1].senses[-1],
-                        list_item,
-                        base_data.lang_code,
-                    )
-                elif node.sarg.endswith("*"):
+                else:
                     extract_unorderd_list_item(wxr, page_data[-1], list_item)
 
     if len(page_data[-1].senses) == 0:
@@ -79,11 +70,13 @@ def extract_gloss_list_item(
     sense = Sense()
     for node in list_item.children:
         if isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
-            if ":" in node.sarg:
-                for e_list_item in node.find_child(NodeKind.LIST_ITEM):
-                    extract_example_list_item(
-                        wxr, sense, e_list_item, word_entry.lang_code
-                    )
+            gloss_text = clean_node(wxr, sense, gloss_nodes)
+            if len(gloss_text) > 0:
+                sense.glosses.append(gloss_text)
+                word_entry.senses.append(sense)
+                gloss_nodes.clear()
+            for nested_list_item in node.find_child(NodeKind.LIST_ITEM):
+                extract_unorderd_list_item(wxr, word_entry, nested_list_item)
             continue
         else:
             gloss_nodes.append(node)
@@ -138,3 +131,8 @@ def extract_unorderd_list_item(
         ):
             extract_linkage_list_item(wxr, word_entry, list_item, "")
             break
+    else:
+        if len(word_entry.senses) > 0:
+            extract_example_list_item(
+                wxr, word_entry.senses[-1], list_item, word_entry.lang_code
+            )
