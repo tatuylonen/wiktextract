@@ -6,6 +6,7 @@ from wikitextprocessor.parser import LEVEL_KIND_FLAGS, LevelNode, NodeKind
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from .etymology import extract_etymology_section
 from .linkage import extract_linkage_section
 from .models import Sense, WordEntry
 from .pos import extract_pos_section
@@ -49,16 +50,29 @@ def parse_section(
             extract_linkage_section(
                 wxr, page_data[-1], level_node, LINKAGE_SECTIONS[title_text]
             )
-    elif title_text in LINKAGE_SECTIONS and len(page_data) > 0:
+    elif title_text in LINKAGE_SECTIONS:
         extract_linkage_section(
-            wxr, page_data[-1], level_node, LINKAGE_SECTIONS[title_text]
+            wxr,
+            page_data[-1] if len(page_data) > 0 else base_data,
+            level_node,
+            LINKAGE_SECTIONS[title_text],
         )
-    elif title_text == "번역" and len(page_data) > 0:
-        extract_translation_section(wxr, page_data[-1], level_node)
+    elif title_text == "번역":
+        extract_translation_section(
+            wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
+        )
     elif title_text == "발음":
         extract_sound_section(
             wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
         )
+    elif title_text == "어원":
+        extract_etymology_section(
+            wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
+        )
+    elif title_text in ["참고 문헌", "독음", "자원"]:
+        pass  # ignore
+    else:
+        wxr.wtp.debug(f"unknown title: {title_text}", sortid="ko/page/63")
 
     for next_level in level_node.find_child(LEVEL_KIND_FLAGS):
         parse_section(wxr, page_data, base_data, next_level)

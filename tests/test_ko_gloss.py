@@ -64,8 +64,8 @@ class TestKoGloss(TestCase):
             [{"glosses": ["강이나 내에 바닷물이 드나드는 곳."]}],
         )
         self.assertEqual(
-            data[1]["etymology_text"],
-            "< 중세 한국어 개〮 [H] (분류두공부시언해 초간본(1481)).",
+            data[1]["etymology_texts"],
+            ["< 중세 한국어 개〮 [H] (분류두공부시언해 초간본(1481))."],
         )
 
     def test_note_list(self):
