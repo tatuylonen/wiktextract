@@ -12,7 +12,7 @@ from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .descendant import extract_descendant_section
 from .etymology import extract_etymology_section
-from .linkage import extract_linkage_section
+from .linkage import extract_fixed_preposition_section, extract_linkage_section
 from .models import Etymology, Sense, WordEntry
 from .pos import extract_pos_section
 from .section_titles import LINKAGE_SECTIONS, POS_DATA
@@ -72,6 +72,10 @@ def parse_section(
         )
     elif title_text == "Overerving en ontlening":
         extract_descendant_section(
+            wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
+        )
+    elif title_text == "Vaste voorzetsels":
+        extract_fixed_preposition_section(
             wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
         )
     elif title_text == "Vervoeging":

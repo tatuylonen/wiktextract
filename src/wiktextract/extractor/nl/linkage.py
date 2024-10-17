@@ -146,3 +146,14 @@ def extract_expr_template(
         getattr(word_entry, linkage_type).append(
             Linkage(word=word, sense=sense, sense_index=sense_index)
         )
+
+
+def extract_fixed_preposition_section(
+    wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
+) -> None:
+    for list_item in level_node.find_child_recursively(NodeKind.LIST_ITEM):
+        word = clean_node(wxr, None, list_item.children)
+        if len(word) > 0:
+            word_entry.derived.append(
+                Linkage(word=word, tags=["prepositional"])
+            )
