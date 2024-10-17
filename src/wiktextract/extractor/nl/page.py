@@ -62,7 +62,7 @@ def parse_section(
         )
     elif title_text == "Woordherkomst en -opbouw":
         etymology_data = extract_etymology_section(wxr, level_node)
-    elif title_text == "Schrijfwijzen":
+    elif title_text in ["Schrijfwijzen", "Verdere woordvormen"]:
         extract_spelling_form_section(
             wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
         )
@@ -82,7 +82,12 @@ def parse_section(
         pass  # conjugation
     elif title_text == "Verbuiging":
         pass  # inflection
-    elif title_text in ["Gangbaarheid", "Meer informatie", "Verwijzingen"]:
+    elif title_text in [
+        "Gangbaarheid",
+        "Meer informatie",
+        "Verwijzingen",
+        "Citaten",
+    ]:
         pass  # ignore
     else:
         wxr.wtp.debug(f"unknown title: {title_text}", sortid="nl/page/60")
