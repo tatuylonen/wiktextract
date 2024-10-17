@@ -66,3 +66,27 @@ class TestNlSound(TestCase):
                 },
             ],
         )
+
+    def test_plain_text_lang_name(self):
+        data = parse_page(
+            self.wxr,
+            "fijne feestdagen",
+            """==Nederlands==
+====Frase====
+# veelgebruikte
+=====Vertalingen=====
+{{trans-top|1. kerstwens}}
+* Spaans: {{trad|es|¡Felices Fiestas!}}""",
+        )
+        self.assertEqual(
+            data[0]["translations"],
+            [
+                {
+                    "word": "¡Felices Fiestas!",
+                    "lang": "Spaans",
+                    "lang_code": "es",
+                    "sense": "kerstwens",
+                    "sense_index": 1,
+                },
+            ],
+        )

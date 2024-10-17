@@ -70,6 +70,24 @@ class Translation(DutchBaseModel):
     roman: str = ""
 
 
+class Etymology(DutchBaseModel):
+    text: str = ""
+    categories: list[str] = []
+    index: str = ""
+
+
+class Form(DutchBaseModel):
+    form: str = ""
+    note: str = ""
+
+
+class Descendant(DutchBaseModel):
+    lang_code: str
+    lang: str
+    word: str
+    descendants: list["Descendant"] = []
+
+
 class WordEntry(DutchBaseModel):
     model_config = ConfigDict(title="Dutch Wiktionary")
     word: str = Field(description="Word string", min_length=1)
@@ -82,6 +100,7 @@ class WordEntry(DutchBaseModel):
     tags: list[str] = []
     raw_tags: list[str] = []
     etymology_index: str = Field(default="", exclude=True)
+    etymology_texts: list[str] = []
     sounds: list[Sound] = []
     anagrams: list[Linkage] = []
     antonyms: list[Linkage] = []
@@ -98,3 +117,6 @@ class WordEntry(DutchBaseModel):
     synonyms: list[Linkage] = []
     translations: list[Translation] = []
     hyphenation: str = ""
+    forms: list[Form] = []
+    notes: list[str] = []
+    descendants: list[Descendant] = []
