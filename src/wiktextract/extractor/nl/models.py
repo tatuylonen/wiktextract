@@ -81,6 +81,13 @@ class Form(DutchBaseModel):
     note: str = ""
 
 
+class Descendant(DutchBaseModel):
+    lang_code: str
+    lang: str
+    word: str
+    descendants: list["Descendant"] = []
+
+
 class WordEntry(DutchBaseModel):
     model_config = ConfigDict(title="Dutch Wiktionary")
     word: str = Field(description="Word string", min_length=1)
@@ -112,3 +119,4 @@ class WordEntry(DutchBaseModel):
     hyphenation: str = ""
     forms: list[Form] = []
     notes: list[str] = []
+    descendants: list[Descendant] = []

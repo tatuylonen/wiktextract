@@ -10,6 +10,7 @@ from wikitextprocessor.parser import (
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from .descendant import extract_descendant_section
 from .etymology import extract_etymology_section
 from .linkage import extract_linkage_section
 from .models import Etymology, Sense, WordEntry
@@ -69,6 +70,14 @@ def parse_section(
         extract_note_section(
             wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
         )
+    elif title_text == "Overerving en ontlening":
+        extract_descendant_section(
+            wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
+        )
+    elif title_text == "Vervoeging":
+        pass  # conjugation
+    elif title_text == "Verbuiging":
+        pass  # inflection
     elif title_text in ["Gangbaarheid", "Meer informatie", "Verwijzingen"]:
         pass  # ignore
     else:
