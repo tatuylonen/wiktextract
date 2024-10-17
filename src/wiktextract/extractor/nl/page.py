@@ -16,6 +16,7 @@ from .models import Etymology, Sense, WordEntry
 from .pos import extract_pos_section
 from .section_titles import LINKAGE_SECTIONS, POS_DATA
 from .sound import extract_hyphenation_section, extract_sound_section
+from .spelling_form import extract_spelling_form_section
 from .translation import extract_translation_section
 
 
@@ -60,6 +61,12 @@ def parse_section(
         )
     elif title_text == "Woordherkomst en -opbouw":
         etymology_data = extract_etymology_section(wxr, level_node)
+    elif title_text == "Schrijfwijzen":
+        extract_spelling_form_section(
+            wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
+        )
+    elif title_text in ["Gangbaarheid", "Meer informatie", "Verwijzingen"]:
+        pass  # ignore
     else:
         wxr.wtp.debug(f"unknown title: {title_text}", sortid="nl/page/60")
 

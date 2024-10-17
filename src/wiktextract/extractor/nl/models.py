@@ -76,6 +76,11 @@ class Etymology(DutchBaseModel):
     index: str = ""
 
 
+class Form(DutchBaseModel):
+    form: str = ""
+    note: str = ""
+
+
 class WordEntry(DutchBaseModel):
     model_config = ConfigDict(title="Dutch Wiktionary")
     word: str = Field(description="Word string", min_length=1)
@@ -105,3 +110,4 @@ class WordEntry(DutchBaseModel):
     synonyms: list[Linkage] = []
     translations: list[Translation] = []
     hyphenation: str = ""
+    forms: list[Form] = []
