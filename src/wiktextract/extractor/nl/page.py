@@ -10,8 +10,9 @@ from wikitextprocessor.parser import (
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from .etymology import extract_etymology_section
 from .linkage import extract_linkage_section
-from .models import Sense, WordEntry
+from .models import Etymology, Sense, WordEntry
 from .pos import extract_pos_section
 from .section_titles import LINKAGE_SECTIONS, POS_DATA
 from .sound import extract_hyphenation_section, extract_sound_section
@@ -30,11 +31,12 @@ def parse_section(
     page_data: list[WordEntry],
     base_data: WordEntry,
     level_node: WikiNode,
-) -> None:
+) -> list[Etymology]:
     # title templates
     # https://nl.wiktionary.org/wiki/Categorie:Lemmasjablonen
     title_text = clean_node(wxr, None, level_node.largs)
     wxr.wtp.start_subsection(title_text)
+    etymology_data = []
     if title_text in POS_DATA:
         extract_pos_section(wxr, page_data, base_data, level_node, title_text)
     elif title_text == "Uitspraak":
@@ -56,12 +58,17 @@ def parse_section(
         extract_hyphenation_section(
             wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
         )
+    elif title_text == "Woordherkomst en -opbouw":
+        etymology_data = extract_etymology_section(wxr, level_node)
+    else:
+        wxr.wtp.debug(f"unknown title: {title_text}", sortid="nl/page/60")
 
     for next_level in level_node.find_child(LEVEL_KIND_FLAGS):
         parse_section(wxr, page_data, base_data, next_level)
     extract_section_categories(
         wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
     )
+    return etymology_data
 
 
 def parse_page(
@@ -92,8 +99,22 @@ def parse_page(
             pos="unknown",
         )
         extract_section_categories(wxr, base_data, level2_node)
+        etymology_data = []
         for next_level_node in level2_node.find_child(LEVEL_KIND_FLAGS):
-            parse_section(wxr, page_data, base_data, next_level_node)
+            new_e_data = parse_section(
+                wxr, page_data, base_data, next_level_node
+            )
+            if len(new_e_data) > 0:
+                etymology_data = new_e_data
+        for data in page_data:
+            if data.lang_code == lang_code:
+                for e_data in etymology_data:
+                    if (
+                        e_data.index == data.etymology_index
+                        or e_data.index == ""
+                    ):
+                        data.etymology_texts.append(e_data.text)
+                        data.categories.extend(e_data.categories)
 
     for data in page_data:
         if len(data.senses) == 0:

@@ -70,6 +70,12 @@ class Translation(DutchBaseModel):
     roman: str = ""
 
 
+class Etymology(DutchBaseModel):
+    text: str = ""
+    categories: list[str] = []
+    index: str = ""
+
+
 class WordEntry(DutchBaseModel):
     model_config = ConfigDict(title="Dutch Wiktionary")
     word: str = Field(description="Word string", min_length=1)
@@ -82,6 +88,7 @@ class WordEntry(DutchBaseModel):
     tags: list[str] = []
     raw_tags: list[str] = []
     etymology_index: str = Field(default="", exclude=True)
+    etymology_texts: list[str] = []
     sounds: list[Sound] = []
     anagrams: list[Linkage] = []
     antonyms: list[Linkage] = []
