@@ -65,6 +65,10 @@ def parse_section(
         extract_spelling_form_section(
             wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
         )
+    elif title_text == "Opmerkingen":
+        extract_note_section(
+            wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
+        )
     elif title_text in ["Gangbaarheid", "Meer informatie", "Verwijzingen"]:
         pass  # ignore
     else:
@@ -127,3 +131,12 @@ def parse_page(
         if len(data.senses) == 0:
             data.senses.append(Sense(tags=["no-gloss"]))
     return [m.model_dump(exclude_defaults=True) for m in page_data]
+
+
+def extract_note_section(
+    wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
+) -> None:
+    for list_item in level_node.find_child_recursively(NodeKind.LIST_ITEM):
+        note_str = clean_node(wxr, word_entry, list_item.children)
+        if len(note_str) > 0:
+            word_entry.notes.append(note_str)

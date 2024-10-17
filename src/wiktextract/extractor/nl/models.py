@@ -111,3 +111,4 @@ class WordEntry(DutchBaseModel):
     translations: list[Translation] = []
     hyphenation: str = ""
     forms: list[Form] = []
+    notes: list[str] = []
