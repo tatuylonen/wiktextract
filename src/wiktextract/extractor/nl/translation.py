@@ -67,7 +67,9 @@ def extract_translation_list_item(
                         Translation(
                             lang=lang_name,
                             lang_code=node.template_parameters.get(1, ""),
-                            word=node.template_parameters.get(2, ""),
+                            word=clean_node(
+                                wxr, None, node.template_parameters.get(2, "")
+                            ),
                             sense=sense,
                             sense_index=sense_index,
                         )
