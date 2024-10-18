@@ -90,3 +90,21 @@ class TestKoLinkage(TestCase):
                 }
             ],
         )
+
+    def test_zh_pinyin(self):
+        data = parse_page(
+            self.wxr,
+            "土",
+            """== 중국어 ==
+=== 명사 ===
+* '''1.''' 흙, 땅
+=== 합성어 ===
+:*[[土產]]/[[土产 ]](tǔchǎn)""",
+        )
+        self.assertEqual(
+            data[0]["derived"],
+            [
+                {"word": "土產", "roman": "tǔchǎn", "sense": "흙, 땅"},
+                {"word": "土产", "roman": "tǔchǎn", "sense": "흙, 땅"},
+            ],
+        )

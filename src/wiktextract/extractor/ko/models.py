@@ -52,6 +52,9 @@ class Sound(KoreanBaseModel):
 class Linkage(KoreanBaseModel):
     word: str
     sense: str = ""
+    roman: str = ""
+    raw_tags: list[str] = []
+    tags: list[str] = []
 
 
 class Translation(KoreanBaseModel):

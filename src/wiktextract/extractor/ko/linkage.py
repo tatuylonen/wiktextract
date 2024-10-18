@@ -1,3 +1,5 @@
+import re
+
 from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
@@ -57,23 +59,35 @@ def extract_linkage_list_item(
     list_item: WikiNode,
     linkage_type: str,
 ) -> None:
+    raw_tag = ""
+    is_roman = False
     for child in list_item.children:
-        if isinstance(child, str) and ":" in child:
-            l_type_str = child[: child.index(":")].strip()
-            if l_type_str in LINKAGE_SECTIONS:
-                linkage_type = LINKAGE_SECTIONS[l_type_str]
+        if isinstance(child, str):
+            if ":" in child:
+                l_type_str = child[: child.index(":")].strip()
+                if l_type_str in LINKAGE_SECTIONS:
+                    linkage_type = LINKAGE_SECTIONS[l_type_str]
+            else:
+                m = re.search(r"\(([^()]+)\)", child)
+                if m is not None:
+                    raw_tag = m.group(1).strip()
+                    is_roman = re.search(r"[a-z]", raw_tag) is not None
 
     for link_node in list_item.find_child(NodeKind.LINK):
         word = clean_node(wxr, None, link_node)
         if word != "":
-            getattr(word_entry, linkage_type).append(
-                Linkage(
-                    word=word,
-                    sense=word_entry.senses[-1].glosses[-1]
-                    if len(word_entry.senses) > 0
-                    else "",
-                )
+            linkage = Linkage(
+                word=word,
+                sense=word_entry.senses[-1].glosses[-1]
+                if len(word_entry.senses) > 0
+                else ""
             )
+            if len(raw_tag) > 0:
+                if is_roman:
+                    linkage.roman = raw_tag
+                else:
+                    linkage.raw_tags.append(raw_tag)
+            getattr(word_entry, linkage_type).append(linkage)
 
 
 def extract_proverb_section(
