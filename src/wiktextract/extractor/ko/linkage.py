@@ -80,7 +80,7 @@ def extract_linkage_list_item(
                 word=word,
                 sense=word_entry.senses[-1].glosses[-1]
                 if len(word_entry.senses) > 0
-                else ""
+                else "",
             )
             if len(raw_tag) > 0:
                 if is_roman:

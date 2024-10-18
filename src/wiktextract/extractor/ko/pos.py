@@ -10,7 +10,7 @@ from .linkage import (
     extract_linkage_list_item,
     extract_linkage_template,
 )
-from .models import Sense, WordEntry
+from .models import AltForm, Sense, WordEntry
 from .section_titles import LINKAGE_SECTIONS, POS_DATA
 from .sound import SOUND_TEMPLATES, extract_sound_template
 from .translation import extract_translation_template
@@ -78,6 +78,11 @@ def extract_gloss_list_item(
             for nested_list_item in node.find_child(NodeKind.LIST_ITEM):
                 extract_unorderd_list_item(wxr, word_entry, nested_list_item)
             continue
+        elif isinstance(node, TemplateNode) and node.template_name.endswith(
+            " of"
+        ):
+            extract_form_of_template(wxr, sense, node)
+            gloss_nodes.append(node)
         else:
             gloss_nodes.append(node)
 
@@ -136,3 +141,14 @@ def extract_unorderd_list_item(
             extract_example_list_item(
                 wxr, word_entry.senses[-1], list_item, word_entry.lang_code
             )
+
+
+def extract_form_of_template(
+    wxr: WiktextractContext, sense: Sense, t_node: TemplateNode
+) -> None:
+    if "form-of" not in sense.tags:
+        sense.tags.append("form-of")
+    word_arg = 1 if t_node.template_name == "ko-hanja form of" else 2
+    word = clean_node(wxr, None, t_node.template_parameters.get(word_arg, ""))
+    if len(word) > 0:
+        sense.form_of.append(AltForm(word=word))
