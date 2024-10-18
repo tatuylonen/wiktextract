@@ -28,6 +28,7 @@ def extract_example_list_item(
         elif isinstance(node, TemplateNode) and node.template_name in [
             "예문",
             "ux",
+            "uxi",
         ]:
             extract_ux_template(wxr, sense, example, node)
             break
