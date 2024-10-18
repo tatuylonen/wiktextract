@@ -13,6 +13,7 @@ from .linkage import (
 from .models import AltForm, Sense, WordEntry
 from .section_titles import LINKAGE_SECTIONS, POS_DATA
 from .sound import SOUND_TEMPLATES, extract_sound_template
+from .tags import translate_raw_tags
 from .translation import extract_translation_template
 
 
@@ -83,12 +84,22 @@ def extract_gloss_list_item(
         ):
             extract_form_of_template(wxr, sense, node)
             gloss_nodes.append(node)
+        elif isinstance(node, TemplateNode) and node.template_name == "라벨":
+            sense.raw_tags.extend(
+                [
+                    raw_tag.strip()
+                    for raw_tag in clean_node(wxr, sense, node)
+                    .strip("()")
+                    .split(",")
+                ]
+            )
         else:
             gloss_nodes.append(node)
 
     gloss_text = clean_node(wxr, sense, gloss_nodes)
     if len(gloss_text) > 0:
         sense.glosses.append(gloss_text)
+        translate_raw_tags(sense)
         word_entry.senses.append(sense)
 
 

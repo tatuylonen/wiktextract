@@ -96,9 +96,8 @@ class TestKoGloss(TestCase):
         self.wxr.wtp.add_page(
             "틀:ko-hanja form of",
             10,
-            """<span class="form-of-definition"><i class="None mention" lang="ko">[[전화#한국어|전화]]</i> <span class="mention-gloss-paren annotation-paren">(</span><span class="mention-gloss-double-quote">“</span><span class="mention-gloss">전화기로 말을 주고받는 일</span><span class="mention-gloss-double-quote">”</span><span class="mention-gloss-paren annotation-paren">)</span>의 [[한자#한국어|한자]] 형태.</span>""",
+            """<span class="form-of-definition"><i class="None mention" lang="ko">[[전화#한국어|전화]]</i> <span class="mention-gloss-paren annotation-paren">(</span><span class="mention-gloss-double-quote">“</span><span class="mention-gloss">전화기로 말을 주고받는 일</span><span class="mention-gloss-double-quote">”</span><span class="mention-gloss-paren annotation-paren">)</span>[[Category:한국어 비표준 문자가 포함된 낱말 (링크)|電話]]의 [[한자#한국어|한자]] 형태.</span>""",
         )
-
         data = parse_page(
             self.wxr,
             "電話",
@@ -109,9 +108,31 @@ class TestKoGloss(TestCase):
         self.assertEqual(
             data[0]["senses"][0],
             {
-                # "categories": ["한국어 비표준 문자가 포함된 낱말 (링크)"],
+                "categories": ["한국어 비표준 문자가 포함된 낱말 (링크)"],
                 "form_of": [{"word": "전화"}],
                 "tags": ["form-of"],
                 "glosses": ["전화 (“전화기로 말을 주고받는 일”)의 한자 형태."],
+            },
+        )
+
+    def test_label_template(self):
+        self.wxr.wtp.add_page(
+            "틀:라벨",
+            10,
+            """<span class="usage-label-sense"><span class="ib-brac">(</span><span class="ib-content">[[부록:용어사전#잘 쓰이지 않는 표현과 그 정도|고어]][[Category:한국어 고어|열다]]<span class="ib-comma">,</span>&#32;[[부록:용어사전#자동사|자동사]][[Category:한국어 자동사|열다]]</span><span class="ib-brac">)</span></span>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "열다",
+            """== 한국어 ==
+=== 명사 ===
+# {{라벨|ko|고어|자동사}} [[열매가 맺히다]]""",
+        )
+        self.assertEqual(
+            data[0]["senses"][0],
+            {
+                "categories": ["한국어 고어", "한국어 자동사"],
+                "tags": ["archaic", "intransitive"],
+                "glosses": ["열매가 맺히다"],
             },
         )

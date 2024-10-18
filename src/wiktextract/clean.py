@@ -1521,7 +1521,7 @@ def clean_value(
     # XXX "Category" -> config variable for portability
     category_ns_data = wxr.wtp.NAMESPACE_DATA.get("Category", {})  # type: ignore[typeddict-item]
     # Fail if we received empty dict from .get()
-    category_ns_names = {category_ns_data["name"]} | set(
+    category_ns_names = {"Category", category_ns_data["name"]} | set(
         category_ns_data["aliases"]
     )
     category_names_pattern = rf"(?:{'|'.join(category_ns_names)})"
