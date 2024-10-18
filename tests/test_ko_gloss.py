@@ -31,6 +31,16 @@ class TestKoGloss(TestCase):
 * '''1.''' [[우리]].""",
         )
         self.assertEqual(data[0]["senses"], [{"glosses": ["우리."]}])
+        data = parse_page(
+            self.wxr,
+            "보다",
+            """== 한국어 ==
+=== 동사 ===
+* '''1-1.''' 눈으로 무엇을 알아차리다.""",
+        )
+        self.assertEqual(
+            data[0]["senses"], [{"glosses": ["눈으로 무엇을 알아차리다."]}]
+        )
 
     def test_no_pos_section(self):
         data = parse_page(
@@ -80,4 +90,28 @@ class TestKoGloss(TestCase):
         self.assertEqual(
             data[0]["senses"][0]["note"],
             "특정 업계에서는 'ea'란 표현을 쓰기도 한다.",
+        )
+
+    def test_form_of_template(self):
+        self.wxr.wtp.add_page(
+            "틀:ko-hanja form of",
+            10,
+            """<span class="form-of-definition"><i class="None mention" lang="ko">[[전화#한국어|전화]]</i> <span class="mention-gloss-paren annotation-paren">(</span><span class="mention-gloss-double-quote">“</span><span class="mention-gloss">전화기로 말을 주고받는 일</span><span class="mention-gloss-double-quote">”</span><span class="mention-gloss-paren annotation-paren">)</span>의 [[한자#한국어|한자]] 형태.</span>""",
+        )
+
+        data = parse_page(
+            self.wxr,
+            "電話",
+            """== 한국어 ==
+=== 명사 ===
+# {{ko-hanja form of|전화|전화기로 말을 주고받는 일}}""",
+        )
+        self.assertEqual(
+            data[0]["senses"][0],
+            {
+                # "categories": ["한국어 비표준 문자가 포함된 낱말 (링크)"],
+                "form_of": [{"word": "전화"}],
+                "tags": ["form-of"],
+                "glosses": ["전화 (“전화기로 말을 주고받는 일”)의 한자 형태."],
+            },
         )

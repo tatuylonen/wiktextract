@@ -22,7 +22,9 @@ def extract_example_list_item(
         elif isinstance(node, TemplateNode) and node.template_name.startswith(
             ("따옴", "지봉유설")
         ):
-            example.ref = clean_node(wxr, None, node).strip("() ")
+            example.ref = (
+                clean_node(wxr, None, node).strip("() ").removeprefix("따옴◄")
+            )
         elif isinstance(node, TemplateNode) and node.template_name in [
             "예문",
             "ux",

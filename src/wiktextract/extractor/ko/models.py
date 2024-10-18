@@ -23,6 +23,10 @@ class Example(KoreanBaseModel):
     note: str = ""
 
 
+class AltForm(KoreanBaseModel):
+    word: str
+
+
 class Sense(KoreanBaseModel):
     glosses: list[str] = []
     tags: list[str] = []
@@ -31,6 +35,7 @@ class Sense(KoreanBaseModel):
     categories: list[str] = []
     examples: list[Example] = []
     note: str = ""
+    form_of: list[AltForm] = []
 
 
 class Sound(KoreanBaseModel):
@@ -52,6 +57,9 @@ class Sound(KoreanBaseModel):
 class Linkage(KoreanBaseModel):
     word: str
     sense: str = ""
+    roman: str = ""
+    raw_tags: list[str] = []
+    tags: list[str] = []
 
 
 class Translation(KoreanBaseModel):
