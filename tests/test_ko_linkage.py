@@ -84,5 +84,9 @@ class TestKoLinkage(TestCase):
         )
         self.assertEqual(
             data[0]["senses"][0]["examples"],
-            [{"text": "한글은 창제 당시 총 28개의 자모가 있었지만 지금은 24개만 사용한다."}]
+            [
+                {
+                    "text": "한글은 창제 당시 총 28개의 자모가 있었지만 지금은 24개만 사용한다."
+                }
+            ],
         )

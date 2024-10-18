@@ -31,6 +31,16 @@ class TestKoGloss(TestCase):
 * '''1.''' [[우리]].""",
         )
         self.assertEqual(data[0]["senses"], [{"glosses": ["우리."]}])
+        data = parse_page(
+            self.wxr,
+            "보다",
+            """== 한국어 ==
+=== 동사 ===
+* '''1-1.''' 눈으로 무엇을 알아차리다.""",
+        )
+        self.assertEqual(
+            data[0]["senses"], [{"glosses": ["눈으로 무엇을 알아차리다."]}]
+        )
 
     def test_no_pos_section(self):
         data = parse_page(

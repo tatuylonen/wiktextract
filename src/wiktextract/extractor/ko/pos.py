@@ -100,7 +100,7 @@ def extract_unorderd_list_item(
             # `* '''1.''' gloss text`, terrible obsolete layout
             is_first_bold = False
             bold_text = clean_node(wxr, None, node)
-            if re.fullmatch(r"\d+\.?", bold_text):
+            if re.fullmatch(r"\d+(?:-\d+)?\.?", bold_text):
                 new_list_item = WikiNode(NodeKind.LIST_ITEM, 0)
                 new_list_item.children = list_item.children[index + 1 :]
                 extract_gloss_list_item(wxr, word_entry, new_list_item)
