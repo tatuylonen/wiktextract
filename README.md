@@ -2,64 +2,58 @@
 
 This is a utility and Python package for extracting data from Wiktionary.
 
-*2024-04-24: Kaikki.org raw download files with newline-separated json
-  object data will be changed at some point in the future to use the
-  suffix `.jsonl` for clarity. This will break download links, so please
-  be aware. For more about `.jsonl`, please see https://jsonlines.org/*
-
-*2024-06-24: The above change has now been committed, and if the kaikki.org
-  html generation process succeeds we should see changes soon.* 
-
 Please report issues on github and we'll try to address them reasonably
 soon.
 
-The current extracted version is available for browsing and download
-at: [https://kaikki.org/dictionary/](http://kaikki.org/dictionary/).
-I plan to maintain an automatically updating version of the data at
-this location.  For most people the preferred way to get the extracted
+The current extracted versions of a few Wiktionary editions are available for
+browsing and download at: [https://kaikki.org/dictionary/](http://kaikki.org/
+dictionary/). We plan to maintain an automatically updating version of the
+data at this location.  For most people the preferred way to get the extracted
 Wiktionary data will be to just take it from the web site.
 
 Note: extracting all data for all languages from the English
 Wiktionary may take from an hour to several days, depending
 on your computer.  Expanding Lua modules is not cheap, but it enables
 superior extraction quality and maintainability! You may want to look
-at the pre-expanded downloads instead of running it yourself.
+at the data downloads instead of running it yourself.
 
 ## Overview
 
-This is a Python package and tool for extracting information from
-English Wiktionary (enwiktionary) data dumps.  Note that the English
-Wiktionary contains extensive dictionaries and inflectional
-information for many languages, not just English.  Only its glosses
-and internal tagging are in English.
+This is a Python package and tool for extracting information from various
+Wiktionary data dumps, most notably and completely the English edition
+(enwiktionary).  Note that an edition of Wiktionary contains extensive
+dictionaries and inflectional information for many languages, not just the
+language it has been written in.
 
-One thing that distinguishes this tool from any system I'm aware of is
+One thing that distinguishes this tool from any system we're aware of is
 that this tool expands templates and Lua macros in Wiktionary.  That
 enables much more accurate rendering and extraction of glosses, word
 senses, inflected forms, and pronunciations.  It also makes the system
 much easier to maintain.  All this results in much higher extraction
 quality and accuracy.
 
-This tool extracts glosses, parts-of-speech, declension/conjugation
-information when available, translations for all languages when
-available, pronunciations (including audio file links), qualifiers
-including usage notes, word forms, links between words including
+The English edition extraction 'module' extracts glosses, parts-of-speech,
+declension/conjugation information when available, translations for all
+languages when available, pronunciations (including audio file links),
+qualifiers including usage notes, word forms, links between words including
 hypernyms, hyponyms, holonyms, meronyms, related words, derived terms,
 compounds, alternative forms, etc.  Links to Wikipedia pages, Wikidata
-identifiers, and other such data are also extracted when available.
-For many classes of words, a word sense is annotated with specific
-information such as what word it is a form of, what is the RGB value
-of the color it represents, what is the numeric value of a number,
-what SI unit it represents, etc.
+identifiers, and other such data are also extracted when available. For many
+classes of words, a word sense is annotated with specific information such as
+what word it is a form of, what is the RGB value of the color it represents,
+what is the numeric value of a number, what SI unit it represents, etc.
+
+Other editions are less complete (or the Wiktionary edition itself doesn't
+necessarily have the same width of data), but we try to cover the basics.
 
 This tool extracts information for all languages that have data in the
-English wiktionary.  It also extracts translingual data and
+wiktionary edition.  It also extracts translingual data and
 information about characters (anything that has an entry in Wiktionary).
 
-This tool reads the ``enwiktionary-<date>-pages-articles.xml.bz2``
-dump file and outputs JSON-format dictionaries containing most of the
-information in Wiktionary.  The dump files can be downloaded from
-https://dumps.wikimedia.org.
+This tool reads a ``<language-code>wiktionary-<date>-pages-articles.xml.bz2``
+dump file and outputs JSONL-format (json objects separated with newlines)
+dictionaries containing most of the information in Wiktionary.  The dump files
+can be downloaded from https:// dumps.wikimedia.org.
 
 This utility will be useful for many natural language processing,
 semantic parsing, machine translation, and language generation
@@ -73,20 +67,11 @@ available for the target language).  Dozens of languages have
 extensive vocabulary in ``enwiktionary``, and several thousand
 languages have partial coverage.
 
-The ``wiktwords`` script makes extracting the information for use by
-other tools trivial without writing a single line of code.  It
-extracts the information specified by command options for languages
-specified on the command line, and writes the extracted data to a file
-or standard output in JSON format for processing by other tools.
-
-While there are currently no active plans to support parsing
-non-English wiktionaries, I'm considering it.  Now that this builds on
-[wikitextprocessor](https://github.com/tatuylonen/wikitextprocessor/)
-and expands templates and Lua macros, it would be fairly
-straightforward to build support for other languages too - and even
-make the extraction configurable so that only a configuration file
-would need to be created for processing a Wiktionary in a new
-language.
+The ``wiktwords`` script makes extracting the information for use by other tools
+trivial without writing a single line of code.  It extracts the information
+specified by command options for languages specified on the command line, and
+writes the extracted data to a file or standard output in JSONL format (json
+objects separated with newlines) for processing by other tools.
 
 As far as we know, this is the most comprehensive tool available for
 extracting information from Wiktionary as of December 2020.
@@ -126,7 +111,7 @@ import json
 with open("filename.json", encoding="utf-8") as f:
     for line in f:
         data = json.loads(line)
-        ... parse the data in this record
+        ... # parse the data in this record
 ```
 
 If you want to collect all the data into a list, you can read the file
@@ -342,10 +327,6 @@ To run the tests, use the following command in the top-level directory:
 make test
 ```
 
-(Unfortunately the test suite for ``wiktextract`` is not yet very
-comprehensive.  The underlying lower-level toolkit,
-``wikitextprocessor``, has much more extensive test coverage.)
-
 ### Expected performance
 
 Extracting all data for all languages from English Wiktionary takes
@@ -353,6 +334,8 @@ about 1.25 hours on a 128-core dual AMD EPYC 7702 system.  The
 performance is expected to be approximately linear with the number of
 processor cores, provided you have enough memory (about 10GB/core or
 5GB/hyperthread recommended).
+
+As the extractor expands, these times will change.
 
 You can control the number of parallel processes to use with the
 `--num-processes` option; the default is to use the number of
@@ -401,6 +384,7 @@ The following command-line options can be used to control its operation:
 * --language-code LANGUAGE_CODE: extracts the given language (this option may be specified multiple times; defaults to dump file language code and `mul`(Translingual))
 * --language-name LANGUAGE_NAME: Similar to `--language-code` except this option accepts language name
 * --dump-file-language-code LANGUAGE_CODE: specifies the language code for the Wiktionary edition that the dump file is for (defaults to "en"; "zh" is supported and others are being added)
+* --skip-extraction: Used to create a database file from the dump file without waiting for the extraction process to complete.
 * --all: causes all data to be captured for the selected languages
 * --translations: causes translations to be captured
 * --pronunciation: causes pronunciation information to be captured
@@ -416,7 +400,7 @@ The following command-line options can be used to control its operation:
 * --num-processes PROCESSES: use this many parallel processes (needs 4GB/process)
 * --human-readable: print human-readable JSON with indentation (no longer
 machine-readable)
-* --override PATH: override pages with files in this directory(first line of the file must be TITLE: pagetitle)
+* --override PATH: override pages with files in this directory (first line of the file must be TITLE: pagetitle)
 * --templates-file: extract Template namespace to this tar file
 * --modules-file: extract Module namespace to this tar file
 * --categories-file: extract Wiktionary category tree into this file as JSON (see description below)
@@ -501,7 +485,7 @@ words and redirects found in the Wiktionary dump.  ``data`` is
 information about a single word and part-of-speech as a dictionary and
 may include several word senses.  It may also be a redirect (indicated
 by the presence of a "redirect" key in the dictionary).  It is in the same
-format as the JSON-formatted dictionaries returned by the
+format as the JSONL-formatted dictionaries returned by the
 ``wiktwords`` tool.
 
 Its arguments are as follows:
@@ -520,9 +504,9 @@ Its arguments are as follows:
   be created but no extraction will take place.  In this case the ``Wtp``
   constructor should probably be given the ``db_path`` argument when
   creating ``wxr.wtp``.
-* `namespace_ids` - a set of namespace ids, pages have namespace ids that not
-  included in this set won't be processed. Avaliable id values can be
-  found in wikitextprocessor project's [data/en/namespaces.json](https://github.com/tatuylonen/wikitextprocessor/blob/main/wikitextprocessor/data/en/namespaces.json)
+* `namespace_ids` - a set of namespace ids, pages with namespace ids that
+  are not included in this set won't be processed. Avaliable id values can
+  be found in wikitextprocessor project's [data/en/namespaces.json](https://github.com/tatuylonen/wikitextprocessor/blob/main/wikitextprocessor/data/en/namespaces.json) 
   file and the Wiktionary *.xml.bz2 dump file.
 * `out_f` - output file object.
 * `human_readable` - if set to `True`, the output JSON will be formatted with indentation.
@@ -579,7 +563,8 @@ or
 wxr = WiktextractContext(wtp, config)
 ```
 
-if it is more convenient
+if it is more convenient.
+
 ### class WiktionaryConfig(object)
 
 The ``WiktionaryConfig`` object is used for specifying what data to collect
@@ -684,17 +669,6 @@ following keys (others may also be present or added later):
 * ``inflection_templates`` - conjugation and declension templates found for the word, as dictionaries.  These basically capture the language-specific inflection template for the word.  Note that for some languages inflection information is also contained in ``head_templates``.  XXX in the very near future, we will start parsing inflections from the inflection tables into ``forms``, so there is usually no need to use the ``inflection_templates`` data.
 
 There may also be other fields.
-
-Note that several of the field on the word entry level indicate
-information that has not been sense-disambiguated.  Such information
-may apply to one or more of the senses.  Currently only the most
-trivial cases are disambiguated; however, it is anticipated that more
-disambiguation may be performed in the future.  It is also possible
-for the same key to be provided in a sense and in the word entry; in
-that case, the data in the sense has been sense-disambiguated and the
-data in the word entry has not (and may not be apply to any particular
-sense, regardless of whether the sense has some related
-sense-disambiguated information).
 
 ### Word senses
 
