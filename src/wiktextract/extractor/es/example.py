@@ -42,6 +42,11 @@ def process_ejemplo_template(
         elif "ref" == span_class:
             example_data.ref = clean_node(wxr, None, span_tag)
 
+    if len(example_data.text) == 0:
+        example_data.text = clean_node(
+            wxr, None, template_node.template_parameters.get(1, "")
+        )
+
     if len(example_data.text) > 0:
         template_data = TemplateData(
             expansion=clean_node(wxr, None, expanded_template)

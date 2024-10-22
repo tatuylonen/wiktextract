@@ -170,3 +170,17 @@ class TestESExample(unittest.TestCase):
                 }
             ],
         )
+
+    def test_ejemplo_no_ref(self):
+        self.wxr.wtp.start_page("read")
+        self.wxr.wtp.add_page(
+            "Plantilla:ejemplo",
+            10,
+            ":*'''Ejemplo:''' Do you read me?",
+        )
+        root = self.wxr.wtp.parse("{{ejemplo|Do you read me?}}")
+        sense_data = Sense()
+        extract_example(self.wxr, sense_data, root.children)
+        dump_data = sense_data.model_dump(exclude_defaults=True)["examples"]
+        del dump_data[0]["example_templates"]
+        self.assertEqual(dump_data, [{"text": "Do you read me?"}])
