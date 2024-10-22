@@ -13,8 +13,15 @@ GLOSS_TAGS = {
     "verouderd": "obsolete",  # Sjabloon:verouderd
 }
 
+TABLE_TAGS = {
+    # Sjabloon:-nlnoun-
+    "enkelvoud": "singular",
+    "meervoud": "plural",
+    "verkleinwoord": "diminutive",
+}
 
-TAGS = {**VERB_TAGS, **GLOSS_TAGS}
+
+TAGS = {**VERB_TAGS, **GLOSS_TAGS, **TABLE_TAGS}
 
 # https://nl.wiktionary.org/wiki/Categorie:WikiWoordenboek:Contextlabels
 TOPICS = {"anatomie": "anatomy"}

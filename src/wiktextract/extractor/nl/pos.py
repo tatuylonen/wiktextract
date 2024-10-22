@@ -18,6 +18,7 @@ def extract_pos_section(
     wxr: WiktextractContext,
     page_data: list[WordEntry],
     base_data: WordEntry,
+    forms_data: WordEntry,
     level_node: LevelNode,
     pos_title: str,
 ) -> None:
@@ -26,6 +27,14 @@ def extract_pos_section(
     pos_data = POS_DATA[pos_title]
     page_data[-1].pos = pos_data["pos"]
     page_data[-1].tags.extend(pos_data.get("tags", []))
+    if forms_data.pos == "unknown":
+        forms_data.pos = page_data[-1].pos
+    if forms_data.pos == page_data[-1].pos:
+        page_data[-1].forms.extend(forms_data.forms)
+        page_data[-1].categories.extend(forms_data.categories)
+    else:
+        forms_data.forms.clear()
+        forms_data.categories.clear()
     extract_pos_section_nodes(wxr, page_data, level_node)
 
 

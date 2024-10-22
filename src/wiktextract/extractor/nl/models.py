@@ -79,6 +79,8 @@ class Etymology(DutchBaseModel):
 class Form(DutchBaseModel):
     form: str = ""
     note: str = ""
+    tags: list[str] = []
+    raw_tags: list[str] = []
 
 
 class Descendant(DutchBaseModel):
