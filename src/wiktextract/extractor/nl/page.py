@@ -12,6 +12,7 @@ from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .descendant import extract_descendant_section
 from .etymology import extract_etymology_section
+from .inflection import extract_inflection_template
 from .linkage import extract_fixed_preposition_section, extract_linkage_section
 from .models import Etymology, Sense, WordEntry
 from .pos import extract_pos_section
@@ -32,6 +33,7 @@ def parse_section(
     wxr: WiktextractContext,
     page_data: list[WordEntry],
     base_data: WordEntry,
+    forms_data: WordEntry,
     level_node: WikiNode,
 ) -> list[Etymology]:
     # title templates
@@ -40,7 +42,9 @@ def parse_section(
     wxr.wtp.start_subsection(title_text)
     etymology_data = []
     if title_text in POS_DATA:
-        extract_pos_section(wxr, page_data, base_data, level_node, title_text)
+        extract_pos_section(
+            wxr, page_data, base_data, forms_data, level_node, title_text
+        )
     elif title_text == "Uitspraak":
         extract_sound_section(
             wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
@@ -93,10 +97,12 @@ def parse_section(
         wxr.wtp.debug(f"unknown title: {title_text}", sortid="nl/page/60")
 
     for next_level in level_node.find_child(LEVEL_KIND_FLAGS):
-        parse_section(wxr, page_data, base_data, next_level)
+        parse_section(wxr, page_data, base_data, forms_data, next_level)
     extract_section_categories(
         wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
     )
+    for t_node in level_node.find_child(NodeKind.TEMPLATE):
+        extract_inflection_template(wxr, forms_data, t_node)
     return etymology_data
 
 
@@ -107,6 +113,8 @@ def parse_page(
     # https://nl.wiktionary.org/wiki/WikiWoordenboek:Stramien
     # language templates
     # https://nl.wiktionary.org/wiki/Categorie:Hoofdtaalsjablonen
+    if page_title.endswith("/vervoeging"):
+        return []  # skip conjugation pages
     wxr.wtp.start_page(page_title)
     tree = wxr.wtp.parse(page_text, pre_expand=True)
     page_data: list[WordEntry] = []
@@ -127,11 +135,12 @@ def parse_page(
             lang=lang_name,
             pos="unknown",
         )
+        forms_data = base_data.model_copy(deep=True)
         extract_section_categories(wxr, base_data, level2_node)
         etymology_data = []
         for next_level_node in level2_node.find_child(LEVEL_KIND_FLAGS):
             new_e_data = parse_section(
-                wxr, page_data, base_data, next_level_node
+                wxr, page_data, base_data, forms_data, next_level_node
             )
             if len(new_e_data) > 0:
                 etymology_data = new_e_data
