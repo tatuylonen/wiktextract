@@ -1,12 +1,14 @@
-from mediawiki_langcodes import name_to_code  # Thanks for xxyzz!
+import re
+
+from mediawiki_langcodes import code_to_name, name_to_code
 
 # NodeKind is an internal enum for WikiNode and subclasses that specifies
 # what kind of WikiNode it is. Subclasses also have the field, but it's
 # always NodeKind.TEMPLATE for TemplateNodes etc.
-from wikitextprocessor.parser import LEVEL_KIND_FLAGS  # , print_tree
+from wikitextprocessor.parser import LEVEL_KIND_FLAGS, NodeKind, WikiNode
 
 # Clean node takes a WikiNode+strings node or tree and gives you a cleanish text
-from wiktextract.page import clean_node
+from wiktextract.page import clean_node, clean_value
 
 # The main context object to more easily share state of parsing between
 # functions. Contains WiktextractContext.wtp, which is the context for
@@ -20,114 +22,56 @@ from wiktextract.wxr_logging import logger
 
 from .etymology import process_etym
 from .models import WordEntry
+from .parse_utils import (
+    POSReturns,
+    find_sections,
+    parse_lower_heading,
+    strip_accents,
+)
 from .pos import process_pos
-from .section_titles import POS_HEADINGS
-from .text_utils import ENDING_NUMBER_RE
+from .pronunciation import process_pron
+from .section_titles import (
+    Heading,
+    Tags,
+)
 
-# ===========================
-# EXTRACTOR STARTING TEMPLATE
-# MAIN ENTRY TO EXTRACTOR
-# =======================
-
-# Every extractor has a subfolder in src/wiktextract/extractor that contains
-# meta-data, config files and source code for that particular extractor. The
-# main Wiktextract code calls these modules by loading them dynamically using
-# importlib, then calls parse_page(); this is the main entry point for your
-# extractor.
-
-# WordEntry is a Pydantic model (or just a dict in the original English
-# extractor) that will eventually be outputted as a json object; each
-# entry is, in general, either a redirect page (which you do not have to
-# worry about) or a Part of Speech section's data. If a word has a `Noun`
-# section and an `Adjective` section, they're processed into different entries;
-# different Etymologies are also separate and can have several entries within
-# them.
-
-# WordEntries are composed of smaller data sections, like lists of Senses,
-# Sounds and Etymology data. Your extractor does not need to handle everything,
-# and there is rarely any need to add new fields (because often they already
-# exist in the English extractor), but it is possible to add them if needed;
-# please check first with an issue to keep everyone in synch.
-
-# To see an actually working extractor with relatively simple code, take a look
-# at src/wiktextract/extractor/simple/ for the Simple English Wiktionary
-# extractor. This template, and its comments, is partially built on that, so
-# some of it might seem repetitive, but the SEW extractor has more specific
-# examples of things that could be needed in an extractor.
+# from .text_utils import ENDING_NUMBER_RE
 
 
 def parse_page(
     wxr: WiktextractContext, page_title: str, page_text: str
 ) -> list[dict[str, WordEntry]]:
-    """Parse __EXAMPLE_TEMPLATE__ Wiktionary page."""
+    """Parse Greek Wiktionary (el.wiktionary.org) page."""
 
     if wxr.config.verbose:
         logger.info(f"Parsing page: {page_title}")
 
-    # In a larger edition, we might need to handle more complex titles that have
-    # been changed due to the restrictions of WikiMedia article names.
     wxr.config.word = page_title
     wxr.wtp.start_page(page_title)
 
-    #####  Debug printing in early stages #####
-    # Temporary debug print stuff without page parsing went into debug_bypass.
-    # If you're running a full extraction to find data, multiprocessing
-    # *will* sometimes mess up your prints by overlaying some prints
-    # with others. For quick and dirty stuff this might not matter; but if
-    # you really want to be sure to get good prints you need to use
-    # something like the logging package, which here is represented by
-    # `logger`; the only annoyance is that it's not easy to get rid of
-    # the datetime string at the start on the fly, so I just do it crudely
-    # by inserting a `\n` in the message after `f"{wxr.wtp.title}..."`.
+    parts = []
+    parts.append(page_title)
 
     # from .debug_bypass import debug_bypass
     # return debug_bypass(wxr, page_title, page_text)
 
-    #####
-
-    ##### Main page parse #####
-    # `Wtp.parse()` (Wtp being the main context class of Wikitextprocessor
-    # imbedded into the Wiktextract context object) takes wikitext and
-    # returns a tree of parsed nodes: strings and WikiNodes.
-
-    # `Wtp.parse()` always returns a `NodeKind.ROOT` node, which has as its
-    # children everything else that was parsed from the string.
+    if page_title.startswith("Πύλη:"):
+        return []
 
     page_root = wxr.wtp.parse(
         page_text,
     )
 
     # print_tree(page_root)  # WikiNode tree pretty printer
-
-    # This is our return list. Each page will return a list Part-of-speech
-    # word entries that are just collected into one big list and eventually
-    # concatenated as a JSONL file. No hierarchies between words, just a flat
-    # list.
     word_datas: list[WordEntry] = []
 
-    # TIP:
-    # It is good to keep in mind for the parse-tree: things like headings
-    # (nodes with NodeKind.LEVEL) will consume the rest of the document
-    # so that everything after them is a child node of that level, until
-    # the next heading comes along; this is the same for lists inside lists,
-    # etc.
-    # This means that you can get the "immediate" contents of a heading, or
-    # the root node, by finding all child nodes that appear before another
-    # heading of the same level.
-
-    stuff_outside_main_headings = page_root.invert_find_child(LEVEL_KIND_FLAGS)
+    # stuff_outside_main_headings = page_root.invert_find_child(
+    #                                                         LEVEL_KIND_FLAGS)
 
     # Handle stuff at the very top of the page
-    for thing_node in stuff_outside_main_headings:
-        ...
+    # for thing_node in stuff_outside_main_headings:
+    #     ...
 
-    # Usually in most Wiktionary editions this is where where you split the page
-    # into different language entries; "English", "Gaelic", "Swahili", etc.
-    # Each section would be a Level 2 node (`NodeKind.LEVEL2`) child of the
-    # page's root node. Wiktionaries do not seem to use LEVEL1 for anything,
-    # although there might be (there definitely is...) an exception somewhere.
-    # LEVEL_KIND_FLAGS is an enum union for all NodeKind.LEVEL:s. We hope we
-    # only get LEVEL2s at the the top level.
     for level in page_root.find_child(LEVEL_KIND_FLAGS):
         # Contents of the heading itself; should be "Languagename".
         # clean_node() is the general purpose WikiNode/string -> string
@@ -135,8 +79,27 @@ def parse_page(
         # the output of wikitext when possible.
         # == English ==  # <- This part
         # === Noun ===
-        lang_name = clean_node(wxr, None, level.largs)
-        lang_code = name_to_code(lang_name, "__EXAMPLE_LANG_CODE__")
+        lang_name, lang_code, ok = parse_language_name(
+            wxr, clean_node(wxr, None, level.largs).strip()
+        )
+
+        section_num = -1
+
+        # print("=====")
+        # print(f"{level=}\n => {clean_node(wxr, None, level.largs).strip()}")
+
+        if not ok:
+            if level.kind not in (NodeKind.LEVEL1, NodeKind.LEVEL2):
+                # We tried to parse a lower level as a language because it
+                # was a direct child of root and failed, so let's just ignore
+                # it and not print a warning.
+                continue
+            wxr.wtp.warning(
+                f"Can't parse language header: '{lang_name}'; "
+                "skipping section",
+                sortid="page/111",
+            )
+            continue
 
         base_data = WordEntry(
             word=page_title,
@@ -145,59 +108,212 @@ def parse_page(
             pos="ERROR_UNKNOWN_POS",
         )
 
-        ##### Looping over sections #####
-        # Each wiktionary has its own standards and lack of standards. Usually,
-        # an article is made out of Level 2 Language headings, under which we
-        # have more specific headings, like Etymology sections that contain
-        # Parts of Speech sections or POS sections if not etymology is provided
-        # (etym sections usually Level 3, POS usually Level 4 ("====").
-        # YMMV! For an example of something quite different, take a look at the
-        # Simple English Wiktionary code.
-        for level_etym in level.find_child(LEVEL_KIND_FLAGS):
-            heading_title = (
-                clean_node(wxr, None, level_etym.largs[0]).lower().strip()
-            )
-            # print(f"=== {heading_title=}")
+        # XXX Some tables are put directly into the language level's content
+        # Separate content and sublevels, parse content and put in base_data
 
-            # Sometimes headings have a number at the end ("Etymology 2", "Noun
-            # 2")
-            if m := ENDING_NUMBER_RE.search(heading_title):
-                heading_num = int(m.group(0).strip())
-                heading_title = heading_title[: m.start()]
-            else:
-                heading_num = -1  # default: see models.py/Sense
-
-            new_data: list[WordEntry] = []
-            if heading_title.startswith(("etymology",)):
-                # USUALLY this is a LEVEL 3 node with Part of speech headings
-                # inside of it. The template assumes if there is an Etym section
-                # then it has POS sections inside of it.
-                etym_data = base_data.model_copy(deep=True)
-                new_data = process_etym(
-                    wxr,
-                    etym_data,
-                    level_etym,
-                    heading_title,
-                    heading_num,
+        for sublevel in level.find_child(LEVEL_KIND_FLAGS):
+            if len(sublevel.largs) == 0:
+                wxr.wtp.debug(
+                    f"Sublevel without .largs: {sublevel=}", sortid="page/92"
                 )
-            elif heading_title in POS_HEADINGS:
-                pos_data = base_data.model_copy(deep=True)
-                # Assume we'll get only one WordEntry or nothing.
+                continue
+
+            heading_title = (
+                clean_node(wxr, None, sublevel.largs[0]).lower().strip()
+            )
+
+            type, heading_name, tags, num, ok = parse_lower_heading(
+                wxr, heading_title
+            )
+
+            section_num = num if num > section_num else section_num
+
+            if not ok:
+                wxr.wtp.warning(
+                    f"Sub-language heading '{heading_title}' couldn't be "
+                    f"be parsed as a heading; "
+                    f"{type=}, {heading_name=}, {tags=}.",
+                    sortid="page/103/20241112",
+                )
+                continue
+
+            if type in (Heading.Err, Heading.Ignored):
+                continue
+            ## TEMP
+
+            found_pos_sections: POSReturns = []
+
+            if type is Heading.Etym:
+                # Update base_data with etymology and maybe sound data.
+                # Return any sublevels in the etymology section
+                # so that we can check for POS sections.
+                num, etym_sublevels = process_etym(
+                    wxr, base_data, sublevel, heading_name, section_num
+                )
+
+                section_num = num if num > section_num else section_num
+
+                found_pos_sections.extend(etym_sublevels)
+
+                # ...
+                # text = clean_node(wxr, None, sublevel)
+                # text = wxr.wtp.node_to_wikitext(sublevel)
+                # if "\n=" in text:
+                #     text = "£ " + "\n£ ".join(text.splitlines())
+                #     logger.warning(f"£ {wxr.wtp.title}\n" + text)
+
+                # PRINTS HERE
+
+            # continue
+
+            ## /TEMP
+
+            # Typical pronunciation section that applies to the whole
+            # entry
+            if type == Heading.Pron:
+                # Update base_data with sound and hyphenation data.
+                # Return any sublevels in the pronunciation section
+                # so that we can check for POS sections.
+                num, pron_sublevels = process_pron(
+                    wxr, sublevel, base_data, section_num
+                )
+
+                section_num = num if num > section_num else section_num
+
+                found_pos_sections.extend(pron_sublevels)
+
+            if type is Heading.POS:
+                found_pos_sections.append(
+                    (
+                        heading_name,
+                        tags,
+                        section_num,
+                        sublevel,
+                        base_data.copy(deep=True),
+                    )
+                )
+
+            #################################################
+            # Finally handle all POS sections we've extracted
+            for (
+                heading_name,
+                tags,
+                num,
+                pos_section,
+                pos_base_data,
+            ) in found_pos_sections:
                 if (
-                    nd := process_pos(
-                        wxr, level, pos_data, heading_title, heading_num
+                    pos_ret := process_pos(
+                        wxr,
+                        sublevel,
+                        pos_base_data.model_copy(deep=True),
+                        heading_name,  # heading_name is the English pos
+                        tags,
+                        num,
                     )
                 ) is not None:
-                    new_data.append(nd)
-            else:
-                ...
-            if new_data is not None:
-                # new_data would be one WordEntry object, for one Part of
-                # Speech section ("Noun", "Verb"); this is generally how we
-                # want it.
-                word_datas.extend(new_data)
+                    word_datas.append(pos_ret)
+                else:
+                    wxr.wtp.error(
+                        f"Couldn't parse PoS section {heading_name}",
+                        sortid="page.py/20250110",
+                    )
 
+            # new_data: list[WordEntry] = []
+            # if heading_title.startswith(("etymology",)):
+            #   #  USUALLY this is a LEVEL 3 node with Part of speech headings
+            #   # inside of it. The template assumes if there is an Etym section
+            #   # then it has POS sections inside of it.
+            #     etym_data = base_data.model_copy(deep=True)
+            #     new_data = process_etym(
+            #         wxr,
+            #         etym_data,
+            #         level_three,
+            #         heading_title,
+            #         heading_num,
+            #     )
+            # elif heading_title in POS_HEADINGS:
+            #     pos_data = base_data.model_copy(deep=True)
+            #     # Assume we'll get only one WordEntry or nothing.
+            #     if (
+            #         nd := process_pos(
+            #             wxr, level, pos_data, heading_title, heading_num
+            #         )
+            #     ) is not None:
+            #         new_data.append(nd)
+            # else:
+            #     ...
+            # if new_data is not None:
+            #     # new_data would be one WordEntry object, for one Part of
+            #     # Speech section ("Noun", "Verb"); this is generally how we
+            #     # want it.
+            #     word_datas.extend(new_data)
+
+    # logger.info("%%" + "\n%%".join(parts))
     # Transform pydantic objects to normal dicts so that the old code can
     # handle them.
     return [wd.model_dump(exclude_defaults=True) for wd in word_datas]
     # return [base_data.model_dump(exclude_defaults=True)]
+
+
+LANGUAGE_HEADINGS_RE = re.compile(r"([\w\s]+)\(([-\w]+)\)")
+
+IRREGULAR_LANGUAGE_HEADINGS = {
+    "διαγλωσσικοί όροι": {"name": "Translingual", "code": "mul"},
+    "διεθνείς όροι": {"name": "Translingual", "code": "mul"},
+    "νέα ελληνικά (el)": {"code": "el"},
+    "μεσαιωνικά ελληνικά (gkm)": {"name": "Medieval Greek", "code": "gkm"},
+    "μεσαιωνικά ελληνικά": {"name": "Medieval Greek", "code": "gkm"},
+    "αρωμουνικά (βλάχικα) (roa-rup)": {"code": "roa-rup"},
+    "κρητικά (el-crt)": {"code": "el-crt", "name": "Cretan Greek"},
+    "κυπριακά (el-cyp)": {"code": "el-cyp", "name": "Cypriot Greek"},
+    "χαρακτήρας unicode": {"code": "mul", "name": "Translingual"},
+    # "": {"code": ""},
+}
+
+
+def parse_language_name(
+    wxr: WiktextractContext, lang_heading: str
+) -> tuple[str, str, bool]:
+    lang_heading = lang_heading.strip()
+    irregulars = IRREGULAR_LANGUAGE_HEADINGS.get(lang_heading.lower(), None)
+    if irregulars is not None:
+        return (
+            irregulars.get("name") or code_to_name(irregulars["code"], "en"),
+            irregulars["code"],
+            True,
+        )
+
+    m = LANGUAGE_HEADINGS_RE.match(lang_heading)
+    if m is None:
+        lang_code = name_to_code(lang_heading, "el")
+        if not lang_code:
+            return lang_heading, "", False
+        english_lang_name = code_to_name(lang_code, "en")
+        if not english_lang_name:
+            wxr.wtp.warning(
+                f"Invalid lang_code '{lang_code}'", sortid="page/194"
+            )
+            return lang_heading, "", False
+        return english_lang_name, lang_code, True
+    else:
+        matched_name = m.group(1).lower().strip()
+        lang_code = m.group(2)
+        greek_lang_name = code_to_name(lang_code, "el")
+        english_lang_name = code_to_name(lang_code, "en")
+        if not english_lang_name:
+            wxr.wtp.warning(
+                f"Invalid lang_code '{lang_code}'", sortid="page/43a"
+            )
+            return lang_heading, "", False
+        if not strip_accents(greek_lang_name).lower() == strip_accents(
+            matched_name
+        ):
+            wxr.wtp.debug(
+                f"Language code '{lang_code}' "
+                f"Greek name '{greek_lang_name}' does not match "
+                f"original string '{lang_heading}'; "
+                f"outputting {english_lang_name}",
+                sortid="page/45",
+            )
+        return english_lang_name, lang_code, True
