@@ -113,6 +113,8 @@ def parse_page(
     # https://nl.wiktionary.org/wiki/WikiWoordenboek:Stramien
     # language templates
     # https://nl.wiktionary.org/wiki/Categorie:Hoofdtaalsjablonen
+    if page_title.endswith("/vervoeging"):
+        return []  # skip conjugation pages
     wxr.wtp.start_page(page_title)
     tree = wxr.wtp.parse(page_text, pre_expand=True)
     page_data: list[WordEntry] = []
