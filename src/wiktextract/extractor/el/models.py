@@ -5,9 +5,9 @@ from pydantic import BaseModel, ConfigDict, Field
 # a lot of validation work and are easier for the type-checker.
 
 
-# Search and replace __EXAMPLE_TEMPLATE__ with `Language Name`
+# Search and replace Greek with `Language Name`
 # Pydantic config stuff.
-class __EXAMPLE_TEMPLATE__BaseModel(BaseModel):
+class GreekBaseModel(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
         strict=True,
@@ -20,13 +20,13 @@ class __EXAMPLE_TEMPLATE__BaseModel(BaseModel):
 
 
 # Examples and quotations in glosses
-class Example(__EXAMPLE_TEMPLATE__BaseModel):
+class Example(GreekBaseModel):
     text: str = Field(default="", description="Example usage sentence")
     type: str = ""  # example or quotation etc.
-    # translation: str = Field(
-    #   default="",
-    #   description="__EXAMPLE_TEMPLATE__ Translation of the example sentence",
-    # )
+    translation: str = Field(
+        default="",
+        description="Greek Translation of the example sentence",
+    )
     # author: str = Field(default="", description="Author's name")
     # title: str = Field(default="", description="Title of the reference")
     # ref: str = Field(default="", description="Raw reference string")
@@ -66,7 +66,7 @@ class Example(__EXAMPLE_TEMPLATE__BaseModel):
     # literal_meaning: str = ""
 
 
-class Translation(__EXAMPLE_TEMPLATE__BaseModel):
+class Translation(GreekBaseModel):
     sense: str = Field(
         default="", description="A gloss of the sense being translated"
     )
@@ -79,12 +79,11 @@ class Translation(__EXAMPLE_TEMPLATE__BaseModel):
     # uncertain: bool = Field(
     #     default=False, description="Translation marked as uncertain"
     # )
-    # roman: str = Field(
-    #     default="", description="Transliteration to Roman characters"
-    # )
-    # sense_index: str = ""
+    roman: str = Field(
+        default="", description="Transliteration to Roman characters"
+    )
+    sense_index: str = ""
     # note: str = ""
-    # roman: str = ""
     # literal_meaning: str = ""
     raw_tags: list[str] = []
     tags: list[str] = []
@@ -94,7 +93,7 @@ class Translation(__EXAMPLE_TEMPLATE__BaseModel):
 # General glass for "link to another related word", like synonym, antonym, etc.
 # Instead of having classes for each, we have differnet fields of list[Linkage],
 # like `synonyms: list[Linkage] = []`.
-class Linkage(__EXAMPLE_TEMPLATE__BaseModel):
+class Linkage(GreekBaseModel):
     word: str
     # translation: str
     # extra: str
@@ -108,14 +107,16 @@ class Linkage(__EXAMPLE_TEMPLATE__BaseModel):
     # topics: list[str] = []
     # urls: list[str]
 
-class FormOf(__EXAMPLE_TEMPLATE__BaseModel):
+
+class FormOf(GreekBaseModel):
     word: str
     # extra: str
     # roman: str
 
+
 # Basically a line or lines of gloss, a meaning of a word. These are collected
 # under the POS as a list.
-class Sense(__EXAMPLE_TEMPLATE__BaseModel):
+class Sense(GreekBaseModel):
     glosses: list[str] = []  # ["Gloss supercategory", "Specific gloss."]
     tags: list[str] = []
     raw_tags: list[str] = []
@@ -123,7 +124,7 @@ class Sense(__EXAMPLE_TEMPLATE__BaseModel):
     # alt_of : list[FormOf] = []
     # compound_of: list[FormOf] = []
     # topics: list[str] = []
-    # categories: list[str] = []  # Wikipedia category link data; not printed.
+    categories: list[str] = []  # Wikipedia category link data; not printed.
     examples: list[Example] = []
     synonyms: list[Linkage] = []
     antonyms: list[Linkage] = []
@@ -144,7 +145,7 @@ class Sense(__EXAMPLE_TEMPLATE__BaseModel):
 
 
 # An inflected form of the word, like `{ form: "bats", tags: ["plural"] }`
-class Form(__EXAMPLE_TEMPLATE__BaseModel):
+class Form(GreekBaseModel):
     form: str = ""
     tags: list[str] = []
     raw_tags: list[str] = []
@@ -153,13 +154,13 @@ class Form(__EXAMPLE_TEMPLATE__BaseModel):
     ipa: str = ""
     # roman: str = ""
     # ruby: list[tuple[str, str]] = []
-    # source: str = ""
+    source: str = ""
     # sense_index: str = ""
 
 
 # A pronunciation or audio file. If you have a string of IPA or SAMPA or
 # something else, that is extracted as its own Sound entry.
-class Sound(__EXAMPLE_TEMPLATE__BaseModel):
+class Sound(GreekBaseModel):
     ipa: str = Field(default="", description="International Phonetic Alphabet")
     # enpr: str = Field(default="", description="American Heritage Dictionary")
     # sampa: str = Field(
@@ -185,7 +186,7 @@ class Sound(__EXAMPLE_TEMPLATE__BaseModel):
 
 # Sometimes we collect raw template arguments separately, like in the main
 # line English extractor where we keep data from etymology templates.
-class TemplateData(__EXAMPLE_TEMPLATE__BaseModel):
+class TemplateData(GreekBaseModel):
     name: str = Field(default="", description="Template's name.")
     args: dict[str, str] = Field(
         default={}, description="Arguments given to the template, if any."
@@ -199,8 +200,8 @@ class TemplateData(__EXAMPLE_TEMPLATE__BaseModel):
 # The highest level entry: This is returned from the program as a JSON object
 # in the JSONL output. These are prototypically Part of Speech sections,
 # like "Noun" under a higher level section like "Etymology".
-class WordEntry(__EXAMPLE_TEMPLATE__BaseModel):
-    model_config = ConfigDict(title="__EXAMPLE_TEMPLATE__ Wiktionary")
+class WordEntry(GreekBaseModel):
+    model_config = ConfigDict(title="Greek Wiktionary")
 
     word: str = Field(description="Word string")
     # original_title: str = ""
@@ -219,7 +220,7 @@ class WordEntry(__EXAMPLE_TEMPLATE__BaseModel):
         "etymology section.",
     )
     # For sections like "Etymology 1"
-    # etymology_number: int = -1
+    etymology_number: int = -1
     senses: list[Sense] = []
     title: str = Field(default="", description="Redirect page source title")
     redirect: str = Field(default="", description="Redirect page target title")
@@ -244,7 +245,8 @@ class WordEntry(__EXAMPLE_TEMPLATE__BaseModel):
     # inflection_templates: list[TemplateData] = []
     # info_template: list[TemplateData] = []
     # literal_meaning: str = ""
-    # related: list[Linkage] = []
-    # translations: list[Translation] = []
+    related: list[Linkage] = []
+    synonyms: list[Linkage] = []
+    translations: list[Translation] = []
     # wikidata: list[str] = []
     # wikipedia: list[str] = []
