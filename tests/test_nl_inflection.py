@@ -113,6 +113,36 @@ class TestNlInflection(TestCase):
         self.wxr.wtp.add_page(
             "Sjabloon:-nlstam-", 10, "[[Categorie:Werkwoord in het Nederlands]]"
         )
+        self.wxr.wtp.add_page(
+            "achten/vervoeging",
+            0,
+            "{{-nlverb-|achten|[[acht]]|[[acht]]|[[achten]]|[[achtte]]|[[achtten]]|hebben|[[geacht]]|[[achte]]|overg=1}}",
+        )
+        self.wxr.wtp.add_page(
+            "Sjabloon:-nlverb-",
+            10,
+            """{|class="infoboxlinks"
+!colspan="9"| <big>[[WikiWoordenboek:Vervoeging|vervoeging]] van de bedrijvende vorm van [[achten#Nederlands|achten]]</big>
+|-
+!colspan="3" class="infoboxrijhoofding"| [[WikiWoordenboek:Infinitief|onbepaalde wijs]]
+! colspan="3"| kort
+! colspan="3"| lang
+|-
+|colspan="1" rowspan="2" class="infoboxrijhoofding"| onvoltooid
+|colspan="2" class="infoboxrijhoofding"| tegenwoordig
+| colspan="3"| achten
+| colspan="3"| te achten
+|-
+|colspan="2" class="infoboxrijhoofding"| toekomend
+| colspan="3"| zullen achten
+| colspan="3"| te zullen achten
+|-
+! !!colspan="2" | [[WikiWoordenboek:Onvoltooid deelwoord|onvoltooid deelwoord]]
+|-
+|class="infoboxrijhoofding"| ||colspan="2"| [[achtend#Nederlands|achtend]]
+|}
+[[Categorie:Vervoeging in het Nederlands]]""",
+        )
         data = parse_page(
             self.wxr,
             "achten",
@@ -123,7 +153,10 @@ class TestNlInflection(TestCase):
 ====Werkwoord====
 # beschouwen""",
         )
-        self.assertEqual(data[0]["categories"], ["Werkwoord in het Nederlands"])
+        self.assertEqual(
+            data[0]["categories"],
+            ["Werkwoord in het Nederlands", "Vervoeging in het Nederlands"],
+        )
         self.assertEqual(
             data[0]["forms"],
             [
@@ -132,6 +165,34 @@ class TestNlInflection(TestCase):
                     "form": "geacht",
                     "tags": ["past", "participle"],
                     "ipa": "ɣə'ʔɑxt",
+                },
+                {
+                    "form": "te achten",
+                    "raw_tags": ["lang"],
+                    "source": "achten/vervoeging",
+                    "tags": ["active", "infinitive", "imperfect", "present"],
+                },
+                {
+                    "form": "zullen achten",
+                    "source": "achten/vervoeging",
+                    "tags": [
+                        "active",
+                        "infinitive",
+                        "imperfect",
+                        "future",
+                        "short-form",
+                    ],
+                },
+                {
+                    "form": "te zullen achten",
+                    "raw_tags": ["lang"],
+                    "source": "achten/vervoeging",
+                    "tags": ["active", "infinitive", "imperfect", "future"],
+                },
+                {
+                    "form": "achtend",
+                    "source": "achten/vervoeging",
+                    "tags": ["imperfect", "participle"],
                 },
             ],
         )
