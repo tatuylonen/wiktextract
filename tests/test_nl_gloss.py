@@ -222,7 +222,7 @@ class TestNlGloss(TestCase):
         self.wxr.wtp.add_page(
             "Sjabloon:anatomie",
             10,
-            """<span>([[anatomie]])</span>[[Categorie:Anatomie_in_het_Nederlands]] """,
+            """<span>([[anatomie]])</span>[[Categorie:Anatomie_in_het_Nederlands]]""",
         )
         data = parse_page(
             self.wxr,
@@ -244,4 +244,49 @@ class TestNlGloss(TestCase):
                     "topics": ["anatomy"],
                 }
             ],
+        )
+
+    def test_eng_onv_d(self):
+        self.wxr.wtp.add_page(
+            "Sjabloon:eng-onv-d",
+            10,
+            """'''opening'''
+#onvoltooid deelwoord van [[open#Engels|open]]
+
+====''[[WikiWoordenboek:Zelfstandig naamwoord|Zelfstandig naamwoord]]''====
+[[Categorie:Zelfstandig naamwoord in het Engels]]
+'''opening'''
+#gerundium van [[open#Engels|open]]""",
+        )
+        data = parse_page(
+            self.wxr,
+            "opening",
+            """==Engels==
+====Werkwoord====
+{{eng-onv-d|open}}""",
+        )
+        self.assertEqual(data[0]["pos"], "verb")
+        self.assertEqual(
+            data[0]["senses"],
+            [
+                {
+                    "glosses": ["onvoltooid deelwoord van open"],
+                    "tags": ["form-of"],
+                    "form_of": [{"word": "open"}],
+                }
+            ],
+        )
+        self.assertEqual(
+            data[1]["senses"],
+            [
+                {
+                    "glosses": ["gerundium van open"],
+                    "tags": ["form-of"],
+                    "form_of": [{"word": "open"}],
+                }
+            ],
+        )
+        self.assertEqual(data[1]["pos"], "noun")
+        self.assertEqual(
+            data[1]["categories"], ["Zelfstandig naamwoord in het Engels"]
         )
