@@ -35,12 +35,14 @@ def extract_pos_section(
     else:
         forms_data.forms.clear()
         forms_data.categories.clear()
-    extract_pos_section_nodes(wxr, page_data, level_node)
+    extract_pos_section_nodes(wxr, page_data, base_data, forms_data, level_node)
 
 
 def extract_pos_section_nodes(
     wxr: WiktextractContext,
     page_data: list[WordEntry],
+    base_data: WordEntry,
+    forms_data: WordEntry,
     level_node: LevelNode,
 ) -> None:
     gloss_list_start = 0
@@ -58,7 +60,14 @@ def extract_pos_section_nodes(
             for list_item in node.find_child(NodeKind.LIST_ITEM):
                 extract_gloss_list_item(wxr, page_data[-1], list_item)
         elif isinstance(node, LevelNode):
-            break
+            title_text = clean_node(wxr, None, node.largs)
+            if title_text in POS_DATA:
+                # expanded from "eng-onv-d" form-of template
+                from .page import parse_section
+
+                parse_section(wxr, page_data, base_data, forms_data, node)
+            else:
+                break
         elif (
             isinstance(node, TemplateNode)
             and node.template_name in EXAMPLE_TEMPLATES
@@ -71,9 +80,21 @@ def extract_pos_section_nodes(
         ]:
             extract_noun_form_of_template(wxr, page_data[-1], node)
         elif isinstance(node, TemplateNode) and node.template_name.startswith(
-            ("1ps", "2ps", "aanv-w", "onv-d", "ott-", "ovt-", "tps", "volt-d")
+            (
+                "1ps",
+                "2ps",
+                "aanv-w",
+                "onv-d",
+                "ott-",
+                "ovt-",
+                "tps",
+                "volt-d",
+                "eng-onv-d",
+            )
         ):
-            extract_verb_form_of_template(wxr, page_data[-1], node)
+            extract_verb_form_of_template(
+                wxr, page_data, base_data, forms_data, node
+            )
 
 
 # https://nl.wiktionary.org/wiki/Categorie:Lemmasjablonen
@@ -208,19 +229,27 @@ def extract_noun_form_of_template(
 
 
 def extract_verb_form_of_template(
-    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+    wxr: WiktextractContext,
+    page_data: list[WordEntry],
+    base_data: WordEntry,
+    forms_data: WordEntry,
+    t_node: TemplateNode,
 ) -> None:
     # https://nl.wiktionary.org/wiki/Categorie:Werkwoordsvormsjablonen_voor_het_Nederlands
     from .page import extract_section_categories
 
-    pre_expanded_node = wxr.wtp.parse(
+    orig_data_len = len(page_data)
+    expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(t_node), expand_all=True
     )
-    extract_pos_section_nodes(wxr, [word_entry], pre_expanded_node)
+    extract_pos_section_nodes(
+        wxr, page_data, base_data, forms_data, expanded_node
+    )
     form_of = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
-    for sense in word_entry.senses:
-        sense.tags.append("form-of")
-        if form_of != "":
-            sense.form_of.append(AltForm(word=form_of))
-    extract_section_categories(wxr, word_entry, pre_expanded_node)
-    word_entry.tags.append("form-of")
+    for word_entry in page_data[orig_data_len - len(page_data) - 1 :]:
+        for sense in word_entry.senses:
+            sense.tags.append("form-of")
+            if form_of != "":
+                sense.form_of.append(AltForm(word=form_of))
+        extract_section_categories(wxr, word_entry, expanded_node)
+        word_entry.tags.append("form-of")
