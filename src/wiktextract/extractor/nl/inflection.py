@@ -1,4 +1,7 @@
-from wikitextprocessor import NodeKind, TemplateNode
+import re
+from dataclasses import dataclass
+
+from wikitextprocessor import NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -11,6 +14,8 @@ def extract_inflection_template(
 ) -> None:
     if t_node.template_name in ["-nlnoun-", "adjcomp"]:
         extract_noun_adj_table(wxr, word_entry, t_node)
+    elif t_node.template_name == "-nlstam-":
+        extract_nlstam_template(wxr, word_entry, t_node)
 
 
 def extract_noun_adj_table(
@@ -47,3 +52,24 @@ def extract_noun_adj_table(
 
     for link_node in expanded_node.find_child(NodeKind.LINK):
         clean_node(wxr, word_entry, link_node)
+
+
+def extract_nlstam_template(
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+) -> None:
+    # verb table
+    # https://nl.wiktionary.org/wiki/Sjabloon:-nlstam-
+    for arg in [2, 3]:
+        form_str = clean_node(
+            wxr, None, t_node.template_parameters.get(arg, "")
+        )
+        if form_str != "":
+            form = Form(
+                form=form_str,
+                ipa=clean_node(
+                    wxr, None, t_node.template_parameters.get(arg + 3, "")
+                ),
+            )
+            form.tags.extend(["past"] if arg == 2 else ["past", "participle"])
+            word_entry.forms.append(form)
+    clean_node(wxr, word_entry, t_node)

@@ -108,3 +108,30 @@ class TestNlInflection(TestCase):
         self.assertEqual(data[0]["categories"], data[1]["categories"])
         self.assertEqual(len(data[0]["forms"]), 3)
         self.assertEqual(data[0]["forms"], data[1]["forms"])
+
+    def test_nlstam(self):
+        self.wxr.wtp.add_page(
+            "Sjabloon:-nlstam-", 10, "[[Categorie:Werkwoord in het Nederlands]]"
+        )
+        data = parse_page(
+            self.wxr,
+            "achten",
+            """==Nederlands==
+=====Woordherkomst en -opbouw=====
+* In de betekenis
+{{-nlstam-|{{pn}}|[[achtte]]|[[geacht]]|'ɑxtə(n)|'ɑxtə|ɣə'ʔɑxt|scheid=n|k=t}}
+====Werkwoord====
+# beschouwen""",
+        )
+        self.assertEqual(data[0]["categories"], ["Werkwoord in het Nederlands"])
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {"form": "achtte", "tags": ["past"], "ipa": "'ɑxtə"},
+                {
+                    "form": "geacht",
+                    "tags": ["past", "participle"],
+                    "ipa": "ɣə'ʔɑxt",
+                },
+            ],
+        )
