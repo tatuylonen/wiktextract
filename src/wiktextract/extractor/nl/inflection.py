@@ -9,14 +9,15 @@ from .tags import translate_raw_tags
 def extract_inflection_template(
     wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
 ) -> None:
-    if t_node.template_name == "-nlnoun-":
-        extract_nlnoun_template(wxr, word_entry, t_node)
+    if t_node.template_name in ["-nlnoun-", "adjcomp"]:
+        extract_noun_adj_table(wxr, word_entry, t_node)
 
 
-def extract_nlnoun_template(
+def extract_noun_adj_table(
     wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
 ) -> None:
     # https://nl.wiktionary.org/wiki/Sjabloon:-nlnoun-
+    # https://nl.wiktionary.org/wiki/Sjabloon:adjcomp
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(t_node), expand_all=True
     )
@@ -35,7 +36,7 @@ def extract_nlnoun_template(
                     row_header = clean_node(wxr, None, data_node)
                 else:
                     form_str = clean_node(wxr, None, data_node)
-                    if form_str not in ["", wxr.wtp.title]:
+                    if form_str not in ["", "-", wxr.wtp.title]:
                         form = Form(form=form_str)
                         if row_header not in ["", "naamwoord"]:
                             form.raw_tags.append(row_header)

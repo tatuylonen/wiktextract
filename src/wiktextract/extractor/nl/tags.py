@@ -18,6 +18,13 @@ TABLE_TAGS = {
     "enkelvoud": "singular",
     "meervoud": "plural",
     "verkleinwoord": "diminutive",
+    # Sjabloon:adjcomp
+    "stellend": "positive",
+    "vergrotend": "comparative",
+    "overtreffend": "superlative",
+    "onverbogen": "uninflected",
+    "verbogen": "inflected",
+    "partitief": "partitive",
 }
 
 
