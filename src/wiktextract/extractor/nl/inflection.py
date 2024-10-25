@@ -40,15 +40,19 @@ def extract_noun_adj_table(
                 if col_index == 0:
                     row_header = clean_node(wxr, None, data_node)
                 else:
-                    form_str = clean_node(wxr, None, data_node)
-                    if form_str not in ["", "-", wxr.wtp.title]:
-                        form = Form(form=form_str)
-                        if row_header not in ["", "naamwoord"]:
-                            form.raw_tags.append(row_header)
-                        if col_index - 1 < len(column_headers):
-                            form.raw_tags.append(column_headers[col_index - 1])
-                        translate_raw_tags(form)
-                        word_entry.forms.append(form)
+                    for form_str in clean_node(
+                        wxr, None, data_node
+                    ).splitlines():
+                        if form_str not in ["", "-", wxr.wtp.title]:
+                            form = Form(form=form_str)
+                            if row_header not in ["", "naamwoord"]:
+                                form.raw_tags.append(row_header)
+                            if col_index - 1 < len(column_headers):
+                                form.raw_tags.append(
+                                    column_headers[col_index - 1]
+                                )
+                            translate_raw_tags(form)
+                            word_entry.forms.append(form)
 
     for link_node in expanded_node.find_child(NodeKind.LINK):
         clean_node(wxr, word_entry, link_node)

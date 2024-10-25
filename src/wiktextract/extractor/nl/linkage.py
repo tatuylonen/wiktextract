@@ -89,6 +89,8 @@ def extract_linkage_list_item(
                 getattr(word_entry, linkage_type).append(
                     Linkage(word=word, sense=sense, sense_index=sense_index)
                 )
+        elif isinstance(node, TemplateNode) and node.template_name == "expr":
+            extract_expr_template(wxr, word_entry, node, linkage_type)
 
 
 def extract_nld_template(
