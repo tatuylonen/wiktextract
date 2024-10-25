@@ -196,3 +196,37 @@ class TestNlInflection(TestCase):
                 },
             ],
         )
+
+    def test_nlnoun_lines(self):
+        self.wxr.wtp.add_page(
+            "Sjabloon:-nlnoun-",
+            10,
+            """{| class="infobox"
+|-
+!
+! [[enkelvoud]]
+! [[meervoud]]
+|-
+| class="infoboxrijhoofding" | [[zelfstandig naamwoord|naamwoord]]
+| corpus
+| [[corpora]]<br>[[corpussen]]
+|}""",
+        )
+        data = parse_page(
+            self.wxr,
+            "corpus",
+            """==Nederlands==
+=====Woordherkomst en -opbouw=====
+*Leenwoord
+{{-nlnoun-|{{pn}}|[[corpora]]<br>[[{{pn}}sen]]|[[corpusje]]|[[corpusjes]]}}
+====Zelfstandig naamwoord====
+{{-l-|n}}
+# alle verzamelde""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {"form": "corpora", "tags": ["plural"]},
+                {"form": "corpussen", "tags": ["plural"]},
+            ],
+        )

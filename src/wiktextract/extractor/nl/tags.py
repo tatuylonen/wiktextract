@@ -158,7 +158,7 @@ TOPICS = {
     # "familie": "family",
     "farmacologie": "pharmacology",
     # "feest": "party",
-    # "fietsen": "cycle",
+    "fietsen": "cycling",
     "filatelie": "philately",
     "filmkunst": "cinematography",
     "filosofie": "philosophy",
