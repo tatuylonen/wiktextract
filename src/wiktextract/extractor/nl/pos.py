@@ -11,7 +11,11 @@ from .example import (
 )
 from .models import AltForm, Sense, WordEntry
 from .section_titles import POS_DATA
-from .tags import translate_raw_tags
+from .tags import (
+    GLOSS_TAG_TEMPLATES,
+    LIST_ITEM_TAG_TEMPLATES,
+    translate_raw_tags,
+)
 
 
 def extract_pos_section(
@@ -74,32 +78,44 @@ def extract_pos_section_nodes(
             and len(page_data[-1].senses) > 0
         ):
             extract_example_template(wxr, page_data[-1].senses[-1], node)
-        elif isinstance(node, TemplateNode) and node.template_name in [
-            "noun-pl",
-            "noun-form",
-        ]:
-            extract_noun_form_of_template(wxr, page_data[-1], node)
-        elif isinstance(node, TemplateNode) and node.template_name.startswith(
-            (
-                "1ps",
-                "2ps",
-                "aanv-w",
-                "onv-d",
-                "ott-",
-                "ovt-",
-                "tps",
-                "volt-d",
-                "eng-onv-d",
+        elif isinstance(node, TemplateNode) and (
+            node.template_name
+            in [
+                "noun-pl",
+                "nl-advb-form",
+                "noun-dim",
+                "noun-dim-pl",
+                "num-form",
+                "ordn-form",
+                "prep-form",
+                "pronom-dem-form",
+                "pronom-pos-form",
+                "xh-pronom-pos-form",
+            ]
+            or node.template_name.endswith(
+                ("adjc-form", "adverb-form", "noun-form")
             )
+        ):
+            extract_noun_form_of_template(wxr, page_data[-1], node)
+        elif isinstance(node, TemplateNode) and (
+            node.template_name.startswith(
+                (
+                    "1ps",
+                    "2ps",
+                    "aanv-w",
+                    "onv-d",
+                    "ott-",
+                    "ovt-",
+                    "tps",
+                    "volt-d",
+                    "eng-onv-d",
+                )
+            )
+            or node.template_name.endswith("verb-form")
         ):
             extract_verb_form_of_template(
                 wxr, page_data, base_data, forms_data, node
             )
-
-
-# https://nl.wiktionary.org/wiki/Categorie:Lemmasjablonen
-# https://nl.wiktionary.org/wiki/Categorie:Werkwoordsjablonen
-GLOSS_TAG_TEMPLATES = frozenset(["auxl", "erga", "inerg"])
 
 
 def extract_gloss_list_item(
@@ -111,6 +127,8 @@ def extract_gloss_list_item(
         if isinstance(child, TemplateNode):
             if child.template_name in GLOSS_TAG_TEMPLATES:
                 sense.raw_tags.append(clean_node(wxr, sense, child))
+            elif child.template_name in LIST_ITEM_TAG_TEMPLATES:
+                sense.tags.append(LIST_ITEM_TAG_TEMPLATES[child.template_name])
             else:
                 expanded_text = clean_node(wxr, sense, child)
                 if expanded_text.startswith("(") and expanded_text.endswith(
@@ -133,7 +151,7 @@ def extract_gloss_list_item(
             gloss_nodes.append(child)
 
     gloss_text = clean_node(wxr, sense, gloss_nodes)
-    if gloss_text.startswith(","):  # between qualifier templates
+    while gloss_text.startswith(","):  # between qualifier templates
         gloss_text = gloss_text.removeprefix(",").strip()
     m = re.match(r"\(([^()]+)\)", gloss_text)
     if m is not None:  # expanded "verouderd" template in "2ps" template
@@ -153,8 +171,12 @@ def extract_pos_header_line_nodes(
             m = re.search(r"\[(.+)\]", node.strip())
             if m is not None:
                 word_entry.etymology_index = m.group(1).strip()
-        elif isinstance(node, TemplateNode) and node.template_name == "-l-":
-            extract_l_template(wxr, word_entry, node)
+        elif isinstance(node, TemplateNode):
+            if node.template_name == "-l-":
+                extract_l_template(wxr, word_entry, node)
+            elif node.template_name == "dimt":
+                word_entry.raw_tags.append(clean_node(wxr, word_entry, node))
+    translate_raw_tags(word_entry)
 
 
 def extract_l_template(
@@ -198,8 +220,9 @@ NOUN_FORM_OF_TEMPLATE_GENDER_TAGS = {
 def extract_noun_form_of_template(
     wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
 ) -> None:
+    # https://nl.wiktionary.org/wiki/Categorie:Vormsjablonen
     sense = Sense(tags=["form-of"])
-    if t_node.template_name == "noun-pl":
+    if t_node.template_name.endswith("-pl"):
         sense.tags.append("plural")
     else:
         num_arg = t_node.template_parameters.get("getal", "")
@@ -236,6 +259,7 @@ def extract_verb_form_of_template(
     t_node: TemplateNode,
 ) -> None:
     # https://nl.wiktionary.org/wiki/Categorie:Werkwoordsvormsjablonen_voor_het_Nederlands
+    # https://nl.wiktionary.org/wiki/Categorie:Werkwoordsvormsjablonen
     from .page import extract_section_categories
 
     orig_data_len = len(page_data)

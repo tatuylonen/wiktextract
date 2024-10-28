@@ -1,12 +1,32 @@
 from .models import WordEntry
 
+# https://nl.wiktionary.org/wiki/Categorie:Lemmasjablonen
 # https://nl.wiktionary.org/wiki/Categorie:Werkwoordsjablonen
-VERB_TAGS = {
-    "ergatief": "ergative",  # Sjabloon:erga
-    "inergatief": "unergative",  # Sjabloon:inerg
-    "hulpwerkwoord": "auxiliary",  # Sjabloon:auxl
-}
+GLOSS_TAG_TEMPLATES = frozenset(
+    [
+        "absol",
+        "accus",
+        "auxl",
+        "copl",
+        "deponens",
+        "ditr",
+        "erga",
+        "inerg",
+        "intr",
+        "modl",
+        "onpr",
+        "ov",
+        "rcpq",
+        "refl",
+        "s-verb",
+        "plurt",
+        "singt",
+        "versterkend voorvoegsel",
+    ]
+)
 
+
+# https://nl.wiktionary.org/wiki/Categorie:Werkwoordsjablonen
 # https://nl.wiktionary.org/wiki/Categorie:WikiWoordenboek:Contextlabels
 GLOSS_TAGS = {
     "figuurlijk": "figuratively",
@@ -55,6 +75,23 @@ GLOSS_TAGS = {
     "zegswijze": "idiomatic",
     "zeldzaam": "rare",
     "Latijns-Amerika": "Latin-America",
+    "absoluut": "absolute",  # Sjabloon:absol
+    "accusatief": "accusative",  # Sjabloon:accus
+    "hulpwerkwoord": "auxiliary",  # Sjabloon:auxl
+    "koppelwerkwoord": "copulative",  # Sjabloon:copl
+    "deponens": "deponent",
+    "ditransitief": "ditransitive",  # Sjabloon:ditr
+    "ergatief": "ergative",  # Sjabloon:erga
+    "inergatief": "unergative",  # Sjabloon:inerg
+    "onovergankelijk": "intransitive",  # Sjabloon:intr
+    "modaal werkwoord": ["modal", "verb"],  # Sjabloon:modl
+    "onpersoonlijk": "impersonal",  # Sjabloon:onpr
+    "overgankelijk": "transitive",  # Sjabloon:ov
+    "wederkerig": "reciprocal",  # Sjabloon:rcpq
+    "wederkerend": "reflexive",  # Sjabloon:refl
+    "alleen meervoud": "plural-only",  # Sjabloon:plurt
+    "geen meervoud": "no-plural",  # Sjabloon:singt
+    "versterkend voorvoegsel": ["intensifier", "prefix"],
 }
 
 TABLE_TAGS = {
@@ -89,7 +126,12 @@ TABLE_TAGS = {
 }
 
 
-TAGS = {**VERB_TAGS, **GLOSS_TAGS, **TABLE_TAGS}
+HEADER_LINE_TAGS = {
+    "dim. tant.": ["diminutive", "noun"],  # Sjabloon:dimt
+}
+
+
+TAGS = {**GLOSS_TAGS, **TABLE_TAGS, **HEADER_LINE_TAGS}
 
 # https://nl.wiktionary.org/wiki/Categorie:WikiWoordenboek:Contextlabels
 TOPICS = {
@@ -342,3 +384,18 @@ def translate_raw_tags(data: WordEntry) -> None:
         else:
             raw_tags.append(raw_tag)
     data.raw_tags = raw_tags
+
+
+# used in translation, linkage and gloss lists
+LIST_ITEM_TAG_TEMPLATES = {
+    "m": "masculine",
+    "f": "feminine",
+    "n": "neuter",
+    "c": "common",
+    "s": "singular",
+    "p": "plural",
+    "a": "animate",
+    "i": "inanimate",
+    "impf": "imperfective",
+    "pf": "perfective",
+}

@@ -5,6 +5,7 @@ from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .models import Translation, WordEntry
+from .tags import LIST_ITEM_TAG_TEMPLATES
 
 
 def extract_translation_section(
@@ -28,18 +29,6 @@ def extract_translation_section(
                 extract_translation_list_item(
                     wxr, word_entry, list_item, sense, sense_index
                 )
-
-
-TR_TEMPLATES = {
-    "m": "masculine",
-    "f": "feminine",
-    "n": "neuter",
-    "c": "common",
-    "s": "singular",
-    "p": "plural",
-    "a": "animate",
-    "i": "inanimate",
-}
 
 
 def extract_translation_list_item(
@@ -75,11 +64,11 @@ def extract_translation_list_item(
                         )
                     )
                 elif (
-                    node.template_name in TR_TEMPLATES
+                    node.template_name in LIST_ITEM_TAG_TEMPLATES
                     and len(word_entry.translations) > 0
                 ):
                     word_entry.translations[-1].tags.append(
-                        TR_TEMPLATES[node.template_name]
+                        LIST_ITEM_TAG_TEMPLATES[node.template_name]
                     )
             elif isinstance(node, str):
                 for c in node:
@@ -93,5 +82,10 @@ def extract_translation_list_item(
                             roman_str = ""
                     elif brackets > 0:
                         roman_str += c
+            elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
+                for next_list_item in node.find_child(NodeKind.LIST_ITEM):
+                    extract_translation_list_item(
+                        wxr, word_entry, next_list_item, sense, sense_index
+                    )
             elif brackets > 0:
                 roman_str += clean_node(wxr, None, node)

@@ -90,3 +90,22 @@ class TestNlSound(TestCase):
                 },
             ],
         )
+
+    def test_nested_list(self):
+        self.wxr.wtp.add_page("Sjabloon:cmn", 10, "Mandarijn")
+        data = parse_page(
+            self.wxr,
+            "kijken",
+            """==Nederlands==
+====Werkwoord====
+# met de ogen waarnemen
+=====Vertalingen=====
+* Chinees:
+** {{cmn}}: {{trad|cmn|看}}""",
+        )
+        self.assertEqual(
+            data[0]["translations"],
+            [
+                {"word": "看", "lang": "Mandarijn", "lang_code": "cmn"},
+            ],
+        )
