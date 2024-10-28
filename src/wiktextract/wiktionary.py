@@ -248,14 +248,25 @@ def check_tags(
             from .tags import uppercase_tags, valid_tags
 
             if tag not in valid_tags and tag not in uppercase_tags:
-                check_error(
-                    wxr,
-                    dt,
-                    word,
-                    lang,
-                    pos,
-                    f"invalid tag {tag} not in valid_tags(or uppercase_tags)",
-                )
+                if len(tag) > 0 and tag[0].isupper():
+                    check_error(
+                        wxr,
+                        dt,
+                        word,
+                        lang,
+                        pos,
+                        f"invalid uppercase tag {tag} not in or uppercase_tags",
+                    )
+                else:
+                    check_error(
+                        wxr,
+                        dt,
+                        word,
+                        lang,
+                        pos,
+                        f"invalid tag {tag} not in valid_tags "
+                        "or uppercase_tags",
+                    )
 
 
 def check_str_fields(
