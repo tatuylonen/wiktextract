@@ -73,24 +73,55 @@ def extract_linkage_list_item(
     sense: str,
     sense_index: str,
 ) -> None:
-    for node in list_item.children:
+    linkage_list = getattr(word_entry, linkage_type)
+    orig_len = len(linkage_list)
+    tags = []
+    for index, node in enumerate(list_item.children):
         if isinstance(node, str):
             m = re.search(r"\[(\d+)\]", node)
             if m is not None:
                 sense_index = int(m.group(1))
-            elif node.strip().startswith("="):
-                sense = node.strip().removeprefix("=").strip()
-                linkage_list = getattr(word_entry, linkage_type)
-                if len(linkage_list) > 0:
+            elif node.strip().startswith(("=", "–")):
+                sense = clean_node(wxr, None, list_item.children[index:]).strip(
+                    "=– "
+                )
+                if len(linkage_list) > orig_len:
                     linkage_list[-1].sense = sense
+                else:
+                    word_nodes = [
+                        n
+                        for n in list_item.children[:index]
+                        if not isinstance(n, TemplateNode)
+                    ]
+                    word = clean_node(wxr, None, word_nodes)
+                    if word != "":
+                        linkage_list.append(
+                            Linkage(
+                                word=word,
+                                sense=sense,
+                                sense_index=sense_index,
+                                tags=tags,
+                            )
+                        )
+                return
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
             word = clean_node(wxr, None, node)
             if word != "":
-                getattr(word_entry, linkage_type).append(
+                linkage_list.append(
                     Linkage(word=word, sense=sense, sense_index=sense_index)
                 )
-        elif isinstance(node, TemplateNode) and node.template_name == "expr":
-            extract_expr_template(wxr, word_entry, node, linkage_type)
+        elif isinstance(node, TemplateNode):
+            from .translation import TR_TEMPLATES
+
+            if node.template_name == "expr":
+                extract_expr_template(wxr, word_entry, node, linkage_type)
+            elif node.template_name in TR_TEMPLATES:
+                if len(linkage_list) > orig_len:
+                    linkage_list[-1].tags.append(
+                        TR_TEMPLATES[node.template_name]
+                    )
+                else:
+                    tags.append(TR_TEMPLATES[node.template_name])
 
 
 def extract_nld_template(

@@ -39,6 +39,8 @@ TR_TEMPLATES = {
     "p": "plural",
     "a": "animate",
     "i": "inanimate",
+    "impf": "imperfective",
+    "pf": "perfective",
 }
 
 

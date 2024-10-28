@@ -148,3 +148,23 @@ class TestNlLinkage(TestCase):
             data[0]["related"],
             [{"sense": "met grote passen lopen", "word": "benen"}],
         )
+
+        data = parse_page(
+            self.wxr,
+            "omyl",
+            """==Tsjechisch==
+====Zelfstandig naamwoord====
+# fout
+=====Typische woordcombinaties=====
+* justiční ''omyl'' {{m}}{{i}} –  justitiële ''dwaling''""",
+        )
+        self.assertEqual(
+            data[0]["derived"],
+            [
+                {
+                    "sense": "justitiële dwaling",
+                    "word": "justiční omyl",
+                    "tags": ["masculine", "inanimate"],
+                }
+            ],
+        )
