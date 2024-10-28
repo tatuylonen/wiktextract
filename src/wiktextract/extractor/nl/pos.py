@@ -118,11 +118,6 @@ def extract_pos_section_nodes(
             )
 
 
-# https://nl.wiktionary.org/wiki/Categorie:Lemmasjablonen
-# https://nl.wiktionary.org/wiki/Categorie:Werkwoordsjablonen
-GLOSS_TAG_TEMPLATES = frozenset(["auxl", "erga", "inerg"])
-
-
 def extract_gloss_list_item(
     wxr: WiktextractContext, word_entry: WordEntry, list_item: WikiNode
 ) -> None:
