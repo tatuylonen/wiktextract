@@ -95,5 +95,10 @@ def extract_translation_list_item(
                             roman_str = ""
                     elif brackets > 0:
                         roman_str += c
+            elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
+                for next_list_item in node.find_child(NodeKind.LIST_ITEM):
+                    extract_translation_list_item(
+                        wxr, word_entry, next_list_item, sense, sense_index
+                    )
             elif brackets > 0:
                 roman_str += clean_node(wxr, None, node)
