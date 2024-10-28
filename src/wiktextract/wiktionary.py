@@ -178,8 +178,13 @@ def check_error(
     lang: str | None,
     pos: str | None,
     msg: str,
+    called_from: str | None = None,
 ) -> None:
     """Formats and outputs an error message about data format checks."""
+    if called_from is None:
+        called_from = "wiktionary/179/20240425"
+    else:
+        called_from = "wiktionary/179/20240425" + called_from
     msg += ": " + json.dumps(dt, sort_keys=True, ensure_ascii=False)
     prefix = word or ""
     if lang:
@@ -198,7 +203,7 @@ def check_error(
         "title": word,
         "section": lang,
         "subsection": pos,
-        "called_from": "wiktionary/179/20240425",
+        "called_from": called_from,
         "path": tuple(),
     }
     config.debugs.append(error_data)
@@ -248,14 +253,26 @@ def check_tags(
             from .tags import uppercase_tags, valid_tags
 
             if tag not in valid_tags and tag not in uppercase_tags:
-                check_error(
-                    wxr,
-                    dt,
-                    word,
-                    lang,
-                    pos,
-                    f"invalid tag {tag} not in valid_tags(or uppercase_tags)",
-                )
+                if len(tag) > 0 and tag[0].isupper():
+                    check_error(
+                        wxr,
+                        dt,
+                        word,
+                        lang,
+                        pos,
+                        f"invalid uppercase tag {tag} not in or uppercase_tags",
+                        called_from="uppercase_tags",
+                    )
+                else:
+                    check_error(
+                        wxr,
+                        dt,
+                        word,
+                        lang,
+                        pos,
+                        f"invalid tag {tag} not in valid_tags "
+                        "or uppercase_tags",
+                    )
 
 
 def check_str_fields(
