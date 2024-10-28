@@ -245,17 +245,16 @@ def check_tags(
         # non-English editions).  Tag values should be standardized across
         # editions, except for uppercase tags (e.g., regional variants).
         if wxr.wtp.lang_code in ("en",):  # Check edition
-            from .tags import valid_tags
+            from .tags import uppercase_tags, valid_tags
 
-            if tag not in valid_tags:
+            if tag not in valid_tags and tag not in uppercase_tags:
                 check_error(
                     wxr,
                     dt,
                     word,
                     lang,
                     pos,
-                    "invalid tag {} not in valid_tags (or "
-                    "uppercase_tags)".format(repr(tag)),
+                    f"invalid tag {tag} not in valid_tags(or uppercase_tags)",
                 )
 
 
