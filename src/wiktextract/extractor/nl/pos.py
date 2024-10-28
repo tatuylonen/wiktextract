@@ -79,18 +79,21 @@ def extract_pos_section_nodes(
             "noun-form",
         ]:
             extract_noun_form_of_template(wxr, page_data[-1], node)
-        elif isinstance(node, TemplateNode) and node.template_name.startswith(
-            (
-                "1ps",
-                "2ps",
-                "aanv-w",
-                "onv-d",
-                "ott-",
-                "ovt-",
-                "tps",
-                "volt-d",
-                "eng-onv-d",
+        elif isinstance(node, TemplateNode) and (
+            node.template_name.startswith(
+                (
+                    "1ps",
+                    "2ps",
+                    "aanv-w",
+                    "onv-d",
+                    "ott-",
+                    "ovt-",
+                    "tps",
+                    "volt-d",
+                    "eng-onv-d",
+                )
             )
+            or node.template_name.endswith("verb-form")
         ):
             extract_verb_form_of_template(
                 wxr, page_data, base_data, forms_data, node
@@ -236,6 +239,7 @@ def extract_verb_form_of_template(
     t_node: TemplateNode,
 ) -> None:
     # https://nl.wiktionary.org/wiki/Categorie:Werkwoordsvormsjablonen_voor_het_Nederlands
+    # https://nl.wiktionary.org/wiki/Categorie:Werkwoordsvormsjablonen
     from .page import extract_section_categories
 
     orig_data_len = len(page_data)
