@@ -11,7 +11,11 @@ from .example import (
 )
 from .models import AltForm, Sense, WordEntry
 from .section_titles import POS_DATA
-from .tags import translate_raw_tags
+from .tags import (
+    GLOSS_TAG_TEMPLATES,
+    LIST_ITEM_TAG_TEMPLATES,
+    translate_raw_tags,
+)
 
 
 def extract_pos_section(
@@ -128,6 +132,8 @@ def extract_gloss_list_item(
         if isinstance(child, TemplateNode):
             if child.template_name in GLOSS_TAG_TEMPLATES:
                 sense.raw_tags.append(clean_node(wxr, sense, child))
+            elif child.template_name in LIST_ITEM_TAG_TEMPLATES:
+                sense.tags.append(LIST_ITEM_TAG_TEMPLATES[child.template_name])
             else:
                 expanded_text = clean_node(wxr, sense, child)
                 if expanded_text.startswith("(") and expanded_text.endswith(

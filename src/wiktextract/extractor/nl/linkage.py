@@ -5,6 +5,7 @@ from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .models import Linkage, WordEntry
+from .tags import LIST_ITEM_TAG_TEMPLATES
 
 
 def extract_linkage_section(
@@ -111,17 +112,15 @@ def extract_linkage_list_item(
                     Linkage(word=word, sense=sense, sense_index=sense_index)
                 )
         elif isinstance(node, TemplateNode):
-            from .translation import TR_TEMPLATES
-
             if node.template_name == "expr":
                 extract_expr_template(wxr, word_entry, node, linkage_type)
-            elif node.template_name in TR_TEMPLATES:
+            elif node.template_name in LIST_ITEM_TAG_TEMPLATES:
                 if len(linkage_list) > orig_len:
                     linkage_list[-1].tags.append(
-                        TR_TEMPLATES[node.template_name]
+                        LIST_ITEM_TAG_TEMPLATES[node.template_name]
                     )
                 else:
-                    tags.append(TR_TEMPLATES[node.template_name])
+                    tags.append(LIST_ITEM_TAG_TEMPLATES[node.template_name])
 
 
 def extract_nld_template(

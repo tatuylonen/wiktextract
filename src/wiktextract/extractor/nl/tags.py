@@ -342,3 +342,18 @@ def translate_raw_tags(data: WordEntry) -> None:
         else:
             raw_tags.append(raw_tag)
     data.raw_tags = raw_tags
+
+
+# used in translation, linkage and gloss lists
+LIST_ITEM_TAG_TEMPLATES = {
+    "m": "masculine",
+    "f": "feminine",
+    "n": "neuter",
+    "c": "common",
+    "s": "singular",
+    "p": "plural",
+    "a": "animate",
+    "i": "inanimate",
+    "impf": "imperfective",
+    "pf": "perfective",
+}
