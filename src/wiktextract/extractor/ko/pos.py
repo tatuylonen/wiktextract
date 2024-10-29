@@ -180,7 +180,14 @@ def extract_form_of_template(
 
 
 HEADER_TEMPLATES = frozenset(
-    ["ko-verb", "한국어 동사", "ko-noun", "한국어 명사"]
+    [
+        "ko-verb",
+        "한국어 동사",
+        "ko-noun",
+        "한국어 명사",
+        "ko-proper noun",
+        "한국어 고유명사",
+    ]
 )
 
 
@@ -189,7 +196,12 @@ def extract_header_template(
 ) -> None:
     if t_node.template_name in ["ko-verb", "한국어 동사"]:
         extract_ko_verb_template(wxr, word_entry, t_node)
-    elif t_node.template_name in ["ko-noun", "한국어 명사"]:
+    elif t_node.template_name in [
+        "ko-noun",
+        "한국어 명사",
+        "ko-proper noun",
+        "한국어 고유명사",
+    ]:
         extract_ko_noun_template(wxr, word_entry, t_node)
 
 
@@ -224,6 +236,7 @@ def extract_ko_noun_template(
     wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
 ) -> None:
     # https://ko.wiktionary.org/wiki/틀:한국어_명사
+    # https://ko.wiktionary.org/wiki/틀:한국어_고유명사
     hanja = clean_node(wxr, None, t_node.template_parameters.get("한자", ""))
     if hanja != "":
         word_entry.forms.append(Form(form=hanja, tags=["hanja"]))
