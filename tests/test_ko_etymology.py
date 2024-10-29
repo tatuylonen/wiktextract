@@ -54,3 +54,27 @@ class TestKoEtymology(TestCase):
         self.assertEqual(
             data[0]["etymology_texts"], ["아기의 이 모음 역행 동화"]
         )
+
+    def test_not_include_subsection_lists(self):
+        data = parse_page(
+            self.wxr,
+            "병신",
+            """== 한국어 ==
+=== 어원 1 ===
+* 욕설로 사용되는 용례는 1950년대부터 확인됨.
+==== 명사 ====
+# 다쳐서 몸이 온전하지 못하거나 혹은 태어나면서부터 기형의 몸을 가진 사람.
+
+=== 어원 2 ===
+* <span class="etyl">[[w:한문|한문]][[Category:한국어 terms borrowed from 한문|없다]]</span> <i class="Hant mention" lang="xzh">[[丙申|丙申]]</i>.
+==== 명사 ====
+# 육십 간지 가운데 하나.""",
+        )
+        self.assertEqual(
+            data[0]["etymology_texts"],
+            ["욕설로 사용되는 용례는 1950년대부터 확인됨."],
+        )
+        self.assertEqual(data[1]["etymology_texts"], ["한문 丙申."])
+        self.assertEqual(
+            data[1]["categories"], ["한국어 terms borrowed from 한문"]
+        )

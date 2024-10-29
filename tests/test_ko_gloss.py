@@ -136,3 +136,43 @@ class TestKoGloss(TestCase):
                 "glosses": ["열매가 맺히다"],
             },
         )
+
+    def test_note_list_above_gloss_list(self):
+        data = parse_page(
+            self.wxr,
+            "놓치다",
+            """== 한국어 ==
+=== 명사 ===
+*활용: 놓치어(놓쳐), 놓치니
+# 손에 잡거나 쥐고 있던 것을 잘못하여 놓아 버리다.
+# 일을 하기에 적절한 때나 기회를 그냥 보내다.""",
+        )
+        self.assertEqual(data[0]["note"], "놓치어(놓쳐), 놓치니")
+
+    def test_ko_verb(self):
+        self.wxr.wtp.add_page(
+            "틀:ko-verb",
+            10,
+            """<span class="headword-line"><strong class="Kore headword" lang="ko">없다</strong> (<span lang="ko-Latn" class="headword-tr tr Latn" dir="ltr">eopda</span>) (부정사형 <b class="None" lang="ko">[[없어#한국어|없어]]</b>[[Category:한국어 비표준 문자가 포함된 낱말 (링크)|없다]], 연결어미형 <b class="None" lang="ko">[[없으니#한국어|없으니]]</b>, 명사형 <b class="None" lang="ko">[[없음#한국어|없음]]</b>, 사동사 <b class="None" lang="ko">[[없애다#한국어|없애다]]</b>)</span>[[Category:한국어 동사|없다]]""",
+        )
+        data = parse_page(
+            self.wxr,
+            "없다",
+            """== 한국어 ==
+=== 형용사 ===
+{{ko-verb|nm=없음|cv=없애다}}
+# 대상이 실제로 존재하지 않는 상태이다.""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {"form": "없어", "tags": ["infinitive"]},
+                {"form": "없으니", "tags": ["sequential"]},
+                {"form": "없음", "tags": ["noun"]},
+                {"form": "없애다", "tags": ["causative"]},
+            ],
+        )
+        self.assertEqual(
+            data[0]["categories"],
+            ["한국어 비표준 문자가 포함된 낱말 (링크)", "한국어 동사"],
+        )

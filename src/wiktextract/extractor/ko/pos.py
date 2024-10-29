@@ -1,6 +1,12 @@
 import re
 
-from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
+from wikitextprocessor import (
+    HTMLNode,
+    LevelNode,
+    NodeKind,
+    TemplateNode,
+    WikiNode,
+)
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -10,7 +16,7 @@ from .linkage import (
     extract_linkage_list_item,
     extract_linkage_template,
 )
-from .models import AltForm, Sense, WordEntry
+from .models import AltForm, Form, Sense, WordEntry
 from .section_titles import LINKAGE_SECTIONS, POS_DATA
 from .sound import SOUND_TEMPLATES, extract_sound_template
 from .tags import translate_raw_tags
@@ -53,6 +59,8 @@ def extract_pos_section(
                     if len(page_data[-1].senses) > 0
                     else "",
                 )
+            elif node.template_name in HEADER_TEMPLATES:
+                extract_header_template(wxr, page_data[-1], node)
         elif node.kind == NodeKind.LIST:
             for list_item in node.find_child(NodeKind.LIST_ITEM):
                 if node.sarg.startswith("#"):
@@ -131,14 +139,20 @@ def extract_unorderd_list_item(
             break
         elif (
             isinstance(node, str)
-            and ("참고:" in node or "참조:" in node)
-            and len(word_entry.senses) > 0
+            and re.search(r"(?:참고|참조|활용):", node) is not None
         ):
-            sense = word_entry.senses[-1]
-            sense.note = node[node.index(":") + 1 :].strip()
-            sense.note += clean_node(
-                wxr, sense, list_item.children[index + 1 :]
+            note_str = node[node.index(":") + 1 :].strip()
+            note_str += clean_node(
+                wxr,
+                word_entry.senses[-1]
+                if len(word_entry.senses) > 0
+                else word_entry,
+                list_item.children[index + 1 :],
             )
+            if len(word_entry.senses) > 0:
+                word_entry.senses[-1].note = note_str
+            else:
+                word_entry.note = note_str
             break
         elif (
             isinstance(node, str)
@@ -163,3 +177,66 @@ def extract_form_of_template(
     word = clean_node(wxr, None, t_node.template_parameters.get(word_arg, ""))
     if len(word) > 0:
         sense.form_of.append(AltForm(word=word))
+
+
+HEADER_TEMPLATES = frozenset(
+    [
+        "ko-verb",
+        "한국어 동사",
+        "ko-noun",
+        "한국어 명사",
+        "ko-proper noun",
+        "한국어 고유명사",
+    ]
+)
+
+
+def extract_header_template(
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+) -> None:
+    if t_node.template_name in ["ko-verb", "한국어 동사"]:
+        extract_ko_verb_template(wxr, word_entry, t_node)
+    elif t_node.template_name in [
+        "ko-noun",
+        "한국어 명사",
+        "ko-proper noun",
+        "한국어 고유명사",
+    ]:
+        extract_ko_noun_template(wxr, word_entry, t_node)
+
+
+def extract_ko_verb_template(
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+) -> None:
+    # https://ko.wiktionary.org/wiki/틀:한국어_동사
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    clean_node(wxr, word_entry, expanded_node)
+    for top_span_tag in expanded_node.find_html(
+        "span", attr_name="class", attr_value="headword-line"
+    ):
+        raw_tag = ""
+        for node in top_span_tag.children:
+            if isinstance(node, str):
+                if "(" in node:
+                    raw_tag = node[node.rindex("(") + 1 :].strip(", ")
+                else:
+                    raw_tag = node.strip(", ")
+            elif isinstance(node, HTMLNode) and node.tag == "b":
+                form = Form(form=clean_node(wxr, None, node))
+                if raw_tag != "":
+                    form.raw_tags.append(raw_tag)
+                if form.form != "":
+                    translate_raw_tags(form)
+                    word_entry.forms.append(form)
+
+
+def extract_ko_noun_template(
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+) -> None:
+    # https://ko.wiktionary.org/wiki/틀:한국어_명사
+    # https://ko.wiktionary.org/wiki/틀:한국어_고유명사
+    hanja = clean_node(wxr, None, t_node.template_parameters.get("한자", ""))
+    if hanja != "":
+        word_entry.forms.append(Form(form=hanja, tags=["hanja"]))

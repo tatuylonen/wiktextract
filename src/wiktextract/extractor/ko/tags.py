@@ -16,7 +16,34 @@ GLOSS_TAGS = {
     "타동사": "transitive",
 }
 
-TAGS = {**GLOSS_TAGS}
+SOUND_TAGS = {
+    # 틀:ko-IPA
+    "Revised Romanization": ["revised", "romanization"],
+    "Revised Romanization (translit.)": [
+        "revised",
+        "romanization",
+        "transliteration",
+    ],
+    "McCune-Reischauer": "McCune-Reischauer",
+    "Yale Romanization": ["Yale", "romanization"],
+    # 틀:ja-pron
+    "도쿄": "Tokyo",
+    # 틀:발음 듣기, 틀:IPA
+    "영국": "UK",
+    "미국": "US",
+    "영": "UK",
+    "미": "US",
+}
+
+HEADER_TAGS = {
+    # 틀:한국어_동사
+    "부정사형": "infinitive",
+    "연결어미형": "sequential",
+    "명사형": "noun",
+    "사동사": "causative",
+}
+
+TAGS = {**GLOSS_TAGS, **SOUND_TAGS, **HEADER_TAGS}
 
 TOPICS = {
     "금융": "finance",
@@ -47,7 +74,11 @@ def translate_raw_tags(data: WordEntry) -> None:
     raw_tags = []
     for raw_tag in data.raw_tags:
         if raw_tag in TAGS:
-            data.tags.append(TAGS[raw_tag])
+            tr_tag = TAGS[raw_tag]
+            if isinstance(tr_tag, str):
+                data.tags.append(tr_tag)
+            elif isinstance(tr_tag, list):
+                data.tags.extend(tr_tag)
         elif raw_tag in TOPICS:
             data.topics.append(TOPICS[raw_tag])
         else:

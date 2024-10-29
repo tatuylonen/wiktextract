@@ -34,14 +34,14 @@ class TestKoSound(TestCase):
 # [[대답하다]], [[대꾸하다]].""",
         )
         self.assertEqual(data[0]["sounds"][0]["audio"], "en-uk-answer.ogg")
-        self.assertEqual(data[0]["sounds"][0]["raw_tags"], ["영국"])
+        self.assertEqual(data[0]["sounds"][0]["tags"], ["UK"])
         self.assertEqual(data[0]["sounds"][1]["audio"], "en-us-answer.ogg")
-        self.assertEqual(data[0]["sounds"][1]["raw_tags"], ["미국"])
+        self.assertEqual(data[0]["sounds"][1]["tags"], ["US"])
         self.assertEqual(
             data[0]["sounds"][2:],
             [
-                {"ipa": "ˈɑːn.sə(ɹ)", "raw_tags": ["영"]},
-                {"ipa": "ˈæn.sɚ", "raw_tags": ["미"]},
+                {"ipa": "ˈɑːn.sə(ɹ)", "tags": ["UK"]},
+                {"ipa": "ˈæn.sɚ", "tags": ["US"]},
             ],
         )
         self.assertEqual(
@@ -69,7 +69,7 @@ class TestKoSound(TestCase):
             [
                 {"ipa": "[ka̠]", "raw_tags": ["표준어/서울"]},
                 {"hangul": "[가]"},
-                {"roman": "ga", "raw_tags": ["Revised Romanization"]},
+                {"roman": "ga", "tags": ["revised", "romanization"]},
             ],
         )
         self.assertEqual(
@@ -94,11 +94,7 @@ class TestKoSound(TestCase):
         self.assertEqual(
             data[0]["sounds"],
             [
-                {
-                    "roman": "[tóꜜòzàì]",
-                    "other": "とーざい",
-                    "raw_tags": ["도쿄"],
-                },
+                {"roman": "[tóꜜòzàì]", "other": "とーざい", "tags": ["Tokyo"]},
                 {"ipa": "[to̞ːza̠i]"},
             ],
         )

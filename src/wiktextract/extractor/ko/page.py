@@ -67,7 +67,11 @@ def parse_section(
         )
     elif title_text == "어원":
         extract_etymology_section(
-            wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
+            wxr,
+            page_data[-1]
+            if len(page_data) > 0 and len(page_data[-1].etymology_texts) == 0
+            else base_data,
+            level_node,
         )
     elif title_text in ["참고 문헌", "독음", "자원"]:
         pass  # ignore
