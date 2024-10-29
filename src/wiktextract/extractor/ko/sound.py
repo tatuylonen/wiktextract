@@ -45,6 +45,7 @@ def extract_listen_pronunciation_template(
             word_entry.sounds.append(sound)
         elif len(word_entry.sounds) > 0:
             word_entry.sounds[-1].raw_tags.append(value)
+            translate_raw_tags(word_entry.sounds[-1])
 
 
 def extract_ipa_template(
@@ -62,6 +63,7 @@ def extract_ipa_template(
             word_entry.sounds.append(sound)
         elif len(word_entry.sounds) > 0:
             word_entry.sounds[-1].raw_tags.append(value)
+            translate_raw_tags(word_entry.sounds[-1])
 
 
 def extract_ko_ipa_template(
@@ -130,5 +132,6 @@ def extract_ja_pron_template(
                 elif span_class == "IPA":
                     sound.ipa = clean_node(wxr, None, span_tag)
             if sound.ipa != "" or sound.roman != "":
+                translate_raw_tags(sound)
                 word_entry.sounds.append(sound)
     clean_node(wxr, word_entry, expanded_node)

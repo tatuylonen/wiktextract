@@ -26,6 +26,13 @@ SOUND_TAGS = {
     ],
     "McCune-Reischauer": "McCune-Reischauer",
     "Yale Romanization": ["Yale", "romanization"],
+    # 틀:ja-pron
+    "도쿄": "Tokyo",
+    # 틀:발음 듣기, 틀:IPA
+    "영국": "UK",
+    "미국": "US",
+    "영": "UK",
+    "미": "US",
 }
 
 TAGS = {**GLOSS_TAGS, **SOUND_TAGS}
