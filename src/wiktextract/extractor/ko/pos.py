@@ -1,11 +1,11 @@
 import re
 
 from wikitextprocessor import (
+    HTMLNode,
     LevelNode,
     NodeKind,
     TemplateNode,
     WikiNode,
-    HTMLNode,
 )
 
 from ...page import clean_node
@@ -179,7 +179,9 @@ def extract_form_of_template(
         sense.form_of.append(AltForm(word=word))
 
 
-HEADER_TEMPLATES = frozenset(["ko-verb", "한국어 동사"])
+HEADER_TEMPLATES = frozenset(
+    ["ko-verb", "한국어 동사", "ko-noun", "한국어 명사"]
+)
 
 
 def extract_header_template(
@@ -187,6 +189,8 @@ def extract_header_template(
 ) -> None:
     if t_node.template_name in ["ko-verb", "한국어 동사"]:
         extract_ko_verb_template(wxr, word_entry, t_node)
+    elif t_node.template_name in ["ko-noun", "한국어 명사"]:
+        extract_ko_noun_template(wxr, word_entry, t_node)
 
 
 def extract_ko_verb_template(
@@ -214,3 +218,12 @@ def extract_ko_verb_template(
                 if form.form != "":
                     translate_raw_tags(form)
                     word_entry.forms.append(form)
+
+
+def extract_ko_noun_template(
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+) -> None:
+    # https://ko.wiktionary.org/wiki/틀:한국어_명사
+    hanja = clean_node(wxr, None, t_node.template_parameters.get("한자", ""))
+    if hanja != "":
+        word_entry.forms.append(Form(form=hanja, tags=["hanja"]))
