@@ -441,13 +441,6 @@ head_end_re = re.compile(
     r"(" + "|".join(re.escape(x) for x in head_end_map.keys()) + r")$"
 )
 
-# Words that can be part of form description
-valid_words: set[str] = set(["or", "and"])
-for x in valid_tags:
-    valid_words.update(x.split(" "))
-for x in xlat_tags_map.keys():
-    valid_words.update(x.split(" "))
-
 
 # Dictionary of language-specific parenthesized head part starts that
 # either introduce new tags or modify previous tags.  The value for each
@@ -929,6 +922,7 @@ def check_unknown(
     words = wordlst[from_i:to_i]
     tag = " ".join(words)
     assert tag
+    # print(f"{tag=}")
     if re.match(ignored_unknown_starts_re, tag):
         # Tags with this start are to be ignored
         return [(from_i, ["UNKNOWN"], [])]
@@ -1010,11 +1004,14 @@ def decode_tags(
         # I hate Python's *nested* list comprehension syntax ^
         or any(s.startswith("error-") for s in topics)
     ):
-        # slashes_re contains valid key entries with slashes; we're going to
-        # skip them by splitting the string and skipping handling every
-        # second entry, which contains the splitting group like "masculine/
-        # feminine" style keys.
+        new_tagsets: list[tuple[str, ...]] = []
+        new_topics: list[str] = []
+
         if "/" in src:
+            # slashes_re contains valid key entries with slashes; we're going
+            # to skip them by splitting the string and skipping handling every
+            # second entry, which contains the splitting group like "masculine/
+            # feminine" style keys.
             split_parts = re.split(slashes_re, src)
             new_parts: list[str] = []
             if len(split_parts) > 1:
@@ -1029,7 +1026,16 @@ def decode_tags(
             new_tagsets, new_topics = decode_tags1(
                 new_src, allow_any, no_unknown_starts
             )
+        elif " or " in src or " and " in src:
+            # Annoying kludge.
+            new_src = src.replace(" and ", " ")
+            new_src = new_src.replace(" or ", " ")
+            new_tagsets, new_topics = decode_tags1(
+                new_src, allow_any, no_unknown_starts
+            )
+            # print(f"{new_tagsets=}")
 
+        if new_tagsets or new_topics:
             old_errors = sum(
                 1 for tagset in tagsets for s in tagset if s.startswith("error")
             )

@@ -8,7 +8,6 @@ from wiktextract.extractor.en.form_descriptions import decode_tags
 
 
 class EnTagTests(unittest.TestCase):
-
     def test_empty(self):
         ret = decode_tags("")
         self.assertEqual(ret, ([()], []))
@@ -67,7 +66,15 @@ class EnTagTests(unittest.TestCase):
 
     def test_tags13(self):
         ret, topics = decode_tags("class 2a stress pattern xyz")
-        self.assertEqual(ret, [("class-2a", "error-unknown-tag",)])
+        self.assertEqual(
+            ret,
+            [
+                (
+                    "class-2a",
+                    "error-unknown-tag",
+                )
+            ],
+        )
 
     def test_tags14(self):
         ret, topics = decode_tags("Cockney rhyming slang")
@@ -84,28 +91,33 @@ class EnTagTests(unittest.TestCase):
 
     def test_tags17(self):
         ret, topics = decode_tags("colloquial Cockney Test rhyming slang")
-        self.assertEqual(ret, [("Cockney", "colloquial",
-                                "error-unknown-tag", "slang")])
+        self.assertEqual(
+            ret, [("Cockney", "colloquial", "error-unknown-tag", "slang")]
+        )
 
     def test_tags18(self):
-        ret, topics = decode_tags("colloquial Cockney Test unknown1 "
-                                  "rhyming slang")
-        self.assertEqual(ret, [("Cockney", "colloquial",
-                                "error-unknown-tag", "slang")])
+        ret, topics = decode_tags(
+            "colloquial Cockney Test unknown1 " "rhyming slang"
+        )
+        self.assertEqual(
+            ret, [("Cockney", "colloquial", "error-unknown-tag", "slang")]
+        )
 
     def test_tags19(self):
-        ret, topics = decode_tags("colloquial Cockney Test unknown1 "
-                                  "rhyming slang",
-                                  allow_any=True)
-        self.assertEqual(ret, [("Cockney", "Test unknown1", "colloquial",
-                                "slang")])
+        ret, topics = decode_tags(
+            "colloquial Cockney Test unknown1 " "rhyming slang", allow_any=True
+        )
+        self.assertEqual(
+            ret, [("Cockney", "Test unknown1", "colloquial", "slang")]
+        )
 
     def test_tags20(self):
-        ret, topics = decode_tags("colloquial Cockney rhyming slang "
-                                  "Test unknown1",
-                                  allow_any=True)
-        self.assertEqual(ret, [("Cockney", "Test unknown1", "colloquial",
-                                "slang")])
+        ret, topics = decode_tags(
+            "colloquial Cockney rhyming slang " "Test unknown1", allow_any=True
+        )
+        self.assertEqual(
+            ret, [("Cockney", "Test unknown1", "colloquial", "slang")]
+        )
 
     def test_tags21(self):
         ret, topics = decode_tags("simple past and past participle")
@@ -113,17 +125,21 @@ class EnTagTests(unittest.TestCase):
         self.assertEqual(ret, [("participle", "past"), ("past",)])
 
     def test_tags22(self):
-        ret, topics = decode_tags("colloquial Cockney Test, unknown1; "
-                                  "rhyming slang",
-                                  allow_any=True)
-        self.assertEqual(ret, [("Cockney", "Test", "colloquial",
-                                "slang", "unknown1")])
+        ret, topics = decode_tags(
+            "colloquial Cockney Test, unknown1; " "rhyming slang",
+            allow_any=True,
+        )
+        self.assertEqual(
+            ret, [("Cockney", "Test", "colloquial", "slang", "unknown1")]
+        )
+
     def test_tags23(self):
-        ret, topics = decode_tags("intransitive, in perfect tenses, "
-                                  "without predicate")
-        self.assertEqual(ret, [("in perfect tenses",
-                                "intransitive",
-                                "without predicate")])
+        ret, topics = decode_tags(
+            "intransitive, in perfect tenses, " "without predicate"
+        )
+        self.assertEqual(
+            ret, [("in perfect tenses", "intransitive", "without predicate")]
+        )
 
     def test_tags24(self):
         ret, topics = decode_tags("as a modifier in compound words")
@@ -187,7 +203,7 @@ class EnTagTests(unittest.TestCase):
 
     def test_tags39(self):
         ret, topics = decode_tags("with inf., obsolescent")
-        self.assertEqual(ret, [("obsolete", "possibly","with-infinitive")])
+        self.assertEqual(ret, [("obsolete", "possibly", "with-infinitive")])
 
     def test_tags40(self):
         ret, topics = decode_tags("transitive of people")
@@ -198,10 +214,21 @@ class EnTagTests(unittest.TestCase):
         self.assertEqual(ret, [("error-unknown-tag", "transitive")])
 
     def test_tags42(self):
-        ret, topics = decode_tags("first/third-person singular present "
-                                  "subjunctive")
-        self.assertEqual(ret, [("first-person", "present",
-                                "singular", "subjunctive", "third-person")])
+        ret, topics = decode_tags(
+            "first/third-person singular present " "subjunctive"
+        )
+        self.assertEqual(
+            ret,
+            [
+                (
+                    "first-person",
+                    "present",
+                    "singular",
+                    "subjunctive",
+                    "third-person",
+                )
+            ],
+        )
 
     def test_tags43(self):
         ret, topics = decode_tags("inflection of")
@@ -209,26 +236,52 @@ class EnTagTests(unittest.TestCase):
 
     def test_tags44(self):
         ret, topics = decode_tags("third-person singular present indicative")
-        self.assertEqual(ret, [("indicative", "present", "singular",
-                                "third-person",)])
+        self.assertEqual(
+            ret,
+            [
+                (
+                    "indicative",
+                    "present",
+                    "singular",
+                    "third-person",
+                )
+            ],
+        )
 
     def test_tags45(self):
         ret, topics = decode_tags("ordinal form of")
         self.assertEqual(ret, [("form-of", "ordinal")])
 
     def test_tags46(self):
-        ret, topics = decode_tags("first-person singular (eu) present "
-                                  "subjunctive")
-        self.assertEqual(ret, [("first-person", "present", "singular",
-                                "subjunctive", "with-eu")])
+        ret, topics = decode_tags(
+            "first-person singular (eu) present " "subjunctive"
+        )
+        self.assertEqual(
+            ret,
+            [("first-person", "present", "singular", "subjunctive", "with-eu")],
+        )
 
     def test_tags47(self):
-        ret, topics = decode_tags("third-person singular (él, ella, also "
-                                  "used with usted) present subjunctive "
-                                  "form of")
-        self.assertEqual(ret, [("form-of", "present", "singular", "subjunctive",
-                                "third-person",
-                                "with-ella", "with-usted", "with-él")])
+        ret, topics = decode_tags(
+            "third-person singular (él, ella, also "
+            "used with usted) present subjunctive "
+            "form of"
+        )
+        self.assertEqual(
+            ret,
+            [
+                (
+                    "form-of",
+                    "present",
+                    "singular",
+                    "subjunctive",
+                    "third-person",
+                    "with-ella",
+                    "with-usted",
+                    "with-él",
+                )
+            ],
+        )
 
     def test_tags48(self):
         ret, topics = decode_tags("instant messaging")
@@ -236,8 +289,13 @@ class EnTagTests(unittest.TestCase):
 
     def test_tags49(self):
         ret, topics = decode_tags("plural and definite singular attributive")
-        self.assertEqual(ret, [("attributive", "definite", "singular"),
-                               ("attributive", "plural")])
+        self.assertEqual(
+            ret,
+            [
+                ("attributive", "definite", "singular"),
+                ("attributive", "plural"),
+            ],
+        )
 
     def test_tags50(self):
         ret, topics = decode_tags("alternative spelling of")
@@ -261,8 +319,16 @@ class EnTagTests(unittest.TestCase):
 
     def test_tags55(self):
         ret, topics = decode_tags("plural and definite singular attributive")
-        self.assertEqual(ret, [("attributive", "definite", "singular"),
-                               ("attributive", "plural",)])
+        self.assertEqual(
+            ret,
+            [
+                ("attributive", "definite", "singular"),
+                (
+                    "attributive",
+                    "plural",
+                ),
+            ],
+        )
 
     def test_tags56(self):
         ret, topics = decode_tags("comparative")
@@ -293,10 +359,13 @@ class EnTagTests(unittest.TestCase):
         self.assertEqual(ret, [("definite", "plural", "singular")])
 
     def test_tags63(self):
-        ret, topics = decode_tags("first-person plural "
-                                  "reflexive/dative/accusative form")
-        self.assertEqual(ret, [("accusative", "dative", "first-person",
-                                "plural", "reflexive")])
+        ret, topics = decode_tags(
+            "first-person plural " "reflexive/dative/accusative form"
+        )
+        self.assertEqual(
+            ret,
+            [("accusative", "dative", "first-person", "plural", "reflexive")],
+        )
 
         self.assertEqual(topics, [])
 
@@ -314,8 +383,17 @@ class EnTagTests(unittest.TestCase):
         # during the first run, except for keys with slashes in them.
         ret, topics = decode_tags("nominative/plural masculine/feminine")
         # -> "nominative plural masculine/feminine"
-        self.assertEqual(ret, [("feminine", "masculine",
-                                "nominative", "plural",)])
+        self.assertEqual(
+            ret,
+            [
+                (
+                    "feminine",
+                    "masculine",
+                    "nominative",
+                    "plural",
+                )
+            ],
+        )
 
     def test_topics1(self):
         ret, topics = decode_tags("nautical")
@@ -323,6 +401,25 @@ class EnTagTests(unittest.TestCase):
 
     def test_topics2(self):
         ret, topics = decode_tags("ropemaking")
-        self.assertEqual(topics, ["ropemaking", "crafts",
-                                  "nautical", "transport",
-                                  "arts", "hobbies", "lifestyle"])
+        self.assertEqual(
+            topics,
+            [
+                "ropemaking",
+                "crafts",
+                "nautical",
+                "transport",
+                "arts",
+                "hobbies",
+                "lifestyle",
+            ],
+        )
+
+    def test_and(self):
+        ret, topics = decode_tags("nominative and accusative")
+        self.assertEqual(
+            ret,
+            [(
+                "accusative",
+                "nominative",
+            )],
+        )

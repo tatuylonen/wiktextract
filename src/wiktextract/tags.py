@@ -4508,7 +4508,7 @@ xlat_tags_map: Dict[str, Union[str, List[str]]] = {
     "syncopated": "syncope",
     "reduplication with syncope": "reduplication syncope",
     "introducing subjunctive hortative": "subjunctive hortative",
-    "nominative and vocative plural animate": "nominative vocative",
+    "nominative and vocative plural animate": "nominative vocative plural animate",
     "with diaeresis to indicate disyllabilicity": "",
     "aphaeretic variant": "variant",
     "mediopassive voice": "mediopassive",
