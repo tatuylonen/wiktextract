@@ -4,6 +4,7 @@ from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from ..share import set_sound_file_url_fields
 from .models import Sound, WordEntry
+from .tags import translate_raw_tags
 
 SOUND_TEMPLATES = frozenset(["발음 듣기", "IPA", "ko-IPA", "ja-pron"])
 
@@ -83,6 +84,7 @@ def extract_ko_ipa_template(
                 elif span_class == "Kore":
                     sound.hangul = clean_node(wxr, None, span_tag)
             if sound.hangul != "" or sound.ipa != "":
+                translate_raw_tags(sound)
                 word_entry.sounds.append(sound)
 
     for table in expanded_node.find_html("table"):
@@ -98,6 +100,7 @@ def extract_ko_ipa_template(
                 sound.roman = clean_node(wxr, None, td_tag)
                 break
             if sound.roman != "":
+                translate_raw_tags(sound)
                 word_entry.sounds.append(sound)
 
     for link_node in expanded_node.find_child(NodeKind.LINK):

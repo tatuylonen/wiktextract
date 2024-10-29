@@ -69,7 +69,7 @@ class TestKoSound(TestCase):
             [
                 {"ipa": "[ka̠]", "raw_tags": ["표준어/서울"]},
                 {"hangul": "[가]"},
-                {"roman": "ga", "raw_tags": ["Revised Romanization"]},
+                {"roman": "ga", "tags": ["revised", "romanization"]},
             ],
         )
         self.assertEqual(
