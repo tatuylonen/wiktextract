@@ -92,3 +92,4 @@ class WordEntry(KoreanBaseModel):
     antonyms: list[Linkage] = []
     translations: list[Translation] = []
     etymology_texts: list[str] = []
+    note: str = ""

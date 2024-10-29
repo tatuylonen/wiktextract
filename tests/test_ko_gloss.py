@@ -136,3 +136,15 @@ class TestKoGloss(TestCase):
                 "glosses": ["열매가 맺히다"],
             },
         )
+
+    def test_note_list_above_gloss_list(self):
+        data = parse_page(
+            self.wxr,
+            "놓치다",
+            """== 한국어 ==
+=== 명사 ===
+*활용: 놓치어(놓쳐), 놓치니
+# 손에 잡거나 쥐고 있던 것을 잘못하여 놓아 버리다.
+# 일을 하기에 적절한 때나 기회를 그냥 보내다.""",
+        )
+        self.assertEqual(data[0]["note"], "놓치어(놓쳐), 놓치니")

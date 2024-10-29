@@ -131,14 +131,20 @@ def extract_unorderd_list_item(
             break
         elif (
             isinstance(node, str)
-            and ("참고:" in node or "참조:" in node)
-            and len(word_entry.senses) > 0
+            and re.search(r"(?:참고|참조|활용):", node) is not None
         ):
-            sense = word_entry.senses[-1]
-            sense.note = node[node.index(":") + 1 :].strip()
-            sense.note += clean_node(
-                wxr, sense, list_item.children[index + 1 :]
+            note_str = node[node.index(":") + 1 :].strip()
+            note_str += clean_node(
+                wxr,
+                word_entry.senses[-1]
+                if len(word_entry.senses) > 0
+                else word_entry,
+                list_item.children[index + 1 :],
             )
+            if len(word_entry.senses) > 0:
+                word_entry.senses[-1].note = note_str
+            else:
+                word_entry.note = note_str
             break
         elif (
             isinstance(node, str)
