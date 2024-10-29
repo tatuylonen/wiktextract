@@ -35,7 +35,15 @@ SOUND_TAGS = {
     "미": "US",
 }
 
-TAGS = {**GLOSS_TAGS, **SOUND_TAGS}
+HEADER_TAGS = {
+    # 틀:한국어_동사
+    "부정사형": "infinitive",
+    "연결어미형": "sequential",
+    "명사형": "noun",
+    "사동사": "causative",
+}
+
+TAGS = {**GLOSS_TAGS, **SOUND_TAGS, **HEADER_TAGS}
 
 TOPICS = {
     "금융": "finance",

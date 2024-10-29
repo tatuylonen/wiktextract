@@ -73,6 +73,12 @@ class Translation(KoreanBaseModel):
     sense: str = ""
 
 
+class Form(KoreanBaseModel):
+    form: str = ""
+    tags: list[str] = []
+    raw_tags: list[str] = []
+
+
 class WordEntry(KoreanBaseModel):
     model_config = ConfigDict(title="Korean Wiktionary")
     word: str = Field(description="Word string", min_length=1)
@@ -93,3 +99,4 @@ class WordEntry(KoreanBaseModel):
     translations: list[Translation] = []
     etymology_texts: list[str] = []
     note: str = ""
+    forms: list[Form] = []
