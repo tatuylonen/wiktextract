@@ -63,8 +63,10 @@ def extract_pos_section(
                 extract_header_template(wxr, page_data[-1], node)
         elif node.kind == NodeKind.LIST:
             for list_item in node.find_child(NodeKind.LIST_ITEM):
-                if node.sarg.startswith("#"):
-                    extract_gloss_list_item(wxr, page_data[-1], list_item)
+                if node.sarg.startswith("#") and node.sarg.endswith("#"):
+                    extract_gloss_list_item(
+                        wxr, page_data[-1], list_item, Sense()
+                    )
                 else:
                     extract_unorderd_list_item(wxr, page_data[-1], list_item)
 
@@ -73,19 +75,30 @@ def extract_pos_section(
 
 
 def extract_gloss_list_item(
-    wxr: WiktextractContext, word_entry: WordEntry, list_item: WikiNode
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    list_item: WikiNode,
+    parent_sense: Sense,
 ) -> None:
     gloss_nodes = []
-    sense = Sense()
+    sense = parent_sense.model_copy(deep=True)
     for node in list_item.children:
         if isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
             gloss_text = clean_node(wxr, sense, gloss_nodes)
             if len(gloss_text) > 0:
                 sense.glosses.append(gloss_text)
+                translate_raw_tags(sense)
                 word_entry.senses.append(sense)
                 gloss_nodes.clear()
             for nested_list_item in node.find_child(NodeKind.LIST_ITEM):
-                extract_unorderd_list_item(wxr, word_entry, nested_list_item)
+                if node.sarg.startswith("#") and node.sarg.endswith("#"):
+                    extract_gloss_list_item(
+                        wxr, word_entry, nested_list_item, sense
+                    )
+                else:
+                    extract_unorderd_list_item(
+                        wxr, word_entry, nested_list_item
+                    )
             continue
         elif isinstance(node, TemplateNode) and node.template_name.endswith(
             " of"
@@ -127,7 +140,7 @@ def extract_unorderd_list_item(
             if re.fullmatch(r"\d+(?:-\d+)?\.?", bold_text):
                 new_list_item = WikiNode(NodeKind.LIST_ITEM, 0)
                 new_list_item.children = list_item.children[index + 1 :]
-                extract_gloss_list_item(wxr, word_entry, new_list_item)
+                extract_gloss_list_item(wxr, word_entry, new_list_item, Sense())
                 break
         elif isinstance(node, str) and "어원:" in node:
             etymology_nodes = []

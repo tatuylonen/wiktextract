@@ -14,6 +14,11 @@ GLOSS_TAGS = {
     "자동사": "intransitive",
     "직역": "literally",
     "타동사": "transitive",
+    "드물게": "rare",
+    "원래의 의미": "naturally",
+    "문학적": "literary",
+    "해학적": "humorous",
+    "완곡적": "euphemistic",
 }
 
 SOUND_TAGS = {

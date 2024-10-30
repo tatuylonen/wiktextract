@@ -50,4 +50,5 @@ LINKAGE_SECTIONS = {
     "같이 보기": "related",
     "복합어": "derived",
     "관련 단어": "related",
+    "동의어": "synonyms",
 }
