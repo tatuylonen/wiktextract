@@ -108,3 +108,31 @@ def extract_proverb_section(
                 break
         if linkage.word != "":
             word_entry.proverbs.append(linkage)
+        else:
+            for t_node in list_item.find_child(NodeKind.TEMPLATE):
+                if t_node.template_name in ["l", "연결"]:
+                    extract_l_template(wxr, word_entry, t_node, "proverbs")
+
+
+def extract_l_template(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    t_node: TemplateNode,
+    linkage_type: str,
+) -> None:
+    # https://ko.wiktionary.org/wiki/틀:연결
+    # https://en.wiktionary.org/wiki/Template:link
+    for word_arg in [3, 2]:
+        if word_arg in t_node.template_parameters:
+            word = clean_node(wxr, None, t_node.template_parameters[word_arg])
+            if word == "":
+                break
+            linkage = Linkage(word=word)
+            for sense_arg in ["t", 4]:
+                if sense_arg in t_node.template_parameters:
+                    linkage.sense = clean_node(
+                        wxr, None, t_node.template_parameters[sense_arg]
+                    )
+                    break
+            getattr(word_entry, linkage_type).append(linkage)
+            break
