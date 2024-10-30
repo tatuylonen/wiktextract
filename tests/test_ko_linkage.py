@@ -108,3 +108,23 @@ class TestKoLinkage(TestCase):
                 {"word": "土产", "roman": "tǔchǎn", "sense": "흙, 땅"},
             ],
         )
+
+    def test_l_template(self):
+        data = parse_page(
+            self.wxr,
+            "병신",
+            """== 중국어 ==
+=== 명사 ===
+# 다쳐서
+==== 관용구 ====
+* {{l|ko|병신도 제 재미에 산다|t=사람은 각자 자기 잘 난 맛에 산다라는 뜻}}""",
+        )
+        self.assertEqual(
+            data[0]["proverbs"],
+            [
+                {
+                    "word": "병신도 제 재미에 산다",
+                    "sense": "사람은 각자 자기 잘 난 맛에 산다라는 뜻",
+                }
+            ],
+        )
