@@ -55,10 +55,12 @@ def extract_example_list_item(
         else:
             e_text_nodes.append(node)
 
-    if example.text == "":
-        example.text = clean_node(wxr, sense, e_text_nodes)
-    if example.translation == "":
-        example.translation = clean_node(wxr, sense, e_tr_nodes)
+    e_text = clean_node(wxr, sense, e_text_nodes)
+    if e_text != "":
+        example.text = e_text
+    e_tr = clean_node(wxr, sense, e_tr_nodes)
+    if e_tr != "":
+        example.translation = e_tr
 
     if len(example.text) > 0:
         if lang_code == "zh" and "/" in example.text:
@@ -77,7 +79,11 @@ def extract_example_list_item(
     for nested_list in list_item.find_child(NodeKind.LIST):
         for nested_list_item in nested_list.find_child(NodeKind.LIST_ITEM):
             extract_example_list_item(
-                wxr, sense, nested_list_item, lang_code, example
+                wxr,
+                sense,
+                nested_list_item,
+                lang_code,
+                example if example.text == "" else Example(),
             )
 
 
