@@ -36,6 +36,7 @@ class Sense(KoreanBaseModel):
     examples: list[Example] = []
     note: str = ""
     form_of: list[AltForm] = []
+    pattern: str = Field(default="", description="Sentence structure, 문형")
 
 
 class Sound(KoreanBaseModel):
@@ -100,3 +101,6 @@ class WordEntry(KoreanBaseModel):
     etymology_texts: list[str] = []
     note: str = ""
     forms: list[Form] = []
+    pattern: str = Field(
+        default="", description="Sentence structure, 문형", exclude=True
+    )
