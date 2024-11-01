@@ -3,7 +3,8 @@ from wikitextprocessor import NodeKind, TemplateNode, WikiNode
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from ..ruby import extract_ruby
-from .models import Example, Sense
+from ..share import set_sound_file_url_fields
+from .models import Example, Sense, Sound
 
 
 def extract_example_list_item(
@@ -14,6 +15,8 @@ def extract_example_list_item(
     parent_example: Example | None = None,
 ) -> None:
     example = Example() if parent_example is None else parent_example
+    e_text_nodes = []
+    e_tr_nodes = []
     after_lang_template = False
     for node in list_item.children:
         if isinstance(node, TemplateNode) and node.template_name == "lang":
@@ -33,11 +36,29 @@ def extract_example_list_item(
             extract_ux_template(wxr, sense, example, node)
             break
         elif after_lang_template:
-            example.translation += clean_node(wxr, None, node)
+            e_tr_nodes.append(node)
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
             break
+        elif (
+            isinstance(node, WikiNode)
+            and node.kind == NodeKind.LINK
+            and len(node.largs) > 0
+            and len(node.largs[0]) > 0
+            and isinstance(node.largs[0][0], str)
+            and node.largs[0][0].startswith("File:")
+        ):
+            sound = Sound()
+            sound_file = node.largs[0][0].removeprefix("File:").strip()
+            set_sound_file_url_fields(wxr, sound_file, sound)
+            if sound.audio != "":
+                example.sounds.append(sound)
         else:
-            example.text += clean_node(wxr, None, node)
+            e_text_nodes.append(node)
+
+    if example.text == "":
+        example.text = clean_node(wxr, sense, e_text_nodes)
+    if example.translation == "":
+        example.translation = clean_node(wxr, sense, e_tr_nodes)
 
     if len(example.text) > 0:
         if lang_code == "zh" and "/" in example.text:

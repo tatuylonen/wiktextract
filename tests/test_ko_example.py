@@ -177,3 +177,21 @@ class TestKoExample(TestCase):
                 "ref": "1614년, 이수광, 《지봉유설》, 〈2권 外國 條〉",
             },
         )
+
+    def test_sound_file(self):
+        data = parse_page(
+            self.wxr,
+            "사람",
+            """== 중국어 ==
+=== 명사 ===
+==== 명사 1 ====
+# 어떤 지역이나 시기에 태어나거나 살고 있거나 살았던 자.
+:* 한국 '''사람''' [[File:Ko-한국 사람.oga]]""",
+        )
+        self.assertEqual(
+            data[0]["senses"][0]["examples"][0]["text"], "한국 사람"
+        )
+        self.assertEqual(
+            data[0]["senses"][0]["examples"][0]["sounds"][0]["audio"],
+            "Ko-한국 사람.oga",
+        )
