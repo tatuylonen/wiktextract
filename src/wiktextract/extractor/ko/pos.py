@@ -65,7 +65,10 @@ def extract_pos_section(
             for list_item in node.find_child(NodeKind.LIST_ITEM):
                 if node.sarg.startswith("#") and node.sarg.endswith("#"):
                     extract_gloss_list_item(
-                        wxr, page_data[-1], list_item, Sense()
+                        wxr,
+                        page_data[-1],
+                        list_item,
+                        Sense(pattern=page_data[-1].pattern),
                     )
                 else:
                     extract_unorderd_list_item(wxr, page_data[-1], list_item)
@@ -173,6 +176,12 @@ def extract_unorderd_list_item(
             and node[: node.index(":")].strip() in LINKAGE_SECTIONS
         ):
             extract_linkage_list_item(wxr, word_entry, list_item, "")
+            break
+        elif isinstance(node, str) and "문형:" in node:
+            word_entry.pattern = node[node.index(":") + 1 :].strip()
+            word_entry.pattern += clean_node(
+                wxr, None, list_item.children[index + 1 :]
+            )
             break
     else:
         if len(word_entry.senses) > 0:

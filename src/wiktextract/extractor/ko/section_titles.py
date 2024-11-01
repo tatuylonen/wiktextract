@@ -32,6 +32,7 @@ POS_DATA = {
     "연어": {"pos": "phrase", "tags": ["idiomatic"]},
     "동사 활용형": {"pos": "verb", "tags": ["form-of"]},
     "재귀동사": {"pos": "verb", "tags": ["reflexive"]},
+    "보조형용사": {"pos": "adj", "tags": ["auxiliary"]},
 }
 
 LINKAGE_SECTIONS = {

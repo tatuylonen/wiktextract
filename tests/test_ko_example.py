@@ -177,3 +177,45 @@ class TestKoExample(TestCase):
                 "ref": "1614년, 이수광, 《지봉유설》, 〈2권 外國 條〉",
             },
         )
+
+    def test_sound_file(self):
+        data = parse_page(
+            self.wxr,
+            "사람",
+            """== 중국어 ==
+=== 명사 ===
+==== 명사 1 ====
+# 어떤 지역이나 시기에 태어나거나 살고 있거나 살았던 자.
+:* 한국 '''사람''' [[File:Ko-한국 사람.oga]]""",
+        )
+        self.assertEqual(
+            data[0]["senses"][0]["examples"][0]["text"], "한국 사람"
+        )
+        self.assertEqual(
+            data[0]["senses"][0]["examples"][0]["sounds"][0]["audio"],
+            "Ko-한국 사람.oga",
+        )
+
+    def test_wrong_nested_list(self):
+        data = parse_page(
+            self.wxr,
+            "들다",
+            """== 중국어 ==
+=== 명사 ===
+==== 명사 1 ====
+#  한 곳에서 다른 어디로 또는 밖에서 속이나 안으로 향해 가거나, 오거나 또는 어디에 자리하다.
+: 안으로 드시지요.
+:* 물이 어디에 '''들어''' 있어요？ [[File:물이 어디에 들어 있어요？.ogg]]""",
+        )
+        self.assertEqual(
+            data[0]["senses"][0]["examples"][0]["text"], "안으로 드시지요."
+        )
+        self.assertTrue("sounds" not in data[0]["senses"][0]["examples"][0])
+        self.assertEqual(
+            data[0]["senses"][0]["examples"][1]["text"],
+            "물이 어디에 들어 있어요？",
+        )
+        self.assertEqual(
+            data[0]["senses"][0]["examples"][1]["sounds"][0]["audio"],
+            "물이 어디에 들어 있어요？.ogg",
+        )

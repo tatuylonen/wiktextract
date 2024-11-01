@@ -10,6 +10,22 @@ class KoreanBaseModel(BaseModel):
     )
 
 
+class Sound(KoreanBaseModel):
+    ipa: str = Field(default="", description="International Phonetic Alphabet")
+    audio: str = Field(default="", description="Audio file name")
+    wav_url: str = ""
+    oga_url: str = ""
+    ogg_url: str = ""
+    mp3_url: str = ""
+    opus_url: str = ""
+    flac_url: str = ""
+    tags: list[str] = []
+    raw_tags: list[str] = []
+    hangul: str = ""
+    roman: str = ""
+    other: str = ""
+
+
 class Example(KoreanBaseModel):
     text: str = ""
     translation: str = ""
@@ -21,6 +37,7 @@ class Example(KoreanBaseModel):
     tags: list[str] = []
     literal_meaning: str = ""
     note: str = ""
+    sounds: list[Sound] = []
 
 
 class AltForm(KoreanBaseModel):
@@ -36,22 +53,7 @@ class Sense(KoreanBaseModel):
     examples: list[Example] = []
     note: str = ""
     form_of: list[AltForm] = []
-
-
-class Sound(KoreanBaseModel):
-    ipa: str = Field(default="", description="International Phonetic Alphabet")
-    audio: str = Field(default="", description="Audio file name")
-    wav_url: str = ""
-    oga_url: str = ""
-    ogg_url: str = ""
-    mp3_url: str = ""
-    opus_url: str = ""
-    flac_url: str = ""
-    tags: list[str] = []
-    raw_tags: list[str] = []
-    hangul: str = ""
-    roman: str = ""
-    other: str = ""
+    pattern: str = Field(default="", description="Sentence structure, 문형")
 
 
 class Linkage(KoreanBaseModel):
@@ -100,3 +102,6 @@ class WordEntry(KoreanBaseModel):
     etymology_texts: list[str] = []
     note: str = ""
     forms: list[Form] = []
+    pattern: str = Field(
+        default="", description="Sentence structure, 문형", exclude=True
+    )

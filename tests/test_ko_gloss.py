@@ -203,3 +203,29 @@ class TestKoGloss(TestCase):
                 },
             ],
         )
+
+    def test_pattern_list(self):
+        data = parse_page(
+            self.wxr,
+            "대하다",
+            """== 한국어 ==
+=== 동사 ===
+==== 동사 2 ====
+*문형: […을] [(…과) …을]
+# 마주 향하여 있다.
+*문형: […에/에게 -게] […을 …으로] […을 -게]
+# 어떤 태도로 상대하다.""",
+        )
+        self.assertEqual(
+            data[0]["senses"],
+            [
+                {
+                    "glosses": ["마주 향하여 있다."],
+                    "pattern": "[…을] [(…과) …을]",
+                },
+                {
+                    "glosses": ["어떤 태도로 상대하다."],
+                    "pattern": "[…에/에게 -게] […을 …으로] […을 -게]",
+                },
+            ],
+        )
