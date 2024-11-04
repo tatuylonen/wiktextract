@@ -45,7 +45,7 @@ def extract_noun_adj_table(
                     ).splitlines():
                         if form_str not in ["", "-", wxr.wtp.title]:
                             form = Form(form=form_str)
-                            if row_header not in ["", "naamwoord"]:
+                            if row_header not in ["", "naamwoord", "demoniem"]:
                                 form.raw_tags.append(row_header)
                             if col_index - 1 < len(column_headers):
                                 form.raw_tags.append(
