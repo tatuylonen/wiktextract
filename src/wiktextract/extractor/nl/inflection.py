@@ -158,7 +158,7 @@ def extract_nlverb_template(
                 cell_rowspan_str = cell_node.attrs.get("rowspan", "1")
                 if re.fullmatch(r"\d+", cell_rowspan_str):
                     cell_rowspan = int(cell_rowspan_str)
-                cell_str = clean_node(wxr, None, cell_node)
+                cell_str = clean_node(wxr, None, cell_node).strip("| ")
                 if cell_str in ["", wxr.wtp.title]:
                     col_index += cell_colspan
                     is_row_first_node = False
