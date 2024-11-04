@@ -1,3 +1,4 @@
+import re
 from typing import Any
 
 from mediawiki_langcodes import name_to_code
@@ -39,6 +40,7 @@ def parse_section(
     # title templates
     # https://nl.wiktionary.org/wiki/Categorie:Lemmasjablonen
     title_text = clean_node(wxr, None, level_node.largs)
+    title_text = re.sub(r"\s+#?\d+:?$", "", title_text)
     wxr.wtp.start_subsection(title_text)
     etymology_data = []
     if title_text in POS_DATA:
