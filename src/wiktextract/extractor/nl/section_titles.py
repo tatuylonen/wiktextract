@@ -46,6 +46,7 @@ POS_DATA = {
     "Achtervoegsel": {"pos": "suffix", "tags": ["morpheme"]},
     "Symbool": {"pos": "symbol"},
     "Werkwoord": {"pos": "verb"},
+    "Betrekkelijk naamwoord": {"pos": "noun", "tags": ["relative"]},
 }
 
 
