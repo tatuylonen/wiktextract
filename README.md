@@ -5,11 +5,9 @@ This is a utility and Python package for extracting data from Wiktionary.
 Please report issues on github and we'll try to address them reasonably
 soon.
 
-The current extracted versions of a few Wiktionary editions are available for
-browsing and download at: [https://kaikki.org/dictionary/](http://kaikki.org/
-dictionary/). We plan to maintain an automatically updating version of the
-data at this location.  For most people the preferred way to get the extracted
-Wiktionary data will be to just take it from the web site.
+Some extracted Wiktionary editions data are available for browsing
+and downloading at https://kaikki.org, the website will be updated
+every few days.
 
 Note: extracting all data for all languages from the English
 Wiktionary may take from an hour to several days, depending
@@ -506,7 +504,7 @@ Its arguments are as follows:
   creating ``wxr.wtp``.
 * `namespace_ids` - a set of namespace ids, pages with namespace ids that
   are not included in this set won't be processed. Avaliable id values can
-  be found in wikitextprocessor project's [data/en/namespaces.json](https://github.com/tatuylonen/wikitextprocessor/blob/main/wikitextprocessor/data/en/namespaces.json) 
+  be found in wikitextprocessor project's [data/en/namespaces.json](https://github.com/tatuylonen/wikitextprocessor/blob/main/wikitextprocessor/data/en/namespaces.json)
   file and the Wiktionary *.xml.bz2 dump file.
 * `out_f` - output file object.
 * `human_readable` - if set to `True`, the output JSON will be formatted with indentation.
