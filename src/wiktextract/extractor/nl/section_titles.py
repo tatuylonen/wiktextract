@@ -51,6 +51,7 @@ POS_DATA = {
 
 
 LINKAGE_SECTIONS = {
+    "Afkorting": "abbreviations",
     "Anagrammen": "anagrams",
     "Antoniemen": "antonyms",
     "Afgeleide begrippen": "derived",

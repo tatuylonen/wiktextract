@@ -106,6 +106,7 @@ class WordEntry(DutchBaseModel):
     etymology_index: str = Field(default="", exclude=True)
     etymology_texts: list[str] = []
     sounds: list[Sound] = []
+    abbreviations: list[Linkage] = []
     anagrams: list[Linkage] = []
     antonyms: list[Linkage] = []
     derived: list[Linkage] = []

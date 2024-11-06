@@ -168,3 +168,16 @@ class TestNlLinkage(TestCase):
                 }
             ],
         )
+
+    def test_abbr(self):
+        data = parse_page(
+            self.wxr,
+            "A grote terts",
+            """==Nederlands==
+====Zelfstandig naamwoord====
+# het akkoord
+=====''[[WikiWoordenboek:Afkorting|Afkorting]]''=====
+*[[A]]""",
+        )
+        self.assertEqual(len(data), 1)
+        self.assertEqual(data[0]["abbreviations"], [{"word": "A"}])
