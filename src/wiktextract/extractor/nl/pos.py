@@ -10,7 +10,7 @@ from .example import (
     extract_example_template,
 )
 from .models import AltForm, Sense, WordEntry
-from .section_titles import POS_DATA
+from .section_titles import LINKAGE_SECTIONS, POS_DATA
 from .tags import (
     GLOSS_TAG_TEMPLATES,
     LIST_ITEM_TAG_TEMPLATES,
@@ -40,6 +40,8 @@ def extract_pos_section(
         forms_data.forms.clear()
         forms_data.categories.clear()
     extract_pos_section_nodes(wxr, page_data, base_data, forms_data, level_node)
+    if len(page_data[-1].senses) == 0:
+        page_data.pop()
 
 
 def extract_pos_section_nodes(
@@ -65,7 +67,7 @@ def extract_pos_section_nodes(
                 extract_gloss_list_item(wxr, page_data[-1], list_item)
         elif isinstance(node, LevelNode):
             title_text = clean_node(wxr, None, node.largs)
-            if title_text in POS_DATA:
+            if title_text in POS_DATA and title_text not in LINKAGE_SECTIONS:
                 # expanded from "eng-onv-d" form-of template
                 from .page import parse_section
 

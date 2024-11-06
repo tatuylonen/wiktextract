@@ -52,7 +52,7 @@ class TestNlInflection(TestCase):
 {{-l-|m}}
 #voorste deel van een [[wapen]]
 ====Werkwoord====
-{{1ps|lopen}}""",
+# gloss""",
         )
         self.assertEqual(len(data), 2)
         self.assertEqual(
