@@ -91,10 +91,12 @@ def extract_pos_section_nodes(
                 "pronom-dem-form",
                 "pronom-pos-form",
                 "xh-pronom-pos-form",
+                "oudeschrijfwijze",
             ]
             or node.template_name.endswith(
                 ("adjc-form", "adverb-form", "noun-form")
             )
+            or re.search(r"-dec\d+", node.template_name) is not None
         ):
             extract_noun_form_of_template(wxr, page_data[-1], node)
         elif isinstance(node, TemplateNode) and (
@@ -199,12 +201,15 @@ def extract_l_template(
 
 # https://nl.wiktionary.org/wiki/Sjabloon:noun-pl
 # https://nl.wiktionary.org/wiki/Sjabloon:noun-form
+# https://nl.wiktionary.org/wiki/Sjabloon:oudeschrijfwijze
 # "getal" and "gesl" args
 NOUN_FORM_OF_TEMPLATE_NUM_TAGS = {
     "s": "singular",
     "p": "plural",
     "d": "dual",
     "c": "collective",
+    "a": "animate",
+    "i": "inanimate",
 }
 NOUN_FORM_OF_TEMPLATE_GENDER_TAGS = {
     "m": "masculine",
@@ -236,6 +241,19 @@ def extract_noun_form_of_template(
             sense.tags.append(gender_tag)
         elif isinstance(gender_tag, list):
             sense.tags.extend(gender_tag)
+
+    # Sjabloon:oudeschrijfwijze
+    g_arg = t_node.template_parameters.get("g", "")
+    for tags_dict in [
+        NOUN_FORM_OF_TEMPLATE_GENDER_TAGS,
+        NOUN_FORM_OF_TEMPLATE_NUM_TAGS,
+    ]:
+        if g_arg in tags_dict:
+            tag = tags_dict[g_arg]
+            if isinstance(tag, str):
+                sense.tags.append(tag)
+            elif isinstance(tag, list):
+                sense.tags.extend(tag)
 
     form_of = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
     if form_of != "":
