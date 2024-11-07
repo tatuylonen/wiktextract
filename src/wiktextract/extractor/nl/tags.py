@@ -126,6 +126,9 @@ TABLE_TAGS = {
     # Sjabloon:-nlname-
     "nominatief": "nominative",
     "genitief": "genitive",
+    # Sjabloon:-denoun-
+    "datief": "dative",
+    "accusatief": "accusative",
 }
 
 
