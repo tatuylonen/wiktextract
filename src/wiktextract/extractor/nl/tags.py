@@ -123,6 +123,9 @@ TABLE_TAGS = {
     "derde": "third-person",
     "verleden": "past",
     "voorwaardelijk": "conditional",
+    # Sjabloon:-nlname-
+    "nominatief": "nominative",
+    "genitief": "genitive",
 }
 
 
