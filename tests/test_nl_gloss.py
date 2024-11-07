@@ -359,3 +359,21 @@ class TestNlGloss(TestCase):
                 }
             ],
         )
+
+    def test_tag_template_after_form_of_template(self):
+        self.wxr.wtp.add_page(
+            "Sjabloon:geologie",
+            10,
+            "<span>([[geologie]])</span>[[Categorie:Geologie_in_het_Nederlands]]",
+        )
+        data = parse_page(
+            self.wxr,
+            "Fanerozoïcum",
+            """==Nederlands==
+====Zelfstandig naamwoord====
+{{oudeschrijfwijze|fanerozoïcum|2006|nld|g=n}} {{geologie|nld}}""",
+        )
+        self.assertEqual(data[0]["senses"][0]["topics"], ["geology"])
+        self.assertEqual(
+            data[0]["senses"][0]["categories"], ["Geologie_in_het_Nederlands"]
+        )

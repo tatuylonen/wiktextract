@@ -120,6 +120,22 @@ def extract_pos_section_nodes(
             extract_verb_form_of_template(
                 wxr, page_data, base_data, forms_data, node
             )
+        elif isinstance(node, TemplateNode):
+            # tag template after form-of template
+            cats = {}
+            expanded_text = clean_node(wxr, cats, node)
+            if (
+                expanded_text.startswith("(")
+                and expanded_text.endswith(")")
+                and len(page_data[-1].senses) > 0
+            ):
+                page_data[-1].senses[-1].raw_tags.append(
+                    expanded_text.strip("() ")
+                )
+                page_data[-1].senses[-1].categories.extend(
+                    cats.get("categories", [])
+                )
+                translate_raw_tags(page_data[-1].senses[-1])
 
 
 def extract_gloss_list_item(
