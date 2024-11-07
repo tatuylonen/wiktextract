@@ -179,9 +179,15 @@ def extract_gloss_list_item(
     while gloss_text.startswith(","):  # between qualifier templates
         gloss_text = gloss_text.removeprefix(",").strip()
     m = re.match(r"\(([^()]+)\)", gloss_text)
-    if m is not None:  # expanded "verouderd" template in "2ps" template
-        gloss_text = gloss_text[m.end() :].strip()
-        sense.raw_tags.append(m.group(1))
+    if m is not None:
+        new_gloss_text = gloss_text[m.end() :].strip()
+        if new_gloss_text != "":
+            # expanded "verouderd" template in "2ps" template
+            gloss_text = new_gloss_text
+            sense.raw_tags.append(m.group(1))
+        else:  # gloss text after form-of template
+            gloss_text = m.group(1)
+
     if len(gloss_text) > 0:
         sense.glosses.append(gloss_text)
     if (

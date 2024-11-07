@@ -377,3 +377,34 @@ class TestNlGloss(TestCase):
         self.assertEqual(
             data[0]["senses"][0]["categories"], ["Geologie_in_het_Nederlands"]
         )
+
+    def test_double_colons_list_in_parentheses(self):
+        self.wxr.wtp.add_page(
+            "Sjabloon:oudeschrijfwijze",
+            10,
+            """'''Haafer'''
+# verouderde spelling of vorm van [[Hafer#Duits|Hafer]]&#32;tot 1876[[Categorie:Oude spelling van het Duits van voor 1876]]""",
+        )
+        self.wxr.wtp.add_page("Sjabloon:Q", 10, "[[Haafer#Duits|Haafer]]")
+        data = parse_page(
+            self.wxr,
+            "Haafer",
+            """==Duits==
+====Zelfstandig naamwoord====
+{{oudeschrijfwijze|Hafer|1876|deu}}
+::(nominatief mannelijk enkelvoud van {{Q|Haafer|deu}})""",
+        )
+        self.assertEqual(
+            data[0]["senses"],
+            [
+                {
+                    "glosses": [
+                        "verouderde spelling of vorm van Hafer tot 1876",
+                        "nominatief mannelijk enkelvoud van Haafer",
+                    ],
+                    "categories": ["Oude spelling van het Duits van voor 1876"],
+                    "tags": ["form-of"],
+                    "form_of": [{"word": "Hafer"}],
+                }
+            ],
+        )
