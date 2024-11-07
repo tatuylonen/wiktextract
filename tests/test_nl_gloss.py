@@ -290,3 +290,121 @@ class TestNlGloss(TestCase):
         self.assertEqual(
             data[1]["categories"], ["Zelfstandig naamwoord in het Engels"]
         )
+
+    def test_no_gloss_but_has_tag_example(self):
+        self.wxr.wtp.add_page(
+            "Sjabloon:naam-m",
+            10,
+            """<span>([[mannelijk]]e [[naam]])</span>[[Categorie:Mannelijke naam_in_het_Engels]]""",
+        )
+        data = parse_page(
+            self.wxr,
+            "Clark",
+            """==Engels==
+====Eigennaam====
+'''Clark'''
+#{{naam-m|eng}}
+{{bijv-2|'''Clark''' Gable was a popular movie star|'''Clark''' Gable was een bekende filmster.}}""",
+        )
+        self.assertEqual(
+            data[0]["senses"],
+            [
+                {
+                    "categories": ["Mannelijke naam_in_het_Engels"],
+                    "tags": ["masculine", "name", "no-gloss"],
+                    "examples": [
+                        {
+                            "text": "Clark Gable was a popular movie star",
+                            "translation": "Clark Gable was een bekende filmster.",
+                        }
+                    ],
+                }
+            ],
+        )
+
+    def test_double_colons_list(self):
+        self.wxr.wtp.add_page(
+            "Sjabloon:oudeschrijfwijze",
+            10,
+            """'''Ehstland'''
+# verouderde spelling of vorm van [[Estland#Duits|Estland]][[Categorie:Oude spelling van het Duits]]""",
+        )
+        self.wxr.wtp.add_page(
+            "Sjabloon:verouderd",
+            10,
+            "<span>([[verouderd]])</span>[[Categorie:Verouderd_in_het_Duits]]",
+        )
+        data = parse_page(
+            self.wxr,
+            "Ehstland",
+            """==Duits==
+====Eigennaam====
+{{oudeschrijfwijze|Estland||deu}}
+::{{verouderd|deu}} nominatief enkelvoud van [[Ehstland#Duits|Ehstland]]""",
+        )
+        self.assertEqual(
+            data[0]["senses"],
+            [
+                {
+                    "categories": [
+                        "Oude spelling van het Duits",
+                        "Verouderd_in_het_Duits",
+                    ],
+                    "glosses": [
+                        "verouderde spelling of vorm van Estland",
+                        "nominatief enkelvoud van Ehstland",
+                    ],
+                    "tags": ["form-of", "obsolete"],
+                    "form_of": [{"word": "Estland"}],
+                }
+            ],
+        )
+
+    def test_tag_template_after_form_of_template(self):
+        self.wxr.wtp.add_page(
+            "Sjabloon:geologie",
+            10,
+            "<span>([[geologie]])</span>[[Categorie:Geologie_in_het_Nederlands]]",
+        )
+        data = parse_page(
+            self.wxr,
+            "Fanerozoïcum",
+            """==Nederlands==
+====Zelfstandig naamwoord====
+{{oudeschrijfwijze|fanerozoïcum|2006|nld|g=n}} {{geologie|nld}}""",
+        )
+        self.assertEqual(data[0]["senses"][0]["topics"], ["geology"])
+        self.assertEqual(
+            data[0]["senses"][0]["categories"], ["Geologie_in_het_Nederlands"]
+        )
+
+    def test_double_colons_list_in_parentheses(self):
+        self.wxr.wtp.add_page(
+            "Sjabloon:oudeschrijfwijze",
+            10,
+            """'''Haafer'''
+# verouderde spelling of vorm van [[Hafer#Duits|Hafer]]&#32;tot 1876[[Categorie:Oude spelling van het Duits van voor 1876]]""",
+        )
+        self.wxr.wtp.add_page("Sjabloon:Q", 10, "[[Haafer#Duits|Haafer]]")
+        data = parse_page(
+            self.wxr,
+            "Haafer",
+            """==Duits==
+====Zelfstandig naamwoord====
+{{oudeschrijfwijze|Hafer|1876|deu}}
+::(nominatief mannelijk enkelvoud van {{Q|Haafer|deu}})""",
+        )
+        self.assertEqual(
+            data[0]["senses"],
+            [
+                {
+                    "glosses": [
+                        "verouderde spelling of vorm van Hafer tot 1876",
+                        "nominatief mannelijk enkelvoud van Haafer",
+                    ],
+                    "categories": ["Oude spelling van het Duits van voor 1876"],
+                    "tags": ["form-of"],
+                    "form_of": [{"word": "Hafer"}],
+                }
+            ],
+        )

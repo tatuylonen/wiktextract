@@ -40,7 +40,7 @@ def extract_pos_section(
         forms_data.forms.clear()
         forms_data.categories.clear()
     extract_pos_section_nodes(wxr, page_data, base_data, forms_data, level_node)
-    if len(page_data[-1].senses) == 0:
+    if len(page_data[-1].senses) == 0 and pos_title in LINKAGE_SECTIONS:
         page_data.pop()
 
 
@@ -56,9 +56,9 @@ def extract_pos_section_nodes(
         if (
             isinstance(node, WikiNode)
             and node.kind == NodeKind.LIST
-            and node.sarg.endswith("#")
+            and node.sarg.endswith(("#", "::"))
         ):
-            if gloss_list_start == 0:
+            if gloss_list_start == 0 and node.sarg.endswith("#"):
                 gloss_list_start = index
                 extract_pos_header_line_nodes(
                     wxr, page_data[-1], level_node.children[:index]
@@ -120,12 +120,33 @@ def extract_pos_section_nodes(
             extract_verb_form_of_template(
                 wxr, page_data, base_data, forms_data, node
             )
+        elif isinstance(node, TemplateNode):
+            # tag template after form-of template
+            cats = {}
+            expanded_text = clean_node(wxr, cats, node)
+            if (
+                expanded_text.startswith("(")
+                and expanded_text.endswith(")")
+                and len(page_data[-1].senses) > 0
+            ):
+                page_data[-1].senses[-1].raw_tags.append(
+                    expanded_text.strip("() ")
+                )
+                page_data[-1].senses[-1].categories.extend(
+                    cats.get("categories", [])
+                )
+                translate_raw_tags(page_data[-1].senses[-1])
 
 
 def extract_gloss_list_item(
-    wxr: WiktextractContext, word_entry: WordEntry, list_item: WikiNode
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    list_item: WikiNode,
 ) -> None:
-    sense = Sense()
+    create_new_sense = (
+        False if list_item.sarg == "::" and len(word_entry.senses) > 0 else True
+    )
+    sense = Sense() if create_new_sense else word_entry.senses[-1]
     gloss_nodes = []
     for child in list_item.children:
         if isinstance(child, TemplateNode):
@@ -158,13 +179,28 @@ def extract_gloss_list_item(
     while gloss_text.startswith(","):  # between qualifier templates
         gloss_text = gloss_text.removeprefix(",").strip()
     m = re.match(r"\(([^()]+)\)", gloss_text)
-    if m is not None:  # expanded "verouderd" template in "2ps" template
-        gloss_text = gloss_text[m.end() :].strip()
-        sense.raw_tags.append(m.group(1))
+    if m is not None:
+        new_gloss_text = gloss_text[m.end() :].strip()
+        if new_gloss_text != "":
+            # expanded "verouderd" template in "2ps" template
+            gloss_text = new_gloss_text
+            sense.raw_tags.append(m.group(1))
+        else:  # gloss text after form-of template
+            gloss_text = m.group(1)
+
     if len(gloss_text) > 0:
         sense.glosses.append(gloss_text)
+    if (
+        len(sense.glosses) > 0
+        or len(sense.tags) > 0
+        or len(sense.raw_tags) > 0
+        or len(sense.examples) > 0
+    ):
         translate_raw_tags(sense)
-        word_entry.senses.append(sense)
+        if len(sense.glosses) == 0:
+            sense.tags.append("no-gloss")
+        if create_new_sense:
+            word_entry.senses.append(sense)
 
 
 def extract_pos_header_line_nodes(

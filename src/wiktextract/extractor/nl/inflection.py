@@ -12,7 +12,13 @@ from .tags import translate_raw_tags
 def extract_inflection_template(
     wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
 ) -> None:
-    if t_node.template_name in ["-nlnoun-", "adjcomp"]:
+    if t_node.template_name in [
+        "-nlnoun-",
+        "adjcomp",
+        "-nlname-",
+        "-denoun-",
+        "-denoun1-",
+    ]:
         extract_noun_adj_table(wxr, word_entry, t_node)
     elif t_node.template_name == "-nlstam-":
         extract_nlstam_template(wxr, word_entry, t_node)
