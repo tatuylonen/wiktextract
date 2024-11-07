@@ -290,3 +290,34 @@ class TestNlGloss(TestCase):
         self.assertEqual(
             data[1]["categories"], ["Zelfstandig naamwoord in het Engels"]
         )
+
+    def test_no_gloss_but_has_tag_example(self):
+        self.wxr.wtp.add_page(
+            "Sjabloon:naam-m",
+            10,
+            """<span>([[mannelijk]]e [[naam]])</span>[[Categorie:Mannelijke naam_in_het_Engels]] """,
+        )
+        data = parse_page(
+            self.wxr,
+            "Clark",
+            """==Engels==
+====Eigennaam====
+'''Clark'''
+#{{naam-m|eng}}
+{{bijv-2|'''Clark''' Gable was a popular movie star|'''Clark''' Gable was een bekende filmster.}}""",
+        )
+        self.assertEqual(
+            data[0]["senses"],
+            [
+                {
+                    "categories": ["Mannelijke naam_in_het_Engels"],
+                    "tags": ["masculine", "name", "no-gloss"],
+                    "examples": [
+                        {
+                            "text": "Clark Gable was a popular movie star",
+                            "translation": "Clark Gable was een bekende filmster.",
+                        }
+                    ],
+                }
+            ],
+        )

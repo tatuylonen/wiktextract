@@ -40,7 +40,7 @@ def extract_pos_section(
         forms_data.forms.clear()
         forms_data.categories.clear()
     extract_pos_section_nodes(wxr, page_data, base_data, forms_data, level_node)
-    if len(page_data[-1].senses) == 0:
+    if len(page_data[-1].senses) == 0 and pos_title in LINKAGE_SECTIONS:
         page_data.pop()
 
 
@@ -163,7 +163,15 @@ def extract_gloss_list_item(
         sense.raw_tags.append(m.group(1))
     if len(gloss_text) > 0:
         sense.glosses.append(gloss_text)
+    if (
+        len(sense.glosses) > 0
+        or len(sense.tags) > 0
+        or len(sense.raw_tags) > 0
+        or len(sense.examples) > 0
+    ):
         translate_raw_tags(sense)
+        if len(sense.glosses) == 0:
+            sense.tags.append("no-gloss")
         word_entry.senses.append(sense)
 
 
