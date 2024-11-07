@@ -4,7 +4,7 @@ from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .models import Example, Sense
 
-EXAMPLE_TEMPLATES = frozenset({"bijv-1", "bijv-2", "citeer"})
+EXAMPLE_TEMPLATES = frozenset({"bijv-1", "bijv-2", "bijv-e", "citeer"})
 
 
 def extract_example_list_item(
@@ -28,7 +28,7 @@ def extract_example_template(
         e_text = clean_node(wxr, None, node.template_parameters.get(1, ""))
         if len(e_text) > 0:
             sense.examples.append(Example(text=e_text))
-    elif node.template_name == "bijv-2":
+    elif node.template_name in ["bijv-2", "bijv-e"]:
         e_text = clean_node(wxr, None, node.template_parameters.get(1, ""))
         if len(e_text) > 0:
             e_trans = clean_node(wxr, None, node.template_parameters.get(2, ""))

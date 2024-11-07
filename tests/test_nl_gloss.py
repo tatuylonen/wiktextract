@@ -295,7 +295,7 @@ class TestNlGloss(TestCase):
         self.wxr.wtp.add_page(
             "Sjabloon:naam-m",
             10,
-            """<span>([[mannelijk]]e [[naam]])</span>[[Categorie:Mannelijke naam_in_het_Engels]] """,
+            """<span>([[mannelijk]]e [[naam]])</span>[[Categorie:Mannelijke naam_in_het_Engels]]""",
         )
         data = parse_page(
             self.wxr,
@@ -318,6 +318,44 @@ class TestNlGloss(TestCase):
                             "translation": "Clark Gable was een bekende filmster.",
                         }
                     ],
+                }
+            ],
+        )
+
+    def test_double_colons_list(self):
+        self.wxr.wtp.add_page(
+            "Sjabloon:oudeschrijfwijze",
+            10,
+            """'''Ehstland'''
+# verouderde spelling of vorm van [[Estland#Duits|Estland]][[Categorie:Oude spelling van het Duits]]""",
+        )
+        self.wxr.wtp.add_page(
+            "Sjabloon:verouderd",
+            10,
+            "<span>([[verouderd]])</span>[[Categorie:Verouderd_in_het_Duits]]",
+        )
+        data = parse_page(
+            self.wxr,
+            "Ehstland",
+            """==Duits==
+====Eigennaam====
+{{oudeschrijfwijze|Estland||deu}}
+::{{verouderd|deu}} nominatief enkelvoud van [[Ehstland#Duits|Ehstland]]""",
+        )
+        self.assertEqual(
+            data[0]["senses"],
+            [
+                {
+                    "categories": [
+                        "Oude spelling van het Duits",
+                        "Verouderd_in_het_Duits",
+                    ],
+                    "glosses": [
+                        "verouderde spelling of vorm van Estland",
+                        "nominatief enkelvoud van Ehstland",
+                    ],
+                    "tags": ["form-of", "obsolete"],
+                    "form_of": [{"word": "Estland"}],
                 }
             ],
         )

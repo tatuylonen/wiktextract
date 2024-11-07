@@ -56,9 +56,9 @@ def extract_pos_section_nodes(
         if (
             isinstance(node, WikiNode)
             and node.kind == NodeKind.LIST
-            and node.sarg.endswith("#")
+            and node.sarg.endswith(("#", "::"))
         ):
-            if gloss_list_start == 0:
+            if gloss_list_start == 0 and node.sarg.endswith("#"):
                 gloss_list_start = index
                 extract_pos_header_line_nodes(
                     wxr, page_data[-1], level_node.children[:index]
@@ -123,9 +123,14 @@ def extract_pos_section_nodes(
 
 
 def extract_gloss_list_item(
-    wxr: WiktextractContext, word_entry: WordEntry, list_item: WikiNode
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    list_item: WikiNode,
 ) -> None:
-    sense = Sense()
+    create_new_sense = (
+        False if list_item.sarg == "::" and len(word_entry.senses) > 0 else True
+    )
+    sense = Sense() if create_new_sense else word_entry.senses[-1]
     gloss_nodes = []
     for child in list_item.children:
         if isinstance(child, TemplateNode):
@@ -172,7 +177,8 @@ def extract_gloss_list_item(
         translate_raw_tags(sense)
         if len(sense.glosses) == 0:
             sense.tags.append("no-gloss")
-        word_entry.senses.append(sense)
+        if create_new_sense:
+            word_entry.senses.append(sense)
 
 
 def extract_pos_header_line_nodes(
