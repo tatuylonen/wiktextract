@@ -104,9 +104,16 @@ def analyze_template(wtp: Wtp, page: Page) -> tuple[set[str], bool]:
     # pre-expand section templates, like "=nld=", "-pron-"
     # don't expand "=="
     # don't expand inflection table templates like "-nlnoun-"
-    return (
-        set(),
+    need_pre_expand = (
         re.fullmatch(r"Sjabloon:=.+=", page.title) is not None
         or page.title in POS_TEMPLATES
-        or page.title in SECTION_TEMPLATES,
+        or page.title in SECTION_TEMPLATES
     )
+
+    # magic word breaks level2 node in "=qtu=" template
+    if need_pre_expand and page.body.startswith("__NOEDITSECTION__"):
+        wtp.add_page(
+            page.title, 10, page.body.removeprefix("__NOEDITSECTION__").strip()
+        )
+
+    return set(), need_pre_expand
