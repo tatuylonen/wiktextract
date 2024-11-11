@@ -132,6 +132,7 @@ title_contains_global_map = {
     "variation of": "dummy-skip-this",  # a'/Scottish Gaelic
     "command form of": "imperative",  # a راتلل/Pashto
     "historical inflection of": "dummy-skip-this",  # kork/Norwegian Nynorsk
+    "obsolete declension": "obsolete",  # März/German 20241111
 }
 for k, v in title_contains_global_map.items():
     if any(t not in valid_tags for t in v.split()):
@@ -3389,6 +3390,7 @@ def parse_inflection_section(
     source = section
     tables = []
     titleparts = []
+    preceding_bolded_title = ""
 
     def process_tables():
         for kind, node, titles, after in tables:
@@ -3507,12 +3509,19 @@ def parse_inflection_section(
             else:
                 recurse(node.largs[0], titles, navframe)
             return
+        if kind == NodeKind.LIST and node.sarg == ";":
+            nonlocal preceding_bolded_title
+            from wiktextract.page import clean_node
+            preceding_bolded_title = clean_node(wxr, None, node).strip("; ")
         for x in node.children:
             recurse(x, titles, navframe)
 
     assert tree.kind == NodeKind.ROOT
     for x in tree.children:
-        recurse(x, [])
+        if preceding_bolded_title != "":
+            recurse(x, [preceding_bolded_title])
+        else:
+            recurse(x, [])
 
     # Process the tables we found
     process_tables()
