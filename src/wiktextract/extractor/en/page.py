@@ -2265,7 +2265,7 @@ def parse_language(
         # we can just count the single braces when those single
         # braces are part of a group.
 
-        # print(text)
+        # print(f"Parse inflection: {text=}")
         # print(repr(brace_matches))
         if len(brace_matches) > 1:
             tsection: list[str] = []
@@ -2275,7 +2275,12 @@ def parse_language(
             # otherwise, text
             # goes with preceding template
             for m in brace_matches:
-                if m.startswith("{{"):
+                if m.startswith("\n; ") and after_templates:
+                    after_templates = False
+                    template_sections.append(tsection)
+                    tsection = []
+                    tsection.append(m)
+                elif m.startswith("{{"):
                     if template_nesting == 0 and after_templates:
                         template_sections.append(tsection)
                         tsection = []
