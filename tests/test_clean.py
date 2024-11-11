@@ -144,6 +144,21 @@ class CleanTests(unittest.TestCase):
         v = clean_value(self.wxr, v)
         self.assertEqual(v, "fooBar")
 
+    def test_cv_link15(self):
+        v = "[[File:Foo.jpg|test| ]]Bar"
+        v = clean_value(self.wxr, v)
+        self.assertEqual(v, "Bar")
+
+    def test_cv_link16(self):
+        v = "[[File:Foo.jpg|test|]]Bar"
+        v = clean_value(self.wxr, v)
+        self.assertEqual(v, "Bar")
+
+    def test_cv_link17(self):
+        v = "[[File:Foo.jpg|test|||||]]Bar"
+        v = clean_value(self.wxr, v)
+        self.assertEqual(v, "Bar")
+
     def test_cv_url1(self):
         v = "This is a [http://ylonen.org test]."
         v = clean_value(self.wxr, v)
