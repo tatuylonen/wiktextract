@@ -2192,6 +2192,7 @@ uppercase_tags = set(
         "Wenzhou Wu",  # Chinese dialect/language
         "West Armenian",
         "West Bengal",
+        "Benglish",  # vai/English 20241112
         "West Cork",
         "West Country",
         "West Java",
