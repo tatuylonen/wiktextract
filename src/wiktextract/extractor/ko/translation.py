@@ -44,7 +44,7 @@ def extract_translation_list_item(
     lang_name = "unknown"
     for node in list_item.children:
         if isinstance(node, str) and lang_name == "unknown":
-            m = re.search(r"\((\w+)\):", node)
+            m = re.search(r"\(([\w-]+)\):", node)
             if m is not None:
                 lang_code = m.group(1)
                 lang_name = node[: m.start()].strip()
