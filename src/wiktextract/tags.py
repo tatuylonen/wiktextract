@@ -760,6 +760,7 @@ uppercase_tags = set(
         "Banatiski Gurbet",
         "Banawá",
         "Bangkok",
+        "Bangladesh", # bhai/English 20241113
         "Banten",
         "Banyamasan",
         "Barbados",
@@ -1173,6 +1174,7 @@ uppercase_tags = set(
         "Hijazi",  # Variant of Arabic
         "Hijazi Arabic",  # Variant of Arabic
         "Hinduism",
+        "Hinglish", # babu/English 20241113
         "Hokkien",  # Chinese dialect/language
         "Honduras",
         "Hong Kong",
