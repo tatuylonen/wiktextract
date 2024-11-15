@@ -1165,8 +1165,16 @@ def parse_language(
             posnode.children,
             lambda x: (
                 isinstance(x, WikiNode)
-                and x.kind == NodeKind.TEMPLATE
-                and x.largs[0][0] in FLOATING_TABLE_TEMPLATES
+                and (
+                    (
+                        x.kind == NodeKind.TEMPLATE
+                        and x.largs[0][0] in FLOATING_TABLE_TEMPLATES
+                    )
+                    or (
+                        x.kind == NodeKind.LINK
+                        and x.largs[0][0].lower().startswith("file:")  # type:ignore[union-attr]
+                    )
+                )
             ),
         )
         tempnode = WikiNode(NodeKind.LEVEL6, 0)
@@ -1445,6 +1453,7 @@ def parse_language(
         new_nodes = []
         info_template_data = []
         for node in header_nodes:
+            # print(f"{node=}")
             info_data, info_out = parse_info_template_node(wxr, node, "head")
             if info_data or info_out:
                 if info_data:
@@ -1913,7 +1922,7 @@ def parse_language(
         elif rawgloss == "Technical or specialized senses.":
             rawgloss = ""
         elif rawgloss.startswith("inflection of "):
-            parsed  = parse_alt_or_inflection_of(wxr, rawgloss, set())
+            parsed = parse_alt_or_inflection_of(wxr, rawgloss, set())
             if parsed is not None:
                 tags, origins = parsed
                 if origins is not None:
