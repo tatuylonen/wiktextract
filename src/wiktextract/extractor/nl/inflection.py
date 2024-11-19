@@ -22,6 +22,8 @@ def extract_inflection_template(
         extract_noun_adj_table(wxr, word_entry, t_node)
     elif t_node.template_name == "-nlstam-":
         extract_nlstam_template(wxr, word_entry, t_node)
+    elif t_node.template_name.startswith("-csadjc-comp-"):
+        extract_csadjc_comp_template(wxr, word_entry, t_node)
 
 
 def extract_noun_adj_table(
@@ -241,3 +243,28 @@ def nlverb_table_cell_is_header(node: WikiNode) -> bool:
         node.kind == NodeKind.TABLE_HEADER_CELL
         or node.attrs.get("class", "") == "infoboxrijhoofding"
     )
+
+
+def extract_csadjc_comp_template(
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+) -> None:
+    # https://nl.wiktionary.org/wiki/Sjabloon:-csadjc-comp-ý3-
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for table in expanded_node.find_child(NodeKind.TABLE):
+        for row in table.find_child(NodeKind.TABLE_ROW):
+            row_header = ""
+            for cell_node in row.find_child(
+                NodeKind.TABLE_HEADER_CELL | NodeKind.TABLE_CELL
+            ):
+                if cell_node.kind == NodeKind.TABLE_HEADER_CELL:
+                    row_header = clean_node(wxr, None, cell_node)
+                elif cell_node.kind == NodeKind.TABLE_CELL:
+                    form_text = clean_node(wxr, None, cell_node)
+                    if form_text not in ["", wxr.wtp.title]:
+                        form = Form(form=form_text)
+                        if row_header != "":
+                            form.raw_tags.append(row_header)
+                            translate_raw_tags(form)
+                        word_entry.forms.append(form)
