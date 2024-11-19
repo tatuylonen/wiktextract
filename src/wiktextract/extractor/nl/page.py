@@ -92,10 +92,6 @@ def parse_section(
         extract_fixed_preposition_section(
             wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
         )
-    elif title_text == "Vervoeging":
-        pass  # conjugation
-    elif title_text == "Verbuiging":
-        pass  # inflection
     elif title_text in [
         "Gangbaarheid",
         "Meer informatie",
@@ -103,7 +99,7 @@ def parse_section(
         "Citaten",
     ]:
         pass  # ignore
-    else:
+    elif not title_text.startswith(("Vervoeging", "Verbuiging")):
         wxr.wtp.debug(f"unknown title: {title_text}", sortid="nl/page/60")
 
     for next_level in level_node.find_child(LEVEL_KIND_FLAGS):
@@ -112,7 +108,14 @@ def parse_section(
         wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
     )
     for t_node in level_node.find_child(NodeKind.TEMPLATE):
-        extract_inflection_template(wxr, forms_data, t_node)
+        extract_inflection_template(
+            wxr,
+            page_data[-1]
+            if title_text.startswith(("Vervoeging", "Verbuiging"))
+            and len(page_data) > 0
+            else forms_data,
+            t_node,
+        )
     return etymology_data
 
 

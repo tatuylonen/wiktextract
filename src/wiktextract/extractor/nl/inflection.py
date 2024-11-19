@@ -22,6 +22,8 @@ def extract_inflection_template(
         extract_noun_adj_table(wxr, word_entry, t_node)
     elif t_node.template_name == "-nlstam-":
         extract_nlstam_template(wxr, word_entry, t_node)
+    elif t_node.template_name.startswith("-csadjc-comp-"):
+        extract_csadjc_comp_template(wxr, word_entry, t_node)
 
 
 def extract_noun_adj_table(
@@ -94,7 +96,7 @@ def extract_vervoeging_page(
         return
     root = wxr.wtp.parse(page.body)
     for t_node in root.find_child(NodeKind.TEMPLATE):
-        if t_node.template_name == "-nlverb-":
+        if t_node.template_name in ["-nlverb-", "-nlverb-reflex-"]:
             extract_nlverb_template(wxr, word_entry, t_node)
 
 
@@ -111,6 +113,7 @@ NLVERB_HEADER_PREFIXES = {
     "vervoeging van de bedrijvende vorm van": ["active"],
     "onpersoonlijke lijdende vorm": ["impersonal", "passive"],
     "lijdende vorm": ["passive"],
+    "vervoeging van het Nederlandse werkwoord": [],
 }
 
 
@@ -118,6 +121,7 @@ def extract_nlverb_template(
     wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
 ) -> None:
     # https://nl.wiktionary.org/wiki/Sjabloon:-nlverb-
+    # Sjabloon:-nlverb-reflex-
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(t_node), expand_all=True
     )
@@ -152,6 +156,7 @@ def extract_nlverb_template(
                 col_headers.clear()
                 row_headers.clear()
 
+            small_tag = ""
             is_row_first_node = True
             for cell_node in row_node.find_child(
                 NodeKind.TABLE_HEADER_CELL | NodeKind.TABLE_CELL
@@ -179,7 +184,10 @@ def extract_nlverb_template(
                             break
                     else:
                         if current_row_all_header:
-                            if is_row_first_node:
+                            if (
+                                is_row_first_node
+                                and t_node.template_name == "-nlverb-"
+                            ):
                                 shared_raw_tags.append(cell_str)
                             else:
                                 col_headers.append(
@@ -206,12 +214,22 @@ def extract_nlverb_template(
                                 )
                             )
                 else:
+                    has_small_tag = False
+                    for small_node in cell_node.find_html("small"):
+                        has_small_tag = True
+                    if has_small_tag:
+                        small_tag = cell_str
+                        col_index += cell_colspan
+                        continue
                     form = Form(
                         form=cell_str,
                         tags=shared_tags,
                         raw_tags=shared_raw_tags,
                         source=f"{wxr.wtp.title}/vervoeging",
                     )
+                    if small_tag != "":
+                        form.raw_tags.append(small_tag)
+                        small_tag = ""
                     for row_header in row_headers:
                         if (
                             row_index >= row_header.row_index
@@ -241,3 +259,28 @@ def nlverb_table_cell_is_header(node: WikiNode) -> bool:
         node.kind == NodeKind.TABLE_HEADER_CELL
         or node.attrs.get("class", "") == "infoboxrijhoofding"
     )
+
+
+def extract_csadjc_comp_template(
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+) -> None:
+    # https://nl.wiktionary.org/wiki/Sjabloon:-csadjc-comp-ý3-
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for table in expanded_node.find_child(NodeKind.TABLE):
+        for row in table.find_child(NodeKind.TABLE_ROW):
+            row_header = ""
+            for cell_node in row.find_child(
+                NodeKind.TABLE_HEADER_CELL | NodeKind.TABLE_CELL
+            ):
+                if cell_node.kind == NodeKind.TABLE_HEADER_CELL:
+                    row_header = clean_node(wxr, None, cell_node)
+                elif cell_node.kind == NodeKind.TABLE_CELL:
+                    form_text = clean_node(wxr, None, cell_node)
+                    if form_text not in ["", wxr.wtp.title]:
+                        form = Form(form=form_text)
+                        if row_header != "":
+                            form.raw_tags.append(row_header)
+                            translate_raw_tags(form)
+                        word_entry.forms.append(form)
