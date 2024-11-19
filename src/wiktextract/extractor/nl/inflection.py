@@ -96,7 +96,7 @@ def extract_vervoeging_page(
         return
     root = wxr.wtp.parse(page.body)
     for t_node in root.find_child(NodeKind.TEMPLATE):
-        if t_node.template_name == "-nlverb-":
+        if t_node.template_name in ["-nlverb-", "-nlverb-reflex-"]:
             extract_nlverb_template(wxr, word_entry, t_node)
 
 
@@ -113,6 +113,7 @@ NLVERB_HEADER_PREFIXES = {
     "vervoeging van de bedrijvende vorm van": ["active"],
     "onpersoonlijke lijdende vorm": ["impersonal", "passive"],
     "lijdende vorm": ["passive"],
+    "vervoeging van het Nederlandse werkwoord": [],
 }
 
 
@@ -120,6 +121,7 @@ def extract_nlverb_template(
     wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
 ) -> None:
     # https://nl.wiktionary.org/wiki/Sjabloon:-nlverb-
+    # Sjabloon:-nlverb-reflex-
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(t_node), expand_all=True
     )
@@ -154,6 +156,7 @@ def extract_nlverb_template(
                 col_headers.clear()
                 row_headers.clear()
 
+            small_tag = ""
             is_row_first_node = True
             for cell_node in row_node.find_child(
                 NodeKind.TABLE_HEADER_CELL | NodeKind.TABLE_CELL
@@ -181,7 +184,10 @@ def extract_nlverb_template(
                             break
                     else:
                         if current_row_all_header:
-                            if is_row_first_node:
+                            if (
+                                is_row_first_node
+                                and t_node.template_name == "-nlverb-"
+                            ):
                                 shared_raw_tags.append(cell_str)
                             else:
                                 col_headers.append(
@@ -208,12 +214,22 @@ def extract_nlverb_template(
                                 )
                             )
                 else:
+                    has_small_tag = False
+                    for small_node in cell_node.find_html("small"):
+                        has_small_tag = True
+                    if has_small_tag:
+                        small_tag = cell_str
+                        col_index += cell_colspan
+                        continue
                     form = Form(
                         form=cell_str,
                         tags=shared_tags,
                         raw_tags=shared_raw_tags,
                         source=f"{wxr.wtp.title}/vervoeging",
                     )
+                    if small_tag != "":
+                        form.raw_tags.append(small_tag)
+                        small_tag = ""
                     for row_header in row_headers:
                         if (
                             row_index >= row_header.row_index

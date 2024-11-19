@@ -129,6 +129,14 @@ TABLE_TAGS = {
     # Sjabloon:-denoun-
     "datief": "dative",
     "accusatief": "accusative",
+    # Sjabloon:-nlverb-reflex-
+    "tegenwoordige tijd": "present",
+    "verleden tijd": "past",
+    "toekomende tijd": "future",
+    "1": "first-person",
+    "2": "second-person",
+    "3": "third-person",
+    "voltooide tijd": "past",
 }
 
 
