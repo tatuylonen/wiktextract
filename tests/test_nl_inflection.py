@@ -348,3 +348,59 @@ class TestNlInflection(TestCase):
                 },
             ],
         )
+
+    def test_nlverb_slash(self):
+        self.wxr.wtp.add_page("Sjabloon:-nlstam-", 10, "")
+        self.wxr.wtp.add_page(
+            "zweren/vervoeging",
+            0,
+            """{{-nlverb-|zweren|[[zweer]]|[[zweert]]|[[zweren]]|[[zweerde]]/ [[zwoor]]|[[zweerden]]/ [[zworen]]|hebben|[[gezworen]]|[[zwere]]||[[zweerde(t)]]/ [[zwoort]]|erg=1}}""",
+        )
+        self.wxr.wtp.add_page(
+            "Sjabloon:-nlverb-",
+            10,
+            """{|
+! enkelvoud
+|-
+! verleden
+| [[zweerde]]/ [[zwoor]]
+|-
+! tweede
+|-
+! toekomend
+| zal/zult [[gezworen]] hebben
+|}""",
+        )
+        data = parse_page(
+            self.wxr,
+            "zweren",
+            """==Nederlands==
+{{-nlstam-}}
+=====Werkwoord=====
+# geïnfecteerd raken, etteren""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {
+                    "form": "zweerde",
+                    "tags": ["singular", "past"],
+                    "source": "zweren/vervoeging",
+                },
+                {
+                    "form": "zwoor",
+                    "tags": ["singular", "past"],
+                    "source": "zweren/vervoeging",
+                },
+                {
+                    "form": "zal gezworen hebben",
+                    "tags": ["second-person", "future"],
+                    "source": "zweren/vervoeging",
+                },
+                {
+                    "form": "zult gezworen hebben",
+                    "tags": ["second-person", "future"],
+                    "source": "zweren/vervoeging",
+                },
+            ],
+        )

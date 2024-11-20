@@ -254,32 +254,47 @@ def extract_nlverb_template(
                         small_tag = cell_str
                         col_index += cell_colspan
                         continue
-                    form = Form(
-                        form=cell_str,
-                        tags=shared_tags,
-                        raw_tags=shared_raw_tags,
-                        source=f"{wxr.wtp.title}/vervoeging",
-                        sense=sense,
-                    )
-                    if small_tag != "":
-                        form.raw_tags.append(small_tag)
-                        small_tag = ""
-                    for row_header in row_headers:
-                        if (
-                            row_index >= row_header.row_index
-                            and row_index
-                            < row_header.row_index + row_header.rowspan
-                        ):
-                            form.raw_tags.append(row_header.text)
-                    for col_header in col_headers:
-                        if (
-                            col_index >= col_header.col_index
-                            and col_index
-                            < col_header.col_index + col_header.colspan
-                        ):
-                            form.raw_tags.append(col_header.text)
-                    translate_raw_tags(form)
-                    word_entry.forms.append(form)
+                    form_texts = [cell_str]
+                    if "/ " in cell_str:  # "zweerde/ zwoor"
+                        form_texts = cell_str.split("/")
+                    elif "/" in cell_str and " " in cell_str:
+                        # "zult/zal zweren" -> ["zult zweren", "zal zweren"]
+                        space_index = cell_str.index(" ")
+                        second_part = cell_str[space_index:]
+                        form_texts = [
+                            f_str + second_part
+                            for f_str in cell_str[:space_index].split("/")
+                        ]
+                    for form_str in form_texts:
+                        form_str = form_str.strip()
+                        if len(form_str) == 0:
+                            continue
+                        form = Form(
+                            form=form_str,
+                            tags=shared_tags,
+                            raw_tags=shared_raw_tags,
+                            source=f"{wxr.wtp.title}/vervoeging",
+                            sense=sense,
+                        )
+                        if small_tag != "":
+                            form.raw_tags.append(small_tag)
+                            small_tag = ""
+                        for row_header in row_headers:
+                            if (
+                                row_index >= row_header.row_index
+                                and row_index
+                                < row_header.row_index + row_header.rowspan
+                            ):
+                                form.raw_tags.append(row_header.text)
+                        for col_header in col_headers:
+                            if (
+                                col_index >= col_header.col_index
+                                and col_index
+                                < col_header.col_index + col_header.colspan
+                            ):
+                                form.raw_tags.append(col_header.text)
+                        translate_raw_tags(form)
+                        word_entry.forms.append(form)
 
                 col_index += cell_colspan
                 is_row_first_node = False
