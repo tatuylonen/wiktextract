@@ -230,3 +230,177 @@ class TestNlInflection(TestCase):
                 {"form": "corpussen", "tags": ["plural"]},
             ],
         )
+
+    def test_separate_forms_data(self):
+        self.wxr.wtp.add_page(
+            "Sjabloon:-nlstam-",
+            10,
+            """{| class="infobox"
+! colspan="3"|[[WikiWoordenboek:Stamtijd|stamtijd]]
+|-
+! [[WikiWoordenboek:Infinitief|onbepaalde <br> wijs]]
+! [[WikiWoordenboek:Verleden tijd|verleden <br> tijd]]
+! [[WikiWoordenboek:Voltooid deelwoord|voltooid <br> deelwoord]]
+|-
+| width=25%|{{{1}}} <br> <span class="IPAtekst">{{{4}}}</span>
+| width=25%|{{{2}}} <br> <span class="IPAtekst">{{{5}}}/</span>
+| width=25%|{{{3}}} <br> <span class="IPAtekst">{{{6}}}</span>
+|}""",
+        )
+        self.wxr.wtp.add_page(
+            "scheren/vervoeging",
+            0,
+            """==Nederlands==
+===rakelings langs iets bewegen===
+{{-nlverb-|scheren|[[scheer]]|[[scheert]]|[[scheren]]|[[scheerde]]|[[scheerden]]|zijn|[[gescheerd]]|[[schere]]}}""",
+        )
+        self.wxr.wtp.add_page(
+            "Sjabloon:-nlverb-",
+            10,
+            """{|class="infoboxlinks"
+!colspan="9"| <big>[[WikiWoordenboek:Vervoeging|vervoeging]] van de bedrijvende vorm van [[scheren#Nederlands|scheren]]</big>
+|-
+!colspan="3" class="infoboxrijhoofding"| [[WikiWoordenboek:Infinitief|onbepaalde wijs]]
+! colspan="3"| kort
+! colspan="3"| lang
+|-
+|colspan="1" rowspan="2" class="infoboxrijhoofding"| onvoltooid
+|colspan="2" class="infoboxrijhoofding"| tegenwoordig
+| colspan="3"| scheren
+| colspan="3"| te scheren
+|}""",
+        )
+        data = parse_page(
+            self.wxr,
+            "scheren",
+            """==Nederlands==
+{{-nlstam-|scheren|[[schoor]]|[[geschoren]]|/'sxɪːrə(n)/|/sxɔːr/|/ɣə'sxɔrə(n)/|scheid=n|k=2|'''[1] - [2]'''}}
+{{-nlstam-|scheren|[[scheerde]]|[[gescheerd]]|/'sxɪːrə(n)/|/sxɪːrdə/|/ɣə'sxɪːrt/|scheid=n|k=d|'''[3]'''}}
+====Werkwoord====
+# met een schaar of mes de huid van haar ontdoen
+
+{{-nlstam-|scheren|[[schoor]]|[[geschoren]]|/'sxɪːrə(n)/|/sxɔːr/|/ɣə'sxɔrə(n)/|scheid=n|k=2|'''[1] - [2]'''}}
+====Werkwoord====
+# bespotten, de spot drijven met, grappen maken met""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {"form": "schoor", "ipa": "/sxɔːr/", "tags": ["past"]},
+                {
+                    "form": "geschoren",
+                    "ipa": "/ɣə'sxɔrə(n)/",
+                    "tags": ["past", "participle"],
+                },
+                {
+                    "form": "te scheren",
+                    "raw_tags": ["lang"],
+                    "sense": "rakelings langs iets bewegen",
+                    "source": "scheren/vervoeging",
+                    "tags": ["active", "infinitive", "imperfect", "present"],
+                },
+                {"form": "scheerde", "ipa": "/sxɪːrdə/", "tags": ["past"]},
+                {
+                    "form": "gescheerd",
+                    "ipa": "/ɣə'sxɪːrt/",
+                    "tags": ["past", "participle"],
+                },
+            ],
+        )
+        self.assertEqual(
+            data[1]["forms"],
+            [
+                {"form": "schoor", "ipa": "/sxɔːr/", "tags": ["past"]},
+                {
+                    "form": "geschoren",
+                    "ipa": "/ɣə'sxɔrə(n)/",
+                    "tags": ["past", "participle"],
+                },
+                {
+                    "form": "te scheren",
+                    "raw_tags": ["lang"],
+                    "sense": "rakelings langs iets bewegen",
+                    "source": "scheren/vervoeging",
+                    "tags": ["active", "infinitive", "imperfect", "present"],
+                },
+            ],
+        )
+
+    def test_nlstam_two_lines(self):
+        self.wxr.wtp.add_page("Sjabloon:-nlstam-", 10, "")
+        data = parse_page(
+            self.wxr,
+            "zweren",
+            """==Nederlands==
+{{-nlstam-|{{pn}}|[[zweerde]]<br>[[zwoor]]|[[gezworen]]|/'zʋɪːrə(n)/|/'zʋɪːrdə/<br>/zʋɔːr/|/ɣə'zʋɔːrə(n)/|{{nlsterk2}}{{nlzwak-d}}</br>{{nlmix}}|2.|scheid=n}}
+=====Werkwoord=====
+# geïnfecteerd raken, etteren""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {"form": "zweerde", "ipa": "/'zʋɪːrdə/", "tags": ["past"]},
+                {"form": "zwoor", "ipa": "/zʋɔːr/", "tags": ["past"]},
+                {
+                    "form": "gezworen",
+                    "ipa": "/ɣə'zʋɔːrə(n)/",
+                    "tags": ["past", "participle"],
+                },
+            ],
+        )
+
+    def test_nlverb_slash(self):
+        self.wxr.wtp.add_page("Sjabloon:-nlstam-", 10, "")
+        self.wxr.wtp.add_page(
+            "zweren/vervoeging",
+            0,
+            """{{-nlverb-|zweren|[[zweer]]|[[zweert]]|[[zweren]]|[[zweerde]]/ [[zwoor]]|[[zweerden]]/ [[zworen]]|hebben|[[gezworen]]|[[zwere]]||[[zweerde(t)]]/ [[zwoort]]|erg=1}}""",
+        )
+        self.wxr.wtp.add_page(
+            "Sjabloon:-nlverb-",
+            10,
+            """{|
+! enkelvoud
+|-
+! verleden
+| [[zweerde]]/ [[zwoor]]
+|-
+! tweede
+|-
+! toekomend
+| zal/zult [[gezworen]] hebben
+|}""",
+        )
+        data = parse_page(
+            self.wxr,
+            "zweren",
+            """==Nederlands==
+{{-nlstam-}}
+=====Werkwoord=====
+# geïnfecteerd raken, etteren""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {
+                    "form": "zweerde",
+                    "tags": ["singular", "past"],
+                    "source": "zweren/vervoeging",
+                },
+                {
+                    "form": "zwoor",
+                    "tags": ["singular", "past"],
+                    "source": "zweren/vervoeging",
+                },
+                {
+                    "form": "zal gezworen hebben",
+                    "tags": ["second-person", "future"],
+                    "source": "zweren/vervoeging",
+                },
+                {
+                    "form": "zult gezworen hebben",
+                    "tags": ["second-person", "future"],
+                    "source": "zweren/vervoeging",
+                },
+            ],
+        )

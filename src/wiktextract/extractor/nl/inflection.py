@@ -1,12 +1,29 @@
 import re
 from dataclasses import dataclass
 
-from wikitextprocessor import NodeKind, TemplateNode, WikiNode
+from wikitextprocessor.parser import (
+    LEVEL_KIND_FLAGS,
+    NodeKind,
+    TemplateNode,
+    WikiNode,
+)
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .models import Form, WordEntry
 from .tags import translate_raw_tags
+
+FORMS_TABLE_TEMPLATES = frozenset(
+    [
+        "-nlnoun-",
+        "adjcomp",
+        "-nlname-",
+        "-denoun-",
+        "-denoun1-",
+        "-nlstam-",
+        "-csadjc-comp-",
+    ]
+)
 
 
 def extract_inflection_template(
@@ -72,20 +89,25 @@ def extract_nlstam_template(
     # verb table
     # https://nl.wiktionary.org/wiki/Sjabloon:-nlstam-
     for arg in [2, 3]:
-        form_str = clean_node(
+        form_texts = clean_node(
             wxr, None, t_node.template_parameters.get(arg, "")
         )
-        if form_str != "":
-            form = Form(
-                form=form_str,
-                ipa=clean_node(
-                    wxr, None, t_node.template_parameters.get(arg + 3, "")
-                ),
-            )
-            form.tags.extend(["past"] if arg == 2 else ["past", "participle"])
-            word_entry.forms.append(form)
+        ipa_texts = clean_node(
+            wxr, None, t_node.template_parameters.get(arg + 3, "")
+        ).splitlines()
+        for index, form_str in enumerate(form_texts.splitlines()):
+            if form_str != "":
+                form = Form(form=form_str)
+                if index < len(ipa_texts):
+                    form.ipa = ipa_texts[index]
+                form.tags.extend(
+                    ["past"] if arg == 2 else ["past", "participle"]
+                )
+                word_entry.forms.append(form)
     clean_node(wxr, word_entry, t_node)
-    extract_vervoeging_page(wxr, word_entry)
+    if not word_entry.extracted_vervoeging_page:
+        extract_vervoeging_page(wxr, word_entry)
+        word_entry.extracted_vervoeging_page = True
 
 
 def extract_vervoeging_page(
@@ -95,9 +117,16 @@ def extract_vervoeging_page(
     if page is None:
         return
     root = wxr.wtp.parse(page.body)
+    table_templates = ["-nlverb-", "-nlverb-reflex-", "-nlverb-onp-"]
     for t_node in root.find_child(NodeKind.TEMPLATE):
-        if t_node.template_name in ["-nlverb-", "-nlverb-reflex-"]:
-            extract_nlverb_template(wxr, word_entry, t_node)
+        if t_node.template_name in table_templates:
+            extract_nlverb_template(wxr, word_entry, t_node, "")
+    sense = ""
+    for level_node in root.find_child_recursively(LEVEL_KIND_FLAGS):
+        sense = clean_node(wxr, None, level_node.largs)
+        for t_node in level_node.find_child(NodeKind.TEMPLATE):
+            if t_node.template_name in table_templates:
+                extract_nlverb_template(wxr, word_entry, t_node, sense)
 
 
 @dataclass
@@ -113,12 +142,14 @@ NLVERB_HEADER_PREFIXES = {
     "vervoeging van de bedrijvende vorm van": ["active"],
     "onpersoonlijke lijdende vorm": ["impersonal", "passive"],
     "lijdende vorm": ["passive"],
-    "vervoeging van het Nederlandse werkwoord": [],
 }
 
 
 def extract_nlverb_template(
-    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    t_node: TemplateNode,
+    sense: str,
 ) -> None:
     # https://nl.wiktionary.org/wiki/Sjabloon:-nlverb-
     # Sjabloon:-nlverb-reflex-
@@ -170,7 +201,7 @@ def extract_nlverb_template(
                 if re.fullmatch(r"\d+", cell_rowspan_str):
                     cell_rowspan = int(cell_rowspan_str)
                 cell_str = clean_node(wxr, None, cell_node).strip("| ")
-                if cell_str in ["", wxr.wtp.title]:
+                if cell_str in ["", "—", wxr.wtp.title]:
                     col_index += cell_colspan
                     is_row_first_node = False
                     continue
@@ -183,7 +214,9 @@ def extract_nlverb_template(
                             shared_tags.extend(prefix_tags)
                             break
                     else:
-                        if current_row_all_header:
+                        if cell_str.startswith("vervoeging van "):
+                            pass
+                        elif current_row_all_header:
                             if (
                                 is_row_first_node
                                 and t_node.template_name == "-nlverb-"
@@ -213,7 +246,7 @@ def extract_nlverb_template(
                                     cell_rowspan,
                                 )
                             )
-                else:
+                else:  # data cell
                     has_small_tag = False
                     for small_node in cell_node.find_html("small"):
                         has_small_tag = True
@@ -221,31 +254,47 @@ def extract_nlverb_template(
                         small_tag = cell_str
                         col_index += cell_colspan
                         continue
-                    form = Form(
-                        form=cell_str,
-                        tags=shared_tags,
-                        raw_tags=shared_raw_tags,
-                        source=f"{wxr.wtp.title}/vervoeging",
-                    )
-                    if small_tag != "":
-                        form.raw_tags.append(small_tag)
-                        small_tag = ""
-                    for row_header in row_headers:
-                        if (
-                            row_index >= row_header.row_index
-                            and row_index
-                            < row_header.row_index + row_header.rowspan
-                        ):
-                            form.raw_tags.append(row_header.text)
-                    for col_header in col_headers:
-                        if (
-                            col_index >= col_header.col_index
-                            and col_index
-                            < col_header.col_index + col_header.colspan
-                        ):
-                            form.raw_tags.append(col_header.text)
-                    translate_raw_tags(form)
-                    word_entry.forms.append(form)
+                    form_texts = [cell_str]
+                    if "/ " in cell_str:  # "zweerde/ zwoor"
+                        form_texts = cell_str.split("/")
+                    elif "/" in cell_str and " " in cell_str:
+                        # "zult/zal zweren" -> ["zult zweren", "zal zweren"]
+                        space_index = cell_str.index(" ")
+                        second_part = cell_str[space_index:]
+                        form_texts = [
+                            f_str + second_part
+                            for f_str in cell_str[:space_index].split("/")
+                        ]
+                    for form_str in form_texts:
+                        form_str = form_str.strip()
+                        if len(form_str) == 0:
+                            continue
+                        form = Form(
+                            form=form_str,
+                            tags=shared_tags,
+                            raw_tags=shared_raw_tags,
+                            source=f"{wxr.wtp.title}/vervoeging",
+                            sense=sense,
+                        )
+                        if small_tag != "":
+                            form.raw_tags.append(small_tag)
+                            small_tag = ""
+                        for row_header in row_headers:
+                            if (
+                                row_index >= row_header.row_index
+                                and row_index
+                                < row_header.row_index + row_header.rowspan
+                            ):
+                                form.raw_tags.append(row_header.text)
+                        for col_header in col_headers:
+                            if (
+                                col_index >= col_header.col_index
+                                and col_index
+                                < col_header.col_index + col_header.colspan
+                            ):
+                                form.raw_tags.append(col_header.text)
+                        translate_raw_tags(form)
+                        word_entry.forms.append(form)
 
                 col_index += cell_colspan
                 is_row_first_node = False
