@@ -96,7 +96,9 @@ def extract_vervoeging_page(
         return
     root = wxr.wtp.parse(page.body)
     for t_node in root.find_child(NodeKind.TEMPLATE):
-        if t_node.template_name in ["-nlverb-", "-nlverb-reflex-"]:
+        if t_node.template_name in [
+            "-nlverb-", "-nlverb-reflex-", "-nlverb-onp-"
+        ]:
             extract_nlverb_template(wxr, word_entry, t_node)
 
 
@@ -113,7 +115,6 @@ NLVERB_HEADER_PREFIXES = {
     "vervoeging van de bedrijvende vorm van": ["active"],
     "onpersoonlijke lijdende vorm": ["impersonal", "passive"],
     "lijdende vorm": ["passive"],
-    "vervoeging van het Nederlandse werkwoord": [],
 }
 
 
@@ -183,7 +184,9 @@ def extract_nlverb_template(
                             shared_tags.extend(prefix_tags)
                             break
                     else:
-                        if current_row_all_header:
+                        if cell_str.startswith("vervoeging van "):
+                            pass
+                        elif current_row_all_header:
                             if (
                                 is_row_first_node
                                 and t_node.template_name == "-nlverb-"
