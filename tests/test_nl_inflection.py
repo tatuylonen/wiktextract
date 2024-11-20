@@ -325,3 +325,26 @@ class TestNlInflection(TestCase):
                 },
             ],
         )
+
+    def test_nlstam_two_lines(self):
+        self.wxr.wtp.add_page("Sjabloon:-nlstam-", 10, "")
+        data = parse_page(
+            self.wxr,
+            "zweren",
+            """==Nederlands==
+{{-nlstam-|{{pn}}|[[zweerde]]<br>[[zwoor]]|[[gezworen]]|/'zʋɪːrə(n)/|/'zʋɪːrdə/<br>/zʋɔːr/|/ɣə'zʋɔːrə(n)/|{{nlsterk2}}{{nlzwak-d}}</br>{{nlmix}}|2.|scheid=n}}
+=====Werkwoord=====
+# geïnfecteerd raken, etteren""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {"form": "zweerde", "ipa": "/'zʋɪːrdə/", "tags": ["past"]},
+                {"form": "zwoor", "ipa": "/zʋɔːr/", "tags": ["past"]},
+                {
+                    "form": "gezworen",
+                    "ipa": "/ɣə'zʋɔːrə(n)/",
+                    "tags": ["past", "participle"],
+                },
+            ],
+        )

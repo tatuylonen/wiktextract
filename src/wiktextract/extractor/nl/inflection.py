@@ -89,18 +89,21 @@ def extract_nlstam_template(
     # verb table
     # https://nl.wiktionary.org/wiki/Sjabloon:-nlstam-
     for arg in [2, 3]:
-        form_str = clean_node(
+        form_texts = clean_node(
             wxr, None, t_node.template_parameters.get(arg, "")
         )
-        if form_str != "":
-            form = Form(
-                form=form_str,
-                ipa=clean_node(
-                    wxr, None, t_node.template_parameters.get(arg + 3, "")
-                ),
-            )
-            form.tags.extend(["past"] if arg == 2 else ["past", "participle"])
-            word_entry.forms.append(form)
+        ipa_texts = clean_node(
+            wxr, None, t_node.template_parameters.get(arg + 3, "")
+        ).splitlines()
+        for index, form_str in enumerate(form_texts.splitlines()):
+            if form_str != "":
+                form = Form(form=form_str)
+                if index < len(ipa_texts):
+                    form.ipa = ipa_texts[index]
+                form.tags.extend(
+                    ["past"] if arg == 2 else ["past", "participle"]
+                )
+                word_entry.forms.append(form)
     clean_node(wxr, word_entry, t_node)
     if not word_entry.extracted_vervoeging_page:
         extract_vervoeging_page(wxr, word_entry)
@@ -243,7 +246,7 @@ def extract_nlverb_template(
                                     cell_rowspan,
                                 )
                             )
-                else:
+                else:  # data cell
                     has_small_tag = False
                     for small_node in cell_node.find_html("small"):
                         has_small_tag = True
