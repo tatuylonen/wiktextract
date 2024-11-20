@@ -13,6 +13,18 @@ from ...wxr_context import WiktextractContext
 from .models import Form, WordEntry
 from .tags import translate_raw_tags
 
+FORMS_TABLE_TEMPLATES = frozenset(
+    [
+        "-nlnoun-",
+        "adjcomp",
+        "-nlname-",
+        "-denoun-",
+        "-denoun1-",
+        "-nlstam-",
+        "-csadjc-comp-",
+    ]
+)
+
 
 def extract_inflection_template(
     wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
@@ -90,7 +102,9 @@ def extract_nlstam_template(
             form.tags.extend(["past"] if arg == 2 else ["past", "participle"])
             word_entry.forms.append(form)
     clean_node(wxr, word_entry, t_node)
-    extract_vervoeging_page(wxr, word_entry)
+    if not word_entry.extracted_vervoeging_page:
+        extract_vervoeging_page(wxr, word_entry)
+        word_entry.extracted_vervoeging_page = True
 
 
 def extract_vervoeging_page(

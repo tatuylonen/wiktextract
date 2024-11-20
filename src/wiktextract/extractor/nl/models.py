@@ -126,3 +126,4 @@ class WordEntry(DutchBaseModel):
     forms: list[Form] = []
     notes: list[str] = []
     descendants: list[Descendant] = []
+    extracted_vervoeging_page: bool = Field(default=False, exclude=True)

@@ -13,7 +13,7 @@ from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .descendant import extract_descendant_section
 from .etymology import extract_etymology_section
-from .inflection import extract_inflection_template
+from .inflection import FORMS_TABLE_TEMPLATES, extract_inflection_template
 from .linkage import extract_fixed_preposition_section, extract_linkage_section
 from .models import Etymology, Sense, WordEntry
 from .pos import extract_pos_section
@@ -107,15 +107,22 @@ def parse_section(
     extract_section_categories(
         wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
     )
+    is_first_forms_template = True
     for t_node in level_node.find_child(NodeKind.TEMPLATE):
-        extract_inflection_template(
-            wxr,
-            page_data[-1]
-            if title_text.startswith(("Vervoeging", "Verbuiging"))
-            and len(page_data) > 0
-            else forms_data,
-            t_node,
-        )
+        if t_node.template_name in FORMS_TABLE_TEMPLATES:
+            if is_first_forms_template:
+                is_first_forms_template = False
+                if len(forms_data.forms) > 0:
+                    forms_data.forms.clear()
+                    forms_data.extracted_vervoeging_page = False
+            extract_inflection_template(
+                wxr,
+                page_data[-1]
+                if title_text.startswith(("Vervoeging", "Verbuiging"))
+                and len(page_data) > 0
+                else forms_data,
+                t_node,
+            )
     return etymology_data
 
 
@@ -151,6 +158,8 @@ def parse_page(
         forms_data = base_data.model_copy(deep=True)
         extract_section_categories(wxr, base_data, level2_node)
         etymology_data = []
+        for t_node in level2_node.find_child(NodeKind.TEMPLATE):
+            extract_inflection_template(wxr, forms_data, t_node)
         for next_level_node in level2_node.find_child(LEVEL_KIND_FLAGS):
             new_e_data = parse_section(
                 wxr, page_data, base_data, forms_data, next_level_node

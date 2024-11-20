@@ -230,3 +230,98 @@ class TestNlInflection(TestCase):
                 {"form": "corpussen", "tags": ["plural"]},
             ],
         )
+
+    def test_separate_forms_data(self):
+        self.wxr.wtp.add_page(
+            "Sjabloon:-nlstam-",
+            10,
+            """{| class="infobox"
+! colspan="3"|[[WikiWoordenboek:Stamtijd|stamtijd]]
+|-
+! [[WikiWoordenboek:Infinitief|onbepaalde <br> wijs]]
+! [[WikiWoordenboek:Verleden tijd|verleden <br> tijd]]
+! [[WikiWoordenboek:Voltooid deelwoord|voltooid <br> deelwoord]]
+|-
+| width=25%|{{{1}}} <br> <span class="IPAtekst">{{{4}}}</span>
+| width=25%|{{{2}}} <br> <span class="IPAtekst">{{{5}}}/</span>
+| width=25%|{{{3}}} <br> <span class="IPAtekst">{{{6}}}</span>
+|}""",
+        )
+        self.wxr.wtp.add_page(
+            "scheren/vervoeging",
+            0,
+            """==Nederlands==
+===rakelings langs iets bewegen===
+{{-nlverb-|scheren|[[scheer]]|[[scheert]]|[[scheren]]|[[scheerde]]|[[scheerden]]|zijn|[[gescheerd]]|[[schere]]}}""",
+        )
+        self.wxr.wtp.add_page(
+            "Sjabloon:-nlverb-",
+            10,
+            """{|class="infoboxlinks"
+!colspan="9"| <big>[[WikiWoordenboek:Vervoeging|vervoeging]] van de bedrijvende vorm van [[scheren#Nederlands|scheren]]</big>
+|-
+!colspan="3" class="infoboxrijhoofding"| [[WikiWoordenboek:Infinitief|onbepaalde wijs]]
+! colspan="3"| kort
+! colspan="3"| lang
+|-
+|colspan="1" rowspan="2" class="infoboxrijhoofding"| onvoltooid
+|colspan="2" class="infoboxrijhoofding"| tegenwoordig
+| colspan="3"| scheren
+| colspan="3"| te scheren
+|}""",
+        )
+        data = parse_page(
+            self.wxr,
+            "scheren",
+            """==Nederlands==
+{{-nlstam-|scheren|[[schoor]]|[[geschoren]]|/'sxɪːrə(n)/|/sxɔːr/|/ɣə'sxɔrə(n)/|scheid=n|k=2|'''[1] - [2]'''}}
+{{-nlstam-|scheren|[[scheerde]]|[[gescheerd]]|/'sxɪːrə(n)/|/sxɪːrdə/|/ɣə'sxɪːrt/|scheid=n|k=d|'''[3]'''}}
+====Werkwoord====
+# met een schaar of mes de huid van haar ontdoen
+
+{{-nlstam-|scheren|[[schoor]]|[[geschoren]]|/'sxɪːrə(n)/|/sxɔːr/|/ɣə'sxɔrə(n)/|scheid=n|k=2|'''[1] - [2]'''}}
+====Werkwoord====
+# bespotten, de spot drijven met, grappen maken met""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {"form": "schoor", "ipa": "/sxɔːr/", "tags": ["past"]},
+                {
+                    "form": "geschoren",
+                    "ipa": "/ɣə'sxɔrə(n)/",
+                    "tags": ["past", "participle"],
+                },
+                {
+                    "form": "te scheren",
+                    "raw_tags": ["lang"],
+                    "sense": "rakelings langs iets bewegen",
+                    "source": "scheren/vervoeging",
+                    "tags": ["active", "infinitive", "imperfect", "present"],
+                },
+                {"form": "scheerde", "ipa": "/sxɪːrdə/", "tags": ["past"]},
+                {
+                    "form": "gescheerd",
+                    "ipa": "/ɣə'sxɪːrt/",
+                    "tags": ["past", "participle"],
+                },
+            ],
+        )
+        self.assertEqual(
+            data[1]["forms"],
+            [
+                {"form": "schoor", "ipa": "/sxɔːr/", "tags": ["past"]},
+                {
+                    "form": "geschoren",
+                    "ipa": "/ɣə'sxɔrə(n)/",
+                    "tags": ["past", "participle"],
+                },
+                {
+                    "form": "te scheren",
+                    "raw_tags": ["lang"],
+                    "sense": "rakelings langs iets bewegen",
+                    "source": "scheren/vervoeging",
+                    "tags": ["active", "infinitive", "imperfect", "present"],
+                },
+            ],
+        )
