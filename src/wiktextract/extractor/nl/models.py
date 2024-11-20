@@ -83,6 +83,7 @@ class Form(DutchBaseModel):
     raw_tags: list[str] = []
     ipa: str = ""
     source: str = ""
+    sense: str = ""
 
 
 class Descendant(DutchBaseModel):

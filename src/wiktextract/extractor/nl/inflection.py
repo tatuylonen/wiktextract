@@ -1,7 +1,12 @@
 import re
 from dataclasses import dataclass
 
-from wikitextprocessor import NodeKind, TemplateNode, WikiNode
+from wikitextprocessor.parser import (
+    LEVEL_KIND_FLAGS,
+    NodeKind,
+    TemplateNode,
+    WikiNode,
+)
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -95,11 +100,16 @@ def extract_vervoeging_page(
     if page is None:
         return
     root = wxr.wtp.parse(page.body)
+    table_templates = ["-nlverb-", "-nlverb-reflex-", "-nlverb-onp-"]
     for t_node in root.find_child(NodeKind.TEMPLATE):
-        if t_node.template_name in [
-            "-nlverb-", "-nlverb-reflex-", "-nlverb-onp-"
-        ]:
-            extract_nlverb_template(wxr, word_entry, t_node)
+        if t_node.template_name in table_templates:
+            extract_nlverb_template(wxr, word_entry, t_node, "")
+    sense = ""
+    for level_node in root.find_child_recursively(LEVEL_KIND_FLAGS):
+        sense = clean_node(wxr, None, level_node.largs)
+        for t_node in level_node.find_child(NodeKind.TEMPLATE):
+            if t_node.template_name in table_templates:
+                extract_nlverb_template(wxr, word_entry, t_node, sense)
 
 
 @dataclass
@@ -119,7 +129,10 @@ NLVERB_HEADER_PREFIXES = {
 
 
 def extract_nlverb_template(
-    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    t_node: TemplateNode,
+    sense: str,
 ) -> None:
     # https://nl.wiktionary.org/wiki/Sjabloon:-nlverb-
     # Sjabloon:-nlverb-reflex-
@@ -171,7 +184,7 @@ def extract_nlverb_template(
                 if re.fullmatch(r"\d+", cell_rowspan_str):
                     cell_rowspan = int(cell_rowspan_str)
                 cell_str = clean_node(wxr, None, cell_node).strip("| ")
-                if cell_str in ["", wxr.wtp.title]:
+                if cell_str in ["", "—", wxr.wtp.title]:
                     col_index += cell_colspan
                     is_row_first_node = False
                     continue
@@ -229,6 +242,7 @@ def extract_nlverb_template(
                         tags=shared_tags,
                         raw_tags=shared_raw_tags,
                         source=f"{wxr.wtp.title}/vervoeging",
+                        sense=sense,
                     )
                     if small_tag != "":
                         form.raw_tags.append(small_tag)
