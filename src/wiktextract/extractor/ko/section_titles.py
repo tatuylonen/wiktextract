@@ -27,12 +27,21 @@ POS_DATA = {
     "어간": {"pos": "stem"},
     "어미": {"pos": "suffix", "tags": ["morpheme"]},
     "의존 명사": {"pos": "noun", "tags": ["dependent"]},
-    "(품사)": {"pos": "unknown"},
+    "품사": {"pos": "unknown"},
     "후치사": {"pos": "postp"},
     "연어": {"pos": "phrase", "tags": ["idiomatic"]},
     "동사 활용형": {"pos": "verb", "tags": ["form-of"]},
     "재귀동사": {"pos": "verb", "tags": ["reflexive"]},
     "보조형용사": {"pos": "adj", "tags": ["auxiliary"]},
+    "고유명사": {"pos": "name"},
+    "개사": {"pos": "unknown"},
+    "간지": {"pos": "unknown"},
+    "이곳에 품사를 입력하세요": {"pos": "unknown"},
+    "여기에 품사를 적어주세요": {"pos": "unknown"},
+    "い형용사": {"pos": "adj"},
+    "な형용사": {"pos": "adj"},
+    "관사": {"pos": "article"},
+    "격조사": {"pos": "particle"},
 }
 
 LINKAGE_SECTIONS = {
@@ -52,4 +61,10 @@ LINKAGE_SECTIONS = {
     "복합어": "derived",
     "관련 단어": "related",
     "동의어": "synonyms",
+    "관용 표현": "idioms",
+    "관련 기호": "related",
+    "관려 어휘": "related",
+    "단어": "derived",
+    "관용어": "idioms",
+    "관련어휘": "related",
 }
