@@ -38,7 +38,9 @@ def parse_section(
     level_node: LevelNode,
 ) -> None:
     title_text = clean_node(wxr, None, level_node.largs)
-    title_text = re.sub(r"\s*\d+$", "", title_text)
+    title_text = re.sub(r"\s*\d+$", "", title_text).strip("() ")
+    if "(" in title_text:
+        title_text = title_text[:title_text.index("(")]
     if title_text.removeprefix("보조 ").strip() in POS_DATA:
         orig_page_data_len = len(page_data)
         extract_pos_section(wxr, page_data, base_data, level_node, title_text)
@@ -73,7 +75,15 @@ def parse_section(
             else base_data,
             level_node,
         )
-    elif title_text in ["참고 문헌", "독음", "자원"]:
+    elif title_text in [
+        "참고 문헌",
+        "독음",
+        "자원",
+        "교차언어",
+        "관사를 입력하세요",
+        "각주",
+        "갤러리",
+    ]:
         pass  # ignore
     else:
         wxr.wtp.debug(f"unknown title: {title_text}", sortid="ko/page/63")

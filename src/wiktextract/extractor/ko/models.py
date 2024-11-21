@@ -105,3 +105,4 @@ class WordEntry(KoreanBaseModel):
     pattern: str = Field(
         default="", description="Sentence structure, 문형", exclude=True
     )
+    idioms: list[Translation] = []
