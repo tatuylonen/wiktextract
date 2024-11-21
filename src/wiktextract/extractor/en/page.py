@@ -94,7 +94,7 @@ ENGLISH_TEXTS = ("english", "taxonomic")
 
 # Matches head tag
 HEAD_TAG_RE = re.compile(
-    r"^(head|Han char|arabic-noun|arabic-noun-form|"
+    r"^(head|Han char|arabic-noun|arabic-noun-form|term-label|tlb|"
     r"hangul-symbol|syllable-hangul)$|"
     + r"^(latin|"
     + "|".join(lang_code for lang_code, *_ in get_all_names("en"))
