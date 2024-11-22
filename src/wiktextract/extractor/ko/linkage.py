@@ -92,6 +92,17 @@ def extract_linkage_list_item(
                     linkage.raw_tags.append(raw_tag)
             getattr(word_entry, linkage_type).append(linkage)
 
+    if not list_item.contain_node(NodeKind.LINK):
+        word = clean_node(wxr, None, list_item.children)
+        if word != "":
+            linkage = Linkage(
+                word=word,
+                sense=word_entry.senses[-1].glosses[-1]
+                if len(word_entry.senses) > 0 and not in_linkage_section
+                else "",
+            )
+            getattr(word_entry, linkage_type).append(linkage)
+
 
 def extract_proverb_section(
     wxr: WiktextractContext,

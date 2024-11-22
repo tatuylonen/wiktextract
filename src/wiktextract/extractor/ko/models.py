@@ -106,3 +106,4 @@ class WordEntry(KoreanBaseModel):
         default="", description="Sentence structure, 문형", exclude=True
     )
     idioms: list[Translation] = []
+    hyponyms: list[Translation] = []
