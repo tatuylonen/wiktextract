@@ -44,6 +44,25 @@ POS_DATA = {
     "격조사": {"pos": "particle"},
     "명사구": {"pos": "noun"},
     "병음": {"pos": "romanization"},
+    "양사": {"pos": "classifier"},
+    "어소": {"pos": "unknown", "tags": ["morpheme"]},
+    "문자": {"pos": "character", "tags": ["letter"]},
+    "알파벳": {"pos": "character", "tags": ["letter"]},
+    "동사구": {"pos": "phrase"},
+    "약자": {"pos": "abbrev", "tags": ["abbreviation"]},
+    "방위사": {"pos": "noun"},
+    "보조사": {"pos": "unknown", "tags": ["completive"]},  # accessory word
+    "사투리": {"pos": "unknown", "tags": ["dialectal"]},
+    "부사구": {"pos": "adv"},
+    "모음": {"pos": "character", "tags": ["letter"]},
+    "보어": {"pos": "unknown", "tags": ["completive"]},
+    "옛말": {"pos": "proverb", "tags": ["archaic"]},
+    "자/타동사": {"pos": "verb", "tags": ["transitive", "intransitive"]},
+    "음소": {"pos": "letter", "tags": ["phoneme"]},
+    "연체사": {"pos": "adnominal"},
+    "한자": {"pos": "character", "tags": ["Hanja"]},
+    "학명": {"pos": "name"},
+    "이태동사": {"pos": "verb"},
 }
 
 LINKAGE_SECTIONS = {
@@ -69,4 +88,9 @@ LINKAGE_SECTIONS = {
     "단어": "derived",
     "관용어": "idioms",
     "관련어휘": "related",
+    "문화어": "synonyms",
+    "비표준어": "synonyms",
+    "숙어": "idioms",
+    "하위어": "hyponyms",
+    "참고": "related",
 }

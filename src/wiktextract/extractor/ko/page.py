@@ -89,6 +89,8 @@ def parse_section(
         "관사를 입력하세요",
         "각주",
         "갤러리",
+        "참조",
+        "이체자",
     ]:
         pass  # ignore
     else:
