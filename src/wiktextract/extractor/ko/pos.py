@@ -73,7 +73,11 @@ def extract_pos_section(
                 else:
                     extract_unorderd_list_item(wxr, page_data[-1], list_item)
 
-    if len(page_data[-1].senses) == 0:
+    if len(
+        page_data[-1].model_dump(
+            exclude_defaults=True, exclude={"pos_title", "tags"}
+        )
+    ) == len(base_data.model_dump(exclude_defaults=True)):
         page_data.pop()
 
 

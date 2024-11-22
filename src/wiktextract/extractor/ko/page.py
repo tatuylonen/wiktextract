@@ -40,7 +40,7 @@ def parse_section(
     title_text = clean_node(wxr, None, level_node.largs)
     title_text = re.sub(r"\s*\d+$", "", title_text).strip("() ")
     if "(" in title_text:
-        title_text = title_text[:title_text.index("(")]
+        title_text = title_text[: title_text.index("(")]
     if title_text.removeprefix("보조 ").strip() in POS_DATA:
         orig_page_data_len = len(page_data)
         extract_pos_section(wxr, page_data, base_data, level_node, title_text)

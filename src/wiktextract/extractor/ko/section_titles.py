@@ -42,6 +42,8 @@ POS_DATA = {
     "な형용사": {"pos": "adj"},
     "관사": {"pos": "article"},
     "격조사": {"pos": "particle"},
+    "명사구": {"pos": "noun"},
+    "병음": {"pos": "romanization"},
 }
 
 LINKAGE_SECTIONS = {
