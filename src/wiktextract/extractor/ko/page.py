@@ -9,7 +9,7 @@ from ...wxr_context import WiktextractContext
 from .etymology import extract_etymology_section
 from .linkage import extract_linkage_section
 from .models import Sense, WordEntry
-from .pos import extract_pos_section
+from .pos import extract_grammar_note_section, extract_pos_section
 from .section_titles import LINKAGE_SECTIONS, POS_DATA
 from .sound import (
     SOUND_TEMPLATES,
@@ -73,6 +73,12 @@ def parse_section(
             page_data[-1]
             if len(page_data) > 0 and len(page_data[-1].etymology_texts) == 0
             else base_data,
+            level_node,
+        )
+    elif title_text == "어법 주의 사항":
+        extract_grammar_note_section(
+            wxr,
+            page_data[-1] if len(page_data) > 0 else base_data,
             level_node,
         )
     elif title_text in [

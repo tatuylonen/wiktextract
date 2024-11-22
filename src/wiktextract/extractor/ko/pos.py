@@ -266,3 +266,10 @@ def extract_ko_noun_template(
     hanja = clean_node(wxr, None, t_node.template_parameters.get("한자", ""))
     if hanja != "":
         word_entry.forms.append(Form(form=hanja, tags=["hanja"]))
+
+
+def extract_grammar_note_section(
+    wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
+) -> None:
+    for list_item in level_node.find_child_recursively(NodeKind.LIST_ITEM):
+        word_entry.note = clean_node(wxr, None, list_item.children)
