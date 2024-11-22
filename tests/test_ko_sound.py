@@ -105,3 +105,13 @@ class TestKoSound(TestCase):
                 "일본어 중복되지 않는 수동 정렬 키를 포함하는 낱말",
             ],
         )
+
+    def test_low_quality_page_no_gloss(self):
+        data = parse_page(
+            self.wxr,
+            "sì",
+            """== 중국어 ==
+===병음===
+{{발음 듣기|Zh-sì.ogg}}""",
+        )
+        self.assertEqual(len(data[0]["sounds"]), 1)

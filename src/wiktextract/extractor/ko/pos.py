@@ -73,7 +73,11 @@ def extract_pos_section(
                 else:
                     extract_unorderd_list_item(wxr, page_data[-1], list_item)
 
-    if len(page_data[-1].senses) == 0:
+    if len(
+        page_data[-1].model_dump(
+            exclude_defaults=True, exclude={"pos_title", "tags"}
+        )
+    ) == len(base_data.model_dump(exclude_defaults=True)):
         page_data.pop()
 
 
@@ -175,7 +179,7 @@ def extract_unorderd_list_item(
             and ":" in node
             and node[: node.index(":")].strip() in LINKAGE_SECTIONS
         ):
-            extract_linkage_list_item(wxr, word_entry, list_item, "")
+            extract_linkage_list_item(wxr, word_entry, list_item, "", False)
             break
         elif isinstance(node, str) and "문형:" in node:
             word_entry.pattern = node[node.index(":") + 1 :].strip()
@@ -262,3 +266,10 @@ def extract_ko_noun_template(
     hanja = clean_node(wxr, None, t_node.template_parameters.get("한자", ""))
     if hanja != "":
         word_entry.forms.append(Form(form=hanja, tags=["hanja"]))
+
+
+def extract_grammar_note_section(
+    wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
+) -> None:
+    for list_item in level_node.find_child_recursively(NodeKind.LIST_ITEM):
+        word_entry.note = clean_node(wxr, None, list_item.children)

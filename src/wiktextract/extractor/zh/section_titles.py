@@ -3,9 +3,8 @@ from wiktextract.config import POSSubtitleData
 POS_TITLES: dict[str, POSSubtitleData] = {
     "不及物动词": {"pos": "verb", "tags": ["intransitive"]},
     "不及物動詞": {
-        "debug": "part-of-speech Intransitive verb is proscribed",
         "pos": "verb",
-        "tags": ["intransitive"],
+        "tags": ["intransitive"]
     },
     "不定代词": {"pos": "pron"},
     "不定冠詞": {"pos": "article"},
@@ -51,7 +50,6 @@ POS_TITLES: dict[str, POSSubtitleData] = {
     "助詞": {"pos": "particle"},
     "助词": {"pos": "particle"},
     "動名詞": {
-        "debug": "part-of-speech Gerund is proscribed",
         "pos": "verb",
         "tags": ["participle", "gerund"],
     },
@@ -79,7 +77,6 @@ POS_TITLES: dict[str, POSSubtitleData] = {
     "小品词": {"pos": "particle"},
     "平假名": {"pos": "syllable"},
     "序數": {
-        "debug": "ordinal numbers should be adjectives",
         "pos": "adj",
         "tags": ["ordinal"],
     },
@@ -120,7 +117,6 @@ POS_TITLES: dict[str, POSSubtitleData] = {
     "标点": {"pos": "punct", "tags": ["punctuation"]},
     "标点符号": {"pos": "punct", "tags": ["punctuation"]},
     "標點符號": {
-        "debug": "part-of-speech Punctuation should be Punctuation mark",
         "pos": "punct",
         "tags": ["punctuation"],
     },
@@ -143,7 +139,6 @@ POS_TITLES: dict[str, POSSubtitleData] = {
     "縮約形": {"pos": "contraction", "tags": ["contraction"]},
     "结合形式": {"pos": "combining_form", "tags": ["morpheme"]},
     "缩写": {
-        "debug": "part-of-speech Abbreviation is proscribed",
         "pos": "abbrev",
         "tags": ["abbreviation"],
     },
@@ -182,7 +177,6 @@ POS_TITLES: dict[str, POSSubtitleData] = {
     "音節": {"pos": "syllable"},
     "音节": {"pos": "syllable"},
     "首字母縮略字": {
-        "debug": "part-of-speech Initialism is proscribed",
         "pos": "abbrev",
         "tags": ["abbreviation"],
     },

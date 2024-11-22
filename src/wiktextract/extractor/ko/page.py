@@ -9,7 +9,7 @@ from ...wxr_context import WiktextractContext
 from .etymology import extract_etymology_section
 from .linkage import extract_linkage_section
 from .models import Sense, WordEntry
-from .pos import extract_pos_section
+from .pos import extract_grammar_note_section, extract_pos_section
 from .section_titles import LINKAGE_SECTIONS, POS_DATA
 from .sound import (
     SOUND_TEMPLATES,
@@ -40,7 +40,7 @@ def parse_section(
     title_text = clean_node(wxr, None, level_node.largs)
     title_text = re.sub(r"\s*\d+$", "", title_text).strip("() ")
     if "(" in title_text:
-        title_text = title_text[:title_text.index("(")]
+        title_text = title_text[: title_text.index("(")]
     if title_text.removeprefix("보조 ").strip() in POS_DATA:
         orig_page_data_len = len(page_data)
         extract_pos_section(wxr, page_data, base_data, level_node, title_text)
@@ -75,6 +75,12 @@ def parse_section(
             else base_data,
             level_node,
         )
+    elif title_text == "어법 주의 사항":
+        extract_grammar_note_section(
+            wxr,
+            page_data[-1] if len(page_data) > 0 else base_data,
+            level_node,
+        )
     elif title_text in [
         "참고 문헌",
         "독음",
@@ -83,6 +89,8 @@ def parse_section(
         "관사를 입력하세요",
         "각주",
         "갤러리",
+        "참조",
+        "이체자",
     ]:
         pass  # ignore
     else:
