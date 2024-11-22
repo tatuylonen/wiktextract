@@ -45,7 +45,9 @@ def extract_linkage_section(
         from .translation import extract_translation_template
 
         for list_item in level_node.find_child_recursively(NodeKind.LIST_ITEM):
-            extract_linkage_list_item(wxr, word_entry, list_item, linkage_type)
+            extract_linkage_list_item(
+                wxr, word_entry, list_item, linkage_type, True
+            )
 
         for t_node in level_node.find_child(NodeKind.TEMPLATE):
             extract_linkage_template(wxr, word_entry, t_node)
@@ -58,6 +60,7 @@ def extract_linkage_list_item(
     word_entry: WordEntry,
     list_item: WikiNode,
     linkage_type: str,
+    in_linkage_section: bool,
 ) -> None:
     raw_tag = ""
     is_roman = False
@@ -79,7 +82,7 @@ def extract_linkage_list_item(
             linkage = Linkage(
                 word=word,
                 sense=word_entry.senses[-1].glosses[-1]
-                if len(word_entry.senses) > 0
+                if len(word_entry.senses) > 0 and not in_linkage_section
                 else "",
             )
             if len(raw_tag) > 0:

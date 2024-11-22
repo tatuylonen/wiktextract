@@ -179,7 +179,7 @@ def extract_unorderd_list_item(
             and ":" in node
             and node[: node.index(":")].strip() in LINKAGE_SECTIONS
         ):
-            extract_linkage_list_item(wxr, word_entry, list_item, "")
+            extract_linkage_list_item(wxr, word_entry, list_item, "", False)
             break
         elif isinstance(node, str) and "문형:" in node:
             word_entry.pattern = node[node.index(":") + 1 :].strip()

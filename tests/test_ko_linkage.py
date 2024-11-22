@@ -104,8 +104,8 @@ class TestKoLinkage(TestCase):
         self.assertEqual(
             data[0]["derived"],
             [
-                {"word": "土產", "roman": "tǔchǎn", "sense": "흙, 땅"},
-                {"word": "土产", "roman": "tǔchǎn", "sense": "흙, 땅"},
+                {"word": "土產", "roman": "tǔchǎn"},
+                {"word": "土产", "roman": "tǔchǎn"},
             ],
         )
 
