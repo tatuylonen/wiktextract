@@ -1423,6 +1423,7 @@ def parse_language(
                 head_group = i + 1 if there_are_many_heads else None
                 # print("parse_part_of_speech: {}: {}: pre={}"
                 # .format(wxr.wtp.section, wxr.wtp.subsection, pre1))
+                header_tags.clear()
                 process_gloss_header(
                     pre1, pos, head_group, pos_data, header_tags
                 )
@@ -1538,8 +1539,6 @@ def parse_language(
             # doesn't like it, so let's ignore it.
             header_tags.extend(pos_data["tags"])  # type: ignore[typeddict-item]
             del pos_data["tags"]  # type: ignore[typeddict-item]
-        else:
-            header_tags.clear()
 
     def process_gloss_without_list(
         nodes: list[Union[WikiNode, str]],
