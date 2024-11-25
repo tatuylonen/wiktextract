@@ -42,6 +42,9 @@ SOUND_TAGS = {
     "표준": "standard",
     "남부": "South",
     "북부": "North",
+    "고대": "archaic",
+    "동부": "East",
+    "서부": "West",
 }
 
 HEADER_TAGS = {
@@ -52,6 +55,7 @@ HEADER_TAGS = {
     "사동사": "causative",
 }
 
+# also in linkage lists
 TRANSLATION_TAGS = {
     "남성": "masculine",
     "여성": "feminine",
@@ -59,6 +63,15 @@ TRANSLATION_TAGS = {
     "중성": "neuter",
     "간체": "Simplified Chinese",
     "번체자": "Traditional Chinese",
+    "오스트리아": "Austria",
+    "표준어": "standard",
+    "히브리 문자": ["Hebrew", "letter"],
+    "아랍 문자": ["Arabic", "letter"],
+    "복수형": "plural",
+    "단수": "singular",
+    "복수": "plural",
+    "불완료체": "imperfect",
+    "완료체": "completive",
 }
 
 TAGS = {**GLOSS_TAGS, **SOUND_TAGS, **HEADER_TAGS, **TRANSLATION_TAGS}
