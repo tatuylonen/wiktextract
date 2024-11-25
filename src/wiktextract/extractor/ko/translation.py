@@ -79,7 +79,7 @@ def extract_translation_list_item(
                         else:
                             for raw_tag in text.split("/"):
                                 raw_tag = raw_tag.strip()
-                                if raw_tag != "":
+                                if raw_tag not in ["", "-"]:
                                     word_entry.translations[-1].raw_tags.append(
                                         raw_tag
                                     )

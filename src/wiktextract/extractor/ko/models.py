@@ -62,6 +62,7 @@ class Linkage(KoreanBaseModel):
     roman: str = ""
     raw_tags: list[str] = []
     tags: list[str] = []
+    sense_index: str = ""
 
 
 class Translation(KoreanBaseModel):

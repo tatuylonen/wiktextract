@@ -128,3 +128,36 @@ class TestKoLinkage(TestCase):
                 }
             ],
         )
+
+    def test_sense_index_num(self):
+        data = parse_page(
+            self.wxr,
+            "jarabe",
+            """== 스페인어 ==
+# [[시럽]].
+# [[주스]].
+==== 유의어 ====
+* (2) [[zumo]]""",
+        )
+        self.assertEqual(
+            data[0]["synonyms"], [{"word": "zumo", "sense_index": "2"}]
+        )
+
+    def test_plain_text_tag(self):
+        data = parse_page(
+            self.wxr,
+            "abettor",
+            """== 영어 ==
+# [[교사자]], [[공범]], [[동조자]].
+*유의어: [[abetter]] (미국)""",
+        )
+        self.assertEqual(
+            data[0]["synonyms"],
+            [
+                {
+                    "word": "abetter",
+                    "sense": "교사자, 공범, 동조자.",
+                    "tags": ["US"],
+                }
+            ],
+        )
