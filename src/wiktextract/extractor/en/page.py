@@ -1355,9 +1355,13 @@ def parse_language(
 
         there_are_many_heads = len(pre) > 1
         header_tags: list[str] = []
+        header_topics: list[str] = []
+        previous_head_had_list = False
 
         if not any(g for g in lists):
-            process_gloss_without_list(poschildren, pos, pos_data, header_tags)
+            process_gloss_without_list(
+                poschildren, pos, pos_data, header_tags, header_topics
+            )
         else:
             for i, (pre1, ls) in enumerate(zip(pre, lists)):
                 # if len(ls) == 0:
@@ -1430,9 +1434,17 @@ def parse_language(
                 head_group = i + 1 if there_are_many_heads else None
                 # print("parse_part_of_speech: {}: {}: pre={}"
                 # .format(wxr.wtp.section, wxr.wtp.subsection, pre1))
-                header_tags.clear()
+
+                if previous_head_had_list:
+                    # We use a boolean flag here because we want to be able
+                    # let the header_tags data pass through after the loop
+                    # is over without accidentally emptying it, if there are
+                    # no pos_datas and we need a dummy data.
+                    header_tags.clear()
+                    header_topics.clear()
+
                 process_gloss_header(
-                    pre1, pos, head_group, pos_data, header_tags
+                    pre1, pos, head_group, pos_data, header_tags, header_topics
                 )
                 for ln in ls:
                     # Parse each list associated with this head.
@@ -1446,16 +1458,25 @@ def parse_language(
                         # the data is already pushed into a sub-gloss
                         # downstream, unless the higher level has examples
                         # that need to be put somewhere.
-                        common_data: SenseData = {"tags": list(header_tags)}
+                        common_data: SenseData = {
+                            "tags": list(header_tags),
+                            "topics": list(header_topics),
+                        }
                         if head_group:
                             common_data["head_nr"] = head_group
                         parse_sense_node(node, common_data, pos)  # type: ignore[arg-type]
+
+                if len(ls) > 0:
+                    previous_head_had_list = True
+                else:
+                    previous_head_had_list = False
 
         # If there are no senses extracted, add a dummy sense.  We want to
         # keep tags extracted from the head for the dummy sense.
         push_sense()  # Make sure unfinished data pushed, and start clean sense
         if len(pos_datas) == 0:
             data_extend(sense_data, "tags", header_tags)
+            data_extend(sense_data, "topics", header_topics)
             data_append(sense_data, "tags", "no-gloss")
             push_sense()
 
@@ -1465,6 +1486,7 @@ def parse_language(
         header_group: Optional[int],
         pos_data: WordData,
         header_tags: list[str],
+        header_topics: list[str],
     ) -> None:
         ruby = []
         links: list[str] = []
@@ -1577,6 +1599,7 @@ def parse_language(
         pos_type: str,
         pos_data: WordData,
         header_tags: list[str],
+        header_topics: list[str],
     ) -> None:
         # gloss text might not inside a list
         header_nodes: list[Union[str, WikiNode]] = []
@@ -1602,11 +1625,18 @@ def parse_language(
 
         if len(header_nodes) > 0:
             process_gloss_header(
-                header_nodes, pos_type, None, pos_data, header_tags
+                header_nodes,
+                pos_type,
+                None,
+                pos_data,
+                header_tags,
+                header_topics,
             )
         if len(gloss_nodes) > 0:
             process_gloss_contents(
-                gloss_nodes, pos_type, {"tags": list(header_tags)}
+                gloss_nodes,
+                pos_type,
+                {"tags": list(header_tags), "topics": list(header_topics)},
             )
 
     def parse_sense_node(
