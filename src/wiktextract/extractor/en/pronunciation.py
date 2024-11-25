@@ -897,7 +897,7 @@ def parse_pronunciation(
                 data_append(data, "sounds", audio)
         # if audios:
         #     have_pronunciations = True
-        audios = []
+    audios = []
 
     ## I have commented out the otherwise unused have_pronunciation
     ## toggles; uncomment them to use this debug print
