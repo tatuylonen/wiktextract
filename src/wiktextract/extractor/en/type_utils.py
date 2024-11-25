@@ -123,6 +123,17 @@ class TranslationData(TypedDict, total=False):
     word: str
 
 
+# Xxyzz's East Asian etymology example data
+class EtymologyExample(TypedDict, total=False):
+    english: str
+    raw_tags: list[str]
+    ref: str
+    roman: str
+    tags: list[str]
+    text: str
+    type: str
+
+
 class SenseData(TypedDict, total=False):
     alt_of: list[AltOf]
     antonyms: list[LinkageData]
@@ -159,6 +170,7 @@ class WordData(TypedDict, total=False):
     coordinate_terms: list[LinkageData]
     derived: list[LinkageData]
     descendants: list[DescendantData]
+    etymology_examples: list[EtymologyExample]
     etymology_number: int
     etymology_templates: list[TemplateData]
     etymology_text: str
