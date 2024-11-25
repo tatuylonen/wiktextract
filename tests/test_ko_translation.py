@@ -25,7 +25,7 @@ class TestKoTranslation(TestCase):
     def test_tr_template(self):
         data = parse_page(
             self.wxr,
-            "개",  # and page "아이"
+            "개",  # and page "아이", "같다"
             """== 한국어 ==
 === 명사 ===
 ==== 명사 1 ====
@@ -36,6 +36,7 @@ class TestKoTranslation(TestCase):
 |
 * 노비알(nov): [[hunde]] ((수컷/암컷) 개)
 * 라트갈레어(bat-ltg): [[bārns]] (남성)
+* 노르만어(nrm): (저지어); [[même]] (남성/여성)
 }}""",
         )
         self.assertEqual(
@@ -44,21 +45,27 @@ class TestKoTranslation(TestCase):
                 {
                     "word": "કુતરો",
                     "roman": "kutro",
-                    "raw_tags": ["남성"],
+                    "tags": ["masculine"],
                     "lang": "구자라트어",
                     "lang_code": "gu",
                 },
                 {
                     "word": "hunde",
-                    "raw_tags": ["수컷/암컷 개"],
+                    "raw_tags": ["수컷", "암컷 개"],
                     "lang": "노비알",
                     "lang_code": "nov",
                 },
                 {
                     "word": "bārns",
-                    "raw_tags": ["남성"],
+                    "tags": ["masculine"],
                     "lang": "라트갈레어",
                     "lang_code": "bat-ltg",
+                },
+                {
+                    "word": "même",
+                    "tags": ["masculine", "feminine"],
+                    "lang": "노르만어",
+                    "lang_code": "nrm",
                 },
             ],
         )

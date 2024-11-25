@@ -31,6 +31,7 @@ SOUND_TAGS = {
     ],
     "McCune-Reischauer": "McCune-Reischauer",
     "Yale Romanization": ["Yale", "romanization"],
+    "표준어/서울": ["SK-Standard", "Seoul"],
     # 틀:ja-pron
     "도쿄": "Tokyo",
     # 틀:발음 듣기, 틀:IPA
@@ -38,6 +39,28 @@ SOUND_TAGS = {
     "미국": "US",
     "영": "UK",
     "미": "US",
+    "표준": "standard",
+    "남부": "South",
+    "북부": "North",
+    "고대": "archaic",
+    "동부": "East",
+    "서부": "West",
+    "포르투갈": "Portugal",
+    "이집트": "Egypt",
+    "시리아": "Syria",
+    "브라질": "Brazil",
+    "독일": "Germany",
+    "현대": "modern",
+    "캐나다": "Canada",
+    "하노이": "Hanoi",
+    "브라질 남부": "Southern-Brazil",
+    "벨기에": "Belgium",
+    "이란": "Iran",
+    "파리": "Paris",
+    "모로코": "Morocco",
+    "베를린": "Berlin",
+    "비격식체": "informal",
+    "민난어 장저우": ["Min-Nan", "Zhangzhou"],
 }
 
 HEADER_TAGS = {
@@ -48,7 +71,43 @@ HEADER_TAGS = {
     "사동사": "causative",
 }
 
-TAGS = {**GLOSS_TAGS, **SOUND_TAGS, **HEADER_TAGS}
+# also in linkage lists
+TRANSLATION_TAGS = {
+    "남성": "masculine",
+    "여성": "feminine",
+    "라틴": "Latin",
+    "중성": "neuter",
+    "간체": "Simplified Chinese",
+    "번체": "Traditional Chinese",
+    "번체자": "Traditional Chinese",
+    "오스트리아": "Austria",
+    "표준어": "standard",
+    "히브리 문자": ["Hebrew", "letter"],
+    "아랍 문자": ["Arabic", "letter"],
+    "복수형": "plural",
+    "단수": "singular",
+    "복수": "plural",
+    "불완료체": "imperfect",
+    "완료체": "completive",
+    "양성": "masculine",
+    "바이에른 방언": ["Bavarian", "dialectal"],
+    "광둥어": "Cantonese",
+    "오스트레일리아": "Australia",
+    "글라골 문자": ["Glagolitic", "letter"],
+    "속어": "slang",
+    "멕시코 속어": ["Mexico", "slang"],
+    "에스파냐": "Spain",
+    "가타카나": "katakana",
+    "고어": "archaic",
+    "쯔놈": "Chu-Nom",
+    "형용사": "adjective",
+    "사투리": "dialectal",
+    "약자": "abbreviation",
+    "동사": "verb",
+    "드문 단어": "rare",
+}
+
+TAGS = {**GLOSS_TAGS, **SOUND_TAGS, **HEADER_TAGS, **TRANSLATION_TAGS}
 
 TOPICS = {
     "금융": "finance",

@@ -67,7 +67,7 @@ class TestKoSound(TestCase):
         self.assertEqual(
             data[0]["sounds"],
             [
-                {"ipa": "[ka̠]", "raw_tags": ["표준어/서울"]},
+                {"ipa": "[ka̠]", "tags": ["SK-Standard", "Seoul"]},
                 {"hangul": "[가]"},
                 {"roman": "ga", "tags": ["revised", "romanization"]},
             ],
@@ -115,3 +115,14 @@ class TestKoSound(TestCase):
 {{발음 듣기|Zh-sì.ogg}}""",
         )
         self.assertEqual(len(data[0]["sounds"]), 1)
+
+    def test_ipa_template_comma(self):
+        data = parse_page(
+            self.wxr,
+            "an toàn",
+            """== 베트남어 ==
+=== 명사 ===
+{{IPA|an˦.tɔan˧˨|표준, 북부|aŋ˦.tɔaŋ˧˨|남부}}
+# [[안전]].""",
+        )
+        self.assertEqual(data[0]["sounds"][0]["tags"], ["standard", "North"])

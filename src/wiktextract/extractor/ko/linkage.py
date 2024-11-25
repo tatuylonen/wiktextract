@@ -6,6 +6,7 @@ from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .models import Linkage, WordEntry
 from .section_titles import LINKAGE_SECTIONS
+from .tags import translate_raw_tags
 
 LINKAGE_TEMPLATES = frozenset(["파생어 상자", "합성어 상자"])
 
@@ -88,8 +89,11 @@ def extract_linkage_list_item(
             if len(raw_tag) > 0:
                 if is_roman:
                     linkage.roman = raw_tag
+                elif re.fullmatch(r"\d+", raw_tag) is not None:
+                    linkage.sense_index = raw_tag
                 else:
                     linkage.raw_tags.append(raw_tag)
+                    translate_raw_tags(linkage)
             getattr(word_entry, linkage_type).append(linkage)
 
     if not list_item.contain_node(NodeKind.LINK):
@@ -101,6 +105,7 @@ def extract_linkage_list_item(
                 if len(word_entry.senses) > 0 and not in_linkage_section
                 else "",
             )
+            translate_raw_tags(linkage)
             getattr(word_entry, linkage_type).append(linkage)
 
 
