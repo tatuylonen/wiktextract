@@ -777,3 +777,29 @@ class HeadTests(unittest.TestCase):
             )[0]["senses"][0]["tags"],
             ["feminine", "dialectal", "masculine"],
         )
+
+    def test_converted_topic_is_not_form(self):
+        # GH issue #906
+        # "fandom slang" -> "slang lifestyle" in "tags.py"
+        self.wxr.wtp.add_page(
+            "Template:term-label",
+            10,
+            """<span class="usage-label-term"><span class="ib-brac">(</span><span class="ib-content">[[fandom]] [[slang]]<span class="ib-comma">,</span>&#32;sometimes&#32;[[derogatory]]</span><span class="ib-brac">)</span></span>""",
+        )
+        self.wxr.wtp.add_page(
+            "Template:en-noun",
+            10,
+            """<span class="headword-line"><strong class="Latn headword" lang="en">chuunibyou</strong> (<i>[[Appendix:Glossary#countable|countable]] and [[Appendix:Glossary#uncountable|uncountable]]</i>, <i>plural</i> <b class="Latn form-of lang-en p-form-of" lang="en">[[chuunibyou#English|chuunibyou]]</b>)</span>""",
+        )
+        self.assertEqual(
+            parse_page(
+                self.wxr,
+                "chuunibyou",
+                """==English==
+===Noun===
+{{en-noun|~|chuunibyou}} {{term-label|en|fandom slang|sometimes|derogatory}}
+
+# gloss""",
+            )[0]["forms"],
+            [{"form": "chuunibyou", "tags": ["plural"]}],
+        )

@@ -123,7 +123,7 @@ def extract_template_ja_usex(
 def extract_template_zh_x(
     wxr: WiktextractContext,
     template_node: TemplateNode,
-    sense_data: SenseData,
+    sense_data: SenseData | None,
     parent_example: ExampleData,
 ) -> list[ExampleData]:
     # https://en.wiktionary.org/wiki/Template:zh-x
