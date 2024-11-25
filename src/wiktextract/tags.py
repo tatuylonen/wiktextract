@@ -4776,6 +4776,7 @@ xlat_tags_map: Dict[str, Union[str, List[str]]] = {
     "Dialectal or colloquial": "colloquial",
     "Rare except in very formal contexts": "rare formal",
     "alternative in würde normally preferred": "",
+    "sometimes derogatory": "sometimes derogatory", 
 }
 
 # This mapping is applied to full descriptions before splitting by comma.

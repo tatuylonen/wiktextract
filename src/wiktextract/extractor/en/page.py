@@ -1074,6 +1074,8 @@ def parse_language(
             return etym_data
         return level_four_data
 
+    term_label_templates: list[TemplateData] = []
+
     def head_post_template_fn(
         name: str, ht: TemplateArgs, expansion: str
     ) -> Optional[str]:
@@ -1101,9 +1103,14 @@ def parse_language(
         ):
             args_ht = clean_template_args(wxr, ht)
             cleaned_expansion = clean_node(wxr, None, expansion)
-            dt = {"name": name, "args": args_ht, "expansion": cleaned_expansion}
+            dt: TemplateData = {
+                "name": name,
+                "args": args_ht,
+                "expansion": cleaned_expansion,
+            }
             data_append(pos_data, "head_templates", dt)
             if name in WORD_LEVEL_HEAD_TEMPLATES:
+                term_label_templates.append(dt)
                 # Squash these, their tags are applied to the whole word,
                 # and some cause problems like "term-label"
                 return ""
@@ -1522,6 +1529,27 @@ def parse_language(
         header_text = clean_node(
             wxr, pos_data, header_nodes, post_template_fn=head_post_template_fn
         )
+
+        term_label_tags: list[str] = []
+        term_label_topics: list[str] = []
+        if len(term_label_templates) > 0:
+            # parse term label templates; if there are other similar kinds
+            # of templates in headers that you want to squash and apply as
+            # tags, you can add them to WORD_LEVEL_HEAD_TEMPLATES
+            for templ_data in term_label_templates:
+                print(templ_data)
+                expan = templ_data.get("expansion", "").strip("(").strip(")")
+                if not expan:
+                    continue
+                tlb_tagsets, tlb_topics = decode_tags(expan)
+                for tlb_tags in tlb_tagsets:
+                    if len(tlb_tags) > 0 and not any(
+                        t.startswith("error-") for t in tlb_tags
+                    ):
+                        term_label_tags.extend(tlb_tags)
+                term_label_topics.extend(tlb_topics)
+            # print(f"{tlb_tagsets=}, {tlb_topicsets=}")
+
         header_text = re.sub(r"\s+", " ", header_text)
         # print(f"{header_text=}")
         parse_word_head(
@@ -1539,6 +1567,10 @@ def parse_language(
             # doesn't like it, so let's ignore it.
             header_tags.extend(pos_data["tags"])  # type: ignore[typeddict-item]
             del pos_data["tags"]  # type: ignore[typeddict-item]
+        if len(term_label_tags) > 0:
+            header_tags.extend(term_label_tags)
+        if len(term_label_topics) > 0:
+            header_topics.extend(term_label_topics)
 
     def process_gloss_without_list(
         nodes: list[Union[WikiNode, str]],
