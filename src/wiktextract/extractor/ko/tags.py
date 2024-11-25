@@ -52,7 +52,16 @@ HEADER_TAGS = {
     "사동사": "causative",
 }
 
-TAGS = {**GLOSS_TAGS, **SOUND_TAGS, **HEADER_TAGS}
+TRANSLATION_TAGS = {
+    "남성": "masculine",
+    "여성": "feminine",
+    "라틴": "Latin",
+    "중성": "neuter",
+    "간체": "Simplified Chinese",
+    "번체자": "Traditional Chinese",
+}
+
+TAGS = {**GLOSS_TAGS, **SOUND_TAGS, **HEADER_TAGS, **TRANSLATION_TAGS}
 
 TOPICS = {
     "금융": "finance",

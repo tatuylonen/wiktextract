@@ -44,7 +44,7 @@ class TestKoTranslation(TestCase):
                 {
                     "word": "કુતરો",
                     "roman": "kutro",
-                    "raw_tags": ["남성"],
+                    "tags": ["masculine"],
                     "lang": "구자라트어",
                     "lang_code": "gu",
                 },
@@ -56,7 +56,7 @@ class TestKoTranslation(TestCase):
                 },
                 {
                     "word": "bārns",
-                    "raw_tags": ["남성"],
+                    "tags": ["masculine"],
                     "lang": "라트갈레어",
                     "lang_code": "bat-ltg",
                 },

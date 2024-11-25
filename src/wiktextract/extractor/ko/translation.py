@@ -5,6 +5,7 @@ from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .models import Translation, WordEntry
+from .tags import translate_raw_tags
 
 
 def extract_translation_section(
@@ -77,6 +78,7 @@ def extract_translation_list_item(
                             word_entry.translations[-1].roman = text
                         else:
                             word_entry.translations[-1].raw_tags.append(text)
+                            translate_raw_tags(word_entry.translations[-1])
                         text = ""
                 elif brackets > 0:
                     text += c

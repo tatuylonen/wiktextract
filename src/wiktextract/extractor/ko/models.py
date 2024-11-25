@@ -71,6 +71,7 @@ class Translation(KoreanBaseModel):
     lang: str = Field(description="Translation language name")
     word: str = Field(description="Translation term")
     roman: str = ""
+    tags: list[str] = []
     raw_tags: list[str] = []
     sense: str = ""
 
