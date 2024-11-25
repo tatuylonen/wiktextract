@@ -31,6 +31,7 @@ SOUND_TAGS = {
     ],
     "McCune-Reischauer": "McCune-Reischauer",
     "Yale Romanization": ["Yale", "romanization"],
+    "표준어/서울": ["SK-Standard", "Seoul"],
     # 틀:ja-pron
     "도쿄": "Tokyo",
     # 틀:발음 듣기, 틀:IPA
@@ -38,6 +39,9 @@ SOUND_TAGS = {
     "미국": "US",
     "영": "UK",
     "미": "US",
+    "표준": "standard",
+    "남부": "South",
+    "북부": "North",
 }
 
 HEADER_TAGS = {

@@ -62,7 +62,10 @@ def extract_ipa_template(
             sound = Sound(ipa=value)
             word_entry.sounds.append(sound)
         elif len(word_entry.sounds) > 0:
-            word_entry.sounds[-1].raw_tags.append(value)
+            for raw_tag in value.split(","):
+                raw_tag = raw_tag.strip()
+                if raw_tag != "":
+                    word_entry.sounds[-1].raw_tags.append(raw_tag.strip())
             translate_raw_tags(word_entry.sounds[-1])
 
 
