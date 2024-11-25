@@ -94,7 +94,7 @@ ENGLISH_TEXTS = ("english", "taxonomic")
 
 # Matches head tag
 HEAD_TAG_RE = re.compile(
-    r"^(head|Han char|arabic-noun|arabic-noun-form|term-label|tlb|"
+    r"^(head|Han char|arabic-noun|arabic-noun-form|"
     r"hangul-symbol|syllable-hangul)$|"
     + r"^(latin|"
     + "|".join(lang_code for lang_code, *_ in get_all_names("en"))
@@ -265,6 +265,11 @@ HEAD_TAG_RE = re.compile(
     )
     + r")(-|/|\+|$)"
 )
+
+# Head-templates causing problems (like newlines) that can be squashed into
+# an empty string in the template handler while saving their template
+# data for later.
+WORD_LEVEL_HEAD_TEMPLATES = {"term-label", "tlb"}
 
 FLOATING_TABLE_TEMPLATES: set[str] = {
     # az-suffix-form creates a style=floatright div that is otherwise
@@ -1090,11 +1095,18 @@ def parse_language(
                 data_append(pos_data, "tags", "Pinyin")
             elif t == "romanization":
                 data_append(pos_data, "tags", "romanization")
-        if HEAD_TAG_RE.fullmatch(name) is not None:
+        if (
+            HEAD_TAG_RE.fullmatch(name) is not None
+            or name in WORD_LEVEL_HEAD_TEMPLATES
+        ):
             args_ht = clean_template_args(wxr, ht)
             cleaned_expansion = clean_node(wxr, None, expansion)
             dt = {"name": name, "args": args_ht, "expansion": cleaned_expansion}
             data_append(pos_data, "head_templates", dt)
+            if name in WORD_LEVEL_HEAD_TEMPLATES:
+                # Squash these, their tags are applied to the whole word,
+                # and some cause problems like "term-label"
+                return ""
 
         # The following are both captured in head_templates and parsed
         # separately
