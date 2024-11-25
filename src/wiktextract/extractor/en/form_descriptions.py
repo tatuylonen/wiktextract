@@ -2441,8 +2441,6 @@ def parse_word_head(
                     ):
                         if alt_related is not None:
                             break
-                        if len(topics) > 0 and len(tagsets) > 0:
-                            break
                         continue
                     if (
                         i > 1
