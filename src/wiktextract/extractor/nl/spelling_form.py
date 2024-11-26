@@ -18,7 +18,9 @@ def extract_spelling_form_section(
                     note_str = new_note_str.strip("() ")
                 else:
                     form_nodes.append(new_note_str)
-            else:
+            elif isinstance(node, str) or (
+                isinstance(node, WikiNode) and node.kind == NodeKind.LINK
+            ):
                 form_nodes.append(node)
         form_str = clean_node(wxr, None, form_nodes)
         if len(form_str) > 0:
