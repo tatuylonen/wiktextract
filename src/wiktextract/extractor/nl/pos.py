@@ -260,28 +260,9 @@ NOUN_FORM_OF_TEMPLATE_GENDER_TAGS = {
 }
 
 
-def extract_noun_form_of_template(
-    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
-) -> None:
-    # https://nl.wiktionary.org/wiki/Categorie:Vormsjablonen
-    sense = Sense(tags=["form-of"])
-    if t_node.template_name.endswith("-pl"):
-        sense.tags.append("plural")
-    else:
-        num_arg = t_node.template_parameters.get("getal", "")
-        if num_arg in NOUN_FORM_OF_TEMPLATE_NUM_TAGS:
-            sense.tags.append(NOUN_FORM_OF_TEMPLATE_NUM_TAGS[num_arg])
-
-    gender_arg = t_node.template_parameters.get("gesl", "")
-    if gender_arg in NOUN_FORM_OF_TEMPLATE_GENDER_TAGS:
-        gender_tag = NOUN_FORM_OF_TEMPLATE_GENDER_TAGS[gender_arg]
-        if isinstance(gender_tag, str):
-            sense.tags.append(gender_tag)
-        elif isinstance(gender_tag, list):
-            sense.tags.extend(gender_tag)
-
-    # Sjabloon:oudeschrijfwijze
-    g_arg = t_node.template_parameters.get("g", "")
+def extract_oudeschrijfwijze_template_g_arg(
+    wxr: WiktextractContext, g_arg: str, sense: Sense
+) -> bool:
     for tags_dict in [
         NOUN_FORM_OF_TEMPLATE_GENDER_TAGS,
         NOUN_FORM_OF_TEMPLATE_NUM_TAGS,
@@ -292,6 +273,51 @@ def extract_noun_form_of_template(
                 sense.tags.append(tag)
             elif isinstance(tag, list):
                 sense.tags.extend(tag)
+            return True
+    return False
+
+
+def extract_oudeschrijfwijze_template(
+    wxr: WiktextractContext, t_node: TemplateNode, sense: Sense
+) -> None:
+    g_arg_str = clean_node(wxr, None, t_node.template_parameters.get("g", ""))
+    if not extract_oudeschrijfwijze_template_g_arg(wxr, g_arg_str, sense):
+        g_args = t_node.template_parameters.get("g", "")
+        if isinstance(g_args, list):
+            for g_arg in g_args:
+                if isinstance(g_arg, TemplateNode):
+                    extract_oudeschrijfwijze_template_g_arg(
+                        wxr, g_arg.template_name, sense
+                    )
+
+
+def extract_noun_form_of_template(
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+) -> None:
+    # https://nl.wiktionary.org/wiki/Categorie:Vormsjablonen
+    sense = Sense(tags=["form-of"])
+    if t_node.template_name.endswith("-pl"):
+        sense.tags.append("plural")
+    else:
+        num_arg = clean_node(
+            wxr, None, t_node.template_parameters.get("getal", "")
+        )
+        if num_arg in NOUN_FORM_OF_TEMPLATE_NUM_TAGS:
+            sense.tags.append(NOUN_FORM_OF_TEMPLATE_NUM_TAGS[num_arg])
+
+    gender_arg = clean_node(
+        wxr, None, t_node.template_parameters.get("gesl", "")
+    )
+    if gender_arg in NOUN_FORM_OF_TEMPLATE_GENDER_TAGS:
+        gender_tag = NOUN_FORM_OF_TEMPLATE_GENDER_TAGS[gender_arg]
+        if isinstance(gender_tag, str):
+            sense.tags.append(gender_tag)
+        elif isinstance(gender_tag, list):
+            sense.tags.extend(gender_tag)
+
+    # Sjabloon:oudeschrijfwijze
+    if t_node.template_name == "oudeschrijfwijze":
+        extract_oudeschrijfwijze_template(wxr, t_node, sense)
 
     form_of = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
     if form_of != "":

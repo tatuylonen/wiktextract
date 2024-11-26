@@ -64,7 +64,7 @@ def extract_translation_list_item(
                                 sense=sense,
                                 sense_index=sense_index,
                             )
-                    )
+                        )
                 elif (
                     node.template_name in LIST_ITEM_TAG_TEMPLATES
                     and len(word_entry.translations) > 0
