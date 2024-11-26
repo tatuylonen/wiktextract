@@ -52,17 +52,19 @@ def extract_translation_list_item(
         elif not before_colon:
             if brackets == 0 and isinstance(node, TemplateNode):
                 if node.template_name == "trad":
-                    word_entry.translations.append(
-                        Translation(
-                            lang=lang_name,
-                            lang_code=node.template_parameters.get(1, ""),
-                            word=clean_node(
-                                wxr, None, node.template_parameters.get(2, "")
-                            ),
-                            sense=sense,
-                            sense_index=sense_index,
-                        )
+                    tr_word = clean_node(
+                        wxr, None, node.template_parameters.get(2, "")
                     )
+                    if tr_word != "":
+                        word_entry.translations.append(
+                            Translation(
+                                lang=lang_name,
+                                lang_code=node.template_parameters.get(1, ""),
+                                word=tr_word,
+                                sense=sense,
+                                sense_index=sense_index,
+                            )
+                        )
                 elif (
                     node.template_name in LIST_ITEM_TAG_TEMPLATES
                     and len(word_entry.translations) > 0

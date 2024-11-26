@@ -66,7 +66,7 @@ GLOSS_TAGS = {
     # "stopwoord": "filled pause",
     "straattaal": "slang",
     "streektaal": "regiolectal",
-    # "taal": "language",
+    "taal": "linguistics",
     "toponiem": "toponymic",
     "verkorting": "clipping",
     "verouderd": "obsolete",
@@ -92,6 +92,8 @@ GLOSS_TAGS = {
     "alleen meervoud": "plural-only",  # Sjabloon:plurt
     "geen meervoud": "no-plural",  # Sjabloon:singt
     "versterkend voorvoegsel": ["intensifier", "prefix"],
+    "in een bijzin": "with-subordinate-clause",  # Sjabloon:ovt-mv-bijz
+    "bij inversie": "inversion",  # Sjabloon:1ps
 }
 
 TABLE_TAGS = {
@@ -99,6 +101,7 @@ TABLE_TAGS = {
     "enkelvoud": "singular",
     "meervoud": "plural",
     "verkleinwoord": "diminutive",
+    "bezitsvorm": "possessive",
     # Sjabloon:adjcomp
     "stellend": "positive",
     "vergrotend": "comparative",
@@ -123,6 +126,8 @@ TABLE_TAGS = {
     "derde": "third-person",
     "verleden": "past",
     "voorwaardelijk": "conditional",
+    "hoofdzin": "main-clause",
+    "bijzin": "subordinate-clause",
     # Sjabloon:-nlname-
     "nominatief": "nominative",
     "genitief": "genitive",
@@ -202,7 +207,7 @@ TOPICS = {
     "ecologie": "ecology",
     "economie": "economics",
     # "eendvogels": "anseriform",
-    # "eenheid": "",
+    "eenheid": "units-of-measure",
     "effectenhandel": "trading",
     "egyptologie": "Egyptology",
     # "toponiem: eiland": "",
@@ -211,7 +216,7 @@ TOPICS = {
     # "element": "element",
     "emotie": "emotion",
     # "evenhoevigen": "",
-    # "familie": "family",
+    "familie": "familiar",
     "farmacologie": "pharmacology",
     # "feest": "party",
     "fietsen": "cycling",

@@ -408,3 +408,34 @@ class TestNlGloss(TestCase):
                 }
             ],
         )
+
+    def test_template_arg_in_oudeschrijfwijze(self):
+        self.wxr.wtp.add_page(
+            "Sjabloon:oudeschrijfwijze",
+            10,
+            """'''Jura''' [[WikiWoordenboek:Genus|<span>v</span>]] / [[WikiWoordenboek:Genus|<span>m</span>]], soms ook: [[WikiWoordenboek:Genus|<span>o</span>]][[Categorie:WikiWoordenboek:Test/Bijzonder genus]]
+# verouderde spelling of vorm van [[jura#Nederlands|jura]]&#32;tot 2006[[Categorie:Oude spelling van het Nederlands van voor 2006]]""",
+        )
+        data = parse_page(
+            self.wxr,
+            "Jura",
+            """==Nederlands==
+====Zelfstandig naamwoord====
+{{oudeschrijfwijze|jura|2006|nld|g={{f}} / {{m}}, soms ook: {{n}}}}""",
+        )
+        self.assertEqual(
+            data[0]["senses"],
+            [
+                {
+                    "glosses": [
+                        "verouderde spelling of vorm van jura tot 2006",
+                    ],
+                    "categories": [
+                        "WikiWoordenboek:Test/Bijzonder genus",
+                        "Oude spelling van het Nederlands van voor 2006",
+                    ],
+                    "tags": ["form-of", "feminine", "masculine", "neuter"],
+                    "form_of": [{"word": "jura"}],
+                }
+            ],
+        )

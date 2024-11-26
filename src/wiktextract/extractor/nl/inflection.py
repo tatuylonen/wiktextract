@@ -22,6 +22,7 @@ FORMS_TABLE_TEMPLATES = frozenset(
         "-denoun1-",
         "-nlstam-",
         "-csadjc-comp-",
+        "-dumstam-",
     ]
 )
 
@@ -41,6 +42,8 @@ def extract_inflection_template(
         extract_nlstam_template(wxr, word_entry, t_node)
     elif t_node.template_name.startswith("-csadjc-comp-"):
         extract_csadjc_comp_template(wxr, word_entry, t_node)
+    elif t_node.template_name == "-dumstam-":
+        extract_dumstam_template(wxr, word_entry, t_node)
 
 
 def extract_noun_adj_table(
@@ -122,9 +125,19 @@ def extract_vervoeging_page(
         if t_node.template_name in table_templates:
             extract_nlverb_template(wxr, word_entry, t_node, "")
     sense = ""
-    for level_node in root.find_child_recursively(LEVEL_KIND_FLAGS):
-        sense = clean_node(wxr, None, level_node.largs)
-        for t_node in level_node.find_child(NodeKind.TEMPLATE):
+    for lang_level_node in root.find_child(NodeKind.LEVEL2):
+        lang_name = clean_node(wxr, None, lang_level_node.largs)
+        if lang_name != word_entry.lang:
+            continue
+        for sense_level_node in lang_level_node.find_child_recursively(
+            LEVEL_KIND_FLAGS
+        ):
+            sense = clean_node(wxr, None, sense_level_node.largs)
+            for t_node in sense_level_node.find_child(NodeKind.TEMPLATE):
+                if t_node.template_name in table_templates:
+                    extract_nlverb_template(wxr, word_entry, t_node, sense)
+        # only have language level node
+        for t_node in lang_level_node.find_child(NodeKind.TEMPLATE):
             if t_node.template_name in table_templates:
                 extract_nlverb_template(wxr, word_entry, t_node, sense)
 
@@ -333,3 +346,23 @@ def extract_csadjc_comp_template(
                             form.raw_tags.append(row_header)
                             translate_raw_tags(form)
                         word_entry.forms.append(form)
+
+
+def extract_dumstam_template(
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+) -> None:
+    # https://nl.wiktionary.org/wiki/Sjabloon:-dumstam-
+    tags = [
+        ["infinitive"],
+        ["past", "singular"],
+        ["past", "plural"],
+        ["past", "participle"],
+    ]
+    for arg_name in range(1, 5):
+        word = clean_node(
+            wxr, None, t_node.template_parameters.get(arg_name, "")
+        )
+        if word not in ["", word_entry.word]:
+            form = Form(form=word, tags=tags[arg_name - 1])
+            word_entry.forms.append(form)
+    clean_node(wxr, word_entry, t_node)
