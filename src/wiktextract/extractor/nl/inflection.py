@@ -22,6 +22,7 @@ FORMS_TABLE_TEMPLATES = frozenset(
         "-denoun1-",
         "-nlstam-",
         "-csadjc-comp-",
+        "-dumstam-",
     ]
 )
 
@@ -41,6 +42,8 @@ def extract_inflection_template(
         extract_nlstam_template(wxr, word_entry, t_node)
     elif t_node.template_name.startswith("-csadjc-comp-"):
         extract_csadjc_comp_template(wxr, word_entry, t_node)
+    elif t_node.template_name == "-dumstam-":
+        extract_dumstam_template(wxr, word_entry, t_node)
 
 
 def extract_noun_adj_table(
@@ -343,3 +346,23 @@ def extract_csadjc_comp_template(
                             form.raw_tags.append(row_header)
                             translate_raw_tags(form)
                         word_entry.forms.append(form)
+
+
+def extract_dumstam_template(
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+) -> None:
+    # https://nl.wiktionary.org/wiki/Sjabloon:-dumstam-
+    tags = [
+        ["infinitive"],
+        ["past", "singular"],
+        ["past", "plural"],
+        ["past", "participle"],
+    ]
+    for arg_name in range(1, 5):
+        word = clean_node(
+            wxr, None, t_node.template_parameters.get(arg_name, "")
+        )
+        if word not in ["", word_entry.word]:
+            form = Form(form=word, tags=tags[arg_name - 1])
+            word_entry.forms.append(form)
+    clean_node(wxr, word_entry, t_node)
