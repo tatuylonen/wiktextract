@@ -122,9 +122,19 @@ def extract_vervoeging_page(
         if t_node.template_name in table_templates:
             extract_nlverb_template(wxr, word_entry, t_node, "")
     sense = ""
-    for level_node in root.find_child_recursively(LEVEL_KIND_FLAGS):
-        sense = clean_node(wxr, None, level_node.largs)
-        for t_node in level_node.find_child(NodeKind.TEMPLATE):
+    for lang_level_node in root.find_child(NodeKind.LEVEL2):
+        lang_name = clean_node(wxr, None, lang_level_node.largs)
+        if lang_name != word_entry.lang:
+            continue
+        for sense_level_node in lang_level_node.find_child_recursively(
+            LEVEL_KIND_FLAGS
+        ):
+            sense = clean_node(wxr, None, sense_level_node.largs)
+            for t_node in sense_level_node.find_child(NodeKind.TEMPLATE):
+                if t_node.template_name in table_templates:
+                    extract_nlverb_template(wxr, word_entry, t_node, sense)
+        # only have language level node
+        for t_node in lang_level_node.find_child(NodeKind.TEMPLATE):
             if t_node.template_name in table_templates:
                 extract_nlverb_template(wxr, word_entry, t_node, sense)
 
