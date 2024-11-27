@@ -10,7 +10,12 @@ from wikitextprocessor.parser import (
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from ...wxr_logging import logger
-from .etymology import EtymologyData, extract_etymology, insert_etymology_data
+from .etymology import (
+    EtymologyData,
+    extract_etymology,
+    extract_etymology_examples,
+    insert_etymology_data,
+)
 from .form_line import extract_form_line
 from .gloss import extract_gloss, process_exemple_template
 from .inflection import extract_inflection
@@ -114,6 +119,8 @@ def parse_section(
                     page_data[-1] if len(page_data) > 0 else base_data,
                     level_node,
                 )
+            elif section_type == "attestations":
+                extract_etymology_examples(wxr, level_node, base_data)
 
     find_bottom_category_links(wxr, page_data, level_node)
     for next_level_node in level_node.find_child(LEVEL_KIND_FLAGS):

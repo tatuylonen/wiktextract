@@ -26,6 +26,7 @@ class Example(FrenchBaseModel):
         default="",
         description="For examples in 'Attestations historiques' section",
     )
+    note: str = ""
 
 
 class Form(FrenchBaseModel):

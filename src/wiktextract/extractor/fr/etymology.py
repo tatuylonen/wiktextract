@@ -12,7 +12,7 @@ from wikitextprocessor.parser import (
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
-from .models import WordEntry
+from .models import Example, WordEntry
 
 
 @dataclass
@@ -214,16 +214,56 @@ def extract_etymology_examples(
     level_node: LevelNode,
     base_data: WordEntry,
 ) -> None:
+    for list_node in level_node.find_child(NodeKind.LIST):
+        for list_item in list_node.find_child(NodeKind.LIST_ITEM):
+            extract_etymology_example_list_item(wxr, list_item, base_data, "")
+
+
+def extract_etymology_example_list_item(
+    wxr: WiktextractContext,
+    list_item: WikiNode,
+    base_data: WordEntry,
+    note: str,
+) -> None:
     from .gloss import process_exemple_template
 
-    for list_item in level_node.find_child_recursively(NodeKind.LIST_ITEM):
-        time = ""
-        for template_node in list_item.find_child(NodeKind.TEMPLATE):
-            if template_node.template_name == "siècle":
-                time = clean_node(wxr, None, template_node).strip("() ")
-            elif template_node.template_name == "exemple":
+    time = ""
+    source = ""
+    example_nodes = []
+    has_exemple_template = False
+    for node in list_item.children:
+        if isinstance(node, TemplateNode):
+            if node.template_name in ["siècle", "circa", "date"]:
+                time = clean_node(wxr, base_data, node).strip("() ")
+            elif node.template_name == "exemple":
+                has_exemple_template = True
                 example_data = process_exemple_template(
-                    wxr, template_node, base_data, time
+                    wxr, node, base_data, time
                 )
                 if example_data.text != "":
+                    example_data.note = note
                     base_data.etymology_examples.append(example_data)
+            elif node.template_name == "source":
+                source = clean_node(wxr, base_data, node).strip("— ()")
+            else:
+                example_nodes.append(node)
+        else:
+            example_nodes.append(node)
+
+    if not has_exemple_template:
+        if time == "" and list_item.contain_node(NodeKind.LIST):
+            note = clean_node(
+                wxr, base_data, list(list_item.invert_find_child(NodeKind.LIST))
+            )
+            for next_list in list_item.find_child(NodeKind.LIST):
+                for next_list_item in next_list.find_child(NodeKind.LIST_ITEM):
+                    extract_etymology_example_list_item(
+                        wxr, next_list_item, base_data, note
+                    )
+        elif len(example_nodes) > 0:
+            example_str = clean_node(wxr, base_data, example_nodes)
+            if example_str != "":
+                example_data = Example(
+                    text=example_str, time=time, ref=source, note=note
+                )
+                base_data.etymology_examples.append(example_data)
