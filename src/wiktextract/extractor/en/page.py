@@ -1178,6 +1178,7 @@ def parse_language(
         # clean_value, so templates that slip through from here won't
         # break anything.
         # XXX bookmark
+        # print("===================")
         # print(posnode.children)
 
         floaters, poschildren = recursively_extract(
@@ -1191,6 +1192,10 @@ def parse_language(
                     )
                     or (
                         x.kind == NodeKind.LINK
+                        # Need to check for stringiness because some links are
+                        # broken; for example, if a template is missing an
+                        # argument, a link might look like `[[{{{1}}}...]]`
+                        and isinstance(x.largs[0][0], str)
                         and x.largs[0][0].lower().startswith("file:")  # type:ignore[union-attr]
                     )
                 )
