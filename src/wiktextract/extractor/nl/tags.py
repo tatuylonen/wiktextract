@@ -142,6 +142,11 @@ TABLE_TAGS = {
     "2": "second-person",
     "3": "third-person",
     "voltooide tijd": "past",
+    # Sjabloon:-dumverb-
+    "onv. deelwoord": ["imperfect", "participle"],
+    "volt deelwoord": ["past", "participle"],
+    "aantonend": "indicative",
+    "aanvoegend": "subjunctive",
 }
 
 
