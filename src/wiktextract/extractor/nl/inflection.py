@@ -120,7 +120,12 @@ def extract_vervoeging_page(
     if page is None:
         return
     root = wxr.wtp.parse(page.body)
-    table_templates = ["-nlverb-", "-nlverb-reflex-", "-nlverb-onp-"]
+    table_templates = [
+        "-nlverb-",
+        "-nlverb-reflex-",
+        "-nlverb-onp-",
+        "-dumverb-",
+    ]
     for t_node in root.find_child(NodeKind.TEMPLATE):
         if t_node.template_name in table_templates:
             extract_nlverb_template(wxr, word_entry, t_node, "")
@@ -166,11 +171,16 @@ def extract_nlverb_template(
 ) -> None:
     # https://nl.wiktionary.org/wiki/Sjabloon:-nlverb-
     # Sjabloon:-nlverb-reflex-
+    # Sjabloon:-dumverb-
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(t_node), expand_all=True
     )
     for link_node in expanded_node.find_child(NodeKind.LINK):
         clean_node(wxr, word_entry, link_node)
+    if t_node.template_name == "-dumverb-":
+        extract_dumverb_table(wxr, word_entry, expanded_node, sense)
+        return
+
     for table_node in expanded_node.find_child(NodeKind.TABLE):
         row_index = 0
         shared_tags = []
@@ -215,10 +225,8 @@ def extract_nlverb_template(
                     cell_rowspan = int(cell_rowspan_str)
                 cell_str = clean_node(wxr, None, cell_node).strip("| ")
                 if cell_str in ["", "—", wxr.wtp.title]:
-                    col_index += cell_colspan
-                    is_row_first_node = False
-                    continue
-                if nlverb_table_cell_is_header(cell_node):
+                    pass
+                elif nlverb_table_cell_is_header(cell_node):
                     for (
                         header_prefix,
                         prefix_tags,
@@ -366,3 +374,79 @@ def extract_dumstam_template(
             form = Form(form=word, tags=tags[arg_name - 1])
             word_entry.forms.append(form)
     clean_node(wxr, word_entry, t_node)
+    if not word_entry.extracted_vervoeging_page:
+        extract_vervoeging_page(wxr, word_entry)
+        word_entry.extracted_vervoeging_page = True
+
+
+def extract_dumverb_table(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    expanded_node: WikiNode,
+    sense: str,
+) -> None:
+    table_node = expanded_node
+    for t_node in expanded_node.find_child(NodeKind.TABLE):
+        table_node = t_node
+        break
+    col_headers = []
+    last_row_all_header = False
+    for row_node in table_node.find_child(NodeKind.TABLE_ROW):
+        col_index = 0
+        row_header = ""
+        current_row_all_header = all(
+            nlverb_table_cell_is_header(n)
+            for n in row_node.find_child(
+                NodeKind.TABLE_HEADER_CELL | NodeKind.TABLE_CELL
+            )
+        )
+        if current_row_all_header and not last_row_all_header:
+            col_headers.clear()
+        for cell_node in row_node.find_child(
+            NodeKind.TABLE_HEADER_CELL | NodeKind.TABLE_CELL
+        ):
+            cell_colspan = 1
+            cell_colspan_str = cell_node.attrs.get("colspan", "1")
+            if re.fullmatch(r"\d+", cell_colspan_str):
+                cell_colspan = int(cell_colspan_str)
+            cell_str = clean_node(wxr, None, cell_node).strip("!| \n")
+            if cell_str in ["", "—", wxr.wtp.title]:
+                continue
+            is_header = nlverb_table_cell_is_header(cell_node)
+            if is_header:
+                if current_row_all_header:
+                    col_headers.append(
+                        TableHeader(
+                            cell_str,
+                            col_index,
+                            cell_colspan,
+                            0,
+                            0,
+                        )
+                    )
+                    col_index += cell_colspan
+                else:
+                    row_header = cell_str
+            else:
+                for cell_line in cell_str.splitlines():
+                    cell_line = cell_line.strip()
+                    if cell_line == "":
+                        continue
+                    form = Form(
+                        form=cell_line,
+                        source=f"{wxr.wtp.title}/vervoeging",
+                        sense=sense,
+                    )
+                    if row_header != "":
+                        form.raw_tags.append(row_header)
+                    for col_header in col_headers:
+                        if (
+                            col_index >= col_header.col_index
+                            and col_index
+                            < col_header.col_index + col_header.colspan
+                        ):
+                            form.raw_tags.append(col_header.text)
+                    translate_raw_tags(form)
+                    word_entry.forms.append(form)
+                col_index += cell_colspan
+        last_row_all_header = current_row_all_header

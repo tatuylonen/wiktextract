@@ -404,3 +404,97 @@ class TestNlInflection(TestCase):
                 },
             ],
         )
+
+    def test_dumstam_and_dumverb_templates(self):
+        self.wxr.wtp.add_page("Sjabloon:-dumstam-", 10, "")
+        self.wxr.wtp.add_page(
+            "graven/vervoeging",
+            0,
+            """==Middelnederlands==
+{{-dumverb-}}""",
+        )
+        self.wxr.wtp.add_page(
+            "Sjabloon:-dumverb-",
+            10,
+            """{|class="infoboxlinks"
+! !!onbepaalde wijs!! gebiedende wijs!!onv. deelwoord!!volt deelwoord
+|-
+|class="infoboxrijhoofding"| || [[graven#Middelnederlands|graven]]<br/>te gravene|| grave<br/>gravet||gravende||gegraven
+|-
+!!!colspan="2"|aantonend!!colspan="2"|aanvoegend
+|-
+!!!tegenwoordig!!verleden!!tegenwoordig!!verleden
+|-
+|class="infoboxrijhoofding"|[[ic]]||grave||groef||grave||groeve
+|}""",
+        )
+        data = parse_page(
+            self.wxr,
+            "graven",
+            """==Middelnederlands==
+{{-dumstam-|graven|groef|groeven|ghegraven|{{dumsterk6}}}}
+=====Werkwoord=====
+# graven""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {"form": "groef", "tags": ["past", "singular"]},
+                {"form": "groeven", "tags": ["past", "plural"]},
+                {"form": "ghegraven", "tags": ["past", "participle"]},
+                {
+                    "form": "graven",
+                    "tags": ["infinitive"],
+                    "source": "graven/vervoeging",
+                },
+                {
+                    "form": "te gravene",
+                    "tags": ["infinitive"],
+                    "source": "graven/vervoeging",
+                },
+                {
+                    "form": "grave",
+                    "tags": ["imperative"],
+                    "source": "graven/vervoeging",
+                },
+                {
+                    "form": "gravet",
+                    "tags": ["imperative"],
+                    "source": "graven/vervoeging",
+                },
+                {
+                    "form": "gravende",
+                    "tags": ["imperfect", "participle"],
+                    "source": "graven/vervoeging",
+                },
+                {
+                    "form": "gegraven",
+                    "tags": ["past", "participle"],
+                    "source": "graven/vervoeging",
+                },
+                {
+                    "form": "grave",
+                    "raw_tags": ["ic"],
+                    "tags": ["indicative", "present"],
+                    "source": "graven/vervoeging",
+                },
+                {
+                    "form": "groef",
+                    "raw_tags": ["ic"],
+                    "tags": ["indicative", "past"],
+                    "source": "graven/vervoeging",
+                },
+                {
+                    "form": "grave",
+                    "raw_tags": ["ic"],
+                    "tags": ["subjunctive", "present"],
+                    "source": "graven/vervoeging",
+                },
+                {
+                    "form": "groeve",
+                    "raw_tags": ["ic"],
+                    "tags": ["subjunctive", "past"],
+                    "source": "graven/vervoeging",
+                },
+            ],
+        )
