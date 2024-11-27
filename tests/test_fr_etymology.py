@@ -283,10 +283,7 @@ class TestEtymology(TestCase):
             10,
             "[[Catégorie:Exemples en moyen français avec traduction désactivée]][[Catégorie:Exemples en moyen français]]",
         )
-        root = self.wxr.wtp.parse("""=== {{S|étymologie}} ===
-etymology text
-
-==== {{S|attestations}} ====
+        root = self.wxr.wtp.parse("""==== {{S|attestations}} ====
 
 * {{siècle|XV}} {{exemple|example text
 |lang=frm
@@ -388,4 +385,53 @@ etymology text
                     texts=["Composé de mètre avec le suffixe -ifier."]
                 )
             },
+        )
+
+    def test_etymology_examples_nested_lists(self):
+        self.wxr.wtp.start_page("drone")
+        self.wxr.wtp.add_page("Modèle:S", 10, "Attestations historiques")
+        self.wxr.wtp.add_page("Modèle:circa", 10, "(c. 1933)")
+        root = self.wxr.wtp.parse("""==== {{S|attestations}} ====
+
+: avec une majuscule et un pilote, un avion léger
+:* {{circa|1933}} example text""")
+        word_entry = WordEntry(
+            lang="Français", lang_code="fr", word="drone", pos="noun"
+        )
+        extract_etymology(self.wxr, root, word_entry)
+        data = word_entry.model_dump(exclude_defaults=True)
+        self.assertEqual(
+            data["etymology_examples"],
+            [
+                {
+                    "time": "c. 1933",
+                    "text": "example text",
+                    "note": "avec une majuscule et un pilote, un avion léger",
+                }
+            ],
+        )
+
+    def test_etymology_examples_text(self):
+        self.wxr.wtp.start_page("préavertir")
+        self.wxr.wtp.add_page("Modèle:S", 10, "Attestations historiques")
+        self.wxr.wtp.add_page("Modèle:date", 10, "({{{1}}})")
+        self.wxr.wtp.add_page("Modèle:source", 10, "— ({{{1}}})")
+        root = self.wxr.wtp.parse("""==== {{S|attestations}} ====
+
+: {{date|lang=fr|1538}} ''Il faisoit ung billet ouquel il inscripvoit les noms de ceulx qui vouloient estre appellez, lesquelz ilz avoient '''preadvertyz''' et sçavoient estre de leur oppinion.'' {{source|''Archives de Besançon'', dans ''Revue histor.'' t. I, page 137}}
+""")
+        word_entry = WordEntry(
+            lang="Français", lang_code="fr", word="préavertir", pos="verb"
+        )
+        extract_etymology(self.wxr, root, word_entry)
+        data = word_entry.model_dump(exclude_defaults=True)
+        self.assertEqual(
+            data["etymology_examples"],
+            [
+                {
+                    "time": "1538",
+                    "text": "Il faisoit ung billet ouquel il inscripvoit les noms de ceulx qui vouloient estre appellez, lesquelz ilz avoient preadvertyz et sçavoient estre de leur oppinion.",
+                    "ref": "Archives de Besançon, dans Revue histor. t. I, page 137",
+                }
+            ],
         )
