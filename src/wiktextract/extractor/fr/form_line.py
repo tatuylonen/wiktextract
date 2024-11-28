@@ -94,7 +94,7 @@ def extract_form_line(
 
 def process_equiv_pour_template(
     wxr: WiktextractContext, node: TemplateNode, page_data: list[WordEntry]
-) -> None:
+) -> list[Form]:
     # equivalent form: https://fr.wiktionary.org/wiki/Modèle:équiv-pour
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(node), expand_all=True
@@ -109,7 +109,7 @@ def process_equiv_pour_template(
         "une fille": "feminine",
         "une personne non-binaire": "neuter",
     }
-
+    forms = []
     for child in expanded_node.find_child(NodeKind.ITALIC | NodeKind.HTML):
         if child.kind == NodeKind.ITALIC:
             raw_gender_tag = clean_node(wxr, None, child).strip("() ")
@@ -127,7 +127,10 @@ def process_equiv_pour_template(
                 else:
                     form_data.raw_tags.append(raw_gender_tag)
             if len(form_data.form) > 0:
-                page_data[-1].forms.append(form_data)
+                if len(page_data) > 0:
+                    page_data[-1].forms.append(form_data)
+                forms.append(form_data)
+    return forms
 
 
 def process_zh_mot_template(

@@ -40,6 +40,7 @@ class Form(FrenchBaseModel):
     )
     hiragana: str = ""
     roman: str = ""
+    sense_index: int = Field(default=0, ge=0)
 
 
 class Sound(FrenchBaseModel):
