@@ -9,6 +9,7 @@ from wiktextract.extractor.fr.etymology import (
     insert_etymology_data,
 )
 from wiktextract.extractor.fr.models import WordEntry
+from wiktextract.extractor.fr.page import parse_section
 from wiktextract.wxr_context import WiktextractContext
 
 
@@ -293,7 +294,7 @@ class TestEtymology(TestCase):
         word_entry = WordEntry(
             lang="Français", lang_code="fr", word="autrice", pos="noun"
         )
-        extract_etymology(self.wxr, root, word_entry)
+        parse_section(self.wxr, [], word_entry, root.children[0])
         data = word_entry.model_dump(exclude_defaults=True)
         self.assertEqual(
             data["etymology_examples"],
@@ -398,7 +399,7 @@ class TestEtymology(TestCase):
         word_entry = WordEntry(
             lang="Français", lang_code="fr", word="drone", pos="noun"
         )
-        extract_etymology(self.wxr, root, word_entry)
+        parse_section(self.wxr, [], word_entry, root.children[0])
         data = word_entry.model_dump(exclude_defaults=True)
         self.assertEqual(
             data["etymology_examples"],
@@ -423,7 +424,7 @@ class TestEtymology(TestCase):
         word_entry = WordEntry(
             lang="Français", lang_code="fr", word="préavertir", pos="verb"
         )
-        extract_etymology(self.wxr, root, word_entry)
+        parse_section(self.wxr, [], word_entry, root.children[0])
         data = word_entry.model_dump(exclude_defaults=True)
         self.assertEqual(
             data["etymology_examples"],

@@ -34,11 +34,8 @@ def extract_etymology(
     for node_index, node in level_node.find_child(
         NodeKind.LIST | LEVEL_KIND_FLAGS, True
     ):
-        if node.kind in LEVEL_KIND_FLAGS:
+        if node.kind in LEVEL_KIND_FLAGS and node_index < level_node_index:
             level_node_index = node_index
-            title_text = clean_node(wxr, None, node.largs)
-            if title_text == "Attestations historiques":
-                extract_etymology_examples(wxr, node, base_data)
         elif node.kind == NodeKind.LIST:
             for etymology_item in node.find_child(NodeKind.LIST_ITEM):
                 etymology_data = find_pos_in_etymology_list(wxr, etymology_item)
