@@ -1,5 +1,3 @@
-from typing import Union
-
 from wikitextprocessor.parser import HTMLNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
@@ -17,7 +15,7 @@ from .tags import translate_raw_tags
 def extract_form_line(
     wxr: WiktextractContext,
     page_data: list[WordEntry],
-    nodes: list[Union[WikiNode, str]],
+    nodes: list[WikiNode | str],
 ) -> None:
     """
     Ligne de forme
@@ -32,7 +30,7 @@ def extract_form_line(
 
     pre_template_name = ""
     for index, node in enumerate(nodes):
-        if isinstance(node, WikiNode) and node.kind == NodeKind.TEMPLATE:
+        if isinstance(node, TemplateNode):
             if node.template_name in IGNORE_TEMPLATES:
                 continue
             elif node.template_name in PRON_TEMPLATES:
@@ -56,6 +54,11 @@ def extract_form_line(
                 continue
             elif node.template_name == "lien pronominal":
                 process_lien_pronominal(wxr, node, page_data)
+            elif node.template_name == "note":
+                note = clean_node(wxr, page_data[-1], nodes[index + 1 :])
+                if note != "":
+                    page_data[-1].notes.append(note)
+                break
             else:
                 raw_tag = clean_node(wxr, page_data[-1], node)
                 expanded_template = wxr.wtp.parse(

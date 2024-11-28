@@ -1,6 +1,5 @@
 from collections import defaultdict
 from dataclasses import dataclass, field
-from typing import Optional
 
 from wikitextprocessor.parser import (
     LEVEL_KIND_FLAGS,
@@ -85,7 +84,7 @@ def extract_etymology(
 
 def find_pos_in_etymology_list(
     wxr: WiktextractContext, list_item_node: WikiNode
-) -> Optional[tuple[str, str, str, list[str]]]:
+) -> tuple[str, str, str, list[str]] | None:
     """
     Return tuple of POS id, title, etymology text, categories if the passed
     list item node starts with italic POS node or POS template, otherwise

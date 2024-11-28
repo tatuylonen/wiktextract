@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 
 from wikitextprocessor.parser import (
     LEVEL_KIND_FLAGS,
@@ -41,7 +41,7 @@ def parse_section(
     page_data: list[WordEntry],
     base_data: WordEntry,
     level_node: WikiNode,
-) -> Optional[EtymologyData]:
+) -> EtymologyData | None:
     etymology_data = None
     for level_node_template in level_node.find_content(NodeKind.TEMPLATE):
         if level_node_template.template_name == "S":
@@ -230,7 +230,7 @@ def parse_page(
                     pos="unknown",
                     categories=categories.get("categories", []),
                 )
-                etymology_data: Optional[EtymologyData] = None
+                etymology_data: EtymologyData | None = None
                 for level3_node in level2_node.find_child(NodeKind.LEVEL3):
                     new_etymology_data = parse_section(
                         wxr, page_data, base_data, level3_node

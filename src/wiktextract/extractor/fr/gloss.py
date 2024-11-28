@@ -1,6 +1,5 @@
 import re
 from collections import defaultdict
-from typing import Optional, Union
 
 from wikitextprocessor import NodeKind, TemplateNode, WikiNode
 
@@ -14,7 +13,7 @@ def extract_gloss(
     wxr: WiktextractContext,
     page_data: list[WordEntry],
     list_node: WikiNode,
-    parent_sense: Optional[Sense] = None,
+    parent_sense: Sense | None = None,
 ) -> None:
     for list_item_node in list_node.find_child(NodeKind.LIST_ITEM):
         gloss_nodes = list(
@@ -144,7 +143,7 @@ def extract_examples(
 def process_exemple_template(
     wxr: WiktextractContext,
     node: TemplateNode,
-    gloss_data: Optional[Sense],
+    gloss_data: Sense | None,
     time: str = "",
 ) -> Example:
     # https://fr.wiktionary.org/wiki/Modèle:exemple
@@ -262,7 +261,7 @@ def find_alt_of_form(
 
 def find_form_of_word(
     wxr: WiktextractContext,
-    gloss_nodes: list[Union[str, WikiNode]],
+    gloss_nodes: list[str | WikiNode],
     gloss_data: Sense,
 ) -> None:
     # https://fr.wiktionary.org/wiki/Catégorie:Modèles_de_variantes

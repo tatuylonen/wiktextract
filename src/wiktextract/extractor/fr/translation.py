@@ -1,5 +1,3 @@
-from typing import Optional
-
 from mediawiki_langcodes import code_to_name
 from wikitextprocessor.parser import NodeKind, TemplateNode, WikiNode
 
@@ -59,8 +57,8 @@ def extract_translation(
 def process_italic_node(
     wxr: WiktextractContext,
     italic_node: WikiNode,
-    previous_node: Optional[WikiNode],
-    translation_data: Optional[Translation],
+    previous_node: WikiNode | None,
+    translation_data: Translation | None,
 ) -> None:
     # add italic text after a "trad" template as a tag
     tag = clean_node(wxr, None, italic_node)
@@ -83,8 +81,8 @@ def process_translation_templates(
     template_node: TemplateNode,
     page_data: list[WordEntry],
     base_translation_data: Translation,
-    translation_data: Optional[Translation],
-) -> Optional[Translation]:
+    translation_data: Translation | None,
+) -> Translation | None:
     if template_node.template_name == "trad-fin":
         # ignore translation end template
         return
