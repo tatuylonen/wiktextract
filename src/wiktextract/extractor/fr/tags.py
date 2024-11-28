@@ -205,7 +205,7 @@ SENSE_TAGS: dict[str, str] = {
     "informel": "informal",  # Modèle:informel
     "familier": "familiar",  # Modèle:familier
     "très familier": "very-familiar",  # Modèle:très familier
-    # "populaire": "",  # Modèle:populaire
+    "populaire": "colloquial",  # Modèle:populaire
     "vulgaire": "vulgar",  # Modèle:vulgaire
     "langage enfantin": "childish",  # Modèle:enfantin
     # Catégorie:Modèles de thématique
