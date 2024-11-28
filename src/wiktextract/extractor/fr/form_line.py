@@ -1,5 +1,3 @@
-from typing import Union
-
 from wikitextprocessor.parser import HTMLNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
@@ -17,7 +15,7 @@ from .tags import translate_raw_tags
 def extract_form_line(
     wxr: WiktextractContext,
     page_data: list[WordEntry],
-    nodes: list[Union[WikiNode, str]],
+    nodes: list[WikiNode | str],
 ) -> None:
     """
     Ligne de forme
@@ -32,7 +30,7 @@ def extract_form_line(
 
     pre_template_name = ""
     for index, node in enumerate(nodes):
-        if isinstance(node, WikiNode) and node.kind == NodeKind.TEMPLATE:
+        if isinstance(node, TemplateNode):
             if node.template_name in IGNORE_TEMPLATES:
                 continue
             elif node.template_name in PRON_TEMPLATES:
@@ -56,6 +54,11 @@ def extract_form_line(
                 continue
             elif node.template_name == "lien pronominal":
                 process_lien_pronominal(wxr, node, page_data)
+            elif node.template_name == "note":
+                note = clean_node(wxr, page_data[-1], nodes[index + 1 :])
+                if note != "":
+                    page_data[-1].notes.append(note)
+                break
             else:
                 raw_tag = clean_node(wxr, page_data[-1], node)
                 expanded_template = wxr.wtp.parse(
@@ -94,7 +97,7 @@ def extract_form_line(
 
 def process_equiv_pour_template(
     wxr: WiktextractContext, node: TemplateNode, page_data: list[WordEntry]
-) -> None:
+) -> list[Form]:
     # equivalent form: https://fr.wiktionary.org/wiki/Modèle:équiv-pour
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(node), expand_all=True
@@ -109,7 +112,7 @@ def process_equiv_pour_template(
         "une fille": "feminine",
         "une personne non-binaire": "neuter",
     }
-
+    forms = []
     for child in expanded_node.find_child(NodeKind.ITALIC | NodeKind.HTML):
         if child.kind == NodeKind.ITALIC:
             raw_gender_tag = clean_node(wxr, None, child).strip("() ")
@@ -127,7 +130,10 @@ def process_equiv_pour_template(
                 else:
                     form_data.raw_tags.append(raw_gender_tag)
             if len(form_data.form) > 0:
-                page_data[-1].forms.append(form_data)
+                if len(page_data) > 0:
+                    page_data[-1].forms.append(form_data)
+                forms.append(form_data)
+    return forms
 
 
 def process_zh_mot_template(

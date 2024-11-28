@@ -228,6 +228,9 @@ def process_inflection_table(
                         form_data.raw_tags.extend(row_headers)
                     if form_data.form != "":
                         for form in form_data.form.splitlines():
+                            if form.startswith("(") and form.endswith(")"):
+                                form_data.raw_tags.append(form.strip("()"))
+                                continue
                             new_form_data = form_data.model_copy(deep=True)
                             new_form_data.form = form.removeprefix("ou ")
                             translate_raw_tags(

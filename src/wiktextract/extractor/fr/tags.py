@@ -2,12 +2,10 @@
 # https://fr.wiktionary.org/wiki/Annexe:Glossaire_grammatical
 # List of templates:
 # https://fr.wiktionary.org/wiki/Wiktionnaire:Liste_de_tous_les_modèles
-from typing import Union
-
 from .models import WordEntry
 
 # https://en.wikipedia.org/wiki/Grammatical_gender
-GENDER_TAGS: dict[str, Union[str, list[str]]] = {
+GENDER_TAGS: dict[str, str | list[str]] = {
     "commun": "common",
     "féminin": "feminine",
     "masculin": "masculine",
@@ -23,7 +21,7 @@ GENDER_TAGS: dict[str, Union[str, list[str]]] = {
 }
 
 # https://en.wikipedia.org/wiki/Grammatical_number
-NUMBER_TAGS: dict[str, Union[str, list[str]]] = {
+NUMBER_TAGS: dict[str, str | list[str]] = {
     "singulier": "singular",
     "pluriel": "plural",
     "duel": "dual",
@@ -51,7 +49,7 @@ MOOD_TAGS: dict[str, str] = {
     "volitif": "volitive",
 }
 
-VERB_FORM_TAGS: dict[str, Union[str, list[str]]] = {
+VERB_FORM_TAGS: dict[str, str | list[str]] = {
     "participe": "participle",
     "imparfait": "imperfect",
     "infinitif": "infinitive",
@@ -62,7 +60,7 @@ VERB_FORM_TAGS: dict[str, Union[str, list[str]]] = {
 }
 
 # https://en.wikipedia.org/wiki/Grammatical_case
-CASE_TAGS: dict[str, Union[str, list[str]]] = {
+CASE_TAGS: dict[str, str | list[str]] = {
     "ablatif": "ablative",
     "accusatif": "accusative",
     "accusatif génitif": ["accusative", "genitive"],
@@ -78,7 +76,7 @@ CASE_TAGS: dict[str, Union[str, list[str]]] = {
 }
 
 # https://en.wikipedia.org/wiki/Grammatical_tense
-TENSE_TAGS: dict[str, Union[str, list[str]]] = {
+TENSE_TAGS: dict[str, str | list[str]] = {
     "présent": "present",
     "passé": "past",
     "passé simple": "past",
@@ -96,7 +94,7 @@ TENSE_TAGS: dict[str, Union[str, list[str]]] = {
 }
 
 # https://en.wikipedia.org/wiki/Grammatical_person
-PERSON_TAGS: dict[str, Union[str, list[str]]] = {
+PERSON_TAGS: dict[str, str | list[str]] = {
     "1ᵉ personne": "first-person",
     "1ʳᵉ personne": "first-person",
     "2ᵉ personne": "second-person",
@@ -216,7 +214,7 @@ SENSE_TAGS: dict[str, str] = {
 }
 
 # https://en.wikipedia.org/wiki/Voice_(grammar)
-VOICE_TAGS: dict[str, Union[str, list[str]]] = {
+VOICE_TAGS: dict[str, str | list[str]] = {
     # https://fr.wiktionary.org/wiki/Modèle:eo-conj
     "participe actif": ["participle", "active"],
     "participe passif": ["participle", "passive"],
@@ -285,7 +283,7 @@ ASPECT_TAGS = {
     "imperfectif": "imperfective",  # Modèle:imperfectif
 }
 
-GRAMMATICAL_TAGS: dict[str, Union[str, list[str]]] = {
+GRAMMATICAL_TAGS: dict[str, str | list[str]] = {
     **GENDER_TAGS,
     **NUMBER_TAGS,
     **MOOD_TAGS,

@@ -202,3 +202,10 @@ class TestFormLine(TestCase):
             [f.model_dump(exclude_defaults=True) for f in page_data[-1].forms],
             [{"form": "se définir", "tags": ["pronominal"]}],
         )
+
+    def test_note(self):
+        self.wxr.wtp.start_page("autaire")
+        page_data = [WordEntry(word="autaire", lang_code="fr", lang="Français")]
+        root = self.wxr.wtp.parse("'''autaire''' {{note}} note")
+        extract_form_line(self.wxr, page_data, root.children)
+        self.assertEqual(page_data[-1].notes, ["note"])

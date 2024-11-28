@@ -691,3 +691,35 @@ class TestFrGloss(TestCase):
                 }
             ],
         )
+
+    def test_équiv_pour_in_gloss(self):
+        self.wxr.wtp.start_page("aumônière")
+        self.wxr.wtp.add_page(
+            "Modèle:équiv-pour",
+            10,
+            """''(pour un homme, on dit'' : <bdi lang="fr" xml:lang="fr" class="lang-fr">[[aumônier#fr|aumônier]]</bdi>'')''""",
+        )
+        root = self.wxr.wtp.parse(
+            "# gloss {{équiv-pour|un homme|aumônier|lang=fr}}."
+        )
+        page_data = [
+            WordEntry(
+                word="aumônière",
+                lang_code="fr",
+                lang="Français",
+                pos="noun",
+            )
+        ]
+        extract_gloss(self.wxr, page_data, root.children[0])
+        self.assertEqual(
+            [f.model_dump(exclude_defaults=True) for f in page_data[0].forms],
+            [
+                {
+                    "form": "aumônier",
+                    "tags": ["masculine"],
+                    "source": "form line template 'équiv-pour'",
+                    "sense_index": 1,
+                }
+            ],
+        )
+        self.assertEqual(page_data[0].senses[0].glosses, ["gloss."])

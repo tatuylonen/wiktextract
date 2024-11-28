@@ -1,5 +1,5 @@
+import re
 from collections import defaultdict
-from typing import Optional, Union
 
 from wikitextprocessor import NodeKind, TemplateNode, WikiNode
 
@@ -13,7 +13,7 @@ def extract_gloss(
     wxr: WiktextractContext,
     page_data: list[WordEntry],
     list_node: WikiNode,
-    parent_sense: Optional[Sense] = None,
+    parent_sense: Sense | None = None,
 ) -> None:
     for list_item_node in list_node.find_child(NodeKind.LIST_ITEM):
         gloss_nodes = list(
@@ -31,7 +31,10 @@ def extract_gloss(
         # https://fr.wiktionary.org/wiki/Wiktionnaire:Liste_de_tous_les_modèles/Précisions_de_sens
         tag_indexes = set()
         for index, gloss_node in enumerate(gloss_nodes):
-            if isinstance(gloss_node, TemplateNode):
+            if (
+                isinstance(gloss_node, TemplateNode)
+                and gloss_node.template_name != "équiv-pour"
+            ):
                 categories_data = defaultdict(list)
                 expanded_text = clean_node(wxr, categories_data, gloss_node)
                 if (
@@ -74,7 +77,7 @@ def extract_gloss(
             ):
                 note_index = index
         gloss_text = find_alt_of_form(
-            wxr, gloss_only_nodes[:note_index], page_data[-1].pos, gloss_data
+            wxr, gloss_only_nodes[:note_index], page_data[-1], gloss_data
         )
         if "form-of" in page_data[-1].tags:
             find_form_of_word(wxr, gloss_only_nodes[:note_index], gloss_data)
@@ -140,7 +143,7 @@ def extract_examples(
 def process_exemple_template(
     wxr: WiktextractContext,
     node: TemplateNode,
-    gloss_data: Optional[Sense],
+    gloss_data: Sense | None,
     time: str = "",
 ) -> Example:
     # https://fr.wiktionary.org/wiki/Modèle:exemple
@@ -176,13 +179,14 @@ def process_exemple_template(
 
 def find_alt_of_form(
     wxr: WiktextractContext,
-    gloss_nodes: list[Union[str, WikiNode]],
-    pos_type: str,
+    gloss_nodes: list[str | WikiNode],
+    word_entry: WordEntry,
     gloss_data: Sense,
 ) -> str:
     """
     Return gloss text, remove tag template expanded from "variante *" templates.
     """
+    from .form_line import process_equiv_pour_template
 
     alt_of = ""
     filtered_gloss_nodes = []
@@ -216,10 +220,17 @@ def find_alt_of_form(
                     gloss_data.raw_tags.append(raw_tag)
                 else:
                     filtered_gloss_nodes.append(node)
+        elif (
+            isinstance(gloss_node, TemplateNode)
+            and gloss_node.template_name == "équiv-pour"
+        ):
+            for form_data in process_equiv_pour_template(wxr, gloss_node, []):
+                form_data.sense_index = len(word_entry.senses) + 1
+                word_entry.forms.append(form_data)
         else:
             filtered_gloss_nodes.append(gloss_node)
 
-    if alt_of == "" and pos_type == "typographic variant":
+    if alt_of == "" and word_entry.pos == "typographic variant":
         for gloss_node in filter(
             lambda n: isinstance(n, WikiNode), gloss_nodes
         ):
@@ -236,6 +247,7 @@ def find_alt_of_form(
             gloss_data.alt_of.append(AltForm(word=alt_of))
 
     gloss_text = clean_node(wxr, gloss_data, filtered_gloss_nodes)
+    gloss_text = re.sub(r"\s+\.$", ".", gloss_text)
     brackets = 0
     for char in gloss_text:
         if char == "(":
@@ -249,7 +261,7 @@ def find_alt_of_form(
 
 def find_form_of_word(
     wxr: WiktextractContext,
-    gloss_nodes: list[Union[str, WikiNode]],
+    gloss_nodes: list[str | WikiNode],
     gloss_data: Sense,
 ) -> None:
     # https://fr.wiktionary.org/wiki/Catégorie:Modèles_de_variantes
