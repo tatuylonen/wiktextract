@@ -35,7 +35,7 @@ def parse_section(
     page_data: list[WordEntry],
     base_data: WordEntry,
     forms_data: WordEntry,
-    level_node: WikiNode,
+    level_node: LevelNode,
 ) -> list[Etymology]:
     # title templates
     # https://nl.wiktionary.org/wiki/Categorie:Lemmasjablonen
