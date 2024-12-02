@@ -13,7 +13,7 @@ from .gloss import extract_glosses
 from .inflection import extract_inf_table_template
 from .linkage import extract_linkages
 from .models import Sense, WordEntry
-from .pronunciation import extract_pronunciation
+from .pronunciation import extract_pronunciation_section
 from .section_titles import FORM_TITLES, LINKAGE_TITLES, POS_SECTIONS
 from .translation import extract_translation
 
@@ -43,7 +43,7 @@ def parse_section(
                 level_node,
             )
         elif wxr.config.capture_pronunciation and section_name == "Aussprache":
-            extract_pronunciation(
+            extract_pronunciation_section(
                 wxr,
                 page_data[-1] if len(page_data) > 0 else base_data,
                 level_node,

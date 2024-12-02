@@ -260,7 +260,7 @@ class TestDEExample(unittest.TestCase):
                 {
                     "examples": [
                         {
-                            "raw_tags": ["Deutschland"],
+                            "tags": ["Germany"],
                             "text": "„Den ganzen ‚Feber‘ hörte man lapidar",
                         }
                     ],

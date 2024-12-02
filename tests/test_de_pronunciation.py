@@ -3,12 +3,7 @@ import unittest
 from wikitextprocessor import Wtp
 
 from wiktextract.config import WiktionaryConfig
-from wiktextract.extractor.de.models import Sound
-from wiktextract.extractor.de.pronunciation import (
-    process_hoerbeispiele,
-    process_ipa,
-    process_lautschrift_template,
-)
+from wiktextract.extractor.de.page import parse_page
 from wiktextract.wxr_context import WiktextractContext
 
 
@@ -17,173 +12,50 @@ class TestDEPronunciation(unittest.TestCase):
 
     def setUp(self) -> None:
         self.wxr = WiktextractContext(
-            Wtp(lang_code="de"), WiktionaryConfig(dump_file_lang_code="de")
+            Wtp(lang_code="de"),
+            WiktionaryConfig(
+                dump_file_lang_code="de", capture_language_codes=None
+            ),
         )
 
     def tearDown(self) -> None:
         self.wxr.wtp.close_db_conn()
 
-    def test_de_process_ipa(self):
-        test_cases = [
-            {
-                "input": "{{Lautschrift|ipa1}}",
-                "expected": [
-                    {
-                        "ipa": "ipa1",
-                    }
-                ],
-            },
-            {
-                "input": "{{Lautschrift|ipa1|spr=de}}",
-                "expected": [
-                    {
-                        "ipa": "ipa1",
-                        "lang": "Deutsch",
-                        "lang_code": "de",
-                    }
-                ],
-            },
-            {
-                "input": "{{Lautschrift|ipa1}} {{Lautschrift|ipa2}}{{Lautschrift|ipa3|spr=de}}",
-                "expected": [
-                    {"ipa": "ipa1"},
-                    {"ipa": "ipa2"},
-                    {
-                        "ipa": "ipa3",
-                        "lang": "Deutsch",
-                        "lang_code": "de",
-                    },
-                ],
-            },
-            {
-                "input": "{{Lautschrift|ipa1}}, ''tag1'' {{Lautschrift|ipa2}}",
-                "expected": [
-                    {"ipa": "ipa1"},
-                    {"ipa": "ipa2", "raw_tags": ["tag1"]},
-                ],
-            },
-        ]
-
-        for case in test_cases:
-            with self.subTest(case=case):
-                self.wxr.wtp.start_page("")
-                self.wxr.wtp.add_page("Vorlage:IPA", 10, "")
-                self.wxr.wtp.add_page("Vorlage:Lautschrift", 10, "(Deutsch)")
-
-                root = self.wxr.wtp.parse(case["input"])
-
-                sound_data = [Sound()]
-
-                process_ipa(
-                    self.wxr, sound_data, list(root.filter_empty_str_child())
-                )
-
-                sounds = [
-                    s.model_dump(exclude_defaults=True) for s in sound_data
-                ]
-                self.assertEqual(sounds, case["expected"])
-
-    def test_de_process_hoerbeispiele(self):
-        # https://de.wiktionary.org/wiki/Beispiel
-        filename1 = "De-Beispiel.ogg"
-        # https://de.wiktionary.org/wiki/butineur
-        filename2 = "LL-Q150 (fra)-WikiLucas00-butineur.wav"
-        test_cases = [
-            {
-                "input": "{{Audio|" + filename1 + "}}",
-                "expected": [
-                    {
-                        "audio": filename1,
-                        "mp3_url": None,  # None = we don't care about exact val
-                        "ogg_url": None,
-                    }
-                ],
-            },
-            {
-                "input": "{{Audio|"
-                + filename1
-                + "}} {{Audio|"
-                + filename2
-                + "}}",
-                "expected": [
-                    {
-                        "audio": filename1,
-                        "mp3_url": None,
-                        "ogg_url": None,
-                    },
-                    {
-                        "audio": filename2,
-                        "ogg_url": None,
-                        "mp3_url": None,
-                        "wav_url": None,
-                    },
-                ],
-            },
-            {
-                "input": "{{Audio|"
-                + filename1
-                + "}} ''tag1'', ''tag2'' {{Audio|"
-                + filename2
-                + "}}",
-                "expected": [
-                    {
-                        "audio": filename1,
-                        "mp3_url": None,
-                        "ogg_url": None,
-                        "raw_tags": ["tag1"],
-                    },
-                    {
-                        "audio": filename2,
-                        "mp3_url": None,
-                        "ogg_url": None,
-                        "wav_url": None,
-                        "raw_tags": ["tag2"],
-                    },
-                ],
-            },
-        ]
-
-        for case in test_cases:
-            with self.subTest(case=case):
-                self.wxr.wtp.start_page("")
-                self.wxr.wtp.add_page("Vorlage:IPA", 10, "")
-                self.wxr.wtp.add_page("Vorlage:Audio", 10, "")
-
-                root = self.wxr.wtp.parse(case["input"])
-
-                sound_data = [Sound()]
-
-                process_hoerbeispiele(
-                    self.wxr, sound_data, list(root.filter_empty_str_child())
-                )
-
-                sounds = [
-                    s.model_dump(exclude_defaults=True) for s in sound_data
-                ]
-                self.assertSoundDataMatchesExpected(sounds, case["expected"])
-
-    def assertSoundDataMatchesExpected(self, sound_data, expected):
-        self.assertEqual(
-            len(sound_data),
-            len(expected),
-            f"Mismatch in number of sound data entries{sound_data}",
+    def test_normal_page(self):
+        self.wxr.wtp.add_page(
+            "Vorlage:Audio",
+            10,
+            """[[Datei:Loudspeaker.svg|15px|Lautsprecherbild|link=]]<span class="aplay">&nbsp;</span>[[Media:De-at-Hund.ogg|Hund&nbsp;(Österreich)]]<sup>&nbsp;([[:Datei:De-at-Hund.ogg|Info]])</sup>[[Kategorie:Wiktionary:Audio-Datei]]""",
         )
+        data = parse_page(
+            self.wxr,
+            "Hund",
+            """== Hund ({{Sprache|Deutsch}}) ==
+=== {{Wortart|Substantiv|Deutsch}}, {{m}} ===
+==== Aussprache ====
+:{{IPA}} {{Lautschrift|hʊnt}}
+:{{Hörbeispiele}} {{Audio|De-at-Hund.ogg|spr=at}}
+:{{Reime}} {{Reim|ʊnt|Deutsch}}
+==== Bedeutungen ====
+:[1] [[Haustier]]""",
+        )
+        self.assertEqual(data[0]["sounds"][0], {"ipa": "hʊnt"})
+        self.assertEqual(data[0]["sounds"][1]["audio"], "De-at-Hund.ogg")
+        self.assertEqual(data[0]["sounds"][1]["tags"], ["Austrian German"])
+        self.assertEqual(data[0]["sounds"][2], {"rhymes": "ʊnt"})
 
-        for data, exp in zip(sound_data, expected):
-            for key, value in exp.items():
-                if value is None:
-                    self.assertIn(key, data)
-                else:
-                    self.assertEqual(data[key], value)
-
-            for key in data:
-                self.assertIn(key, exp)
-                if exp[key] is not None:
-                    self.assertEqual(data[key], exp[key])
-
-    def test_empty_ipa_in_lautschrift(self):
-        self.wxr.wtp.start_page("BU")
-        root = self.wxr.wtp.parse("{{Lautschrift}}")
-        sound_data = [Sound()]
-        process_lautschrift_template(self.wxr, sound_data, root.children[0])
-        self.assertEqual(sound_data[0].model_dump(exclude_defaults=True), {})
+    def test_nested_lists(self):
+        data = parse_page(
+            self.wxr,
+            "Garage",
+            """== Garage ({{Sprache|Deutsch}}) ==
+=== {{Wortart|Substantiv|Deutsch}}, {{f}} ===
+==== Aussprache ====
+:{{IPA}}
+::''[[Deutschland]]:'' {{Lautschrift|ɡaˈʁaːʒə}}
+==== Bedeutungen ====
+:[1] [[Raum]]""",
+        )
+        self.assertEqual(
+            data[0]["sounds"][0], {"ipa": "ɡaˈʁaːʒə", "tags": ["Germany"]}
+        )
