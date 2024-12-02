@@ -4,7 +4,6 @@ from wikitextprocessor.parser import (
     LEVEL_KIND_FLAGS,
     LevelNode,
     NodeKind,
-    WikiNode,
 )
 
 from ...page import clean_node
@@ -23,7 +22,14 @@ def parse_section(
     cats = {}
     title_text = clean_node(wxr, cats, level_node.largs)
     if title_text in POS_DATA:
-        extract_pos_section(wxr, page_data, base_data, level_node, title_text)
+        extract_pos_section(
+            wxr,
+            page_data,
+            base_data,
+            level_node,
+            title_text,
+            cats.get("categories", []),
+        )
 
 
 def parse_page(
@@ -35,7 +41,8 @@ def parse_page(
     tree = wxr.wtp.parse(page_text)
     page_data: list[WordEntry] = []
     for level1_node in tree.find_child(NodeKind.LEVEL1):
-        lang_name = clean_node(wxr, None, level1_node.largs)
+        lang_cats = {}
+        lang_name = clean_node(wxr, lang_cats, level1_node.largs)
         lang_code = "unknown"
         for lang_template in level1_node.find_content(NodeKind.TEMPLATE):
             lang_code = lang_template.template_name.strip("-")
@@ -51,6 +58,7 @@ def parse_page(
             lang_code=lang_code,
             lang=lang_name,
             pos="unknown",
+            categories=lang_cats.get("categories", []),
         )
         for next_level_node in level1_node.find_child(LEVEL_KIND_FLAGS):
             parse_section(wxr, page_data, base_data, next_level_node)

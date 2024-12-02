@@ -64,6 +64,7 @@ class WiktionaryConfig:
         "save_ns_names",
         "extract_ns_names",
         "allowed_html_tags",
+        "parser_function_aliases",
     )
 
     def __init__(
@@ -128,6 +129,7 @@ class WiktionaryConfig:
         # these are extracted namespaces
         self.extract_ns_names = ["Main"]
         self.allowed_html_tags: dict[str, HTMLTagData] = {}
+        self.parser_function_aliases: dict[str, str] = {}
         self.load_edition_settings()
 
     def merge_return(self, ret: CollatedErrorReturnData):
