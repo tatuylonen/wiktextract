@@ -230,14 +230,13 @@ class TestDEGloss(unittest.TestCase):
             [
                 {
                     "raw_tags": [
-                        "Deutschland",
                         "Fernsehen",
                         "Kurzwort",
                         "Akronym",
                     ],
                     "glosses": ["für das erste Fernsehprogramm der ARD"],
                     "sense_index": "2",
-                    "tags": ["colloquial"],
+                    "tags": ["Germany", "colloquial"],
                 },
             ],
         )

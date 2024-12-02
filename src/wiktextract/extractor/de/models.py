@@ -105,28 +105,16 @@ class Sense(BaseModelWrap):
 
 class Sound(BaseModelWrap):
     ipa: str = Field(default="", description="International Phonetic Alphabet")
-    # phonetic_transcription: list[str] = Field(
-    #     default=[], description="Phonetic transcription, less exact than IPA."
-    # )
     audio: str = Field(default="", description="Audio file name")
     wav_url: str = Field(default="")
     ogg_url: str = Field(default="")
     mp3_url: str = Field(default="")
     oga_url: str = Field(default="")
     flac_url: str = Field(default="")
-    lang_code: str = Field(default="", description="Wiktionary language code")
-    lang: str = Field(default="", description="Localized language name")
-    # roman: list[str] = Field(
-    #     default=[], description="Translitaration to Roman characters"
-    # )
-    # syllabic: list[str] = Field(
-    #     default=[], description="Syllabic transcription"
-    # )
-    raw_tags: list[str] = Field(
-        default=[], description="Specifying the variant of the pronunciation"
-    )
+    raw_tags: list[str] = []
     tags: list[str] = []
     rhymes: str = ""
+    categories: list[str] = Field(default=[], exclude=True)
 
 
 class Form(BaseModelWrap):

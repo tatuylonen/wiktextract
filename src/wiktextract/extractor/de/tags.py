@@ -40,6 +40,7 @@ K_TEMPLATE_TAGS = {
     # "das": "",
     "Dativ": "dative",
     # "DDR": "",
+    "Deutschland": "Germany",
     # "der": "",
     "dichter.": "poetic",
     # "die": "",
