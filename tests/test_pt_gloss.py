@@ -44,7 +44,8 @@ class TestPtGloss(TestCase):
             "cão",
             """={{-pt-}}=
 =={{Substantivo|pt}}==
-# {{escopo|pt|Brasil|popular}} [[gênio]] do [[mal]] em geral ("capeta")""",
+# {{escopo|pt|Brasil|popular}} [[gênio]] do [[mal]] em geral ("capeta")
+#* ''O '''cão''' em forma de gente.''""",
         )
         self.assertEqual(
             data,
@@ -66,6 +67,7 @@ class TestPtGloss(TestCase):
                             ],
                             "glosses": ['gênio do mal em geral ("capeta")'],
                             "raw_tags": ["Brasil", "popular"],
+                            "examples": [{"text": "O cão em forma de gente."}],
                         }
                     ],
                     "word": "cão",

@@ -10,12 +10,19 @@ class PortugueseBaseModel(BaseModel):
     )
 
 
+class Example(PortugueseBaseModel):
+    text: str = ""
+    translation: str = ""
+    ref: str = ""
+
+
 class Sense(PortugueseBaseModel):
     glosses: list[str] = []
     tags: list[str] = []
     raw_tags: list[str] = []
     categories: list[str] = []
     topics: list[str] = []
+    examples: list[Example] = []
 
 
 class WordEntry(PortugueseBaseModel):

@@ -2,7 +2,7 @@ from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
-from .models import Sense, WordEntry
+from .models import Example, Sense, WordEntry
 from .section_titles import POS_DATA
 
 
@@ -30,11 +30,11 @@ def extract_pos_section(
 def extract_gloss_list_item(
     wxr: WiktextractContext,
     word_entry: WordEntry,
-    list_item_node: WikiNode,
+    list_item: WikiNode,
 ) -> None:
     gloss_nodes = []
     sense = Sense()
-    for node in list_item_node.children:
+    for node in list_item.children:
         if isinstance(node, TemplateNode):
             if node.template_name == "escopo":
                 extract_escopo_template(wxr, sense, node)
@@ -43,7 +43,9 @@ def extract_gloss_list_item(
             else:
                 gloss_nodes.append(node)
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
-            pass
+            if node.sarg.endswith("*"):
+                for next_list_item in node.find_child(NodeKind.LIST_ITEM):
+                    extract_example_list_item(wxr, sense, next_list_item)
         else:
             gloss_nodes.append(node)
 
@@ -80,3 +82,14 @@ def extract_escopo2_template(
         sense.raw_tags.append(
             clean_node(wxr, None, t_node.template_parameters[arg])
         )
+
+
+def extract_example_list_item(
+    wxr: WiktextractContext,
+    sense: Sense,
+    list_item: WikiNode,
+) -> None:
+    example = Example()
+    example.text = clean_node(wxr, sense, list_item.children)
+    if example.text != "":
+        sense.examples.append(example)
