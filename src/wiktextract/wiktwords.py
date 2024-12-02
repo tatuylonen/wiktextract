@@ -395,8 +395,11 @@ def main():
     wtp = Wtp(
         db_path=args.db_path,
         lang_code=args.dump_file_language_code,
-        template_override_funcs=template_override_fns,
+        template_override_funcs=template_override_fns
+        if args.dump_file_language_code == "en"
+        else {},
         extension_tags=conf.allowed_html_tags,
+        parser_function_aliases=conf.parser_function_aliases,
         quiet=args.quiet,
     )
     wxr = WiktextractContext(wtp, conf)

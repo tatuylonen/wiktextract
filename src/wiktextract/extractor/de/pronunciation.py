@@ -81,6 +81,8 @@ def extract_audio_template(
     for link_node in expanded_node.find_child(NodeKind.LINK):
         link_str = clean_node(wxr, None, link_node)
         if "(" in link_str:
-            sound.raw_tags.append(link_str[link_str.index("(") + 1:].strip(")"))
+            sound.raw_tags.append(
+                link_str[link_str.index("(") + 1 :].strip(")")
+            )
     clean_node(wxr, sound, expanded_node)
     return sound

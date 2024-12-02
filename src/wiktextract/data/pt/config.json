@@ -1,0 +1,9 @@
+{
+  "parser_function_aliases": {
+    "#se": "#if",
+    "#seigual": "#ifeq",
+    "#seerro": "#iferror",
+    "#seexiste": "#ifexist",
+    "#seexpr": "#ifexpr"
+  }
+}
