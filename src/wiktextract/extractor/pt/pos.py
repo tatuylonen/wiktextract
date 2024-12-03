@@ -1,4 +1,10 @@
-from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
+from wikitextprocessor import (
+    HTMLNode,
+    LevelNode,
+    NodeKind,
+    TemplateNode,
+    WikiNode,
+)
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -90,6 +96,30 @@ def extract_example_list_item(
     list_item: WikiNode,
 ) -> None:
     example = Example()
-    example.text = clean_node(wxr, sense, list_item.children)
+    for node in list_item.children:
+        if isinstance(node, WikiNode) and node.kind == NodeKind.ITALIC:
+            example.text = clean_node(wxr, None, node)
+        elif isinstance(node, HTMLNode) and node.tag == "small":
+            example.translation = clean_node(wxr, None, node)
+            if example.translation.startswith(
+                "("
+            ) and example.translation.endswith(")"):
+                example.translation = example.translation.strip("()")
+        elif isinstance(node, TemplateNode):
+            match node.template_name:
+                case "OESP":
+                    example.ref = clean_node(wxr, sense, node).strip("()")
+                case "tradex":
+                    example.text = clean_node(
+                        wxr, None, node.template_parameters.get(2, "")
+                    )
+                    example.translation = clean_node(
+                        wxr, None, node.template_parameters.get(3, "")
+                    )
+                    clean_node(wxr, sense, node)
+                case "Ex.":
+                    example.text = clean_node(
+                        wxr, sense, node.template_parameters.get(1, "")
+                    )
     if example.text != "":
         sense.examples.append(example)
