@@ -8,6 +8,7 @@ from wikitextprocessor.parser import (
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from .linkage import extract_expression_section
 from .models import Sense, WordEntry
 from .pos import extract_pos_section
 from .section_titles import POS_DATA
@@ -33,6 +34,10 @@ def parse_section(
         )
     elif title_text == "Tradução":
         extract_translation_section(
+            wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
+        )
+    elif title_text == "Expressões":
+        extract_expression_section(
             wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
         )
 

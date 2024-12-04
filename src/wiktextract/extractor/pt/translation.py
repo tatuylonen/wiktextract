@@ -50,11 +50,14 @@ def extract_translation_list_item(
     sense_index: int,
 ) -> None:
     translations = []
+    lang_name = "unknown"
     for node in list_item.children:
         if isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
             link_str = clean_node(wxr, None, node)
-            if "/traduções" in link_str:
+            if "/traduções" in link_str or "/tradução" in link_str:
                 extract_translation_subpage(wxr, word_entry, link_str)
+            elif lang_name == "unknown":
+                lang_name = link_str
         elif isinstance(node, TemplateNode):
             match node.template_name:
                 case "trad":
@@ -80,7 +83,7 @@ def extract_translation_list_item(
                             sense_index,
                             translations[-1].lang
                             if len(translations) > 0
-                            else "unknown",
+                            else lang_name,
                         )
                     )
         elif isinstance(node, str) and re.search(r"\(.+\)", node) is not None:
@@ -95,6 +98,11 @@ def extract_translation_list_item(
             raw_tag = clean_node(wxr, None, node)
             if raw_tag != "":
                 translations[-1].raw_tags.append(raw_tag)
+        elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
+            for next_list_item in node.find_child(NodeKind.LIST_ITEM):
+                extract_translation_list_item(
+                    wxr, word_entry, next_list_item, sense, sense_index
+                )
 
     word_entry.translations.extend(translations)
 
