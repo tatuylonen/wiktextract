@@ -41,6 +41,13 @@ class Translation(PortugueseBaseModel):
     roman: str = ""
 
 
+class Linkage(PortugueseBaseModel):
+    word: str
+    tags: list[str] = []
+    raw_tags: list[str] = []
+    senses: list[Sense] = []
+
+
 class WordEntry(PortugueseBaseModel):
     model_config = ConfigDict(title="Portuguese Wiktionary")
     word: str = Field(description="Word string", min_length=1)
@@ -53,3 +60,4 @@ class WordEntry(PortugueseBaseModel):
     tags: list[str] = []
     raw_tags: list[str] = []
     translations: list[Translation] = []
+    expressions: list[Linkage] = []
