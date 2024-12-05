@@ -11,6 +11,7 @@ POS_DATA = {
     "Pronome": {"pos": "pron"},
     "Substantivo": {"pos": "noun"},
     "Verbo": {"pos": "verb"},
+    "Forma de substantivo": {"pos": "noun", "tags": ["form-of"]},
     "Forma verbal": {"pos": "verb", "tags": ["form-of"]},
     "Locução substantiva": {"pos": "phrase", "tags": ["substantive"]},
     "Locução adjetiva": {"pos": "phrase", "tags": ["adjectival"]},
@@ -23,4 +24,11 @@ POS_DATA = {
     "Sufixo": {"pos": "suffix", "tags": ["morpheme"]},
     "Sigla": {"pos": "abbrev", "tags": ["abbreviation"]},
     "Símbolo": {"pos": "symbol"},
+}
+
+
+LINKAGE_SECTIONS = {
+    "Antônimos": "antonyms",
+    "Sinônimos": "synonyms",
+    "Verbetes derivados": "derived",
 }

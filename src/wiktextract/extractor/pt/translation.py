@@ -125,16 +125,17 @@ def extract_trad_template(
         if arg not in t_node.template_parameters:
             break
         tr_str = clean_node(wxr, None, t_node.template_parameters.get(arg, ""))
-        translations.append(
-            Translation(
-                word=tr_str,
-                lang=lang_name,
-                lang_code=lang_code,
-                roman=roman,
-                sense=sense,
-                sense_index=sense_index,
+        if tr_str != "":
+            translations.append(
+                Translation(
+                    word=tr_str,
+                    lang=lang_name,
+                    lang_code=lang_code,
+                    roman=roman,
+                    sense=sense,
+                    sense_index=sense_index,
+                )
             )
-        )
     return translations
 
 

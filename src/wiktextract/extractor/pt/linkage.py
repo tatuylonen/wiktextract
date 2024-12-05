@@ -1,8 +1,11 @@
-from wikitextprocessor import LevelNode, NodeKind, WikiNode
+import re
+
+from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .models import Linkage, WordEntry
+from .tags import translate_raw_tags
 
 
 def extract_expression_section(
@@ -34,7 +37,17 @@ def extract_expression_list_item(
         elif not (isinstance(node, WikiNode) and node.kind == NodeKind.LIST):
             sense_nodes.append(node)
 
-    sense_str = clean_node(wxr, None, sense_nodes)
+    sense_str = clean_node(
+        wxr,
+        None,
+        [
+            n
+            for n in sense_nodes
+            if not (
+                isinstance(n, TemplateNode) and n.template_name == "escopo2"
+            )
+        ],
+    )
     if sense_str != "":
         gloss_list_item = WikiNode(NodeKind.LIST_ITEM, 0)
         gloss_list_item.children = sense_nodes
@@ -48,3 +61,79 @@ def extract_expression_list_item(
 
     if expression_data.word != "":
         word_entry.expressions.append(expression_data)
+
+
+def extract_linkage_section(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    level_node: LevelNode,
+    linkage_type: str,
+) -> None:
+    sense = ""
+    sense_index = 0
+    for node in level_node.children:
+        if isinstance(node, TemplateNode) and node.template_name == "fraseini":
+            sense, sense_index = extract_fraseini_template(wxr, node)
+        elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
+            for list_item in node.find_child(NodeKind.LIST_ITEM):
+                extract_linkage_list_item(
+                    wxr, word_entry, list_item, linkage_type, sense, sense_index
+                )
+
+
+def extract_fraseini_template(
+    wxr: WiktextractContext, t_node: TemplateNode
+) -> tuple[str, int]:
+    sense = ""
+    sense_index = 0
+    first_arg = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
+    m = re.search(r"(\d+)$", first_arg)
+    if m is not None:
+        sense_index = int(m.group(1))
+        sense = first_arg[: m.start()].strip()
+    else:
+        sense = first_arg
+    return sense, sense_index
+
+
+def extract_linkage_list_item(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    list_item: WikiNode,
+    linkage_type: str,
+    sense: str,
+    sense_index: int,
+) -> None:
+    linkage_words = []
+    raw_tags = []
+    for node in list_item.children:
+        if isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
+            word = clean_node(wxr, None, node)
+            if word != "":
+                linkage_words.append(word)
+        elif isinstance(node, WikiNode) and node.kind == NodeKind.BOLD:
+            bold_str = clean_node(wxr, None, node)
+            if re.fullmatch(r"\d+", bold_str):
+                sense_index = int(bold_str)
+        elif isinstance(node, str):
+            m = re.search(r"\((.+)\)", node)
+            if m is not None:
+                sense = m.group(1)
+        elif (
+            isinstance(node, TemplateNode)
+            and node.template_name == "link preto"
+        ):
+            word = clean_node(wxr, None, node.template_parameters.get(1, ""))
+            if word != "":
+                linkage_words.append(word)
+        elif isinstance(node, WikiNode) and node.kind == NodeKind.ITALIC:
+            raw_tag = clean_node(wxr, None, node)
+            if raw_tag != "":
+                raw_tags.append(raw_tag)
+
+    for word in linkage_words:
+        linkage = Linkage(
+            word=word, sense=sense, sense_index=sense_index, raw_tags=raw_tags
+        )
+        translate_raw_tags(linkage)
+        getattr(word_entry, linkage_type).append(linkage)

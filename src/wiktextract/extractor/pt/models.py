@@ -46,6 +46,10 @@ class Linkage(PortugueseBaseModel):
     tags: list[str] = []
     raw_tags: list[str] = []
     senses: list[Sense] = []
+    sense: str = ""
+    sense_index: int = Field(
+        default=0, ge=0, description="Number of the definition, start from 1"
+    )
 
 
 class WordEntry(PortugueseBaseModel):
@@ -61,3 +65,7 @@ class WordEntry(PortugueseBaseModel):
     raw_tags: list[str] = []
     translations: list[Translation] = []
     expressions: list[Linkage] = []
+    antonyms: list[Linkage] = []
+    synonyms: list[Linkage] = []
+    derived: list[Linkage] = []
+    etymology_texts: list[str] = []
