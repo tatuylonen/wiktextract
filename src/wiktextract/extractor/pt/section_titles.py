@@ -24,3 +24,10 @@ POS_DATA = {
     "Sigla": {"pos": "abbrev", "tags": ["abbreviation"]},
     "Símbolo": {"pos": "symbol"},
 }
+
+
+LINKAGE_SECTIONS = {
+    "Antônimos": "antonyms",
+    "Sinônimos": "synonyms",
+    "Verbetes derivados": "derived",
+}

@@ -68,3 +68,25 @@ class TestPtLinkage(TestCase):
                 },
             ],
         )
+
+    def test_synonyms(self):
+        self.wxr.wtp.add_page("Predefinição:-pt-", 10, "Português")
+        data = parse_page(
+            self.wxr,
+            "olho",
+            """={{-pt-}}=
+==Substantivo==
+# órgão
+===Sinônimos===
+* De '''5''' (furo, na agulha, para a passagem de linhas ou fios): [[buraco]]""",
+        )
+        self.assertEqual(
+            data[0]["synonyms"],
+            [
+                {
+                    "word": "buraco",
+                    "sense": "furo, na agulha, para a passagem de linhas ou fios",
+                    "sense_index": 5,
+                }
+            ],
+        )
