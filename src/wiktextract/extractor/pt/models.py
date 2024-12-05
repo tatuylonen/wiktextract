@@ -68,3 +68,4 @@ class WordEntry(PortugueseBaseModel):
     antonyms: list[Linkage] = []
     synonyms: list[Linkage] = []
     derived: list[Linkage] = []
+    etymology_texts: list[str] = []

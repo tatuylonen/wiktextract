@@ -8,6 +8,7 @@ from wikitextprocessor.parser import (
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from .etymology import extract_etymology_section
 from .linkage import extract_expression_section, extract_linkage_section
 from .models import Sense, WordEntry
 from .pos import extract_pos_section
@@ -47,6 +48,8 @@ def parse_section(
             level_node,
             LINKAGE_SECTIONS[title_text],
         )
+    elif title_text == "Etimologia":
+        extract_etymology_section(wxr, page_data, level_node)
 
     cats = {}
     for link_node in level_node.find_child(NodeKind.LINK):

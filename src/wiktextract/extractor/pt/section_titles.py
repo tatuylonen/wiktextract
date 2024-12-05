@@ -11,6 +11,7 @@ POS_DATA = {
     "Pronome": {"pos": "pron"},
     "Substantivo": {"pos": "noun"},
     "Verbo": {"pos": "verb"},
+    "Forma de substantivo": {"pos": "noun", "tags": ["form-of"]},
     "Forma verbal": {"pos": "verb", "tags": ["form-of"]},
     "Locução substantiva": {"pos": "phrase", "tags": ["substantive"]},
     "Locução adjetiva": {"pos": "phrase", "tags": ["adjectival"]},
