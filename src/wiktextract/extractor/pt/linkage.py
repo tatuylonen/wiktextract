@@ -107,29 +107,46 @@ def extract_linkage_list_item(
     linkage_words = []
     raw_tags = []
     for node in list_item.children:
-        if isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
-            word = clean_node(wxr, None, node)
-            if word != "":
-                linkage_words.append(word)
-        elif isinstance(node, WikiNode) and node.kind == NodeKind.BOLD:
-            bold_str = clean_node(wxr, None, node)
-            if re.fullmatch(r"\d+", bold_str):
-                sense_index = int(bold_str)
+        if isinstance(node, TemplateNode):
+            match node.template_name:
+                case "link preto":
+                    word = clean_node(
+                        wxr, None, node.template_parameters.get(1, "")
+                    )
+                    if word != "":
+                        linkage_words.append(word)
+                case "escopo2":
+                    from .pos import extract_escopo2_template
+
+                    raw_tags.extend(extract_escopo2_template(wxr, node))
+        elif isinstance(node, WikiNode):
+            match node.kind:
+                case NodeKind.LINK:
+                    word = clean_node(wxr, None, node)
+                    if word != "" and not word.startswith("Wikisaurus:"):
+                        linkage_words.append(word)
+                case NodeKind.BOLD:
+                    bold_str = clean_node(wxr, None, node)
+                    if re.fullmatch(r"\d+", bold_str):
+                        sense_index = int(bold_str)
+                case NodeKind.ITALIC:
+                    raw_tag = clean_node(wxr, None, node)
+                    if raw_tag != "":
+                        raw_tags.append(raw_tag)
+                case NodeKind.LIST:
+                    for child_list_item in node.find_child(NodeKind.LIST_ITEM):
+                        extract_linkage_list_item(
+                            wxr,
+                            word_entry,
+                            child_list_item,
+                            linkage_type,
+                            sense,
+                            sense_index,
+                        )
         elif isinstance(node, str):
             m = re.search(r"\((.+)\)", node)
             if m is not None:
                 sense = m.group(1)
-        elif (
-            isinstance(node, TemplateNode)
-            and node.template_name == "link preto"
-        ):
-            word = clean_node(wxr, None, node.template_parameters.get(1, ""))
-            if word != "":
-                linkage_words.append(word)
-        elif isinstance(node, WikiNode) and node.kind == NodeKind.ITALIC:
-            raw_tag = clean_node(wxr, None, node)
-            if raw_tag != "":
-                raw_tags.append(raw_tag)
 
     for word in linkage_words:
         linkage = Linkage(

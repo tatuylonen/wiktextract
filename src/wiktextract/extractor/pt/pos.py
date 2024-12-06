@@ -53,7 +53,7 @@ def extract_gloss_list_item(
             if node.template_name == "escopo":
                 extract_escopo_template(wxr, sense, node)
             elif node.template_name == "escopo2":
-                extract_escopo2_template(wxr, sense, node)
+                sense.raw_tags.extend(extract_escopo2_template(wxr, node))
             else:
                 gloss_nodes.append(node)
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
@@ -80,24 +80,25 @@ def extract_escopo_template(
     for arg in range(2, 9):
         if arg not in t_node.template_parameters:
             break
-        sense.raw_tags.append(
-            clean_node(wxr, None, t_node.template_parameters[arg])
-        )
+        raw_tag = clean_node(wxr, None, t_node.template_parameters[arg])
+        if raw_tag != "":
+            sense.raw_tags.append(raw_tag)
     clean_node(wxr, sense, t_node)
 
 
 def extract_escopo2_template(
     wxr: WiktextractContext,
-    sense: Sense,
     t_node: TemplateNode,
-) -> None:
+) -> list[str]:
     # https://pt.wiktionary.org/wiki/Predefinição:escopo2
+    raw_tags = []
     for arg in range(1, 4):
         if arg not in t_node.template_parameters:
             break
-        sense.raw_tags.append(
-            clean_node(wxr, None, t_node.template_parameters[arg])
-        )
+        raw_tag = clean_node(wxr, None, t_node.template_parameters[arg])
+        if raw_tag != "":
+            raw_tags.append(raw_tag)
+    return raw_tags
 
 
 def extract_example_list_item(
