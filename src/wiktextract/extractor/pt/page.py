@@ -12,6 +12,7 @@ from .etymology import extract_etymology_section
 from .linkage import extract_expression_section, extract_linkage_section
 from .models import Sense, WordEntry
 from .pos import extract_pos_section
+from .pronunciation import extract_pronunciation_section
 from .section_titles import LINKAGE_SECTIONS, POS_DATA
 from .translation import extract_translation_section
 
@@ -50,16 +51,35 @@ def parse_section(
         )
     elif title_text == "Etimologia":
         extract_etymology_section(wxr, page_data, level_node)
+    elif title_text == "Pronúncia":
+        extract_pronunciation_section(wxr, page_data, level_node)
 
+    if title_text not in POS_DATA:
+        save_section_cats(
+            cats.get("categories", []), page_data, level_node, True
+        )
     cats = {}
     for link_node in level_node.find_child(NodeKind.LINK):
         clean_node(wxr, cats, link_node)
-    for data in page_data:
-        if data.lang_code == page_data[-1].lang_code:
-            data.categories.extend(cats.get("categories", []))
+    save_section_cats(cats.get("categories", []), page_data, level_node, False)
 
-    for next_level in level_node.find_child(LEVEL_KIND_FLAGS):
-        parse_section(wxr, page_data, base_data, next_level)
+    if title_text != "Pronúncia":
+        for next_level in level_node.find_child(LEVEL_KIND_FLAGS):
+            parse_section(wxr, page_data, base_data, next_level)
+
+
+def save_section_cats(
+    cats: list[str],
+    page_data: list[WordEntry],
+    level_node: LevelNode,
+    from_title: bool,
+) -> None:
+    if not from_title or (from_title and level_node.kind == NodeKind.LEVEL2):
+        for data in page_data:
+            if data.lang_code == page_data[-1].lang_code:
+                data.categories.extend(cats)
+    elif len(page_data) > 0:
+        page_data[-1].categories.extend(cats)
 
 
 def parse_page(
