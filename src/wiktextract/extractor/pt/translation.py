@@ -87,7 +87,7 @@ def extract_translation_list_item(
                         )
                     )
         elif isinstance(node, str) and re.search(r"\(.+\)", node) is not None:
-            roman = node.strip("() ")
+            roman = node.strip("() \n")
             for tr_data in translations:
                 tr_data.roman = roman
         elif (

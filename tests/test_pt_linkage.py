@@ -113,3 +113,35 @@ class TestPtLinkage(TestCase):
                 }
             ],
         )
+
+    def test_nested_list(self):
+        self.wxr.wtp.add_page("Predefinição:-pt-", 10, "Português")
+        data = parse_page(
+            self.wxr,
+            "cão",
+            """={{-pt-}}=
+==Substantivo==
+# animal
+===Sinônimos===
+* De '''1''' (animal mamífero, carnívoro e quadrúpede):
+** [[cachorro]]
+** {{escopo2|Brasil|RS}} [[cusco]]
+*De '''3''' (gênio do mal):
+** vide [[Wikisaurus:diabo]]""",
+        )
+        self.assertEqual(
+            data[0]["synonyms"],
+            [
+                {
+                    "word": "cachorro",
+                    "sense": "animal mamífero, carnívoro e quadrúpede",
+                    "sense_index": 1,
+                },
+                {
+                    "word": "cusco",
+                    "sense": "animal mamífero, carnívoro e quadrúpede",
+                    "sense_index": 1,
+                    "raw_tags": ["Brasil", "RS"],
+                },
+            ],
+        )

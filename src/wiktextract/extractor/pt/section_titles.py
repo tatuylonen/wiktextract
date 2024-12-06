@@ -30,5 +30,7 @@ POS_DATA = {
 LINKAGE_SECTIONS = {
     "Antônimos": "antonyms",
     "Sinônimos": "synonyms",
+    "Sinónimos/Sinônimos": "synonyms",
+    "Sinónimos": "synonyms",
     "Verbetes derivados": "derived",
 }

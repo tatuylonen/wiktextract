@@ -52,6 +52,19 @@ class Linkage(PortugueseBaseModel):
     )
 
 
+class Sound(PortugueseBaseModel):
+    ipa: str = Field(default="", description="International Phonetic Alphabet")
+    audio: str = Field(default="", description="Audio file name")
+    wav_url: str = ""
+    oga_url: str = ""
+    ogg_url: str = ""
+    mp3_url: str = ""
+    opus_url: str = ""
+    flac_url: str = ""
+    tags: list[str] = []
+    raw_tags: list[str] = []
+
+
 class WordEntry(PortugueseBaseModel):
     model_config = ConfigDict(title="Portuguese Wiktionary")
     word: str = Field(description="Word string", min_length=1)
@@ -69,3 +82,4 @@ class WordEntry(PortugueseBaseModel):
     synonyms: list[Linkage] = []
     derived: list[Linkage] = []
     etymology_texts: list[str] = []
+    sounds: list[Sound] = []
