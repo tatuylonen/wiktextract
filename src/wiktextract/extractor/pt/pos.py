@@ -107,8 +107,13 @@ def extract_example_list_item(
     list_item: WikiNode,
 ) -> None:
     example = Example()
+    ref_nodes = []
     for node in list_item.children:
-        if isinstance(node, WikiNode) and node.kind == NodeKind.ITALIC:
+        if (
+            isinstance(node, WikiNode)
+            and node.kind == NodeKind.ITALIC
+            and example.text == ""
+        ):
             example.text = clean_node(wxr, None, node)
         elif isinstance(node, HTMLNode) and node.tag == "small":
             example.translation = clean_node(wxr, None, node)
@@ -132,5 +137,10 @@ def extract_example_list_item(
                     example.text = clean_node(
                         wxr, sense, node.template_parameters.get(1, "")
                     )
+        else:
+            ref_nodes.append(node)
+
     if example.text != "":
+        if example.ref == "":
+            example.ref = clean_node(wxr, sense, ref_nodes).strip(":() \n")
         sense.examples.append(example)
