@@ -142,7 +142,7 @@ def process_noun_table(
                         form.raw_tags.append(row_header)
                     if col_index < len(column_headers):
                         form.raw_tags.append(column_headers[col_index])
-                    if len(form.form) > 0 and form.form != "—":
+                    if form.form not in ["—", "", "?"]:
                         translate_raw_tags(form)
                         word_entry.forms.append(form)
 
@@ -181,7 +181,7 @@ def process_adj_table(
                 column_headers.append(cell_text)
             else:
                 for form_text in cell_text.splitlines():
-                    if form_text in ("—", ""):
+                    if form_text in ("—", "", "?"):
                         continue
                     form = Form(form=form_text)
                     if col_index < len(column_headers):

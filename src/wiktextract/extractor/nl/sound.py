@@ -31,8 +31,9 @@ def extract_audio_template(
 ) -> None:
     # https://nl.wiktionary.org/wiki/Sjabloon:audio
     audio_file = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
-    set_sound_file_url_fields(wxr, audio_file, sound)
-    clean_node(wxr, word_entry, t_node)
+    if audio_file not in ["", "..."]:
+        set_sound_file_url_fields(wxr, audio_file, sound)
+        clean_node(wxr, word_entry, t_node)
 
 
 def extract_ipa_template(

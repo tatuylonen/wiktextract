@@ -111,6 +111,7 @@ class Sound(BaseModelWrap):
     mp3_url: str = Field(default="")
     oga_url: str = Field(default="")
     flac_url: str = Field(default="")
+    opus_url: str = Field(default="")
     raw_tags: list[str] = []
     tags: list[str] = []
     rhymes: str = ""

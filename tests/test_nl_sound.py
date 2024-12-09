@@ -60,3 +60,20 @@ class TestNlSound(TestCase):
 # stappen""",
         )
         self.assertEqual(data[0]["hyphenation"], "lo·pen")
+
+    def test_sound_section(self):
+        data = parse_page(
+            self.wxr,
+            "vin",
+            """==Deens==
+===Zelfstandig naamwoord===
+# [[wijn]]
+
+==Frans==
+===Uitspraak===
+*{{sound}}: {{audio|Fr-vin.ogg|vin|fra}}
+===Zelfstandig naamwoord===
+# [[wijn]]""",
+        )
+        self.assertTrue("sounds" not in data[0])
+        self.assertTrue("sounds" in data[1])
