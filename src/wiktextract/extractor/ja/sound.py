@@ -45,7 +45,7 @@ def process_sound_template(
         audio_file = clean_node(
             wxr, None, template_node.template_parameters.get(2, "")
         )
-        if len(audio_file) > 0:
+        if audio_file not in ["", "-"]:
             sound = Sound()
             raw_tag = clean_node(
                 wxr, None, template_node.template_parameters.get(3, "")
