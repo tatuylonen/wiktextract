@@ -65,6 +65,12 @@ class Sound(PortugueseBaseModel):
     raw_tags: list[str] = []
 
 
+class Form(PortugueseBaseModel):
+    form: str = ""
+    tags: list[str] = []
+    raw_tags: list[str] = []
+
+
 class WordEntry(PortugueseBaseModel):
     model_config = ConfigDict(title="Portuguese Wiktionary")
     word: str = Field(description="Word string", min_length=1)
@@ -83,3 +89,4 @@ class WordEntry(PortugueseBaseModel):
     derived: list[Linkage] = []
     etymology_texts: list[str] = []
     sounds: list[Sound] = []
+    forms: list[Form] = []

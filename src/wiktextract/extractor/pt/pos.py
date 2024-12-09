@@ -9,6 +9,7 @@ from wikitextprocessor import (
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .head_line import extract_head_line_nodes
+from .inflection import extract_flex_template
 from .models import Example, Linkage, Sense, WordEntry
 from .section_titles import POS_DATA
 
@@ -38,6 +39,10 @@ def extract_pos_section(
     extract_head_line_nodes(
         wxr, page_data[-1], level_node.children[:first_gloss_index]
     )
+    # forms table template may not in header line
+    for t_node in level_node.find_child(NodeKind.TEMPLATE):
+        if t_node.template_name.startswith("flex."):
+            extract_flex_template(wxr, page_data[-1], t_node)
 
 
 def extract_gloss_list_item(

@@ -100,7 +100,20 @@ HEAD_LINE_TAGS = {
     "minúscula": "lowercase",
 }
 
-TAGS = {**HEAD_LINE_TAGS}
+TABLE_TAGS = {
+    # Predefinição:flex.pt
+    "Masculino": "masculine",
+    "Feminino": "feminine",
+    "Plural": "plural",
+    "Singular": "singular",
+    # Predefinição:flex.pt.subst.completa
+    "Coletivo": "collective",
+    "Normal": "standard",
+    "Aumentativo": "augmentative",
+    "Diminutivo": "diminutive",
+}
+
+TAGS = {**HEAD_LINE_TAGS, **TABLE_TAGS}
 
 
 def translate_raw_tags(data: WordEntry) -> None:
