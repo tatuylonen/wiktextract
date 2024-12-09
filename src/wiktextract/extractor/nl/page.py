@@ -6,7 +6,6 @@ from wikitextprocessor.parser import (
     LEVEL_KIND_FLAGS,
     LevelNode,
     NodeKind,
-    WikiNode,
 )
 
 from ...page import clean_node
@@ -30,6 +29,18 @@ def extract_section_categories(
         clean_node(wxr, word_entry, link_node)
 
 
+def select_word_entry(
+    page_data: list[WordEntry], base_data: WordEntry
+) -> WordEntry:
+    # use a function not a variable because new data could be appended to
+    # `page_data` after the variable is created
+    return (
+        page_data[-1]
+        if len(page_data) > 0 and page_data[-1].lang_code == base_data.lang_code
+        else base_data
+    )
+
+
 def parse_section(
     wxr: WiktextractContext,
     page_data: list[WordEntry],
@@ -43,6 +54,7 @@ def parse_section(
     title_text = re.sub(r"\s+#?\d+:?$", "", title_text)
     wxr.wtp.start_subsection(title_text)
     etymology_data = []
+
     if title_text in POS_DATA:
         last_data_len = len(page_data)
         extract_pos_section(
@@ -57,40 +69,40 @@ def parse_section(
             )
     elif title_text == "Uitspraak":
         extract_sound_section(
-            wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
+            wxr, select_word_entry(page_data, base_data), level_node
         )
     elif title_text in LINKAGE_SECTIONS:
         extract_linkage_section(
             wxr,
-            page_data[-1] if len(page_data) > 0 else base_data,
+            select_word_entry(page_data, base_data),
             level_node,
             LINKAGE_SECTIONS[title_text],
         )
     elif title_text == "Vertalingen":
         extract_translation_section(
-            wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
+            wxr, select_word_entry(page_data, base_data), level_node
         )
     elif title_text == "Woordafbreking":
         extract_hyphenation_section(
-            wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
+            wxr, select_word_entry(page_data, base_data), level_node
         )
     elif title_text == "Woordherkomst en -opbouw":
         etymology_data = extract_etymology_section(wxr, level_node)
     elif title_text in ["Schrijfwijzen", "Verdere woordvormen"]:
         extract_spelling_form_section(
-            wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
+            wxr, select_word_entry(page_data, base_data), level_node
         )
     elif title_text == "Opmerkingen":
         extract_note_section(
-            wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
+            wxr, select_word_entry(page_data, base_data), level_node
         )
     elif title_text == "Overerving en ontlening":
         extract_descendant_section(
-            wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
+            wxr, select_word_entry(page_data, base_data), level_node
         )
     elif title_text == "Vaste voorzetsels":
         extract_fixed_preposition_section(
-            wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
+            wxr, select_word_entry(page_data, base_data), level_node
         )
     elif title_text in [
         "Gangbaarheid",
@@ -105,7 +117,7 @@ def parse_section(
     for next_level in level_node.find_child(LEVEL_KIND_FLAGS):
         parse_section(wxr, page_data, base_data, forms_data, next_level)
     extract_section_categories(
-        wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
+        wxr, select_word_entry(page_data, base_data), level_node
     )
     is_first_forms_template = True
     for t_node in level_node.find_child(NodeKind.TEMPLATE):
@@ -120,6 +132,7 @@ def parse_section(
                 page_data[-1]
                 if title_text.startswith(("Vervoeging", "Verbuiging"))
                 and len(page_data) > 0
+                and page_data[-1].lang_code == base_data.lang_code
                 else forms_data,
                 t_node,
             )
