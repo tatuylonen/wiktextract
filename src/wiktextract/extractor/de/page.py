@@ -264,3 +264,5 @@ def extract_hyphenation_section(
                     break
                 else:
                     word_entry.hyphenation += node.strip()
+    if word_entry.hyphenation == "?":
+        word_entry.hyphenation = ""
