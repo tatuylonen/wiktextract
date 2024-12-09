@@ -2440,13 +2440,25 @@ def parse_word_head(
                         or any("error-unknown-tag" in x for x in tagsets)
                     ):
                         if alt_related is not None:
+                            # We already had a good division, so let's stop.
                             break
+                        # Bad division, try deeper
                         continue
                     if (
                         i > 1
                         and len(parts[i - 1]) >= 4
                         and distw(titleparts, parts[i - 1]) <= 0.4
+                        # Fixes wiktextract #983, where "participle"
+                        # was too close to "Martinize" and so this accepted
+                        # ["participle", "Martinize"] as matching; this
+                        # kludge prevents this from happening if titleparts
+                        # is shorter than what would be 'related'.
+                        # This breaks if we want to detect stuff that
+                        # actually gets an extra space-separated word when
+                        # 'inflected'.
+                        and len(titleparts) >= len(parts[i - 1:])
                     ):
+                        # print(f"Reached; {parts=}, {parts[i-1]=}")
                         alt_related = related
                         alt_tagsets = tagsets
                         continue
@@ -2491,6 +2503,7 @@ def parse_word_head(
                     tagsets = alt_tagsets
 
             # print("FORM END: tagsets={} related={}".format(tagsets, related))
+            # print("==================")
             if not tagsets:
                 continue
 
