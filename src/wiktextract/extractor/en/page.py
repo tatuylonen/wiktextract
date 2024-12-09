@@ -456,6 +456,7 @@ PANEL_TEMPLATES: set[str] = {
     "wrongtitle",
     "zh-forms",
     "zh-hanzi-box",
+    "no entry",
 }
 
 # lookup table for the tags of Chinese dialectal synonyms
