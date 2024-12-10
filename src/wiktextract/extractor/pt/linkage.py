@@ -5,6 +5,7 @@ from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .models import Linkage, WordEntry
+from .section_titles import LINKAGE_SECTIONS
 from .tags import translate_raw_tags
 
 
@@ -68,9 +69,9 @@ def extract_linkage_section(
     word_entry: WordEntry,
     level_node: LevelNode,
     linkage_type: str,
+    sense: str,
+    sense_index: int,
 ) -> None:
-    sense = ""
-    sense_index = 0
     for node in level_node.children:
         if isinstance(node, TemplateNode) and node.template_name == "fraseini":
             sense, sense_index = extract_fraseini_template(wxr, node)
@@ -123,7 +124,16 @@ def extract_linkage_list_item(
             match node.kind:
                 case NodeKind.LINK:
                     word = clean_node(wxr, None, node)
-                    if word != "" and not word.startswith("Wikisaurus:"):
+                    if word.startswith("Wikisaurus:"):
+                        extract_wikisaurus_page(
+                            wxr,
+                            word_entry,
+                            word,
+                            linkage_type,
+                            sense,
+                            sense_index,
+                        )
+                    elif word != "":
                         linkage_words.append(word)
                 case NodeKind.BOLD:
                     bold_str = clean_node(wxr, None, node)
@@ -131,7 +141,16 @@ def extract_linkage_list_item(
                         sense_index = int(bold_str)
                 case NodeKind.ITALIC:
                     raw_tag = clean_node(wxr, None, node)
-                    if raw_tag != "":
+                    if raw_tag.startswith("Wikisaurus:"):
+                        extract_wikisaurus_page(
+                            wxr,
+                            word_entry,
+                            raw_tag,
+                            linkage_type,
+                            sense,
+                            sense_index,
+                        )
+                    elif raw_tag != "":
                         raw_tags.append(raw_tag)
                 case NodeKind.LIST:
                     for child_list_item in node.find_child(NodeKind.LIST_ITEM):
@@ -154,3 +173,37 @@ def extract_linkage_list_item(
         )
         translate_raw_tags(linkage)
         getattr(word_entry, linkage_type).append(linkage)
+
+
+def extract_wikisaurus_page(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    page_title: str,
+    linkage_type: str,
+    sense: str,
+    sense_index: int,
+) -> None:
+    page = wxr.wtp.get_page(page_title, 0)
+    if page is None or page.body is None:
+        return
+    root = wxr.wtp.parse(page.body)
+    for level1_node in root.find_child(NodeKind.LEVEL1):
+        lang_name = clean_node(wxr, None, level1_node.largs)
+        if lang_name != word_entry.lang:
+            continue
+        for level2_node in level1_node.find_child(NodeKind.LEVEL2):
+            pos_title = clean_node(wxr, None, level2_node.largs)
+            if pos_title != word_entry.pos_title:
+                continue
+            for level3_node in level2_node.find_child(NodeKind.LEVEL3):
+                linkage_title = clean_node(wxr, None, level3_node.largs)
+                if LINKAGE_SECTIONS.get(linkage_title) != linkage_type:
+                    continue
+                extract_linkage_section(
+                    wxr,
+                    word_entry,
+                    level3_node,
+                    linkage_type,
+                    sense,
+                    sense_index,
+                )
