@@ -48,6 +48,8 @@ def parse_section(
             page_data[-1] if len(page_data) > 0 else base_data,
             level_node,
             LINKAGE_SECTIONS[title_text],
+            "",
+            0,
         )
     elif title_text == "Etimologia":
         extract_etymology_section(wxr, page_data, level_node)
@@ -87,7 +89,8 @@ def parse_page(
 ) -> list[dict[str, Any]]:
     # page layout
     # https://pt.wiktionary.org/wiki/Wikcionário:Livro_de_estilo
-    if "/traduções" in page_title:  # skip translation page
+    if "/traduções" in page_title or page_title.startswith("Wikisaurus:"):
+        # skip translation and thesaurus pages
         return []
     wxr.wtp.start_page(page_title)
     tree = wxr.wtp.parse(page_text)
