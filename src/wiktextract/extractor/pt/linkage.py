@@ -141,7 +141,16 @@ def extract_linkage_list_item(
                         sense_index = int(bold_str)
                 case NodeKind.ITALIC:
                     raw_tag = clean_node(wxr, None, node)
-                    if raw_tag != "":
+                    if raw_tag.startswith("Wikisaurus:"):
+                        extract_wikisaurus_page(
+                            wxr,
+                            word_entry,
+                            raw_tag,
+                            linkage_type,
+                            sense,
+                            sense_index,
+                        )
+                    elif raw_tag != "":
                         raw_tags.append(raw_tag)
                 case NodeKind.LIST:
                     for child_list_item in node.find_child(NodeKind.LIST_ITEM):
