@@ -10,11 +10,18 @@ class ItalianBaseModel(BaseModel):
     )
 
 
+class Example(ItalianBaseModel):
+    text: str = ""
+    translation: str = ""
+    ref: str = ""
+
+
 class Sense(ItalianBaseModel):
     glosses: list[str] = []
     tags: list[str] = []
     raw_tags: list[str] = []
     categories: list[str] = []
+    examples: list[Example] = []
 
 
 class WordEntry(ItalianBaseModel):

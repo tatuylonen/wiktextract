@@ -2,6 +2,7 @@ from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from .example import extract_example_list_item
 from .models import Sense, WordEntry
 from .section_titles import POS_DATA
 
@@ -43,7 +44,11 @@ def extract_gloss_list_item(
                         sense.raw_tags.append(raw_tag)
                 case _:
                     gloss_nodes.append(node)
-        elif not (isinstance(node, WikiNode) and node.kind == NodeKind.LIST):
+        elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
+            if node.sarg.endswith("*"):
+                for example_list_item in node.find_child(NodeKind.LIST_ITEM):
+                    extract_example_list_item(wxr, sense, example_list_item)
+        else:
             gloss_nodes.append(node)
     gloss_str = clean_node(wxr, sense, gloss_nodes)
     if gloss_str != "":
