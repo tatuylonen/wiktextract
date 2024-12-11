@@ -1,4 +1,4 @@
-from wikitextprocessor import LevelNode, NodeKind, WikiNode
+from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -35,7 +35,15 @@ def extract_gloss_list_item(
     gloss_nodes = []
     sense = Sense()
     for node in list_item.children:
-        if not (isinstance(node, WikiNode) and node.kind == NodeKind.LIST):
+        if isinstance(node, TemplateNode):
+            match node.template_name:
+                case "Term":
+                    raw_tag = clean_node(wxr, sense, node).strip("() \n")
+                    if raw_tag != "":
+                        sense.raw_tags.append(raw_tag)
+                case _:
+                    gloss_nodes.append(node)
+        elif not (isinstance(node, WikiNode) and node.kind == NodeKind.LIST):
             gloss_nodes.append(node)
     gloss_str = clean_node(wxr, sense, gloss_nodes)
     if gloss_str != "":

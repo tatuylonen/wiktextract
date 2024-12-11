@@ -46,7 +46,8 @@ class TestItGloss(TestCase):
                     "pos_title": "Sostantivo",
                     "senses": [
                         {
-                            "glosses": ["(mammalogia) animale"],
+                            "glosses": ["animale"],
+                            "raw_tags": ["mammalogia"],
                             "categories": ["Mammalogia-IT"],
                         }
                     ],

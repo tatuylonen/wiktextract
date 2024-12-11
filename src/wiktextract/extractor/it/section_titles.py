@@ -59,4 +59,6 @@ POS_DATA = {
         "pos": "abbrev",
         "tags": ["abbreviation"],
     },
+    "Codice / Simbolo": {"pos": "symbol"},
+    "Carattere hiragana": {"pos": "character", "tags": ["hiragana"]},
 }

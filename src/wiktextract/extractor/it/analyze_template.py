@@ -67,7 +67,7 @@ SECTION_TITLE_TEMPLATES = {
     "Template:-uso-",
     "Template:-var-",
     "Template:-alter-",
-    "Template:-chat-",
+    "Template:-chat-",  # pos
     "Template:-coni-",
     "Template:-decl-",
     "Template:-der-",
@@ -76,6 +76,13 @@ SECTION_TITLE_TEMPLATES = {
     "Template:-pron-",
     "Template:-prov-",
     "Template:-trascrizione-",  # pos
+    # https://it.wiktionary.org/wiki/Categoria:Template_vocabolo
+    "Template:-etim-",
+    "Template:-trad-",
+    "Template:-ant-",
+    "Template:-cod-",  # pos
+    "Template:-carhi-",  # pos
+    "Template:-quote-",
 }
 
 
