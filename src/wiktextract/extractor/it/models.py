@@ -30,6 +30,19 @@ class Sense(ItalianBaseModel):
     examples: list[Example] = []
 
 
+class Translation(ItalianBaseModel):
+    lang_code: str = Field(
+        default="",
+        description="Wiktionary language code of the translation term",
+    )
+    lang: str = Field(default="", description="Translation language name")
+    word: str = Field(default="", description="Translation term")
+    sense: str = Field(default="", description="Translation gloss")
+    tags: list[str] = []
+    raw_tags: list[str] = []
+    roman: str = ""
+
+
 class WordEntry(ItalianBaseModel):
     model_config = ConfigDict(title="Italian Wiktionary")
     word: str = Field(description="Word string", min_length=1)
@@ -41,3 +54,4 @@ class WordEntry(ItalianBaseModel):
     categories: list[str] = []
     tags: list[str] = []
     raw_tags: list[str] = []
+    translations: list[Translation] = []
