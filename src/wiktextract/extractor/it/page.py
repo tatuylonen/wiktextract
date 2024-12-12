@@ -7,6 +7,7 @@ from ...wxr_context import WiktextractContext
 from .models import Sense, WordEntry
 from .pos import extract_pos_section
 from .section_titles import POS_DATA
+from .translation import extract_translation_section
 
 
 def parse_section(
@@ -18,6 +19,8 @@ def parse_section(
     title_text = clean_node(wxr, None, level_node.largs)
     if title_text in POS_DATA:
         extract_pos_section(wxr, page_data, base_data, level_node, title_text)
+    elif title_text == "Traduzione":
+        extract_translation_section(wxr, page_data, level_node)
 
     for next_level in level_node.find_child(LEVEL_KIND_FLAGS):
         parse_section(wxr, page_data, base_data, next_level)
