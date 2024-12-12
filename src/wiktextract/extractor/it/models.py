@@ -14,6 +14,12 @@ class Example(ItalianBaseModel):
     text: str = ""
     translation: str = ""
     ref: str = ""
+    ruby: list[tuple[str, ...]] = Field(
+        default=[], description="Japanese Kanji and furigana"
+    )
+    roman: str = ""
+    tags: list[str] = []
+    raw_tags: list[str] = []
 
 
 class Sense(ItalianBaseModel):
