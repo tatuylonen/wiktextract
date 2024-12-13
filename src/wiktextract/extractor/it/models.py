@@ -64,3 +64,4 @@ class WordEntry(ItalianBaseModel):
     forms: list[Form] = []
     etymology_texts: list[str] = []
     etymology_examples: list[Example] = []
+    hyphenation: str = ""
