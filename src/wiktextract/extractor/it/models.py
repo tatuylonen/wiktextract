@@ -62,3 +62,5 @@ class WordEntry(ItalianBaseModel):
     raw_tags: list[str] = []
     translations: list[Translation] = []
     forms: list[Form] = []
+    etymology_texts: list[str] = []
+    etymology_examples: list[Example] = []

@@ -4,6 +4,7 @@ from wikitextprocessor.parser import LEVEL_KIND_FLAGS, LevelNode, NodeKind
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from .etymology import extract_citation_section, extract_etymology_section
 from .models import Sense, WordEntry
 from .pos import extract_pos_section
 from .section_titles import POS_DATA
@@ -21,6 +22,10 @@ def parse_section(
         extract_pos_section(wxr, page_data, base_data, level_node, title_text)
     elif title_text == "Traduzione":
         extract_translation_section(wxr, page_data, level_node)
+    elif title_text == "Etimologia / Derivazione":
+        extract_etymology_section(wxr, page_data, level_node)
+    elif title_text == "Citazione":
+        extract_citation_section(wxr, page_data, level_node)
 
     for next_level in level_node.find_child(LEVEL_KIND_FLAGS):
         parse_section(wxr, page_data, base_data, next_level)
@@ -37,6 +42,8 @@ def parse_page(
     for level2_node in tree.find_child(NodeKind.LEVEL2):
         lang_cats = {}
         lang_name = clean_node(wxr, lang_cats, level2_node.largs)
+        if lang_name in ["Altri progetti", "Note / Riferimenti"]:
+            continue
         lang_code = "unknown"
         for lang_template in level2_node.find_content(NodeKind.TEMPLATE):
             lang_code = lang_template.template_name.strip("-")
