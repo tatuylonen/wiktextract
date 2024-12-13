@@ -3,5 +3,10 @@
     "body": "===Traduzione===\n",
     "namespace_id": 10,
     "need_pre_expand": true
+  },
+  "Template:-ref-": {
+    "body": "===Note / Riferimenti===\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
   }
 }
