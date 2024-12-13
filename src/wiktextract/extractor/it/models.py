@@ -43,6 +43,25 @@ class Translation(ItalianBaseModel):
     roman: str = ""
 
 
+class Form(ItalianBaseModel):
+    form: str = ""
+    tags: list[str] = []
+    raw_tags: list[str] = []
+
+
+class Sound(ItalianBaseModel):
+    ipa: str = Field(default="", description="International Phonetic Alphabet")
+    audio: str = Field(default="", description="Audio file name")
+    wav_url: str = ""
+    oga_url: str = ""
+    ogg_url: str = ""
+    mp3_url: str = ""
+    opus_url: str = ""
+    flac_url: str = ""
+    tags: list[str] = []
+    raw_tags: list[str] = []
+
+
 class WordEntry(ItalianBaseModel):
     model_config = ConfigDict(title="Italian Wiktionary")
     word: str = Field(description="Word string", min_length=1)
@@ -55,3 +74,8 @@ class WordEntry(ItalianBaseModel):
     tags: list[str] = []
     raw_tags: list[str] = []
     translations: list[Translation] = []
+    forms: list[Form] = []
+    etymology_texts: list[str] = []
+    etymology_examples: list[Example] = []
+    hyphenation: str = ""
+    sounds: list[Sound] = []
