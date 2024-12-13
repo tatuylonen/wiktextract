@@ -5,6 +5,7 @@ from ...wxr_context import WiktextractContext
 from .example import extract_example_list_item
 from .models import Sense, WordEntry
 from .section_titles import POS_DATA
+from .tag_form_line import extract_tag_form_line_nodes
 
 
 def extract_pos_section(
@@ -22,10 +23,22 @@ def extract_pos_section(
     for link_node in level_node.find_child(NodeKind.LINK):
         clean_node(wxr, page_data[-1], link_node)
 
-    for list_node in level_node.find_child(NodeKind.LIST):
-        if list_node.sarg.startswith("#") and list_node.sarg.endswith("#"):
-            for list_item in list_node.find_child(NodeKind.LIST_ITEM):
+    first_gloss_list_index = len(level_node.children)
+    for index, node in enumerate(level_node.children):
+        if (
+            isinstance(node, WikiNode)
+            and node.kind == NodeKind.LIST
+            and node.sarg.startswith("#")
+            and node.sarg.endswith("#")
+        ):
+            for list_item in node.find_child(NodeKind.LIST_ITEM):
                 extract_gloss_list_item(wxr, page_data[-1], list_item)
+            if index < first_gloss_list_index:
+                first_gloss_list_index = index
+
+    extract_tag_form_line_nodes(
+        wxr, page_data[-1], level_node.children[:first_gloss_list_index]
+    )
 
 
 def extract_gloss_list_item(
