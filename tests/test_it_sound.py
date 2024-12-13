@@ -30,3 +30,19 @@ class TestItSound(TestCase):
 ; cà | ne""",
         )
         self.assertEqual(data[0]["hyphenation"], "cà | ne")
+
+    def test_ipa_audio_templates(self):
+        self.wxr.wtp.add_page("Template:-it-", 10, "Italiano")
+        data = parse_page(
+            self.wxr,
+            "cane",
+            """== {{-it-}} ==
+===Sostantivo===
+# {{Term|mammalogia|it}} [[animale]]
+===Pronuncia===
+{{IPA|/ˈkaːne/}}
+{{Audio|it-cane.ogg}}""",
+        )
+        sound = data[0]["sounds"][0]
+        self.assertEqual(sound["ipa"], "/ˈkaːne/")
+        self.assertEqual(sound["audio"], "it-cane.ogg")
