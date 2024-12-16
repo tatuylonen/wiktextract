@@ -128,3 +128,19 @@ class TestItSound(TestCase):
         )
         self.assertEqual(data[0]["sounds"][0]["ipa"], "/ˈpɛska/")
         self.assertEqual(data[0]["sounds"][0]["audio"], "It-pesca_(frutto).ogg")
+
+    def test_glossa_tag(self):
+        self.wxr.wtp.add_page("Template:-en-", 10, "Inglese")
+        self.wxr.wtp.add_page("Template:glossa", 10, "({{{1}}})")
+        data = parse_page(
+            self.wxr,
+            "large",
+            """== {{-en-}} ==
+===Aggettivo===
+# [[largo]]
+===Pronuncia===
+*{{glossa|UK}} {{IPA|/lɑːd͡ʒ/}}""",
+        )
+        self.assertEqual(
+            data[0]["sounds"], [{"raw_tags": ["UK"], "ipa": "/lɑːd͡ʒ/"}]
+        )

@@ -57,7 +57,7 @@ def extract_pronunciation_section(
 
     # no list
     for t_node in level_node.find_child(NodeKind.TEMPLATE):
-        extract_sound_template(wxr, t_node, sounds, "")
+        extract_sound_template(wxr, t_node, sounds, "", [])
 
     for data in page_data:
         if data.lang_code == page_data[-1].lang_code:
@@ -68,12 +68,16 @@ def extract_sound_list_item(
     wxr: WiktextractContext, list_item: WikiNode, sounds: list[Sound]
 ) -> None:
     sense = ""
+    raw_tags = []
     for node in list_item.find_child(NodeKind.ITALIC | NodeKind.TEMPLATE):
         match node.kind:
             case NodeKind.ITALIC:
                 sense = clean_node(wxr, None, node).strip("()")
             case NodeKind.TEMPLATE:
-                extract_sound_template(wxr, node, sounds, sense)
+                if node.template_name.lower() == "glossa":
+                    raw_tags.append(clean_node(wxr, None, node).strip("()"))
+                else:
+                    extract_sound_template(wxr, node, sounds, sense, raw_tags)
 
 
 def extract_sound_template(
@@ -81,6 +85,7 @@ def extract_sound_template(
     t_node: TemplateNode,
     sounds: list[Sound],
     sense: str,
+    raw_tags: list[str],
 ) -> None:
     match t_node.template_name:
         case "IPA" | "SAMPA":
@@ -93,7 +98,7 @@ def extract_sound_template(
                     wxr, None, t_node.template_parameters.get(arg_name, "")
                 )
                 if ipa != "":
-                    sound = Sound(ipa=ipa, sense=sense)
+                    sound = Sound(ipa=ipa, sense=sense, raw_tags=raw_tags)
                     if t_node.template_name.lower() == "sampa":
                         sound.tags.append("SAMPA")
                     sounds.append(sound)
@@ -111,7 +116,7 @@ def extract_sound_template(
                     if raw_tag != "":
                         sounds[-1].raw_tags.append(raw_tag)
                 else:
-                    sound = Sound(sense=sense)
+                    sound = Sound(sense=sense, raw_tags=raw_tags)
                     set_sound_file_url_fields(wxr, sound_file, sound)
                     if raw_tag != "":
                         sound.raw_tags.append(raw_tag)
