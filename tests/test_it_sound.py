@@ -91,3 +91,23 @@ class TestItSound(TestCase):
                 {"hyphenation": "cé | spi | ta"},
             ],
         )
+
+    def test_sampa(self):
+        self.wxr.wtp.add_page("Template:-it-", 10, "Italiano")
+        data = parse_page(
+            self.wxr,
+            "Italia",
+            """== {{-it-}} ==
+===Nome proprio===
+# [[stato]]
+===Pronuncia===
+{{IPA|/iˈtalja/|/iˈtaː.li̯a/}}, {{SAMPA|/i"talja/}}
+{{Audio|It-Italia.ogg}}""",
+        )
+        self.assertEqual(
+            data[0]["sounds"][:2],
+            [{"ipa": "/iˈtalja/"}, {"ipa": "/iˈtaː.li̯a/"}],
+        )
+        self.assertEqual(data[0]["sounds"][2]["ipa"], '/i"talja/')
+        self.assertEqual(data[0]["sounds"][2]["tags"], ["SAMPA"])
+        self.assertEqual(data[0]["sounds"][2]["audio"], "It-Italia.ogg")

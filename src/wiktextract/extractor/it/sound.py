@@ -52,12 +52,20 @@ def extract_pronunciation_section(
     sounds = []
     for t_node in level_node.find_child(NodeKind.TEMPLATE):
         match t_node.template_name.lower():
-            case "ipa":
-                ipa = clean_node(
-                    wxr, None, t_node.template_parameters.get(1, "")
-                )
-                if ipa != "":
-                    sounds.append(Sound(ipa=ipa))
+            case "ipa" | "sampa":
+                # https://it.wiktionary.org/wiki/Template:IPA
+                # https://it.wiktionary.org/wiki/Template:SAMPA
+                for arg_name in range(1, 5):
+                    if arg_name not in t_node.template_parameters:
+                        break
+                    ipa = clean_node(
+                        wxr, None, t_node.template_parameters.get(arg_name, "")
+                    )
+                    if ipa != "":
+                        sound = Sound(ipa=ipa)
+                        if t_node.template_name.lower() == "sampa":
+                            sound.tags.append("SAMPA")
+                        sounds.append(sound)
             case "audio":
                 sound_file = clean_node(
                     wxr, None, t_node.template_parameters.get(1, "")
