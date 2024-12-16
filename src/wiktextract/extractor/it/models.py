@@ -60,6 +60,7 @@ class Sound(ItalianBaseModel):
     flac_url: str = ""
     tags: list[str] = []
     raw_tags: list[str] = []
+    sense: str = ""
 
 
 class Hyphenation(ItalianBaseModel):

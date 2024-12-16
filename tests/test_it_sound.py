@@ -111,3 +111,20 @@ class TestItSound(TestCase):
         self.assertEqual(data[0]["sounds"][2]["ipa"], '/i"talja/')
         self.assertEqual(data[0]["sounds"][2]["tags"], ["SAMPA"])
         self.assertEqual(data[0]["sounds"][2]["audio"], "It-Italia.ogg")
+
+    def test_sound_list(self):
+        self.wxr.wtp.add_page("Template:-it-", 10, "Italiano")
+        data = parse_page(
+            self.wxr,
+            "pesca",
+            """== {{-it-}} ==
+===Nome proprio===
+# [[frutto]]
+===Pronuncia===
+* ''(il frutto e significati correlati)'' {{IPA|/ˈpɛska/}} {{Audio|It-pesca_(frutto).ogg}}""",
+        )
+        self.assertEqual(
+            data[0]["sounds"][0]["sense"], "il frutto e significati correlati"
+        )
+        self.assertEqual(data[0]["sounds"][0]["ipa"], "/ˈpɛska/")
+        self.assertEqual(data[0]["sounds"][0]["audio"], "It-pesca_(frutto).ogg")
