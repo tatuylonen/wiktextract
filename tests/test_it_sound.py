@@ -18,7 +18,7 @@ class TestItSound(TestCase):
             ),
         )
 
-    def test_hyphenation(self):
+    def test_hyphenation_single_list(self):
         self.wxr.wtp.add_page("Template:-it-", 10, "Italiano")
         data = parse_page(
             self.wxr,
@@ -29,7 +29,7 @@ class TestItSound(TestCase):
 ===Sillabazione===
 ; cà | ne""",
         )
-        self.assertEqual(data[0]["hyphenation"], "cà | ne")
+        self.assertEqual(data[0]["hyphenations"], [{"hyphenation": "cà | ne"}])
 
     def test_ipa_audio_templates(self):
         self.wxr.wtp.add_page("Template:-it-", 10, "Italiano")
@@ -46,3 +46,29 @@ class TestItSound(TestCase):
         sound = data[0]["sounds"][0]
         self.assertEqual(sound["ipa"], "/ˈkaːne/")
         self.assertEqual(sound["audio"], "it-cane.ogg")
+
+    def test_hyphenation_lists(self):
+        self.wxr.wtp.add_page("Template:-it-", 10, "Italiano")
+        data = parse_page(
+            self.wxr,
+            "pesca",
+            """== {{-it-}} ==
+===Sostantivo===
+# [[frutto]] del [[pesco]]
+===Sillabazione===
+* ''(il frutto e significati correlati)'' '''pè | sca'''
+* ''(l'atto del pescare e significati correlati)'' '''pé | sca'''""",
+        )
+        self.assertEqual(
+            data[0]["hyphenations"],
+            [
+                {
+                    "hyphenation": "pè | sca",
+                    "sense": "il frutto e significati correlati",
+                },
+                {
+                    "hyphenation": "pé | sca",
+                    "sense": "l'atto del pescare e significati correlati",
+                },
+            ],
+        )

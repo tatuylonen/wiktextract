@@ -3,19 +3,41 @@ from wikitextprocessor import LevelNode, NodeKind
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from ..share import set_sound_file_url_fields
-from .models import Sound, WordEntry
+from .models import Hyphenation, Sound, WordEntry
 
 
 def extract_hyphenation_section(
     wxr: WiktextractContext, page_data: list[WordEntry], level_node: LevelNode
 ) -> None:
-    hyphenation = ""
+    # https://it.wiktionary.org/wiki/Aiuto:Sillabazione
+    hyphenations = []
     for list_node in level_node.find_child(NodeKind.LIST):
-        for list_item in list_node.find_child(NodeKind.LIST_ITEM):
-            hyphenation = clean_node(wxr, None, list_item.children)
+        match list_node.sarg:
+            case ";":
+                for list_item in list_node.find_child(NodeKind.LIST_ITEM):
+                    h_str = clean_node(wxr, None, list_item.children)
+                    if h_str != "":
+                        hyphenations.append(Hyphenation(hyphenation=h_str))
+                        break
+            case "*":
+                for list_item in list_node.find_child(NodeKind.LIST_ITEM):
+                    h_data = Hyphenation()
+                    for node in list_item.find_child(
+                        NodeKind.ITALIC | NodeKind.BOLD
+                    ):
+                        match node.kind:
+                            case NodeKind.ITALIC:
+                                h_data.sense = clean_node(
+                                    wxr, None, node
+                                ).strip("()")
+                            case NodeKind.BOLD:
+                                h_data.hyphenation = clean_node(wxr, None, node)
+                    if h_data.hyphenation != "":
+                        hyphenations.append(h_data)
+
     for data in page_data:
         if data.lang_code == page_data[-1].lang_code:
-            data.hyphenation = hyphenation
+            data.hyphenations.extend(hyphenations)
 
 
 def extract_pronunciation_section(

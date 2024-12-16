@@ -62,6 +62,11 @@ class Sound(ItalianBaseModel):
     raw_tags: list[str] = []
 
 
+class Hyphenation(ItalianBaseModel):
+    hyphenation: str = ""
+    sense: str = ""
+
+
 class WordEntry(ItalianBaseModel):
     model_config = ConfigDict(title="Italian Wiktionary")
     word: str = Field(description="Word string", min_length=1)
@@ -77,5 +82,5 @@ class WordEntry(ItalianBaseModel):
     forms: list[Form] = []
     etymology_texts: list[str] = []
     etymology_examples: list[Example] = []
-    hyphenation: str = ""
+    hyphenations: list[Hyphenation] = []
     sounds: list[Sound] = []
