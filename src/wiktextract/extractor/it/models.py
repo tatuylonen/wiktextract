@@ -68,6 +68,12 @@ class Hyphenation(ItalianBaseModel):
     sense: str = ""
 
 
+class Linkage(ItalianBaseModel):
+    word: str
+    tags: list[str] = []
+    raw_tags: list[str] = []
+
+
 class WordEntry(ItalianBaseModel):
     model_config = ConfigDict(title="Italian Wiktionary")
     word: str = Field(description="Word string", min_length=1)
@@ -85,3 +91,10 @@ class WordEntry(ItalianBaseModel):
     etymology_examples: list[Example] = []
     hyphenations: list[Hyphenation] = []
     sounds: list[Sound] = []
+    synonyms: list[Linkage] = []
+    antonyms: list[Linkage] = []
+    derived: list[Linkage] = []
+    related: list[Linkage] = []
+    hyponyms: list[Linkage] = []
+    hypernyms: list[Linkage] = []
+    proverbs: list[Linkage] = []
