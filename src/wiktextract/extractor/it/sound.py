@@ -35,6 +35,12 @@ def extract_hyphenation_section(
                     if h_data.hyphenation != "":
                         hyphenations.append(h_data)
 
+    # no list
+    for node in level_node.find_child(NodeKind.BOLD):
+        h_str = clean_node(wxr, None, node)
+        if h_str != "":
+            hyphenations.append(Hyphenation(hyphenation=h_str))
+
     for data in page_data:
         if data.lang_code == page_data[-1].lang_code:
             data.hyphenations.extend(hyphenations)

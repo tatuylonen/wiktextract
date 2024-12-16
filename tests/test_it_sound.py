@@ -72,3 +72,22 @@ class TestItSound(TestCase):
                 },
             ],
         )
+
+    def test_hyphenation_no_list(self):
+        self.wxr.wtp.add_page("Template:-it-", 10, "Italiano")
+        data = parse_page(
+            self.wxr,
+            "cespita",
+            """== {{-it-}} ==
+===Sostantivo===
+# [[variante]] di [[ceppita]]
+===Sillabazione===
+'''cè | spi | ta''' o '''cé | spi | ta'''""",
+        )
+        self.assertEqual(
+            data[0]["hyphenations"],
+            [
+                {"hyphenation": "cè | spi | ta"},
+                {"hyphenation": "cé | spi | ta"},
+            ],
+        )
