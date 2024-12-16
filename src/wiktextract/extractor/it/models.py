@@ -60,6 +60,18 @@ class Sound(ItalianBaseModel):
     flac_url: str = ""
     tags: list[str] = []
     raw_tags: list[str] = []
+    sense: str = ""
+
+
+class Hyphenation(ItalianBaseModel):
+    hyphenation: str = ""
+    sense: str = ""
+
+
+class Linkage(ItalianBaseModel):
+    word: str
+    tags: list[str] = []
+    raw_tags: list[str] = []
 
 
 class WordEntry(ItalianBaseModel):
@@ -77,5 +89,12 @@ class WordEntry(ItalianBaseModel):
     forms: list[Form] = []
     etymology_texts: list[str] = []
     etymology_examples: list[Example] = []
-    hyphenation: str = ""
+    hyphenations: list[Hyphenation] = []
     sounds: list[Sound] = []
+    synonyms: list[Linkage] = []
+    antonyms: list[Linkage] = []
+    derived: list[Linkage] = []
+    related: list[Linkage] = []
+    hyponyms: list[Linkage] = []
+    hypernyms: list[Linkage] = []
+    proverbs: list[Linkage] = []

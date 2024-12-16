@@ -8,6 +8,7 @@ from .models import Example, WordEntry
 def extract_etymology_section(
     wxr: WiktextractContext, page_data: list[WordEntry], level_node: LevelNode
 ) -> None:
+    # https://it.wiktionary.org/wiki/Aiuto:Etimologia
     etymology_texts = []
     for list_node in level_node.find_child(NodeKind.LIST):
         for list_item in list_node.find_child(NodeKind.LIST_ITEM):

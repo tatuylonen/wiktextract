@@ -62,3 +62,18 @@ POS_DATA = {
     "Codice / Simbolo": {"pos": "symbol"},
     "Carattere hiragana": {"pos": "character", "tags": ["hiragana"]},
 }
+
+
+LINKAGE_SECTIONS = {
+    "Sinonimi": "synonyms",
+    "Contrari": "antonyms",
+    "Derivati": "derived",
+    "Termini correlati": "related",
+    "Varianti": "related",
+    "Alterati": "related",
+    "Iponimi": "hyponyms",
+    "Iperonimi": "hypernyms",
+    "Da non confondere con": "related",
+    "Proverbi e modi di dire": "proverbs",
+    "Parole derivate": "derived",
+}

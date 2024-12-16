@@ -50,13 +50,11 @@ def extract_gloss_list_item(
     sense = Sense()
     for node in list_item.children:
         if isinstance(node, TemplateNode):
-            match node.template_name:
-                case "Term":
-                    raw_tag = clean_node(wxr, sense, node).strip("() \n")
-                    if raw_tag != "":
-                        sense.raw_tags.append(raw_tag)
-                case _:
-                    gloss_nodes.append(node)
+            t_str = clean_node(wxr, sense, node)
+            if t_str.startswith("(") and t_str.endswith(")"):
+                sense.raw_tags.append(t_str.strip("()"))
+            else:
+                gloss_nodes.append(t_str)
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
             if node.sarg.endswith("*"):
                 for example_list_item in node.find_child(NodeKind.LIST_ITEM):
