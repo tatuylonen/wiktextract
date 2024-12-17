@@ -91,12 +91,7 @@ def extract_gloss_list_item(
             else:
                 gloss_nodes.append(t_str)
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
-            if node.sarg.endswith("*"):
-                for example_list_item in node.find_child(NodeKind.LIST_ITEM):
-                    extract_example_list_item(
-                        wxr, sense, example_list_item, word_entry.lang_code
-                    )
-            elif (
+            if (
                 node.sarg.endswith(":")
                 and len(sense.examples) > 0
                 and sense.examples[-1].translation == ""
@@ -104,6 +99,11 @@ def extract_gloss_list_item(
                 for tr_list_item in node.find_child(NodeKind.LIST_ITEM):
                     sense.examples[-1].translation = clean_node(
                         wxr, sense, tr_list_item.children
+                    )
+            elif node.sarg.endswith(("*", ":")):
+                for example_list_item in node.find_child(NodeKind.LIST_ITEM):
+                    extract_example_list_item(
+                        wxr, sense, example_list_item, word_entry.lang_code
                     )
         else:
             gloss_nodes.append(node)

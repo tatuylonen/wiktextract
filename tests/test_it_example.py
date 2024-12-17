@@ -139,3 +139,79 @@ class TestItExample(TestCase):
                 }
             ],
         )
+
+    def test_double_italic_nodes_with_translation(self):
+        self.wxr.wtp.add_page("Template:-en-", 10, "Inglese")
+        data = parse_page(
+            self.wxr,
+            "water",
+            """== {{-en-}} ==
+===Sostantivo===
+# acqua
+#: ''May I have a glass of '''water'''?'' - ''Posso avere un bicchiere d''''acqua'''''?""",
+        )
+        self.assertEqual(
+            data[0]["senses"],
+            [
+                {
+                    "glosses": ["acqua"],
+                    "examples": [
+                        {
+                            "text": "May I have a glass of water?",
+                            "translation": "Posso avere un bicchiere d'acqua?",
+                        }
+                    ],
+                }
+            ],
+        )
+
+    def test_double_italic_nodes_no_translation(self):
+        self.wxr.wtp.add_page("Template:-it-", 10, "Italiano")
+        data = parse_page(
+            self.wxr,
+            "essere",
+            """== {{-it-}} ==
+===Sostantivo===
+#chi [[esiste]]
+#* ''gli '''esseri''' viventi''; ''gli '''esseri''' animati''""",
+        )
+        self.assertEqual(
+            data[0]["senses"],
+            [
+                {
+                    "glosses": ["chi esiste"],
+                    "examples": [
+                        {"text": "gli esseri viventi; gli esseri animati"}
+                    ],
+                }
+            ],
+        )
+
+    def test_term_ref_template(self):
+        self.wxr.wtp.add_page("Template:-la-", 10, "Latino")
+        self.wxr.wtp.add_page("Template:Term", 10, "({{{1}}})")
+        data = parse_page(
+            self.wxr,
+            "libero",
+            """== {{-la-}} ==
+===Verbo===
+# [[assolvere]], [[liberare]] dalle [[accuse]], [[giudicare]] [[innocente]]
+#* ''et eum omni [[ignominia]] '''liberat''''' - e lo [[assolve]] da ogni [[ignominia]] {{Term|[[:w:Marco Tullio Cicerone|Cicerone]], [[:w:Pro Cluentio|Pro Cluentio]], [[:s:la:Pro_Aulo_Cluentio_Habito|XLVII, 132]]}}""",
+        )
+        self.assertEqual(
+            data[0]["senses"],
+            [
+                {
+                    "glosses": [
+                        "assolvere, liberare dalle accuse, giudicare innocente"
+                    ],
+                    "examples": [
+                        {
+                            "text": "et eum omni ignominia liberat",
+                            "translation": "e lo assolve da ogni ignominia",
+                            "ref": "Cicerone, Pro Cluentio, XLVII, 132",
+                        }
+                    ],
+                }
+            ],
+        )
