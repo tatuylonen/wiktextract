@@ -7,7 +7,7 @@ from wiktextract.extractor.it.page import parse_page
 from wiktextract.wxr_context import WiktextractContext
 
 
-class TestItGloss(TestCase):
+class TestItTranslation(TestCase):
     maxDiff = None
 
     def setUp(self) -> None:

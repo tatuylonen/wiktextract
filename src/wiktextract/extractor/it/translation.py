@@ -13,6 +13,7 @@ def extract_translation_section(
     page_data: list[WordEntry],
     level_node: LevelNode,
 ) -> None:
+    # https://it.wiktionary.org/wiki/Aiuto:Traduzioni
     sense = ""
     translations = []
     cats = {}
