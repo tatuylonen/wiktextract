@@ -43,7 +43,9 @@ def extract_linkage_list_item(
         elif isinstance(node, str):
             for word_str in node.split(","):
                 word_str = word_str.strip()
-                if word_str != "":
+                if word_str.startswith("(") and word_str.endswith(")"):
+                    raw_tags.append(word_str.strip("()"))
+                elif word_str != "":
                     linkages.append(Linkage(word=word_str, raw_tags=raw_tags))
                     raw_tags.clear()
 

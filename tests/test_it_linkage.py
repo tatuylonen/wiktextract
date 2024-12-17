@@ -42,3 +42,19 @@ class TestItLinkage(TestCase):
                 {"word": "intenso"},
             ],
         )
+
+    def test_text_tag(self):
+        self.wxr.wtp.add_page("Template:-it-", 10, "Italiano")
+        data = parse_page(
+            self.wxr,
+            "cane",
+            """== {{-it-}} ==
+===Sostantivo===
+# [[animale]]
+===Iperonimi===
+* (dominio) [[eucariote]]""",
+        )
+        self.assertEqual(
+            data[0]["hypernyms"],
+            [{"word": "eucariote", "raw_tags": ["dominio"]}],
+        )
