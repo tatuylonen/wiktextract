@@ -14,7 +14,11 @@ def extract_linkage_section(
     linkages = []
     for list_node in level_node.find_child(NodeKind.LIST):
         for list_item in list_node.find_child(NodeKind.LIST_ITEM):
-            linkages.extend(extract_linkage_list_item(wxr, list_item))
+            linkages.extend(
+                extract_proverb_list_item(wxr, list_item)
+                if linkage_type == "proverbs"
+                else extract_linkage_list_item(wxr, list_item)
+            )
 
     for data in page_data:
         if data.lang_code == page_data[-1].lang_code:
@@ -50,3 +54,20 @@ def extract_linkage_list_item(
                     raw_tags.clear()
 
     return linkages
+
+
+def extract_proverb_list_item(
+    wxr: WiktextractContext, list_item: WikiNode
+) -> list[Linkage]:
+    proverb = Linkage(word="")
+    for index, node in enumerate(list_item.children):
+        if isinstance(node, WikiNode) and node.kind == NodeKind.ITALIC:
+            proverb.word = clean_node(wxr, None, node)
+        elif isinstance(node, str) and ":" in node:
+            proverb.sense = clean_node(
+                wxr,
+                None,
+                [node[node.index(":") + 1 :]] + list_item.children[index + 1 :],
+            )
+            break
+    return [proverb] if proverb.word != "" else []

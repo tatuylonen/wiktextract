@@ -72,6 +72,7 @@ class Linkage(ItalianBaseModel):
     word: str
     tags: list[str] = []
     raw_tags: list[str] = []
+    sense: str = ""
 
 
 class WordEntry(ItalianBaseModel):
