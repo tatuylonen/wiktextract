@@ -42,3 +42,40 @@ class TestItLinkage(TestCase):
                 {"word": "intenso"},
             ],
         )
+
+    def test_text_tag(self):
+        self.wxr.wtp.add_page("Template:-it-", 10, "Italiano")
+        data = parse_page(
+            self.wxr,
+            "cane",
+            """== {{-it-}} ==
+===Sostantivo===
+# [[animale]]
+===Iperonimi===
+* (dominio) [[eucariote]]""",
+        )
+        self.assertEqual(
+            data[0]["hypernyms"],
+            [{"word": "eucariote", "raw_tags": ["dominio"]}],
+        )
+
+    def test_proverbs(self):
+        self.wxr.wtp.add_page("Template:-it-", 10, "Italiano")
+        data = parse_page(
+            self.wxr,
+            "cane",
+            """== {{-it-}} ==
+===Sostantivo===
+# [[animale]]
+===Proverbi e modi di dire===
+* ''Menare il '''can''' per l'aia'': tergiversare, prendere tempo""",
+        )
+        self.assertEqual(
+            data[0]["proverbs"],
+            [
+                {
+                    "word": "Menare il can per l'aia",
+                    "sense": "tergiversare, prendere tempo",
+                }
+            ],
+        )

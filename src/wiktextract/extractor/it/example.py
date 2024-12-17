@@ -14,12 +14,15 @@ def extract_example_list_item(
     text_nodes = []
     roman = ""
     translation = ""
+    ref = ""
+    has_zh_tradsem = False
     for index, node in enumerate(list_item.children):
         if (
             isinstance(node, TemplateNode)
             and node.template_name == "zh-tradsem"
         ):
             examples.extend(extract_zh_tradsem(wxr, node))
+            has_zh_tradsem = True
         elif isinstance(node, WikiNode):
             match node.kind:
                 case NodeKind.ITALIC:
@@ -39,17 +42,38 @@ def extract_example_list_item(
                 case _ if lang_code in ["zh", "ja"]:
                     if before_italic:
                         text_nodes.append(node)
-        elif (
-            isinstance(node, str) and lang_code in ["zh", "ja"] and "-" in node
-        ):
+        elif isinstance(node, str) and "-" in node:
+            for t_node in list_item.find_child(NodeKind.TEMPLATE):
+                if t_node.template_name == "Term":
+                    ref = clean_node(wxr, None, t_node).strip("()")
+                    break
             translation = clean_node(
                 wxr,
                 sense,
                 wxr.wtp.node_to_wikitext(
                     [node[node.index("-") + 1 :]]
-                    + list_item.children[index + 1 :]
+                    + [
+                        n
+                        for n in list_item.children[index + 1 :]
+                        if not (
+                            isinstance(n, TemplateNode)
+                            and n.template_name == "Term"
+                        )
+                    ]
                 ),
             )
+            if not has_zh_tradsem and len(examples) > 1:
+                examples.clear()
+                examples.append(
+                    Example(
+                        text=clean_node(
+                            wxr,
+                            None,
+                            list_item.children[:index]
+                            + [node[: node.index("-")]],
+                        )
+                    )
+                )
             break
         elif lang_code in ["zh", "ja"] and len(examples) == 0 and before_italic:
             text_nodes.append(node)
@@ -69,11 +93,23 @@ def extract_example_list_item(
         )
         examples.append(example)
 
+    if not has_zh_tradsem and len(examples) > 1:
+        examples.clear()
+        examples.append(
+            Example(
+                text=clean_node(
+                    wxr, None, list(list_item.invert_find_child(NodeKind.LIST))
+                )
+            )
+        )
+
     for example in examples:
         if roman != "":
             example.roman = roman
         if translation != "":
             example.translation = translation
+        if ref != "":
+            example.ref = ref
         if example.text != "":
             sense.examples.append(example)
 
