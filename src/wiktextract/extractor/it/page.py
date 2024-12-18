@@ -53,6 +53,7 @@ def parse_page(
 ) -> list[dict[str, Any]]:
     # page layout
     # https://it.wiktionary.org/wiki/Wikizionario:Manuale_di_stile
+    # https://it.wiktionary.org/wiki/Aiuto:Come_iniziare_una_pagina
     wxr.wtp.start_page(page_title)
     tree = wxr.wtp.parse(page_text, pre_expand=True)
     page_data: list[WordEntry] = []

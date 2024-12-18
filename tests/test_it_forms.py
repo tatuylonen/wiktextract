@@ -55,3 +55,31 @@ class TestItForms(TestCase):
             [{"form": "cagne", "tags": ["plural"]}],
         )
         self.assertEqual(data[0]["tags"], ["feminine", "singular"])
+
+    def test_it_decl_agg(self):
+        self.wxr.wtp.add_page("Template:-it-", 10, "Italiano")
+        self.wxr.wtp.add_page("Template:It-decl-agg4", 10, """{|
+|- align="center"
+| &nbsp;
+!bgcolor="#FFFFE0" color="#000"|&nbsp;''[[singolare]]''&nbsp;
+!bgcolor="#FFFFE0" color="#000"|&nbsp;''[[plurale]]''&nbsp;
+|- align="center"
+!bgcolor="#FFFFE0" color="#000" colspan="3"|&nbsp;''[[positivo]]''&nbsp;
+|- align="center"
+!bgcolor="#FFFFE0" color="#000"|&nbsp;''[[maschile]]''&nbsp;
+|&nbsp; [[libero]] &nbsp;
+|&nbsp; [[liberi]] &nbsp;
+|}""")
+        data = parse_page(
+            self.wxr,
+            "libero",
+            """== {{-it-}} ==
+===Aggettivo===
+{{It-decl-agg4|liber}}
+{{Pn|w}} ''m sing''
+# non [[imprigionato]] o in [[schiavitù]]""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [{"form": "liberi", "tags": ["positive", "masculine", "plural"]}],
+        )

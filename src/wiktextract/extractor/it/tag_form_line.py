@@ -2,7 +2,7 @@ from wikitextprocessor import NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
-from .inflection import extract_tabs_template
+from .inflection import extract_it_decl_agg_template, extract_tabs_template
 from .models import Form, WordEntry
 
 
@@ -18,6 +18,8 @@ def extract_tag_form_line_nodes(
                 extract_tabs_template(wxr, word_entry, node)
             elif node.template_name.lower() in FORM_LINK_TEMPLATES.keys():
                 extract_form_link_template(wxr, word_entry, node)
+            elif node.template_name.lower().startswith("it-decl-agg"):
+                extract_it_decl_agg_template(wxr, word_entry, node)
 
 
 ITALIC_TAGS = {
