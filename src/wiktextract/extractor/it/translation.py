@@ -50,7 +50,11 @@ def extract_translation_list_item(
     for index, node in enumerate(list_item.children):
         if before_colon and isinstance(node, str) and ":" in node:
             before_colon = False
-            lang_name = clean_node(wxr, None, list_item.children[:index])
+            lang_name = clean_node(
+                wxr,
+                None,
+                list_item.children[:index] + [node[: node.index(":")]],
+            )
             for n in list_item.children[:index]:
                 if isinstance(n, TemplateNode):
                     lang_code = n.template_name

@@ -98,9 +98,13 @@ def parse_page(
     for level1_node in tree.find_child(NodeKind.LEVEL1):
         lang_cats = {}
         lang_name = clean_node(wxr, lang_cats, level1_node.largs)
+        if lang_name == "":
+            lang_name = "unknown"
         lang_code = "unknown"
         for lang_template in level1_node.find_content(NodeKind.TEMPLATE):
             lang_code = lang_template.template_name.strip("-")
+            if lang_code == "":  # template "--"
+                lang_code = "unknown"
             break
         if (
             wxr.config.capture_language_codes is not None

@@ -2,7 +2,7 @@ from wikitextprocessor import NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
-from .inflection import extract_tabs_template
+from .inflection import extract_it_decl_agg_template, extract_tabs_template
 from .models import Form, WordEntry
 
 
@@ -14,17 +14,12 @@ def extract_tag_form_line_nodes(
         if isinstance(node, WikiNode) and node.kind == NodeKind.ITALIC:
             extract_italic_tag_node(wxr, word_entry, node)
         elif isinstance(node, TemplateNode):
-            match node.template_name.lower():
-                case "tabs":
-                    extract_tabs_template(wxr, word_entry, node)
-                case "linkp":
-                    form = clean_node(
-                        wxr, None, node.template_parameters.get(1, "")
-                    )
-                    if form != "":
-                        word_entry.forms.append(
-                            Form(form=form, tags=["plural"])
-                        )
+            if node.template_name.lower() == "tabs":
+                extract_tabs_template(wxr, word_entry, node)
+            elif node.template_name.lower() in FORM_LINK_TEMPLATES.keys():
+                extract_form_link_template(wxr, word_entry, node)
+            elif node.template_name.lower().startswith("it-decl-agg"):
+                extract_it_decl_agg_template(wxr, word_entry, node)
 
 
 ITALIC_TAGS = {
@@ -50,3 +45,28 @@ def extract_italic_tag_node(
             word_entry.tags.append(ITALIC_TAGS[raw_tag])
         else:
             word_entry.raw_tags.append(raw_tag)
+
+
+FORM_LINK_TEMPLATES = {
+    "linkf": ["feminine"],
+    "linkfp": ["feminine", "plural"],
+    "linkg": ["genitive"],
+    "linkm": ["masculine"],
+    "linkn": ["neuter"],
+    "linkmai": ["uppercase"],
+    "linkp": ["plural"],
+    "links": ["singular"],
+}
+
+
+def extract_form_link_template(
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+) -> None:
+    arg_name = 1
+    while arg_name in t_node.template_parameters:
+        form = clean_node(
+            wxr, None, t_node.template_parameters.get(arg_name, "")
+        )
+        if form != "":
+            word_entry.forms.append(Form(form=form, tags=["plural"]))
+        arg_name += 1

@@ -7,9 +7,9 @@ from .models import Sense, WordEntry
 from .section_titles import POS_DATA
 from .tag_form_line import extract_tag_form_line_nodes
 
-# https://it.wiktionary.org/wiki/Categoria:Template_per_i_verbi
 POS_SUBSECTION_TEMPLATES = frozenset(
     [
+        # https://it.wiktionary.org/wiki/Categoria:Template_per_i_verbi
         "-participio passato-",
         "-participio presente-",
         "Ausiliare",
@@ -19,7 +19,14 @@ POS_SUBSECTION_TEMPLATES = frozenset(
         "Passivo",
         "Reciproco",
         "Riflessivo",
+        "riflessivo",
         "Transitivo",
+        # https://it.wiktionary.org/wiki/Categoria:Template_vocabolo
+        "Attivo",
+        "attivo",
+        "Inpr",
+        "inpr",
+        "Riflpr",
     ]
 )
 
