@@ -21,18 +21,25 @@ def parse_section(
 ) -> None:
     title_text = clean_node(wxr, None, level_node.largs)
     if title_text in POS_DATA:
+        wxr.wtp.start_subsection(title_text)
         extract_pos_section(wxr, page_data, base_data, level_node, title_text)
     elif title_text == "Traduzione":
+        wxr.wtp.start_subsection(title_text)
         extract_translation_section(wxr, page_data, level_node)
     elif title_text == "Etimologia / Derivazione":
+        wxr.wtp.start_subsection(title_text)
         extract_etymology_section(wxr, page_data, level_node)
     elif title_text == "Citazione":
+        wxr.wtp.start_subsection(title_text)
         extract_citation_section(wxr, page_data, level_node)
     elif title_text == "Sillabazione":
+        wxr.wtp.start_subsection(title_text)
         extract_hyphenation_section(wxr, page_data, level_node)
     elif title_text == "Pronuncia":
+        wxr.wtp.start_subsection(title_text)
         extract_pronunciation_section(wxr, page_data, level_node)
     elif title_text in LINKAGE_SECTIONS:
+        wxr.wtp.start_subsection(title_text)
         extract_linkage_section(
             wxr, page_data, level_node, LINKAGE_SECTIONS[title_text]
         )

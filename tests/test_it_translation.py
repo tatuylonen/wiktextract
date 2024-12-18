@@ -52,3 +52,19 @@ class TestItTranslation(TestCase):
                 },
             ],
         )
+
+    def test_no_lang_name_template(self):
+        self.wxr.wtp.add_page("Template:-it-", 10, "Italiano")
+        data = parse_page(
+            self.wxr,
+            "Italia",
+            """== {{-it-}} ==
+===Nome proprio===
+# stato
+===Traduzione===
+:* võro: [[Itaalia]]""",
+        )
+        self.assertEqual(
+            data[0]["translations"],
+            [{"word": "Itaalia", "lang_code": "vro", "lang": "võro"}],
+        )
