@@ -1,6 +1,8 @@
+# https://it.wiktionary.org/wiki/Wikizionario:Parti_del_discorso
 # https://it.wiktionary.org/wiki/Categoria:Template_parti_del_discorso
 # https://it.wiktionary.org/wiki/Categoria:Template_aggiornati
 # https://it.wiktionary.org/wiki/Categoria:Template_per_gli_aggettivi
+# https://it.wiktionary.org/wiki/Categoria:Template_altre_voci
 POS_DATA = {
     "Acronimo / Abbreviazione": {"pos": "abbrev", "tags": ["abbreviation"]},
     "Articolo": {"pos": "article"},
@@ -61,6 +63,8 @@ POS_DATA = {
     },
     "Codice / Simbolo": {"pos": "symbol"},
     "Carattere hiragana": {"pos": "character", "tags": ["hiragana"]},
+    "Confisso": {"pos": "affix"},
+    "Kanji": {"pos": "character", "tags": ["kanji"]},
 }
 
 

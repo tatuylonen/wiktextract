@@ -55,6 +55,10 @@ SECTION_TITLE_TEMPLATES = {
     # https://it.wiktionary.org/wiki/Categoria:Template_per_gli_aggettivi
     "Template:-agg form-",
     "Template:-agg num form-",
+    # POS
+    # https://it.wiktionary.org/wiki/Categoria:Template_altre_voci
+    "Template:-conf-",
+    "Template:-kanji-",
     # other sections
     # https://it.wiktionary.org/wiki/Categoria:Template_sezione
     "Template:-esempio-",
