@@ -4,6 +4,7 @@ from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .inflection import extract_it_decl_agg_template, extract_tabs_template
 from .models import Form, WordEntry
+from .tags import translate_raw_tags
 
 
 def extract_tag_form_line_nodes(
@@ -16,10 +17,12 @@ def extract_tag_form_line_nodes(
         elif isinstance(node, TemplateNode):
             if node.template_name.lower() == "tabs":
                 extract_tabs_template(wxr, word_entry, node)
-            elif node.template_name.lower() in FORM_LINK_TEMPLATES.keys():
+            elif node.template_name.lower() in FORM_LINK_TEMPLATES:
                 extract_form_link_template(wxr, word_entry, node)
             elif node.template_name.lower().startswith("it-decl-agg"):
                 extract_it_decl_agg_template(wxr, word_entry, node)
+            elif node.template_name.lower() == "a cmp":
+                extract_a_cmp_template(wxr, word_entry, node)
 
 
 ITALIC_TAGS = {
@@ -70,3 +73,25 @@ def extract_form_link_template(
         if form != "":
             word_entry.forms.append(Form(form=form, tags=["plural"]))
         arg_name += 1
+
+
+def extract_a_cmp_template(
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+) -> None:
+    # https://it.wiktionary.org/wiki/Template:A_cmp
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    raw_tag = ""
+    for node in expanded_node.find_child(NodeKind.ITALIC | NodeKind.BOLD):
+        match node.kind:
+            case NodeKind.ITALIC:
+                raw_tag = clean_node(wxr, None, node)
+            case NodeKind.BOLD:
+                form_str = clean_node(wxr, None, node)
+                if form_str not in ["", wxr.wtp.title]:
+                    form = Form(form=form_str)
+                    if raw_tag != "":
+                        form.raw_tags.append(raw_tag)
+                    translate_raw_tags(form)
+                    word_entry.forms.append(form)

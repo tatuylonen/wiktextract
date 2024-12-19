@@ -58,7 +58,10 @@ class TestItForms(TestCase):
 
     def test_it_decl_agg(self):
         self.wxr.wtp.add_page("Template:-it-", 10, "Italiano")
-        self.wxr.wtp.add_page("Template:It-decl-agg4", 10, """{|
+        self.wxr.wtp.add_page(
+            "Template:It-decl-agg4",
+            10,
+            """{|
 |- align="center"
 | &nbsp;
 !bgcolor="#FFFFE0" color="#000"|&nbsp;''[[singolare]]''&nbsp;
@@ -69,7 +72,8 @@ class TestItForms(TestCase):
 !bgcolor="#FFFFE0" color="#000"|&nbsp;''[[maschile]]''&nbsp;
 |&nbsp; [[libero]] &nbsp;
 |&nbsp; [[liberi]] &nbsp;
-|}""")
+|}""",
+        )
         data = parse_page(
             self.wxr,
             "libero",
@@ -82,4 +86,29 @@ class TestItForms(TestCase):
         self.assertEqual(
             data[0]["forms"],
             [{"form": "liberi", "tags": ["positive", "masculine", "plural"]}],
+        )
+
+    def test_a_cmp(self):
+        self.wxr.wtp.add_page("Template:-en-", 10, "Inglese")
+        self.wxr.wtp.add_page(
+            "Template:A cmp",
+            10,
+            "(''comparativo'' '''[[direr]]''', '''more dire''', ''superlativo'' '''[[direst]]''', '''most dire''')",
+        )
+        data = parse_page(
+            self.wxr,
+            "dire",
+            """== {{-en-}} ==
+===Aggettivo===
+{{Pn}} {{A cmp|direr|c2=more dire|direst|s2=most dire}}
+# [[sinistro]]""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {"form": "direr", "tags": ["comparative"]},
+                {"form": "more dire", "tags": ["comparative"]},
+                {"form": "direst", "tags": ["superlative"]},
+                {"form": "most dire", "tags": ["superlative"]},
+            ],
         )
