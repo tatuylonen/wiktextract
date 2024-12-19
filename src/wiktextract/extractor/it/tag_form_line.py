@@ -2,7 +2,11 @@ from wikitextprocessor import NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
-from .inflection import extract_it_decl_agg_template, extract_tabs_template
+from .inflection import (
+    extract_appendix_conjugation_page,
+    extract_it_decl_agg_template,
+    extract_tabs_template,
+)
 from .models import Form, WordEntry
 from .tags import translate_raw_tags
 
@@ -23,6 +27,8 @@ def extract_tag_form_line_nodes(
                 extract_it_decl_agg_template(wxr, word_entry, node)
             elif node.template_name.lower() == "a cmp":
                 extract_a_cmp_template(wxr, word_entry, node)
+            elif node.template_name.lower() == "pn":
+                extract_pn_template(wxr, word_entry, node)
 
 
 ITALIC_TAGS = {
@@ -95,3 +101,29 @@ def extract_a_cmp_template(
                         form.raw_tags.append(raw_tag)
                     translate_raw_tags(form)
                     word_entry.forms.append(form)
+
+
+def extract_pn_template(
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+) -> None:
+    # https://it.wiktionary.org/wiki/Template:Pn
+    has_c_arg = False
+    for arg_key, arg_value in t_node.template_parameters.items():
+        if arg_key == "c":
+            has_c_arg = True
+            break
+        arg_value_str = clean_node(wxr, None, arg_value)
+        if arg_value_str == "c":
+            has_c_arg = True
+            break
+    if not has_c_arg:
+        return
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for small_tag in expanded_node.find_html("small"):
+        for link_node in small_tag.find_child(NodeKind.LINK):
+            if len(link_node.largs) > 0:
+                link_str = clean_node(wxr, None, link_node.largs[0])
+                if link_str.startswith("Appendice:Coniugazioni/"):
+                    extract_appendix_conjugation_page(wxr, word_entry, link_str)

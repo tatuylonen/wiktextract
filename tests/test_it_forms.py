@@ -112,3 +112,79 @@ class TestItForms(TestCase):
                 {"form": "most dire", "tags": ["superlative"]},
             ],
         )
+
+    def test_pn_template(self):
+        self.wxr.wtp.add_page("Template:-it-", 10, "Italiano")
+        self.wxr.wtp.add_page(
+            "Template:Pn",
+            10,
+            "'''dire'''<small>&nbsp;([[Appendice:Coniugazioni/Italiano/dire|vai alla coniugazione]])</small>",
+        )
+        self.wxr.wtp.add_page(
+            "Appendice:Coniugazioni/Italiano/dire", 100, "{{It-conj}}"
+        )
+        self.wxr.wtp.add_page(
+            "Template:It-conj",
+            10,
+            """{|
+|-
+|-
+! colspan="1" rowspan="2" | persona
+! colspan="3" | singolare
+! colspan="3" | plurale
+|-
+! prima
+|-
+! indicativo
+! io
+|-
+! passato prossimo
+| <div>
+  {|
+  |-
+  | [[ho]] [[detto#Italiano|detto]]</br>[[sono]] [[detto#Italiano|detto]]
+  |}</div>
+|-
+! colspan="1" rowspan="2" | imperativo
+! -
+! tu
+|-
+|
+|[[di’#Italiano|di’]],</br> non [[dire#Italiano|dire]]
+|}""",
+        )
+        data = parse_page(
+            self.wxr,
+            "dire",
+            """== {{-it-}} ==
+===Verbo===
+{{Pn|c}} 3° coniugazione
+# [[esternare]] ciò che si pensa parlando""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {
+                    "form": "ho detto",
+                    "raw_tags": ["passato prossimo", "prima", "io"],
+                    "tags": ["singular"],
+                    "source": "Appendice:Coniugazioni/Italiano/dire",
+                },
+                {
+                    "form": "sono detto",
+                    "raw_tags": ["passato prossimo", "prima", "io"],
+                    "tags": ["singular"],
+                    "source": "Appendice:Coniugazioni/Italiano/dire",
+                },
+                {
+                    "form": "di’",
+                    "raw_tags": ["imperativo", "tu"],
+                    "source": "Appendice:Coniugazioni/Italiano/dire",
+                },
+                {
+                    "form": "non dire",
+                    "raw_tags": ["imperativo", "tu"],
+                    "source": "Appendice:Coniugazioni/Italiano/dire",
+                },
+            ],
+        )
