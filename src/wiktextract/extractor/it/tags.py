@@ -12,8 +12,14 @@ TABLE_TAGS = {
     "m e f": ["masculine", "feminine"],
 }
 
+FORM_LINE_TEMPLATE_TAGS = {
+    # https://it.wiktionary.org/wiki/Template:A_cmp
+    "comparativo": "comparative",
+    "superlativo": "superlative",
+}
 
-TAGS = {**TABLE_TAGS}
+
+TAGS = {**TABLE_TAGS, **FORM_LINE_TEMPLATE_TAGS}
 
 
 def translate_raw_tags(data: WordEntry) -> None:

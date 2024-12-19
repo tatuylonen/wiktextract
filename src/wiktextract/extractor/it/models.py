@@ -47,6 +47,7 @@ class Form(ItalianBaseModel):
     form: str = ""
     tags: list[str] = []
     raw_tags: list[str] = []
+    source: str = ""
 
 
 class Sound(ItalianBaseModel):
