@@ -75,7 +75,7 @@ TERM_TEMPLATE_TOPICS = {
     "chimica industriale": "chemistry",
     "chirurgia": "surgery",
     "cinematografia": "cinematography",
-    "colori": "color",
+    "colore": "color",
     "commercio": "commerce",
     # "composti organici": "",
     # "composti inorganici": "",
@@ -191,8 +191,30 @@ TERM_TEMPLATE_TAGS = {
     "volgare": "vulgar",
 }
 
+# https://it.wiktionary.org/wiki/Categoria:Template_ambito
+GLOSS_LIST_TEMPATE_TAGS = {
+    "accrescitivo": "augmentative",  # Template:Accr
+    "colloquiale": "colloquial",  # Template:Coll
+    "diminutivo": "diminutive",  # Template:Dim
+    "per estensione": "broadly",  # Template:Est
+    "senso figurato": "figuratively",  # Template:Fig
+    "letteralmente": "literally",  # Template:Lett
+    "peggiorativo": "pejorative",  # Template:Pegg
+    "riferito solo a persone": "person",  # Template:Pers
+    "per sineddoche": "synecdoche",  # Template:Sndc
+    "specialmente al plurale": ["especially", "in-plural"],  # Template:Spec pl
+    "spregiativo": "pejorative",  # Template:Spreg
+    "vezzeggiativo": "endearing",  # Template:Vezz
+    "volgare": "vulgar",  # Template:Vulg
+}
 
-TAGS = {**TABLE_TAGS, **FORM_LINE_TEMPLATE_TAGS, **TERM_TEMPLATE_TAGS}
+
+TAGS = {
+    **TABLE_TAGS,
+    **FORM_LINE_TEMPLATE_TAGS,
+    **TERM_TEMPLATE_TAGS,
+    **GLOSS_LIST_TEMPATE_TAGS,
+}
 
 
 def translate_raw_tags(data: WordEntry) -> None:
