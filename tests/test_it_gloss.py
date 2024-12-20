@@ -47,7 +47,7 @@ class TestItGloss(TestCase):
                     "senses": [
                         {
                             "glosses": ["animale"],
-                            "raw_tags": ["mammalogia"],
+                            "topics": ["mammalogy"],
                             "categories": ["Mammalogia-IT"],
                         }
                     ],

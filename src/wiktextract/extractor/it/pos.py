@@ -6,6 +6,7 @@ from .example import extract_example_list_item
 from .models import Sense, WordEntry
 from .section_titles import POS_DATA
 from .tag_form_line import extract_tag_form_line_nodes
+from .tags import translate_raw_tags
 
 POS_SUBSECTION_TEMPLATES = frozenset(
     [
@@ -117,4 +118,5 @@ def extract_gloss_list_item(
     gloss_str = clean_node(wxr, sense, gloss_nodes)
     if gloss_str != "":
         sense.glosses.append(gloss_str)
+        translate_raw_tags(sense)
         word_entry.senses.append(sense)

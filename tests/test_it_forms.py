@@ -166,24 +166,26 @@ class TestItForms(TestCase):
             [
                 {
                     "form": "ho detto",
-                    "raw_tags": ["passato prossimo", "prima", "io"],
-                    "tags": ["singular"],
+                    "raw_tags": ["io"],
+                    "tags": ["past", "perfect", "singular", "first-person"],
                     "source": "Appendice:Coniugazioni/Italiano/dire",
                 },
                 {
                     "form": "sono detto",
-                    "raw_tags": ["passato prossimo", "prima", "io"],
-                    "tags": ["singular"],
+                    "raw_tags": ["io"],
+                    "tags": ["past", "perfect", "singular", "first-person"],
                     "source": "Appendice:Coniugazioni/Italiano/dire",
                 },
                 {
                     "form": "di’",
-                    "raw_tags": ["imperativo", "tu"],
+                    "raw_tags": ["tu"],
+                    "tags": ["imperative"],
                     "source": "Appendice:Coniugazioni/Italiano/dire",
                 },
                 {
                     "form": "non dire",
-                    "raw_tags": ["imperativo", "tu"],
+                    "raw_tags": ["tu"],
+                    "tags": ["imperative"],
                     "source": "Appendice:Coniugazioni/Italiano/dire",
                 },
             ],
