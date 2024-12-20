@@ -50,6 +50,7 @@ def parse_section(
             LINKAGE_SECTIONS[title_text],
             "",
             0,
+            "",
         )
     elif title_text == "Etimologia":
         extract_etymology_section(wxr, page_data, level_node)

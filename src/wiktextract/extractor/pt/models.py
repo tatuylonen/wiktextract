@@ -50,6 +50,7 @@ class Linkage(PortugueseBaseModel):
     sense_index: int = Field(
         default=0, ge=0, description="Number of the definition, start from 1"
     )
+    source: str = ""
 
 
 class Sound(PortugueseBaseModel):

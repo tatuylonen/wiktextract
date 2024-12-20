@@ -71,6 +71,7 @@ def extract_linkage_section(
     linkage_type: str,
     sense: str,
     sense_index: int,
+    source: str,
 ) -> None:
     for node in level_node.children:
         if isinstance(node, TemplateNode) and node.template_name == "fraseini":
@@ -78,7 +79,13 @@ def extract_linkage_section(
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
             for list_item in node.find_child(NodeKind.LIST_ITEM):
                 extract_linkage_list_item(
-                    wxr, word_entry, list_item, linkage_type, sense, sense_index
+                    wxr,
+                    word_entry,
+                    list_item,
+                    linkage_type,
+                    sense,
+                    sense_index,
+                    source,
                 )
 
 
@@ -104,6 +111,7 @@ def extract_linkage_list_item(
     linkage_type: str,
     sense: str,
     sense_index: int,
+    source: str,
 ) -> None:
     linkage_words = []
     raw_tags = []
@@ -161,6 +169,7 @@ def extract_linkage_list_item(
                             linkage_type,
                             sense,
                             sense_index,
+                            source,
                         )
         elif isinstance(node, str):
             m = re.search(r"\((.+)\)", node)
@@ -169,7 +178,11 @@ def extract_linkage_list_item(
 
     for word in linkage_words:
         linkage = Linkage(
-            word=word, sense=sense, sense_index=sense_index, raw_tags=raw_tags
+            word=word,
+            sense=sense,
+            sense_index=sense_index,
+            raw_tags=raw_tags,
+            source=source,
         )
         translate_raw_tags(linkage)
         getattr(word_entry, linkage_type).append(linkage)
@@ -206,4 +219,5 @@ def extract_wikisaurus_page(
                     linkage_type,
                     sense,
                     sense_index,
+                    page_title,
                 )
