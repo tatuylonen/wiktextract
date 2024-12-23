@@ -27,6 +27,8 @@ def extract_gloss(
         gloss_data = parent_gloss_data.model_copy(deep=True)
         for node in list_item_node.children:
             if isinstance(node, TemplateNode):
+                if node.template_name == "rfdef":
+                    continue
                 raw_tag = clean_node(wxr, gloss_data, node)
                 if node.template_name in LABEL_TEMPLATES:
                     raw_tags.extend(raw_tag.strip("()").split("，"))
