@@ -24,7 +24,9 @@ def parse_section(
     level_node: LevelNode,
 ) -> None:
     cats = {}
-    title_text = clean_node(wxr, cats, level_node.largs).strip("⁰¹²³⁴⁵⁶⁷⁸⁹")
+    title_text = clean_node(wxr, cats, level_node.largs).strip(
+        "⁰¹²³⁴⁵⁶⁷⁸⁹0123456789"
+    )
     if title_text in POS_DATA:
         extract_pos_section(
             wxr,
