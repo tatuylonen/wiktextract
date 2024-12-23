@@ -2,10 +2,7 @@ from wiktextract.config import POSSubtitleData
 
 POS_TITLES: dict[str, POSSubtitleData] = {
     "不及物动词": {"pos": "verb", "tags": ["intransitive"]},
-    "不及物動詞": {
-        "pos": "verb",
-        "tags": ["intransitive"]
-    },
+    "不及物動詞": {"pos": "verb", "tags": ["intransitive"]},
     "不定代词": {"pos": "pron"},
     "不定冠詞": {"pos": "article"},
     "不定冠词": {"pos": "article"},
