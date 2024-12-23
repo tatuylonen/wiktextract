@@ -13,7 +13,7 @@ from .linkage import extract_expression_section, extract_linkage_section
 from .models import Sense, WordEntry
 from .pos import extract_pos_section
 from .pronunciation import extract_pronunciation_section
-from .section_titles import LINKAGE_SECTIONS, POS_DATA
+from .section_titles import LINKAGE_SECTIONS, LINKAGE_TAGS, POS_DATA
 from .translation import extract_translation_section
 
 
@@ -24,8 +24,10 @@ def parse_section(
     level_node: LevelNode,
 ) -> None:
     cats = {}
-    title_text = clean_node(wxr, cats, level_node.largs).strip("⁰¹²³⁴⁵⁶⁷⁸⁹")
-    if title_text in POS_DATA:
+    title_text = clean_node(wxr, cats, level_node.largs).strip(
+        "⁰¹²³⁴⁵⁶⁷⁸⁹0123456789"
+    )
+    if title_text.lower() in POS_DATA:
         extract_pos_section(
             wxr,
             page_data,
@@ -34,7 +36,7 @@ def parse_section(
             title_text,
             cats.get("categories", []),
         )
-    elif title_text in ["Tradução", "Cognatos"]:
+    elif title_text in ["Tradução", "Traduções", "Cognatos"]:
         extract_translation_section(
             wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
         )
@@ -42,22 +44,40 @@ def parse_section(
         extract_expression_section(
             wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
         )
-    elif title_text in LINKAGE_SECTIONS:
+    elif title_text.lower() in LINKAGE_SECTIONS:
         extract_linkage_section(
             wxr,
             page_data[-1] if len(page_data) > 0 else base_data,
             level_node,
-            LINKAGE_SECTIONS[title_text],
+            LINKAGE_SECTIONS[title_text.lower()],
             "",
             0,
             "",
+            LINKAGE_TAGS.get(title_text.lower(), []),
         )
     elif title_text == "Etimologia":
         extract_etymology_section(wxr, page_data, level_node)
     elif title_text == "Pronúncia":
         extract_pronunciation_section(wxr, page_data, level_node)
+    elif title_text in ["Nota", "Notas", "Nota de uso"]:
+        pass
+    elif title_text.lower() not in [
+        "ver também",
+        "ligações externas",
+        "referências",
+        "referência",
+        "no wikcionário",
+        "na wikipédia",
+        "no wikiquote",
+        "no wikispecies",
+        "no wikisaurus",
+        "no commons",
+        "no wikimedia commons",
+        "galeria",
+    ]:
+        wxr.wtp.debug(f"unknown section: {title_text}")
 
-    if title_text not in POS_DATA:
+    if title_text.lower() not in POS_DATA:
         save_section_cats(
             cats.get("categories", []), page_data, level_node, True
         )
