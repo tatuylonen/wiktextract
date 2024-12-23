@@ -72,6 +72,7 @@ def extract_linkage_section(
     sense: str,
     sense_index: int,
     source: str,
+    tags: list[str],
 ) -> None:
     for node in level_node.children:
         if isinstance(node, TemplateNode) and node.template_name == "fraseini":
@@ -86,6 +87,7 @@ def extract_linkage_section(
                     sense,
                     sense_index,
                     source,
+                    tags,
                 )
 
 
@@ -112,6 +114,7 @@ def extract_linkage_list_item(
     sense: str,
     sense_index: int,
     source: str,
+    tags: list[str],
 ) -> None:
     linkage_words = []
     raw_tags = []
@@ -140,6 +143,7 @@ def extract_linkage_list_item(
                             linkage_type,
                             sense,
                             sense_index,
+                            tags,
                         )
                     elif word != "":
                         linkage_words.append(word)
@@ -157,6 +161,7 @@ def extract_linkage_list_item(
                             linkage_type,
                             sense,
                             sense_index,
+                            tags,
                         )
                     elif raw_tag != "":
                         raw_tags.append(raw_tag)
@@ -170,6 +175,7 @@ def extract_linkage_list_item(
                             sense,
                             sense_index,
                             source,
+                            tags,
                         )
         elif isinstance(node, str):
             m = re.search(r"\((.+)\)", node)
@@ -183,6 +189,7 @@ def extract_linkage_list_item(
             sense_index=sense_index,
             raw_tags=raw_tags,
             source=source,
+            tags=tags,
         )
         translate_raw_tags(linkage)
         getattr(word_entry, linkage_type).append(linkage)
@@ -195,6 +202,7 @@ def extract_wikisaurus_page(
     linkage_type: str,
     sense: str,
     sense_index: int,
+    tags: list[str],
 ) -> None:
     page = wxr.wtp.get_page(page_title, 0)
     if page is None or page.body is None:
@@ -220,4 +228,5 @@ def extract_wikisaurus_page(
                     sense,
                     sense_index,
                     page_title,
+                    tags,
                 )
