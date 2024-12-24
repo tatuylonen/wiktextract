@@ -9,7 +9,11 @@ from wikitextprocessor.parser import (
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .etymology import extract_etymology_section
-from .linkage import extract_expression_section, extract_linkage_section
+from .linkage import (
+    extract_expression_section,
+    extract_linkage_section,
+    extract_phraseology_section,
+)
 from .models import Sense, WordEntry
 from .pos import extract_pos_section
 from .pronunciation import extract_pronunciation_section
@@ -25,7 +29,7 @@ def parse_section(
 ) -> None:
     cats = {}
     title_text = clean_node(wxr, cats, level_node.largs).strip(
-        "⁰¹²³⁴⁵⁶⁷⁸⁹0123456789"
+        "⁰¹²³⁴⁵⁶⁷⁸⁹0123456789:"
     )
     if title_text.lower() in POS_DATA:
         extract_pos_section(
@@ -59,11 +63,16 @@ def parse_section(
         extract_etymology_section(wxr, page_data, level_node)
     elif title_text == "Pronúncia":
         extract_pronunciation_section(wxr, page_data, level_node)
+    elif title_text == "Fraseologia":
+        extract_phraseology_section(
+            wxr, page_data[-1] if len(page_data) else base_data, level_node
+        )
     elif title_text in ["Nota", "Notas", "Nota de uso"]:
         pass
     elif title_text.lower() not in [
         "ver também",
         "ligações externas",
+        "ligação extena",
         "referências",
         "referência",
         "no wikcionário",
@@ -73,7 +82,9 @@ def parse_section(
         "no wikisaurus",
         "no commons",
         "no wikimedia commons",
+        "na internet",
         "galeria",
+        "galeria de imagens",
     ]:
         wxr.wtp.debug(f"unknown section: {title_text}")
 

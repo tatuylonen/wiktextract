@@ -51,6 +51,7 @@ class Linkage(PortugueseBaseModel):
         default=0, ge=0, description="Number of the definition, start from 1"
     )
     source: str = ""
+    roman: str = ""
 
 
 class Sound(PortugueseBaseModel):
@@ -92,6 +93,10 @@ class WordEntry(PortugueseBaseModel):
     hypernyms: list[Linkage] = []
     related: list[Linkage] = []
     hyponyms: list[Linkage] = []
+    homophones: list[Linkage] = []
+    homonyms: list[Linkage] = []
+    paronyms: list[Linkage] = []
+    phraseology: list[Linkage] = []
     etymology_texts: list[str] = []
     sounds: list[Sound] = []
     forms: list[Form] = []
