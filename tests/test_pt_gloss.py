@@ -74,3 +74,21 @@ class TestPtGloss(TestCase):
                 }
             ],
         )
+
+    def test_nested_list(self):
+        self.wxr.wtp.add_page("Predefinição:-en-", 10, "Inglês")
+        data = parse_page(
+            self.wxr,
+            "average",
+            """={{-en-}}=
+==Adjetivo==
+# [[médio]]
+## [[relativo à]] [[média]];''""",
+        )
+        self.assertEqual(
+            data[0]["senses"],
+            [
+                {"glosses": ["médio"]},
+                {"glosses": ["médio", "relativo à média;"]},
+            ],
+        )
