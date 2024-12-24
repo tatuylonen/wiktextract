@@ -100,3 +100,4 @@ class WordEntry(PortugueseBaseModel):
     etymology_texts: list[str] = []
     sounds: list[Sound] = []
     forms: list[Form] = []
+    notes: list[str] = []

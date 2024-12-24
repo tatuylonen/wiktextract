@@ -19,6 +19,7 @@ POS_DATA = {
     "locução prepositiva": {"pos": "phrase", "tags": ["prepositional"]},
     "expressão": {"pos": "phrase"},
     "abreviatura": {"pos": "abbrev", "tags": ["abbreviation"]},
+    "abreviação": {"pos": "abbrev", "tags": ["abbreviation"]},
     "contração": {"pos": "contraction", "tags": ["contraction"]},
     "prefixo": {"pos": "prefix", "tags": ["morpheme"]},
     "sufixo": {"pos": "suffix", "tags": ["morpheme"]},
