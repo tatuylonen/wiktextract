@@ -49,11 +49,11 @@ def extract_gloss_list_item(
     wxr: WiktextractContext,
     word_entry: WordEntry | Linkage,
     list_item: WikiNode,
+    parent_gloss: list[str] = [],
 ) -> None:
     gloss_nodes = []
-    sense = Sense()
-    first_gloss_index = len(list_item.children)
-    for index, node in enumerate(list_item.children):
+    sense = Sense(glosses=parent_gloss)
+    for node in list_item.children:
         if isinstance(node, TemplateNode):
             if node.template_name == "escopo":
                 extract_escopo_template(wxr, sense, node)
@@ -65,8 +65,6 @@ def extract_gloss_list_item(
             if node.sarg.endswith(("*", ":")):
                 for next_list_item in node.find_child(NodeKind.LIST_ITEM):
                     extract_example_list_item(wxr, sense, next_list_item)
-                if index < first_gloss_index:
-                    first_gloss_index = index
         else:
             gloss_nodes.append(node)
 
@@ -74,6 +72,13 @@ def extract_gloss_list_item(
     if len(gloss_str) > 0:
         sense.glosses.append(gloss_str)
         word_entry.senses.append(sense)
+
+    for child_list in list_item.find_child(NodeKind.LIST):
+        if child_list.sarg.startswith("#") and child_list.sarg.endswith("#"):
+            for child_list_item in child_list.find_child(NodeKind.LIST_ITEM):
+                extract_gloss_list_item(
+                    wxr, word_entry, child_list_item, sense.glosses
+                )
 
 
 def extract_escopo_template(

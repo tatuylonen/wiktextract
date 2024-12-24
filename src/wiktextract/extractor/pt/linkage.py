@@ -97,10 +97,13 @@ def extract_fraseini_template(
     sense = ""
     sense_index = 0
     first_arg = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
-    m = re.search(r"(\d+)$", first_arg)
+    m = re.search(r"\((\d+)\)$", first_arg)
     if m is not None:
         sense_index = int(m.group(1))
         sense = first_arg[: m.start()].strip()
+    elif (m := re.match(r"De (\d+)", first_arg)) is not None:
+        sense_index = int(m.group(1))
+        sense = first_arg[m.end() :].strip("() \n")
     else:
         sense = first_arg
     return sense, sense_index
@@ -230,3 +233,61 @@ def extract_wikisaurus_page(
                     page_title,
                     tags,
                 )
+
+
+def extract_phraseology_section(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    level_node: LevelNode,
+) -> None:
+    sense = ""
+    sense_index = 0
+    for node in level_node.find_child(NodeKind.LIST | NodeKind.TEMPLATE):
+        if isinstance(node, TemplateNode) and node.template_name == "fraseini":
+            sense, sense_index = extract_fraseini_template(wxr, node)
+        elif node.kind == NodeKind.LIST:
+            for list_item in node.find_child(NodeKind.LIST_ITEM):
+                extract_phraseology_list_item(
+                    wxr, word_entry, list_item, sense, sense_index
+                )
+
+
+def extract_phraseology_list_item(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    list_item: WikiNode,
+    sense: str,
+    sense_index: int,
+) -> None:
+    l_data = Linkage(word="", sense=sense, sense_index=sense_index)
+    for index, node in enumerate(list_item.children):
+        if (
+            isinstance(node, WikiNode)
+            and node.kind in NodeKind.BOLD | NodeKind.LINK
+            and l_data.word == ""
+        ):
+            l_data.word = clean_node(wxr, None, node)
+        elif isinstance(node, WikiNode) and node.kind == NodeKind.ITALIC:
+            l_data.roman = clean_node(wxr, None, node)
+        elif isinstance(node, str) and ("=" in node or ":" in node):
+            sense_start = node.index("=" if "=" in node else ":") + 1
+            l_data.sense = clean_node(
+                wxr,
+                None,
+                [node[sense_start:]]
+                + [
+                    n
+                    for n in list_item.children[index + 1 :]
+                    if not (isinstance(n, WikiNode) and n.kind == NodeKind.LIST)
+                ],
+            )
+            break
+
+    if l_data.word != "":
+        word_entry.phraseology.append(l_data)
+
+    for child_list in list_item.find_child(NodeKind.LIST):
+        for next_list_item in child_list.find_child(NodeKind.LIST_ITEM):
+            extract_phraseology_list_item(
+                wxr, word_entry, next_list_item, sense, sense_index
+            )

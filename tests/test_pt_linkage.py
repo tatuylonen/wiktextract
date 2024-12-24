@@ -145,3 +145,79 @@ class TestPtLinkage(TestCase):
                 },
             ],
         )
+
+    def test_phraseology_equal(self):
+        self.wxr.wtp.add_page("Predefinição:-en-", 10, "Inglês")
+        data = parse_page(
+            self.wxr,
+            "aboard",
+            """={{-en-}}=
+== Advérbio ==
+'''a.board'''
+#[[a bordo]]
+
+===Fraseologia===
+* '''aboard the train''' (''locução adverbial'') = a bordo do trem""",
+        )
+        self.assertEqual(
+            data[0]["phraseology"],
+            [
+                {
+                    "word": "aboard the train",
+                    "roman": "locução adverbial",
+                    "sense": "a bordo do trem",
+                }
+            ],
+        )
+
+    def test_phraseology_colon(self):
+        self.wxr.wtp.add_page("Predefinição:-la-", 10, "Latim")
+        data = parse_page(
+            self.wxr,
+            "secundus",
+            """={{-la-}}=
+==Adjetivo==
+'''se.cun.dus'''
+# que [[seguir|segue]]
+
+==Fraseologia==
+* '''secundae [[res]]''': ''[[felicidade]]''
+* [[secunda mensa]]: [[sobremesa]]""",
+        )
+        self.assertEqual(
+            data[0]["phraseology"],
+            [
+                {"word": "secundae res", "sense": "felicidade"},
+                {"word": "secunda mensa", "sense": "sobremesa"},
+            ],
+        )
+
+    def test_phraseology_nested_list(self):
+        self.wxr.wtp.add_page("Predefinição:-pt-", 10, "Português")
+        data = parse_page(
+            self.wxr,
+            "gota",
+            """={{-pt-}}=
+==Substantivo==
+# [[fragmento]]
+
+===Fraseologia===
+{{fraseini|De 1 (gota: pingo)}}
+# ''' [[até a última gota]] ''' ([[locução]]):  [[até]] [[ser]] [[usado]] ou [[bebido]] [[totalmente]] (um [[líquido]])
+#* ''' [[este|Este]] [[café]] é [[bom]] até a [[última]] gota '''  (frase comum)""",
+        )
+        self.assertEqual(
+            data[0]["phraseology"],
+            [
+                {
+                    "word": "até a última gota",
+                    "sense": "até ser usado ou bebido totalmente (um líquido)",
+                    "sense_index": 1,
+                },
+                {
+                    "word": "Este café é bom até a última gota",
+                    "sense": "gota: pingo",
+                    "sense_index": 1,
+                },
+            ],
+        )
