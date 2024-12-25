@@ -76,7 +76,7 @@ def extract_gloss_list_item(
         word_entry.senses.append(sense)
 
     for child_list in list_item.find_child(NodeKind.LIST):
-        if child_list.sarg.startswith("#") and child_list.sarg.endswith("#"):
+        if child_list.sarg.endswith("#"):
             for child_list_item in child_list.find_child(NodeKind.LIST_ITEM):
                 extract_gloss_list_item(
                     wxr, word_entry, child_list_item, sense.glosses

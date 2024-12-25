@@ -221,3 +221,34 @@ class TestPtLinkage(TestCase):
                 },
             ],
         )
+
+    def test_expression_gloss_child_list(self):
+        self.wxr.wtp.add_page("Predefinição:-pt-", 10, "Português")
+        data = parse_page(
+            self.wxr,
+            "testa",
+            """={{-pt-}}=
+==Substantivo==
+# [[parte]]
+
+===Expressões===
+* '''[[testa de boi]]''': (Portugal, Douro)
+*# indivíduo com a testa avantajada;""",
+        )
+        self.assertEqual(
+            data[0]["expressions"],
+            [
+                {
+                    "word": "testa de boi",
+                    "senses": [
+                        {"glosses": ["(Portugal, Douro)"]},
+                        {
+                            "glosses": [
+                                "(Portugal, Douro)",
+                                "indivíduo com a testa avantajada;",
+                            ]
+                        },
+                    ],
+                }
+            ],
+        )
