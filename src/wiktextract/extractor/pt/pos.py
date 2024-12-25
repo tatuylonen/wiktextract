@@ -118,7 +118,8 @@ def extract_example_list_item(
 ) -> None:
     example = Example()
     ref_nodes = []
-    for node in list_item.children:
+
+    for index, node in enumerate(list_item.children):
         if (
             isinstance(node, WikiNode)
             and node.kind == NodeKind.ITALIC
@@ -147,6 +148,12 @@ def extract_example_list_item(
                     example.text = clean_node(
                         wxr, sense, node.template_parameters.get(1, "")
                     )
+        elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
+            ref_nodes.clear()
+            example.ref = clean_node(wxr, None, list_item.children[:index])
+            for child_list_item in node.find_child(NodeKind.LIST_ITEM):
+                example.text = clean_node(wxr, None, child_list_item.children)
+                break
         else:
             ref_nodes.append(node)
 

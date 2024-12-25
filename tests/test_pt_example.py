@@ -127,3 +127,27 @@ class TestPtExample(TestCase):
                 ],
             },
         )
+
+    def test_nested_example_list(self):
+        self.wxr.wtp.add_page("Predefinição:-pt-", 10, "Português")
+        data = parse_page(
+            self.wxr,
+            "amor",
+            """={{-pt-}}=
+==Substantivo==
+# [[sentimento]]
+#* '''1595''', [[w:Luís de Camões|Luís de Camões]], ''Rimas'':
+#*: "'''''Amor''' é fogo que arde sem se ver<br>é ferida que dói, e não se sente,<br>é um contentamento descontente,<br>é dor que desatina sem doer.''\"""",
+        )
+        self.assertEqual(
+            data[0]["senses"][0],
+            {
+                "glosses": ["sentimento"],
+                "examples": [
+                    {
+                        "text": '"Amor é fogo que arde sem se ver\né ferida que dói, e não se sente,\né um contentamento descontente,\né dor que desatina sem doer."',
+                        "ref": "1595, Luís de Camões, Rimas:",
+                    }
+                ],
+            },
+        )
