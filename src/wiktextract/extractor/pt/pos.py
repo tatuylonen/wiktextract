@@ -1,3 +1,5 @@
+import re
+
 from wikitextprocessor import (
     HTMLNode,
     LevelNode,
@@ -148,12 +150,27 @@ def extract_example_list_item(
                     example.text = clean_node(
                         wxr, sense, node.template_parameters.get(1, "")
                     )
+        elif isinstance(node, WikiNode) and node.kind == NodeKind.BOLD:
+            bold_str = clean_node(wxr, None, node)
+            if re.fullmatch(r"\d+", bold_str) is not None:
+                list_item_str = clean_node(
+                    wxr, None, list(list_item.invert_find_child(NodeKind.LIST))
+                )
+                if list_item_str.endswith(":"):
+                    ref_nodes.clear()
+                    example.ref = list_item_str
+                    for child_list in list_item.find_child(NodeKind.LIST):
+                        for child_list_item in child_list.find_child(
+                            NodeKind.LIST_ITEM
+                        ):
+                            example.text = clean_node(
+                                wxr, None, child_list_item.children
+                            )
+                    break
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
             ref_nodes.clear()
-            example.ref = clean_node(wxr, None, list_item.children[:index])
             for child_list_item in node.find_child(NodeKind.LIST_ITEM):
-                example.text = clean_node(wxr, None, child_list_item.children)
-                break
+                ref_nodes.append(child_list_item.children)
         else:
             ref_nodes.append(node)
 
