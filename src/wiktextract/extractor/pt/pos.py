@@ -89,13 +89,10 @@ def extract_escopo_template(
     t_node: TemplateNode,
 ) -> None:
     # https://pt.wiktionary.org/wiki/Predefinição:escopo
-    for arg in range(2, 9):
-        if arg not in t_node.template_parameters:
-            break
-        raw_tag = clean_node(wxr, None, t_node.template_parameters[arg])
-        if raw_tag != "":
-            sense.raw_tags.append(raw_tag)
-    clean_node(wxr, sense, t_node)
+    expanded_str = clean_node(wxr, sense, t_node).strip("()")
+    for raw_tag in re.split(r", | e ", expanded_str):
+        if raw_tag.strip() != "":
+            sense.raw_tags.append(raw_tag.strip())
 
 
 def extract_escopo2_template(
