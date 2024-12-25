@@ -54,20 +54,22 @@ def extract_flex_template(
                 elif cell_node.attrs.get("style") == "background:#f4f4f4;":
                     row_header = cell_text
                     col_header_index += col_span
-                elif cell_text in ["–", wxr.wtp.title]:
-                    col_cell_index += col_span
-                    continue
                 else:
-                    form = Form(form=cell_text)
-                    if row_header != "":
-                        form.raw_tags.append(row_header)
-                    for col_header in col_headers:
-                        if (
-                            col_cell_index >= col_header.col_index
-                            and col_cell_index
-                            < col_header.col_index + col_header.colspan
-                        ):
-                            form.raw_tags.append(col_header.text)
-                    translate_raw_tags(form)
-                    word_entry.forms.append(form)
+                    for link_node in cell_node.find_child(NodeKind.LINK):
+                        form_str = clean_node(wxr, None, link_node)
+                        if form_str in ["", "–", "-", wxr.wtp.title]:
+                            continue
+                        form_data = Form(form=form_str)
+                        if row_header != "":
+                            form_data.raw_tags.append(row_header)
+                        for col_header in col_headers:
+                            if (
+                                col_cell_index >= col_header.col_index
+                                and col_cell_index
+                                < col_header.col_index + col_header.colspan
+                            ):
+                                form_data.raw_tags.append(col_header.text)
+                        translate_raw_tags(form_data)
+                        word_entry.forms.append(form_data)
+
                     col_cell_index += col_span

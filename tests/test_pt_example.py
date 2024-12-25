@@ -127,3 +127,51 @@ class TestPtExample(TestCase):
                 ],
             },
         )
+
+    def test_source_above_text_child_list(self):
+        self.wxr.wtp.add_page("Predefinição:-pt-", 10, "Português")
+        data = parse_page(
+            self.wxr,
+            "amor",
+            """={{-pt-}}=
+==Substantivo==
+# [[sentimento]]
+#* '''1595''', [[w:Luís de Camões|Luís de Camões]], ''Rimas'':
+#*: "'''''Amor''' é fogo que arde sem se ver<br>é ferida que dói, e não se sente,<br>é um contentamento descontente,<br>é dor que desatina sem doer.''\"""",
+        )
+        self.assertEqual(
+            data[0]["senses"][0],
+            {
+                "glosses": ["sentimento"],
+                "examples": [
+                    {
+                        "text": '"Amor é fogo que arde sem se ver\né ferida que dói, e não se sente,\né um contentamento descontente,\né dor que desatina sem doer."',
+                        "ref": "1595, Luís de Camões, Rimas:",
+                    }
+                ],
+            },
+        )
+
+    def test_text_above_ref_child_list(self):
+        self.wxr.wtp.add_page("Predefinição:-pt-", 10, "Português")
+        data = parse_page(
+            self.wxr,
+            "mar",
+            """={{-pt-}}=
+==Substantivo==
+# grande quantidade de
+#:"''Ó '''mar''' salgado, quanto do teu sal<br />São lágrimas de Portugal!<br />Por te cruzarmos, quantas mães choraram,<br />Quantos filhos em vão rezaram!<br />Quantas noivas ficaram por casar<br />Para que fosses nosso, ó '''mar'''!''"
+#:: ''-Mensagem, de Fernando Pessoa''""",
+        )
+        self.assertEqual(
+            data[0]["senses"][0],
+            {
+                "glosses": ["grande quantidade de"],
+                "examples": [
+                    {
+                        "text": "Ó mar salgado, quanto do teu sal\nSão lágrimas de Portugal!\nPor te cruzarmos, quantas mães choraram,\nQuantos filhos em vão rezaram!\nQuantas noivas ficaram por casar\nPara que fosses nosso, ó mar!",
+                        "ref": "-Mensagem, de Fernando Pessoa",
+                    }
+                ],
+            },
+        )

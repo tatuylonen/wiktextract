@@ -113,7 +113,72 @@ TABLE_TAGS = {
     "Diminutivo": "diminutive",
 }
 
-TAGS = {**HEAD_LINE_TAGS, **TABLE_TAGS}
+# https://pt.wiktionary.org/wiki/Predefinição:escopo/núcleo
+GLOSS_TAGS = {
+    "Grafia portuguesa": "Portugal",
+    "Grafia brasileira": "Brazil",
+    "histórico": "historical",
+}
+
+TAGS = {**HEAD_LINE_TAGS, **TABLE_TAGS, **GLOSS_TAGS}
+
+# https://pt.wiktionary.org/wiki/Predefinição:escopo/núcleo
+TOPICS = {
+    "botânica": "botany",
+    "ciência da computação": "computing",
+    # "ciência dos materiais": "",
+    "engenharia": "engineering",
+    # "pedagogia": "pedagogy",
+    # "cronônimo": "chrononym",
+    "basquetebol": "basketball",
+    "beisebol": "baseball",
+    "críquete": "cricket",
+    "desporto": "sports",
+    "esporte": "sports",
+    "ténis": "tennis",
+    "tênis": "tennis",
+    "esgrima": "fencing",
+    "geografia": "geography",
+    # "toponímia": "",
+    # "territory": "",
+    "zoologia": "zoology",
+    "ornitologia": "ornithology",
+    # "artrópodes": "",
+    "entomologia": "entomology",
+    "ictiologia": "ichthyology",
+    "veterinária": "veterinary",
+    # "antropónimo": "",
+    "alimentação": "food",
+    "arte": "arts",
+    "aeronáutica": "aeronautics",
+    "aritmética": "arithmetic",
+    "Meteorologia": "meteorology",
+    "design": "design",
+    "patologia": "pathology",
+    "etnologia": "ethnology",
+    "farmacologia": "pharmacology",
+    "transporte": "transport",
+    "Ginecologia": "gynecology",
+    "linguística": "linguistics",
+    "indústria têxtil": "textiles",
+    "mídia": "media",
+    "ciência da informação": "information-science",
+    "ludologia": "ludology",
+    "náutica": "nautical",
+    "mitologia": "mythology",
+    "mineralogia": "mineralogy",
+    "mobiliário": "furniture",
+    "numismática": "numismatics",
+    # "Esoterismo": "",
+    "profissão": "profession",
+    # "parapsiquismo": "",
+    "vestuário": "clothing",
+    "direito": "law",
+    "química": "chemistry",
+    "videojogo": "video-games",
+    "vídeo game": "video-games",
+    "viticultura": "viticulture",
+}
 
 
 def translate_raw_tags(data: WordEntry) -> None:
@@ -125,6 +190,8 @@ def translate_raw_tags(data: WordEntry) -> None:
                 data.tags.append(tr_tag)
             elif isinstance(tr_tag, list):
                 data.tags.extend(tr_tag)
+        elif raw_tag in TOPICS and hasattr(data, "topics"):
+            data.topics.append(TOPICS[raw_tag])
         else:
             raw_tags.append(raw_tag)
     data.raw_tags = raw_tags

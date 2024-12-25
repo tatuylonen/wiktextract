@@ -1,3 +1,5 @@
+import re
+
 from wikitextprocessor import (
     HTMLNode,
     LevelNode,
@@ -74,7 +76,7 @@ def extract_gloss_list_item(
         word_entry.senses.append(sense)
 
     for child_list in list_item.find_child(NodeKind.LIST):
-        if child_list.sarg.startswith("#") and child_list.sarg.endswith("#"):
+        if child_list.sarg.endswith("#"):
             for child_list_item in child_list.find_child(NodeKind.LIST_ITEM):
                 extract_gloss_list_item(
                     wxr, word_entry, child_list_item, sense.glosses
@@ -87,13 +89,10 @@ def extract_escopo_template(
     t_node: TemplateNode,
 ) -> None:
     # https://pt.wiktionary.org/wiki/Predefinição:escopo
-    for arg in range(2, 9):
-        if arg not in t_node.template_parameters:
-            break
-        raw_tag = clean_node(wxr, None, t_node.template_parameters[arg])
-        if raw_tag != "":
-            sense.raw_tags.append(raw_tag)
-    clean_node(wxr, sense, t_node)
+    expanded_str = clean_node(wxr, sense, t_node).strip("()")
+    for raw_tag in re.split(r", | e ", expanded_str):
+        if raw_tag.strip() != "":
+            sense.raw_tags.append(raw_tag.strip())
 
 
 def extract_escopo2_template(
@@ -118,7 +117,8 @@ def extract_example_list_item(
 ) -> None:
     example = Example()
     ref_nodes = []
-    for node in list_item.children:
+
+    for index, node in enumerate(list_item.children):
         if (
             isinstance(node, WikiNode)
             and node.kind == NodeKind.ITALIC
@@ -147,6 +147,27 @@ def extract_example_list_item(
                     example.text = clean_node(
                         wxr, sense, node.template_parameters.get(1, "")
                     )
+        elif isinstance(node, WikiNode) and node.kind == NodeKind.BOLD:
+            bold_str = clean_node(wxr, None, node)
+            if re.fullmatch(r"\d+", bold_str) is not None:
+                list_item_str = clean_node(
+                    wxr, None, list(list_item.invert_find_child(NodeKind.LIST))
+                )
+                if list_item_str.endswith(":"):
+                    ref_nodes.clear()
+                    example.ref = list_item_str
+                    for child_list in list_item.find_child(NodeKind.LIST):
+                        for child_list_item in child_list.find_child(
+                            NodeKind.LIST_ITEM
+                        ):
+                            example.text = clean_node(
+                                wxr, None, child_list_item.children
+                            )
+                    break
+        elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
+            ref_nodes.clear()
+            for child_list_item in node.find_child(NodeKind.LIST_ITEM):
+                ref_nodes.append(child_list_item.children)
         else:
             ref_nodes.append(node)
 
