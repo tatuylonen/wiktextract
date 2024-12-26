@@ -111,6 +111,26 @@ TABLE_TAGS = {
     "Normal": "standard",
     "Aumentativo": "augmentative",
     "Diminutivo": "diminutive",
+    # Predefinição:conj.pt
+    "Infinitivo impessoal": ["impersonal", "infinitive"],
+    "Gerúndio": "gerund",
+    "Particípio": "participle",
+    "primeira": "first-person",
+    "segunda": "second-person",
+    "terceira": "third-person",
+    "Modo\nIndicativo": "indicative",
+    "Presente": "present",
+    "Pretérito imperfeito": ["past", "continuative"],
+    "Pretérito perfeito": "past",
+    "Pretérito mais-que-perfeito": "pluperfect",
+    "Futuro do presente": ["future", "present"],
+    "Futuro do pretérito": ["future", "past"],
+    "Modo\nSubjuntivo\n(Conjuntivo)": ["subjunctive", "conjunctive"],
+    "Futuro": "future",
+    "Modo\nImperativo": "imperative",
+    "Afirmativo": "affirmative",
+    "Negativo": "negative",
+    "Infinitivo pessoal": ["personal", "infinitive"],
 }
 
 # https://pt.wiktionary.org/wiki/Predefinição:escopo/núcleo
@@ -118,14 +138,86 @@ GLOSS_TAGS = {
     "Grafia portuguesa": "Portugal",
     "Grafia brasileira": "Brazil",
     "histórico": "historical",
+    "antigo": "archaic",
+    "arcaico": "archaic",
+    "em desuso": "obsolete",
+    "obsoleto": "obsolete",
+    "pouco comum": "uncommon",
+    "raro": "rare",
+    "obsceno": "vulgar",
+    "coloquial": "colloquial",
+    "familiar": "familiar",
+    "informal": "informal",
+    # "popular": "",
+    "figurado": "figuratively",
+    "depreciativo": "derogatory",
+    "pejorativo": "pejorative",
+    "poético": "poetic",
+    "internetês": ["Internet", "slang"],
+    "ironia": "ironic",
+    # "alemanismo": "",
+    # "italianismo": "Italianism",
+    # "germanismo": "Germanism",
+    # "francesismo": "",
+    # "galicismo": "Gallicism",
+    "anglicismo": "Anglicism",
+    # "portuguesismo": "Portuguesism",
+    # "estrangeirismo": "loanword",
+    "regionalism": "regional",
+    "Angola": "Angola",
+    "Brasil": "Brazil",
+    # "Amazônia": "Amazonia",
+    "Nordeste do Brasil": "Northeast-Brazil",
+    "Norte do Brasil": "North-Brazil",
+    "Centro-Oeste do Brasil": "Central-West-Brazil",
+    "Sudeste do Brasil": "Southeast-Brazil",
+    "Sul do Brasil": "Southern-Brazil",
+    "Acre": "Acre",
+    "Alagoas": "Alagoas",
+    "Amapá": "Amapá",
+    "Amazonas": "Amazonas",
+    "Bahia": "Bahia",
+    "dialeto caipira": "dialectal",
+    "Ceará": "Ceará",
+    # "Distrito Federal": "Federal District",
+    "Espírito Santo": "Espírito Santo",
+    "Goiás": "Goias",
+    "Maranhão": "Maranhão",
+    "Mato Grosso": "Mato Grosso",
+    "Mato Grosso do Sul": "Mato Grosso do Sul",
+    "Minas Gerais": "Minas Gerais",
+    "Pará": "Pará",
+    "Paraíba": "Paraíba",
+    "Paraná": "Paraná",
+    "Pernambuco": "Pernambuco",
+    "Piauí": "Piauí",
+    "Rio de Janeiro": "Rio de Janeiro",
+    "Rio Grande do Norte": "Rio Grande do Norte",
+    "Rio Grande do Sul": "Rio Grande do Sul",
+    "Rondônia": "Rondônia",
+    "Roraima": "Roraima",
+    # "baralhete": "",
+    # "canteiros": "",
+    # "alvanéis": "",
+    # "telheiros": "",
+    # "músicos": "",
+    # "cesteiros": "",
+    "transitivo": "transitive",
+    "intransitivo": "intransitive",
+    "reflexivo": "reflexive",
+    "pronominal": "pronominal",
+    "plural": "plural",
 }
 
 TAGS = {**HEAD_LINE_TAGS, **TABLE_TAGS, **GLOSS_TAGS}
 
 # https://pt.wiktionary.org/wiki/Predefinição:escopo/núcleo
 TOPICS = {
+    "anatomia": "anatomy",
+    "arquitetura": "architecture",
     "botânica": "botany",
     "ciência da computação": "computing",
+    "comunicação": "communications",
     # "ciência dos materiais": "",
     "engenharia": "engineering",
     # "pedagogia": "pedagogy",
@@ -184,14 +276,16 @@ TOPICS = {
 def translate_raw_tags(data: WordEntry) -> None:
     raw_tags = []
     for raw_tag in data.raw_tags:
-        if raw_tag in TAGS:
-            tr_tag = TAGS[raw_tag]
+        if raw_tag in TAGS or raw_tag.lower() in TAGS:
+            tr_tag = TAGS.get(raw_tag, TAGS.get(raw_tag.lower()))
             if isinstance(tr_tag, str):
                 data.tags.append(tr_tag)
             elif isinstance(tr_tag, list):
                 data.tags.extend(tr_tag)
-        elif raw_tag in TOPICS and hasattr(data, "topics"):
-            data.topics.append(TOPICS[raw_tag])
+        elif (raw_tag in TOPICS or raw_tag.lower() in TOPICS) and hasattr(
+            data, "topics"
+        ):
+            data.topics.append(TOPICS.get(raw_tag, TOPICS.get(raw_tag.lower())))
         else:
             raw_tags.append(raw_tag)
     data.raw_tags = raw_tags

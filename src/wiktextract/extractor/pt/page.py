@@ -9,6 +9,7 @@ from wikitextprocessor.parser import (
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .etymology import extract_etymology_section
+from .inflection import extract_conjugation_section
 from .linkage import (
     extract_expression_section,
     extract_linkage_section,
@@ -69,6 +70,10 @@ def parse_section(
         )
     elif title_text.startswith("Nota"):
         extract_note_section(wxr, page_data, level_node)
+    elif title_text == "Conjugação":
+        extract_conjugation_section(
+            wxr, page_data[-1] if len(page_data) else base_data, level_node
+        )
     elif title_text.lower() not in [
         "ver também",
         "ligação externa",

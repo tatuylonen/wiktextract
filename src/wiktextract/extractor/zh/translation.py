@@ -162,7 +162,7 @@ def translation_subpage(
         wxr, None, template_node.template_parameters.get(2, wxr.wtp.title)
     )
     if "#" in page_title:
-        page_title = page_title[:page_title.index("#")]
+        page_title = page_title[: page_title.index("#")]
 
     translation_subpage_title = page_title
     if page_title == wxr.wtp.title:

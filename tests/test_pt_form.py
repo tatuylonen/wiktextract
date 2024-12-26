@@ -138,3 +138,84 @@ class TestPtForm(TestCase):
                 {"form": "párvoas", "tags": ["standard", "feminine", "plural"]},
             ],
         )
+
+    def test_conj_pt(self):
+        self.wxr.wtp.add_page("Predefinição:-pt-", 10, "Português")
+        self.wxr.wtp.add_page(
+            "Predefinição:conj/pt",
+            10,
+            """<div>
+<div>&nbsp; &nbsp; Verbo regular da 1.ª conjugação (-ar) &nbsp; &nbsp;</div>
+<div class="NavContent">
+{|
+|+ '''Formas impessoais'''
+|-
+! '''Infinitivo impessoal'''
+| [[ababalhar#Português|ababalhar]]
+! '''Gerúndio'''
+| [[ababalhando#Português|ababalhando]]
+! '''Particípio'''
+| ababalhado
+|}<br/>
+{|
+|+ '''Formas pessoais'''
+|-
+! colspan="2" |
+! colspan="3" | '''singular'''
+! colspan="3" | '''plural'''
+|-
+! colspan="2" |
+! '''primeira'''
+! '''segunda'''
+! '''terceira'''
+! '''primeira'''
+! '''segunda'''
+! '''terceira'''
+|-
+! rowspan="6" | '''Modo<br>Indicativo'''
+! '''Pretérito perfeito'''
+| [[ababalhei#Português|ababalhei]]
+| [[ababalhaste#Português|ababalhaste]]
+| ababalhou
+| [[ababalhamos#Português|ababalhamos]]<sup>1</sup> /<br/>[[ababalhámos#Português|ababalhámos]]<sup>2</sup>
+|}
+<small>''<sup>1</sup> Grafia adotada no [[w:português brasileiro|português brasileiro]].''</small>
+</br><small>''<sup>2</sup> Grafia adotada no [[w:português europeu|português europeu]].''</small>
+</div></div>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "ababalhar",
+            """={{-pt-}}=
+==Verbo==
+# {{escopo|pt|Popular}} [[babar]]; [[conspurcar]]
+===Conjugação===
+{{conj/pt|ababalh|ar}}""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {"form": "ababalhando", "tags": ["gerund"]},
+                {"form": "ababalhado", "tags": ["participle"]},
+                {
+                    "form": "ababalhei",
+                    "tags": ["singular", "first-person", "indicative", "past"],
+                },
+                {
+                    "form": "ababalhaste",
+                    "tags": ["singular", "second-person", "indicative", "past"],
+                },
+                {
+                    "form": "ababalhou",
+                    "tags": ["singular", "third-person", "indicative", "past"],
+                },
+                {
+                    "form": "ababalhamos",
+                    "tags": ["plural", "first-person", "indicative", "past"],
+                },
+                {
+                    "form": "ababalhámos",
+                    "tags": ["plural", "first-person", "indicative", "past"],
+                },
+            ],
+        )
