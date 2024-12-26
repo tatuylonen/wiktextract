@@ -1,7 +1,7 @@
 import re
 from dataclasses import dataclass
 
-from wikitextprocessor import NodeKind, TemplateNode
+from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -73,3 +73,144 @@ def extract_flex_template(
                         word_entry.forms.append(form_data)
 
                     col_cell_index += col_span
+
+
+def extract_conjugation_section(
+    wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
+) -> None:
+    for t_node in level_node.find_child(NodeKind.TEMPLATE):
+        if t_node.template_name.startswith(("conj.pt", "conj/pt")):
+            extract_conj_pt_template(wxr, word_entry, t_node)
+
+
+def extract_conj_pt_template(
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+) -> None:
+    # https://pt.wiktionary.org/wiki/Predefinição:conj.pt
+    # https://pt.wiktionary.org/wiki/Predefinição:conj/pt
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for index, table_node in enumerate(
+        expanded_node.find_child_recursively(NodeKind.TABLE)
+    ):
+        match index:
+            case 0:
+                extract_conj_pt_template_first_table(
+                    wxr, word_entry, table_node
+                )
+            case 1:
+                extract_conj_pt_template_second_table(
+                    wxr, word_entry, table_node
+                )
+
+
+def extract_conj_pt_template_first_table(
+    wxr: WiktextractContext, word_entry: WordEntry, table_node: WikiNode
+) -> None:
+    for row in table_node.find_child(NodeKind.TABLE_ROW):
+        row_header = ""
+        for cell in row.find_child(
+            NodeKind.TABLE_HEADER_CELL | NodeKind.TABLE_CELL
+        ):
+            match cell.kind:
+                case NodeKind.TABLE_HEADER_CELL:
+                    row_header = clean_node(wxr, None, cell)
+                case NodeKind.TABLE_CELL:
+                    form_str = clean_node(wxr, None, cell)
+                    if form_str not in ["", wxr.wtp.title]:
+                        form = Form(form=form_str)
+                        if row_header != "":
+                            form.raw_tags.append(row_header)
+                        translate_raw_tags(form)
+                        word_entry.forms.append(form)
+
+
+def extract_conj_pt_template_second_table(
+    wxr: WiktextractContext, word_entry: WordEntry, table_node: WikiNode
+) -> None:
+    col_headers = []
+    row_headers = []
+    row_index = 0
+    for row in table_node.find_child(NodeKind.TABLE_ROW):
+        col_index = 0
+        for cell in row.find_child(
+            NodeKind.TABLE_HEADER_CELL | NodeKind.TABLE_CELL
+        ):
+            match cell.kind:
+                case NodeKind.TABLE_HEADER_CELL:
+                    colspan = 1
+                    colspan_str = cell.attrs.get("colspan", "1")
+                    if re.fullmatch(r"\d+", colspan_str):
+                        colspan = int(colspan_str)
+                    rowspan = 1
+                    rowspan_str = cell.attrs.get("rowspan", "1")
+                    if re.fullmatch(r"\d+", rowspan_str):
+                        rowspan = int(rowspan_str)
+                    header_str = clean_node(wxr, None, cell)
+                    if header_str == "":
+                        continue
+                    if rowspan > 1:
+                        row_index = 0
+                        row_headers.clear()
+                    header = TableHeader(
+                        header_str, col_index, colspan, row_index, rowspan
+                    )
+                    if not row.contain_node(NodeKind.TABLE_CELL):
+                        col_headers.append(header)
+                        col_index += colspan
+                    else:
+                        row_headers.append(header)
+                case NodeKind.TABLE_CELL:
+                    has_link = False
+                    for link_node in cell.find_child(NodeKind.LINK):
+                        link_str = clean_node(wxr, None, link_node)
+                        if link_str not in ["", wxr.wtp.title]:
+                            add_conj_pt_form(
+                                word_entry,
+                                link_str,
+                                col_index,
+                                row_index,
+                                col_headers,
+                                row_headers,
+                            )
+                        has_link = True
+                    if not has_link:
+                        cell_str = clean_node(wxr, None, cell)
+                        if cell_str not in ["", wxr.wtp.title]:
+                            add_conj_pt_form(
+                                word_entry,
+                                cell_str,
+                                col_index,
+                                row_index,
+                                col_headers,
+                                row_headers,
+                            )
+                    col_index += 1
+
+        row_index += 1
+
+
+def add_conj_pt_form(
+    word_entry: WordEntry,
+    form_str: str,
+    col_index: int,
+    row_index: int,
+    col_headers: list[TableHeader],
+    row_headers: list[TableHeader],
+) -> None:
+    form = Form(form=form_str)
+    for col_header in col_headers:
+        if (
+            col_index >= col_header.col_index
+            and col_index < col_header.col_index + col_header.colspan
+        ):
+            form.raw_tags.append(col_header.text)
+    for row_header in row_headers:
+        if (
+            row_index >= row_header.row_index
+            and row_index < row_header.row_index + row_header.rowspan
+        ):
+            form.raw_tags.append(row_header.text)
+    translate_raw_tags(form)
+    word_entry.forms.append(form)

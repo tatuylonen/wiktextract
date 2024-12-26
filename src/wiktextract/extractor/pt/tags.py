@@ -111,6 +111,26 @@ TABLE_TAGS = {
     "Normal": "standard",
     "Aumentativo": "augmentative",
     "Diminutivo": "diminutive",
+    # Predefinição:conj.pt
+    "Infinitivo impessoal": ["impersonal", "infinitive"],
+    "Gerúndio": "gerund",
+    "Particípio": "participle",
+    "primeira": "first-person",
+    "segunda": "second-person",
+    "terceira": "third-person",
+    "Modo\nIndicativo": "indicative",
+    "Presente": "present",
+    "Pretérito imperfeito": ["past", "continuative"],
+    "Pretérito perfeito": "past",
+    "Pretérito mais-que-perfeito": "pluperfect",
+    "Futuro do presente": ["future", "present"],
+    "Futuro do pretérito": ["future", "past"],
+    "Modo\nSubjuntivo\n(Conjuntivo)": ["subjunctive", "conjunctive"],
+    "Futuro": "future",
+    "Modo\nImperativo": "imperative",
+    "Afirmativo": "affirmative",
+    "Negativo": "negative",
+    "Infinitivo pessoal": ["personal", "infinitive"],
 }
 
 # https://pt.wiktionary.org/wiki/Predefinição:escopo/núcleo
