@@ -56,7 +56,7 @@ class TestPtLinkage(TestCase):
                     "senses": [
                         {
                             "glosses": ["perceber a verdade"],
-                            "raw_tags": ["intransitivo"],
+                            "tags": ["intransitive"],
                             "examples": [
                                 {
                                     "text": "Entre amores, trapaças e muitas confusões, Katie terá que lutar para conquistar seu espaço e abrir os olhos para a realidade da cidade grande."
@@ -141,7 +141,8 @@ class TestPtLinkage(TestCase):
                     "word": "cusco",
                     "sense": "animal mamífero, carnívoro e quadrúpede",
                     "sense_index": 1,
-                    "raw_tags": ["Brasil", "RS"],
+                    "tags": ["Brazil"],
+                    "raw_tags": ["RS"],
                 },
             ],
         )

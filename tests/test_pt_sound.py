@@ -48,12 +48,13 @@ class TestPtSound(TestCase):
             [
                 {
                     "ipa": "/ˈɔ.ʎʊ/",
-                    "raw_tags": ["Brasil", "Forma verbal"],
+                    "tags": ["Brazil"],
+                    "raw_tags": ["Forma verbal"],
                 },
                 {
                     "ipa": '/"O.LU/',
-                    "raw_tags": ["Brasil", "Forma verbal"],
-                    "tags": ["X-SAMPA"],
+                    "raw_tags": ["Forma verbal"],
+                    "tags": ["X-SAMPA", "Brazil"],
                 },
             ],
         )

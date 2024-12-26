@@ -84,6 +84,7 @@ class WordEntry(PortugueseBaseModel):
     categories: list[str] = []
     tags: list[str] = []
     raw_tags: list[str] = []
+    topics: list[str] = []
     translations: list[Translation] = []
     expressions: list[Linkage] = []
     antonyms: list[Linkage] = []

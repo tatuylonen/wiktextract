@@ -14,6 +14,7 @@ from .head_line import extract_head_line_nodes
 from .inflection import extract_flex_template
 from .models import Example, Linkage, Sense, WordEntry
 from .section_titles import POS_DATA
+from .tags import translate_raw_tags
 
 
 def extract_pos_section(
@@ -73,6 +74,7 @@ def extract_gloss_list_item(
     gloss_str = clean_node(wxr, sense, gloss_nodes)
     if len(gloss_str) > 0:
         sense.glosses.append(gloss_str)
+        translate_raw_tags(sense)
         word_entry.senses.append(sense)
 
     for child_list in list_item.find_child(NodeKind.LIST):
