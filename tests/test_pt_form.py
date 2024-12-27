@@ -247,3 +247,29 @@ class TestPtForm(TestCase):
                 {"form": "redd", "tags": ["past"]},
             ],
         )
+
+    def test_degree_section(self):
+        self.wxr.wtp.add_page("Predefinição:-pt-", 10, "Português")
+        data = parse_page(
+            self.wxr,
+            "bom",
+            """={{-pt-}}=
+==Adjetivo==
+# que
+===Graus===
+* '''comparativo de superioridade''': [[melhor]] do que
+* '''superlativo absoluto sintético''': [[boníssimo]], [[ótimo]]
+* '''superlativo relativo de superioridade''': melhor""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {"form": "melhor do que", "tags": ["comparative", "superior"]},
+                {"form": "boníssimo", "tags": ["absolute", "superlative"]},
+                {"form": "ótimo", "tags": ["absolute", "superlative"]},
+                {
+                    "form": "melhor",
+                    "tags": ["relative", "superlative", "superior"],
+                },
+            ],
+        )
