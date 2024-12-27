@@ -348,3 +348,19 @@ class TestRUPage(TestCase):
                 }
             ],
         )
+
+    def test_stressed_form(self):
+        self.wxr.wtp.add_page("Шаблон:-ru-", 10, "Русский")
+        data = parse_page(
+            self.wxr,
+            "-ful",
+            """= {{-ru-}} =
+== {{заголовок|ударение=коса́ (существительное I)}} ==
+{{сущ-ru|коса́|f ina 1d|слоги={{по-слогам|ко|са́}}}}
+=== Семантические свойства ===
+==== Значение ====
+# [[вид]] укладки [[волос]]""",
+        )
+        self.assertEqual(
+            data[0]["forms"], [{"form": "коса́", "tags": ["stressed"]}]
+        )

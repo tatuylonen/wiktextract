@@ -1,8 +1,9 @@
 import re
-from typing import Any, Optional
+from typing import Any
 
 from wikitextprocessor.parser import (
     LEVEL_KIND_FLAGS,
+    LevelNode,
     NodeKind,
     TemplateNode,
     WikiNode,
@@ -71,7 +72,7 @@ MORPH_TEMPLATE_ARGS = {
 
 def get_pos_from_template(
     wxr: WiktextractContext, template_node: TemplateNode
-) -> Optional[POSSubtitleData]:
+) -> POSSubtitleData | None:
     # Search for POS in template names
     template_name = template_node.template_name.lower()
     if template_name == "morph":
@@ -103,7 +104,7 @@ def get_pos_from_template(
 
 def get_pos(
     wxr: WiktextractContext, level_node: WikiNode
-) -> Optional[POSSubtitleData]:
+) -> POSSubtitleData | None:
     for template_node in level_node.find_child(NodeKind.TEMPLATE):
         pos_data = get_pos_from_template(wxr, template_node)
         if pos_data is not None:
@@ -287,6 +288,7 @@ def parse_page(
                     base_data.pos = pos_data["pos"]
                     base_data.tags.extend(pos_data.get("tags", []))
             page_data.append(base_data.model_copy(deep=True))
+            extract_level2_node_contents(wxr, page_data[-1], level2_node)
             has_level3 = False
             for level3_node in level2_node.find_child(NodeKind.LEVEL3):
                 parse_section(wxr, page_data, level3_node)
@@ -436,3 +438,22 @@ def extract_zh_forms_template(
                 base_data.forms.append(form_data)
         elif p_name == "lit":
             base_data.literal_meaning = clean_node(wxr, None, p_value)
+
+
+def extract_level2_node_contents(
+    wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
+) -> None:
+    for t_node in level_node.find_content(NodeKind.TEMPLATE):
+        if t_node.template_name in ["заголовок", "з"]:
+            # https://ru.wiktionary.org/wiki/Шаблон:з
+            stressed_form = clean_node(
+                wxr, None, t_node.template_parameters.get("ударение", "")
+            )
+            if "(" in stressed_form:
+                stressed_form = stressed_form[
+                    : stressed_form.index("(")
+                ].strip()
+            if stressed_form not in ["", wxr.wtp.title]:
+                word_entry.forms.append(
+                    Form(form=stressed_form, tags=["stressed"])
+                )
