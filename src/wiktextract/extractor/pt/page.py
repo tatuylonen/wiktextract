@@ -41,9 +41,12 @@ def parse_section(
             title_text,
             cats.get("categories", []),
         )
-    elif title_text in ["Tradução", "Traduções", "Cognatos"]:
+    elif title_text in ["Tradução", "Traduções", "Cognatos", "Descendentes"]:
         extract_translation_section(
-            wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
+            wxr,
+            page_data[-1] if len(page_data) > 0 else base_data,
+            level_node,
+            title_text,
         )
     elif title_text == "Expressões":
         extract_expression_section(

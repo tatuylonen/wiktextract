@@ -102,3 +102,5 @@ class WordEntry(PortugueseBaseModel):
     sounds: list[Sound] = []
     forms: list[Form] = []
     notes: list[str] = []
+    cognates: list[Translation] = []
+    descendants: list[Translation] = []
