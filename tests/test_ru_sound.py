@@ -29,5 +29,5 @@ class TestRUSound(TestCase):
         extract_homophone_section(self.wxr, data, root)
         self.assertEqual(
             [s.model_dump(exclude_defaults=True) for s in data.sounds],
-            [{"homophones": ["ไท", "ไถ"]}]
+            [{"homophones": ["ไท", "ไถ"]}],
         )
