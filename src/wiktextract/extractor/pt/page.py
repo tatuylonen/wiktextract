@@ -9,7 +9,7 @@ from wikitextprocessor.parser import (
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .etymology import extract_etymology_section
-from .inflection import extract_conjugation_section
+from .inflection import extract_conjugation_section, extract_degree_section
 from .linkage import (
     extract_expression_section,
     extract_linkage_section,
@@ -41,9 +41,12 @@ def parse_section(
             title_text,
             cats.get("categories", []),
         )
-    elif title_text in ["Tradução", "Traduções", "Cognatos"]:
+    elif title_text in ["Tradução", "Traduções", "Cognatos", "Descendentes"]:
         extract_translation_section(
-            wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
+            wxr,
+            page_data[-1] if len(page_data) > 0 else base_data,
+            level_node,
+            title_text,
         )
     elif title_text == "Expressões":
         extract_expression_section(
@@ -68,10 +71,14 @@ def parse_section(
         extract_phraseology_section(
             wxr, page_data[-1] if len(page_data) else base_data, level_node
         )
-    elif title_text.startswith("Nota"):
+    elif title_text.startswith(("Nota", "Uso")):
         extract_note_section(wxr, page_data, level_node)
     elif title_text == "Conjugação":
         extract_conjugation_section(
+            wxr, page_data[-1] if len(page_data) else base_data, level_node
+        )
+    elif title_text == "Graus":
+        extract_degree_section(
             wxr, page_data[-1] if len(page_data) else base_data, level_node
         )
     elif title_text.lower() not in [

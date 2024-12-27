@@ -11,9 +11,17 @@ def extract_translation_section(
     wxr: WiktextractContext,
     word_entry: WordEntry,
     level_node: LevelNode,
+    title_text: str,
 ) -> None:
     sense = ""
     sense_index = 0
+    target_field = "translations"
+    match title_text:
+        case "Cognatos":
+            target_field = "cognates"
+        case "Descendentes":
+            target_field = "descendants"
+
     for node in level_node.find_child(NodeKind.TEMPLATE | NodeKind.LIST):
         match node.kind:
             case NodeKind.TEMPLATE:
@@ -22,7 +30,12 @@ def extract_translation_section(
             case NodeKind.LIST:
                 for list_item in node.find_child(NodeKind.LIST_ITEM):
                     extract_translation_list_item(
-                        wxr, word_entry, list_item, sense, sense_index
+                        wxr,
+                        word_entry,
+                        list_item,
+                        sense,
+                        sense_index,
+                        target_field,
                     )
 
 
@@ -48,6 +61,7 @@ def extract_translation_list_item(
     list_item: WikiNode,
     sense: str,
     sense_index: int,
+    target_field: str,
 ) -> None:
     translations = []
     lang_name = "unknown"
@@ -101,10 +115,15 @@ def extract_translation_list_item(
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
             for next_list_item in node.find_child(NodeKind.LIST_ITEM):
                 extract_translation_list_item(
-                    wxr, word_entry, next_list_item, sense, sense_index
+                    wxr,
+                    word_entry,
+                    next_list_item,
+                    sense,
+                    sense_index,
+                    target_field,
                 )
 
-    word_entry.translations.extend(translations)
+    getattr(word_entry, target_field).extend(translations)
 
 
 def extract_trad_template(
@@ -239,4 +258,4 @@ def extract_translation_subpage(
     page = wxr.wtp.get_page(page_title, 0)
     if page is not None and page.body is not None:
         root = wxr.wtp.parse(page.body)
-        extract_translation_section(wxr, word_entry, root)
+        extract_translation_section(wxr, word_entry, root, "Tradução")

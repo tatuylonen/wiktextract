@@ -219,3 +219,57 @@ class TestPtForm(TestCase):
                 },
             ],
         )
+
+    def test_conj_en(self):
+        self.wxr.wtp.add_page("Predefinição:-en-", 10, "Inglês")
+        self.wxr.wtp.add_page(
+            "Predefinição:conj.en.2",
+            10,
+            """{|
+|-
+| <sup>Passado simples:</sup>
+: '''[[red]]''' / '''[[redd]]'''
+|}""",
+        )
+        data = parse_page(
+            self.wxr,
+            "rede",
+            """={{-en-}}=
+==Verbo==
+# {{escopo|en|Arcaísmo}} [[governar]], [[proteger]]
+===Conjugação===
+{{conj.en.2|rede|redes|red|redd|red|redd|reding}}""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {"form": "red", "tags": ["past"]},
+                {"form": "redd", "tags": ["past"]},
+            ],
+        )
+
+    def test_degree_section(self):
+        self.wxr.wtp.add_page("Predefinição:-pt-", 10, "Português")
+        data = parse_page(
+            self.wxr,
+            "bom",
+            """={{-pt-}}=
+==Adjetivo==
+# que
+===Graus===
+* '''comparativo de superioridade''': [[melhor]] do que
+* '''superlativo absoluto sintético''': [[boníssimo]], [[ótimo]]
+* '''superlativo relativo de superioridade''': melhor""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {"form": "melhor do que", "tags": ["comparative", "superior"]},
+                {"form": "boníssimo", "tags": ["absolute", "superlative"]},
+                {"form": "ótimo", "tags": ["absolute", "superlative"]},
+                {
+                    "form": "melhor",
+                    "tags": ["relative", "superlative", "superior"],
+                },
+            ],
+        )

@@ -131,6 +131,9 @@ TABLE_TAGS = {
     "Afirmativo": "affirmative",
     "Negativo": "negative",
     "Infinitivo pessoal": ["personal", "infinitive"],
+    # Predefinição:conj.en
+    "Infinitivo": "infinitive",
+    "Passado simples": "past",
 }
 
 # https://pt.wiktionary.org/wiki/Predefinição:escopo/núcleo
@@ -209,7 +212,17 @@ GLOSS_TAGS = {
     "plural": "plural",
 }
 
-TAGS = {**HEAD_LINE_TAGS, **TABLE_TAGS, **GLOSS_TAGS}
+OTHER_TAGS = {
+    "comparativo de superioridade": ["comparative", "superior"],
+    "superlativo absoluto sintético": ["absolute", "superlative"],
+    "superlativo relativo de superioridade": [
+        "relative",
+        "superlative",
+        "superior",
+    ],
+}
+
+TAGS = {**HEAD_LINE_TAGS, **TABLE_TAGS, **GLOSS_TAGS, **OTHER_TAGS}
 
 # https://pt.wiktionary.org/wiki/Predefinição:escopo/núcleo
 TOPICS = {

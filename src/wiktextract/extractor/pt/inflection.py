@@ -81,6 +81,8 @@ def extract_conjugation_section(
     for t_node in level_node.find_child(NodeKind.TEMPLATE):
         if t_node.template_name.startswith(("conj.pt", "conj/pt")):
             extract_conj_pt_template(wxr, word_entry, t_node)
+        elif t_node.template_name.startswith("conj.en"):
+            extract_conj_en_template(wxr, word_entry, t_node)
 
 
 def extract_conj_pt_template(
@@ -214,3 +216,53 @@ def add_conj_pt_form(
             form.raw_tags.append(row_header.text)
     translate_raw_tags(form)
     word_entry.forms.append(form)
+
+
+def extract_conj_en_template(
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+) -> None:
+    # https://pt.wiktionary.org/wiki/Predefinição:conj.en
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for table in expanded_node.find_child(NodeKind.TABLE):
+        for row in table.find_child(NodeKind.TABLE_ROW):
+            for cell in row.find_child(NodeKind.TABLE_CELL):
+                raw_tag = ""
+                for sup_tag in cell.find_html("sup"):
+                    raw_tag = clean_node(wxr, None, sup_tag.children).strip(
+                        ": "
+                    )
+                for list_node in cell.find_child(NodeKind.LIST):
+                    for list_item in list_node.find_child(NodeKind.LIST_ITEM):
+                        for bold_node in list_item.find_child(NodeKind.BOLD):
+                            form_str = clean_node(wxr, None, bold_node)
+                            if form_str not in ["", wxr.wtp.title]:
+                                form = Form(form=form_str)
+                                if raw_tag != "":
+                                    form.raw_tags.append(raw_tag)
+                                translate_raw_tags(form)
+                                word_entry.forms.append(form)
+
+
+def extract_degree_section(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    level_node: LevelNode,
+) -> None:
+    for list_node in level_node.find_child(NodeKind.LIST):
+        for list_item in list_node.find_child(NodeKind.LIST_ITEM):
+            for index, bold_node in list_item.find_child(NodeKind.BOLD, True):
+                bold_str = clean_node(wxr, None, bold_node)
+                forms_str = clean_node(
+                    wxr, None, list_item.children[index + 1 :]
+                ).strip(": ")
+                for form_str in forms_str.split(","):
+                    form_str = form_str.strip()
+                    if form_str not in ["", wxr.wtp.title]:
+                        form = Form(form=form_str)
+                        if form_str != "":
+                            form.raw_tags.append(bold_str)
+                        translate_raw_tags(form)
+                        word_entry.forms.append(form)
+                break
