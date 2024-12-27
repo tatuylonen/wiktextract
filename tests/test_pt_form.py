@@ -219,3 +219,31 @@ class TestPtForm(TestCase):
                 },
             ],
         )
+
+    def test_conj_en(self):
+        self.wxr.wtp.add_page("Predefinição:-en-", 10, "Inglês")
+        self.wxr.wtp.add_page(
+            "Predefinição:conj.en.2",
+            10,
+            """{|
+|-
+| <sup>Passado simples:</sup>
+: '''[[red]]''' / '''[[redd]]'''
+|}""",
+        )
+        data = parse_page(
+            self.wxr,
+            "rede",
+            """={{-en-}}=
+==Verbo==
+# {{escopo|en|Arcaísmo}} [[governar]], [[proteger]]
+===Conjugação===
+{{conj.en.2|rede|redes|red|redd|red|redd|reding}}""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {"form": "red", "tags": ["past"]},
+                {"form": "redd", "tags": ["past"]},
+            ],
+        )

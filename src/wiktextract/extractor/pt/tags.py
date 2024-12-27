@@ -131,6 +131,9 @@ TABLE_TAGS = {
     "Afirmativo": "affirmative",
     "Negativo": "negative",
     "Infinitivo pessoal": ["personal", "infinitive"],
+    # Predefinição:conj.en
+    "Infinitivo": "infinitive",
+    "Passado simples": "past",
 }
 
 # https://pt.wiktionary.org/wiki/Predefinição:escopo/núcleo
