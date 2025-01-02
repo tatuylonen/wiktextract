@@ -109,6 +109,13 @@ def main():
         "--edition",
         type=str,
         default="en",
+        choices=[
+            p.stem
+            for p in (files("wiktextract") / "extractor").iterdir()
+            if p.is_dir()
+            and p.stem != "template"
+            and (p / "models.py").is_file()
+        ],
         help="Language code of the dump file.",
     )
     parser.add_argument(
