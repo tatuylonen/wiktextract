@@ -291,7 +291,7 @@ word `thrill` as an English verb (only one part-of-speech is shown here):
 #### Use container:
 
 ```
-$ podman run -it --rm ghcr.io/tatuylonen/wiktextract --help
+$ podman run -v /data:/data -it --rm ghcr.io/tatuylonen/wiktextract --all --all-languages --out /data/fr-20250101.jsonl --edition fr /data/frwiktionary-20250101-pages-articles.xml.bz2
 ```
 
 #### Install from source:
@@ -355,7 +355,7 @@ run the script.  The correct dump file the name
 
 An example of a typical invocation for extracting all data would be:
 ```
-wiktwords --all --all-languages --out data.json enwiktionary-20230801-pages-articles.xml.bz2
+wiktwords --all --all-languages --out data.json --edition en enwiktionary-20230801-pages-articles.xml.bz2
 ```
 
 If you wish to modify the code or test processing individual pages,
@@ -365,14 +365,14 @@ the following may also be useful:
 processing individual pages:
 
 ```
-wiktwords --db-path en_20230801.db enwiktionary-20230801-pages-articles.xml.bz2
+wiktwords --db-path en_20230801.db --edition en enwiktionary-20230801-pages-articles.xml.bz2
 ```
 
 2. To process a single page and produce a human-readable output file
 for debugging:
 
 ```
-wiktwords --db-path en_20230801.db --all --all-languages --out outfile --page page_title
+wiktwords --db-path en_20230801.db --edition en --all --all-languages --out outfile --page page_title
 ```
 
 The following command-line options can be used to control its operation:
