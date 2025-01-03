@@ -99,6 +99,7 @@ LINKAGE_SECTIONS = {
     "palavras com o kanji": "related",
     "compostos": "derived",
     "vermos derivados": "derived",
+    "expressões": "expressions",
 }
 
 LINKAGE_TAGS = {

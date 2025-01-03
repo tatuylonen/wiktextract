@@ -1,6 +1,12 @@
 import re
 
-from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
+from wikitextprocessor.parser import (
+    LEVEL_KIND_FLAGS,
+    LevelNode,
+    NodeKind,
+    TemplateNode,
+    WikiNode,
+)
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -34,6 +40,16 @@ def extract_expression_list_item(
         elif isinstance(node, str) and ":" in node:
             node = node.lstrip(": ")
             if node != "":
+                sense_nodes.append(node)
+        elif isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
+            link_str = clean_node(wxr, None, node)
+            if link_str.startswith("Wikisaurus:"):
+                extract_wikisaurus_page(
+                    wxr, word_entry, link_str, "expressions", "", 0, []
+                )
+            elif expression_data.word == "":
+                expression_data.word = link_str
+            else:
                 sense_nodes.append(node)
         elif not (isinstance(node, WikiNode) and node.kind == NodeKind.LIST):
             sense_nodes.append(node)
@@ -89,6 +105,17 @@ def extract_linkage_section(
                     source,
                     tags,
                 )
+        elif isinstance(node, WikiNode) and node.kind in LEVEL_KIND_FLAGS:
+            extract_linkage_section(
+                wxr,
+                word_entry,
+                node,
+                linkage_type,
+                sense,
+                sense_index,
+                source,
+                tags,
+            )
 
 
 def extract_fraseini_template(
@@ -220,7 +247,7 @@ def extract_wikisaurus_page(
             if pos_title != word_entry.pos_title:
                 continue
             for level3_node in level2_node.find_child(NodeKind.LEVEL3):
-                linkage_title = clean_node(wxr, None, level3_node.largs)
+                linkage_title = clean_node(wxr, None, level3_node.largs).lower()
                 if LINKAGE_SECTIONS.get(linkage_title) != linkage_type:
                     continue
                 extract_linkage_section(
