@@ -177,3 +177,21 @@ def extract_example_list_item(
         if example.ref == "":
             example.ref = clean_node(wxr, sense, ref_nodes).strip(":() \n")
         sense.examples.append(example)
+    else:
+        extract_example_text_list(wxr, sense, list_item)
+
+
+def extract_example_text_list(
+    wxr: WiktextractContext,
+    sense: Sense,
+    list_item: WikiNode,
+) -> None:
+    list_item_text = clean_node(
+        wxr, sense, list(list_item.invert_find_child(NodeKind.LIST))
+    )
+    example = Example(text=list_item_text)
+    if "-" in example.text:
+        tr_start = example.text.index("-")
+        example.translation = example.text[tr_start + 1 :].strip()
+        example.text = example.text[:tr_start].strip()
+        sense.examples.append(example)
