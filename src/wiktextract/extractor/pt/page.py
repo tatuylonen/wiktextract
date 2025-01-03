@@ -30,7 +30,7 @@ def parse_section(
 ) -> None:
     cats = {}
     title_text = clean_node(wxr, cats, level_node.largs).strip(
-        "⁰¹²³⁴⁵⁶⁷⁸⁹0123456789:"
+        "⁰¹²³⁴⁵⁶⁷⁸⁹0123456789: \n"
     )
     if title_text.lower() in POS_DATA:
         extract_pos_section(

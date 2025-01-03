@@ -175,3 +175,26 @@ class TestPtExample(TestCase):
                 ],
             },
         )
+
+    def test_plain_text_example_list(self):
+        self.wxr.wtp.add_page("Predefinição:-ja-", 10, "Japonês")
+        data = parse_page(
+            self.wxr,
+            "大家",
+            """={{-ja-}}=
+==Substantivo 2==
+# [[mestre]]; [[perito]]; [[autoridade]]
+#* [[雑学]]の'''大家''' - mestre em conhecimentos gerais""",
+        )
+        self.assertEqual(
+            data[0]["senses"][0],
+            {
+                "glosses": ["mestre; perito; autoridade"],
+                "examples": [
+                    {
+                        "text": "雑学の大家",
+                        "translation": "mestre em conhecimentos gerais",
+                    }
+                ],
+            },
+        )
