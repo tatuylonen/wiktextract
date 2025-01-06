@@ -69,7 +69,10 @@ segunda conjugación,&nbsp;irregular</span>
 || [[ves|ves]]<sup><sup>tú</sup></sup><br/>[[ves|ves]]<sup><sup>vos</sup></sup>||[[ve|ve]]|| [[vemos]]
 || [[veis|veis]]
 || [[ven|ven]]
-|}""",  # noqa: E501
+|-
+! colspan="2" style="background:#e4d4c0; color:#000; padding-left:5px"|Afirmativo
+|| [[ve|ve]]<sup><sup>tú</sup></sup><br/>[[ve|ve]]<sup><sup>vos</sup></sup>
+|}""",
         )
         root = self.wxr.wtp.parse("{{es.v.conj.ver|v}}")
         word_entry = WordEntry(
@@ -103,5 +106,13 @@ segunda conjugación,&nbsp;irregular</span>
                     "tags": ["present", "plural", "second-person"],
                 },
                 {"form": "ven", "tags": ["present", "plural", "third-person"]},
+                {
+                    "form": "ve^(tú)",
+                    "tags": ["affirmative", "singular", "second-person"],
+                },
+                {
+                    "form": "veᵛᵒˢ",
+                    "tags": ["affirmative", "singular", "second-person"],
+                },
             ],
         )
