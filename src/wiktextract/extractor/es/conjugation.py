@@ -86,6 +86,7 @@ def process_es_v_conj_template(
                     )
                 else:
                     row_header = cell_text
+                    col_cell_index += colspan - 1
                 col_header_index += colspan
             else:
                 for line in cell_text.splitlines():
