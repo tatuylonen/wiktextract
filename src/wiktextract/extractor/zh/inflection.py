@@ -26,11 +26,12 @@ def extract_inflections(
     page_data: list[WordEntry],
     level_node: WikiNode,
 ) -> None:
-    for child in level_node.find_child(NodeKind.TEMPLATE):
-        template_name = child.template_name.lower()
-        if template_name.startswith(JAPANESE_INFLECTION_TEMPLATE_PREFIXES):
+    for t_node in level_node.find_child(NodeKind.TEMPLATE):
+        if t_node.template_name.lower().startswith(
+            JAPANESE_INFLECTION_TEMPLATE_PREFIXES
+        ):
             expanded_template = wxr.wtp.parse(
-                wxr.wtp.node_to_wikitext(level_node), expand_all=True
+                wxr.wtp.node_to_wikitext(t_node), expand_all=True
             )
             for table_node in expanded_template.find_child_recursively(
                 NodeKind.TABLE
@@ -43,7 +44,7 @@ def extract_ja_inf_table(
     page_data: list[WordEntry],
     table_node: WikiNode,
 ) -> None:
-    table_header = []
+    table_header = ""
     small_tags_dict = {}
     for row_node in table_node.find_child(NodeKind.TABLE_ROW):
         if len(list(row_node.filter_empty_str_child())) == 1:
@@ -101,14 +102,16 @@ def extract_ja_inf_table(
             for form, hiragana, roman, small_tag in zip_longest(
                 form_list, hiragana_list, roman_list, small_tags
             ):
-                if form is None:
+                if form in [None, "", "－", wxr.wtp.title]:
                     continue
                 form_data = Form(
-                    raw_tags=[table_header] + raw_tags,
+                    raw_tags=[table_header] + raw_tags
+                    if table_header != ""
+                    else raw_tags,
                     source="inflection table",
                     form=form,
                     hiragana=hiragana or "",
-                    roman=roman or "",
+                    roman=roman if roman not in [None, "", "－"] else "",
                 )
                 if small_tag is not None:
                     form_data.raw_tags.append(small_tag)
