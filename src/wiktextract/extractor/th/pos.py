@@ -2,6 +2,7 @@ from wikitextprocessor import LevelNode, NodeKind, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from .example import extract_example_list_item
 from .models import Sense, WordEntry
 from .section_titles import POS_DATA
 
@@ -20,8 +21,8 @@ def extract_pos_section(
     page_data[-1].tags.extend(pos_data.get("tags", []))
 
     for list_node in level_node.find_child(NodeKind.LIST):
-        if list_node.sarg.startswith("#") and list_node.sarg.endswith("#"):
-            for list_item in list_node.find_child(NodeKind.LIST_ITEM):
+        for list_item in list_node.find_child(NodeKind.LIST_ITEM):
+            if list_node.sarg.startswith("#") and list_node.sarg.endswith("#"):
                 extract_gloss_list_item(wxr, page_data[-1], list_item)
 
 
@@ -34,6 +35,13 @@ def extract_gloss_list_item(
     gloss_str = clean_node(
         wxr, sense, list(list_item.invert_find_child(NodeKind.LIST))
     )
+    for child_list in list_item.find_child(NodeKind.LIST):
+        if child_list.sarg.startswith("#") and child_list.sarg.endswith(
+            (":", "*")
+        ):
+            for e_list_item in child_list.find_child(NodeKind.LIST_ITEM):
+                extract_example_list_item(wxr, sense, e_list_item)
+
     if gloss_str != "":
         sense.glosses.append(gloss_str)
         word_entry.senses.append(sense)

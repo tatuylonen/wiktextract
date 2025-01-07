@@ -10,11 +10,30 @@ class ThaiBaseModel(BaseModel):
     )
 
 
+class Example(ThaiBaseModel):
+    text: str
+    translation: str = ""
+    literal_meaning: str = ""
+    roman: str = Field(
+        default="", description="Romanization of the example sentence"
+    )
+    ref: str = Field(
+        default="",
+        description="Source of the sentence, like book title and page number",
+    )
+    ruby: list[tuple[str, ...]] = Field(
+        default=[], description="Japanese Kanji and furigana"
+    )
+    tags: list[str] = []
+    raw_tags: list[str] = []
+
+
 class Sense(ThaiBaseModel):
     glosses: list[str] = []
     tags: list[str] = []
     raw_tags: list[str] = []
     categories: list[str] = []
+    examples: list[Example] = []
 
 
 class WordEntry(ThaiBaseModel):
