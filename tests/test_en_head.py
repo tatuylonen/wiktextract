@@ -21,7 +21,7 @@ class HeadTests(unittest.TestCase):
             Wtp(), WiktionaryConfig(capture_language_codes=None)
         )
         self.wxr.wtp.start_page("testpage")
-        self.wxr.wtp.start_section("English")
+        self.wxr.wtp.start_section("Finnish")
 
     def tearDown(self) -> None:
         self.wxr.wtp.close_db_conn()
