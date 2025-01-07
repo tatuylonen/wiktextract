@@ -1759,6 +1759,28 @@ def add_related(
     return following_tagsets
 
 
+# Issue #967, in English word forms sometimes forms are skipped because
+# they are taggable words and their distw() is too big, like clipping from clip
+WORDS_WITH_TAG_LOOKING_FORMS: dict[str, list[str]] = {
+    "clip": ["clipping"],  # XXX remember to change me back to clipping after
+    # tests.
+}
+
+FALSE_POSITIVE_MISSING_FORMS: dict[str, list[str]] = {}
+
+FORM_ASSOCIATED_TAG_WORDS: set[str] = {
+    "participle",
+    "past",
+    "present",
+    "singular",
+    "plural",
+    "first-person",
+    "second-person",
+    "third-person",
+    "gerund",
+}
+
+
 def parse_word_head(
     wxr: WiktextractContext,
     pos: str,
@@ -2449,22 +2471,22 @@ def parse_word_head(
                         and len(parts[i - 1]) >= 4
                         and (
                             distw(titleparts, parts[i - 1]) <= 0.4
-                            # Fixes wiktextract #983, where "participle"
-                            # was too close to "Martinize" and so this accepted
-                            # ["participle", "Martinize"] as matching; this
-                            # kludge prevents this from happening if titleparts
-                            # is shorter than what would be 'related'.
-                            # This breaks if we want to detect stuff that
-                            # actually gets an extra space-separated word when
-                            # 'inflected'.
                             or (
                                 wxr.wtp.section == "English"
-                                and any(
-                                    parts[i - 1].startswith(title)
-                                    for title in titleparts
-                                )
+                                and wxr.wtp.title
+                                in WORDS_WITH_TAG_LOOKING_FORMS
+                                and parts[i - 1]
+                                in WORDS_WITH_TAG_LOOKING_FORMS[wxr.wtp.title]
                             )
                         )
+                        # Fixes wiktextract #983, where "participle"
+                        # was too close to "Martinize" and so this accepted
+                        # ["participle", "Martinize"] as matching; this
+                        # kludge prevents this from happening if titleparts
+                        # is shorter than what would be 'related'.
+                        # This breaks if we want to detect stuff that
+                        # actually gets an extra space-separated word when
+                        # 'inflected'.
                         and len(titleparts) >= len(parts[i - 1 :])
                     ):
                         # print(f"Reached; {parts=}, {parts[i-1]=}")
@@ -2513,6 +2535,32 @@ def parse_word_head(
 
             # print("FORM END: tagsets={} related={}".format(tagsets, related))
             # print("==================")
+
+            if (
+                len(related) <= 0
+                and wxr.wtp.section == "English"
+                and tagsets is not None
+                and len(tagsets) > 0
+                and not any(
+                    s.startswith("error-") for tagset in tagsets for s in tagset
+                )
+                and any(
+                    s in FORM_ASSOCIATED_TAG_WORDS
+                    for tagset in tagsets
+                    for s in tagset
+                )
+                and (
+                    wxr.wtp.title not in FALSE_POSITIVE_MISSING_FORMS
+                    and not any(
+                        rel in FALSE_POSITIVE_MISSING_FORMS[wxr.wtp.title or ""]
+                        for rel in related
+                    )
+                )
+            ):
+                wxr.wtp.debug(
+                    f"Form tags without form: {desc=}, {tagsets=}",
+                    sortid="form_description/20250107",
+                )
             if not tagsets:
                 continue
 
