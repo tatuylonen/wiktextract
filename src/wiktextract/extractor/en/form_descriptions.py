@@ -2447,16 +2447,25 @@ def parse_word_head(
                     if (
                         i > 1
                         and len(parts[i - 1]) >= 4
-                        and distw(titleparts, parts[i - 1]) <= 0.4
-                        # Fixes wiktextract #983, where "participle"
-                        # was too close to "Martinize" and so this accepted
-                        # ["participle", "Martinize"] as matching; this
-                        # kludge prevents this from happening if titleparts
-                        # is shorter than what would be 'related'.
-                        # This breaks if we want to detect stuff that
-                        # actually gets an extra space-separated word when
-                        # 'inflected'.
-                        and len(titleparts) >= len(parts[i - 1:])
+                        and (
+                            distw(titleparts, parts[i - 1]) <= 0.4
+                            # Fixes wiktextract #983, where "participle"
+                            # was too close to "Martinize" and so this accepted
+                            # ["participle", "Martinize"] as matching; this
+                            # kludge prevents this from happening if titleparts
+                            # is shorter than what would be 'related'.
+                            # This breaks if we want to detect stuff that
+                            # actually gets an extra space-separated word when
+                            # 'inflected'.
+                            or (
+                                wxr.wtp.section == "English"
+                                and any(
+                                    parts[i - 1].startswith(title)
+                                    for title in titleparts
+                                )
+                            )
+                        )
+                        and len(titleparts) >= len(parts[i - 1 :])
                     ):
                         # print(f"Reached; {parts=}, {parts[i-1]=}")
                         alt_related = related
