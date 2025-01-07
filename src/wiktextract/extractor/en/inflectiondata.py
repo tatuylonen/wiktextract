@@ -4021,8 +4021,13 @@ infl_map: dict[str, InflMapNode] = {
             "Moroccan Arabic",
             "Maltese",
             "Gulf Arabic",
+            "Assyrian Neo-Aramaic",
         ],
         # "pos": ["noun", "verb", "particle", "prep"],
+        "then": "stem",
+    },
+    "Base Form": {
+        "lang": ["Assyrian Neo-Aramaic",],
         "then": "stem",
     },
     "Personal-pronoun- including forms": {
