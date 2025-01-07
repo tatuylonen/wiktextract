@@ -1,0 +1,47 @@
+from wikitextprocessor import NodeKind, TemplateNode, WikiNode
+
+from ...page import clean_node
+from ...wxr_context import WiktextractContext
+from .models import Example, Sense
+
+
+def extract_example_list_item(
+    wxr: WiktextractContext, sense: Sense, list_item: WikiNode
+) -> None:
+    for node in list_item.children:
+        if isinstance(node, TemplateNode):
+            if node.template_name in ["ux", "usex", "ko-usex"]:
+                extract_ux_template(wxr, sense, node)
+
+
+def extract_ux_template(
+    wxr: WiktextractContext, sense: Sense, t_node: TemplateNode
+) -> None:
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    e_data = Example(text="")
+    for i_tag in expanded_node.find_html_recursively("i"):
+        i_class = i_tag.attrs.get("class", "")
+        if "e-example" in i_class:
+            e_data.text = clean_node(wxr, None, i_tag)
+        elif "e-transliteration" in i_class:
+            e_data.roman = clean_node(wxr, None, i_tag)
+    for span_tag in expanded_node.find_html_recursively("span"):
+        span_class = span_tag.attrs.get("class", "")
+        if "e-translation" in span_class:
+            e_data.translation = clean_node(wxr, None, span_tag)
+        elif "e-literally" in span_class:
+            e_data.literal_meaning = clean_node(wxr, None, span_tag)
+        elif "qualifier-content" in span_class:
+            raw_tag = clean_node(wxr, None, span_tag)
+            if raw_tag != "":
+                e_data.raw_tags.append(raw_tag)
+
+    e_data.ref = clean_node(
+        wxr, None, t_node.template_parameters.get("ref", "")
+    )
+    if e_data.text != "":
+        sense.examples.append(e_data)
+        for link_node in expanded_node.find_child(NodeKind.LINK):
+            clean_node(wxr, sense, link_node)
