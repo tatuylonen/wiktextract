@@ -803,3 +803,40 @@ class HeadTests(unittest.TestCase):
             )[0]["forms"],
             [{"form": "chuunibyou", "tags": ["plural"]}],
         )
+
+    def test_english_forms_that_are_also_tag_words1(self):
+        # Issue #967
+        # Specifically only for English words
+        # "clipping" is in valid tags...
+        # Check if language section is "English", then if the checked
+        # word starts with the title ([clip]ping) accept that even if
+        # the distw is high (in this case, clipping and clip -> 0.5 distw())
+        data = {}
+        self.maxDiff = 10000
+        self.wxr.wtp.start_page("clip")
+        self.wxr.wtp.start_section("English")
+        self.wxr.wtp.start_subsection("verb")
+        parse_word_head(
+            self.wxr,
+            "verb",
+            "clip (third-person singular simple present clips, present participle clipping, simple past and past participle clipped)",
+            data,
+            False,
+            None,
+        )
+        # print(json.dumps(data, indent=2, sort_keys=True))
+        self.assertEqual(
+            data,
+            {
+                "forms": [
+                    {
+                        "form": "clips",
+                        "tags": ["present", "singular", "third-person"],
+                    },
+                    {"form": "clipping", "tags": ["participle", "present"]},
+                    {"form": "clipped", "tags": ["participle", "past"]},
+                    {"form": "clipped", "tags": ["past"]},
+                ],
+            },
+        )
+
