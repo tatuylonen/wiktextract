@@ -125,7 +125,7 @@ def match_sense_index(sense_idx: str, sense: Sense) -> bool:
 
     if sense_idx == sense.sense_index:
         return True
-    first_number_str = re.split(r",|\.|-", sense.sense_index, 1)[0]
+    first_number_str = re.split(r",|\.|-", sense.sense_index, maxsplit=1)[0]
     first_number = 0
     if first_number_str.isdigit():
         first_number = int(first_number_str)

@@ -288,6 +288,7 @@ VERB_FORM_TAGS = {
     "Infinitive": "infinitive",
     "Infinitiv": "infinitive",
     "Partizipien": "participle",
+    "unregelmäßig": "irregular",
 }
 
 VOICE_TAGS = {
