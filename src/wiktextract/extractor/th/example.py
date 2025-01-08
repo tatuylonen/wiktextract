@@ -4,12 +4,16 @@ from wikitextprocessor import HTMLNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from ..ruby import extract_ruby
 from .models import Example, Sense
 from .tags import translate_raw_tags
 
 
 def extract_example_list_item(
-    wxr: WiktextractContext, sense: Sense, list_item: WikiNode
+    wxr: WiktextractContext,
+    sense: Sense,
+    list_item: WikiNode,
+    ref: str = "",
 ) -> None:
     for node in list_item.children:
         if isinstance(node, TemplateNode):
@@ -17,6 +21,13 @@ def extract_example_list_item(
                 extract_ux_template(wxr, sense, node)
             elif node.template_name in ["zh-x", "zh-usex"]:
                 extract_template_zh_x(wxr, sense, node)
+            elif node.template_name in ["ja-x", "ja-usex"]:
+                extract_template_ja_usex(wxr, sense, node, ref)
+            elif node.template_name.startswith("quote-"):
+                ref = extract_quote_template(wxr, sense, node)
+        elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
+            for child_list_item in node.find_child(NodeKind.LIST_ITEM):
+                extract_example_list_item(wxr, sense, child_list_item, ref)
 
 
 def extract_ux_template(
@@ -130,3 +141,67 @@ def extract_zh_x_no_dl_tag(
                     examples.append(example)
 
     return examples
+
+
+def extract_quote_template(
+    wxr: WiktextractContext,
+    sense: Sense,
+    t_node: TemplateNode,
+) -> str:
+    ref = ""
+    if all(
+        arg not in t_node.template_parameters for arg in ["text", "passage", 7]
+    ):
+        ref = clean_node(wxr, sense, t_node)
+    else:
+        expanded_node = wxr.wtp.parse(
+            wxr.wtp.node_to_wikitext(t_node), expand_all=True
+        )
+        example = Example(text="")
+        for span_tag in expanded_node.find_html_recursively("span"):
+            span_class = span_tag.attrs.get("class", "")
+            if "cited-source" == span_class:
+                example.ref = clean_node(wxr, None, span_tag)
+            elif "e-quotation" in span_class:
+                example.text = clean_node(wxr, None, span_tag)
+            elif "e-translation" in span_class:
+                example.translation = clean_node(wxr, None, span_tag)
+        for i_tag in expanded_node.find_html_recursively(
+            "i", attr_name="class", attr_value="e-transliteration"
+        ):
+            example.roman = clean_node(wxr, None, i_tag)
+            break
+        if example.text != "":
+            sense.examples.append(example)
+        clean_node(wxr, sense, expanded_node)
+
+    return ref
+
+
+def extract_template_ja_usex(
+    wxr: WiktextractContext, sense: Sense, t_node: TemplateNode, ref: str
+) -> None:
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    example = Example(text="", ref=ref)
+    for span_tag in expanded_node.find_html(
+        "span", attr_name="class", attr_value="Jpan"
+    ):
+        ruby_data, node_without_ruby = extract_ruby(wxr, span_tag)
+        example.text = clean_node(wxr, None, node_without_ruby)
+        example.ruby = ruby_data
+    for span_tag in expanded_node.find_html_recursively(
+        "span", attr_name="class", attr_value="tr"
+    ):
+        example.roman = clean_node(wxr, None, span_tag)
+    example.translation = clean_node(
+        wxr, None, t_node.template_parameters.get(3, "")
+    )
+    example.literal_meaning = clean_node(
+        wxr, None, t_node.template_parameters.get("lit", "")
+    )
+    if example.text != "":
+        sense.examples.append(example)
+        for link_node in expanded_node.find_child(NodeKind.LINK):
+            clean_node(wxr, sense, link_node)
