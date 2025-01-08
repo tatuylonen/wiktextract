@@ -381,7 +381,7 @@ The following command-line options can be used to control its operation:
 * --all-languages: extract words for all available languages
 * --language-code LANGUAGE_CODE: extracts the given language (this option may be specified multiple times; defaults to dump file language code and `mul`(Translingual))
 * --language-name LANGUAGE_NAME: Similar to `--language-code` except this option accepts language name
-* --edition LANGUAGE_CODE: specifies the language code for the Wiktionary edition that the dump file is for (defaults to "en"; other supported editions are listed in `-h` help descriptions)
+* --edition LANGUAGE_CODE: specifies the language code for the Wiktionary edition that the dump file is for (supported editions are listed in `-h` help descriptions)
 * --skip-extraction: Used to create a database file from the dump file without waiting for the extraction process to complete.
 * --all: causes all data to be captured for the selected languages
 * --translations: causes translations to be captured

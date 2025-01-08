@@ -108,7 +108,7 @@ def main():
         "--dump-file-language-code",
         "--edition",
         type=str,
-        default="en",
+        required=True,
         choices=sorted(
             [
                 p.stem
