@@ -1,12 +1,14 @@
 from dataclasses import dataclass
 
-from wikitextprocessor import NodeKind
-from wikitextprocessor.parser import HTMLNode, TemplateNode
+from wikitextprocessor.parser import HTMLNode, NodeKind, TemplateNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .models import Form, WordEntry
 from .tags import translate_raw_tags
+
+
+LEVEL2_TAGS = frozenset(["untrennbar", "unregelmäßig"])
 
 
 def parse_flexion_page(
@@ -19,17 +21,26 @@ def parse_flexion_page(
     if flexion_page is None:
         return
     flexion_root = wxr.wtp.parse(flexion_page)
-    for flexion_template in flexion_root.find_child_recursively(
-        NodeKind.TEMPLATE
+    shared_raw_tags = []
+    for node in flexion_root.find_child_recursively(
+        NodeKind.TEMPLATE | NodeKind.LEVEL2
     ):
-        if flexion_template.template_name.startswith("Deklinationsseite"):
-            process_deklinationsseite_template(
-                wxr, word_entry, flexion_template, page_title
-            )
-        elif flexion_template.template_name.startswith("Deutsch Verb"):
-            process_deutsch_verb_template(
-                wxr, word_entry, flexion_template, page_title
-            )
+        match node.kind:
+            case NodeKind.LEVEL2:
+                shared_raw_tags.clear()
+                section_str = clean_node(wxr, None, node.largs)
+                for raw_tag in LEVEL2_TAGS:
+                    if raw_tag in section_str:
+                        shared_raw_tags.append(raw_tag)
+            case NodeKind.TEMPLATE:
+                if node.template_name.startswith("Deklinationsseite"):
+                    process_deklinationsseite_template(
+                        wxr, word_entry, node, page_title
+                    )
+                elif node.template_name.startswith("Deutsch Verb"):
+                    process_deutsch_verb_template(
+                        wxr, word_entry, node, page_title, shared_raw_tags
+                    )
 
 
 @dataclass
@@ -113,6 +124,7 @@ def process_deutsch_verb_template(
     word_entry: WordEntry,
     template_node: TemplateNode,
     page_tite: str,
+    shared_raw_tags: list[str],
 ) -> None:
     # Vorlage:Deutsch Verb regelmäßig
     expanded_template = wxr.wtp.parse(
@@ -201,7 +213,9 @@ def process_deutsch_verb_template(
                                     ":", 1
                                 )
                             form = Form(
-                                form=form_text.strip(), source=page_tite
+                                form=form_text.strip(),
+                                source=page_tite,
+                                raw_tags=shared_raw_tags,
                             )
                             if form_raw_tag != "":
                                 form.raw_tags.append(form_raw_tag)
