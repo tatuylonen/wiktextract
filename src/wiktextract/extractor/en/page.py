@@ -1565,7 +1565,7 @@ def parse_language(
             # of templates in headers that you want to squash and apply as
             # tags, you can add them to WORD_LEVEL_HEAD_TEMPLATES
             for templ_data in term_label_templates:
-                print(templ_data)
+                # print(templ_data)
                 expan = templ_data.get("expansion", "").strip("().,; ")
                 if not expan:
                     continue
