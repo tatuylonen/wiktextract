@@ -1,10 +1,11 @@
-from wikitextprocessor import LevelNode, NodeKind, WikiNode
+from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .example import extract_example_list_item
 from .models import Sense, WordEntry
 from .section_titles import POS_DATA
+from .tags import translate_raw_tags
 
 
 def extract_pos_section(
@@ -32,9 +33,18 @@ def extract_gloss_list_item(
     list_item: WikiNode,
 ) -> None:
     sense = Sense()
-    gloss_str = clean_node(
-        wxr, sense, list(list_item.invert_find_child(NodeKind.LIST))
-    )
+    gloss_nodes = []
+    for node in list_item.children:
+        if isinstance(node, TemplateNode) and node.template_name in [
+            "label",
+            "lb",
+            "lbl",
+        ]:
+            extract_label_template(wxr, sense, node)
+        elif not (isinstance(node, WikiNode) and node.kind == NodeKind.LIST):
+            gloss_nodes.append(node)
+
+    gloss_str = clean_node(wxr, sense, gloss_nodes)
     for child_list in list_item.find_child(NodeKind.LIST):
         if child_list.sarg.startswith("#") and child_list.sarg.endswith(
             (":", "*")
@@ -44,4 +54,17 @@ def extract_gloss_list_item(
 
     if gloss_str != "":
         sense.glosses.append(gloss_str)
+        translate_raw_tags(sense)
         word_entry.senses.append(sense)
+
+
+def extract_label_template(
+    wxr: WiktextractContext,
+    sense: Sense,
+    t_node: TemplateNode,
+) -> None:
+    raw_tag_str = clean_node(wxr, sense, t_node).strip("() ")
+    for raw_tag in raw_tag_str.split(","):
+        raw_tag = raw_tag.strip()
+        if raw_tag != "":
+            sense.raw_tags.append(raw_tag)

@@ -69,3 +69,29 @@ class TestThGloss(TestCase):
                 },
             ],
         )
+
+    def test_label_template(self):
+        self.wxr.wtp.add_page(
+            "แม่แบบ:lb",
+            10,
+            """<span class="usage-label-sense"><span class="ib-brac">(</span><span class="ib-content">[[Appendix:Glossary#ไม่ทางการ|ไม่ทางการ]][[Category:ศัพท์ภาษาญี่ปุ่นที่ไม่เป็นทางการ|にいはお]][[Category:ญี่ปุ่น terms with non-redundant non-automated sortkeys|にいはお]]<span class="ib-comma">,</span>&#32;พบได้ยาก[[Category:ศัพท์ภาษาญี่ปุ่นที่มีนัยพบได้ยาก|にいはお]][[Category:ญี่ปุ่น terms with non-redundant non-automated sortkeys|にいはお]]</span><span class="ib-brac">)</span></span> """,
+        )
+        page_data = parse_page(
+            self.wxr,
+            "กบ",
+            """== ภาษาญี่ปุ่น ==
+=== คำอุทาน ===
+# {{lb|ja|ไม่ทางการ|พบยาก|sort=にいはお}} [[สวัสดี]]""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"][0],
+            {
+                "categories": [
+                    "ศัพท์ภาษาญี่ปุ่นที่ไม่เป็นทางการ",
+                    "ญี่ปุ่น terms with non-redundant non-automated sortkeys",
+                    "ศัพท์ภาษาญี่ปุ่นที่มีนัยพบได้ยาก",
+                ],
+                "raw_tags": ["ไม่ทางการ", "พบได้ยาก"],
+                "glosses": ["สวัสดี"],
+            },
+        )
