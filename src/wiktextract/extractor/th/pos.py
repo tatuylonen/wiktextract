@@ -23,10 +23,17 @@ def extract_pos_section(
     page_data[-1].pos = pos_data["pos"]
     page_data[-1].tags.extend(pos_data.get("tags", []))
 
-    for list_node in level_node.find_child(NodeKind.LIST):
+    gloss_list_index = len(level_node.children)
+    for index, list_node in level_node.find_child(NodeKind.LIST, True):
         for list_item in list_node.find_child(NodeKind.LIST_ITEM):
             if list_node.sarg.startswith("#") and list_node.sarg.endswith("#"):
                 extract_gloss_list_item(wxr, page_data[-1], list_item)
+                if index < gloss_list_index:
+                    gloss_list_index = index
+
+    for node in level_node.children[:gloss_list_index]:
+        if isinstance(node, TemplateNode) and node.template_name == "th-noun":
+            extract_th_noun_template(wxr, page_data[-1], node)
 
 
 def extract_gloss_list_item(
@@ -88,3 +95,20 @@ def extract_cls_template(
         if cls != "":
             sense.classifiers.append(cls)
     clean_node(wxr, sense, t_node)
+
+
+def extract_th_noun_template(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    t_node: TemplateNode,
+) -> None:
+    # https://th.wiktionary.org/wiki/แม่แบบ:th-noun
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for b_tag in expanded_node.find_html_recursively("b"):
+        cls = clean_node(wxr, None, b_tag)
+        if cls != "":
+            word_entry.classifiers.append(cls)
+
+    clean_node(wxr, word_entry, expanded_node)

@@ -49,3 +49,4 @@ class WordEntry(ThaiBaseModel):
     tags: list[str] = []
     raw_tags: list[str] = []
     etymology_text: str = ""
+    classifiers: list[str] = []

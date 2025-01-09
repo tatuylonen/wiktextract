@@ -24,6 +24,11 @@ class TestThGloss(TestCase):
             10,
             """สืบทอดจาก<span class="etyl">[[w:ภาษาไทดั้งเดิม|ไทดั้งเดิม]][[Category:ศัพท์ภาษาไทยที่สืบทอดจากภาษาไทดั้งเดิม|กบ]][[Category:ศัพท์ภาษาไทยที่รับมาจากภาษาไทดั้งเดิม|กบ]]</span> <i class="Latn mention" lang="tai-pro">[[การสืบสร้าง&#x3A;ไทดั้งเดิม&#x2F;kɤpᴰ|&#x2A;kɤpᴰ]]</i>""",
         )
+        self.wxr.wtp.add_page(
+            "แม่แบบ:th-noun",
+            10,
+            """<span class="headword-line"><strong class="Thai headword" lang="th">กบ</strong> (<i>คำลักษณนาม</i> <b class="Thai" lang="th">[[ตัว#ภาษาไทย|ตัว]]</b>)</span>[[Category:คำหลักภาษาไทย|กบ]]""",
+        )
         page_data = parse_page(
             self.wxr,
             "กบ",
@@ -32,7 +37,6 @@ class TestThGloss(TestCase):
 {{inh+|th|tai-pro|*kɤpᴰ}}
 
 ==== คำนาม ====
-{{th-noun|ตัว}}
 
 # [[ชื่อ]]
 
@@ -41,7 +45,7 @@ class TestThGloss(TestCase):
 ==== คำนาม ====
 {{th-noun|ตัว}}
 
-# [[ปลา]]""",
+# [[ปลา]][[คางคก]]""",
         )
         self.assertEqual(
             page_data,
@@ -60,12 +64,14 @@ class TestThGloss(TestCase):
                     "lang_code": "th",
                 },
                 {
-                    "senses": [{"glosses": ["ปลา"]}],
+                    "categories": ["คำหลักภาษาไทย"],
+                    "senses": [{"glosses": ["ปลาคางคก"]}],
                     "pos": "noun",
                     "pos_title": "คำนาม",
                     "word": "กบ",
                     "lang": "ไทย",
                     "lang_code": "th",
+                    "classifiers": ["ตัว"],
                 },
             ],
         )
@@ -119,5 +125,35 @@ class TestThGloss(TestCase):
                 ],
                 "classifiers": ["ตัว", "อัน"],
                 "glosses": ["อุปกรณ์ใช้เหลาดินสอ"],
+            },
+        )
+
+    def test_th_noun(self):
+        self.wxr.wtp.add_page(
+            "แม่แบบ:th-noun",
+            10,
+            """<span class="headword-line"><strong class="Thai headword" lang="th">กิ๊ก</strong> (<i>คำลักษณนาม</i> <b class="Thai" lang="th">[[กิ๊ก#ภาษาไทย|กิ๊ก]]</b>)</span>[[Category:คำหลักภาษาไทย|กิ๊ก]]""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "กิ๊ก",
+            """== ภาษาไทย ==
+=== รากศัพท์ 3 ===
+==== คำนาม ====
+{{th-noun|*}}
+
+# [[กิกะไบต์]], [[จิกะไบต์]]""",
+        )
+        self.assertEqual(
+            page_data[0],
+            {
+                "categories": ["คำหลักภาษาไทย"],
+                "classifiers": ["กิ๊ก"],
+                "senses": [{"glosses": ["กิกะไบต์, จิกะไบต์"]}],
+                "word": "กิ๊ก",
+                "pos": "noun",
+                "pos_title": "คำนาม",
+                "lang": "ไทย",
+                "lang_code": "th",
             },
         )
