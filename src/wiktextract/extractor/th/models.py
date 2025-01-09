@@ -34,6 +34,13 @@ class Sense(ThaiBaseModel):
     raw_tags: list[str] = []
     categories: list[str] = []
     examples: list[Example] = []
+    classifiers: list[str] = []
+
+
+class Form(ThaiBaseModel):
+    form: str
+    tags: list[str] = []
+    raw_tags: list[str] = []
 
 
 class WordEntry(ThaiBaseModel):
@@ -45,6 +52,9 @@ class WordEntry(ThaiBaseModel):
     pos_title: str = ""
     senses: list[Sense] = []
     categories: list[str] = []
+    etymology_categories: list[str] = Field(default=[], exclude=True)
     tags: list[str] = []
     raw_tags: list[str] = []
     etymology_text: str = ""
+    classifiers: list[str] = []
+    forms: list[Form] = []

@@ -1,9 +1,11 @@
+import itertools
+
 from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .example import extract_example_list_item
-from .models import Sense, WordEntry
+from .models import Form, Sense, WordEntry
 from .section_titles import POS_DATA
 from .tags import translate_raw_tags
 
@@ -21,10 +23,22 @@ def extract_pos_section(
     page_data[-1].pos = pos_data["pos"]
     page_data[-1].tags.extend(pos_data.get("tags", []))
 
-    for list_node in level_node.find_child(NodeKind.LIST):
+    gloss_list_index = len(level_node.children)
+    for index, list_node in level_node.find_child(NodeKind.LIST, True):
         for list_item in list_node.find_child(NodeKind.LIST_ITEM):
             if list_node.sarg.startswith("#") and list_node.sarg.endswith("#"):
                 extract_gloss_list_item(wxr, page_data[-1], list_item)
+                if index < gloss_list_index:
+                    gloss_list_index = index
+
+    for node in level_node.children[:gloss_list_index]:
+        if isinstance(node, TemplateNode) and node.template_name == "th-noun":
+            extract_th_noun_template(wxr, page_data[-1], node)
+        elif isinstance(node, TemplateNode) and node.template_name in [
+            "th-verb",
+            "th-adj",
+        ]:
+            extract_th_verb_adj_template(wxr, page_data[-1], node)
 
 
 def extract_gloss_list_item(
@@ -41,6 +55,8 @@ def extract_gloss_list_item(
             "lbl",
         ]:
             extract_label_template(wxr, sense, node)
+        elif isinstance(node, TemplateNode) and node.template_name == "cls":
+            extract_cls_template(wxr, sense, node)
         elif not (isinstance(node, WikiNode) and node.kind == NodeKind.LIST):
             gloss_nodes.append(node)
 
@@ -63,8 +79,75 @@ def extract_label_template(
     sense: Sense,
     t_node: TemplateNode,
 ) -> None:
-    raw_tag_str = clean_node(wxr, sense, t_node).strip("() ")
-    for raw_tag in raw_tag_str.split(","):
-        raw_tag = raw_tag.strip()
-        if raw_tag != "":
-            sense.raw_tags.append(raw_tag)
+    # https://th.wiktionary.org/wiki/แม่แบบ:label
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for span_tag in expanded_node.find_html_recursively(
+        "span", attr_name="class", attr_value="ib-content"
+    ):
+        span_str = clean_node(wxr, None, span_tag)
+        for raw_tag in span_str.split(","):
+            raw_tag = raw_tag.strip()
+            if raw_tag != "":
+                sense.raw_tags.append(raw_tag)
+    clean_node(wxr, sense, expanded_node)
+
+
+def extract_cls_template(
+    wxr: WiktextractContext,
+    sense: Sense,
+    t_node: TemplateNode,
+) -> None:
+    # https://th.wiktionary.org/wiki/แม่แบบ:cls
+    for arg_name in itertools.count(2):
+        if arg_name not in t_node.template_parameters:
+            break
+        cls = clean_node(wxr, None, t_node.template_parameters[arg_name])
+        if cls != "":
+            sense.classifiers.append(cls)
+    clean_node(wxr, sense, t_node)
+
+
+def extract_th_noun_template(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    t_node: TemplateNode,
+) -> None:
+    # https://th.wiktionary.org/wiki/แม่แบบ:th-noun
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for b_tag in expanded_node.find_html_recursively("b"):
+        cls = clean_node(wxr, None, b_tag)
+        if cls != "":
+            word_entry.classifiers.append(cls)
+
+    clean_node(wxr, word_entry, expanded_node)
+
+
+def extract_th_verb_adj_template(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    t_node: TemplateNode,
+) -> None:
+    # https://th.wiktionary.org/wiki/แม่แบบ:th-noun
+    # https://th.wiktionary.org/wiki/แม่แบบ:th-adj
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for b_tag in expanded_node.find_html_recursively("b"):
+        form_str = clean_node(wxr, None, b_tag)
+        if form_str != "":
+            word_entry.forms.append(
+                Form(
+                    form=form_str,
+                    tags=[
+                        "abstract-noun"
+                        if t_node.template_name == "th-verb"
+                        else "noun-from-adj"
+                    ],
+                )
+            )
+
+    clean_node(wxr, word_entry, expanded_node)
