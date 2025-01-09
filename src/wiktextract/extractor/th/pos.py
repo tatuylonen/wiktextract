@@ -77,11 +77,18 @@ def extract_label_template(
     t_node: TemplateNode,
 ) -> None:
     # https://th.wiktionary.org/wiki/แม่แบบ:label
-    raw_tag_str = clean_node(wxr, sense, t_node).strip("() ")
-    for raw_tag in raw_tag_str.split(","):
-        raw_tag = raw_tag.strip()
-        if raw_tag != "":
-            sense.raw_tags.append(raw_tag)
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for span_tag in expanded_node.find_html_recursively(
+        "span", attr_name="class", attr_value="ib-content"
+    ):
+        span_str = clean_node(wxr, None, span_tag)
+        for raw_tag in span_str.split(","):
+            raw_tag = raw_tag.strip()
+            if raw_tag != "":
+                sense.raw_tags.append(raw_tag)
+    clean_node(wxr, sense, expanded_node)
 
 
 def extract_cls_template(
