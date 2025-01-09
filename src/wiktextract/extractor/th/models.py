@@ -37,6 +37,12 @@ class Sense(ThaiBaseModel):
     classifiers: list[str] = []
 
 
+class Form(ThaiBaseModel):
+    form: str
+    tags: list[str] = []
+    raw_tags: list[str] = []
+
+
 class WordEntry(ThaiBaseModel):
     model_config = ConfigDict(title="Thai Wiktionary")
     word: str = Field(description="Word string", min_length=1)
@@ -50,3 +56,4 @@ class WordEntry(ThaiBaseModel):
     raw_tags: list[str] = []
     etymology_text: str = ""
     classifiers: list[str] = []
+    forms: list[Form] = []

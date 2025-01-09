@@ -5,7 +5,7 @@ from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .example import extract_example_list_item
-from .models import Sense, WordEntry
+from .models import Form, Sense, WordEntry
 from .section_titles import POS_DATA
 from .tags import translate_raw_tags
 
@@ -34,6 +34,8 @@ def extract_pos_section(
     for node in level_node.children[:gloss_list_index]:
         if isinstance(node, TemplateNode) and node.template_name == "th-noun":
             extract_th_noun_template(wxr, page_data[-1], node)
+        elif isinstance(node, TemplateNode) and node.template_name == "th-verb":
+            extract_th_verb_template(wxr, page_data[-1], node)
 
 
 def extract_gloss_list_item(
@@ -110,5 +112,22 @@ def extract_th_noun_template(
         cls = clean_node(wxr, None, b_tag)
         if cls != "":
             word_entry.classifiers.append(cls)
+
+    clean_node(wxr, word_entry, expanded_node)
+
+
+def extract_th_verb_template(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    t_node: TemplateNode,
+) -> None:
+    # https://th.wiktionary.org/wiki/แม่แบบ:th-noun
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for b_tag in expanded_node.find_html_recursively("b"):
+        form_str = clean_node(wxr, None, b_tag)
+        if form_str != "":
+            word_entry.forms.append(Form(form=form_str, tags=["abstract-noun"]))
 
     clean_node(wxr, word_entry, expanded_node)

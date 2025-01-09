@@ -157,3 +157,35 @@ class TestThGloss(TestCase):
                 "lang_code": "th",
             },
         )
+
+    def test_th_verb(self):
+        self.wxr.wtp.add_page(
+            "แม่แบบ:th-verb",
+            10,
+            """<span class="headword-line"><strong class="Thai headword" lang="th">กลัว</strong> (<i>คำอาการนาม</i> <b class="Thai form-of lang-th abstract-noun-form-of pos-คำนาม" lang="th">[[การกลัว#ภาษาไทย|การกลัว]]</b> <i>หรือ</i> <b class="Thai form-of lang-th abstract-noun-form-of pos-คำนาม" lang="th">[[ความกลัว#ภาษาไทย|ความกลัว]]</b>)</span>[[Category:คำหลักภาษาไทย|กลัว]]""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "กลัว",
+            """== ภาษาไทย ==
+=== คำกริยา ===
+{{th-verb|~}}
+
+# [[รู้สึก]][[ไม่]][[อยาก]][[ประสบ]][[สิ่ง]][[ที่]]ไม่[[ดี]][[แก่]][[ตัว]]""",
+        )
+        self.assertEqual(
+            page_data[0],
+            {
+                "categories": ["คำหลักภาษาไทย"],
+                "forms": [
+                    {"form": "การกลัว", "tags": ["abstract-noun"]},
+                    {"form": "ความกลัว", "tags": ["abstract-noun"]},
+                ],
+                "senses": [{"glosses": ["รู้สึกไม่อยากประสบสิ่งที่ไม่ดีแก่ตัว"]}],
+                "word": "กลัว",
+                "pos": "verb",
+                "pos_title": "คำกริยา",
+                "lang": "ไทย",
+                "lang_code": "th",
+            },
+        )
