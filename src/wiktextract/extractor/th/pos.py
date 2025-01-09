@@ -1,3 +1,5 @@
+import itertools
+
 from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
@@ -41,6 +43,8 @@ def extract_gloss_list_item(
             "lbl",
         ]:
             extract_label_template(wxr, sense, node)
+        elif isinstance(node, TemplateNode) and node.template_name == "cls":
+            extract_cls_template(wxr, sense, node)
         elif not (isinstance(node, WikiNode) and node.kind == NodeKind.LIST):
             gloss_nodes.append(node)
 
@@ -63,8 +67,24 @@ def extract_label_template(
     sense: Sense,
     t_node: TemplateNode,
 ) -> None:
+    # https://th.wiktionary.org/wiki/แม่แบบ:label
     raw_tag_str = clean_node(wxr, sense, t_node).strip("() ")
     for raw_tag in raw_tag_str.split(","):
         raw_tag = raw_tag.strip()
         if raw_tag != "":
             sense.raw_tags.append(raw_tag)
+
+
+def extract_cls_template(
+    wxr: WiktextractContext,
+    sense: Sense,
+    t_node: TemplateNode,
+) -> None:
+    # https://th.wiktionary.org/wiki/แม่แบบ:cls
+    for arg_name in itertools.count(2):
+        if arg_name not in t_node.template_parameters:
+            break
+        cls = clean_node(wxr, None, t_node.template_parameters[arg_name])
+        if cls != "":
+            sense.classifiers.append(cls)
+    clean_node(wxr, sense, t_node)

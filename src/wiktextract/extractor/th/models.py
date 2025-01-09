@@ -34,6 +34,7 @@ class Sense(ThaiBaseModel):
     raw_tags: list[str] = []
     categories: list[str] = []
     examples: list[Example] = []
+    classifiers: list[str] = []
 
 
 class WordEntry(ThaiBaseModel):

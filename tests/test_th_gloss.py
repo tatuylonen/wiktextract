@@ -74,7 +74,7 @@ class TestThGloss(TestCase):
         self.wxr.wtp.add_page(
             "แม่แบบ:lb",
             10,
-            """<span class="usage-label-sense"><span class="ib-brac">(</span><span class="ib-content">[[Appendix:Glossary#ไม่ทางการ|ไม่ทางการ]][[Category:ศัพท์ภาษาญี่ปุ่นที่ไม่เป็นทางการ|にいはお]][[Category:ญี่ปุ่น terms with non-redundant non-automated sortkeys|にいはお]]<span class="ib-comma">,</span>&#32;พบได้ยาก[[Category:ศัพท์ภาษาญี่ปุ่นที่มีนัยพบได้ยาก|にいはお]][[Category:ญี่ปุ่น terms with non-redundant non-automated sortkeys|にいはお]]</span><span class="ib-brac">)</span></span> """,
+            """<span class="usage-label-sense"><span class="ib-brac">(</span><span class="ib-content">[[Appendix:Glossary#ไม่ทางการ|ไม่ทางการ]][[Category:ศัพท์ภาษาญี่ปุ่นที่ไม่เป็นทางการ|にいはお]][[Category:ญี่ปุ่น terms with non-redundant non-automated sortkeys|にいはお]]<span class="ib-comma">,</span>&#32;พบได้ยาก[[Category:ศัพท์ภาษาญี่ปุ่นที่มีนัยพบได้ยาก|にいはお]][[Category:ญี่ปุ่น terms with non-redundant non-automated sortkeys|にいはお]]</span><span class="ib-brac">)</span></span>""",
         )
         page_data = parse_page(
             self.wxr,
@@ -93,5 +93,31 @@ class TestThGloss(TestCase):
                 ],
                 "raw_tags": ["ไม่ทางการ", "พบได้ยาก"],
                 "glosses": ["สวัสดี"],
+            },
+        )
+
+    def test_cls_template(self):
+        self.wxr.wtp.add_page(
+            "แม่แบบ:cls",
+            10,
+            """<span><span>(''คำลักษณนาม'': '''<span class="Thai" lang="th">[[ตัว#ภาษาไทย|ตัว]]</span>'''[[หมวดหมู่:คำนามภาษาไทยที่ใช้คำลักษณนาม ตัว]]&nbsp;''หรือ''&nbsp;'''<span class="Thai" lang="th">[[อัน#ภาษาไทย|อัน]]</span>'''[[หมวดหมู่:คำนามภาษาไทยที่ใช้คำลักษณนาม อัน]])</span></span>""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "กบ",
+            """== ภาษาญี่ปุ่น ==
+=== รากศัพท์ 4 ===
+==== คำนาม ====
+# [[อุปกรณ์]][[ใช้]][[เหลา]][[ดินสอ]] {{cls|th|ตัว|อัน}}""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"][0],
+            {
+                "categories": [
+                    "คำนามภาษาไทยที่ใช้คำลักษณนาม ตัว",
+                    "คำนามภาษาไทยที่ใช้คำลักษณนาม อัน",
+                ],
+                "classifiers": ["ตัว", "อัน"],
+                "glosses": ["อุปกรณ์ใช้เหลาดินสอ"],
             },
         )
