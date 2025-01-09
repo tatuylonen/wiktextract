@@ -57,6 +57,7 @@ def parse_page(
             parse_section(wxr, page_data, base_data, next_level_node)
 
     for data in page_data:
+        data.categories.extend(data.etymology_categories)
         if len(data.senses) == 0:
             data.senses.append(Sense(tags=["no-gloss"]))
     return [m.model_dump(exclude_defaults=True) for m in page_data]
