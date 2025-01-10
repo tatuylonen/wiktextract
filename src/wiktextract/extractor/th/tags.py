@@ -8,8 +8,27 @@ EXAMPLE_TAGS = {
     "simp.": "Simplified Chinese",
 }
 
+TRANSLATION_TAGS = {
+    # แม่แบบ:t
+    # https://th.wiktionary.org/wiki/มอดูล:gender_and_number/data
+    "ญ.": "feminine",
+    "ช.": "masculine",
+    "ก.": "neuter",
+    "ร.": "common",
+    "ชีว.": "animate",
+    "อชีว.": "inanimate",
+    "สัต.": "animal-not-person",
+    "บุค.": "personal",
+    "อบุค.": "impersonal",
+    "เอก.": "singular",
+    "ทวิ.": "dual",
+    "พหู.": "plural",
+    "ไม่สมบูรณ์": "imperfective",
+    "สมบูรณ์": "perfective",
+}
 
-TAGS = {**EXAMPLE_TAGS}
+
+TAGS = {**EXAMPLE_TAGS, **TRANSLATION_TAGS}
 
 
 def translate_raw_tags(data: WordEntry) -> None:

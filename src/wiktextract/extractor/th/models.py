@@ -43,6 +43,19 @@ class Form(ThaiBaseModel):
     raw_tags: list[str] = []
 
 
+class Translation(ThaiBaseModel):
+    lang_code: str = Field(
+        description="Wiktionary language code of the translation term",
+    )
+    lang: str = Field(description="Translation language name")
+    word: str = Field(description="Translation term")
+    sense: str = Field(default="", description="Translation gloss")
+    tags: list[str] = []
+    raw_tags: list[str] = []
+    roman: str = ""
+    lit: str = Field(default="", description="Literal translation")
+
+
 class WordEntry(ThaiBaseModel):
     model_config = ConfigDict(title="Thai Wiktionary")
     word: str = Field(description="Word string", min_length=1)
@@ -58,3 +71,4 @@ class WordEntry(ThaiBaseModel):
     etymology_text: str = ""
     classifiers: list[str] = []
     forms: list[Form] = []
+    translations: list[Translation] = []
