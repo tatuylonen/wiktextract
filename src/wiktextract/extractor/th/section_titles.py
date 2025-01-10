@@ -13,3 +13,10 @@ POS_DATA = {
     "วลี": {"pos": "phrase"},
     "เลข": {"pos": "num", "tags": ["number"]},
 }
+
+
+LINKAGE_SECTIONS = {
+    "คำตรงข้าม": "antonyms",
+    "คำพ้องความ": "synonyms",
+    "ลูกคำ": "derived",
+}
