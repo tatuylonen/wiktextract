@@ -56,6 +56,13 @@ class Translation(ThaiBaseModel):
     lit: str = Field(default="", description="Literal translation")
 
 
+class Linkage(ThaiBaseModel):
+    word: str
+    tags: list[str] = []
+    raw_tags: list[str] = []
+    roman: str = ""
+
+
 class WordEntry(ThaiBaseModel):
     model_config = ConfigDict(title="Thai Wiktionary")
     word: str = Field(description="Word string", min_length=1)
@@ -72,3 +79,6 @@ class WordEntry(ThaiBaseModel):
     classifiers: list[str] = []
     forms: list[Form] = []
     translations: list[Translation] = []
+    antonyms: list[Linkage] = []
+    synonyms: list[Linkage] = []
+    derived: list[Linkage] = []

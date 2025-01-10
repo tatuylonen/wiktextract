@@ -40,7 +40,7 @@ class TestThTranslation(TestCase):
 {{trans-top|ชื่อสัตว์สะเทินน้ำสะเทินบกชนิดหนึ่ง}}
 * จีน:
 *: จีนกลาง: {{t+|cmn|蛙|tr=wā}}
-{{trans-bottom}} """,
+{{trans-bottom}}""",
         )
         self.assertEqual(
             page_data[0]["translations"],
@@ -75,7 +75,7 @@ class TestThTranslation(TestCase):
 ===== คำแปลภาษาอื่น =====
 {{trans-top}}
 * กาลิเซีย: {{t+|gl|ra|f}}
-{{trans-bottom}} """,
+{{trans-bottom}}""",
         )
         self.assertEqual(
             page_data[0]["translations"],
@@ -108,4 +108,4 @@ class TestThTranslation(TestCase):
                     "lang_code": "unknown",
                 }
             ],
-            )
+        )
