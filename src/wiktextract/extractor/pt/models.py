@@ -16,6 +16,10 @@ class Example(PortugueseBaseModel):
     ref: str = ""
 
 
+class AltForm(PortugueseBaseModel):
+    word: str
+
+
 class Sense(PortugueseBaseModel):
     glosses: list[str] = []
     tags: list[str] = []
@@ -23,6 +27,7 @@ class Sense(PortugueseBaseModel):
     categories: list[str] = []
     topics: list[str] = []
     examples: list[Example] = []
+    form_of: list[AltForm] = []
 
 
 class Translation(PortugueseBaseModel):

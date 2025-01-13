@@ -1,7 +1,6 @@
 import re
 
 from wikitextprocessor import (
-    HTMLNode,
     LevelNode,
     NodeKind,
     TemplateNode,
@@ -10,9 +9,10 @@ from wikitextprocessor import (
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from .example import extract_example_list_item
 from .head_line import extract_head_line_nodes
 from .inflection import extract_flex_template
-from .models import Example, Linkage, Sense, WordEntry
+from .models import AltForm, Linkage, Sense, WordEntry
 from .section_titles import POS_DATA
 from .tags import translate_raw_tags
 
@@ -75,6 +75,8 @@ def extract_gloss_list_item(
     if len(gloss_str) > 0:
         sense.glosses.append(gloss_str)
         translate_raw_tags(sense)
+        if "form-of" in word_entry.tags:
+            extract_form_of_word(wxr, sense, list_item)
         word_entry.senses.append(sense)
 
     for child_list in list_item.find_child(NodeKind.LIST):
@@ -112,86 +114,11 @@ def extract_escopo2_template(
     return raw_tags
 
 
-def extract_example_list_item(
-    wxr: WiktextractContext,
-    sense: Sense,
-    list_item: WikiNode,
+def extract_form_of_word(
+    wxr: WiktextractContext, sense: Sense, list_item: WikiNode
 ) -> None:
-    example = Example()
-    ref_nodes = []
-
-    for index, node in enumerate(list_item.children):
-        if (
-            isinstance(node, WikiNode)
-            and node.kind == NodeKind.ITALIC
-            and example.text == ""
-        ):
-            example.text = clean_node(wxr, None, node)
-        elif isinstance(node, HTMLNode) and node.tag == "small":
-            example.translation = clean_node(wxr, None, node)
-            if example.translation.startswith(
-                "("
-            ) and example.translation.endswith(")"):
-                example.translation = example.translation.strip("()")
-        elif isinstance(node, TemplateNode):
-            match node.template_name:
-                case "OESP":
-                    example.ref = clean_node(wxr, sense, node).strip("()")
-                case "tradex":
-                    example.text = clean_node(
-                        wxr, None, node.template_parameters.get(2, "")
-                    )
-                    example.translation = clean_node(
-                        wxr, None, node.template_parameters.get(3, "")
-                    )
-                    clean_node(wxr, sense, node)
-                case "Ex.":
-                    example.text = clean_node(
-                        wxr, sense, node.template_parameters.get(1, "")
-                    )
-        elif isinstance(node, WikiNode) and node.kind == NodeKind.BOLD:
-            bold_str = clean_node(wxr, None, node)
-            if re.fullmatch(r"\d+", bold_str) is not None:
-                list_item_str = clean_node(
-                    wxr, None, list(list_item.invert_find_child(NodeKind.LIST))
-                )
-                if list_item_str.endswith(":"):
-                    ref_nodes.clear()
-                    example.ref = list_item_str
-                    for child_list in list_item.find_child(NodeKind.LIST):
-                        for child_list_item in child_list.find_child(
-                            NodeKind.LIST_ITEM
-                        ):
-                            example.text = clean_node(
-                                wxr, None, child_list_item.children
-                            )
-                    break
-        elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
-            ref_nodes.clear()
-            for child_list_item in node.find_child(NodeKind.LIST_ITEM):
-                ref_nodes.append(child_list_item.children)
-        else:
-            ref_nodes.append(node)
-
-    if example.text != "":
-        if example.ref == "":
-            example.ref = clean_node(wxr, sense, ref_nodes).strip(":() \n")
-        sense.examples.append(example)
-    else:
-        extract_example_text_list(wxr, sense, list_item)
-
-
-def extract_example_text_list(
-    wxr: WiktextractContext,
-    sense: Sense,
-    list_item: WikiNode,
-) -> None:
-    list_item_text = clean_node(
-        wxr, sense, list(list_item.invert_find_child(NodeKind.LIST))
-    )
-    example = Example(text=list_item_text)
-    if "-" in example.text:
-        tr_start = example.text.index("-")
-        example.translation = example.text[tr_start + 1 :].strip()
-        example.text = example.text[:tr_start].strip()
-        sense.examples.append(example)
+    form_of = ""
+    for link_node in list_item.find_child_recursively(NodeKind.LINK):
+        form_of = clean_node(wxr, None, link_node)
+    if form_of != "":
+        sense.form_of.append(AltForm(word=form_of))
