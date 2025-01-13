@@ -22,6 +22,10 @@ class Example(ItalianBaseModel):
     raw_tags: list[str] = []
 
 
+class AltForm(ItalianBaseModel):
+    word: str
+
+
 class Sense(ItalianBaseModel):
     glosses: list[str] = []
     tags: list[str] = []
@@ -29,6 +33,7 @@ class Sense(ItalianBaseModel):
     categories: list[str] = []
     examples: list[Example] = []
     topics: list[str] = []
+    form_of: list[AltForm] = []
 
 
 class Translation(ItalianBaseModel):
