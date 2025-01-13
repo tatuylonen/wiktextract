@@ -93,3 +93,36 @@ class TestPtGloss(TestCase):
                 {"glosses": ["médio", "relativo à média;"]},
             ],
         )
+
+    def test_form_of_bold(self):
+        self.wxr.wtp.add_page("Predefinição:-pt-", 10, "Português")
+        data = parse_page(
+            self.wxr,
+            "cães",
+            """={{-pt-}}=
+==Forma de substantivo==
+# plural de '''[[cão]]'''""",
+        )
+        self.assertEqual(
+            data[0]["senses"],
+            [{"glosses": ["plural de cão"], "form_of": [{"word": "cão"}]}],
+        )
+
+    def test_form_of_link(self):
+        self.wxr.wtp.add_page("Predefinição:-pt-", 10, "Português")
+        data = parse_page(
+            self.wxr,
+            "cãs",
+            """={{-pt-}}=
+==Forma de substantivo==
+# feminino plural de [[cão]] (cruel, brutal)""",
+        )
+        self.assertEqual(
+            data[0]["senses"],
+            [
+                {
+                    "glosses": ["feminino plural de cão (cruel, brutal)"],
+                    "form_of": [{"word": "cão"}],
+                }
+            ],
+        )

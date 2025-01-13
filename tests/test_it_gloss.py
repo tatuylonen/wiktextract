@@ -158,3 +158,17 @@ class TestItGloss(TestCase):
                 },
             ],
         )
+
+    def test_form_of(self):
+        self.wxr.wtp.add_page("Template:-it-", 10, "Italiano")
+        data = parse_page(
+            self.wxr,
+            "cani",
+            """== {{-it-}} ==
+===Sostantivo, forma flessa===
+# plurale di [[cane]]""",
+        )
+        self.assertEqual(
+            data[0]["senses"],
+            [{"glosses": ["plurale di cane"], "form_of": [{"word": "cane"}]}],
+        )
