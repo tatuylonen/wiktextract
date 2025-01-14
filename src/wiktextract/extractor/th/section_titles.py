@@ -19,4 +19,5 @@ LINKAGE_SECTIONS = {
     "คำตรงข้าม": "antonyms",
     "คำพ้องความ": "synonyms",
     "ลูกคำ": "derived",
+    "คำเกี่ยวข้อง": "related",
 }

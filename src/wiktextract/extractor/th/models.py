@@ -63,6 +63,17 @@ class Linkage(ThaiBaseModel):
     roman: str = ""
 
 
+class Descendant(ThaiBaseModel):
+    lang_code: str = Field(description="Wiktionary language code")
+    lang: str = Field(description="Language name")
+    word: str
+    roman: str = ""
+    tags: list[str] = []
+    raw_tags: list[str] = []
+    descendants: list["Descendant"] = []
+    sense: str = ""
+
+
 class WordEntry(ThaiBaseModel):
     model_config = ConfigDict(title="Thai Wiktionary")
     word: str = Field(description="Word string", min_length=1)
@@ -82,3 +93,5 @@ class WordEntry(ThaiBaseModel):
     antonyms: list[Linkage] = []
     synonyms: list[Linkage] = []
     derived: list[Linkage] = []
+    related: list[Linkage] = []
+    descendants: list[Descendant] = []
