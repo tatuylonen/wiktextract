@@ -6,6 +6,7 @@ from wikitextprocessor.parser import LEVEL_KIND_FLAGS, LevelNode, NodeKind
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from .alt_form import extract_alt_form_section
 from .descendant import extract_descendant_section
 from .etymology import extract_etymology_section
 from .linkage import extract_linkage_section
@@ -43,6 +44,14 @@ def parse_section(
         extract_descendant_section(
             wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
         )
+    elif title_text == "การออกเสียง":
+        pass  # sounds
+    elif title_text == "รูปแบบอื่น":
+        extract_alt_form_section(
+            wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
+        )
+    elif title_text not in ["ดูเพิ่ม"]:
+        wxr.wtp.debug(f"Unknown title: {title_text}")
 
     for next_level in level_node.find_child(LEVEL_KIND_FLAGS):
         parse_section(wxr, page_data, base_data, next_level)

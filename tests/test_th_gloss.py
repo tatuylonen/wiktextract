@@ -185,3 +185,26 @@ class TestThGloss(TestCase):
                 "lang_code": "th",
             },
         )
+
+    def test_alt_template(self):
+        self.wxr.wtp.add_page(
+            "แม่แบบ:alt",
+            10,
+            """(''เลิกใช้'') <span class="Thai" lang="th">[[เดอร#ภาษาไทย|เดอร]]</span>, <span class="Thai" lang="th">[[เดิร#ภาษาไทย|เดิร]]</span>""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "เดิน",
+            """== ภาษาไทย ==
+=== รูปแบบอื่น ===
+* {{alt|th|เดอร|เดิร||เลิกใช้}}
+=== คำกริยา ===
+# [[ยก]][[เท้า]][[ก้าว]][[ไป]]""",
+        )
+        self.assertEqual(
+            page_data[0]["forms"],
+            [
+                {"form": "เดอร", "raw_tags": ["เลิกใช้"]},
+                {"form": "เดิร", "raw_tags": ["เลิกใช้"]},
+            ],
+        )

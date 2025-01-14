@@ -28,7 +28,7 @@ def extract_desc_list_item(
             "desc",
             "descendant",
             "desctree",
-            "descendants tree"
+            "descendants tree",
         ]:
             desc_list.extend(
                 extract_desc_template(wxr, word_entry, parent_data, node)

@@ -22,7 +22,7 @@ class TestThDesc(unittest.TestCase):
         self.wxr.wtp.add_page(
             "แม่แบบ:desc",
             10,
-            """<span class="desc-arr" title="borrowed">→</span> พม่า: <span class="Mymr" lang="{{{1}}}">[[{{{2}}}]]</span> <span class="mention-gloss-paren annotation-paren">(</span><span lang="my-Latn" class="tr Latn">{{{tr|}}}</span>, <span class="mention-gloss-double-quote">“</span><span class="mention-gloss">{{{t|}}}</span><span class="mention-gloss-double-quote">”</span><span class="mention-gloss-paren annotation-paren">)</span>"""
+            """<span class="desc-arr" title="borrowed">→</span> พม่า: <span class="Mymr" lang="{{{1}}}">[[{{{2}}}]]</span> <span class="mention-gloss-paren annotation-paren">(</span><span lang="my-Latn" class="tr Latn">{{{tr|}}}</span>, <span class="mention-gloss-double-quote">“</span><span class="mention-gloss">{{{t|}}}</span><span class="mention-gloss-double-quote">”</span><span class="mention-gloss-paren annotation-paren">)</span>""",
         )
         page_data = parse_page(
             self.wxr,
