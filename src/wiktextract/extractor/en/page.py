@@ -322,6 +322,10 @@ ADDITIONAL_EXPAND_TEMPLATES: set[str] = {
     "ru-alt-ё",
     "inflection of",
     "no deprecated lang param usage",
+    # These separated top and bottom templates for inflection tables were
+    # introduced at the end of 2024...
+    "inflection-table-top",
+    "inflection-table-bottom",
 }
 
 # Inverse linkage for those that have them
