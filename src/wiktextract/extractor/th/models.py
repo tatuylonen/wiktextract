@@ -96,3 +96,8 @@ class WordEntry(ThaiBaseModel):
     derived: list[Linkage] = []
     related: list[Linkage] = []
     descendants: list[Descendant] = []
+    anagrams: list[Linkage] = []
+    notes: list[str] = []
+    hyponyms: list[Linkage] = []
+    hypernyms: list[Linkage] = []
+    idioms: list[Linkage] = []
