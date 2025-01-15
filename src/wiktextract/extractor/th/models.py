@@ -41,6 +41,7 @@ class Form(ThaiBaseModel):
     form: str
     tags: list[str] = []
     raw_tags: list[str] = []
+    roman: str = ""
 
 
 class Translation(ThaiBaseModel):

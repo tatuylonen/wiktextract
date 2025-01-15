@@ -208,3 +208,26 @@ class TestThGloss(TestCase):
                 {"form": "เดิร", "raw_tags": ["เลิกใช้"]},
             ],
         )
+
+    def test_lo_alt(self):
+        self.wxr.wtp.add_page(
+            "แม่แบบ:lo-alt",
+            10,
+            """* (''ล้าสมัย'') <span class="Laoo" lang="lo">[[ທຸຣຽນ#ภาษาลาว|ທຸຣຽນ]]</span> <span class="mention-gloss-paren annotation-paren">(</span><span lang="lo-Latn" class="tr Latn">ทุรย̂น</span><span class="mention-gloss-paren annotation-paren">)</span>""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "ທຸລຽນ",
+            """== ภาษาลาว ==
+=== รูปแบบอื่น ===
+{{lo-alt|d=ທຸຣຽນ}}
+=== คำนาม ===
+{{lo-noun}}
+# [[ทุเรียน]]""",
+        )
+        self.assertEqual(
+            page_data[0]["forms"],
+            [
+                {"form": "ທຸຣຽນ", "raw_tags": ["ล้าสมัย"], "roman": "ทุรย̂น"},
+            ],
+        )
