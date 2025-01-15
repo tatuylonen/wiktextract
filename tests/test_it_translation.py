@@ -18,6 +18,9 @@ class TestItTranslation(TestCase):
             ),
         )
 
+    def tearDown(self):
+        self.wxr.wtp.close_db_conn()
+
     def test_common_lists(self):
         self.wxr.wtp.add_page("Template:-it-", 10, "Italiano")
         self.wxr.wtp.add_page("Template:ar", 10, "arabo")

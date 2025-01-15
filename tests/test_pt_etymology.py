@@ -23,6 +23,9 @@ class TestPtEtymology(TestCase):
             conf,
         )
 
+    def tearDown(self):
+        self.wxr.wtp.close_db_conn()
+
     def test_list(self):
         self.wxr.wtp.add_page("Predefinição:-pt-", 10, "Português")
         self.wxr.wtp.add_page(

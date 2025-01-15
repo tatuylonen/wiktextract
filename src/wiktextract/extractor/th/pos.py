@@ -151,3 +151,19 @@ def extract_th_verb_adj_template(
             )
 
     clean_node(wxr, word_entry, expanded_node)
+
+
+def extract_note_section(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    level_node: LevelNode,
+) -> None:
+    for list_node in level_node.find_child(NodeKind.LIST):
+        for list_item in list_node.find_child(NodeKind.LIST_ITEM):
+            note_str = clean_node(
+                wxr,
+                word_entry,
+                list(list_item.invert_find_child(NodeKind.LIST)),
+            )
+            if note_str != "":
+                word_entry.notes.append(note_str)

@@ -18,6 +18,9 @@ class TestItExample(TestCase):
             ),
         )
 
+    def tearDown(self):
+        self.wxr.wtp.close_db_conn()
+
     def test_list_example(self):
         self.wxr.wtp.add_page("Template:-br-", 10, "Bretone")
         data = parse_page(

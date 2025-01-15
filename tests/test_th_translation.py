@@ -18,6 +18,9 @@ class TestThTranslation(TestCase):
             ),
         )
 
+    def tearDown(self):
+        self.wxr.wtp.close_db_conn()
+
     def test_nested_list(self):
         self.wxr.wtp.add_page(
             "แม่แบบ:trans-top",

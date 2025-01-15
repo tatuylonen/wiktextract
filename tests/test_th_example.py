@@ -18,6 +18,9 @@ class TestThExample(TestCase):
             ),
         )
 
+    def tearDown(self):
+        self.wxr.wtp.close_db_conn()
+
     def test_ux(self):
         self.wxr.wtp.add_page(
             "แม่แบบ:ko-usex",

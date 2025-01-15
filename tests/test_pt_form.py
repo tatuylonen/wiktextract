@@ -23,6 +23,9 @@ class TestPtForm(TestCase):
             conf,
         )
 
+    def tearDown(self):
+        self.wxr.wtp.close_db_conn()
+
     def test_flex_pt_subst_completa(self):
         self.wxr.wtp.add_page("Predefinição:-pt-", 10, "Português")
         self.wxr.wtp.add_page(

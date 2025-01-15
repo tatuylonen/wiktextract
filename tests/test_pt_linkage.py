@@ -23,6 +23,9 @@ class TestPtLinkage(TestCase):
             conf,
         )
 
+    def tearDown(self):
+        self.wxr.wtp.close_db_conn()
+
     def test_expression(self):
         self.wxr.wtp.add_page("Predefinição:-pt-", 10, "Português")
         self.wxr.wtp.add_page("Predefinição:g", 10, "''masculino''")

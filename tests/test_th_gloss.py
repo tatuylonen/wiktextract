@@ -18,6 +18,9 @@ class TestThGloss(TestCase):
             ),
         )
 
+    def tearDown(self):
+        self.wxr.wtp.close_db_conn()
+
     def test_do_not_share_etymology_data(self):
         self.wxr.wtp.add_page(
             "แม่แบบ:inh+",
@@ -206,5 +209,28 @@ class TestThGloss(TestCase):
             [
                 {"form": "เดอร", "raw_tags": ["เลิกใช้"]},
                 {"form": "เดิร", "raw_tags": ["เลิกใช้"]},
+            ],
+        )
+
+    def test_lo_alt(self):
+        self.wxr.wtp.add_page(
+            "แม่แบบ:lo-alt",
+            10,
+            """* (''ล้าสมัย'') <span class="Laoo" lang="lo">[[ທຸຣຽນ#ภาษาลาว|ທຸຣຽນ]]</span> <span class="mention-gloss-paren annotation-paren">(</span><span lang="lo-Latn" class="tr Latn">ทุรย̂น</span><span class="mention-gloss-paren annotation-paren">)</span>""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "ທຸລຽນ",
+            """== ภาษาลาว ==
+=== รูปแบบอื่น ===
+{{lo-alt|d=ທຸຣຽນ}}
+=== คำนาม ===
+{{lo-noun}}
+# [[ทุเรียน]]""",
+        )
+        self.assertEqual(
+            page_data[0]["forms"],
+            [
+                {"form": "ທຸຣຽນ", "raw_tags": ["ล้าสมัย"], "roman": "ทุรย̂น"},
             ],
         )

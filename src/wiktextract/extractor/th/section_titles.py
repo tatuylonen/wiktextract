@@ -12,6 +12,20 @@ POS_DATA = {
     "คำอุทาน": {"pos": "intj"},
     "วลี": {"pos": "phrase"},
     "เลข": {"pos": "num", "tags": ["number"]},
+    "อักษรจีน": {"pos": "character"},
+    "การถอดเป็นอักษรโรมัน": {"pos": "romanization"},
+    "สัญลักษณ์": {"pos": "symbol"},
+    "คำวิเศษณ์": {"pos": "adj"},
+    "ตัวอักษร": {"pos": "character"},
+    "รูปผันคำกำกับนาม": {"pos": "noun", "tags": ["form-of"]},
+    "รูปผันคำสรรพนาม": {"pos": "pron", "tags": ["form-of"]},
+    "คำกำกับนาม": {"pos": "noun"},
+    "ตัวเลข": {"pos": "num", "tags": ["number"]},
+    "พาร์ทิซิเพิล": {"pos": "verb", "tags": ["participle"]},
+    "พยางค์": {"pos": "syllable"},
+    "คันจิ": {"pos": "character", "tags": ["kanji"]},
+    "คำอาการนาม": {"pos": "adj_noun"},
+    "อุปสรรค": {"pos": "prefix", "tags": ["morpheme"]},
 }
 
 
@@ -20,4 +34,12 @@ LINKAGE_SECTIONS = {
     "คำพ้องความ": "synonyms",
     "ลูกคำ": "derived",
     "คำเกี่ยวข้อง": "related",
+    "คำที่เกี่ยวข้อง": "related",
+    "คำที่รับมา": "derived",
+    "คำตรงกันข้าม": "antonyms",
+    "คำสลับอักษร": "anagrams",
+    "การสลับอักษร": "anagrams",
+    "คำลูกกลุ่ม": "hyponyms",
+    "คำจ่ากลุ่ม": "hypernyms",
+    "สำนวน": "idioms",
 }

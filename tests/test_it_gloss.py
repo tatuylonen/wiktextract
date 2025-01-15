@@ -18,6 +18,9 @@ class TestItGloss(TestCase):
             ),
         )
 
+    def tearDown(self):
+        self.wxr.wtp.close_db_conn()
+
     def test_gloss_list(self):
         self.wxr.wtp.add_page("Template:-it-", 10, "Italiano")
         self.wxr.wtp.add_page(
