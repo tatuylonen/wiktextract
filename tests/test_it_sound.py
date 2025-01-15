@@ -18,6 +18,9 @@ class TestItSound(TestCase):
             ),
         )
 
+    def tearDown(self):
+        self.wxr.wtp.close_db_conn()
+
     def test_hyphenation_single_list(self):
         self.wxr.wtp.add_page("Template:-it-", 10, "Italiano")
         data = parse_page(

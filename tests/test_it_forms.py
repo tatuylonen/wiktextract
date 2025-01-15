@@ -18,6 +18,9 @@ class TestItForms(TestCase):
             ),
         )
 
+    def tearDown(self):
+        self.wxr.wtp.close_db_conn()
+
     def test_tabs_template(self):
         self.wxr.wtp.add_page("Template:-it-", 10, "Italiano")
         data = parse_page(

@@ -23,6 +23,9 @@ class TestPtExample(TestCase):
             conf,
         )
 
+    def tearDown(self):
+        self.wxr.wtp.close_db_conn()
+
     def test_tradex_template(self):
         self.wxr.wtp.add_page("Predefinição:-ryu-", 10, "Okinawano")
         self.wxr.wtp.add_page("Predefinição:Substantivo", 10, "Substantivo")

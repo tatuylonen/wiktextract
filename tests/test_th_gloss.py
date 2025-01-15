@@ -18,6 +18,9 @@ class TestThGloss(TestCase):
             ),
         )
 
+    def tearDown(self):
+        self.wxr.wtp.close_db_conn()
+
     def test_do_not_share_etymology_data(self):
         self.wxr.wtp.add_page(
             "แม่แบบ:inh+",

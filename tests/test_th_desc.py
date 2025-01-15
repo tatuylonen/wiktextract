@@ -18,6 +18,9 @@ class TestThDesc(unittest.TestCase):
             ),
         )
 
+    def tearDown(self):
+        self.wxr.wtp.close_db_conn()
+
     def test_desc_template(self):
         self.wxr.wtp.add_page(
             "แม่แบบ:desc",
