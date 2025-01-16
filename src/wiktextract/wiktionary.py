@@ -4,6 +4,7 @@
 #
 # Copyright (c) 2018-2022, 2024 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
+import atexit
 import io
 import json
 import os
@@ -11,9 +12,11 @@ import re
 import tarfile
 import tempfile
 import time
-import traceback
-from multiprocessing import Pool, current_process
+from concurrent.futures import ProcessPoolExecutor
+from copy import deepcopy
+from multiprocessing import current_process, get_context
 from pathlib import Path
+from traceback import format_exc
 from typing import TextIO
 
 from wikitextprocessor import Page
@@ -39,7 +42,7 @@ def page_handler(
     # steps.
     # We've given the page_handler function an extra wxr attribute previously.
     # This should never cause an exception, and if it does, we want it to.
-    wxr: WiktextractContext = page_handler.wxr  #  type:ignore[attr-defined]
+
     # Helps debug extraction hangs. This writes the path of each file being
     # processed into /tmp/wiktextract*/wiktextract-*.  Once a hang
     # has been observed, these files contain page(s) that hang.  They should
@@ -49,7 +52,7 @@ def page_handler(
         with open(debug_path, "w", encoding="utf-8") as f:
             f.write(page.title + "\n")
 
-        wxr.wtp.start_page(page.title)
+        worker_wxr.wtp.start_page(page.title)
         try:
             title = re.sub(r"[\s\000-\037]+", " ", page.title)
             title = title.strip()
@@ -64,7 +67,7 @@ def page_handler(
             else:
                 # XXX Sign gloss pages?
                 start_t = time.time()
-                page_data = parse_page(wxr, title, page.body)  # type: ignore[arg-type]
+                page_data = parse_page(worker_wxr, title, page.body)  # type: ignore[arg-type]
                 dur = time.time() - start_t
                 if dur > 100:
                     logger.warning(
@@ -73,15 +76,15 @@ def page_handler(
                         )
                     )
 
-            return page_data, wxr.wtp.to_return()
+            return page_data, worker_wxr.wtp.to_return()
         except Exception:
-            wxr.wtp.error(
+            worker_wxr.wtp.error(
                 f'=== EXCEPTION while parsing page "{page.title}" '
                 f"in process {current_process().name}",
-                traceback.format_exc(),
+                format_exc(),
                 "page_handler_exception",
             )
-            return [], wxr.wtp.to_return()
+            return [], worker_wxr.wtp.to_return()
 
 
 def parse_wiktionary(
@@ -164,11 +167,6 @@ def estimate_progress(
         )
         last_time = current_time
     return last_time
-
-
-def init_worker_process(worker_func, wxr: WiktextractContext) -> None:
-    wxr.reconnect_databases()
-    worker_func.wxr = wxr
 
 
 def check_error(
@@ -741,6 +739,13 @@ def check_json_data(wxr: WiktextractContext, dt: dict) -> None:
         # template checking code above into a function
 
 
+def init_worker(wxr: WiktextractContext) -> None:
+    global worker_wxr
+    worker_wxr = wxr
+    worker_wxr.reconnect_databases()
+    atexit.register(worker_wxr.remove_unpicklable_objects)
+
+
 def reprocess_wiktionary(
     wxr: WiktextractContext,
     num_processes: int | None,
@@ -772,14 +777,20 @@ def reprocess_wiktionary(
         process_ns_ids, True, "wikitext", search_pattern
     )
     wxr.remove_unpicklable_objects()
-    with Pool(num_processes, init_worker_process, (page_handler, wxr)) as pool:
-        wxr.reconnect_databases(False)
+    with ProcessPoolExecutor(
+        max_workers=num_processes,
+        mp_context=get_context("spawn"),
+        initializer=init_worker,
+        initargs=(deepcopy(wxr),),
+    ) as executor:
+        wxr.reconnect_databases()
         for processed_pages, (page_data, wtp_stats) in enumerate(
-            pool.imap_unordered(
+            executor.map(
                 page_handler,
                 wxr.wtp.get_all_pages(
                     process_ns_ids, True, "wikitext", search_pattern
                 ),
+                chunksize=100,  # default is 1 too slow
             )
         ):
             wxr.config.merge_return(wtp_stats)
@@ -794,6 +805,7 @@ def reprocess_wiktionary(
             last_time = estimate_progress(
                 processed_pages, all_page_nums, start_time, last_time
             )
+
     if wxr.config.dump_file_lang_code == "en":
         emit_words_in_thesaurus(wxr, emitted, out_f, human_readable)
     logger.info("Reprocessing wiktionary complete")
