@@ -2,15 +2,18 @@
 # merged into word linkages in later stages.
 #
 # Copyright (c) 2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
+import atexit
 import os
 import sqlite3
 import tempfile
 import time
-import traceback
 from collections.abc import Iterable
+from concurrent.futures import ProcessPoolExecutor
+from copy import deepcopy
 from dataclasses import dataclass, field
-from multiprocessing import Pool, current_process
+from multiprocessing import current_process, get_context
 from pathlib import Path
+from traceback import format_exc
 from typing import Optional, TextIO
 
 from mediawiki_langcodes import code_to_name
@@ -37,30 +40,32 @@ class ThesaurusTerm:
     sense: str = ""
 
 
+def init_worker(wxr: WiktextractContext) -> None:
+    global worker_wxr
+    worker_wxr = wxr
+    worker_wxr.reconnect_databases()
+    atexit.register(worker_wxr.remove_unpicklable_objects)
+
+
 def worker_func(
     page: Page,
 ) -> tuple[bool, list[ThesaurusTerm], CollatedErrorReturnData, Optional[str]]:
-    wxr: WiktextractContext = worker_func.wxr  # type:ignore[attr-defined]
     with tempfile.TemporaryDirectory(prefix="wiktextract") as tmpdirname:
         debug_path = "{}/wiktextract-{}".format(tmpdirname, os.getpid())
         with open(debug_path, "w", encoding="utf-8") as f:
             f.write(page.title + "\n")
 
-        wxr.wtp.start_page(page.title)
+        worker_wxr.wtp.start_page(page.title)
         try:
-            terms = extract_thesaurus_page(wxr, page)
-            return True, terms, wxr.wtp.to_return(), None
-        except Exception as e:
-            lst = traceback.format_exception(
-                type(e), value=e, tb=e.__traceback__
-            )
+            terms = extract_thesaurus_page(worker_wxr, page)
+            return True, terms, worker_wxr.wtp.to_return(), None
+        except Exception:
             msg = (
-                '=== EXCEPTION while parsing page "{}":\n '
-                "in process {}".format(
+                '=== EXCEPTION while parsing page "{}":\n in process {}'.format(
                     page.title,
                     current_process().name,
                 )
-                + "".join(lst)
+                + format_exc()
             )
             return False, [], {}, msg  # type:ignore[typeddict-item]
 
@@ -77,8 +82,6 @@ def extract_thesaurus_page(
 def extract_thesaurus_data(
     wxr: WiktextractContext, num_processes: Optional[int] = None
 ) -> None:
-    from .wiktionary import init_worker_process
-
     start_t = time.time()
     logger.info("Extracting thesaurus data")
     thesaurus_ns_data: NamespaceDataEntry = wxr.wtp.NAMESPACE_DATA.get(
@@ -88,10 +91,17 @@ def extract_thesaurus_data(
     thesaurus_ns_id = thesaurus_ns_data.get("id", 0)
 
     wxr.remove_unpicklable_objects()
-    with Pool(num_processes, init_worker_process, (worker_func, wxr)) as pool:
-        wxr.reconnect_databases(False)
-        for success, terms, stats, err in pool.imap_unordered(
-            worker_func, wxr.wtp.get_all_pages([thesaurus_ns_id], False)
+    with ProcessPoolExecutor(
+        max_workers=num_processes,
+        mp_context=get_context("spawn"),
+        initializer=init_worker,
+        initargs=(deepcopy(wxr),),
+    ) as executor:
+        wxr.reconnect_databases()
+        for success, terms, stats, err in executor.map(
+            worker_func,
+            wxr.wtp.get_all_pages([thesaurus_ns_id], False),
+            chunksize=100,  # default is 1 too slow
         ):
             if not success:
                 # Print error in parent process - do not remove
