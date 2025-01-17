@@ -57,3 +57,43 @@ class TestThLinkage(TestCase):
             page_data[0]["synonyms"],
             [{"word": "มณฑก"}],
         )
+
+    def test_theasurus_page(self):
+        self.wxr.wtp.add_page(
+            "อรรถาภิธาน:ระดู",
+            110,
+            """== ภาษาไทย ==
+=== คำนาม ===
+==== {{ws sense|th|เลือดที่ถูกขับถ่ายจากมดลูกออกมาทางช่องคลอดทุก ๆ ประมาณ 1 เดือน}} ====
+===== คำพ้องความ =====
+{{ws beginlist}}
+{{ws|th|ต่อมโลหิต}}
+{{ws endlist}}""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "ระดู",
+            """== ภาษาไทย ==
+=== คำนาม ===
+# [[เลือด]]
+==== คำพ้องความ ====
+:''ดูที่ [[อรรถาภิธาน:ระดู]]''""",
+        )
+        self.assertEqual(
+            page_data[0]["synonyms"],
+            [{"word": "ต่อมโลหิต", "source": "อรรถาภิธาน:ระดู"}],
+        )
+
+    def test_syn_template(self):
+        page_data = parse_page(
+            self.wxr,
+            "โทรทัศน์",
+            """== ภาษาไทย ==
+=== คำนาม ===
+# กระบวนการถ่ายทอด
+#: {{syn|th|ทีวี|โทรภาพ}}""",
+        )
+        self.assertEqual(
+            page_data[0]["synonyms"],
+            [{"word": "ทีวี"}, {"word": "โทรภาพ"}],
+        )

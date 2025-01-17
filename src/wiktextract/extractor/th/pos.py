@@ -1,11 +1,16 @@
 import itertools
 
-from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
+from wikitextprocessor import (
+    LevelNode,
+    NodeKind,
+    TemplateNode,
+    WikiNode,
+)
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .example import extract_example_list_item
-from .models import Form, Sense, WordEntry
+from .models import AltForm, Form, Sense, WordEntry
 from .section_titles import POS_DATA
 from .tags import translate_raw_tags
 
@@ -57,6 +62,15 @@ def extract_gloss_list_item(
             extract_label_template(wxr, sense, node)
         elif isinstance(node, TemplateNode) and node.template_name == "cls":
             extract_cls_template(wxr, sense, node)
+        elif isinstance(node, TemplateNode) and (
+            node.template_name.endswith(" of")
+            or node.template_name == "altform"
+        ):
+            expanded_node = wxr.wtp.parse(
+                wxr.wtp.node_to_wikitext(node), expand_all=True
+            )
+            extract_form_of_template(wxr, sense, expanded_node)
+            gloss_nodes.append(expanded_node)
         elif not (isinstance(node, WikiNode) and node.kind == NodeKind.LIST):
             gloss_nodes.append(node)
 
@@ -66,7 +80,7 @@ def extract_gloss_list_item(
             (":", "*")
         ):
             for e_list_item in child_list.find_child(NodeKind.LIST_ITEM):
-                extract_example_list_item(wxr, sense, e_list_item)
+                extract_example_list_item(wxr, word_entry, sense, e_list_item)
 
     if gloss_str != "":
         sense.glosses.append(gloss_str)
@@ -167,3 +181,22 @@ def extract_note_section(
             )
             if note_str != "":
                 word_entry.notes.append(note_str)
+
+
+def extract_form_of_template(
+    wxr: WiktextractContext,
+    sense: Sense,
+    expanded_node: WikiNode,
+) -> None:
+    form = AltForm(word="")
+    for i_tag in expanded_node.find_html_recursively("i"):
+        form.word = clean_node(wxr, None, i_tag)
+        break
+    for span_tag in expanded_node.find_html_recursively("span"):
+        if "mention-tr" in span_tag.attrs.get("class", ""):
+            form.roman = clean_node(wxr, None, span_tag)
+            break
+    if form.word != "":
+        sense.form_of.append(form)
+        if "form-of" not in sense.tags:
+            sense.tags.append("form-of")

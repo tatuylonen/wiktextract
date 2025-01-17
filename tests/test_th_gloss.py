@@ -234,3 +234,27 @@ class TestThGloss(TestCase):
                 {"form": "ທຸຣຽນ", "raw_tags": ["ล้าสมัย"], "roman": "ทุรย̂น"},
             ],
         )
+
+    def test_alt_form_template(self):
+        self.wxr.wtp.add_page(
+            "แม่แบบ:altform",
+            10,
+            """<span class='form-of-definition use-with-mention'>อีกรูปหนึ่งของ <span class='form-of-definition-link'><i class="Lana mention" lang="nod">[[ᨸᩣ᩠ᨠ#ภาษาคำเมือง|ᨸᩣ᩠ᨠ]]</i> <span class="mention-gloss-paren annotation-paren">(</span><span lang="nod-Latn" class="mention-tr tr Latn">ปาก</span><span class="mention-gloss-paren annotation-paren">)</span></span></span>""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "ปาก",
+            """== ภาษาคำเมือง ==
+=== คำนาม ===
+{{nod-noun}}
+
+# {{altform|nod|ᨸᩣ᩠ᨠ}}""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"][0],
+            {
+                "glosses": ["อีกรูปหนึ่งของ ᨸᩣ᩠ᨠ (ปาก)"],
+                "form_of": [{"word": "ᨸᩣ᩠ᨠ", "roman": "ปาก"}],
+                "tags": ["form-of"],
+            },
+        )
