@@ -28,6 +28,11 @@ class Example(ThaiBaseModel):
     raw_tags: list[str] = []
 
 
+class AltForm(ThaiBaseModel):
+    word: str
+    roman: str = ""
+
+
 class Sense(ThaiBaseModel):
     glosses: list[str] = []
     tags: list[str] = []
@@ -35,6 +40,7 @@ class Sense(ThaiBaseModel):
     categories: list[str] = []
     examples: list[Example] = []
     classifiers: list[str] = []
+    form_of: list[AltForm] = []
 
 
 class Form(ThaiBaseModel):

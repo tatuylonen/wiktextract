@@ -187,7 +187,7 @@ class TestThExample(TestCase):
         self.wxr.wtp.add_page(
             "แม่แบบ:syn of",
             10,
-            "คำพ้องความของ 北極熊 (ฮกเกียวกุงุมะ, “หมีขั้วโลก”)",
+            """<span class='form-of-definition use-with-mention'>คำพ้องความของ <span class='form-of-definition-link'><i class="Jpan mention" lang="ja">[[北極熊#ภาษาญี่ปุ่น|北極熊]]</i> <span class="mention-gloss-paren annotation-paren">(</span><span class="mention-tr tr">ฮกเกียวกุงุมะ</span>, <span class="mention-gloss-double-quote">“</span><span class="mention-gloss">หมีขั้วโลก</span><span class="mention-gloss-double-quote">”</span><span class="mention-gloss-paren annotation-paren">)</span></span></span>""",
         )
         page_data = parse_page(
             self.wxr,
@@ -236,5 +236,7 @@ class TestThExample(TestCase):
                         "ref": "1990 มิถุนายน 15, Takahashi, Rumiko, “:แม่แบบ:jaru [PART.5 Snatching the Scroll of Secrets]”, in :แม่แบบ:wj [Ranma ½], volume 11 (fiction), Tokyo: Shogakukan, →ISBN, page 72:",
                     }
                 ],
+                "form_of": [{"word": "北極熊", "roman": "ฮกเกียวกุงุมะ"}],
+                "tags": ["form-of"],
             },
         )
