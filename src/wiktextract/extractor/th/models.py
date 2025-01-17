@@ -102,3 +102,4 @@ class WordEntry(ThaiBaseModel):
     hyponyms: list[Linkage] = []
     hypernyms: list[Linkage] = []
     idioms: list[Linkage] = []
+    coordinate_terms: list[Linkage] = []

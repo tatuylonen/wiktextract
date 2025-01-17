@@ -66,7 +66,7 @@ def extract_gloss_list_item(
             (":", "*")
         ):
             for e_list_item in child_list.find_child(NodeKind.LIST_ITEM):
-                extract_example_list_item(wxr, sense, e_list_item)
+                extract_example_list_item(wxr, word_entry, sense, e_list_item)
 
     if gloss_str != "":
         sense.glosses.append(gloss_str)

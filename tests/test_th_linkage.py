@@ -83,3 +83,17 @@ class TestThLinkage(TestCase):
             page_data[0]["synonyms"],
             [{"word": "ต่อมโลหิต", "source": "อรรถาภิธาน:ระดู"}],
         )
+
+    def test_syn_template(self):
+        page_data = parse_page(
+            self.wxr,
+            "โทรทัศน์",
+            """== ภาษาไทย ==
+=== คำนาม ===
+# กระบวนการถ่ายทอด
+#: {{syn|th|ทีวี|โทรภาพ}}""",
+        )
+        self.assertEqual(
+            page_data[0]["synonyms"],
+            [{"word": "ทีวี"}, {"word": "โทรภาพ"}],
+        )

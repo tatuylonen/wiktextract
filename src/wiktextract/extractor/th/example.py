@@ -5,16 +5,19 @@ from wikitextprocessor import HTMLNode, NodeKind, TemplateNode, WikiNode
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from ..ruby import extract_ruby
-from .models import Example, Sense
+from .models import Example, Sense, WordEntry
 from .tags import translate_raw_tags
 
 
 def extract_example_list_item(
     wxr: WiktextractContext,
+    word_entry: WordEntry,
     sense: Sense,
     list_item: WikiNode,
     ref: str = "",
 ) -> None:
+    from .linkage import LINKAGE_TEMPLATES, extract_syn_template
+
     for node in list_item.children:
         if isinstance(node, TemplateNode):
             if node.template_name in ["ux", "usex", "ko-usex"]:
@@ -25,9 +28,15 @@ def extract_example_list_item(
                 extract_template_ja_usex(wxr, sense, node, ref)
             elif node.template_name.startswith("quote-"):
                 ref = extract_quote_template(wxr, sense, node)
+            elif node.template_name in LINKAGE_TEMPLATES:
+                extract_syn_template(
+                    wxr, word_entry, node, LINKAGE_TEMPLATES[node.template_name]
+                )
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
             for child_list_item in node.find_child(NodeKind.LIST_ITEM):
-                extract_example_list_item(wxr, sense, child_list_item, ref)
+                extract_example_list_item(
+                    wxr, word_entry, sense, child_list_item, ref
+                )
 
 
 def extract_ux_template(

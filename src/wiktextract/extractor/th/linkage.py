@@ -1,3 +1,5 @@
+from itertools import count
+
 from wikitextprocessor.parser import (
     LEVEL_KIND_FLAGS,
     LevelNode,
@@ -129,3 +131,34 @@ def extract_ws_template(
     if word != "":
         l_data = Linkage(word=word, source=source)
         getattr(word_entry, linkage_type).append(l_data)
+
+
+LINKAGE_TEMPLATES = {
+    "syn": "synonyms",
+    "synonyms": "synonyms",
+    "synsee": "synonyms",
+    "ant": "antonyms",
+    "antonyms": "antonyms",
+    "cot": "coordinate_terms",
+    "coordinate terms": "coordinate_terms",
+    "hyper": "hypernyms",
+    "hypernyms": "hypernyms",
+    "hypo": "hyponyms",
+    "hyponyms": "hyponyms",
+}
+
+
+def extract_syn_template(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    t_node: TemplateNode,
+    linkage_type: str,
+) -> None:
+    for arg_name in count(2):
+        if arg_name not in t_node.template_parameters:
+            break
+        arg_value = clean_node(wxr, None, t_node.template_parameters[arg_name])
+        if arg_value.startswith("อรรถาภิธาน:"):
+            extract_thesaurus_page(wxr, word_entry, linkage_type, arg_value)
+        elif arg_value != "":
+            getattr(word_entry, linkage_type).append(Linkage(word=arg_value))
