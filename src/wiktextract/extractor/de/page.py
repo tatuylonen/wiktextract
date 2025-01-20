@@ -15,6 +15,7 @@ from .linkage import extract_linkages
 from .models import Sense, WordEntry
 from .pronunciation import extract_pronunciation_section
 from .section_titles import FORM_TITLES, LINKAGE_TITLES, POS_SECTIONS
+from .tags import translate_raw_tags
 from .translation import extract_translation
 
 
@@ -49,7 +50,11 @@ def parse_section(
                 level_node,
             )
         elif wxr.config.capture_examples and section_name == "Beispiele":
-            extract_examples(wxr, page_data, level_node)
+            extract_examples(
+                wxr,
+                page_data[-1] if len(page_data) > 0 else base_data,
+                level_node,
+            )
         elif (
             wxr.config.capture_translations and section_name == "Übersetzungen"
         ):
@@ -153,20 +158,31 @@ def process_pos_section(
                     f"Unknown Wortart template POS argument: {pos_argument}",
                     sortid="extractor/de/page/process_pos_section/55",
                 )
-        elif template_node.template_name in GENDER_TEMPLATES:
-            base_data.tags.extend(GENDER_TEMPLATES[template_node.template_name])
 
     if len(pos_data_list) == 0:
         return
+    page_data.append(base_data.model_copy(deep=True))
     for pos_index, pos_data in enumerate(pos_data_list):
         pos = pos_data["pos"]
-        pos_tags = pos_data.get("tags", [])
-        base_data.tags.extend(pos_tags)
+        for tag in pos_data.get("tags", []):
+            if tag not in page_data[-1].tags:
+                page_data[-1].tags.append(tag)
         if pos_index == 0:
-            base_data.pos = pos
-        elif pos != base_data.pos:
-            base_data.other_pos.append(pos)
-    page_data.append(base_data.model_copy(deep=True))
+            page_data[-1].pos = pos
+        elif pos != page_data[-1].pos and pos not in page_data[-1].other_pos:
+            page_data[-1].other_pos.append(pos)
+
+    for node in level_node.find_content(NodeKind.TEMPLATE | NodeKind.ITALIC):
+        if (
+            isinstance(node, TemplateNode)
+            and node.template_name in GENDER_TEMPLATES
+        ):
+            page_data[-1].tags.extend(GENDER_TEMPLATES[node.template_name])
+        elif node.kind == NodeKind.ITALIC:
+            raw_tag = clean_node(wxr, None, node)
+            if raw_tag != "":
+                page_data[-1].raw_tags.append(raw_tag)
+
     wxr.wtp.start_subsection(clean_node(wxr, page_data[-1], level_node.largs))
 
     for level_4_node in level_node.find_child(NodeKind.LEVEL4):
@@ -178,6 +194,7 @@ def process_pos_section(
 
     if not level_node.contain_node(NodeKind.LEVEL4):
         extract_glosses(wxr, page_data[-1], level_node)
+    translate_raw_tags(page_data[-1])
 
 
 def parse_page(

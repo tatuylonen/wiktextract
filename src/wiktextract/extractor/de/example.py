@@ -37,7 +37,7 @@ LITERATUR_TEMPLATE_ARGS = {
 
 def extract_examples(
     wxr: WiktextractContext,
-    page_data: list[WordEntry],
+    word_entry: WordEntry,
     level_node: LevelNode,
 ) -> None:
     last_example = None
@@ -62,11 +62,10 @@ def extract_examples(
                 example_data.text = example_text
                 if len(sense_idx) > 0:
                     find_sense = False
-                    for word_entry in page_data:
-                        for sense in word_entry.senses:
-                            if match_sense_index(sense_idx, sense):
-                                sense.examples.append(example_data)
-                                find_sense = True
+                    for sense in word_entry.senses:
+                        if match_sense_index(sense_idx, sense):
+                            sense.examples.append(example_data)
+                            find_sense = True
                     if not find_sense:
                         new_sense = Sense(
                             sense_index=sense_idx, tags=["no-gloss"]

@@ -159,3 +159,15 @@ class TestDEPage(unittest.TestCase):
             """,
         )
         self.assertEqual(data[0]["hyphenation"], "Hun·de")
+
+    def test_italic_tag_in_pos_title(self):
+        self.wxr.wtp.add_page("Vorlage:Sprache", 10, "{{{1}}}")
+        data = parse_page(
+            self.wxr,
+            "in",
+            """== in ({{Sprache|Latein}}) ==
+=== {{Wortart|Präposition|Latein}} ''mit Akkusativ'' ===
+====Bedeutungen====
+:[1] in""",
+        )
+        self.assertEqual(data[0]["tags"], ["with-accusative"])
