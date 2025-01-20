@@ -108,7 +108,6 @@ class WordEntry(ThaiBaseModel):
     pos_title: str = ""
     senses: list[Sense] = []
     categories: list[str] = []
-    etymology_categories: list[str] = Field(default=[], exclude=True)
     tags: list[str] = []
     raw_tags: list[str] = []
     etymology_text: str = ""
@@ -127,4 +126,3 @@ class WordEntry(ThaiBaseModel):
     idioms: list[Linkage] = []
     coordinate_terms: list[Linkage] = []
     sounds: list[Sound] = []
-    sound_categories: list[str] = Field(default=[], exclude=True)

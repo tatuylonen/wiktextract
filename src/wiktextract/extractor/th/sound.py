@@ -15,8 +15,6 @@ def extract_sound_section(
     base_data: WordEntry,
     level_node: LevelNode,
 ) -> None:
-    base_data.sound_categories.clear()
-    base_data.sounds.clear()
     for t_node in level_node.find_child(NodeKind.TEMPLATE):
         if t_node.template_name == "th-pron":
             extract_th_pron_template(wxr, base_data, t_node)
@@ -87,6 +85,4 @@ def extract_th_pron_template(
                         translate_raw_tags(sound)
                         base_data.sounds.append(sound)
 
-    cats = {}
-    clean_node(wxr, cats, expanded_node)
-    base_data.sound_categories = cats.get("categories", [])
+    clean_node(wxr, base_data, expanded_node)
