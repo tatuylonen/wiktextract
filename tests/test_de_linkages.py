@@ -113,8 +113,7 @@ class TestDELinkages(unittest.TestCase):
                 {
                     "word": "Hornung",
                     "sense_index": "1",
-                    "tags": ["archaic"],
-                    "raw_tags": ["landschaftlich"],
+                    "tags": ["archaic", "regional"],
                 },
             ],
         )

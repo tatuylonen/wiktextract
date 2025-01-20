@@ -15,6 +15,7 @@ from .linkage import extract_linkages
 from .models import Sense, WordEntry
 from .pronunciation import extract_pronunciation_section
 from .section_titles import FORM_TITLES, LINKAGE_TITLES, POS_SECTIONS
+from .tags import translate_raw_tags
 from .translation import extract_translation
 
 
@@ -171,9 +172,16 @@ def process_pos_section(
         elif pos != page_data[-1].pos and pos not in page_data[-1].other_pos:
             page_data[-1].other_pos.append(pos)
 
-    for t_node in level_node.find_content(NodeKind.TEMPLATE):
-        if t_node.template_name in GENDER_TEMPLATES:
-            page_data[-1].tags.extend(GENDER_TEMPLATES[t_node.template_name])
+    for node in level_node.find_content(NodeKind.TEMPLATE | NodeKind.ITALIC):
+        if (
+            isinstance(node, TemplateNode)
+            and node.template_name in GENDER_TEMPLATES
+        ):
+            page_data[-1].tags.extend(GENDER_TEMPLATES[node.template_name])
+        elif node.kind == NodeKind.ITALIC:
+            raw_tag = clean_node(wxr, None, node)
+            if raw_tag != "":
+                page_data[-1].raw_tags.append(raw_tag)
 
     wxr.wtp.start_subsection(clean_node(wxr, page_data[-1], level_node.largs))
 
@@ -186,6 +194,7 @@ def process_pos_section(
 
     if not level_node.contain_node(NodeKind.LEVEL4):
         extract_glosses(wxr, page_data[-1], level_node)
+    translate_raw_tags(page_data[-1])
 
 
 def parse_page(
