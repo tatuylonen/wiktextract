@@ -7,7 +7,6 @@ from ...wxr_context import WiktextractContext
 from .models import Form, WordEntry
 from .tags import translate_raw_tags
 
-
 LEVEL2_TAGS = frozenset(["untrennbar", "unregelmäßig"])
 
 

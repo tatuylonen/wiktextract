@@ -4,8 +4,8 @@ from wikitextprocessor import Wtp
 
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.de.gloss import extract_glosses
-from wiktextract.extractor.de.page import parse_page
 from wiktextract.extractor.de.models import WordEntry
+from wiktextract.extractor.de.page import parse_page
 from wiktextract.wxr_context import WiktextractContext
 
 

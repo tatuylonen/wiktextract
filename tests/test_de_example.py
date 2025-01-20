@@ -31,7 +31,7 @@ class TestDEExample(unittest.TestCase):
         page_data = self.get_default_page_data()
         page_data[-1].senses = [Sense(sense_index="1"), Sense(sense_index="2")]
 
-        extract_examples(self.wxr, page_data, root)
+        extract_examples(self.wxr, page_data[-1], root)
 
         senses = [
             s.model_dump(exclude_defaults=True) for s in page_data[-1].senses
@@ -65,7 +65,7 @@ class TestDEExample(unittest.TestCase):
         page_data = self.get_default_page_data()
         page_data[-1].senses = [Sense(sense_index="1")]
 
-        extract_examples(self.wxr, page_data, root)
+        extract_examples(self.wxr, page_data[-1], root)
 
         senses = [
             s.model_dump(exclude_defaults=True) for s in page_data[-1].senses
@@ -100,8 +100,7 @@ class TestDEExample(unittest.TestCase):
         self.assertEqual(
             example_data.model_dump(exclude_defaults=True),
             {
-                "ref": "Expanded template, Seite 273. "
-                "ISBN 978-3-89029-459-9.",
+                "ref": "Expanded template, Seite 273. ISBN 978-3-89029-459-9.",
                 "title": "Viva Warszawa",
                 "author": "Steffen Möller",
                 "title_complement": "Polen für Fortgeschrittene",
@@ -149,7 +148,7 @@ class TestDEExample(unittest.TestCase):
                 word="auf",
             )
         ]
-        extract_examples(self.wxr, page_data, root)
+        extract_examples(self.wxr, page_data[-1], root)
         self.assertEqual(
             [s.model_dump(exclude_defaults=True) for s in page_data[-1].senses],
             [
@@ -181,7 +180,7 @@ class TestDEExample(unittest.TestCase):
                 word="bot",
             )
         ]
-        extract_examples(self.wxr, page_data, root)
+        extract_examples(self.wxr, page_data[-1], root)
         self.assertEqual(
             [s.model_dump(exclude_defaults=True) for s in page_data[-1].senses],
             [
@@ -213,7 +212,7 @@ class TestDEExample(unittest.TestCase):
                 word="albanische Sprache",
             )
         ]
-        extract_examples(self.wxr, page_data, root)
+        extract_examples(self.wxr, page_data[-1], root)
         self.assertEqual(
             [s.model_dump(exclude_defaults=True) for s in page_data[0].senses],
             [
@@ -253,7 +252,7 @@ class TestDEExample(unittest.TestCase):
                 word="albanische Sprache",
             )
         ]
-        extract_examples(self.wxr, page_data, root)
+        extract_examples(self.wxr, page_data[-1], root)
         self.assertEqual(
             [s.model_dump(exclude_defaults=True) for s in page_data[0].senses],
             [

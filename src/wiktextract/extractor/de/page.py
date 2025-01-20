@@ -49,7 +49,11 @@ def parse_section(
                 level_node,
             )
         elif wxr.config.capture_examples and section_name == "Beispiele":
-            extract_examples(wxr, page_data, level_node)
+            extract_examples(
+                wxr,
+                page_data[-1] if len(page_data) > 0 else base_data,
+                level_node,
+            )
         elif (
             wxr.config.capture_translations and section_name == "Übersetzungen"
         ):
