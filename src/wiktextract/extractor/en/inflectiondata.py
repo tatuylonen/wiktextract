@@ -4030,10 +4030,6 @@ infl_map: dict[str, InflMapNode] = {
         "lang": ["Assyrian Neo-Aramaic",],
         "then": "stem",
     },
-    "base form": {
-        "lang": ["Assyrian Neo-Aramaic",],
-        "then": "stem",
-    },
     "Personal-pronoun- including forms": {
         "lang": [
             "Arabic",

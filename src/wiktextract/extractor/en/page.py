@@ -2340,14 +2340,7 @@ def parse_language(
         text = wxr.wtp.node_to_wikitext(node.children)
 
         # Split text into separate sections for each to-level template
-        brace_matches = re.split(r"((?:^|\n)\s*{\||\n\s*\|}|{{+|}}+)", text)
-        # ["{{", "template", "}}"] or ["^{|", "table contents", "\n|}"]
-        # The (?:...) creates a non-capturing regex group; if it was capturing,
-        # like the group around it, it would create elements in brace_matches,
-        # including None if it doesn't match.
-        # 20250114: Added {| and |} into the regex because tables were being
-        # cut into pieces by this code. Issue #973, introduction of two-part
-        # book-end templates similar to trans-top and tran-bottom.
+        brace_matches = re.split("({{+|}}+)", text)  # ["{{", "template", "}}"]
         template_sections = []
         template_nesting = 0  # depth of SINGLE BRACES { { nesting } }
         # Because there is the possibility of triple curly braces
@@ -2359,13 +2352,9 @@ def parse_language(
         # about the outer-most delimiters (the highest level template)
         # we can just count the single braces when those single
         # braces are part of a group.
-        table_nesting = 0
-        # However, if we have a stray table ({| ... |}) that should always
-        # be its own section, and should prevent templates from cutting it
-        # into sections.
 
         # print(f"Parse inflection: {text=}")
-        # print(f"Brace matches: {repr('///'.join(brace_matches))}")
+        # print(repr(brace_matches))
         if len(brace_matches) > 1:
             tsection: list[str] = []
             after_templates = False  # kludge to keep any text
@@ -2379,49 +2368,25 @@ def parse_language(
                     template_sections.append(tsection)
                     tsection = []
                     tsection.append(m)
-                elif m.startswith("{{") or m.endswith("{|"):
-                    if (
-                        template_nesting == 0
-                        and after_templates
-                        and table_nesting == 0
-                    ):
+                elif m.startswith("{{"):
+                    if template_nesting == 0 and after_templates:
                         template_sections.append(tsection)
                         tsection = []
                         # start new section
                     after_templates = True
-                    if m.startswith("{{"):
-                        template_nesting += 1
-                    else:
-                        # m.endswith("{|")
-                        table_nesting += 1
+                    template_nesting += len(m)
                     tsection.append(m)
-                elif m.startswith("}}") or m.endswith("|}"):
-                    if m.startswith("}}"):
-                        template_nesting -= 1
-                        if template_nesting < 0:
-                            wxr.wtp.error(
-                                "Negatively nested braces, "
-                                "couldn't split inflection templates, "
-                                "{}/{} section {}".format(
-                                    word, language, section
-                                ),
-                                sortid="page/1871",
-                            )
-                            template_sections = []  # use whole text
-                            break
-                    else:
-                        table_nesting -= 1
-                        if table_nesting < 0:
-                            wxr.wtp.error(
-                                "Negatively nested table braces, "
-                                "couldn't split inflection section, "
-                                "{}/{} section {}".format(
-                                    word, language, section
-                                ),
-                                sortid="page/20250114",
-                            )
-                            template_sections = []  # use whole text
-                            break
+                elif m.startswith("}}"):
+                    template_nesting -= len(m)
+                    if template_nesting < 0:
+                        wxr.wtp.error(
+                            "Negatively nested braces, "
+                            "couldn't split inflection templates, "
+                            "{}/{} section {}".format(word, language, section),
+                            sortid="page/1871",
+                        )
+                        template_sections = []  # use whole text
+                        break
                     tsection.append(m)
                 else:
                     tsection.append(m)

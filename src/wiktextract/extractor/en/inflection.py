@@ -3046,10 +3046,6 @@ def handle_wikitext_or_html_table(
     # Imported here to avoid a circular import
     from wiktextract.page import clean_node, recursively_extract
 
-    # from wikitextprocessor.parser import print_tree
-    # print_tree(tree)
-    # print("-------==========-------")
-
     if not tablecontext:
         tablecontext = TableContext()
 
@@ -3093,8 +3089,6 @@ def handle_wikitext_or_html_table(
 
         sub_ret = []
 
-        # from wikitextprocessor.parser import print_tree
-        # print_tree(tree)
         for node in tree.children:
             if not isinstance(node, WikiNode):
                 continue
@@ -3175,19 +3169,6 @@ def handle_wikitext_or_html_table(
                         colspan = 1
                     # print("COL:", col)
 
-                    if colspan > 30:
-                        wxr.wtp.error(
-                            f"Colspan {colspan} over 30, set to 1",
-                            sortid="inflection/20250113a",
-                        )
-                        colspan = 1
-                    if rowspan > 30:
-                        wxr.wtp.error(
-                            f"Rowspan {rowspan} over 30, set to 1",
-                            sortid="inflection/20250113b",
-                        )
-                        rowspan = 1
-
                     # Process any nested tables recursively.
                     tables, rest = recursively_extract(
                         col,
@@ -3198,7 +3179,6 @@ def handle_wikitext_or_html_table(
                     # Clean the rest of the cell.
                     celltext = clean_node(wxr, None, rest)
                     # print("CLEANED:", celltext)
-                    # print(f"SUBTABLES: {tables}")
 
                     # Handle nested tables.
                     for tbl in tables:
@@ -3411,10 +3391,6 @@ def parse_inflection_section(
     tables = []
     titleparts = []
     preceding_bolded_title = ""
-
-    # from wikitextprocessor.parser import print_tree
-    # print_tree(tree)
-    # print("--------------******************----------------")
 
     def process_tables():
         for kind, node, titles, after in tables:
