@@ -82,6 +82,23 @@ class Descendant(ThaiBaseModel):
     sense: str = ""
 
 
+class Sound(ThaiBaseModel):
+    zh_pron: str = Field(default="", description="Chinese word pronunciation")
+    ipa: str = Field(default="", description="International Phonetic Alphabet")
+    audio: str = Field(default="", description="Audio file name")
+    wav_url: str = ""
+    oga_url: str = ""
+    ogg_url: str = ""
+    mp3_url: str = ""
+    opus_url: str = ""
+    flac_url: str = ""
+    tags: list[str] = []
+    raw_tags: list[str] = []
+    homophone: str = ""
+    other: str = ""
+    roman: str = ""
+
+
 class WordEntry(ThaiBaseModel):
     model_config = ConfigDict(title="Thai Wiktionary")
     word: str = Field(description="Word string", min_length=1)
@@ -109,3 +126,5 @@ class WordEntry(ThaiBaseModel):
     hypernyms: list[Linkage] = []
     idioms: list[Linkage] = []
     coordinate_terms: list[Linkage] = []
+    sounds: list[Sound] = []
+    sound_categories: list[str] = Field(default=[], exclude=True)

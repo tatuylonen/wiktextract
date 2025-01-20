@@ -27,8 +27,12 @@ TRANSLATION_TAGS = {
     "สมบูรณ์": "perfective",
 }
 
+SOUND_TAGS = {
+    "การแผลงเป็น\nอักษรโรมัน": "romanization",  # Template:th-pron
+}
 
-TAGS = {**EXAMPLE_TAGS, **TRANSLATION_TAGS}
+
+TAGS = {**EXAMPLE_TAGS, **TRANSLATION_TAGS, **SOUND_TAGS}
 
 
 def translate_raw_tags(data: WordEntry) -> None:

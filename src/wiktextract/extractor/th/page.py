@@ -13,6 +13,7 @@ from .linkage import extract_linkage_section
 from .models import Sense, WordEntry
 from .pos import extract_note_section, extract_pos_section
 from .section_titles import LINKAGE_SECTIONS, POS_DATA
+from .sound import extract_sound_section
 from .translation import extract_translation_section
 
 
@@ -45,7 +46,7 @@ def parse_section(
             wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
         )
     elif title_text.startswith(("การออกเสียง", "การอ่านออกเสียง")):
-        pass  # sounds
+        extract_sound_section(wxr, base_data, level_node)
     elif title_text == "รูปแบบอื่น":
         extract_alt_form_section(
             wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
@@ -89,6 +90,7 @@ def parse_page(
 
     for data in page_data:
         data.categories.extend(data.etymology_categories)
+        data.categories.extend(data.sound_categories)
         if len(data.senses) == 0:
             data.senses.append(Sense(tags=["no-gloss"]))
     return [m.model_dump(exclude_defaults=True) for m in page_data]
