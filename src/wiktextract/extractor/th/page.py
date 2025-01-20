@@ -13,6 +13,7 @@ from .linkage import extract_linkage_section
 from .models import Sense, WordEntry
 from .pos import extract_note_section, extract_pos_section
 from .section_titles import LINKAGE_SECTIONS, POS_DATA
+from .sound import extract_sound_section
 from .translation import extract_translation_section
 
 
@@ -28,6 +29,8 @@ def parse_section(
     if title_text in POS_DATA:
         extract_pos_section(wxr, page_data, base_data, level_node, title_text)
     elif title_text == "รากศัพท์":
+        if level_node.contain_node(LEVEL_KIND_FLAGS):
+            base_data = base_data.model_copy(deep=True)
         extract_etymology_section(wxr, base_data, level_node)
     elif title_text in ["คำแปลภาษาอื่น", "คำแปล"]:
         extract_translation_section(
@@ -45,7 +48,7 @@ def parse_section(
             wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
         )
     elif title_text.startswith(("การออกเสียง", "การอ่านออกเสียง")):
-        pass  # sounds
+        extract_sound_section(wxr, base_data, level_node)
     elif title_text == "รูปแบบอื่น":
         extract_alt_form_section(
             wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
@@ -88,7 +91,6 @@ def parse_page(
             parse_section(wxr, page_data, base_data, next_level_node)
 
     for data in page_data:
-        data.categories.extend(data.etymology_categories)
         if len(data.senses) == 0:
             data.senses.append(Sense(tags=["no-gloss"]))
     return [m.model_dump(exclude_defaults=True) for m in page_data]
