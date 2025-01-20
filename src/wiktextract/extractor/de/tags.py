@@ -103,6 +103,8 @@ K_TEMPLATE_TAGS = {
     "meton.": "metonymically",
     "mG": "genitive",
     "mitteld.": "Central German",
+    "mit Dativ": "with-dative",
+    "mit Akkusativ": "with-accusative",
     # "mitunter": "",
     "mlat.": "Medieval Latin",
     "mittellateinisch": "Medieval Latin",
@@ -119,10 +121,12 @@ K_TEMPLATE_TAGS = {
     "nordwestd.": "Northwestern Germany",
     "nPl.": "plural-only",
     "Österreich": "Austrian German",
+    "örtlich": "regional",
     "österr.": "Austrian German",
     "österreichisch": "Austrian German",
     "ostfränkisch": "East Franconian German",
     "pej.": "pejorative",
+    "personifizierend": "person",
     "poet.": "poetic",
     "PräpmG": "genitive prepositional",
     "PmG": "genitive prepositional",
@@ -191,7 +195,7 @@ K_TEMPLATE_TAGS = {
     "vulgärlateinisch": ["vulgar", "Latin"],
     "wien.": "Vienna",
     "wienerisch": "Vienna",
-    # "Wpräp": "",
+    "Wpräp": "prepositional",
     # "z. B.": "",
     # "z. T.": "",
     # "zijn": "",
@@ -259,6 +263,7 @@ OTHER_TAGS = {
     # Vorlage:Deutsch Verb schwach untrennbar reflexiv
     "nichterweitert": "not-extended",
     "erweitert": "extended",
+    "zeitlich": "temporal",
 }
 
 TENSE_TAGS = {

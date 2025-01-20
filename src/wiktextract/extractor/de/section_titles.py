@@ -13,7 +13,6 @@ POS_SECTIONS: dict[str, POSSubtitleData] = {
     "Bruchzahlwort": {"pos": "num"},
     "Buchstabe": {"pos": "character"},
     "Demonstrativpronomen": {"pos": "pron"},
-    "Eigenname ": {"pos": "name"},
     "Eigenname": {"pos": "name"},
     "Enklitikon": {"pos": "suffix", "tags": ["morpheme"]},
     "Fokuspartikel": {"pos": "particle"},
