@@ -46,15 +46,21 @@ def extract_col_template(
         wxr.wtp.node_to_wikitext(t_node), expand_all=True
     )
     for li_tag in expanded_node.find_html_recursively("li"):
-        l_data = Linkage(word="", source=source)
+        l_data = []
         for span_tag in li_tag.find_html("span"):
             span_class = span_tag.attrs.get("class", "")
             if "Latn" in span_class:
-                l_data.roman = clean_node(wxr, None, span_tag)
+                for data in l_data:
+                    data.roman = clean_node(wxr, None, span_tag)
             elif "lang" in span_tag.attrs:
-                l_data.word = clean_node(wxr, None, span_tag)
-        if l_data.word != "":
-            getattr(word_entry, linkage_type).append(l_data)
+                word = clean_node(wxr, None, span_tag)
+                if word != "":
+                    l_data.append(Linkage(word=word, source=source))
+                    if span_class == "Hant":
+                        l_data[-1].tags.append("Traditional Chinese")
+                    elif span_class == "Hans":
+                        l_data[-1].tags.append("Simplified Chinese")
+        getattr(word_entry, linkage_type).extend(l_data)
 
 
 def extract_linkage_lite_item(

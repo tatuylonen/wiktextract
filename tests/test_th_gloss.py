@@ -258,3 +258,49 @@ class TestThGloss(TestCase):
                 "tags": ["form-of"],
             },
         )
+
+    def test_alt_form_second_language_section(self):
+        self.wxr.wtp.add_page(
+            "แม่แบบ:alt",
+            10,
+            """(''เลิกใช้'') <span class="Thai" lang="th">[[เดอร#ภาษาไทย|เดอร]]</span>, <span class="Thai" lang="th">[[เดิร#ภาษาไทย|เดิร]]</span>""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "ข้าว",
+            """== ภาษาไทย ==
+=== คำกริยา ===
+# [[ชื่อ]]
+
+== ภาษาญ้อ ==
+=== รูปแบบอื่น ===
+* {{l|nyw|เข้า}}
+=== คำนาม ===
+# [[ข้าว]]""",
+        )
+        self.assertTrue("forms" not in page_data[0])
+        self.assertEqual(page_data[1]["forms"], [{"form": "เข้า"}])
+
+    def test_alt_form_after_pos(self):
+        self.wxr.wtp.add_page(
+            "แม่แบบ:lo-alt",
+            10,
+            """* (''ล้าสมัย'') <span class="Laoo" lang="lo">[[ໄທຍ໌#ภาษาลาว|ໄທຍ໌]]</span> <span class="mention-gloss-paren annotation-paren">(</span><span lang="lo-Latn" class="tr Latn">ไทย์</span><span class="mention-gloss-paren annotation-paren">)</span>""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "ໄທ",
+            """== ภาษาลาว ==
+=== คำนาม ===
+# [[ไทย]]
+
+=== คำวิสามานยนาม ===
+# [[ไทย]]
+==== รูปแบบอื่น ====
+{{lo-alt|d=ໄທຍ}}""",
+        )
+        self.assertTrue("forms" not in page_data[0])
+        self.assertEqual(
+            page_data[1]["forms"],
+            [{"form": "ໄທຍ໌", "raw_tags": ["ล้าสมัย"], "roman": "ไทย์"}],
+        )

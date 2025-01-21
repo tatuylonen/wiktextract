@@ -301,7 +301,7 @@ def check_str_fields(
                     "mandatory field): {}".format(
                         field,
                         "" if empty_ok else " non-empty",
-                        json.dumps(item, sort_keys=True),
+                        json.dumps(item, sort_keys=True, ensure_ascii=False),
                     ),
                 )
             continue
@@ -315,7 +315,7 @@ def check_str_fields(
                 "{!r} should be a{} string: {}".format(
                     field,
                     "" if empty_ok else " non-empty",
-                    json.dumps(item, sort_keys=True),
+                    json.dumps(item, sort_keys=True, ensure_ascii=False),
                 ),
             )
         if not v and not empty_ok:
@@ -326,7 +326,7 @@ def check_str_fields(
                 lang,
                 pos,
                 "{!r} should contain a non-empty string: {}".format(
-                    field, json.dumps(item, sort_keys=True)
+                    field, json.dumps(item, sort_keys=True, ensure_ascii=False)
                 ),
             )
 

@@ -17,6 +17,11 @@ def extract_alt_form_section(
                     and node.template_name == "alt"
                 ):
                     extract_alt_template(wxr, word_entry, node)
+                elif isinstance(node, TemplateNode) and node.template_name in [
+                    "l",
+                    "link",
+                ]:
+                    extract_l_template(wxr, word_entry, node)
 
     for t_node in level_node.find_child(NodeKind.TEMPLATE):
         if t_node.template_name == "lo-alt":
@@ -52,8 +57,9 @@ def extract_alt_expanded_nodes(
         span_lang = span_tag.attrs.get("lang", "")
         if span_lang == lang_code:
             form = Form(form=clean_node(wxr, None, span_tag), raw_tags=raw_tags)
-            translate_raw_tags(form)
-            word_entry.forms.append(form)
+            if form.form != "":
+                translate_raw_tags(form)
+                word_entry.forms.append(form)
         elif span_lang.endswith("-Latn") and len(word_entry.forms) > 0:
             word_entry.forms[-1].roman = clean_node(wxr, None, span_tag)
 
@@ -69,3 +75,13 @@ def extract_lo_alt_template(
     for list_node in expanded_node.find_child(NodeKind.LIST):
         for list_item in list_node.find_child(NodeKind.LIST_ITEM):
             extract_alt_expanded_nodes(wxr, word_entry, list_item, "lo")
+
+
+def extract_l_template(
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+) -> None:
+    form = Form(
+        form=clean_node(wxr, None, t_node.template_parameters.get(2, ""))
+    )
+    if form.form != "":
+        word_entry.forms.append(form)

@@ -1,7 +1,13 @@
 import re
 from dataclasses import dataclass
 
-from wikitextprocessor import LevelNode, NodeKind, TemplateNode
+from wikitextprocessor import (
+    HTMLNode,
+    LevelNode,
+    NodeKind,
+    TemplateNode,
+    WikiNode,
+)
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -18,6 +24,8 @@ def extract_sound_section(
     for t_node in level_node.find_child(NodeKind.TEMPLATE):
         if t_node.template_name == "th-pron":
             extract_th_pron_template(wxr, base_data, t_node)
+        elif t_node.template_name == "lo-pron":
+            extract_lo_pron_template(wxr, base_data, t_node)
 
 
 @dataclass
@@ -84,5 +92,53 @@ def extract_th_pron_template(
                             sound.raw_tags.append(header.text)
                         translate_raw_tags(sound)
                         base_data.sounds.append(sound)
+
+    clean_node(wxr, base_data, expanded_node)
+
+
+def extract_lo_pron_template(
+    wxr: WiktextractContext,
+    base_data: WordEntry,
+    t_node: TemplateNode,
+) -> None:
+    # https://th.wiktionary.org/wiki/แม่แบบ:lo-pron
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for list_node in expanded_node.find_child(NodeKind.LIST):
+        for list_item in list_node.find_child(NodeKind.LIST_ITEM):
+            field = "other"
+            raw_tag = ""
+            for node in list_item.children:
+                if isinstance(node, HTMLNode) and node.tag == "span":
+                    span_class = node.attrs.get("class", "")
+                    if "qualifier-content" in span_class:
+                        raw_tag = clean_node(wxr, None, node)
+                    elif span_class == "IPA":
+                        ipa = clean_node(wxr, None, node)
+                        if ipa != "":
+                            sound = Sound(ipa=ipa)
+                            if raw_tag != "":
+                                sound.raw_tags.append(raw_tag)
+                                translate_raw_tags(sound)
+                            base_data.sounds.append(sound)
+                    else:
+                        span_lang = node.attrs.get("lang", "")
+                        if span_lang == "lo" and field == "hyphenation":
+                            span_str = clean_node(wxr, None, node)
+                            if span_str != "":
+                                base_data.hyphenation.append(span_str)
+                elif isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
+                    link_str = clean_node(wxr, None, node)
+                    if link_str == "สัทอักษรสากล":
+                        field = "ipa"
+                    elif link_str != "" and field == "rhymes":
+                        base_data.sounds.append(Sound(rhymes=link_str))
+                elif isinstance(node, str) and node.strip().endswith(":"):
+                    node = node.strip()
+                    if node == "การแบ่งพยางค์:":
+                        field = "hyphenation"
+                    elif node == "สัมผัส:":
+                        field = "rhymes"
 
     clean_node(wxr, base_data, expanded_node)
