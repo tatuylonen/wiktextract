@@ -97,6 +97,7 @@ class Sound(ThaiBaseModel):
     homophone: str = ""
     other: str = ""
     roman: str = ""
+    rhymes: str = ""
 
 
 class WordEntry(ThaiBaseModel):
@@ -126,3 +127,4 @@ class WordEntry(ThaiBaseModel):
     idioms: list[Linkage] = []
     coordinate_terms: list[Linkage] = []
     sounds: list[Sound] = []
+    hyphenation: list[str] = []

@@ -68,3 +68,39 @@ class TestThSound(unittest.TestCase):
                 "ศัพท์ภาษาไทยที่มี 1 พยางค์",
             ],
         )
+
+    def test_lo_pron(self):
+        self.wxr.wtp.add_page(
+            "แม่แบบ:lo-pron",
+            10,
+            """* <span class="ib-brac qualifier-brac">(</span><span class="ib-content qualifier-content"><span class="usage-label-accent">เวียงจันทน์</span></span><span class="ib-brac qualifier-brac">)</span> [[วิกิพจนานุกรม:สัทอักษรสากล|สัทอักษรสากล]]<sup>([[wikipedia:ระบบเสียงภาษาลาว|คำอธิบาย]])</sup>:&#32;<span class="IPA">[tʰaj˧˥]</span>[[Category:ศัพท์ภาษาลาวที่มีการออกเสียงไอพีเอ|ໄທ]][[Category:ศัพท์ภาษาลาวที่มี 1 พยางค์|ໄທ]]
+* <span class="ib-brac qualifier-brac">(</span><span class="ib-content qualifier-content"><span class="usage-label-accent">หลวงพระบาง</span></span><span class="ib-brac qualifier-brac">)</span> [[วิกิพจนานุกรม:สัทอักษรสากล|สัทอักษรสากล]]<sup>([[wikipedia:ระบบเสียงภาษาลาว|คำอธิบาย]])</sup>:&#32;<span class="IPA">[tʰaj˩˨]</span>[[Category:ศัพท์ภาษาลาวที่มีการออกเสียงไอพีเอ|ໄທ]][[Category:ศัพท์ภาษาลาวที่มี 1 พยางค์|ໄທ]]
+* การแบ่งพยางค์: <span class='Laoo lo-reading' lang='lo'>ໄທ</span>
+* สัมผัส: [[:หมวดหมู่:สัมผัส:ภาษาลาว/aj|<span class="IPA">-aj</span>]][[Category:สัมผัส:ภาษาลาว/aj|ໄທ]]""",
+        )
+        data = parse_page(
+            self.wxr,
+            "ໄທ",
+            """== ภาษาลาว ==
+=== การออกเสียง ===
+{{lo-pron}}
+=== คำนาม ===
+# [[ไทย]]""",
+        )
+        self.assertEqual(data[0]["hyphenation"], ["ໄທ"])
+        self.assertEqual(
+            data[0]["sounds"],
+            [
+                {"ipa": "[tʰaj˧˥]", "raw_tags": ["เวียงจันทน์"]},
+                {"ipa": "[tʰaj˩˨]", "raw_tags": ["หลวงพระบาง"]},
+                {"rhymes": "-aj"},
+            ],
+        )
+        self.assertEqual(
+            data[0]["categories"],
+            [
+                "ศัพท์ภาษาลาวที่มีการออกเสียงไอพีเอ",
+                "ศัพท์ภาษาลาวที่มี 1 พยางค์",
+                "สัมผัส:ภาษาลาว/aj",
+            ],
+        )
