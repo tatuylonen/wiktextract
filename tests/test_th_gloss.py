@@ -258,3 +258,25 @@ class TestThGloss(TestCase):
                 "tags": ["form-of"],
             },
         )
+
+    def test_alt_form_second_language_section(self):
+        self.wxr.wtp.add_page(
+            "แม่แบบ:alt",
+            10,
+            """(''เลิกใช้'') <span class="Thai" lang="th">[[เดอร#ภาษาไทย|เดอร]]</span>, <span class="Thai" lang="th">[[เดิร#ภาษาไทย|เดิร]]</span>""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "ข้าว",
+            """== ภาษาไทย ==
+=== คำกริยา ===
+# [[ชื่อ]]
+
+== ภาษาญ้อ ==
+=== รูปแบบอื่น ===
+* {{l|nyw|เข้า}}
+=== คำนาม ===
+# [[ข้าว]]""",
+        )
+        self.assertTrue("forms" not in page_data[0])
+        self.assertEqual(page_data[1]["forms"], [{"form": "เข้า"}])
