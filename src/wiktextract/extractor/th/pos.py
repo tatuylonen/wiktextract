@@ -26,6 +26,7 @@ def extract_pos_section(
     page_data[-1].pos_title = pos_title
     pos_data = POS_DATA[pos_title]
     page_data[-1].pos = pos_data["pos"]
+    base_data.pos = pos_data["pos"]
     page_data[-1].tags.extend(pos_data.get("tags", []))
 
     gloss_list_index = len(level_node.children)

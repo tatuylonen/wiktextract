@@ -280,3 +280,27 @@ class TestThGloss(TestCase):
         )
         self.assertTrue("forms" not in page_data[0])
         self.assertEqual(page_data[1]["forms"], [{"form": "เข้า"}])
+
+    def test_alt_form_after_pos(self):
+        self.wxr.wtp.add_page(
+            "แม่แบบ:lo-alt",
+            10,
+            """* (''ล้าสมัย'') <span class="Laoo" lang="lo">[[ໄທຍ໌#ภาษาลาว|ໄທຍ໌]]</span> <span class="mention-gloss-paren annotation-paren">(</span><span lang="lo-Latn" class="tr Latn">ไทย์</span><span class="mention-gloss-paren annotation-paren">)</span>""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "ໄທ",
+            """== ภาษาลาว ==
+=== คำนาม ===
+# [[ไทย]]
+
+=== คำวิสามานยนาม ===
+# [[ไทย]]
+==== รูปแบบอื่น ====
+{{lo-alt|d=ໄທຍ}}""",
+        )
+        self.assertTrue("forms" not in page_data[0])
+        self.assertEqual(
+            page_data[1]["forms"],
+            [{"form": "ໄທຍ໌", "raw_tags": ["ล้าสมัย"], "roman": "ไทย์"}],
+        )

@@ -50,7 +50,15 @@ def parse_section(
     elif title_text.startswith(("การออกเสียง", "การอ่านออกเสียง")):
         extract_sound_section(wxr, base_data, level_node)
     elif title_text == "รูปแบบอื่น":
-        extract_alt_form_section(wxr, base_data, level_node)
+        extract_alt_form_section(
+            wxr,
+            page_data[-1]
+            if len(page_data) > 0
+            and page_data[-1].lang_code == base_data.lang_code
+            and page_data[-1].pos == base_data.pos
+            else base_data,
+            level_node,
+        )
     elif title_text == "การใช้":
         extract_note_section(
             wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
