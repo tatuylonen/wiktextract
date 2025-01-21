@@ -97,3 +97,34 @@ class TestThLinkage(TestCase):
             page_data[0]["synonyms"],
             [{"word": "ทีวี"}, {"word": "โทรภาพ"}],
         )
+
+    def test_col3_zh_pinyin(self):
+        self.wxr.wtp.add_page(
+            "แม่แบบ:col3",
+            10,
+            """<div><div><ul><li><span class="Hant" lang="zh">[[電腦遊戲#ภาษาจีน|電腦遊戲]]</span><span class="Zsym mention">&nbsp;/ </span><span class="Hans" lang="zh">[[电脑游戏#ภาษาจีน|电脑游戏]]</span> <span class="mention-gloss-paren annotation-paren">(</span><span lang="zh-Latn" class="tr Latn">diànnǎo yóuxì</span><span class="mention-gloss-paren annotation-paren">)</span></li></ul></div></div>""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "電腦",
+            """== ภาษาจีน ==
+=== คำนาม ===
+# [[คอมพิวเตอร์]]
+==== ลูกคำ ====
+{{col3|zh|電腦遊戲}}""",
+        )
+        self.assertEqual(
+            page_data[0]["derived"],
+            [
+                {
+                    "word": "電腦遊戲",
+                    "roman": "diànnǎo yóuxì",
+                    "tags": ["Traditional Chinese"],
+                },
+                {
+                    "word": "电脑游戏",
+                    "roman": "diànnǎo yóuxì",
+                    "tags": ["Simplified Chinese"],
+                },
+            ],
+        )
