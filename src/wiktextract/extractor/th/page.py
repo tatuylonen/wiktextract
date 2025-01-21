@@ -67,6 +67,10 @@ def parse_page(
 ) -> list[dict[str, Any]]:
     # page layout
     # https://th.wiktionary.org/wiki/วิธีใช้:คู่มือในการเขียน
+
+    # skip translation pages
+    if page_title.endswith("/คำแปลภาษาอื่น"):
+        return []
     wxr.wtp.start_page(page_title)
     tree = wxr.wtp.parse(page_text, pre_expand=True)
     page_data: list[WordEntry] = []
