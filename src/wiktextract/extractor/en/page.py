@@ -2455,6 +2455,9 @@ def parse_language(
                 text, expand_all=True, template_fn=inflection_template_fn
             )
 
+            if not text.strip():
+                continue
+
             # Parse inflection tables from the section.  The data is stored
             # under "forms".
             if wxr.config.capture_inflections:
