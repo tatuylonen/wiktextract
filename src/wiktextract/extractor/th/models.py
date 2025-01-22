@@ -41,6 +41,7 @@ class Sense(ThaiBaseModel):
     examples: list[Example] = []
     classifiers: list[str] = []
     form_of: list[AltForm] = []
+    topics: list[str] = []
 
 
 class Form(ThaiBaseModel):
