@@ -96,7 +96,7 @@ class TestThGloss(TestCase):
             page_data[0]["senses"][0],
             {
                 "categories": ["ศัพท์ภาษาไทยที่เป็นภาษาปาก", "สแลงภาษาไทย"],
-                "raw_tags": ["ภาษาปาก", "สแลง"],
+                "tags": ["colloquial", "slang"],
                 "glosses": ["ทำให้ผู้หญิงท้องแล้วมักไม่รับผิดชอบ"],
             },
         )
@@ -207,8 +207,8 @@ class TestThGloss(TestCase):
         self.assertEqual(
             page_data[0]["forms"],
             [
-                {"form": "เดอร", "raw_tags": ["เลิกใช้"]},
-                {"form": "เดิร", "raw_tags": ["เลิกใช้"]},
+                {"form": "เดอร", "tags": ["obsolete"]},
+                {"form": "เดิร", "tags": ["obsolete"]},
             ],
         )
 
@@ -231,7 +231,7 @@ class TestThGloss(TestCase):
         self.assertEqual(
             page_data[0]["forms"],
             [
-                {"form": "ທຸຣຽນ", "raw_tags": ["ล้าสมัย"], "roman": "ทุรย̂น"},
+                {"form": "ທຸຣຽນ", "tags": ["dated"], "roman": "ทุรย̂น"},
             ],
         )
 
@@ -302,5 +302,5 @@ class TestThGloss(TestCase):
         self.assertTrue("forms" not in page_data[0])
         self.assertEqual(
             page_data[1]["forms"],
-            [{"form": "ໄທຍ໌", "raw_tags": ["ล้าสมัย"], "roman": "ไทย์"}],
+            [{"form": "ໄທຍ໌", "tags": ["dated"], "roman": "ไทย์"}],
         )
