@@ -9,6 +9,7 @@ from wikitextprocessor import (
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from .example import extract_example_list_item
 from .models import Sense, WordEntry
 from .section_titles import POS_DATA
 
@@ -47,6 +48,13 @@ def extract_gloss_list_item(
             extract_ferhengok_template(wxr, sense, node)
         elif not (isinstance(node, WikiNode) and node.kind == NodeKind.LIST):
             gloss_nodes.append(node)
+
+    for child_list in list_item.find_child(NodeKind.LIST):
+        if child_list.sarg.startswith("#") and child_list.sarg.endswith(
+            (":", "*")
+        ):
+            for e_list_item in child_list.find_child(NodeKind.LIST_ITEM):
+                extract_example_list_item(wxr, word_entry, sense, e_list_item)
 
     gloss_str = clean_node(wxr, sense, gloss_nodes)
     if gloss_str != "":

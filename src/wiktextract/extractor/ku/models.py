@@ -10,11 +10,26 @@ class KurdishBaseModel(BaseModel):
     )
 
 
+class Example(KurdishBaseModel):
+    text: str
+    translation: str = ""
+    roman: str = Field(
+        default="", description="Romanization of the example sentence"
+    )
+    ref: str = Field(
+        default="",
+        description="Source of the sentence, like book title and page number",
+    )
+    tags: list[str] = []
+    raw_tags: list[str] = []
+
+
 class Sense(KurdishBaseModel):
     glosses: list[str] = []
     tags: list[str] = []
     raw_tags: list[str] = []
     categories: list[str] = []
+    examples: list[Example] = []
 
 
 class WordEntry(KurdishBaseModel):
