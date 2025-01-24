@@ -57,3 +57,18 @@ class TestKuGloss(TestCase):
                 ],
             },
         )
+
+    def test_navdêr(self):
+        self.wxr.wtp.add_page("Şablon:ziman", 10, "Almanî")
+        page_data = parse_page(
+            self.wxr,
+            "Wähler",
+            """== {{ziman|de}} ==
+=== Navdêr ===
+{{navdêr|de|z=n|m=Wählerin}}
+# [[hilbijêr]]""",
+        )
+        self.assertEqual(page_data[0]["tags"], ["masculine"])
+        self.assertEqual(
+            page_data[0]["forms"], [{"form": "Wählerin", "tags": ["feminine"]}]
+        )
