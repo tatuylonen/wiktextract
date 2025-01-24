@@ -121,9 +121,7 @@ def extract_pos_header_nodes(
     nodes: list[WikiNode | str],
 ) -> None:
     for node in nodes:
-        if isinstance(node, TemplateNode) and node.template_name == "navdêr":
-            extract_navdêr_template(wxr, word_entry, node)
-        elif (
+        if (
             isinstance(node, TemplateNode)
             and node.template_name in POS_HEADER_TEMPLATES
         ):
@@ -135,6 +133,14 @@ def extract_pos_header_nodes(
             )
             if form.form != "":
                 word_entry.forms.append(form)
+                clean_node(wxr, word_entry, node)
+        if isinstance(node, TemplateNode) and node.template_name in [
+            "navdêr",
+            "serenav",
+        ]:
+            extract_navdêr_template(wxr, word_entry, node)
+        elif isinstance(node, TemplateNode) and node.template_name == "lêker":
+            extract_lêker_template(wxr, word_entry, node)
 
 
 def extract_navdêr_template(
@@ -143,6 +149,7 @@ def extract_navdêr_template(
     t_node: TemplateNode,
 ) -> None:
     # https://ku.wiktionary.org/wiki/Şablon:navdêr
+    # Şablon:serenav
     GENDERS = {
         "n": "masculine",
         "n+": "masculine-usually",
@@ -196,8 +203,6 @@ def extract_navdêr_template(
                 break
             extract_navdêr_template_form(wxr, word_entry, t_node, form_arg, tag)
 
-    clean_node(wxr, word_entry, t_node)
-
 
 def extract_navdêr_template_form(
     wxr: WiktextractContext,
@@ -215,3 +220,55 @@ def extract_navdêr_template_form(
         form.tags.extend(tag)
     if form.form != "":
         word_entry.forms.append(form)
+
+
+def extract_lêker_template(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    t_node: TemplateNode,
+) -> None:
+    # https://ku.wiktionary.org/wiki/Şablon:lêker
+    TAGS = {
+        "gh": "transitive",
+        "ngh": "intransitive",
+        "x": "proper-noun",
+        "p": "compound",
+        "h": "compound",
+        "b": "idiomatic",
+    }
+    c_arg_value = clean_node(wxr, None, t_node.template_parameters.get("c", ""))
+    for c_arg in c_arg_value.split("-"):
+        if c_arg in TAGS:
+            word_entry.tags.append(TAGS[c_arg])
+    FORM_TAGS = {
+        "nd": "noun-from-verb",
+        "niha": "present",
+        "borî": "past",
+        "subj": "subjunctive",
+    }
+    for form_arg, tag in FORM_TAGS.items():
+        extract_lêker_template_form(wxr, word_entry, t_node, form_arg, tag)
+
+
+def extract_lêker_template_form(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    t_node: TemplateNode,
+    arg_name: str,
+    tag: str,
+) -> None:
+    if arg_name not in t_node.template_parameters:
+        return
+    form = Form(
+        form=clean_node(wxr, None, t_node.template_parameters[arg_name]),
+        tags=[tag],
+        roman=clean_node(
+            wxr, None, t_node.template_parameters.get(arg_name + "tr", "")
+        ),
+    )
+    if form.form != "":
+        word_entry.forms.append(form)
+    if arg_name != "nd" and not arg_name.endswith("2"):
+        extract_lêker_template_form(
+            wxr, word_entry, t_node, arg_name + "2", tag
+        )
