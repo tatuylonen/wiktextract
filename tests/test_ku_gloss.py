@@ -57,3 +57,37 @@ class TestKuGloss(TestCase):
                 ],
             },
         )
+
+    def test_navdêr(self):
+        self.wxr.wtp.add_page("Şablon:ziman", 10, "Almanî")
+        page_data = parse_page(
+            self.wxr,
+            "Wähler",
+            """== {{ziman|de}} ==
+=== Navdêr ===
+{{navdêr|de|z=n|m=Wählerin}}
+# [[hilbijêr]]""",
+        )
+        self.assertEqual(page_data[0]["tags"], ["masculine"])
+        self.assertEqual(
+            page_data[0]["forms"], [{"form": "Wählerin", "tags": ["feminine"]}]
+        )
+
+    def test_lêker(self):
+        self.wxr.wtp.add_page("Şablon:ziman", 10, "Farisî")
+        page_data = parse_page(
+            self.wxr,
+            "کردن",
+            """== {{ziman|fa}} ==
+=== Lêker ===
+{{lêker|fa|tr=kerden|niha=کن|nihatr=kon|borî=کرد|borîtr=kerd}}
+# [[kirin]]""",
+        )
+        self.assertEqual(
+            page_data[0]["forms"],
+            [
+                {"form": "kerden", "tags": ["romanization"]},
+                {"form": "کن", "tags": ["present"], "roman": "kon"},
+                {"form": "کرد", "tags": ["past"], "roman": "kerd"},
+            ],
+        )

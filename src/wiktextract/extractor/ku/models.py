@@ -32,6 +32,13 @@ class Sense(KurdishBaseModel):
     examples: list[Example] = []
 
 
+class Form(KurdishBaseModel):
+    form: str
+    tags: list[str] = []
+    raw_tags: list[str] = []
+    roman: str = ""
+
+
 class WordEntry(KurdishBaseModel):
     model_config = ConfigDict(title="Kurdish Wiktionary")
     word: str = Field(description="Word string")
@@ -43,3 +50,5 @@ class WordEntry(KurdishBaseModel):
     categories: list[str] = []
     tags: list[str] = []
     raw_tags: list[str] = []
+    forms: list[Form] = []
+    etymology_text: str = ""

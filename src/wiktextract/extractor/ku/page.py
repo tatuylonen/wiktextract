@@ -1,9 +1,11 @@
+import string
 from typing import Any
 
 from wikitextprocessor.parser import LEVEL_KIND_FLAGS, LevelNode, NodeKind
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from .etymology import extract_etymology_section
 from .models import Sense, WordEntry
 from .pos import extract_pos_section
 from .section_titles import POS_DATA
@@ -16,9 +18,14 @@ def parse_section(
     level_node: LevelNode,
 ) -> None:
     title_text = clean_node(wxr, None, level_node.largs)
+    title_text = title_text.rstrip(string.digits + string.whitespace)
     wxr.wtp.start_subsection(title_text)
     if title_text in POS_DATA:
         extract_pos_section(wxr, page_data, base_data, level_node, title_text)
+    elif title_text == "Etîmolojî":
+        extract_etymology_section(
+            wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
+        )
 
     for next_level in level_node.find_child(LEVEL_KIND_FLAGS):
         parse_section(wxr, page_data, base_data, next_level)
