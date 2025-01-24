@@ -17,6 +17,8 @@ def extract_example_list_item(
                 "jêder-"
             ):
                 extract_jêder_template(wxr, sense, node)
+            elif node.template_name in ["mk", "mînak"]:
+                extract_mînak_template(wxr, sense, node)
 
 
 def extract_jêder_template(
@@ -44,3 +46,21 @@ def extract_jêder_template(
     if e_data.text != "":
         sense.examples.append(e_data)
     clean_node(wxr, sense, expanded_node)
+
+
+def extract_mînak_template(
+    wxr: WiktextractContext,
+    sense: Sense,
+    t_node: TemplateNode,
+) -> None:
+    # https://ku.wiktionary.org/wiki/Şablon:mînak
+    e_data = Example(
+        text=clean_node(wxr, None, t_node.template_parameters.get(2, "")),
+        roman=clean_node(wxr, None, t_node.template_parameters.get("tr", "")),
+        translation=clean_node(
+            wxr, None, t_node.template_parameters.get("w", "")
+        ),
+    )
+    if e_data.text != "":
+        sense.examples.append(e_data)
+    clean_node(wxr, sense, t_node)
