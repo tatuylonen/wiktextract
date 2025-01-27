@@ -129,6 +129,7 @@ class TestLinkage(TestCase):
                     "lang": "英語",
                     "lang_code": "en",
                     "pos": "name",
+                    "pos_title": "專有名詞",
                     "senses": [{"glosses": ["偵探漫畫"]}],
                     "synonyms": [{"word": "Tec"}],
                     "word": "'Tec",
@@ -268,6 +269,7 @@ class TestLinkage(TestCase):
                     "lang": "漢語",
                     "lang_code": "zh",
                     "pos": "noun",
+                    "pos_title": "名詞",
                     "senses": [{"glosses": ["愚昧的人民"]}],
                     "word": "愚民",
                 },
@@ -275,6 +277,7 @@ class TestLinkage(TestCase):
                     "lang": "漢語",
                     "lang_code": "zh",
                     "pos": "verb",
+                    "pos_title": "動詞",
                     "descendants": [
                         {
                             "lang_code": "ja",

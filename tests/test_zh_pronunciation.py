@@ -147,6 +147,7 @@ class TestPronunciation(TestCase):
                     "lang": "漢語",
                     "lang_code": "zh",
                     "pos": "verb",
+                    "pos_title": "動詞",
                     "senses": [{"glosses": ["塞住耳朵"]}],
                     "sounds": [
                         {"zh_pron": "chōng'ěr", "tags": ["Mandarin", "Pinyin"]}
@@ -162,6 +163,7 @@ class TestPronunciation(TestCase):
                     "lang": "漢語",
                     "lang_code": "zh",
                     "pos": "noun",
+                    "pos_title": "名詞",
                     "senses": [
                         {"glosses": ["古冠冕旁的瑱玉，因其下垂及耳，而得名"]}
                     ],
@@ -222,6 +224,7 @@ class TestPronunciation(TestCase):
                     "lang": "漢語",
                     "lang_code": "zh",
                     "pos": "noun",
+                    "pos_title": "名詞",
                     "senses": [{"glosses": ["眾人，某個範圍中所有的人"]}],
                     "sounds": [
                         {
@@ -235,6 +238,7 @@ class TestPronunciation(TestCase):
                     "lang": "漢語",
                     "lang_code": "zh",
                     "pos": "noun",
+                    "pos_title": "名詞",
                     "senses": [{"glosses": ["卿大夫之家"]}],
                     "sounds": [
                         {"zh_pron": "dàjiā", "tags": ["Mandarin", "Pinyin"]}
@@ -245,6 +249,7 @@ class TestPronunciation(TestCase):
                     "lang": "漢語",
                     "lang_code": "zh",
                     "pos": "noun",
+                    "pos_title": "名詞",
                     "senses": [{"glosses": ["對女子的尊稱"]}],
                     "sounds": [
                         {"zh_pron": "dàgū", "tags": ["Mandarin", "Pinyin"]}

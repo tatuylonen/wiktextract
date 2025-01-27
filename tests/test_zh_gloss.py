@@ -161,6 +161,7 @@ class TestGloss(TestCase):
                         "lang": "漢語",
                         "lang_code": "zh",
                         "pos": "unknown",
+                        "pos_title": "釋義",
                         "senses": [
                             {
                                 "glosses": [
@@ -318,6 +319,7 @@ class TestGloss(TestCase):
                     "lang": "冰島語",
                     "lang_code": "is",
                     "pos": "noun",
+                    "pos_title": "名詞",
                     "senses": [
                         {
                             "form_of": [{"word": "lindi"}],
@@ -544,6 +546,7 @@ class TestGloss(TestCase):
                     "lang": "漢語",
                     "lang_code": "zh",
                     "pos": "adv",
+                    "pos_title": "副詞",
                     "senses": [
                         {
                             "categories": ["官話漢語", "官話兒化詞"],
