@@ -5,7 +5,7 @@ from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.fr.models import WordEntry
 from wiktextract.extractor.fr.page import parse_page
-from wiktextract.extractor.fr.translation import extract_translation
+from wiktextract.extractor.fr.translation import extract_translation_section
 from wiktextract.wxr_context import WiktextractContext
 
 
@@ -32,7 +32,7 @@ class TestTranslation(TestCase):
         )
         base_data = WordEntry(word="bonjour", lang_code="fr", lang="Français")
         page_data = [base_data.model_copy(deep=True)]
-        extract_translation(self.wxr, page_data, base_data, root.children[0])
+        extract_translation_section(self.wxr, page_data, root.children[0])
         self.assertEqual(
             page_data[-1].model_dump(exclude_defaults=True),
             {
@@ -67,7 +67,7 @@ class TestTranslation(TestCase):
         )
         base_data = WordEntry(word="bonjour", lang_code="fr", lang="Français")
         page_data = [base_data.model_copy(deep=True)]
-        extract_translation(self.wxr, page_data, base_data, root.children[0])
+        extract_translation_section(self.wxr, page_data, root.children[0])
         self.assertEqual(
             page_data[-1].model_dump(exclude_defaults=True),
             {
@@ -94,7 +94,7 @@ class TestTranslation(TestCase):
         )
         base_data = WordEntry(word="bonjour", lang_code="fr", lang="Français")
         page_data = [base_data.model_copy(deep=True)]
-        extract_translation(self.wxr, page_data, base_data, root.children[0])
+        extract_translation_section(self.wxr, page_data, root.children[0])
         self.assertEqual(
             page_data[-1].model_dump(exclude_defaults=True),
             {
@@ -123,7 +123,7 @@ class TestTranslation(TestCase):
         )
         base_data = WordEntry(word="cambium", lang_code="fr", lang="Français")
         page_data = [base_data.model_copy(deep=True)]
-        extract_translation(self.wxr, page_data, base_data, root.children[0])
+        extract_translation_section(self.wxr, page_data, root.children[0])
         self.assertEqual(
             page_data[-1].model_dump(exclude_defaults=True),
             {
@@ -193,7 +193,7 @@ class TestTranslation(TestCase):
         root = self.wxr.wtp.parse("* Anglais : {{trad+|en|MDF}}")
         base_data = WordEntry(word="medium", lang_code="fr", lang="Français")
         page_data = [base_data.model_copy(deep=True)]
-        extract_translation(self.wxr, page_data, base_data, root)
+        extract_translation_section(self.wxr, page_data, root)
         self.assertEqual(
             [
                 t.model_dump(exclude_defaults=True)
@@ -221,7 +221,7 @@ class TestTranslation(TestCase):
         )
         base_data = WordEntry(word="autrice", lang_code="fr", lang="Français")
         page_data = [base_data.model_copy(deep=True)]
-        extract_translation(self.wxr, page_data, base_data, root)
+        extract_translation_section(self.wxr, page_data, root)
         self.assertEqual(
             [
                 t.model_dump(exclude_defaults=True)
@@ -253,7 +253,7 @@ class TestTranslation(TestCase):
         )
         base_data = WordEntry(word="marron", lang_code="fr", lang="Français")
         page_data = [base_data.model_copy(deep=True)]
-        extract_translation(self.wxr, page_data, base_data, root)
+        extract_translation_section(self.wxr, page_data, root)
         self.assertEqual(
             [
                 t.model_dump(exclude_defaults=True)

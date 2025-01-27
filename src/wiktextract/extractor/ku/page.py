@@ -9,6 +9,7 @@ from .etymology import extract_etymology_section
 from .models import Sense, WordEntry
 from .pos import extract_pos_section
 from .section_titles import POS_DATA
+from .translation import extract_translation_section
 
 
 def parse_section(
@@ -26,6 +27,10 @@ def parse_section(
         extract_etymology_section(
             wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
         )
+    elif title_text == "Werger":
+        extract_translation_section(
+            wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
+        )
 
     for next_level in level_node.find_child(LEVEL_KIND_FLAGS):
         parse_section(wxr, page_data, base_data, next_level)
@@ -37,6 +42,8 @@ def parse_page(
     # page layout
     # https://ku.wiktionary.org/wiki/Wîkîferheng:Normalkirina_gotaran
     # https://ku.wiktionary.org/wiki/Alîkarî:Formata_nivîsînê
+    if page_title.endswith("/Werger"):  # skip translation pages
+        return []
     wxr.wtp.start_page(page_title)
     tree = wxr.wtp.parse(page_text, pre_expand=True)
     page_data: list[WordEntry] = []
