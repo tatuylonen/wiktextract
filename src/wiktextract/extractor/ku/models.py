@@ -39,6 +39,22 @@ class Form(KurdishBaseModel):
     roman: str = ""
 
 
+class Translation(KurdishBaseModel):
+    lang_code: str = Field(
+        description="Wiktionary language code of the translation term",
+    )
+    lang: str = Field(description="Translation language name")
+    word: str = Field(description="Translation term")
+    sense: str = Field(default="", description="Translation gloss")
+    sense_index: int = Field(
+        default=0, ge=0, description="Number of the definition, start from 1"
+    )
+    tags: list[str] = []
+    raw_tags: list[str] = []
+    roman: str = ""
+    source: str = ""
+
+
 class WordEntry(KurdishBaseModel):
     model_config = ConfigDict(title="Kurdish Wiktionary")
     word: str = Field(description="Word string")
@@ -52,3 +68,4 @@ class WordEntry(KurdishBaseModel):
     raw_tags: list[str] = []
     forms: list[Form] = []
     etymology_text: str = ""
+    translations: list[Translation] = []

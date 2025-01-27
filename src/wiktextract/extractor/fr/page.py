@@ -33,7 +33,7 @@ from .section_types import (
     PRONUNCIATION_SECTIONS,
     TRANSLATION_SECTIONS,
 )
-from .translation import extract_translation
+from .translation import extract_translation_section
 
 
 def parse_section(
@@ -96,10 +96,9 @@ def parse_section(
                 wxr.config.capture_translations
                 and section_type in TRANSLATION_SECTIONS
             ):
-                extract_translation(
+                extract_translation_section(
                     wxr,
                     page_data if len(page_data) > 0 else [base_data],
-                    base_data,
                     level_node,
                 )
             elif (

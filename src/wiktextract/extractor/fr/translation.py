@@ -8,11 +8,8 @@ from .models import Translation, WordEntry
 from .tags import translate_raw_tags
 
 
-def extract_translation(
-    wxr: WiktextractContext,
-    page_data: list[WordEntry],
-    base_data: WordEntry,
-    level_node: WikiNode,
+def extract_translation_section(
+    wxr: WiktextractContext, page_data: list[WordEntry], level_node: WikiNode
 ) -> None:
     base_translation_data = Translation()
     for level_node_child in level_node.filter_empty_str_child():
