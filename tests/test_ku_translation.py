@@ -52,3 +52,19 @@ class TestKuTranslation(TestCase):
                 }
             ],
         )
+
+    def test_link(self):
+        self.wxr.wtp.add_page("Şablon:ziman", 10, "Kurmancî")
+        page_data = parse_page(
+            self.wxr,
+            "av",
+            """== {{ziman|ku}} ==
+=== Navdêr ===
+# [[vexwarin|Vexwarin]]a bê[[reng]]
+==== Werger ====
+* [[bolognezî]]: [[âcua]]""",
+        )
+        self.assertEqual(
+            page_data[0]["translations"],
+            [{"word": "âcua", "lang": "bolognezî", "lang_code": "unknown"}],
+        )

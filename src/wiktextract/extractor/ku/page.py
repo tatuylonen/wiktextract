@@ -1,3 +1,4 @@
+import re
 import string
 from typing import Any
 
@@ -42,8 +43,8 @@ def parse_page(
     # page layout
     # https://ku.wiktionary.org/wiki/Wîkîferheng:Normalkirina_gotaran
     # https://ku.wiktionary.org/wiki/Alîkarî:Formata_nivîsînê
-    if page_title.endswith("/Werger"):  # skip translation pages
-        return []
+    if re.match(r"/Werger(?:\d+)?$", page_text) is not None:
+        return []  # skip translation pages
     wxr.wtp.start_page(page_title)
     tree = wxr.wtp.parse(page_text, pre_expand=True)
     page_data: list[WordEntry] = []

@@ -1,5 +1,6 @@
 import re
 
+from mediawiki_langcodes import name_to_code
 from wikitextprocessor import NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
@@ -38,6 +39,7 @@ def extract_translation_list_item(
     sense_index: int,
 ) -> None:
     lang_name = "unknown"
+    before_colon = True
     for index, node in enumerate(list_item.children):
         if isinstance(node, str) and ":" in node and lang_name == "unknown":
             lang_name = clean_node(
@@ -45,6 +47,7 @@ def extract_translation_list_item(
                 None,
                 list_item.children[:index] + [node[: node.index(":")]],
             )
+            before_colon = False
         elif isinstance(node, TemplateNode) and node.template_name in [
             "W",
             "W+",
@@ -58,6 +61,20 @@ def extract_translation_list_item(
                 extract_translation_list_item(
                     wxr, word_entry, child_list_item, sense, sense_index
                 )
+        elif (
+            isinstance(node, WikiNode)
+            and node.kind == NodeKind.LINK
+            and not before_colon
+        ):
+            tr_data = Translation(
+                word=clean_node(wxr, None, node),
+                lang=lang_name,
+                lang_code=name_to_code(lang_name, "ku") or "unknown",
+                sense=sense,
+                sense_index=sense_index,
+            )
+            if tr_data.word != "":
+                word_entry.translations.append(tr_data)
 
 
 def extract_w_template(
