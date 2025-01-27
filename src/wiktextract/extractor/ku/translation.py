@@ -1,19 +1,33 @@
 import re
 
 from mediawiki_langcodes import name_to_code
-from wikitextprocessor import NodeKind, TemplateNode, WikiNode
+from wikitextprocessor.parser import (
+    LEVEL_KIND_FLAGS,
+    NodeKind,
+    TemplateNode,
+    WikiNode,
+)
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .models import Translation, WordEntry
 
 
+def is_translation_page(title: str) -> bool:
+    return re.search(r"/Werger(?:\d+)?$", title) is not None
+
+
 def extract_translation_section(
-    wxr: WiktextractContext, word_entry: WordEntry, level_node: WikiNode
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    level_node: WikiNode,
+    source: str = "",
 ) -> None:
     sense = ""
     sense_index = 0
-    for node in level_node.find_child(NodeKind.LIST | NodeKind.TEMPLATE):
+    for node in level_node.find_child(
+        NodeKind.LIST | NodeKind.TEMPLATE | NodeKind.ITALIC | NodeKind.BOLD
+    ):
         if (
             isinstance(node, TemplateNode)
             and node.template_name == "werger-ser"
@@ -27,8 +41,22 @@ def extract_translation_section(
         elif node.kind == NodeKind.LIST:
             for list_item in node.find_child(NodeKind.LIST_ITEM):
                 extract_translation_list_item(
-                    wxr, word_entry, list_item, sense, sense_index
+                    wxr, word_entry, list_item, sense, sense_index, source
                 )
+        elif node.kind in (NodeKind.ITALIC | NodeKind.BOLD):
+            for link_node in node.find_child(NodeKind.LINK):
+                link_str = clean_node(wxr, None, link_node)
+                if is_translation_page(link_str):
+                    extract_translation_page(wxr, word_entry, link_str)
+        elif (
+            isinstance(node, TemplateNode)
+            and node.template_name == "werger-bnr"
+        ):
+            page_title = clean_node(
+                wxr, None, node.template_parameters.get(1, "")
+            )
+            if is_translation_page(page_title):
+                extract_translation_page(wxr, word_entry, page_title)
 
 
 def extract_translation_list_item(
@@ -37,6 +65,7 @@ def extract_translation_list_item(
     list_item: WikiNode,
     sense: str,
     sense_index: int,
+    source: str,
 ) -> None:
     lang_name = "unknown"
     before_colon = True
@@ -54,12 +83,12 @@ def extract_translation_list_item(
             "W-",
         ]:
             extract_w_template(
-                wxr, word_entry, node, sense, sense_index, lang_name
+                wxr, word_entry, node, sense, sense_index, lang_name, source
             )
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
             for child_list_item in node.find_child(NodeKind.LIST_ITEM):
                 extract_translation_list_item(
-                    wxr, word_entry, child_list_item, sense, sense_index
+                    wxr, word_entry, child_list_item, sense, sense_index, source
                 )
         elif (
             isinstance(node, WikiNode)
@@ -72,6 +101,7 @@ def extract_translation_list_item(
                 lang_code=name_to_code(lang_name, "ku") or "unknown",
                 sense=sense,
                 sense_index=sense_index,
+                source=source,
             )
             if tr_data.word != "":
                 word_entry.translations.append(tr_data)
@@ -84,6 +114,7 @@ def extract_w_template(
     sense: str,
     sense_index: int,
     lang_name: str,
+    source: str,
 ) -> None:
     # https://ku.wiktionary.org/wiki/Şablon:W
     tr_data = Translation(
@@ -98,6 +129,7 @@ def extract_w_template(
                 "cuda", t_node.template_parameters.get(2, "")
             ),
         ),
+        source=source,
     )
     tag_args = {
         "n": "masculine",
@@ -126,3 +158,24 @@ def extract_w_template(
                 break
     if tr_data.word != "":
         word_entry.translations.append(tr_data)
+
+
+def extract_translation_page(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    page_title: str,
+) -> None:
+    page = wxr.wtp.get_page(page_title, 0)
+    if page is None or page.body is None:
+        return
+    root = wxr.wtp.parse(page.body)
+    for level2_node in root.find_child(NodeKind.LEVEL2):
+        lang_name = clean_node(wxr, None, level2_node.largs)
+        if lang_name != word_entry.lang:
+            continue
+        for child_level in level2_node.find_child_recursively(LEVEL_KIND_FLAGS):
+            child_level_str = clean_node(wxr, None, child_level.largs)
+            if child_level_str == "Werger":
+                extract_translation_section(
+                    wxr, word_entry, child_level, page_title
+                )

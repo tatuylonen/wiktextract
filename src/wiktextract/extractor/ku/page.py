@@ -1,4 +1,3 @@
-import re
 import string
 from typing import Any
 
@@ -10,7 +9,7 @@ from .etymology import extract_etymology_section
 from .models import Sense, WordEntry
 from .pos import extract_pos_section
 from .section_titles import POS_DATA
-from .translation import extract_translation_section
+from .translation import extract_translation_section, is_translation_page
 
 
 def parse_section(
@@ -43,8 +42,8 @@ def parse_page(
     # page layout
     # https://ku.wiktionary.org/wiki/Wîkîferheng:Normalkirina_gotaran
     # https://ku.wiktionary.org/wiki/Alîkarî:Formata_nivîsînê
-    if re.match(r"/Werger(?:\d+)?$", page_text) is not None:
-        return []  # skip translation pages
+    if is_translation_page(page_title):
+        return []
     wxr.wtp.start_page(page_title)
     tree = wxr.wtp.parse(page_text, pre_expand=True)
     page_data: list[WordEntry] = []

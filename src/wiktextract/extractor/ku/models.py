@@ -52,6 +52,7 @@ class Translation(KurdishBaseModel):
     tags: list[str] = []
     raw_tags: list[str] = []
     roman: str = ""
+    source: str = ""
 
 
 class WordEntry(KurdishBaseModel):
