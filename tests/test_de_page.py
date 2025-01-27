@@ -42,6 +42,7 @@ class TestDEPage(unittest.TestCase):
                     "lang_code": "de",
                     "word": "Beispiel",
                     "pos": "noun",
+                    "pos_title": "Substantiv",
                     "senses": [{"tags": ["no-gloss"]}],
                 }
             ],
@@ -69,6 +70,7 @@ class TestDEPage(unittest.TestCase):
                     "lang_code": "de",
                     "word": "Beispiel",
                     "pos": "noun",
+                    "pos_title": "Substantiv",
                     "senses": [{"tags": ["no-gloss"]}],
                 }
             ],
@@ -91,6 +93,7 @@ class TestDEPage(unittest.TestCase):
                     "lang": "Deutsch",
                     "lang_code": "de",
                     "pos": "noun",
+                    "pos_title": "Substantiv",
                     "other_pos": ["name"],
                     "senses": [
                         {
