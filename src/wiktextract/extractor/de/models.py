@@ -136,6 +136,7 @@ class WordEntry(BaseModelWrap):
 
     word: str = Field(description="word string")
     pos: str = Field(default="", description="Part of speech type")
+    pos_title: str = ""
     other_pos: list[str] = []
     # pos_title: str = Field(default=None, description="Original POS title")
     lang_code: str = Field(

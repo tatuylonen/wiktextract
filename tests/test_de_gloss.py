@@ -259,6 +259,7 @@ class TestDEGloss(unittest.TestCase):
                     "lang": "Deutsch",
                     "lang_code": "de",
                     "pos": "adj",
+                    "pos_title": "Deklinierte Form",
                     "senses": [
                         {
                             "form_of": [{"word": "konjugiert"}],
@@ -300,6 +301,7 @@ class TestDEGloss(unittest.TestCase):
                     "lang": "Litauisch",
                     "lang_code": "lt",
                     "pos": "unknown",
+                    "pos_title": "Deklinierte Form",
                     "senses": [
                         {
                             "form_of": [{"word": "abakas"}],
@@ -330,6 +332,7 @@ class TestDEGloss(unittest.TestCase):
                     "lang": "Latein",
                     "lang_code": "la",
                     "pos": "verb",
+                    "pos_title": "Infinitiv",
                     "senses": [
                         {
                             "form_of": [{"word": "abire"}],
@@ -363,6 +366,7 @@ Indikativ Präsens Aktiv des Verbs '''[[amar]]'''""",
                     "lang": "Interlingua",
                     "lang_code": "ia",
                     "pos": "unknown",
+                    "pos_title": "Konjugierte Form",
                     "senses": [
                         {"glosses": ["Indikativ Präsens Aktiv des Verbs amar"]}
                     ],
@@ -390,6 +394,7 @@ Indikativ Präsens Aktiv des Verbs '''[[amar]]'''""",
                     "lang": "Prußisch",
                     "lang_code": "prg",
                     "pos": "prep",
+                    "pos_title": "Präposition",
                     "senses": [{"glosses": ["Nebenform der Präposition esse"]}],
                     "word": "assa",
                 }
@@ -413,6 +418,7 @@ Indikativ Präsens Aktiv des Verbs '''[[amar]]'''""",
                     "lang": "Polnisch",
                     "lang_code": "pl",
                     "pos": "noun",
+                    "pos_title": "Deklinierte Form",
                     "senses": [
                         {
                             "form_of": [{"word": "auto"}],

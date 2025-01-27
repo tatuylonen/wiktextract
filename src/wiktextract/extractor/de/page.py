@@ -131,9 +131,12 @@ def process_pos_section(
     level_node: LevelNode,
 ) -> None:
     pos_data_list = []
+    pos_title = ""
     for template_node in level_node.find_content(NodeKind.TEMPLATE):
         if template_node.template_name == "Wortart":
             pos_argument = template_node.template_parameters.get(1, "").strip()
+            if pos_title == "":
+                pos_title = pos_argument
             if pos_argument in IGNORE_POS:
                 continue
             elif pos_argument in FORM_POS:
@@ -169,6 +172,7 @@ def process_pos_section(
                 page_data[-1].tags.append(tag)
         if pos_index == 0:
             page_data[-1].pos = pos
+            page_data[-1].pos_title = pos_title
         elif pos != page_data[-1].pos and pos not in page_data[-1].other_pos:
             page_data[-1].other_pos.append(pos)
 
