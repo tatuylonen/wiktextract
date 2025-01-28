@@ -56,6 +56,15 @@ class Translation(KurdishBaseModel):
     source: str = ""
 
 
+class Linkage(KurdishBaseModel):
+    word: str
+    tags: list[str] = []
+    raw_tags: list[str] = []
+    roman: str = ""
+    translation: str = ""
+    sense: str = ""
+
+
 class WordEntry(KurdishBaseModel):
     model_config = ConfigDict(title="Kurdish Wiktionary")
     word: str = Field(description="Word string")
@@ -70,3 +79,11 @@ class WordEntry(KurdishBaseModel):
     forms: list[Form] = []
     etymology_text: str = ""
     translations: list[Translation] = []
+    synonyms: list[Linkage] = []
+    antonyms: list[Linkage] = []
+    derived: list[Linkage] = []
+    related: list[Linkage] = []
+    hypernyms: list[Linkage] = []
+    hyponyms: list[Linkage] = []
+    anagrams: list[Linkage] = []
+    rhymes: list[Linkage] = []

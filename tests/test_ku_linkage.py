@@ -41,3 +41,18 @@ class TestKuLinkage(TestCase):
             page_data[0]["forms"],
             [{"form": "کووچک", "raw_tags": ["kurdî-erebî"]}],
         )
+
+    def test_kol_text(self):
+        self.wxr.wtp.add_page("Şablon:ziman", 10, "Kurmancî")
+        page_data = parse_page(
+            self.wxr,
+            "av",
+            """== {{ziman|ku}} ==
+=== Navdêr ===
+# [[vexwarin|Vexwarin]]a bê[[reng]]
+==== Jê ====
+{{kol3|ku|cure=Jê
+|kêmav
+}}""",
+        )
+        self.assertEqual(page_data[0]["derived"], [{"word": "kêmav"}])
