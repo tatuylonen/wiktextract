@@ -32,3 +32,16 @@ POS_DATA = {
     "Formeke cînavê": {"pos": "pron", "tags": ["form-of"]},
     "Formeke hokerê": {"pos": "adv", "tags": ["form-of"]},
 }
+
+LINKAGE_SECTIONS = {
+    "Hevmane": "synonyms",
+    "Dijmane": "antonyms",
+    "Jê": "derived",
+    "Nêzîk": "synonyms",
+    "Têkildar": "related",
+    "Jornav": "hypernyms",
+    "Jêrnav": "hyponyms",
+    "Anagram": "anagrams",
+    "Binêre herwiha": "related",
+    "Qafiye": "rhymes",
+}
