@@ -6,6 +6,7 @@ from wikitextprocessor import NodeKind, TemplateNode, WikiNode
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .models import Form, Linkage, WordEntry
+from .tags import translate_raw_tags
 
 
 def extract_ku_form_template(
@@ -43,7 +44,18 @@ def extract_g_template(
     t_node: TemplateNode,
     linkage_type: str = "",
     sense: str = "",
+    raw_tags: list[str] = [],
 ) -> None:
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for span_tag in expanded_node.find_html(
+        "span", attr_name="class", attr_value="gender"
+    ):
+        for abbr_tag in span_tag.find_html("abbr"):
+            raw_tag = clean_node(wxr, None, abbr_tag)
+            if raw_tag not in ["", "?"]:
+                raw_tags.append(raw_tag)
     if linkage_type == "":
         form = Form(
             form=clean_node(
@@ -59,8 +71,10 @@ def extract_g_template(
             translation=clean_node(
                 wxr, None, t_node.template_parameters.get("w", "")
             ),
+            raw_tags=raw_tags,
         )
         if form.form != "":
+            translate_raw_tags(form)
             word_entry.forms.append(form)
     else:
         l_data = Linkage(
@@ -78,8 +92,10 @@ def extract_g_template(
                 wxr, None, t_node.template_parameters.get("w", "")
             ),
             sense=sense,
+            raw_tags=raw_tags,
         )
         if l_data.word != "":
+            translate_raw_tags(l_data)
             getattr(word_entry, linkage_type).append(l_data)
 
 
@@ -191,19 +207,28 @@ def extract_linkage_list_item(
     linkage_type: str,
     sense: str,
 ) -> None:
+    raw_tags = []
     for node in list_item.children:
         if isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
             word = clean_node(wxr, None, node)
             if word != "":
                 if linkage_type != "":
-                    getattr(word_entry, linkage_type).append(
-                        Linkage(word=word, sense=sense)
-                    )
+                    l_data = Linkage(word=word, sense=sense, raw_tags=raw_tags)
+                    translate_raw_tags(l_data)
+                    getattr(word_entry, linkage_type).append(l_data)
                 else:
-                    word_entry.forms.append(Form(form=word))
+                    form = Form(form=word, raw_tags=raw_tags)
+                    translate_raw_tags(form)
+                    word_entry.forms.append(form)
         elif isinstance(node, TemplateNode):
             if node.template_name == "g":
-                extract_g_template(wxr, word_entry, node, linkage_type)
+                extract_g_template(
+                    wxr,
+                    word_entry,
+                    node,
+                    linkage_type=linkage_type,
+                    raw_tags=raw_tags,
+                )
             elif node.template_name.startswith("ku-"):
                 extract_ku_form_template(
                     wxr,
@@ -220,6 +245,10 @@ def extract_linkage_list_item(
                     linkage_type=linkage_type,
                     sense=sense,
                 )
+            elif node.template_name == "mj":
+                raw_tag = clean_node(wxr, None, node).strip("() ")
+                if raw_tag != "":
+                    raw_tags.append(raw_tag)
 
 
 def extract_stûn_template(

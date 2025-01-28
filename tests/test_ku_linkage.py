@@ -106,3 +106,35 @@ class TestKuLinkage(TestCase):
 }}""",
         )
         self.assertEqual(page_data[0]["synonyms"], [{"word": "pisik"}])
+
+    def test_mj(self):
+        self.wxr.wtp.add_page("Şablon:ziman", 10, "Kurmancî")
+        self.wxr.wtp.add_page(
+            "Şablon:g",
+            10,
+            """<span class="Latn" lang="ku">[[pişê#Kurmancî|pişê]]</span>&nbsp;<span class="gender"><abbr title="zayenda mê">m</abbr></span>""",
+        )
+        self.wxr.wtp.add_page(
+            "Şablon:mj",
+            10,
+            """<i><span class="ib-brac">(</span><span class="ib-content">[[{{{1}}}]]</span><span class="ib-brac">)</span></i>""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "pisîk",
+            """== {{ziman|ku}} ==
+=== Navdêr ===
+# [[heywan|Heywanek]]
+==== Hevmane ====
+* {{mj|zimanê zarokan}} {{g|ku|pişê|z=m}}""",
+        )
+        self.assertEqual(
+            page_data[0]["synonyms"],
+            [
+                {
+                    "word": "pişê",
+                    "tags": ["feminine"],
+                    "raw_tags": ["zimanê zarokan"],
+                }
+            ],
+        )
