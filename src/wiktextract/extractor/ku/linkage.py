@@ -8,27 +8,6 @@ from ...wxr_context import WiktextractContext
 from .models import Form, Linkage, WordEntry
 
 
-def extract_other_form_section(
-    wxr: WiktextractContext,
-    word_entry: WordEntry,
-    level_node: WikiNode,
-) -> None:
-    for list_node in level_node.find_child(NodeKind.LIST):
-        for list_item in list_node.find_child(NodeKind.LIST_ITEM):
-            for node in list_item.find_child(NodeKind.TEMPLATE | NodeKind.LINK):
-                if isinstance(node, TemplateNode):
-                    if node.template_name.startswith("ku-"):
-                        extract_ku_form_template(wxr, word_entry, node)
-                    elif node.template_name == "g":
-                        extract_g_template(wxr, word_entry, node)
-                    elif node.template_name in ["herwiha", "hw"]:
-                        extract_hw_template(wxr, word_entry, node)
-                elif node.kind == NodeKind.LINK:
-                    form = clean_node(wxr, None, node)
-                    if form != "":
-                        word_entry.forms.append(Form(form=form))
-
-
 def extract_ku_form_template(
     wxr: WiktextractContext,
     word_entry: WordEntry,
@@ -162,9 +141,12 @@ def extract_linkage_section(
         ):
             extract_kol_template(wxr, word_entry, node, linkage_type)
         elif isinstance(node, TemplateNode) and node.template_name == "stûn":
-            pass
+            extract_stûn_template(wxr, word_entry, node, linkage_type)
         elif node.kind == NodeKind.LIST:
-            pass
+            for list_item in node.find_child(NodeKind.LIST_ITEM):
+                extract_linkage_list_item(
+                    wxr, word_entry, list_item, linkage_type, ""
+                )
 
 
 def extract_kol_template(
@@ -179,12 +161,79 @@ def extract_kol_template(
         if arg not in t_node.template_parameters:
             break
         arg_value = t_node.template_parameters[arg]
-        if isinstance(arg_value, str) and arg_value.strip() != "":
-            getattr(word_entry, linkage_type).append(
-                Linkage(word=arg_value.strip(), sense=sense)
+        if isinstance(arg_value, str):
+            if arg_value.strip() != "":
+                if linkage_type != "":
+                    getattr(word_entry, linkage_type).append(
+                        Linkage(word=arg_value.strip(), sense=sense)
+                    )
+                else:
+                    word_entry.forms.append(Form(form=arg_value.strip()))
+        else:
+            if not isinstance(arg_value, list):
+                arg_value = [arg_value]
+            if (
+                len(arg_value) > 0
+                and isinstance(arg_value[0], str)
+                and arg_value[0].strip() == ""
+            ):
+                arg_value.pop(0)  # not preformatted node
+            arg_value_node = wxr.wtp.parse(wxr.wtp.node_to_wikitext(arg_value))
+            extract_linkage_list_item(
+                wxr, word_entry, arg_value_node, linkage_type, sense
             )
-        elif (
-            isinstance(arg_value, TemplateNode)
-            and arg_value.template_name == "g"
-        ):
-            extract_g_template(wxr, word_entry, arg_value, linkage_type)
+
+
+def extract_linkage_list_item(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    list_item: WikiNode,
+    linkage_type: str,
+    sense: str,
+) -> None:
+    for node in list_item.children:
+        if isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
+            word = clean_node(wxr, None, node)
+            if word != "":
+                if linkage_type != "":
+                    getattr(word_entry, linkage_type).append(
+                        Linkage(word=word, sense=sense)
+                    )
+                else:
+                    word_entry.forms.append(Form(form=word))
+        elif isinstance(node, TemplateNode):
+            if node.template_name == "g":
+                extract_g_template(wxr, word_entry, node, linkage_type)
+            elif node.template_name.startswith("ku-"):
+                extract_ku_form_template(
+                    wxr,
+                    word_entry,
+                    node,
+                    linkage_type=linkage_type,
+                    sense=sense,
+                )
+            elif node.template_name in ["herwiha", "hw"]:
+                extract_hw_template(
+                    wxr,
+                    word_entry,
+                    node,
+                    linkage_type=linkage_type,
+                    sense=sense,
+                )
+
+
+def extract_stûn_template(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    t_node: TemplateNode,
+    linkage_type: str,
+) -> None:
+    first_arg = t_node.template_parameters.get(1)
+    if first_arg is None:
+        return
+    first_arg = wxr.wtp.parse(wxr.wtp.node_to_wikitext(first_arg))
+    for list_node in first_arg.find_child(NodeKind.LIST):
+        for list_item in list_node.find_child(NodeKind.LIST_ITEM):
+            extract_linkage_list_item(
+                wxr, word_entry, list_item, linkage_type, ""
+            )

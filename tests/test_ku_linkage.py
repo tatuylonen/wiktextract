@@ -56,3 +56,53 @@ class TestKuLinkage(TestCase):
 }}""",
         )
         self.assertEqual(page_data[0]["derived"], [{"word": "kêmav"}])
+
+    def test_stûn_link(self):
+        self.wxr.wtp.add_page("Şablon:ziman", 10, "Kurmancî")
+        page_data = parse_page(
+            self.wxr,
+            "se",
+            """== {{ziman|ku}} ==
+=== Navdêr ===
+# [[ajal|Ajal]]ek
+==== Hevmane ====
+{{stûn|
+* [[kûçik]]
+}}""",
+        )
+        self.assertEqual(page_data[0]["synonyms"], [{"word": "kûçik"}])
+
+    def test_stûn_g(self):
+        self.wxr.wtp.add_page("Şablon:ziman", 10, "Kurmancî")
+        page_data = parse_page(
+            self.wxr,
+            "dar",
+            """== {{ziman|ku}} ==
+=== Navdêr 1 ===
+# [[riwek|Riwek]]eke
+==== Hevmane ====
+{{stûn|
+* [[kûçik]]
+}}""",
+        )
+        self.assertEqual(page_data[0]["synonyms"], [{"word": "kûçik"}])
+
+    def test_kol_hw(self):
+        self.wxr.wtp.add_page("Şablon:ziman", 10, "Kurmancî")
+        self.wxr.wtp.add_page(
+            "Şablon:hw",
+            10,
+            """<span class="Latn" lang="ku">[[pisik#Kurmancî|pisik]]</span> &ndash; ''[[w:Reşoyî (devok)|Reşwî]]''""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "pisîk",
+            """== {{ziman|ku}} ==
+=== Navdêr ===
+# [[heywan|Heywanek]]
+==== Hevmane ====
+{{kol2|ku|cure=Herwiha
+| {{hw|ku|pisik||Reşwî}}
+}}""",
+        )
+        self.assertEqual(page_data[0]["synonyms"], [{"word": "pisik"}])

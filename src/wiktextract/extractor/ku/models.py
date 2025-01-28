@@ -38,6 +38,7 @@ class Form(KurdishBaseModel):
     raw_tags: list[str] = []
     roman: str = ""
     translation: str = ""
+    sense: str = ""
 
 
 class Translation(KurdishBaseModel):
