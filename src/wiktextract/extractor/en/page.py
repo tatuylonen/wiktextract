@@ -4244,7 +4244,7 @@ def parse_top_template(
             return ""
         if name in ("reconstruction",):
             return ""
-        if name.lower() == "also":
+        if name.lower() == "also" or name.lower().startswith("also/"):
             # XXX shows related words that might really have been the intended
             # word, capture them
             return ""
