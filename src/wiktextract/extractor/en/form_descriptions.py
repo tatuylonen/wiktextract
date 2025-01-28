@@ -1550,8 +1550,8 @@ def add_related(
     assert isinstance(ruby_data, (list, tuple)) or ruby_data is None
     if ruby_data is None:
         ruby_data = []
-    # print("add_related: tags_lst={} related={}".format(tags_lst, related))
     related = " ".join(related_list)
+    # print("add_related: tags_lst={} related={}".format(tags_lst, related))
     if related == "[please provide]":
         return None
     if related in IGNORED_RELATED:
