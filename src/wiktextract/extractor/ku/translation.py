@@ -23,6 +23,7 @@ def extract_translation_section(
     word_entry: WordEntry,
     level_node: LevelNode,
     source: str = "",
+    tags: list[str] = [],
 ) -> None:
     sense = ""
     sense_index = 0
@@ -42,7 +43,13 @@ def extract_translation_section(
         elif node.kind == NodeKind.LIST:
             for list_item in node.find_child(NodeKind.LIST_ITEM):
                 extract_translation_list_item(
-                    wxr, word_entry, list_item, sense, sense_index, source
+                    wxr,
+                    word_entry,
+                    list_item,
+                    sense,
+                    sense_index,
+                    source,
+                    tags=tags,
                 )
         elif node.kind in (NodeKind.ITALIC | NodeKind.BOLD):
             for link_node in node.find_child(NodeKind.LINK):
@@ -67,6 +74,7 @@ def extract_translation_list_item(
     sense: str,
     sense_index: int,
     source: str,
+    tags: list[str] = [],
 ) -> None:
     lang_name = "unknown"
     lang_code = "unknown"
@@ -94,7 +102,13 @@ def extract_translation_list_item(
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
             for child_list_item in node.find_child(NodeKind.LIST_ITEM):
                 extract_translation_list_item(
-                    wxr, word_entry, child_list_item, sense, sense_index, source
+                    wxr,
+                    word_entry,
+                    child_list_item,
+                    sense,
+                    sense_index,
+                    source,
+                    tags=tags,
                 )
         elif (
             isinstance(node, WikiNode)
@@ -112,6 +126,7 @@ def extract_translation_list_item(
                 sense=sense,
                 sense_index=sense_index,
                 source=source,
+                tags=tags,
             )
             if tr_data.word != "":
                 word_entry.translations.append(tr_data)
@@ -125,6 +140,7 @@ def extract_w_template(
     sense_index: int,
     lang_name: str,
     source: str,
+    tags: list[str] = [],
 ) -> None:
     # https://ku.wiktionary.org/wiki/Şablon:W
     tr_data = Translation(
@@ -140,6 +156,7 @@ def extract_w_template(
             ),
         ),
         source=source,
+        tags=tags,
     )
     tag_args = {
         "n": "masculine",

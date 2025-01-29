@@ -59,9 +59,13 @@ class TestKuSound(TestCase):
 # [[vexwarin|Vexwarin]]a bê[[reng]]""",
         )
         self.assertEqual(
-            page_data[0]["categories"], ["Dengên kurmancî ji Amedê", "Deng bi kurmancî"]
+            page_data[0]["categories"],
+            ["Dengên kurmancî ji Amedê", "Deng bi kurmancî"],
         )
-        self.assertEqual(page_data[0]["sounds"][0]["audio"], "LL-Q36368 (kur)-Dildadil-av.wav")
+        self.assertEqual(
+            page_data[0]["sounds"][0]["audio"],
+            "LL-Q36368 (kur)-Dildadil-av.wav",
+        )
 
     def test_ku_kîte(self):
         self.wxr.wtp.add_page("Şablon:ziman", 10, "Kurmancî")

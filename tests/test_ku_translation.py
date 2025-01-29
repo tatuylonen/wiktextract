@@ -83,5 +83,12 @@ class TestKuTranslation(TestCase):
         )
         self.assertEqual(
             page_data[0]["translations"],
-            [{"word": "awî", "lang": "Hewramî", "lang_code": "hac"}],
+            [
+                {
+                    "word": "awî",
+                    "lang": "Hewramî",
+                    "lang_code": "hac",
+                    "tags": ["dialectal"],
+                }
+            ],
         )

@@ -31,7 +31,10 @@ def parse_section(
         )
     elif title_text in ["Werger", "Bi zaravayên din"]:
         extract_translation_section(
-            wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
+            wxr,
+            page_data[-1] if len(page_data) > 0 else base_data,
+            level_node,
+            tags=["dialectal"] if title_text == "Bi zaravayên din" else [],
         )
     elif title_text in ["Bi alfabeyên din", "Herwiha", "Bide ber"]:
         extract_linkage_section(
