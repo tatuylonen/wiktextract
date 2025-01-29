@@ -28,7 +28,7 @@ def parse_section(
         extract_etymology_section(
             wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
         )
-    elif title_text == "Werger":
+    elif title_text in ["Werger", "Bi zaravayên din"]:
         extract_translation_section(
             wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
         )

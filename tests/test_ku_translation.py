@@ -68,3 +68,20 @@ class TestKuTranslation(TestCase):
             page_data[0]["translations"],
             [{"word": "âcua", "lang": "bolognezî", "lang_code": "unknown"}],
         )
+
+    def test_dialects(self):
+        self.wxr.wtp.add_page("Şablon:ziman", 10, "Kurmancî")
+        self.wxr.wtp.add_page("Şablon:Z", 10, "Hewramî")
+        page_data = parse_page(
+            self.wxr,
+            "av",
+            """== {{ziman|ku}} ==
+=== Navdêr ===
+# [[vexwarin|Vexwarin]]a bê[[reng]]
+==== Bi zaravayên din ====
+* {{Z|hac}}: [[awî]]""",
+        )
+        self.assertEqual(
+            page_data[0]["translations"],
+            [{"word": "awî", "lang": "Hewramî", "lang_code": "hac"}],
+        )

@@ -68,6 +68,7 @@ def extract_translation_list_item(
     source: str,
 ) -> None:
     lang_name = "unknown"
+    lang_code = "unknown"
     before_colon = True
     for index, node in enumerate(list_item.children):
         if isinstance(node, str) and ":" in node and lang_name == "unknown":
@@ -77,6 +78,10 @@ def extract_translation_list_item(
                 list_item.children[:index] + [node[: node.index(":")]],
             )
             before_colon = False
+        elif isinstance(node, TemplateNode) and node.template_name == "Z":
+            lang_code = clean_node(
+                wxr, None, node.template_parameters.get(1, "")
+            )
         elif isinstance(node, TemplateNode) and node.template_name in [
             "W",
             "W+",
@@ -95,10 +100,14 @@ def extract_translation_list_item(
             and node.kind == NodeKind.LINK
             and not before_colon
         ):
+            if lang_code in ["", "unknown"]:
+                new_code = name_to_code(lang_name, "ku")
+                if new_code != "":
+                    lang_code = new_code
             tr_data = Translation(
                 word=clean_node(wxr, None, node),
                 lang=lang_name,
-                lang_code=name_to_code(lang_name, "ku") or "unknown",
+                lang_code=lang_code,
                 sense=sense,
                 sense_index=sense_index,
                 source=source,
