@@ -66,6 +66,19 @@ class Linkage(KurdishBaseModel):
     sense: str = ""
 
 
+class Sound(KurdishBaseModel):
+    ipa: str = ""
+    audio: str = Field(default="", description="Audio file name")
+    wav_url: str = ""
+    oga_url: str = ""
+    ogg_url: str = ""
+    mp3_url: str = ""
+    opus_url: str = ""
+    flac_url: str = ""
+    tags: list[str] = []
+    raw_tags: list[str] = []
+
+
 class WordEntry(KurdishBaseModel):
     model_config = ConfigDict(title="Kurdish Wiktionary")
     word: str = Field(description="Word string")
@@ -88,3 +101,5 @@ class WordEntry(KurdishBaseModel):
     hyponyms: list[Linkage] = []
     anagrams: list[Linkage] = []
     rhymes: list[Linkage] = []
+    sounds: list[Sound] = []
+    hyphenation: str = ""

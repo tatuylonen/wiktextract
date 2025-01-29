@@ -10,6 +10,7 @@ from .linkage import extract_linkage_section
 from .models import Sense, WordEntry
 from .pos import extract_pos_section
 from .section_titles import LINKAGE_SECTIONS, POS_DATA
+from .sound import extract_sound_section
 from .translation import extract_translation_section, is_translation_page
 
 
@@ -28,9 +29,12 @@ def parse_section(
         extract_etymology_section(
             wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
         )
-    elif title_text == "Werger":
+    elif title_text in ["Werger", "Bi zaravayên din"]:
         extract_translation_section(
-            wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
+            wxr,
+            page_data[-1] if len(page_data) > 0 else base_data,
+            level_node,
+            tags=["dialectal"] if title_text == "Bi zaravayên din" else [],
         )
     elif title_text in ["Bi alfabeyên din", "Herwiha", "Bide ber"]:
         extract_linkage_section(
@@ -46,6 +50,8 @@ def parse_section(
             level_node,
             LINKAGE_SECTIONS[title_text],
         )
+    elif title_text == "Bilêvkirin":
+        extract_sound_section(wxr, base_data, level_node)
 
     for next_level in level_node.find_child(LEVEL_KIND_FLAGS):
         parse_section(wxr, page_data, base_data, next_level)

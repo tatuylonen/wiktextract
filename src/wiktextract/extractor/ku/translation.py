@@ -3,6 +3,7 @@ import re
 from mediawiki_langcodes import name_to_code
 from wikitextprocessor.parser import (
     LEVEL_KIND_FLAGS,
+    LevelNode,
     NodeKind,
     TemplateNode,
     WikiNode,
@@ -20,8 +21,9 @@ def is_translation_page(title: str) -> bool:
 def extract_translation_section(
     wxr: WiktextractContext,
     word_entry: WordEntry,
-    level_node: WikiNode,
+    level_node: LevelNode,
     source: str = "",
+    tags: list[str] = [],
 ) -> None:
     sense = ""
     sense_index = 0
@@ -41,7 +43,13 @@ def extract_translation_section(
         elif node.kind == NodeKind.LIST:
             for list_item in node.find_child(NodeKind.LIST_ITEM):
                 extract_translation_list_item(
-                    wxr, word_entry, list_item, sense, sense_index, source
+                    wxr,
+                    word_entry,
+                    list_item,
+                    sense,
+                    sense_index,
+                    source,
+                    tags=tags,
                 )
         elif node.kind in (NodeKind.ITALIC | NodeKind.BOLD):
             for link_node in node.find_child(NodeKind.LINK):
@@ -66,8 +74,10 @@ def extract_translation_list_item(
     sense: str,
     sense_index: int,
     source: str,
+    tags: list[str] = [],
 ) -> None:
     lang_name = "unknown"
+    lang_code = "unknown"
     before_colon = True
     for index, node in enumerate(list_item.children):
         if isinstance(node, str) and ":" in node and lang_name == "unknown":
@@ -77,6 +87,10 @@ def extract_translation_list_item(
                 list_item.children[:index] + [node[: node.index(":")]],
             )
             before_colon = False
+        elif isinstance(node, TemplateNode) and node.template_name == "Z":
+            lang_code = clean_node(
+                wxr, None, node.template_parameters.get(1, "")
+            )
         elif isinstance(node, TemplateNode) and node.template_name in [
             "W",
             "W+",
@@ -88,20 +102,31 @@ def extract_translation_list_item(
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
             for child_list_item in node.find_child(NodeKind.LIST_ITEM):
                 extract_translation_list_item(
-                    wxr, word_entry, child_list_item, sense, sense_index, source
+                    wxr,
+                    word_entry,
+                    child_list_item,
+                    sense,
+                    sense_index,
+                    source,
+                    tags=tags,
                 )
         elif (
             isinstance(node, WikiNode)
             and node.kind == NodeKind.LINK
             and not before_colon
         ):
+            if lang_code in ["", "unknown"]:
+                new_code = name_to_code(lang_name, "ku")
+                if new_code != "":
+                    lang_code = new_code
             tr_data = Translation(
                 word=clean_node(wxr, None, node),
                 lang=lang_name,
-                lang_code=name_to_code(lang_name, "ku") or "unknown",
+                lang_code=lang_code,
                 sense=sense,
                 sense_index=sense_index,
                 source=source,
+                tags=tags,
             )
             if tr_data.word != "":
                 word_entry.translations.append(tr_data)
@@ -115,6 +140,7 @@ def extract_w_template(
     sense_index: int,
     lang_name: str,
     source: str,
+    tags: list[str] = [],
 ) -> None:
     # https://ku.wiktionary.org/wiki/Şablon:W
     tr_data = Translation(
@@ -130,6 +156,7 @@ def extract_w_template(
             ),
         ),
         source=source,
+        tags=tags,
     )
     tag_args = {
         "n": "masculine",
