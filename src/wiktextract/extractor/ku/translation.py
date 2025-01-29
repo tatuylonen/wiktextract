@@ -3,6 +3,7 @@ import re
 from mediawiki_langcodes import name_to_code
 from wikitextprocessor.parser import (
     LEVEL_KIND_FLAGS,
+    LevelNode,
     NodeKind,
     TemplateNode,
     WikiNode,
@@ -20,7 +21,7 @@ def is_translation_page(title: str) -> bool:
 def extract_translation_section(
     wxr: WiktextractContext,
     word_entry: WordEntry,
-    level_node: WikiNode,
+    level_node: LevelNode,
     source: str = "",
 ) -> None:
     sense = ""
