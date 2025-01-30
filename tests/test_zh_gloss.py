@@ -373,6 +373,11 @@ class TestGloss(TestCase):
 
     def test_linkage_under_in_gloss_list(self):
         self.wxr.wtp.start_page("linda")
+        self.wxr.wtp.add_page(
+            "Template:syn",
+            10,
+            """<span class="nyms 近義詞"><span class="defdate">近義詞：</span><span class="Latn" lang="eo">-{[[ĉarmeta#世界語|-{ĉarmeta}-]]}-</span></span>""",
+        )
         self.wxr.wtp.add_page("Template:pt-verb form of", 10, "{{{2}}}")
         root = self.wxr.wtp.parse("# [[可愛]]的\n#: {{syn|eo|ĉarmeta}}")
         page_data = [WordEntry(word="", lang_code="", lang="", pos="")]

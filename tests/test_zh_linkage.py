@@ -332,3 +332,75 @@ class TestLinkage(TestCase):
                 }
             ],
         )
+
+    def test_zh_syn_template(self):
+        self.wxr.wtp.add_page(
+            "Template:syn",
+            10,
+            """<span class="nyms 近義詞"><span class="defdate">近義詞：</span><span class="Hant" lang="zh">-{[[:wuu&#58;號頭|-{號頭}-]]}-</span><span class="Zsym mention" style="font-size:100%;">／</span><span class="Hans" lang="zh">-{[[:wuu&#58;号头|-{号头}-]]}-</span></span>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "月",
+            """==漢語==
+===詞源1===
+====釋義====
+# [[月份]]
+#: {{syn|zh|wuu:號頭}}""",
+        )
+        self.assertEqual(
+            data[0]["synonyms"],
+            [
+                {
+                    "word": "號頭",
+                    "tags": ["Traditional Chinese"],
+                    "sense": "月份",
+                },
+                {
+                    "word": "号头",
+                    "tags": ["Simplified Chinese"],
+                    "sense": "月份",
+                },
+            ],
+        )
+
+    def test_syn_roman(self):
+        self.wxr.wtp.add_page(
+            "Template:syn",
+            10,
+            """<span class="nyms 近義詞"><span class="defdate">近義詞：</span><span class="Jpan" lang="ja">-{[[追憶#日語|-{追憶}-]]}-</span> <span class="mention-gloss-paren annotation-paren">(</span><span class="tr">-{<!---->tsuioku<!---->}-</span><span class="mention-gloss-paren annotation-paren">)</span>、<span class="Jpan" lang="ja">-{[[追想#日語|-{追想}-]]}-</span> <span class="mention-gloss-paren annotation-paren">(</span><span class="tr">-{<!---->tsuisō<!---->}-</span><span class="mention-gloss-paren annotation-paren">)</span></span>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "記憶",
+            """==日語==
+===名詞===
+# [[個體]]
+#: {{syn|ja|追憶|tr1=tsuioku|追想|tr2=tsuisō}}""",
+        )
+        self.assertEqual(
+            data[0]["synonyms"],
+            [
+                {"word": "追憶", "sense": "個體", "roman": "tsuioku"},
+                {"word": "追想", "sense": "個體", "roman": "tsuisō"},
+            ],
+        )
+
+    def test_syn_qualifier(self):
+        self.wxr.wtp.add_page(
+            "Template:syn",
+            10,
+            """<span class="nyms 近義詞"><span class="defdate">近義詞：</span><span class="ib-brac qualifier-brac">(</span><span class="ib-content qualifier-content">俚语，弃用</span><span class="ib-brac qualifier-brac">)</span> <span class="Latn" lang="en">-{[[duck#英語|-{duck}-]]}-</span></span>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "faggot",
+            """==英语==
+===名词===
+# [[肉丸]]
+#: {{syn|en|duck|q1=俚语，弃用}}""",
+        )
+        self.assertEqual(
+            data[0]["synonyms"],
+            [{"word": "duck", "sense": "肉丸", "tags": ["slang", "obsolete"]}],
+        )

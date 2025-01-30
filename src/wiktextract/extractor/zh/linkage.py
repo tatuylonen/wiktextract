@@ -1,7 +1,12 @@
-import itertools
 from collections import defaultdict
 
-from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
+from wikitextprocessor import (
+    HTMLNode,
+    LevelNode,
+    NodeKind,
+    TemplateNode,
+    WikiNode,
+)
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -305,24 +310,56 @@ def process_linkage_col_template(
 
 def process_linkage_templates_in_gloss(
     wxr: WiktextractContext,
-    page_data: list[WordEntry],
-    template_node: TemplateNode,
+    word_entry: WordEntry,
+    t_node: TemplateNode,
     linkage_type: str,
     sense: str,
 ) -> None:
-    for word_index in itertools.count(2):
-        if word_index not in template_node.template_parameters:
-            break
-        word = clean_node(
-            wxr, None, template_node.template_parameters[word_index]
-        )
-        if len(word) == 0:
-            continue
-        if word.startswith(wxr.wtp.NAMESPACE_DATA["Thesaurus"]["name"] + ":"):
-            continue
-        linkage = Linkage(word=word, sense=sense)
-        pre_data = getattr(page_data[-1], linkage_type)
-        pre_data.append(linkage)
+    # https://en.wiktionary.org/wiki/Template:synonyms
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    lang_code = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
+    l_list = []
+    raw_tags = []
+    for top_span_tag in expanded_node.find_html("span"):
+        for node in top_span_tag.children:
+            if isinstance(node, HTMLNode) and node.tag == "span":
+                span_lang = node.attrs.get("lang", "")
+                span_class = node.attrs.get("class", "")
+                if span_lang == lang_code:
+                    l_data = Linkage(
+                        word=clean_node(wxr, None, node),
+                        sense=sense,
+                        raw_tags=raw_tags,
+                    )
+                    if span_class == "Hant":
+                        l_data.tags.append("Traditional Chinese")
+                    elif span_class == "Hans":
+                        l_data.tags.append("Simplified Chinese")
+                    if l_data.word != "":
+                        l_list.append(l_data)
+                elif span_lang == f"{lang_code}-Latn" or "tr" in span_class:
+                    roman = clean_node(wxr, None, node)
+                    for d in l_list:
+                        d.roman = roman
+                elif span_class == "mention-gloss":
+                    sense = clean_node(wxr, None, node)
+                    for d in l_list:
+                        d.sense = sense
+                elif "qualifier-content" in span_class:
+                    raw_tag_str = clean_node(wxr, None, node)
+                    for raw_tag in raw_tag_str.split("，"):
+                        raw_tag = raw_tag.strip()
+                        if raw_tag != "":
+                            raw_tags.append(raw_tag)
+            elif isinstance(node, str) and node.strip() == "、":
+                getattr(word_entry, linkage_type).extend(l_list)
+                l_list.clear()
+
+    getattr(word_entry, linkage_type).extend(l_list)
+    for data in getattr(word_entry, linkage_type):
+        translate_raw_tags(data)
 
 
 def extract_ja_r_multi_template(

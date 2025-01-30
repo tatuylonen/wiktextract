@@ -94,6 +94,7 @@ GRAMMATICAL_TAGS: dict[str, str] = {
 # https://zh.wiktionary.org/wiki/Template:注释
 LABEL_TAGS = {
     "棄用": "obsolete",
+    "弃用": "obsolete",
     "比喻": "figuratively",
     "古": "archaic",
     "陽": "masculine",
@@ -132,6 +133,7 @@ LABEL_TAGS = {
     "使役": "causative",
     "俗語": "idiomatic",
     "俚語": "slang",
+    "俚语": "slang",
     "兒童用語": "childish",
     "公文": "bureaucratese",
     "冒犯": "offensive",

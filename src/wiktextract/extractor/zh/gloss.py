@@ -80,7 +80,7 @@ def extract_gloss(
                 else:
                     for e_list_item in next_list.find_child(NodeKind.LIST_ITEM):
                         extract_example_list_item(
-                            wxr, gloss_data, e_list_item, page_data
+                            wxr, gloss_data, e_list_item, page_data[-1]
                         )
 
         if not has_nested_gloss and len(gloss_data.glosses) > 0:

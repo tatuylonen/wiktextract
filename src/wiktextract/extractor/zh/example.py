@@ -25,7 +25,7 @@ def extract_example_list_item(
     wxr: WiktextractContext,
     sense_data: Sense,
     list_item: WikiNode,
-    page_data: list[WordEntry],
+    word_entry: WordEntry,
     parent_example: Optional[Example] = None,
 ) -> None:
     example_data = parent_example or Example()
@@ -63,7 +63,7 @@ def extract_example_list_item(
             elif template_name in LINKAGE_TEMPLATES:
                 process_linkage_templates_in_gloss(
                     wxr,
-                    page_data,
+                    word_entry,
                     child,
                     LINKAGE_TEMPLATES[template_name],
                     sense_data.glosses[0]
@@ -77,7 +77,7 @@ def extract_example_list_item(
             NodeKind.LIST_ITEM
         ):
             extract_example_list_item(
-                wxr, sense_data, next_list_item, page_data, example_data
+                wxr, sense_data, next_list_item, word_entry, example_data
             )
 
     if len(example_data.text) > 0 and parent_example is None:
