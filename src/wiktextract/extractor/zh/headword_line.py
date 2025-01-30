@@ -1,5 +1,4 @@
 import re
-from typing import Union
 
 from wikitextprocessor import HTMLNode, NodeKind, TemplateNode, WikiNode
 
@@ -11,24 +10,32 @@ from .models import Form, WordEntry
 from .tags import TEMPLATE_TAG_ARGS, translate_raw_tags
 
 
+def extract_pos_head_line_nodes(
+    wxr: WiktextractContext, word_entry: WordEntry, nodes: list[WikiNode | str]
+) -> None:
+    for node in nodes:
+        if isinstance(node, TemplateNode):
+            if node.template_name in ["tlb", "term-label"]:
+                extract_tlb_template(wxr, word_entry, node)
+            else:
+                extract_headword_line_template(wxr, word_entry, node)
+
+
 def extract_headword_line_template(
-    wxr: WiktextractContext,
-    page_data: list[WordEntry],
-    node: TemplateNode,
-    lang_code: str,
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
 ) -> None:
     # handle the first template in header line
-    template_name = node.template_name
+    template_name = t_node.template_name
     if (
         template_name != "head"
-        and not template_name.startswith(f"{lang_code}-")
+        and not template_name.startswith(f"{word_entry.lang_code}-")
     ) or template_name.endswith("-see"):
         return
 
     expanded_node = wxr.wtp.parse(
-        wxr.wtp.node_to_wikitext(node), expand_all=True
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
     )
-    clean_node(wxr, page_data[-1], expanded_node)
+    clean_node(wxr, word_entry, expanded_node)
     forms_start_index = 0
     for span_node in expanded_node.find_html(
         "span", attr_name="class", attr_value="headword-line"
@@ -38,9 +45,9 @@ def extract_headword_line_template(
                 forms_start_index = index + 1
                 class_names = span_child.attrs.get("class", "")
                 if "headword-tr" in class_names:
-                    page_data[-1].forms.append(
+                    word_entry.forms.append(
                         Form(
-                            form=clean_node(wxr, page_data[-1], span_child),
+                            form=clean_node(wxr, word_entry, span_child),
                             tags=["romanization"],
                         )
                     )
@@ -48,42 +55,40 @@ def extract_headword_line_template(
                     for abbr_tag in span_child.find_html("abbr"):
                         gender = abbr_tag.children[0]
                         if gender in TEMPLATE_TAG_ARGS:
-                            page_data[-1].tags.append(TEMPLATE_TAG_ARGS[gender])
+                            word_entry.tags.append(TEMPLATE_TAG_ARGS[gender])
                         else:
-                            page_data[-1].raw_tags.append(gender)
-                            translate_raw_tags(page_data[-1])
+                            word_entry.raw_tags.append(gender)
+                            translate_raw_tags(word_entry)
                 else:
                     for strong_node in span_child.find_html(
                         "strong", attr_name="class", attr_value="headword"
                     ):
-                        process_ja_headword(wxr, page_data, strong_node)
+                        process_ja_headword(wxr, word_entry, strong_node)
             elif (
                 span_child.tag == "strong"
                 and "headword" in span_child.attrs.get("class", "")
             ):
                 forms_start_index = index + 1
-                if lang_code == "ja":
-                    process_ja_headword(wxr, page_data, span_child)
+                if word_entry.lang_code == "ja":
+                    process_ja_headword(wxr, word_entry, span_child)
             elif span_child.tag == "b":
                 # this is a form <b> tag, already inside form parentheses
                 break
 
         extract_headword_forms(
-            wxr, page_data, span_node.children[forms_start_index:]
+            wxr, word_entry, span_node.children[forms_start_index:]
         )
 
 
 def process_ja_headword(
-    wxr: WiktextractContext,
-    page_data: list[WordEntry],
-    strong_node: HTMLNode,
+    wxr: WiktextractContext, word_entry: WordEntry, strong_node: HTMLNode
 ) -> None:
     ruby_data, node_without_ruby = extract_ruby(wxr, strong_node)
-    form = clean_node(wxr, page_data[-1], node_without_ruby)
-    if (len(ruby_data) > 0 or form != page_data[-1].word) and len(form) > 0:
-        page_data[-1].forms.append(
+    form = clean_node(wxr, word_entry, node_without_ruby)
+    if (len(ruby_data) > 0 or form != word_entry.word) and len(form) > 0:
+        word_entry.forms.append(
             Form(
-                form=clean_node(wxr, page_data[-1], node_without_ruby),
+                form=clean_node(wxr, word_entry, node_without_ruby),
                 ruby=ruby_data,
                 tags=["canonical"],
             )
@@ -92,30 +97,30 @@ def process_ja_headword(
 
 def extract_headword_forms(
     wxr: WiktextractContext,
-    page_data: list[WordEntry],
-    form_nodes: list[Union[WikiNode, str]],
+    word_entry: WordEntry,
+    form_nodes: list[WikiNode | str],
 ) -> None:
     current_nodes = []
     for node in form_nodes:
         if isinstance(node, str) and node.startswith(("，", ",")):
-            process_forms_text(wxr, page_data, current_nodes)
+            process_forms_text(wxr, word_entry, current_nodes)
             current_nodes = [node[1:]]
         else:
             current_nodes.append(node)
 
     if len(current_nodes) > 0:
-        process_forms_text(wxr, page_data, current_nodes)
+        process_forms_text(wxr, word_entry, current_nodes)
 
 
 def process_forms_text(
     wxr: WiktextractContext,
-    page_data: list[WordEntry],
-    form_nodes: list[Union[WikiNode, str]],
+    word_entry: WordEntry,
+    form_nodes: list[WikiNode | str],
 ) -> None:
     tag_nodes = []
     has_forms = False
     striped_nodes = list(strip_nodes(form_nodes))
-    lang_code = page_data[-1].lang_code
+    lang_code = word_entry.lang_code
     for index, node in enumerate(striped_nodes):
         if isinstance(node, WikiNode) and node.kind == NodeKind.HTML:
             if node.tag == "b":
@@ -152,16 +157,16 @@ def process_forms_text(
                     ruby=ruby_data,
                 )
                 translate_raw_tags(form_data)
-                page_data[-1].forms.append(form_data)
+                word_entry.forms.append(form_data)
             elif (
                 node.tag == "span"
                 and "tr" in node.attrs.get("class", "")
-                and len(page_data[-1].forms) > 0
+                and len(word_entry.forms) > 0
             ):
                 # romanization of the previous form <b> tag
-                page_data[-1].forms[-1].roman = clean_node(wxr, None, node)
+                word_entry.forms[-1].roman = clean_node(wxr, None, node)
             elif node.tag == "sup" and lang_code == "ja":
-                extract_historical_kana(wxr, page_data, node)
+                extract_historical_kana(wxr, word_entry, node)
             else:
                 tag_nodes.append(node)
         else:
@@ -169,11 +174,11 @@ def process_forms_text(
 
     if not has_forms:
         tags_list = extract_headword_tags(
-            clean_node(wxr, page_data[-1], tag_nodes).strip("() ")
+            clean_node(wxr, word_entry, tag_nodes).strip("() ")
         )
         if len(tags_list) > 0:
-            page_data[-1].raw_tags.extend(tags_list)
-            translate_raw_tags(page_data[-1])
+            word_entry.raw_tags.extend(tags_list)
+            translate_raw_tags(word_entry)
 
 
 def extract_headword_tags(tags_str: str) -> list[str]:
@@ -186,9 +191,7 @@ def extract_headword_tags(tags_str: str) -> list[str]:
 
 
 def extract_historical_kana(
-    wxr: WiktextractContext,
-    page_data: list[WordEntry],
-    sup_node: HTMLNode,
+    wxr: WiktextractContext, word_entry: WordEntry, sup_node: HTMLNode
 ) -> None:
     # https://zh.wiktionary.org/wiki/Template:ja-adj
     # "hist" parameter
@@ -202,24 +205,22 @@ def extract_historical_kana(
         roman = clean_node(wxr, None, span_node).strip("()")
     if len(form) > 0:
         form_data = Form(form=form, roman=roman)
-        page_data[-1].forms.append(form_data)
+        word_entry.forms.append(form_data)
 
 
 def extract_tlb_template(
-    wxr: WiktextractContext,
-    template_node: TemplateNode,
-    page_data: list[WordEntry],
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
 ) -> None:
     # https://zh.wiktionary.org/wiki/Template:Tlb
     # https://en.wiktionary.org/wiki/Template:term-label
     expanded_node = wxr.wtp.parse(
-        wxr.wtp.node_to_wikitext(template_node), expand_all=True
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
     )
     for span_tag in expanded_node.find_html_recursively(
         "span", attr_name="class", attr_value="ib-content"
     ):
         raw_tag = clean_node(wxr, None, span_tag)
         if len(raw_tag) > 0:
-            page_data[-1].raw_tags.append(raw_tag)
-    clean_node(wxr, page_data[-1], expanded_node)
-    translate_raw_tags(page_data[-1])
+            word_entry.raw_tags.append(raw_tag)
+    clean_node(wxr, word_entry, expanded_node)
+    translate_raw_tags(word_entry)

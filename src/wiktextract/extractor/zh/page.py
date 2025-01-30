@@ -16,7 +16,7 @@ from ...wxr_logging import logger
 from .descendant import extract_descendant_section
 from .etymology import extract_etymology
 from .gloss import extract_gloss
-from .headword_line import extract_headword_line_template, extract_tlb_template
+from .headword_line import extract_pos_head_line_nodes
 from .inflection import extract_inflections
 from .linkage import extract_linkage_section
 from .models import Form, Sense, WordEntry
@@ -50,6 +50,14 @@ def parse_section(
         pass
     elif subtitle in POS_TITLES:
         process_pos_block(wxr, page_data, base_data, level_node, subtitle)
+        if len(page_data[-1].senses) == 0 and subtitle in LINKAGE_TITLES:
+            page_data.pop()
+            extract_linkage_section(
+                wxr,
+                page_data if len(page_data) > 0 else [base_data],
+                level_node,
+                LINKAGE_TITLES[subtitle],
+            )
     elif wxr.config.capture_etymologies and subtitle.startswith(
         tuple(ETYMOLOGY_TITLES)
     ):
@@ -124,33 +132,41 @@ def process_pos_block(
     page_data.append(base_data.model_copy(deep=True))
     page_data[-1].pos_title = pos_title
     page_data[-1].tags.extend(pos_data.get("tags", []))
-    for index, child in enumerate(level_node.filter_empty_str_child()):
-        if isinstance(child, WikiNode):
-            if index == 0 and isinstance(child, TemplateNode):
-                extract_headword_line_template(
-                    wxr, page_data, child, base_data.lang_code
-                )
-                process_soft_redirect_template(wxr, child, page_data)
-            elif (
-                isinstance(child, TemplateNode) and child.template_name == "tlb"
-            ):
-                extract_tlb_template(wxr, child, page_data)
-            elif child.kind == NodeKind.LIST:
-                extract_gloss(wxr, page_data, child, Sense())
+    first_gloss_list_index = len(level_node.children)
+    for index, child in enumerate(level_node.children):
+        if (
+            isinstance(child, WikiNode)
+            and child.kind == NodeKind.LIST
+            and child.sarg.startswith("#")
+        ):
+            if index < first_gloss_list_index:
+                first_gloss_list_index = index
+            extract_gloss(wxr, page_data, child, Sense())
+
+    extract_pos_head_line_nodes(
+        wxr, page_data[-1], level_node.children[:first_gloss_list_index]
+    )
 
     if len(page_data[-1].senses) == 0 and not level_node.contain_node(
         NodeKind.LIST
     ):
         # low quality pages don't put gloss in list
-        gloss_text = clean_node(
-            wxr,
-            page_data[-1],
-            list(level_node.invert_find_child(LEVEL_KIND_FLAGS)),
+        expanded_node = wxr.wtp.parse(
+            wxr.wtp.node_to_wikitext(
+                list(level_node.invert_find_child(LEVEL_KIND_FLAGS))
+            ),
+            expand_all=True,
         )
-        if len(gloss_text) > 0:
-            page_data[-1].senses.append(Sense(glosses=[gloss_text]))
-        else:
-            page_data[-1].senses.append(Sense(tags=["no-gloss"]))
+        if not expanded_node.contain_node(NodeKind.LIST):
+            gloss_text = clean_node(
+                wxr,
+                page_data[-1],
+                expanded_node,
+            )
+            if len(gloss_text) > 0:
+                page_data[-1].senses.append(Sense(glosses=[gloss_text]))
+            else:
+                page_data[-1].senses.append(Sense(tags=["no-gloss"]))
 
 
 def parse_page(

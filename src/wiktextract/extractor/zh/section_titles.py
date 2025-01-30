@@ -198,6 +198,7 @@ LINKAGE_TITLES: dict[str, str] = {
     "下層概念": "derived",
     "下義詞": "hyponyms",
     "俗语": "related",
+    "俗語": "related",
     "关联词": "related",
     "关联词条": "related",
     "其他书写系统": "synonyms",
