@@ -293,3 +293,42 @@ class TestLinkage(TestCase):
                 },
             ],
         )
+
+    def test_ja_r_multi(self):
+        self.wxr.wtp.add_page(
+            "Template:ja-r/multi",
+            10,
+            """* <span class="Jpan" lang="ja">-{[[月よ星よ#日語|-{<ruby>月<rp>(</rp><rt>つき</rt><rp>)</rp></ruby>よ<ruby>星<rp>(</rp><rt>ほし</rt><rp>)</rp></ruby>よ}-]]}-</span> <span class="mention-gloss-paren annotation-paren">(</span><span class="tr">-{<!----><span class="mention-tr tr">-{<!---->tsuki yo hoshi yo<!---->}-</span><!---->}-</span><span class="mention-gloss-paren annotation-paren">)</span>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "月",
+            """==日語==
+===詞源1===
+====名詞====
+# [[月亮]]
+=====俗語=====
+{{ja-r/multi|data=
+* {{ja-r/args|月 よ 星 よ|つき よ ほし よ}}
+}}""",
+        )
+        self.assertEqual(
+            data,
+            [
+                {
+                    "lang": "日語",
+                    "lang_code": "ja",
+                    "pos": "noun",
+                    "pos_title": "名詞",
+                    "senses": [{"glosses": ["月亮"]}],
+                    "related": [
+                        {
+                            "word": "月よ星よ",
+                            "roman": "tsuki yo hoshi yo",
+                            "ruby": [("月", "つき"), ("星", "ほし")],
+                        }
+                    ],
+                    "word": "月",
+                }
+            ],
+        )

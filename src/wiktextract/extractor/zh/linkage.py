@@ -1,12 +1,7 @@
 import itertools
 from collections import defaultdict
 
-from wikitextprocessor.parser import (
-    LevelNode,
-    NodeKind,
-    TemplateNode,
-    WikiNode,
-)
+from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -44,6 +39,10 @@ def extract_linkage_section(
             elif node.template_name.startswith("col"):
                 linkage_list.extend(
                     process_linkage_col_template(wxr, node, sense)
+                )
+            elif node.template_name == "ja-r/multi":
+                linkage_list.extend(
+                    extract_ja_r_multi_template(wxr, node, sense)
                 )
 
     if level_node.kind == NodeKind.LEVEL3:
@@ -238,6 +237,15 @@ def process_ja_r_template(
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(template_node), expand_all=True
     )
+    return process_expanded_ja_r_node(wxr, expanded_node, sense, raw_tags)
+
+
+def process_expanded_ja_r_node(
+    wxr: WiktextractContext,
+    expanded_node: WikiNode,
+    sense: str,
+    raw_tags: list[str] = [],
+) -> Linkage:
     linkage_data = Linkage(sense=sense, raw_tags=raw_tags)
     for span_node in expanded_node.find_html("span"):
         span_class = span_node.attrs.get("class", "")
@@ -315,3 +323,19 @@ def process_linkage_templates_in_gloss(
         linkage = Linkage(word=word, sense=sense)
         pre_data = getattr(page_data[-1], linkage_type)
         pre_data.append(linkage)
+
+
+def extract_ja_r_multi_template(
+    wxr: WiktextractContext, template_node: TemplateNode, sense: str
+) -> Linkage:
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(template_node), expand_all=True
+    )
+    linkage_list = []
+    for list_node in expanded_node.find_child(NodeKind.LIST):
+        for list_item in list_node.find_child(NodeKind.LIST_ITEM):
+            linkage_list.append(
+                process_expanded_ja_r_node(wxr, list_item, sense, [])
+            )
+
+    return linkage_list
