@@ -1,7 +1,7 @@
-import itertools
 from collections import defaultdict
 
-from wikitextprocessor.parser import (
+from wikitextprocessor import (
+    HTMLNode,
     LevelNode,
     NodeKind,
     TemplateNode,
@@ -44,6 +44,10 @@ def extract_linkage_section(
             elif node.template_name.startswith("col"):
                 linkage_list.extend(
                     process_linkage_col_template(wxr, node, sense)
+                )
+            elif node.template_name == "ja-r/multi":
+                linkage_list.extend(
+                    extract_ja_r_multi_template(wxr, node, sense)
                 )
 
     if level_node.kind == NodeKind.LEVEL3:
@@ -238,6 +242,15 @@ def process_ja_r_template(
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(template_node), expand_all=True
     )
+    return process_expanded_ja_r_node(wxr, expanded_node, sense, raw_tags)
+
+
+def process_expanded_ja_r_node(
+    wxr: WiktextractContext,
+    expanded_node: WikiNode,
+    sense: str,
+    raw_tags: list[str] = [],
+) -> Linkage:
     linkage_data = Linkage(sense=sense, raw_tags=raw_tags)
     for span_node in expanded_node.find_html("span"):
         span_class = span_node.attrs.get("class", "")
@@ -297,21 +310,69 @@ def process_linkage_col_template(
 
 def process_linkage_templates_in_gloss(
     wxr: WiktextractContext,
-    page_data: list[WordEntry],
-    template_node: TemplateNode,
+    word_entry: WordEntry,
+    t_node: TemplateNode,
     linkage_type: str,
     sense: str,
 ) -> None:
-    for word_index in itertools.count(2):
-        if word_index not in template_node.template_parameters:
-            break
-        word = clean_node(
-            wxr, None, template_node.template_parameters[word_index]
-        )
-        if len(word) == 0:
-            continue
-        if word.startswith(wxr.wtp.NAMESPACE_DATA["Thesaurus"]["name"] + ":"):
-            continue
-        linkage = Linkage(word=word, sense=sense)
-        pre_data = getattr(page_data[-1], linkage_type)
-        pre_data.append(linkage)
+    # https://en.wiktionary.org/wiki/Template:synonyms
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    lang_code = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
+    l_list = []
+    raw_tags = []
+    for top_span_tag in expanded_node.find_html("span"):
+        for node in top_span_tag.children:
+            if isinstance(node, HTMLNode) and node.tag == "span":
+                span_lang = node.attrs.get("lang", "")
+                span_class = node.attrs.get("class", "")
+                if span_lang == lang_code:
+                    l_data = Linkage(
+                        word=clean_node(wxr, None, node),
+                        sense=sense,
+                        raw_tags=raw_tags,
+                    )
+                    if span_class == "Hant":
+                        l_data.tags.append("Traditional Chinese")
+                    elif span_class == "Hans":
+                        l_data.tags.append("Simplified Chinese")
+                    if l_data.word != "":
+                        l_list.append(l_data)
+                elif span_lang == f"{lang_code}-Latn" or "tr" in span_class:
+                    roman = clean_node(wxr, None, node)
+                    for d in l_list:
+                        d.roman = roman
+                elif span_class == "mention-gloss":
+                    sense = clean_node(wxr, None, node)
+                    for d in l_list:
+                        d.sense = sense
+                elif "qualifier-content" in span_class:
+                    raw_tag_str = clean_node(wxr, None, node)
+                    for raw_tag in raw_tag_str.split("，"):
+                        raw_tag = raw_tag.strip()
+                        if raw_tag != "":
+                            raw_tags.append(raw_tag)
+            elif isinstance(node, str) and node.strip() == "、":
+                getattr(word_entry, linkage_type).extend(l_list)
+                l_list.clear()
+
+    getattr(word_entry, linkage_type).extend(l_list)
+    for data in getattr(word_entry, linkage_type):
+        translate_raw_tags(data)
+
+
+def extract_ja_r_multi_template(
+    wxr: WiktextractContext, template_node: TemplateNode, sense: str
+) -> Linkage:
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(template_node), expand_all=True
+    )
+    linkage_list = []
+    for list_node in expanded_node.find_child(NodeKind.LIST):
+        for list_item in list_node.find_child(NodeKind.LIST_ITEM):
+            linkage_list.append(
+                process_expanded_ja_r_node(wxr, list_item, sense, [])
+            )
+
+    return linkage_list

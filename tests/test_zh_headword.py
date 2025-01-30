@@ -37,9 +37,7 @@ class TestHeadword(TestCase):
             WordEntry(word="manga", lang_code="en", lang="英語", pos="noun")
         ]
         self.wxr.wtp.title = "manga"
-        extract_headword_line_template(
-            self.wxr, page_data, root.children[0], "en"
-        )
+        extract_headword_line_template(self.wxr, page_data[0], root.children[0])
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in page_data],
             [
@@ -68,31 +66,27 @@ class TestHeadword(TestCase):
             '<span class="headword-line"><strong class="Latn headword" lang="nl">-{manga}-</strong>&nbsp;<span class="gender"><abbr title="陽性名詞">m</abbr></span> (複數-{ <b>[[manga\'s#荷蘭語|-{manga\'s}-]]</b>}-，指小詞-{ <b>[[mangaatje#荷蘭語|-{mangaatje}-]]</b>&nbsp;<span class="gender"><abbr title="中性名詞">n</abbr></span>}-)</span>',
         )
         root = self.wxr.wtp.parse("{{nl-noun|m|-'s|mangaatje}}")
-        page_data = [
-            WordEntry(word="manga", lang_code="en", lang="英語", pos="noun")
-        ]
-        self.wxr.wtp.title = "manga"
-        extract_headword_line_template(
-            self.wxr, page_data, root.children[0], "nl"
+        word_entry = WordEntry(
+            word="manga", lang_code="nl", lang="荷蘭語", pos="noun"
         )
+        self.wxr.wtp.title = "manga"
+        extract_headword_line_template(self.wxr, word_entry, root.children[0])
         self.assertEqual(
-            [d.model_dump(exclude_defaults=True) for d in page_data],
-            [
-                {
-                    "word": "manga",
-                    "lang_code": "en",
-                    "lang": "英語",
-                    "forms": [
-                        {"form": "manga's", "tags": ["plural"]},
-                        {
-                            "form": "mangaatje",
-                            "tags": ["neuter", "diminutive"],
-                        },
-                    ],
-                    "tags": ["masculine"],
-                    "pos": "noun",
-                }
-            ],
+            word_entry.model_dump(exclude_defaults=True),
+            {
+                "word": "manga",
+                "lang_code": "nl",
+                "lang": "荷蘭語",
+                "forms": [
+                    {"form": "manga's", "tags": ["plural"]},
+                    {
+                        "form": "mangaatje",
+                        "tags": ["neuter", "diminutive"],
+                    },
+                ],
+                "tags": ["masculine"],
+                "pos": "noun",
+            },
         )
 
     def test_headword_roman(self) -> None:
@@ -111,9 +105,7 @@ class TestHeadword(TestCase):
                 word="-κρατίας", lang_code="grc", lang="古希臘語", pos="suffix"
             )
         ]
-        extract_headword_line_template(
-            self.wxr, page_data, root.children[0], "grc"
-        )
+        extract_headword_line_template(self.wxr, page_data[0], root.children[0])
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in page_data],
             [
@@ -141,9 +133,7 @@ class TestHeadword(TestCase):
         page_data = [
             WordEntry(word="大家", lang_code="ja", lang="日語", pos="noun")
         ]
-        extract_headword_line_template(
-            self.wxr, page_data, root.children[0], "ja"
-        )
+        extract_headword_line_template(self.wxr, page_data[0], root.children[0])
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in page_data],
             [
@@ -183,6 +173,6 @@ class TestHeadword(TestCase):
         page_data = [
             WordEntry(word="放鴿子", lang_code="zh", lang="漢語", pos="verb")
         ]
-        extract_tlb_template(self.wxr, root.children[0], page_data)
+        extract_tlb_template(self.wxr, page_data[0], root.children[0])
         self.assertEqual(page_data[0].tags, ["intransitive"])
         self.assertEqual(page_data[0].categories, ["漢語不及物動詞"])
