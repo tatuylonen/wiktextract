@@ -49,7 +49,7 @@ def extract_example_list_item(
             elif template_name in ["ja-x", "ja-usex"]:
                 extract_template_ja_usex(wxr, child, example_data)
                 clean_node(wxr, sense_data, child)  # add cat link
-            elif template_name in ["zh-x", "zh-usex", "zh-q"]:
+            elif template_name in ["zh-x", "zh-usex", "zh-q", "zh-co"]:
                 sense_data.examples.extend(
                     extract_template_zh_x(wxr, child, example_data)
                 )
