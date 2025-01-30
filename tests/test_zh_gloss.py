@@ -621,3 +621,28 @@ class TestGloss(TestCase):
         self.assertEqual(len(page_data), 2)
         self.assertEqual(page_data[0]["senses"][0]["glosses"], ["德語"])
         self.assertEqual(page_data[1]["senses"][0]["glosses"], ["德国的"])
+
+    def test_lb_separator(self):
+        self.wxr.wtp.add_page(
+            "Template:lb",
+            10,
+            '<small><span class="usage-label-sense"><span class="ib-brac">(</span><span class="ib-content">[[Appendix:Glossary#書面|書面]][[Category:漢語書面用語|A]]或[[Appendix:Glossary#方言|方言]][[Category:漢語方言用語|A]]</span><span class="ib-brac">)</span></span></small>',
+        )
+        page_data = parse_page(
+            self.wxr,
+            "月",
+            """==漢語==
+===詞源1===
+====釋義====
+# {{lb|zh|literary|or|方言}} [[月亮]]""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"],
+            [
+                {
+                    "categories": ["漢語書面用語", "漢語方言用語"],
+                    "glosses": ["月亮"],
+                    "tags": ["literary", "dialectal"],
+                }
+            ],
+        )

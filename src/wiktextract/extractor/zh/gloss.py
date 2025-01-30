@@ -31,7 +31,10 @@ def extract_gloss(
                     continue
                 raw_tag = clean_node(wxr, gloss_data, node)
                 if node.template_name in LABEL_TEMPLATES:
-                    raw_tags.extend(raw_tag.strip("()").split("，"))
+                    for r_tag in re.split(r"，|或", raw_tag.strip("()")):
+                        r_tag = r_tag.strip()
+                        if r_tag != "":
+                            raw_tags.append(r_tag)
                 elif raw_tag.startswith("〈") and raw_tag.endswith("〉"):
                     raw_tags.append(raw_tag.strip("〈〉"))
                 elif (
