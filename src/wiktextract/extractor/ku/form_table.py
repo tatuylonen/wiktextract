@@ -1,3 +1,6 @@
+import re
+from dataclasses import dataclass
+
 from wikitextprocessor import NodeKind, TemplateNode
 
 from ...page import clean_node
@@ -54,3 +57,81 @@ def extract_ku_tewîn_nav_template(
                         translate_raw_tags(form)
                         word_entry.forms.append(form)
                     col_index += 1
+
+
+@dataclass
+class TableHeader:
+    text: str
+    row_index: int
+    rowspan: int
+
+
+def extract_ku_tewîn_lk_template(
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+) -> None:
+    # https://ku.wiktionary.org/wiki/Şablon:ku-tewîn-lk
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for table_node in expanded_node.find_child(NodeKind.TABLE):
+        row_index = 0
+        shared_tags = []
+        row_headers = []
+        for row in table_node.find_child(NodeKind.TABLE_ROW):
+            if len(row.children) == 1:
+                row_str = clean_node(wxr, None, row.children)
+                clear_values = False
+                if row_str.endswith(" gerguhêz)"):
+                    shared_tags = ["transitive"]
+                    clear_values = True
+                elif row_str.endswith(" negerguhêz)"):
+                    shared_tags = ["intransitive"]
+                    clear_values = True
+                elif row_str.startswith("Rehê dema "):
+                    clear_values = True
+                elif row_str.startswith("Formên din:"):
+                    pass
+                if clear_values:
+                    row_index = 0
+                    row_headers.clear()
+                    continue
+            for header_cell in row.find_child(NodeKind.TABLE_HEADER_CELL):
+                rowspan = 1
+                rowspan_str = header_cell.attrs.get("rowspan", "1")
+                if re.fullmatch(r"\d+", rowspan_str):
+                    rowspan = int(rowspan_str)
+                row_headers.append(
+                    TableHeader(
+                        text=clean_node(wxr, None, header_cell),
+                        rowspan=rowspan,
+                        row_index=row_index,
+                    )
+                )
+            for col_index, cell in enumerate(
+                row.find_child(NodeKind.TABLE_CELL)
+            ):
+                cell_str = clean_node(wxr, None, cell)
+                if cell_str == "":
+                    continue
+                if col_index == 0:
+                    row_headers.append(
+                        TableHeader(
+                            text=cell_str, rowspan=1, row_index=row_index
+                        )
+                    )
+                else:
+                    for form_str in cell_str.split("/"):
+                        form_str = form_str.strip()
+                        if form_str not in ["", wxr.wtp.title]:
+                            form = Form(form=form_str, tags=shared_tags)
+                            for header in row_headers:
+                                if (
+                                    row_index >= header.row_index
+                                    and row_index
+                                    < header.row_index + header.rowspan
+                                ):
+                                    form.raw_tags.append(header.text)
+                            translate_raw_tags(form)
+                            word_entry.forms.append(form)
+
+            row_index += 1

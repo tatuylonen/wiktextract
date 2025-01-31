@@ -87,3 +87,58 @@ class TestKuForm(TestCase):
                 },
             ],
         )
+
+    def test_ku_tewîn_lk(self):
+        self.wxr.wtp.add_page("Şablon:ziman", 10, "Kurmancî")
+        self.wxr.wtp.add_page(
+            "Şablon:ku-tewîn-lk",
+            10,
+            """{|
+! colspan="3" align="center"| dîtin (lêkera gerguhêz)
+|-
+| colspan="3" align="center" | Rehê dema niha:&nbsp;[[-bîn-|-<b>bîn</b>-]]
+|-
+! rowspan="5" |<kbd><span title="Raweya pêşkerî"><span>RP.</span></span></kbd><br>Niha
+|-
+| width="60" |ez
+|<span lang="ku">[[dibînim#Kurmancî|dibînim]]</span>
+|-
+| colspan="3" align="center" | Rehê dema borî:&nbsp;&nbsp;/&nbsp;<span>-<b>dî</b>-</span>
+|-
+! rowspan="5" | <kbd><span title="Raweya pêşkerî"><span>RP.</span></span></kbd><br>Boriya<br>sade
+|-
+| <span style="color:green">min</span>
+|<span lang="ku">[[dît#Kurmancî|dît]]</span>&nbsp;/&nbsp;<span lang="ku">[[dî#Kurmancî|dî]]</span>
+|-
+| colspan="3"|Formên din:[[Wêne:1rightarrow.png|15px|link=]] [[Tewandin:dîtin|Tewandin:dîtin]]
+|}
+""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "dîtin",
+            """== {{ziman|ku}} ==
+=== Lêker ===
+{{ku-tewîn-lk|dîtin|form=gerguhêz|niha=bîn|borî=dît|borî2=dî}}
+# Bi""",
+        )
+        self.assertEqual(
+            page_data[0]["forms"],
+            [
+                {
+                    "form": "dibînim",
+                    "tags": ["transitive", "present"],
+                    "raw_tags": ["ez"],
+                },
+                {
+                    "form": "dît",
+                    "tags": ["transitive", "past"],
+                    "raw_tags": ["min"],
+                },
+                {
+                    "form": "dî",
+                    "tags": ["transitive", "past"],
+                    "raw_tags": ["min"],
+                },
+            ],
+        )

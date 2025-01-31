@@ -43,6 +43,10 @@ TABLE_TAGS = {
     "Pozîtîv": "positive",
     "Komparatîv": "comparative",
     "Sûperlatîv": "superlative",
+    # Şablon:ku-tewîn-lk
+    "RP.\nNiha": "present",
+    "Fermanî": "imperative",
+    "RP.\nBoriya\nsade": "past",
 }
 
 TAGS = {**GENDER_NUMBER_TAGS, **TABLE_TAGS}

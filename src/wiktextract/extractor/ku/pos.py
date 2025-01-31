@@ -6,7 +6,10 @@ from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .example import extract_example_list_item
-from .form_table import extract_ku_tewîn_nav_template
+from .form_table import (
+    extract_ku_tewîn_lk_template,
+    extract_ku_tewîn_nav_template,
+)
 from .models import Form, Sense, WordEntry
 from .section_titles import POS_DATA
 
@@ -137,6 +140,11 @@ def extract_pos_header_nodes(
             "ku-tewîn-rd",
         ]:
             extract_ku_tewîn_nav_template(wxr, word_entry, node)
+        elif (
+            isinstance(node, TemplateNode)
+            and node.template_name == "ku-tewîn-lk"
+        ):
+            extract_ku_tewîn_lk_template(wxr, word_entry, node)
 
 
 def extract_navdêr_template(
