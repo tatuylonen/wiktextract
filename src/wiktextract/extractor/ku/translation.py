@@ -188,9 +188,7 @@ def extract_w_template(
 
 
 def extract_translation_page(
-    wxr: WiktextractContext,
-    word_entry: WordEntry,
-    page_title: str,
+    wxr: WiktextractContext, word_entry: WordEntry, page_title: str
 ) -> None:
     page = wxr.wtp.get_page(page_title, 0)
     if page is None or page.body is None:

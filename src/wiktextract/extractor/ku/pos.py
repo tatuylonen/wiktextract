@@ -1,16 +1,12 @@
 import re
 from itertools import count
 
-from wikitextprocessor import (
-    LevelNode,
-    NodeKind,
-    TemplateNode,
-    WikiNode,
-)
+from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .example import extract_example_list_item
+from .form_table import extract_ku_tewîn_nav_template
 from .models import Form, Sense, WordEntry
 from .section_titles import POS_DATA
 
@@ -42,9 +38,7 @@ def extract_pos_section(
 
 
 def extract_gloss_list_item(
-    wxr: WiktextractContext,
-    word_entry: WordEntry,
-    list_item: WikiNode,
+    wxr: WiktextractContext, word_entry: WordEntry, list_item: WikiNode
 ) -> None:
     sense = Sense()
     gloss_nodes = []
@@ -71,9 +65,7 @@ def extract_gloss_list_item(
 
 
 def extract_ferhengok_template(
-    wxr: WiktextractContext,
-    sense: Sense,
-    t_node: TemplateNode,
+    wxr: WiktextractContext, sense: Sense, t_node: TemplateNode
 ) -> None:
     # https://ku.wiktionary.org/wiki/Şablon:ferhengok
     node_str = clean_node(wxr, sense, t_node).strip("() ")
@@ -116,9 +108,7 @@ POS_HEADER_TEMPLATES = frozenset(
 
 
 def extract_pos_header_nodes(
-    wxr: WiktextractContext,
-    word_entry: WordEntry,
-    nodes: list[WikiNode | str],
+    wxr: WiktextractContext, word_entry: WordEntry, nodes: list[WikiNode | str]
 ) -> None:
     for node in nodes:
         if (
@@ -141,12 +131,16 @@ def extract_pos_header_nodes(
             extract_navdêr_template(wxr, word_entry, node)
         elif isinstance(node, TemplateNode) and node.template_name == "lêker":
             extract_lêker_template(wxr, word_entry, node)
+        elif isinstance(node, TemplateNode) and node.template_name in [
+            "ku-tewîn-nav",
+            "ku-tew-nav",
+            "ku-tewîn-rd",
+        ]:
+            extract_ku_tewîn_nav_template(wxr, word_entry, node)
 
 
 def extract_navdêr_template(
-    wxr: WiktextractContext,
-    word_entry: WordEntry,
-    t_node: TemplateNode,
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
 ) -> None:
     # https://ku.wiktionary.org/wiki/Şablon:navdêr
     # Şablon:serenav
@@ -223,9 +217,7 @@ def extract_navdêr_template_form(
 
 
 def extract_lêker_template(
-    wxr: WiktextractContext,
-    word_entry: WordEntry,
-    t_node: TemplateNode,
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
 ) -> None:
     # https://ku.wiktionary.org/wiki/Şablon:lêker
     TAGS = {
