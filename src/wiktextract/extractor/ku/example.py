@@ -22,9 +22,7 @@ def extract_example_list_item(
 
 
 def extract_jêder_template(
-    wxr: WiktextractContext,
-    sense: Sense,
-    t_node: TemplateNode,
+    wxr: WiktextractContext, sense: Sense, t_node: TemplateNode
 ) -> None:
     # https://ku.wiktionary.org/wiki/Şablon:jêder
     expanded_node = wxr.wtp.parse(
@@ -49,9 +47,7 @@ def extract_jêder_template(
 
 
 def extract_mînak_template(
-    wxr: WiktextractContext,
-    sense: Sense,
-    t_node: TemplateNode,
+    wxr: WiktextractContext, sense: Sense, t_node: TemplateNode
 ) -> None:
     # https://ku.wiktionary.org/wiki/Şablon:mînak
     e_data = Example(

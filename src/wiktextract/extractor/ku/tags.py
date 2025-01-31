@@ -22,7 +22,34 @@ GENDER_NUMBER_TAGS = {
     "ngh": "intransitive",
 }
 
-TAGS = {**GENDER_NUMBER_TAGS}
+TABLE_TAGS = {
+    # Şablon:ku-tewîn-nav
+    "Yekjimar": "singular",
+    "Pirjimar": "plural",
+    "Navkî": "nominative",
+    "Îzafe": "construct",
+    "Çemandî": "oblique",
+    "Nîşandera çemandî": ["demonstrative", "oblique"],
+    "Bangkirin": "vocative",
+    "Binavkirî": "definite",
+    "Nebinavkirî": "indefinite",
+    "Mê (yj.)": ["feminine", "singular"],
+    "Nêr (yj.)": ["masculine", "singular"],
+    "Mê û nêr (pj.)": ["feminine", "masculine", "plural"],
+    # Şablon:ku-tew-nav
+    "Mê": "feminine",
+    "Nêr": "masculine",
+    # Şablon:ku-tewîn-rd
+    "Pozîtîv": "positive",
+    "Komparatîv": "comparative",
+    "Sûperlatîv": "superlative",
+    # Şablon:ku-tewîn-lk
+    "RP.\nNiha": "present",
+    "Fermanî": "imperative",
+    "RP.\nBoriya\nsade": "past",
+}
+
+TAGS = {**GENDER_NUMBER_TAGS, **TABLE_TAGS}
 
 
 def translate_raw_tags(data: WordEntry) -> None:
