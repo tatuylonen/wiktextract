@@ -39,6 +39,7 @@ class Form(KurdishBaseModel):
     roman: str = ""
     translation: str = ""
     sense: str = ""
+    source: str = ""
 
 
 class Translation(KurdishBaseModel):

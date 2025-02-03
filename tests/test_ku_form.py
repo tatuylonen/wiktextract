@@ -142,3 +142,124 @@ class TestKuForm(TestCase):
                 },
             ],
         )
+
+    def test_etîket_tewandin(self):
+        import wiktextract.clean as clean_module
+
+        clean_module.IMAGE_LINK_RE = None  # clear cache
+        self.wxr.wtp.add_page("Şablon:ziman", 10, "Kurmancî")
+        self.wxr.wtp.add_page(
+            "Şablon:ku-tewîn-lk",
+            10,
+            """{|
+| colspan="3"|Formên din:[[Wêne:1rightarrow.png|15px|link=]] [[Tewandin:gotin|Tewandin:gotin]]
+|}""",
+        )
+        self.wxr.wtp.add_page(
+            "Tewandin:gotin",
+            106,
+            """== Tewandin ==
+{{etîket tewandin
+|etîket1  = Standard
+|naverok1 = {{ku-tewandin|gotin|form=gerguhêz|niha=bêj|borî=got}}
+}}""",
+        )
+        self.wxr.wtp.add_page(
+            "Şablon:ku-tewandin",
+            10,
+            """<div><span>vegere '''[[gotin#Kurmancî|gotin]]''' </span></div>
+{| cellspacing="0" cellpadding="4"
+|-
+|+ colspan="8" | [[Gotûbêja modulê:ku-tewandin|Pirsgirêkan nîşan bide – Pêşniyaran bike]]
+|-
+! colspan="8" | Tewandina lêkera [[gotin]]<br/><span>(hevedudanî, gerguhêz)</span></big><br/>
+|-
+!colspan="4"|
+!colspan="2" | Dema niha
+!colspan="2" | Dema borî
+|-
+!colspan="4" | Reh
+|colspan="2" | –bêj–
+|colspan="2" | –got–
+|-
+!colspan="8" | Raweya pêşkerî (daxuyanî) - <small><i>Indicative</i></small>
+|-
+!colspan="4" | [[Pêvek:Rastnivîsî/Lêker/Dema niha|Dema niha]] - <small><i>Present</i></small>
+!colspan="4"| [[Pêvek:Rastnivîsî/Lêker/Dema borî ya sade|Raboriya sade]] - <small><i>Preterite</i></small><br><small>Dema boriya têdeyî</small>
+|-
+!colspan="2" | Erênî
+!colspan="2" | Neyînî
+!colspan="2" | Erênî
+!colspan="2" | Neyînî
+|-
+|colspan="2"|ez dibêjim
+|colspan="2"|ez <b>na</b>bêjim
+|colspan="2"|<span style="color:green">min </span> got
+|colspan="2"|<span style="color:green">min </span> <b>ne</b>got
+|}
+== Binêre ==
+* [[:Kategorî:Tewandin:lêkerên hevedudanî yên kurmancî li gel "gotin"|Tewandin:lêkerên '''hevedudanî''' yên kurmancî li gel "'''gotin'''"]]
+* [[:Kategorî:Tewandin:lêkerên pêkhatî yên kurmancî li gel "gotin"|Tewandin:lêkerên '''pêkhatî''' yên kurmancî li gel "'''gotin'''"]][[Kategorî:Tewandin:lêker (kurmancî)]][[Kategorî:Tewandin:lêkerên xwerû (kurmancî)]]
+[[Kategorî:Tewandin:lêkerên gerguhêz (kurmancî)]]
+[[Kategorî:Tewandin:lêkerên xwerû yên gerguhêz (kurmancî)]]""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "gotin",
+            """== {{ziman|ku}} ==
+=== Lêker ===
+{{ku-tewîn-lk|gotin|form=gerguhêz|niha=bêj|borî=got}}
+# Bi""",
+        )
+        self.assertEqual(
+            page_data[0]["categories"],
+            [
+                'Tewandin:lêkerên hevedudanî yên kurmancî li gel "gotin"',
+                'Tewandin:lêkerên pêkhatî yên kurmancî li gel "gotin"',
+                "Tewandin:lêker (kurmancî)",
+                "Tewandin:lêkerên xwerû (kurmancî)",
+                "Tewandin:lêkerên gerguhêz (kurmancî)",
+                "Tewandin:lêkerên xwerû yên gerguhêz (kurmancî)",
+            ],
+        )
+        self.assertEqual(
+            page_data[0]["forms"],
+            [
+                {
+                    "form": "–bêj–",
+                    "tags": ["standard", "root", "present"],
+                    "raw_tags": [
+                        "Tewandina lêkera gotin\n(hevedudanî, gerguhêz)"
+                    ],
+                    "source": "Tewandin:gotin",
+                },
+                {
+                    "form": "–got–",
+                    "tags": ["standard", "root", "past"],
+                    "raw_tags": [
+                        "Tewandina lêkera gotin\n(hevedudanî, gerguhêz)"
+                    ],
+                    "source": "Tewandin:gotin",
+                },
+                {
+                    "form": "ez dibêjim",
+                    "tags": ["standard", "indicative", "present", "positive"],
+                    "source": "Tewandin:gotin",
+                },
+                {
+                    "form": "ez nabêjim",
+                    "tags": ["standard", "indicative", "present", "negative"],
+                    "source": "Tewandin:gotin",
+                },
+                {
+                    "form": "min got",
+                    "tags": ["standard", "indicative", "past", "positive"],
+                    "source": "Tewandin:gotin",
+                },
+                {
+                    "form": "min negot",
+                    "tags": ["standard", "indicative", "past", "negative"],
+                    "source": "Tewandin:gotin",
+                },
+            ],
+        )
