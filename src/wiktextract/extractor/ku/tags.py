@@ -85,6 +85,7 @@ TABLE_TAGS = {
     ],
     "Dema boriya mercî - Preterite conditional": ["preterite", "conditional"],
     "Raweya fermanî - Imperative": "imperative",
+    "Standard": "standard",
 }
 
 TAGS = {**GENDER_NUMBER_TAGS, **TABLE_TAGS}
