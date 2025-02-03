@@ -47,6 +47,44 @@ TABLE_TAGS = {
     "RP.\nNiha": "present",
     "Fermanî": "imperative",
     "RP.\nBoriya\nsade": "past",
+    # Şablon:ku-tewandin
+    "Dema niha": "present",
+    "Dema borî": "past",
+    "Reh": "root",
+    "Raweya pêşkerî (daxuyanî) - Indicative": "indicative",
+    "Dema niha - Present": "present",
+    "Raboriya sade - Preterite\nDema boriya têdeyî": "past",
+    "Erênî": "positive",
+    "Neyînî": "negative",
+    "Raboriya berdest - Imperfect\nÇîrokiya dema niha": "imperfect",
+    "Raboriya dûr - Pluperfect\nÇirokiye boriya têdeyî": "pluperfect",
+    "Dema bê - Future": "future",
+    "Dahatiya pêş - Future perfect": ["future", "perfect"],
+    "Raboriya dûdar - Perfect\nDema boriya dûdar": "perfect",
+    "Çîrokiya boriya dûdar - Nonconfirmative pluperfect": [
+        "nonconfirmative",
+        "pluperfect",
+    ],
+    # "Raweya xwestekî (bilanî, daxwazî) - Subjunctive": "subjunctive",
+    "Dema nihaya xwestekî - Present subjunctive\nNihaya bilaniyê": [
+        "present",
+        "subjunctive",
+    ],
+    "Dema boriya xwestekî - Preterite subjunctive": [
+        "preterite",
+        "subjunctive",
+    ],
+    "Raboriya bilaniyê - Imperfect subjunctive": ["imperfect", "subjunctive"],
+    "Raboriya dûr a bilaniyê - Pluperfect subjunctive": [
+        "pluperfect",
+        "subjunctive",
+    ],
+    "Çîrokiya dema nihaya mercî - Present conditional": [
+        "present",
+        "conditional",
+    ],
+    "Dema boriya mercî - Preterite conditional": ["preterite", "conditional"],
+    "Raweya fermanî - Imperative": "imperative",
 }
 
 TAGS = {**GENDER_NUMBER_TAGS, **TABLE_TAGS}

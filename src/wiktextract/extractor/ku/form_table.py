@@ -7,6 +7,7 @@ from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .models import Form, WordEntry
 from .tags import translate_raw_tags
+from .tewandin import extract_tewandin_page
 
 
 def extract_ku_tewîn_nav_template(
@@ -62,8 +63,10 @@ def extract_ku_tewîn_nav_template(
 @dataclass
 class TableHeader:
     text: str
-    row_index: int
-    rowspan: int
+    row_index: int = 0
+    rowspan: int = 0
+    col_index: int = 0
+    colspan: int = 0
 
 
 def extract_ku_tewîn_lk_template(
@@ -90,7 +93,7 @@ def extract_ku_tewîn_lk_template(
                 elif row_str.startswith("Rehê dema "):
                     clear_values = True
                 elif row_str.startswith("Formên din:"):
-                    pass
+                    extract_tewandin_page(wxr, word_entry, row_str[11:].strip())
                 if clear_values:
                     row_index = 0
                     row_headers.clear()
