@@ -1,3 +1,5 @@
+import re
+
 from wikitextprocessor.parser import (
     LEVEL_KIND_FLAGS,
     HTMLNode,
@@ -34,6 +36,10 @@ def extract_conjugation(
     for conj_template in conj_root.find_child(NodeKind.TEMPLATE):
         if conj_template.template_name.endswith("-intro"):
             continue
+        if conj_template.template_name in ["ku-conj-trans", "ku-conj"]:
+            extract_ku_conj_trans_template(
+                wxr, entry, conj_template, conj_page_title
+            )
         elif "-conj" in conj_template.template_name:
             process_conj_template(wxr, entry, conj_template, conj_page_title)
         elif conj_template.template_name == "Onglets conjugaison":
@@ -52,11 +58,18 @@ def extract_conjugation(
                 ),
             )
         elif conj_template.template_name.startswith("ja-flx-adj"):
-            proces_ja_flx_adj_template(
+            process_ja_flx_adj_template(
                 wxr, entry, conj_template, conj_page_title
             )
         elif conj_template.template_name.startswith("ja-"):
-            proces_ja_conj_template(wxr, entry, conj_template, conj_page_title)
+            process_ja_conj_template(wxr, entry, conj_template, conj_page_title)
+
+    if conj_page_title.startswith("Conjugaison:kurde/"):
+        for table in conj_root.find_child(NodeKind.TABLE):
+            extract_ku_conj_trans_table_node(wxr, entry, table, conj_page_title)
+
+    for link_node in conj_root.find_child(NodeKind.LINK):
+        clean_node(wxr, None, link_node)
 
 
 def process_onglets_conjugaison_template(
@@ -276,7 +289,7 @@ def process_fr_conj_wiki_table(
                 entry.forms.append(form)
 
 
-def proces_ja_flx_adj_template(
+def process_ja_flx_adj_template(
     wxr: WiktextractContext,
     entry: WordEntry,
     template_node: TemplateNode,
@@ -321,7 +334,7 @@ def proces_ja_flx_adj_template(
             entry.forms.extend(forms)
 
 
-def proces_ja_conj_template(
+def process_ja_conj_template(
     wxr: WiktextractContext,
     entry: WordEntry,
     template_node: TemplateNode,
@@ -377,3 +390,79 @@ def proces_ja_conj_template(
             if len(form.form) > 0:
                 translate_raw_tags(form)
                 entry.forms.append(form)
+
+
+def extract_ku_conj_trans_template(
+    wxr: WiktextractContext,
+    entry: WordEntry,
+    t_node: TemplateNode,
+    conj_page_title: str,
+) -> None:
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for table in expanded_node.find_child(NodeKind.TABLE):
+        extract_ku_conj_trans_table_node(wxr, entry, table, conj_page_title)
+    for link_node in expanded_node.find_child(NodeKind.LINK):
+        clean_node(wxr, entry, link_node)
+
+
+def extract_ku_conj_trans_table_node(
+    wxr: WiktextractContext,
+    entry: WordEntry,
+    table_node: WikiNode,
+    conj_page_title: str,
+) -> None:
+    from .inflection import ColspanHeader
+
+    ignore_headers = (
+        "Conjugaison du verbe",
+        "TEMPS DU PRÉSENT ET DU FUTUR",
+        "TEMPS DU PRESENT ET DU FUTUR",
+        "TEMPS DU PASSÉ",
+        "TEMPS DU PASSE",
+    )
+    col_headers = []
+    last_row_has_header = False
+    last_header = ""
+    for row in table_node.find_child(NodeKind.TABLE_ROW):
+        col_index = 0
+        current_row_has_header = row.contain_node(NodeKind.TABLE_HEADER_CELL)
+        if not last_row_has_header and current_row_has_header:
+            col_headers.clear()
+        for cell in row.find_child(
+            NodeKind.TABLE_HEADER_CELL | NodeKind.TABLE_CELL
+        ):
+            cell_str = clean_node(wxr, None, cell)
+            if cell_str == "":
+                col_index += 1
+                continue
+            if cell.kind == NodeKind.TABLE_HEADER_CELL:
+                if cell_str.startswith(ignore_headers):
+                    last_header = cell_str
+                    continue
+                colspan = 1
+                colspan_str = cell.attrs.get("colspan", "1")
+                if re.fullmatch(r"\d+", colspan_str) is not None:
+                    colspan = int(colspan_str)
+                col_headers.append(
+                    ColspanHeader(text=cell_str, index=col_index, span=colspan)
+                )
+                last_header = cell_str
+                col_index += colspan
+            elif last_header == "TEMPS DU PASSÉ":
+                continue
+            elif cell_str == "(inusité)":
+                col_index += 1
+            elif cell_str != wxr.wtp.title:
+                form = Form(form=cell_str, source=conj_page_title)
+                for header in col_headers:
+                    if (
+                        col_index >= header.index
+                        and col_index < header.index + header.span
+                    ):
+                        form.raw_tags.append(header.text)
+                translate_raw_tags(form)
+                entry.forms.append(form)
+                col_index += 1
+        last_row_has_header = current_row_has_header

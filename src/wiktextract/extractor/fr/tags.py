@@ -18,6 +18,9 @@ GENDER_TAGS: dict[str, str | list[str]] = {
     "masculin ou féminin (l’usage hésite)": ["masculine", "feminine"],
     "féminin ou masculin (l’usage hésite)": ["feminine", "masculine"],
     "invariable": "invariable",  # Modèle:invar
+    # Modèle:flex-ku-nommixt
+    "masculin sing.": ["masculine", "singular"],
+    "féminin sing.": ["feminine", "singular"],
 }
 
 # https://en.wikipedia.org/wiki/Grammatical_number
@@ -52,6 +55,9 @@ MOOD_TAGS: dict[str, str] = {
 VERB_FORM_TAGS: dict[str, str | list[str]] = {
     "participe": "participle",
     "imparfait": "imperfect",
+    # Template:ku-conj-trans
+    "parfait": "perfect",
+    "imparfait narratif": ["imperfect", "narrative"],
     "infinitif": "infinitive",
     "gérondif": "gerund",
     # template "pt-verbe-flexion"
@@ -91,6 +97,9 @@ TENSE_TAGS: dict[str, str | list[str]] = {
     "présent simple, 3ᵉ pers. sing.": ["present", "third-person", "singular"],
     "participe passé": ["participle", "past"],
     "participe présent": ["participle", "present"],
+    # Template:ku-conj-trans
+    "présent progressif": ["present", "progressive"],
+    "prétérit et imparfait": ["preterite", "imperfect"],
 }
 
 # https://en.wikipedia.org/wiki/Grammatical_person
@@ -165,6 +174,13 @@ OTHER_GRAMMATICAL_TAGS: dict[str, str] = {
     # Modèle:zh-formes
     "simplifié": "Simplified Chinese",
     "traditionnel": "Traditional Chinese",
+    # Modèle:flex-ku-nomf
+    "ézafé principal": ["ezafe", "primary"],
+    "ézafé secondaire": ["ezafe", "secondary"],
+    "cas oblique": "oblique",
+    # Modèle:ku-conj-trans
+    "forme affirmative": "affirmative",
+    "forme négative": "negative",
 }
 
 # template text before gloss

@@ -38,6 +38,7 @@ IGNORE_TABLE_HEADERS = frozenset(
         "conjugaison présent indicatif",  # avk-tab-conjug
         "mode",  # eo-conj
         "avec suffixes possessifs",  # fi-décl-valo
+        "en kurmandji",  # flex-ku-nomf
     }
 )
 IGNORE_TABLE_HEADER_PREFIXES = (

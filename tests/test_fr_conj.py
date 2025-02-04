@@ -9,6 +9,8 @@ from wiktextract.wxr_context import WiktextractContext
 
 
 class TestNotes(TestCase):
+    maxDiff = None
+
     def setUp(self) -> None:
         self.wxr = WiktextractContext(
             Wtp(lang_code="fr"), WiktionaryConfig(dump_file_lang_code="fr")
@@ -331,3 +333,122 @@ class TestNotes(TestCase):
                 },
             ],
         )
+
+    def test_ku_conj_trans(self):
+        self.wxr.wtp.start_page("gotin")
+        self.wxr.wtp.add_page(
+            "Conjugaison:kurde/gotin",
+            116,
+            "{{ku-conj-trans|gotin|bêj|got||pr=b|dr=c|prp=c|drp=c|incompl=oui}}",
+        )
+        self.wxr.wtp.add_page(
+            "Modèle:ku-conj-trans",
+            10,
+            """{|
+|-
+! colspan="7" | Conjugaison du verbe gotin en kurmandji
+|-
+| &nbsp;
+|-
+! colspan="7"| TEMPS DU PRÉSENT ET DU FUTUR
+|-
+! colspan="3" | Présent
+| &nbsp;
+! colspan="3" | Présent progressif
+| &nbsp;
+|-
+! Forme affirmative
+| &nbsp;
+! Forme négative
+| &nbsp;
+! Forme affirmative
+| &nbsp;
+! Forme négative
+|-
+| ez [[dibêjim]]
+| &nbsp;
+| ez [[nabêjim]]
+| &nbsp;
+| ez [[dibêjime]]
+| &nbsp;
+| ez [[nabêjime]]
+|-
+| colspan="7" | &nbsp;
+|-
+! Subjonctif
+| &nbsp;
+! Futur
+| &nbsp;
+|-
+! Forme affirmative
+| &nbsp;
+! Forme négative
+| &nbsp;
+! Forme affirmative
+| &nbsp;
+! Forme négative
+|-
+| ez [[bibêjim]]
+|}
+
+{|
+|-
+! colspan="3" | TEMPS DU PASSÉ
+|-
+| colspan="3" | ignore this
+|-
+| &nbsp;
+|-
+! colspan="3" | Prétérit
+| &nbsp;
+|-
+! Forme affirmative
+| &nbsp;
+! Forme négative
+|-
+| (''inusité'')
+| &nbsp;
+| (''inusité'')
+|-
+| <span style="color:green">min/ te/</span> <span style="color:lime">''wî''/ ''wê''/</span> <span style="color:green">me/ we/ wan</span> <span style="color:blue">ew/</span> <span style="color:teal">''xwe''</span> [[got]]
+|}
+[[Catégorie:Conjugaison en kurde]]""",
+        )
+        entry = WordEntry(lang_code="ku", lang="Kurde", word="gotin")
+        extract_conjugation(self.wxr, entry, "Conjugaison:kurde/gotin")
+        self.assertEqual(
+            [f.model_dump(exclude_defaults=True) for f in entry.forms],
+            [
+                {
+                    "form": "ez dibêjim",
+                    "tags": ["present", "affirmative"],
+                    "source": "Conjugaison:kurde/gotin",
+                },
+                {
+                    "form": "ez nabêjim",
+                    "tags": ["present", "negative"],
+                    "source": "Conjugaison:kurde/gotin",
+                },
+                {
+                    "form": "ez dibêjime",
+                    "tags": ["present", "progressive", "affirmative"],
+                    "source": "Conjugaison:kurde/gotin",
+                },
+                {
+                    "form": "ez nabêjime",
+                    "tags": ["present", "progressive", "negative"],
+                    "source": "Conjugaison:kurde/gotin",
+                },
+                {
+                    "form": "ez bibêjim",
+                    "tags": ["subjunctive", "affirmative"],
+                    "source": "Conjugaison:kurde/gotin",
+                },
+                {
+                    "form": "min/ te/ wî/ wê/ me/ we/ wan ew/ xwe got",
+                    "tags": ["preterite", "affirmative"],
+                    "source": "Conjugaison:kurde/gotin",
+                },
+            ],
+        )
+        self.assertEqual(entry.categories, ["Conjugaison en kurde"])

@@ -91,6 +91,8 @@ def extract_form_line(
             raw_tag = clean_node(wxr, None, node)
             if raw_tag != "ou":
                 page_data[-1].raw_tags.append(raw_tag)
+        elif isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
+            process_conj_link_node(wxr, node, page_data)
 
         translate_raw_tags(page_data[-1])
 
@@ -197,28 +199,7 @@ def process_conj_template(
         wxr.wtp.node_to_wikitext(template_node), expand_all=True
     )
     for link in expanded_node.find_child(NodeKind.LINK):
-        if len(link.largs) == 0:
-            continue
-        conj_title = link.largs[0][0]
-        if not conj_title.startswith("Conjugaison:"):
-            continue
-        conj_word = conj_title.split("/", 1)[-1]
-        if conj_word in (
-            "Premier groupe",
-            "Deuxième groupe",
-            "Troisième groupe",
-        ):
-            continue
-        if (
-            len(page_data) > 1
-            and page_data[-2].lang_code == page_data[-1].lang_code
-            and page_data[-2].pos == page_data[-1].pos
-            and len(page_data[-2].forms) > 0
-            and page_data[-2].forms[-1].source == conj_title
-        ):
-            page_data[-1].forms = page_data[-2].forms
-        else:
-            extract_conjugation(wxr, page_data[-1], conj_title)
+        process_conj_link_node(wxr, link, page_data)
 
     tag = clean_node(wxr, page_data[-1], expanded_node)
     if template_node.template_name in ("conj", "conjugaison"):
@@ -229,6 +210,35 @@ def process_conj_template(
         )
     if len(tag) > 0:
         page_data[-1].raw_tags.append(tag)
+
+
+def process_conj_link_node(
+    wxr: WiktextractContext,
+    link: WikiNode,
+    page_data: list[WordEntry],
+) -> None:
+    if len(link.largs) == 0:
+        return
+    conj_title = link.largs[0][0]
+    if not conj_title.startswith("Conjugaison:"):
+        return
+    conj_word = conj_title.split("/", 1)[-1]
+    if conj_word in (
+        "Premier groupe",
+        "Deuxième groupe",
+        "Troisième groupe",
+    ):
+        return
+    if (
+        len(page_data) > 1
+        and page_data[-2].lang_code == page_data[-1].lang_code
+        and page_data[-2].pos == page_data[-1].pos
+        and len(page_data[-2].forms) > 0
+        and page_data[-2].forms[-1].source == conj_title
+    ):
+        page_data[-1].forms = page_data[-2].forms
+    else:
+        extract_conjugation(wxr, page_data[-1], conj_title)
 
 
 def process_lien_pronominal(
