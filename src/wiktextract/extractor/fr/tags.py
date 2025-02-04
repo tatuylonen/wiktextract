@@ -99,6 +99,7 @@ TENSE_TAGS: dict[str, str | list[str]] = {
     "participe présent": ["participle", "present"],
     # Template:ku-conj-trans
     "présent progressif": ["present", "progressive"],
+    "prétérit et imparfait": ["preterite", "imperfect"],
 }
 
 # https://en.wikipedia.org/wiki/Grammatical_person

@@ -36,7 +36,7 @@ def extract_conjugation(
     for conj_template in conj_root.find_child(NodeKind.TEMPLATE):
         if conj_template.template_name.endswith("-intro"):
             continue
-        if conj_template.template_name == "ku-conj-trans":
+        if conj_template.template_name in ["ku-conj-trans", "ku-conj"]:
             extract_ku_conj_trans_template(
                 wxr, entry, conj_template, conj_page_title
             )
@@ -63,6 +63,13 @@ def extract_conjugation(
             )
         elif conj_template.template_name.startswith("ja-"):
             process_ja_conj_template(wxr, entry, conj_template, conj_page_title)
+
+    if conj_page_title.startswith("Conjugaison:kurde/"):
+        for table in conj_root.find_child(NodeKind.TABLE):
+            extract_ku_conj_trans_table_node(wxr, entry, table, conj_page_title)
+
+    for link_node in conj_root.find_child(NodeKind.LINK):
+        clean_node(wxr, None, link_node)
 
 
 def process_onglets_conjugaison_template(
@@ -411,7 +418,9 @@ def extract_ku_conj_trans_table_node(
     ignore_headers = (
         "Conjugaison du verbe",
         "TEMPS DU PRÉSENT ET DU FUTUR",
+        "TEMPS DU PRESENT ET DU FUTUR",
         "TEMPS DU PASSÉ",
+        "TEMPS DU PASSE",
     )
     col_headers = []
     last_row_has_header = False
