@@ -18,6 +18,9 @@ GENDER_TAGS: dict[str, str | list[str]] = {
     "masculin ou féminin (l’usage hésite)": ["masculine", "feminine"],
     "féminin ou masculin (l’usage hésite)": ["feminine", "masculine"],
     "invariable": "invariable",  # Modèle:invar
+    # Modèle:flex-ku-nommixt
+    "masculin sing.": ["masculine", "singular"],
+    "féminin sing.": ["feminine", "singular"],
 }
 
 # https://en.wikipedia.org/wiki/Grammatical_number
@@ -165,6 +168,10 @@ OTHER_GRAMMATICAL_TAGS: dict[str, str] = {
     # Modèle:zh-formes
     "simplifié": "Simplified Chinese",
     "traditionnel": "Traditional Chinese",
+    # Modèle:flex-ku-nomf
+    "ézafé principal": ["ezafe", "primary"],
+    "ézafé secondaire": ["ezafe", "secondary"],
+    "cas oblique": "oblique",
 }
 
 # template text before gloss

@@ -174,7 +174,7 @@ def process_pos_block(
                 elif template_name.startswith(("zh-mot", "ja-mot")):
                     # skip form line templates
                     form_line_start = index
-                elif template_name.startswith(f"{lang_code}-"):
+                elif template_name.startswith((f"{lang_code}-", "flex-ku-")):
                     extract_inflection(wxr, page_data, child)
             elif child.kind == NodeKind.BOLD and form_line_start == 0:
                 form_line_start = index + 1
