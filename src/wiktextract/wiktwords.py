@@ -502,7 +502,7 @@ def main():
         extract_namespace(wxr, "Module", args.modules_file)
     if args.templates_file:
         extract_namespace(wxr, "Template", args.templates_file)
-    if args.categories_file:
+    if args.categories_file and args.dump_file_language_code == "en":
         logger.info("Extracting category tree")
         tree = extract_categories(wxr)
         with open(args.categories_file, "w") as f:
