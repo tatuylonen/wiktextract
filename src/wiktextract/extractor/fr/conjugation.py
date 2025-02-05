@@ -1,4 +1,5 @@
 import re
+from dataclasses import dataclass
 
 from wikitextprocessor.parser import (
     LEVEL_KIND_FLAGS,
@@ -40,6 +41,8 @@ def extract_conjugation(
             extract_ku_conj_trans_template(
                 wxr, entry, conj_template, conj_page_title
             )
+        elif conj_template.template_name == "ko-conj":
+            extract_ko_conj_template(wxr, entry, conj_template, conj_page_title)
         elif "-conj" in conj_template.template_name:
             process_conj_template(wxr, entry, conj_template, conj_page_title)
         elif conj_template.template_name == "Onglets conjugaison":
@@ -466,3 +469,134 @@ def extract_ku_conj_trans_table_node(
                 entry.forms.append(form)
                 col_index += 1
         last_row_has_header = current_row_has_header
+
+
+@dataclass
+class TableHeader:
+    text: str
+    col_index: int = 0
+    colspan: int = 0
+    row_index: int = 0
+    rowspan: int = 0
+
+
+def extract_ko_conj_template(
+    wxr: WiktextractContext,
+    entry: WordEntry,
+    t_node: TemplateNode,
+    conj_page_title: str,
+) -> None:
+    word_page_title = wxr.wtp.title
+    wxr.wtp.title = conj_page_title
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for h3 in expanded_node.find_html("h3"):
+        clean_node(wxr, entry, h3)
+    for table_index, table in enumerate(
+        expanded_node.find_child(NodeKind.TABLE)
+    ):
+        if table_index == 0:
+            continue
+        shared_raw_tags = []
+        for caption_node in table.find_child(NodeKind.TABLE_CAPTION):
+            caption = clean_node(wxr, None, caption_node.children)
+            if caption != "":
+                shared_raw_tags.append(caption)
+        col_headers = []
+        row_headers = []
+        row_index = 0
+        row_header_indexes = [0]
+        for row in table.find_child(NodeKind.TABLE_ROW):
+            col_index = 0
+            for header_cell in row.find_child(NodeKind.TABLE_HEADER_CELL):
+                cell_str = clean_node(wxr, None, header_cell)
+                if cell_str == "":
+                    continue
+                colspan, rowspan = get_cell_span(header_cell)
+                if row.contain_node(NodeKind.TABLE_CELL):
+                    header_added = False
+                    current_row_index = row_index
+                    for index, row_header_index in enumerate(
+                        row_header_indexes
+                    ):
+                        if row_index >= row_header_index:
+                            current_row_index = row_header_indexes[index]
+                            row_header_indexes[index] += rowspan
+                        header_added = True
+                        break
+                    if not header_added:
+                        row_header_indexes.append(rowspan)
+                    row_headers.append(
+                        TableHeader(
+                            text=cell_str,
+                            row_index=current_row_index,
+                            rowspan=rowspan,
+                        )
+                    )
+                else:
+                    col_headers.append(
+                        TableHeader(
+                            text=cell_str,
+                            col_index=col_index,
+                            colspan=colspan,
+                        )
+                    )
+                col_index += colspan
+            if row.contain_node(NodeKind.TABLE_CELL):
+                row_index += 1
+
+        row_index = 0
+        for row in table.find_child(NodeKind.TABLE_ROW):
+            col_index = 0
+            for cell in row.find_child(NodeKind.TABLE_CELL):
+                cell_str = clean_node(wxr, None, cell)
+                colspan, rowspan = get_cell_span(cell)
+                if cell_str == "—":
+                    col_index += 1
+                else:
+                    form = Form(
+                        source=conj_page_title, raw_tags=shared_raw_tags
+                    )
+                    for line_index, line in enumerate(cell_str.splitlines()):
+                        match line_index:
+                            case 0:
+                                form.form = line
+                            case 1:
+                                form.roman = line
+                            case 2:
+                                form.ipas.append(line)
+                    for header in col_headers:
+                        if (
+                            col_index >= header.col_index
+                            and col_index < header.col_index + header.colspan
+                        ):
+                            form.raw_tags.append(header.text)
+                    for header in row_headers:
+                        if (
+                            row_index < header.row_index + header.rowspan
+                            and row_index + rowspan > header.row_index
+                        ):
+                            form.raw_tags.append(header.text)
+                    if form.form not in ["", wxr.wtp.title]:
+                        translate_raw_tags(form)
+                        entry.forms.append(form)
+                    col_index += 1
+            if row.contain_node(NodeKind.TABLE_CELL):
+                row_index += 1
+
+    for link in expanded_node.find_child(NodeKind.LINK):
+        clean_node(wxr, entry, link)
+    wxr.wtp.title = word_page_title
+
+
+def get_cell_span(cell: WikiNode) -> tuple[int, int]:
+    colspan = 1
+    colspan_str = cell.attrs.get("colspan", "1")
+    if re.fullmatch(r"\d+", colspan_str) is not None:
+        colspan = int(colspan_str)
+    rowspan = 1
+    rowspan_str = cell.attrs.get("rowspan", "1")
+    if re.fullmatch(r"\d+", rowspan_str) is not None:
+        rowspan = int(rowspan_str)
+    return colspan, rowspan
