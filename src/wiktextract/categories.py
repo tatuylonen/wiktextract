@@ -2,10 +2,7 @@
 #
 # Copyright (c) 2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
-from typing import (
-    Optional,
-    TypedDict,
-)
+from typing import TypedDict
 
 from wikitextprocessor.core import NamespaceDataEntry
 
@@ -41,17 +38,19 @@ local function extract_tree(data, parts)
     print( k..": "..desc )
     desc = string.gsub(desc, "\n", "\\n")
     table.insert(parts, k .. "@@" .. desc)
-    for kk, vv in pairs(v.parents) do
-      local name
-      local sort = ""
-      if type(vv) == "table" then
-        name = vv.name
-        sort = vv.sort or ""
-      else
-        name = vv
-      end
-      if name then
-        table.insert(parts, "@@" .. name .. "@@" .. sort)
+    if type(v.parents) == "table" then
+      for kk, vv in pairs(v.parents) do
+        local name
+        local sort = ""
+        if type(vv) == "table" then
+          name = vv.name
+          sort = vv.sort or ""
+        else
+          name = vv
+        end
+        if name then
+          table.insert(parts, "@@" .. name .. "@@" .. sort)
+        end
       end
     end
     table.insert(parts, "\n")
@@ -93,15 +92,16 @@ CategoryReturn = TypedDict(
     total=False,
 )
 
+
 def extract_categories(wxr: WiktextractContext) -> CategoryReturn:
     """Extracts the category tree from Wiktionary."""
-    module_ns: Optional[NamespaceDataEntry] = wxr.wtp.NAMESPACE_DATA.get(
-                                                            "Module", None)
-    assert module_ns is not None
-    module_ns_local_name = module_ns.get("name")
-    module_ns_id = module_ns.get("id")
-    wxr.wtp.add_page(f"{module_ns_local_name}:wiktextract cat tree",
-                 module_ns_id, LUA_CODE, model="Scribunto")
+    module_ns: NamespaceDataEntry = wxr.wtp.NAMESPACE_DATA["Module"]
+    wxr.wtp.add_page(
+        f"{module_ns['name']}:wiktextract cat tree",
+        module_ns["id"],
+        LUA_CODE,
+        model="Scribunto",
+    )
     wxr.wtp.start_page("Wiktextract category tree extraction")
     rawdata = wxr.wtp.expand("{{#invoke:wiktextract cat tree|main}}")
     ht: dict[str, CategoryEntry] = {}
@@ -109,6 +109,8 @@ def extract_categories(wxr: WiktextractContext) -> CategoryReturn:
         if not line:
             continue
         parts = line.split("@@")
+        if len(parts) < 2:
+            continue
         name = parts[0]
         desc = parts[1]
         name = name.removeprefix("Category:")
@@ -127,7 +129,7 @@ def extract_categories(wxr: WiktextractContext) -> CategoryReturn:
             parent_name_lc = parent_name.lower()
             parent_sort = parts[i + 1]
             if parent_name_lc not in ht:
-                p: CategoryEntry  = {"name": parent_name}
+                p: CategoryEntry = {"name": parent_name}
                 ht[parent_name_lc] = p
             else:
                 p = ht[parent_name_lc]
@@ -157,7 +159,7 @@ def extract_categories(wxr: WiktextractContext) -> CategoryReturn:
 
     notseen_set = set(x.lower() for x in ht.keys()) - seen - is_child
     notseen = list(ht[x]["name"] for x in sorted(notseen_set))
-    #if notseen:
+    # if notseen:
     #    print("NOT SEEN:", "; ".join(notseen))
 
     # Sort lists of children
