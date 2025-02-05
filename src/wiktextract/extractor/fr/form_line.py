@@ -212,16 +212,21 @@ def process_conj_template(
         page_data[-1].raw_tags.append(tag)
 
 
+def is_conj_link(link: WikiNode) -> bool:
+    if len(link.largs) == 0:
+        return False
+    conj_title = link.largs[0][0]
+    return conj_title.startswith("Conjugaison:")
+
+
 def process_conj_link_node(
     wxr: WiktextractContext,
     link: WikiNode,
     page_data: list[WordEntry],
 ) -> None:
-    if len(link.largs) == 0:
+    if not is_conj_link(link):
         return
     conj_title = link.largs[0][0]
-    if not conj_title.startswith("Conjugaison:"):
-        return
     conj_word = conj_title.split("/", 1)[-1]
     if conj_word in (
         "Premier groupe",

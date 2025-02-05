@@ -224,21 +224,24 @@ class TestNotes(TestCase):
                     "hiragana": "かっこうだろ",
                     "roman": "kakkou daro",
                     "source": "Conjugaison:japonais/格好だ",
-                    "raw_tags": ["Formes de base", "Imperfectif (未然形)"],
+                    "tags": ["base-form"],
+                    "raw_tags": ["Imperfectif (未然形)"],
                 },
                 {
                     "form": "格好ではない",
                     "hiragana": "かっこうではない",
                     "roman": "kakkou dewa nai",
                     "source": "Conjugaison:japonais/格好だ",
-                    "raw_tags": ["Clefs de constructions", "Neutre négatif"],
+                    "tags": ["neuter", "negative"],
+                    "raw_tags": ["Clefs de constructions"],
                 },
                 {
                     "form": "格好じゃない",
                     "hiragana": "かっこうじゃない",
                     "roman": "kakkou ja nai",
                     "source": "Conjugaison:japonais/格好だ",
-                    "raw_tags": ["Clefs de constructions", "Neutre négatif"],
+                    "tags": ["neuter", "negative"],
+                    "raw_tags": ["Clefs de constructions"],
                 },
             ],
         )
@@ -295,41 +298,32 @@ class TestNotes(TestCase):
                     "hiragana": "ある",
                     "roman": "aru",
                     "source": "Conjugaison:japonais/在る",
-                    "raw_tags": ["Formes de base", "L'inaccompli"],
+                    "tags": ["base-form"],
+                    "raw_tags": ["L'inaccompli"],
                 },
                 {
                     "form": "無い",
                     "hiragana": "ない",
                     "roman": "nai",
                     "source": "Conjugaison:japonais/在る",
-                    "raw_tags": [
-                        "Formes de base",
-                        "Imperfectif (未然形, mizen-kei)",
-                    ],
+                    "tags": ["base-form"],
+                    "raw_tags": ["Imperfectif (未然形, mizen-kei)"],
                 },
                 {
                     "form": "在ります",
                     "hiragana": "あります",
                     "roman": "arimasu",
                     "source": "Conjugaison:japonais/在る",
-                    "raw_tags": [
-                        "Clefs de constructions",
-                        "Présent / Futur",
-                        "poli",
-                        "affirmatif",
-                    ],
+                    "tags": ["present", "future", "polite", "affirmative"],
+                    "raw_tags": ["Clefs de constructions"],
                 },
                 {
                     "form": "在りません",
                     "hiragana": "ありません",
                     "roman": "arimasen",
                     "source": "Conjugaison:japonais/在る",
-                    "raw_tags": [
-                        "Clefs de constructions",
-                        "Présent / Futur",
-                        "poli",
-                        "négatif",
-                    ],
+                    "tags": ["present", "future", "polite", "negative"],
+                    "raw_tags": ["Clefs de constructions"],
                 },
             ],
         )
@@ -452,3 +446,139 @@ class TestNotes(TestCase):
             ],
         )
         self.assertEqual(entry.categories, ["Conjugaison en kurde"])
+
+    def test_ko_conj(self):
+        self.wxr.wtp.start_page("오다")
+        self.wxr.wtp.add_page(
+            "Conjugaison:coréen/오다", 116, "{{ko-conj|rad3=court|classe=v}}"
+        )
+        self.wxr.wtp.add_page(
+            "Modèle:ko-conj",
+            10,
+            """<h3><span>Verbe</span><span> </span>[[Catégorie:Wiktionnaire:Sections de type avec locution forcée]]</h3>
+{|
+|-
+| ignore
+|}
+{|
+|+ Formes finales
+! rowspan="2" colspan="3" |
+! colspan="2" | Registre formel
+! colspan="2" | Registre informel
+|-
+! Non poli !! Poli !! Non poli !! Poli
+|-
+! rowspan="17" | Non passé
+! rowspan="6" | Indicatif
+! Déclaratif
+| <span lang="ko" xml:lang="ko" class="lang-ko"><bdi>온다</bdi></span><br/>onda<br/>[[Annexe:Prononciation/coréen|<span class="API" title="Prononciation API">[on.da]</span>]]
+| <span lang="ko" xml:lang="ko" class="lang-ko"><bdi>옵니다</bdi></span><br/>omnida<br/>[[Annexe:Prononciation/coréen|<span class="API" title="Prononciation API">[om.ni.da]</span>]]
+| rowspan="2" | <span lang="ko" xml:lang="ko" class="lang-ko"><bdi>와</bdi></span><br/>wa<br/>[[Annexe:Prononciation/coréen|<span class="API" title="Prononciation API">[wa]</span>]]
+| rowspan="2" | <span lang="ko" xml:lang="ko" class="lang-ko"><bdi>와요</bdi></span><br/>wayo<br/>[[Annexe:Prononciation/coréen|<span class="API" title="Prononciation API">[wa.jo̞]</span>]]
+|-
+! rowspan="3" | Interrogatif
+| <span lang="ko" xml:lang="ko" class="lang-ko"><bdi>오느냐</bdi></span><br/>oneunya<br/>[[Annexe:Prononciation/coréen|<span class="API" title="Prononciation API">[o.nɯ.nja]</span>]]
+| <span lang="ko" xml:lang="ko" class="lang-ko"><bdi>옵니까</bdi></span><br/>omnikka<br/>[[Annexe:Prononciation/coréen|<span class="API" title="Prononciation API">[om.ni.ˀka]</span>]]
+|}
+[[Catégorie:Conjugaison en coréen]]""",
+        )
+        entry = WordEntry(lang_code="ko", lang="Coréen", word="오다")
+        extract_conjugation(self.wxr, entry, "Conjugaison:coréen/오다")
+        self.assertEqual(
+            entry.categories,
+            [
+                "Wiktionnaire:Sections de type avec locution forcée",
+                "Conjugaison en coréen",
+            ],
+        )
+        self.assertEqual(
+            [f.model_dump(exclude_defaults=True) for f in entry.forms],
+            [
+                {
+                    "form": "온다",
+                    "tags": [
+                        "final",
+                        "formal",
+                        "impolite",
+                        "non-past",
+                        "indicative",
+                        "declarative",
+                    ],
+                    "roman": "onda",
+                    "ipas": ["[on.da]"],
+                    "source": "Conjugaison:coréen/오다",
+                },
+                {
+                    "form": "옵니다",
+                    "tags": [
+                        "final",
+                        "formal",
+                        "polite",
+                        "non-past",
+                        "indicative",
+                        "declarative",
+                    ],
+                    "roman": "omnida",
+                    "ipas": ["[om.ni.da]"],
+                    "source": "Conjugaison:coréen/오다",
+                },
+                {
+                    "form": "와",
+                    "tags": [
+                        "final",
+                        "informal",
+                        "impolite",
+                        "non-past",
+                        "indicative",
+                        "declarative",
+                        "interrogative",
+                    ],
+                    "roman": "wa",
+                    "ipas": ["[wa]"],
+                    "source": "Conjugaison:coréen/오다",
+                },
+                {
+                    "form": "와요",
+                    "tags": [
+                        "final",
+                        "informal",
+                        "polite",
+                        "non-past",
+                        "indicative",
+                        "declarative",
+                        "interrogative",
+                    ],
+                    "roman": "wayo",
+                    "ipas": ["[wa.jo̞]"],
+                    "source": "Conjugaison:coréen/오다",
+                },
+                {
+                    "form": "오느냐",
+                    "tags": [
+                        "final",
+                        "formal",
+                        "impolite",
+                        "non-past",
+                        "indicative",
+                        "interrogative",
+                    ],
+                    "roman": "oneunya",
+                    "ipas": ["[o.nɯ.nja]"],
+                    "source": "Conjugaison:coréen/오다",
+                },
+                {
+                    "form": "옵니까",
+                    "tags": [
+                        "final",
+                        "formal",
+                        "polite",
+                        "non-past",
+                        "indicative",
+                        "interrogative",
+                    ],
+                    "roman": "omnikka",
+                    "ipas": ["[om.ni.ˀka]"],
+                    "source": "Conjugaison:coréen/오다",
+                },
+            ],
+        )

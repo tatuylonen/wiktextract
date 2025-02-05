@@ -21,6 +21,13 @@ GENDER_TAGS: dict[str, str | list[str]] = {
     # Modèle:flex-ku-nommixt
     "masculin sing.": ["masculine", "singular"],
     "féminin sing.": ["feminine", "singular"],
+    # Template:ja-flx-adj-な
+    "neutre négatif": ["neuter", "negative"],
+    "neutre passé": ["neuter", "past"],
+    "neutre négatif passé": ["neuter", "negative", "past"],
+    "poli négatif": ["polite", "negative"],
+    "poli passé": ["polite", "past"],
+    "poli négatif passé": ["polite", "negative", "past"],
 }
 
 # https://en.wikipedia.org/wiki/Grammatical_number
@@ -50,6 +57,18 @@ MOOD_TAGS: dict[str, str] = {
     "conditionnel": "conditional",
     "impératif": "imperative",
     "volitif": "volitive",
+    "déclaratif": "declarative",
+    "interrogatif": "interrogative",
+    "aperceptif": "apperceptive",
+    "euphémique": "euphemistic",
+    "évidentiel": "evidential",
+    "spéculatif": "speculative",
+    "assertif": "assertive",
+    "hortatif": "hortative",
+    "promissif": "promissive",
+    "conditionnel / subjonctif": ["conditional", "subjunctive"],
+    "conjonctif": "subjunctive",
+    "provisionnel": "temporal",
 }
 
 VERB_FORM_TAGS: dict[str, str | list[str]] = {
@@ -63,6 +82,21 @@ VERB_FORM_TAGS: dict[str, str | list[str]] = {
     # template "pt-verbe-flexion"
     "infinitif personnel": ["infinitive", "personal"],
     "supin": "supine",
+    # Template:ko-conj
+    "conjugaison": "conjugation",
+    "radical": "radical",
+    "formes finales": "final",
+    "registre formel": "formal",
+    "registre informel": "informal",
+    "non poli": "impolite",
+    "poli": "polite",
+    "formes nominales": "nominal",
+    "formes conjonctives": "subjunctive",
+    # Template:ja-在る
+    "formes de base": "base-form",
+    "affirmatif": "affirmative",
+    "négatif": "negative",
+    "adverbial": "adverbial",
 }
 
 # https://en.wikipedia.org/wiki/Grammatical_case
@@ -100,6 +134,8 @@ TENSE_TAGS: dict[str, str | list[str]] = {
     # Template:ku-conj-trans
     "présent progressif": ["present", "progressive"],
     "prétérit et imparfait": ["preterite", "imperfect"],
+    "non passé": "non-past",
+    "présent / futur": ["present", "future"],
 }
 
 # https://en.wikipedia.org/wiki/Grammatical_person

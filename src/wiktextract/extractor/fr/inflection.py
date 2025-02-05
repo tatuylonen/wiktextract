@@ -87,6 +87,8 @@ def process_inflection_table(
     page_data: list[WordEntry],
     table_template: TemplateNode,
 ) -> None:
+    from .form_line import is_conj_link, process_conj_link_node
+
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(table_template), expand_all=True
     )
@@ -193,6 +195,14 @@ def process_inflection_table(
                                 )
                             )
                 elif table_cell.kind == NodeKind.TABLE_CELL:
+                    has_conj_link = False
+                    for link_node in table_cell.find_child(NodeKind.LINK):
+                        if is_conj_link(link_node):
+                            process_conj_link_node(wxr, link_node, page_data)
+                            has_conj_link = True
+                            break
+                    if has_conj_link:
+                        continue
                     table_cell_lines = clean_node(wxr, None, table_cell)
                     for table_cell_line in table_cell_lines.splitlines():
                         if is_ipa_text(table_cell_line):
