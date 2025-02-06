@@ -130,11 +130,5 @@ class TestKuLinkage(TestCase):
         )
         self.assertEqual(
             page_data[0]["synonyms"],
-            [
-                {
-                    "word": "pişê",
-                    "tags": ["feminine"],
-                    "raw_tags": ["zimanê zarokan"],
-                }
-            ],
+            [{"word": "pişê", "tags": ["childish", "feminine"]}],
         )
