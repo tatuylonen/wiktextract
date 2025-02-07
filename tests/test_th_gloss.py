@@ -254,8 +254,8 @@ class TestThGloss(TestCase):
             page_data[0]["senses"][0],
             {
                 "glosses": ["อีกรูปหนึ่งของ ᨸᩣ᩠ᨠ (ปาก)"],
-                "form_of": [{"word": "ᨸᩣ᩠ᨠ", "roman": "ปาก"}],
-                "tags": ["form-of"],
+                "alt_of": [{"word": "ᨸᩣ᩠ᨠ", "roman": "ปาก"}],
+                "tags": ["alt-of"],
             },
         )
 
