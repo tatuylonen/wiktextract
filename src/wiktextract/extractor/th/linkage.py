@@ -30,7 +30,7 @@ def extract_linkage_section(
             extract_ws_template(wxr, word_entry, node, linkage_type, source)
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
             for list_item in node.find_child(NodeKind.LIST_ITEM):
-                extract_linkage_lite_item(
+                extract_linkage_list_item(
                     wxr, word_entry, list_item, linkage_type, source
                 )
 
@@ -63,7 +63,7 @@ def extract_col_template(
         getattr(word_entry, linkage_type).extend(l_data)
 
 
-def extract_linkage_lite_item(
+def extract_linkage_list_item(
     wxr: WiktextractContext,
     word_entry: WordEntry,
     list_item: WikiNode,
