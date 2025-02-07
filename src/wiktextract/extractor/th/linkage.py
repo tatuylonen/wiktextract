@@ -83,7 +83,9 @@ def extract_linkage_list_item(
         elif isinstance(node, WikiNode) and node.kind == NodeKind.ITALIC:
             for link_node in node.find_child(NodeKind.LINK):
                 link_str = clean_node(wxr, None, link_node)
-                if link_str.startswith("อรรถาภิธาน:"):
+                if link_str.startswith("อรรถาภิธาน:") and not source.startswith(
+                    "อรรถาภิธาน:"
+                ):
                     extract_thesaurus_page(
                         wxr, word_entry, linkage_type, link_str
                     )
