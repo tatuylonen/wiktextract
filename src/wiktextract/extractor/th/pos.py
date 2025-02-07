@@ -47,6 +47,10 @@ def extract_pos_section(
             extract_th_verb_adj_template(wxr, page_data[-1], node)
 
 
+# redirect
+ALT_OF_TEMPLATES = frozenset(["altform", "alt form", "alt sp", "altsp"])
+
+
 def extract_gloss_list_item(
     wxr: WiktextractContext,
     word_entry: WordEntry,
@@ -65,12 +69,13 @@ def extract_gloss_list_item(
             extract_cls_template(wxr, sense, node)
         elif isinstance(node, TemplateNode) and (
             node.template_name.endswith(" of")
-            or node.template_name == "altform"
+            or node.template_name.startswith("alternate ")
+            or node.template_name in ALT_OF_TEMPLATES
         ):
             expanded_node = wxr.wtp.parse(
                 wxr.wtp.node_to_wikitext(node), expand_all=True
             )
-            extract_form_of_template(wxr, sense, expanded_node)
+            extract_form_of_template(wxr, sense, expanded_node, node)
             gloss_nodes.append(expanded_node)
         elif not (isinstance(node, WikiNode) and node.kind == NodeKind.LIST):
             gloss_nodes.append(node)
@@ -188,6 +193,7 @@ def extract_form_of_template(
     wxr: WiktextractContext,
     sense: Sense,
     expanded_node: WikiNode,
+    t_node: TemplateNode,
 ) -> None:
     form = AltForm(word="")
     for i_tag in expanded_node.find_html_recursively("i"):
@@ -197,7 +203,16 @@ def extract_form_of_template(
         if "mention-tr" in span_tag.attrs.get("class", ""):
             form.roman = clean_node(wxr, None, span_tag)
             break
+    is_alt_of = (
+        t_node.template_name.startswith(("alternative ", "alternate "))
+        or t_node.template_name in ALT_OF_TEMPLATES
+    )
     if form.word != "":
-        sense.form_of.append(form)
-        if "form-of" not in sense.tags:
+        if is_alt_of:
+            sense.alt_of.append(form)
+        else:
+            sense.form_of.append(form)
+        if is_alt_of and "alt-of" not in sense.tags:
+            sense.tags.append("alt-of")
+        if not is_alt_of and "form-of" not in sense.tags:
             sense.tags.append("form-of")
