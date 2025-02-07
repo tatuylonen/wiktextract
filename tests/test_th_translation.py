@@ -108,7 +108,7 @@ class TestThTranslation(TestCase):
                 {
                     "word": "Corea",
                     "lang": "อินเทอร์ลิงกวา",
-                    "lang_code": "unknown",
+                    "lang_code": "ia",
                 }
             ],
         )
