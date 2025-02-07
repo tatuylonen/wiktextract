@@ -24,6 +24,10 @@ class Example(KurdishBaseModel):
     raw_tags: list[str] = []
 
 
+class AltForm(KurdishBaseModel):
+    word: str
+
+
 class Sense(KurdishBaseModel):
     glosses: list[str] = []
     tags: list[str] = []
@@ -31,6 +35,7 @@ class Sense(KurdishBaseModel):
     categories: list[str] = []
     examples: list[Example] = []
     topics: list[str] = []
+    form_of: list[AltForm] = []
 
 
 class Form(KurdishBaseModel):

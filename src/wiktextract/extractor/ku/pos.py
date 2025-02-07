@@ -10,8 +10,9 @@ from .form_table import (
     extract_ku_tewîn_lk_template,
     extract_ku_tewîn_nav_template,
 )
-from .models import Form, Sense, WordEntry
+from .models import AltForm, Form, Sense, WordEntry
 from .section_titles import POS_DATA
+from .tags import TAGS
 
 
 def extract_pos_section(
@@ -51,6 +52,12 @@ def extract_gloss_list_item(
             "ferhengok",
         ]:
             extract_ferhengok_template(wxr, sense, node)
+        elif isinstance(node, TemplateNode) and node.template_name in [
+            "formeke peyvê",
+            "inflection of",
+        ]:
+            extract_form_of_template(wxr, sense, node)
+            gloss_nodes.append(node)
         elif not (isinstance(node, WikiNode) and node.kind == NodeKind.LIST):
             gloss_nodes.append(node)
 
@@ -272,3 +279,30 @@ def extract_lêker_template_form(
         extract_lêker_template_form(
             wxr, word_entry, t_node, arg_name + "2", tag
         )
+
+
+def extract_form_of_template(
+    wxr: WiktextractContext, sense: Sense, t_node: TemplateNode
+) -> None:
+    # Şablon:formeke peyvê
+    for arg in ["cude", 3, 2]:
+        form_str = clean_node(
+            wxr, None, t_node.template_parameters.get(arg, "")
+        )
+        if form_str != "":
+            sense.form_of.append(AltForm(word=form_str))
+            if "form-of" not in sense.tags:
+                sense.tags.append("form-of")
+            for tag_arg in count(4):
+                if tag_arg not in t_node.template_parameters:
+                    break
+                raw_tag = clean_node(
+                    wxr, None, t_node.template_parameters[tag_arg]
+                ).capitalize()
+                if raw_tag in TAGS:
+                    tr_tag = TAGS[raw_tag]
+                    if isinstance(tr_tag, str):
+                        sense.tags.append(tr_tag)
+                    elif isinstance(tr_tag, list):
+                        sense.tags.extend(tr_tag)
+            break

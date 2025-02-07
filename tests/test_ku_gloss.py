@@ -91,3 +91,36 @@ class TestKuGloss(TestCase):
                 {"form": "کرد", "tags": ["past"], "roman": "kerd"},
             ],
         )
+
+    def test_form_of(self):
+        self.wxr.wtp.add_page("Şablon:ziman", 10, "Kurmancî")
+        self.wxr.wtp.add_page(
+            "Şablon:formeke peyvê",
+            10,
+            "Rewşa îzafeyî ya binavkirî ya pirjimar ya nêr ya kûçik.",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "kûçikên",
+            """== {{ziman|fa}} ==
+=== Formeke navdêrê ===
+# {{formeke peyvê|ku|kûçik||îzafe|ya|binavkirî|ya|pirjimar|ya|nêr}}""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"],
+            [
+                {
+                    "form_of": [{"word": "kûçik"}],
+                    "glosses": [
+                        "Rewşa îzafeyî ya binavkirî ya pirjimar ya nêr ya kûçik."
+                    ],
+                    "tags": [
+                        "form-of",
+                        "construct",
+                        "definite",
+                        "plural",
+                        "masculine",
+                    ],
+                }
+            ],
+        )
