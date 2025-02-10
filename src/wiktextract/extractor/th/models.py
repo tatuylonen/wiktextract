@@ -131,3 +131,4 @@ class WordEntry(ThaiBaseModel):
     coordinate_terms: list[Linkage] = []
     sounds: list[Sound] = []
     hyphenation: list[str] = []
+    notes: list[str] = []

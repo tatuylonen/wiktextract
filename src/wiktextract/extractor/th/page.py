@@ -11,7 +11,11 @@ from .descendant import extract_descendant_section
 from .etymology import extract_etymology_section
 from .linkage import extract_linkage_section
 from .models import Sense, WordEntry
-from .pos import extract_note_section, extract_pos_section
+from .pos import (
+    extract_note_section,
+    extract_pos_section,
+    extract_usage_note_section,
+)
 from .section_titles import LINKAGE_SECTIONS, POS_DATA
 from .sound import extract_sound_section
 from .translation import extract_translation_section
@@ -63,7 +67,25 @@ def parse_section(
         extract_note_section(
             wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
         )
-    elif title_text not in ["ดูเพิ่ม", "อ้างอิง", "อ่านเพิ่ม", "อ่านเพิ่มเติม"]:
+    elif title_text == "หมายเหตุการใช้":
+        extract_usage_note_section(
+            wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
+        )
+    elif title_text not in [
+        "ดูเพิ่ม",  # see more
+        "อ้างอิง",  # references
+        "อ่านเพิ่ม",  # read more
+        "อ่านเพิ่มเติม",  # read more
+        "รากอักขระ",  # glyph origin
+        "การผันรูป",  # conjugation
+        "การผัน",  # conjugation
+        "คำกริยาในรูปต่าง ๆ",  # verb forms
+        "การอ่าน",  # Japanese readings
+        "การผันคำกริยา",  # conjugation
+        "การผันคำ",  # inflection
+        "การกลายรูป",  # conjugation
+        "การผันคำนาม",  # inflection
+    ]:
         wxr.wtp.debug(f"Unknown title: {title_text}")
 
     for next_level in level_node.find_child(LEVEL_KIND_FLAGS):

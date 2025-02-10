@@ -216,3 +216,15 @@ def extract_form_of_template(
             sense.tags.append("alt-of")
         if not is_alt_of and "form-of" not in sense.tags:
             sense.tags.append("form-of")
+
+
+def extract_usage_note_section(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    level_node: LevelNode,
+) -> None:
+    for list_node in level_node.find_child(NodeKind.LIST):
+        for list_item in list_node.find_child(NodeKind.LIST_ITEM):
+            note_str = clean_node(wxr, None, list_item.children)
+            if note_str != "":
+                word_entry.notes.append(note_str)
