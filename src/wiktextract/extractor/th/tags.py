@@ -29,6 +29,11 @@ TRANSLATION_TAGS = {
 
 SOUND_TAGS = {
     "การแผลงเป็น\nอักษรโรมัน": "romanization",  # Template:th-pron
+    "ไพบูลย์พับบลิชชิง": "Paiboon",
+    "ราชบัณฑิตยสภา": "Royal-Institute",
+    "การแบ่งพยางค์": "phoneme",
+    "US": "US",
+    "UK": "UK",
 }
 
 LABEL_TAGS = {
@@ -108,7 +113,9 @@ LABEL_TAGS = {
     "หยาบคาย": "vulgar",
     "กรีซโบราณ": "Ancient Greek",
     "โรมโบราณ": "Ancient Rome",
+    "สะกดผิด": "misspelling",
 }
+
 
 TAGS = {**EXAMPLE_TAGS, **TRANSLATION_TAGS, **SOUND_TAGS, **LABEL_TAGS}
 

@@ -71,6 +71,7 @@ class Linkage(ThaiBaseModel):
     raw_tags: list[str] = []
     roman: str = ""
     source: str = ""
+    sense: str = ""
 
 
 class Descendant(ThaiBaseModel):
@@ -100,6 +101,7 @@ class Sound(ThaiBaseModel):
     other: str = ""
     roman: str = ""
     rhymes: str = ""
+    enpr: str = ""
 
 
 class WordEntry(ThaiBaseModel):
@@ -130,3 +132,5 @@ class WordEntry(ThaiBaseModel):
     coordinate_terms: list[Linkage] = []
     sounds: list[Sound] = []
     hyphenation: list[str] = []
+    abbreviations: list[Linkage] = []
+    notes: list[str] = []

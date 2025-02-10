@@ -45,13 +45,11 @@ class TestThSound(unittest.TestCase):
             [
                 {
                     "other": "rót",
-                    "tags": ["romanization"],
-                    "raw_tags": ["ไพบูลย์พับบลิชชิง"],
+                    "tags": ["romanization", "Paiboon"],
                 },
                 {
                     "other": "rot",
-                    "tags": ["romanization"],
-                    "raw_tags": ["ราชบัณฑิตยสภา"],
+                    "tags": ["romanization", "Royal-Institute"],
                 },
                 {"ipa": "/rot̚˦˥/^((สัมผัส))"},
                 {"homophone": "รด"},

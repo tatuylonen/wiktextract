@@ -26,6 +26,17 @@ POS_DATA = {
     "คันจิ": {"pos": "character", "tags": ["kanji"]},
     "คำอาการนาม": {"pos": "adj_noun"},
     "อุปสรรค": {"pos": "prefix", "tags": ["morpheme"]},
+    "ประโยค": {"pos": "clause"},
+    "คำปัจฉบท": {"pos": "postp"},
+    "อักษรย่อ": {"pos": "abbrev", "tags": ["abbreviation"]},
+    "จำนวน": {"pos": "num", "tags": ["number"]},
+    "ปัจจัย": {"pos": "suffix", "tags": ["morpheme"]},
+    "หน่วยคำเติม": {"pos": "affix"},
+    "อักษรฮั่น": {"pos": "character", "tags": ["han"]},
+    "ฮันจา": {"pos": "character", "tags": ["Hanja"]},
+    "อักษรโรมัน": {"pos": "romanization"},
+    "เครื่องหมายวรรคตอน": {"pos": "punct", "tags": ["punctuation"]},
+    "คำกำหนด": {"pos": "det"},
 }
 
 
@@ -36,10 +47,15 @@ LINKAGE_SECTIONS = {
     "คำเกี่ยวข้อง": "related",
     "คำที่เกี่ยวข้อง": "related",
     "คำที่รับมา": "derived",
+    "คำแผลง": "derived",
     "คำตรงกันข้าม": "antonyms",
     "คำสลับอักษร": "anagrams",
     "การสลับอักษร": "anagrams",
     "คำลูกกลุ่ม": "hyponyms",
     "คำจ่ากลุ่ม": "hypernyms",
     "สำนวน": "idioms",
+    "คำย่อ": "abbreviations",
+    "คำที่สัมพันธ์กัน": "related",
+    "ตัวอักษรที่เกี่ยวข้อง": "related",
+    "วลี": "derived",
 }
