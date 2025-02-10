@@ -32,6 +32,14 @@ def parse_section(
     wxr.wtp.start_subsection(title_text)
     if title_text in POS_DATA:
         extract_pos_section(wxr, page_data, base_data, level_node, title_text)
+        if len(page_data[-1].senses) == 0 and title_text in LINKAGE_SECTIONS:
+            page_data.pop()
+            extract_linkage_section(
+                wxr,
+                page_data[-1] if len(page_data) > 0 else base_data,
+                level_node,
+                LINKAGE_SECTIONS[title_text],
+            )
     elif title_text == "รากศัพท์":
         if level_node.contain_node(LEVEL_KIND_FLAGS):
             base_data = base_data.model_copy(deep=True)

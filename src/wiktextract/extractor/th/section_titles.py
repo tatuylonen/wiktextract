@@ -57,4 +57,5 @@ LINKAGE_SECTIONS = {
     "คำย่อ": "abbreviations",
     "คำที่สัมพันธ์กัน": "related",
     "ตัวอักษรที่เกี่ยวข้อง": "related",
+    "วลี": "derived",
 }
