@@ -47,7 +47,7 @@ def parse_section(
         extract_descendant_section(
             wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
         )
-    elif title_text.startswith(("การออกเสียง", "การอ่านออกเสียง")):
+    elif title_text.startswith(("การออกเสียง", "การอ่านออกเสียง", "ออกเสียง")):
         extract_sound_section(wxr, base_data, level_node)
     elif title_text == "รูปแบบอื่น":
         extract_alt_form_section(

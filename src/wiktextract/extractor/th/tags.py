@@ -29,6 +29,8 @@ TRANSLATION_TAGS = {
 
 SOUND_TAGS = {
     "การแผลงเป็น\nอักษรโรมัน": "romanization",  # Template:th-pron
+    "US": "US",
+    "UK": "UK",
 }
 
 LABEL_TAGS = {
@@ -109,6 +111,7 @@ LABEL_TAGS = {
     "กรีซโบราณ": "Ancient Greek",
     "โรมโบราณ": "Ancient Rome",
 }
+
 
 TAGS = {**EXAMPLE_TAGS, **TRANSLATION_TAGS, **SOUND_TAGS, **LABEL_TAGS}
 

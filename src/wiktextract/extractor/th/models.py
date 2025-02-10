@@ -100,6 +100,7 @@ class Sound(ThaiBaseModel):
     other: str = ""
     roman: str = ""
     rhymes: str = ""
+    enpr: str = ""
 
 
 class WordEntry(ThaiBaseModel):

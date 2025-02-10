@@ -26,6 +26,83 @@ def extract_sound_section(
             extract_th_pron_template(wxr, base_data, t_node)
         elif t_node.template_name == "lo-pron":
             extract_lo_pron_template(wxr, base_data, t_node)
+    for list_node in level_node.find_child(NodeKind.LIST):
+        for list_item in list_node.find_child(NodeKind.LIST_ITEM):
+            extract_sound_list_item(wxr, base_data, list_item)
+
+
+def extract_sound_list_item(
+    wxr: WiktextractContext,
+    base_data: WordEntry,
+    list_item: WikiNode,
+) -> None:
+    for t_node in list_item.find_child(NodeKind.TEMPLATE):
+        if t_node.template_name == "IPA":
+            extract_ipa_template(wxr, base_data, t_node)
+        elif t_node.template_name == "X-SAMPA":
+            extract_x_sampa_template(wxr, base_data, t_node)
+        elif t_node.template_name == "enPR":
+            extract_enpr_template(wxr, base_data, t_node)
+        elif t_node.template_name == "audio":
+            extract_audio_template(wxr, base_data, t_node)
+
+
+def extract_ipa_template(
+    wxr: WiktextractContext,
+    base_data: WordEntry,
+    t_node: TemplateNode,
+) -> None:
+    sound = Sound(
+        ipa=clean_node(wxr, None, t_node.template_parameters.get(2, ""))
+    )
+    if sound.ipa != "":
+        base_data.sounds.append(sound)
+        clean_node(wxr, base_data, t_node)
+
+
+def extract_x_sampa_template(
+    wxr: WiktextractContext,
+    base_data: WordEntry,
+    t_node: TemplateNode,
+) -> None:
+    sound = Sound(
+        ipa=clean_node(wxr, None, t_node.template_parameters.get(1, "")),
+        tags=["X-SAMPA"],
+    )
+    if sound.ipa != "":
+        base_data.sounds.append(sound)
+
+
+def extract_enpr_template(
+    wxr: WiktextractContext,
+    base_data: WordEntry,
+    t_node: TemplateNode,
+) -> None:
+    sound = Sound(
+        enpr=clean_node(wxr, None, t_node.template_parameters.get(1, ""))
+    )
+    if sound.enpr != "":
+        base_data.sounds.append(sound)
+
+
+def extract_audio_template(
+    wxr: WiktextractContext,
+    base_data: WordEntry,
+    t_node: TemplateNode,
+) -> None:
+    sound = Sound()
+    filename = clean_node(wxr, None, t_node.template_parameters.get(2, ""))
+    if filename != "":
+        set_sound_file_url_fields(wxr, filename, sound)
+        for raw_tag in clean_node(
+            wxr, None, t_node.template_parameters.get("a", "")
+        ).split(","):
+            raw_tag = raw_tag.strip()
+            if raw_tag != "":
+                sound.raw_tags.append(raw_tag)
+        translate_raw_tags(sound)
+        base_data.sounds.append(sound)
+        clean_node(wxr, base_data, t_node)
 
 
 @dataclass
