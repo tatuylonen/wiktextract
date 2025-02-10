@@ -89,6 +89,10 @@ def extract_linkage_list_item(
                     extract_thesaurus_page(
                         wxr, word_entry, linkage_type, link_str
                     )
+        elif isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
+            link_str = clean_node(wxr, None, node)
+            if link_str != "":
+                linkages.append(Linkage(word=link_str))
 
     getattr(word_entry, linkage_type).extend(linkages)
 
