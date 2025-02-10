@@ -128,3 +128,18 @@ class TestThLinkage(TestCase):
                 },
             ],
         )
+
+    def test_sense(self):
+        page_data = parse_page(
+            self.wxr,
+            "aback",
+            """== ภาษาอังกฤษ ==
+=== คำกริยาวิเศษณ์ ===
+# ไป[[ข้าง]][[หลัง]]
+=== วลี ===
+* [[take aback]] - ทำให้[[สะดุ้ง]], ทำให้[[ตกใจ]]""",
+        )
+        self.assertEqual(
+            page_data[0]["derived"],
+            [{"word": "take aback", "sense": "ทำให้สะดุ้ง, ทำให้ตกใจ"}],
+        )

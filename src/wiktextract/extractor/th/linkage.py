@@ -72,7 +72,7 @@ def extract_linkage_list_item(
 ) -> None:
     linkages = []
 
-    for node in list_item.children:
+    for index, node in enumerate(list_item.children):
         if isinstance(node, TemplateNode) and node.template_name == "l":
             l_data = Linkage(
                 word=clean_node(wxr, None, node.template_parameters.get(2, "")),
@@ -93,6 +93,19 @@ def extract_linkage_list_item(
             link_str = clean_node(wxr, None, node)
             if link_str != "":
                 linkages.append(Linkage(word=link_str))
+        elif isinstance(node, str) and ("-" in node or "–" in node):
+            if "-" in node:
+                sense = node[node.index("-") + 1 :]
+            elif "–" in node:
+                sense = node[node.index("–") + 1 :]
+            sense = clean_node(
+                wxr,
+                None,
+                [sense] + list_item.children[index + 1 :],
+            ).strip()
+            for l_data in linkages:
+                l_data.sense = sense
+            break
 
     getattr(word_entry, linkage_type).extend(linkages)
 

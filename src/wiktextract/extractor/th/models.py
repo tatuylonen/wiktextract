@@ -71,6 +71,7 @@ class Linkage(ThaiBaseModel):
     raw_tags: list[str] = []
     roman: str = ""
     source: str = ""
+    sense: str = ""
 
 
 class Descendant(ThaiBaseModel):
