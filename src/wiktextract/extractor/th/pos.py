@@ -49,6 +49,7 @@ def extract_pos_section(
 
 # redirect
 ALT_OF_TEMPLATES = frozenset(["altform", "alt form", "alt sp", "altsp"])
+FORM_OF_TEMPLATES = frozenset(["อักษรย่อ", "คำย่อ"])
 
 
 def extract_gloss_list_item(
@@ -71,6 +72,7 @@ def extract_gloss_list_item(
             node.template_name.endswith(" of")
             or node.template_name.startswith("alternate ")
             or node.template_name in ALT_OF_TEMPLATES
+            or node.template_name in FORM_OF_TEMPLATES
         ):
             expanded_node = wxr.wtp.parse(
                 wxr.wtp.node_to_wikitext(node), expand_all=True
