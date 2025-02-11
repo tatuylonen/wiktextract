@@ -212,10 +212,10 @@ def process_conj_template(
         page_data[-1].raw_tags.append(tag)
 
 
-def is_conj_link(link: WikiNode) -> bool:
+def is_conj_link(wxr: WiktextractContext, link: WikiNode) -> bool:
     if len(link.largs) == 0:
         return False
-    conj_title = link.largs[0][0]
+    conj_title = clean_node(wxr, None, link.largs[0][0])
     return conj_title.startswith("Conjugaison:")
 
 
@@ -224,7 +224,7 @@ def process_conj_link_node(
     link: WikiNode,
     page_data: list[WordEntry],
 ) -> None:
-    if not is_conj_link(link):
+    if not is_conj_link(wxr, link):
         return
     conj_title = link.largs[0][0]
     conj_word = conj_title.split("/", 1)[-1]

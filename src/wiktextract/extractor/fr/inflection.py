@@ -197,7 +197,7 @@ def process_inflection_table(
                 elif table_cell.kind == NodeKind.TABLE_CELL:
                     has_conj_link = False
                     for link_node in table_cell.find_child(NodeKind.LINK):
-                        if is_conj_link(link_node):
+                        if is_conj_link(wxr, link_node):
                             process_conj_link_node(wxr, link_node, page_data)
                             has_conj_link = True
                             break
