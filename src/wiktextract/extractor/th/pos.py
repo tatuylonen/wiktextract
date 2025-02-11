@@ -59,6 +59,7 @@ def extract_gloss_list_item(
 ) -> None:
     sense = Sense()
     gloss_nodes = []
+    has_form_of_template = False
     for node in list_item.children:
         if isinstance(node, TemplateNode) and node.template_name in [
             "label",
@@ -74,15 +75,11 @@ def extract_gloss_list_item(
             or node.template_name in ALT_OF_TEMPLATES
             or node.template_name in FORM_OF_TEMPLATES
         ):
-            expanded_node = wxr.wtp.parse(
-                wxr.wtp.node_to_wikitext(node), expand_all=True
-            )
-            extract_form_of_template(wxr, sense, expanded_node, node)
-            gloss_nodes.append(expanded_node)
+            extract_form_of_template(wxr, word_entry, sense, node)
+            has_form_of_template = True
         elif not (isinstance(node, WikiNode) and node.kind == NodeKind.LIST):
             gloss_nodes.append(node)
 
-    gloss_str = clean_node(wxr, sense, gloss_nodes)
     for child_list in list_item.find_child(NodeKind.LIST):
         if child_list.sarg.startswith("#") and child_list.sarg.endswith(
             (":", "*")
@@ -90,10 +87,12 @@ def extract_gloss_list_item(
             for e_list_item in child_list.find_child(NodeKind.LIST_ITEM):
                 extract_example_list_item(wxr, word_entry, sense, e_list_item)
 
-    if gloss_str != "":
-        sense.glosses.append(gloss_str)
-        translate_raw_tags(sense)
-        word_entry.senses.append(sense)
+    if not has_form_of_template:
+        gloss_str = clean_node(wxr, sense, gloss_nodes)
+        if gloss_str != "":
+            sense.glosses.append(gloss_str)
+            translate_raw_tags(sense)
+            word_entry.senses.append(sense)
 
 
 def extract_label_template(
@@ -193,11 +192,42 @@ def extract_note_section(
 
 def extract_form_of_template(
     wxr: WiktextractContext,
-    sense: Sense,
-    expanded_node: WikiNode,
+    word_entry: WordEntry,
+    first_sense: Sense,
     t_node: TemplateNode,
 ) -> None:
     form = AltForm(word="")
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    senses = []
+    if expanded_node.contain_node(NodeKind.LIST):
+        first_list_idx = len(expanded_node.children)
+        first_gloss = ""
+        for index, node in enumerate(expanded_node.children):
+            if isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
+                if index < first_list_idx:
+                    first_list_idx = index
+                    first_gloss = clean_node(
+                        wxr, first_sense, expanded_node.children[:index]
+                    )
+                    if first_gloss != "":
+                        first_sense.glosses.append(first_gloss)
+                        senses.append(first_sense)
+                for list_item in node.find_child(NodeKind.LIST_ITEM):
+                    sense = Sense()
+                    if first_gloss != "":
+                        sense.glosses.append(first_gloss)
+                    gloss = clean_node(wxr, sense, list_item.children)
+                    if gloss != "":
+                        sense.glosses.append(gloss)
+                        senses.append(sense)
+    else:
+        gloss = clean_node(wxr, first_sense, expanded_node)
+        if gloss != "":
+            first_sense.glosses.append(gloss)
+            senses.append(first_sense)
+
     for i_tag in expanded_node.find_html_recursively("i"):
         form.word = clean_node(wxr, None, i_tag)
         break
@@ -210,14 +240,16 @@ def extract_form_of_template(
         or t_node.template_name in ALT_OF_TEMPLATES
     )
     if form.word != "":
-        if is_alt_of:
-            sense.alt_of.append(form)
-        else:
-            sense.form_of.append(form)
-        if is_alt_of and "alt-of" not in sense.tags:
-            sense.tags.append("alt-of")
-        if not is_alt_of and "form-of" not in sense.tags:
-            sense.tags.append("form-of")
+        for sense in senses:
+            if is_alt_of:
+                sense.alt_of.append(form)
+            else:
+                sense.form_of.append(form)
+            if is_alt_of and "alt-of" not in sense.tags:
+                sense.tags.append("alt-of")
+            if not is_alt_of and "form-of" not in sense.tags:
+                sense.tags.append("form-of")
+    word_entry.senses.extend(senses)
 
 
 def extract_usage_note_section(

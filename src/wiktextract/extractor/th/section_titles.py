@@ -37,6 +37,7 @@ POS_DATA = {
     "อักษรโรมัน": {"pos": "romanization"},
     "เครื่องหมายวรรคตอน": {"pos": "punct", "tags": ["punctuation"]},
     "คำกำหนด": {"pos": "det"},
+    "จำนวนเชิงอันดับที่": {"pos": "adj", "tags": ["ordinal"]},
 }
 
 
