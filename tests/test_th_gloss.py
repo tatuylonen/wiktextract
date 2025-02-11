@@ -375,3 +375,19 @@ class TestThGloss(TestCase):
                 },
             ],
         )
+
+    def test_roman_section_not_pos(self):
+        page_data = parse_page(
+            self.wxr,
+            "ข้าวหน้าเป็ด",
+            """== ภาษาไทย ==
+=== การถอดเป็นอักษรโรมัน ===
+* {{RTGS|khao na pet}}
+=== คำนาม ===
+# ข้าวสุกมีเป็ดย่างสับเป็นชิ้นวางข้างบน ราดด้วยน้ำเป็ดย่าง""",
+        )
+        self.assertEqual(len(page_data), 1)
+        self.assertEqual(
+            page_data[0]["forms"],
+            [{"form": "khao na pet", "tags": ["romanization", "RTGS"]}],
+        )
