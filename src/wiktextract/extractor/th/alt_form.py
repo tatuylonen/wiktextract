@@ -85,3 +85,26 @@ def extract_l_template(
     )
     if form.form != "":
         word_entry.forms.append(form)
+
+
+def extract_romanization_section(
+    wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
+) -> None:
+    for list_node in level_node.find_child(NodeKind.LIST):
+        for list_item in list_node.find_child(NodeKind.LIST_ITEM):
+            for node in list_item.children:
+                if (
+                    isinstance(node, TemplateNode)
+                    and node.template_name == "RTGS"
+                ):
+                    roman = clean_node(
+                        wxr, None, node.template_parameters.get(1, "")
+                    )
+                    if roman != "":
+                        form = Form(form=roman, tags=["romanization", "RTGS"])
+                        word_entry.forms.append(form)
+    for link_node in level_node.find_child(NodeKind.LINK):
+        roman = clean_node(wxr, None, link_node)
+        if roman != "":
+            form = Form(form=roman, tags=["romanization"])
+            word_entry.forms.append(form)

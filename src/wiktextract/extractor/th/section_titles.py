@@ -37,6 +37,8 @@ POS_DATA = {
     "อักษรโรมัน": {"pos": "romanization"},
     "เครื่องหมายวรรคตอน": {"pos": "punct", "tags": ["punctuation"]},
     "คำกำหนด": {"pos": "det"},
+    "จำนวนเชิงอันดับที่": {"pos": "adj", "tags": ["ordinal"]},
+    "สุภาษิต": {"pos": "proverb"},
 }
 
 
@@ -55,6 +57,7 @@ LINKAGE_SECTIONS = {
     "คำจ่ากลุ่ม": "hypernyms",
     "สำนวน": "idioms",
     "คำย่อ": "abbreviations",
+    "อักษรย่อ": "abbreviations",
     "คำที่สัมพันธ์กัน": "related",
     "ตัวอักษรที่เกี่ยวข้อง": "related",
     "วลี": "derived",

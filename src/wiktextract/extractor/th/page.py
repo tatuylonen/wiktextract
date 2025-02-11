@@ -6,7 +6,7 @@ from wikitextprocessor.parser import LEVEL_KIND_FLAGS, LevelNode, NodeKind
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
-from .alt_form import extract_alt_form_section
+from .alt_form import extract_alt_form_section, extract_romanization_section
 from .descendant import extract_descendant_section
 from .etymology import extract_etymology_section
 from .linkage import extract_linkage_section
@@ -39,6 +39,15 @@ def parse_section(
                 page_data[-1] if len(page_data) > 0 else base_data,
                 level_node,
                 LINKAGE_SECTIONS[title_text],
+            )
+        elif (
+            len(page_data[-1].senses) == 0 and title_text == "การถอดเป็นอักษรโรมัน"
+        ):
+            page_data.pop()
+            extract_romanization_section(
+                wxr,
+                page_data[-1] if len(page_data) > 0 else base_data,
+                level_node,
             )
     elif title_text == "รากศัพท์":
         if level_node.contain_node(LEVEL_KIND_FLAGS):

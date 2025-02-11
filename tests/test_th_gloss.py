@@ -304,3 +304,90 @@ class TestThGloss(TestCase):
             page_data[1]["forms"],
             [{"form": "ໄທຍ໌", "tags": ["dated"], "roman": "ไทย์"}],
         )
+
+    def test_inflection_of(self):
+        self.wxr.wtp.add_page(
+            "แม่แบบ:inflection of",
+            10,
+            """<span>การผันรูปของ <span><i>[[achten#ภาษาเยอรมัน|achten]]</i></span>:</span>
+## <span>[[ภาคผนวก:อภิธานศัพท์#บุรุษที่หนึ่ง|บุรุษที่หนึ่ง]] [[ภาคผนวก:อภิธานศัพท์#เอกพจน์|เอกพจน์]] [[ภาคผนวก:อภิธานศัพท์#ปัจจุบันกาล|ปัจจุบันกาล]]</span>
+## <span><span>[[ภาคผนวก:อภิธานศัพท์#บุรุษที่หนึ่ง|บุรุษที่หนึ่ง]]<span>/</span>[[ภาคผนวก:อภิธานศัพท์#บุรุษที่สาม|บุรุษที่สาม]]</span> [[ภาคผนวก:อภิธานศัพท์#เอกพจน์|เอกพจน์]] [[ภาคผนวก:อภิธานศัพท์#มาลาสมมุติ|มาลาสมมุติ]] I</span>
+## <span>[[ภาคผนวก:อภิธานศัพท์#เอกพจน์|เอกพจน์]] [[ภาคผนวก:อภิธานศัพท์#มาลาสั่ง|มาลาสั่ง]]</span>""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "achte",
+            """== ภาษาเยอรมัน ==
+=== คำกริยา ===
+# {{inflection of|de|achten||1|s|pres|;|1//3|s|sub|I|;|s|imp}}
+""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"],
+            [
+                {
+                    "glosses": ["การผันรูปของ achten:"],
+                    "form_of": [{"word": "achten"}],
+                    "tags": ["form-of"],
+                },
+                {
+                    "glosses": [
+                        "การผันรูปของ achten:",
+                        "บุรุษที่หนึ่ง เอกพจน์ ปัจจุบันกาล",
+                    ],
+                    "form_of": [{"word": "achten"}],
+                    "tags": ["form-of"],
+                },
+                {
+                    "glosses": [
+                        "การผันรูปของ achten:",
+                        "บุรุษที่หนึ่ง/บุรุษที่สาม เอกพจน์ มาลาสมมุติ I",
+                    ],
+                    "form_of": [{"word": "achten"}],
+                    "tags": ["form-of"],
+                },
+                {
+                    "glosses": ["การผันรูปของ achten:", "เอกพจน์ มาลาสั่ง"],
+                    "form_of": [{"word": "achten"}],
+                    "tags": ["form-of"],
+                },
+            ],
+        )
+
+    def test_nested_gloss_lists(self):
+        page_data = parse_page(
+            self.wxr,
+            "-",
+            """== ภาษาร่วม ==
+=== สัญลักษณ์ ===
+# [[ขีด]]ที่อยู่กึ่งกลาง ซึ่งสามารถใช้แทนได้หลายเครื่องหมายดังนี้
+## [[ยัติภังค์]]""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"],
+            [
+                {"glosses": ["ขีดที่อยู่กึ่งกลาง ซึ่งสามารถใช้แทนได้หลายเครื่องหมายดังนี้"]},
+                {
+                    "glosses": [
+                        "ขีดที่อยู่กึ่งกลาง ซึ่งสามารถใช้แทนได้หลายเครื่องหมายดังนี้",
+                        "ยัติภังค์",
+                    ]
+                },
+            ],
+        )
+
+    def test_roman_section_not_pos(self):
+        page_data = parse_page(
+            self.wxr,
+            "ข้าวหน้าเป็ด",
+            """== ภาษาไทย ==
+=== การถอดเป็นอักษรโรมัน ===
+* {{RTGS|khao na pet}}
+=== คำนาม ===
+# ข้าวสุกมีเป็ดย่างสับเป็นชิ้นวางข้างบน ราดด้วยน้ำเป็ดย่าง""",
+        )
+        self.assertEqual(len(page_data), 1)
+        self.assertEqual(
+            page_data[0]["forms"],
+            [{"form": "khao na pet", "tags": ["romanization", "RTGS"]}],
+        )
