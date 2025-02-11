@@ -52,6 +52,8 @@ def parse_section(
         )
     elif title_text == "Bilêvkirin":
         extract_sound_section(wxr, base_data, level_node)
+    else:
+        wxr.wtp.debug(f"Unknown title: {title_text}")
 
     for next_level in level_node.find_child(LEVEL_KIND_FLAGS):
         parse_section(wxr, page_data, base_data, next_level)

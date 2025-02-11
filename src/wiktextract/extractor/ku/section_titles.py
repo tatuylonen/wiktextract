@@ -31,6 +31,7 @@ POS_DATA = {
     "Formeke rengdêrê": {"pos": "adj", "tags": ["form-of"]},
     "Formeke cînavê": {"pos": "pron", "tags": ["form-of"]},
     "Formeke hokerê": {"pos": "adv", "tags": ["form-of"]},
+    "Mane": {"pos": "unknown"},
 }
 
 LINKAGE_SECTIONS = {
