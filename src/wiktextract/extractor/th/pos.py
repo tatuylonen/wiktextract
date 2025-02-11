@@ -56,8 +56,9 @@ def extract_gloss_list_item(
     wxr: WiktextractContext,
     word_entry: WordEntry,
     list_item: WikiNode,
+    parent_glosses: list[str] = [],
 ) -> None:
-    sense = Sense()
+    sense = Sense(glosses=parent_glosses)
     gloss_nodes = []
     has_form_of_template = False
     for node in list_item.children:
@@ -80,19 +81,24 @@ def extract_gloss_list_item(
         elif not (isinstance(node, WikiNode) and node.kind == NodeKind.LIST):
             gloss_nodes.append(node)
 
-    for child_list in list_item.find_child(NodeKind.LIST):
-        if child_list.sarg.startswith("#") and child_list.sarg.endswith(
-            (":", "*")
-        ):
-            for e_list_item in child_list.find_child(NodeKind.LIST_ITEM):
-                extract_example_list_item(wxr, word_entry, sense, e_list_item)
-
     if not has_form_of_template:
         gloss_str = clean_node(wxr, sense, gloss_nodes)
         if gloss_str != "":
             sense.glosses.append(gloss_str)
             translate_raw_tags(sense)
             word_entry.senses.append(sense)
+
+    for child_list in list_item.find_child(NodeKind.LIST):
+        if child_list.sarg.startswith("#") and child_list.sarg.endswith(
+            (":", "*")
+        ):
+            for e_list_item in child_list.find_child(NodeKind.LIST_ITEM):
+                extract_example_list_item(wxr, word_entry, sense, e_list_item)
+        elif child_list.sarg.startswith("#") and child_list.sarg.endswith("#"):
+            for child_list_item in child_list.find_child(NodeKind.LIST_ITEM):
+                extract_gloss_list_item(
+                    wxr, word_entry, child_list_item, sense.glosses
+                )
 
 
 def extract_label_template(
