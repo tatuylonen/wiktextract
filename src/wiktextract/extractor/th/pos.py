@@ -56,9 +56,13 @@ def extract_gloss_list_item(
     wxr: WiktextractContext,
     word_entry: WordEntry,
     list_item: WikiNode,
-    parent_glosses: list[str] = [],
+    parent_sense: Sense | None = None,
 ) -> None:
-    sense = Sense(glosses=parent_glosses)
+    sense = (
+        parent_sense.model_copy(deep=True)
+        if parent_sense is not None
+        else Sense()
+    )
     gloss_nodes = []
     has_form_of_template = False
     for node in list_item.children:
@@ -96,9 +100,7 @@ def extract_gloss_list_item(
                 extract_example_list_item(wxr, word_entry, sense, e_list_item)
         elif child_list.sarg.startswith("#") and child_list.sarg.endswith("#"):
             for child_list_item in child_list.find_child(NodeKind.LIST_ITEM):
-                extract_gloss_list_item(
-                    wxr, word_entry, child_list_item, sense.glosses
-                )
+                extract_gloss_list_item(wxr, word_entry, child_list_item, sense)
 
 
 def extract_label_template(

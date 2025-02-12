@@ -41,6 +41,38 @@ def extract_pos_section(
     )
 
 
+FORM_OF_TEMPLATES = frozenset(
+    [
+        "formeke peyvê",
+        "inflection of",
+        "dem2",
+        "guherto",
+        "guharto",
+        "rastnivîs",
+        "şaşnivîs",
+        "şaşî",
+        "kevnbûyî",
+        "binêre",
+        "bnr",
+        "binêre2",
+        "bnr2",
+        "awayekî din",
+        "ad",
+        "komparatîv",
+        "kom",
+        "sûperlatîv",
+        "sûp",
+        "ku-dema-bê",
+        "ku-dema-niha",
+        "ku-fermanî",
+        "dem",
+        "dema-bê",
+        "dema-fireh",
+        "raboriya-sade",
+    ]
+)
+
+
 def extract_gloss_list_item(
     wxr: WiktextractContext,
     word_entry: WordEntry,
@@ -59,27 +91,10 @@ def extract_gloss_list_item(
             "ferhengok",
         ]:
             extract_ferhengok_template(wxr, sense, node)
-        elif isinstance(node, TemplateNode) and node.template_name in [
-            "formeke peyvê",
-            "inflection of",
-            "dem2",
-            "guherto",
-            "guharto",
-            "rastnivîs",
-            "şaşnivîs",
-            "şaşî",
-            "kevnbûyî",
-            "binêre",
-            "bnr",
-            "binêre2",
-            "bnr2",
-            "awayekî din",
-            "ad",
-            "komparatîv",
-            "kom",
-            "sûperlatîv",
-            "sûp",
-        ]:
+        elif (
+            isinstance(node, TemplateNode)
+            and node.template_name in FORM_OF_TEMPLATES
+        ):
             extract_form_of_template(wxr, sense, node)
             gloss_nodes.append(node)
         elif not (isinstance(node, WikiNode) and node.kind == NodeKind.LIST):
@@ -334,8 +349,15 @@ def extract_form_of_template(
             | "kom"
             | "sûperlatîv"
             | "sûp"
+            | "dema-bê"
+            | "dema-fireh"
+            | "raboriya-sade"
         ):
             form_args = [2]
+        case "ku-dema-bê" | "ku-dema-niha" | "ku-fermanî":
+            form_args = [1]
+        case "dem":
+            form_args = [3]
         case _:
             form_args = []
     for arg in form_args:
@@ -346,16 +368,17 @@ def extract_form_of_template(
             sense.form_of.append(AltForm(word=form_str))
             if "form-of" not in sense.tags:
                 sense.tags.append("form-of")
-            for tag_arg in count(4):
-                if tag_arg not in t_node.template_parameters:
-                    break
-                raw_tag = clean_node(
-                    wxr, None, t_node.template_parameters[tag_arg]
-                ).capitalize()
-                if raw_tag in TAGS:
-                    tr_tag = TAGS[raw_tag]
-                    if isinstance(tr_tag, str):
-                        sense.tags.append(tr_tag)
-                    elif isinstance(tr_tag, list):
-                        sense.tags.extend(tr_tag)
+            if t_node.template_name in ["formeke peyvê", "inflection of"]:
+                for tag_arg in count(4):
+                    if tag_arg not in t_node.template_parameters:
+                        break
+                    raw_tag = clean_node(
+                        wxr, None, t_node.template_parameters[tag_arg]
+                    ).capitalize()
+                    if raw_tag in TAGS:
+                        tr_tag = TAGS[raw_tag]
+                        if isinstance(tr_tag, str):
+                            sense.tags.append(tr_tag)
+                        elif isinstance(tr_tag, list):
+                            sense.tags.extend(tr_tag)
             break
