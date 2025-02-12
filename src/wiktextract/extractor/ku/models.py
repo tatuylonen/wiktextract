@@ -110,3 +110,4 @@ class WordEntry(KurdishBaseModel):
     rhymes: list[Linkage] = []
     sounds: list[Sound] = []
     hyphenation: str = ""
+    notes: list[str] = []

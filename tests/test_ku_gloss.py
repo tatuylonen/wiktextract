@@ -52,7 +52,7 @@ class TestKuGloss(TestCase):
                     {
                         "categories": ["Guhandar bi kurmancî"],
                         "glosses": ["Heywanek"],
-                        "raw_tags": ["guhandar"],
+                        "topics": ["mammals"],
                     }
                 ],
             },
