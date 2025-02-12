@@ -53,7 +53,7 @@ def parse_section(
         )
     elif title_text == "Bilêvkirin":
         extract_sound_section(wxr, base_data, level_node)
-    elif title_text == "Ji wêjeyê":
+    elif title_text in ["Ji wêjeyê", "Ji wêjeya klasîk"]:
         extract_example_section(
             wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
         )

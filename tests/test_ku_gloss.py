@@ -124,3 +124,36 @@ class TestKuGloss(TestCase):
                 }
             ],
         )
+
+    def test_nested_gloss_list(self):
+        self.wxr.wtp.add_page("Şablon:ziman", 10, "Kurmancî")
+        self.wxr.wtp.add_page(
+            "Şablon:komparatîv",
+            10,
+            '<i>Forma [[komparatîv]] ji rengdêra</i>&nbsp;<strong class="Latn headword" lang="ku">[[zêde#Kurmancî|zêde]]</strong>.[[Kategorî:Komparatîv bi kurmancî]]',
+        )
+        page_data = parse_page(
+            self.wxr,
+            "zêdetir",
+            """== {{ziman|ku}} ==
+=== Formeke rengdêrê ===
+# {{komparatîv|ku|zêde}}
+## [[pirtir]]""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"],
+            [
+                {
+                    "categories": ["Komparatîv bi kurmancî"],
+                    "form_of": [{"word": "zêde"}],
+                    "glosses": ["Forma komparatîv ji rengdêra zêde."],
+                    "tags": ["form-of"],
+                },
+                {
+                    "categories": ["Komparatîv bi kurmancî"],
+                    "form_of": [{"word": "zêde"}],
+                    "glosses": ["Forma komparatîv ji rengdêra zêde.", "pirtir"],
+                    "tags": ["form-of"],
+                },
+            ],
+        )

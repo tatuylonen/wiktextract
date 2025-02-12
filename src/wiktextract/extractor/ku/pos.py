@@ -42,9 +42,16 @@ def extract_pos_section(
 
 
 def extract_gloss_list_item(
-    wxr: WiktextractContext, word_entry: WordEntry, list_item: WikiNode
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    list_item: WikiNode,
+    parent_sense: Sense | None = None,
 ) -> None:
-    sense = Sense()
+    sense = (
+        parent_sense.model_copy(deep=True)
+        if parent_sense is not None
+        else Sense()
+    )
     gloss_nodes = []
     for node in list_item.children:
         if isinstance(node, TemplateNode) and node.template_name in [
@@ -55,11 +62,34 @@ def extract_gloss_list_item(
         elif isinstance(node, TemplateNode) and node.template_name in [
             "formeke peyvê",
             "inflection of",
+            "dem2",
+            "guherto",
+            "guharto",
+            "rastnivîs",
+            "şaşnivîs",
+            "şaşî",
+            "kevnbûyî",
+            "binêre",
+            "bnr",
+            "binêre2",
+            "bnr2",
+            "awayekî din",
+            "ad",
+            "komparatîv",
+            "kom",
+            "sûperlatîv",
+            "sûp",
         ]:
             extract_form_of_template(wxr, sense, node)
             gloss_nodes.append(node)
         elif not (isinstance(node, WikiNode) and node.kind == NodeKind.LIST):
             gloss_nodes.append(node)
+
+    gloss_str = clean_node(wxr, sense, gloss_nodes)
+    if gloss_str != "":
+        sense.glosses.append(gloss_str)
+        translate_raw_tags(sense)
+        word_entry.senses.append(sense)
 
     for child_list in list_item.find_child(NodeKind.LIST):
         if child_list.sarg.startswith("#") and child_list.sarg.endswith(
@@ -67,12 +97,9 @@ def extract_gloss_list_item(
         ):
             for e_list_item in child_list.find_child(NodeKind.LIST_ITEM):
                 extract_example_list_item(wxr, word_entry, sense, e_list_item)
-
-    gloss_str = clean_node(wxr, sense, gloss_nodes)
-    if gloss_str != "":
-        sense.glosses.append(gloss_str)
-        translate_raw_tags(sense)
-        word_entry.senses.append(sense)
+        elif child_list.sarg.startswith("#") and child_list.sarg.endswith("#"):
+            for child_list_item in child_list.find_child(NodeKind.LIST_ITEM):
+                extract_gloss_list_item(wxr, word_entry, child_list_item, sense)
 
 
 def extract_ferhengok_template(
@@ -286,7 +313,32 @@ def extract_form_of_template(
     wxr: WiktextractContext, sense: Sense, t_node: TemplateNode
 ) -> None:
     # Şablon:formeke peyvê
-    for arg in ["cude", 3, 2]:
+    match t_node.template_name:
+        case "formeke peyvê" | "inflection of":
+            form_args = ["cude", 3, 2]
+        case (
+            "dem2"
+            | "guherto"
+            | "guharto"
+            | "rastnivîs"
+            | "şaşnivîs"
+            | "şaşî"
+            | "kevnbûyî"
+            | "binêre"
+            | "bnr"
+            | "binêre2"
+            | "bnr2"
+            | "awayekî din"
+            | "ad"
+            | "komparatîv"
+            | "kom"
+            | "sûperlatîv"
+            | "sûp"
+        ):
+            form_args = [2]
+        case _:
+            form_args = []
+    for arg in form_args:
         form_str = clean_node(
             wxr, None, t_node.template_parameters.get(arg, "")
         )
