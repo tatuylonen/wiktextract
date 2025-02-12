@@ -6,6 +6,7 @@ from wikitextprocessor.parser import LEVEL_KIND_FLAGS, LevelNode, NodeKind
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .etymology import extract_etymology_section
+from .example import extract_example_section
 from .linkage import extract_linkage_section
 from .models import Sense, WordEntry
 from .pos import extract_pos_section
@@ -52,6 +53,16 @@ def parse_section(
         )
     elif title_text == "Bilêvkirin":
         extract_sound_section(wxr, base_data, level_node)
+    elif title_text in ["Ji wêjeyê", "Ji wêjeya klasîk"]:
+        extract_example_section(
+            wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
+        )
+    elif title_text == "Bikaranîn":
+        extract_note_section(
+            wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
+        )
+    elif title_text not in ["Çavkanî"]:
+        wxr.wtp.debug(f"Unknown title: {title_text}")
 
     for next_level in level_node.find_child(LEVEL_KIND_FLAGS):
         parse_section(wxr, page_data, base_data, next_level)
@@ -93,3 +104,13 @@ def parse_page(
         if len(data.senses) == 0:
             data.senses.append(Sense(tags=["no-gloss"]))
     return [m.model_dump(exclude_defaults=True) for m in page_data]
+
+
+def extract_note_section(
+    wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
+) -> None:
+    for list_node in level_node.find_child(NodeKind.LIST):
+        for list_item in list_node.find_child(NodeKind.LIST_ITEM):
+            note = clean_node(wxr, None, list_item.children)
+            if note != "":
+                word_entry.notes.append(note)

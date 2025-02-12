@@ -1,4 +1,4 @@
-from wikitextprocessor import TemplateNode, WikiNode
+from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -60,3 +60,16 @@ def extract_mînak_template(
     if e_data.text != "":
         sense.examples.append(e_data)
     clean_node(wxr, sense, t_node)
+
+
+def extract_example_section(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    level_node: LevelNode,
+) -> None:
+    if len(word_entry.senses) > 0:
+        for list_node in level_node.find_child(NodeKind.LIST):
+            for list_item in list_node.find_child(NodeKind.LIST_ITEM):
+                extract_example_list_item(
+                    wxr, word_entry, word_entry.senses[0], list_item
+                )

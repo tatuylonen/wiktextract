@@ -86,6 +86,8 @@ def extract_translation_list_item(
                 None,
                 list_item.children[:index] + [node[: node.index(":")]],
             )
+            if lang_name == "":
+                lang_name = "unknown"
             before_colon = False
         elif isinstance(node, TemplateNode) and node.template_name == "Z":
             lang_code = clean_node(
@@ -173,7 +175,11 @@ def extract_w_template(
             wxr, None, t_node.template_parameters.get(tag_arg, "")
         )
         if tag_arg_value in tag_args:
-            tr_data.tags.append(tag_args[tag_arg_value])
+            tag = tag_args[tag_arg_value]
+            if isinstance(tag, str):
+                tr_data.tags.append(tag)
+            elif isinstance(tag, list):
+                tr_data.tags.extend(tag)
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(t_node), expand_all=True
     )
