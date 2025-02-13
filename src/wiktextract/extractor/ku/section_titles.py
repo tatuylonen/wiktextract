@@ -48,4 +48,7 @@ LINKAGE_SECTIONS = {
     "Qafiye": "rhymes",
     "Navê zanistî": "related",
     "Têkilî": "related",
+    "Bide Ber": "related",
+    "Binere herwiha": "related",
+    "Demên din": "synonyms",
 }
