@@ -5,6 +5,7 @@ from wikitextprocessor.parser import LEVEL_KIND_FLAGS, LevelNode, NodeKind
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from .descendant import extract_descendant_section
 from .etymology import extract_etymology_section
 from .example import extract_example_section
 from .linkage import extract_linkage_section
@@ -59,6 +60,10 @@ def parse_section(
         )
     elif title_text == "Bikaranîn":
         extract_note_section(
+            wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
+        )
+    elif title_text == "Dûnde":
+        extract_descendant_section(
             wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
         )
     elif title_text not in ["Çavkanî"]:
