@@ -9,6 +9,7 @@ from wikitextprocessor import (
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .models import Descendant, WordEntry
+from .tags import translate_raw_tags
 
 
 def extract_descendant_section(
@@ -27,12 +28,18 @@ def extract_desc_list_item(
 ) -> None:
     desc_list = []
     for node in list_item.children:
-        if isinstance(node, TemplateNode) and node.template_name == "dû":
-            desc = extract_dû_template(wxr, word_entry, node, parent_data)
-            if desc is not None:
-                desc_list.append(desc)
-        elif isinstance(node, TemplateNode) and node.template_name == "dardû":
-            desc = extract_dardû_template(wxr, word_entry, node, parent_data)
+        if isinstance(node, TemplateNode):
+            desc = None
+            if node.template_name == "dû":
+                desc = extract_dû_template(wxr, word_entry, node, parent_data)
+            elif node.template_name == "dardû":
+                desc = extract_dardû_template(
+                    wxr, word_entry, node, parent_data
+                )
+            elif node.template_name == "g" and len(desc_list) > 0:
+                desc = extract_g_template(
+                    wxr, word_entry, node, desc_list[-1], parent_data
+                )
             if desc is not None:
                 desc_list.append(desc)
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
@@ -109,6 +116,48 @@ def extract_dardû_template(
         if child_desc.word != "":
             desc.descendants.append(child_desc)
     if desc.word != "":
+        for parent_desc in parent_descs:
+            parent_desc.descendants.append(desc)
+        if len(parent_descs) == 0:
+            word_entry.descendants.append(desc)
+        return desc
+    return None
+
+
+def extract_g_template(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    t_node: TemplateNode,
+    previous_desc: Descendant,
+    parent_descs: list[Descendant],
+) -> Descendant | None:
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    raw_tags = []
+    for span_tag in expanded_node.find_html(
+        "span", attr_name="class", attr_value="gender"
+    ):
+        for abbr_tag in span_tag.find_html("abbr"):
+            raw_tag = clean_node(wxr, None, abbr_tag)
+            if raw_tag not in ["", "?"]:
+                raw_tags.append(raw_tag)
+    desc = Descendant(
+        word=clean_node(
+            wxr,
+            None,
+            t_node.template_parameters.get(
+                2, t_node.template_parameters.get("cuda", "")
+            ),
+        ),
+        lang=previous_desc.lang,
+        lang_code=previous_desc.lang_code,
+        roman=clean_node(wxr, None, t_node.template_parameters.get("tr", "")),
+        sense=clean_node(wxr, None, t_node.template_parameters.get("w", "")),
+        raw_tags=raw_tags,
+    )
+    if desc.word != "":
+        translate_raw_tags(desc)
         for parent_desc in parent_descs:
             parent_desc.descendants.append(desc)
         if len(parent_descs) == 0:

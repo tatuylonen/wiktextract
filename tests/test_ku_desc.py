@@ -81,3 +81,36 @@ class TestKuDesc(TestCase):
                 },
             ],
         )
+
+    def test_g(self):
+        self.wxr.wtp.add_page("Şablon:ziman", 10, "Farisî")
+        self.wxr.wtp.add_page(
+            "Şablon:dû",
+            10,
+            """{{#switch: {{{2}}}
+|-=<span class="desc-arr" title="deynkirî">→</span> Maithilî:
+|#default=Devanagari: <span class="Deva" lang="mai">-{[[किताप#Maithilî|किताप]]}-</span>
+}}""",
+        )
+        self.wxr.wtp.add_page(
+            "Şablon:g",
+            10,
+            """<span class="Deva" lang="mai">-{[[किताब#Maithilî|किताब]]}-</span>""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "کتاب",
+            """== {{ziman|fa}} ==
+=== Navdêr ===
+# [[pirtûk]], [[kitêb]], [[kîtab]]
+==== Dûnde ====
+* {{dû|mai|-|deyn=1}}
+*: {{dû|mai|किताप|sclb=1}}, {{g|mai|किताब}}""",
+        )
+        self.assertEqual(
+            page_data[0]["descendants"],
+            [
+                {"word": "किताप", "lang": "Devanagari", "lang_code": "mai"},
+                {"word": "किताब", "lang": "Devanagari", "lang_code": "mai"},
+            ],
+        )
