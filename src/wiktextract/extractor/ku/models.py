@@ -86,6 +86,17 @@ class Sound(KurdishBaseModel):
     raw_tags: list[str] = []
 
 
+class Descendant(KurdishBaseModel):
+    lang_code: str = Field(description="Wiktionary language code")
+    lang: str = Field(description="Language name")
+    word: str
+    roman: str = ""
+    tags: list[str] = []
+    raw_tags: list[str] = []
+    descendants: list["Descendant"] = []
+    sense: str = ""
+
+
 class WordEntry(KurdishBaseModel):
     model_config = ConfigDict(title="Kurdish Wiktionary")
     word: str = Field(description="Word string")
@@ -111,3 +122,4 @@ class WordEntry(KurdishBaseModel):
     sounds: list[Sound] = []
     hyphenation: str = ""
     notes: list[str] = []
+    descendants: list[Descendant] = []

@@ -69,6 +69,7 @@ FORM_OF_TEMPLATES = frozenset(
         "dema-bê",
         "dema-fireh",
         "raboriya-sade",
+        "rehê dema niha",
     ]
 )
 
@@ -174,7 +175,7 @@ def extract_pos_header_nodes(
                 ),
                 tags=["romanization"],
             )
-            if form.form != "":
+            if form.form not in ["", "-"]:
                 word_entry.forms.append(form)
                 clean_node(wxr, word_entry, node)
         if isinstance(node, TemplateNode) and node.template_name in [
@@ -358,6 +359,9 @@ def extract_form_of_template(
             form_args = [1]
         case "dem":
             form_args = [3]
+        case "rehê dema niha":
+            extract_rehê_dema_niha_template(wxr, sense, t_node)
+            return
         case _:
             form_args = []
     for arg in form_args:
@@ -382,3 +386,17 @@ def extract_form_of_template(
                         elif isinstance(tr_tag, list):
                             sense.tags.extend(tr_tag)
             break
+
+
+def extract_rehê_dema_niha_template(
+    wxr: WiktextractContext, sense: Sense, t_node: TemplateNode
+) -> None:
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for bold_node in expanded_node.find_child(NodeKind.BOLD):
+        word = clean_node(wxr, None, bold_node)
+        if word != "":
+            sense.form_of.append(AltForm(word=word))
+            if "form-of" not in sense.tags:
+                sense.tags.append("form-of")
