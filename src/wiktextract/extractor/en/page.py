@@ -290,7 +290,7 @@ FLOATING_TABLE_TEMPLATES: set[str] = {
 # so that the template are left in place with their identifying
 # name intact for later filtering.
 
-DO_NOT_PRE_EXPAND_TEMPLATES: set[str] = {"aii-infl-prep/1c"}
+DO_NOT_PRE_EXPAND_TEMPLATES: set[str] = set()
 DO_NOT_PRE_EXPAND_TEMPLATES.update(FLOATING_TABLE_TEMPLATES)
 
 # Additional templates to be expanded in the pre-expand phase
@@ -2328,7 +2328,7 @@ def parse_language(
                 r"declension|inflection|mut|mutation)($|-)",
                 name,
             )
-            if m is not None or name == "ar-prep-auto":
+            if m:
                 args_ht = clean_template_args(wxr, ht)
                 dt = {"name": name, "args": args_ht}
                 data_append(pos_data, "inflection_templates", dt)
