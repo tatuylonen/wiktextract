@@ -46,4 +46,6 @@ LINKAGE_SECTIONS = {
     "Anagram": "anagrams",
     "Binêre herwiha": "related",
     "Qafiye": "rhymes",
+    "Navê zanistî": "related",
+    "Têkilî": "related",
 }
