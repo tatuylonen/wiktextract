@@ -51,4 +51,13 @@ LINKAGE_SECTIONS = {
     "Bide Ber": "related",
     "Binere herwiha": "related",
     "Demên din": "synonyms",
+    "Kurtenav": "abbreviations",
+    "Sembol": "synonyms",
+    "Biwêj": "related",
+}
+
+LINKAGE_TAGS = {
+    "Navê zanistî": ["Scientific-Latin"],
+    "Sembol": ["symbol"],
+    "Biwêj": ["idiomatic"],
 }

@@ -357,6 +357,7 @@ TOPICS = {
     "muzîsyen": "music",
     # "nifş": "generations",
     "navçe": "districts",
+    "Navçe": "districts",
     "navgîn": "vehicles",
     "nivîsîn": "writing",
     "nexweşî": "pathology",
@@ -379,6 +380,7 @@ TOPICS = {
     "riwek": "botany",
     "riweknasî": "botany",
     "robar": "rivers",
+    "Robar": "rivers",
     "sosyolojî": "sociology",
     "salnameya koçî": "Islamic months",
     "sebze": "vegetable",
@@ -411,6 +413,7 @@ TOPICS = {
     "zimannasî": "linguistics",
     "zoolojî": "zoology",
     "zanistên sepandî": "applied-sciences",
+    "Herêm": "region",
 }
 
 
