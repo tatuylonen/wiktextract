@@ -149,6 +149,7 @@ def extract_linkage_section(
     word_entry: WordEntry,
     level_node: WikiNode,
     linkage_type: str,
+    shared_tags: list[str] = [],
 ) -> None:
     for node in level_node.find_child(NodeKind.LIST | NodeKind.TEMPLATE):
         if (
@@ -161,7 +162,7 @@ def extract_linkage_section(
         elif node.kind == NodeKind.LIST:
             for list_item in node.find_child(NodeKind.LIST_ITEM):
                 extract_linkage_list_item(
-                    wxr, word_entry, list_item, linkage_type, ""
+                    wxr, word_entry, list_item, linkage_type, "", shared_tags
                 )
 
 
@@ -206,6 +207,7 @@ def extract_linkage_list_item(
     list_item: WikiNode,
     linkage_type: str,
     sense: str,
+    shared_tags: list[str] = [],
 ) -> None:
     raw_tags = []
     for node in list_item.children:
@@ -213,11 +215,16 @@ def extract_linkage_list_item(
             word = clean_node(wxr, None, node)
             if word != "":
                 if linkage_type != "":
-                    l_data = Linkage(word=word, sense=sense, raw_tags=raw_tags)
+                    l_data = Linkage(
+                        word=word,
+                        sense=sense,
+                        raw_tags=raw_tags,
+                        tags=shared_tags,
+                    )
                     translate_raw_tags(l_data)
                     getattr(word_entry, linkage_type).append(l_data)
                 else:
-                    form = Form(form=word, raw_tags=raw_tags)
+                    form = Form(form=word, raw_tags=raw_tags, tags=shared_tags)
                     translate_raw_tags(form)
                     word_entry.forms.append(form)
         elif isinstance(node, TemplateNode):

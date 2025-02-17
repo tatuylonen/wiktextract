@@ -52,4 +52,10 @@ LINKAGE_SECTIONS = {
     "Binere herwiha": "related",
     "Demên din": "synonyms",
     "Kurtenav": "abbreviations",
+    "Sembol": "synonyms",
+}
+
+LINKAGE_TAGS = {
+    "Navê zanistî": ["Scientific-Latin"],
+    "Sembol": ["symbol"],
 }
