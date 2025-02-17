@@ -51,4 +51,5 @@ LINKAGE_SECTIONS = {
     "Bide Ber": "related",
     "Binere herwiha": "related",
     "Demên din": "synonyms",
+    "Kurtenav": "abbreviations",
 }

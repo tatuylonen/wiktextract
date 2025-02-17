@@ -123,3 +123,4 @@ class WordEntry(KurdishBaseModel):
     hyphenation: str = ""
     notes: list[str] = []
     descendants: list[Descendant] = []
+    abbreviations: list[Linkage] = []
