@@ -87,17 +87,21 @@ def extract_gloss_list_item(
     )
     gloss_nodes = []
     for node in list_item.children:
-        if isinstance(node, TemplateNode) and node.template_name in [
-            "f",
-            "ferhengok",
-        ]:
-            extract_ferhengok_template(wxr, sense, node)
-        elif (
-            isinstance(node, TemplateNode)
-            and node.template_name in FORM_OF_TEMPLATES
-        ):
-            extract_form_of_template(wxr, sense, node)
-            gloss_nodes.append(node)
+        if isinstance(node, TemplateNode):
+            if node.template_name in ["f", "ferhengok"]:
+                extract_ferhengok_template(wxr, sense, node)
+            elif node.template_name in FORM_OF_TEMPLATES:
+                extract_form_of_template(wxr, sense, node)
+                gloss_nodes.append(node)
+            elif node.template_name in ["bajar"]:
+                clean_node(wxr, sense, node)
+                sense.topics.append("city")
+            else:
+                t_node_text = clean_node(wxr, sense, node)
+                if t_node_text.startswith("(") and t_node_text.endswith(")"):
+                    sense.raw_tags.append(t_node_text.strip("() "))
+                else:
+                    gloss_nodes.append(t_node_text)
         elif not (isinstance(node, WikiNode) and node.kind == NodeKind.LIST):
             gloss_nodes.append(node)
 

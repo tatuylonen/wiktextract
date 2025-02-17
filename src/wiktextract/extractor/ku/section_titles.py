@@ -53,9 +53,11 @@ LINKAGE_SECTIONS = {
     "Demên din": "synonyms",
     "Kurtenav": "abbreviations",
     "Sembol": "synonyms",
+    "Biwêj": "related",
 }
 
 LINKAGE_TAGS = {
     "Navê zanistî": ["Scientific-Latin"],
     "Sembol": ["symbol"],
+    "Biwêj": ["idiomatic"],
 }
