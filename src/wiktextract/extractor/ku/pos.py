@@ -62,15 +62,19 @@ FORM_OF_TEMPLATES = frozenset(
         "kom",
         "sûperlatîv",
         "sûp",
-        "ku-dema-bê",
-        "ku-dema-niha",
-        "ku-fermanî",
         "dem",
         "dema-bê",
         "dema-fireh",
         "raboriya-sade",
         "rehê dema niha",
     ]
+)
+FORM_OF_TEMPLATE_SUFFIXES = (
+    "-dema-bê",
+    "-dema-bê-p",
+    "-dema-niha",
+    "-dema-niha-p",
+    "-fermanî",
 )
 
 
@@ -90,7 +94,10 @@ def extract_gloss_list_item(
         if isinstance(node, TemplateNode):
             if node.template_name in ["f", "ferhengok"]:
                 extract_ferhengok_template(wxr, sense, node)
-            elif node.template_name in FORM_OF_TEMPLATES:
+            elif (
+                node.template_name in FORM_OF_TEMPLATES
+                or node.template_name.endswith(FORM_OF_TEMPLATE_SUFFIXES)
+            ):
                 extract_form_of_template(wxr, sense, node)
                 gloss_nodes.append(node)
             elif node.template_name in ["bajar"]:
@@ -333,41 +340,42 @@ def extract_form_of_template(
     wxr: WiktextractContext, sense: Sense, t_node: TemplateNode
 ) -> None:
     # Şablon:formeke peyvê
-    match t_node.template_name:
-        case "formeke peyvê" | "inflection of":
-            form_args = ["cude", 3, 2]
-        case (
-            "dem2"
-            | "guherto"
-            | "guharto"
-            | "rastnivîs"
-            | "şaşnivîs"
-            | "şaşî"
-            | "kevnbûyî"
-            | "binêre"
-            | "bnr"
-            | "binêre2"
-            | "bnr2"
-            | "awayekî din"
-            | "ad"
-            | "komparatîv"
-            | "kom"
-            | "sûperlatîv"
-            | "sûp"
-            | "dema-bê"
-            | "dema-fireh"
-            | "raboriya-sade"
-        ):
-            form_args = [2]
-        case "ku-dema-bê" | "ku-dema-niha" | "ku-fermanî":
-            form_args = [1]
-        case "dem":
-            form_args = [3]
-        case "rehê dema niha":
-            extract_rehê_dema_niha_template(wxr, sense, t_node)
-            return
-        case _:
-            form_args = []
+    if t_node.template_name in ["formeke peyvê", "inflection of"]:
+        form_args = ["cude", 3, 2]
+    elif t_node.template_name in [
+        "dem2",
+        "guherto",
+        "guharto",
+        "rastnivîs",
+        "şaşnivîs",
+        "şaşî",
+        "kevnbûyî",
+        "binêre",
+        "bnr",
+        "binêre2",
+        "bnr2",
+        "awayekî din",
+        "ad",
+        "komparatîv",
+        "kom",
+        "sûperlatîv",
+        "sûp",
+        "dema-bê",
+        "dema-fireh",
+        "raboriya-sade",
+    ]:
+        form_args = [2]
+    elif t_node.template_name.endswith(
+        ("-dema-bê", "-dema-bê-p", "-dema-niha", "-dema-niha-p", "-fermanî")
+    ):
+        form_args = [1]
+    elif t_node.template_name == "dem":
+        form_args = [3]
+    elif t_node.template_name == "rehê dema niha":
+        extract_rehê_dema_niha_template(wxr, sense, t_node)
+        return
+    else:
+        form_args = []
     for arg in form_args:
         form_str = clean_node(
             wxr, None, t_node.template_parameters.get(arg, "")
