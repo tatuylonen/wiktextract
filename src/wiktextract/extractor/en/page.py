@@ -61,7 +61,7 @@ from .info_templates import (
     parse_info_template_arguments,
     parse_info_template_node,
 )
-from .linkages import parse_linkage_item_text
+from .linkages import parse_linkage_item_text, extract_alt_form_section
 from .parts_of_speech import PARTS_OF_SPEECH
 from .section_titles import (
     COMPOUNDS_TITLE,
@@ -3724,6 +3724,8 @@ def parse_language(
                 parse_translations(data, node)
             elif t in INFLECTION_TITLES:
                 parse_inflection(node, t, pos)
+            elif t == "alternative forms":
+                extract_alt_form_section(wxr, select_data(), node)
             else:
                 lst = t.split()
                 while len(lst) > 1 and lst[-1].isdigit():
@@ -4488,7 +4490,7 @@ def parse_page(wxr: WiktextractContext, word: str, text: str) -> list[WordData]:
                 )
             else:
                 wxr.wtp.debug(
-                    f"DIFFERENT ORIGINAL TITLE: '{word}' " f"-> '{x['word']}'",
+                    f"DIFFERENT ORIGINAL TITLE: '{word}' -> '{x['word']}'",
                     sortid="20231101/3582page.py",
                 )
             x["original_title"] = word
