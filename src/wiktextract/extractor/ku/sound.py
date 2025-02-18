@@ -1,4 +1,4 @@
-from wikitextprocessor import LevelNode, NodeKind, TemplateNode
+from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -11,13 +11,23 @@ def extract_sound_section(
 ) -> None:
     for list_node in level_node.find_child(NodeKind.LIST):
         for list_item in list_node.find_child(NodeKind.LIST_ITEM):
-            for t_node in list_item.find_child(NodeKind.TEMPLATE):
-                if t_node.template_name == "ku-IPA":
-                    extract_ku_ipa_template(wxr, word_entry, t_node)
-                elif t_node.template_name == "deng":
-                    extract_deng_template(wxr, word_entry, t_node)
-                elif t_node.template_name == "ku-kîte":
-                    extract_ku_kîte(wxr, word_entry, t_node)
+            extract_sound_list_item(wxr, word_entry, list_item)
+
+
+def extract_sound_list_item(
+    wxr: WiktextractContext, word_entry: WordEntry, list_item: WikiNode
+) -> None:
+    for node in list_item.children:
+        if isinstance(node, TemplateNode):
+            if node.template_name == "ku-IPA":
+                extract_ku_ipa_template(wxr, word_entry, node)
+            elif node.template_name == "deng":
+                extract_deng_template(wxr, word_entry, node)
+            elif node.template_name == "ku-kîte":
+                extract_ku_kîte(wxr, word_entry, node)
+        elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
+            for child_list_item in node.find_child(NodeKind.LIST_ITEM):
+                extract_sound_list_item(wxr, word_entry, child_list_item)
 
 
 def extract_ku_ipa_template(
