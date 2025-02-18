@@ -10,13 +10,19 @@ from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.en.form_descriptions import (
     parse_alt_or_inflection_of,
 )
+from wiktextract.extractor.en.page import parse_page
 from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.wxr_context import WiktextractContext
 
 
 class FormOfTests(unittest.TestCase):
     def setUp(self):
-        self.wxr = WiktextractContext(Wtp(), WiktionaryConfig())
+        self.wxr = WiktextractContext(
+            Wtp(lang_code="en"),
+            WiktionaryConfig(
+                dump_file_lang_code="en", capture_language_codes=None
+            )
+        )
         self.wxr.wtp.start_page("testpage")
         self.wxr.wtp.start_section("English")
 
@@ -138,4 +144,27 @@ class FormOfTests(unittest.TestCase):
         self.assertEqual(self.wxr.wtp.debugs, [])
         self.assertEqual(
             ret, (["Western-Armenian", "alt-of"], [{"word": "OK"}])
+        )
+
+    def test_alt_form_section(self):
+        self.wxr.wtp.add_page(
+            "Template:alter",
+            10,
+            """<span class="Latn" lang="scn">[[zùccuru#Sicilian|zùccuru]]</span>, <span class="Latn" lang="scn">[[zùcchiru#Sicilian|zùcchiru]]</span>""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "zùccaru",
+            """==Sicilian==
+===Alternative forms===
+* {{alter|scn|zùccuru|zùcchiru}}
+===Noun===
+# [[sugar]]""",
+        )
+        self.assertEqual(
+            page_data[0]["forms"],
+            [
+                {"form": "zùccuru", "tags": ["alternative"]},
+                {"form": "zùcchiru", "tags": ["alternative"]},
+            ],
         )

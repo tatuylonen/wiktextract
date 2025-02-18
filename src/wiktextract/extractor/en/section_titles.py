@@ -235,7 +235,6 @@ LINKAGE_TITLES: dict[str, str] = {
     "proverbs": "proverbs",
     "abbreviations": "abbreviations",
     "derived terms": "derived",
-    "alternative forms": "synonyms",
 }
 
 COMPOUNDS_TITLE = "compounds"

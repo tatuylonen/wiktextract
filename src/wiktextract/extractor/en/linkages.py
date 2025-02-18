@@ -6,7 +6,10 @@ import re
 import unicodedata
 from typing import Optional, Sequence
 
-from ...datautils import data_append, split_at_comma_semi
+from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
+
+from ...datautils import data_append, data_extend, split_at_comma_semi
+from ...page import clean_node
 from ...tags import linkage_beginning_tags
 from ...wxr_context import WiktextractContext
 from .form_descriptions import (
@@ -20,7 +23,7 @@ from .form_descriptions import (
     parse_head_final_tags,
     parse_sense_qualifier,
 )
-from .type_utils import LinkageData, WordData
+from .type_utils import FormData, LinkageData, WordData
 
 # Linkage will be ignored if it matches this regexp before splitting
 linkage_pre_split_ignore_re = re.compile(
@@ -949,7 +952,7 @@ def parse_linkage_item_text(
                     url.strip() for url in urls if url and isinstance(url, str)
                 ]
             dt["word"] = w
-            for old in data.get(field, ()): # type: ignore[attr-defined]
+            for old in data.get(field, ()):  # type: ignore[attr-defined]
                 if dt == old:
                     break
             else:
@@ -1045,3 +1048,46 @@ def parse_linkage_item_text(
 
         add(item1, roman)
     return None
+
+
+def extract_alt_form_section(
+    wxr: WiktextractContext, word_entry: WordData, level_node: LevelNode
+) -> None:
+    for list_node in level_node.find_child(NodeKind.LIST):
+        for list_item in list_node.find_child(NodeKind.LIST_ITEM):
+            for node in list_item.children:
+                if isinstance(node, TemplateNode) and node.template_name in [
+                    "l",
+                    "link",
+                    "L",
+                    "alt",
+                    "alter",
+                ]:
+                    extract_l_template(wxr, word_entry, node)
+                elif isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
+                    word = clean_node(wxr, None, node)
+                    if word != "":
+                        form: FormData = {"form": word, "tags": ["alternative"]}
+                        data_append(word_entry, "forms", form)
+
+
+def extract_l_template(
+    wxr: WiktextractContext, word_entry: WordData, t_node: TemplateNode
+) -> None:
+    forms: list[FormData] = []
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    lang_code = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
+    for span_tag in expanded_node.find_html("span"):
+        span_lang = span_tag.attrs.get("lang", "")
+        if span_lang == lang_code:
+            word = clean_node(wxr, None, span_tag)
+            if word != "":
+                form: FormData = {"form": word, "tags": ["alternative"]}
+                forms.append(form)
+        elif span_lang.endswith("-Latn") and len(forms) > 0:
+            roman = clean_node(wxr, None, span_tag)
+            if roman != "":
+                forms[-1].roman = roman
+    data_extend(word_entry, "forms", forms)
