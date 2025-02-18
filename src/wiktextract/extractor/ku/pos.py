@@ -340,6 +340,8 @@ def extract_form_of_template(
     wxr: WiktextractContext, sense: Sense, t_node: TemplateNode
 ) -> None:
     # Şablon:formeke peyvê
+    is_alt_of = False
+    break_first_arg = True
     if t_node.template_name in ["formeke peyvê", "inflection of"]:
         form_args = ["cude", 3, 2]
     elif t_node.template_name in [
@@ -350,8 +352,6 @@ def extract_form_of_template(
         "şaşnivîs",
         "şaşî",
         "kevnbûyî",
-        "binêre",
-        "bnr",
         "binêre2",
         "bnr2",
         "awayekî din",
@@ -374,6 +374,10 @@ def extract_form_of_template(
     elif t_node.template_name == "rehê dema niha":
         extract_rehê_dema_niha_template(wxr, sense, t_node)
         return
+    elif t_node.template_name in ["binêre", "bnr"]:
+        form_args = [1, 2, 3, 4]
+        is_alt_of = True
+        break_first_arg = False
     else:
         form_args = []
     for arg in form_args:
@@ -381,8 +385,13 @@ def extract_form_of_template(
             wxr, None, t_node.template_parameters.get(arg, "")
         )
         if form_str != "":
-            sense.form_of.append(AltForm(word=form_str))
-            if "form-of" not in sense.tags:
+            if is_alt_of:
+                sense.alt_of.append(AltForm(word=form_str))
+            else:
+                sense.form_of.append(AltForm(word=form_str))
+            if is_alt_of and "alt-of" not in sense.tags:
+                sense.tags.append("alt-of")
+            elif not is_alt_of and "form-of" not in sense.tags:
                 sense.tags.append("form-of")
             if t_node.template_name in ["formeke peyvê", "inflection of"]:
                 for tag_arg in count(4):
@@ -397,7 +406,8 @@ def extract_form_of_template(
                             sense.tags.append(tr_tag)
                         elif isinstance(tr_tag, list):
                             sense.tags.extend(tr_tag)
-            break
+            if break_first_arg:
+                break
 
 
 def extract_rehê_dema_niha_template(
