@@ -161,9 +161,7 @@ class TestKuGloss(TestCase):
     def test_bnr(self):
         self.wxr.wtp.add_page("Şablon:ziman", 10, "Kurmancî")
         self.wxr.wtp.add_page(
-            "Şablon:bnr",
-            10,
-            "''Binêre'' '''[[hejmar]]''', '''[[jimar]]'''."
+            "Şablon:bnr", 10, "''Binêre'' '''[[hejmar]]''', '''[[jimar]]'''."
         )
         page_data = parse_page(
             self.wxr,
