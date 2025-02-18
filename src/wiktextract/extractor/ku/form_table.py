@@ -46,17 +46,17 @@ def extract_ku_tewîn_nav_template(
                 elif len(row.children) == 1:
                     continue
                 else:
-                    form_str = clean_node(wxr, None, cell)
-                    if form_str not in ["", wxr.wtp.title]:
-                        form = Form(
-                            form=form_str, tags=gender_tags + shared_tags
-                        )
-                        if row_header != "":
-                            form.raw_tags.append(row_header)
-                        if col_index < len(col_headers):
-                            form.raw_tags.append(col_headers[col_index])
-                        translate_raw_tags(form)
-                        word_entry.forms.append(form)
+                    for form_str in clean_node(wxr, None, cell).splitlines():
+                        if form_str not in ["", wxr.wtp.title]:
+                            form = Form(
+                                form=form_str, tags=gender_tags + shared_tags
+                            )
+                            if row_header != "":
+                                form.raw_tags.append(row_header)
+                            if col_index < len(col_headers):
+                                form.raw_tags.append(col_headers[col_index])
+                            translate_raw_tags(form)
+                            word_entry.forms.append(form)
                     col_index += 1
 
 
