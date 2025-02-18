@@ -54,7 +54,6 @@ LINKAGE_SECTIONS = {
     "Kurtenav": "abbreviations",
     "Sembol": "synonyms",
     "Biwêj": "related",
-    "Herwiha": "synonyms",
 }
 
 LINKAGE_TAGS = {

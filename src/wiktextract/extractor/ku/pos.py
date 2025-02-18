@@ -128,6 +128,9 @@ def extract_gloss_list_item(
             for child_list_item in child_list.find_child(NodeKind.LIST_ITEM):
                 extract_gloss_list_item(wxr, word_entry, child_list_item, sense)
 
+    if len(sense.glosses) == 0 and len(sense.examples) > 0:
+        word_entry.senses.append(sense)
+
 
 def extract_ferhengok_template(
     wxr: WiktextractContext, sense: Sense, t_node: TemplateNode
