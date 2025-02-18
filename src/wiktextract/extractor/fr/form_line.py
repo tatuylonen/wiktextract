@@ -213,7 +213,7 @@ def process_conj_template(
 
 
 def is_conj_link(wxr: WiktextractContext, link: WikiNode) -> bool:
-    if len(link.largs) == 0:
+    if len(link.largs) == 0 or len(link.largs[0]) == 0:
         return False
     conj_title = clean_node(wxr, None, link.largs[0][0])
     return conj_title.startswith("Conjugaison:")
