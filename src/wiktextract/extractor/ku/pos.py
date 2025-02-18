@@ -62,15 +62,19 @@ FORM_OF_TEMPLATES = frozenset(
         "kom",
         "sûperlatîv",
         "sûp",
-        "ku-dema-bê",
-        "ku-dema-niha",
-        "ku-fermanî",
         "dem",
         "dema-bê",
         "dema-fireh",
         "raboriya-sade",
         "rehê dema niha",
     ]
+)
+FORM_OF_TEMPLATE_SUFFIXES = (
+    "-dema-bê",
+    "-dema-bê-p",
+    "-dema-niha",
+    "-dema-niha-p",
+    "-fermanî",
 )
 
 
@@ -90,7 +94,10 @@ def extract_gloss_list_item(
         if isinstance(node, TemplateNode):
             if node.template_name in ["f", "ferhengok"]:
                 extract_ferhengok_template(wxr, sense, node)
-            elif node.template_name in FORM_OF_TEMPLATES:
+            elif (
+                node.template_name in FORM_OF_TEMPLATES
+                or node.template_name.endswith(FORM_OF_TEMPLATE_SUFFIXES)
+            ):
                 extract_form_of_template(wxr, sense, node)
                 gloss_nodes.append(node)
             elif node.template_name in ["bajar"]:
@@ -120,6 +127,9 @@ def extract_gloss_list_item(
         elif child_list.sarg.startswith("#") and child_list.sarg.endswith("#"):
             for child_list_item in child_list.find_child(NodeKind.LIST_ITEM):
                 extract_gloss_list_item(wxr, word_entry, child_list_item, sense)
+
+    if len(sense.glosses) == 0 and len(sense.examples) > 0:
+        word_entry.senses.append(sense)
 
 
 def extract_ferhengok_template(
@@ -333,48 +343,58 @@ def extract_form_of_template(
     wxr: WiktextractContext, sense: Sense, t_node: TemplateNode
 ) -> None:
     # Şablon:formeke peyvê
-    match t_node.template_name:
-        case "formeke peyvê" | "inflection of":
-            form_args = ["cude", 3, 2]
-        case (
-            "dem2"
-            | "guherto"
-            | "guharto"
-            | "rastnivîs"
-            | "şaşnivîs"
-            | "şaşî"
-            | "kevnbûyî"
-            | "binêre"
-            | "bnr"
-            | "binêre2"
-            | "bnr2"
-            | "awayekî din"
-            | "ad"
-            | "komparatîv"
-            | "kom"
-            | "sûperlatîv"
-            | "sûp"
-            | "dema-bê"
-            | "dema-fireh"
-            | "raboriya-sade"
-        ):
-            form_args = [2]
-        case "ku-dema-bê" | "ku-dema-niha" | "ku-fermanî":
-            form_args = [1]
-        case "dem":
-            form_args = [3]
-        case "rehê dema niha":
-            extract_rehê_dema_niha_template(wxr, sense, t_node)
-            return
-        case _:
-            form_args = []
+    is_alt_of = False
+    break_first_arg = True
+    if t_node.template_name in ["formeke peyvê", "inflection of"]:
+        form_args = ["cude", 3, 2]
+    elif t_node.template_name in [
+        "dem2",
+        "guherto",
+        "guharto",
+        "rastnivîs",
+        "şaşnivîs",
+        "şaşî",
+        "kevnbûyî",
+        "binêre2",
+        "bnr2",
+        "awayekî din",
+        "ad",
+        "komparatîv",
+        "kom",
+        "sûperlatîv",
+        "sûp",
+        "dema-bê",
+        "dema-fireh",
+        "raboriya-sade",
+    ]:
+        form_args = [2]
+    elif t_node.template_name.endswith(
+        ("-dema-bê", "-dema-bê-p", "-dema-niha", "-dema-niha-p", "-fermanî")
+    ):
+        form_args = [1]
+    elif t_node.template_name == "dem":
+        form_args = [3]
+    elif t_node.template_name == "rehê dema niha":
+        extract_rehê_dema_niha_template(wxr, sense, t_node)
+        return
+    elif t_node.template_name in ["binêre", "bnr"]:
+        form_args = [1, 2, 3, 4]
+        is_alt_of = True
+        break_first_arg = False
+    else:
+        form_args = []
     for arg in form_args:
         form_str = clean_node(
             wxr, None, t_node.template_parameters.get(arg, "")
         )
         if form_str != "":
-            sense.form_of.append(AltForm(word=form_str))
-            if "form-of" not in sense.tags:
+            if is_alt_of:
+                sense.alt_of.append(AltForm(word=form_str))
+            else:
+                sense.form_of.append(AltForm(word=form_str))
+            if is_alt_of and "alt-of" not in sense.tags:
+                sense.tags.append("alt-of")
+            elif not is_alt_of and "form-of" not in sense.tags:
                 sense.tags.append("form-of")
             if t_node.template_name in ["formeke peyvê", "inflection of"]:
                 for tag_arg in count(4):
@@ -389,7 +409,8 @@ def extract_form_of_template(
                             sense.tags.append(tr_tag)
                         elif isinstance(tr_tag, list):
                             sense.tags.extend(tr_tag)
-            break
+            if break_first_arg:
+                break
 
 
 def extract_rehê_dema_niha_template(

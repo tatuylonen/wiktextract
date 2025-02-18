@@ -263,3 +263,36 @@ class TestKuForm(TestCase):
                 },
             ],
         )
+
+    def test_ku_tewîn_rd(self):
+        self.wxr.wtp.add_page("Şablon:ziman", 10, "Kurmancî")
+        self.wxr.wtp.add_page(
+            "Şablon:ku-tewîn-rd",
+            10,
+            """{|
+|-
+! Pozîtîv
+! Komparatîv
+! Sûperlatîv
+|-
+| aqil
+| <span><span>aqil'''tir'''</span></span>
+| '''herî'''&nbsp;aqil<br><span><span>aqil'''tirîn'''</span></span>
+|}""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "aqil",
+            """== {{ziman|ku}} ==
+=== Rengdêr ===
+{{ku-tewîn-rd|aqil}}
+# [[jîr|Jîr]]""",
+        )
+        self.assertEqual(
+            page_data[0]["forms"],
+            [
+                {"form": "aqiltir", "tags": ["comparative"]},
+                {"form": "herî aqil", "tags": ["superlative"]},
+                {"form": "aqiltirîn", "tags": ["superlative"]},
+            ],
+        )

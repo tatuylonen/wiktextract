@@ -180,12 +180,24 @@ def extract_kol_template(
         arg_value = t_node.template_parameters[arg]
         if isinstance(arg_value, str):
             if arg_value.strip() != "":
+                word = arg_value.strip()
+                raw_tag = ""
+                m = re.search(r"<q:(.+)>", word)
+                if m is not None:
+                    word = word[: m.start()].strip()
+                    raw_tag = m.group(1).strip()
                 if linkage_type != "":
-                    getattr(word_entry, linkage_type).append(
-                        Linkage(word=arg_value.strip(), sense=sense)
-                    )
+                    l_data = Linkage(word=word, sense=sense)
+                    if raw_tag != "":
+                        l_data.raw_tags.append(raw_tag)
+                        translate_raw_tags(l_data)
+                    getattr(word_entry, linkage_type).append(l_data)
                 else:
-                    word_entry.forms.append(Form(form=arg_value.strip()))
+                    form = Form(form=word, sense=sense)
+                    if raw_tag != "":
+                        form.raw_tags.append(raw_tag)
+                        translate_raw_tags(form)
+                    word_entry.forms.append(form)
         else:
             if not isinstance(arg_value, list):
                 arg_value = [arg_value]

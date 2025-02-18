@@ -132,3 +132,20 @@ class TestKuLinkage(TestCase):
             page_data[0]["synonyms"],
             [{"word": "pişê", "tags": ["childish", "feminine"]}],
         )
+
+    def test_kol_tag(self):
+        self.wxr.wtp.add_page("Şablon:ziman", 10, "Kurmancî")
+        page_data = parse_page(
+            self.wxr,
+            "aqil",
+            """== {{ziman|ku}} ==
+=== Navdêr ===
+# [[bal]]
+==== Jê ====
+{{kol3|ku|cure=Jê
+|aqil kirin<q:lêker>
+}}""",
+        )
+        self.assertEqual(
+            page_data[0]["derived"], [{"word": "aqil kirin", "tags": ["verb"]}]
+        )

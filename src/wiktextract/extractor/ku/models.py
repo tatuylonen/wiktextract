@@ -36,6 +36,7 @@ class Sense(KurdishBaseModel):
     examples: list[Example] = []
     topics: list[str] = []
     form_of: list[AltForm] = []
+    alt_of: list[AltForm] = []
 
 
 class Form(KurdishBaseModel):
