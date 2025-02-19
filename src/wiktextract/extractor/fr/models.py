@@ -40,6 +40,7 @@ class Form(FrenchBaseModel):
     )
     hiragana: str = ""
     roman: str = ""
+    sense: str = Field(default="", description="Definition of the word")
     sense_index: int = Field(default=0, ge=0)
 
 

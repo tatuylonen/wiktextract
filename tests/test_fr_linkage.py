@@ -255,10 +255,10 @@ class TestLinkage(TestCase):
         self.assertEqual(
             [
                 d.model_dump(exclude_defaults=True)
-                for d in page_data[-1].related
+                for d in page_data[-1].forms
             ],
             [
-                {"word": "Gb", "sense": "10⁹"},
+                {"form": "Gb", "sense": "10⁹"},
             ],
         )
 
