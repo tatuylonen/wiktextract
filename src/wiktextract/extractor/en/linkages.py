@@ -1089,5 +1089,5 @@ def extract_l_template(
         elif span_lang.endswith("-Latn") and len(forms) > 0:
             roman = clean_node(wxr, None, span_tag)
             if roman != "":
-                forms[-1].roman = roman
+                forms[-1]["roman"] = roman
     data_extend(word_entry, "forms", forms)
