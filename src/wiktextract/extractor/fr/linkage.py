@@ -5,8 +5,8 @@ from wikitextprocessor import NodeKind, TemplateNode, WikiNode
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from ..share import capture_text_in_parentheses
-from .models import Linkage, WordEntry
-from .section_types import LINKAGE_SECTIONS
+from .models import Form, Linkage, WordEntry
+from .section_types import LINKAGE_SECTIONS, LINKAGE_TAGS
 from .tags import translate_raw_tags
 
 
@@ -31,6 +31,7 @@ def extract_linkage(
             page_data,
             level_node,
             LINKAGE_SECTIONS[section_type],
+            LINKAGE_TAGS.get(section_type, []),
         )
 
 
@@ -70,6 +71,7 @@ def process_linkage_list(
     page_data: list[WordEntry],
     level_node: WikiNode,
     linkage_type: str,
+    section_tags: list[str] = [],
 ) -> None:
     sense_text = ""
     sense_index = 0
@@ -106,7 +108,7 @@ def process_linkage_list(
                 sense_index = int(m.group(1))
             continue
 
-        linkage_data = Linkage(word="")
+        linkage_data = Linkage(word="", tags=section_tags)
         if len(sense_text) > 0:
             linkage_data.sense = sense_text
         if sense_index != 0:
@@ -161,9 +163,8 @@ def process_linkage_list(
                     and linkage_data.word != ""
                 ):
                     # list item has more than one word
-                    pre_data = getattr(page_data[-1], linkage_type)
-                    pre_data.append(linkage_data)
-                    linkage_data = Linkage(word="")
+                    add_linkage_data(page_data[-1], linkage_type, linkage_data)
+                    linkage_data = Linkage(word="", tags=section_tags)
                     continue
                 if tag_text.strip().startswith(
                     "("
@@ -204,9 +205,28 @@ def process_linkage_list(
                             linkage_data.raw_tags.append(tag)
 
         if len(linkage_data.word) > 0:
-            pre_data = getattr(page_data[-1], linkage_type)
-            translate_raw_tags(linkage_data)
-            pre_data.append(linkage_data)
+            add_linkage_data(page_data[-1], linkage_type, linkage_data)
+
+
+def add_linkage_data(
+    word_entry: WordEntry, l_type: str, l_data: Linkage
+) -> None:
+    if l_data.word == "":
+        return
+    translate_raw_tags(l_data)
+    if l_type == "forms":
+        word_entry.forms.append(
+            Form(
+                form=l_data.word,
+                tags=l_data.tags,
+                raw_tags=l_data.raw_tags,
+                roman=l_data.roman,
+                sense=l_data.sense,
+                sense_index=l_data.sense_index,
+            )
+        )
+    else:
+        getattr(word_entry, l_type).append(l_data)
 
 
 def process_linkage_template(
