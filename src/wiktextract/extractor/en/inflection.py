@@ -3176,18 +3176,18 @@ def handle_wikitext_or_html_table(
                     # print("COL:", col)
 
                     # Too many of these errors
-                    # if colspan > 30:
-                    #     wxr.wtp.error(
-                    #         f"Colspan {colspan} over 30, set to 1",
-                    #         sortid="inflection/20250113a",
-                    #     )
-                    #     colspan = 1
-                    # if rowspan > 30:
-                    #     wxr.wtp.error(
-                    #         f"Rowspan {rowspan} over 30, set to 1",
-                    #         sortid="inflection/20250113b",
-                    #     )
-                    #     rowspan = 1
+                    if colspan > 40:
+                        # wxr.wtp.error(
+                        #     f"Colspan {colspan} over 30, set to 1",
+                        #     sortid="inflection/20250113a",
+                        # )
+                        colspan = 1
+                    if rowspan > 40:
+                        # wxr.wtp.error(
+                        #     f"Rowspan {rowspan} over 30, set to 1",
+                        #     sortid="inflection/20250113b",
+                        # )
+                        rowspan = 1
 
                     # Process any nested tables recursively.
                     tables, rest = recursively_extract(
@@ -3537,6 +3537,7 @@ def parse_inflection_section(
         if kind == NodeKind.LIST and node.sarg == ";":
             nonlocal preceding_bolded_title
             from wiktextract.page import clean_node
+
             preceding_bolded_title = clean_node(wxr, None, node).strip("; ")
         for x in node.children:
             recurse(x, titles, navframe)
