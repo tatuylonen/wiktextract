@@ -1,0 +1,51 @@
+{
+  "Templat:-def-": {
+    "body": "==={{{1}}} {{{num|}}}===\n",
+    "namespace_id": 10
+  },
+  "Templat:-etym-": {
+    "body": "====Etimologi====\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Templat:-syn-": {
+    "body": "====Sinonim====\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Templat:-ant-": {
+    "body": "====Antonim====\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Templat:-drv-": {
+    "body": "====Kata turunan====\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Templat:-frasa-": {
+    "body": "====Frasa dan kata majemuk====\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Templat:-lihat-": {
+    "body": "====Lihat pula====\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Templat:-ejaan-": {
+    "body": "====Ejaan====\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Templat:-terkait-": {
+    "body": "====Kata terkait====\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Templat:terjemahan": {
+    "body": "====Terjemahan====\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  }
+}
