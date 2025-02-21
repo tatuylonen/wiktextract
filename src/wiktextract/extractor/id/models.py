@@ -10,11 +10,22 @@ class IndonesianBaseModel(BaseModel):
     )
 
 
+class Example(IndonesianBaseModel):
+    text: str
+    translation: str = ""
+    literal_meaning: str = ""
+    roman: str = ""
+    ref: str = ""
+    tags: list[str] = []
+    raw_tags: list[str] = []
+
+
 class Sense(IndonesianBaseModel):
     glosses: list[str] = []
     tags: list[str] = []
     raw_tags: list[str] = []
     categories: list[str] = []
+    examples: list[Example] = []
 
 
 class WordEntry(IndonesianBaseModel):
