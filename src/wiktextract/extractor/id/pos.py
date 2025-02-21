@@ -1,4 +1,4 @@
-from wikitextprocessor import LevelNode, NodeKind, WikiNode
+from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -29,15 +29,35 @@ def extract_pos_section(
 
 
 def extract_gloss_list_item(
-    wxr: WiktextractContext, word_entry: WordEntry, list_item: WikiNode
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    list_item: WikiNode,
+    parent_sense: Sense | None = None,
 ) -> None:
-    sense = Sense()
+    sense = (
+        parent_sense.model_copy(deep=True)
+        if parent_sense is not None
+        else Sense()
+    )
     gloss_nodes = []
     for node in list_item.children:
-        if not (isinstance(node, WikiNode) and node.kind == NodeKind.LIST):
+        if isinstance(node, TemplateNode):
+            expanded = clean_node(wxr, sense, node)
+            if expanded.startswith("(") and expanded.strip().endswith(
+                (")", ") ·")
+            ):
+                sense.raw_tags.append(expanded.strip("()· "))
+            else:
+                gloss_nodes.append(expanded)
+        elif not (isinstance(node, WikiNode) and node.kind == NodeKind.LIST):
             gloss_nodes.append(node)
 
     gloss_str = clean_node(wxr, sense, gloss_nodes)
     if gloss_str != "":
         sense.glosses.append(gloss_str)
         word_entry.senses.append(sense)
+
+    for child_list in list_item.find_child(NodeKind.LIST):
+        if child_list.sarg.startswith("#") and child_list.sarg.endswith("#"):
+            for child_list_item in child_list.find_child(NodeKind.LIST_ITEM):
+                extract_gloss_list_item(wxr, word_entry, child_list_item, sense)
