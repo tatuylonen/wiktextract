@@ -149,3 +149,23 @@ class TestKuLinkage(TestCase):
         self.assertEqual(
             page_data[0]["derived"], [{"word": "aqil kirin", "tags": ["verb"]}]
         )
+
+    def test_kol_mj(self):
+        self.wxr.wtp.add_page("Şablon:ziman", 10, "Îngilîzî")
+        self.wxr.wtp.add_page("Şablon:mj", 10, "(xweşbêjî)")
+        page_data = parse_page(
+            self.wxr,
+            "go the way of all flesh",
+            """== {{ziman|en}} ==
+=== Biwêj ===
+# [[texsîrî]]
+==== Jê ====
+==== Hevmane ====
+{{kol3|en|cure=Hevmane
+|exit {{mj|{{nimînok|xweşbêjî}}}}
+}}""",
+        )
+        self.assertEqual(
+            page_data[0]["synonyms"],
+            [{"word": "exit", "tags": ["euphemistic"]}],
+        )

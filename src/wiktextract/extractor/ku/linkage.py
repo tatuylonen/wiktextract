@@ -222,8 +222,11 @@ def extract_linkage_list_item(
     shared_tags: list[str] = [],
 ) -> None:
     raw_tags = []
+    forms = []
     for node in list_item.children:
-        if isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
+        if (
+            isinstance(node, WikiNode) and node.kind == NodeKind.LINK
+        ) or isinstance(node, str):
             word = clean_node(wxr, None, node)
             if word != "":
                 if linkage_type != "":
@@ -233,10 +236,12 @@ def extract_linkage_list_item(
                         raw_tags=raw_tags,
                         tags=shared_tags,
                     )
+                    forms.append(l_data)
                     translate_raw_tags(l_data)
                     getattr(word_entry, linkage_type).append(l_data)
                 else:
                     form = Form(form=word, raw_tags=raw_tags, tags=shared_tags)
+                    forms.append(l_data)
                     translate_raw_tags(form)
                     word_entry.forms.append(form)
         elif isinstance(node, TemplateNode):
@@ -268,6 +273,9 @@ def extract_linkage_list_item(
                 raw_tag = clean_node(wxr, None, node).strip("() ")
                 if raw_tag != "":
                     raw_tags.append(raw_tag)
+                    for form in forms:
+                        form.raw_tags.append(raw_tag)
+                        translate_raw_tags(form)
 
 
 def extract_stûn_template(
