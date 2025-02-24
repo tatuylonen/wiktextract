@@ -1,13 +1,20 @@
 from dataclasses import dataclass
 
-from wikitextprocessor.parser import HTMLNode, NodeKind, TemplateNode
+from wikitextprocessor.parser import (
+    LEVEL_KIND_FLAGS,
+    HTMLNode,
+    LevelNode,
+    NodeKind,
+    TemplateNode,
+    WikiNode,
+)
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .models import Form, WordEntry
-from .tags import translate_raw_tags
+from .tags import GRAMMATICAL_TAGS, translate_raw_tags
 
-LEVEL2_TAGS = frozenset(["untrennbar", "unregelmäßig"])
+LEVEL2_TAGS = frozenset(["untrennbar"])
 
 
 def parse_flexion_page(
@@ -28,9 +35,12 @@ def parse_flexion_page(
             case NodeKind.LEVEL2:
                 shared_raw_tags.clear()
                 section_str = clean_node(wxr, None, node.largs)
-                for raw_tag in LEVEL2_TAGS:
-                    if raw_tag in section_str:
-                        shared_raw_tags.append(raw_tag)
+                for word in section_str.split(" "):
+                    word = word.strip(", ")
+                    if (
+                        word in LEVEL2_TAGS or word in GRAMMATICAL_TAGS
+                    ) and not page_title.endswith(f":{word}"):
+                        shared_raw_tags.append(word)
             case NodeKind.TEMPLATE:
                 if node.template_name.startswith("Deklinationsseite"):
                     process_deklinationsseite_template(
@@ -129,108 +139,138 @@ def process_deutsch_verb_template(
     expanded_template = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(template_node), expand_all=True
     )
-    for table in expanded_template.find_child_recursively(NodeKind.TABLE):
-        col_headers = []
-        for row in table.find_child(NodeKind.TABLE_ROW):
-            row_header = ""
-            col_index = 0
-            col_header_index = 0
-            is_bold_col_header = all(
-                c.contain_node(NodeKind.BOLD)
-                for c in row.find_child(NodeKind.TABLE_CELL)
-                if clean_node(wxr, None, c) != ""
-            )
-            if (
-                len(
-                    list(
-                        row.find_child(
-                            NodeKind.TABLE_HEADER_CELL | NodeKind.TABLE_CELL
-                        )
+    for level_node in expanded_template.find_child(LEVEL_KIND_FLAGS):
+        process_deutsch_verb_section(
+            wxr, word_entry, level_node, page_tite, shared_raw_tags
+        )
+
+
+def process_deutsch_verb_section(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    level_node: LevelNode,
+    page_tite: str,
+    shared_raw_tags: list[str],
+) -> None:
+    section_title = clean_node(wxr, None, level_node.largs)
+    new_raw_tags = shared_raw_tags.copy()
+    new_raw_tags.append(section_title)
+    for table_node in level_node.find_child(NodeKind.TABLE):
+        process_deutsch_verb_table(
+            wxr, word_entry, table_node, page_tite, new_raw_tags
+        )
+    for next_level in level_node.find_child(LEVEL_KIND_FLAGS):
+        process_deutsch_verb_section(
+            wxr, word_entry, next_level, page_tite, new_raw_tags
+        )
+
+
+def process_deutsch_verb_table(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    table: WikiNode,
+    page_tite: str,
+    shared_raw_tags: list[str],
+) -> None:
+    col_headers = []
+    for row in table.find_child(NodeKind.TABLE_ROW):
+        row_header = ""
+        col_index = 0
+        col_header_index = 0
+        is_bold_col_header = all(
+            c.contain_node(NodeKind.BOLD)
+            for c in row.find_child(NodeKind.TABLE_CELL)
+            if clean_node(wxr, None, c) != ""
+        )
+        if (
+            len(
+                list(
+                    row.find_child(
+                        NodeKind.TABLE_HEADER_CELL | NodeKind.TABLE_CELL
                     )
                 )
-                == 1
+            )
+            == 1
+        ):
+            col_headers.clear()  # new table
+        for cell in row.find_child(
+            NodeKind.TABLE_HEADER_CELL | NodeKind.TABLE_CELL
+        ):
+            cell_text = clean_node(wxr, None, cell)
+            if cell_text in (
+                "Flexion der Verbaladjektive",
+                "(nichterweiterte) Infinitive",
             ):
-                col_headers.clear()  # new table
-            for cell in row.find_child(
-                NodeKind.TABLE_HEADER_CELL | NodeKind.TABLE_CELL
+                break
+            elif cell.kind == NodeKind.TABLE_HEADER_CELL and cell_text not in (
+                "",
+                "Person",
             ):
-                cell_text = clean_node(wxr, None, cell)
-                if cell_text in (
-                    "Flexion der Verbaladjektive",
-                    "(nichterweiterte) Infinitive",
-                ):
-                    break
-                elif (
-                    cell.kind == NodeKind.TABLE_HEADER_CELL
-                    and cell_text not in ("", "Person")
-                ):
-                    colspan = int(cell.attrs.get("colspan", "1"))
-                    col_headers.append(
-                        SpanHeader(
-                            cell_text,
-                            col_header_index,
-                            colspan,
-                        )
+                colspan = int(cell.attrs.get("colspan", "1"))
+                col_headers.append(
+                    SpanHeader(
+                        cell_text,
+                        col_header_index,
+                        colspan,
                     )
-                    col_header_index += colspan
-                elif cell.kind == NodeKind.TABLE_CELL:
-                    if cell_text in (
-                        "",
-                        "—",
-                        "Text",
-                        "Person",
-                    ) or cell_text.startswith("Flexion:"):
-                        col_index += 1
-                    elif (
-                        cell.contain_node(NodeKind.BOLD)
-                        or (
-                            len(list(cell.find_html("small"))) > 0
-                            and len(list(cell.filter_empty_str_child())) == 1
-                        )
-                        # Vorlage:Deutsch Verb schwach untrennbar reflexiv
-                        or cell.attrs.get("bgcolor", "").lower() == "#f4f4f4"
-                    ):  # header in cell
-                        colspan = int(cell.attrs.get("colspan", "1"))
-                        if is_bold_col_header:
-                            for bold_node in cell.find_child(NodeKind.BOLD):
-                                col_headers.append(
-                                    SpanHeader(
-                                        clean_node(wxr, None, bold_node),
-                                        col_header_index,
-                                        colspan,
-                                    )
+                )
+                col_header_index += colspan
+            elif cell.kind == NodeKind.TABLE_CELL:
+                if cell_text in (
+                    "",
+                    "—",
+                    "Text",
+                    "Person",
+                ) or cell_text.startswith("Flexion:"):
+                    col_index += 1
+                elif (
+                    cell.contain_node(NodeKind.BOLD)
+                    or (
+                        len(list(cell.find_html("small"))) > 0
+                        and len(list(cell.filter_empty_str_child())) == 1
+                    )
+                    # Vorlage:Deutsch Verb schwach untrennbar reflexiv
+                    or cell.attrs.get("bgcolor", "").lower() == "#f4f4f4"
+                ):  # header in cell
+                    colspan = int(cell.attrs.get("colspan", "1"))
+                    if is_bold_col_header:
+                        for bold_node in cell.find_child(NodeKind.BOLD):
+                            col_headers.append(
+                                SpanHeader(
+                                    clean_node(wxr, None, bold_node),
+                                    col_header_index,
+                                    colspan,
                                 )
-                        else:
-                            row_header = cell_text
-                        col_header_index += colspan
-                    else:
-                        for form_text in cell_text.splitlines():
-                            form_text = form_text.strip(", ")
-                            form_raw_tag = ""
-                            if ":" in form_text:
-                                form_raw_tag, form_text = form_text.split(
-                                    ":", 1
-                                )
-                            form = Form(
-                                form=form_text.strip(),
-                                source=page_tite,
-                                raw_tags=shared_raw_tags,
                             )
-                            if form_raw_tag != "":
-                                form.raw_tags.append(form_raw_tag)
-                            if row_header != "":
-                                form.raw_tags.append(row_header)
-                            for col_header in col_headers:
-                                if (
-                                    col_index >= col_header.index
-                                    and col_index
-                                    < col_header.index + col_header.span
-                                ):
-                                    if col_header.text.endswith("I"):
-                                        form.raw_tags.append(col_header.text)
-                                    else:
-                                        for raw_tag in col_header.text.split():
-                                            form.raw_tags.append(raw_tag)
-                            translate_raw_tags(form)
-                            word_entry.forms.append(form)
-                        col_index += 1
+                    else:
+                        row_header = cell_text
+                    col_header_index += colspan
+                else:
+                    for form_text in cell_text.splitlines():
+                        form_text = form_text.strip(", ")
+                        form_raw_tag = ""
+                        if ":" in form_text:
+                            form_raw_tag, form_text = form_text.split(":", 1)
+                        form = Form(
+                            form=form_text.strip(),
+                            source=page_tite,
+                            raw_tags=shared_raw_tags,
+                        )
+                        if form_raw_tag != "":
+                            form.raw_tags.append(form_raw_tag)
+                        if row_header != "":
+                            form.raw_tags.append(row_header)
+                        for col_header in col_headers:
+                            if (
+                                col_index >= col_header.index
+                                and col_index
+                                < col_header.index + col_header.span
+                            ):
+                                if col_header.text.endswith("I"):
+                                    form.raw_tags.append(col_header.text)
+                                else:
+                                    for raw_tag in col_header.text.split():
+                                        form.raw_tags.append(raw_tag)
+                        translate_raw_tags(form)
+                        word_entry.forms.append(form)
+                    col_index += 1

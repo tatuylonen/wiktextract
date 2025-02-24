@@ -306,12 +306,12 @@ VERB_FORM_TAGS = {
 VOICE_TAGS = {
     # Vorlage:Deutsch Verb unregelmäßig
     "Aktiv": "active",
-    "Vorgangspassiv": "processual passive",
-    "Zustandspassiv": "statal passive",
+    "Vorgangspassiv": "processual-passive",
+    "Zustandspassiv": "statal-passive",
     "Passiv": "passive",
     "Gerundivum": "gerundive",
     # Vorlage:Deutsch Verb schwach untrennbar reflexiv
-    "Zustandsreflexiv": "statal reflexive",
+    "Zustandsreflexiv": "statal-reflexive",
 }
 
 PERSON_TAGS = {
@@ -406,17 +406,20 @@ def translate_raw_tags(data: WordEntry) -> None:
     for raw_tag in data.raw_tags:
         if raw_tag in GRAMMATICAL_TAGS:
             tag = GRAMMATICAL_TAGS[raw_tag]
-            if isinstance(tag, str):
+            if isinstance(tag, str) and tag not in data.tags:
                 data.tags.append(tag)
             elif isinstance(tag, list):
-                data.tags.extend(tag)
+                for t in tag:
+                    if t not in data.tags:
+                        data.tags.append(t)
         elif raw_tag in K_TEMPLATE_TOPICS and hasattr(data, "topics"):
             topic = K_TEMPLATE_TOPICS[raw_tag]
-            if isinstance(topic, str):
+            if isinstance(topic, str) and topic not in data.topics:
                 data.topics.append(topic)
-            elif isinstance(topic, dict):
-                data.topics.append(topic.get("topic"))
-                data.tags.append(topic.get("tag"))
+            elif isinstance(topic, dict) and topic["topic"] not in data.topics:
+                data.topics.append(topic["topic"])
+                if topic["tag"] not in data.tags:
+                    data.tags.append(topic["tag"])
         else:
             raw_tags.append(raw_tag)
     data.raw_tags = raw_tags

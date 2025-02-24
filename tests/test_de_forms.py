@@ -311,31 +311,37 @@ class TestDeForms(TestCase):
                     "form": "sehen",
                     "tags": ["active", "infinitive", "present"],
                     "source": "Flexion:sehen",
+                    "raw_tags": ["Infinitive und Partizipien"],
                 },
                 {
                     "form": "gesehen haben",
                     "tags": ["active", "infinitive", "perfect"],
                     "source": "Flexion:sehen",
+                    "raw_tags": ["Infinitive und Partizipien"],
                 },
                 {
                     "form": "sehend",
                     "tags": ["participle", "present", "active"],
                     "source": "Flexion:sehen",
+                    "raw_tags": ["Infinitive und Partizipien"],
                 },
                 {
                     "form": "gesehen",
                     "tags": ["participle", "perfect", "passive"],
                     "source": "Flexion:sehen",
+                    "raw_tags": ["Infinitive und Partizipien"],
                 },
                 {
                     "form": "zu sehender",
                     "tags": ["participle", "gerundive"],
                     "source": "Flexion:sehen",
+                    "raw_tags": ["Infinitive und Partizipien"],
                 },
                 {
                     "form": "zu sehende …",
                     "tags": ["participle", "gerundive"],
                     "source": "Flexion:sehen",
+                    "raw_tags": ["Infinitive und Partizipien"],
                 },
             ],
         )
