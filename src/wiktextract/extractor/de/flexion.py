@@ -14,13 +14,13 @@ from ...wxr_context import WiktextractContext
 from .models import Form, WordEntry
 from .tags import GRAMMATICAL_TAGS, translate_raw_tags
 
-LEVEL2_TAGS = frozenset(["untrennbar"])
-
 
 def parse_flexion_page(
     wxr: WiktextractContext, word_entry: WordEntry, page_title: str
 ) -> None:
     # https://de.wiktionary.org/wiki/Hilfe:Flexionsseiten
+    LEVEL2_TAGS = ["Hilfsverb haben", "Hilfsverb sein"]
+
     flexion_page = wxr.wtp.get_page_body(
         page_title, wxr.wtp.NAMESPACE_DATA["Flexion"]["id"]
     )
@@ -37,10 +37,13 @@ def parse_flexion_page(
                 section_str = clean_node(wxr, None, node.largs)
                 for word in section_str.split(" "):
                     word = word.strip(", ")
-                    if (
-                        word in LEVEL2_TAGS or word in GRAMMATICAL_TAGS
-                    ) and not page_title.endswith(f":{word}"):
+                    if word in GRAMMATICAL_TAGS and not page_title.endswith(
+                        f":{word}"
+                    ):
                         shared_raw_tags.append(word)
+                for raw_tag in LEVEL2_TAGS:
+                    if raw_tag in section_str:
+                        shared_raw_tags.append(raw_tag)
             case NodeKind.TEMPLATE:
                 if node.template_name.startswith("Deklinationsseite"):
                     process_deklinationsseite_template(
