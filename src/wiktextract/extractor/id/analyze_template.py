@@ -2,6 +2,7 @@ from wikitextprocessor import Page, Wtp
 
 # https://id.wiktionary.org/wiki/Wikikamus:Penjelasan_tataletak_entri
 # https://id.wiktionary.org/wiki/Kategori:Templat_kelas_kata
+# https://id.wiktionary.org/wiki/Kategori:Templat_umum
 SECTION_TITLE_TEMPLATES = {
     "Templat:-adj-",
     "Templat:-adv-",
@@ -33,8 +34,8 @@ SECTION_TITLE_TEMPLATES = {
     "Templat:=pron=",
     "Templat:=pronom=",
     "Templat:=verb=",
-    "Templat:nomina -nya",
     "Templat:ulang",
+    "Templat:-sdd-",
 }
 
 
@@ -48,6 +49,8 @@ def analyze_template(wtp: Wtp, page: Page) -> tuple[set[str], bool]:
                 "Templat:sisipan ",
                 "Templat:ulang ",
                 "Templat:verba ",
+                "Templat:nomina ",
             )
-        ),
+        )
+        or page.title.endswith(("proper noun", "-nm")),
     )

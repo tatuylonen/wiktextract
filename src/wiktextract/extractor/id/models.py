@@ -39,3 +39,4 @@ class WordEntry(IndonesianBaseModel):
     categories: list[str] = []
     tags: list[str] = []
     raw_tags: list[str] = []
+    etymology_texts: list[str] = []
