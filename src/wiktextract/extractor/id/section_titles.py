@@ -1,4 +1,5 @@
 # https://id.wiktionary.org/wiki/Kategori:Templat_kelas_kata
+# https://id.wiktionary.org/wiki/Kategori:Templat_umum
 POS_DATA = {
     "Adjektiva": {"pos": "adj"},
     "Adverbia": {"pos": "adv"},
@@ -16,4 +17,12 @@ POS_DATA = {
     "Pronomina": {"pos": "pron"},
     "Subjungsi": {"pos": "conj"},
     "Verba": {"pos": "verb"},
+    "Akar kata": {"pos": "root", "tags": ["morpheme"]},
+    "Akhiran": {"pos": "suffix", "tags": ["morpheme"]},
+    "Huruf": {"pos": "character", "tags": ["letter"]},
+    "Inisialisme": {"pos": "abbrev", "tags": ["abbreviation"]},
+    "Awalan": {"pos": "prefix", "tags": ["morpheme"]},
+    "Kontraksi": {"pos": "contraction", "tags": ["contraction"]},
+    "Singkatan": {"pos": "abbrev", "tags": ["abbreviation"]},
+    "Nama diri": {"pos": "name"},
 }

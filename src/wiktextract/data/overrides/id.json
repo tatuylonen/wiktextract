@@ -9,7 +9,7 @@
     "need_pre_expand": true
   },
   "Templat:-syn-": {
-    "body": "====Sinonim====\n",
+    "body": "====Sinonim====\n{{#ifeq:{{{1|}}}|id||{{-syn2-|{{{1|}}}|{{{2|}}}|{{{3|}}}|{{{4|}}}|{{{5|}}}|{{{6|}}}|{{{7|}}}|{{{8|}}}|{{{9|}}}|{{{10|}}}|{{{11|}}}|{{{12|}}}|{{{13|}}}|{{{14|}}}|{{{15|}}}|{{{16|}}}|{{{17|}}}|{{{18|}}}|{{{19|}}}|{{{20|}}}|{{{21|}}}|{{{22|}}}|{{{23|}}}|{{{24|}}}|{{{25|}}}|{{{26|}}}|{{{27|}}}|{{{28|}}}|{{{29|}}}|{{{30|}}}}}}}\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
@@ -23,7 +23,17 @@
     "namespace_id": 10,
     "need_pre_expand": true
   },
+  "Templat:-drv-multi-": {
+    "body": "====Kata turunan====\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
   "Templat:-frasa-": {
+    "body": "====Frasa dan kata majemuk====\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Templat:-frasa2-": {
     "body": "====Frasa dan kata majemuk====\n",
     "namespace_id": 10,
     "need_pre_expand": true
@@ -45,6 +55,106 @@
   },
   "Templat:terjemahan": {
     "body": "====Terjemahan====\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Templat:-ref-": {
+    "body": "====Referensi====\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Templat:-akar-": {
+    "body": "===Akar kata===\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Templat:-akhir-": {
+    "body": "===Akhiran===[[Kategori:{{{1|id}}}:Akhiran]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Templat:-alt-": {
+    "body": "====Alternatif====\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Templat:-awal-": {
+    "body": "===Awalan===[[Kategori:{{{1|id}}}:Awalan]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Templat:-cog-": {
+    "body": "====Kognat====\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Templat:-desc-": {
+    "body": "====Turunan====\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Templat:-huruf-": {
+    "body": "===Huruf===\n''huruf kecil'' [[{{lc:{{PAGENAME}}}}]]; ''huruf besar'' [[{{uc:{{PAGENAME}}}}]][[Kategori:Huruf]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Templat:-inisialisme-": {
+    "body": "===Inisialisme===[[Kategori:{{{1|id}}}:Inisialisme]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Templat:-keluarga-": {
+    "body": "====Keluarga kata====\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Templat:-kiasan-": {
+    "body": "====Kiasan====\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Templat:-kontraksi-": {
+    "body": "===Kontraksi===[[Kategori:{{{1}}}:Kontraksi]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Templat:-lafal-": {
+    "body": "====Pelafalan====\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Templat:-noun-": {
+    "body": "===Nomina===[[Kategori:{{{1|id}}}:{{nom}}]]\n'''{{PAGENAME}}''' (''plural'' '''[[{{PAGENAME}}-{{PAGENAME}}]]''', ''posesif orang pertama'' '''{{PAGENAME}}[[-ku|ku]]''', ''posesif orang kedua'' '''{{PAGENAME}}[[-mu|mu]]''', ''posesif orang ketiga'' '''{{PAGENAME}}[[-nya|nya]]''')\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Templat:-peribahasa-": {
+    "body": "====Peribahasa====\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Templat:-singkatan-": {
+    "body": "===Singkatan===[[Kategori:{{{1}}}:Singkatan]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Templat:-syn-multi-": {
+    "body": "====Sinonim====\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Templat:-ucap-": {
+    "body": "====Pengucapan====\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Templat:-var-": {
+    "body": "====Variasi====\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Templat:=drv=": {
+    "body": "====Frasa turunan====\n",
     "namespace_id": 10,
     "need_pre_expand": true
   }
