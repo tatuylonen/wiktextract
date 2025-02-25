@@ -338,6 +338,9 @@ INFLECTION_TABLE_TAGS = {
     # Vorlage:Deutsch Verb schwach trennbar reflexiv
     "Nebensatzkonjugation": "subordinate-clause",
     "Hauptsatzkonjugation": "main-clause",
+    "regelmäßig": "regular",
+    "untrennbar": "inseparable",
+    "trennbar": "separable",
 }
 
 GRAMMATICAL_TAGS = {
