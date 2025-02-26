@@ -4,6 +4,7 @@ from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .models import Translation, WordEntry
+from .tags import translate_raw_tags
 
 
 def extract_translation_section(
@@ -55,6 +56,9 @@ def extract_translation_list_item(
             "qualifier",
             "q",
             "qual",
+            "f",
+            "n",
+            "p",
         ]:
             extract_qualifier_template(wxr, word_entry, node)
         elif (
@@ -108,6 +112,7 @@ def extract_t_template(
         tr_data.raw_tags.append(clean_node(wxr, None, abbr_tag))
 
     if tr_data.word != "":
+        translate_raw_tags(tr_data)
         word_entry.translations.append(tr_data)
         for link_node in expanded_node.find_child(NodeKind.LINK):
             clean_node(wxr, word_entry, link_node)
@@ -121,3 +126,5 @@ def extract_qualifier_template(
         raw_tag = raw_tag.strip()
         if raw_tag != "" and len(word_entry.translations) > 0:
             word_entry.translations[-1].raw_tags.append(raw_tag)
+    if len(word_entry.translations) > 0:
+        translate_raw_tags(word_entry.translations[-1])
