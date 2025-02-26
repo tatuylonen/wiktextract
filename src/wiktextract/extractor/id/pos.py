@@ -21,12 +21,26 @@ def extract_pos_section(
     page_data[-1].tags.extend(pos_data.get("tags", []))
 
     gloss_list_index = len(level_node.children)
-    for index, list_node in level_node.find_child(NodeKind.LIST, True):
-        for list_item in list_node.find_child(NodeKind.LIST_ITEM):
-            if list_node.sarg.startswith("#") and list_node.sarg.endswith("#"):
-                extract_gloss_list_item(wxr, page_data[-1], list_item)
-                if index < gloss_list_index:
-                    gloss_list_index = index
+    for index, node in enumerate(level_node.children):
+        if isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
+            for list_item in node.find_child(NodeKind.LIST_ITEM):
+                if node.sarg.startswith("#") and node.sarg.endswith("#"):
+                    extract_gloss_list_item(wxr, page_data[-1], list_item)
+                    if index < gloss_list_index:
+                        gloss_list_index = index
+        elif isinstance(node, TemplateNode) and node.template_name in [
+            "lihat 2",
+            "lihat ulang",
+            "lihat v",
+            "lihat2 a",
+            "lihat2 adv",
+            "lihat v ber2",
+            "lihat n",
+            "lihat 2 an",
+            "lihat v ter2",
+            "lihat2 v",
+        ]:
+            extract_lihat_2_template(wxr, page_data[-1], node)
 
 
 def extract_gloss_list_item(
@@ -67,3 +81,26 @@ def extract_gloss_list_item(
         ):
             for e_list_item in child_list.find_child(NodeKind.LIST_ITEM):
                 extract_example_list_item(wxr, word_entry, sense, e_list_item)
+
+
+def extract_lihat_2_template(
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+) -> None:
+    # https://id.wiktionary.org/wiki/Templat:lihat_2
+    expanded_template = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for list_node in expanded_template.find_child(NodeKind.LIST):
+        for list_item in list_node.find_child(NodeKind.LIST_ITEM):
+            sense = Sense()
+            gloss_str = clean_node(wxr, sense, list_item.children)
+            if "⇢" in gloss_str:
+                sense.glosses.append(
+                    gloss_str[gloss_str.index("⇢") + 1 :].strip()
+                )
+            if ")" in gloss_str:
+                sense.raw_tags.append(
+                    gloss_str[: gloss_str.index(")")].strip("( ")
+                )
+            if len(sense.glosses) > 0:
+                word_entry.senses.append(sense)
