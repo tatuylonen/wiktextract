@@ -28,6 +28,19 @@ class Sense(IndonesianBaseModel):
     examples: list[Example] = []
 
 
+class Translation(IndonesianBaseModel):
+    lang_code: str = Field(
+        description="Wiktionary language code of the translation term",
+    )
+    lang: str = Field(description="Translation language name")
+    word: str = Field(description="Translation term")
+    sense: str = Field(default="", description="Translation gloss")
+    tags: list[str] = []
+    raw_tags: list[str] = []
+    roman: str = ""
+    lit: str = Field(default="", description="Literal translation")
+
+
 class WordEntry(IndonesianBaseModel):
     model_config = ConfigDict(title="Indonesian Wiktionary")
     word: str = Field(description="Word string")
@@ -40,3 +53,4 @@ class WordEntry(IndonesianBaseModel):
     tags: list[str] = []
     raw_tags: list[str] = []
     etymology_texts: list[str] = []
+    translations: list[Translation] = []

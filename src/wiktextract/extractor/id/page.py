@@ -9,6 +9,7 @@ from .etymology import extract_etymology_section
 from .models import Sense, WordEntry
 from .pos import extract_pos_section
 from .section_titles import POS_DATA
+from .translation import extract_translation_section
 
 
 def parse_section(
@@ -25,6 +26,10 @@ def parse_section(
         extract_etymology_section(
             wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
         )
+    elif title_text == "Terjemahan":
+        extract_translation_section(
+            wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
+        )
 
     for next_level in level_node.find_child(LEVEL_KIND_FLAGS):
         parse_section(wxr, page_data, base_data, next_level)
@@ -33,6 +38,11 @@ def parse_section(
         clean_node(
             wxr, page_data[-1] if len(page_data) > 0 else base_data, link_node
         )
+    for t_node in level_node.find_child(NodeKind.TEMPLATE):
+        if t_node.template_name.endswith("-cat"):
+            clean_node(
+                wxr, page_data[-1] if len(page_data) > 0 else base_data, t_node
+            )
 
 
 def parse_page(
