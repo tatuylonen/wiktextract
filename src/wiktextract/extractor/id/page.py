@@ -9,6 +9,7 @@ from .etymology import extract_etymology_section
 from .models import Sense, WordEntry
 from .pos import extract_pos_section
 from .section_titles import POS_DATA
+from .sound import extract_sound_section
 from .translation import extract_translation_section
 
 
@@ -28,6 +29,10 @@ def parse_section(
         )
     elif title_text == "Terjemahan":
         extract_translation_section(
+            wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
+        )
+    elif title_text in ["Pelafalan", "Ejaan"]:
+        extract_sound_section(
             wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
         )
 

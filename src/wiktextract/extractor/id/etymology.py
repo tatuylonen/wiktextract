@@ -10,12 +10,14 @@ def extract_etymology_section(
     word_entry: WordEntry,
     level_node: LevelNode,
 ) -> None:
+    has_list = False
     for list_node in level_node.find_child(NodeKind.LIST):
+        has_list = True
         for list_item in list_node.find_child(NodeKind.LIST_ITEM):
             e_str = clean_node(wxr, word_entry, list_item.children)
             if e_str != "":
                 word_entry.etymology_texts.append(e_str)
-    if len(word_entry.etymology_texts) == 0:
+    if not has_list:
         e_str = clean_node(
             wxr,
             word_entry,

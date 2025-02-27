@@ -1,10 +1,17 @@
-from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
+from wikitextprocessor import (
+    HTMLNode,
+    LevelNode,
+    NodeKind,
+    TemplateNode,
+    WikiNode,
+)
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .example import extract_example_list_item
-from .models import Sense, WordEntry
+from .models import Example, Sense, WordEntry
 from .section_titles import POS_DATA
+from .tags import translate_raw_tags
 
 
 def extract_pos_section(
@@ -55,6 +62,7 @@ def extract_gloss_list_item(
         else Sense()
     )
     gloss_nodes = []
+    after_br_tag = False
     for node in list_item.children:
         if isinstance(node, TemplateNode):
             expanded = clean_node(wxr, sense, node)
@@ -64,12 +72,25 @@ def extract_gloss_list_item(
                 sense.raw_tags.append(expanded.strip("()· "))
             else:
                 gloss_nodes.append(expanded)
+        elif (
+            isinstance(node, HTMLNode) and node.tag == "br" and not after_br_tag
+        ):
+            after_br_tag = True
+        elif (
+            isinstance(node, WikiNode)
+            and node.kind == NodeKind.ITALIC
+            and after_br_tag
+        ):
+            e_str = clean_node(wxr, None, node)
+            if e_str != "":
+                sense.examples.append(Example(text=e_str))
         elif not (isinstance(node, WikiNode) and node.kind == NodeKind.LIST):
             gloss_nodes.append(node)
 
     gloss_str = clean_node(wxr, sense, gloss_nodes)
     if gloss_str != "":
         sense.glosses.append(gloss_str)
+        translate_raw_tags(sense)
         word_entry.senses.append(sense)
 
     for child_list in list_item.find_child(NodeKind.LIST):

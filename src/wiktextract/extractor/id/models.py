@@ -26,6 +26,7 @@ class Sense(IndonesianBaseModel):
     raw_tags: list[str] = []
     categories: list[str] = []
     examples: list[Example] = []
+    topics: list[str] = []
 
 
 class Translation(IndonesianBaseModel):
@@ -41,6 +42,30 @@ class Translation(IndonesianBaseModel):
     lit: str = Field(default="", description="Literal translation")
 
 
+class Sound(IndonesianBaseModel):
+    zh_pron: str = Field(default="", description="Chinese word pronunciation")
+    ipa: str = Field(default="", description="International Phonetic Alphabet")
+    audio: str = Field(default="", description="Audio file name")
+    wav_url: str = ""
+    oga_url: str = ""
+    ogg_url: str = ""
+    mp3_url: str = ""
+    opus_url: str = ""
+    flac_url: str = ""
+    tags: list[str] = []
+    raw_tags: list[str] = []
+    roman: str = ""
+
+
+class Linkage(IndonesianBaseModel):
+    word: str
+    tags: list[str] = []
+    raw_tags: list[str] = []
+    roman: str = ""
+    source: str = ""
+    sense: str = ""
+
+
 class WordEntry(IndonesianBaseModel):
     model_config = ConfigDict(title="Indonesian Wiktionary")
     word: str = Field(description="Word string")
@@ -54,3 +79,6 @@ class WordEntry(IndonesianBaseModel):
     raw_tags: list[str] = []
     etymology_texts: list[str] = []
     translations: list[Translation] = []
+    sounds: list[Sound] = []
+    antonyms: list[Linkage] = []
+    synonyms: list[Linkage] = []

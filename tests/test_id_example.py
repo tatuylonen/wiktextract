@@ -46,3 +46,21 @@ class TestIdExample(TestCase):
                 }
             ],
         )
+
+    def test_italic_after_br(self):
+        page_data = parse_page(
+            self.wxr,
+            "angin",
+            """==bahasa Indonesia==
+===Nomina===
+# hawa; udara: <br />''ban berisi angin''""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"],
+            [
+                {
+                    "glosses": ["hawa; udara:"],
+                    "examples": [{"text": "ban berisi angin"}],
+                }
+            ],
+        )
