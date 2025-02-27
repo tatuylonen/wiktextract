@@ -60,7 +60,7 @@ class TestIdExample(TestCase):
             [
                 {
                     "glosses": ["hawa; udara:"],
-                    "examples": [{"text": "ban berisi angin"}]
+                    "examples": [{"text": "ban berisi angin"}],
                 }
-            ]
+            ],
         )

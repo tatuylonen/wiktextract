@@ -2,6 +2,7 @@ from wikitextprocessor import NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from .linkage import extract_syn_template
 from .models import Example, Sense, WordEntry
 
 
@@ -13,8 +14,17 @@ def extract_example_list_item(
 ) -> None:
     italic_str = ""
     for node in list_item.children:
-        if isinstance(node, TemplateNode) and node.template_name == "ux":
-            extract_ux_template(wxr, sense, node)
+        if isinstance(node, TemplateNode):
+            if node.template_name == "ux":
+                extract_ux_template(wxr, sense, node)
+            elif node.template_name in [
+                "sinonim",
+                "syn",
+                "synonyms",
+                "synonym of",
+                "sinonim dari",
+            ]:
+                extract_syn_template(wxr, word_entry, node)
         elif isinstance(node, WikiNode):
             if node.kind == NodeKind.ITALIC:
                 italic_str = clean_node(wxr, sense, node)

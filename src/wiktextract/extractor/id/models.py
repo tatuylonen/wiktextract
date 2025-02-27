@@ -57,6 +57,15 @@ class Sound(IndonesianBaseModel):
     roman: str = ""
 
 
+class Linkage(IndonesianBaseModel):
+    word: str
+    tags: list[str] = []
+    raw_tags: list[str] = []
+    roman: str = ""
+    source: str = ""
+    sense: str = ""
+
+
 class WordEntry(IndonesianBaseModel):
     model_config = ConfigDict(title="Indonesian Wiktionary")
     word: str = Field(description="Word string")
@@ -71,3 +80,5 @@ class WordEntry(IndonesianBaseModel):
     etymology_texts: list[str] = []
     translations: list[Translation] = []
     sounds: list[Sound] = []
+    antonyms: list[Linkage] = []
+    synonyms: list[Linkage] = []
