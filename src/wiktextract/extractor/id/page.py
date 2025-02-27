@@ -31,7 +31,7 @@ def parse_section(
         extract_translation_section(
             wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
         )
-    elif title_text == "Pelafalan":
+    elif title_text in ["Pelafalan", "Ejaan"]:
         extract_sound_section(
             wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
         )

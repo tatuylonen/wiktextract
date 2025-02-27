@@ -27,6 +27,8 @@ def extract_sound_list_item(
                 extract_ipa_template(wxr, word_entry, node)
             elif node.template_name == "audio":
                 extract_audio_template(wxr, word_entry, node)
+            elif node.template_name == "ejaan:id":
+                extract_ejaan_id_template(wxr, word_entry, node)
 
 
 def extract_ipa_template(
@@ -52,3 +54,11 @@ def extract_audio_template(
             translate_raw_tags(sound)
         word_entry.sounds.append(sound)
     clean_node(wxr, word_entry, t_node)
+
+
+def extract_ejaan_id_template(
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+) -> None:
+    sound = Sound(ipa=clean_node(wxr, None, t_node))
+    if sound.ipa != "":
+        word_entry.sounds.append(sound)
