@@ -1,6 +1,8 @@
 from .models import WordEntry
 
 TRANSLATION_TAGS = {
+    # https://id.wiktionary.org/wiki/Modul:gender_and_number/data
+    "m": "masculine",
     "f": "feminine",
     "n": "neuter",
     "jamak": "plural",
