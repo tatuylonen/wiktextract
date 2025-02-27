@@ -241,8 +241,8 @@ def extract_linkage_list_item(
                     getattr(word_entry, linkage_type).append(l_data)
                 else:
                     form = Form(form=word, raw_tags=raw_tags, tags=shared_tags)
-                    forms.append(l_data)
                     translate_raw_tags(form)
+                    forms.append(form)
                     word_entry.forms.append(form)
         elif isinstance(node, TemplateNode):
             if node.template_name == "g":
