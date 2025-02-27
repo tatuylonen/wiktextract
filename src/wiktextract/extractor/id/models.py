@@ -26,6 +26,7 @@ class Sense(IndonesianBaseModel):
     raw_tags: list[str] = []
     categories: list[str] = []
     examples: list[Example] = []
+    topics: list[str] = []
 
 
 class Translation(IndonesianBaseModel):

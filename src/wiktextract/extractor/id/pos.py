@@ -11,6 +11,7 @@ from ...wxr_context import WiktextractContext
 from .example import extract_example_list_item
 from .models import Example, Sense, WordEntry
 from .section_titles import POS_DATA
+from .tags import translate_raw_tags
 
 
 def extract_pos_section(
@@ -89,6 +90,7 @@ def extract_gloss_list_item(
     gloss_str = clean_node(wxr, sense, gloss_nodes)
     if gloss_str != "":
         sense.glosses.append(gloss_str)
+        translate_raw_tags(sense)
         word_entry.senses.append(sense)
 
     for child_list in list_item.find_child(NodeKind.LIST):
