@@ -4,6 +4,8 @@ GLOSS_TAGS = {
     # https://id.wiktionary.org/wiki/Templat:Istilah
     "cak": "informal",
     "kiasan": "figuratively",
+    "mdt": "morpheme",
+    "Sas": "literary",
 }
 
 TRANSLATION_TAGS = {
@@ -14,10 +16,21 @@ TRANSLATION_TAGS = {
     "jamak": "plural",
 }
 
-TAGS = {**TRANSLATION_TAGS, **GLOSS_TAGS}
+NUM_TAGS = {
+    "tunggal": "singular",
+    "plural": "plural",
+}
+
+SOUND_TAGS = {
+    "RP": "Received-Pronunciation",
+    "US": "US",
+}
+
+TAGS = {**TRANSLATION_TAGS, **GLOSS_TAGS, **NUM_TAGS, **SOUND_TAGS}
 
 TOPICS = {
     "Kim": "chemistry",
+    "Mat": "mathematics",
 }
 
 

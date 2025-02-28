@@ -111,7 +111,11 @@ def analyze_template(wtp: Wtp, page: Page) -> tuple[set[str], bool]:
     )
 
     # magic word breaks level2 node in "=qtu=" template
-    if need_pre_expand and page.body.startswith("__NOEDITSECTION__"):
+    if (
+        need_pre_expand
+        and page.body is not None
+        and page.body.startswith("__NOEDITSECTION__")
+    ):
         wtp.add_page(
             page.title, 10, page.body.removeprefix("__NOEDITSECTION__").strip()
         )

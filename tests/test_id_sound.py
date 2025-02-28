@@ -45,3 +45,19 @@ class TestIdSound(TestCase):
         self.assertEqual(
             page_data[0]["categories"], ["id:Lema dengan tautan audio"]
         )
+
+    def test_a_tag(self):
+        self.wxr.wtp.add_page("Templat:a", 10, "({{{1}}})")
+        page_data = parse_page(
+            self.wxr,
+            "constant",
+            """==bahasa Inggris==
+===Nomina===
+# sesuatu yang
+====Ejaan====
+* {{a|RP}} {{IPA|/ˈkɒnstənt/}}""",
+        )
+        self.assertEqual(
+            page_data[0]["sounds"],
+            [{"ipa": "/ˈkɒnstənt/", "tags": ["Received-Pronunciation"]}],
+        )

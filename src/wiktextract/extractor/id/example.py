@@ -24,7 +24,9 @@ def extract_example_list_item(
                 "synonym of",
                 "sinonim dari",
             ]:
-                extract_syn_template(wxr, word_entry, node)
+                extract_syn_template(wxr, word_entry, node, "synonyms")
+            elif node.template_name == "antonim":
+                extract_syn_template(wxr, word_entry, node, "antonyms")
         elif isinstance(node, WikiNode):
             if node.kind == NodeKind.ITALIC:
                 italic_str = clean_node(wxr, sense, node)
