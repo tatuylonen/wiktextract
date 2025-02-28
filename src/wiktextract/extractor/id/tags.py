@@ -19,7 +19,12 @@ NUM_TAGS = {
     "plural": "plural",
 }
 
-TAGS = {**TRANSLATION_TAGS, **GLOSS_TAGS, **NUM_TAGS}
+SOUND_TAGS = {
+    "RP": "Received-Pronunciation",
+    "US": "US",
+}
+
+TAGS = {**TRANSLATION_TAGS, **GLOSS_TAGS, **NUM_TAGS, **SOUND_TAGS}
 
 TOPICS = {
     "Kim": "chemistry",
