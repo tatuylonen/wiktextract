@@ -9,7 +9,7 @@ from wikitextprocessor import (
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .example import extract_example_list_item
-from .models import Example, Sense, WordEntry
+from .models import Example, Form, Sense, WordEntry
 from .section_titles import POS_DATA
 from .tags import translate_raw_tags
 
@@ -48,6 +48,10 @@ def extract_pos_section(
             "lihat2 v",
         ]:
             extract_lihat_2_template(wxr, page_data[-1], node)
+
+    process_pos_header_nodes(
+        wxr, page_data[-1], level_node.children[:gloss_list_index]
+    )
 
 
 def extract_gloss_list_item(
@@ -125,3 +129,25 @@ def extract_lihat_2_template(
                 )
             if len(sense.glosses) > 0:
                 word_entry.senses.append(sense)
+
+
+def process_pos_header_nodes(
+    wxr: WiktextractContext, word_entry: WordEntry, nodes: list[WikiNode | str]
+) -> None:
+    raw_tag = ""
+    after_bold_node = False
+    for node in nodes:
+        if isinstance(node, WikiNode):
+            if node.kind == NodeKind.BOLD:
+                after_bold_node = True
+            elif node.kind == NodeKind.LINK and after_bold_node:
+                word = clean_node(wxr, None, node)
+                if word != "":
+                    form = Form(form=word)
+                    if raw_tag != "":
+                        form.raw_tags.append(raw_tag)
+                        translate_raw_tags(form)
+                    word_entry.forms.append(form)
+                    break
+        elif isinstance(node, str) and node.strip().endswith(":"):
+            raw_tag = node.strip("(): ")

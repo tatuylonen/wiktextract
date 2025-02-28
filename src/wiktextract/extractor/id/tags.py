@@ -14,7 +14,12 @@ TRANSLATION_TAGS = {
     "jamak": "plural",
 }
 
-TAGS = {**TRANSLATION_TAGS, **GLOSS_TAGS}
+NUM_TAGS = {
+    "tunggal": "singular",
+    "plural": "plural",
+}
+
+TAGS = {**TRANSLATION_TAGS, **GLOSS_TAGS, **NUM_TAGS}
 
 TOPICS = {
     "Kim": "chemistry",

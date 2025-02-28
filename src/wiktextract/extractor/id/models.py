@@ -66,6 +66,12 @@ class Linkage(IndonesianBaseModel):
     sense: str = ""
 
 
+class Form(IndonesianBaseModel):
+    form: str
+    tags: list[str] = []
+    raw_tags: list[str] = []
+
+
 class WordEntry(IndonesianBaseModel):
     model_config = ConfigDict(title="Indonesian Wiktionary")
     word: str = Field(description="Word string")
@@ -82,3 +88,4 @@ class WordEntry(IndonesianBaseModel):
     sounds: list[Sound] = []
     antonyms: list[Linkage] = []
     synonyms: list[Linkage] = []
+    forms: list[Form] = []

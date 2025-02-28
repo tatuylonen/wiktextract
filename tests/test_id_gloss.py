@@ -54,3 +54,17 @@ class TestIdGloss(TestCase):
                 }
             ],
         )
+
+    def test_plural_form(self):
+        page_data = parse_page(
+            self.wxr,
+            "anjing",
+            """==bahasa Indonesia==
+===Nomina===
+'''anjing''' (plural: [[anjing-anjing]])
+# mamalia""",
+        )
+        self.assertEqual(
+            page_data[0]["forms"],
+            [{"form": "anjing-anjing", "tags": ["plural"]}],
+        )
