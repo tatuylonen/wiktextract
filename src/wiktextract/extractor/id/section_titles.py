@@ -26,3 +26,19 @@ POS_DATA = {
     "Singkatan": {"pos": "abbrev", "tags": ["abbreviation"]},
     "Nama diri": {"pos": "name"},
 }
+
+
+LINKAGE_SECTIONS = {
+    "Sinonim": "synonyms",
+    "Antonim": "antonyms",
+    "Kata turunan": "derived",
+    "Frasa dan kata majemuk": "derived",
+    "Lihat pula": "related",
+    "Kata terkait": "related",
+    "Akar kata": "related",
+    "Turunan": "derived",
+    "Peribahasa": "proverbs",
+    "Variasi": "forms",
+    "Alternatif": "forms",
+    "Frasa turunan": "derived",
+}

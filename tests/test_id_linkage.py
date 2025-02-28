@@ -39,3 +39,18 @@ class TestIdLinkage(TestCase):
                 }
             ],
         )
+
+    def test_linkage_list(self):
+        self.wxr.wtp.add_page("Templat:q", 10, "({{{1}}})")
+        page_data = parse_page(
+            self.wxr,
+            "constant",
+            """==bahasa Inggris==
+===Nomina===
+# sesuatu yang
+====Kata terkait====
+* {{l|en|constancy}} {{q|n}}""",
+        )
+        self.assertEqual(
+            page_data[0]["related"], [{"word": "constancy", "tags": ["neuter"]}]
+        )

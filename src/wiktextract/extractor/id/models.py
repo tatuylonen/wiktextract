@@ -89,3 +89,5 @@ class WordEntry(IndonesianBaseModel):
     antonyms: list[Linkage] = []
     synonyms: list[Linkage] = []
     forms: list[Form] = []
+    derived: list[Linkage] = []
+    related: list[Linkage] = []
