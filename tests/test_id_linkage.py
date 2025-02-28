@@ -78,3 +78,32 @@ class TestIdLinkage(TestCase):
                 },
             ],
         )
+
+    def test_m(self):
+        page_data = parse_page(
+            self.wxr,
+            "ḍĕṅĕr",
+            """==bahasa Jawa Kuna==
+===Verba===
+# [[dengar]]
+====Kata turunan====
+* {{m|kaw|amiḍĕṅĕr|t=mendengar}}""",
+        )
+        self.assertEqual(
+            page_data[0]["derived"],
+            [{"word": "amiḍĕṅĕr", "roman": "mendengar"}],
+        )
+
+    def test_alter(self):
+        page_data = parse_page(
+            self.wxr,
+            "ḍĕṅĕr",
+            """==bahasa Kangean==
+====Alternatif====
+* {{alter|kkv|deje|daja}}
+===Nomina===
+# utara""",
+        )
+        self.assertEqual(
+            page_data[0]["forms"], [{"form": "deje"}, {"form": "daja"}]
+        )

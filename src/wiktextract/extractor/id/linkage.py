@@ -64,6 +64,12 @@ def extract_linkage_list_item(
                 l_data = extract_l_template(wxr, node)
                 if l_data.word != "":
                     linkages.append(l_data)
+            elif node.template_name == "m":
+                l_data = extract_m_template(wxr, node)
+                if l_data.word != "":
+                    linkages.append(l_data)
+            elif node.template_name == "alter":
+                linkages.extend(extract_alter_template(wxr, node))
         elif isinstance(node, str) and ":" in node:
             sense = clean_node(
                 wxr,
@@ -95,3 +101,32 @@ def extract_l_template(
     return Linkage(
         word=clean_node(wxr, None, t_node.template_parameters.get(2, ""))
     )
+
+
+def extract_m_template(
+    wxr: WiktextractContext, t_node: TemplateNode
+) -> Linkage:
+    l_data = Linkage(
+        word=clean_node(
+            wxr,
+            None,
+            t_node.template_parameters.get(
+                3, t_node.template_parameters.get(2, "")
+            ),
+        ),
+        roman=clean_node(wxr, None, t_node.template_parameters.get("t", "")),
+    )
+    return l_data
+
+
+def extract_alter_template(
+    wxr: WiktextractContext, t_node: TemplateNode
+) -> list[Linkage]:
+    l_list = []
+    for index in count(2):
+        if index not in t_node.template_parameters:
+            break
+        word = clean_node(wxr, None, t_node.template_parameters[index])
+        if word != "":
+            l_list.append(Linkage(word=word))
+    return l_list

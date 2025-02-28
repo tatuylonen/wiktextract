@@ -4,6 +4,8 @@ GLOSS_TAGS = {
     # https://id.wiktionary.org/wiki/Templat:Istilah
     "cak": "informal",
     "kiasan": "figuratively",
+    "mdt": "morpheme",
+    "Sas": "literary",
 }
 
 TRANSLATION_TAGS = {
