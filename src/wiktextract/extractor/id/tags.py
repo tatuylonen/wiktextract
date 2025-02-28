@@ -23,6 +23,7 @@ TAGS = {**TRANSLATION_TAGS, **GLOSS_TAGS, **NUM_TAGS}
 
 TOPICS = {
     "Kim": "chemistry",
+    "Mat": "mathematics",
 }
 
 

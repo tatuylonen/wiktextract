@@ -8,14 +8,17 @@ from .models import Linkage, WordEntry
 
 
 def extract_syn_template(
-    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    t_node: TemplateNode,
+    l_type: str,
 ) -> None:
     for index in count(2):
         if index not in t_node.template_parameters:
             break
         word = clean_node(wxr, None, t_node.template_parameters[index])
         if word != "":
-            word_entry.synonyms.append(
+            getattr(word_entry, l_type).append(
                 Linkage(
                     word=word,
                     sense=word_entry.senses[-1].glosses[0]
