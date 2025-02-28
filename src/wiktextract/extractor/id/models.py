@@ -91,3 +91,4 @@ class WordEntry(IndonesianBaseModel):
     forms: list[Form] = []
     derived: list[Linkage] = []
     related: list[Linkage] = []
+    proverbs: list[Linkage] = []

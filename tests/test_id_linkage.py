@@ -54,3 +54,27 @@ class TestIdLinkage(TestCase):
         self.assertEqual(
             page_data[0]["related"], [{"word": "constancy", "tags": ["neuter"]}]
         )
+
+    def test_proverb(self):
+        page_data = parse_page(
+            self.wxr,
+            "malu",
+            """==bahasa Indonesia==
+===Nomina===
+# kemaluan
+====Peribahasa====
+* [[mendapat hidung panjang]], [[beroleh hidung panjang]]: mendapat malu atau kecewa;""",
+        )
+        self.assertEqual(
+            page_data[0]["proverbs"],
+            [
+                {
+                    "word": "mendapat hidung panjang",
+                    "sense": "mendapat malu atau kecewa;",
+                },
+                {
+                    "word": "beroleh hidung panjang",
+                    "sense": "mendapat malu atau kecewa;",
+                },
+            ],
+        )

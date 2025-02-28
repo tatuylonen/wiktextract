@@ -49,7 +49,8 @@ def extract_linkage_list_item(
 ) -> None:
     raw_tags = []
     linkages = []
-    for node in list_item.children:
+    sense = ""
+    for index, node in enumerate(list_item.children):
         if isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
             word = clean_node(wxr, None, node)
             if word != "":
@@ -63,8 +64,15 @@ def extract_linkage_list_item(
                 l_data = extract_l_template(wxr, node)
                 if l_data.word != "":
                     linkages.append(l_data)
+        elif isinstance(node, str) and ":" in node:
+            sense = clean_node(
+                wxr,
+                None,
+                [node[node.index(":") + 1 :]] + list_item.children[index + 1 :],
+            )
 
     for l_data in linkages:
+        l_data.sense = sense
         l_data.raw_tags.extend(raw_tags)
         translate_raw_tags(l_data)
 
@@ -72,9 +80,11 @@ def extract_linkage_list_item(
         for l_data in linkages:
             if l_data.word == wxr.wtp.title:
                 continue
-        word_entry.forms.append(
-            Form(form=l_data.word, raw_tags=l_data.raw_tags, tags=l_data.tags)
-        )
+            word_entry.forms.append(
+                Form(
+                    form=l_data.word, raw_tags=l_data.raw_tags, tags=l_data.tags
+                )
+            )
     else:
         getattr(word_entry, l_type).extend(linkages)
 
