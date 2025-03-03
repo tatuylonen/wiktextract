@@ -205,7 +205,7 @@ def parse_page(
                 if (
                     pos_ret := process_pos(
                         wxr,
-                        sublevel,
+                        pos_section,
                         pos_base_data.model_copy(deep=True),
                         heading_name,  # heading_name is the English pos
                         tags,
