@@ -100,6 +100,8 @@ def partition_head_forms(
                 if not ch.isalpha():
                     continue
                 if not unicode_name(ch).startswith("GREEK"):
+                    if code_to_name(t) != "":
+                        break
                     current_forms.append(t)
                     continue
                 break
