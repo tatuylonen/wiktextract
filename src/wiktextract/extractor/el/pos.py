@@ -119,7 +119,7 @@ def process_pos(
 
     if glosses_index is None:
         # Could not find any glosses.
-        logger.info(f"  ////  {wxr.wtp.title}\n  MISSING GLOSSES")
+        # logger.info(f"  ////  {wxr.wtp.title}\n  MISSING GLOSSES")
         wxr.wtp.warning("Missing glosses", sortid="pos/20250121")
         return None
 
@@ -413,16 +413,17 @@ def process_pos(
             Heading.Infl,
             Heading.Related,
         ):
-            expanded = wxr.wtp.expand(wxr.wtp.node_to_wikitext(sl))
-            # text = clean_node(wxr, None, sl)
-            logger.warning(
-                f"""
-{wxr.wtp.title}: {type}, '{heading_name}', {ok=}
-{expanded}
+            ...
+#             expanded = wxr.wtp.expand(wxr.wtp.node_to_wikitext(sl))
+#             text = clean_node(wxr, None, sl)
+#             logger.warning(
+#                 f"""
+# {wxr.wtp.title}: {type}, '{heading_name}', {ok=}
+# {expanded}
 
-###########################
-"""
-            )
+# ###########################
+# """
+#             )
 
     #####
     #####
