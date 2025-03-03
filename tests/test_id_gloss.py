@@ -98,3 +98,22 @@ class TestIdGloss(TestCase):
                 }
             ],
         )
+
+    def test_form_of(self):
+        page_data = parse_page(
+            self.wxr,
+            "berkehendaknya",
+            """==bahasa Indonesia==
+===Verba===
+#''bentuk posesif orang ketiga dari [[berkehendak]]''""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"],
+            [
+                {
+                    "glosses": ["bentuk posesif orang ketiga dari berkehendak"],
+                    "form_of": [{"word": "berkehendak"}],
+                    "tags": ["form-of"],
+                }
+            ],
+        )

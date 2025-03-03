@@ -98,6 +98,9 @@ def extract_gloss_list_item(
     gloss_str = clean_node(wxr, sense, gloss_nodes)
     if gloss_str != "":
         sense.glosses.append(gloss_str)
+        if gloss_str.startswith("bentuk "):
+            find_form_of_link(wxr, sense, gloss_nodes)
+
     if len(sense.glosses) > 0:
         translate_raw_tags(sense)
         word_entry.senses.append(sense)
@@ -169,3 +172,21 @@ def extract_variasi_template(
     if gloss != "":
         sense.glosses.append(gloss)
     sense.tags.append("alt-of")
+
+
+def find_form_of_link(
+    wxr: WiktextractContext, sense: Sense, gloss_nodes: list[WikiNode | str]
+) -> None:
+    # pre-expanded "nomina *", "imbuhan *", "ulang *", "verba *" templates
+    form_of = ""
+    for node in gloss_nodes:
+        if isinstance(node, WikiNode):
+            if node.kind == NodeKind.LINK:
+                form_of = clean_node(wxr, None, node)
+            elif node.kind == NodeKind.ITALIC:
+                for link in node.find_child(NodeKind.LINK):
+                    form_of = clean_node(wxr, None, link)
+
+    if form_of != "":
+        sense.form_of.append(AltForm(word=form_of))
+        sense.tags.append("form-of")
