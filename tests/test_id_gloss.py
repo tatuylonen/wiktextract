@@ -68,3 +68,33 @@ class TestIdGloss(TestCase):
             page_data[0]["forms"],
             [{"form": "anjing-anjing", "tags": ["plural"]}],
         )
+
+    def test_variasi(self):
+        self.wxr.wtp.add_page(
+            "Templat:variasi",
+            10,
+            """''variasi dari kata [[bengkarung]]''
+[[Kategori:Turunan kata bengkarung]]
+[[Kategori:id:Variasi kata]]""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "mengkarung",
+            """==bahasa Indonesia==
+===Nomina===
+# {{variasi|bengkarung}}""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"],
+            [
+                {
+                    "categories": [
+                        "Turunan kata bengkarung",
+                        "id:Variasi kata",
+                    ],
+                    "glosses": ["variasi dari kata bengkarung"],
+                    "alt_of": [{"word": "bengkarung"}],
+                    "tags": ["alt-of"],
+                }
+            ],
+        )
