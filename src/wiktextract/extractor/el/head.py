@@ -47,8 +47,9 @@ def partition_head_forms(
     wxr: WiktextractContext, split_text: list[str]
 ) -> list[Form]:
     if len(split_text) < 2:
-        logger.error(
-            f"Failed to partition head forms; " f"too few items {split_text=}"
+        wxr.wtp.error(
+            f"Failed to partition head forms; " f"too few items {split_text=}",
+            sortid="head/50/20250303",
         )
         return []
 
