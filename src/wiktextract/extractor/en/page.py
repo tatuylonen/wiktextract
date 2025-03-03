@@ -3218,7 +3218,7 @@ def parse_language(
                 ):
                     # These are expanded in the default way
                     return None
-                if name in ("trans-top",):
+                if name in ("trans-top", "trans-top-see",):
                     # XXX capture id from trans-top?  Capture sense here
                     # instead of trying to parse it from expanded content?
                     if ht.get(1):
