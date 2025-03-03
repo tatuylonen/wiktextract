@@ -1,6 +1,6 @@
 {
   "Templat:-def-": {
-    "body": "==={{{1}}} {{{num|}}}===\n",
+    "body": "==={{{1}}} {{{num|}}}===\n{{#if: {{#ifeq: {{NAMESPACE}} | | {{{bahasa|}}} }} | {{#if: {{{ascii|}}} | {{#iferror:{{DEFAULTSORT:{{LC:{{{ascii|}}}}}}}||{{DEFAULTSORT:{{LC:{{{ascii|}}}}}}}}} | }} {{#if: {{{type|}}} | {{#switch:{{{bahasa}}}|qqq=|#default=[[Kategori:{{{bahasa}}}:{{{type}}} {{{imbuhan|}}}]]}} | }} | }}\n",
     "namespace_id": 10
   },
   "Templat:-etym-": {

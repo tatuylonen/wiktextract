@@ -9,7 +9,7 @@ from wikitextprocessor import (
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .example import extract_example_list_item
-from .models import Example, Form, Sense, WordEntry
+from .models import AltForm, Example, Form, Sense, WordEntry
 from .section_titles import POS_DATA
 from .tags import translate_raw_tags
 
@@ -68,7 +68,11 @@ def extract_gloss_list_item(
     gloss_nodes = []
     after_br_tag = False
     for node in list_item.children:
-        if isinstance(node, TemplateNode):
+        if isinstance(node, TemplateNode) and node.template_name.startswith(
+            "variasi"
+        ):
+            extract_variasi_template(wxr, sense, node)
+        elif isinstance(node, TemplateNode):
             expanded = clean_node(wxr, sense, node)
             if expanded.startswith("(") and expanded.strip().endswith(
                 (")", ") ·")
@@ -94,6 +98,10 @@ def extract_gloss_list_item(
     gloss_str = clean_node(wxr, sense, gloss_nodes)
     if gloss_str != "":
         sense.glosses.append(gloss_str)
+        if gloss_str.startswith("bentuk "):
+            find_form_of_link(wxr, sense, gloss_nodes)
+
+    if len(sense.glosses) > 0:
         translate_raw_tags(sense)
         word_entry.senses.append(sense)
 
@@ -151,3 +159,34 @@ def process_pos_header_nodes(
                     break
         elif isinstance(node, str) and node.strip().endswith(":"):
             raw_tag = node.strip("(): ")
+
+
+def extract_variasi_template(
+    wxr: WiktextractContext, sense: Sense, t_node: TemplateNode
+) -> None:
+    for index in range(1, 4):
+        word = clean_node(wxr, None, t_node.template_parameters.get(index, ""))
+        if word != "":
+            sense.alt_of.append(AltForm(word=word))
+    gloss = clean_node(wxr, sense, t_node)
+    if gloss != "":
+        sense.glosses.append(gloss)
+    sense.tags.append("alt-of")
+
+
+def find_form_of_link(
+    wxr: WiktextractContext, sense: Sense, gloss_nodes: list[WikiNode | str]
+) -> None:
+    # pre-expanded "nomina *", "imbuhan *", "ulang *", "verba *" templates
+    form_of = ""
+    for node in gloss_nodes:
+        if isinstance(node, WikiNode):
+            if node.kind == NodeKind.LINK:
+                form_of = clean_node(wxr, None, node)
+            elif node.kind == NodeKind.ITALIC:
+                for link in node.find_child(NodeKind.LINK):
+                    form_of = clean_node(wxr, None, link)
+
+    if form_of != "":
+        sense.form_of.append(AltForm(word=form_of))
+        sense.tags.append("form-of")

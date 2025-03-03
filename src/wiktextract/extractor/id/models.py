@@ -20,6 +20,10 @@ class Example(IndonesianBaseModel):
     raw_tags: list[str] = []
 
 
+class AltForm(IndonesianBaseModel):
+    word: str
+
+
 class Sense(IndonesianBaseModel):
     glosses: list[str] = []
     tags: list[str] = []
@@ -27,6 +31,8 @@ class Sense(IndonesianBaseModel):
     categories: list[str] = []
     examples: list[Example] = []
     topics: list[str] = []
+    alt_of: list[AltForm] = []
+    form_of: list[AltForm] = []
 
 
 class Translation(IndonesianBaseModel):
