@@ -32,6 +32,8 @@ def parse_head(wxr: WiktextractContext, pos_data: WordEntry, text: str) -> bool:
     #     f"\n  §§ {wxr.wtp.title} ->  {''.join(split_text)}\n  § "
     #     + "\n  § ".join(f"{''.join(pb)}" for pb in print_blocks)
     # )
+    if len(forms) == 0:
+        return False
 
     pos_data.forms = forms
 
