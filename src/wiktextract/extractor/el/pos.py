@@ -617,18 +617,6 @@ def recurse_glosses1(
             dummy_parent = {}
 
             return [example]
-        elif node.sarg in (":"):
-            # Lines that start with only ":".
-            # If this happens, someone probably messed up something on the
-            # Wiktionary side, but some editions might use these as parts of
-            # their gloss list structure. Using debug print calls we can later
-            # take a look at what happened here, and then handle stuff more
-            # appropriately in a later version of the extractor.
-            wxr.wtp.debug(
-                f"Gloss item line starts with {node.sarg=}.",
-                sortid="simple/pos/214",
-            )
-            return []
 
         found_gloss = parse_gloss(wxr, parent_sense, contents)
 
