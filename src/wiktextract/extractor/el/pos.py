@@ -230,7 +230,8 @@ def process_pos(
         stripped = wxr.wtp.node_to_text(
             line, node_handler_fn=bold_node_handler_fn
         ).strip()
-        # print(f"{stripped=}")
+        if not stripped:
+            continue
         if not found_head and parse_head(wxr, data, stripped):
             # print(data)
             found_head = True
