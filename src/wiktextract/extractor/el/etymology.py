@@ -31,7 +31,9 @@ def process_etym(
     # Get everything except subsections, which we assume are POS nodes.
     etym_contents = list(node.invert_find_child(LEVEL_KIND_FLAGS))
     etym_sublevels = list(node.find_child(LEVEL_KIND_FLAGS))
-    ret_etym_sublevels: list[tuple[str, Tags, int, WikiNode, WordEntry]] = []
+    ret_etym_sublevels: POSReturns = []
+
+    wxr.wtp.start_subsection(title)
 
     section_num = num
 
@@ -42,19 +44,19 @@ def process_etym(
     if etym_text:
         base_data.etymology_text = etym_text
 
-    for heading_type, heading_name, tags, num, subnode in find_sections(
+    for heading_type, pos, tags, num, subnode in find_sections(
         wxr, etym_sublevels
     ):
         if heading_type == Heading.POS:
             section_num = num if num > section_num else section_num
             ret_etym_sublevels.append(
-                (heading_name, tags, num, subnode, base_data.copy(deep=True))
+                (pos, tags, num, subnode, base_data.copy(deep=True))
             )
         elif heading_type == Heading.Pron:
             section_num = num if num > section_num else section_num
 
             num, pron_sublevels = process_pron(
-                wxr, subnode, base_data, section_num
+                wxr, subnode, base_data, heading_name, section_num
             )
 
             ret_etym_sublevels.extend(pron_sublevels)

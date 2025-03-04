@@ -33,7 +33,7 @@ class TestElHeader(TestCase):
 """
 )
         pos_node = root.children[0]
-        process_pos(self.wxr, pos_node, data, pos_title="noun", pos_tags=[])
+        process_pos(self.wxr, pos_node, data, "noun", "ουσιαστικό", pos_tags=[])
         # print(f"{data.model_dump(exclude_defaults=True)}")
 
         expected = [
@@ -53,7 +53,7 @@ class TestElHeader(TestCase):
 # foo"""
 )
         pos_node = root.children[0]
-        process_pos(self.wxr, pos_node, data, pos_title="noun", pos_tags=[])
+        process_pos(self.wxr, pos_node, data, "noun", "ουσιαστικό", pos_tags=[])
         # print(f"{data.model_dump(exclude_defaults=True)}")
 
         expected = [

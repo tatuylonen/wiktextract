@@ -57,6 +57,7 @@ def process_pron(
     wxr: WiktextractContext,
     node: WikiNode,
     target_data: WordEntry,
+    title: str,
     num: int,  # Section number
 ) -> tuple[int, POSReturns]:
     """Process a Pronunciation section WikiNode, extracting Sound data entries
@@ -76,6 +77,8 @@ def process_pron(
     sublevels: list[WikiNode] = []
 
     pos_returns: POSReturns = []
+
+    wxr.wtp.start_subsection(title)
 
     section_num = num
 
