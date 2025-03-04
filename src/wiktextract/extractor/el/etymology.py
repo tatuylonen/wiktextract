@@ -44,19 +44,19 @@ def process_etym(
     if etym_text:
         base_data.etymology_text = etym_text
 
-    for heading_type, pos, tags, num, subnode in find_sections(
+    for heading_type, pos, title, tags, num, subnode in find_sections(
         wxr, etym_sublevels
     ):
         if heading_type == Heading.POS:
             section_num = num if num > section_num else section_num
             ret_etym_sublevels.append(
-                (pos, tags, num, subnode, base_data.copy(deep=True))
+                (pos, title, tags, num, subnode, base_data.copy(deep=True))
             )
         elif heading_type == Heading.Pron:
             section_num = num if num > section_num else section_num
 
             num, pron_sublevels = process_pron(
-                wxr, subnode, base_data, heading_name, section_num
+                wxr, subnode, base_data, title, section_num
             )
 
             ret_etym_sublevels.extend(pron_sublevels)
