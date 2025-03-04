@@ -2,7 +2,8 @@ from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
-from .models import Sense, WordEntry
+from .example import extract_example_list_item
+from .models import Example, Sense, WordEntry
 from .section_titles import POS_DATA
 from .tags import translate_raw_tags
 
@@ -61,6 +62,16 @@ def extract_gloss_list_item(
         if child_list.sarg.startswith("#") and child_list.sarg.endswith("#"):
             for child_list_item in child_list.find_child(NodeKind.LIST_ITEM):
                 extract_gloss_list_item(wxr, word_entry, child_list_item, sense)
+        elif child_list.sarg.startswith("#") and child_list.sarg.endswith(
+            (":", "*")
+        ):
+            for child_list_item in child_list.find_child(NodeKind.LIST_ITEM):
+                example = Example(text="")
+                extract_example_list_item(
+                    wxr, word_entry, child_list_item, example
+                )
+                if example.text != "":
+                    sense.examples.append(example)
 
 
 def extract_terim_template(

@@ -10,12 +10,21 @@ class TurkishBaseModel(BaseModel):
     )
 
 
+class Example(TurkishBaseModel):
+    text: str
+    translation: str = ""
+    ref: str = ""
+    tags: list[str] = []
+    raw_tags: list[str] = []
+
+
 class Sense(TurkishBaseModel):
     glosses: list[str] = []
     tags: list[str] = []
     raw_tags: list[str] = []
     categories: list[str] = []
     topics: list[str] = []
+    examples: list[Example] = []
 
 
 class WordEntry(TurkishBaseModel):

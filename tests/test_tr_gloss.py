@@ -60,3 +60,52 @@ class TestTrGloss(TestCase):
                 },
             ],
         )
+
+    def test_ux(self):
+        page_data = parse_page(
+            self.wxr,
+            "Zahn",
+            """==Almanca==
+===Ad===
+# [[diş]]
+#: {{ux|de|Der Zahnarzt entfernte ihr drei '''Zähne'''.|Diş hekimi '''dişler'''inden üçünü çıkardı.}}""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"],
+            [
+                {
+                    "examples": [
+                        {
+                            "text": "Der Zahnarzt entfernte ihr drei Zähne.",
+                            "translation": "Diş hekimi dişlerinden üçünü çıkardı.",
+                        }
+                    ],
+                    "glosses": ["diş"],
+                }
+            ],
+        )
+
+    def test_örnek(self):
+        page_data = parse_page(
+            self.wxr,
+            "game",
+            """==İngilizce==
+===Ad===
+# Oyun oynama [[an|ânı]]; [[maç]].
+#: {{örnek|Sally won the '''game'''.|dil=en}}
+#:: {{örnek|Sally '''oyunu''' kazandı.|dil=tr}}""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"],
+            [
+                {
+                    "examples": [
+                        {
+                            "text": "Sally won the game.",
+                            "translation": "Sally oyunu kazandı.",
+                        }
+                    ],
+                    "glosses": ["Oyun oynama ânı; maç."],
+                }
+            ],
+        )
