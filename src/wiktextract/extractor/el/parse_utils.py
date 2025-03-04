@@ -77,17 +77,21 @@ GREEK_LANGCODES = set(
 )
 
 
-POSReturns: TypeAlias = list[tuple[str, Tags, int, WikiNode, WordEntry]]
+Title: TypeAlias = str
+
+POSReturns: TypeAlias = list[
+    tuple[POSName, Title, Tags, int, WikiNode, WordEntry]
+]
 
 
 def find_sections(
     wxr: WiktextractContext,
     nodes: list[WikiNode],
-) -> Generator[tuple[Heading, str, Tags, int, WikiNode], None, None]:
+) -> Generator[tuple[Heading, POSName, Title, Tags, int, WikiNode], None, None]:
     for node in nodes:
         heading_title = clean_node(wxr, None, node.largs[0]).lower().strip()
 
-        type, heading_name, tags, num, ok = parse_lower_heading(
+        type, pos, heading_name, tags, num, ok = parse_lower_heading(
             wxr, heading_title
         )
 
@@ -96,28 +100,28 @@ def find_sections(
                 f"Sub-sub-section is numbered: {heading_name}, {num=}",
                 sortid="page/find_pos_sections_1",
             )
-        yield type, heading_name, tags, num, node
+        yield type, pos, heading_name, tags, num, node
 
 
 def parse_lower_heading(
     wxr: WiktextractContext, heading: str
-) -> tuple[Heading, str, Tags, int, bool]:
+) -> tuple[Heading, str, str, Tags, int, bool]:
     """Determine if a heading is for a part of speech or other subsection.
     Returns heading type enum, POS name or string data, list of tags and a
     success bool."""
     if m := POS_HEADINGS_RE.match(heading):
         pos, tags, num, ok = parse_pos_heading(wxr, heading, m)
         if ok:
-            return Heading.POS, pos, tags, num, True
+            return Heading.POS, pos, heading, tags, num, True
 
     if m := SUBSECTIONS_RE.match(heading):
         section, section_name, tags, num, ok = parse_section_heading(
             wxr, heading, m
         )
         if ok:
-            return section, section_name, tags, num, True
+            return section, section_name, heading, tags, num, True
 
-    return Heading.Err, heading, [], -1, False
+    return Heading.Err, "", heading, [], -1, False
 
 
 def parse_pos_heading(

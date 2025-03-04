@@ -101,6 +101,8 @@ def parse_page(
             )
             continue
 
+        wxr.wtp.start_section(lang_name)
+
         base_data = WordEntry(
             word=page_title,
             lang_code=lang_code,
@@ -122,7 +124,7 @@ def parse_page(
                 clean_node(wxr, None, sublevel.largs[0]).lower().strip()
             )
 
-            type, heading_name, tags, num, ok = parse_lower_heading(
+            type, pos, heading_name, tags, num, ok = parse_lower_heading(
                 wxr, heading_title
             )
 
@@ -175,7 +177,7 @@ def parse_page(
                 # Return any sublevels in the pronunciation section
                 # so that we can check for POS sections.
                 num, pron_sublevels = process_pron(
-                    wxr, sublevel, base_data, section_num
+                    wxr, sublevel, base_data, heading_name, section_num
                 )
 
                 section_num = num if num > section_num else section_num
@@ -185,6 +187,7 @@ def parse_page(
             if type is Heading.POS:
                 found_pos_sections.append(
                     (
+                        pos,
                         heading_name,
                         tags,
                         section_num,
@@ -196,7 +199,8 @@ def parse_page(
             #################################################
             # Finally handle all POS sections we've extracted
             for (
-                heading_name,
+                pos,
+                title,
                 tags,
                 num,
                 pos_section,
@@ -207,7 +211,8 @@ def parse_page(
                         wxr,
                         pos_section,
                         pos_base_data.model_copy(deep=True),
-                        heading_name,  # heading_name is the English pos
+                        pos,  # heading_name is the English pos
+                        title,
                         tags,
                         num,
                     )
@@ -215,7 +220,7 @@ def parse_page(
                     word_datas.append(pos_ret)
                 else:
                     wxr.wtp.error(
-                        f"Couldn't parse PoS section {heading_name}",
+                        f"Couldn't parse PoS section {pos}",
                         sortid="page.py/20250110",
                     )
 

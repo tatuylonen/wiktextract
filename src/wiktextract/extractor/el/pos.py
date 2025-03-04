@@ -40,7 +40,8 @@ def process_pos(
     node: WikiNode,
     data: WordEntry,
     # the "noun" in "Noun 2"
-    pos_title: str,
+    pos: str,
+    title: str,
     # the "2" in "Noun 2"
     pos_tags: list[str],
     pos_num: int = -1,
@@ -50,8 +51,10 @@ def process_pos(
 
     # Metadata for different part-of-speech kinds.
     # print(f"{pos_title=}, {pos_tags=}, {pos_num=}")
-    data.pos = pos_title  # the internal/translated name for the POS
+    data.pos = pos  # the internal/translated name for the POS
     data.pos_num = pos_num  # SEW uses "Noun 1", "Noun 2" style headings.
+
+    wxr.wtp.start_subsection(title)
 
     # Sound data associated with this POS might be coming from a shared
     # section, in which case we've tried to tag the sound data with its
@@ -361,7 +364,7 @@ def process_pos(
         # Wiktionaries handle glosses the usual way: with numbered lists.
         # Each list entry is a gloss, sometimes with subglosses, but with
         # Simple English Wiktionary that seems rare.
-        # logger.debug(f"{child}")
+        # logger.debug(f"{lst}")
         senses = recurse_glosses(wxr, lst, data)
         if len(senses) > 0:
             got_senses = True
@@ -398,7 +401,9 @@ def process_pos(
     for sl in pos_sublevels:
         subtitle = clean_node(wxr, None, sl.largs[0]).lower().strip()
 
-        type, heading_name, tags, num, ok = parse_lower_heading(wxr, subtitle)
+        type, pos, heading_name, tags, num, ok = parse_lower_heading(
+            wxr, subtitle
+        )
 
         # if type == Heading.Translation:
         #     process_translations(wxr, data, sl)
@@ -557,7 +562,7 @@ def recurse_glosses1(
     found_gloss = False
 
     # Pydantic stuff doesn't play nice with Tatu's manual dict manipulation
-    # functions, so we'll use a dummy dict here that when then check for
+    # functions, so we'll use a dummy dict here that we then check for
     # content and apply to `parent_sense`.
     dummy_parent: dict = {}
 
