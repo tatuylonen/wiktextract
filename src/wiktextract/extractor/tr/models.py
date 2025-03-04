@@ -15,6 +15,7 @@ class Sense(TurkishBaseModel):
     tags: list[str] = []
     raw_tags: list[str] = []
     categories: list[str] = []
+    topics: list[str] = []
 
 
 class WordEntry(TurkishBaseModel):
