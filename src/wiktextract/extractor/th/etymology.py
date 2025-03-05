@@ -6,14 +6,10 @@ from .models import WordEntry
 
 
 def extract_etymology_section(
-    wxr: WiktextractContext,
-    base_data: WordEntry,
-    level_node: LevelNode,
+    wxr: WiktextractContext, base_data: WordEntry, level_node: LevelNode
 ) -> None:
-    index = len(level_node.children)
-    for node_index, _ in level_node.find_child(LEVEL_KIND_FLAGS, True):
-        index = node_index
-        break
-    e_str = clean_node(wxr, base_data, level_node.children[:index])
+    e_str = clean_node(
+        wxr, base_data, list(level_node.invert_find_child(LEVEL_KIND_FLAGS))
+    )
     if e_str != "":
         base_data.etymology_text = e_str

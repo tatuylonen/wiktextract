@@ -109,3 +109,28 @@ class TestTrGloss(TestCase):
                 }
             ],
         )
+
+    def test_tr_ad(self):
+        self.wxr.wtp.add_page(
+            "Şablon:tr-ad",
+            10,
+            """<strong class="Latn headword" lang="tr">göz</strong> (''belirtme hâli'' <b class="Latn" lang="tr">[[gözü#Türkçe|gözü]]</b>, ''çoğulu'' <b class="Latn" lang="tr">[[gözler#Türkçe|gözler]]</b>)[[Category:Türkçe sözcükler|GÖZ]][[Category:Türkçe adlar|GÖZ]]""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "göz",
+            """==Türkçe==
+===Ad===
+{{tr-ad}}
+# [[bakış]], [[görüş]]""",
+        )
+        self.assertEqual(
+            page_data[0]["forms"],
+            [
+                {"form": "gözü", "tags": ["accusative"]},
+                {"form": "gözler", "tags": ["plural"]},
+            ],
+        )
+        self.assertEqual(
+            page_data[0]["categories"], ["Türkçe sözcükler", "Türkçe adlar"]
+        )

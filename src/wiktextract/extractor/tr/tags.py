@@ -6,7 +6,18 @@ GLOSS_TAGS = {
     "özellikle": "especially",
 }
 
-TAGS = {**GLOSS_TAGS}
+POS_HEADER_TAGS = {
+    # Şablon:tr-ad
+    "belirtme hâli": "accusative",
+    "çoğulu": "plural",
+    # Şablon:en-ad
+    "üçüncü tekil kişi geniş zaman": ["third-person", "singular", "present"],
+    "şimdiki zaman": "present",
+    "geçmiş zaman ve yakın geçmiş zaman": "past",
+}
+
+
+TAGS = {**GLOSS_TAGS, **POS_HEADER_TAGS}
 
 # https://tr.wiktionary.org/wiki/Modül:temalar/veri/konu
 TOPICS = {
