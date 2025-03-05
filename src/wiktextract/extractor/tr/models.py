@@ -45,3 +45,4 @@ class WordEntry(TurkishBaseModel):
     tags: list[str] = []
     raw_tags: list[str] = []
     forms: list[Form] = []
+    etymology_texts: list[str] = []
