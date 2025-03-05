@@ -110,6 +110,8 @@ def parse_page(
             pos="ERROR_UNKNOWN_POS",
         )
 
+        prev_data: WordEntry | None = None
+
         # XXX Some tables are put directly into the language level's content
         # Separate content and sublevels, parse content and put in base_data
 
@@ -211,6 +213,7 @@ def parse_page(
                         wxr,
                         pos_section,
                         pos_base_data.model_copy(deep=True),
+                        prev_data,
                         pos,  # heading_name is the English pos
                         title,
                         tags,
@@ -218,41 +221,12 @@ def parse_page(
                     )
                 ) is not None:
                     word_datas.append(pos_ret)
+                    prev_data = pos_ret
                 else:
                     wxr.wtp.error(
                         f"Couldn't parse PoS section {pos}",
                         sortid="page.py/20250110",
                     )
-
-            # new_data: list[WordEntry] = []
-            # if heading_title.startswith(("etymology",)):
-            #   #  USUALLY this is a LEVEL 3 node with Part of speech headings
-            #   # inside of it. The template assumes if there is an Etym section
-            #   # then it has POS sections inside of it.
-            #     etym_data = base_data.model_copy(deep=True)
-            #     new_data = process_etym(
-            #         wxr,
-            #         etym_data,
-            #         level_three,
-            #         heading_title,
-            #         heading_num,
-            #     )
-            # elif heading_title in POS_HEADINGS:
-            #     pos_data = base_data.model_copy(deep=True)
-            #     # Assume we'll get only one WordEntry or nothing.
-            #     if (
-            #         nd := process_pos(
-            #             wxr, level, pos_data, heading_title, heading_num
-            #         )
-            #     ) is not None:
-            #         new_data.append(nd)
-            # else:
-            #     ...
-            # if new_data is not None:
-            #     # new_data would be one WordEntry object, for one Part of
-            #     # Speech section ("Noun", "Verb"); this is generally how we
-            #     # want it.
-            #     word_datas.extend(new_data)
 
     # logger.info("%%" + "\n%%".join(parts))
     # Transform pydantic objects to normal dicts so that the old code can

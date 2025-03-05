@@ -39,6 +39,7 @@ def process_pos(
     wxr: WiktextractContext,
     node: WikiNode,
     data: WordEntry,
+    prev_data: WordEntry,  # data from the last entry in this language
     # the "noun" in "Noun 2"
     pos: str,
     title: str,
@@ -241,11 +242,16 @@ def process_pos(
         # in this case, the result is just not including any `forms` field
         # for these (or copying the previous one).
 
-        # XXX copy previous `forms`.
-        wxr.wtp.warning(
-            f"Part of speech missing head: {wxr.wtp.title}",
-            sortid="pos/460/20250104",
-        )
+        if prev_data is None:
+            wxr.wtp.warning(
+                f"Part of speech missing head: {wxr.wtp.title}",
+                sortid="pos/460/20250104",
+            )
+        else:
+            # No head found, copy previous (in this language)
+            data.forms = [
+                form.model_copy(deep=True) for form in prev_data.forms
+            ]
 
     if len(template_data) > 0:
         data.head_templates = template_data
