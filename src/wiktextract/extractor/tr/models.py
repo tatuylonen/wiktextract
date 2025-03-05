@@ -33,6 +33,20 @@ class Form(TurkishBaseModel):
     raw_tags: list[str] = []
 
 
+class Sound(TurkishBaseModel):
+    ipa: str = Field(default="", description="International Phonetic Alphabet")
+    audio: str = Field(default="", description="Audio file name")
+    wav_url: str = ""
+    oga_url: str = ""
+    ogg_url: str = ""
+    mp3_url: str = ""
+    opus_url: str = ""
+    flac_url: str = ""
+    tags: list[str] = []
+    raw_tags: list[str] = []
+    roman: str = ""
+
+
 class WordEntry(TurkishBaseModel):
     model_config = ConfigDict(title="Turkish Wiktionary")
     word: str = Field(description="Word string")
@@ -46,3 +60,5 @@ class WordEntry(TurkishBaseModel):
     raw_tags: list[str] = []
     forms: list[Form] = []
     etymology_texts: list[str] = []
+    sounds: list[Sound] = []
+    hyphenation: str = ""
