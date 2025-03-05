@@ -1,9 +1,15 @@
-from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
+from wikitextprocessor import (
+    HTMLNode,
+    LevelNode,
+    NodeKind,
+    TemplateNode,
+    WikiNode,
+)
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .example import extract_example_list_item
-from .models import Example, Sense, WordEntry
+from .models import Example, Form, Sense, WordEntry
 from .section_titles import POS_DATA
 from .tags import translate_raw_tags
 
@@ -29,6 +35,10 @@ def extract_pos_section(
                     extract_gloss_list_item(wxr, page_data[-1], list_item)
                     if index < gloss_list_index:
                         gloss_list_index = index
+
+    extract_pos_header_nodes(
+        wxr, page_data[-1], level_node.children[:gloss_list_index]
+    )
 
 
 def extract_gloss_list_item(
@@ -83,3 +93,37 @@ def extract_terim_template(
         raw_tag = raw_tag.strip()
         if raw_tag != "":
             sense.raw_tags.append(raw_tag)
+
+
+def extract_pos_header_nodes(
+    wxr: WiktextractContext, word_entry: WordEntry, nodes: list[WikiNode | str]
+) -> None:
+    for node in nodes:
+        if isinstance(node, TemplateNode) and (
+            node.template_name.startswith((word_entry.lang_code + "-"))
+            or node.template_name == "başlık başı"
+        ):
+            extract_pos_header_template(wxr, word_entry, node)
+
+
+def extract_pos_header_template(
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+) -> None:
+    # Şablon:başlık_başı, Şablon:tr-ad
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    raw_tag = ""
+    for node in expanded_node.children:
+        if isinstance(node, WikiNode) and node.kind == NodeKind.ITALIC:
+            raw_tag = clean_node(wxr, None, node)
+        elif isinstance(node, HTMLNode) and node.tag == "b":
+            word = clean_node(wxr, None, node)
+            if word != "":
+                form = Form(form=word)
+                if raw_tag != "":
+                    form.raw_tags.append(raw_tag)
+                    translate_raw_tags(form)
+                word_entry.forms.append(form)
+
+    clean_node(wxr, word_entry, expanded_node)
