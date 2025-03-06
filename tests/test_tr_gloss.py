@@ -134,3 +134,22 @@ class TestTrGloss(TestCase):
         self.assertEqual(
             page_data[0]["categories"], ["Türkçe sözcükler", "Türkçe adlar"]
         )
+
+    def test_low_quality(self):
+        page_data = parse_page(
+            self.wxr,
+            "siyah",
+            """==Türkçe==
+===Ön ad===
+:[1] siyah [[renkli]] [[olmak|olan]]
+::''Siyah ekmek.''""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"],
+            [
+                {
+                    "glosses": ["siyah renkli olan"],
+                    "examples": [{"text": "Siyah ekmek."}],
+                }
+            ],
+        )

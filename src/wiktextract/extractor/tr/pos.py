@@ -1,3 +1,5 @@
+import re
+
 from wikitextprocessor import (
     HTMLNode,
     LevelNode,
@@ -31,7 +33,12 @@ def extract_pos_section(
     for index, node in enumerate(level_node.children):
         if isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
             for list_item in node.find_child(NodeKind.LIST_ITEM):
-                if node.sarg.startswith("#") and node.sarg.endswith("#"):
+                if node.sarg == "#" or (
+                    node.sarg == ":"
+                    and len(list_item.children) > 0
+                    and isinstance(list_item.children[0], str)
+                    and re.search(r"\[\d+\]", list_item.children[0]) is not None
+                ):
                     extract_gloss_list_item(wxr, page_data[-1], list_item)
                     if index < gloss_list_index:
                         gloss_list_index = index
@@ -63,6 +70,7 @@ def extract_gloss_list_item(
             gloss_nodes.append(node)
 
     gloss_str = clean_node(wxr, sense, gloss_nodes)
+    gloss_str = re.sub(r"^\[\d+\]\s*", "", gloss_str)
     if gloss_str != "":
         sense.glosses.append(gloss_str)
         translate_raw_tags(sense)
@@ -72,9 +80,9 @@ def extract_gloss_list_item(
         if child_list.sarg.startswith("#") and child_list.sarg.endswith("#"):
             for child_list_item in child_list.find_child(NodeKind.LIST_ITEM):
                 extract_gloss_list_item(wxr, word_entry, child_list_item, sense)
-        elif child_list.sarg.startswith("#") and child_list.sarg.endswith(
-            (":", "*")
-        ):
+        elif child_list.sarg.startswith(
+            ("#", ":")
+        ) and child_list.sarg.endswith((":", "*")):
             for child_list_item in child_list.find_child(NodeKind.LIST_ITEM):
                 example = Example(text="")
                 extract_example_list_item(
