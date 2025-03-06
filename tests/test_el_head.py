@@ -44,6 +44,25 @@ class TestElHeader(TestCase):
         dumped = data.model_dump(exclude_defaults=True)
         self.assertEqual(dumped["forms"], expected)
 
+    def test_el_head_dash_before_template(self) -> None:
+        self.wxr.wtp.start_page("φώσφορος")
+        data = WordEntry(lang="Greek", lang_code="el", word="φώσφορος")
+        root = self.wxr.wtp.parse(
+"""==={{ουσιαστικό|el}}===
+-'''{{PAGENAME}}'''
+* foo
+"""
+)
+        pos_node = root.children[0]
+        process_pos(self.wxr, pos_node, data, None, "noun", "ουσιαστικό", pos_tags=[])
+        # print(f"{data.model_dump(exclude_defaults=True)}")
+
+        expected = [
+            {"form": "-φώσφορος"},
+        ]
+        dumped = data.model_dump(exclude_defaults=True)
+        self.assertEqual(dumped["forms"], expected)
+
     def test_en_head1(self) -> None:
         self.wxr.wtp.start_page("free")
         data = WordEntry(lang="Greek", lang_code="en", word="free")

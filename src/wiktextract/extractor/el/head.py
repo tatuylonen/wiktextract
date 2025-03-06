@@ -18,7 +18,16 @@ def parse_head(wxr: WiktextractContext, pos_data: WordEntry, text: str) -> bool:
 
     if not split_text[0] == "":
         # This should always be True; maybe an assert?
-        return False
+        # Turns out *some* articles add `-` before the template, like funa...
+        if split_text[0] == "-":  # make this `in ("-", ...)` if necessary
+            if len(split_text) > 3:
+                # Just throw the prefix into the (probably) bolded text
+                split_text[2] = split_text[0] + split_text[2]
+                split_text[0] = ''
+            else:
+                return False
+        else:
+            return False
 
     forms: list[Form] = []
     # print_blocks = []
