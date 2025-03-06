@@ -29,7 +29,7 @@ class TestESTranslation(unittest.TestCase):
         root = self.wxr.wtp.parse(
             "{{t|zh|a1=1|t1=你好|tl1=nĭ hăo|t2=您好|tl2=nín hăo|nota2=formal}}"
         )
-        extract_translation_section(self.wxr, word_entry, root)
+        extract_translation_section(self.wxr, [word_entry], root)
         self.assertEqual(
             [
                 t.model_dump(exclude_defaults=True)
@@ -65,7 +65,7 @@ class TestESTranslation(unittest.TestCase):
         root = self.wxr.wtp.parse(
             "{{t|th|a1=1|t1=สวัสดีครับ|g1=m|t2=สวัสดีค่ะ|g2=f}}"
         )
-        extract_translation_section(self.wxr, word_entry, root)
+        extract_translation_section(self.wxr, [word_entry], root)
         self.assertEqual(
             [
                 t.model_dump(exclude_defaults=True)

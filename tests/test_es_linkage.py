@@ -45,7 +45,7 @@ class TestESLinkage(unittest.TestCase):
                 word_entry = WordEntry(word="", lang_code="", lang="")
                 root = self.wxr.wtp.parse(case["input"])
                 extract_linkage_section(
-                    self.wxr, word_entry, root.children[0], "compounds"
+                    self.wxr, [word_entry], root.children[0], "compounds"
                 )
                 self.assertEqual(
                     word_entry.model_dump(exclude_defaults=True)["compounds"],
@@ -114,7 +114,7 @@ class TestESLinkage(unittest.TestCase):
         root = self.wxr.wtp.parse(
             "*[[perro caliente]] o [[perrito caliente]]: sándwich de salchicha de Viena"
         )
-        extract_linkage_section(self.wxr, word_entry, root, "idioms")
+        extract_linkage_section(self.wxr, [word_entry], root, "idioms")
         self.assertEqual(
             word_entry.model_dump(exclude_defaults=True)["idioms"],
             [

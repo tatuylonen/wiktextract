@@ -3,8 +3,9 @@ from unittest import TestCase
 from wikitextprocessor import Wtp
 
 from wiktextract.config import WiktionaryConfig
-from wiktextract.extractor.es.conjugation import process_conjugation_template
+from wiktextract.extractor.es.conjugation import extract_conjugation_section
 from wiktextract.extractor.es.models import WordEntry
+from wiktextract.extractor.es.page import parse_page
 from wiktextract.wxr_context import WiktextractContext
 
 
@@ -78,7 +79,7 @@ segunda conjugación,&nbsp;irregular</span>
         word_entry = WordEntry(
             word="ver", pos="verb", lang="Español", lang_code="es"
         )
-        process_conjugation_template(self.wxr, word_entry, root.children[0])
+        extract_conjugation_section(self.wxr, [word_entry], root)
         self.assertEqual(
             word_entry.model_dump(exclude_defaults=True)["forms"],
             [
@@ -116,3 +117,72 @@ segunda conjugación,&nbsp;irregular</span>
                 },
             ],
         )
+
+    def test_es_v(self):
+        self.wxr.wtp.start_page("dar")
+        self.wxr.wtp.add_page("Plantilla:lengua", 10, "Español")
+        self.wxr.wtp.add_page(
+            "Plantilla:verbo transitivo", 10, "Verbo transitivo"
+        )
+        self.wxr.wtp.add_page(
+            "Plantilla:verbo intransitivo", 10, "Verbo intransitivo"
+        )
+        self.wxr.wtp.add_page(
+            "Plantilla:es.v",
+            10,
+            """<div>
+{|
+|-
+! colspan=8 | Formas no personales (verboides)
+|-
+! Infinitivo
+| colspan=3 | dar
+| colspan=4 | haber [[dado|dado]]
+|-
+! colspan=8 | Formas personales
+|-
+! colspan=8 | Modo subjuntivo
+|-
+!
+! que yo
+|-
+! Pretérito imperfecto
+|  | <span class='movil'>que yo&ensp;</span> [[diera|diera]],  [[diese|diese]]
+|}[[Categoría:ES:Verbos del paradigma dar]][[Categoría:ES:Verbos irregulares]]""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "dar",
+            """== {{lengua|es}} ==
+=== Etimología 1 ===
+etymology text
+==== {{verbo transitivo|es}} ====
+;1: Traspasar algo a otra persona de forma [[gratuito|gratuita]].
+==== {{verbo intransitivo|es}} ====
+;12: Asestar golpes.
+==== Conjugación ====
+{{es.v}}""",
+        )
+        self.assertEqual(
+            page_data[0]["forms"],
+            [
+                {"form": "dar", "tags": ["impersonal", "infinitive"]},
+                {"form": "haber dado", "tags": ["impersonal", "infinitive"]},
+                {
+                    "form": "diera",
+                    "tags": ["subjunctive", "past", "imperfect"],
+                    "raw_tags": ["que yo"],
+                },
+                {
+                    "form": "diese",
+                    "tags": ["subjunctive", "past", "imperfect"],
+                    "raw_tags": ["que yo"],
+                },
+            ],
+        )
+        self.assertEqual(page_data[0]["forms"], page_data[1]["forms"])
+        self.assertEqual(
+            page_data[0]["categories"],
+            ["ES:Verbos del paradigma dar", "ES:Verbos irregulares"],
+        )
+        self.assertEqual(page_data[0]["categories"], page_data[1]["categories"])
