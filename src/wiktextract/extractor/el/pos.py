@@ -39,7 +39,7 @@ def process_pos(
     wxr: WiktextractContext,
     node: WikiNode,
     data: WordEntry,
-    prev_data: WordEntry,  # data from the last entry in this language
+    prev_data: WordEntry | None,  # data from the last entry in this language
     # the "noun" in "Noun 2"
     pos: str,
     title: str,
