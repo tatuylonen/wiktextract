@@ -24,7 +24,7 @@ from .parse_utils import (
 )
 from .related import process_related
 from .section_titles import POS_HEADINGS
-from .table import parse_table
+from .table import parse_table, process_inflection_section
 from .tags_utils import convert_tags_in_sense
 from .text_utils import (
     ENDING_NUMBER_RE,
@@ -412,10 +412,10 @@ def process_pos(
             wxr, subtitle
         )
 
-        # if type == Heading.Translation:
-        #     process_translations(wxr, data, sl)
-        # elif type == Heading.Infl:
-        #     process_inflection_section(wxr, data, sl)
+        if type == Heading.Translation:
+            process_translations(wxr, data, sl)
+        elif type == Heading.Infl:
+            process_inflection_section(wxr, data, sl)
         if type == Heading.Related:
             process_related(wxr, data, sl)
         if type not in (
