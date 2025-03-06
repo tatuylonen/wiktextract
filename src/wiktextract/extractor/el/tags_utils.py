@@ -3,7 +3,7 @@ import re
 from .models import Sense
 from .section_titles import POS_HEADINGS
 from .simple_tags import simple_tag_map
-from .text_utils import ENDING_NUMBER_RE, STRIP_PUNCTUATION
+from .text_utils import ENDING_NUMBER_RE, STRIP_PUNCTUATION, normalized_int
 
 # If you want to use groups in a regex meant for re.split(), you need to use the
 # syntax `(?:...)` to make the group non-capturing. re.split() has the feature
@@ -38,7 +38,7 @@ def convert_tags(raw_tags: list[str]) -> tuple[list[str], list[str], list[str]]:
             pos_num = -1
             if m := ENDING_NUMBER_RE.search(s):
                 s = s[: m.start()].strip()
-                pos_num = int(m.group(1))
+                pos_num = normalized_int(m.group(1))
             if s.lower() in POS_HEADINGS:
                 # XXX might be better to separate out the POS-number here
                 if pos_num and pos_num != -1:
