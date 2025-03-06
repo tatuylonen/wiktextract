@@ -17,6 +17,7 @@ from .section_titles import (
     POSName,
     Tags,
 )
+from .text_utils import normalized_int
 
 # Ignorable templates that generate panels to the side, like
 # Template:Wikipedia, or other meta-info like Template:see.
@@ -133,7 +134,7 @@ def parse_pos_heading(
     if rest:
         # logger.info(f"POS REST: '{rest}'")
         if rest.strip().isdigit():
-            post_number = int(rest.strip())
+            post_number = normalized_int(rest.strip())
             # logger.info(f"POST_NUMBER {post_number}")
     pos_data = POS_HEADINGS[pos_str]
     return pos_data["pos"], pos_data.get("tags", []), post_number, True
@@ -148,7 +149,7 @@ def parse_section_heading(
     if rest:
         # logger.info(f"SUBSECTION REST: '{rest}'")
         if rest.strip().isdigit():
-            post_number = int(rest.strip())
+            post_number = normalized_int(rest.strip())
             # logger.info(f"POST_NUMBER {post_number}")
     section_data = SUBSECTION_HEADINGS[subsection_str]
     return (

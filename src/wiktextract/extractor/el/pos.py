@@ -24,11 +24,11 @@ from .parse_utils import (
 )
 from .related import process_related
 from .section_titles import POS_HEADINGS
-from .table import parse_table, process_inflection_section
+from .table import parse_table
 from .tags_utils import convert_tags_in_sense
 from .text_utils import (
     ENDING_NUMBER_RE,
-    STRIP_PUNCTUATION,
+    normalized_int,
 )
 from .translations import process_translations
 
@@ -72,7 +72,7 @@ def process_pos(
             for sound_pos in sound.poses:
                 m = ENDING_NUMBER_RE.search(sound_pos)
                 if m is not None:
-                    s_num = int(m.group(1).strip())
+                    s_num = normalized_int(m.group(1).strip())
                     s_pos = sound_pos[: m.start()].strip().lower()
                 else:
                     s_pos = sound_pos.strip().lower()
