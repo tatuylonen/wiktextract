@@ -116,6 +116,7 @@ def process_pos(
             len(line) == 1
             and isinstance(line[0], WikiNode)
             and line[0].kind == NodeKind.LIST
+            and (line[0].sarg != ":")
         ):
             if glosses_index is None:
                 glosses_index = i
@@ -239,7 +240,7 @@ def process_pos(
         template_depth = 0
         stripped = wxr.wtp.node_to_text(
             line, node_handler_fn=bold_node_handler_fn
-        ).strip()
+        ).removeprefix(":").strip()
         if not stripped:
             continue
         if not found_head and parse_head(wxr, data, stripped):
