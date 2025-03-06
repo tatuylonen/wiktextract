@@ -14,10 +14,11 @@ from .section_titles import LINKAGE_TITLES
 
 def extract_linkage_section(
     wxr: WiktextractContext,
-    word_entry: WordEntry,
+    page_data: list[WordEntry],
     level_node: LevelNode,
     linkage_type: str,
 ):
+    linkage_list = []
     for list_item_node in level_node.find_child_recursively(NodeKind.LIST_ITEM):
         sense_nodes = []
         after_colon = False
@@ -34,9 +35,14 @@ def extract_linkage_section(
                 sense_nodes.append(node[node.index(":") + 1 :])
         sense = clean_node(wxr, None, sense_nodes)
         for word in filter(None, words):
-            getattr(word_entry, linkage_type).append(
-                Linkage(word=word, sense=sense)
-            )
+            linkage_list.append(Linkage(word=word, sense=sense))
+
+    for data in page_data:
+        if (
+            data.lang_code == page_data[-1].lang_code
+            and data.etymology_text == page_data[-1].etymology_text
+        ):
+            getattr(data, linkage_type).extend(linkage_list)
 
 
 def process_linkage_template(

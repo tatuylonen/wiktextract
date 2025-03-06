@@ -9,23 +9,27 @@ from .tags import translate_raw_tags
 
 
 def extract_conjugation_section(
-    wxr: WiktextractContext,
-    word_entry: WordEntry,
-    level_node: WikiNode,
+    wxr: WiktextractContext, page_data: list[WordEntry], level_node: WikiNode
 ) -> None:
-    for template_node in level_node.find_child(NodeKind.TEMPLATE):
-        process_conjugation_template(wxr, word_entry, template_node)
+    forms = []
+    cats = []
+    for t_node in level_node.find_child(NodeKind.TEMPLATE):
+        if "es.v.conj." in t_node.template_name:
+            new_forms, new_cats = process_es_v_conj_template(wxr, t_node)
+            forms.extend(new_forms)
+            cats.extend(new_cats)
+        elif t_node.template_name == "es.v":
+            new_forms, new_cats = process_es_v_template(wxr, t_node)
+            forms.extend(new_forms)
+            cats.extend(new_cats)
 
-
-def process_conjugation_template(
-    wxr: WiktextractContext,
-    word_entry: WordEntry,
-    template_node: TemplateNode,
-) -> None:
-    if "es.v.conj." in template_node.template_name:
-        process_es_v_conj_template(wxr, word_entry, template_node)
-    elif template_node.template_name == "es.v":
-        process_es_v_template(wxr, word_entry, template_node)
+    for data in page_data:
+        if (
+            data.lang_code == page_data[-1].lang_code
+            and data.etymology_text == page_data[-1].etymology_text
+        ):
+            data.forms.extend(forms)
+            data.categories.extend(cats)
 
 
 @dataclass
@@ -43,14 +47,15 @@ IGNORE_ES_V_HEADERS = {"número:", "persona:"}
 
 
 def process_es_v_conj_template(
-    wxr: WiktextractContext,
-    word_entry: WordEntry,
-    template_node: TemplateNode,
-) -> None:
+    wxr: WiktextractContext, template_node: TemplateNode
+) -> tuple[list[Form], list[str]]:
     # https://es.wiktionary.org/wiki/Plantilla:es.v.conj
+    forms = []
+    cats = {}
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(template_node), expand_all=True
     )
+    clean_node(wxr, cats, expanded_node)
     table_nodes = list(expanded_node.find_child(NodeKind.TABLE))
     if len(table_nodes) == 0:
         return
@@ -104,19 +109,21 @@ def process_es_v_conj_template(
 
                     if form.form != "":
                         translate_raw_tags(form)
-                        word_entry.forms.append(form)
+                        forms.append(form)
                 col_cell_index += colspan
+    return forms, cats.get("categories", [])
 
 
 def process_es_v_template(
-    wxr: WiktextractContext,
-    word_entry: WordEntry,
-    template_node: TemplateNode,
-) -> None:
+    wxr: WiktextractContext, template_node: TemplateNode
+) -> tuple[list[Form], list[str]]:
     # https://es.wiktionary.org/wiki/Plantilla:es.v
+    forms = []
+    cats = {}
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(template_node), expand_all=True
     )
+    clean_node(wxr, cats, expanded_node)
     table_nodes = list(expanded_node.find_child_recursively(NodeKind.TABLE))
     if len(table_nodes) == 0:
         return
@@ -175,5 +182,6 @@ def process_es_v_template(
                         form.raw_tags.append(row_header)
                     if form.form not in ["", "―"]:
                         translate_raw_tags(form)
-                        word_entry.forms.append(form)
+                        forms.append(form)
                 col_index += 1
+    return forms, cats.get("categories", [])

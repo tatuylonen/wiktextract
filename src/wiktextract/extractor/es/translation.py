@@ -10,11 +10,23 @@ from .tags import translate_raw_tags
 
 
 def extract_translation_section(
-    wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
+    wxr: WiktextractContext, page_data: list[WordEntry], level_node: LevelNode
 ) -> None:
-    for template_node in level_node.find_child(NodeKind.TEMPLATE):
-        if template_node.template_name == "t":
-            process_t_template(wxr, word_entry, template_node)
+    tr_data = []
+    cats = []
+    for t_node in level_node.find_child(NodeKind.TEMPLATE):
+        if t_node.template_name == "t":
+            new_tr_list, new_cats = process_t_template(wxr, t_node)
+            tr_data.extend(new_tr_list)
+            cats.extend(new_cats)
+
+    for data in page_data:
+        if (
+            data.lang_code == page_data[-1].lang_code
+            and data.etymology_text == page_data[-1].etymology_text
+        ):
+            data.translations.extend(tr_data)
+            data.categories.extend(cats)
 
 
 # https://es.wiktionary.org/wiki/Módulo:t
@@ -36,11 +48,13 @@ T_NUMBERS = {
 
 
 def process_t_template(
-    wxr: WiktextractContext, word_entry: WordEntry, template_node: TemplateNode
-) -> None:
+    wxr: WiktextractContext, template_node: TemplateNode
+) -> tuple[list[Translation], list[str]]:
     # https://es.wiktionary.org/wiki/Plantilla:t
+    tr_list = []
+    cats = {}
     lang_code = template_node.template_parameters.get(1, "")
-    template_text = clean_node(wxr, word_entry, template_node)
+    template_text = clean_node(wxr, cats, template_node)
     lang_name = template_text[: template_text.find(":")].strip("* ")
     if lang_name == "":  # in case Lua error
         lang_name = code_to_name(lang_code, "es")
@@ -88,4 +102,5 @@ def process_t_template(
 
         if len(tr_data.word) > 0:
             translate_raw_tags(tr_data)
-            word_entry.translations.append(tr_data)
+            tr_list.append(tr_data)
+    return tr_list, cats.get("categories", [])
