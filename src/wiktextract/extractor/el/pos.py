@@ -126,7 +126,7 @@ def process_pos(
         # Could not find any glosses.
         # logger.info(f"  ////  {wxr.wtp.title}\n  MISSING GLOSSES")
         wxr.wtp.warning("Missing glosses", sortid="pos/20250121")
-        return None
+        data.tags.append("no-gloss")
 
     template_data: list[TemplateData] = []
     category_data: list[str] = []
