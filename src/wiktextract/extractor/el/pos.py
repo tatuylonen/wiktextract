@@ -148,7 +148,16 @@ def process_pos(
         kind = node.kind
         nonlocal template_depth
         nonlocal top_template_name
-        if kind == NodeKind.BOLD:
+        if kind == NodeKind.BOLD or (
+            isinstance(node, HTMLNode)
+            and node.tag == "span"
+            and "style" in node.attrs
+            and (
+                "bold" in node.attrs["style"]
+                # Special handling for output for stuff in arabic script
+                or node.attrs["style"] == "color:black; font-size:200%;"
+            )
+        ):
             # These are word forms almost always
             return ["__B__", *node.children, "__/B__"]
         elif kind == NodeKind.ITALIC:
