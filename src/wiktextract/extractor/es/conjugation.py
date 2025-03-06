@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from wikitextprocessor.parser import NodeKind, TemplateNode, WikiNode
+from wikitextprocessor import HTMLNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -24,6 +24,8 @@ def process_conjugation_template(
 ) -> None:
     if "es.v.conj." in template_node.template_name:
         process_es_v_conj_template(wxr, word_entry, template_node)
+    elif template_node.template_name == "es.v":
+        process_es_v_template(wxr, word_entry, template_node)
 
 
 @dataclass
@@ -104,3 +106,74 @@ def process_es_v_conj_template(
                         translate_raw_tags(form)
                         word_entry.forms.append(form)
                 col_cell_index += colspan
+
+
+def process_es_v_template(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    template_node: TemplateNode,
+) -> None:
+    # https://es.wiktionary.org/wiki/Plantilla:es.v
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(template_node), expand_all=True
+    )
+    table_nodes = list(expanded_node.find_child_recursively(NodeKind.TABLE))
+    if len(table_nodes) == 0:
+        return
+    table_node = table_nodes[0]
+    col_headers = []
+    for row in table_node.find_child(NodeKind.TABLE_ROW):
+        row_header = ""
+        single_cell = len(list(row.filter_empty_str_child())) == 1
+        all_header_row = row.contain_node(
+            NodeKind.TABLE_HEADER_CELL
+        ) and not row.contain_node(NodeKind.TABLE_CELL)
+        if not all_header_row and single_cell:
+            continue  # ignore end notes
+        if all_header_row and single_cell:
+            col_headers.clear()  # new table
+
+        col_index = 0
+        for cell in row.find_child(
+            NodeKind.TABLE_HEADER_CELL | NodeKind.TABLE_CELL
+        ):
+            cell_text = clean_node(wxr, None, cell)
+            if cell_text == "":
+                continue
+            if cell.kind == NodeKind.TABLE_HEADER_CELL:
+                if all_header_row:
+                    colspan = int(cell.attrs.get("colspan", "1"))
+                    col_headers.append(
+                        SpanHeader(
+                            cell_text.removeprefix("Modo ").strip(),
+                            col_index,
+                            colspan,
+                        )
+                    )
+                    col_index += colspan
+                else:
+                    row_header = cell_text.removesuffix("^†").strip()
+            else:
+                cell_nodes = []
+                for node in cell.children:
+                    if not (
+                        isinstance(node, HTMLNode)
+                        and "movil" in node.attrs.get("class", "")
+                    ):
+                        cell_nodes.append(node)  # hidden HTML tag
+                cell_text = clean_node(wxr, None, cell_nodes)
+                for word in cell_text.split(","):
+                    word = word.strip()
+                    form = Form(form=word)
+                    for col_head in col_headers:
+                        if (
+                            col_index >= col_head.index
+                            and col_index < col_head.index + col_head.span
+                        ):
+                            form.raw_tags.append(col_head.text)
+                    if row_header != "":
+                        form.raw_tags.append(row_header)
+                    if form.form not in ["", "―"]:
+                        translate_raw_tags(form)
+                        word_entry.forms.append(form)
+                col_index += 1

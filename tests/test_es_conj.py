@@ -116,3 +116,51 @@ segunda conjugación,&nbsp;irregular</span>
                 },
             ],
         )
+
+    def test_es_v(self):
+        self.wxr.wtp.start_page("dar")
+        self.wxr.wtp.add_page(
+            "Plantilla:es.v",
+            10,
+            """<div>
+{|
+|-
+! colspan=8 | Formas no personales (verboides)
+|-
+! Infinitivo
+| colspan=3 | dar
+| colspan=4 | haber [[dado|dado]]
+|-
+! colspan=8 | Formas personales
+|-
+! colspan=8 | Modo subjuntivo
+|-
+!
+! que yo
+|-
+! Pretérito imperfecto
+|  | <span class='movil'>que yo&ensp;</span> [[diera|diera]],  [[diese|diese]]
+|}""",
+        )
+        root = self.wxr.wtp.parse("{{es.v}}")
+        word_entry = WordEntry(
+            word="dar", pos="verb", lang="Español", lang_code="es"
+        )
+        process_conjugation_template(self.wxr, word_entry, root.children[0])
+        self.assertEqual(
+            word_entry.model_dump(exclude_defaults=True)["forms"],
+            [
+                {"form": "dar", "tags": ["impersonal", "infinitive"]},
+                {"form": "haber dado", "tags": ["impersonal", "infinitive"]},
+                {
+                    "form": "diera",
+                    "tags": ["subjunctive", "past", "imperfect"],
+                    "raw_tags": ["que yo"],
+                },
+                {
+                    "form": "diese",
+                    "tags": ["subjunctive", "past", "imperfect"],
+                    "raw_tags": ["que yo"],
+                },
+            ],
+        )

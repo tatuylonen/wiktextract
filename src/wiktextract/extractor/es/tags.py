@@ -716,6 +716,18 @@ VERB_FORM_TAGS = {
     "participio": "participle",
 }
 
+TABLE_TAGS = {
+    # Plantilla:es.v
+    "formas no personales (verboides)": "impersonal",
+    "futuro compuesto": ["future", "compound"],
+    "pretérito perfecto compuesto": ["present", "perfect", "compound"],
+    "condicional simple": "conditional",
+    "condicional compuesto": ["conditional", "compound"],
+    "indicativo": "indicative",
+    "subjuntivo": "subjunctive",
+    "imperativo": "imperative",
+}
+
 
 ALL_TAGS = {
     **NUMBER_TAGS,
@@ -724,6 +736,7 @@ ALL_TAGS = {
     **PERSON_TAGS,
     **TENSE_TAGS,
     **VERB_FORM_TAGS,
+    **TABLE_TAGS,
     "afirmativo": "affirmative",
     "negativo": "negative",
     "simples": "simple",
@@ -737,10 +750,12 @@ def translate_raw_tags(data: WordEntry):
         lower_raw_tag = raw_tag.lower()
         if lower_raw_tag in ALL_TAGS:
             tr_tag = ALL_TAGS[lower_raw_tag]
-            if isinstance(tr_tag, str):
+            if isinstance(tr_tag, str) and tr_tag not in data.tags:
                 data.tags.append(tr_tag)
             elif isinstance(tr_tag, list):
-                data.tags.extend(tr_tag)
+                for tag in tr_tag:
+                    if tag not in data.tags:
+                        data.tags.append(tag)
         elif lower_raw_tag in CSEM_TOPICS and hasattr(data, "topics"):
             data.topics.append(CSEM_TOPICS[lower_raw_tag])
         else:
