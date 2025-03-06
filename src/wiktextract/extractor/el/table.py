@@ -243,6 +243,9 @@ def parse_table(
 
     # print(f"{table_grid=}")
 
+    first_cells_are_bold = False
+    found_unformatted_text = False
+
     for r, row_d in table_grid.items():
         # Check for previously added row headers that may have spread lower;
         # Remove old row headers that don't exist on this row.
@@ -263,12 +266,21 @@ def parse_table(
             if len(spans) <= 0:
                 continue
 
+            if r == 0:
+                if spans[0][0]: # starts_bold
+                    first_cells_are_bold = True
+
             text = clean_value(wxr, " ".join(span[3] for span in spans))
             # print(f"{text=}")
 
-            if is_header(wxr, cell, spans, is_greek_entry) or (
-                c == 0 and first_column_is_headers is True
-            ):
+            this_is_header, unformatted_text = is_header(
+                wxr, cell, spans, is_greek_entry, found_unformatted_text, first_cells_are_bold
+            )
+
+            if unformatted_text is True:
+                found_unformatted_text = True
+
+            if this_is_header or (c == 0 and first_column_is_headers is True):
                 # Because Greek wiktionary has its own written script to rely
                 # in heuristics, we can use that. It also seems that for
                 # tables in Greek-language entries even if the table doesn't
@@ -434,16 +446,21 @@ def process_cell_text(
     return spans
 
 
+UnformattedFound: TypeAlias = bool
+
+
 def is_header(
     wxr: WiktextractContext,
     cell: WikiNode,
     spans: list[tuple[bool, bool, bool, str]],
     is_greek_entry: bool,
-):
+    unformatted_text_found: bool,
+    first_cells_are_bold
+) -> tuple[bool, UnformattedFound]:
     # Container for more complex logic stuff because trying to figure out
     # if something is a header can get messy.
     if cell.kind == NodeKind.TABLE_HEADER_CELL:
-        return True
+        return True, False
 
     starts_bold, starts_italicized, starts_greek, text = spans[0]
 
@@ -457,19 +474,27 @@ def is_header(
         if starts_greek:
             # If the table is for another language other than Greek, a cell
             # starting with Greek text is a table header
-            return True
+            return True, (starts_bold or starts_italicized)
         else:
-            return False
+            return False, (starts_bold or starts_italicized)
 
     # Is a Greek entry
     if starts_italicized is True:
-        return True
+        return True, False
 
     if starts_bold is False:
-        return False
+        return False, True
+
+    if unformatted_text_found:
+        # This is bolded, but we've seen unformatted text before
+        return True, False
+    # print(f"{text=}-> {starts_bold=}, {starts_italicized=}, {starts_greek=}")
+
+    if first_cells_are_bold:
+        return True, False
 
     wxr.wtp.warning(
         f"Can't be sure if bolded text entry '{text}' is a header or not",
         sortid="table/20250210a",
     )
-    return False
+    return False, False
