@@ -72,6 +72,9 @@ def parse_page(
     # for thing_node in stuff_outside_main_headings:
     #     ...
 
+    previous_empty_language_name: str | None = None
+    previous_empty_language_code: str | None = None
+
     for level in page_root.find_child(LEVEL_KIND_FLAGS):
         # Contents of the heading itself; should be "Languagename".
         # clean_node() is the general purpose WikiNode/string -> string
@@ -88,18 +91,27 @@ def parse_page(
         # print("=====")
         # print(f"{level=}\n => {clean_node(wxr, None, level.largs).strip()}")
 
+        sublevels = list(level.find_child(LEVEL_KIND_FLAGS))
+
         if not ok:
             if level.kind not in (NodeKind.LEVEL1, NodeKind.LEVEL2):
                 # We tried to parse a lower level as a language because it
                 # was a direct child of root and failed, so let's just ignore
                 # it and not print a warning.
                 continue
-            wxr.wtp.warning(
-                f"Can't parse language header: '{lang_name}'; "
-                "skipping section",
-                sortid="page/111",
-            )
-            continue
+            if (
+                previous_empty_language_name is None
+                or previous_empty_language_code is None
+            ):
+                wxr.wtp.warning(
+                    f"Can't parse language header: '{lang_name}'; "
+                    "skipping section",
+                    sortid="page/111",
+                )
+                continue
+            lang_name = previous_empty_language_name
+            lang_code = previous_empty_language_code
+            sublevels = [level]
 
         wxr.wtp.start_section(lang_name)
 
@@ -112,10 +124,21 @@ def parse_page(
 
         prev_data: WordEntry | None = None
 
+
+        if len(sublevels) == 0 and ok:
+            # Someone messed up by putting a Level 1 directly after a language
+            # header.
+            previous_empty_language_name = lang_name
+            previous_empty_language_code = lang_code
+            continue
+
+        previous_empty_language_name = None
+        previous_empty_language_code = None
+
         # XXX Some tables are put directly into the language level's content
         # Separate content and sublevels, parse content and put in base_data
 
-        for sublevel in level.find_child(LEVEL_KIND_FLAGS):
+        for sublevel in sublevels:
             if len(sublevel.largs) == 0:
                 wxr.wtp.debug(
                     f"Sublevel without .largs: {sublevel=}", sortid="page/92"
