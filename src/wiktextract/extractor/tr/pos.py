@@ -46,8 +46,11 @@ def extract_pos_section(
     extract_pos_header_nodes(
         wxr, page_data[-1], level_node.children[:gloss_list_index]
     )
+    translate_raw_tags(page_data[-1])
 
 
+# https://tr.wiktionary.org/wiki/Kategori:Çekim_şablonları
+# https://tr.wiktionary.org/wiki/Kategori:Tanım_şablonları
 FORM_OF_TEMPLATES = {
     "çekim",
     "karşılaştırma",
@@ -56,6 +59,7 @@ FORM_OF_TEMPLATES = {
     "üstünlük",
     "Sup.",
     "tr-çekim",
+    "tr-çekim:m1",
     "ad-hâl",
     "hâl",
     "çoğul ad",
@@ -66,6 +70,31 @@ FORM_OF_TEMPLATES = {
     "ikil",
     "çoğul kısaltma",
     "el-ortaç çekimi",
+    "eylem-hâl",
+    "fiil",
+    "eylem",
+    "dişil tekili",
+    "dişil çoğulu",
+    "eril çoğulu",
+    "el-çekim:ος-η-ο",
+    "el-çekim:βιώνω",
+    "el-çekim:ος-α-ο",
+    "el-çekim:θεωρώ",
+    "el-çekim:ορίζω",
+    "yanlış yazım",
+    "doğrusu",
+    "Doğrusu",
+    "imla hatası",
+    "ön ad",
+    "sıfat",
+    "kısaltma",
+    "akronim",
+    "farklı",
+    "alternatif",
+    "kısa",
+    "mastarı",
+    "ar-mastarı",
+    "romanizasyon",
 }
 
 
@@ -147,20 +176,54 @@ def extract_pos_header_template(
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(t_node), expand_all=True
     )
-    raw_tag = ""
+    form_raw_tag = ""
     for node in expanded_node.children:
         if isinstance(node, WikiNode) and node.kind == NodeKind.ITALIC:
-            raw_tag = clean_node(wxr, None, node)
+            form_raw_tag = clean_node(wxr, None, node)
         elif isinstance(node, HTMLNode) and node.tag == "b":
             word = clean_node(wxr, None, node)
             if word != "":
                 form = Form(form=word)
-                if raw_tag != "":
-                    form.raw_tags.append(raw_tag)
+                if form_raw_tag != "":
+                    form.raw_tags.append(form_raw_tag)
                     translate_raw_tags(form)
                 word_entry.forms.append(form)
+        elif (
+            isinstance(node, HTMLNode)
+            and node.tag == "span"
+            and "gender" in node.attrs.get("class", "")
+        ):
+            gender_raw_tag = clean_node(wxr, None, node)
+            if gender_raw_tag != "":
+                word_entry.raw_tags.append(gender_raw_tag)
 
     clean_node(wxr, word_entry, expanded_node)
+
+
+# https://tr.wiktionary.org/wiki/Kategori:Tanım_şablonları
+BOLD_FORM_OF_TEMPLATE_TAGS = {
+    "akronim": "acronym",
+    "kısaltma": "abbreviation",
+    "kısa": "short-form",
+    "mastarı": "noun-from-verb",
+    "ar-mastarı": "noun-from-verb",
+}
+FORM_OF_TEMPLATE_TAGS = {
+    "romanizasyon": "romanization",
+    "yanlış yazım": "misspelling",
+    "doğrusu": "misspelling",
+    "Doğrusu": "misspelling",
+    "imla hatası": "misspelling",
+}
+
+ALT_OF_TEMPLATES = {
+    "farklı",
+    "alternatif",
+    "yanlış yazım",
+    "doğrusu",
+    "Doğrusu",
+    "imla hatası",
+}
 
 
 def extract_form_of_template(
@@ -173,13 +236,32 @@ def extract_form_of_template(
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(t_node), expand_all=True
     )
-    for link_node in expanded_node.find_child_recursively(NodeKind.LINK):
-        word = clean_node(wxr, None, link_node)
-        if word != "":
-            sense.form_of.append(AltForm(word=word))
-        break
+    word = ""
+    if t_node.template_name in BOLD_FORM_OF_TEMPLATE_TAGS:
+        sense.tags.append(BOLD_FORM_OF_TEMPLATE_TAGS[t_node.template_name])
+        for bold_node in expanded_node.find_child(NodeKind.BOLD):
+            word = clean_node(wxr, None, bold_node)
+            break
+    else:
+        if t_node.template_name in FORM_OF_TEMPLATE_TAGS:
+            sense.tags.append(FORM_OF_TEMPLATE_TAGS[t_node.template_name])
+        for i_tag in expanded_node.find_html_recursively("i"):
+            word = clean_node(wxr, None, i_tag)
+            break
+        if word == "":
+            for link_node in expanded_node.find_child_recursively(
+                NodeKind.LINK
+            ):
+                word = clean_node(wxr, None, link_node)
+                break
 
-    sense.tags.append("form-of")
+    if word != "" and t_node.template_name in ALT_OF_TEMPLATES:
+        sense.tags.append("alt-of")
+        sense.alt_of.append(AltForm(word=word))
+    elif word != "":
+        sense.tags.append("form-of")
+        sense.form_of.append(AltForm(word=word))
+
     clean_node(wxr, sense, expanded_node)
     if expanded_node.contain_node(NodeKind.LIST):
         for index, list_node in expanded_node.find_child(
@@ -188,6 +270,7 @@ def extract_form_of_template(
             gloss = clean_node(wxr, None, expanded_node.children[:index])
             if gloss != "":
                 sense.glosses.append(gloss)
+                translate_raw_tags(sense)
                 word_entry.senses.append(sense)
             for list_item in list_node.find_child(NodeKind.LIST_ITEM):
                 extract_gloss_list_item(wxr, word_entry, list_item, sense)
@@ -196,4 +279,5 @@ def extract_form_of_template(
         gloss = clean_node(wxr, None, expanded_node)
         if gloss != "":
             sense.glosses.append(gloss)
+            translate_raw_tags(sense)
             word_entry.senses.append(sense)

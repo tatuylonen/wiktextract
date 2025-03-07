@@ -4,6 +4,8 @@ GLOSS_TAGS = {
     "mecaz": "metaphoric",  # "Şablon:mecaz"
     "bazen": "sometimes",
     "özellikle": "especially",
+    "ender": "rare",
+    "kısa": "short-form",
 }
 
 POS_HEADER_TAGS = {
@@ -14,6 +16,12 @@ POS_HEADER_TAGS = {
     "üçüncü tekil kişi geniş zaman": ["third-person", "singular", "present"],
     "şimdiki zaman": "present",
     "geçmiş zaman ve yakın geçmiş zaman": "past",
+    # Şablon:de-ad
+    "tamlayan hâli": "genitive",
+    "dişil": "feminine",
+    "d": "feminine",
+    "e": "masculine",
+    "eril": "masculine",
 }
 
 
@@ -23,6 +31,8 @@ TAGS = {**GLOSS_TAGS, **POS_HEADER_TAGS}
 TOPICS = {
     "anatomi": "anatomy",
     "bilişim": "informatics",
+    "diller": "language",
+    "eğitim": "education",
 }
 
 

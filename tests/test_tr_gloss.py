@@ -217,3 +217,69 @@ class TestTrGloss(TestCase):
                 },
             ],
         )
+
+    def test_form_of_kısaltma(self):
+        self.wxr.wtp.add_page("Şablon:t", 10, "(''kısa'')")
+        self.wxr.wtp.add_page(
+            "Şablon:kısaltma",
+            10,
+            """'''<span class="Latn" lang="de">[[türkisch#Almanca|türkisch]]es [[Restaurant#Almanca|Restaurant]]</span>''' kavramının [[kısaltma]]sı""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "Türke",
+            """==Almanca==
+===Ad===
+# {{t|kısa|dil=de}} {{kısaltma|[[türkisch]]es [[Restaurant]]|dil=de}}
+#: ''Gehen wir heute Abend zum '''Türken'''?''
+#::''Bu akşam '''Türk restoranına''' gidiyor muyuz?''""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"],
+            [
+                {
+                    "glosses": ["türkisches Restaurant kavramının kısaltması"],
+                    "form_of": [
+                        {
+                            "word": "türkisches Restaurant",
+                        }
+                    ],
+                    "tags": ["abbreviation", "form-of", "short-form"],
+                    "examples": [
+                        {
+                            "text": "Gehen wir heute Abend zum Türken?",
+                            "translation": "Bu akşam Türk restoranına gidiyor muyuz?",
+                        }
+                    ],
+                }
+            ],
+        )
+
+    def test_kısaltma_bold_node(self):
+        self.wxr.wtp.add_page(
+            "Şablon:t", 10, "(''eğitim'')[[Kategori:Türkçede eğitim]]"
+        )
+        self.wxr.wtp.add_page(
+            "Şablon:kısaltma",
+            10,
+            """'''<span class="Latn" lang="tr">Türkçe [[ders#Türkçe|ders]]i</span>''' kavramının [[kısaltma]]sı""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "Türkçe",
+            """==Almanca==
+===Özel ad===
+#{{t|dil=tr|eğitim}} {{kısaltma|dil=tr|Türkçe [[ders]]i}}""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"],
+            [
+                {
+                    "categories": ["Türkçede eğitim"],
+                    "glosses": ["Türkçe dersi kavramının kısaltması"],
+                    "form_of": [{"word": "Türkçe dersi"}],
+                    "tags": ["abbreviation", "form-of"],
+                    "topics": ["education"],
+                }
+            ],
+        )
