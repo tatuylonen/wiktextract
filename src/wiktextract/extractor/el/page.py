@@ -123,7 +123,7 @@ def parse_page(
                 continue
 
             heading_title = (
-                clean_node(wxr, None, sublevel.largs[0]).lower().strip()
+                clean_node(wxr, None, sublevel.largs[0]).lower().strip("= \n")
             )
 
             type, pos, heading_name, tags, num, ok = parse_lower_heading(
