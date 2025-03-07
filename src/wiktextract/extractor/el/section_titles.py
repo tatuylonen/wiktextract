@@ -12,10 +12,10 @@ class Heading(Enum):
     Pron = auto()
     Infl = auto()
     Related = auto()
-    Synonym = auto()
-    Homonym = auto()
-    Antonym = auto()
-    Translation = auto()
+    Synonyms = auto()
+    Homonyms = auto()
+    Antonyms = auto()
+    Translations = auto()
     Derived = auto()
     Ref = auto()
     Notes = auto()
@@ -641,12 +641,12 @@ SUBSECTION_HEADINGS: dict[str, SubSectionMap] = {
     "πολυλεκτικοί όροι": {"type": Heading.Related},
     "συγγενείς": {"type": Heading.Related},
     # Homonyms
-    "ομώνυμα / ομόηχα": {"type": Heading.Homonym},
-    "συνώνυμα": {"type": Heading.Synonym},
+    "ομώνυμα / ομόηχα": {"type": Heading.Homonyms},
+    "συνώνυμα": {"type": Heading.Synonyms},
     # Partial synonyms
-    "μερική συνωνυμία": {"type": Heading.Synonym},
+    "μερική συνωνυμία": {"type": Heading.Synonyms},
     # Exact synonym
-    "ταυτόσημο": {"type": Heading.Synonym},
+    "ταυτόσημο": {"type": Heading.Synonyms},
     "εκφράσεις": {"type": Heading.Related, "tags": ["idiomatic"]},
     "σύνθετα": {"type": Heading.Related, "tags": ["compound"]},
     "μεταγραφές": {"type": Heading.Related, "tags": ["romanization"]},
@@ -656,16 +656,16 @@ SUBSECTION_HEADINGS: dict[str, SubSectionMap] = {
     "απόγονοι": {"type": Heading.Derived},
     "υποκοριστικά": {"type": Heading.Derived, "tags": ["diminuitive"]},
     # Anagrams
-    "αλλόγλωσσα παράγωγα": {"type": Heading.Translation},
-    "μεταφράσεις": {"type": Heading.Translation},
+    "αλλόγλωσσα παράγωγα": {"type": Heading.Translations},
+    "μεταφράσεις": {"type": Heading.Translations},
     "αναγραμματισμοί": {"type": Heading.Ignored},
     # "misspelling" as POS
     "ανορθογραφία": {"type": Heading.Ignored},
     # see also
     "δείτε επίσης": {"type": Heading.Ignored},
     # Antonyms
-    "αντώνυμα": {"type": Heading.Antonym},
-    "αντώνυμη έκφραση": {"type": Heading.Antonym},
+    "αντώνυμα": {"type": Heading.Antonyms},
+    "αντώνυμη έκφραση": {"type": Heading.Antonyms},
     "αρχικοί χρόνοι": {"type": Heading.Notes},
     "σημειώσεις": {"type": Heading.Notes},
     "υποσημειώσεις": {"type": Heading.Notes},

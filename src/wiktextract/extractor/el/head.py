@@ -15,6 +15,7 @@ BOLD_RE = re.compile(r"(__/?[BIL]__|\(|\)|,|\.)")
 
 def parse_head(wxr: WiktextractContext, pos_data: WordEntry, text: str) -> bool:
     split_text = BOLD_RE.split(text)
+    # print(split_text)
 
     if not split_text[0] == "":
         # This should always be True; maybe an assert?

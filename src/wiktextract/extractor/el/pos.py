@@ -15,6 +15,7 @@ from wiktextract.page import clean_node
 from wiktextract.wxr_logging import logger
 
 from .head import parse_head
+from .linkages import process_linkage_section
 from .models import Example, Linkage, Sense, TemplateData, WordEntry
 from .parse_utils import (
     GREEK_LANGCODES,
@@ -22,7 +23,6 @@ from .parse_utils import (
     parse_lower_heading,
     remove_duplicate_forms,
 )
-from .related import process_related
 from .section_titles import POS_HEADINGS
 from .table import parse_table, process_inflection_section
 from .tags_utils import convert_tags_in_sense
@@ -238,9 +238,11 @@ def process_pos(
     for line in reversed(node_lines[:glosses_index]):
         template_data = []
         template_depth = 0
-        stripped = wxr.wtp.node_to_text(
-            line, node_handler_fn=bold_node_handler_fn
-        ).removeprefix(":").strip()
+        stripped = (
+            wxr.wtp.node_to_text(line, node_handler_fn=bold_node_handler_fn)
+            .removeprefix(":")
+            .strip()
+        )
         if not stripped:
             continue
         if not found_head and parse_head(wxr, data, stripped):
@@ -422,30 +424,35 @@ def process_pos(
             wxr, subtitle
         )
 
-        if type == Heading.Translation:
+        if type == Heading.Translations:
             process_translations(wxr, data, sl)
         elif type == Heading.Infl:
             process_inflection_section(wxr, data, sl)
-        if type == Heading.Related:
-            process_related(wxr, data, sl)
-        if type not in (
-            Heading.Translation,
-            Heading.Ignored,
-            Heading.Translation,
-            Heading.Infl,
-            Heading.Related,
-        ):
-            ...
-#             expanded = wxr.wtp.expand(wxr.wtp.node_to_wikitext(sl))
-#             text = clean_node(wxr, None, sl)
-#             logger.warning(
-#                 f"""
-# {wxr.wtp.title}: {type}, '{heading_name}', {ok=}
-# {expanded}
+        elif type in (Heading.Related, Heading.Synonyms, Heading.Antonyms):
+            process_linkage_section(wxr, data, sl, type)
+    #     if type not in (
+    #         Heading.Translations,
+    #         Heading.Ignored,
+    #         Heading.Infl,
+    #         Heading.Related,
+    #         Heading.Synonyms,
+    #         Heading.Antonyms,
+    #         Heading.Derived,
+    #         # We're going to ignore homonyms because they're
+    #         # only tangentially related, like anagrams
+    #         Heading.Homonyms,
+    #     ):
+    #         # ...
+    #         expanded = wxr.wtp.expand(wxr.wtp.node_to_wikitext(sl))
+    #         # text = clean_node(wxr, None, sl)
+    #         logger.warning(
+    #             f"""
+    # {wxr.wtp.title}: {type}, '{heading_name}', {ok=}
+    # {expanded}
 
-# ###########################
-# """
-#             )
+    # ###########################
+    # """
+    #         )
 
     #####
     #####
@@ -472,7 +479,6 @@ def parse_gloss(
         return False
 
     template_tags: list[str] = []
-    found_template = False
     synonyms: list[Linkage] = []
     antonyms: list[Linkage] = []
 
@@ -503,49 +509,12 @@ def parse_gloss(
         # Don't handle other templates here.
         return None
 
-    for i, tnode in enumerate(contents):
-        if (
-            isinstance(tnode, str)
-            and tnode.strip(STRIP_PUNCTUATION)
-            or not isinstance(tnode, (TemplateNode, str))
-        ):
-            # When we encounter the first naked string that isn't just
-            # whitespace or the first WikiNode that isn't a template.
-            # This is a pretty common pattern, to have templates before
-            # the main text.
-            break
-        if isinstance(tnode, TemplateNode):
-            # Example of a template that creates some text that basically
-            # say "this is a stub". Give the sense a no-gloss tag for later
-            # handling.
-            if tnode.template_name == "stub":
-                parent_sense.raw_tags.append("no-gloss")
-                return False
-            tag_text = clean_node(
-                wxr, parent_sense, tnode, template_fn=gloss_template_fn
-            )
-            if tag_text.endswith((")", "]")):
-                # Simple English wiktionary, where this example is taken from,
-                # is pretty good at making these templates have brackets
-                tag_text = tag_text.strip(STRIP_PUNCTUATION)
-                if tag_text:
-                    found_template = True
-                    template_tags.append(tag_text)
-            else:
-                # looks like normal text, so probably something {{plural of}}.
-                break
-    # else for the for loop: if we never break
-    else:
-        # If we never break, that means the last item was a tag.
-        i += 1
-
-    if found_template is True:
-        contents = contents[i:]
-
     # The rest of the text.
     text = clean_node(
         wxr, parent_sense, contents, template_fn=gloss_template_fn
     )
+
+    # print(f"   ============  {contents=}, {text=}")
 
     # Greek Wiktionary uses a lot of template-less tags.
     if parens_n := PARENS_BEFORE_RE.match(text):
