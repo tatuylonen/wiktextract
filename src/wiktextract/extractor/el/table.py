@@ -52,6 +52,7 @@ ARTICLES: set[str] = {
     "ο",
     "η",
     "το",
+    "την",
     "της",
     "τον",
     "τη",
@@ -267,14 +268,19 @@ def parse_table(
                 continue
 
             if r == 0:
-                if spans[0][0]: # starts_bold
+                if spans[0][0]:  # starts_bold
                     first_cells_are_bold = True
 
             text = clean_value(wxr, " ".join(span[3] for span in spans))
             # print(f"{text=}")
 
             this_is_header, unformatted_text = is_header(
-                wxr, cell, spans, is_greek_entry, found_unformatted_text, first_cells_are_bold
+                wxr,
+                cell,
+                spans,
+                is_greek_entry,
+                found_unformatted_text,
+                first_cells_are_bold,
             )
 
             if unformatted_text is True:
@@ -340,7 +346,6 @@ def parse_table(
                     "τας",
                     "τες",
                     "τη",
-                    "την",
                     "τοις",
                     "τω",
                 ):
@@ -455,7 +460,7 @@ def is_header(
     spans: list[tuple[bool, bool, bool, str]],
     is_greek_entry: bool,
     unformatted_text_found: bool,
-    first_cells_are_bold
+    first_cells_are_bold,
 ) -> tuple[bool, UnformattedFound]:
     # Container for more complex logic stuff because trying to figure out
     # if something is a header can get messy.
