@@ -254,3 +254,32 @@ class TestTrGloss(TestCase):
                 }
             ],
         )
+
+    def test_kısaltma_bold_node(self):
+        self.wxr.wtp.add_page(
+            "Şablon:t", 10, "(''eğitim'')[[Kategori:Türkçede eğitim]]"
+        )
+        self.wxr.wtp.add_page(
+            "Şablon:kısaltma",
+            10,
+            """'''<span class="Latn" lang="tr">Türkçe [[ders#Türkçe|ders]]i</span>''' kavramının [[kısaltma]]sı""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "Türkçe",
+            """==Almanca==
+===Özel ad===
+#{{t|dil=tr|eğitim}} {{kısaltma|dil=tr|Türkçe [[ders]]i}}""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"],
+            [
+                {
+                    "categories": ["Türkçede eğitim"],
+                    "glosses": ["Türkçe dersi kavramının kısaltması"],
+                    "form_of": [{"word": "Türkçe dersi"}],
+                    "tags": ["abbreviation", "form-of"],
+                    "topics": ["education"],
+                }
+            ],
+        )

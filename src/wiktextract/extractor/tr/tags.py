@@ -31,6 +31,8 @@ TAGS = {**GLOSS_TAGS, **POS_HEADER_TAGS}
 TOPICS = {
     "anatomi": "anatomy",
     "bilişim": "informatics",
+    "diller": "language",
+    "eğitim": "education",
 }
 
 

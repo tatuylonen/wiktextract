@@ -30,6 +30,7 @@ class Sense(TurkishBaseModel):
     topics: list[str] = []
     examples: list[Example] = []
     form_of: list[AltForm] = []
+    alt_of: list[AltForm] = []
 
 
 class Form(TurkishBaseModel):
