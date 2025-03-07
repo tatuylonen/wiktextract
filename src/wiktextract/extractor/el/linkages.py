@@ -6,14 +6,18 @@ from wikitextprocessor.parser import NodeKind
 from wiktextract.wxr_context import WiktextractContext
 
 from .models import Linkage, WordEntry
+from .parse_utils import Heading
 
 Node = str | WikiNode
 
 LINK_RE = re.compile(r"(__/?L__)")
 
 
-def process_related(
-    wxr: WiktextractContext, data: WordEntry, rnode: WikiNode
+def process_linkage_section(
+    wxr: WiktextractContext,
+    data: WordEntry,
+    rnode: WikiNode,
+    linkage_type: Heading,
 ) -> None:
     def links_node_fn(
         node: WikiNode,
@@ -72,10 +76,23 @@ def process_related(
                 interrupted_link = False
                 continue
 
-    data.related.extend(
+    match linkage_type:
+        case Heading.Related:
+            target_field = data.related
+        case Heading.Synonyms:
+            target_field = data.synonyms
+        case Heading.Antonyms:
+            target_field = data.antonyms
+        case Heading.Derived:
+            target_field = data.derived
+        case _:
+            wxr.wtp.error("process_linkage_section() given unhandled Heading: "
+                          f"{linkage_type=}", sortid="linkages/83")
+            return
+
+    target_field.extend(
         Linkage(word=" ".join(parts)) for parts in chained_links
     )
-
 
     # iterate over list item lines and get links
 

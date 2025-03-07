@@ -34,7 +34,7 @@ def process_translations(
 
         if name == "μτφ-αρχή":
             current_sense = clean_node(wxr, None, ht.get(1, ""))
-            print(f"{current_sense=}")
+            # print(f"{current_sense=}")
         if name in ("τ", "t"):
             lang_code = ht.get(1, "")
             lang_name = code_to_name(lang_code)
@@ -74,4 +74,4 @@ def process_translations(
         template_fn=translation_template_fn,
     )
     data.translations = translations
-    print(f"{translations=}")
+    # print(f"{translations=}")

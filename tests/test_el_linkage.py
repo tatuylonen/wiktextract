@@ -3,8 +3,9 @@ from unittest import TestCase
 from wikitextprocessor import WikiNode, Wtp
 
 from wiktextract.config import WiktionaryConfig
+from wiktextract.extractor.el.linkages import process_linkage_section
 from wiktextract.extractor.el.models import WordEntry
-from wiktextract.extractor.el.related import process_related
+from wiktextract.extractor.el.parse_utils import Heading
 from wiktextract.wxr_context import WiktextractContext
 
 
@@ -19,7 +20,6 @@ class TestElLinkage(TestCase):
             ),
         )
 
-
     def tearDown(self):
         self.wxr.wtp.close_db_conn()
 
@@ -29,7 +29,9 @@ class TestElLinkage(TestCase):
         parsed = self.wxr.wtp.parse(text)
         related_section = parsed.children[0]
         assert isinstance(related_section, WikiNode)
-        process_related(self.wxr, data, related_section)
+        process_linkage_section(
+            self.wxr, data, related_section, Heading.Related
+        )
 
         return data.model_dump(exclude_defaults=True)
 
