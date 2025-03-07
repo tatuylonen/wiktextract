@@ -46,6 +46,7 @@ def extract_pos_section(
     extract_pos_header_nodes(
         wxr, page_data[-1], level_node.children[:gloss_list_index]
     )
+    translate_raw_tags(page_data[-1])
 
 
 FORM_OF_TEMPLATES = {
@@ -66,6 +67,7 @@ FORM_OF_TEMPLATES = {
     "ikil",
     "çoğul kısaltma",
     "el-ortaç çekimi",
+    "kısaltma",
 }
 
 
@@ -147,18 +149,26 @@ def extract_pos_header_template(
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(t_node), expand_all=True
     )
-    raw_tag = ""
+    form_raw_tag = ""
     for node in expanded_node.children:
         if isinstance(node, WikiNode) and node.kind == NodeKind.ITALIC:
-            raw_tag = clean_node(wxr, None, node)
+            form_raw_tag = clean_node(wxr, None, node)
         elif isinstance(node, HTMLNode) and node.tag == "b":
             word = clean_node(wxr, None, node)
             if word != "":
                 form = Form(form=word)
-                if raw_tag != "":
-                    form.raw_tags.append(raw_tag)
+                if form_raw_tag != "":
+                    form.raw_tags.append(form_raw_tag)
                     translate_raw_tags(form)
                 word_entry.forms.append(form)
+        elif (
+            isinstance(node, HTMLNode)
+            and node.tag == "span"
+            and "gender" in node.attrs.get("class", "")
+        ):
+            gender_raw_tag = clean_node(wxr, None, node)
+            if gender_raw_tag != "":
+                word_entry.raw_tags.append(gender_raw_tag)
 
     clean_node(wxr, word_entry, expanded_node)
 
@@ -173,11 +183,19 @@ def extract_form_of_template(
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(t_node), expand_all=True
     )
-    for link_node in expanded_node.find_child_recursively(NodeKind.LINK):
-        word = clean_node(wxr, None, link_node)
-        if word != "":
-            sense.form_of.append(AltForm(word=word))
-        break
+    if t_node.template_name == "kısaltma":
+        sense.tags.append("abbreviation")
+        for bold_node in expanded_node.find_child(NodeKind.BOLD):
+            word = clean_node(wxr, None, bold_node)
+            if word != "":
+                sense.form_of.append(AltForm(word=word))
+            break
+    else:
+        for i_tag in expanded_node.find_html_recursively("i"):
+            word = clean_node(wxr, None, i_tag)
+            if word != "":
+                sense.form_of.append(AltForm(word=word))
+            break
 
     sense.tags.append("form-of")
     clean_node(wxr, sense, expanded_node)
@@ -188,6 +206,7 @@ def extract_form_of_template(
             gloss = clean_node(wxr, None, expanded_node.children[:index])
             if gloss != "":
                 sense.glosses.append(gloss)
+                translate_raw_tags(sense)
                 word_entry.senses.append(sense)
             for list_item in list_node.find_child(NodeKind.LIST_ITEM):
                 extract_gloss_list_item(wxr, word_entry, list_item, sense)
@@ -196,4 +215,5 @@ def extract_form_of_template(
         gloss = clean_node(wxr, None, expanded_node)
         if gloss != "":
             sense.glosses.append(gloss)
+            translate_raw_tags(sense)
             word_entry.senses.append(sense)

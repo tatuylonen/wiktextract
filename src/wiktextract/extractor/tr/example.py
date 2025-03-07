@@ -31,8 +31,11 @@ def extract_example_list_item(
                         )
                 case NodeKind.ITALIC:
                     italic_str = clean_node(wxr, None, node)
-                    if italic_str != "" and example.text == "":
-                        example.text = italic_str
+                    if italic_str != "":
+                        if example.text == "":
+                            example.text = italic_str
+                        else:
+                            example.translation = italic_str
 
 
 def extract_ux_template(

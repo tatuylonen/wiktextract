@@ -217,3 +217,40 @@ class TestTrGloss(TestCase):
                 },
             ],
         )
+
+    def test_form_of_kısaltma(self):
+        self.wxr.wtp.add_page("Şablon:t", 10, "(''kısa'')")
+        self.wxr.wtp.add_page(
+            "Şablon:kısaltma",
+            10,
+            """'''<span class="Latn" lang="de">[[türkisch#Almanca|türkisch]]es [[Restaurant#Almanca|Restaurant]]</span>''' kavramının [[kısaltma]]sı""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "Türke",
+            """==Almanca==
+===Ad===
+# {{t|kısa|dil=de}} {{kısaltma|[[türkisch]]es [[Restaurant]]|dil=de}}
+#: ''Gehen wir heute Abend zum '''Türken'''?''
+#::''Bu akşam '''Türk restoranına''' gidiyor muyuz?''""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"],
+            [
+                {
+                    "glosses": ["türkisches Restaurant kavramının kısaltması"],
+                    "form_of": [
+                        {
+                            "word": "türkisches Restaurant",
+                        }
+                    ],
+                    "tags": ["abbreviation", "form-of", "short-form"],
+                    "examples": [
+                        {
+                            "text": "Gehen wir heute Abend zum Türken?",
+                            "translation": "Bu akşam Türk restoranına gidiyor muyuz?",
+                        }
+                    ],
+                }
+            ],
+        )
