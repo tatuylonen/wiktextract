@@ -20,11 +20,12 @@ POS_DATA = {
     "Sembol": {"pos": "symbol"},
     "Atasözü": {"pos": "proverb"},
     "Deyim": {"pos": "phrase", "tags": ["idiomatic"]},
-    # "Mecaz"
+    "Mecaz": {"pos": "noun", "tags": ["metaphoric"]},
     "İfade": {"pos": "phrase"},
     "Han karakteri": {"pos": "character", "tags": ["han"]},
     "Hanzi": {"pos": "character", "tags": ["hanzi"]},
     "Kanji": {"pos": "character", "tags": ["kanji"]},
     "Hanja": {"pos": "character", "tags": ["Hanja"]},
     "Romanizasyon": {"pos": "romanization"},
+    "Ortaç": {"pos": "verb", "tags": ["participle"]},
 }

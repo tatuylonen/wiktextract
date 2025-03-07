@@ -153,3 +153,67 @@ class TestTrGloss(TestCase):
                 }
             ],
         )
+
+    def test_form_of_çekim_template_lists(self):
+        self.wxr.wtp.add_page(
+            "Şablon:karşılaştırma",
+            10,
+            """<span class='form-of-definition use-with-mention'><span class='cekim-aciklama-bag'><i class="Latn mention" lang="de">[[tauglich#Almanca|tauglich]]</i></span> sözcüğünün [[karşılaştırma derecesi]] çekimi</span>""",
+        )
+        self.wxr.wtp.add_page(
+            "Şablon:çekim",
+            10,
+            """<span class='form-of-definition use-with-mention'><span class='cekim-aciklama-bag'><i class="Latn mention" lang="de">[[tauglich#Almanca|tauglich]]</i></span> sözcüğünün çekimi:</span>
+##<span class='form-of-definition use-with-mention'><span class="inflection-of-conjoined">güçlü<span class="cekim_ayirici">/</span>karma</span> yalın eril tekil</span>
+##<span class='form-of-definition use-with-mention'>güçlü <span class="inflection-of-conjoined">tamlayan<span class="cekim_ayirici">/</span>yönelme</span> dişil tekil</span>
+##<span class='form-of-definition use-with-mention'>güçlü tamlayan çoğul</span>""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "tauglicher",
+            """==Türkçe==
+===Ön ad===
+# {{karşılaştırma|de|tauglich}}
+# {{çekim|dil=de|tauglich||güçlü//karma|nom|e|t|;|güçlü|gen//dat|d|t|;|güçlü|gen|ç}}""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"],
+            [
+                {
+                    "form_of": [{"word": "tauglich"}],
+                    "glosses": [
+                        "tauglich sözcüğünün karşılaştırma derecesi çekimi"
+                    ],
+                    "tags": ["form-of"],
+                },
+                {
+                    "form_of": [{"word": "tauglich"}],
+                    "glosses": ["tauglich sözcüğünün çekimi:"],
+                    "tags": ["form-of"],
+                },
+                {
+                    "form_of": [{"word": "tauglich"}],
+                    "glosses": [
+                        "tauglich sözcüğünün çekimi:",
+                        "güçlü/karma yalın eril tekil",
+                    ],
+                    "tags": ["form-of"],
+                },
+                {
+                    "form_of": [{"word": "tauglich"}],
+                    "glosses": [
+                        "tauglich sözcüğünün çekimi:",
+                        "güçlü tamlayan/yönelme dişil tekil",
+                    ],
+                    "tags": ["form-of"],
+                },
+                {
+                    "form_of": [{"word": "tauglich"}],
+                    "glosses": [
+                        "tauglich sözcüğünün çekimi:",
+                        "güçlü tamlayan çoğul",
+                    ],
+                    "tags": ["form-of"],
+                },
+            ],
+        )

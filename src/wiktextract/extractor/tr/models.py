@@ -18,6 +18,10 @@ class Example(TurkishBaseModel):
     raw_tags: list[str] = []
 
 
+class AltForm(TurkishBaseModel):
+    word: str
+
+
 class Sense(TurkishBaseModel):
     glosses: list[str] = []
     tags: list[str] = []
@@ -25,6 +29,7 @@ class Sense(TurkishBaseModel):
     categories: list[str] = []
     topics: list[str] = []
     examples: list[Example] = []
+    form_of: list[AltForm] = []
 
 
 class Form(TurkishBaseModel):

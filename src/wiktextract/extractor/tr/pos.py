@@ -11,7 +11,7 @@ from wikitextprocessor import (
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .example import extract_example_list_item
-from .models import Example, Form, Sense, WordEntry
+from .models import AltForm, Example, Form, Sense, WordEntry
 from .section_titles import POS_DATA
 from .tags import translate_raw_tags
 
@@ -48,6 +48,27 @@ def extract_pos_section(
     )
 
 
+FORM_OF_TEMPLATES = {
+    "çekim",
+    "karşılaştırma",
+    "Komp.",
+    "artıklık",
+    "üstünlük",
+    "Sup.",
+    "tr-çekim",
+    "ad-hâl",
+    "hâl",
+    "çoğul ad",
+    "çoğulu",
+    "çoğul isim",
+    "ota-çekim",
+    "ikil ad",
+    "ikil",
+    "çoğul kısaltma",
+    "el-ortaç çekimi",
+}
+
+
 def extract_gloss_list_item(
     wxr: WiktextractContext,
     word_entry: WordEntry,
@@ -66,6 +87,11 @@ def extract_gloss_list_item(
             "terim",
         ]:
             extract_terim_template(wxr, sense, node)
+        elif (
+            isinstance(node, TemplateNode)
+            and node.template_name in FORM_OF_TEMPLATES
+        ):
+            extract_form_of_template(wxr, word_entry, sense, node)
         elif not (isinstance(node, WikiNode) and node.kind == NodeKind.LIST):
             gloss_nodes.append(node)
 
@@ -135,3 +161,39 @@ def extract_pos_header_template(
                 word_entry.forms.append(form)
 
     clean_node(wxr, word_entry, expanded_node)
+
+
+def extract_form_of_template(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    sense: Sense,
+    t_node: TemplateNode,
+) -> None:
+    # https://tr.wiktionary.org/wiki/Şablon:çekim
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for link_node in expanded_node.find_child_recursively(NodeKind.LINK):
+        word = clean_node(wxr, None, link_node)
+        if word != "":
+            sense.form_of.append(AltForm(word=word))
+        break
+
+    sense.tags.append("form-of")
+    clean_node(wxr, sense, expanded_node)
+    if expanded_node.contain_node(NodeKind.LIST):
+        for index, list_node in expanded_node.find_child(
+            NodeKind.LIST, with_index=True
+        ):
+            gloss = clean_node(wxr, None, expanded_node.children[:index])
+            if gloss != "":
+                sense.glosses.append(gloss)
+                word_entry.senses.append(sense)
+            for list_item in list_node.find_child(NodeKind.LIST_ITEM):
+                extract_gloss_list_item(wxr, word_entry, list_item, sense)
+            break
+    else:
+        gloss = clean_node(wxr, None, expanded_node)
+        if gloss != "":
+            sense.glosses.append(gloss)
+            word_entry.senses.append(sense)
