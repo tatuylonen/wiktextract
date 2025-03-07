@@ -510,7 +510,7 @@ POS_HEADINGS: dict[str, POSMap] = {
     # πολυλεκτικός όρος επίθετο:   πολυλεκτικός: polylectic όρος: term
     # (word, phrase; limitation, restriction) // definition, stipulation //
     # clause // article όρος: mount, mountain επίθετο: adjective // surname
-    "πολυλεκτικός όρος επίθετο": {"pos": "adh"},
+    "πολυλεκτικός όρος επίθετο": {"pos": "adj"},
     # πολυλεκτικός όρος ουσιαστικό:   πολυλεκτικός: polylectic όρος: term
     # (word, phrase; limitation, restriction) // definition, stipulation //
     # clause // article όρος: mount, mountain ουσιαστικό: noun, substantive
