@@ -167,6 +167,12 @@ def extract_pos_header_nodes(
             or node.template_name == "başlık başı"
         ):
             extract_pos_header_template(wxr, word_entry, node)
+        elif isinstance(node, TemplateNode) and node.template_name in [
+            "sahiplik",
+            "sahiplik eki",
+            "özel çoğul",
+        ]:
+            extract_sahiplik_template(wxr, word_entry, node)
 
 
 def extract_pos_header_template(
@@ -281,3 +287,28 @@ def extract_form_of_template(
             sense.glosses.append(gloss)
             translate_raw_tags(sense)
             word_entry.senses.append(sense)
+
+
+def extract_sahiplik_template(
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+) -> None:
+    # https://tr.wiktionary.org/wiki/Şablon:sahiplik, Şablon:özel_çoğul
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    form = Form(form="")
+    for node in expanded_node.children:
+        if isinstance(node, WikiNode) and node.kind == NodeKind.ITALIC:
+            raw_tag = clean_node(wxr, None, node)
+            if raw_tag != "":
+                form.raw_tags.append(raw_tag)
+        elif isinstance(node, WikiNode) and node.kind == NodeKind.BOLD:
+            if t_node.template_name in ["sahiplik", "sahiplik eki"]:
+                for link_node in node.find_child(NodeKind.LINK):
+                    if len(link_node.largs) > 0:
+                        form.form = clean_node(wxr, None, link_node.largs[0])
+            else:
+                form.form = clean_node(wxr, None, node)
+    if form.form != "":
+        translate_raw_tags(form)
+        word_entry.forms.append(form)

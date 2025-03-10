@@ -53,6 +53,27 @@ class Sound(TurkishBaseModel):
     roman: str = ""
 
 
+class Translation(TurkishBaseModel):
+    lang_code: str = Field(
+        description="Wiktionary language code of the translation term",
+    )
+    lang: str = Field(description="Translation language name")
+    word: str = Field(description="Translation term")
+    sense: str = Field(default="", description="Translation gloss")
+    tags: list[str] = []
+    raw_tags: list[str] = []
+    roman: str = ""
+
+
+class Linkage(TurkishBaseModel):
+    word: str
+    tags: list[str] = []
+    raw_tags: list[str] = []
+    roman: str = ""
+    source: str = ""
+    sense: str = ""
+
+
 class WordEntry(TurkishBaseModel):
     model_config = ConfigDict(title="Turkish Wiktionary")
     word: str = Field(description="Word string")
@@ -68,3 +89,12 @@ class WordEntry(TurkishBaseModel):
     etymology_texts: list[str] = []
     sounds: list[Sound] = []
     hyphenation: str = ""
+    translations: list[Translation] = []
+    synonyms: list[Linkage] = []
+    antonyms: list[Linkage] = []
+    hypernyms: list[Linkage] = []
+    hyponyms: list[Linkage] = []
+    related: list[Linkage] = []
+    derived: list[Linkage] = []
+    proverbs: list[Linkage] = []
+    idioms: list[Linkage] = []

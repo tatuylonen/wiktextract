@@ -22,10 +22,30 @@ POS_HEADER_TAGS = {
     "d": "feminine",
     "e": "masculine",
     "eril": "masculine",
+    "sahiplik şekli": "possessive",  # Şablon:sahiplik
+}
+
+TRANSLATION_TAGS = {
+    # Modül:cinsiyet_ve_numara
+    "n": "neutral",
+    "g": "general",
+    "anim": "animate",
+    "cansız": "inanimate",
+    "pers": "personal",
+    "npers": "impersonal",
+    "te": "singular",
+    "ik": "dual",
+    "ç": "plural",
+    "impf": "imperfective",
+    "pf": "perfective",
+}
+
+LINKAGE_TAGS = {
+    "eskimiş": "obsolete",
 }
 
 
-TAGS = {**GLOSS_TAGS, **POS_HEADER_TAGS}
+TAGS = {**GLOSS_TAGS, **POS_HEADER_TAGS, **TRANSLATION_TAGS, **LINKAGE_TAGS}
 
 # https://tr.wiktionary.org/wiki/Modül:temalar/veri/konu
 TOPICS = {
