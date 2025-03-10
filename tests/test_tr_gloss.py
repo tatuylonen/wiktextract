@@ -283,3 +283,69 @@ class TestTrGloss(TestCase):
                 }
             ],
         )
+
+    def test_özel_çoğul(self):
+        self.wxr.wtp.add_page(
+            "Şablon:tr-özel ad",
+            10,
+            """<strong class="Latn headword" lang="tr">Türkçe</strong> (''belirtme hâli'' <b class="Latn" lang="tr">[[Türkçeyi#Türkçe|Türkçeyi]]</b>)[[Category:Türkçe sözcükler|TÜRKÇE]][[Category:Türkçe özel adlar|TÜRKÇE]]""",
+        )
+        self.wxr.wtp.add_page(
+            "Şablon:özel çoğul", 10, ", ''çoğulu'' '''[[Türkçeler]]'''"
+        )
+        self.wxr.wtp.add_page(
+            "Şablon:sahiplik",
+            10,
+            ", ''sahiplik şekli'' '''[[Türkçesi|Türkçe -si]]'''",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "Türkçe",
+            """==Türkçe==
+===Özel ad===
+{{tr-özel ad}}{{özel çoğul|tr|e}}{{sahiplik|si}}
+# [[Türkiye]] [[ve]]""",
+        )
+        self.assertEqual(
+            page_data[0]["forms"],
+            [
+                {"form": "Türkçeyi", "tags": ["accusative"]},
+                {"form": "Türkçeler", "tags": ["plural"]},
+                {"form": "Türkçesi", "tags": ["possessive"]},
+            ],
+        )
+        self.assertEqual(
+            page_data[0]["categories"],
+            ["Türkçe sözcükler", "Türkçe özel adlar"],
+        )
+
+    def test_sahiplik(self):
+        self.wxr.wtp.add_page(
+            "Şablon:tr-özel ad",
+            10,
+            """<strong class="Latn headword" lang="tr">Avusturya</strong> (''belirtme hâli'' <b class="Latn" lang="tr">[[Avusturya'yı#Türkçe|Avusturya'yı]]</b>)[[Category:Türkçe sözcükler|AVUSTURYA]][[Category:Türkçe özel adlar|AVUSTURYA]]""",
+        )
+        self.wxr.wtp.add_page(
+            "Şablon:sahiplik",
+            10,
+            """, ''sahiplik şekli'' '''[[Avusturya'sı|Avusturya -'sı]]'''""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "Avusturya",
+            """==Türkçe==
+===Özel ad===
+{{tr-özel ad|a=1}}{{sahiplik|sı|1}}
+# [[Orta Avrupa]]'da""",
+        )
+        self.assertEqual(
+            page_data[0]["forms"],
+            [
+                {"form": "Avusturya'yı", "tags": ["accusative"]},
+                {"form": "Avusturya'sı", "tags": ["possessive"]},
+            ],
+        )
+        self.assertEqual(
+            page_data[0]["categories"],
+            ["Türkçe sözcükler", "Türkçe özel adlar"],
+        )

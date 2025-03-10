@@ -22,6 +22,7 @@ POS_HEADER_TAGS = {
     "d": "feminine",
     "e": "masculine",
     "eril": "masculine",
+    "sahiplik şekli": "possessive",  # Şablon:sahiplik
 }
 
 TRANSLATION_TAGS = {
