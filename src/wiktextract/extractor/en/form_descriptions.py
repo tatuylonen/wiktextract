@@ -1809,11 +1809,14 @@ def parse_word_head(
     if len(links) > 0:
         # if we have link data (that is, links with stuff like commas and
         # spaces, replace word_re with a modified local scope pattern
+        # print(f"links {list((c, ord(c)) for link in links for c in link)=}")
         word_re = re.compile(
-            r"|".join(
+            r"\b" +  # In case we have forms that are longer and contain links
+                # or words as a substring...
+            r"\b|\b".join(
                 sorted((re.escape(s) for s in links), key=lambda x: -len(x))
             )
-            + r"|"
+            + r"\b|"
             + word_pattern
         )
     else:
@@ -2019,7 +2022,7 @@ def parse_word_head(
         # print("EXPANDED_ALTS:", expanded_alts)
         tagsets: Optional[list[tuple[str, ...]]]
         for alt in expanded_alts:
-            baseparts = list(m.group(0) for m in re.finditer(word_re, alt))
+            baseparts = list(m.group(0) for m in word_re.finditer(alt))
             if alt_i > 0:
                 tagsets, topics = decode_tags(" ".join(baseparts))
                 if not any("error-unknown-tag" in x for x in tagsets):

@@ -1518,7 +1518,7 @@ def parse_language(
             else:
                 pos_data["info_templates"].extend(info_template_data)
 
-        if not word.isalnum():
+        if not word.isalnum() and not (word[0] != "-" and word[1:].isalnum()):
             # if the word contains non-letter or -number characters, it might
             # have something that messes with split-at-semi-comma; we collect
             # links so that we can skip splitting them.
@@ -3218,7 +3218,10 @@ def parse_language(
                 ):
                     # These are expanded in the default way
                     return None
-                if name in ("trans-top", "trans-top-see",):
+                if name in (
+                    "trans-top",
+                    "trans-top-see",
+                ):
                     # XXX capture id from trans-top?  Capture sense here
                     # instead of trying to parse it from expanded content?
                     if ht.get(1):
