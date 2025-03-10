@@ -1519,22 +1519,27 @@ def parse_language(
                 pos_data["info_templates"].extend(info_template_data)
 
         if not word.isalnum():
-            # if the word contains non-letter or -number characters, it might
-            # have something that messes with split-at-semi-comma; we collect
-            # links so that we can skip splitting them.
-            exp = wxr.wtp.parse(
-                wxr.wtp.node_to_wikitext(header_nodes), expand_all=True
-            )
-            link_nodes, _ = recursively_extract(
-                exp.children,
-                lambda x: isinstance(x, WikiNode) and x.kind == NodeKind.LINK,
-            )
-            for ln in link_nodes:
-                ltext = clean_node(wxr, None, ln.largs[-1])  # type: ignore[union-attr]
-                if not ltext.isalnum():
-                    links.append(ltext)
-            if word not in links:
-                links.append(word)
+            # `-` is kosher, add more of these if needed.
+            if word.replace("-", "").isalnum():
+                pass
+            else:
+                # if the word contains non-letter or -number characters, it
+                # might have something that messes with split-at-semi-comma; we
+                # collect links so that we can skip splitting them.
+                exp = wxr.wtp.parse(
+                    wxr.wtp.node_to_wikitext(header_nodes), expand_all=True
+                )
+                link_nodes, _ = recursively_extract(
+                    exp.children,
+                    lambda x: isinstance(x, WikiNode)
+                    and x.kind == NodeKind.LINK,
+                )
+                for ln in link_nodes:
+                    ltext = clean_node(wxr, None, ln.largs[-1])  # type: ignore[union-attr]
+                    if not ltext.isalnum():
+                        links.append(ltext)
+                if word not in links:
+                    links.append(word)
         if lang_code == "ja":
             exp = wxr.wtp.parse(
                 wxr.wtp.node_to_wikitext(header_nodes), expand_all=True
@@ -3218,7 +3223,10 @@ def parse_language(
                 ):
                     # These are expanded in the default way
                     return None
-                if name in ("trans-top", "trans-top-see",):
+                if name in (
+                    "trans-top",
+                    "trans-top-see",
+                ):
                     # XXX capture id from trans-top?  Capture sense here
                     # instead of trying to parse it from expanded content?
                     if ht.get(1):

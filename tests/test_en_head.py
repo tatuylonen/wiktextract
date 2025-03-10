@@ -719,6 +719,48 @@ class HeadTests(unittest.TestCase):
             },
         )
 
+    def test_head_combining_diacritics1(self):
+        # See https://en.wiktionary.org/wiki/-%DC%98#Assyrian_Neo-Aramaic
+        # Issue Wiktextract #1034
+        # WITHOUT DASH
+        data = {}
+        # Article title is missing combining diacritic
+        self.wxr.wtp.start_page("ܘ")
+        self.wxr.wtp.start_section("Assyrian Neo-Aramaic")
+        self.wxr.wtp.start_subsection("Suffix")
+        # Combining diacritic in head
+        parse_word_head(self.wxr, "suffix", "ܘܿ", data, False, None)
+        # print(json.dumps(data, indent=2, sort_keys=True))
+        self.assertEqual(
+            data,
+            {
+                "forms": [
+                    {"form": "ܘܿ", "tags": ["canonical"]},
+                ],
+            },
+        )
+
+    def test_head_combining_diacritics2(self):
+        # See https://en.wiktionary.org/wiki/-%DC%98#Assyrian_Neo-Aramaic
+        # Issue Wiktextract #1034
+        # WITH DASH
+        data = {}
+        # Article title is missing combining diacritic
+        self.wxr.wtp.start_page("-ܘ")
+        self.wxr.wtp.start_section("Assyrian Neo-Aramaic")
+        self.wxr.wtp.start_subsection("Suffix")
+        # Combining diacritic in head
+        parse_word_head(self.wxr, "suffix", "-ܘܿ", data, False, None)
+        # print(json.dumps(data, indent=2, sort_keys=True))
+        self.assertEqual(
+            data,
+            {
+                "forms": [
+                    {"form": "-ܘܿ", "tags": ["canonical"]},
+                ],
+            },
+        )
+
     def test_head_templates_regex(self):
         # GitHub issue 405
         from wiktextract.extractor.en.page import HEAD_TAG_RE
@@ -839,4 +881,3 @@ class HeadTests(unittest.TestCase):
                 ],
             },
         )
-
