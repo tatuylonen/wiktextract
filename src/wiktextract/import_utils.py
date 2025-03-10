@@ -10,6 +10,7 @@ def import_extractor_module(
         full_module_name = f"wiktextract.extractor.{lang_code}.{module_name}"
         if importlib.util.find_spec(full_module_name) is not None:
             return importlib.import_module(full_module_name)
-    except ModuleNotFoundError:
+    except ModuleNotFoundError as e:
+        print(f"ModuleNotFoundError: {e}")
         return None
     return None
