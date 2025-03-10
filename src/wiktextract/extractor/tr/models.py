@@ -65,6 +65,15 @@ class Translation(TurkishBaseModel):
     roman: str = ""
 
 
+class Linkage(TurkishBaseModel):
+    word: str
+    tags: list[str] = []
+    raw_tags: list[str] = []
+    roman: str = ""
+    source: str = ""
+    sense: str = ""
+
+
 class WordEntry(TurkishBaseModel):
     model_config = ConfigDict(title="Turkish Wiktionary")
     word: str = Field(description="Word string")
@@ -81,3 +90,11 @@ class WordEntry(TurkishBaseModel):
     sounds: list[Sound] = []
     hyphenation: str = ""
     translations: list[Translation] = []
+    synonyms: list[Linkage] = []
+    antonyms: list[Linkage] = []
+    hypernyms: list[Linkage] = []
+    hyponyms: list[Linkage] = []
+    related: list[Linkage] = []
+    derived: list[Linkage] = []
+    proverbs: list[Linkage] = []
+    idioms: list[Linkage] = []

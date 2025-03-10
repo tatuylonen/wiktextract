@@ -32,7 +32,6 @@ class TestTrTranslation(TestCase):
 | άνθρωπος = <span class="Grek" lang="el">[[άνθρωπος#Yunanca|άνθρωπος]]</span><span class="tpos">&nbsp;[[:el:άνθρωπος|(el)]]</span>&nbsp;<span class="gender"><abbr title="eril cinsiyet">e</abbr></span> <span class="mention-gloss-paren annotation-paren">(</span><span lang="el-Latn" class="tr Latn">ánthropos</span><span class="mention-gloss-paren annotation-paren">)</span>
 }}""",
         )
-
         page_data = parse_page(
             self.wxr,
             "adam",

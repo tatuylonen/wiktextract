@@ -40,8 +40,12 @@ TRANSLATION_TAGS = {
     "pf": "perfective",
 }
 
+LINKAGE_TAGS = {
+    "eskimiş": "obsolete",
+}
 
-TAGS = {**GLOSS_TAGS, **POS_HEADER_TAGS, **TRANSLATION_TAGS}
+
+TAGS = {**GLOSS_TAGS, **POS_HEADER_TAGS, **TRANSLATION_TAGS, **LINKAGE_TAGS}
 
 # https://tr.wiktionary.org/wiki/Modül:temalar/veri/konu
 TOPICS = {

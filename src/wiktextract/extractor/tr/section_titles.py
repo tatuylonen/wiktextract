@@ -29,3 +29,18 @@ POS_DATA = {
     "Romanizasyon": {"pos": "romanization"},
     "Ortaç": {"pos": "verb", "tags": ["participle"]},
 }
+
+LINKAGE_SECTIONS = {
+    "Eş anlamlılar": "synonyms",
+    "Zıt anlamlılar": "antonyms",
+    "Üst kavramlar": "hypernyms",
+    "Benzer sözcükler": "related",
+    "Karşıt anlamlılar": "antonyms",
+    "Alt kavramlar": "hyponyms",
+    "Yan kavramlar": "related",
+    "Türetilmiş kavramlar": "derived",
+    "İlgili sözcükler": "related",
+    "Atasözleri": "proverbs",
+    "Deyimler": "idioms",
+    "Benzer kelimeler": "related",
+}
