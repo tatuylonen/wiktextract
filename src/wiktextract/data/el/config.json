@@ -1,0 +1,5 @@
+{
+  "allowed_html_tags": {
+    "phonos": {"parents": ["*"], "content": ["*"]}
+  }
+}

@@ -374,6 +374,8 @@ def clean_node(
         template_fn=template_fn,
         post_template_fn=post_template_fn,
     )
+    # print("##########")
+    # print(f"{wikinode=}")
     # print("clean_node: v={!r}".format(v))
 
     # Capture categories if sense_data has been given.  We also track
