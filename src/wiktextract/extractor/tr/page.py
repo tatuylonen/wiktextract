@@ -10,7 +10,7 @@ from .etymology import extract_etymology_section
 from .linkage import extract_linkage_section
 from .models import Sense, WordEntry
 from .pos import extract_note_section, extract_pos_section
-from .section_titles import LINKAGE_SECTIONS, POS_DATA
+from .section_titles import LINKAGE_SECTIONS, LINKAGE_TAGS, POS_DATA
 from .sound import extract_sound_section
 from .translation import extract_translation_section
 
@@ -26,6 +26,15 @@ def parse_section(
     title_text = title_text.rstrip(string.digits + string.whitespace)
     if title_text in POS_DATA:
         extract_pos_section(wxr, page_data, base_data, level_node, title_text)
+        if len(page_data[-1].senses) == 0 and title_text in LINKAGE_SECTIONS:
+            page_data.pop()
+            extract_linkage_section(
+                wxr,
+                page_data[-1] if len(page_data) > 0 else base_data,
+                level_node,
+                LINKAGE_SECTIONS[title_text],
+                LINKAGE_TAGS.get(title_text, []),
+            )
     elif title_text == "Köken":
         if level_node.contain_node(LEVEL_KIND_FLAGS):
             base_data = base_data.model_copy(deep=True)
@@ -44,6 +53,7 @@ def parse_section(
             page_data[-1] if len(page_data) > 0 else base_data,
             level_node,
             LINKAGE_SECTIONS[title_text],
+            LINKAGE_TAGS.get(title_text, []),
         )
     elif title_text == "Açıklamalar":
         extract_note_section(

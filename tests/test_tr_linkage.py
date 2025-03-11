@@ -53,3 +53,21 @@ class TestTrLinkage(TestCase):
             page_data[0]["idioms"],
             [{"word": "adam başı"}, {"word": "adam gibi adam"}],
         )
+
+    def test_symbol(self):
+        page_data = parse_page(
+            self.wxr,
+            "iki",
+            """==Türkçe==
+===Ad===
+# [[bir]]den [[sonra]] [[gelmek|gelen]] [[sayı]]nın [[ad]]ı
+====Sembol====
+* [[2]], [[II]]""",
+        )
+        self.assertEqual(
+            page_data[0]["synonyms"],
+            [
+                {"word": "2", "tags": ["symbol"]},
+                {"word": "II", "tags": ["symbol"]},
+            ],
+        )
