@@ -47,3 +47,37 @@ def extract_linkage_list_item(
                     l_list[-1].raw_tags.append(raw_tag)
                     translate_raw_tags(l_list[-1])
     getattr(word_entry, l_type).extend(l_list)
+
+
+GLOSS_LIST_LINKAGE_TEMPLATES = {
+    "eş anlamlılar": "synonyms",
+    "zıt anlamlılar": "antonyms",
+    "zıt anlamlı": "antonyms",
+    "alt kavramlar": "hyponyms",
+}
+
+
+def extract_gloss_list_linkage_template(
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+) -> None:
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    l_list = []
+    for span_tag in expanded_node.find_html("span"):
+        if word_entry.lang_code == span_tag.attrs.get("lang", ""):
+            l_data = Linkage(
+                word=clean_node(wxr, None, span_tag),
+                sense=" ".join(
+                    word_entry.senses[-1].glosses
+                    if len(word_entry.senses) > 0
+                    else ""
+                ),
+            )
+            if l_data.word != "":
+                l_list.append(l_data)
+        elif "Latn" in span_tag.attrs.get("class", "") and len(l_list) > 0:
+            l_list[-1].roman = clean_node(wxr, None, span_tag)
+    getattr(
+        word_entry, GLOSS_LIST_LINKAGE_TEMPLATES[t_node.template_name]
+    ).extend(l_list)
