@@ -52,6 +52,7 @@ class Sound(TurkishBaseModel):
     raw_tags: list[str] = []
     roman: str = ""
     homophone: str = ""
+    rhymes: str = ""
 
 
 class Translation(TurkishBaseModel):

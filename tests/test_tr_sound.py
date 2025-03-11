@@ -80,11 +80,17 @@ class TestTrSound(TestCase):
             "cat",
             """==İngilizce==
 ===Söyleniş===
+* {{kafiyeler|dil=en|æt|s=1}}
 * {{eş sesliler|dil=en|Kat|khat|qat}}
 ===Ad===
 [[kedi]], [[pişik]]""",
         )
         self.assertEqual(
             page_data[0]["sounds"],
-            [{"homophone": "Kat"}, {"homophone": "khat"}, {"homophone": "qat"}],
+            [
+                {"rhymes": "-æt"},
+                {"homophone": "Kat"},
+                {"homophone": "khat"},
+                {"homophone": "qat"},
+            ],
         )
