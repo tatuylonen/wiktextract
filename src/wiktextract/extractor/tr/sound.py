@@ -33,6 +33,13 @@ def extract_sound_list_item(
             extract_heceleme_template(wxr, word_entry, t_node)
         elif t_node.template_name.lower() in ["ses", "audio"]:
             extract_ses_template(wxr, word_entry, t_node)
+        elif t_node.template_name in [
+            "eş sesliler",
+            "sesteşler",
+            "eşsesli",
+            "eşsesliler",
+        ]:
+            extract_eş_sesliler(wxr, word_entry, t_node)
 
 
 def extract_ipa_template(
@@ -74,3 +81,19 @@ def extract_ses_template(
             sound.raw_tags.append(raw_tag)
             translate_raw_tags(sound)
         word_entry.sounds.append(sound)
+
+
+def extract_eş_sesliler(
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+) -> None:
+    # https://tr.wiktionary.org/wiki/Şablon:eş_sesliler
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    lang_code = clean_node(wxr, None, t_node.template_parameters.get("dil", ""))
+    for span_tag in expanded_node.find_html(
+        "span", attr_name="lang", attr_value=lang_code
+    ):
+        homophone = clean_node(wxr, None, span_tag)
+        if homophone != "":
+            word_entry.sounds.append(Sound(homophone=homophone))

@@ -68,3 +68,23 @@ class TestTrSound(TestCase):
         )
         self.assertEqual(page_data[0]["sounds"], [{"ipa": "/ħubb/"}])
         self.assertEqual(page_data[1]["sounds"], [{"ipa": "/ħibb/"}])
+
+    def test_cat(self):
+        self.wxr.wtp.add_page(
+            "Şablon:eş sesliler",
+            10,
+            '[[eş sesli|Eş sesliler]]: <span class="Latn" lang="en">[[Kat#İngilizce|Kat]]</span>, <span class="Latn" lang="en">[[khat#İngilizce|khat]]</span>, <span class="Latn" lang="en">[[qat#İngilizce|qat]]</span>',
+        )
+        page_data = parse_page(
+            self.wxr,
+            "cat",
+            """==İngilizce==
+===Söyleniş===
+* {{eş sesliler|dil=en|Kat|khat|qat}}
+===Ad===
+[[kedi]], [[pişik]]""",
+        )
+        self.assertEqual(
+            page_data[0]["sounds"],
+            [{"homophone": "Kat"}, {"homophone": "khat"}, {"homophone": "qat"}],
+        )
