@@ -51,6 +51,8 @@ class Sound(TurkishBaseModel):
     tags: list[str] = []
     raw_tags: list[str] = []
     roman: str = ""
+    homophone: str = ""
+    rhymes: str = ""
 
 
 class Translation(TurkishBaseModel):
@@ -98,3 +100,4 @@ class WordEntry(TurkishBaseModel):
     derived: list[Linkage] = []
     proverbs: list[Linkage] = []
     idioms: list[Linkage] = []
+    notes: list[str] = []

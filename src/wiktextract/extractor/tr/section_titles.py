@@ -43,4 +43,7 @@ LINKAGE_SECTIONS = {
     "Atasözleri": "proverbs",
     "Deyimler": "idioms",
     "Benzer kelimeler": "related",
+    "Sembol": "synonyms",
 }
+
+LINKAGE_TAGS = {"Sembol": ["symbol"]}

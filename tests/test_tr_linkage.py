@@ -53,3 +53,58 @@ class TestTrLinkage(TestCase):
             page_data[0]["idioms"],
             [{"word": "adam başı"}, {"word": "adam gibi adam"}],
         )
+
+    def test_symbol(self):
+        page_data = parse_page(
+            self.wxr,
+            "iki",
+            """==Türkçe==
+===Ad===
+# [[bir]]den [[sonra]] [[gelmek|gelen]] [[sayı]]nın [[ad]]ı
+====Sembol====
+* [[2]], [[II]]""",
+        )
+        self.assertEqual(
+            page_data[0]["synonyms"],
+            [
+                {"word": "2", "tags": ["symbol"]},
+                {"word": "II", "tags": ["symbol"]},
+            ],
+        )
+
+    def test_gloss_list_template(self):
+        self.wxr.wtp.add_page(
+            "Şablon:alt kavramlar",
+            10,
+            'alt kavramsı: <span class="Arab" lang="ar">[[سيل#Arapça|سَيْل]]</span>&lrm; <span class="mention-gloss-paren annotation-paren">(</span><span lang="ar-Latn" class="tr Latn">seyl</span><span class="mention-gloss-paren annotation-paren">)</span>',
+        )
+        self.wxr.wtp.add_page(
+            "Şablon:eş anlamlılar",
+            10,
+            'eş anlamlısı: <span class="Arab" lang="ar">[[فضاء#Arapça|فَضَاء]]</span>&lrm; <span class="mention-gloss-paren annotation-paren">(</span><span lang="ar-Latn" class="tr Latn">faḍāʾ</span><span class="mention-gloss-paren annotation-paren">)</span>',
+        )
+        page_data = parse_page(
+            self.wxr,
+            "سماء",
+            """==Arapça==
+===Ad===
+# [[gök]], [[sema]]
+## [[sema]]nın [[bulut]], [[yağış]] gibi [[üretme|ürettikleri]]
+##: {{alt kavramlar|ar|سَيْل|t1=bulutlar}}
+## [[dış uzay]]
+##: {{eş anlamlılar|ar|فَضَاء|t=bir uzay/boşluk}}""",
+        )
+        self.assertEqual(
+            page_data[0]["hyponyms"],
+            [
+                {
+                    "word": "سَيْل",
+                    "sense": "gök, sema semanın bulut, yağış gibi ürettikleri",
+                    "roman": "seyl",
+                }
+            ],
+        )
+        self.assertEqual(
+            page_data[0]["synonyms"],
+            [{"word": "فَضَاء", "sense": "gök, sema dış uzay", "roman": "faḍāʾ"}],
+        )

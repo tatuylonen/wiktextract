@@ -2,6 +2,10 @@ from wikitextprocessor import NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from .linkage import (
+    GLOSS_LIST_LINKAGE_TEMPLATES,
+    extract_gloss_list_linkage_template,
+)
 from .models import Example, WordEntry
 
 
@@ -13,15 +17,12 @@ def extract_example_list_item(
 ) -> None:
     for node in list_item.children:
         if isinstance(node, TemplateNode):
-            match node.template_name:
-                case "ux" | "uxi":
-                    extract_ux_template(
-                        wxr, word_entry.lang_code, node, example
-                    )
-                case "örnek":
-                    extract_örnek_template(
-                        wxr, word_entry.lang_code, node, example
-                    )
+            if node.template_name in ["ux", "uxi"]:
+                extract_ux_template(wxr, word_entry.lang_code, node, example)
+            elif node.template_name == "örnek":
+                extract_örnek_template(wxr, word_entry.lang_code, node, example)
+            elif node.template_name in GLOSS_LIST_LINKAGE_TEMPLATES:
+                extract_gloss_list_linkage_template(wxr, word_entry, node)
         elif isinstance(node, WikiNode):
             match node.kind:
                 case NodeKind.LIST:
