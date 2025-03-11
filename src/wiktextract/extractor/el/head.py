@@ -109,19 +109,27 @@ def partition_head_forms(
             # checking each word for greekness?
             # This doesn't need to check if the language we're processing
             # is greek or not, because all non-greek words are 'forms'.
+            found_language_code = False
+            is_foreign_script = False
             for ch in t:
                 if not ch.isalpha():
                     continue
                 if not unicode_name(ch).startswith("GREEK"):
                     if code_to_name(t) != "":
+                        found_language_code = True
                         break
-                    current_forms.append(t)
-                    continue
+                    is_foreign_script = True
+                    break
+
+            if found_language_code:
                 break
 
             if inside_italics:
                 # Italicized words should always be tags
                 current_tags.append(t)
+                continue
+            if is_foreign_script:
+                current_forms.append(t)
                 continue
             if inside_bold:
                 # Bolded words should always be forms
@@ -245,6 +253,7 @@ def partition_head_forms(
     ret: list[Form] = []
 
     for forms, tags in blocks:
+        # print(f"{forms=}, {tags=}")
         tags = list(set(tags))
         for form in forms:
             ret.append(Form(form=form, raw_tags=tags))

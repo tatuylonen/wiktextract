@@ -101,8 +101,8 @@ class Linkage(GreekBaseModel):
     # sense: str
     # sense_index: str = ""
     # note: str = ""
-    # raw_tags: list[str] = []
-    # tags: list[str] = []
+    raw_tags: list[str] = []
+    tags: list[str] = []
     # topics: list[str] = []
     # topics: list[str] = []
     # urls: list[str]

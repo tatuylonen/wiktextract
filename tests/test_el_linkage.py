@@ -23,15 +23,13 @@ class TestElLinkage(TestCase):
     def tearDown(self):
         self.wxr.wtp.close_db_conn()
 
-    def parse_related(self, word: str, text: str) -> dict:
+    def parse_related(self, word: str, text: str, type=Heading.Related) -> dict:
         data = WordEntry(word=word)
         self.wxr.wtp.start_page(word)
         parsed = self.wxr.wtp.parse(text)
         related_section = parsed.children[0]
         assert isinstance(related_section, WikiNode)
-        process_linkage_section(
-            self.wxr, data, related_section, Heading.Related
-        )
+        process_linkage_section(self.wxr, data, related_section, type)
 
         return data.model_dump(exclude_defaults=True)
 
@@ -62,5 +60,31 @@ class TestElLinkage(TestCase):
             data["related"],
             [
                 {"word": "ντυμένος στα κόκκινα"},
+            ],
+        )
+
+    def test_transliterations(self):
+        data = self.parse_related(
+            "foo",
+            """===={{μεταγραφές}}====
+* ''αραβικό αλφάβητο'': arabfoo
+* ''λατινικό αλφάβητο [[Yañalif]]'': yanalatinfoo
+* ''λατινικό αλφάβητο'': latinfoo
+""",
+            type=Heading.Transliterations,
+        )
+        print(f"{data=}")
+        self.assertEqual(
+            data["forms"],
+            [
+                {"raw_tags": ["αραβικό αλφάβητο", "transliteration"]},
+                {
+                    "raw_tags": [
+                        "λατινικό αλφάβητο",
+                        "Yañalif",
+                        "transliteration",
+                    ]
+                },
+                {"raw_tags": ["λατινικό αλφάβητο", "transliteration"]},
             ],
         )
