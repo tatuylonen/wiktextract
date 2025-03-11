@@ -312,3 +312,13 @@ def extract_sahiplik_template(
     if form.form != "":
         translate_raw_tags(form)
         word_entry.forms.append(form)
+
+
+def extract_note_section(
+    wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
+) -> None:
+    for list_node in level_node.find_child(NodeKind.LIST):
+        for list_item in list_node.find_child(NodeKind.LIST_ITEM):
+            note = clean_node(wxr, None, list_item.children)
+            if note != "":
+                word_entry.notes.append(note)

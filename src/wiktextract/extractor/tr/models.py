@@ -98,3 +98,4 @@ class WordEntry(TurkishBaseModel):
     derived: list[Linkage] = []
     proverbs: list[Linkage] = []
     idioms: list[Linkage] = []
+    notes: list[str] = []
