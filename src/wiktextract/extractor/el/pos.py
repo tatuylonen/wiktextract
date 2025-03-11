@@ -428,7 +428,12 @@ def process_pos(
             process_translations(wxr, data, sl)
         elif type == Heading.Infl:
             process_inflection_section(wxr, data, sl)
-        elif type in (Heading.Related, Heading.Synonyms, Heading.Antonyms):
+        elif type in (
+            Heading.Related,
+            Heading.Synonyms,
+            Heading.Antonyms,
+            Heading.Transliterations,
+        ):
             process_linkage_section(wxr, data, sl, type)
     #     if type not in (
     #         Heading.Translations,

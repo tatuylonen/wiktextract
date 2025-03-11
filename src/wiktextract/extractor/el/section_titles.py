@@ -12,6 +12,7 @@ class Heading(Enum):
     Pron = auto()
     Infl = auto()
     Related = auto()
+    Transliterations = auto()
     Synonyms = auto()
     Homonyms = auto()
     Antonyms = auto()
@@ -649,7 +650,7 @@ SUBSECTION_HEADINGS: dict[str, SubSectionMap] = {
     "ταυτόσημο": {"type": Heading.Synonyms},
     "εκφράσεις": {"type": Heading.Related, "tags": ["idiomatic"]},
     "σύνθετα": {"type": Heading.Related, "tags": ["compound"]},
-    "μεταγραφές": {"type": Heading.Related, "tags": ["romanization"]},
+    "μεταγραφές": {"type": Heading.Transliterations},
     # Related words in foreign languages
     "παράγωγα": {"type": Heading.Derived},
     # Derived words

@@ -5,12 +5,12 @@ from wikitextprocessor.parser import NodeKind
 
 from wiktextract.wxr_context import WiktextractContext
 
-from .models import Linkage, WordEntry
+from .models import Form, Linkage, WordEntry
 from .parse_utils import Heading
 
 Node = str | WikiNode
 
-LINK_RE = re.compile(r"(__/?L__)")
+LINK_RE = re.compile(r"(__/?[IL]__)")
 
 
 def process_linkage_section(
@@ -23,6 +23,8 @@ def process_linkage_section(
         node: WikiNode,
     ) -> list[Node] | None:
         """Handle nodes in the parse tree specially."""
+        if node.kind == NodeKind.ITALIC:
+            return ["__I__", *node.children, "__/I__"]
         if node.kind == NodeKind.LINK:
             if not isinstance(node.largs[0][0], str):
                 return None
@@ -45,36 +47,54 @@ def process_linkage_section(
     # parse nodes to get lists and list_items
     reparsed = wxr.wtp.parse(wxr.wtp.node_to_wikitext(rnode), expand_all=True)
 
-    chained_links: list[list[str]] = [[]]
+    combined_line_data: list[tuple[list[str], list[str]]] = []
 
     for list_item in reparsed.find_child_recursively(NodeKind.LIST_ITEM):
         text = wxr.wtp.node_to_text(list_item, node_handler_fn=links_node_fn)
 
+        chained_links: list[str] = []
+        line_tags: list[str] = []
         inside_link = False
+        inside_italics = False
         interrupted_link = False
 
         for i, token in enumerate(LINK_RE.split(text)):
             token = token.strip()
 
+            if not token:
+                continue
+
             if i % 2 == 0:
                 # Actual text, not __L__or __/L__
+                # print(f"{i=}, {token=}, {line_tags=}")
+                if inside_italics:
+                    line_tags.append(token)
+                    continue
                 if inside_link is False and token:
                     # There's something between two link nodes
                     interrupted_link = True
                     continue
                 if inside_link is True:
-                    if interrupted_link is True and len(chained_links[-1]) > 0:
-                        chained_links.append([token])
+                    if interrupted_link is True and len(chained_links) > 0:
+                        combined_line_data.append((chained_links, line_tags))
+                        chained_links = [token]
                     else:
-                        chained_links[-1].append(token)
+                        chained_links.append(token)
                     continue
+            if token == "__I__":
+                inside_italics = True
+                continue
+            if token == "__/I__":
+                inside_italics = False
+                continue
             if token == "__L__":
                 inside_link = True
                 continue
-            else:
+            if token == "__/L__":
                 inside_link = False
                 interrupted_link = False
                 continue
+        combined_line_data.append((chained_links, line_tags))
 
     match linkage_type:
         case Heading.Related:
@@ -85,13 +105,27 @@ def process_linkage_section(
             target_field = data.antonyms
         case Heading.Derived:
             target_field = data.derived
+        case Heading.Transliterations:
+            # For transliteration sections we add these to forms instead.
+            data.forms.extend(
+                Form(
+                    form=" ".join(link_parts),
+                    raw_tags=ltags + ["transliteration"],
+                )
+                for link_parts, ltags in combined_line_data
+            )
+            return
         case _:
-            wxr.wtp.error("process_linkage_section() given unhandled Heading: "
-                          f"{linkage_type=}", sortid="linkages/83")
+            wxr.wtp.error(
+                "process_linkage_section() given unhandled Heading: "
+                f"{linkage_type=}",
+                sortid="linkages/83",
+            )
             return
 
     target_field.extend(
-        Linkage(word=" ".join(parts)) for parts in chained_links
+        Linkage(word=" ".join(link_parts), raw_tags=ltags)
+        for link_parts, ltags in combined_line_data
     )
 
     # iterate over list item lines and get links

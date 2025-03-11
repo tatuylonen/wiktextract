@@ -2,7 +2,6 @@ from wiktextract.tags import valid_tags
 
 simple_tag_map: dict[str, list[str]] = {
     "no-gloss": ["no-gloss"],
-    "comparative": ["comparative"],
 }
 
 
