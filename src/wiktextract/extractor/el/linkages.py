@@ -1,6 +1,6 @@
 import re
 
-from wikitextprocessor import WikiNode
+from wikitextprocessor import TemplateNode, WikiNode
 from wikitextprocessor.parser import NodeKind
 
 from wiktextract.wxr_context import WiktextractContext
@@ -19,10 +19,32 @@ def process_linkage_section(
     rnode: WikiNode,
     linkage_type: Heading,
 ) -> None:
+    def get_rid_of_annoying_template_fn(
+        node: WikiNode,
+    ) -> list[Node] | None:
+        """Handle nodes in the parse tree specially."""
+        # print(f"{node=}")
+        if isinstance(node, TemplateNode) and node.template_name == "βλ":
+            # print("REACHED")
+            # print(f"{node.largs=}")
+            ret: list[Node] = []
+            # print(f"{ret=}")
+            comma = False
+            for arg in node.largs[1:]:
+                if comma:
+                    ret.append(", ")
+                ret.append("__L__")
+                ret.append(wxr.wtp.node_to_text(arg))
+                ret.append("__/L__")
+                comma = True
+            return ret
+        return None
+
     def links_node_fn(
         node: WikiNode,
     ) -> list[Node] | None:
         """Handle nodes in the parse tree specially."""
+        # print(f"{node=}")
         if node.kind == NodeKind.ITALIC:
             return ["__I__", *node.children, "__/I__"]
         if node.kind == NodeKind.LINK:
@@ -42,10 +64,19 @@ def process_linkage_section(
                 "__/L__",
             ]
             # print(f"{node.largs=}")
+        if isinstance(node, TemplateNode) and node.template_name == "βλ":
+            # print("REACHED")
+            # print(f"{node=}")
+            return node.children
         return None
 
     # parse nodes to get lists and list_items
-    reparsed = wxr.wtp.parse(wxr.wtp.node_to_wikitext(rnode), expand_all=True)
+    reparsed = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(
+            rnode, node_handler_fn=get_rid_of_annoying_template_fn
+        ),
+        expand_all=True,
+    )
 
     combined_line_data: list[tuple[list[str], list[str]]] = []
 

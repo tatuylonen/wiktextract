@@ -38,13 +38,47 @@ class TestElLinkage(TestCase):
             "κόκκινο",
             """==== <span style="cursor:help;" title="Λέξεις της ίδιας γλώσσας με ετυμολογική συγγένεια">Συγγενικά</span> ====
 
-* →&nbsp;''δείτε''&nbsp;''τη&nbsp;λέξη''&nbsp;[[κόκκινος]]
+* [[κόκκινος]]
 """,
         )
         self.assertEqual(
             data["related"],
             [
                 {"word": "κόκκινος"},
+            ],
+        )
+
+    def test_related1b(self):
+        data = self.parse_related(
+            "κόκκινο",
+            """==== <span style="cursor:help;" title="Λέξεις της ίδιας γλώσσας με ετυμολογική συγγένεια">Συγγενικά</span> ====
+
+* {{βλ|κόκκινος}}
+""",
+
+        )
+        self.assertEqual(
+            data["related"],
+            [
+                {"word": "κόκκινος"},
+            ],
+        )
+
+    def test_related1c(self):
+        data = self.parse_related(
+            "κόκκινο",
+            """==== <span style="cursor:help;" title="Λέξεις της ίδιας γλώσσας με ετυμολογική συγγένεια">Συγγενικά</span> ====
+
+* {{βλ|κόκκινος|foo|bar}}
+""",
+
+        )
+        self.assertEqual(
+            data["related"],
+            [
+                {"word": "κόκκινος"},
+                {"word": "foo"},
+                {"word": "bar"},
             ],
         )
 
@@ -73,7 +107,7 @@ class TestElLinkage(TestCase):
 """,
             type=Heading.Transliterations,
         )
-        print(f"{data=}")
+        # print(f"{data=}")
         self.assertEqual(
             data["forms"],
             [
