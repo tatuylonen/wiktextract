@@ -13,9 +13,19 @@ def extract_linkage_section(
     l_type: str,
     tags: list[str],
 ) -> None:
-    for list_node in level_node.find_child(NodeKind.LIST):
-        for list_item in list_node.find_child(NodeKind.LIST_ITEM):
-            extract_linkage_list_item(wxr, word_entry, list_item, l_type, tags)
+    sense = ""
+    for node in level_node.children:
+        if isinstance(node, TemplateNode) and node.template_name.lower() in [
+            "üst",
+            "trans-top",
+        ]:
+            sense = clean_node(wxr, None, node.template_parameters.get(1, ""))
+        elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
+            for list_node in level_node.find_child(NodeKind.LIST):
+                for list_item in list_node.find_child(NodeKind.LIST_ITEM):
+                    extract_linkage_list_item(
+                        wxr, word_entry, list_item, l_type, tags, sense
+                    )
     for link_node in level_node.find_child(NodeKind.LINK):
         word = clean_node(wxr, None, link_node)
         if word != "":
@@ -28,8 +38,8 @@ def extract_linkage_list_item(
     list_item: WikiNode,
     l_type: str,
     tags: list[str],
+    sense: str,
 ) -> None:
-    sense = ""
     l_list = []
     for node in list_item.children:
         if isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
