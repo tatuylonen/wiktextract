@@ -10,7 +10,7 @@ from wiktextract.wxr_logging import logger
 
 from .models import Form, WordEntry
 
-BOLD_RE = re.compile(r"(__/?[BIL]__|\(|\)|,|\.)")
+BOLD_RE = re.compile(r"(__/?[BIL]__|\(|\)|, |\. |: )")
 
 
 def parse_head(wxr: WiktextractContext, pos_data: WordEntry, text: str) -> bool:
@@ -92,16 +92,31 @@ def partition_head_forms(
     inside_link = False
     inside_italics = False
 
+    previous_token_was_period = False
     for i, t in enumerate(split_text):
-        t = t.strip()
+        # print(f"{i}: {t=}")
+        t2 = t.strip()
+        if not t2 and t and previous_token_was_period:
+            # Whitespace
+            # print("Prev. was dot")
+            previous_token_was_period = False
+            push_new_block()
+            continue
+        t = t2
+        if i % 2 == 0:
+            previous_token_was_period = False
         if t in ("", "ή"):
             continue
-        if t in ("και", "&"):
+        elif t in ("και", "&", ":", ".:"):
             push_new_block()
             continue
 
         if i % 2 == 0:
             # Odd elements: text
+
+            if t == ".":
+                previous_token_was_period = True
+                continue
 
             # Check if word is not in greek; if it's not, that's a form.
             # XXX this might be problematic if there's a stretch of unbolded
