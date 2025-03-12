@@ -467,11 +467,36 @@ def process_pos(
 ExOrSense = Sense | Example
 
 
-IGNORED_GLOSS_TEMPLATES = ("ignoredtemplatename",)
-
 PARENS_BEFORE_RE = re.compile(r"\s*(\([^()]+\)\s*)+")
 ITER_PARENS_RE = re.compile(r"\(([^()]+)\)")
 
+def bold_node_fn(
+    node: WikiNode,
+) -> list[str | WikiNode] | None:
+    """Handle nodes in the parse tree specially."""
+    # print(f"{node=}")
+    if node.kind == NodeKind.ITALIC:
+        return ["__I__", *node.children, "__/I__"]
+    if node.kind == NodeKind.BOLD:
+        return ["__B__", *node.children, "__/B__"]
+    # if node.kind == NodeKind.LINK:
+    #     if not isinstance(node.largs[0][0], str):
+    #         return None
+    #     return [
+    #         "__L__",
+    #         # unpacking a list-comprehension, unpacking into a list
+    #         # seems to be more performant than adding lists together.
+    #         *(
+    #             wxr.wtp.node_to_text(
+    #                 node.largs[1:2] or node.largs[0],
+    #             )
+    #             # output the "visible" half of the link.
+    #         ),
+    #         # XXX collect link data if it turns out to be important.
+    #         "__/L__",
+    #     ]
+    #     # print(f"{node.largs=}")
+    return None
 
 def parse_gloss(
     wxr: WiktextractContext, parent_sense: Sense, contents: list[str | WikiNode]
@@ -487,36 +512,9 @@ def parse_gloss(
     synonyms: list[Linkage] = []
     antonyms: list[Linkage] = []
 
-    # Wikitext `{{template|arg}}` handler example, from Simple English Wikt.
-    def gloss_template_fn(name: str, ht: TemplateArgs) -> str | None:
-        # XXX Delete these and replace with specific templates to handle.
-        # if name in ("synonyms", "synonym", "syn"):
-        #     # example. {{syn|case|illustration|lesson|object|part|pattern}}
-        #     for syn in ht.values():  # ht for 'hashtable'. Tatu comes from C.
-        #         # The template parameters of `synonyms` is simple: just a list.
-        #         if not syn:
-        #             continue
-        #         synonyms.append(Linkage(word=syn))
-        #     # Returning a string means replacing the 'expansion' that would
-        #     # have otherwise appeared there with it; `None` leaves things alone.
-        #     return ""
-        # if name in ("antonyms", "antonym", "ant"):
-        #     for ant in ht.values():
-        #         if not ant:
-        #             continue
-        #         antonyms.append(Linkage(word=ant))
-        #     return ""
-        # # XXX Delete above.
-
-        if name in IGNORED_GLOSS_TEMPLATES:
-            return ""
-
-        # Don't handle other templates here.
-        return None
-
     # The rest of the text.
     text = clean_node(
-        wxr, parent_sense, contents, template_fn=gloss_template_fn
+        wxr, parent_sense, contents, node_handler_fn=bold_node_fn
     )
 
     # print(f"   ============  {contents=}, {text=}")
@@ -525,7 +523,20 @@ def parse_gloss(
     if parens_n := PARENS_BEFORE_RE.match(text):
         text = text[parens_n.end() :]
         blocks = ITER_PARENS_RE.findall(parens_n.group(0))
-        parent_sense.raw_tags.extend(blocks)
+        # print(f"{blocks=}")
+        forms = []
+        raw_tag_texts = []
+        for block in blocks:
+            nforms, nraw_tag_texts = extract_forms_and_tags(block)
+            forms.extend(nforms)
+            raw_tag_texts.extend(nraw_tag_texts)
+        # print(f"{forms=}, {raw_tag_texts=}")
+        if forms:
+            # print(f"{forms=}")
+            parent_sense.related.extend(Linkage(word=form) for form in forms)
+        parent_sense.raw_tags.extend(raw_tag_texts)
+
+    text = re.sub(r"__/?[IB]__", "", text)
 
     if len(synonyms) > 0:
         parent_sense.synonyms = synonyms
@@ -713,3 +724,44 @@ def split_nodes_to_lines(
     # yield final parts
     if len(parts) > 0:
         yield parts
+
+BOLD_RE = re.compile(r"(__/?[BI]__|, |\. )")
+
+def extract_forms_and_tags(tagged_text: str) -> tuple[list[str], list[str]]:
+    forms: list[str] = []
+    tags: list[str] = []
+
+    # print(f"{tagged_text=}")
+    # inside_italics = False
+    inside_bold = False
+
+    for i, t in enumerate(BOLD_RE.split(tagged_text)):
+        t = t.strip()
+        # print(f"{i}: {t=}")
+        if not t:
+            continue
+
+        if i % 2 == 0:
+            # Text between splitters
+            if inside_bold is True:
+                forms.append(t)
+                continue
+            # Add everything else to raw_tags
+            # if inside_italics is True:
+            #     tags.append(t)
+            #     continue
+            # ". " and ", " just split. They're stripped to "." and "," if
+            # this needs to be modified later.
+            tags.append(t)
+            continue
+        match t:
+            case "__B__":
+                inside_bold = True
+            case "__/B__":
+                inside_bold = False
+            # case "__I__":
+            #     inside_italics = True
+            # case "__/I__":
+            #     inside_italics = False
+
+    return forms, tags

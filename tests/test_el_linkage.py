@@ -55,7 +55,6 @@ class TestElLinkage(TestCase):
 
 * {{βλ|κόκκινος}}
 """,
-
         )
         self.assertEqual(
             data["related"],
@@ -71,7 +70,6 @@ class TestElLinkage(TestCase):
 
 * {{βλ|κόκκινος|foo|bar}}
 """,
-
         )
         self.assertEqual(
             data["related"],
@@ -101,9 +99,9 @@ class TestElLinkage(TestCase):
         data = self.parse_related(
             "foo",
             """===={{μεταγραφές}}====
-* ''αραβικό αλφάβητο'': arabfoo
-* ''λατινικό αλφάβητο [[Yañalif]]'': yanalatinfoo
-* ''λατινικό αλφάβητο'': latinfoo
+* ''αραβικό αλφάβητο'': [[arabfoo]]
+* ''λατινικό αλφάβητο [[Yañalif]]'': [[yanalatinfoo]]
+* ''λατινικό αλφάβητο'': [[latinfoo]]
 """,
             type=Heading.Transliterations,
         )
@@ -111,14 +109,53 @@ class TestElLinkage(TestCase):
         self.assertEqual(
             data["forms"],
             [
-                {"raw_tags": ["αραβικό αλφάβητο", "transliteration"]},
                 {
+                    "form": "arabfoo",
+                    "raw_tags": ["αραβικό αλφάβητο"],
+                    "tags": ["transliteration"],
+                },
+                {
+                    "form": "yanalatinfoo",
                     "raw_tags": [
                         "λατινικό αλφάβητο",
                         "Yañalif",
+                    ],
+                    "tags": ["transliteration"],
+                },
+                {
+                    "form": "latinfoo",
+                    "raw_tags": ["λατινικό αλφάβητο"],
+                    "tags": ["transliteration"],
+                },
+            ],
+        )
+
+    def test_transliterations_esperanto(self):
+        data = self.parse_related(
+            "foo",
+            """===={{άλλη γραφή}}====
+* {{eo-h|acidajho}}
+* {{eo-x|acidajxo}}
+""",
+            type=Heading.Transliterations,
+        )
+        # print(f"{data=}")
+        self.assertEqual(
+            data["forms"],
+            [
+                {
+                    "form": "acidajho",
+                    "raw_tags": ["H-sistemo"],
+                    "tags": [
                         "transliteration",
                     ]
                 },
-                {"raw_tags": ["λατινικό αλφάβητο", "transliteration"]},
+                {
+                    "form": "acidajxo",
+                    "raw_tags": ["X-sistemo"],
+                    "tags": [
+                        "transliteration",
+                    ]
+                },
             ],
         )
