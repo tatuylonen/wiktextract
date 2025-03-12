@@ -82,7 +82,7 @@ def process_inflection_section(
     def table_node_handler_fn(
         node: WikiNode,
     ) -> list[str | WikiNode] | None:
-        """Insert special markers `__*S__` and `__*E__` around bold nodes so
+        """Insert special markers `__*__` and `__/*__` around bold nodes so
         that the strings can later be split into "head-word" and "tag-words"
         parts. Collect incidental stuff, like side-tables, that are often
         put around the head."""
