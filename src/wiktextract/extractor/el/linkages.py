@@ -19,12 +19,17 @@ def process_linkage_section(
     rnode: WikiNode,
     linkage_type: Heading,
 ) -> None:
-    def get_rid_of_annoying_template_fn(
+
+    transliteration_template_data: list[Form] = []
+
+    def prehandle_templates_fn(
         node: WikiNode,
     ) -> list[Node] | None:
         """Handle nodes in the parse tree specially."""
         # print(f"{node=}")
-        if isinstance(node, TemplateNode) and node.template_name == "βλ":
+        if not isinstance(node, TemplateNode):
+            return None
+        if node.template_name == "βλ":
             # print("REACHED")
             # print(f"{node.largs=}")
             ret: list[Node] = []
@@ -38,6 +43,21 @@ def process_linkage_section(
                 ret.append("__/L__")
                 comma = True
             return ret
+        if node.template_name in ("eo-h", "eo-x"):
+            transliteration_template_data.append(
+                Form(
+                    form="".join(
+                        wxr.wtp.node_to_text(arg) for arg in node.largs[1]
+                    ),
+                    raw_tags=[
+                        "H-sistemo"
+                        if node.template_name == "eo-h"
+                        else "X-sistemo"
+                    ],
+                    tags=["transliteration"],
+                )
+            )
+            return []
         return None
 
     def links_node_fn(
@@ -72,9 +92,7 @@ def process_linkage_section(
 
     # parse nodes to get lists and list_items
     reparsed = wxr.wtp.parse(
-        wxr.wtp.node_to_wikitext(
-            rnode, node_handler_fn=get_rid_of_annoying_template_fn
-        ),
+        wxr.wtp.node_to_wikitext(rnode, node_handler_fn=prehandle_templates_fn),
         expand_all=True,
     )
 
@@ -125,7 +143,14 @@ def process_linkage_section(
                 inside_link = False
                 interrupted_link = False
                 continue
-        combined_line_data.append((chained_links, line_tags))
+        if chained_links:
+            combined_line_data.append((chained_links, line_tags))
+
+    new_combined = []
+    for link_parts, tags in combined_line_data:
+        if link_parts:
+            new_combined.append((link_parts, tags))
+    combined_line_data = new_combined
 
     match linkage_type:
         case Heading.Related:
@@ -141,10 +166,13 @@ def process_linkage_section(
             data.forms.extend(
                 Form(
                     form=" ".join(link_parts),
-                    raw_tags=ltags + ["transliteration"],
+                    raw_tags=ltags,
+                    tags=["transliteration"],
                 )
                 for link_parts, ltags in combined_line_data
             )
+            if transliteration_template_data:
+                data.forms.extend(transliteration_template_data)
             return
         case _:
             wxr.wtp.error(

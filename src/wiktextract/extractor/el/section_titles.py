@@ -635,7 +635,7 @@ SUBSECTION_HEADINGS: dict[str, SubSectionMap] = {
     "κλίση": {"type": Heading.Infl},
     "references": {"type": Heading.Ref},
     "αναφορές": {"type": Heading.Ref},
-    "άλλες γραφές": {"type": Heading.Related},
+    "άλλες γραφές": {"type": Heading.Transliterations},
     "άλλες μορφές": {"type": Heading.Related},
     "ανεπίσημα": {"type": Heading.Related},
     "συγγενικά": {"type": Heading.Related},
