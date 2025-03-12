@@ -44,6 +44,7 @@ LINKAGE_SECTIONS = {
     "Deyimler": "idioms",
     "Benzer kelimeler": "related",
     "Sembol": "synonyms",
+    "Benzer sözcükler": "related",
 }
 
 LINKAGE_TAGS = {"Sembol": ["symbol"]}

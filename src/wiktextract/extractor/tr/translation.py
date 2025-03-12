@@ -1,3 +1,5 @@
+from mediawiki_langcodes import name_to_code
+
 from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
@@ -40,6 +42,16 @@ def extract_translation_list_item(
             for child_list_item in node.find_child(NodeKind.LIST_ITEM):
                 extract_translation_list_item(
                     wxr, word_entry, child_list_item, sense
+                )
+        elif isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
+            word = clean_node(wxr, None, node)
+            if word != "":
+                word_entry.translations.append(
+                    Translation(
+                        word=word,
+                        lang=lang_name,
+                        lang_code=name_to_code(lang_name, "tr") or "unknown",
+                    )
                 )
 
 

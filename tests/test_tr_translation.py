@@ -80,3 +80,25 @@ class TestTrTranslation(TestCase):
                 },
             ],
         )
+
+    def test_link(self):
+        page_data = parse_page(
+            self.wxr,
+            "acıkmak",
+            """==Türkçe==
+===Eylem===
+# [[yemek]] [[yeme]] [[gerek]]sinimi [[duymak]]
+====Çeviriler====
+*İngilizce: [[become hungry]], [[be hungry]]""",
+        )
+        self.assertEqual(
+            page_data[0]["translations"],
+            [
+                {
+                    "lang": "İngilizce",
+                    "lang_code": "en",
+                    "word": "become hungry",
+                },
+                {"lang": "İngilizce", "lang_code": "en", "word": "be hungry"},
+            ],
+        )
