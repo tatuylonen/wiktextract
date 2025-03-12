@@ -178,6 +178,7 @@ def parse_table(
         else tnode.find_child_recursively(NodeKind.TABLE_ROW)
     ):
         c = 0
+        # print(f"{r=}, {row=}")
         if r not in table_grid:
             table_grid[r] = {}
 
@@ -218,7 +219,29 @@ def parse_table(
                 for cc in range(c, c + colspan):
                     table_grid[rr][cc] = cell
 
+    if not table_grid[len(table_grid) - 1]:
+        # Last row is empty; traverse backwards to skip empty rows at end
+        last_item = None
+        for i, rowd in reversed(table_grid.items()):
+            if rowd:
+                last_item = i
+                break
+
+        assert last_item is not None
+
+        new_table_grid = dict()
+        for i, rowd in table_grid.items():
+            if i > last_item:
+                continue
+            new_table_grid[i] = rowd
+        table_grid = new_table_grid
+
     if len(table_grid[0]) == 1:
+        # Table is one column in width, no headers on rows
+        first_column_is_headers = False
+
+    if len(table_grid) == 2:
+        # There's only one or two rows
         first_column_is_headers = False
 
     # Headers are saved in two dict that has their keys made out of tuples
