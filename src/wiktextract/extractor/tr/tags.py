@@ -44,8 +44,45 @@ LINKAGE_TAGS = {
     "eskimiş": "obsolete",
 }
 
+TABLE_TAGS = {
+    # Şablon:tr-ad-tablo
+    "tekil": "singular",
+    "çoğul": "plural",
+    "yalın": "nominative",
+    "belirtme": "accusative",
+    "yönelme": "dative",
+    "bulunma": "locative",
+    "ayrılma": "ablative",
+    "tamlayan": "genitive",
+    "iyelik": "possessive",
+    "1. tekil": ["first-person", "singular"],
+    "2. tekil": ["second-person", "singular"],
+    "3. tekil": ["third-person", "singular"],
+    "1. çoğul": ["first-person", "plural"],
+    "2. çoğul": ["second-person", "plural"],
+    "3. çoğul": ["third-person", "plural"],
+    # Şablon:tr-eylem-tablo
+    "olumlu çekimler": "positive",
+    "belirli geçmiş": ["definite", "past"],
+    "belirsiz geçmiş": ["indefinite", "past"],
+    "şimdiki": "present",
+    "gelecek": "future",
+    # "basit": "simple",
+    # "hikaye": "",
+    # "rivayet": "",
+    "şart": "conditional",
+    "gereklilik": "necessitative",
+    "olumsuz çekimler": "negative",
+}
 
-TAGS = {**GLOSS_TAGS, **POS_HEADER_TAGS, **TRANSLATION_TAGS, **LINKAGE_TAGS}
+
+TAGS = {
+    **GLOSS_TAGS,
+    **POS_HEADER_TAGS,
+    **TRANSLATION_TAGS,
+    **LINKAGE_TAGS,
+    **TABLE_TAGS,
+}
 
 # https://tr.wiktionary.org/wiki/Modül:temalar/veri/konu
 TOPICS = {
@@ -61,10 +98,12 @@ def translate_raw_tags(data: BaseModel) -> None:
     for raw_tag in data.raw_tags:
         if raw_tag in TAGS and hasattr(data, "tags"):
             tr_tag = TAGS[raw_tag]
-            if isinstance(tr_tag, str):
+            if isinstance(tr_tag, str) and tr_tag not in data.tags:
                 data.tags.append(tr_tag)
             elif isinstance(tr_tag, list):
-                data.tags.extend(tr_tag)
+                for t in tr_tag:
+                    if t not in data.tags:
+                        data.tags.append(t)
         elif raw_tag in TOPICS and hasattr(data, "topics"):
             topic = TOPICS[raw_tag]
             if isinstance(topic, str):
