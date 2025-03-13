@@ -1,5 +1,6 @@
 import re
 from collections.abc import Iterator
+from unicodedata import name as unicode_name
 
 from wikitextprocessor import (
     HTMLNode,
@@ -521,12 +522,16 @@ def parse_gloss(
 
     # Greek Wiktionary uses a lot of template-less tags.
     if parens_n := PARENS_BEFORE_RE.match(text):
-        text = text[parens_n.end() :]
         blocks = ITER_PARENS_RE.findall(parens_n.group(0))
         # print(f"{blocks=}")
+        kept_blocks: list[str] = []
         forms = []
         raw_tag_texts = []
         for block in blocks:
+            if block_has_non_greek_text(block):
+                # Keep parentheses with non-greek text with gloss text)
+                kept_blocks.extend(("(", block, ") "))
+                continue
             nforms, nraw_tag_texts = extract_forms_and_tags(block)
             forms.extend(nforms)
             raw_tag_texts.extend(nraw_tag_texts)
@@ -535,6 +540,8 @@ def parse_gloss(
             # print(f"{forms=}")
             parent_sense.related.extend(Linkage(word=form) for form in forms)
         parent_sense.raw_tags.extend(raw_tag_texts)
+        kept_blocks.append(text[parens_n.end():])
+        text = "".join(kept_blocks)
 
     text = re.sub(r"__/?[IB]__", "", text)
 
@@ -765,3 +772,16 @@ def extract_forms_and_tags(tagged_text: str) -> tuple[list[str], list[str]]:
             #     inside_italics = False
 
     return forms, tags
+
+META_RE = re.compile(r"__/?[ILEB]__")
+
+def block_has_non_greek_text(text: str) -> bool:
+    text = META_RE.sub("", text)
+    for t in text.split():
+        for ch in t:
+            if not ch.isalpha():
+                continue
+            if not unicode_name(ch).startswith("GREEK"):
+                return True
+            break
+    return False
