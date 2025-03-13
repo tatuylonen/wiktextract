@@ -3,6 +3,7 @@ import re
 from wikitextprocessor import TemplateNode, WikiNode
 from wikitextprocessor.parser import NodeKind
 
+from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
 from .models import Form, Linkage, WordEntry
@@ -12,6 +13,8 @@ Node = str | WikiNode
 
 LINK_RE = re.compile(r"(__/?[IL]__)")
 
+EXAMPLES_RE = re.compile(r"(?sm)__E__(.*?)__/E__")
+
 
 def process_linkage_section(
     wxr: WiktextractContext,
@@ -19,7 +22,6 @@ def process_linkage_section(
     rnode: WikiNode,
     linkage_type: Heading,
 ) -> None:
-
     transliteration_template_data: list[Form] = []
 
     def prehandle_templates_fn(
@@ -88,6 +90,8 @@ def process_linkage_section(
             # print("REACHED")
             # print(f"{node=}")
             return node.children
+        if node.kind == NodeKind.LIST_ITEM and node.sarg.endswith(":"):
+            return [node.sarg, "__E__", *node.children, "__/E__\n"]
         return None
 
     # parse nodes to get lists and list_items
@@ -96,9 +100,10 @@ def process_linkage_section(
         expand_all=True,
     )
 
-    combined_line_data: list[tuple[list[str], list[str]]] = []
+    combined_line_data: list[tuple[list[str], list[str], list[str]]] = []
 
     for list_item in reparsed.find_child_recursively(NodeKind.LIST_ITEM):
+        # print(f"{list_item=}")
         text = wxr.wtp.node_to_text(list_item, node_handler_fn=links_node_fn)
 
         chained_links: list[str] = []
@@ -107,7 +112,18 @@ def process_linkage_section(
         inside_italics = False
         interrupted_link = False
 
+        examples = []
+        for m in EXAMPLES_RE.finditer(text):
+            example = re.sub(r"__/?[IL]__", "", m.group(1))
+            parsed = wxr.wtp.parse(example)
+            example = clean_node(wxr, None, parsed)
+            example = example.strip(" \n*:⮡")
+            examples.append(example)
+
+        text = EXAMPLES_RE.sub("", text)
+
         for i, token in enumerate(LINK_RE.split(text)):
+            # print(f"{token=}")
             token = token.strip()
 
             if not token:
@@ -125,7 +141,9 @@ def process_linkage_section(
                     continue
                 if inside_link is True:
                     if interrupted_link is True and len(chained_links) > 0:
-                        combined_line_data.append((chained_links, line_tags))
+                        combined_line_data.append(
+                            (chained_links, line_tags, examples)
+                        )
                         chained_links = [token]
                     else:
                         chained_links.append(token)
@@ -144,12 +162,12 @@ def process_linkage_section(
                 interrupted_link = False
                 continue
         if chained_links:
-            combined_line_data.append((chained_links, line_tags))
+            combined_line_data.append((chained_links, line_tags, examples))
 
     new_combined = []
-    for link_parts, tags in combined_line_data:
+    for link_parts, tags, examples in combined_line_data:
         if link_parts:
-            new_combined.append((link_parts, tags))
+            new_combined.append((link_parts, tags, examples))
     combined_line_data = new_combined
 
     match linkage_type:
@@ -169,7 +187,7 @@ def process_linkage_section(
                     raw_tags=ltags,
                     tags=["transliteration"],
                 )
-                for link_parts, ltags in combined_line_data
+                for link_parts, ltags, _ in combined_line_data
             )
             if transliteration_template_data:
                 data.forms.extend(transliteration_template_data)
@@ -183,8 +201,8 @@ def process_linkage_section(
             return
 
     target_field.extend(
-        Linkage(word=" ".join(link_parts), raw_tags=ltags)
-        for link_parts, ltags in combined_line_data
+        Linkage(word=" ".join(link_parts), raw_tags=ltags, examples=lexamples)
+        for link_parts, ltags, lexamples in combined_line_data
     )
 
     # iterate over list item lines and get links
