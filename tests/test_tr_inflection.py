@@ -123,3 +123,86 @@ class TestTrInflection(TestCase):
                 },
             ],
         )
+
+    def test_tr_çekim_ad(self):
+        self.wxr.wtp.add_page(
+            "Şablon:tr-çekim-ad-1",
+            10,
+            """<div>
+<div>mayıs adının çekimi</div>
+<div>
+{|
+|-
+!
+! [[tekil]]
+! [[çoğul]]
+|-
+! [[yalın hâl|yalın]]
+| mayıs
+| [[mayıslar]]
+|}
+</div></div>
+<div>
+<div>[[iyelik eki|iyelik ekleriyle]]</div>
+<div>
+{|
+|-
+! 1. tekil ([[benim]])
+! [[tekil]]
+! [[çoğul]]
+|-
+! [[yalın hâl|yalın]]
+| [[mayısım]]
+| [[mayıslarım]]
+|-
+! 3. çoğul ([[onların]])
+! [[tekil]]
+! [[çoğul]]
+|-
+! [[yalın hâl|yalın]]
+| [[mayısı]]<br>[[mayısları]]
+| [[mayısları]]
+|}
+</div></div>""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "mayıs",
+            """==Türkçe==
+===Ad===
+# [[Yıl]]ın 31 [[gün]] süren [[beşinci]] [[ay]]ı
+====Çekimleme====
+{{tr-çekim-ad-1|ı|t}}""",
+        )
+        self.assertEqual(
+            page_data[0]["forms"],
+            [
+                {"form": "mayıs", "tags": ["singular", "nominative"]},
+                {"form": "mayıslar", "tags": ["plural", "nominative"]},
+                {
+                    "form": "mayısım",
+                    "tags": ["possessive", "singular", "nominative"],
+                    "raw_tags": ["1. tekil (benim)"],
+                },
+                {
+                    "form": "mayıslarım",
+                    "tags": ["possessive", "plural", "nominative"],
+                    "raw_tags": ["1. tekil (benim)"],
+                },
+                {
+                    "form": "mayısı",
+                    "tags": ["possessive", "singular", "nominative"],
+                    "raw_tags": ["3. çoğul (onların)"],
+                },
+                {
+                    "form": "mayısları",
+                    "tags": ["possessive", "singular", "nominative"],
+                    "raw_tags": ["3. çoğul (onların)"],
+                },
+                {
+                    "form": "mayısları",
+                    "tags": ["possessive", "plural", "nominative"],
+                    "raw_tags": ["3. çoğul (onların)"],
+                },
+            ],
+        )
