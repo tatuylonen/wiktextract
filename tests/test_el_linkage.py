@@ -148,14 +148,39 @@ class TestElLinkage(TestCase):
                     "raw_tags": ["H-sistemo"],
                     "tags": [
                         "transliteration",
-                    ]
+                    ],
                 },
                 {
                     "form": "acidajxo",
                     "raw_tags": ["X-sistemo"],
                     "tags": [
                         "transliteration",
-                    ]
+                    ],
+                },
+            ],
+        )
+
+    def test_related_examples1(self):
+        data = self.parse_related(
+            "papillon",
+            """==== <span style="cursor:help;" title="Εκφράσεις που περιέχουν τη λέξη «κόκκινο»">Εκφράσεις</span> ====
+
+* [[ντυμένος]]
+*: Foo
+* [[στα κόκκινα]]
+*: Baz
+""",
+        )
+        self.assertEqual(
+            data["related"],
+            [
+                {
+                    "word": "ντυμένος",
+                    "examples": ["Foo"],
+                },
+                {
+                    "word": "στα κόκκινα",
+                    "examples": ["Baz"],
                 },
             ],
         )
