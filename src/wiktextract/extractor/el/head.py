@@ -169,7 +169,7 @@ def partition_head_forms(
                     current_forms.append(t)
                     continue
                 words = t.split()
-                orig_words = wxr.wtp.title or ""
+                orig_words = (wxr.wtp.title or "").split()
 
                 if len(words) < len(orig_words):
                     # The phrase we're looking at it shorter than the article
@@ -182,7 +182,7 @@ def partition_head_forms(
                 matches = 0
 
                 for word in words:
-                    if distw([orig_words], word) < 0.4:
+                    if distw(orig_words, word) < 0.4:
                         matches += 1
                         break
 
