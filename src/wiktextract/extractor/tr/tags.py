@@ -6,6 +6,14 @@ GLOSS_TAGS = {
     "özellikle": "especially",
     "ender": "rare",
     "kısa": "short-form",
+    "Almanya": "Germany",
+    "Amerika Birleşik Devletleri": "US",
+    "Asya": "Asia",
+    "Avrupa": "Europe",
+    "Avrupa Birliği": "European-Union",
+    "Avustralya": "Australia",
+    "Avusturya": "Austria",
+    "Fransa": "France",
 }
 
 POS_HEADER_TAGS = {
@@ -85,11 +93,84 @@ TAGS = {
 }
 
 # https://tr.wiktionary.org/wiki/Modül:temalar/veri/konu
+# https://tr.wiktionary.org/wiki/Modül:temalar/veri/grup
 TOPICS = {
     "anatomi": "anatomy",
-    "bilişim": "informatics",
     "diller": "language",
+    "akışkanlar mekaniği": "fluid-dynamics",
+    "antropoloji": "anthropology",
+    "arıcılık": "beekeeping",
+    "aritmetik": "arithmetic",
+    "arkeoloji": "archaeology",
+    "askeriye": "military",
+    "astroloji": "astrology",
+    "aşçılık": "cooking",
+    "avcılık": "hunting",
+    "bakteriyoloji": "bacteriology",
+    # "bale": "ballet",
+    "balıkçılık": "fishing",
+    "bankacılık": "banking",
+    "basketbol": "basketball",
+    "basın-yayın": "publishing",
+    "bilardo": "billiards",
+    "bilgisayar bilimi": ["computer", "science"],
+    "bilgisayar dili": "computer-languages",
+    "bilim": "science",
+    "bilişim": "informatics",
+    # "binalar": "building",
+    "binicilik": "equestrianism",
+    "Birleşik Krallık": "UK",
+    "bitki bilimi": "botany",
+    # "bitki hastalıkları": "",
+    "biyokimya": "biochemistry",
+    "biyoloji": "biology",
+    "biyoteknoloji": "biotechnology",
+    "boks": "boxing",
+    "böcek bilimi": "entomology",
+    "Budizm": "Buddhism",
+    "budun bilimi": "ethnology",
+    "cerrahi": "surgery",
+    "ceza hukuku": "law",
+    "cinsellik": "sexuality",
+    "cinsellik bilimi": "sexology",
+    "cinsiyet": "sexuality",
+    "coğrafya": "geography",
+    "dans": "dancing",
+    "demiryolu ulaşımı": ["railways", "transport"],
+    "dermatoloji": "dermatology",
+    "dil bilgisi": "grammar",
+    "dil bilimi": "linguistics",
+    "din": "religion",
+    "diplomasi": "diplomacy",
+    "diş hekimliği": "dentistry",
+    "doğa bilimi": "natural-sciences",
+    "dokuma": "weaving",
+    "drama": "drama",
+    "eczacılık": "pharmacology",
+    "edebiyat": "literature",
     "eğitim": "education",
+    "eğlence": "entertainment",
+    "ekonomi": "economics",
+    "elektrik": "electricity",
+    "elektrik mühendisliği": "electrical-engineering",
+    "elektromanyetizm": "electromagnetism",
+    "elektronik": "electronics",
+    "enerji": "energy",
+    "epistemoloji": "epistemology",
+    "eşey": "sex",
+    "etik": "ethics",
+    # "evlilik": "marriage",
+    # "evrim": "evolution",
+    "fahişelik": "prostitution",
+    "farmakoloji": "pharmacology",
+    "felsefe": "philosophy",
+    "filateli": "philately",
+    "finans": "finance",
+    "fitopatoloji": "phytopathology",
+    "fizik": "physics",
+    "fizyoloji": "physiology",
+    "fotoğrafçılık": "photography",
+    "futbol": "football",
 }
 
 
@@ -106,10 +187,12 @@ def translate_raw_tags(data: BaseModel) -> None:
                         data.tags.append(t)
         elif raw_tag in TOPICS and hasattr(data, "topics"):
             topic = TOPICS[raw_tag]
-            if isinstance(topic, str):
+            if isinstance(topic, str) and topic not in data.topics:
                 data.topics.append(topic)
             elif isinstance(topic, list):
-                data.topics.extend(topic)
+                for t in topic:
+                    if t not in data.topics:
+                        data.topics.append(t)
         else:
             raw_tags.append(raw_tag)
     data.raw_tags = raw_tags

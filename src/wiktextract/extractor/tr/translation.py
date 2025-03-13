@@ -1,5 +1,4 @@
 from mediawiki_langcodes import name_to_code
-
 from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node

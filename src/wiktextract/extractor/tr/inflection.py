@@ -12,7 +12,10 @@ def extract_inflection_section(
     wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
 ) -> None:
     for t_node in level_node.find_child(NodeKind.TEMPLATE):
-        if t_node.template_name in ["tr-ad-tablo", "tr-eylem-tablo"]:
+        if t_node.template_name in [
+            "tr-ad-tablo",
+            "tr-eylem-tablo",
+        ] or t_node.template_name.startswith("tr-çekim-ad-"):
             extract_tr_ad_tablo_template(wxr, word_entry, t_node)
 
 
@@ -31,11 +34,17 @@ def extract_tr_ad_tablo_template(
     )
     for link_node in expanded_node.find_child(NodeKind.LINK):
         clean_node(wxr, word_entry, link_node)
-    for table in expanded_node.find_child_recursively(NodeKind.TABLE):
+    for table_index, table in enumerate(
+        expanded_node.find_child_recursively(NodeKind.TABLE)
+    ):
         last_row_has_data = False
         col_headers = []
         row_headers = []
         row_index = 0
+        table_tags = []
+        table_raw_tags = []
+        if t_node.template_name.startswith("tr-çekim-ad-") and table_index == 1:
+            table_tags.append("possessive")
         for row in table.find_child(NodeKind.TABLE_ROW):
             col_index = 0
             row_has_data = row.contain_node(NodeKind.TABLE_CELL)
@@ -43,24 +52,30 @@ def extract_tr_ad_tablo_template(
                 NodeKind.TABLE_HEADER_CELL
             ):
                 continue
-            for cell in row.find_child(
-                NodeKind.TABLE_HEADER_CELL | NodeKind.TABLE_CELL
+            for cell_index, cell in enumerate(
+                row.find_child(NodeKind.TABLE_HEADER_CELL | NodeKind.TABLE_CELL)
             ):
                 cell_text = clean_node(wxr, None, cell)
                 if cell_text == "":
                     continue
                 if cell.kind == NodeKind.TABLE_HEADER_CELL:
                     if not row_has_data:
-                        if last_row_has_data:  # new table
+                        if last_row_has_data and cell_index == 0:  # new table
                             col_headers.clear()
                             row_headers.clear()
-                            col_index = 0
+                            table_raw_tags.clear()
                             row_index = 0
                         colspan = int(cell.attrs.get("colspan", "1"))
-                        col_headers.append(
-                            SpanHeader(cell_text, col_index, colspan)
-                        )
-                        col_index += colspan
+                        if (
+                            t_node.template_name.startswith("tr-çekim-ad-")
+                            and cell_index == 0
+                        ):
+                            table_raw_tags.append(cell_text)
+                        else:
+                            col_headers.append(
+                                SpanHeader(cell_text, col_index, colspan)
+                            )
+                            col_index += colspan
                     else:
                         rowspan = int(cell.attrs.get("rowspan", "1"))
                         row_headers.append(
@@ -74,7 +89,9 @@ def extract_tr_ad_tablo_template(
                         word = line.strip()
                         if word == "":
                             continue
-                        form = Form(form=word)
+                        form = Form(
+                            form=word, tags=table_tags, raw_tags=table_raw_tags
+                        )
                         for col_head in col_headers:
                             if (
                                 col_index >= col_head.index
