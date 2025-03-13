@@ -104,8 +104,8 @@ class Linkage(GreekBaseModel):
     raw_tags: list[str] = []
     tags: list[str] = []
     # topics: list[str] = []
-    # topics: list[str] = []
     # urls: list[str]
+    examples: list[str] = []
 
 
 class FormOf(GreekBaseModel):
