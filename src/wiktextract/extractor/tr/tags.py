@@ -1,5 +1,6 @@
 from .models import BaseModel
 
+# Modül:temalar/veri/söz_biçim
 GLOSS_TAGS = {
     "mecaz": "metaphoric",  # "Şablon:mecaz"
     "bazen": "sometimes",
@@ -24,6 +25,26 @@ GLOSS_TAGS = {
     "retorik": "rhetoric",
     "Türkiye": "Turkey",
     "Yeni Zelanda": "New Zealand",
+    "halk ağzı": "dialectal",
+    "argo": "slang",
+    "artık kullanılmayan sözcükler": "obsolete",
+    "aşağılayıcı ifadeler": "pejorative",
+    "çocuk dili": "childish",
+    "eskimekte": "obsolete",
+    "eskimiş": "obsolete",
+    "günlük konuşma dili": "vernacular",
+    "hakaret yollu sözcükler": "offensive",
+    "internet jargonu": ["Internet", "jargon"],
+    "kaba konuşma": "vulgar",
+    "kısa biçimler": "short-form",
+    "konuşma dili ifadeleri": "vernacular",
+    "mecazlar": "metaphoric",
+    "örtmeceler": "euphemistic",
+    "resmî dil": "official-language",
+    "şaka yollu sözcükler": "humorous",
+    "şiirsel terimler": "poetic",
+    "teklifsiz konuşma": "informal",
+    "kökler": "root",
 }
 
 POS_HEADER_TAGS = {
@@ -130,6 +151,7 @@ TOPICS = {
     "binalar": "building",
     "binicilik": "equestrianism",
     "Birleşik Krallık": "UK",
+    "bitki anatomisi": "botany",
     "bitki bilimi": "botany",
     # "bitki hastalıkları": "",
     "biyokimya": "biochemistry",
@@ -365,8 +387,41 @@ TOPICS = {
     "yönetim": "management",
     "yüzey bilimi": "geomorphology",
     "zaman": "time",
+    "atgiller": "horses",
+    # Modül:temalar/veri/grup
+    # "adalar": "island",
+    "aletler": "tools",
+    "alkollü içecekler": "beverages",
     "ateşli silahlar": "firearms",
     "atgiller": "horses",
+    "balıklar": "fish",
+    "böcekler": "insects",
+    "bilimsel adlar": "scientific",
+    "bitkiler": "vegetable",
+    # "çay": "tea",
+    "çiçekler": "flowery",
+    "doğangiller": "falconry",
+    "gezegenler": "planets",
+    "haftanın günleri": "weekdays",
+    "içecekler": "beverages",
+    # "kahve": "coffee",
+    "kemikler": "bone",
+    "kemiriciler": "rodents",
+    "kıtalar": "continents",
+    # "kuşlar": "birds",
+    "memeliler": "mammals",
+    "mevsimler": "seasons",
+    "renkler": "color",
+    "sebzeler": "vegetable",
+    "silahlar": "weapon",
+    "şehirler": "cities",
+    "takılar": "jewellery",
+    "taşıtlar": "vehicles",
+    "top oyunları": "ball-games",
+    "ülkeler": "country",
+    "yapılar": "architecture",
+    "yılanlar": "snakes",
+    "yiyecekler": "food",
 }
 
 
