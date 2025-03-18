@@ -154,7 +154,7 @@ def extract_terim_template(
     raw_tags_str = clean_node(wxr, sense, t_node).strip("() ")
     for raw_tag in raw_tags_str.split(","):
         raw_tag = raw_tag.strip()
-        if raw_tag != "":
+        if raw_tag not in ["", "'"]:
             sense.raw_tags.append(raw_tag)
 
 
@@ -199,9 +199,10 @@ def extract_pos_header_template(
             and node.tag == "span"
             and "gender" in node.attrs.get("class", "")
         ):
-            gender_raw_tag = clean_node(wxr, None, node)
-            if gender_raw_tag != "":
-                word_entry.raw_tags.append(gender_raw_tag)
+            for abbr_tag in node.find_html("abbr"):
+                gender_raw_tag = clean_node(wxr, None, abbr_tag)
+                if gender_raw_tag not in ["", "?"]:
+                    word_entry.raw_tags.append(gender_raw_tag)
 
     clean_node(wxr, word_entry, expanded_node)
 

@@ -349,3 +349,21 @@ class TestTrGloss(TestCase):
             page_data[0]["categories"],
             ["Türkçe sözcükler", "Türkçe özel adlar"],
         )
+
+    def test_two_pos_header_tags(self):
+        self.wxr.wtp.add_page(
+            "Şablon:başlık başı",
+            10,
+            """<strong class="Latn headword" lang="it">Aabid</strong>&nbsp;<span class="gender"><abbr title="eril cinsiyet">e</abbr>, <abbr title="dişil cinsiyet">d</abbr></span>[[Category:İtalyanca sözcükler|AABID]]""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "Aabid",
+            """==Türkçe==
+===Özel ad===
+{{başlık başı|it|özel ad|c=e|c2=d}}
+
+# Bir soyadı.""",
+        )
+        self.assertEqual(page_data[0]["tags"], ["masculine", "feminine"])
+        self.assertEqual(page_data[0]["categories"], ["İtalyanca sözcükler"])
