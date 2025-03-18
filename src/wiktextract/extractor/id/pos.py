@@ -77,7 +77,10 @@ def extract_gloss_list_item(
             if expanded.startswith("(") and expanded.strip().endswith(
                 (")", ") ·")
             ):
-                sense.raw_tags.append(expanded.strip("()· "))
+                for raw_tag in expanded.split("·"):
+                    raw_tag = raw_tag.strip("() ")
+                    if raw_tag != "":
+                        sense.raw_tags.append(raw_tag)
             else:
                 gloss_nodes.append(expanded)
         elif (
@@ -148,17 +151,21 @@ def process_pos_header_nodes(
         if isinstance(node, WikiNode):
             if node.kind == NodeKind.BOLD:
                 after_bold_node = True
-            elif node.kind == NodeKind.LINK and after_bold_node:
-                word = clean_node(wxr, None, node)
+            elif (
+                node.kind == NodeKind.LINK
+                and after_bold_node
+                and clean_node(wxr, None, node) != ""
+                and len(node.largs) > 0
+            ):
+                word = clean_node(wxr, None, node.largs[0])
                 if word != "":
                     form = Form(form=word)
                     if raw_tag != "":
                         form.raw_tags.append(raw_tag)
                         translate_raw_tags(form)
                     word_entry.forms.append(form)
-                    break
         elif isinstance(node, str) and node.strip().endswith(":"):
-            raw_tag = node.strip("(): ")
+            raw_tag = node.strip("():;, ")
 
 
 def extract_variasi_template(

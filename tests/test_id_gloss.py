@@ -117,3 +117,66 @@ class TestIdGloss(TestCase):
                 }
             ],
         )
+
+    def test_imbuhan_di_kan(self):
+        page_data = parse_page(
+            self.wxr,
+            "diabadikan",
+            """==bahasa Indonesia==
+===Verba===
+'''diabadikan''' (''[[di-]]'' + ''[[abadi]]'' + ''[[-kan]]'' ; pasif: [[diabadikan|di-]], [[kuabadikan|ku-]], [[kauabadikan|kau-]], transitif: [[abadikan|abadikan]], imperatif: [[abadikanlah|-lah]])
+#''bentuk pasif dari [[mengabadikan]] """,
+        )
+        self.assertEqual(
+            page_data[0]["forms"],
+            [
+                {"form": "diabadikan", "tags": ["passive"]},
+                {"form": "kuabadikan", "tags": ["passive"]},
+                {"form": "kauabadikan", "tags": ["passive"]},
+                {"form": "abadikan", "tags": ["transitive"]},
+                {"form": "abadikanlah", "tags": ["imperative"]},
+            ],
+        )
+
+    def test_imbuhan_ber(self):
+        page_data = parse_page(
+            self.wxr,
+            "bebercak",
+            """==bahasa Indonesia==
+===Verba===
+'''bebercak''' (''[[ber-]]'' + ''[[bercak#bahasa Indonesia|bercak]]'', aktif: [[membercakkan]], pasif: [[dibercakkan]])
+[[Kategori:Turunan kata bercak]]
+# mempunyai bercak; ada bercaknya""",
+        )
+        self.assertEqual(
+            page_data[0]["forms"],
+            [
+                {"form": "membercakkan", "tags": ["active"]},
+                {"form": "dibercakkan", "tags": ["passive"]},
+            ],
+        )
+        self.assertEqual(page_data[0]["categories"], ["Turunan kata bercak"])
+
+    def test_klasik(self):
+        self.wxr.wtp.add_page(
+            "Templat:klasik",
+            10,
+            """<i title="Istilah klasik"><span class="usage-label-sense"><span class="ib-brac">(</span><span class="ib-content">klasik</span><span class="ib-brac">)</span></span></i> [[:Kategori:id:Istilah klasik|·]][[Kategori:id:Istilah klasik|bebercak]] <i title="Istilah arkais"><span class="usage-label-sense"><span class="ib-brac">(</span><span class="ib-content">arkais</span><span class="ib-brac">)</span></span></i> [[:Kategori:id:Istilah arkais|·]]""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "demi",
+            """==bahasa Indonesia==
+===Preposisi===
+#{{klasik}} sebagai; seperti (untuk membandingkan):""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"],
+            [
+                {
+                    "glosses": ["sebagai; seperti (untuk membandingkan):"],
+                    "tags": ["Classical", "archaic"],
+                    "categories": ["id:Istilah klasik", "id:Istilah arkais"],
+                }
+            ],
+        )
