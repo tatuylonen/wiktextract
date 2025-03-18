@@ -6,6 +6,8 @@ GLOSS_TAGS = {
     "kiasan": "figuratively",
     "mdt": "morpheme",
     "Sas": "literary",
+    "arkais": "archaic",
+    "klasik": "Classical",
 }
 
 TRANSLATION_TAGS = {

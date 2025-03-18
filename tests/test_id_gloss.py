@@ -156,3 +156,27 @@ class TestIdGloss(TestCase):
             ],
         )
         self.assertEqual(page_data[0]["categories"], ["Turunan kata bercak"])
+
+    def test_klasik(self):
+        self.wxr.wtp.add_page(
+            "Templat:klasik",
+            10,
+            """<i title="Istilah klasik"><span class="usage-label-sense"><span class="ib-brac">(</span><span class="ib-content">klasik</span><span class="ib-brac">)</span></span></i> [[:Kategori:id:Istilah klasik|·]][[Kategori:id:Istilah klasik|bebercak]] <i title="Istilah arkais"><span class="usage-label-sense"><span class="ib-brac">(</span><span class="ib-content">arkais</span><span class="ib-brac">)</span></span></i> [[:Kategori:id:Istilah arkais|·]]""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "demi",
+            """==bahasa Indonesia==
+===Preposisi===
+#{{klasik}} sebagai; seperti (untuk membandingkan):""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"],
+            [
+                {
+                    "glosses": ["sebagai; seperti (untuk membandingkan):"],
+                    "tags": ["Classical", "archaic"],
+                    "categories": ["id:Istilah klasik", "id:Istilah arkais"],
+                }
+            ],
+        )

@@ -77,7 +77,10 @@ def extract_gloss_list_item(
             if expanded.startswith("(") and expanded.strip().endswith(
                 (")", ") ·")
             ):
-                sense.raw_tags.append(expanded.strip("()· "))
+                for raw_tag in expanded.split("·"):
+                    raw_tag = raw_tag.strip("() ")
+                    if raw_tag != "":
+                        sense.raw_tags.append(raw_tag)
             else:
                 gloss_nodes.append(expanded)
         elif (
