@@ -26,7 +26,20 @@ SOUND_TAGS = {
     "US": "US",
 }
 
-TAGS = {**TRANSLATION_TAGS, **GLOSS_TAGS, **NUM_TAGS, **SOUND_TAGS}
+POS_HEADER_TAGS = {
+    "pasif": "passive",
+    "transitif": "transitive",
+    "imperatif": "imperative",
+    "aktif": "active",
+}
+
+TAGS = {
+    **TRANSLATION_TAGS,
+    **GLOSS_TAGS,
+    **NUM_TAGS,
+    **SOUND_TAGS,
+    **POS_HEADER_TAGS,
+}
 
 TOPICS = {
     "Kim": "chemistry",
