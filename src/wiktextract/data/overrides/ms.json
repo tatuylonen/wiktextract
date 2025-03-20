@@ -124,6 +124,11 @@
         "namespace_id": 10,
         "need_pre_expand": true
     },
+    "Templat:ms": {
+        "body": "==Bahasa Melayu==\n",
+        "namespace_id": 10,
+        "need_pre_expand": true
+    },
     "Templat:mul": {
         "body": "==Rentas bahasa==\n",
         "namespace_id": 10,

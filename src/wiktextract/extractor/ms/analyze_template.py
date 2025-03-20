@@ -4,6 +4,8 @@ SECTION_TITLE_TEMPLATES = {
     "Templat:crh",
     "Templat:eo-kn",
     "Templat:lnd",
+    "Templat:ms-kkt",
+    "Templat:ms-kt",
 }
 
 

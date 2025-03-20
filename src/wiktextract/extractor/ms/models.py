@@ -17,6 +17,12 @@ class Sense(MalayBaseModel):
     categories: list[str] = []
 
 
+class Form(MalayBaseModel):
+    form: str
+    tags: list[str] = []
+    raw_tags: list[str] = []
+
+
 class WordEntry(MalayBaseModel):
     model_config = ConfigDict(title="Malay Wiktionary")
     word: str = Field(description="Word string")
@@ -28,3 +34,4 @@ class WordEntry(MalayBaseModel):
     categories: list[str] = []
     tags: list[str] = []
     raw_tags: list[str] = []
+    forms: list[Form] = []
