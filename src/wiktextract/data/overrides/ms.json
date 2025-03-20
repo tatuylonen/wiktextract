@@ -1,0 +1,227 @@
+{
+    "Templat:adjektif": {
+        "body": "===Adjektif {{{num|}}}===\n{{#if:{{{1|}}}{{{bahasa|}}}|[[Kategori:Kata sifat bahasa {{{bahasa|}}}{{{1|}}}]]}}\n",
+        "namespace_id": 10,
+        "need_pre_expand": true
+    },
+    "Templat:bg": {
+        "body": "==Bahasa Bulgaria==\n[[Kategori:Perkataan Bulgaria]]\n",
+        "namespace_id": 10,
+        "need_pre_expand": true
+    },
+    "Templat:bjn": {
+        "body": "==Bahasa Banjar==\n===Takrifan===\n[[Kategori:Perkataan Banjar]]\n",
+        "namespace_id": 10,
+        "need_pre_expand": true
+    },
+    "Templat:de": {
+        "body": "==Bahasa Jerman==\n",
+        "namespace_id": 10,
+        "need_pre_expand": true
+    },
+    "Templat:dtp": {
+        "body": "==Bahasa Kadazandusun==\n",
+        "namespace_id": 10,
+        "need_pre_expand": true
+    },
+    "Templat:en": {
+        "body": "==Bahasa Inggeris==\n",
+        "namespace_id": 10,
+        "need_pre_expand": true
+    },
+    "Templat:eo": {
+        "body": "==Bahasa Esperanto==\n",
+        "namespace_id": 10,
+        "need_pre_expand": true
+    },
+    "Templat:es": {
+        "body": "==Bahasa Sepanyol==\n",
+        "namespace_id": 10,
+        "need_pre_expand": true
+    },
+    "Templat:et": {
+        "body": "==Bahasa Estonia==\n[[Kategori: Perkataan Estonia]]\n",
+        "namespace_id": 10,
+        "need_pre_expand": true
+    },
+    "Templat:fa": {
+        "body": "==Bahasa Parsi==\n[[Kategori:Perkataan Parsi]]\n",
+        "namespace_id": 10,
+        "need_pre_expand": true
+    },
+    "Templat:hr": {
+        "body": "==Bahasa Croatia==\n",
+        "namespace_id": 10,
+        "need_pre_expand": true
+    },
+    "Templat:id": {
+        "body": "==Bahasa Indonesia==\n",
+        "namespace_id": 10,
+        "need_pre_expand": true
+    },
+    "Templat:io": {
+        "body": "==Bahasa Ido==\n===Takrifan===\n",
+        "namespace_id": 10,
+        "need_pre_expand": true
+    },
+    "Templat:it": {
+        "body": "==Bahasa Itali==\n===Takrifan===\n[[Kategori: Perkataan Itali]]\n",
+        "namespace_id": 10,
+        "need_pre_expand": true
+    },
+    "Templat:ja": {
+        "body": "==Bahasa Jepun==\n",
+        "namespace_id": 10,
+        "need_pre_expand": true
+    },
+    "Templat:jv": {
+        "body": "==Bahasa Jawa==\n",
+        "namespace_id": 10,
+        "need_pre_expand": true
+    },
+    "Templat:kata kerja": {
+        "body": "===Kata kerja===\n{{#if:{{{1|}}}{{{bahasa|}}}|[[Kategori:Kata kerja bahasa {{{bahasa|}}}{{{1|}}}]]}}\n",
+        "namespace_id": 10,
+        "need_pre_expand": true
+    },
+    "Templat:kata nama": {
+        "body": "===Kata nama===\n{{#if:{{{1|}}}{{{bahasa|}}}|[[Kategori:Kata nama bahasa {{{bahasa|}}}{{{1|}}}]]}}\n",
+        "namespace_id": 10,
+        "need_pre_expand": true
+    },
+    "Templat:ko": {
+        "body": "==Bahasa Korea==\n",
+        "namespace_id": 10,
+        "need_pre_expand": true
+    },
+    "Templat:ku": {
+        "body": "==Bahasa Kurdi==\n",
+        "namespace_id": 10,
+        "need_pre_expand": true
+    },
+    "Templat:kla": {
+        "body": "==Bahasa Latin==\n[[Kategori: Perkataan Latin]]\n",
+        "namespace_id": 10,
+        "need_pre_expand": true
+    },
+    "Templat:lt": {
+        "body": "==Bahasa Lithuania==\n[[Kategori: Perkataan Lithuania]]\n",
+        "namespace_id": 10,
+        "need_pre_expand": true
+    },
+    "Templat:lv": {
+        "body": "==Bahasa Latvia==\n[[Kategori:Perkataan Latvia]]\n",
+        "namespace_id": 10,
+        "need_pre_expand": true
+    },
+    "Templat:mi": {
+        "body": "==Bahasa Maori==\n",
+        "namespace_id": 10,
+        "need_pre_expand": true
+    },
+    "Templat:ml": {
+        "body": "==Bahasa Malayalam==\n[[Kategori:Perkataan Malayalam]]\n",
+        "namespace_id": 10,
+        "need_pre_expand": true
+    },
+    "Templat:ms": {
+        "body": "==Bahasa Melayu==\n",
+        "namespace_id": 10,
+        "need_pre_expand": true
+    },
+    "Templat:mul": {
+        "body": "==Rentas bahasa==\n",
+        "namespace_id": 10,
+        "need_pre_expand": true
+    },
+    "Templat:nan": {
+        "body": "==Bahasa Hokkien==\n",
+        "namespace_id": 10,
+        "need_pre_expand": true
+    },
+    "Templat:nl": {
+        "body": "==Bahasa Belanda==\n",
+        "namespace_id": 10,
+        "need_pre_expand": true
+    },
+    "Templat:pa": {
+        "body": "==Bahasa Punjabi==\n",
+        "namespace_id": 10,
+        "need_pre_expand": true
+    },
+    "Templat:pam": {
+        "body": "==Bahasa Kapampangan==\n[[Kategori:Perkataan Kapampangan]]\n",
+        "namespace_id": 10,
+        "need_pre_expand": true
+    },
+    "Templat:pl": {
+        "body": "==Bahasa Poland==\n[[Kategori: Perkataan Poland]]\n",
+        "namespace_id": 10,
+        "need_pre_expand": true
+    },
+    "Templat:pro": {
+        "body": "==Bahasa Provençal Lama==\n",
+        "namespace_id": 10,
+        "need_pre_expand": true
+    },
+    "Templat:pt": {
+        "body": "==Bahasa Portugis==\n[[Kategori:Perkataan Portugis]]\n",
+        "namespace_id": 10,
+        "need_pre_expand": true
+    },
+    "Templat:ru": {
+        "body": "==Bahasa Rusia==\n[[Kategori:Perkataan Rusia]]\n",
+        "namespace_id": 10,
+        "need_pre_expand": true
+    },
+    "Templat:sh": {
+        "body": "==Bahasa Serbo-Croatia==\n",
+        "namespace_id": 10,
+        "need_pre_expand": true
+    },
+    "Templat:sl": {
+        "body": "==Bahasa Slovene==\n",
+        "namespace_id": 10,
+        "need_pre_expand": true
+    },
+    "Templat:sq": {
+        "body": "==Bahasa Albania==\n===Takrifan===\n",
+        "namespace_id": 10,
+        "need_pre_expand": true
+    },
+    "Templat:sr": {
+        "body": "==Bahasa Serbia==\n",
+        "namespace_id": 10,
+        "need_pre_expand": true
+    },
+    "Templat:tagalog": {
+        "body": "==Bahasa Tagalog==\n===Takrifan===\n[[Kategori:Perkataan Tagalog]]\n",
+        "namespace_id": 10,
+        "need_pre_expand": true
+    },
+    "Templat:tr": {
+        "body": "==Bahasa Turki==\n===Takrifan===\n",
+        "namespace_id": 10,
+        "need_pre_expand": true
+    },
+    "Templat:tr": {
+        "body": "==Bahasa Urdu==\n",
+        "namespace_id": 10,
+        "need_pre_expand": true
+    },
+    "Templat:vi": {
+        "body": "==Bahasa Vietnam==\n[[Kategori: Perkataan Vietnam]]\n",
+        "namespace_id": 10,
+        "need_pre_expand": true
+    },
+    "Templat:zh": {
+        "body": "==Bahasa Cina==\n[[Kategori:Perkataan Cina]]\n",
+        "namespace_id": 10,
+        "need_pre_expand": true
+    },
+    "Templat:zu": {
+        "body": "==Bahasa Zulu==\n[[Kategori:Perkataan Zulu]]\n",
+        "namespace_id": 10,
+        "need_pre_expand": true
+    }
+}
