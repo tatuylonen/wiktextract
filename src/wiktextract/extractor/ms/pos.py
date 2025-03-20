@@ -74,7 +74,17 @@ def extract_gloss_list_item(
     )
     gloss_nodes = []
     for node in list_item.children:
-        if not (isinstance(node, WikiNode) and node.kind == NodeKind.LIST):
+        if isinstance(node, TemplateNode):
+            if node.template_name in [
+                "label",
+                "lb",
+                "konteks",
+                "context",
+                "konteks 1",
+                "context 2",
+            ]:
+                extract_label_template(wxr, sense, node)
+        elif not (isinstance(node, WikiNode) and node.kind == NodeKind.LIST):
             gloss_nodes.append(node)
     gloss_str = clean_node(wxr, sense, gloss_nodes)
     if gloss_str != "":
@@ -136,3 +146,13 @@ def extract_pos_header_template(
                     form.raw_tags.append(raw_tag)
                 if form.form != "":
                     page_data[-1].forms.append(form)
+
+
+def extract_label_template(
+    wxr: WiktextractContext, sense: Sense, t_node: TemplateNode
+) -> None:
+    text = clean_node(wxr, sense, t_node).strip("() ")
+    for raw_tag in text.split(","):
+        raw_tag = raw_tag.strip()
+        if raw_tag != "":
+            sense.raw_tags.append(raw_tag)

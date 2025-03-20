@@ -147,3 +147,31 @@ class TestMsGloss(TestCase):
                 },
             ],
         )
+
+    def test_label(self):
+        self.wxr.wtp.add_page(
+            "Templat:lb",
+            10,
+            '<span class="usage-label-sense"><span class="ib-brac">(</span><span class="ib-content">[[w:Brunei|Brunei]][[Kategori:Brunei bahasa Melayu|PANTAT]]<span class="ib-comma">,</span>&#32;Sabah<span class="ib-comma">,</span>&#32;[[w:Melayu Sarawak|Sarawak]][[Kategori:Sarawak bahasa Melayu|PANTAT]]<span class="ib-comma">,</span>&#32;[[w:Orang Melayu Singapura|Singapura]][[Kategori:Singapura bahasa Melayu|PANTAT]]</span><span class="ib-brac">)</span></span>',
+        )
+        page_data = parse_page(
+            self.wxr,
+            "pantat",
+            """==Bahasa Melayu==
+===Takrifan===
+#{{lb|ms|Brunei|Sabah|Sarawak|Singapura}} [[punggung]].""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"],
+            [
+                {
+                    "categories": [
+                        "Brunei bahasa Melayu",
+                        "Sarawak bahasa Melayu",
+                        "Singapura bahasa Melayu",
+                    ],
+                    "raw_tags": ["Brunei", "Sabah", "Sarawak", "Singapura"],
+                    "glosses": ["punggung."],
+                }
+            ],
+        )
