@@ -124,3 +124,26 @@ class TestMsGloss(TestCase):
         self.assertEqual(
             page_data[0]["forms"], [{"form": "اڤ", "raw_tags": ["ejaan Jawi"]}]
         )
+
+    def test_nested_list(self):
+        page_data = parse_page(
+            self.wxr,
+            "ha",
+            """==Bahasa Melayu==
+===Takrifan 1===
+==== Kata nama ====
+# [[huruf]] abjad [[Jawi]];
+## huruf ketujuh, ha kecil, ha pedas, ح.""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"],
+            [
+                {"glosses": ["huruf abjad Jawi;"]},
+                {
+                    "glosses": [
+                        "huruf abjad Jawi;",
+                        "huruf ketujuh, ha kecil, ha pedas, ح.",
+                    ]
+                },
+            ],
+        )

@@ -1,3 +1,4 @@
+import string
 from typing import Any
 
 from mediawiki_langcodes import name_to_code
@@ -18,6 +19,7 @@ def parse_section(
 ) -> None:
     title_text = clean_node(wxr, None, level_node.largs)
     wxr.wtp.start_subsection(title_text)
+    title_text = title_text.rstrip(string.digits + string.whitespace + "IVX")
     if title_text in POS_DATA:
         extract_pos_section(wxr, page_data, base_data, level_node, title_text)
 

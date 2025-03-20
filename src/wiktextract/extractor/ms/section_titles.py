@@ -14,4 +14,5 @@ POS_DATA = {
     "Hanzi": {"pos": "character", "tags": ["hanzi"]},
     "Kata depan": {"pos": "prep"},
     "Kata seru": {"pos": "intj"},
+    "Kata tugas": {"pos": "unknown"},
 }
