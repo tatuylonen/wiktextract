@@ -10,11 +10,21 @@ class MalayBaseModel(BaseModel):
     )
 
 
+class Example(MalayBaseModel):
+    text: str
+    translation: str = ""
+    roman: str = ""
+    ref: str = ""
+    tags: list[str] = []
+    raw_tags: list[str] = []
+
+
 class Sense(MalayBaseModel):
     glosses: list[str] = []
     tags: list[str] = []
     raw_tags: list[str] = []
     categories: list[str] = []
+    examples: list[Example] = []
 
 
 class Form(MalayBaseModel):

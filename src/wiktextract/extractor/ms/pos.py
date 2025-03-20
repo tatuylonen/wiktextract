@@ -2,6 +2,7 @@ from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from .example import extract_example_list_item
 from .models import Form, Sense, WordEntry
 from .section_titles import POS_DATA
 
@@ -85,6 +86,11 @@ def extract_gloss_list_item(
         if child_list.sarg.startswith("#") and child_list.sarg.endswith("#"):
             for child_list_item in child_list.find_child(NodeKind.LIST_ITEM):
                 extract_gloss_list_item(wxr, word_entry, child_list_item, sense)
+        elif child_list.sarg.startswith("#") and child_list.sarg.endswith(
+            (":", "*")
+        ):
+            for e_list_item in child_list.find_child(NodeKind.LIST_ITEM):
+                extract_example_list_item(wxr, word_entry, sense, e_list_item)
 
 
 def extract_pos_header_template(
