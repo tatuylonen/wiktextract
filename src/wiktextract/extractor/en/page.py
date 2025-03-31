@@ -3653,7 +3653,6 @@ def parse_language(
             return None
 
         for node in treenode.children:
-            # print(node)
             if not isinstance(node, WikiNode):
                 # print("  X{}".format(repr(node)[:40]))
                 continue
@@ -3765,6 +3764,7 @@ def parse_language(
                         for pdata in pos_datas:
                             data_extend(pdata, "tags", dt["tags"])
                 elif t_no_number in LINKAGE_TITLES:
+                    # print(f"LINKAGE_TITLES NODE {node=}")
                     rel = LINKAGE_TITLES[t_no_number]
                     data = select_data()
                     parse_linkage(data, rel, node)

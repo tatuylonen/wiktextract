@@ -120,7 +120,7 @@ POS_TITLES: dict[str, POSSubtitleData] = {
         "pos": "noun",
         "debug": "part-of-speech Noun form is proscribed",
     },
-    "nouns": {"pos": "noun", "debug": "usually in singular"},
+    # "nouns": {"pos": "noun", "debug": "usually in singular"},
     "noum": {"pos": "noun", "debug": "misspelled subtitle"},
     "number": {"pos": "num", "tags": ["number"]},
     "numeral": {"pos": "num"},
@@ -235,6 +235,8 @@ LINKAGE_TITLES: dict[str, str] = {
     "proverbs": "proverbs",
     "abbreviations": "abbreviations",
     "derived terms": "derived",
+    "nouns": "derived",
+    "proper nouns": "derived",
 }
 
 COMPOUNDS_TITLE = "compounds"
