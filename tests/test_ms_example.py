@@ -78,3 +78,108 @@ class TestMsExample(TestCase):
                 }
             ],
         )
+
+    def test_lit(self):
+        self.wxr.wtp.add_page(
+            "Templat:uxi",
+            10,
+            """<span class="h-usage-example"><i class="Latn mention e-example" lang="de">die sterblichen '''Überreste'''</i> ― <span class="e-translation">'''jasad'''</span> (literally, “<span class="e-literally">badan orang mati</span>”)</span>[[Kategori:Kata bahasa Jerman dengan contoh penggunaan|HA]]""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "Überrest",
+            """==Bahasa Jerman==
+==== Kata nama ====
+# [[mayat]]
+#: {{uxi|de|die sterblichen '''Überreste'''|'''jasad'''|lit=badan orang mati}}""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"],
+            [
+                {
+                    "categories": [
+                        "Kata bahasa Jerman dengan contoh penggunaan"
+                    ],
+                    "examples": [
+                        {
+                            "text": "die sterblichen Überreste",
+                            "translation": "jasad",
+                            "literal_meaning": "badan orang mati",
+                        }
+                    ],
+                    "glosses": ["mayat"],
+                }
+            ],
+        )
+
+    def test_quote(self):
+        self.wxr.wtp.add_page(
+            "Templat:quote",
+            10,
+            """<div class="h-quotation"><span class="Latn e-quotation" lang="de">Nun steht fest&#x3A; Bei dem Skelett handelt es sich mit "an Sicherheit grenzender Wahrscheinlichkeit" um die '''Überreste''' der aus England stammenden Prinzessin, die mit dem damaligen König Otto dem Großen verheiratet war.</span><dl><dd><span class="e-translation">Sekarang sudah jelas: kerangka itu hampir pasti sebahagian daripada '''jenazah''' puteri dari England yang telah berkahwin dengan raja pada waktu itu, Otto the Great.</span></dd></dl></div>[[Kategori:Kata bahasa Jerman dengan petikan|UBERREST]]""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "Überrest",
+            """==Bahasa Jerman==
+==== Kata nama ====
+# [[mayat]]
+#* '''2010''' Jun 16, "Überreste von Königin Editha identifiziert", ''der Spiegel''.
+#*: {{quote|de|Nun steht fest: Bei dem Skelett handelt es sich mit "an Sicherheit grenzender Wahrscheinlichkeit" um die '''Überreste''' der aus England stammenden Prinzessin, die mit dem damaligen König Otto dem Großen verheiratet war.|Sekarang sudah jelas: kerangka itu hampir pasti sebahagian daripada '''jenazah''' puteri dari England yang telah berkahwin dengan raja pada waktu itu, Otto the Great.}}""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"],
+            [
+                {
+                    "categories": ["Kata bahasa Jerman dengan petikan"],
+                    "examples": [
+                        {
+                            "text": 'Nun steht fest: Bei dem Skelett handelt es sich mit "an Sicherheit grenzender Wahrscheinlichkeit" um die Überreste der aus England stammenden Prinzessin, die mit dem damaligen König Otto dem Großen verheiratet war.',
+                            "translation": "Sekarang sudah jelas: kerangka itu hampir pasti sebahagian daripada jenazah puteri dari England yang telah berkahwin dengan raja pada waktu itu, Otto the Great.",
+                            "ref": '2010 Jun 16, "Überreste von Königin Editha identifiziert", der Spiegel.',
+                        }
+                    ],
+                    "glosses": ["mayat"],
+                }
+            ],
+        )
+
+    def test_quote_book(self):
+        self.wxr.wtp.add_page(
+            "Templat:quote-book",
+            10,
+            """<div class="citation-whole"><span class="cited-source"><span class="None" lang="und">'''2014'''</span>, Jonas Grethlein, “Das homerische Epos als Quelle, Überrest und Monument”, dalam <cite>Medien der Geschichte - Antikes Griechenland und Rom</cite>&lrm;<sup>[http://archiv.ub.uni-heidelberg.de/volltextserver/20459/1/Das%20homerische%20Epos.pdf]</sup>, <small><span class="neverexpand">[https://doi.org/10.11588%2Fheidok.00020459 →DOI]</span></small>:</span><dl><dd><div class="h-quotation"><span class="Latn e-quotation cited-passage" lang="de">Als ‚Quellen’ bezeichnet Droysen die „schriftlichen und mündlichen Nachrichten für die Erinnerungen“, als ‚'''Überreste'''’ solche Materialien, die nicht um der Überlieferung willen in die Welt gesetzt wurden, aber von uns als Zeugnisse ihrer Zeit interpretiert werden können.</span><dl><dd><span class="e-translation">Droysen menggunakan istilah ‘sumber’ untuk "mesej yang ditulis dan dituturkan demi kepentingan peringatan" dan ‘'''jasad'''’ untuk bahan yang tidak dicipta dengan niat tradisi tetapi masih boleh ditafsirkan sebagai saksi masa mereka.</span></dd></dl></div>[[Kategori:Kata bahasa Jerman dengan petikan|UBERREST]]</dd></dl></div>""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "Überrest",
+            """==Bahasa Jerman==
+==== Kata nama ====
+# [[mayat]]
+#* {{quote-book
+|de
+|year=2014
+|doi=10.11588/heidok.00020459
+|author=Jonas Grethlein
+|title=Medien der Geschichte - Antikes Griechenland und Rom
+|chapter=Das homerische Epos als Quelle, Überrest und Monument
+|url=http://archiv.ub.uni-heidelberg.de/volltextserver/20459/1/Das%20homerische%20Epos.pdf
+|passage= Als ‚Quellen’ bezeichnet Droysen die „schriftlichen und mündlichen Nachrichten für die Erinnerungen“, als ‚'''Überreste'''’ solche Materialien, die nicht um der Überlieferung willen in die Welt gesetzt wurden, aber von uns als Zeugnisse ihrer Zeit interpretiert werden können.
+|translation=Droysen menggunakan istilah ‘sumber’ untuk "mesej yang ditulis dan dituturkan demi kepentingan peringatan" dan ‘'''jasad'''’ untuk bahan yang tidak dicipta dengan niat tradisi tetapi masih boleh ditafsirkan sebagai saksi masa mereka.}}""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"],
+            [
+                {
+                    "categories": ["Kata bahasa Jerman dengan petikan"],
+                    "examples": [
+                        {
+                            "text": "Als ‚Quellen’ bezeichnet Droysen die „schriftlichen und mündlichen Nachrichten für die Erinnerungen“, als ‚Überreste’ solche Materialien, die nicht um der Überlieferung willen in die Welt gesetzt wurden, aber von uns als Zeugnisse ihrer Zeit interpretiert werden können.",
+                            "translation": 'Droysen menggunakan istilah ‘sumber’ untuk "mesej yang ditulis dan dituturkan demi kepentingan peringatan" dan ‘jasad’ untuk bahan yang tidak dicipta dengan niat tradisi tetapi masih boleh ditafsirkan sebagai saksi masa mereka.',
+                            "ref": "2014, Jonas Grethlein, “Das homerische Epos als Quelle, Überrest und Monument”, dalam Medien der Geschichte - Antikes Griechenland und Rom, →DOI:",
+                        }
+                    ],
+                    "glosses": ["mayat"],
+                }
+            ],
+        )
