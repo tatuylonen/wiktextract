@@ -74,16 +74,15 @@ def extract_gloss_list_item(
     )
     gloss_nodes = []
     for node in list_item.children:
-        if isinstance(node, TemplateNode):
-            if node.template_name in [
-                "label",
-                "lb",
-                "konteks",
-                "context",
-                "konteks 1",
-                "context 2",
-            ]:
-                extract_label_template(wxr, sense, node)
+        if isinstance(node, TemplateNode) and node.template_name in [
+            "label",
+            "lb",
+            "konteks",
+            "context",
+            "konteks 1",
+            "context 2",
+        ]:
+            extract_label_template(wxr, sense, node)
         elif not (isinstance(node, WikiNode) and node.kind == NodeKind.LIST):
             gloss_nodes.append(node)
     gloss_str = clean_node(wxr, sense, gloss_nodes)

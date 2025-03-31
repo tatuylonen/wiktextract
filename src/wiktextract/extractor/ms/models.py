@@ -17,6 +17,7 @@ class Example(MalayBaseModel):
     ref: str = ""
     tags: list[str] = []
     raw_tags: list[str] = []
+    literal_meaning: str = ""
 
 
 class Sense(MalayBaseModel):

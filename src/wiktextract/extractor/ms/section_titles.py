@@ -15,4 +15,5 @@ POS_DATA = {
     "Kata depan": {"pos": "prep"},
     "Kata seru": {"pos": "intj"},
     "Kata tugas": {"pos": "unknown"},
+    "Perumian": {"pos": "romanization"},
 }

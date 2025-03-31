@@ -78,3 +78,36 @@ class TestMsExample(TestCase):
                 }
             ],
         )
+
+    def test_lit(self):
+        self.wxr.wtp.add_page(
+            "Templat:uxi",
+            10,
+            """<span class="h-usage-example"><i class="Latn mention e-example" lang="de">die sterblichen '''Überreste'''</i> ― <span class="e-translation">'''jasad'''</span> (literally, “<span class="e-literally">badan orang mati</span>”)</span>[[Kategori:Kata bahasa Jerman dengan contoh penggunaan|HA]]""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "ha",
+            """==Bahasa Jerman==
+==== Kata nama ====
+# [[mayat]]
+#: {{uxi|de|die sterblichen '''Überreste'''|'''jasad'''|lit=badan orang mati}}""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"],
+            [
+                {
+                    "categories": [
+                        "Kata bahasa Jerman dengan contoh penggunaan"
+                    ],
+                    "examples": [
+                        {
+                            "text": "die sterblichen Überreste",
+                            "translation": "jasad",
+                            "literal_meaning": "badan orang mati",
+                        }
+                    ],
+                    "glosses": ["mayat"],
+                }
+            ],
+        )

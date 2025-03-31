@@ -14,7 +14,7 @@ def extract_example_list_item(
     italic_str = ""
     for node in list_item.children:
         if isinstance(node, TemplateNode):
-            if node.template_name in ["cp", "usex", "ux", "ko-usex"]:
+            if node.template_name in ["cp", "usex", "ux", "ko-usex", "uxi"]:
                 extract_cp_template(wxr, sense, node)
         elif isinstance(node, WikiNode):
             if node.kind == NodeKind.ITALIC:
@@ -51,6 +51,9 @@ def extract_cp_template(
                 e_data.roman = clean_node(wxr, None, html_tag)
         elif html_tag.tag == "span" and "e-translation" in html_class:
             e_data.translation = clean_node(wxr, None, html_tag)
+        elif html_tag.tag == "span" and "e-literally" in html_class:
+            e_data.literal_meaning = clean_node(wxr, None, html_tag)
+
     if e_data.text != "":
         sense.examples.append(e_data)
     for link_node in expanded_template.find_child(NodeKind.LINK):
