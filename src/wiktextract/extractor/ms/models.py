@@ -20,12 +20,18 @@ class Example(MalayBaseModel):
     literal_meaning: str = ""
 
 
+class AltForm(MalayBaseModel):
+    word: str
+
+
 class Sense(MalayBaseModel):
     glosses: list[str] = []
     tags: list[str] = []
     raw_tags: list[str] = []
     categories: list[str] = []
     examples: list[Example] = []
+    form_of: list[AltForm] = []
+    alt_of: list[AltForm] = []
 
 
 class Form(MalayBaseModel):

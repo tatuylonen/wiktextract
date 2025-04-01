@@ -175,3 +175,52 @@ class TestMsGloss(TestCase):
                 }
             ],
         )
+
+    def test_form_of(self):
+        self.wxr.wtp.add_page(
+            "Templat:jamak",
+            10,
+            """<span class='form-of-definition use-with-mention'>[[Lampiran:Glosari#bilangan_jamak|jamak]] bagi <span class='form-of-definition-link'><i class="Latn mention" lang="io">[[abado#Ido|abado]]</i></span></span>[[Kategori:Jamak berpautan merah untuk mufrad]]""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "abadi",
+            """==Bahasa Ido==
+===Kata nama===
+# {{jamak|io|abado}}; ketua-ketua biara.""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"],
+            [
+                {
+                    "form_of": [{"word": "abado"}],
+                    "categories": ["Jamak berpautan merah untuk mufrad"],
+                    "glosses": ["jamak bagi abado; ketua-ketua biara."],
+                }
+            ],
+        )
+
+    def test_alt_of(self):
+        self.wxr.wtp.add_page(
+            "Templat:alternative case form of",
+            10,
+            """<span class='form-of-definition use-with-mention'>Bentuk alternatif jenis huruf besar bagi <span class='form-of-definition-link'><i class="Latn mention" lang="ms">[[orang kena tuduh#Melayu|orang kena tuduh]]</i></span></span>""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "Orang Kena Tuduh",
+            """==Bahasa Melayu==
+===Takrifan===
+# {{alternative case form of|ms|orang kena tuduh}}.""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"],
+            [
+                {
+                    "alt_of": [{"word": "orang kena tuduh"}],
+                    "glosses": [
+                        "Bentuk alternatif jenis huruf besar bagi orang kena tuduh."
+                    ],
+                }
+            ],
+        )
