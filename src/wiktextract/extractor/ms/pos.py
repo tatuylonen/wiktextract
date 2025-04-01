@@ -3,8 +3,34 @@ from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .example import extract_example_list_item
-from .models import Form, Sense, WordEntry
+from .models import AltForm, Form, Sense, WordEntry
 from .section_titles import POS_DATA
+
+POS_HEADER_TEMPLATE_SUFFIXES = (
+    "-ks",
+    "-adj",
+    "-kn",
+    "-noun",
+    "-kk",
+    "-verb",
+    "-kerja",
+    "-kgn",
+    "-pron",
+    "-kkt",
+    "-adv",
+    "-kp",
+    "-sendi",
+    "-prep",
+    "-seru",
+    "-kanji",
+    "-hanzi",
+    "-hanja",
+    "-conj",
+    "-hantu",
+)
+
+FORM_OF_TEMPLATES = {"ja-perumian", "jamak", "alt case"}
+ALT_OF_TEMPLATES = {"alt case", "alternative case form of"}
 
 
 def extract_pos_section(
@@ -29,30 +55,7 @@ def extract_pos_section(
                     if index < gloss_list_index:
                         gloss_list_index = index
         elif isinstance(node, TemplateNode) and (
-            node.template_name.endswith(
-                (
-                    "-ks",
-                    "-adj",
-                    "-kn",
-                    "-noun",
-                    "-kk",
-                    "-verb",
-                    "-kerja",
-                    "-kgn",
-                    "-pron",
-                    "-kkt",
-                    "-adv",
-                    "-kp",
-                    "-sendi",
-                    "-prep",
-                    "-seru",
-                    "-kanji",
-                    "-hanzi",
-                    "-hanja",
-                    "-conj",
-                    "-hantu",
-                )
-            )
+            node.template_name.endswith(POS_HEADER_TEMPLATE_SUFFIXES)
             or node.template_name in ["inti", "head", "Han char"]
         ):
             extract_pos_header_template(wxr, page_data, base_data, node)
@@ -83,6 +86,13 @@ def extract_gloss_list_item(
             "context 2",
         ]:
             extract_label_template(wxr, sense, node)
+        elif isinstance(node, TemplateNode) and (
+            node.template_name.endswith(" of")
+            or node.template_name in FORM_OF_TEMPLATES
+            or node.template_name in ALT_OF_TEMPLATES
+        ):
+            extract_form_of_template(wxr, sense, node)
+            gloss_nodes.append(node)
         elif not (isinstance(node, WikiNode) and node.kind == NodeKind.LIST):
             gloss_nodes.append(node)
     gloss_str = clean_node(wxr, sense, gloss_nodes)
@@ -155,3 +165,19 @@ def extract_label_template(
         raw_tag = raw_tag.strip()
         if raw_tag != "":
             sense.raw_tags.append(raw_tag)
+
+
+def extract_form_of_template(
+    wxr: WiktextractContext, sense: Sense, t_node: TemplateNode
+) -> None:
+    expanded_template = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for html_tag in expanded_template.find_child_recursively(NodeKind.HTML):
+        if html_tag.tag == "i" and "mention" in html_tag.attrs.get("class", ""):
+            word = clean_node(wxr, None, html_tag)
+            if word != "":
+                if t_node.template_name in ALT_OF_TEMPLATES:
+                    sense.alt_of.append(AltForm(word=word))
+                else:
+                    sense.form_of.append(AltForm(word=word))

@@ -20,16 +20,28 @@ class Example(MalayBaseModel):
     literal_meaning: str = ""
 
 
+class AltForm(MalayBaseModel):
+    word: str
+
+
 class Sense(MalayBaseModel):
     glosses: list[str] = []
     tags: list[str] = []
     raw_tags: list[str] = []
     categories: list[str] = []
     examples: list[Example] = []
+    form_of: list[AltForm] = []
+    alt_of: list[AltForm] = []
 
 
 class Form(MalayBaseModel):
     form: str
+    tags: list[str] = []
+    raw_tags: list[str] = []
+
+
+class Linkage(MalayBaseModel):
+    word: str
     tags: list[str] = []
     raw_tags: list[str] = []
 
@@ -46,3 +58,6 @@ class WordEntry(MalayBaseModel):
     tags: list[str] = []
     raw_tags: list[str] = []
     forms: list[Form] = []
+    etymology_text: str = ""
+    antonyms: list[Linkage] = []
+    synonyms: list[Linkage] = []
