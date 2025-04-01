@@ -6,9 +6,10 @@ from wikitextprocessor.parser import LEVEL_KIND_FLAGS, LevelNode, NodeKind
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from .linkage import extract_form_section
 from .models import Sense, WordEntry
 from .pos import extract_pos_section
-from .section_titles import POS_DATA
+from .section_titles import FORM_SECTIONS, POS_DATA
 
 
 def parse_section(
@@ -25,6 +26,13 @@ def parse_section(
     elif title_text == "Etimologi":
         extract_etymology_section(
             wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
+        )
+    elif title_text in FORM_SECTIONS:
+        extract_form_section(
+            wxr,
+            page_data[-1] if len(page_data) > 0 else base_data,
+            level_node,
+            FORM_SECTIONS[title_text],
         )
 
     for next_level in level_node.find_child(LEVEL_KIND_FLAGS):

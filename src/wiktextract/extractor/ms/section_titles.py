@@ -17,3 +17,8 @@ POS_DATA = {
     "Kata tugas": {"pos": "unknown"},
     "Perumian": {"pos": "romanization"},
 }
+
+FORM_SECTIONS = {
+    "Tulisan Jawi": ["Jawi"],
+    "Tulisan Rumi": ["Rumi"],
+}
