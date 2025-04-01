@@ -32,3 +32,23 @@ class TestMsLinkage(TestCase):
         self.assertEqual(
             page_data[0]["forms"], [{"form": "لمبو", "tags": ["Jawi"]}]
         )
+
+    def test_list(self):
+        page_data = parse_page(
+            self.wxr,
+            "abadi",
+            """== Bahasa Melayu ==
+=== Takrifan ===
+# kekal untuk selamanya.
+=== Tesaurus ===
+; Sinonim: [[abadiah]], [[abadiat]], baqa, wujud.""",
+        )
+        self.assertEqual(
+            page_data[0]["synonyms"],
+            [
+                {"word": "abadiah"},
+                {"word": "abadiat"},
+                {"word": "baqa"},
+                {"word": "wujud"},
+            ],
+        )

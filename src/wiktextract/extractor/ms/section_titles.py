@@ -22,3 +22,8 @@ FORM_SECTIONS = {
     "Tulisan Jawi": ["Jawi"],
     "Tulisan Rumi": ["Rumi"],
 }
+
+LINKAGE_SECTIONS = {
+    "Sinonim": "synonyms",
+    "Antonim": "antonyms",
+}
