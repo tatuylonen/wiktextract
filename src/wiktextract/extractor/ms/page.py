@@ -22,6 +22,10 @@ def parse_section(
     title_text = title_text.rstrip(string.digits + string.whitespace + "IVX")
     if title_text in POS_DATA:
         extract_pos_section(wxr, page_data, base_data, level_node, title_text)
+    elif title_text == "Etimologi":
+        extract_etymology_section(
+            wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
+        )
 
     for next_level in level_node.find_child(LEVEL_KIND_FLAGS):
         parse_section(wxr, page_data, base_data, next_level)
@@ -64,3 +68,11 @@ def parse_page(
         if len(data.senses) == 0:
             data.senses.append(Sense(tags=["no-gloss"]))
     return [m.model_dump(exclude_defaults=True) for m in page_data]
+
+
+def extract_etymology_section(
+    wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
+) -> None:
+    word_entry.etymology_text = clean_node(
+        wxr, word_entry, list(level_node.invert_find_child(LEVEL_KIND_FLAGS))
+    )

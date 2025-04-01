@@ -52,3 +52,4 @@ class WordEntry(MalayBaseModel):
     tags: list[str] = []
     raw_tags: list[str] = []
     forms: list[Form] = []
+    etymology_text: str = ""
