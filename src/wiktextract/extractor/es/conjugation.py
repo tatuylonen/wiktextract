@@ -27,6 +27,7 @@ def extract_conjugation_section(
         if (
             data.lang_code == page_data[-1].lang_code
             and data.etymology_text == page_data[-1].etymology_text
+            and data.pos == "verb"  # should be fixed on Wiktionary
         ):
             data.forms.extend(forms)
             data.categories.extend(cats)
@@ -37,13 +38,6 @@ class SpanHeader:
     text: str
     index: int
     span: int
-
-
-IGNORE_ES_V_ROW_PREFIXES = (
-    "Modo ",
-    "Tiempos ",
-)
-IGNORE_ES_V_HEADERS = {"número:", "persona:"}
 
 
 def process_es_v_conj_template(
@@ -61,22 +55,14 @@ def process_es_v_conj_template(
         return
     table_node = table_nodes[0]
     col_headers = []
+    color_col_headers = []
+    color_table_headers = []
+    row_header = SpanHeader("", 0, 0)
     for row in table_node.find_child(NodeKind.TABLE_ROW):
-        row_header = ""
+        row_header.span -= 1
+        if row_header.span <= 0:
+            row_header = SpanHeader("", 0, 0)
         all_header_row = not row.contain_node(NodeKind.TABLE_CELL)
-        if row.contain_node(NodeKind.TABLE_HEADER_CELL) and all_header_row:
-            first_header = next(row.find_child(NodeKind.TABLE_HEADER_CELL))
-            first_header_text = clean_node(wxr, None, first_header)
-            if first_header_text.startswith(IGNORE_ES_V_ROW_PREFIXES):
-                continue  # ignore personal pronouns row
-            elif len(list(row.filter_empty_str_child())) == 1:  # new table
-                col_headers.clear()
-                continue
-        if row.contain_node(NodeKind.TABLE_CELL) and not row.contain_node(
-            NodeKind.TABLE_HEADER_CELL
-        ):
-            continue  # ignore end notes
-
         col_header_index = 0
         col_cell_index = 0
         for cell in row.find_child(
@@ -84,29 +70,60 @@ def process_es_v_conj_template(
         ):
             cell_text = clean_node(wxr, None, cell)
             colspan = int(cell.attrs.get("colspan", "1"))
-            if cell_text == "" or cell_text in IGNORE_ES_V_HEADERS:
-                continue
-            elif cell.kind == NodeKind.TABLE_HEADER_CELL:
-                if all_header_row:
-                    col_headers.append(
-                        SpanHeader(cell_text, col_header_index, colspan)
-                    )
+            if cell.kind == NodeKind.TABLE_HEADER_CELL:
+                if (
+                    # ignore empty header in the second row
+                    # but not the last table
+                    cell_text == "" and len(color_table_headers) == 0
+                ) or cell_text in ["número:", "persona:"]:
+                    continue
+                elif all_header_row:
+                    if cell_text.startswith("Formas "):  # new table
+                        col_headers.clear()
+                        row_header = SpanHeader("", 0, 0)
+                    if "background:" in cell.attrs.get("style", ""):
+                        if cell_text.startswith("Modo "):
+                            color_col_headers.clear()
+                            color_table_headers.clear()
+                            color_table_headers.append(cell_text)
+                        elif cell_text.startswith("Tiempos "):
+                            if len(color_table_headers) > 1:
+                                color_table_headers.pop()
+                            color_table_headers.append(cell_text)
+                        else:
+                            color_col_headers.append(
+                                SpanHeader(cell_text, col_header_index, colspan)
+                            )
+                            col_header_index += colspan
+                    else:
+                        col_headers.append(
+                            SpanHeader(cell_text, col_header_index, colspan)
+                        )
+                        col_header_index += colspan
                 else:
-                    row_header = cell_text
+                    row_header = SpanHeader(
+                        cell_text, 0, int(cell.attrs.get("rowspan", "1"))
+                    )
                     col_cell_index += colspan - 1
-                col_header_index += colspan
+            elif cell_text == "" or "background-color:" in cell.attrs.get(
+                "style", ""
+            ):
+                continue  # ignore end notes
             else:
                 for line in cell_text.splitlines():
                     form = Form(form=line)
-                    if row_header != "":
-                        form.raw_tags.extend(row_header.split(" o "))
-                    for col_head in col_headers:
-                        if (
-                            col_cell_index >= col_head.index
-                            and col_cell_index < col_head.index + col_head.span
-                        ):
-                            form.raw_tags.append(col_head.text)
-
+                    for col_header_list in [col_headers, color_col_headers]:
+                        for col_head in col_header_list:
+                            if (
+                                col_cell_index >= col_head.index
+                                and col_cell_index
+                                < col_head.index + col_head.span
+                                and col_head.text != ""
+                            ):
+                                form.raw_tags.append(col_head.text)
+                    form.raw_tags.extend(color_table_headers)
+                    if row_header.text != "":
+                        form.raw_tags.extend(row_header.text.split(" o "))
                     if form.form != "":
                         translate_raw_tags(form)
                         forms.append(form)
