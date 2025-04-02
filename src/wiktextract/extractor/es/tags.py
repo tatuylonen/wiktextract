@@ -726,6 +726,13 @@ TABLE_TAGS = {
     "indicativo": "indicative",
     "subjuntivo": "subjunctive",
     "imperativo": "imperative",
+    # Plantilla:es.v.conj.ar
+    "formas no personales": "impersonal",
+    "formas personales": "personal",
+    "modo indicativo": "indicative",
+    "modo subjuntivo": "subjunctive",
+    "modo imperativo": "imperative",
+    "pretérito": "preterite",
 }
 
 
