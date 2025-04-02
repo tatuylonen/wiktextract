@@ -18,6 +18,9 @@ class TestMsLinkage(TestCase):
             ),
         )
 
+    def tearDown(self):
+        self.wxr.wtp.close_db_conn()
+
     def test_forms(self):
         self.wxr.wtp.add_page("Templat:ARchar", 10, "{{{1}}}")
         page_data = parse_page(

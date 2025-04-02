@@ -42,7 +42,7 @@ def extract_linkage_list_item(
                 )
         elif isinstance(node, str):
             for word in node.split(","):
-                word = word.strip(" .")
+                word = word.strip(" .\n")
                 if word != "":
                     getattr(word_entry, LINKAGE_SECTIONS[linkage_name]).append(
                         Linkage(word=word)
