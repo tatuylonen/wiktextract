@@ -46,6 +46,18 @@ class Linkage(MalayBaseModel):
     raw_tags: list[str] = []
 
 
+class Translation(MalayBaseModel):
+    lang_code: str = Field(
+        description="Wiktionary language code of the translation term",
+    )
+    lang: str = Field(description="Translation language name")
+    word: str = Field(description="Translation term")
+    sense: str = Field(default="", description="Translation gloss")
+    tags: list[str] = []
+    raw_tags: list[str] = []
+    roman: str = ""
+
+
 class WordEntry(MalayBaseModel):
     model_config = ConfigDict(title="Malay Wiktionary")
     word: str = Field(description="Word string")
@@ -61,3 +73,4 @@ class WordEntry(MalayBaseModel):
     etymology_text: str = ""
     antonyms: list[Linkage] = []
     synonyms: list[Linkage] = []
+    translations: list[Translation] = []
