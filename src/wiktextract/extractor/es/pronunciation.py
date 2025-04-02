@@ -2,7 +2,7 @@ from wikitextprocessor import HTMLNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
-from ..share import create_audio_url_dict
+from ..share import set_sound_file_url_fields
 from .models import Sound, WordEntry
 
 # translate table row header to sound model field
@@ -75,10 +75,7 @@ def process_pron_graf_ipa_cell(
             sound.ipa += node.strip()
         elif isinstance(node, HTMLNode) and node.tag == "phonos":
             sound_file = node.attrs.get("file", "")
-            sound_urls = create_audio_url_dict(sound_file)
-            for sound_key, sound_value in sound_urls.items():
-                if hasattr(sound, sound_key):
-                    setattr(sound, sound_key, sound_value)
+            set_sound_file_url_fields(wxr, sound_file, sound)
             for small_tag in node.find_html("small"):
                 location = clean_node(wxr, None, small_tag)
                 sound.raw_tags.append(location)

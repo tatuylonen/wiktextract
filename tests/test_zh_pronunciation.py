@@ -34,7 +34,11 @@ class TestPronunciation(TestCase):
             10,
             """* [[w:官話|官話]]
 ** <small>([[w:現代標準漢語|現代標準漢語]])</small>
-*** <small>同音詞</small>：<table><tr><th>[展開/摺疊]</th></tr><tr><td><span class="Hani" lang="zh">[[大姑#漢語|大姑]]</span><br><span class="Hani" lang="zh">[[小姑#漢語|小姑]]</span></td></tr></table>""",
+*** <small>同音詞</small>：<table><tr><th>[展開/摺疊]</th></tr><tr><td><span class="Hani" lang="zh">[[大姑#漢語|大姑]]</span><br><span class="Hani" lang="zh">[[小姑#漢語|小姑]]</span></td></tr></table>
+* [[w:晉語|晉語]]
+** <small>([[w:太原話|太原話]])</sup></small>
+*** <small>[[Wiktionary:國際音標|國際音標]] (老派)</small>：<span class="IPA">/sz̩⁵³/</span>
+            """,
         )
         root = self.wxr.wtp.parse("{{zh-pron}}")
         base_data = WordEntry(
@@ -54,6 +58,11 @@ class TestPronunciation(TestCase):
                     "homophone": "小姑",
                     "tags": ["Mandarin", "Standard Chinese"],
                     "raw_tags": ["同音詞"],
+                },
+                {
+                    "ipa": "/sz̩⁵³/",
+                    "tags": ["Jin"],
+                    "raw_tags": ["太原話", "國際音標 (老派)"],
                 },
             ],
         )
