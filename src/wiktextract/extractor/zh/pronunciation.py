@@ -10,7 +10,7 @@ from wikitextprocessor import (
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
-from ..share import create_audio_url_dict, set_sound_file_url_fields
+from ..share import set_sound_file_url_fields
 from .models import Sound, WordEntry
 from .tags import translate_raw_tags
 
@@ -109,32 +109,25 @@ def process_zh_pron_list_item(
         if isinstance(node, WikiNode):
             if node.kind == NodeKind.LINK:
                 if len(node.largs) > 0 and node.largs[0][0].startswith("File:"):
-                    sound_file_data = create_audio_url_dict(
-                        node.largs[0][0].removeprefix("File:")
-                    )
+                    filename = node.largs[0][0].removeprefix("File:")
                     sound_data = Sound()
-                    for key, value in sound_file_data.items():
-                        if key in Sound.model_fields:
-                            setattr(sound_data, key, value)
-                        else:
-                            wxr.wtp.warning(
-                                f"{key=} not defined in Sound",
-                                sortid="zh.pronunciation/56",
-                            )
+                    set_sound_file_url_fields(wxr, filename, sound_data)
                     sounds.append(sound_data)
                 else:
                     current_tags.append(clean_node(wxr, None, node).strip("()"))
             elif isinstance(node, HTMLNode):
                 if node.tag == "small":
                     # remove "幫助"(help) <sup> tag
-                    raw_tags = re.split(
-                        r"，|：",
-                        clean_node(
-                            wxr,
-                            None,
-                            list(node.invert_find_child(NodeKind.HTML)),
-                        ).strip("()"),
+                    raw_tag_text = clean_node(
+                        wxr,
+                        None,
+                        list(node.invert_find_child(NodeKind.HTML)),
                     )
+                    if raw_tag_text.startswith("(") and raw_tag_text.endswith(
+                        ")"
+                    ):
+                        raw_tag_text = raw_tag_text.strip("()")
+                    raw_tags = re.split(r"，|：", raw_tag_text)
                     current_tags.extend(
                         [t.strip() for t in raw_tags if len(t.strip()) > 0]
                     )
