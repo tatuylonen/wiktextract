@@ -35,6 +35,7 @@ class TestElGlosses(TestCase):
         https://el.wiktionary.org/wiki/Πρότυπο:βλ
 
         Test suite:
+        * linkage in a not (":" or "*")-ending LIST_ITEM
         * linkage inside synonym
         * linkage without gloss
         * linkage without gloss, but one quote
@@ -62,11 +63,27 @@ class TestElGlosses(TestCase):
         senses = {"senses": dumped["senses"]}
         self.assertEqual(senses, expected)
 
+    def test_bl_linkage_irregular_list_item(self) -> None:
+        # https://el.wiktionary.org/wiki/Καραγκιόζης
+        # * The βλ template appears in an not (":" or "*")-ending ITEM
+        # * The ετ-template just adds a: "metaphorically tag"
+        raw = """
+            # [[ήρωας]] του [[θέατρο σκιών|θεάτρου σκιών]]
+            # {{ετ|μτφρ|00=-}} {{βλ|καραγκιόζης}}
+        """
+        expected = {
+            "senses": [
+                {"glosses": ["ήρωας του θεάτρου σκιών"]},
+                {
+                    "related": [{"word": "καραγκιόζης"}],
+                    "raw_tags": ["μεταφορικά"],
+                },
+            ],
+        }
+        self.mktest_bl_linkage(raw, expected)
+
     def test_bl_linkage_inside_synonym(self) -> None:
         # https://el.wiktionary.org/wiki/αφόδευμα
-        #
-        # NOTE: the original had a {{}} instead of {{συνων}} that was expanded
-        # before reaching process_pos, so we edited manually.
         raw = """
             * [[ό,τι]] [[αφοδεύω|αφοδεύει]] κάποιος
             *: {{συνων}} {{βλ|περίττωμα}}

@@ -498,8 +498,40 @@ def bold_node_fn(
     return None
 
 
+def extract_gloss_templates(
+    wxr: WiktextractContext, parent_sense: Sense, contents: WikiNodeChildrenList
+) -> None:
+    """Expand the necessary templates in a gloss.
+
+    May mutate contents, removing expanded nodes.
+
+    Only supports the ετ (label) for now:
+        * {{ετ|μουσ όργ}} [[έγχορδος|έγχορδο]] μουσικό [[όργανο]]
+        # {{ετ|μτφρ|00=-}} {{βλ|καραγκιόζης}}
+    """
+    template_names_to_expand = ("ετ",)
+    LABEL_TAGS = {
+        "μτφρ": "μεταφορικά",
+    }
+
+    # https://github.com/tatuylonen/wiktextract/blob/35ac807e20a38166c35c968ccd8da3fe49971fc1/src/wiktextract/extractor/es/gloss.py#L78
+    for idx, elt in enumerate(contents):
+        if (
+            isinstance(elt, TemplateNode)
+            and elt.template_name in template_names_to_expand
+        ):
+            for _, arg_value in elt.template_parameters.items():
+                arg_value = clean_node(wxr, None, arg_value)
+                raw_tags = LABEL_TAGS.get(arg_value)
+                if isinstance(raw_tags, str):
+                    parent_sense.raw_tags.append(LABEL_TAGS[arg_value])
+                elif isinstance(raw_tags, list):
+                    parent_sense.raw_tags.extend(LABEL_TAGS[arg_value])
+            contents[idx] = ""
+
+
 def parse_gloss(
-    wxr: WiktextractContext, parent_sense: Sense, contents: list[str | WikiNode]
+    wxr: WiktextractContext, parent_sense: Sense, contents: WikiNodeChildrenList
 ) -> bool:
     """Take what is preferably a line of text and extract tags and a gloss from
     it. The data is inserted into parent_sense, and for recursion purposes
@@ -508,6 +540,9 @@ def parse_gloss(
     if len(contents) == 0:
         return False
 
+    extract_gloss_templates(wxr, parent_sense, contents)
+
+    # Try to parse a single linkage entry. Ex. * {{βλ|αγριόσκυλο}}
     if bl_linkage := extract_linkage_from_bl_template(contents):
         parent_sense.related.extend(bl_linkage)
         return True
@@ -584,6 +619,37 @@ def extract_next_template_node(
     return None, contents
 
 
+def expand_bl_template(bl_node: TemplateNode) -> list[str]:
+    """Expand a (supposedly) βλ-node into a list of strings."""
+
+    def ignore_arg(arg: str) -> bool:
+        """Ignore irrelevant arguments of a βλ template, cf. [REF].
+
+        * Prefixes are "="-suffixed to not ignore words starting with και etc.
+        * Since the "βλ" element itself is not "="-suffixed, we have to
+          exclude the string "βλ" so as to not ignore "βλ"-prefixed words.
+          f.e. βλέπε in {{βλ|βλέπε}}
+        """
+        return arg == "βλ" or any(
+            arg.startswith(pref)
+            for pref in ("και=", "πθ=", "όρος=", "0=", "00=")
+        )
+
+    words: list[str] = []
+    for arglist in bl_node.largs:
+        fst_arg: str | WikiNode | None = next(iter(arglist), None)
+        if fst_arg is None or not isinstance(fst_arg, str):
+            # Can an arglist be empty?
+            # Can an arglist contain a non-str Node?
+            pass
+        elif not ignore_arg(fst_arg):
+            # SAFETY: words is a list[str] because otherwise we could
+            # not have called startswith at ignore_arg.
+            words.extend(arglist)  # type: ignore
+
+    return words
+
+
 def extract_linkage_from_bl_template(
     contents: WikiNodeChildrenList,
 ) -> list[Linkage] | None:
@@ -599,19 +665,6 @@ def extract_linkage_from_bl_template(
       with existing code, but I'm not sure it's ideal.
     """
 
-    def ignore_arg(arg: str) -> bool:
-        """Ignore irrelevant arguments of a βλ template, cf. [REF].
-
-        * Prefixes are "="-suffixed to not ignore words starting with και etc.
-        * Since the "βλ" element itself is not "="-suffixed, we have to
-          exclude the string "βλ" so as to not ignore "βλ"-prefixed words.
-          f.e. βλέπε in {{βλ|βλέπε}}
-        """
-        return arg == "βλ" or any(
-            arg.startswith(pref)
-            for pref in ("και=", "πθ=", "όρος=", "0=", "00=")
-        )
-
     template_subnodes = [
         (idx, subnode)
         for (idx, subnode) in enumerate(contents)
@@ -620,15 +673,7 @@ def extract_linkage_from_bl_template(
     match template_subnodes:
         case [(idx, subnode)]:
             if subnode.template_name == "βλ":
-                words = []
-                for arglist in subnode.largs:
-                    fst_arg: str | WikiNode = next(iter(arglist))
-                    if fst_arg is None or not isinstance(fst_arg, str):
-                        # Can an arglist be empty?
-                        # Can an arglist contain a non-str Node?
-                        pass
-                    elif not ignore_arg(fst_arg):
-                        words.extend(arglist)
+                words = expand_bl_template(subnode)
 
                 # What if we filtered everything?
                 # Cf. this one, meaning: "see the expression section"
@@ -658,12 +703,12 @@ def parse_inner_node(
     sublists: WikiNodeChildrenList,
     dummy_parent: dict,
 ) -> tuple[bool, RecGlossReturn]:
-    """Try to parse a node that ends in (but is not equal to) : or *
+    """Try to parse a node with sarg ending in (but is not equal to) : or *
 
     Return a boolean indicating if we have to reset dummy_parent,
-    and the list of RecGlossReturn items parsed.
+    and the list of items parsed: RecGlossReturn.
 
-    This should be either:
+    This should represent either:
       quotation
       | example
       | βλ-linkage
