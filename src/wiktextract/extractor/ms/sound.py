@@ -2,9 +2,9 @@ from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from ..share import set_sound_file_url_fields
 from .models import Sound, WordEntry
 from .tags import translate_raw_tags
-from ..share import set_sound_file_url_fields
 
 
 def extract_sound_section(
@@ -29,6 +29,13 @@ def extract_sound_list_item(
                     raw_tags.append(raw_tag)
             else:
                 extract_sound_templates(wxr, word_entry, node, raw_tags)
+        elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
+            for child_list_item in node.find_child(NodeKind.LIST_ITEM):
+                extract_sound_list_item(wxr, word_entry, child_list_item)
+        elif isinstance(node, str) and node.strip().endswith(":"):
+            raw_tag = node.strip(": ")
+            if raw_tag != "":
+                raw_tags.append(raw_tag)
 
 
 def extract_sound_templates(
@@ -39,7 +46,12 @@ def extract_sound_templates(
 ) -> None:
     if t_node.template_name == "dewan":
         extract_dewan_template(wxr, word_entry, t_node)
-    elif t_node.template_name.lower() in ["afa", "ipa"]:
+    elif t_node.template_name in ["audio-AFA", "audio-IPA"]:
+        extract_audio_ipa_template(wxr, word_entry, t_node, raw_tags)
+    elif t_node.template_name.lower() in [
+        "afa",
+        "ipa",
+    ] or t_node.template_name.lower().endswith(("-afa", "-ipa")):
         extract_ipa_template(wxr, word_entry, t_node, raw_tags)
     elif t_node.template_name in ["penyempangan", "hyphenation", "hyph"]:
         extract_hyph_template(wxr, word_entry, t_node)
@@ -115,3 +127,18 @@ def extract_rhyme_template(
         text = clean_node(wxr, word_entry, link)
         if text != "":
             word_entry.sounds.append(Sound(rhymes=text))
+
+
+def extract_audio_ipa_template(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    t_node: TemplateNode,
+    raw_tags: list[str],
+) -> None:
+    filename = clean_node(wxr, None, t_node.template_parameters.get(2, ""))
+    if filename != "":
+        ipa = clean_node(wxr, None, t_node.template_parameters.get(3, ""))
+        sound = Sound(ipa=ipa)
+        set_sound_file_url_fields(wxr, filename, sound)
+        word_entry.sounds.append(sound)
+    clean_node(wxr, word_entry, t_node)

@@ -106,3 +106,43 @@ class TestMsSound(TestCase):
         self.assertEqual(
             page_data[0]["sounds"][1]["audio"], "Ms-MY-bendera.ogg"
         )
+
+    def test_nested_list(self):
+        self.wxr.wtp.add_page(
+            "Templat:a",
+            10,
+            '<span class="ib-brac qualifier-brac">(</span><span class="ib-content qualifier-content">{{{1}}}</span><span class="ib-brac qualifier-brac">)</span>',
+        )
+        self.wxr.wtp.add_page(
+            "Templat:fr-IPA",
+            10,
+            '[[Wikikamus:Abjad Fonetik Antarabangsa|AFA]]<sup>([[Lampiran:Sebutan bahasa Perancis|kekunci]])</sup>:&#32;<span class="IPA">/tɛʁ/</span>[[Kategori:Perkataan 1 suku kata bahasa Perancis|TERRE]][[Kategori:Perkataan bahasa Perancis dengan sebutan AFA|TERRE]]',
+        )
+        self.wxr.wtp.add_page(
+            "Templat:IPA",
+            10,
+            '[[Wikikamus:Abjad Fonetik Antarabangsa|AFA]]<sup>([[Lampiran:Sebutan bahasa Perancis|kekunci]])</sup>:&#32;<span class="IPA">[taɛ̯ʁ]</span>[[Kategori:Perkataan bahasa Perancis dengan sebutan AFA|TERRE]]',
+        )
+        page_data = parse_page(
+            self.wxr,
+            "terre",
+            """== Bahasa Perancis ==
+=== Takrifan ===
+==== Kata nama ====
+# [[tanah]], [[bumi]]
+=== Sebutan ===
+* {{a|Eropah}} {{fr-IPA}}
+* {{a|Kanada}} {{IPA|fr|[taɛ̯ʁ]}}
+** {{audio-IPA|fr|Fr-terre-ca-Montréal.ogg|[tæɛ̯ʁ̥]}}""",
+        )
+        self.assertEqual(
+            page_data[0]["sounds"][:2],
+            [
+                {"ipa": "/tɛʁ/", "raw_tags": ["Eropah"]},
+                {"ipa": "[taɛ̯ʁ]", "raw_tags": ["Kanada"]},
+            ],
+        )
+        self.assertEqual(page_data[0]["sounds"][2]["ipa"], "[tæɛ̯ʁ̥]")
+        self.assertEqual(
+            page_data[0]["sounds"][2]["audio"], "Fr-terre-ca-Montréal.ogg"
+        )
