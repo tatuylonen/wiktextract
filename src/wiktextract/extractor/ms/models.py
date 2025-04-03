@@ -44,6 +44,7 @@ class Linkage(MalayBaseModel):
     word: str
     tags: list[str] = []
     raw_tags: list[str] = []
+    sense: str = ""
 
 
 class Translation(MalayBaseModel):
@@ -74,3 +75,6 @@ class WordEntry(MalayBaseModel):
     antonyms: list[Linkage] = []
     synonyms: list[Linkage] = []
     translations: list[Translation] = []
+    hypernyms: list[Linkage] = []
+    coordinate_terms: list[Linkage] = []
+    hyponyms: list[Linkage] = []

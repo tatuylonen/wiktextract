@@ -122,7 +122,7 @@ class TestMsGloss(TestCase):
 # kata yang digunakan untuk [[soal|menyoal]]""",
         )
         self.assertEqual(
-            page_data[0]["forms"], [{"form": "اڤ", "raw_tags": ["ejaan Jawi"]}]
+            page_data[0]["forms"], [{"form": "اڤ", "tags": ["Jawi"]}]
         )
 
     def test_nested_list(self):

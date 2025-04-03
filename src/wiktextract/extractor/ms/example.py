@@ -4,6 +4,7 @@ from wikitextprocessor import NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from .linkage import LINKAGE_TEMPLATES, extract_nyms_template
 from .models import Example, Sense, WordEntry
 
 
@@ -24,6 +25,11 @@ def extract_example_list_item(
             or node.template_name.startswith("quote-")
         ):
             extract_cp_template(wxr, sense, node, e_data)
+        elif (
+            isinstance(node, TemplateNode)
+            and node.template_name in LINKAGE_TEMPLATES
+        ):
+            extract_nyms_template(wxr, word_entry, node)
         elif isinstance(node, WikiNode):
             if node.kind == NodeKind.ITALIC and not is_ref:
                 if parent_e_data is None:

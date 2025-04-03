@@ -5,6 +5,7 @@ from ...wxr_context import WiktextractContext
 from .example import extract_example_list_item
 from .models import AltForm, Form, Sense, WordEntry
 from .section_titles import POS_DATA
+from .tags import translate_raw_tags
 
 POS_HEADER_TEMPLATE_SUFFIXES = (
     "-ks",
@@ -154,6 +155,7 @@ def extract_pos_header_template(
                 if raw_tag != "":
                     form.raw_tags.append(raw_tag)
                 if form.form != "":
+                    translate_raw_tags(form)
                     page_data[-1].forms.append(form)
 
 
