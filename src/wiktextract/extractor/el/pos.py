@@ -465,11 +465,9 @@ def process_pos(
     return data
 
 
-ExOrSense = Sense | Example
-
-
 PARENS_BEFORE_RE = re.compile(r"\s*(\([^()]+\)\s*)+")
 ITER_PARENS_RE = re.compile(r"\(([^()]+)\)")
+
 
 def bold_node_fn(
     node: WikiNode,
@@ -499,6 +497,7 @@ def bold_node_fn(
     #     # print(f"{node.largs=}")
     return None
 
+
 def parse_gloss(
     wxr: WiktextractContext, parent_sense: Sense, contents: list[str | WikiNode]
 ) -> bool:
@@ -513,10 +512,34 @@ def parse_gloss(
     synonyms: list[Linkage] = []
     antonyms: list[Linkage] = []
 
+    bl_linkages: list[Linkage] = []
+    no_gloss_but_keep_anyway = False
+
+    def bl_template_handler_fn(name: str, ht: TemplateArgs) -> str | None:
+        nonlocal bl_linkages
+        if name == "βλ":
+            for k, v in ht.items():
+                if isinstance(k, int):
+                    bl_linkages.append(Linkage(word=clean_node(wxr, None, v)))
+            return ""
+        return None
+
     # The rest of the text.
     text = clean_node(
-        wxr, parent_sense, contents, node_handler_fn=bold_node_fn
+        wxr,
+        parent_sense,
+        contents,
+        template_fn=bl_template_handler_fn,
+        node_handler_fn=bold_node_fn,
     )
+
+    if len(bl_linkages) > 0:
+        parent_sense.related.extend(bl_linkages)
+        no_gloss_but_keep_anyway = True
+
+    if not text.strip():
+        if len(bl_linkages) <= 0:
+            return False
 
     # print(f"   ============  {contents=}, {text=}")
 
@@ -525,8 +548,8 @@ def parse_gloss(
         blocks = ITER_PARENS_RE.findall(parens_n.group(0))
         # print(f"{blocks=}")
         kept_blocks: list[str] = []
-        forms = []
-        raw_tag_texts = []
+        forms: list[str] = []
+        raw_tag_texts: list[str] = []
         for block in blocks:
             if block_has_non_greek_text(block):
                 # Keep parentheses with non-greek text with gloss text)
@@ -540,7 +563,7 @@ def parse_gloss(
             # print(f"{forms=}")
             parent_sense.related.extend(Linkage(word=form) for form in forms)
         parent_sense.raw_tags.extend(raw_tag_texts)
-        kept_blocks.append(text[parens_n.end():])
+        kept_blocks.append(text[parens_n.end() :])
         text = "".join(kept_blocks)
 
     text = re.sub(r"__/?[IB]__", "", text)
@@ -558,6 +581,10 @@ def parse_gloss(
         parent_sense.glosses.append(text)
         return True
 
+    if no_gloss_but_keep_anyway:
+        parent_sense.raw_tags.append("no-gloss")
+        return True
+
     return False
 
 
@@ -565,15 +592,33 @@ def recurse_glosses1(
     wxr: WiktextractContext,
     parent_sense: Sense,
     node: WikiNode,
-) -> list[ExOrSense]:
+) -> list[Example | Sense]:
     """Helper function for recurse_glosses"""
-    ret: list[ExOrSense] = []
+
+    ret: list[Example | Sense] = []
     found_gloss = False
 
     # Pydantic stuff doesn't play nice with Tatu's manual dict manipulation
     # functions, so we'll use a dummy dict here that we then check for
     # content and apply to `parent_sense`.
     dummy_parent: dict = {}
+
+    bl_linkages: list[Linkage] = []
+    example_is_synonym = False
+
+    def bl_template_handler_fn(name: str, ht: TemplateArgs) -> str | None:
+        nonlocal bl_linkages
+        nonlocal example_is_synonym
+        if name == "βλ":
+            for k, v in ht.items():
+                if isinstance(k, int):
+                    bl_linkages.append(Linkage(word=clean_node(wxr, None, v)))
+            return ""
+        if name == "συνων":
+            # The following example is a synonym
+            example_is_synonym = True
+            return ""
+        return None
 
     # List nodes contain only LIST_ITEM nodes, which may contain sub-LIST nodes.
     if node.kind == NodeKind.LIST:
@@ -589,17 +634,17 @@ def recurse_glosses1(
                 recurse_glosses1(wxr, parent_sense.model_copy(deep=True), child)
             )
     elif node.kind == NodeKind.LIST_ITEM:
-        contents = []
-        sublists = []
-        broke_out = False
-        for i, c in enumerate(node.children):
-            # The contents ends when a new sublist begins.
-            if isinstance(c, WikiNode) and c.kind == NodeKind.LIST:
-                broke_out = True
-                break
-            contents.append(c)
-        if broke_out is True:
-            sublists = node.children[i:]
+        # Split at first LIST node found
+        split_at = next(
+            (
+                i
+                for i, c in enumerate(node.children)
+                if isinstance(c, WikiNode) and c.kind == NodeKind.LIST
+            ),
+            len(node.children),
+        )
+        contents = node.children[:split_at]
+        sublists = node.children[split_at:]
 
         # A LIST and LIST_ITEM `sarg` is basically the prefix of the line, like
         # `#` or `##:`: the token that appears at the very start of a line that
@@ -609,7 +654,24 @@ def recurse_glosses1(
         # `##*` Example 1.1
         if node.sarg.endswith((":", "*")) and node.sarg not in (":", "*"):
             # This is either a quotation or example.
-            text = clean_node(wxr, dummy_parent, contents).strip("⮡ \n")
+            text = clean_node(
+                wxr, dummy_parent, contents, template_fn=bl_template_handler_fn
+            ).strip("⮡ \n")
+
+            if len(bl_linkages) > 0:
+                if example_is_synonym:
+                    parent_sense.synonyms.extend(bl_linkages)
+                else:
+                    parent_sense.related.extend(bl_linkages)
+                bl_linkages = []
+                if not text.strip():
+                    return [parent_sense]
+
+            example_is_synonym = False
+
+            if not text.strip():
+                return []
+
             example = Example(text=text)
             # logger.debug(f"{wxr.wtp.title}/example\n{text}")
             if len(sublists) > 0:
@@ -641,8 +703,10 @@ def recurse_glosses1(
             ):
                 if isinstance(r, Example):
                     parent_sense.examples.append(r)
-                else:
+                elif isinstance(r, Sense):
                     ret.append(r)
+                else:
+                    logger.error(f"Unreachable, unexpected type: {type(r)}")
 
     if len(ret) > 0:
         # the recursion returned actual senses from below, so we will
@@ -664,22 +728,20 @@ def recurse_glosses(
 ) -> list[Sense]:
     """Recurse through WikiNodes to find glosses and sense-related data."""
     base_sense = Sense()
-    ret = []
+    ret: list[Sense] = []
 
+    # recurse_glosses should return Senses. (yet it returns a Sense | Example)
     for r in recurse_glosses1(wxr, base_sense, node):
-        if isinstance(r, Example):
+        if not isinstance(r, Sense):
             wxr.wtp.error(
-                f"Example() has bubbled to recurse_glosses: {r.json()}",
+                f"NOT Sense has bubbled to recurse_glosses: {type(r)=}",
                 sortid="simple/pos/glosses",
             )
             continue
         convert_tags_in_sense(r)
         ret.append(r)
 
-    if len(ret) > 0:
-        return ret
-
-    return []
+    return ret
 
 
 def split_nodes_to_lines(
@@ -732,7 +794,9 @@ def split_nodes_to_lines(
     if len(parts) > 0:
         yield parts
 
+
 BOLD_RE = re.compile(r"(__/?[BI]__|, |\. )")
+
 
 def extract_forms_and_tags(tagged_text: str) -> tuple[list[str], list[str]]:
     forms: list[str] = []
@@ -773,7 +837,9 @@ def extract_forms_and_tags(tagged_text: str) -> tuple[list[str], list[str]]:
 
     return forms, tags
 
+
 META_RE = re.compile(r"__/?[ILEB]__")
+
 
 def block_has_non_greek_text(text: str) -> bool:
     text = META_RE.sub("", text)

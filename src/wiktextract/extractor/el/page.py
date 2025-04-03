@@ -41,7 +41,11 @@ from .section_titles import (
 def parse_page(
     wxr: WiktextractContext, page_title: str, page_text: str
 ) -> list[dict[str, WordEntry]]:
-    """Parse Greek Wiktionary (el.wiktionary.org) page."""
+    """Parse Greek Wiktionary (el.wiktionary.org) page.
+
+    References:
+    * https://el.wiktionary.org/wiki/Βικιλεξικό:Δομή_λημμάτων
+    """
 
     if wxr.config.verbose:
         logger.info(f"Parsing page: {page_title}")
@@ -123,7 +127,6 @@ def parse_page(
         )
 
         prev_data: WordEntry | None = None
-
 
         if len(sublevels) == 0 and ok:
             # Someone messed up by putting a Level 1 directly after a language

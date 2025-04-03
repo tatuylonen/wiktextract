@@ -1,3 +1,4 @@
+from typing import Any
 from unittest import TestCase
 
 from wikitextprocessor import Wtp
@@ -6,6 +7,10 @@ from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.el.models import WordEntry
 from wiktextract.extractor.el.pos import process_pos
 from wiktextract.wxr_context import WiktextractContext
+
+
+def raw_trim(raw: str) -> str:
+    return "\n".join(line.strip() for line in raw.strip().split("\n"))
 
 
 class TestElGlosses(TestCase):
@@ -22,6 +27,167 @@ class TestElGlosses(TestCase):
 
     def tearDown(self) -> None:
         self.wxr.wtp.close_db_conn()
+
+    def mktest_bl_linkage(self, raw: str, expected: dict[str, Any]) -> None:
+        """Test βλ-linkage parsing in glosses.
+
+        Reference:
+        https://el.wiktionary.org/wiki/Πρότυπο:βλ
+
+        Test suite:
+        * linkage in a not (":" or "*")-ending LIST_ITEM
+        * linkage inside synonym
+        * linkage without gloss
+        * linkage without gloss, but one quote
+        * linkage without gloss, with βλ-prefixed linkage
+        * linkage basic
+        * linkage multiple
+        * linkage useless (delete)
+
+        Notes:
+        * Is this another template or equivalent?
+        https://el.wiktionary.org/wiki/Πρότυπο:ΒΠ
+        * Same for βλέπε, δείτε etc.
+        """
+        self.wxr.wtp.start_page("start_filler")
+        data = WordEntry(lang="Greek", lang_code="el", word="word_filler")
+        # * Prefixing the header allows us to not have it everywhere in the tests.
+        # * Adding the head just silences a warning.
+        raw = "==={{ουσιαστικό|el}}===\n'''head'''\n" + raw_trim(raw)
+        root = self.wxr.wtp.parse(raw)
+        pos_node = root.children[0]
+        process_pos(self.wxr, pos_node, data, None, "", "", pos_tags=[])  # type: ignore
+        # from wiktextract.extractor.el.logger import dbg
+        # dbg(data)
+        dumped = data.model_dump(exclude_defaults=True)
+        # print(f"{dumped=}")
+        senses = {"senses": dumped["senses"]}
+        self.assertEqual(senses, expected)
+
+    def test_bl_linkage_irregular_list_item(self) -> None:
+        # https://el.wiktionary.org/wiki/Καραγκιόζης
+        # * The βλ template appears in an not (":" or "*")-ending ITEM
+        raw = """
+            # [[ήρωας]] του [[θέατρο σκιών|θεάτρου σκιών]]
+            # (μεταφορικά) {{βλ|καραγκιόζης}}
+        """
+        expected = {
+            "senses": [
+                {"glosses": ["ήρωας του θεάτρου σκιών"]},
+                {
+                    "related": [{"word": "καραγκιόζης"}],
+                    "raw_tags": ["μεταφορικά"],
+                    "tags": ["no-gloss"],
+                },
+            ],
+        }
+        self.mktest_bl_linkage(raw, expected)
+
+    def test_bl_linkage_inside_synonym(self) -> None:
+        # https://el.wiktionary.org/wiki/αφόδευμα
+        raw = """
+            * [[ό,τι]] [[αφοδεύω|αφοδεύει]] κάποιος
+            *: {{συνων}} {{βλ|περίττωμα}}
+        """
+        expected = {
+            "senses": [
+                {
+                    "glosses": ["ό,τι αφοδεύει κάποιος"],
+                    "synonyms": [{"word": "περίττωμα"}],
+                }
+            ],
+        }
+        self.mktest_bl_linkage(raw, expected)
+
+    def test_bl_linkage_no_gloss(self) -> None:
+        # https://el.wiktionary.org/wiki/αγριόσκυλος
+        raw = """* {{βλ|αγριόσκυλο}}"""
+        expected = {
+            "senses": [
+                {"tags": ["no-gloss"], "related": [{"word": "αγριόσκυλο"}]}
+            ]
+        }
+        self.mktest_bl_linkage(raw, expected)
+
+    def test_bl_linkage_no_gloss_with_bl_starting_linkage(self) -> None:
+        # Handmade: to test prefix selection.
+        raw = """* {{βλ|βλέπε}}"""
+        expected = {
+            "senses": [
+                {
+                    "related": [{"word": "βλέπε"}],
+                    "tags": ["no-gloss"],
+                }
+            ]
+        }
+
+        self.mktest_bl_linkage(raw, expected)
+
+    def test_bl_linkage_no_gloss_one_quote(self) -> None:
+        # https://el.wiktionary.org/wiki/αιματόχροος
+        raw = """
+            * {{βλ|αιματόχρους}}
+            *: {{παράθεμα}} ''Στα πρώτα...''
+        """
+        expected = {
+            "senses": [
+                {
+                    "examples": [{"text": ":Πρότυπο:παράθεμα Στα πρώτα..."}],
+                    "related": [{"word": "αιματόχρους"}],
+                    "tags": ["no-gloss"],
+                }
+            ],
+        }
+        self.mktest_bl_linkage(raw, expected)
+
+    def test_bl_linkage(self) -> None:
+        # https://el.wiktionary.org/wiki/μετροταινία
+        raw = """
+            * οποιοδήποτε είδος ταινίας...
+            *: {{βλ|και=2|μεζούρα}}
+        """
+        expected = {
+            "senses": [
+                {
+                    "glosses": ["οποιοδήποτε είδος ταινίας..."],
+                    "related": [{"word": "μεζούρα"}],
+                }
+            ]
+        }
+        self.mktest_bl_linkage(raw, expected)
+
+    def test_bl_linkage_multiple(self) -> None:
+        # https://el.wiktionary.org/wiki/ισοβαρής
+        raw = """
+            # που ενώνει σημεία με ίδια [[βαρομετρικός|βαρομετρική]] [[πίεση]]
+            #: {{βλ|όρος=1|ισοβαρής γραμμή|ισοβαρής καμπύλη}}
+            #: {{βλ|και=2|ισαλλοβαρής}}
+        """
+        expected = {
+            "senses": [
+                {
+                    "glosses": ["που ενώνει σημεία με ίδια βαρομετρική πίεση"],
+                    "related": [
+                        {"word": "ισοβαρής γραμμή"},
+                        {"word": "ισοβαρής καμπύλη"},
+                    ],
+                },
+                {
+                    "glosses": ["που ενώνει σημεία με ίδια βαρομετρική πίεση"],
+                    "related": [
+                        {"word": "ισαλλοβαρής"},
+                    ],
+                },
+            ],
+        }
+        self.mktest_bl_linkage(raw, expected)
+
+    def test_bl_linkage_inline_useless(self) -> None:
+        # https://el.wiktionary.org/wiki/επί
+        # Should delete the βλ template
+        raw = """# δηλώνει [[αιτία]] {{βλ|όρος=τις εκφράσεις}}"""
+        expected = {"senses": [{"glosses": ["δηλώνει αιτία"]}]}
+        self.mktest_bl_linkage(raw, expected)
 
     def test_el_glosses1(self) -> None:
         self.wxr.wtp.start_page("brain")
@@ -51,7 +217,13 @@ class TestElGlosses(TestCase):
         )
         pos_node = root.children[0]
         process_pos(
-            self.wxr, pos_node, data, None, "noun", "ουσιαστικό", pos_tags=[]
+            self.wxr,
+            pos_node,  # type: ignore[arg-type]
+            data,
+            None,
+            "noun",
+            "ουσιαστικό",
+            pos_tags=[],
         )
         # print(f"{data.model_dump(exclude_defaults=True)}")
         test = {
