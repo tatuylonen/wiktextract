@@ -55,3 +55,25 @@ class TestMsLinkage(TestCase):
                 {"word": "wujud"},
             ],
         )
+
+    def test_nyms_template(self):
+        self.wxr.wtp.add_page(
+            "Templat:ant",
+            10,
+            '<span class="nyms antonim"><span class="defdate">Antonim:</span> <span class="Latn" lang="ms">[[masa lalu#Melayu|masa lalu]]</span>, <span class="Latn" lang="ms">[[masa lampau#Melayu|masa lampau]]</span></span>',
+        )
+        page_data = parse_page(
+            self.wxr,
+            "abadi",
+            """== Bahasa Melayu ==
+=== Takrifan ===
+# [[zaman|Zaman]] yang akan datang.
+#: {{ant|ms|masa lalu|masa lampau}}""",
+        )
+        self.assertEqual(
+            page_data[0]["antonyms"],
+            [
+                {"word": "masa lalu", "sense": "Zaman yang akan datang."},
+                {"word": "masa lampau", "sense": "Zaman yang akan datang."},
+            ],
+        )

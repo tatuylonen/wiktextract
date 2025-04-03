@@ -23,8 +23,17 @@ GENDER_TAGS = {
     "mengikut keadaan": ["masculine", "feminine"],
 }
 
+POS_HEADER_TAGS = {
+    "ejaan Jawi": "Jawi",
+}
 
-TAGS = {**GENDER_TAGS}
+SOUND_TAGS = {
+    "Received Pronunciation": "Received-Pronunciation",
+    "General American": "General-American",
+}
+
+
+TAGS = {**GENDER_TAGS, **POS_HEADER_TAGS, **SOUND_TAGS}
 
 
 def translate_raw_tags(data: WordEntry) -> None:
