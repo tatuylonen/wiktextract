@@ -60,16 +60,16 @@ class TestElGlosses(TestCase):
         # from wiktextract.extractor.el.logger import dbg
         # dbg(data)
         dumped = data.model_dump(exclude_defaults=True)
+        # print(f"{dumped=}")
         senses = {"senses": dumped["senses"]}
         self.assertEqual(senses, expected)
 
     def test_bl_linkage_irregular_list_item(self) -> None:
         # https://el.wiktionary.org/wiki/Καραγκιόζης
         # * The βλ template appears in an not (":" or "*")-ending ITEM
-        # * The ετ-template just adds a: "metaphorically tag"
         raw = """
             # [[ήρωας]] του [[θέατρο σκιών|θεάτρου σκιών]]
-            # {{ετ|μτφρ|00=-}} {{βλ|καραγκιόζης}}
+            # (μεταφορικά) {{βλ|καραγκιόζης}}
         """
         expected = {
             "senses": [
@@ -77,6 +77,7 @@ class TestElGlosses(TestCase):
                 {
                     "related": [{"word": "καραγκιόζης"}],
                     "raw_tags": ["μεταφορικά"],
+                    "tags": ["no-gloss"],
                 },
             ],
         }
@@ -92,7 +93,7 @@ class TestElGlosses(TestCase):
             "senses": [
                 {
                     "glosses": ["ό,τι αφοδεύει κάποιος"],
-                    "related": [{"word": "περίττωμα"}],
+                    "synonyms": [{"word": "περίττωμα"}],
                 }
             ],
         }
@@ -101,13 +102,25 @@ class TestElGlosses(TestCase):
     def test_bl_linkage_no_gloss(self) -> None:
         # https://el.wiktionary.org/wiki/αγριόσκυλος
         raw = """* {{βλ|αγριόσκυλο}}"""
-        expected = {"senses": [{"related": [{"word": "αγριόσκυλο"}]}]}
+        expected = {
+            "senses": [
+                {"tags": ["no-gloss"], "related": [{"word": "αγριόσκυλο"}]}
+            ]
+        }
         self.mktest_bl_linkage(raw, expected)
 
     def test_bl_linkage_no_gloss_with_bl_starting_linkage(self) -> None:
         # Handmade: to test prefix selection.
         raw = """* {{βλ|βλέπε}}"""
-        expected = {"senses": [{"related": [{"word": "βλέπε"}]}]}
+        expected = {
+            "senses": [
+                {
+                    "related": [{"word": "βλέπε"}],
+                    "tags": ["no-gloss"],
+                }
+            ]
+        }
+
         self.mktest_bl_linkage(raw, expected)
 
     def test_bl_linkage_no_gloss_one_quote(self) -> None:
@@ -121,6 +134,7 @@ class TestElGlosses(TestCase):
                 {
                     "examples": [{"text": ":Πρότυπο:παράθεμα Στα πρώτα..."}],
                     "related": [{"word": "αιματόχρους"}],
+                    "tags": ["no-gloss"],
                 }
             ],
         }
@@ -156,6 +170,11 @@ class TestElGlosses(TestCase):
                     "related": [
                         {"word": "ισοβαρής γραμμή"},
                         {"word": "ισοβαρής καμπύλη"},
+                    ],
+                },
+                {
+                    "glosses": ["που ενώνει σημεία με ίδια βαρομετρική πίεση"],
+                    "related": [
                         {"word": "ισαλλοβαρής"},
                     ],
                 },
@@ -198,7 +217,13 @@ class TestElGlosses(TestCase):
         )
         pos_node = root.children[0]
         process_pos(
-            self.wxr, pos_node, data, None, "noun", "ουσιαστικό", pos_tags=[]
+            self.wxr,
+            pos_node,  # type: ignore[arg-type]
+            data,
+            None,
+            "noun",
+            "ουσιαστικό",
+            pos_tags=[],
         )
         # print(f"{data.model_dump(exclude_defaults=True)}")
         test = {

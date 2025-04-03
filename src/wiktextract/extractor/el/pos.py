@@ -9,7 +9,7 @@ from wikitextprocessor import (
     TemplateNode,
     WikiNode,
 )
-from wikitextprocessor.parser import LEVEL_KIND_FLAGS, WikiNodeChildrenList
+from wikitextprocessor.parser import LEVEL_KIND_FLAGS
 
 from wiktextract import WiktextractContext
 from wiktextract.page import clean_node
@@ -498,40 +498,8 @@ def bold_node_fn(
     return None
 
 
-def extract_gloss_templates(
-    wxr: WiktextractContext, parent_sense: Sense, contents: WikiNodeChildrenList
-) -> None:
-    """Expand the necessary templates in a gloss.
-
-    May mutate contents, removing expanded nodes.
-
-    Only supports the ετ (label) for now:
-        * {{ετ|μουσ όργ}} [[έγχορδος|έγχορδο]] μουσικό [[όργανο]]
-        # {{ετ|μτφρ|00=-}} {{βλ|καραγκιόζης}}
-    """
-    template_names_to_expand = ("ετ",)
-    LABEL_TAGS = {
-        "μτφρ": "μεταφορικά",
-    }
-
-    # https://github.com/tatuylonen/wiktextract/blob/35ac807e20a38166c35c968ccd8da3fe49971fc1/src/wiktextract/extractor/es/gloss.py#L78
-    for idx, elt in enumerate(contents):
-        if (
-            isinstance(elt, TemplateNode)
-            and elt.template_name in template_names_to_expand
-        ):
-            for _, arg_value in elt.template_parameters.items():
-                arg_value = clean_node(wxr, None, arg_value)
-                raw_tags = LABEL_TAGS.get(arg_value)
-                if isinstance(raw_tags, str):
-                    parent_sense.raw_tags.append(LABEL_TAGS[arg_value])
-                elif isinstance(raw_tags, list):
-                    parent_sense.raw_tags.extend(LABEL_TAGS[arg_value])
-            contents[idx] = ""
-
-
 def parse_gloss(
-    wxr: WiktextractContext, parent_sense: Sense, contents: WikiNodeChildrenList
+    wxr: WiktextractContext, parent_sense: Sense, contents: list[str | WikiNode]
 ) -> bool:
     """Take what is preferably a line of text and extract tags and a gloss from
     it. The data is inserted into parent_sense, and for recursion purposes
@@ -540,19 +508,38 @@ def parse_gloss(
     if len(contents) == 0:
         return False
 
-    extract_gloss_templates(wxr, parent_sense, contents)
-
-    # Try to parse a single linkage entry. Ex. * {{βλ|αγριόσκυλο}}
-    if bl_linkage := extract_linkage_from_bl_template(contents):
-        parent_sense.related.extend(bl_linkage)
-        return True
-
     template_tags: list[str] = []
     synonyms: list[Linkage] = []
     antonyms: list[Linkage] = []
 
+    bl_linkages: list[Linkage] = []
+    no_gloss_but_keep_anyway = False
+
+    def bl_template_handler_fn(name: str, ht: TemplateArgs) -> str | None:
+        nonlocal bl_linkages
+        if name == "βλ":
+            for k, v in ht.items():
+                if isinstance(k, int):
+                    bl_linkages.append(Linkage(word=clean_node(wxr, None, v)))
+            return ""
+        return None
+
     # The rest of the text.
-    text = clean_node(wxr, parent_sense, contents, node_handler_fn=bold_node_fn)
+    text = clean_node(
+        wxr,
+        parent_sense,
+        contents,
+        template_fn=bl_template_handler_fn,
+        node_handler_fn=bold_node_fn,
+    )
+
+    if len(bl_linkages) > 0:
+        parent_sense.related.extend(bl_linkages)
+        no_gloss_but_keep_anyway = True
+
+    if not text.strip():
+        if len(bl_linkages) <= 0:
+            return False
 
     # print(f"   ============  {contents=}, {text=}")
 
@@ -594,170 +581,44 @@ def parse_gloss(
         parent_sense.glosses.append(text)
         return True
 
+    if no_gloss_but_keep_anyway:
+        parent_sense.raw_tags.append("no-gloss")
+        return True
+
     return False
-
-
-def peek_next_template_node_idx(contents: WikiNodeChildrenList) -> int:
-    """Get the index of the next template node."""
-    for idx, subnode in enumerate(contents):
-        if isinstance(subnode, TemplateNode):
-            return idx
-    return -1
-
-
-def extract_next_template_node(
-    contents: WikiNodeChildrenList,
-) -> tuple[TemplateNode | None, WikiNodeChildrenList]:
-    """Consuming parser for the next template node in contents.
-
-    If it succeeds, return: (next_template_node, rest_contents)
-    If it fails,    return: (None, original_contents)
-    """
-    idx = peek_next_template_node_idx(contents)
-    if idx > -1:
-        return contents[idx], contents[idx + 1 :]  # type: ignore
-    return None, contents
-
-
-def expand_bl_template(bl_node: TemplateNode) -> list[str]:
-    """Expand a (supposedly) βλ-node into a list of strings."""
-
-    def ignore_arg(arg: str) -> bool:
-        """Ignore irrelevant arguments of a βλ template, cf. [REF].
-
-        * Prefixes are "="-suffixed to not ignore words starting with και etc.
-        * Since the "βλ" element itself is not "="-suffixed, we have to
-          exclude the string "βλ" so as to not ignore "βλ"-prefixed words.
-          f.e. βλέπε in {{βλ|βλέπε}}
-        """
-        return arg == "βλ" or any(
-            arg.startswith(pref)
-            for pref in ("και=", "πθ=", "όρος=", "0=", "00=")
-        )
-
-    words: list[str] = []
-    for arglist in bl_node.largs:
-        fst_arg: str | WikiNode | None = next(iter(arglist), None)
-        if fst_arg is None or not isinstance(fst_arg, str):
-            # Can an arglist be empty?
-            # Can an arglist contain a non-str Node?
-            pass
-        elif not ignore_arg(fst_arg):
-            # SAFETY: words is a list[str] because otherwise we could
-            # not have called startswith at ignore_arg.
-            words.extend(arglist)  # type: ignore
-
-    return words
-
-
-def extract_linkage_from_bl_template(
-    contents: WikiNodeChildrenList,
-) -> list[Linkage] | None:
-    """Extract linkage from a βλ-template.
-
-    May mutate contents (!) since sometimes we want to remove the bl node.
-
-    Return None in case of extraction failure.
-
-    Notes:
-    * [REF] https://el.wiktionary.org/wiki/Πρότυπο:βλ
-    * While it takes a contents object, this is for having less friction
-      with existing code, but I'm not sure it's ideal.
-    """
-
-    template_subnodes = [
-        (idx, subnode)
-        for (idx, subnode) in enumerate(contents)
-        if isinstance(subnode, TemplateNode)
-    ]
-    match template_subnodes:
-        case [(idx, subnode)]:
-            if subnode.template_name == "βλ":
-                words = expand_bl_template(subnode)
-
-                # What if we filtered everything?
-                # Cf. this one, meaning: "see the expression section"
-                # <TEMPLATE(['βλ'], ['όρος=τις εκφράσεις']){} >
-                #
-                # Ideally we would want to remove the subnode altogether from
-                # contents!
-                if not words:
-                    del contents[idx]
-
-                linkages = [Linkage(word=word) for word in words]
-                return linkages
-        case _:
-            # No template subnodes or more than one
-            pass
-
-    return None
-
-
-RecGlossReturn = list[Sense | Example | list[Linkage]]
-
-
-def parse_inner_node(
-    wxr: WiktextractContext,
-    parent_sense: Sense,
-    contents: WikiNodeChildrenList,
-    sublists: WikiNodeChildrenList,
-    dummy_parent: dict,
-) -> tuple[bool, RecGlossReturn]:
-    """Try to parse a node with sarg ending in (but is not equal to) : or *
-
-    Return a boolean indicating if we have to reset dummy_parent,
-    and the list of items parsed: RecGlossReturn.
-
-    This should represent either:
-      quotation
-      | example
-      | βλ-linkage
-      | synonym linkage (that may include βλ-linkage)
-    """
-    # Cf. *: {{συνων}} {{βλ|περίττωμα}} @ https://el.wiktionary.org/wiki/αφόδευμα
-    # We consume the synonym template, and we store in state the fact that we
-    # are parsing a synonym.
-    next_template_idx = peek_next_template_node_idx(contents)
-    if next_template_idx > -1:
-        template_node: TemplateNode = contents[next_template_idx]  # type: ignore
-        if template_node.template_name == "συνων":
-            # TODO: precise synonym (Sense has one: list[Linkage])
-            # - For now just consume
-            _, contents = extract_next_template_node(contents)
-
-    # Deal with βλ-linkeage
-    if bl_linkage := extract_linkage_from_bl_template(contents):
-        return False, [bl_linkage]
-
-    # WikiNode
-    text = clean_node(wxr, dummy_parent, contents).strip("⮡ \n")
-    example = Example(text=text)
-    # logger.debug(f"{wxr.wtp.title}/example\n{text}")
-    if len(sublists) > 0:
-        translation = clean_node(wxr, dummy_parent, sublists).strip("#*: \n")
-        if translation != "":
-            example.translation = translation
-
-    for k, v in dummy_parent.items():
-        if k == "categories":
-            parent_sense.categories.extend(v)
-
-    return True, [example]
 
 
 def recurse_glosses1(
     wxr: WiktextractContext,
     parent_sense: Sense,
     node: WikiNode,
-) -> RecGlossReturn:
+) -> list[Example | Sense]:
     """Helper function for recurse_glosses"""
-    ret: RecGlossReturn = []
+
+    ret: list[Example | Sense] = []
     found_gloss = False
 
     # Pydantic stuff doesn't play nice with Tatu's manual dict manipulation
     # functions, so we'll use a dummy dict here that we then check for
     # content and apply to `parent_sense`.
     dummy_parent: dict = {}
+
+    bl_linkages: list[Linkage] = []
+    example_is_synonym = False
+
+    def bl_template_handler_fn(name: str, ht: TemplateArgs) -> str | None:
+        nonlocal bl_linkages
+        nonlocal example_is_synonym
+        if name == "βλ":
+            for k, v in ht.items():
+                if isinstance(k, int):
+                    bl_linkages.append(Linkage(word=clean_node(wxr, None, v)))
+            return ""
+        if name == "συνων":
+            # The following example is a synonym
+            example_is_synonym = True
+            return ""
+        return None
 
     # List nodes contain only LIST_ITEM nodes, which may contain sub-LIST nodes.
     if node.kind == NodeKind.LIST:
@@ -792,12 +653,40 @@ def recurse_glosses1(
         # `##` Item 1.1
         # `##*` Example 1.1
         if node.sarg.endswith((":", "*")) and node.sarg not in (":", "*"):
-            reset_dummy_parent, ret = parse_inner_node(
-                wxr, parent_sense, contents, sublists, dummy_parent
-            )
-            if reset_dummy_parent:
-                dummy_parent = {}
-            return ret
+            # This is either a quotation or example.
+            text = clean_node(
+                wxr, dummy_parent, contents, template_fn=bl_template_handler_fn
+            ).strip("⮡ \n")
+
+            if len(bl_linkages) > 0:
+                if example_is_synonym:
+                    parent_sense.synonyms.extend(bl_linkages)
+                else:
+                    parent_sense.related.extend(bl_linkages)
+                bl_linkages = []
+                if not text.strip():
+                    return [parent_sense]
+
+            example_is_synonym = False
+
+            if not text.strip():
+                return []
+
+            example = Example(text=text)
+            # logger.debug(f"{wxr.wtp.title}/example\n{text}")
+            if len(sublists) > 0:
+                translation = clean_node(wxr, dummy_parent, sublists).strip(
+                    "#*: \n"
+                )
+                if translation != "":
+                    example.translation = translation
+
+            for k, v in dummy_parent.items():
+                if k == "categories":
+                    parent_sense.categories.extend(v)
+            dummy_parent = {}
+
+            return [example]
 
         found_gloss = parse_gloss(wxr, parent_sense, contents)
 
@@ -814,11 +703,6 @@ def recurse_glosses1(
             ):
                 if isinstance(r, Example):
                     parent_sense.examples.append(r)
-                # list[Linkage]
-                elif isinstance(r, list) and all(
-                    isinstance(item, Linkage) for item in r
-                ):
-                    parent_sense.related.extend(r)
                 elif isinstance(r, Sense):
                     ret.append(r)
                 else:
@@ -850,7 +734,7 @@ def recurse_glosses(
     for r in recurse_glosses1(wxr, base_sense, node):
         if not isinstance(r, Sense):
             wxr.wtp.error(
-                f"NOT Sense() has bubbled to recurse_glosses: {type(r)=}",
+                f"NOT Sense has bubbled to recurse_glosses: {type(r)=}",
                 sortid="simple/pos/glosses",
             )
             continue
