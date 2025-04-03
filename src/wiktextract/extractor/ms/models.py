@@ -59,6 +59,24 @@ class Translation(MalayBaseModel):
     roman: str = ""
 
 
+class Sound(MalayBaseModel):
+    zh_pron: str = Field(default="", description="Chinese word pronunciation")
+    ipa: str = Field(default="", description="International Phonetic Alphabet")
+    audio: str = Field(default="", description="Audio file name")
+    wav_url: str = ""
+    oga_url: str = ""
+    ogg_url: str = ""
+    mp3_url: str = ""
+    opus_url: str = ""
+    flac_url: str = ""
+    tags: list[str] = []
+    raw_tags: list[str] = []
+    homophone: str = ""
+    other: str = ""
+    roman: str = ""
+    rhymes: str = ""
+
+
 class WordEntry(MalayBaseModel):
     model_config = ConfigDict(title="Malay Wiktionary")
     word: str = Field(description="Word string")
@@ -78,3 +96,5 @@ class WordEntry(MalayBaseModel):
     hypernyms: list[Linkage] = []
     coordinate_terms: list[Linkage] = []
     hyponyms: list[Linkage] = []
+    hyphenation: str = ""
+    sounds: list[Sound] = []
