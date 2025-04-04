@@ -3,11 +3,11 @@ import re
 from html import unescape
 from typing import Iterable, Optional, Union
 
-from wikitextprocessor import WikiNode
+from wikitextprocessor import NodeKind, WikiNode
 
 
 def strip_nodes(
-    nodes: list[Union[WikiNode, str]]
+    nodes: list[Union[WikiNode, str]],
 ) -> Iterable[Union[WikiNode, str]]:
     # filter nodes that only have newlines, white spaces and non-breaking spaces
     return filter(
@@ -58,7 +58,7 @@ def create_audio_url_dict(filename: str) -> dict[str, str]:
     file_extension = filename[filename.rfind(".") + 1 :].lower()
     if file_extension == "ogv":
         # ".ogv" pages are redirected to ".oga" pages in Wikipedia Commons
-        filename = filename[:filename.rfind(".")] + ".oga"
+        filename = filename[: filename.rfind(".")] + ".oga"
         file_extension = "oga"
     file_url_key = file_extension + "_url"
     filename_without_prefix = filename.removeprefix("File:")
@@ -127,7 +127,32 @@ def split_senseids(senseids_str: str) -> list[str]:
                         )
                     ]
                 )
-            except:
+            except Exception:
                 pass
 
     return senseids
+
+
+def calculate_bold_offsets(
+    wxr,
+    node: WikiNode,
+    node_text: str,
+    example,
+    field: str,
+) -> None:
+    from ..page import clean_node
+
+    offsets = []
+    bold_words = set()
+    for b_tag in node.find_html_recursively("b"):
+        bold_words.add(clean_node(wxr, None, b_tag))
+    for bold_node in node.find_child_recursively(NodeKind.BOLD):
+        bold_words.add(clean_node(wxr, None, bold_node))
+    for bold_word in bold_words:
+        for m in re.finditer(re.escape(bold_word), node_text):
+            offsets.append((m.start(), m.end()))
+    if len(offsets) > 0:
+        if hasattr(example, field):  # pydantic model
+            setattr(example, field, sorted(offsets))
+        elif isinstance(example, dict):
+            example[field] = sorted(offsets)

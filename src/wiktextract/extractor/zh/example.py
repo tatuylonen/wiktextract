@@ -1,10 +1,9 @@
-from typing import Optional
-
 from wikitextprocessor.parser import HTMLNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from ..ruby import extract_ruby
+from ..share import calculate_bold_offsets
 from .linkage import process_linkage_templates_in_gloss
 from .models import Example, Sense, WordEntry
 from .tags import translate_raw_tags
@@ -26,7 +25,7 @@ def extract_example_list_item(
     sense_data: Sense,
     list_item: WikiNode,
     word_entry: WordEntry,
-    parent_example: Optional[Example] = None,
+    parent_example: Example | None = None,
 ) -> None:
     example_data = parent_example or Example()
     if list_item.contain_node(NodeKind.LIST) and not all(
@@ -167,6 +166,13 @@ def extract_template_zh_x(
                     "span", attr_name="lang", attr_value="Latn"
                 ):
                     example_data.roman = clean_node(wxr, None, span_tag)
+                    calculate_bold_offsets(
+                        wxr,
+                        span_tag,
+                        example_data.roman,
+                        example_data,
+                        "bold_roman_offsets",
+                    )
                     is_roman = True
                     for span_tag in dd_tag.find_html_recursively("span"):
                         span_text = clean_node(wxr, None, span_tag)
@@ -177,6 +183,13 @@ def extract_template_zh_x(
                     break
                 if not is_roman:
                     example_data.translation = dd_text
+                    calculate_bold_offsets(
+                        wxr,
+                        dd_tag,
+                        dd_text,
+                        example_data,
+                        "bold_translation_offsets",
+                    )
         results.extend(extract_zh_x_dl_span_tag(wxr, dl_tag, example_data))
 
     # no source, single line example
@@ -186,16 +199,43 @@ def extract_template_zh_x(
             "span", attr_name="lang", attr_value="Latn"
         ):
             example_data.roman = clean_node(wxr, None, span_tag)
+            calculate_bold_offsets(
+                wxr,
+                span_tag,
+                example_data.roman,
+                example_data,
+                "bold_roman_offsets",
+            )
             break
         for span_tag in expanded_node.find_html("span"):
             span_text = clean_node(wxr, None, span_tag)
             if span_text.startswith("[") and span_text.endswith("]"):
                 example_data.raw_tags.append(span_text.strip("[]"))
-        example_data.translation = clean_node(
-            wxr, None, template_node.template_parameters.get(2, "")
+        tr_arg = wxr.wtp.parse(
+            wxr.wtp.node_to_wikitext(
+                template_node.template_parameters.get(2, "")
+            )
         )
-        example_data.literal_meaning = clean_node(
-            wxr, None, template_node.template_parameters.get("lit", "")
+        example_data.translation = clean_node(wxr, None, tr_arg)
+        calculate_bold_offsets(
+            wxr,
+            tr_arg,
+            example_data.translation,
+            example_data,
+            "bold_translation_offsets",
+        )
+        lit_arg = wxr.wtp.parse(
+            wxr.wtp.node_to_wikitext(
+                template_node.template_parameters.get("lit", "")
+            )
+        )
+        example_data.literal_meaning = clean_node(wxr, None, lit_arg)
+        calculate_bold_offsets(
+            wxr,
+            lit_arg,
+            example_data.literal_meaning,
+            example_data,
+            "bold_literal_offsets",
         )
         for span_tag in expanded_node.find_html("span"):
             span_lang = span_tag.attrs.get("lang", "")
@@ -204,6 +244,13 @@ def extract_template_zh_x(
                 if len(example_text) > 0:
                     new_example = example_data.model_copy(deep=True)
                     new_example.text = example_text
+                    calculate_bold_offsets(
+                        wxr,
+                        span_tag,
+                        example_text,
+                        new_example,
+                        "bold_text_offsets",
+                    )
                     new_example.tags.append(
                         "Traditional Chinese"
                         if span_lang == "zh-Hant"
@@ -225,6 +272,13 @@ def extract_zh_x_dl_span_tag(
         if span_lang in ["zh-Hant", "zh-Hans"]:
             new_example = example.model_copy(deep=True)
             new_example.text = clean_node(wxr, None, span_tag)
+            calculate_bold_offsets(
+                wxr,
+                span_tag,
+                new_example.text,
+                new_example,
+                "bold_text_offsets",
+            )
             results.append(new_example)
         elif "vsHide" in span_tag.attrs.get("class", ""):
             # template has arg "collapsed=y"
