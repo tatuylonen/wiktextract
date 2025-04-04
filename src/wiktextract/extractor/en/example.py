@@ -6,6 +6,7 @@ from ...page import clean_node
 from ...tags import valid_tags
 from ...wxr_context import WiktextractContext
 from ..ruby import extract_ruby
+from ..share import calculate_bold_offsets
 from .type_utils import ExampleData, SenseData
 
 
@@ -136,8 +137,18 @@ def extract_template_zh_x(
     for dl_tag in expanded_node.find_html_recursively("dl"):
         has_dl_tag = True
         example_data = deepcopy(parent_example)
-        example_data["english"] = clean_node(
-            wxr, None, template_node.template_parameters.get(2, "")
+        tr_arg = wxr.wtp.parse(
+            wxr.wtp.node_to_wikitext(
+                template_node.template_parameters.get(2, "")
+            )
+        )
+        example_data["english"] = clean_node(wxr, None, tr_arg)
+        calculate_bold_offsets(
+            wxr,
+            tr_arg,
+            example_data["english"],
+            example_data,
+            "bold_english_offsets",
         )
         for dd_tag in dl_tag.find_html("dd"):
             dd_text = clean_node(wxr, None, dd_tag)
@@ -148,6 +159,13 @@ def extract_template_zh_x(
                     "span", attr_name="lang", attr_value="Latn"
                 ):
                     example_data["roman"] = clean_node(wxr, None, span_tag)
+                    calculate_bold_offsets(
+                        wxr,
+                        span_tag,
+                        example_data["roman"],
+                        example_data,
+                        "bold_roman_offsets",
+                    )
                     for span_tag in dd_tag.find_html_recursively("span"):
                         span_text = clean_node(wxr, None, span_tag)
                         if span_text.startswith("[") and span_text.endswith(
@@ -166,16 +184,43 @@ def extract_template_zh_x(
             "span", attr_name="lang", attr_value="Latn"
         ):
             example_data["roman"] = clean_node(wxr, None, span_tag)
+            calculate_bold_offsets(
+                wxr,
+                span_tag,
+                example_data["roman"],
+                example_data,
+                "bold_roman_offsets",
+            )
             break
         for span_tag in expanded_node.find_html("span"):
             span_text = clean_node(wxr, None, span_tag)
             if span_text.startswith("[") and span_text.endswith("]"):
                 example_data["raw_tags"].append(span_text.strip("[]"))
-        example_data["english"] = clean_node(
-            wxr, None, template_node.template_parameters.get(2, "")
+        tr_arg = wxr.wtp.parse(
+            wxr.wtp.node_to_wikitext(
+                template_node.template_parameters.get(2, "")
+            )
         )
-        example_data["literal_meaning"] = clean_node(
-            wxr, None, template_node.template_parameters.get("lit", "")
+        example_data["english"] = clean_node(wxr, None, tr_arg)
+        calculate_bold_offsets(
+            wxr,
+            tr_arg,
+            example_data["english"],
+            example_data,
+            "bold_english_offsets",
+        )
+        lit_arg = wxr.wtp.parse(
+            wxr.wtp.node_to_wikitext(
+                template_node.template_parameters.get("lit", "")
+            )
+        )
+        example_data["literal_meaning"] = clean_node(wxr, None, lit_arg)
+        calculate_bold_offsets(
+            wxr,
+            tr_arg,
+            example_data["literal_meaning"],
+            example_data,
+            "bold_literal_offsets",
         )
         for span_tag in expanded_node.find_html("span"):
             span_lang = span_tag.attrs.get("lang", "")
@@ -184,6 +229,13 @@ def extract_template_zh_x(
                 if len(example_text) > 0:
                     new_example = deepcopy(example_data)
                     new_example["text"] = example_text
+                    calculate_bold_offsets(
+                        wxr,
+                        span_tag,
+                        example_text,
+                        example_data,
+                        "bold_text_offsets",
+                    )
                     new_example["tags"].append(
                         "Traditional Chinese"
                         if span_lang == "zh-Hant"
@@ -205,6 +257,13 @@ def extract_zh_x_dl_span_tag(
         if span_lang in ["zh-Hant", "zh-Hans"]:
             new_example = deepcopy(example)
             new_example["text"] = clean_node(wxr, None, span_tag)
+            calculate_bold_offsets(
+                wxr,
+                span_tag,
+                new_example["text"],
+                new_example,
+                "bold_text_offsets",
+            )
             results.append(new_example)
         elif "vsHide" in span_tag.attrs.get("class", ""):
             # template has arg "collapsed=y"

@@ -3,6 +3,7 @@ from unittest import TestCase
 from wikitextprocessor import Wtp
 
 from wiktextract.config import WiktionaryConfig
+from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.wxr_context import WiktextractContext
 
 
@@ -14,6 +15,9 @@ class TestEnCategory(TestCase):
 
     def tearDown(self) -> None:
         self.wxr.wtp.close_db_conn()
+        close_thesaurus_db(
+            self.wxr.thesaurus_db_path, self.wxr.thesaurus_db_conn
+        )
 
     def test_filter_language_categories(self):
         # GH issue #537
@@ -40,11 +44,15 @@ class TestEnCategory(TestCase):
         self.wxr.wtp.add_page(
             "Template:C",
             10,
-            "[[Category:en:Beetles|BEETLE]][[Category:en:Games|BEETLE]]"
+            "[[Category:en:Beetles|BEETLE]][[Category:en:Games|BEETLE]]",
         )
-        page_data = parse_page(self.wxr, "beetle", """==English==
+        page_data = parse_page(
+            self.wxr,
+            "beetle",
+            """==English==
 ===Noun===
 # Any of numerous species of insect...
 
-{{C|en|Beetles|Games}}""")
+{{C|en|Beetles|Games}}""",
+        )
         self.assertEqual(page_data[0]["categories"], ["en:Beetles", "en:Games"])
