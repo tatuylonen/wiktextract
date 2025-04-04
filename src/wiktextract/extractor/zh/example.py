@@ -425,6 +425,13 @@ def extract_template_Q(
                     "i", attr_name="class", attr_value="e-transliteration"
                 ):
                     example_data.roman = clean_node(wxr, None, i_tag)
+                    calculate_bold_offsets(
+                        wxr,
+                        i_tag,
+                        example_data.roman,
+                        example_data,
+                        "bold_roman_offsets",
+                    )
                 break
             ref_nodes.append(child)
         ref_text = clean_node(wxr, None, ref_nodes)
@@ -436,8 +443,18 @@ def extract_template_Q(
             ("trans", "translation"),
             ("lit", "literal_meaning"),
         ):
-            value = clean_node(
-                wxr, None, node.template_parameters.get(t_arg, "")
+            t_arg_node = wxr.wtp.parse(
+                wxr.wtp.node_to_wikitext(
+                    node.template_parameters.get(t_arg, "")
+                )
             )
+            value = clean_node(wxr, None, t_arg_node)
             if len(value) > 0:
                 setattr(example_data, field, value)
+                calculate_bold_offsets(
+                    wxr,
+                    t_arg_node,
+                    value,
+                    example_data,
+                    "bold_" + field.split("_")[0] + "_offsets",
+                )

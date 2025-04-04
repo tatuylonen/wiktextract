@@ -375,8 +375,11 @@ class TestExample(TestCase):
             [
                 {
                     "text": "Я кончаюсь, Горбунок: Царь велит мне в кипяток!",
+                    'bold_text_offsets': [(39, 46)],
                     "roman": "Ja končajusʹ, Gorbunok: Carʹ velit mne v kipjatok!",
+                    'bold_roman_offsets': [(41, 49)],
                     "translation": "我將要完蛋，駝背。國王命令我跳入沸水中！",
+                    'bold_translation_offsets': [(16, 18)],
                     "ref": "P. Yershov, The Humpback Horse 駝背的馬:",
                 },
             ],
