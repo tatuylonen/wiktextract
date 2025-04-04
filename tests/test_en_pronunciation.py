@@ -5,6 +5,7 @@ from wikitextprocessor import Page, Wtp
 
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.en.pronunciation import parse_pronunciation
+from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.wxr_context import WiktextractContext
 
 
@@ -18,6 +19,9 @@ class TestPronunciation(TestCase):
 
     def tearDown(self) -> None:
         self.wxr.wtp.close_db_conn()
+        close_thesaurus_db(
+            self.wxr.thesaurus_db_path, self.wxr.thesaurus_db_conn
+        )
 
     test1_templates = [
         ("enPR", "(Received Pronunciation) enPR: föö"),
@@ -245,11 +249,12 @@ class TestPronunciation(TestCase):
                         "ipa": "/foo/",
                         "pos": "noun",
                     },
-                    { "homophone": "feu", "pos": "noun" },
+                    {"homophone": "feu", "pos": "noun"},
                     {"rhymes": "-oo", "pos": "noun"},
                 ]
             },
         )
+
     test1_templates = [
         (
             "IPA",

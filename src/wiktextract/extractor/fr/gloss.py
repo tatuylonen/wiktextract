@@ -5,6 +5,7 @@ from wikitextprocessor import NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from ..share import calculate_bold_offsets
 from .models import AltForm, Example, Sense, WordEntry
 from .tags import translate_raw_tags
 
@@ -149,26 +150,42 @@ def process_exemple_template(
     # https://fr.wiktionary.org/wiki/Modèle:exemple
     # https://fr.wiktionary.org/wiki/Modèle:ja-exemple
     # https://fr.wiktionary.org/wiki/Modèle:zh-exemple
-    text = clean_node(wxr, None, node.template_parameters.get(1, ""))
-    translation = clean_node(
-        wxr,
-        None,
-        node.template_parameters.get(
-            2, node.template_parameters.get("sens", "")
-        ),
+    text_arg = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(node.template_parameters.get(1, ""))
     )
-    transcription = clean_node(
-        wxr,
-        None,
-        node.template_parameters.get(3, node.template_parameters.get("tr", "")),
+    text = clean_node(wxr, None, text_arg)
+    trans_arg = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(
+            node.template_parameters.get(
+                2, node.template_parameters.get("sens", "")
+            )
+        )
     )
+    translation = clean_node(wxr, None, trans_arg)
+    roman_arg = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(
+            node.template_parameters.get(
+                3, node.template_parameters.get("tr", "")
+            )
+        )
+    )
+    transcription = clean_node(wxr, None, roman_arg)
     source = clean_node(wxr, None, node.template_parameters.get("source", ""))
     example_data = Example(
-        text=clean_node(wxr, None, text),
-        translation=clean_node(wxr, None, translation),
-        roman=clean_node(wxr, None, transcription),
-        ref=clean_node(wxr, None, source),
+        text=text,
+        translation=translation,
+        roman=transcription,
+        ref=source,
         time=time,
+    )
+    calculate_bold_offsets(
+        wxr, text_arg, text, example_data, "bold_text_offsets"
+    )
+    calculate_bold_offsets(
+        wxr, trans_arg, translation, example_data, "bold_translation_offsets"
+    )
+    calculate_bold_offsets(
+        wxr, roman_arg, transcription, example_data, "bold_roman_offsets"
     )
     if len(example_data.text) > 0 and isinstance(gloss_data, Sense):
         gloss_data.examples.append(example_data)

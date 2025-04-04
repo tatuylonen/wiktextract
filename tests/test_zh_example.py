@@ -65,8 +65,11 @@ class TestExample(TestCase):
                         "Traditional Chinese",
                     ],
                     "text": "王曰：「封，以厥庶民暨厥臣達大家，以厥臣達王惟邦君。」",
+                    "bold_text_offsets": [(14, 16)],
                     "roman": "Wáng yuē: “Fēng, yǐ jué shùmín jì jué chén dá dàjiā, yǐ jué chén dá wáng wéi bāngjūn.”",
+                    "bold_roman_offsets": [(46, 51)],
                     "translation": "王說：「封啊，從殷的老百姓和他們的官員到卿大夫，從他們的官員到諸侯和國君。」",
+                    "bold_translation_offsets": [(20, 23)],
                 },
                 {
                     "ref": "《尚書·梓材》",
@@ -76,8 +79,11 @@ class TestExample(TestCase):
                         "Simplified Chinese",
                     ],
                     "text": "王曰：「封，以厥庶民暨厥臣达大家，以厥臣达王惟邦君。」",
+                    "bold_text_offsets": [(14, 16)],
                     "roman": "Wáng yuē: “Fēng, yǐ jué shùmín jì jué chén dá dàjiā, yǐ jué chén dá wáng wéi bāngjūn.”",
+                    "bold_roman_offsets": [(46, 51)],
                     "translation": "王說：「封啊，從殷的老百姓和他們的官員到卿大夫，從他們的官員到諸侯和國君。」",
+                    "bold_translation_offsets": [(20, 23)],
                 },
             ],
         )
@@ -99,13 +105,17 @@ class TestExample(TestCase):
             [
                 {
                     "text": "中文授課",
+                    "bold_text_offsets": [(0, 2)],
                     "tags": ["Traditional Chinese"],
                     "roman": "zhōngwén shòukè",
+                    "bold_roman_offsets": [(0, 8)],
                 },
                 {
                     "text": "中文授课",
+                    "bold_text_offsets": [(0, 2)],
                     "tags": ["Simplified Chinese"],
                     "roman": "zhōngwén shòukè",
+                    "bold_roman_offsets": [(0, 8)],
                 },
             ],
         )
@@ -134,7 +144,9 @@ class TestExample(TestCase):
                 {
                     "ref": "2002年3月9日, 堀田 由美",
                     "text": "オレの日本語どう？悪くないだろ 韓国語と英語も話すんだぜ 趣味だな語学は 寝泊りはどこ？近くのホテル？",
+                    "bold_text_offsets": [(20, 22)],
                     "roman": "Ore no Nihongo dō? Waruku naidaro Kankokugo to Eigo mo hanasunda ze Shumi da na gogaku wa Netomari wa doko? Chikaku no hoteru?",
+                    "bold_roman_offsets": [(47, 51)],
                     "ruby": [
                         ("日", "に"),
                         ("本", "ほん"),
@@ -169,7 +181,7 @@ class TestExample(TestCase):
         self.wxr.wtp.add_page(
             "Template:zh-x",
             10,
-            """<dl class="zhusex"><span lang="zh-Hant" class="Hant">-{<!-- -->[[如果#漢語|如果]][[唔係#漢語|唔係]][[今日#漢語|今日]][[拆穿#漢語|拆穿]][[你#漢語|你]][[槓嘢#漢語|槓野]]，[[畀#漢語|俾]][[你#漢語|你]][[混#漢語|混]][[咗#漢語|左]][[入#漢語|入]][[稅局#漢語|稅局]][[重#漢語|重]][[死人#漢語|死人]][[呀#漢語|呀]]！<!-- -->}-</span> <span style="color:darkgreen; font-size:x-small;">&#91;[[w:廣州話|廣州話]]，[[w:繁体中文|繁體]]&#93;</span><br><span lang="zh-Hans" class="Hans">-{<!-- -->[[如果#漢語|如果]][[唔系#漢語|唔系]][[今日#漢語|今日]][[拆穿#漢語|拆穿]][[你#漢語|你]][[杠嘢#漢語|杠野]]，[[畀#漢語|俾]][[你#漢語|你]][[混#漢語|混]][[咗#漢語|左]][[入#漢語|入]][[税局#漢語|税局]][[重#漢語|重]][[死人#漢語|死人]][[呀#漢語|呀]]！<!-- -->}-</span> <span style="color:darkgreen; font-size:x-small;">&#91;[[w:廣州話|廣州話]]，[[w:简体中文|簡體]]&#93;</span><dd><span lang="zh-Latn"><i>roman</i></span> <span>&#91;[[w:廣州話拼音方案|廣州話拼音]]&#93;</span></dd><dd>如果不是今天揭穿你的老底，給你混進稅務局就更'''糟糕'''了！</dd></dl>[[Category:有使用例的粵語詞]]""",
+            """<dl class="zhusex"><span lang="zh-Hant" class="Hant">-{<!-- -->[[如果#漢語|如果]][[唔係#漢語|唔係]][[今日#漢語|今日]][[拆穿#漢語|拆穿]][[你#漢語|你]][[槓嘢#漢語|槓野]]，[[畀#漢語|俾]][[你#漢語|你]][[混#漢語|混]][[咗#漢語|左]][[入#漢語|入]][[稅局#漢語|稅局]][[重#漢語|重]]<b>死人</b>[[呀#漢語|呀]]！<!-- -->}-</span> <span style="color:darkgreen; font-size:x-small;">&#91;[[w:廣州話|廣州話]]，[[w:繁体中文|繁體]]&#93;</span><br><span lang="zh-Hans" class="Hans">-{<!-- -->[[如果#漢語|如果]][[唔系#漢語|唔系]][[今日#漢語|今日]][[拆穿#漢語|拆穿]][[你#漢語|你]][[杠嘢#漢語|杠野]]，[[畀#漢語|俾]][[你#漢語|你]][[混#漢語|混]][[咗#漢語|左]][[入#漢語|入]][[税局#漢語|税局]][[重#漢語|重]]<b>死人</b>[[呀#漢語|呀]]！<!-- -->}-</span> <span style="color:darkgreen; font-size:x-small;">&#91;[[w:廣州話|廣州話]]，[[w:简体中文|簡體]]&#93;</span><dd><span lang="zh-Latn" style="color:#404D52"><i>jyu<sup>4</sup> gwo<sup>2</sup> m<sup>4</sup> hai<sup>6</sup> gam<sup>1</sup> jat<sup>6</sup> caak<sup>3</sup> cyun<sup>1</sup> nei<sup>5</sup> lung<sup>5</sup> je<sup>5</sup>, bei<sup>2</sup> nei<sup>5</sup> wan<sup>6</sup> zo<sup>2</sup> jap<sup>6</sup> seoi<sup>3</sup> guk<sup>6-2</sup> zung<sup>6</sup> <b>sei<sup>2</sup> jan<sup>4</sup></b> aa<sup>3</sup>!</i></span> <span style="color:darkgreen; font-size:x-small;">&#91;[[w:廣州話拼音方案|廣州話拼音]]&#93;</span></dd><dd>如果不是今天揭穿你的老底，給你混進稅務局就更'''糟糕'''了！</dd></dl>[[Category:有使用例的粵語詞]]""",
         )
         sense_data = Sense()
         root = self.wxr.wtp.parse("""#* {{quote-book|zh}}
@@ -183,16 +195,22 @@ class TestExample(TestCase):
                 {
                     "ref": "1957, 王力",
                     "text": "如果唔係今日拆穿你槓野，俾你混左入稅局重死人呀！",
-                    "roman": "roman",
+                    "bold_text_offsets": [(20, 22)],
+                    "roman": "jyu⁴ gwo² m⁴ hai⁶ gam¹ jat⁶ caak³ cyun¹ nei⁵ lung⁵ je⁵, bei² nei⁵ wan⁶ zo² jap⁶ seoi³ guk⁶⁻² zung⁶ sei² jan⁴ aa³!",
+                    "bold_roman_offsets": [(99, 108)],
                     "tags": ["Cantonese", "Pinyin", "Traditional Chinese"],
                     "translation": "如果不是今天揭穿你的老底，給你混進稅務局就更糟糕了！",
+                    "bold_translation_offsets": [(22, 24)],
                 },
                 {
                     "ref": "1957, 王力",
                     "text": "如果唔系今日拆穿你杠野，俾你混左入税局重死人呀！",
-                    "roman": "roman",
+                    "bold_text_offsets": [(20, 22)],
+                    "roman": "jyu⁴ gwo² m⁴ hai⁶ gam¹ jat⁶ caak³ cyun¹ nei⁵ lung⁵ je⁵, bei² nei⁵ wan⁶ zo² jap⁶ seoi³ guk⁶⁻² zung⁶ sei² jan⁴ aa³!",
+                    "bold_roman_offsets": [(99, 108)],
                     "tags": ["Cantonese", "Pinyin", "Simplified Chinese"],
                     "translation": "如果不是今天揭穿你的老底，給你混進稅務局就更糟糕了！",
+                    "bold_translation_offsets": [(22, 24)],
                 },
             ],
         )
@@ -217,7 +235,9 @@ class TestExample(TestCase):
             [
                 {
                     "text": "黑奴籲天錄",
+                    "bold_text_offsets": [(0, 2)],
                     "roman": "Hēinú Yùtiānlù",
+                    "bold_roman_offsets": [(0, 5)],
                     "tags": [
                         "Traditional Chinese",
                         "Classical Chinese",
@@ -225,10 +245,13 @@ class TestExample(TestCase):
                     ],
                     "translation": "湯姆叔叔的小屋",
                     "literal_meaning": "黑人奴隸向上天呼告的記錄",
+                    "bold_literal_offsets": [(0, 4)],
                 },
                 {
                     "text": "黑奴吁天录",
+                    "bold_text_offsets": [(0, 2)],
                     "roman": "Hēinú Yùtiānlù",
+                    "bold_roman_offsets": [(0, 5)],
                     "tags": [
                         "Simplified Chinese",
                         "Classical Chinese",
@@ -236,6 +259,7 @@ class TestExample(TestCase):
                     ],
                     "translation": "湯姆叔叔的小屋",
                     "literal_meaning": "黑人奴隸向上天呼告的記錄",
+                    "bold_literal_offsets": [(0, 4)],
                 },
             ],
         )
@@ -259,7 +283,9 @@ class TestExample(TestCase):
             [
                 {
                     "text": "その認識で正しいと思う。",
+                    "bold_text_offsets": [(2, 4)],
                     "roman": "Sono ninshiki de tadashii to omou.",
+                    "bold_roman_offsets": [(5, 13)],
                     "ruby": [
                         ("認識", "にんしき"),
                         ("正", "ただ"),
@@ -267,6 +293,7 @@ class TestExample(TestCase):
                     ],
                     "translation": "我相信你是對的。",
                     "literal_meaning": "我相信你的理解是對的。",
+                    "bold_literal_offsets": [(5, 7)],
                 },
             ],
         )
@@ -290,8 +317,11 @@ class TestExample(TestCase):
             [
                 {
                     "text": "وَمَا مُحَمَّدٌ إِلَّا رَسُولٌ قَدْ خَلَتْ مِنْ قَبْلِهِ الرُّسُلُ",
+                    "bold_text_offsets": [(6, 15)],
                     "roman": "wa-mā muḥammadun ʔillā rasūlun qad ḵalat min qablihi r-rusulu",
+                    "bold_roman_offsets": [(6, 16)],
                     "translation": "穆罕默德只是一個使者，在他之前，有許多使者，確已逝去了。",
+                    "bold_translation_offsets": [(0, 4)],
                     "ref": "公元 609年–632年, 《古蘭經》, 3:144:",
                 },
             ],
@@ -316,7 +346,9 @@ class TestExample(TestCase):
             [
                 {
                     "text": "В чужо́й монасты́рь со свои́м уста́вом не хо́дят",
+                    "bold_text_offsets": [(30, 38)],
                     "roman": "V čužój monastýrʹ so svoím ustávom ne xódjat",
+                    "bold_roman_offsets": [(27, 34)],
                     "translation": "入鄉隨俗，入境隨俗",
                     "literal_meaning": "你不能用你自己的憲章去另一個寺院",
                     "raw_tags": ["諺語"],
@@ -343,8 +375,11 @@ class TestExample(TestCase):
             [
                 {
                     "text": "Я кончаюсь, Горбунок: Царь велит мне в кипяток!",
+                    'bold_text_offsets': [(39, 46)],
                     "roman": "Ja končajusʹ, Gorbunok: Carʹ velit mne v kipjatok!",
+                    'bold_roman_offsets': [(41, 49)],
                     "translation": "我將要完蛋，駝背。國王命令我跳入沸水中！",
+                    'bold_translation_offsets': [(16, 18)],
                     "ref": "P. Yershov, The Humpback Horse 駝背的馬:",
                 },
             ],

@@ -131,9 +131,11 @@ class TestFrGloss(TestCase):
                         "examples": [
                             {
                                 "text": "这匹马很大。",
+                                "bold_text_offsets": [(2, 3)],
                                 "translation": "Ce cheval est grand.",
                                 "roman": "Zhè pǐ mǎ hěn dà.\n"
                                 "⠌⠢⠆ ⠏⠊⠄ ⠍⠔⠄ ⠓⠴⠄ ⠙⠔⠆⠐⠆",
+                                "bold_roman_offsets": [(7, 9)],
                             }
                         ],
                     }
@@ -687,6 +689,7 @@ class TestFrGloss(TestCase):
                 {
                     "ref": "source",
                     "text": "之後十年，越南人民吃盡千辛萬苦",
+                    "bold_text_offsets": [(11, 15)],
                     "translation": "Au cours de la décennie suivante, le peuple vietnamien a beaucoup souffert",
                 }
             ],
