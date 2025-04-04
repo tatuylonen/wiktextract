@@ -714,6 +714,11 @@ def recurse_glosses1(
         # been given to parent_sense) and return that instead.
         # XXX if this becomes relevant, add the example data to a returned
         # subsense instead?
+        # if any(
+        #     isinstance(r, Sense) and r.raw_tags == ["no-gloss"] for r in ret
+        # ):
+        #     print(f"{ret=}")
+        ret = combine_senses_with_identical_glosses(ret)
         return ret
 
     # If nothing came from below, then this.
@@ -851,3 +856,35 @@ def block_has_non_greek_text(text: str) -> bool:
                 return True
             break
     return False
+
+
+def combine_senses_with_identical_glosses(
+    orig_senses: list[Sense | Example],
+) -> list[Sense | Example]:
+    glosses_to_senses: dict[tuple[str, ...], list[Sense]] = {}
+    examples: list[Example] = []
+    senses: list[Sense] = []
+
+    found_identical_glosses = False
+
+    for item in orig_senses:
+        if isinstance(item, Example):
+            examples.append(item)
+            continue
+        glosses_key = tuple(item.glosses)
+        if glosses_key not in glosses_to_senses:
+            glosses_to_senses[glosses_key] = [item]
+        else:
+            glosses_to_senses[glosses_key].append(item)
+            found_identical_glosses = True
+
+    if not found_identical_glosses:
+        return orig_senses
+
+    for twinned_senses in glosses_to_senses.values():
+        main_sense = twinned_senses[0]
+        for other_sense in twinned_senses[1:]:
+            main_sense.merge(other_sense)
+        senses.append(main_sense)
+
+    return senses + examples
