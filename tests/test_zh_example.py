@@ -144,7 +144,9 @@ class TestExample(TestCase):
                 {
                     "ref": "2002年3月9日, 堀田 由美",
                     "text": "オレの日本語どう？悪くないだろ 韓国語と英語も話すんだぜ 趣味だな語学は 寝泊りはどこ？近くのホテル？",
+                    "bold_text_offsets": [(20, 22)],
                     "roman": "Ore no Nihongo dō? Waruku naidaro Kankokugo to Eigo mo hanasunda ze Shumi da na gogaku wa Netomari wa doko? Chikaku no hoteru?",
+                    "bold_roman_offsets": [(47, 51)],
                     "ruby": [
                         ("日", "に"),
                         ("本", "ほん"),
@@ -281,7 +283,9 @@ class TestExample(TestCase):
             [
                 {
                     "text": "その認識で正しいと思う。",
+                    "bold_text_offsets": [(2, 4)],
                     "roman": "Sono ninshiki de tadashii to omou.",
+                    "bold_roman_offsets": [(5, 13)],
                     "ruby": [
                         ("認識", "にんしき"),
                         ("正", "ただ"),
@@ -289,6 +293,7 @@ class TestExample(TestCase):
                     ],
                     "translation": "我相信你是對的。",
                     "literal_meaning": "我相信你的理解是對的。",
+                    "bold_literal_offsets": [(5, 7)],
                 },
             ],
         )
