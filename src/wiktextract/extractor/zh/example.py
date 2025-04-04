@@ -151,16 +151,46 @@ def extract_template_ja_usex(
     ):
         ruby_data, node_without_ruby = extract_ruby(wxr, span_tag)
         example_data.text = clean_node(wxr, None, node_without_ruby)
+        calculate_bold_offsets(
+            wxr,
+            wxr.wtp.parse(wxr.wtp.node_to_wikitext(node_without_ruby)),
+            example_data.text,
+            example_data,
+            "bold_text_offsets",
+        )
         example_data.ruby = ruby_data
     for span_tag in expanded_node.find_html_recursively(
         "span", attr_name="class", attr_value="tr"
     ):
         example_data.roman = clean_node(wxr, None, span_tag)
-    example_data.translation = clean_node(
-        wxr, None, node.template_parameters.get(3, "")
+        calculate_bold_offsets(
+            wxr,
+            span_tag,
+            example_data.roman,
+            example_data,
+            "bold_roman_offsets",
+        )
+    tr_arg = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(node.template_parameters.get(3, ""))
     )
-    example_data.literal_meaning = clean_node(
-        wxr, None, node.template_parameters.get("lit", "")
+    example_data.translation = clean_node(wxr, None, tr_arg)
+    calculate_bold_offsets(
+        wxr,
+        tr_arg,
+        example_data.translation,
+        example_data,
+        "bold_translation_offsets",
+    )
+    lit_arg = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(node.template_parameters.get("lit", ""))
+    )
+    example_data.literal_meaning = clean_node(wxr, None, lit_arg)
+    calculate_bold_offsets(
+        wxr,
+        lit_arg,
+        example_data.literal_meaning,
+        example_data,
+        "bold_literal_offsets",
     )
 
 
