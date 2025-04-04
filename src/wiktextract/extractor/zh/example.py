@@ -110,12 +110,33 @@ def extract_quote_templates(
             example_data.ref = clean_node(wxr, None, span_tag)
         elif "e-quotation" in span_class:
             example_data.text = clean_node(wxr, None, span_tag)
+            calculate_bold_offsets(
+                wxr,
+                span_tag,
+                example_data.text,
+                example_data,
+                "bold_text_offsets",
+            )
         elif "e-translation" in span_class:
             example_data.translation = clean_node(wxr, None, span_tag)
+            calculate_bold_offsets(
+                wxr,
+                span_tag,
+                example_data.translation,
+                example_data,
+                "bold_translation_offsets",
+            )
     for i_tag in expanded_node.find_html_recursively(
         "i", attr_name="class", attr_value="e-transliteration"
     ):
         example_data.roman = clean_node(wxr, None, i_tag)
+        calculate_bold_offsets(
+            wxr,
+            i_tag,
+            example_data.roman,
+            example_data,
+            "bold_roman_offsets",
+        )
         break
 
 

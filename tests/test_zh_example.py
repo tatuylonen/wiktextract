@@ -312,8 +312,11 @@ class TestExample(TestCase):
             [
                 {
                     "text": "وَمَا مُحَمَّدٌ إِلَّا رَسُولٌ قَدْ خَلَتْ مِنْ قَبْلِهِ الرُّسُلُ",
+                    "bold_text_offsets": [(6, 15)],
                     "roman": "wa-mā muḥammadun ʔillā rasūlun qad ḵalat min qablihi r-rusulu",
+                    "bold_roman_offsets": [(6, 16)],
                     "translation": "穆罕默德只是一個使者，在他之前，有許多使者，確已逝去了。",
+                    "bold_translation_offsets": [(0, 4)],
                     "ref": "公元 609年–632年, 《古蘭經》, 3:144:",
                 },
             ],
