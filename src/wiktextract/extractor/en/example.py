@@ -66,26 +66,43 @@ def extract_quote_templates(
         wxr.wtp.node_to_wikitext(node), expand_all=True
     )
     clean_node(wxr, sense_data, expanded_node)
-    ref = ""
-    text = ""
-    translation = ""
-    roman = ""
+    example_data = ExampleData(
+        text="", ref="", english="", roman="", type="quote"
+    )
     for span_tag in expanded_node.find_html_recursively("span"):
         span_class = span_tag.attrs.get("class", "")
         if "cited-source" == span_class:
-            ref = clean_node(wxr, None, span_tag)
+            example_data["ref"] = clean_node(wxr, None, span_tag)
         elif "e-quotation" in span_class:
-            text = clean_node(wxr, None, span_tag)
+            example_data["text"] = clean_node(wxr, None, span_tag)
+            calculate_bold_offsets(
+                wxr,
+                span_tag,
+                example_data["text"],
+                example_data,
+                "bold_text_offsets",
+            )
         elif "e-translation" in span_class:
-            translation = clean_node(wxr, None, span_tag)
+            example_data["english"] = clean_node(wxr, None, span_tag)
+            calculate_bold_offsets(
+                wxr,
+                span_tag,
+                example_data["english"],
+                example_data,
+                "bold_english_offsets",
+            )
     for i_tag in expanded_node.find_html_recursively(
         "i", attr_name="class", attr_value="e-transliteration"
     ):
-        roman = clean_node(wxr, None, i_tag)
+        example_data["roman"] = clean_node(wxr, None, i_tag)
+        calculate_bold_offsets(
+            wxr,
+            span_tag,
+            example_data["roman"],
+            example_data,
+            "bold_roman_offsets",
+        )
         break
-    example_data = ExampleData(
-        text=text, ref=ref, english=translation, roman=roman, type="quote"
-    )
     clean_example_empty_data(example_data)
     return example_data
 
