@@ -369,14 +369,38 @@ def extract_template_ux(
         i_class = i_tag.attrs.get("class", "")
         if "e-example" in i_class:
             example_data.text = clean_node(wxr, None, i_tag)
+            calculate_bold_offsets(
+                wxr, i_tag, example_data.text, example_data, "bold_text_offsets"
+            )
         elif "e-transliteration" in i_class:
             example_data.roman = clean_node(wxr, None, i_tag)
+            calculate_bold_offsets(
+                wxr,
+                i_tag,
+                example_data.roman,
+                example_data,
+                "bold_roman_offsets",
+            )
     for span_tag in expanded_node.find_html_recursively("span"):
         span_class = span_tag.attrs.get("class", "")
         if "e-translation" in span_class:
             example_data.translation = clean_node(wxr, None, span_tag)
+            calculate_bold_offsets(
+                wxr,
+                span_tag,
+                example_data.translation,
+                example_data,
+                "bold_translation_offsets",
+            )
         elif "e-literally" in span_class:
             example_data.literal_meaning = clean_node(wxr, None, span_tag)
+            calculate_bold_offsets(
+                wxr,
+                span_tag,
+                example_data.literal_meaning,
+                example_data,
+                "bold_literal_offsets",
+            )
         elif "qualifier-content" in span_class:
             example_data.raw_tags.extend(
                 clean_node(wxr, None, span_tag).split("、")

@@ -346,7 +346,9 @@ class TestExample(TestCase):
             [
                 {
                     "text": "В чужо́й монасты́рь со свои́м уста́вом не хо́дят",
+                    "bold_text_offsets": [(30, 38)],
                     "roman": "V čužój monastýrʹ so svoím ustávom ne xódjat",
+                    "bold_roman_offsets": [(27, 34)],
                     "translation": "入鄉隨俗，入境隨俗",
                     "literal_meaning": "你不能用你自己的憲章去另一個寺院",
                     "raw_tags": ["諺語"],
