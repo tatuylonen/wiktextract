@@ -39,9 +39,7 @@ def parse_section(
     elif title_text == "Terjemahan":
         extract_translation_section(wxr, page_data, base_data, level_node)
     elif title_text == "Sebutan":
-        extract_sound_section(
-            wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
-        )
+        extract_sound_section(wxr, page_data, base_data, level_node)
 
     for next_level in level_node.find_child(LEVEL_KIND_FLAGS):
         parse_section(wxr, page_data, base_data, next_level)

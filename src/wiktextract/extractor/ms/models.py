@@ -80,6 +80,8 @@ class Sound(MalayBaseModel):
     other: str = ""
     roman: str = ""
     rhymes: str = ""
+    categories: list[str] = Field(default=[], exclude=True)
+    hyphenation: str = Field(default="", exclude=True)
 
 
 class WordEntry(MalayBaseModel):
