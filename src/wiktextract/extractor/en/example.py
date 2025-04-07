@@ -62,8 +62,18 @@ def extract_example_list_item(
             "ko-usex",
             "koex",
             "ko-x",
+            "th-usex",
+            "th-x",
+            "th-xi",
         ]:
-            examples.append(extract_ux_template(wxr, template_node, sense_data))
+            examples.append(
+                extract_ux_template(
+                    wxr,
+                    template_node,
+                    sense_data,
+                    parent_data,
+                )
+            )
 
     return examples
 
@@ -376,13 +386,15 @@ def clean_example_empty_data(data: ExampleData) -> None:
 
 
 def extract_ux_template(
-    wxr: WiktextractContext, t_node: TemplateNode, sense_data: SenseData
+    wxr: WiktextractContext,
+    t_node: TemplateNode,
+    sense_data: SenseData,
+    example_data: ExampleData,
 ) -> ExampleData:
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(t_node), expand_all=True
     )
     clean_node(wxr, sense_data, expanded_node)
-    example_data = ExampleData(raw_tags=[])
     for html_node in expanded_node.find_child_recursively(NodeKind.HTML):
         class_names = html_node.attrs.get("class", "")
         if "e-example" in class_names:

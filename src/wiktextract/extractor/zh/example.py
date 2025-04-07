@@ -62,6 +62,9 @@ def extract_example_list_item(
                 "ko-usex",
                 "ko-x",
                 "koex",
+                "th-usex",
+                "th-x",
+                "th-xi",
             ]:
                 extract_template_ux(wxr, child, example_data)
                 clean_node(wxr, sense_data, child)  # add cat link
@@ -374,45 +377,47 @@ def extract_template_ux(
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(node), expand_all=True
     )
-    for i_tag in expanded_node.find_html_recursively("i"):
-        i_class = i_tag.attrs.get("class", "")
-        if "e-example" in i_class:
-            example_data.text = clean_node(wxr, None, i_tag)
-            calculate_bold_offsets(
-                wxr, i_tag, example_data.text, example_data, "bold_text_offsets"
-            )
-        elif "e-transliteration" in i_class:
-            example_data.roman = clean_node(wxr, None, i_tag)
+    for html_node in expanded_node.find_child_recursively(NodeKind.HTML):
+        class_names = html_node.attrs.get("class", "")
+        if "e-example" in class_names:
+            example_data.text = clean_node(wxr, None, html_node)
             calculate_bold_offsets(
                 wxr,
-                i_tag,
+                html_node,
+                example_data.text,
+                example_data,
+                "bold_text_offsets",
+            )
+        elif "e-transliteration" in class_names:
+            example_data.roman = clean_node(wxr, None, html_node)
+            calculate_bold_offsets(
+                wxr,
+                html_node,
                 example_data.roman,
                 example_data,
                 "bold_roman_offsets",
             )
-    for span_tag in expanded_node.find_html_recursively("span"):
-        span_class = span_tag.attrs.get("class", "")
-        if "e-translation" in span_class:
-            example_data.translation = clean_node(wxr, None, span_tag)
+        elif "e-translation" in class_names:
+            example_data.translation = clean_node(wxr, None, html_node)
             calculate_bold_offsets(
                 wxr,
-                span_tag,
+                html_node,
                 example_data.translation,
                 example_data,
                 "bold_translation_offsets",
             )
-        elif "e-literally" in span_class:
-            example_data.literal_meaning = clean_node(wxr, None, span_tag)
+        elif "e-literally" in class_names:
+            example_data.literal_meaning = clean_node(wxr, None, html_node)
             calculate_bold_offsets(
                 wxr,
-                span_tag,
+                html_node,
                 example_data.literal_meaning,
                 example_data,
                 "bold_literal_offsets",
             )
-        elif "qualifier-content" in span_class:
+        elif "qualifier-content" in class_names:
             example_data.raw_tags.extend(
-                clean_node(wxr, None, span_tag).split("、")
+                clean_node(wxr, None, html_node).split("、")
             )
     translate_raw_tags(example_data)
 
