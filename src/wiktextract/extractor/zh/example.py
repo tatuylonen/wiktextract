@@ -58,6 +58,8 @@ def extract_example_list_item(
                 "eg",
                 "usex",
                 "uxi",
+                "collocation",
+                "co",
                 "coi",
                 "ko-usex",
                 "ko-x",

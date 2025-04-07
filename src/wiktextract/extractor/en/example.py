@@ -65,6 +65,9 @@ def extract_example_list_item(
             "th-usex",
             "th-x",
             "th-xi",
+            "collocation",
+            "co",
+            "coi",
         ]:
             examples.append(
                 extract_ux_template(
