@@ -865,7 +865,7 @@ class InflTests(unittest.TestCase):
                 {
                     "form": "affect",
                     "source": "Conjugation",
-                    "tags": ["plural", "present", "third-person"],
+                    "tags": ["present", "third-person"],
                 },
                 {
                     "form": "is affecting",
@@ -882,7 +882,6 @@ class InflTests(unittest.TestCase):
                     "form": "are affecting",
                     "source": "Conjugation",
                     "tags": [
-                        "plural",
                         "present",
                         "progressive",
                         "third-person",
@@ -905,7 +904,6 @@ class InflTests(unittest.TestCase):
                     "source": "Conjugation",
                     "tags": [
                         "perfect",
-                        "plural",
                         "present",
                         "third-person",
                         "multiword-construction",
@@ -928,7 +926,6 @@ class InflTests(unittest.TestCase):
                     "source": "Conjugation",
                     "tags": [
                         "perfect",
-                        "plural",
                         "present",
                         "progressive",
                         "third-person",
@@ -1057,7 +1054,7 @@ class InflTests(unittest.TestCase):
                 {
                     "form": "affected",
                     "source": "Conjugation",
-                    "tags": ["past", "plural", "third-person"],
+                    "tags": ["past", "third-person"],
                 },
                 {
                     "form": "was affecting",
@@ -1075,7 +1072,6 @@ class InflTests(unittest.TestCase):
                     "source": "Conjugation",
                     "tags": [
                         "past",
-                        "plural",
                         "progressive",
                         "third-person",
                         "multiword-construction",
@@ -1098,7 +1094,6 @@ class InflTests(unittest.TestCase):
                     "tags": [
                         "past",
                         "perfect",
-                        "plural",
                         "third-person",
                         "multiword-construction",
                     ],
@@ -1121,7 +1116,6 @@ class InflTests(unittest.TestCase):
                     "tags": [
                         "past",
                         "perfect",
-                        "plural",
                         "progressive",
                         "third-person",
                         "multiword-construction",
@@ -1270,7 +1264,6 @@ class InflTests(unittest.TestCase):
                     "source": "Conjugation",
                     "tags": [
                         "future",
-                        "plural",
                         "third-person",
                         "multiword-construction",
                     ],
@@ -1291,7 +1284,6 @@ class InflTests(unittest.TestCase):
                     "source": "Conjugation",
                     "tags": [
                         "future",
-                        "plural",
                         "progressive",
                         "third-person",
                         "multiword-construction",
@@ -1314,7 +1306,6 @@ class InflTests(unittest.TestCase):
                     "tags": [
                         "future",
                         "perfect",
-                        "plural",
                         "third-person",
                         "multiword-construction",
                     ],
@@ -1337,7 +1328,6 @@ class InflTests(unittest.TestCase):
                     "tags": [
                         "future",
                         "perfect",
-                        "plural",
                         "progressive",
                         "third-person",
                         "multiword-construction",
@@ -1486,7 +1476,6 @@ class InflTests(unittest.TestCase):
                     "source": "Conjugation",
                     "tags": [
                         "conditional",
-                        "plural",
                         "third-person",
                         "multiword-construction",
                     ],
@@ -1507,7 +1496,6 @@ class InflTests(unittest.TestCase):
                     "source": "Conjugation",
                     "tags": [
                         "conditional",
-                        "plural",
                         "progressive",
                         "third-person",
                         "multiword-construction",
@@ -1530,7 +1518,6 @@ class InflTests(unittest.TestCase):
                     "tags": [
                         "conditional",
                         "perfect",
-                        "plural",
                         "third-person",
                         "multiword-construction",
                     ],
@@ -1553,7 +1540,6 @@ class InflTests(unittest.TestCase):
                     "tags": [
                         "conditional",
                         "perfect",
-                        "plural",
                         "progressive",
                         "third-person",
                         "multiword-construction",
@@ -2395,7 +2381,6 @@ class InflTests(unittest.TestCase):
                     "source": "Conjugation",
                     "tags": [
                         "indicative",
-                        "plural",
                         "present",
                         "singular",
                         "third-person",
@@ -2406,7 +2391,6 @@ class InflTests(unittest.TestCase):
                     "source": "Conjugation",
                     "tags": [
                         "indicative",
-                        "plural",
                         "present",
                         "singular",
                         "third-person",
@@ -2566,7 +2550,6 @@ class InflTests(unittest.TestCase):
                     "source": "Conjugation",
                     "tags": [
                         "indicative",
-                        "plural",
                         "preterite",
                         "singular",
                         "third-person",
