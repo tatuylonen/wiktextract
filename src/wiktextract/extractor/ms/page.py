@@ -26,9 +26,7 @@ def parse_section(
     if title_text in POS_DATA:
         extract_pos_section(wxr, page_data, base_data, level_node, title_text)
     elif title_text == "Etimologi":
-        extract_etymology_section(
-            wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
-        )
+        extract_etymology_section(wxr, page_data, base_data, level_node)
     elif title_text in FORM_SECTIONS:
         extract_form_section(
             wxr,
@@ -93,8 +91,25 @@ def parse_page(
 
 
 def extract_etymology_section(
-    wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
+    wxr: WiktextractContext,
+    page_data: list[WordEntry],
+    base_data: WordEntry,
+    level_node: LevelNode,
 ) -> None:
-    word_entry.etymology_text = clean_node(
-        wxr, word_entry, list(level_node.invert_find_child(LEVEL_KIND_FLAGS))
+    cats = {}
+    e_text = clean_node(
+        wxr, cats, list(level_node.invert_find_child(LEVEL_KIND_FLAGS))
     )
+    if e_text == "":
+        return
+    if len(page_data) == 0:
+        base_data.etymology_text = e_text
+        base_data.categories.extend(cats.get("categories", []))
+    elif level_node.kind == NodeKind.LEVEL3:
+        for data in page_data:
+            if data.lang_code == page_data[-1].lang_code:
+                data.etymology_text = e_text
+                data.categories.extend(cats.get("categories", []))
+    else:
+        page_data[-1].etymology_text = e_text
+        page_data[-1].categories.extend(cats.get("categories", []))
