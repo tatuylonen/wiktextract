@@ -53,7 +53,16 @@ def extract_example_list_item(
                     extract_template_zh_x(wxr, child, example_data)
                 )
                 clean_node(wxr, sense_data, child)  # add cat link
-            elif template_name in ["ux", "eg", "usex", "uxi", "coi"]:
+            elif template_name in [
+                "ux",
+                "eg",
+                "usex",
+                "uxi",
+                "coi",
+                "ko-usex",
+                "ko-x",
+                "koex",
+            ]:
                 extract_template_ux(wxr, child, example_data)
                 clean_node(wxr, sense_data, child)  # add cat link
             elif template_name == "Q":

@@ -18,7 +18,7 @@ def extract_example_list_item(
 ) -> list[ExampleData]:
     examples = []
     for template_node in list_item.find_child(NodeKind.TEMPLATE):
-        if template_node.template_name in ["zh-x", "zh-q"]:
+        if template_node.template_name in ["zh-x", "zh-usex", "zh-q"]:
             examples.extend(
                 extract_template_zh_x(
                     wxr,
@@ -27,7 +27,7 @@ def extract_example_list_item(
                     parent_data,
                 )
             )
-        elif template_node.template_name in ["ja-usex", "ja-x"]:
+        elif template_node.template_name in ["ja-usex", "ja-x", "ja-ux"]:
             examples.append(
                 extract_template_ja_usex(
                     wxr,
@@ -55,6 +55,15 @@ def extract_example_list_item(
                     )
             else:
                 examples.append(q_example)
+        elif template_node.template_name in [
+            "ux",
+            "usex",
+            "uxi",
+            "ko-usex",
+            "koex",
+            "ko-x",
+        ]:
+            examples.append(extract_ux_template(wxr, template_node, sense_data))
 
     return examples
 
@@ -364,3 +373,58 @@ def clean_example_empty_data(data: ExampleData) -> None:
     for key, value in data.copy().items():
         if len(value) == 0:
             del data[key]
+
+
+def extract_ux_template(
+    wxr: WiktextractContext, t_node: TemplateNode, sense_data: SenseData
+) -> ExampleData:
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    clean_node(wxr, sense_data, expanded_node)
+    example_data = ExampleData(raw_tags=[])
+    for html_node in expanded_node.find_child_recursively(NodeKind.HTML):
+        class_names = html_node.attrs.get("class", "")
+        if "e-example" in class_names:
+            example_data["text"] = clean_node(wxr, None, html_node)
+            calculate_bold_offsets(
+                wxr,
+                html_node,
+                example_data["text"],
+                example_data,
+                "bold_text_offsets",
+            )
+        elif "e-transliteration" in class_names:
+            example_data["roman"] = clean_node(wxr, None, html_node)
+            calculate_bold_offsets(
+                wxr,
+                html_node,
+                example_data["roman"],
+                example_data,
+                "bold_roman_offsets",
+            )
+        elif "e-translation" in class_names:
+            example_data["english"] = clean_node(wxr, None, html_node)
+            calculate_bold_offsets(
+                wxr,
+                html_node,
+                example_data["english"],
+                example_data,
+                "bold_english_offsets",
+            )
+        elif "e-literally" in class_names:
+            example_data["literal_meaning"] = clean_node(wxr, None, html_node)
+            calculate_bold_offsets(
+                wxr,
+                html_node,
+                example_data["literal_meaning"],
+                example_data,
+                "bold_literal_offsets",
+            )
+        elif "qualifier-content" in class_names:
+            raw_tag = clean_node(wxr, None, html_node)
+            if raw_tag != "":
+                example_data["raw_tags"].append(raw_tag)
+
+    clean_example_empty_data(example_data)
+    return example_data
