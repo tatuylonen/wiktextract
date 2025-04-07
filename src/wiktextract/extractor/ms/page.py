@@ -35,9 +35,7 @@ def parse_section(
             FORM_SECTIONS[title_text],
         )
     elif title_text == "Tesaurus":
-        extract_linkage_section(
-            wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
-        )
+        extract_linkage_section(wxr, page_data, base_data, level_node)
     elif title_text == "Terjemahan":
         extract_translation_section(
             wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node

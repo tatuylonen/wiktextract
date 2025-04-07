@@ -77,3 +77,23 @@ class TestMsLinkage(TestCase):
                 {"word": "masa lampau", "sense": "Zaman yang akan datang."},
             ],
         )
+
+    def test_normal_list(self):
+        self.wxr.wtp.add_page("Templat:sense", 10, "({{{1}}}):")
+        page_data = parse_page(
+            self.wxr,
+            "makan",
+            """== Bahasa Melayu ==
+=== Takrifan ===
+====Kata kerja====
+# memamah serta
+====Kata nama====
+# [[rezeki]].
+=== Tesaurus ===
+; Sinonim:
+* {{sense|santap}} [[bahau]]""",
+        )
+        self.assertEqual(
+            page_data[0]["synonyms"], [{"word": "bahau", "sense": "santap"}]
+        )
+        self.assertEqual(page_data[0]["synonyms"], page_data[1]["synonyms"])
