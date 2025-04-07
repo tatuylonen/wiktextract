@@ -61,6 +61,7 @@ class Translation(MalayBaseModel):
     tags: list[str] = []
     raw_tags: list[str] = []
     roman: str = ""
+    categories: list[str] = Field(default=[], exclude=True)
 
 
 class Sound(MalayBaseModel):

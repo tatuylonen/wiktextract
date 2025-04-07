@@ -7,27 +7,53 @@ from .tags import translate_raw_tags
 
 
 def extract_translation_section(
-    wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
+    wxr: WiktextractContext,
+    page_data: list[WordEntry],
+    base_data: WordEntry,
+    level_node: LevelNode,
 ) -> None:
     sense = ""
+    tr_list = []
+    cats = {}
     for node in level_node.children:
         if isinstance(node, TemplateNode) and node.template_name in [
             "ter-atas",
             "teratas",
             "trans-top",
         ]:
-            sense = clean_node(wxr, word_entry, node)
+            sense = clean_node(wxr, cats, node)
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
             for list_item in node.find_child(NodeKind.LIST_ITEM):
-                extract_translation_list_item(wxr, word_entry, list_item, sense)
+                tr_list.extend(
+                    extract_translation_list_item(wxr, list_item, sense)
+                )
+
+    if len(page_data) == 0:
+        base_data.categories.extend(cats.get("categories", []))
+        for tr_data in tr_list:
+            if tr_data.word != "":
+                base_data.translations.append(tr_data)
+                base_data.categories.extend(tr_data.categories)
+    elif level_node.kind == NodeKind.LEVEL3:
+        for data in page_data:
+            if data.lang_code == page_data[-1].lang_code:
+                data.categories.extend(cats.get("categories", []))
+                for tr_data in tr_list:
+                    if tr_data.word != "":
+                        data.translations.append(tr_data)
+                        data.categories.extend(tr_data.categories)
+    else:
+        page_data[-1].categories.extend(cats.get("categories", []))
+        for tr_data in tr_list:
+            if tr_data.word != "":
+                page_data[-1].translations.append(tr_data)
+                page_data[-1].categories.extend(tr_data.categories)
 
 
 def extract_translation_list_item(
-    wxr: WiktextractContext,
-    word_entry: WordEntry,
-    list_item: WikiNode,
-    sense: str,
+    wxr: WiktextractContext, list_item: WikiNode, sense: str
 ) -> None:
+    tr_list = []
     lang_name = "unknown"
     for node in list_item.children:
         if (
@@ -43,21 +69,31 @@ def extract_translation_list_item(
             "t-",
             "t+",
         ]:
-            extract_t_template(wxr, word_entry, node, sense, lang_name)
+            tr_list.append(extract_t_template(wxr, node, sense, lang_name))
+        elif (
+            isinstance(node, TemplateNode)
+            and node.template_name
+            in ["penerang", "qualifier", "i", "q", "qual"]
+            and len(tr_list) > 0
+        ):
+            raw_tag = clean_node(wxr, None, node).strip("() ")
+            if raw_tag != "":
+                tr_list[-1].raw_tags.append(raw_tag)
+                translate_raw_tags(tr_list[-1])
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
             for child_list_item in node.find_child(NodeKind.LIST_ITEM):
-                extract_translation_list_item(
-                    wxr, word_entry, child_list_item, sense
+                tr_list.extend(
+                    extract_translation_list_item(wxr, child_list_item, sense)
                 )
+    return tr_list
 
 
 def extract_t_template(
     wxr: WiktextractContext,
-    word_entry: WordEntry,
     t_node: TemplateNode,
     sense: str,
     lang_name: str,
-) -> None:
+) -> Translation:
     lang_code = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
     if lang_code == "":
         lang_code = "unknown"
@@ -79,6 +115,6 @@ def extract_t_template(
             tr_data.roman = clean_node(wxr, None, span_tag)
     if tr_data.word != "":
         translate_raw_tags(tr_data)
-        word_entry.translations.append(tr_data)
         for link_node in expanded_node.find_child(NodeKind.LINK):
-            clean_node(wxr, word_entry, link_node)
+            clean_node(wxr, tr_data, link_node)
+    return tr_data
