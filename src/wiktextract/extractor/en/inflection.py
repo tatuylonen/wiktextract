@@ -1691,6 +1691,7 @@ def parse_simple_table(
                     for k, v in repls.items():
                         alt = re.sub(k, v, alt)
                     alts.append(alt)
+
         # Remove "*" from beginning of forms, as in non-attested
         # or reconstructed forms.  Otherwise it might confuse romanization
         # detection.
@@ -2187,6 +2188,7 @@ def parse_simple_table(
     table_tags = []
     special_phrase_splits = get_lang_conf(lang, "special_phrase_splits")
     form_replacements = get_lang_conf(lang, "form_replacements")
+    form_transformations = get_lang_conf(lang, "form_transformations")
     possibly_ignored_forms = get_lang_conf(lang, "conditionally_ignored_cells")
     cleanup_rules = get_lang_conf(lang, "minor_text_cleanups")
 
@@ -2505,6 +2507,30 @@ def parse_simple_table(
                     assert isinstance(tags, str)
                     form = replacement
                     extra_tags.extend(tags.split())
+
+                check_romanization_form_transformation = False
+                # loop over regexes in form_transformation and replace text
+                # in form using regex patterns
+                # this does a bit of the same stuff the above does,
+                # but with regexes and re.sub() instead
+                for (
+                    form_transformations_pos,
+                    v,
+                    subst,
+                    tags,
+                ) in form_transformations:
+                    # v is a pattern string, like "^ich"
+                    if pos != form_transformations_pos:
+                        continue
+                    m = re.search(v, form)
+                    if m is not None:
+                        form = re.sub(v, subst, form)
+                        for x in tags.split():
+                            assert x in valid_tags
+                        extra_tags.extend(tags.split())
+                        check_romanization_form_transformation = True
+                        break
+
                 # Clean the value, extracting reference symbols
                 form, refs, defs, hdr_tags = extract_cell_content(
                     lang, word, form
@@ -2520,6 +2546,23 @@ def parse_simple_table(
                         refs_tags.update(def_ht[ref])
 
                 if base_roman:
+                    if check_romanization_form_transformation:
+                        # because form_transformations are used to handle things
+                        # where the romanization has the "same" structure, we
+                        # need to handle that here too....
+                        for (
+                            _,
+                            v,
+                            subst,
+                            _,
+                        ) in form_transformations:
+                            # v is a pattern string, like "^ich"
+                            m = re.search(v, base_roman)
+                            if m is not None:
+                                base_roman = re.sub(v, subst, base_roman)
+                                # XXX add tag stuff here if needed
+                                break
+
                     base_roman, _, _, hdr_tags = extract_cell_content(
                         lang, word, base_roman
                     )
