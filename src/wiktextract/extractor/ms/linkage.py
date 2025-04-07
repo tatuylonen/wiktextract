@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
@@ -20,33 +22,73 @@ def extract_form_section(
 
 
 def extract_linkage_section(
-    wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
+    wxr: WiktextractContext,
+    page_data: list[WordEntry],
+    base_data: WordEntry,
+    level_node: LevelNode,
 ) -> None:
+    l_dict = defaultdict(list)
+    linkage_name = ""
     for list_node in level_node.find_child(NodeKind.LIST):
         for list_item in list_node.find_child(NodeKind.LIST_ITEM):
-            extract_linkage_list_item(wxr, word_entry, list_item)
+            new_l_name = extract_linkage_list_item(
+                wxr, l_dict, linkage_name, list_item
+            )
+            if new_l_name != "":
+                linkage_name = new_l_name
+
+    if len(page_data) == 0:
+        for field, data in l_dict.items():
+            getattr(base_data, field).extend(data)
+    elif level_node.kind == NodeKind.LEVEL3:
+        for data in page_data:
+            if data.lang_code == page_data[-1].lang_code:
+                for field, l_data in l_dict.items():
+                    getattr(data, field).extend(l_data)
+    else:
+        for field, l_data in l_dict.items():
+            getattr(page_data[-1], field).extend(l_data)
 
 
 def extract_linkage_list_item(
-    wxr: WiktextractContext, word_entry: WordEntry, list_item: WikiNode
-) -> None:
-    linkage_name = clean_node(wxr, None, list_item.children)
-    if linkage_name not in LINKAGE_SECTIONS:
-        return
-    for node in list_item.definition:
-        if isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
-            word = clean_node(wxr, None, node)
-            if word != "":
-                getattr(word_entry, LINKAGE_SECTIONS[linkage_name]).append(
-                    Linkage(word=word)
-                )
-        elif isinstance(node, str):
-            for word in node.split(","):
-                word = word.strip(" .\n")
+    wxr: WiktextractContext,
+    l_dict: dict[str, list[Linkage]],
+    linkage_name: str,
+    list_item: WikiNode,
+) -> str:
+    if list_item.definition is not None and len(list_item.definition) > 0:
+        linkage_name = clean_node(wxr, None, list_item.children)
+        if linkage_name not in LINKAGE_SECTIONS:
+            return ""
+        for node in list_item.definition:
+            if isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
+                word = clean_node(wxr, None, node)
                 if word != "":
-                    getattr(word_entry, LINKAGE_SECTIONS[linkage_name]).append(
+                    l_dict[LINKAGE_SECTIONS[linkage_name]].append(
                         Linkage(word=word)
                     )
+            elif isinstance(node, str):
+                for word in node.split(","):
+                    word = word.strip(" .\n")
+                    if word != "":
+                        l_dict[LINKAGE_SECTIONS[linkage_name]].append(
+                            Linkage(word=word)
+                        )
+    elif linkage_name == "":
+        return ""
+    else:
+        sense = ""
+        for node in list_item.children:
+            if isinstance(node, TemplateNode) and node.template_name == "sense":
+                sense = clean_node(wxr, None, node).strip("(): ")
+            elif isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
+                word = clean_node(wxr, None, node)
+                if word != "":
+                    l_dict[LINKAGE_SECTIONS[linkage_name]].append(
+                        Linkage(word=word, sense=sense)
+                    )
+
+    return linkage_name
 
 
 LINKAGE_TEMPLATES = {
