@@ -12,12 +12,16 @@ class MalayBaseModel(BaseModel):
 
 class Example(MalayBaseModel):
     text: str
+    bold_text_offsets: list[tuple[int, int]] = []
     translation: str = ""
+    bold_translation_offsets: list[tuple[int, int]] = []
     roman: str = ""
+    bold_roman_offsets: list[tuple[int, int]] = []
     ref: str = ""
     tags: list[str] = []
     raw_tags: list[str] = []
     literal_meaning: str = ""
+    bold_literal_offsets: list[tuple[int, int]] = []
 
 
 class AltForm(MalayBaseModel):

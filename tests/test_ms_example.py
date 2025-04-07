@@ -38,7 +38,9 @@ class TestMsExample(TestCase):
                     "examples": [
                         {
                             "text": "Jemputlah makan kuih ini.",
+                            "bold_text_offsets": [(10, 15)],
                             "translation": ".جمڤوتله ماکن کو^ءيه اين",
+                            "bold_translation_offsets": [(9, 13)],
                         }
                     ],
                     "glosses": ["memasukkan sesuatu ke dalam mulut"],
@@ -70,8 +72,11 @@ class TestMsExample(TestCase):
                     "examples": [
                         {
                             "text": "젓가락으로 먹다",
+                            "bold_text_offsets": [(0, 3)],
                             "roman": "jeotgarakeuro meokda",
+                            "bold_roman_offsets": [(0, 9)],
                             "translation": "makan menggunakan penyepit",
+                            "bold_translation_offsets": [(18, 26)],
                         }
                     ],
                     "glosses": ["penyepit"],
@@ -103,7 +108,9 @@ class TestMsExample(TestCase):
                     "examples": [
                         {
                             "text": "die sterblichen Überreste",
+                            "bold_text_offsets": [(16, 25)],
                             "translation": "jasad",
+                            "bold_translation_offsets": [(0, 5)],
                             "literal_meaning": "badan orang mati",
                         }
                     ],
@@ -135,7 +142,9 @@ class TestMsExample(TestCase):
                     "examples": [
                         {
                             "text": 'Nun steht fest: Bei dem Skelett handelt es sich mit "an Sicherheit grenzender Wahrscheinlichkeit" um die Überreste der aus England stammenden Prinzessin, die mit dem damaligen König Otto dem Großen verheiratet war.',
+                            "bold_text_offsets": [(105, 114)],
                             "translation": "Sekarang sudah jelas: kerangka itu hampir pasti sebahagian daripada jenazah puteri dari England yang telah berkahwin dengan raja pada waktu itu, Otto the Great.",
+                            "bold_translation_offsets": [(68, 75)],
                             "ref": '2010 Jun 16, "Überreste von Königin Editha identifiziert", der Spiegel.',
                         }
                     ],
@@ -175,7 +184,9 @@ class TestMsExample(TestCase):
                     "examples": [
                         {
                             "text": "Als ‚Quellen’ bezeichnet Droysen die „schriftlichen und mündlichen Nachrichten für die Erinnerungen“, als ‚Überreste’ solche Materialien, die nicht um der Überlieferung willen in die Welt gesetzt wurden, aber von uns als Zeugnisse ihrer Zeit interpretiert werden können.",
+                            "bold_text_offsets": [(107, 116)],
                             "translation": 'Droysen menggunakan istilah ‘sumber’ untuk "mesej yang ditulis dan dituturkan demi kepentingan peringatan" dan ‘jasad’ untuk bahan yang tidak dicipta dengan niat tradisi tetapi masih boleh ditafsirkan sebagai saksi masa mereka.',
+                            "bold_translation_offsets": [(112, 117)],
                             "ref": "2014, Jonas Grethlein, “Das homerische Epos als Quelle, Überrest und Monument”, dalam Medien der Geschichte - Antikes Griechenland und Rom, →DOI:",
                         }
                     ],

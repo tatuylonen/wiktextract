@@ -4,6 +4,7 @@ from wikitextprocessor import NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from ..share import calculate_bold_offsets
 from .linkage import LINKAGE_TEMPLATES, extract_nyms_template
 from .models import Example, Sense, WordEntry
 
@@ -34,8 +35,18 @@ def extract_example_list_item(
             if node.kind == NodeKind.ITALIC and not is_ref:
                 if parent_e_data is None:
                     e_data.text = clean_node(wxr, sense, node)
+                    calculate_bold_offsets(
+                        wxr, node, e_data.text, e_data, "bold_text_offsets"
+                    )
                 else:
                     e_data.translation = clean_node(wxr, sense, node)
+                    calculate_bold_offsets(
+                        wxr,
+                        node,
+                        e_data.translation,
+                        e_data,
+                        "bold_translation_offsets",
+                    )
             elif node.kind == NodeKind.LIST:
                 for child_list_item in node.find_child(NodeKind.LIST_ITEM):
                     extract_example_list_item(
@@ -66,12 +77,32 @@ def extract_cp_template(
         html_class = html_tag.attrs.get("class", "")
         if "e-example" in html_class or "e-quotation" in html_class:
             e_data.text = clean_node(wxr, None, html_tag)
+            calculate_bold_offsets(
+                wxr, html_tag, e_data.text, e_data, "bold_text_offsets"
+            )
         elif "e-transliteration" in html_class:
             e_data.roman = clean_node(wxr, None, html_tag)
+            calculate_bold_offsets(
+                wxr, html_tag, e_data.roman, e_data, "bold_roman_offsets"
+            )
         elif "e-translation" in html_class:
             e_data.translation = clean_node(wxr, None, html_tag)
+            calculate_bold_offsets(
+                wxr,
+                html_tag,
+                e_data.translation,
+                e_data,
+                "bold_translation_offsets",
+            )
         elif "e-literally" in html_class:
             e_data.literal_meaning = clean_node(wxr, None, html_tag)
+            calculate_bold_offsets(
+                wxr,
+                html_tag,
+                e_data.literal_meaning,
+                e_data,
+                "bold_literal_offsets",
+            )
         elif "cited-source" in html_class:
             e_data.ref = clean_node(wxr, None, html_tag)
 
