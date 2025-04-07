@@ -30,13 +30,17 @@ class LinkageData(TypedDict, total=False):
 
 class ExampleData(TypedDict, total=False):
     english: str
+    bold_english_offsets: list[tuple[int, int]]
     note: str
     ref: str
     roman: str
+    bold_roman_offsets: list[tuple[int, int]]
     ruby: Union[list[tuple[str, str]], list[Sequence[str]]]
     text: str
+    bold_text_offsets: list[tuple[int, int]]
     type: str
     literal_meaning: str
+    bold_literal_offsets: list[tuple[int, int]]
     tags: list[str]
     raw_tags: list[str]
 

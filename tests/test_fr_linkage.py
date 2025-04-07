@@ -253,10 +253,7 @@ class TestLinkage(TestCase):
         root = self.wxr.wtp.parse("* (''10<sup>9</sup>'') [[Gb]]")
         extract_linkage(self.wxr, page_data, root, "variantes orthographiques")
         self.assertEqual(
-            [
-                d.model_dump(exclude_defaults=True)
-                for d in page_data[-1].forms
-            ],
+            [d.model_dump(exclude_defaults=True) for d in page_data[-1].forms],
             [
                 {"form": "Gb", "sense": "10⁹"},
             ],

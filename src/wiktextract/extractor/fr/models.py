@@ -12,12 +12,15 @@ class FrenchBaseModel(BaseModel):
 
 class Example(FrenchBaseModel):
     text: str = Field(default="", description="Example usage sentence")
+    bold_text_offsets: list[tuple[int, int]] = []
     translation: str = Field(
         default="", description="French translation of the example sentence"
     )
+    bold_translation_offsets: list[tuple[int, int]] = []
     roman: str = Field(
         default="", description="Romanization of the example sentence"
     )
+    bold_roman_offsets: list[tuple[int, int]] = []
     ref: str = Field(
         default="",
         description="Source of the sentence, like book title and page number",
