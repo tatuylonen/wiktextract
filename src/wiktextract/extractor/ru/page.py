@@ -15,7 +15,7 @@ from ...wxr_context import WiktextractContext
 from ...wxr_logging import logger
 from .etymology import extract_etymology
 from .gloss import extract_gloss, process_meaning_template
-from .inflection import parse_adj_forms_table, parse_wikitext_forms_table
+from .inflection import parse_html_forms_table, parse_wikitext_forms_table
 from .linkage import (
     extract_linkages,
     extract_phrase_section,
@@ -140,10 +140,14 @@ def extract_morphological_section(
         expanded_template = wxr.wtp.parse(
             wxr.wtp.node_to_wikitext(child_node), expand_all=True
         )
-        if child_node.template_name.startswith("прил"):
-            parse_adj_forms_table(wxr, page_data[-1], expanded_template)
-        elif child_node.template_name.startswith(("сущ", "гл")):
-            parse_wikitext_forms_table(wxr, page_data[-1], expanded_template)
+        clean_node(wxr, page_data[-1], expanded_template)  # add category links
+        if child_node.template_name.startswith(
+            ("прил ru", "сущ ", "гл ", "мест ru ", "числ ru ", "числ-")
+        ):
+            for table_node in expanded_template.find_child(NodeKind.TABLE):
+                parse_wikitext_forms_table(wxr, page_data[-1], table_node)
+            for table_tag in expanded_template.find_html("table"):
+                parse_html_forms_table(wxr, page_data[-1], table_tag)
 
         for node in expanded_template.children:
             node_text = clean_node(wxr, page_data[-1], node)
