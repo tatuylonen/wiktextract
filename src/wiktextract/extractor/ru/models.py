@@ -57,9 +57,11 @@ class Sound(BaseModelWrap):
 
 class Example(BaseModelWrap):
     text: str = Field(default="", description="Example usage sentence")
+    bold_text_offsets: list[tuple[int, int]] = []
     translation: str = Field(
         default="", description="Russian translation of the example sentence"
     )
+    bold_translation_offsets: list[tuple[int, int]] = []
     ref: str = Field(
         default="",
         description="Example reference, combine data like author and title",

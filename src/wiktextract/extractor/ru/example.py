@@ -2,6 +2,7 @@ from wikitextprocessor import NodeKind, TemplateNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from ..share import calculate_bold_offsets
 from .models import Example, Sense
 
 EXAMPLE_TEMPLATES = frozenset(["пример", "english surname example"])
@@ -65,11 +66,22 @@ def process_пример_template(
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(template_node), expand_all=True
     )
-    for span_node in expanded_node.find_html_recursively(
-        "span", attr_name="class", attr_value="example-details"
-    ):
-        example.ref = clean_node(wxr, None, span_node)
-        break
+    for span_node in expanded_node.find_html_recursively("span"):
+        span_class = span_node.attrs.get("class", "")
+        if "example-details" in span_class:
+            example.ref = clean_node(wxr, None, span_node)
+        elif "example-block" in span_class:
+            calculate_bold_offsets(
+                wxr, span_node, example.text, example, "bold_text_offsets"
+            )
+        elif "example-translate" in span_class:
+            calculate_bold_offsets(
+                wxr,
+                span_node,
+                example.translation,
+                example,
+                "bold_translation_offsets",
+            )
 
     if len(example.text) > 0:
         sense.examples.append(example)
