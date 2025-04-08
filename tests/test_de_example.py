@@ -153,12 +153,22 @@ class TestDEExample(unittest.TestCase):
             [s.model_dump(exclude_defaults=True) for s in page_data[-1].senses],
             [
                 {
-                    "examples": [{"text": "Er stand auf dem Dach."}],
+                    "examples": [
+                        {
+                            "text": "Er stand auf dem Dach.",
+                            "italic_text_offsets": [(9, 12)],
+                        }
+                    ],
                     "glosses": ["gloss 1a"],
                     "sense_index": "1a",
                 },
                 {
-                    "examples": [{"text": "Er stieg aufs Dach."}],
+                    "examples": [
+                        {
+                            "text": "Er stieg aufs Dach.",
+                            "italic_text_offsets": [(9, 13)],
+                        }
+                    ],
                     "glosses": ["gloss 1b"],
                     "sense_index": "1b",
                 },
@@ -188,6 +198,7 @@ class TestDEExample(unittest.TestCase):
                     "examples": [
                         {
                             "text": "Un bot son quinze litres:",
+                            "italic_text_offsets": [(3, 6)],
                             "translation": "Ein Bot (Weinschlauch) hat ca. fünfzehn Liter.",
                         }
                     ],
@@ -261,6 +272,7 @@ class TestDEExample(unittest.TestCase):
                         {
                             "tags": ["Germany"],
                             "text": "„Den ganzen ‚Feber‘ hörte man lapidar",
+                            "italic_text_offsets": [(12, 19)],
                         }
                     ],
                     "glosses": ["gloss 1"],

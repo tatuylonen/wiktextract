@@ -139,6 +139,7 @@ def calculate_bold_offsets(
     node_text: str,
     example,
     field: str,
+    extra_node_kind: NodeKind | None = None,
 ) -> None:
     from ..page import clean_node
 
@@ -146,7 +147,11 @@ def calculate_bold_offsets(
     bold_words = set()
     for b_tag in node.find_html_recursively("b"):
         bold_words.add(clean_node(wxr, None, b_tag))
-    for bold_node in node.find_child_recursively(NodeKind.BOLD):
+    for bold_node in node.find_child_recursively(
+        NodeKind.BOLD
+        if extra_node_kind is None
+        else NodeKind.BOLD | extra_node_kind
+    ):
         bold_words.add(clean_node(wxr, None, bold_node))
     for bold_word in bold_words:
         for m in re.finditer(re.escape(bold_word), node_text):
