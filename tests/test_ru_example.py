@@ -68,8 +68,11 @@ class TestRUExample(unittest.TestCase):
                 self.assertEqual(examples, case["expected"])
 
     def test_en_surname(self):
-        self.wxr.wtp.add_page("Шаблон:помета", 10, "{{{1}}}")
-        self.wxr.wtp.add_page("Шаблон:пример", 10, "")
+        self.wxr.wtp.add_page(
+            "Шаблон:пример",
+            10,
+            """<span class="example-fullblock ">&#9670;&nbsp;<span class="example-block" style="color:darkgreen">This is Mister <b class="example-select" style="background-color: #EDF0FF; font-weight: bold;">Abad</b><span class="example-translate" style="color:grey">&#160;—&#32;Это мистер <b class="example-select" style="background-color: #EDF0FF; font-weight: bold;">Abad</b></span> <span class="example-details" style="font-size:smaller;"> <i><span class="citation-source"> </span></i></span></span></span>""",
+        )
         self.wxr.wtp.add_page(
             "Шаблон:english surname example",
             10,
@@ -91,7 +94,9 @@ class TestRUExample(unittest.TestCase):
                 "examples": [
                     {
                         "text": "This is Mister Abad",
+                        "bold_text_offsets": [(15, 19)],
                         "translation": "Это мистер Abad",
+                        "bold_translation_offsets": [(11, 15)],
                     }
                 ],
             },

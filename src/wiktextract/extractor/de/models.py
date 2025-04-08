@@ -42,9 +42,11 @@ class Translation(BaseModelWrap):
 
 class Example(BaseModelWrap):
     text: str = Field(default="", description="Example usage sentence")
+    italic_text_offsets: list[tuple[int, int]] = []
     translation: str = Field(
         default="", description="German translation of the example sentence"
     )
+    italic_translation_offsets: list[tuple[int, int]] = []
     raw_tags: list[str] = []
     tags: list[str] = []
     ref: str = Field(default="", description="Raw reference string")

@@ -4,6 +4,7 @@ from wikitextprocessor import LevelNode, NodeKind, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from ..share import calculate_bold_offsets
 from .models import Example, Sense, WordEntry
 from .tags import translate_raw_tags
 from .utils import extract_sense_index
@@ -53,13 +54,24 @@ def extract_examples(
             example_data = Example(raw_tags=raw_tags)
             for ref_tag in list_item_node.find_html("ref"):
                 extract_reference(wxr, example_data, ref_tag)
-            example_text = clean_node(
-                wxr, None, list(list_item_node.invert_find_child(NodeKind.LIST))
+            example_text_node = wxr.wtp.parse(
+                wxr.wtp.node_to_wikitext(
+                    list(list_item_node.invert_find_child(NodeKind.LIST))
+                )
             )
+            example_text = clean_node(wxr, None, example_text_node)
             sense_idx, example_text = extract_sense_index(example_text)
             if len(example_text) > 0:
                 translate_raw_tags(example_data)
                 example_data.text = example_text
+                calculate_bold_offsets(
+                    wxr,
+                    example_text_node,
+                    example_text,
+                    example_data,
+                    "italic_text_offsets",
+                    extra_node_kind=NodeKind.ITALIC,
+                )
                 if len(sense_idx) > 0:
                     find_sense = False
                     for sense in word_entry.senses:
@@ -75,6 +87,14 @@ def extract_examples(
                     last_example = example_data
                 elif last_example is not None:
                     last_example.translation = example_text
+                    calculate_bold_offsets(
+                        wxr,
+                        example_text_node,
+                        example_text,
+                        example_data,
+                        "italic_translation_offsets",
+                        extra_node_kind=NodeKind.ITALIC,
+                    )
                 else:
                     wxr.wtp.debug(
                         f"Found example data without senseid: {example_data}",

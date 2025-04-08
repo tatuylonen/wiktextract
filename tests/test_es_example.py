@@ -46,6 +46,7 @@ class TestESExample(unittest.TestCase):
                 {
                     "text": "And He has on His robe and on His thigh a name "
                     "written: KING OF KINGS AND LORD OF LORDS",
+                    "bold_text_offsets": [(74, 78), (82, 86)],
                     "translation": "Y en su vestidura y en su muslo tiene "
                     "escrito este nombre: REY DE REYES Y SEÑOR DE SEÑORES",
                     "ref": "Bible Revelation 19:16. Versión: New King James."
@@ -165,6 +166,7 @@ class TestESExample(unittest.TestCase):
                 {
                     "text": "«Apoyado contra el quicio de la puerta, adivina, "
                     "de pronto, a su marido.»",
+                    "bold_text_offsets": [(19, 25)],
                     "ref": "Bombal, María Luisa (2012). «La Amortajada», "
                     "La Última Niebla/La Amortajada. Planeta, 151.",
                 }

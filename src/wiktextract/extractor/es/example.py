@@ -7,6 +7,7 @@ from wikitextprocessor.parser import (
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from ..share import calculate_bold_offsets
 from .models import Example, Sense, TemplateData
 
 
@@ -32,9 +33,27 @@ def process_ejemplo_template(
                 example_data.text = clean_node(
                     wxr, None, span_tag.children[:-1]
                 )
+                calculate_bold_offsets(
+                    wxr,
+                    wxr.wtp.parse(
+                        wxr.wtp.node_to_wikitext(span_tag.children[:-1])
+                    ),
+                    example_data.text,
+                    example_data,
+                    "bold_text_offsets",
+                    extra_node_kind=NodeKind.ITALIC,
+                )
                 example_data.ref = clean_node(wxr, None, span_tag.children[-1])
             else:
                 example_data.text = clean_node(wxr, None, span_tag)
+                calculate_bold_offsets(
+                    wxr,
+                    span_tag,
+                    example_data.text,
+                    example_data,
+                    "bold_text_offsets",
+                    extra_node_kind=NodeKind.ITALIC,
+                )
         elif "trad" == span_class:
             example_data.translation = clean_node(
                 wxr, None, span_tag
@@ -43,8 +62,15 @@ def process_ejemplo_template(
             example_data.ref = clean_node(wxr, None, span_tag)
 
     if len(example_data.text) == 0:
-        example_data.text = clean_node(
-            wxr, None, template_node.template_parameters.get(1, "")
+        first_arg = template_node.template_parameters.get(1, "")
+        example_data.text = clean_node(wxr, None, first_arg)
+        calculate_bold_offsets(
+            wxr,
+            wxr.wtp.parse(wxr.wtp.node_to_wikitext(first_arg)),
+            example_data.text,
+            example_data,
+            "bold_text_offsets",
+            extra_node_kind=NodeKind.ITALIC,
         )
 
     if len(example_data.text) > 0:
@@ -110,6 +136,14 @@ def process_example_list(
                 text_nodes.append(child)
         example_data.text = clean_node(wxr, None, text_nodes)
         if len(example_data.text) > 0:
+            calculate_bold_offsets(
+                wxr,
+                wxr.wtp.parse(wxr.wtp.node_to_wikitext(text_nodes)),
+                example_data.text,
+                example_data,
+                "bold_text_offsets",
+                extra_node_kind=NodeKind.ITALIC,
+            )
             sense_data.examples.append(example_data)
 
     # If no example was found in sublists,
@@ -120,4 +154,12 @@ def process_example_list(
         )
         if len(text) > 0:
             example_data = Example(text=text)
+            calculate_bold_offsets(
+                wxr,
+                wxr.wtp.parse(wxr.wtp.node_to_wikitext(list_item.children)),
+                text,
+                example_data,
+                "bold_text_offsets",
+                extra_node_kind=NodeKind.ITALIC,
+            )
             sense_data.examples.append(example_data)

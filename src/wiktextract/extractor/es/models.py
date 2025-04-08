@@ -51,9 +51,11 @@ class TemplateData(BaseModelWrap):
 
 class Example(BaseModelWrap):
     text: str = Field(description="Example usage sentence")
+    bold_text_offsets: list[tuple[int, int]] = []
     translation: str = Field(
         default="", description="Spanish translation of the example sentence"
     )
+    bold_translation_offsets: list[tuple[int, int]] = []
     ref: str = ""
     example_templates: list[TemplateData] = []
 
