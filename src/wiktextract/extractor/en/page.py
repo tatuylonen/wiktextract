@@ -322,6 +322,8 @@ ADDITIONAL_EXPAND_TEMPLATES: set[str] = {
     "ru-alt-ё",
     "inflection of",
     "no deprecated lang param usage",
+    "transclude",  # these produce sense entries (or other lists)
+    "tcl",
 }
 
 # Inverse linkage for those that have them
