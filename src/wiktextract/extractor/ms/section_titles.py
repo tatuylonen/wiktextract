@@ -21,6 +21,8 @@ POS_DATA = {
 FORM_SECTIONS = {
     "Tulisan Jawi": ["Jawi"],
     "Tulisan Rumi": ["Rumi"],
+    "Aksara Jawa": ["Javanese"],
+    "Bentuk alternatif": ["alt-of"],
 }
 
 LINKAGE_SECTIONS = {
