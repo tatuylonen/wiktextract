@@ -97,3 +97,19 @@ class TestMsLinkage(TestCase):
             page_data[0]["synonyms"], [{"word": "bahau", "sense": "santap"}]
         )
         self.assertEqual(page_data[0]["synonyms"], page_data[1]["synonyms"])
+
+    def test_no_gloss_Indonesia_section(self):
+        page_data = parse_page(
+            self.wxr,
+            "makan",
+            """== Bahasa Melayu ==
+=== Takrifan ===
+# memamah serta
+== Bahasa Indonesia ==
+=== Etimologi ===
+Daripada
+=== Terbitan ===
+* [[kaumakan]]""",
+        )
+        self.assertEqual(page_data[1]["etymology_text"], "Daripada")
+        self.assertEqual(page_data[1]["derived"], [{"word": "kaumakan"}])

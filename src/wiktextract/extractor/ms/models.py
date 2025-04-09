@@ -32,6 +32,7 @@ class Sense(MalayBaseModel):
     glosses: list[str] = []
     tags: list[str] = []
     raw_tags: list[str] = []
+    topics: list[str] = []
     categories: list[str] = []
     examples: list[Example] = []
     form_of: list[AltForm] = []
@@ -105,3 +106,5 @@ class WordEntry(MalayBaseModel):
     hyponyms: list[Linkage] = []
     hyphenation: str = ""
     sounds: list[Sound] = []
+    derived: list[Linkage] = []
+    anagrams: list[Linkage] = []

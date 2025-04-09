@@ -14,11 +14,20 @@ def extract_form_section(
     level_node: LevelNode,
     tags: list[str],
 ) -> None:
-    for t_node in level_node.find_child(NodeKind.TEMPLATE):
-        if t_node.template_name in ["ARchar", "Arab", "PSchar", "SDchar"]:
-            word = clean_node(wxr, None, t_node)
+    for node in level_node.find_child(NodeKind.TEMPLATE | NodeKind.LINK):
+        if (
+            isinstance(node, TemplateNode)
+            and node.template_name in ["ARchar", "Arab", "PSchar", "SDchar"]
+        ) or node.kind == NodeKind.LINK:
+            word = clean_node(wxr, None, node)
             if word != "":
                 word_entry.forms.append(Form(form=word, tags=tags))
+    for list_node in level_node.find_child(NodeKind.LIST):
+        for list_item in list_node.find_child(NodeKind.LIST_ITEM):
+            for node in list_item.find_child(NodeKind.LINK):
+                word = clean_node(wxr, None, node)
+                if word != "":
+                    word_entry.forms.append(Form(form=word, tags=tags))
 
 
 def extract_linkage_section(
@@ -28,7 +37,7 @@ def extract_linkage_section(
     level_node: LevelNode,
 ) -> None:
     l_dict = defaultdict(list)
-    linkage_name = ""
+    linkage_name = clean_node(wxr, None, level_node.largs)
     for list_node in level_node.find_child(NodeKind.LIST):
         for list_item in list_node.find_child(NodeKind.LIST_ITEM):
             new_l_name = extract_linkage_list_item(
@@ -37,7 +46,7 @@ def extract_linkage_section(
             if new_l_name != "":
                 linkage_name = new_l_name
 
-    if len(page_data) == 0:
+    if len(page_data) == 0 or page_data[-1].lang_code != base_data.lang_code:
         for field, data in l_dict.items():
             getattr(base_data, field).extend(data)
     elif level_node.kind == NodeKind.LEVEL3:

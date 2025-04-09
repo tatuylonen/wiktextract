@@ -20,7 +20,7 @@ def extract_sound_section(
     for node in level_node.find_child(NodeKind.TEMPLATE):
         extract_sound_templates(wxr, node, [])
 
-    if len(page_data) == 0:
+    if len(page_data) == 0 or page_data[-1].lang_code != base_data.lang_code:
         for sound in sounds:
             if sound.hyphenation != "":
                 base_data.hyphenation = sound.hyphenation
