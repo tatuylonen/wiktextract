@@ -37,7 +37,7 @@ def extract_linkage_section(
             if new_l_name != "":
                 linkage_name = new_l_name
 
-    if len(page_data) == 0:
+    if len(page_data) == 0 or page_data[-1].lang_code != base_data.lang_code:
         for field, data in l_dict.items():
             getattr(base_data, field).extend(data)
     elif level_node.kind == NodeKind.LEVEL3:

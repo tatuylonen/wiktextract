@@ -64,6 +64,7 @@ def parse_page(
     page_data: list[WordEntry] = []
 
     for level2_node in tree.find_child(NodeKind.LEVEL2):
+        pre_data_len = len(page_data)
         lang_name = clean_node(wxr, None, level2_node.largs)
         lang_code = (
             name_to_code(lang_name.removeprefix("Bahasa "), "ms") or "unknown"
@@ -77,6 +78,8 @@ def parse_page(
         )
         for next_level_node in level2_node.find_child(LEVEL_KIND_FLAGS):
             parse_section(wxr, page_data, base_data, next_level_node)
+        if len(page_data) == pre_data_len:
+            page_data.append(base_data.model_copy(deep=True))
 
     for data in page_data:
         if len(data.senses) == 0:
@@ -96,7 +99,7 @@ def extract_etymology_section(
     )
     if e_text == "":
         return
-    if len(page_data) == 0:
+    if len(page_data) == 0 or page_data[-1].lang_code != base_data.lang_code:
         base_data.etymology_text = e_text
         base_data.categories.extend(cats.get("categories", []))
     elif level_node.kind == NodeKind.LEVEL3:

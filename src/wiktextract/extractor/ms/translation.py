@@ -28,7 +28,7 @@ def extract_translation_section(
                     extract_translation_list_item(wxr, list_item, sense)
                 )
 
-    if len(page_data) == 0:
+    if len(page_data) == 0 or page_data[-1].lang_code != base_data.lang_code:
         base_data.categories.extend(cats.get("categories", []))
         for tr_data in tr_list:
             if tr_data.word != "":
