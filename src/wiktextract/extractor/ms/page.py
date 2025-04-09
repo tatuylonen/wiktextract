@@ -9,7 +9,7 @@ from ...wxr_context import WiktextractContext
 from .linkage import extract_form_section, extract_linkage_section
 from .models import Sense, WordEntry
 from .pos import extract_pos_section
-from .section_titles import FORM_SECTIONS, POS_DATA
+from .section_titles import FORM_SECTIONS, LINKAGE_SECTIONS, POS_DATA
 from .sound import extract_sound_section
 from .translation import extract_translation_section
 
@@ -34,7 +34,7 @@ def parse_section(
             level_node,
             FORM_SECTIONS[title_text],
         )
-    elif title_text == "Tesaurus":
+    elif title_text == "Tesaurus" or title_text in LINKAGE_SECTIONS:
         extract_linkage_section(wxr, page_data, base_data, level_node)
     elif title_text == "Terjemahan":
         extract_translation_section(wxr, page_data, base_data, level_node)

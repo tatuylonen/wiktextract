@@ -26,4 +26,6 @@ FORM_SECTIONS = {
 LINKAGE_SECTIONS = {
     "Sinonim": "synonyms",
     "Antonim": "antonyms",
+    "Terbitan": "derived",
+    "Kata majmuk": "derived",
 }

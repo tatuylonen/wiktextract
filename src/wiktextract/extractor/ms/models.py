@@ -105,3 +105,4 @@ class WordEntry(MalayBaseModel):
     hyponyms: list[Linkage] = []
     hyphenation: str = ""
     sounds: list[Sound] = []
+    derived: list[Linkage] = []

@@ -28,7 +28,7 @@ def extract_linkage_section(
     level_node: LevelNode,
 ) -> None:
     l_dict = defaultdict(list)
-    linkage_name = ""
+    linkage_name = clean_node(wxr, None, level_node.largs)
     for list_node in level_node.find_child(NodeKind.LIST):
         for list_item in list_node.find_child(NodeKind.LIST_ITEM):
             new_l_name = extract_linkage_list_item(
