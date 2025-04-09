@@ -204,7 +204,7 @@ def process_semantics_template(
         if key in LINKAGE_TITLES and isinstance(value, str):
             for word in value.split(","):
                 word = word.strip()
-                if word not in ("", "-"):
+                if word not in ("", "-", "—"):
                     getattr(word_entry, LINKAGE_TITLES[key]).append(
                         Linkage(word=word, sense_index=sense_index)
                     )
