@@ -106,3 +106,4 @@ class WordEntry(MalayBaseModel):
     hyphenation: str = ""
     sounds: list[Sound] = []
     derived: list[Linkage] = []
+    anagrams: list[Linkage] = []

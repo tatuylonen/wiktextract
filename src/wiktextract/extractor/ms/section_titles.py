@@ -30,4 +30,5 @@ LINKAGE_SECTIONS = {
     "Antonim": "antonyms",
     "Terbitan": "derived",
     "Kata majmuk": "derived",
+    "Anagram": "anagrams",
 }
