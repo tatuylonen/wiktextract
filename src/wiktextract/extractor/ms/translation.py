@@ -61,7 +61,7 @@ def extract_translation_list_item(
             and node.strip().endswith(":")
             and lang_name == "unknown"
         ):
-            lang_name = node.strip(": ")
+            lang_name = node.strip(": ") or "unknown"
         elif isinstance(node, TemplateNode) and node.template_name in [
             "t",
             "trad",
@@ -94,9 +94,10 @@ def extract_t_template(
     sense: str,
     lang_name: str,
 ) -> Translation:
-    lang_code = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
-    if lang_code == "":
-        lang_code = "unknown"
+    lang_code = (
+        clean_node(wxr, None, t_node.template_parameters.get(1, ""))
+        or "unknown"
+    )
     tr_data = Translation(
         word="", lang=lang_name, lang_code=lang_code, sense=sense
     )
