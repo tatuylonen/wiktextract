@@ -83,8 +83,6 @@ def extract_linkage_list_item(
                         l_dict[LINKAGE_SECTIONS[linkage_name]].append(
                             Linkage(word=word)
                         )
-    elif linkage_name == "":
-        return ""
     else:
         sense = ""
         for node in list_item.children:
@@ -92,10 +90,14 @@ def extract_linkage_list_item(
                 sense = clean_node(wxr, None, node).strip("(): ")
             elif isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
                 word = clean_node(wxr, None, node)
-                if word != "":
+                if word != "" and linkage_name in LINKAGE_SECTIONS:
                     l_dict[LINKAGE_SECTIONS[linkage_name]].append(
                         Linkage(word=word, sense=sense)
                     )
+            elif isinstance(node, str) and node.strip().endswith(":"):
+                new_linkage_name = node.strip("(): ").capitalize()
+                if new_linkage_name in LINKAGE_SECTIONS:
+                    linkage_name = new_linkage_name
 
     return linkage_name
 

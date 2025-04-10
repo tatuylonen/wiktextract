@@ -113,3 +113,33 @@ Daripada
         )
         self.assertEqual(page_data[1]["etymology_text"], "Daripada")
         self.assertEqual(page_data[1]["derived"], [{"word": "kaumakan"}])
+
+    def test_non_standard_list(self):
+        page_data = parse_page(
+            self.wxr,
+            "apanggor",
+            """==Bahasa Kadazandusun==
+===Takrifan===
+====Kata sifat====
+# (blh berdiri dgn) teguh, kukuh, tegap
+===Tesaurus===
+* (sinonim): [[apantod]]""",
+        )
+        self.assertEqual(page_data[0]["synonyms"], [{"word": "apantod"}])
+        page_data = parse_page(
+            self.wxr,
+            "mositi",
+            """==Bahasa Kadazandusun==
+===Takrifan===
+====Kata nama====
+# mesti
+===Tesaurus===
+*(Sinonim): [[nuru]], [[apatut]]
+*(Antonim): [[tagal]], [[pagawi]]""",
+        )
+        self.assertEqual(
+            page_data[0]["synonyms"], [{"word": "nuru"}, {"word": "apatut"}]
+        )
+        self.assertEqual(
+            page_data[0]["antonyms"], [{"word": "tagal"}, {"word": "pagawi"}]
+        )
