@@ -100,6 +100,7 @@ def extract_gloss_list_item(
     if gloss_str != "":
         sense.glosses.append(gloss_str)
     if len(sense.glosses) > 0:
+        translate_raw_tags(sense)
         word_entry.senses.append(sense)
 
     for child_list in list_item.find_child(NodeKind.LIST):
