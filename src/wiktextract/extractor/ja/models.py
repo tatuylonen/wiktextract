@@ -12,9 +12,13 @@ class JapaneseBaseModel(BaseModel):
 
 class Example(JapaneseBaseModel):
     text: str = ""
+    bold_text_offsets: list[tuple[int, int]] = []
     translation: str = ""
+    bold_translation_offsets: list[tuple[int, int]] = []
     ref: str = ""
     ruby: list[tuple[str, ...]] = []
+    roman: str = ""
+    bold_roman_offsets: list[tuple[int, int]] = []
 
 
 class AltForm(JapaneseBaseModel):
@@ -30,6 +34,7 @@ class Sense(JapaneseBaseModel):
     ruby: list[tuple[str, ...]] = []
     examples: list[Example] = []
     form_of: list[AltForm] = []
+    notes: list[str] = []
 
 
 class Form(JapaneseBaseModel):

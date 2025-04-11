@@ -3,6 +3,7 @@ from wikitextprocessor.parser import NodeKind, TemplateNode, WikiNode
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from ..ruby import extract_ruby
+from ..share import calculate_bold_offsets
 from .linkage import process_linkage_list_item
 from .models import Example, Sense, WordEntry
 from .section_titles import LINKAGES
@@ -55,6 +56,13 @@ def extract_example_list_item(
         )
         ruby, no_ruby = extract_ruby(wxr, expanded_nodes.children)
         example = Example(text=clean_node(wxr, None, no_ruby), ruby=ruby)
+        calculate_bold_offsets(
+            wxr,
+            wxr.wtp.parse(wxr.wtp.node_to_wikitext(no_ruby)),
+            example.text,
+            example,
+            "bold_text_offsets",
+        )
         for tr_list_item in list_item.find_child_recursively(
             NodeKind.LIST_ITEM
         ):
@@ -88,17 +96,37 @@ def extract_example_list_item(
 
 
 def process_ux_template(
-    wxr: WiktextractContext, template: TemplateNode, sense: Sense
+    wxr: WiktextractContext, t_node: TemplateNode, sense: Sense
 ) -> None:
     # https://ja.wiktionary.org/wiki/テンプレート:ux
     # https://ja.wiktionary.org/wiki/テンプレート:uxi
     example = Example()
-    example.text = clean_node(
-        wxr, None, template.template_parameters.get(2, "")
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
     )
-    example.translation = clean_node(
-        wxr, None, template.template_parameters.get(3, "")
-    )
+    for i_tag in expanded_node.find_html_recursively("i"):
+        i_tag_class = i_tag.attrs.get("class", "")
+        if "e-example" in i_tag_class:
+            example.text = clean_node(wxr, None, i_tag)
+            calculate_bold_offsets(
+                wxr, i_tag, example.text, example, "bold_text_offsets"
+            )
+        elif "e-transliteration" in i_tag_class:
+            example.roman = clean_node(wxr, None, i_tag)
+            calculate_bold_offsets(
+                wxr, i_tag, example.roman, example, "bold_roman_offsets"
+            )
+    for span_tag in expanded_node.find_html_recursively("span"):
+        span_tag_class = span_tag.attrs.get("class", "")
+        if "e-translation" in span_tag_class:
+            example.translation = clean_node(wxr, None, span_tag)
+            calculate_bold_offsets(
+                wxr,
+                span_tag,
+                example.translation,
+                example,
+                "bold_translation_offsets",
+            )
     if example.text != "":
         sense.examples.append(example)
-    clean_node(wxr, sense, template)
+    clean_node(wxr, sense, t_node)

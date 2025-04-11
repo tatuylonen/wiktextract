@@ -147,12 +147,23 @@ def calculate_bold_offsets(
     bold_words = set()
     for b_tag in node.find_html_recursively("b"):
         bold_words.add(clean_node(wxr, None, b_tag))
+    for strong_tag in node.find_html_recursively("strong"):
+        bold_words.add(clean_node(wxr, None, strong_tag))
     for bold_node in node.find_child_recursively(
         NodeKind.BOLD
         if extra_node_kind is None
         else NodeKind.BOLD | extra_node_kind
     ):
         bold_words.add(clean_node(wxr, None, bold_node))
+    for link_node in node.find_child_recursively(NodeKind.LINK):
+        if len(link_node.largs) > 0:
+            link_dest = clean_node(wxr, None, link_node.largs[0])
+            if "#" in link_dest and not link_dest.startswith("#"):
+                link_dest = link_dest[:link_dest.index("#")]
+            if link_dest == wxr.wtp.title:
+                link_text = clean_node(wxr, None, link_node)
+                bold_words.add(link_text)
+
     for bold_word in bold_words:
         for m in re.finditer(re.escape(bold_word), node_text):
             offsets.append((m.start(), m.end()))

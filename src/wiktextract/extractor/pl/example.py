@@ -61,8 +61,8 @@ def process_example_list_item(
                 break
         elif isinstance(node, WikiNode) and node.kind == NodeKind.ITALIC:
             example_data.text = clean_node(wxr, None, node)
-            calculate_bold_link_offsets(
-                wxr, node, example_data.text, example_data
+            calculate_bold_offsets(
+                wxr, node, example_data.text, example_data, "bold_text_offsets"
             )
         elif isinstance(node, HTMLNode) and node.tag == "ref":
             example_data.ref = clean_node(wxr, None, node.children)
@@ -95,7 +95,7 @@ def process_example_list_item(
             example_data.text = clean_node(
                 wxr, None, list_item.children[example_start:translation_start]
             ).strip("→ ")
-            calculate_bold_link_offsets(
+            calculate_bold_offsets(
                 wxr,
                 wxr.wtp.parse(
                     wxr.wtp.node_to_wikitext(
@@ -104,6 +104,7 @@ def process_example_list_item(
                 ),
                 example_data.text,
                 example_data,
+                "bold_text_offsets",
             )
     if "(" in example_data.text and example_data.text.endswith(")"):
         roman_start = example_data.text.rindex("(")
@@ -111,20 +112,3 @@ def process_example_list_item(
         example_data.text = example_data.text[:roman_start].strip()
     if len(example_data.text) > 0:
         examples[sense_index].append(example_data)
-
-
-def calculate_bold_link_offsets(
-    wxr: WiktextractContext, node: WikiNode, text: str, example: Example
-):
-    bold_words = []
-    for link_node in node.find_child(NodeKind.LINK):
-        if len(link_node.largs) > 0:
-            link_dest = clean_node(wxr, None, link_node.largs[0])
-            if link_dest == wxr.wtp.title:
-                link_text = clean_node(wxr, None, link_node)
-                if link_text not in bold_words:
-                    bold_words.append(link_text)
-
-    for bold_word in bold_words:
-        for m in re.finditer(re.escape(bold_word), text):
-            example.bold_text_offsets.append((m.start(), m.end()))
