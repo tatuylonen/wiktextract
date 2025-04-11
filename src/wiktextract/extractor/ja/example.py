@@ -47,6 +47,15 @@ def extract_example_list_item(
                 has_example_template = True
         if has_example_template:
             return
+        for bold_index, bold_node in list_item.find_child(NodeKind.BOLD, True):
+            bold_text = clean_node(wxr, None, bold_node)
+            if bold_text == "注．":
+                note = clean_node(
+                    wxr, None, list_item.children[bold_index + 1 :]
+                ).lstrip(": ")
+                if note != "":
+                    sense.notes.append(note)
+                return
 
         expanded_nodes = wxr.wtp.parse(
             wxr.wtp.node_to_wikitext(

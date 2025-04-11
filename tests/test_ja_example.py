@@ -171,22 +171,29 @@ class TestJaExample(TestCase):
 ===名詞===
 # [[つき|月]]。
 ## {{q|[[こよみ|暦]]の}} [[つき|月]]。
-##* '''注．''' ''月の用法に関しては、{{m|pl|styczeń}} を参照。''
+##* '''注．''' ''月の用法に関しては、styczeń を参照。''
 ## 〔[[詩]]や[[方言]]で〕{{q|[[天体]]の}} 月。
 ##* {{ux|pl|[[ty|Tobie]] [[świecić|świeci]] [[miesiąc]], [[a]] [[ja|mnie]] [[świecić|świecą]] [[gwiazda|gwiazdy]]. （民謡 &quot;To i hola&quot;）|[[あんた]][[の#助詞|の]][[ため]][[に#助詞|に]][[は#助詞|は]]'''月'''[[しか]][[かがやく|輝い]][[て#助詞|て]][[いる|い]][[ない]][[けれど]]、[[わたし|私]]には[[たくさん]]の[[ほし|星]][[が#助詞|が]]輝いてくれる。}}""",
         )
         self.assertEqual(
-            page_data[0]["senses"][2],
-            {
-                "glosses": ["月。", "〔詩や方言で〕(天体の) 月。"],
-                "categories": ["ポーランド語 例文あり"],
-                "examples": [
-                    {
-                        "text": 'Tobie świeci miesiąc, a mnie świecą gwiazdy. （民謡 "To i hola"）',
-                        "bold_text_offsets": [(13, 20)],
-                        "translation": "あんたのためには月しか輝いていないけれど、私にはたくさんの星が輝いてくれる。",
-                        "bold_translation_offsets": [(8, 9)],
-                    }
-                ],
-            },
+            page_data[0]["senses"],
+            [
+                {"glosses": ["月。"]},
+                {
+                    "glosses": ["月。", "(暦の) 月。"],
+                    "notes": ["月の用法に関しては、styczeń を参照。"],
+                },
+                {
+                    "glosses": ["月。", "〔詩や方言で〕(天体の) 月。"],
+                    "categories": ["ポーランド語 例文あり"],
+                    "examples": [
+                        {
+                            "text": 'Tobie świeci miesiąc, a mnie świecą gwiazdy. （民謡 "To i hola"）',
+                            "bold_text_offsets": [(13, 20)],
+                            "translation": "あんたのためには月しか輝いていないけれど、私にはたくさんの星が輝いてくれる。",
+                            "bold_translation_offsets": [(8, 9)],
+                        }
+                    ],
+                },
+            ],
         )
