@@ -5,6 +5,7 @@ from wikitextprocessor import HTMLNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from ..share import calculate_bold_offsets
 from .models import Example, Sense, WordEntry
 
 
@@ -60,6 +61,9 @@ def process_example_list_item(
                 break
         elif isinstance(node, WikiNode) and node.kind == NodeKind.ITALIC:
             example_data.text = clean_node(wxr, None, node)
+            calculate_bold_link_offsets(
+                wxr, node, example_data.text, example_data
+            )
         elif isinstance(node, HTMLNode) and node.tag == "ref":
             example_data.ref = clean_node(wxr, None, node.children)
     if translation_start != 0:
@@ -76,13 +80,51 @@ def process_example_list_item(
         example_data.translation = clean_node(
             wxr, None, list_item.children[translation_start:lit_start]
         ).strip("() ")
+        calculate_bold_offsets(
+            wxr,
+            wxr.wtp.parse(
+                wxr.wtp.node_to_wikitext(
+                    list_item.children[translation_start:lit_start]
+                )
+            ),
+            example_data.translation,
+            example_data,
+            "bold_translation_offsets",
+        )
         if len(example_data.text) == 0:
             example_data.text = clean_node(
                 wxr, None, list_item.children[example_start:translation_start]
             ).strip("→ ")
+            calculate_bold_link_offsets(
+                wxr,
+                wxr.wtp.parse(
+                    wxr.wtp.node_to_wikitext(
+                        list_item.children[example_start:translation_start]
+                    )
+                ),
+                example_data.text,
+                example_data,
+            )
     if "(" in example_data.text and example_data.text.endswith(")"):
         roman_start = example_data.text.rindex("(")
         example_data.roman = example_data.text[roman_start:].strip("() ")
         example_data.text = example_data.text[:roman_start].strip()
     if len(example_data.text) > 0:
         examples[sense_index].append(example_data)
+
+
+def calculate_bold_link_offsets(
+    wxr: WiktextractContext, node: WikiNode, text: str, example: Example
+):
+    bold_words = []
+    for link_node in node.find_child(NodeKind.LINK):
+        if len(link_node.largs) > 0:
+            link_dest = clean_node(wxr, None, link_node.largs[0])
+            if link_dest == wxr.wtp.title:
+                link_text = clean_node(wxr, None, link_node)
+                if link_text not in bold_words:
+                    bold_words.append(link_text)
+
+    for bold_word in bold_words:
+        for m in re.finditer(re.escape(bold_word), text):
+            example.bold_text_offsets.append((m.start(), m.end()))

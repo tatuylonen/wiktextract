@@ -12,7 +12,9 @@ class PolishBaseModel(BaseModel):
 
 class Example(PolishBaseModel):
     text: str = ""
+    bold_text_offsets: list[tuple[int, int]] = []
     translation: str = ""
+    bold_translation_offsets: list[tuple[int, int]] = []
     ref: str = ""
     roman: str = ""
     literal_meaning: str = ""
