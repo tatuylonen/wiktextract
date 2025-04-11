@@ -4,7 +4,11 @@ from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from ..ruby import extract_ruby
 from ..share import calculate_bold_offsets
-from .linkage import process_linkage_list_item
+from .linkage import (
+    LINKAGE_TEMPLATES,
+    extract_gloss_list_linkage_template,
+    process_linkage_list_item,
+)
 from .models import Example, Sense, WordEntry
 from .section_titles import LINKAGES
 
@@ -33,6 +37,12 @@ def extract_example_list_item(
                     sense.glosses[0] if len(sense.glosses) > 0 else "",
                 )
                 return
+        elif (
+            isinstance(node, TemplateNode)
+            and node.template_name in LINKAGE_TEMPLATES
+        ):
+            extract_gloss_list_linkage_template(wxr, word_entry, node)
+            return
 
     if any(
         child.contain_node(NodeKind.BOLD) or child.kind == NodeKind.BOLD
