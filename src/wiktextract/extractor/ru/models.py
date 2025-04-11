@@ -88,11 +88,6 @@ class AltForm(BaseModelWrap):
 
 
 class Sense(BaseModelWrap):
-    raw_glosses: list[str] = Field(
-        default=[],
-        description="Raw gloss string for the word sense. "
-        "This might contain tags and other markup.",
-    )
     glosses: list[str] = Field(
         default=[],
         description="Gloss string for the word sense. This has been cleaned, "
@@ -104,10 +99,6 @@ class Sense(BaseModelWrap):
     )
     raw_tags: list[str] = []
     topics: list[str] = []
-    notes: list[str] = Field(
-        default=[],
-        description="Usually describing usage.",
-    )
     categories: list[str] = []
     examples: list[Example] = Field(default=[], description="List of examples")
     form_of: list[AltForm] = []

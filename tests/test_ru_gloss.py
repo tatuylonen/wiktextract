@@ -42,9 +42,6 @@ class TestRUGloss(unittest.TestCase):
                     "glosses": [
                         "бесхарактерный, безвольный человек, лишённый активной жизненной позиции"
                     ],
-                    "raw_glosses": [
-                        "разг., неодобр. или пренебр. бесхарактерный, безвольный человек, лишённый активной жизненной позиции"
-                    ],
                 },
             },
             # Extracts notes
@@ -53,9 +50,6 @@ class TestRUGloss(unittest.TestCase):
                 "expected": {
                     "glosses": [
                         "обобщающее название растительной пищи, не включающей фрукты и крупы"
-                    ],
-                    "raw_glosses": [
-                        "часто мн. ч. обобщающее название растительной пищи, не включающей фрукты и крупы"
                     ],
                     "tags": ["often", "plural"],
                 },
@@ -210,7 +204,6 @@ class TestRUGloss(unittest.TestCase):
                     "senses": [
                         {
                             "glosses": ["то же"],
-                            "raw_glosses": ["авиац. то же"],
                             "topics": ["aeronautics"],
                         }
                     ],
@@ -242,9 +235,6 @@ class TestRUGloss(unittest.TestCase):
                     "senses": [
                         {
                             "glosses": ["то же, что фуражная шапка"],
-                            "raw_glosses": [
-                                "воен. жарг. то же, что фуражная шапка"
-                            ],
                             "tags": ["slang"],
                             "topics": ["military"],
                         }
@@ -362,6 +352,40 @@ class TestRUGloss(unittest.TestCase):
                         {"glosses": ["кот, кошка"], "topics": ["zoology"]}
                     ],
                     "hypernyms": [{"word": "动物", "sense": "кот, кошка"}],
+                },
+            ],
+        )
+
+    def test_nested_lists(self):
+        self.wxr.wtp.add_page("Шаблон:-en-", 10, "Английский")
+        page_data = parse_page(
+            self.wxr,
+            "keep",
+            """= {{-en-}} =
+=== Морфологические и синтаксические свойства ===
+{{гл en irreg|keep|keeps|kept|kept|keeping|слоги={{по-слогам|keep}}
+}}
+=== Семантические свойства ===
+==== Значение ====
+# [[сохраняться]], не портиться
+## [[хранить]], [[сохранять]], не давать портиться
+## сохранять новизну, не устаревать""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"],
+            [
+                {"glosses": ["сохраняться, не портиться"]},
+                {
+                    "glosses": [
+                        "сохраняться, не портиться",
+                        "хранить, сохранять, не давать портиться",
+                    ]
+                },
+                {
+                    "glosses": [
+                        "сохраняться, не портиться",
+                        "сохранять новизну, не устаревать",
+                    ]
                 },
             ],
         )
