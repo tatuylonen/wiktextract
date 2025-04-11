@@ -139,3 +139,38 @@ def process_desc_list_item(
     for p_data in parent_list:
         p_data.descendants.extend(desc_list)
     return desc_list
+
+
+# カテゴリ:文法テンプレート
+LINKAGE_TEMPLATES = {
+    "syn": "synonyms",
+    "ant": "antonyms",
+    "hyper": "hypernyms",
+    "hypo": "hyponyms",
+    "hyponyms": "hyponyms",
+    "mero": "meronyms",
+    "cot": "coordinate_terms",
+}
+
+
+def extract_gloss_list_linkage_template(
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+) -> None:
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    lang_code = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
+    for span_tag in expanded_node.find_html(
+        "span", attr_name="lang", attr_value=lang_code
+    ):
+        word = clean_node(wxr, None, span_tag)
+        if word != "":
+            getattr(word_entry, LINKAGE_TEMPLATES[t_node.template_name]).append(
+                Linkage(
+                    word=word,
+                    sense=" ".join(word_entry.senses[-1].glosses)
+                    if len(word_entry.senses) > 0
+                    and len(word_entry.senses[-1].glosses) > 0
+                    else "",
+                )
+            )

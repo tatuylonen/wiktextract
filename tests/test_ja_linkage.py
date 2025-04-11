@@ -219,3 +219,25 @@ etymology text
         )
         self.assertEqual(data[0]["etymology_texts"], ["etymology text"])
         self.assertEqual(data[0]["pos"], "noun")
+
+    def test_linkage_template_in_gloss_list(self):
+        self.wxr.wtp.add_page(
+            "テンプレート:hyponyms",
+            10,
+            """下位語: <span class="Latn" lang="hu">[[berek#ハンガリー語|berek]]</span>, <span class="Latn" lang="hu">[[esőerdő#ハンガリー語|esőerdő]]</span>""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "erdő",
+            """==ハンガリー語==
+===名詞===
+# [[森林]]、[[森]]、[[林]]。
+#: {{hyponyms|hu|berek|esőerdő}}""",
+        )
+        self.assertEqual(
+            page_data[0]["hyponyms"],
+            [
+                {"word": "berek", "sense": "森林、森、林。"},
+                {"word": "esőerdő", "sense": "森林、森、林。"},
+            ],
+        )

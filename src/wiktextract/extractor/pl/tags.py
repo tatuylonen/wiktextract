@@ -123,7 +123,7 @@ TAGS = {
     "nwh.": "Navajo",
     "nżw": "inanimate",
     "nord.": "Nordic",
-    "obraź": "offensive",
+    "obraź.": "offensive",
     "odczas.": "verbal",
     "odm.": "inflected",
     "odprzym.": "deadjectival",
