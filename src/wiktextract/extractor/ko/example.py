@@ -3,7 +3,7 @@ from wikitextprocessor import NodeKind, TemplateNode, WikiNode
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from ..ruby import extract_ruby
-from ..share import set_sound_file_url_fields
+from ..share import calculate_bold_offsets, set_sound_file_url_fields
 from .models import Example, Sense, Sound
 
 
@@ -58,12 +58,22 @@ def extract_example_list_item(
     e_text = clean_node(wxr, sense, e_text_nodes)
     if e_text != "":
         example.text = e_text
+        calculate_bold_offsets(
+            wxr,
+            wxr.wtp.parse(wxr.wtp.node_to_wikitext(e_text_nodes)),
+            e_text,
+            example,
+            "bold_text_offsets",
+        )
     e_tr = clean_node(wxr, sense, e_tr_nodes)
     if e_tr != "":
         example.translation = e_tr
 
     if len(example.text) > 0:
         if lang_code == "zh" and "/" in example.text:
+            example.bold_text_offsets = example.bold_text_offsets[
+                : len(example.bold_text_offsets) // 2
+            ]
             for index, text in enumerate(example.text.split("/", 1)):
                 new_example = example.model_copy(deep=True)
                 new_example.text = text
@@ -103,12 +113,31 @@ def extract_example_lang_template(
             ).children,
         )
         example.text = clean_node(wxr, None, text_nodes)
-    else:
-        example.text = clean_node(
-            wxr, None, node.template_parameters.get(2, "")
+        calculate_bold_offsets(
+            wxr,
+            wxr.wtp.parse(wxr.wtp.node_to_wikitext(text_nodes)),
+            example.text,
+            example,
+            "bold_text_offsets",
         )
-    example.translation = clean_node(
-        wxr, None, node.template_parameters.get(4, "")
+    else:
+        second_arg = node.template_parameters.get(2, "")
+        example.text = clean_node(wxr, None, second_arg)
+        calculate_bold_offsets(
+            wxr,
+            wxr.wtp.parse(wxr.wtp.node_to_wikitext(second_arg)),
+            example.text,
+            example,
+            "bold_text_offsets",
+        )
+    tr_arg = node.template_parameters.get(4, "")
+    example.translation = clean_node(wxr, None, tr_arg)
+    calculate_bold_offsets(
+        wxr,
+        wxr.wtp.parse(wxr.wtp.node_to_wikitext(tr_arg)),
+        example.translation,
+        example,
+        "bold_translation_offsets",
     )
     if lang_code == "zh" and "(" in example.text and example.text.endswith(")"):
         roman_start_index = example.text.index("(")
@@ -134,24 +163,62 @@ def extract_ux_template(
             if span_class == "Jpan":
                 example.ruby, no_ruby = extract_ruby(wxr, span_tag)
                 example.text = clean_node(wxr, None, no_ruby)
+                calculate_bold_offsets(
+                    wxr,
+                    wxr.wtp.parse(wxr.wtp.node_to_wikitext(no_ruby)),
+                    example.text,
+                    example,
+                    "bold_text_offsets",
+                )
             elif span_class == "tr":
                 example.roman = clean_node(wxr, None, span_tag)
-        example.translation = clean_node(
-            wxr, None, t_node.template_parameters.get(4, "")
+                calculate_bold_offsets(
+                    wxr,
+                    wxr.wtp.parse(wxr.wtp.node_to_wikitext(span_tag)),
+                    example.roman,
+                    example,
+                    "bold_roman_offsets",
+                )
+        tr_arg = t_node.template_parameters.get(4, "")
+        example.translation = clean_node(wxr, None, tr_arg)
+        calculate_bold_offsets(
+            wxr,
+            wxr.wtp.parse(wxr.wtp.node_to_wikitext(tr_arg)),
+            example.translation,
+            example,
+            "bold_translation_offsets",
         )
-        example.literal_meaning = clean_node(
-            wxr, None, t_node.template_parameters.get("lit", "")
+        lit_arg = t_node.template_parameters.get("lit", "")
+        example.literal_meaning = clean_node(wxr, None, lit_arg)
+        calculate_bold_offsets(
+            wxr,
+            wxr.wtp.parse(wxr.wtp.node_to_wikitext(lit_arg)),
+            example.literal_meaning,
+            example,
+            "bold_literal_offsets",
         )
         if example.ref == "":
             example.ref = clean_node(
                 wxr, None, t_node.template_parameters.get("ref", "")
             )
     else:
-        example.text = clean_node(
-            wxr, None, t_node.template_parameters.get(2, "")
+        second_arg = t_node.template_parameters.get(2, "")
+        example.text = clean_node(wxr, None, second_arg)
+        calculate_bold_offsets(
+            wxr,
+            wxr.wtp.parse(wxr.wtp.node_to_wikitext(second_arg)),
+            example.text,
+            example,
+            "bold_text_offsets",
         )
-        example.translation = clean_node(
-            wxr, None, t_node.template_parameters.get(3, "")
+        third_arg = t_node.template_parameters.get(3, "")
+        example.translation = clean_node(wxr, None, third_arg)
+        calculate_bold_offsets(
+            wxr,
+            wxr.wtp.parse(wxr.wtp.node_to_wikitext(third_arg)),
+            example.translation,
+            example,
+            "bold_translation_offsets",
         )
         example.note = clean_node(
             wxr, None, t_node.template_parameters.get("footer", "")
