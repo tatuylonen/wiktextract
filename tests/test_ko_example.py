@@ -61,12 +61,14 @@ class TestKoExample(TestCase):
             [
                 {
                     "text": "聖春問大家",
+                    "bold_text_offsets": [(3, 5)],
                     "roman": "Shèng chūn wèn dàjiā",
                     "tags": ["Traditional Chinese"],
                     "translation": "성춴은 모두에게 물었다.",
                 },
                 {
                     "text": "聖春问大家",
+                    "bold_text_offsets": [(3, 5)],
                     "roman": "Shèng chūn wèn dàjiā",
                     "tags": ["Simplified Chinese"],
                     "translation": "성춴은 모두에게 물었다.",
@@ -98,30 +100,35 @@ class TestKoExample(TestCase):
 
     def test_ja_ux_template(self):
         self.wxr.wtp.add_page(
-            "틀:예문",
+            "틀:ux",
             10,
-            """<div style="font-size: 120%"><span lang="ja" class="Jpan">'''<ruby>東西<rp>(</rp><rt>とうざい</rt><rp>)</rp></ruby>'''に<ruby>走<rp>(</rp><rt>はし</rt><rp>)</rp></ruby>る<ruby>道<rp>(</rp><rt>どう</rt><rp>)</rp></ruby><ruby>路<rp>(</rp><rt>ろ</rt><rp>)</rp></ruby></span></div><dl><dd><i><span class="tr">'''tōzai''' ni hashiru dōro</span></i></dd><dd>'''동서'''로 달리는 도로</dd><dd>(literally, “lit”)</dd></dl>[[분류:일본어 용례가 포함된 낱말|東西]]""",
+            """<div><span lang="ja" class="Jpan"><ruby>阿<rp>(</rp><rt>あ</rt><rp>)</rp></ruby><ruby>吽<rp>(</rp><rt>うん</rt><rp>)</rp></ruby>の'''<ruby>呼<rp>(</rp><rt>こ</rt><rp>)</rp></ruby><ruby>吸<rp>(</rp><rt>きゅう</rt><rp>)</rp></ruby>'''</span></div><dl><dd><i><span class="tr">aun no '''kokyū'''</span></i></dd><dd>찰떡'''호흡'''</dd><dd>(literally, “아흠의 '''호흡'''”)</dd></dl>[[분류:일본어 용례가 포함된 낱말|呼吸]]""",
         )
         data = parse_page(
             self.wxr,
-            "東西",
+            "呼吸",
             """== 일본어 ==
 === 명사 ===
-# [[동서]] ([[동쪽]]과 [[서쪽]])
-#: {{예문|ja|'''東西'''に走る道%路|'''とうざい''' に はしる どう%ろ|'''동서'''로 달리는 도로}}""",
+# [[조화]], [[호흡]]
+#: {{ux|ja|阿%吽の'''呼%吸'''|あ%うん の '''こ%きゅう'''|찰떡'''호흡'''|lit=아흠의 '''호흡'''}}""",
         )
         self.assertEqual(
             data[0]["senses"][0]["examples"][0],
             {
-                "text": "東西に走る道路",
+                "text": "阿吽の呼吸",
+                "bold_text_offsets": [(3, 5)],
                 "ruby": [
-                    ("東西", "とうざい"),
-                    ("走", "はし"),
-                    ("道", "どう"),
-                    ("路", "ろ"),
+                    ("阿", "あ"),
+                    ("吽", "うん"),
+                    ("呼", "こ"),
+                    ("吸", "きゅう"),
                 ],
-                "roman": "tōzai ni hashiru dōro",
-                "translation": "동서로 달리는 도로",
+                "roman": "aun no kokyū",
+                "bold_roman_offsets": [(7, 12)],
+                "translation": "찰떡호흡",
+                "bold_translation_offsets": [(2, 4)],
+                "literal_meaning": "아흠의 호흡",
+                "bold_literal_offsets": [(4, 6)],
             },
         )
         self.assertEqual(
@@ -146,6 +153,7 @@ class TestKoExample(TestCase):
             data[0]["senses"][0]["examples"][0],
             {
                 "text": "미리 밝혀둘 것도 없이 마크 로스코와 나는 아무 관계도 없다",
+                "bold_text_offsets": [(31, 33)],
                 "note": "화자와 마크 로스크는 서로 관계가 없음",
                 "ref": "한강의 시, 〈마크 로스코와 나〉",
             },
@@ -173,6 +181,7 @@ class TestKoExample(TestCase):
             data[0]["senses"][0]["examples"][0],
             {
                 "text": "東西六十日程",
+                "bold_text_offsets": [(0, 2)],
                 "translation": "동서로 60일이 걸리는 거리이다.",
                 "ref": "1614년, 이수광, 《지봉유설》, 〈2권 外國 條〉",
             },
@@ -214,6 +223,9 @@ class TestKoExample(TestCase):
         self.assertEqual(
             data[0]["senses"][0]["examples"][1]["text"],
             "물이 어디에 들어 있어요？",
+        )
+        self.assertEqual(
+            data[0]["senses"][0]["examples"][1]["bold_text_offsets"], [(7, 9)]
         )
         self.assertEqual(
             data[0]["senses"][0]["examples"][1]["sounds"][0]["audio"],

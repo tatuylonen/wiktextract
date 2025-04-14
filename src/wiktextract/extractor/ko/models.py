@@ -28,14 +28,18 @@ class Sound(KoreanBaseModel):
 
 class Example(KoreanBaseModel):
     text: str = ""
+    bold_text_offsets: list[tuple[int, int]] = []
     translation: str = ""
+    bold_translation_offsets: list[tuple[int, int]] = []
     ref: str = ""
     roman: str = ""
+    bold_roman_offsets: list[tuple[int, int]] = []
     ruby: list[tuple[str, ...]] = Field(
         default=[], description="Japanese Kanji and furigana"
     )
     tags: list[str] = []
     literal_meaning: str = ""
+    bold_literal_offsets: list[tuple[int, int]] = []
     note: str = ""
     sounds: list[Sound] = []
 
