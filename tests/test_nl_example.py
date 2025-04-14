@@ -48,7 +48,9 @@ class TestNlExample(TestCase):
             [
                 {
                     "text": "この車は日本製だ。",
+                    "bold_text_offsets": [(4, 6)],
                     "translation": "Deze auto werd gemaakt in Japan.",
+                    "bold_translation_offsets": [(26, 31)],
                 }
             ],
         )
@@ -97,7 +99,9 @@ class TestNlExample(TestCase):
             [
                 {
                     "text": "(in reactie op het lachende publiek)\nSilence! I kill you!",
+                    "bold_text_offsets": [(37, 44)],
                     "translation": "Stilte! Ik maak jullie af!",
+                    "bold_translation_offsets": [(0, 6)],
                     "ref": "Weblink bron Jeff Dunham als Achmed the Dead Terrorist in “Spark of Insanity” (17 september 2007)",
                 }
             ],

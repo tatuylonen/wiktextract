@@ -2,6 +2,7 @@ from wikitextprocessor import NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from ..share import calculate_bold_offsets
 from .models import Example, Sense
 
 EXAMPLE_TEMPLATES = frozenset({"bijv-1", "bijv-2", "bijv-e", "citeer"})
@@ -25,14 +26,40 @@ def extract_example_template(
 ) -> None:
     if node.template_name == "bijv-1":
         # https://nl.wiktionary.org/wiki/Sjabloon:bijv-1
-        e_text = clean_node(wxr, None, node.template_parameters.get(1, ""))
+        first_arg = node.template_parameters.get(1, "")
+        e_text = clean_node(wxr, None, first_arg)
         if len(e_text) > 0:
-            sense.examples.append(Example(text=e_text))
+            e_data = Example(text=e_text)
+            calculate_bold_offsets(
+                wxr,
+                wxr.wtp.parse(wxr.wtp.node_to_wikitext(first_arg)),
+                e_text,
+                e_data,
+                "bold_text_offsets",
+            )
+            sense.examples.append(e_data)
     elif node.template_name in ["bijv-2", "bijv-e"]:
-        e_text = clean_node(wxr, None, node.template_parameters.get(1, ""))
+        first_arg = node.template_parameters.get(1, "")
+        e_text = clean_node(wxr, None, first_arg)
         if len(e_text) > 0:
-            e_trans = clean_node(wxr, None, node.template_parameters.get(2, ""))
-            sense.examples.append(Example(text=e_text, translation=e_trans))
+            e_data = Example(text=e_text)
+            calculate_bold_offsets(
+                wxr,
+                wxr.wtp.parse(wxr.wtp.node_to_wikitext(first_arg)),
+                e_text,
+                e_data,
+                "bold_text_offsets",
+            )
+            second_arg = node.template_parameters.get(2, "")
+            e_data.translation = clean_node(wxr, None, second_arg)
+            calculate_bold_offsets(
+                wxr,
+                wxr.wtp.parse(wxr.wtp.node_to_wikitext(second_arg)),
+                e_data.translation,
+                e_data,
+                "bold_translation_offsets",
+            )
+            sense.examples.append(e_data)
     elif node.template_name == "citeer":
         extract_citeer_template(wxr, sense, node)
 
@@ -41,21 +68,33 @@ def extract_citeer_template(
     wxr: WiktextractContext, sense: Sense, node: TemplateNode
 ) -> None:
     # https://nl.wiktionary.org/wiki/Sjabloon:citeer
-    e_text = clean_node(wxr, None, node.template_parameters.get("citaat", ""))
-    if len(e_text) == 0:
-        e_text = clean_node(
-            wxr, None, node.template_parameters.get("passage", "")
-        )
-    if len(e_text) == 0:
-        return
-    e_trans = clean_node(
-        wxr, None, node.template_parameters.get("vertaling", "")
+    e_data = Example()
+    for text_arg_name in ["citaat", "passage"]:
+        text_arg = node.template_parameters.get(text_arg_name, "")
+        e_data.text = clean_node(wxr, None, text_arg)
+        if e_data.text != "":
+            calculate_bold_offsets(
+                wxr,
+                wxr.wtp.parse(wxr.wtp.node_to_wikitext(text_arg)),
+                e_data.text,
+                e_data,
+                "bold_text_offsets",
+            )
+            break
+    tr_arg = node.template_parameters.get("vertaling", "")
+    e_data.translation = clean_node(wxr, None, tr_arg)
+    calculate_bold_offsets(
+        wxr,
+        wxr.wtp.parse(wxr.wtp.node_to_wikitext(tr_arg)),
+        e_data.translation,
+        e_data,
+        "bold_translation_offsets",
     )
-    example = Example(text=e_text, translation=e_trans)
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(node), expand_all=True
     )
     for ref_tag in expanded_node.find_html_recursively("ref"):
-        example.ref = clean_node(wxr, sense, ref_tag.children)
+        e_data.ref = clean_node(wxr, sense, ref_tag.children)
         break
-    sense.examples.append(example)
+    if e_data.text != "":
+        sense.examples.append(e_data)

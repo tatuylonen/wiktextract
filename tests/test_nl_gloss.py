@@ -315,7 +315,9 @@ class TestNlGloss(TestCase):
                     "examples": [
                         {
                             "text": "Clark Gable was a popular movie star",
+                            "bold_text_offsets": [(0, 5)],
                             "translation": "Clark Gable was een bekende filmster.",
+                            "bold_translation_offsets": [(0, 5)],
                         }
                     ],
                 }
