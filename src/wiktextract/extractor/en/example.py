@@ -68,6 +68,7 @@ def extract_example_list_item(
             "collocation",
             "co",
             "coi",
+            "uxa",
         ]:
             examples.append(
                 extract_ux_template(
