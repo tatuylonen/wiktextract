@@ -71,7 +71,12 @@ class TestPtGloss(TestCase):
                             "glosses": ['gênio do mal em geral ("capeta")'],
                             "raw_tags": ["popular"],
                             "tags": ["Brazil"],
-                            "examples": [{"text": "O cão em forma de gente."}],
+                            "examples": [
+                                {
+                                    "text": "O cão em forma de gente.",
+                                    "bold_text_offsets": [(2, 5)],
+                                }
+                            ],
                         }
                     ],
                     "word": "cão",

@@ -50,6 +50,7 @@ class TestPtExample(TestCase):
                 "examples": [
                     {
                         "text": "沖縄ぬ政治 (うちなーぬしーじ)",
+                        "bold_text_offsets": [(3, 5)],
                         "translation": "governo de Okinawa",
                     }
                 ],
@@ -74,6 +75,7 @@ class TestPtExample(TestCase):
                 "examples": [
                     {
                         "text": "My life is an open book. (I have no secrets.)",
+                        "bold_text_offsets": [(19, 23)],
                         "translation": "Minha vida é um livro aberto. (Não tenho segredos.)",
                     }
                 ],
@@ -102,6 +104,7 @@ class TestPtExample(TestCase):
                 "examples": [
                     {
                         "text": "Com verba pública, livro técnico ainda é restrito.",
+                        "bold_text_offsets": [(19, 24)],
                         "ref": "notícia do jornal O Estado de S. Paulo de 08 de abril de 2008",
                     }
                 ],
@@ -125,6 +128,7 @@ class TestPtExample(TestCase):
                 "examples": [
                     {
                         "text": "“O diabo é o pai do rock!”.",
+                        "bold_text_offsets": [(3, 8)],
                         "ref": "passagem da composição “Rock do Diabo” de Raul Seixas/Paulo Coelho, 1975",
                     }
                 ],
@@ -149,6 +153,7 @@ class TestPtExample(TestCase):
                 "examples": [
                     {
                         "text": '"Amor é fogo que arde sem se ver\né ferida que dói, e não se sente,\né um contentamento descontente,\né dor que desatina sem doer."',
+                        "bold_text_offsets": [(1, 5)],
                         "ref": "1595, Luís de Camões, Rimas:",
                     }
                 ],
@@ -173,6 +178,7 @@ class TestPtExample(TestCase):
                 "examples": [
                     {
                         "text": "Ó mar salgado, quanto do teu sal\nSão lágrimas de Portugal!\nPor te cruzarmos, quantas mães choraram,\nQuantos filhos em vão rezaram!\nQuantas noivas ficaram por casar\nPara que fosses nosso, ó mar!",
+                        "bold_text_offsets": [(2, 5), (189, 192)],
                         "ref": "-Mensagem, de Fernando Pessoa",
                     }
                 ],
@@ -196,6 +202,7 @@ class TestPtExample(TestCase):
                 "examples": [
                     {
                         "text": "雑学の大家",
+                        "bold_text_offsets": [(3, 5)],
                         "translation": "mestre em conhecimentos gerais",
                     }
                 ],
