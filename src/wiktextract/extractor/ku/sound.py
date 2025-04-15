@@ -19,9 +19,9 @@ def extract_sound_list_item(
 ) -> None:
     for node in list_item.children:
         if isinstance(node, TemplateNode):
-            if node.template_name == "ku-IPA":
+            if node.template_name in ["ku-IPA", "IPA-ku"]:
                 extract_ku_ipa_template(wxr, word_entry, node)
-            elif node.template_name == "deng":
+            elif node.template_name in ["deng", "sound"]:
                 extract_deng_template(wxr, word_entry, node)
             elif node.template_name == "ku-kîte":
                 extract_ku_kîte(wxr, word_entry, node)

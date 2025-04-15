@@ -10,18 +10,36 @@ class KurdishBaseModel(BaseModel):
     )
 
 
+class Sound(KurdishBaseModel):
+    ipa: str = ""
+    audio: str = Field(default="", description="Audio file name")
+    wav_url: str = ""
+    oga_url: str = ""
+    ogg_url: str = ""
+    mp3_url: str = ""
+    opus_url: str = ""
+    flac_url: str = ""
+    tags: list[str] = []
+    raw_tags: list[str] = []
+
+
 class Example(KurdishBaseModel):
     text: str
+    bold_text_offsets: list[tuple[int, int]] = []
     translation: str = ""
+    bold_translation_offsets: list[tuple[int, int]] = []
     roman: str = Field(
         default="", description="Romanization of the example sentence"
     )
+    bold_roman_offsets: list[tuple[int, int]] = []
     ref: str = Field(
         default="",
         description="Source of the sentence, like book title and page number",
     )
     tags: list[str] = []
     raw_tags: list[str] = []
+    sounds: list[Sound] = []
+    categories: list[str] = Field(default=[], exclude=True)
 
 
 class AltForm(KurdishBaseModel):
@@ -72,19 +90,6 @@ class Linkage(KurdishBaseModel):
     roman: str = ""
     translation: str = ""
     sense: str = ""
-
-
-class Sound(KurdishBaseModel):
-    ipa: str = ""
-    audio: str = Field(default="", description="Audio file name")
-    wav_url: str = ""
-    oga_url: str = ""
-    ogg_url: str = ""
-    mp3_url: str = ""
-    opus_url: str = ""
-    flac_url: str = ""
-    tags: list[str] = []
-    raw_tags: list[str] = []
 
 
 class Descendant(KurdishBaseModel):
