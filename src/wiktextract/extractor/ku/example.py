@@ -20,6 +20,19 @@ def extract_example_list_item(
                 extract_jêder_template(wxr, sense, node)
             elif node.template_name in ["mk", "mînak", "ux", "nimûne", "nim"]:
                 extract_nimûne_template(wxr, sense, node)
+            elif (
+                node.template_name in ["deng", "audio"]
+                and len(sense.examples) > 0
+            ):
+                from .sound import extract_deng_template
+
+                extract_deng_template(wxr, sense.examples[-1], node)
+                sense.categories.extend(sense.examples[-1].categories)
+        elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
+            for child_list_item in node.find_child(NodeKind.LIST_ITEM):
+                extract_example_list_item(
+                    wxr, word_entry, sense, child_list_item
+                )
 
 
 def extract_jêder_template(

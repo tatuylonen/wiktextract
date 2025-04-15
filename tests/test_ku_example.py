@@ -90,3 +90,24 @@ class TestKuExample(TestCase):
                 }
             ],
         )
+
+    def test_deng(self):
+        self.wxr.wtp.add_page("Şablon:ziman", 10, "Koreyî")
+        self.wxr.wtp.add_page(
+            "Şablon:mk",
+            10,
+            """<div class="h-usage-example"><i class="Kore mention e-example" lang="ko">-{서울에 '''가요'''}-</i> ― <i lang="ko-Latn" class="e-transliteration tr Latn"><i>-{Seoul-e '''gayo'''.}-</i></i> ― <span class="e-translation">(Ez, tu, em û hwd) biçin Sêûlê.</span></div>[[Category:Nimûne bi koreyî|가다]]""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "가능",
+            """== {{ziman|ko}} ==
+=== Lêker ===
+# [[çûn]]
+#: {{mk|ko|서울에 '''가요'''|tr=Seoul-e '''gayo'''.|w=(Ez, tu, em û hwd) biçin Sêûlê.|birêz=1}}
+#:: {{deng|ko|서울에 가요.ogg|Deng}}""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"][0]["examples"][0]["sounds"][0]["audio"],
+            "서울에 가요.ogg",
+        )
