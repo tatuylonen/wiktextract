@@ -501,14 +501,7 @@ def bold_node_fn(
 def parse_gloss_inflections(
     parent_sense: Sense, contents: list[str | WikiNode]
 ) -> None:
-    """Parse form_of for nouns and adjectives.
-
-    Supports:
-    * [gender του] πτώση-πτώσεις templates
-    * TODO: verbs
-
-    Notes:
-    * πτώση has exactly one case, πτώση as at least two cases
+    """Parse form_of for nouns, adjectives and verbs.
 
     * References:
     https://el.wiktionary.org/wiki/Κατηγορία:Πρότυπα_για_κλιτικούς_τύπους
@@ -522,15 +515,38 @@ def parse_gloss_inflections(
     if len(compact_contents) != 1:
         return
 
-    only_node = compact_contents[0]
-    if not isinstance(only_node, TemplateNode):
+    t_node = compact_contents[0]
+    if not isinstance(t_node, TemplateNode):
         return
 
-    t_name = only_node.template_name
+    # Nouns and adjectives
+    t_name = t_node.template_name
     inflection_t_names = ("πτώσεις", "πτώση")
-    if not any(name in t_name for name in inflection_t_names):
-        return
+    if any(name in t_name for name in inflection_t_names):
+        return parse_gloss_inflections_ptosi(parent_sense, t_node)
 
+    # Verbs
+    # https://el.wiktionary.org/wiki/Πρότυπο:ρημ_τύπος
+    if t_name == "ρημ τύπος":
+        lemma = t_node.largs[-1][0]
+        assert isinstance(lemma, str)
+        form_of = FormOf(word=lemma)
+        parent_sense.form_of.append(form_of)
+
+
+def parse_gloss_inflections_ptosi(
+    parent_sense: Sense, t_node: TemplateNode
+) -> None:
+    """Parse form_of for nouns and adjectives.
+
+    Supports:
+    * [gender του] πτώση-πτώσεις templates
+
+    Notes:
+    * πτώση has exactly one case, πτώση as at least two cases
+    """
+    t_name = t_node.template_name
+    inflection_t_names = ("πτώσεις", "πτώση")
     tags: list[str] = []
 
     # Parse and consume gender if any
@@ -570,7 +586,7 @@ def parse_gloss_inflections(
     tags.extend([elt for elt in cases + [number]])
     tags.sort()  # For the tests, but also good practice
 
-    lemma = only_node.largs[-1][0]
+    lemma = t_node.largs[-1][0]
     assert isinstance(lemma, str)
 
     form_of = FormOf(word=lemma)

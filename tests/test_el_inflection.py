@@ -53,7 +53,8 @@ class TestElGlosses(TestCase):
 
             # The order of tags may change between runs
             # FIXME: this should not be the case?
-            sense["raw_tags"].sort()
+            if "raw_tags" in sense:
+                sense["raw_tags"].sort()
 
         received = dumped["senses"]
         # print(f"{received=}")
@@ -117,3 +118,10 @@ class TestElGlosses(TestCase):
             },
         ]
         self.mktest_sense(raw, expected)
+
+    def test_inflection_verb(self) -> None:
+        # https://el.wiktionary.org/wiki/ξεκίνησα
+        raw = """* {{ρημ τύπος|α' ενικό [[οριστική]]ς αορίστου|ξεκινώ}}"""
+        expected = [{'form_of': [{'word': 'ξεκινώ'}]}]
+        self.mktest_sense(raw, expected)
+
