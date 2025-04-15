@@ -259,16 +259,28 @@ def extract_navdêr_template(
         "np": ["masculine", "plural"],
         "mp": ["feminine", "plural"],
         "lk": "verb-from-noun",
+        "hanja": "Hanja",
     }
     for form_arg, tag in FORMS.items():
         if form_arg not in t_node.template_parameters:
-            return
+            continue
         extract_navdêr_template_form(wxr, word_entry, t_node, form_arg, tag)
         for index in count(2):
             form_arg += str(index)
             if form_arg not in t_node.template_parameters:
                 break
             extract_navdêr_template_form(wxr, word_entry, t_node, form_arg, tag)
+
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for i_tag in expanded_node.find_html_recursively("i"):
+        i_text = clean_node(wxr, None, i_tag)
+        if i_text.startswith("(") and i_text.endswith(")"):
+            word_entry.forms.append(
+                Form(form=i_text.strip("() "), tags=["romanization"])
+            )
+    clean_node(wxr, word_entry, expanded_node)
 
 
 def extract_navdêr_template_form(

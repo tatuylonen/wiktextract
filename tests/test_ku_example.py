@@ -64,11 +64,17 @@ class TestKuExample(TestCase):
             10,
             """<div class="h-usage-example"><i class="Kore mention e-example" lang="ko">-{[[스스로#Koreyî|스스로]] [[확인#Koreyî|확인]] '''가능'''}-</i><dl><dd><i lang="ko-Latn" class="e-transliteration tr Latn"><i>-{seuseuro hwagin '''ganeung'''}-</i></i></dd><dd><span class="e-translation">self-kontrolbar / şexsen tesdîq dibe / mimkin e şexsen piştrast bike</span></dd></dl></div>[[Category:Nimûne bi koreyî|가능]]""",
         )
+        self.wxr.wtp.add_page(
+            "Şablon:navdêr",
+            10,
+            """<strong class="Kore headword" lang="ko">-{가능}-</strong>&nbsp;<i>(ganeung)</i> <i>(</i><i>hanja</i> <span class="Kore form-of lang-ko hanja-form-of" lang="ko">-{[[:可能#koreyî|可能]]}-</span><i>)</i>[[Kategorî:Navdêr bi koreyî]]""",
+        )
         page_data = parse_page(
             self.wxr,
             "가능",
             """== {{ziman|ko}} ==
 === Navdêr ===
+{{navdêr|ko|hanja=可能}}
 # [[îmkan|Îmkan]],  [[derfet]]; [[ihtimal]]
 #: {{ux|ko|[[스스로]] [[확인]] '''가능'''|self-kontrolbar / şexsen tesdîq dibe / mimkin e şexsen piştrast bike}}""",
         )
@@ -90,6 +96,14 @@ class TestKuExample(TestCase):
                 }
             ],
         )
+        self.assertEqual(
+            page_data[0]["forms"],
+            [
+                {"form": "可能", "tags": ["Hanja"]},
+                {"form": "ganeung", "tags": ["romanization"]},
+            ],
+        )
+        self.assertEqual(page_data[0]["categories"], ["Navdêr bi koreyî"])
 
     def test_deng(self):
         self.wxr.wtp.add_page("Şablon:ziman", 10, "Koreyî")
