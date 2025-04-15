@@ -120,7 +120,7 @@ class Sense(GreekBaseModel):
     glosses: list[str] = []  # ["Gloss supercategory", "Specific gloss."]
     tags: list[str] = []
     raw_tags: list[str] = []
-    # form_of: list[FormOf] = []
+    form_of: list[FormOf] = []
     # alt_of : list[FormOf] = []
     # compound_of: list[FormOf] = []
     # topics: list[str] = []

@@ -17,7 +17,7 @@ from wiktextract.wxr_logging import logger
 
 from .head import parse_head
 from .linkages import process_linkage_section
-from .models import Example, Linkage, Sense, TemplateData, WordEntry
+from .models import Example, FormOf, Linkage, Sense, TemplateData, WordEntry
 from .parse_utils import (
     GREEK_LANGCODES,
     Heading,
@@ -498,6 +498,86 @@ def bold_node_fn(
     return None
 
 
+def parse_gloss_inflections(
+    parent_sense: Sense, contents: list[str | WikiNode]
+) -> None:
+    """Parse form_of for nouns and adjectives.
+
+    Supports:
+    * [gender του] πτώση-πτώσεις templates
+    * TODO: verbs
+
+    Notes:
+    * πτώση has exactly one case, πτώση as at least two cases
+
+    * References:
+    https://el.wiktionary.org/wiki/Κατηγορία:Πρότυπα_για_κλιτικούς_τύπους
+    """
+
+    # For the moment...
+    # Be sure that we only contain a single non-string node!
+    compact_contents = [
+        elt for elt in contents if isinstance(elt, WikiNode) or elt.strip()
+    ]
+    if len(compact_contents) != 1:
+        return
+
+    only_node = compact_contents[0]
+    if not isinstance(only_node, TemplateNode):
+        return
+
+    t_name = only_node.template_name
+    inflection_t_names = ("πτώσεις", "πτώση")
+    if not any(name in t_name for name in inflection_t_names):
+        return
+
+    tags: list[str] = []
+
+    # Parse and consume gender if any
+    if "-" in t_name:
+        # Cf. {{ουδ του-πτώσειςΟΑΚεν|καλός|grc}}
+        gender, inflection = t_name.split("-")
+        code = gender[:3]
+        GENDER_INFLECTION_MAP = {
+            "θηλ": "θηλυκό",
+            "αρσ": "αρσενικό",
+            "ουδ": "ουδέτερο",
+        }
+        gender_tag = GENDER_INFLECTION_MAP[code]
+        tags.append(gender_tag)
+    else:
+        inflection = t_name
+
+    # Remove πτώση-πτώσεις prefix
+    for prefix in inflection_t_names:
+        if inflection.startswith(prefix):
+            inflection = inflection[len(prefix) :]
+            break
+
+    PTOSI_INFLECTION_MAP = {
+        "Ο": "ονομαστική",
+        "Α": "αιτιατική",
+        "Γ": "γενική",
+        "Κ": "κλητική",
+    }
+
+    lowercase = "".join(ch for ch in inflection if ch.islower())
+    number = {"εν": "ενικού", "πλ": "πληθυντικού"}[lowercase]
+
+    uppercase = [ch for ch in inflection if not ch.islower()]
+    cases = [PTOSI_INFLECTION_MAP[ch] for ch in uppercase]
+
+    tags.extend([elt for elt in cases + [number]])
+    tags.sort()  # For the tests, but also good practice
+
+    lemma = only_node.largs[-1][0]
+    assert isinstance(lemma, str)
+
+    form_of = FormOf(word=lemma)
+    parent_sense.form_of.append(form_of)
+    parent_sense.raw_tags.extend(tags)
+
+
 def parse_gloss(
     wxr: WiktextractContext, parent_sense: Sense, contents: list[str | WikiNode]
 ) -> bool:
@@ -507,6 +587,8 @@ def parse_gloss(
     lower node."""
     if len(contents) == 0:
         return False
+
+    parse_gloss_inflections(parent_sense, contents)
 
     template_tags: list[str] = []
     synonyms: list[Linkage] = []
