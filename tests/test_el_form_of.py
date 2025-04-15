@@ -52,7 +52,6 @@ class TestElGlosses(TestCase):
             self.assertIn("glosses", sense)
             sense.pop("glosses")
 
-        received = dumped["senses"]
         # print(f"{received=}")
         # print(f"{expected=}")
         self.assertEqual(received, expected)

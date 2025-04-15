@@ -498,8 +498,8 @@ def bold_node_fn(
     return None
 
 
-def parse_gloss_inflections(
-    parent_sense: Sense, contents: list[str | WikiNode]
+def extract_form_of_templates(
+    wxr: WiktextractContext, parent_sense: Sense, contents: list[str | WikiNode]
 ) -> None:
     """Parse form_of for nouns, adjectives and verbs.
 
@@ -523,19 +523,18 @@ def parse_gloss_inflections(
     t_name = t_node.template_name
     inflection_t_names = ("πτώσεις", "πτώση")
     if any(name in t_name for name in inflection_t_names):
-        return parse_gloss_inflections_ptosi(parent_sense, t_node)
+        return extract_form_of_templates_ptosi(wxr, parent_sense, t_node)
 
     # Verbs
     # https://el.wiktionary.org/wiki/Πρότυπο:ρημ_τύπος
     if t_name == "ρημ τύπος":
-        lemma = t_node.largs[-1][0]
-        assert isinstance(lemma, str)
+        lemma = clean_node(wxr, None, t_node.largs[-1])
         form_of = FormOf(word=lemma)
         parent_sense.form_of.append(form_of)
 
 
-def parse_gloss_inflections_ptosi(
-    parent_sense: Sense, t_node: TemplateNode
+def extract_form_of_templates_ptosi(
+    wxr: WiktextractContext, parent_sense: Sense, t_node: TemplateNode
 ) -> None:
     """Parse form_of for nouns and adjectives.
 
@@ -555,14 +554,14 @@ def parse_gloss_inflections_ptosi(
         gender, inflection = t_name.split("-")
         code = gender[:3]
         GENDER_INFLECTION_MAP = {
-            "θηλ": "θηλυκό",
-            "αρσ": "αρσενικό",
-            "ουδ": "ουδέτερο",
+            "θηλ": "feminine",
+            "αρσ": "masculine",
+            "ουδ": "neuter",
         }
         try:
             gender_tag = GENDER_INFLECTION_MAP[code]
         except KeyError:
-            # Bad template name. Can this even happen?
+            # Bad template name.
             return
         tags.append(gender_tag)
     else:
@@ -575,10 +574,10 @@ def parse_gloss_inflections_ptosi(
             break
 
     PTOSI_INFLECTION_MAP = {
-        "Ο": "ονομαστική",
-        "Α": "αιτιατική",
-        "Γ": "γενική",
-        "Κ": "κλητική",
+        "Ο": "nominative",
+        "Α": "accusative",
+        "Γ": "genitive",
+        "Κ": "vocative",
     }
 
     # The πτώση-πτώσεις templates contains:
@@ -590,35 +589,16 @@ def parse_gloss_inflections_ptosi(
     # * {{πτώσειςΟΚπλ|κόρφος}} > nominative, vocative | plural
     try:
         lowercase = "".join(ch for ch in inflection if ch.islower())
-        number = {"εν": "ενικού", "πλ": "πληθυντικού"}[lowercase]
+        number = {"εν": "singular", "πλ": "plural"}[lowercase]
         uppercase = [ch for ch in inflection if not ch.islower()]
         cases = [PTOSI_INFLECTION_MAP[ch] for ch in uppercase]
     except KeyError:
-        # Bad template name. Can this even happen?
+        # Bad template name.
         return
 
     tags.extend([elt for elt in cases + [number]])
 
-    TAGS_EL_EN = {
-        # Gender
-        "θηλυκό": "feminine",
-        "αρσενικό": "masculine",
-        "ουδέτερο": "neuter",
-        # Case
-        "ονομαστική": "nominative",
-        "αιτιατική": "accusative",
-        "γενική": "genitive",
-        "κλητική": "vocative",
-        # Number
-        "ενικού": "singular",
-        "πληθυντικού": "plural",
-    }
-    # If we KeyError here it's entirely our fault
-    tags = [TAGS_EL_EN[tag_el] for tag_el in tags]
-
-    lemma = t_node.largs[-1][0]
-    assert isinstance(lemma, str)
-
+    lemma = clean_node(wxr, None, t_node.largs[-1])
     form_of = FormOf(word=lemma)
     parent_sense.form_of.append(form_of)
     tags.sort()  # For the tests, but also good practice
@@ -635,7 +615,7 @@ def parse_gloss(
     if len(contents) == 0:
         return False
 
-    parse_gloss_inflections(parent_sense, contents)
+    extract_form_of_templates(wxr, parent_sense, contents)
 
     template_tags: list[str] = []
     synonyms: list[Linkage] = []
