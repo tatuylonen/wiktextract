@@ -142,7 +142,16 @@ def extract_morphological_section(
         )
         clean_node(wxr, page_data[-1], expanded_template)  # add category links
         if child_node.template_name.startswith(
-            ("прил ru", "сущ ", "гл ", "мест ru ", "числ ru ", "числ-")
+            (
+                "прил ru",
+                "прил-ru",
+                "сущ ",
+                "сущ-ru",
+                "гл ",
+                "мест ru ",
+                "числ ru ",
+                "числ-",
+            )
         ):
             for table_node in expanded_template.find_child(NodeKind.TABLE):
                 parse_wikitext_forms_table(wxr, page_data[-1], table_node)
