@@ -3,6 +3,7 @@ from wikitextprocessor import NodeKind, TemplateNode, WikiNode
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from ..ruby import extract_ruby
+from ..share import calculate_bold_offsets
 from .models import Example, Sense
 
 
@@ -12,9 +13,7 @@ def extract_example_list_item(
     examples = []
     before_italic = True
     text_nodes = []
-    roman = ""
-    translation = ""
-    ref = ""
+    shared_example = Example()
     has_zh_tradsem = False
     for index, node in enumerate(list_item.children):
         if (
@@ -28,16 +27,32 @@ def extract_example_list_item(
                 case NodeKind.ITALIC:
                     if lang_code in ["zh", "ja"]:
                         if before_italic:
-                            roman = clean_node(wxr, sense, node)
+                            shared_example.roman = clean_node(wxr, sense, node)
+                            calculate_bold_offsets(
+                                wxr,
+                                node,
+                                shared_example.roman,
+                                shared_example,
+                                "bold_roman_offsets",
+                            )
                             before_italic = False
                     else:
-                        examples.append(
-                            Example(text=clean_node(wxr, sense, node))
+                        e_data = Example(text=clean_node(wxr, sense, node))
+                        calculate_bold_offsets(
+                            wxr, node, e_data.text, e_data, "bold_text_offsets"
                         )
+                        examples.append(e_data)
                 case NodeKind.LIST:
                     for tr_list_item in node.find_child(NodeKind.LIST_ITEM):
-                        translation = clean_node(
+                        shared_example.translation = clean_node(
                             wxr, sense, tr_list_item.children
+                        )
+                        calculate_bold_offsets(
+                            wxr,
+                            tr_list_item,
+                            shared_example.translation,
+                            shared_example,
+                            "bold_translation_offsets",
                         )
                 case _ if lang_code in ["zh", "ja"]:
                     if before_italic:
@@ -45,11 +60,11 @@ def extract_example_list_item(
         elif isinstance(node, str) and "-" in node:
             for t_node in list_item.find_child(NodeKind.TEMPLATE):
                 if t_node.template_name == "Term":
-                    ref = clean_node(wxr, None, t_node).strip("()")
+                    shared_example.ref = clean_node(wxr, None, t_node).strip(
+                        "()"
+                    )
                     break
-            translation = clean_node(
-                wxr,
-                sense,
+            tr_nodes = wxr.wtp.parse(
                 wxr.wtp.node_to_wikitext(
                     [node[node.index("-") + 1 :]]
                     + [
@@ -60,20 +75,28 @@ def extract_example_list_item(
                             and n.template_name == "Term"
                         )
                     ]
-                ),
+                )
+            )
+            shared_example.translation = clean_node(wxr, sense, tr_nodes)
+            calculate_bold_offsets(
+                wxr,
+                tr_nodes,
+                shared_example.translation,
+                shared_example,
+                "bold_translation_offsets",
             )
             if not has_zh_tradsem and len(examples) > 1:
                 examples.clear()
-                examples.append(
-                    Example(
-                        text=clean_node(
-                            wxr,
-                            None,
-                            list_item.children[:index]
-                            + [node[: node.index("-")]],
-                        )
+                text_node = wxr.wtp.parse(
+                    wxr.wtp.node_to_wikitext(
+                        list_item.children[:index] + [node[: node.index("-")]]
                     )
                 )
+                e_data = Example(text=clean_node(wxr, None, text_node))
+                calculate_bold_offsets(
+                    wxr, text_node, e_data.text, e_data, "bold_text_offsets"
+                )
+                examples.append(e_data)
             break
         elif lang_code in ["zh", "ja"] and len(examples) == 0 and before_italic:
             text_nodes.append(node)
@@ -91,26 +114,42 @@ def extract_example_list_item(
             .replace(" ", "")
             .strip("(")
         )
+        calculate_bold_offsets(
+            wxr,
+            wxr.wtp.parse(wxr.wtp.node_to_wikitext(node_without_ruby)),
+            example.text,
+            example,
+            "bold_text_offsets",
+        )
         examples.append(example)
 
     if not has_zh_tradsem and len(examples) > 1:
         examples.clear()
-        examples.append(
-            Example(
-                text=clean_node(
-                    wxr, None, list(list_item.invert_find_child(NodeKind.LIST))
-                )
+        text_node = wxr.wtp.parse(
+            wxr.wtp.node_to_wikitext(
+                list(list_item.invert_find_child(NodeKind.LIST))
             )
         )
+        e_data = Example(text=clean_node(wxr, None, text_node))
+        calculate_bold_offsets(
+            wxr, text_node, e_data.text, e_data, "bold_text_offsets"
+        )
+        examples.append(e_data)
 
     for example in examples:
-        if roman != "":
-            example.roman = roman
-        if translation != "":
-            example.translation = translation
-        if ref != "":
-            example.ref = ref
-        if example.text != "":
+        for attr in [
+            "roman",
+            "bold_roman_offsets",
+            "translation",
+            "bold_translation_offsets",
+            "ref",
+            "text",
+            "bold_text_offsets",
+        ]:
+            value = getattr(shared_example, attr)
+            if len(value) > 0:
+                setattr(example, attr, value)
+        if len(example.text) > 0:
             sense.examples.append(example)
 
 
@@ -120,11 +159,17 @@ def extract_zh_tradsem(
     # https://it.wiktionary.org/wiki/Template:zh-tradsem
     examples = []
     for arg_index in [1, 2]:
-        arg_value = clean_node(
-            wxr, None, t_node.template_parameters.get(arg_index, "")
-        ).replace(" ", "")
-        if arg_value != "":
-            example = Example(text=arg_value)
+        arg_value = t_node.template_parameters.get(arg_index, "")
+        arg_value_str = clean_node(wxr, None, arg_value).replace(" ", "")
+        if arg_value_str != "":
+            example = Example(text=arg_value_str)
+            calculate_bold_offsets(
+                wxr,
+                wxr.wtp.parse(wxr.wtp.node_to_wikitext(arg_value)),
+                example.text,
+                example,
+                "bold_text_offsets",
+            )
             if arg_index == 1:
                 example.tags.append("Traditional Chinese")
             elif arg_index == 2:
