@@ -40,6 +40,7 @@ class TestItExample(TestCase):
                     "examples": [
                         {
                             "text": "Da dog, e dog.",
+                            "bold_text_offsets": [(3, 6), (10, 13)],
                             "translation": "Il tuo cappello, il suo cappello.",
                         }
                     ],
@@ -65,7 +66,9 @@ class TestItExample(TestCase):
                     "examples": [
                         {
                             "text": "苍蝇的幼虫",
+                            "bold_text_offsets": [(3, 5)],
                             "roman": "cāngyíng de yòuchóng",
+                            "bold_roman_offsets": [(12, 20)],
                             "translation": "larva di mosca, bigattino",
                         }
                     ],
@@ -101,8 +104,11 @@ class TestItExample(TestCase):
                     "examples": [
                         {
                             "text": "今行くよ!",
+                            "bold_text_offsets": [(1, 3)],
                             "roman": "ima iku yo!",
+                            "bold_roman_offsets": [(4, 7)],
                             "translation": "sto andando!",
+                            "bold_translation_offsets": [(4, 11)],
                             "ruby": [("今", "いま"), ("行", "い")],
                         }
                     ],
@@ -128,13 +134,17 @@ class TestItExample(TestCase):
                     "examples": [
                         {
                             "text": "一個可能的事件",
+                            "bold_text_offsets": [(2, 4)],
                             "roman": "yī ge kěnéng de shìjiàn",
+                            "bold_roman_offsets": [(6, 12)],
                             "translation": "un evento possibile",
                             "tags": ["Traditional Chinese"],
                         },
                         {
                             "text": "一个可能的事件",
+                            "bold_text_offsets": [(2, 4)],
                             "roman": "yī ge kěnéng de shìjiàn",
+                            "bold_roman_offsets": [(6, 12)],
                             "translation": "un evento possibile",
                             "tags": ["Simplified Chinese"],
                         },
@@ -161,7 +171,9 @@ class TestItExample(TestCase):
                     "examples": [
                         {
                             "text": "May I have a glass of water?",
+                            "bold_text_offsets": [(22, 27)],
                             "translation": "Posso avere un bicchiere d'acqua?",
+                            "bold_translation_offsets": [(26, 32)],
                         }
                     ],
                 }
@@ -184,7 +196,10 @@ class TestItExample(TestCase):
                 {
                     "glosses": ["chi esiste"],
                     "examples": [
-                        {"text": "gli esseri viventi; gli esseri animati"}
+                        {
+                            "text": "gli esseri viventi; gli esseri animati",
+                            "bold_text_offsets": [(4, 10), (24, 30)],
+                        }
                     ],
                 }
             ],
@@ -211,6 +226,7 @@ class TestItExample(TestCase):
                     "examples": [
                         {
                             "text": "et eum omni ignominia liberat",
+                            "bold_text_offsets": [(22, 29)],
                             "translation": "e lo assolve da ogni ignominia",
                             "ref": "Cicerone, Pro Cluentio, XLVII, 132",
                         }

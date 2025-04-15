@@ -12,6 +12,7 @@ class PortugueseBaseModel(BaseModel):
 
 class Example(PortugueseBaseModel):
     text: str = ""
+    bold_text_offsets: list[tuple[int, int]] = []
     translation: str = ""
     ref: str = ""
 

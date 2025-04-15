@@ -2,6 +2,7 @@ from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from ..share import calculate_bold_offsets
 from .example import extract_example_list_item
 from .models import AltForm, Sense, WordEntry
 from .section_titles import POS_DATA
@@ -107,6 +108,13 @@ def extract_gloss_list_item(
                 for tr_list_item in node.find_child(NodeKind.LIST_ITEM):
                     sense.examples[-1].translation = clean_node(
                         wxr, sense, tr_list_item.children
+                    )
+                    calculate_bold_offsets(
+                        wxr,
+                        tr_list_item,
+                        sense.examples[-1].translation,
+                        sense.examples[-1],
+                        "bold_translation_offsets",
                     )
             elif node.sarg.endswith(("*", ":")):
                 for example_list_item in node.find_child(NodeKind.LIST_ITEM):

@@ -12,12 +12,15 @@ class ItalianBaseModel(BaseModel):
 
 class Example(ItalianBaseModel):
     text: str = ""
+    bold_text_offsets: list[tuple[int, int]] = []
     translation: str = ""
+    bold_translation_offsets: list[tuple[int, int]] = []
     ref: str = ""
     ruby: list[tuple[str, ...]] = Field(
         default=[], description="Japanese Kanji and furigana"
     )
     roman: str = ""
+    bold_roman_offsets: list[tuple[int, int]] = []
     tags: list[str] = []
     raw_tags: list[str] = []
 

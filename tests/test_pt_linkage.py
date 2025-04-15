@@ -62,7 +62,8 @@ class TestPtLinkage(TestCase):
                             "tags": ["intransitive"],
                             "examples": [
                                 {
-                                    "text": "Entre amores, trapaças e muitas confusões, Katie terá que lutar para conquistar seu espaço e abrir os olhos para a realidade da cidade grande."
+                                    "text": "Entre amores, trapaças e muitas confusões, Katie terá que lutar para conquistar seu espaço e abrir os olhos para a realidade da cidade grande.",
+                                    "bold_text_offsets": [(93, 107)],
                                 }
                             ],
                         }
