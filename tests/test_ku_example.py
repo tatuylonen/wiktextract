@@ -56,3 +56,37 @@ class TestKuExample(TestCase):
                 }
             ],
         )
+
+    def test_ux(self):
+        self.wxr.wtp.add_page("Şablon:ziman", 10, "Koreyî")
+        self.wxr.wtp.add_page(
+            "Şablon:ux",
+            10,
+            """<div class="h-usage-example"><i class="Kore mention e-example" lang="ko">-{[[스스로#Koreyî|스스로]] [[확인#Koreyî|확인]] '''가능'''}-</i><dl><dd><i lang="ko-Latn" class="e-transliteration tr Latn"><i>-{seuseuro hwagin '''ganeung'''}-</i></i></dd><dd><span class="e-translation">self-kontrolbar / şexsen tesdîq dibe / mimkin e şexsen piştrast bike</span></dd></dl></div>[[Category:Nimûne bi koreyî|가능]]""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "가능",
+            """== {{ziman|ko}} ==
+=== Navdêr ===
+# [[îmkan|Îmkan]],  [[derfet]]; [[ihtimal]]
+#: {{ux|ko|[[스스로]] [[확인]] '''가능'''|self-kontrolbar / şexsen tesdîq dibe / mimkin e şexsen piştrast bike}}""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"],
+            [
+                {
+                    "categories": ["Nimûne bi koreyî"],
+                    "glosses": ["Îmkan, derfet; ihtimal"],
+                    "examples": [
+                        {
+                            "text": "스스로 확인 가능",
+                            "bold_text_offsets": [(7, 9)],
+                            "roman": "seuseuro hwagin ganeung",
+                            "bold_roman_offsets": [(16, 23)],
+                            "translation": "self-kontrolbar / şexsen tesdîq dibe / mimkin e şexsen piştrast bike",
+                        }
+                    ],
+                }
+            ],
+        )
