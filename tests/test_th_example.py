@@ -27,6 +27,11 @@ class TestThExample(TestCase):
             10,
             """<div class="h-usage-example"><i class="Kore mention e-example" lang="ko">^파리는 ^프랑스의 '''서울'''이다.</i><dl><dd><i lang="ko-Latn" class="e-transliteration tr Latn">Pari-neun Peurangseu-ui '''seour'''-ida.</i></dd><dd><span class="e-translation">ปารีสคือเมืองหลวงของฝรั่งเศส</span></dd></dl></div>[[Category:ศัพท์ภาษาเกาหลีที่มีตัวอย่างการใช้|서울]]""",
         )
+        self.wxr.wtp.add_page(
+            "แม่แบบ:audio",
+            10,
+            """<table><tr><td>เสียง <span class="ib-brac qualifier-brac">(</span><span class="usage-label-accent"><span class="ib-content">South Korea</span></span><span class="ib-brac qualifier-brac">)</span><span class="ib-colon qualifier-colon">:</span></td><td class="audiofile">[[File:서울에 가요.ogg|noicon|175px]]</td><td class="audiometa">([[:File:서울에 가요.ogg|file]])</td></tr></table>[[Category:ศัพท์ภาษาเกาหลีที่มีลิงก์เสียง|서울]]""",
+        )
         page_data = parse_page(
             self.wxr,
             "서울",
@@ -35,12 +40,21 @@ class TestThExample(TestCase):
 {{ko-noun}}
 
 # [[เมืองหลวง]]; [[เมือง]][[ใหญ่]]
-#: {{ko-usex|^파리-는 ^프랑스-의 '''서울'''-이다.|ปารีสคือเมืองหลวงของฝรั่งเศส}}""",
+#: {{ko-usex|^파리-는 ^프랑스-의 '''서울'''-이다.|ปารีสคือเมืองหลวงของฝรั่งเศส}}
+#:: {{audio|ko|서울에 가요.ogg|a=South Korea}}""",
         )
+        self.assertEqual(
+            page_data[0]["senses"][0]["examples"][0]["sounds"][0]["audio"],
+            "서울에 가요.ogg",
+        )
+        del page_data[0]["senses"][0]["examples"][0]["sounds"]
         self.assertEqual(
             page_data[0]["senses"][0],
             {
-                "categories": ["ศัพท์ภาษาเกาหลีที่มีตัวอย่างการใช้"],
+                "categories": [
+                    "ศัพท์ภาษาเกาหลีที่มีตัวอย่างการใช้",
+                    "ศัพท์ภาษาเกาหลีที่มีลิงก์เสียง",
+                ],
                 "glosses": ["เมืองหลวง; เมืองใหญ่"],
                 "examples": [
                     {

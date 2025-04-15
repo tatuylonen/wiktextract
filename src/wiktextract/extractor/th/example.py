@@ -33,6 +33,11 @@ def extract_example_list_item(
                 extract_syn_template(
                     wxr, word_entry, node, LINKAGE_TEMPLATES[node.template_name]
                 )
+            elif node.template_name == "audio" and len(sense.examples) > 0:
+                from .sound import extract_audio_template
+
+                extract_audio_template(wxr, sense.examples[-1], node)
+                sense.categories.extend(sense.examples[-1].categories)
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
             for child_list_item in node.find_child(NodeKind.LIST_ITEM):
                 extract_example_list_item(

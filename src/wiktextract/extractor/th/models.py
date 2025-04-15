@@ -10,6 +10,25 @@ class ThaiBaseModel(BaseModel):
     )
 
 
+class Sound(ThaiBaseModel):
+    zh_pron: str = Field(default="", description="Chinese word pronunciation")
+    ipa: str = Field(default="", description="International Phonetic Alphabet")
+    audio: str = Field(default="", description="Audio file name")
+    wav_url: str = ""
+    oga_url: str = ""
+    ogg_url: str = ""
+    mp3_url: str = ""
+    opus_url: str = ""
+    flac_url: str = ""
+    tags: list[str] = []
+    raw_tags: list[str] = []
+    homophone: str = ""
+    other: str = ""
+    roman: str = ""
+    rhymes: str = ""
+    enpr: str = ""
+
+
 class Example(ThaiBaseModel):
     text: str
     bold_text_offsets: list[tuple[int, int]] = []
@@ -30,6 +49,8 @@ class Example(ThaiBaseModel):
     )
     tags: list[str] = []
     raw_tags: list[str] = []
+    categories: list[str] = Field(default=[], exclude=True)
+    sounds: list[Sound] = []
 
 
 class AltForm(ThaiBaseModel):
@@ -87,25 +108,6 @@ class Descendant(ThaiBaseModel):
     raw_tags: list[str] = []
     descendants: list["Descendant"] = []
     sense: str = ""
-
-
-class Sound(ThaiBaseModel):
-    zh_pron: str = Field(default="", description="Chinese word pronunciation")
-    ipa: str = Field(default="", description="International Phonetic Alphabet")
-    audio: str = Field(default="", description="Audio file name")
-    wav_url: str = ""
-    oga_url: str = ""
-    ogg_url: str = ""
-    mp3_url: str = ""
-    opus_url: str = ""
-    flac_url: str = ""
-    tags: list[str] = []
-    raw_tags: list[str] = []
-    homophone: str = ""
-    other: str = ""
-    roman: str = ""
-    rhymes: str = ""
-    enpr: str = ""
 
 
 class WordEntry(ThaiBaseModel):
