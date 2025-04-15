@@ -45,7 +45,9 @@ class TestThExample(TestCase):
                 "examples": [
                     {
                         "text": "^파리는 ^프랑스의 서울이다.",
+                        "bold_text_offsets": [(11, 13)],
                         "roman": "Pari-neun Peurangseu-ui seour-ida.",
+                        "bold_roman_offsets": [(24, 29)],
                         "translation": "ปารีสคือเมืองหลวงของฝรั่งเศส",
                     }
                 ],
@@ -76,14 +78,20 @@ class TestThExample(TestCase):
                 "examples": [
                     {
                         "text": "大家都還行。",
+                        "bold_text_offsets": [(0, 2)],
                         "roman": "Dàjiā dōu hái xíng.",
+                        "bold_roman_offsets": [(0, 5)],
                         "translation": "ทุกคนยังสบายดี",
+                        "bold_translation_offsets": [(0, 5)],
                         "tags": ["Traditional Chinese"],
                     },
                     {
                         "text": "大家都还行。",
+                        "bold_text_offsets": [(0, 2)],
                         "roman": "Dàjiā dōu hái xíng.",
+                        "bold_roman_offsets": [(0, 5)],
                         "translation": "ทุกคนยังสบายดี",
+                        "bold_translation_offsets": [(0, 5)],
                         "tags": ["Simplified Chinese"],
                     },
                 ],
@@ -114,8 +122,11 @@ class TestThExample(TestCase):
                 "examples": [
                     {
                         "text": "大家都很尊敬他。",
+                        "bold_text_offsets": [(0, 2)],
                         "roman": "Dàjiā dōu hěn zūnjìng tā.",
+                        "bold_roman_offsets": [(0, 5)],
                         "translation": "ทุกคนต่างเคารพเขามาก",
+                        "bold_translation_offsets": [(0, 5)],
                         "tags": [
                             "Modern Standard Chinese",
                             "Traditional Chinese",
@@ -151,8 +162,11 @@ class TestThExample(TestCase):
                 "examples": [
                     {
                         "text": "請大家保持安靜。",
+                        "bold_text_offsets": [(1, 3)],
                         "roman": "Qǐng dàjiā bǎochí ānjìng.",
+                        "bold_roman_offsets": [(5, 10)],
                         "translation": "ทุกคนกรุณาเงียบ",
+                        "bold_translation_offsets": [(0, 5)],
                         "tags": [
                             "Modern Standard Chinese",
                             "Traditional Chinese",
@@ -161,8 +175,11 @@ class TestThExample(TestCase):
                     },
                     {
                         "text": "请大家保持安静。",
+                        "bold_text_offsets": [(1, 3)],
                         "roman": "Qǐng dàjiā bǎochí ānjìng.",
+                        "bold_roman_offsets": [(5, 10)],
                         "translation": "ทุกคนกรุณาเงียบ",
+                        "bold_translation_offsets": [(0, 5)],
                         "tags": [
                             "Modern Standard Chinese",
                             "Simplified Chinese",
@@ -225,7 +242,9 @@ class TestThExample(TestCase):
                 "examples": [
                     {
                         "text": "日本の山中に…シロクマがいるか—————っ‼",
+                        "bold_text_offsets": [(7, 11)],
                         "roman": "Nippon no sanchū ni… shirokuma ga iru ka—————'‼",
+                        "bold_roman_offsets": [(21, 30)],
                         "translation": "ทำไมถึงมี...หมีขั้วโลกบนภูเขาญี่ปุ่นได้⁉",
                         "ruby": [
                             ("日", "にっ"),
