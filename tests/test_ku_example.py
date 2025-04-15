@@ -49,6 +49,7 @@ class TestKuExample(TestCase):
                     "examples": [
                         {
                             "text": "Kûçikên li hewşa pêş û paşî, ji hîva rûnixumandî tirsnaktir û ji ecacokê hartir, gez dikin bê.",
+                            "bold_text_offsets": [(0, 7)],
                             "ref": "Îrfan Amîda, Şevek Şîzofren, Weşanên Lîs, 2018, r. 6, ISBN 9786058152175",
                         }
                     ],

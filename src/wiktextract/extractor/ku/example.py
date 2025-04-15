@@ -2,6 +2,7 @@ from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from ..share import calculate_bold_offsets
 from .models import Example, Sense, WordEntry
 
 
@@ -28,14 +29,34 @@ def extract_jêder_template(
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(t_node), expand_all=True
     )
+    text_arg = t_node.template_parameters.get("jêgirtin", "")
+    roman_arg = t_node.template_parameters.get("tr", "")
+    trans_arg = t_node.template_parameters.get("werger", "")
     e_data = Example(
-        text=clean_node(
-            wxr, None, t_node.template_parameters.get("jêgirtin", "")
-        ),
-        roman=clean_node(wxr, None, t_node.template_parameters.get("tr", "")),
-        translation=clean_node(
-            wxr, None, t_node.template_parameters.get("werger", "")
-        ),
+        text=clean_node(wxr, None, text_arg),
+        roman=clean_node(wxr, None, roman_arg),
+        translation=clean_node(wxr, None, trans_arg),
+    )
+    calculate_bold_offsets(
+        wxr,
+        wxr.wtp.parse(wxr.wtp.node_to_wikitext(text_arg)),
+        e_data.text,
+        e_data,
+        "bold_text_offsets",
+    )
+    calculate_bold_offsets(
+        wxr,
+        wxr.wtp.parse(wxr.wtp.node_to_wikitext(roman_arg)),
+        e_data.roman,
+        e_data,
+        "bold_roman_offsets",
+    )
+    calculate_bold_offsets(
+        wxr,
+        wxr.wtp.parse(wxr.wtp.node_to_wikitext(trans_arg)),
+        e_data.translation,
+        e_data,
+        "bold_translation_offsets",
     )
     for span_tag in expanded_node.find_html(
         "span", attr_name="class", attr_value="jeder"
@@ -50,12 +71,34 @@ def extract_mînak_template(
     wxr: WiktextractContext, sense: Sense, t_node: TemplateNode
 ) -> None:
     # https://ku.wiktionary.org/wiki/Şablon:mînak
+    text_arg = t_node.template_parameters.get(2, "")
+    roman_arg = t_node.template_parameters.get("tr", "")
+    trans_arg = t_node.template_parameters.get("w", "")
     e_data = Example(
-        text=clean_node(wxr, None, t_node.template_parameters.get(2, "")),
-        roman=clean_node(wxr, None, t_node.template_parameters.get("tr", "")),
-        translation=clean_node(
-            wxr, None, t_node.template_parameters.get("w", "")
-        ),
+        text=clean_node(wxr, None, text_arg),
+        roman=clean_node(wxr, None, roman_arg),
+        translation=clean_node(wxr, None, trans_arg),
+    )
+    calculate_bold_offsets(
+        wxr,
+        wxr.wtp.parse(wxr.wtp.node_to_wikitext(text_arg)),
+        e_data.text,
+        e_data,
+        "bold_text_offsets",
+    )
+    calculate_bold_offsets(
+        wxr,
+        wxr.wtp.parse(wxr.wtp.node_to_wikitext(roman_arg)),
+        e_data.roman,
+        e_data,
+        "bold_roman_offsets",
+    )
+    calculate_bold_offsets(
+        wxr,
+        wxr.wtp.parse(wxr.wtp.node_to_wikitext(trans_arg)),
+        e_data.translation,
+        e_data,
+        "bold_translation_offsets",
     )
     if e_data.text != "":
         sense.examples.append(e_data)
