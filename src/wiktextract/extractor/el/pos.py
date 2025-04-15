@@ -559,7 +559,11 @@ def parse_gloss_inflections_ptosi(
             "αρσ": "αρσενικό",
             "ουδ": "ουδέτερο",
         }
-        gender_tag = GENDER_INFLECTION_MAP[code]
+        try:
+            gender_tag = GENDER_INFLECTION_MAP[code]
+        except KeyError:
+            # Bad template name. Can this even happen?
+            return
         tags.append(gender_tag)
     else:
         inflection = t_name
@@ -577,21 +581,48 @@ def parse_gloss_inflections_ptosi(
         "Κ": "κλητική",
     }
 
-    lowercase = "".join(ch for ch in inflection if ch.islower())
-    number = {"εν": "ενικού", "πλ": "πληθυντικού"}[lowercase]
-
-    uppercase = [ch for ch in inflection if not ch.islower()]
-    cases = [PTOSI_INFLECTION_MAP[ch] for ch in uppercase]
+    # The πτώση-πτώσεις templates contains:
+    # * Case(s) (1 for πτώση, >1 for πτώσεις) in uppercase characters.
+    # * Number in either "εν" (singular) or "πλ" (plural)
+    #
+    # Examples:
+    # * {{πτώσηΑεν|κόρφος}}    > accusative           | singular
+    # * {{πτώσειςΟΚπλ|κόρφος}} > nominative, vocative | plural
+    try:
+        lowercase = "".join(ch for ch in inflection if ch.islower())
+        number = {"εν": "ενικού", "πλ": "πληθυντικού"}[lowercase]
+        uppercase = [ch for ch in inflection if not ch.islower()]
+        cases = [PTOSI_INFLECTION_MAP[ch] for ch in uppercase]
+    except KeyError:
+        # Bad template name. Can this even happen?
+        return
 
     tags.extend([elt for elt in cases + [number]])
-    tags.sort()  # For the tests, but also good practice
+
+    TAGS_EL_EN = {
+        # Gender
+        "θηλυκό": "feminine",
+        "αρσενικό": "masculine",
+        "ουδέτερο": "neuter",
+        # Case
+        "ονομαστική": "nominative",
+        "αιτιατική": "accusative",
+        "γενική": "genitive",
+        "κλητική": "vocative",
+        # Number
+        "ενικού": "singular",
+        "πληθυντικού": "plural",
+    }
+    # If we KeyError here it's entirely our fault
+    tags = [TAGS_EL_EN[tag_el] for tag_el in tags]
 
     lemma = t_node.largs[-1][0]
     assert isinstance(lemma, str)
 
     form_of = FormOf(word=lemma)
     parent_sense.form_of.append(form_of)
-    parent_sense.raw_tags.extend(tags)
+    tags.sort()  # For the tests, but also good practice
+    parent_sense.tags.extend(tags)
 
 
 def parse_gloss(

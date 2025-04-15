@@ -46,15 +46,11 @@ class TestElGlosses(TestCase):
         dumped = data.model_dump(exclude_defaults=True)
 
         # Check for the "glosses" key and remove it for comparison
-        for sense in dumped["senses"]:
+        received = dumped["senses"]
+        for sense in received:
             self.assertIsInstance(sense, dict)
             self.assertIn("glosses", sense)
             sense.pop("glosses")
-
-            # The order of tags may change between runs
-            # FIXME: this should not be the case?
-            if "raw_tags" in sense:
-                sense["raw_tags"].sort()
 
         received = dumped["senses"]
         # print(f"{received=}")
@@ -66,8 +62,8 @@ class TestElGlosses(TestCase):
         raw = """* {{πτώσηΑεν|κόρφος}}"""
         expected = [
             {
-                "raw_tags": ["αιτιατική", "ενικού"],
                 "form_of": [{"word": "κόρφος"}],
+                "tags": ["accusative", "singular"],
             }
         ]
         self.mktest_sense(raw, expected)
@@ -77,7 +73,7 @@ class TestElGlosses(TestCase):
         raw = """* {{πτώσειςΟΚπλ|κόρφος}}"""
         expected = [
             {
-                "raw_tags": ["κλητική", "ονομαστική", "πληθυντικού"],
+                "tags": ["nominative", "plural", "vocative"],
                 "form_of": [{"word": "κόρφος"}],
             }
         ]
@@ -88,8 +84,13 @@ class TestElGlosses(TestCase):
         raw = """* {{θηλ_του-πτώσειςΟΑΚεν|μικρός}}"""
         expected = [
             {
-                "tags": ["θηλυκό"],  # This is parsed somewhere else I guess
-                "raw_tags": ["αιτιατική", "ενικού", "κλητική", "ονομαστική"],
+                "tags": [
+                    "accusative",
+                    "feminine",
+                    "nominative",
+                    "singular",
+                    "vocative",
+                ],
                 "form_of": [{"word": "μικρός"}],
             }
         ]
@@ -103,16 +104,16 @@ class TestElGlosses(TestCase):
         """
         expected = [
             {
-                "raw_tags": ["αιτιατική", "ενικού"],
+                "tags": ["accusative", "singular"],
                 "form_of": [{"word": "θαυμάσιος"}],
             },
             {
-                "raw_tags": [
-                    "αιτιατική",
-                    "ενικού",
-                    "κλητική",
-                    "ονομαστική",
-                    "ουδέτερο",
+                "tags": [
+                    "accusative",
+                    "neuter",
+                    "nominative",
+                    "singular",
+                    "vocative",
                 ],
                 "form_of": [{"word": "θαυμάσιος"}],
             },
@@ -122,6 +123,5 @@ class TestElGlosses(TestCase):
     def test_inflection_verb(self) -> None:
         # https://el.wiktionary.org/wiki/ξεκίνησα
         raw = """* {{ρημ τύπος|α' ενικό [[οριστική]]ς αορίστου|ξεκινώ}}"""
-        expected = [{'form_of': [{'word': 'ξεκινώ'}]}]
+        expected = [{"form_of": [{"word": "ξεκινώ"}]}]
         self.mktest_sense(raw, expected)
-

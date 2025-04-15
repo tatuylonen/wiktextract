@@ -65,6 +65,6 @@ def convert_tags(raw_tags: list[str]) -> tuple[list[str], list[str], list[str]]:
 
 def convert_tags_in_sense(sense: Sense) -> None:
     tags, raw_tags, poses = convert_tags(sense.raw_tags)
-    sense.tags = tags
+    sense.tags.extend(tags)
     sense.raw_tags = raw_tags
     sense.tags.extend(poses)
