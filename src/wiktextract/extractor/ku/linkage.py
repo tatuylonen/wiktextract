@@ -309,6 +309,8 @@ LINKAGE_TEMPLATES = {
     "hîponîm": "hyponyms",
     "termên koordîne": "coordinate_terms",
     "peyvên koordîneyî": "coordinate_terms",
+    "herwiha di rêza maneyê de": "forms",
+    "herwiha-rêz": "forms",
 }
 
 
@@ -343,4 +345,10 @@ def extract_nyms_template(
                 l_list[-1].raw_tags.append(raw_tag)
                 translate_raw_tags(l_list[-1])
 
+    field = LINKAGE_TEMPLATES[t_node.template_name]
+    if field == "forms":
+        l_list = [
+            Form(form=l_data.word, tags=["alt-of"], sense=l_data.sense)
+            for l_data in l_list
+        ]
     getattr(word_entry, LINKAGE_TEMPLATES[t_node.template_name]).extend(l_list)
