@@ -17,7 +17,7 @@ from wiktextract.wxr_logging import logger
 
 from .head import parse_head
 from .linkages import process_linkage_section
-from .models import Example, Linkage, Sense, TemplateData, WordEntry
+from .models import Example, FormOf, Linkage, Sense, TemplateData, WordEntry
 from .parse_utils import (
     GREEK_LANGCODES,
     Heading,
@@ -498,6 +498,113 @@ def bold_node_fn(
     return None
 
 
+def extract_form_of_templates(
+    wxr: WiktextractContext, parent_sense: Sense, contents: list[str | WikiNode]
+) -> None:
+    """Parse form_of for nouns, adjectives and verbs.
+
+    * References:
+    https://el.wiktionary.org/wiki/Κατηγορία:Πρότυπα_για_κλιτικούς_τύπους
+    """
+
+    # For the moment...
+    # Be sure that we only contain a single non-string node!
+    compact_contents = [
+        elt for elt in contents if isinstance(elt, WikiNode) or elt.strip()
+    ]
+    if len(compact_contents) != 1:
+        return
+
+    t_node = compact_contents[0]
+    if not isinstance(t_node, TemplateNode):
+        return
+
+    # Nouns and adjectives
+    t_name = t_node.template_name
+    inflection_t_names = ("πτώσεις", "πτώση")
+    if any(name in t_name for name in inflection_t_names):
+        return extract_form_of_templates_ptosi(wxr, parent_sense, t_node)
+
+    # Verbs
+    # https://el.wiktionary.org/wiki/Πρότυπο:ρημ_τύπος
+    if t_name == "ρημ τύπος":
+        lemma = clean_node(wxr, None, t_node.largs[-1])
+        form_of = FormOf(word=lemma)
+        parent_sense.form_of.append(form_of)
+
+
+def extract_form_of_templates_ptosi(
+    wxr: WiktextractContext, parent_sense: Sense, t_node: TemplateNode
+) -> None:
+    """Parse form_of for nouns and adjectives.
+
+    Supports:
+    * [gender του] πτώση-πτώσεις templates
+
+    Notes:
+    * πτώση has exactly one case, πτώση as at least two cases
+    """
+    t_name = t_node.template_name
+    inflection_t_names = ("πτώσεις", "πτώση")
+    tags: list[str] = []
+
+    # Parse and consume gender if any
+    if "-" in t_name:
+        # Cf. {{ουδ του-πτώσειςΟΑΚεν|καλός|grc}}
+        gender, inflection = t_name.split("-")
+        code = gender[:3]
+        GENDER_INFLECTION_MAP = {
+            "θηλ": "feminine",
+            "αρσ": "masculine",
+            "ουδ": "neuter",
+        }
+        try:
+            gender_tag = GENDER_INFLECTION_MAP[code]
+        except KeyError:
+            # Bad template name.
+            return
+        tags.append(gender_tag)
+    else:
+        inflection = t_name
+
+    # Remove πτώση-πτώσεις prefix
+    for prefix in inflection_t_names:
+        if inflection.startswith(prefix):
+            inflection = inflection[len(prefix) :]
+            break
+
+    PTOSI_INFLECTION_MAP = {
+        "Ο": "nominative",
+        "Α": "accusative",
+        "Γ": "genitive",
+        "Κ": "vocative",
+    }
+
+    # The πτώση-πτώσεις templates contains:
+    # * Case(s) (1 for πτώση, >1 for πτώσεις) in uppercase characters.
+    # * Number in either "εν" (singular) or "πλ" (plural)
+    #
+    # Examples:
+    # * {{πτώσηΑεν|κόρφος}}    > accusative           | singular
+    # * {{πτώσειςΟΚπλ|κόρφος}} > nominative, vocative | plural
+    try:
+        lowercase = "".join(ch for ch in inflection if ch.islower())
+        number = {"εν": "singular", "πλ": "plural"}[lowercase]
+        uppercase = [ch for ch in inflection if not ch.islower()]
+        cases = [PTOSI_INFLECTION_MAP[ch] for ch in uppercase]
+    except KeyError:
+        # Bad template name.
+        return
+
+    tags.extend([elt for elt in cases + [number]])
+
+    lemma = clean_node(wxr, None, t_node.largs[-1])
+    form_of = FormOf(word=lemma)
+    parent_sense.form_of.append(form_of)
+    tags.sort()  # For the tests, but also good practice
+    parent_sense.tags.extend(tags)
+
+
 def parse_gloss(
     wxr: WiktextractContext, parent_sense: Sense, contents: list[str | WikiNode]
 ) -> bool:
@@ -507,6 +614,8 @@ def parse_gloss(
     lower node."""
     if len(contents) == 0:
         return False
+
+    extract_form_of_templates(wxr, parent_sense, contents)
 
     template_tags: list[str] = []
     synonyms: list[Linkage] = []
