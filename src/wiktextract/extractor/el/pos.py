@@ -528,7 +528,14 @@ def extract_form_of_templates(
     # Verbs
     # https://el.wiktionary.org/wiki/Πρότυπο:ρημ_τύπος
     if t_name == "ρημ τύπος":
-        lemma = clean_node(wxr, None, t_node.largs[-1])
+        t_args = t_node.template_parameters
+        if 2 not in t_args:
+            wxr.wtp.warning("Form-of template does not have lemma data: "
+                            f"{t_name}, {t_args=}",
+                            sortid="pos/535/20250416")
+            return
+        lemma = clean_node(wxr, None, t_args[2])
+
         form_of = FormOf(word=lemma)
         parent_sense.form_of.append(form_of)
 
@@ -598,7 +605,15 @@ def extract_form_of_templates_ptosi(
 
     tags.extend([elt for elt in cases + [number]])
 
-    lemma = clean_node(wxr, None, t_node.largs[-1])
+    t_args = t_node.template_parameters
+
+    if 1 not in t_args:
+        wxr.wtp.warning("Form-of template does not have lemma data: "
+                        f"{t_name}, {t_args=}",
+                        sortid="pos/620/20250416")
+        return
+
+    lemma = clean_node(wxr, None, t_args[1])
     form_of = FormOf(word=lemma)
     parent_sense.form_of.append(form_of)
     tags.sort()  # For the tests, but also good practice
