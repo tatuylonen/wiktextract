@@ -36,6 +36,13 @@ def extract_example_list_item(
                 extract_example_list_item(
                     wxr, word_entry, sense, child_list_item
                 )
+        elif isinstance(node, WikiNode) and node.kind == NodeKind.ITALIC:
+            e_data = Example(text=clean_node(wxr, None, node))
+            calculate_bold_offsets(
+                wxr, node, e_data.text, e_data, "bold_text_offsets"
+            )
+            if e_data.text != "":
+                sense.examples.append(e_data)
 
 
 def extract_jêder_template(
