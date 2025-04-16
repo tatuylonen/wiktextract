@@ -77,7 +77,9 @@ class TestTrGloss(TestCase):
                     "examples": [
                         {
                             "text": "Der Zahnarzt entfernte ihr drei Zähne.",
+                            "bold_text_offsets": [(32, 37)],
                             "translation": "Diş hekimi dişlerinden üçünü çıkardı.",
+                            "bold_translation_offsets": [(14, 20)],
                         }
                     ],
                     "glosses": ["diş"],
@@ -102,7 +104,9 @@ class TestTrGloss(TestCase):
                     "examples": [
                         {
                             "text": "Sally won the game.",
+                            "bold_text_offsets": [(14, 18)],
                             "translation": "Sally oyunu kazandı.",
+                            "bold_translation_offsets": [(6, 11)],
                         }
                     ],
                     "glosses": ["Oyun oynama ânı; maç."],
@@ -248,7 +252,9 @@ class TestTrGloss(TestCase):
                     "examples": [
                         {
                             "text": "Gehen wir heute Abend zum Türken?",
+                            "bold_text_offsets": [(26, 32)],
                             "translation": "Bu akşam Türk restoranına gidiyor muyuz?",
+                            "bold_translation_offsets": [(9, 25)],
                         }
                     ],
                 }
@@ -367,3 +373,99 @@ class TestTrGloss(TestCase):
         )
         self.assertEqual(page_data[0]["tags"], ["masculine", "feminine"])
         self.assertEqual(page_data[0]["categories"], ["İtalyanca sözcükler"])
+
+    def test_at_template(self):
+        self.wxr.wtp.add_page(
+            "Şablon:AT:Kur'an",
+            10,
+            """'''[[Ek:Açıklamalar#MS|M.S.]] 609–632''', ''[[w:tr:Kur'an|Kur'an]]'', [https://quran.com/89/20 89<nowiki/>:20]<br>وَتُحِبُّونَ الْمَالَ '''حُبًّا''' جَمًّا&nbsp;–&nbsp;Ve malı da pek çok '''seviyorsunuz'''.""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "Aabid",
+            """==Arapça==
+===Ad===
+# [[sevgi]]
+#* {{AT:Kur'an|89|20|pasaj=وَتُحِبُّونَ الْمَالَ '''حُبًّا''' جَمًّا|t=Ve malı da pek çok '''seviyorsunuz'''.}}""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"],
+            [
+                {
+                    "glosses": ["sevgi"],
+                    "examples": [
+                        {
+                            "text": "وَتُحِبُّونَ الْمَالَ حُبًّا جَمًّا",
+                            "bold_text_offsets": [(22, 28)],
+                            "translation": "Ve malı da pek çok seviyorsunuz.",
+                            "bold_translation_offsets": [(19, 31)],
+                            "ref": "M.S. 609–632, Kur'an, 89:20",
+                        }
+                    ],
+                }
+            ],
+        )
+
+    def test_at_only_has_t(self):
+        self.wxr.wtp.add_page(
+            "Şablon:AT:Kur'an",
+            10,
+            """'''[[Ek:Açıklamalar#MS|M.S.]] 609–632''', ''[[w:tr:Kur'an|Kur'an]]'', [https://quran.com/112/1-4 112<nowiki/>:1-4]<br>De ki: "'''Allah''' Ehad'dır. '''Allah''' Samet'tir. Hiç kimse ondan doğmamış ve o doğrulmamıştır. Eşi benzeri olmayan ilahtır.""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "Allah",
+            """==Türkçe==
+===Özel ad===
+# [[Tanrı]]
+#* {{AT:Kur'an|112|1-4|t=De ki: "'''Allah''' Ehad'dır. '''Allah''' Samet'tir. Hiç kimse ondan doğmamış ve o doğrulmamıştır. Eşi benzeri olmayan ilahtır.}}""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"],
+            [
+                {
+                    "glosses": ["Tanrı"],
+                    "examples": [
+                        {
+                            "text": """De ki: "Allah Ehad'dır. Allah Samet'tir. Hiç kimse ondan doğmamış ve o doğrulmamıştır. Eşi benzeri olmayan ilahtır.""",
+                            "bold_text_offsets": [(8, 13), (24, 29)],
+                            "ref": "M.S. 609–632, Kur'an, 112:1-4",
+                        }
+                    ],
+                }
+            ],
+        )
+
+    def test_at_template_as_ref(self):
+        self.wxr.wtp.add_page(
+            "Şablon:AT:Kur'an",
+            10,
+            """'''[[Ek:Açıklamalar#MS|M.S.]] 609–632''', ''[[w:tr:Kur'an|Kur'an]]'', [https://quran.com/4/78 4<nowiki/>:78]<br>""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "موت",
+            """==Arapça==
+===Ad===
+# [[ölüm]]
+#* {{AT:Kur'an|4|78}}
+#*: {{örnek|dil=ar|‎أَيۡنَمَا تَكُونُوا۟ يُدۡرِككُّمُ '''ٱلۡمَوۡتُ''' وَلَوۡ كُنتُمۡ فِي بُرُوجࣲ مُّشَيَّدَةࣲ|t=
+Nerede olursanız olun, sağlam ve tahkim edilmiş kaleler içinde bulunsanız bile '''ölüm''' size ulaşacaktır.}}""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"],
+            [
+                {
+                    "glosses": ["ölüm"],
+                    "examples": [
+                        {
+                            "ref": "M.S. 609–632, Kur'an, 4:78",
+                            "text": "أَيۡنَمَا تَكُونُوا۟ يُدۡرِككُّمُ ٱلۡمَوۡتُ وَلَوۡ كُنتُمۡ فِي بُرُوجࣲ مُّشَيَّدَةࣲ",
+                            "bold_text_offsets": [(34, 43)],
+                            "translation": "Nerede olursanız olun, sağlam ve tahkim edilmiş kaleler içinde bulunsanız bile ölüm size ulaşacaktır.",
+                            "bold_translation_offsets": [(79, 83)],
+                        }
+                    ],
+                }
+            ],
+        )

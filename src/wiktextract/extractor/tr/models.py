@@ -12,7 +12,9 @@ class TurkishBaseModel(BaseModel):
 
 class Example(TurkishBaseModel):
     text: str
+    bold_text_offsets: list[tuple[int, int]] = []
     translation: str = ""
+    bold_translation_offsets: list[tuple[int, int]] = []
     ref: str = ""
     tags: list[str] = []
     raw_tags: list[str] = []
