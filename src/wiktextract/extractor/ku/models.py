@@ -130,3 +130,4 @@ class WordEntry(KurdishBaseModel):
     notes: list[str] = []
     descendants: list[Descendant] = []
     abbreviations: list[Linkage] = []
+    coordinate_terms: list[Linkage] = []

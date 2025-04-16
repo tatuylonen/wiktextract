@@ -169,3 +169,35 @@ class TestKuLinkage(TestCase):
             page_data[0]["synonyms"],
             [{"word": "exit", "tags": ["euphemistic"]}],
         )
+
+    def test_linkage_in_gloss_list(self):
+        self.wxr.wtp.add_page("Şablon:ziman", 10, "Koreyî")
+        self.wxr.wtp.add_page(
+            "Şablon:hevmaneyên peyvê",
+            10,
+            '<span class="nyms Hevmane"><span class="defdate">Hevmane:</span> <span class="Kore" lang="ko">-{[[여자친구#Koreyî|여자친구 (女子親舊)]]}-</span> <span class="mention-gloss-paren annotation-paren">(</span><span lang="ko-Latn" class="tr Latn"><i>-{yeojachin-gu }-</i></span><span class="mention-gloss-paren annotation-paren">)</span>, <span class="Kore" lang="ko">-{[[여친#Koreyî|여친 (女親)]]}-</span> <span class="mention-gloss-paren annotation-paren">(</span><span lang="ko-Latn" class="tr Latn"><i>-{yeochin }-</i></span>, <span class="ann-pos">zimanê rojane</span><span class="mention-gloss-paren annotation-paren">)</span></span>',
+        )
+        page_data = parse_page(
+            self.wxr,
+            "걸프렌드",
+            """== {{ziman|ko}} ==
+=== Navdêr ===
+# [[heval|Heval]]a [[keçik]].
+#: {{hevmaneyên peyvê|ko|[[여자친구|여자친구 (女子親舊)]]|[[여친|여친 (女親)]]|pos2=zimanê rojane}}""",
+        )
+        self.assertEqual(
+            page_data[0]["synonyms"],
+            [
+                {
+                    "word": "여자친구 (女子親舊)",
+                    "roman": "yeojachin-gu",
+                    "sense": "Hevala keçik.",
+                },
+                {
+                    "word": "여친 (女親)",
+                    "roman": "yeochin",
+                    "raw_tags": ["zimanê rojane"],
+                    "sense": "Hevala keçik.",
+                },
+            ],
+        )
