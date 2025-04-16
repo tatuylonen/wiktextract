@@ -39,7 +39,9 @@ class TestIdExample(TestCase):
                     "examples": [
                         {
                             "text": "payo bubuh pempeknyo, jangan semon-semon",
+                            "bold_text_offsets": [(5, 10)],
                             "translation": "ayo tambah pempeknya, jangan malu-malu",
+                            "bold_translation_offsets": [(4, 10)],
                         }
                     ],
                     "glosses": ["tambah"],
