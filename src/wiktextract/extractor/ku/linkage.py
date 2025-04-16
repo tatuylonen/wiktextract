@@ -293,3 +293,62 @@ def extract_stûn_template(
             extract_linkage_list_item(
                 wxr, word_entry, list_item, linkage_type, ""
             )
+
+
+LINKAGE_TEMPLATES = {
+    "hevmane": "synonyms",
+    "hevwate": "synonyms",
+    "hevmaneya peyvê": "synonyms",
+    "hevmaneyên peyvê": "synonyms",
+    "dijmane": "antonyms",
+    "dijmaneyên peyvê": "antonyms",
+    "dijwate": "antonyms",
+    "jornav": "hypernyms",
+    "hîpernîm": "hypernyms",
+    "jêrnav": "hyponyms",
+    "hîponîm": "hyponyms",
+    "termên koordîne": "coordinate_terms",
+    "peyvên koordîneyî": "coordinate_terms",
+    "herwiha di rêza maneyê de": "forms",
+    "herwiha-rêz": "forms",
+}
+
+
+def extract_nyms_template(
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+) -> None:
+    # https://ku.wiktionary.org/wiki/Modul:nyms
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    l_list = []
+    lang_code = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
+    for span_tag in expanded_node.find_html_recursively("span"):
+        span_lang = span_tag.attrs.get("lang", "")
+        span_class = span_tag.attrs.get("class", "")
+        if span_lang == lang_code:
+            l_list.append(
+                Linkage(
+                    word=clean_node(wxr, None, span_tag),
+                    sense=" ".join(
+                        word_entry.senses[-1].glosses
+                        if len(word_entry.senses) > 0
+                        else ""
+                    ),
+                )
+            )
+        elif span_class == "tr Latn" and len(l_list) > 0:
+            l_list[-1].roman = clean_node(wxr, None, span_tag)
+        elif span_class == "ann-pos" and len(l_list) > 0:
+            raw_tag = clean_node(wxr, None, span_tag)
+            if raw_tag != "":
+                l_list[-1].raw_tags.append(raw_tag)
+                translate_raw_tags(l_list[-1])
+
+    field = LINKAGE_TEMPLATES[t_node.template_name]
+    if field == "forms":
+        l_list = [
+            Form(form=l_data.word, tags=["alt-of"], sense=l_data.sense)
+            for l_data in l_list
+        ]
+    getattr(word_entry, LINKAGE_TEMPLATES[t_node.template_name]).extend(l_list)

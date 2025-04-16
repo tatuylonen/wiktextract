@@ -125,3 +125,28 @@ class TestKuExample(TestCase):
             page_data[0]["senses"][0]["examples"][0]["sounds"][0]["audio"],
             "서울에 가요.ogg",
         )
+
+    def test_italic(self):
+        self.wxr.wtp.add_page("Şablon:ziman", 10, "Kurmancî")
+        page_data = parse_page(
+            self.wxr,
+            "rast",
+            """== {{ziman|ku}} ==
+=== Rengdêr ===
+# [[bêxeletî]]
+#: ''Bersiva te '''rast''' e.''""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"],
+            [
+                {
+                    "glosses": ["bêxeletî"],
+                    "examples": [
+                        {
+                            "bold_text_offsets": [(11, 15)],
+                            "text": "Bersiva te rast e.",
+                        }
+                    ],
+                }
+            ],
+        )

@@ -3,6 +3,7 @@ from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from ..share import calculate_bold_offsets
+from .linkage import LINKAGE_TEMPLATES, extract_nyms_template
 from .models import Example, Sense, WordEntry
 
 
@@ -28,11 +29,20 @@ def extract_example_list_item(
 
                 extract_deng_template(wxr, sense.examples[-1], node)
                 sense.categories.extend(sense.examples[-1].categories)
+            elif node.template_name in LINKAGE_TEMPLATES:
+                extract_nyms_template(wxr, word_entry, node)
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
             for child_list_item in node.find_child(NodeKind.LIST_ITEM):
                 extract_example_list_item(
                     wxr, word_entry, sense, child_list_item
                 )
+        elif isinstance(node, WikiNode) and node.kind == NodeKind.ITALIC:
+            e_data = Example(text=clean_node(wxr, None, node))
+            calculate_bold_offsets(
+                wxr, node, e_data.text, e_data, "bold_text_offsets"
+            )
+            if e_data.text != "":
+                sense.examples.append(e_data)
 
 
 def extract_jêder_template(
