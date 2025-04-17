@@ -90,8 +90,10 @@ class Sound(BaseModelWrap):
     ipa: str = Field("", description="International Phonetic Alphabet")
     audio: str = Field("", description="Audio file name")
     wav_url: str = ""
+    oga_url: str = ""
     ogg_url: str = ""
     mp3_url: str = ""
+    opus_url: str = ""
     flac_url: str = ""
     roman: str = Field("", description="Translitaration to Roman characters")
     syllabic: str = Field("", description="Syllabic transcription")
