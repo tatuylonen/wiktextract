@@ -16,16 +16,6 @@ from ...wxr_logging import logger
 from .section_titles import LINKAGE_TITLES, POS_TITLES
 from .tags import translate_raw_tags
 
-SENSE_SUBTITLE_PREFIX = "詞義："
-IGNORED_SUBTITLES = frozenset(
-    [
-        "參見",  # see also
-        "参见",
-        "延伸閱讀",  # further reading
-        "延伸阅读",
-    ]
-)
-
 
 def parse_section(
     wxr: WiktextractContext,
@@ -39,7 +29,7 @@ def parse_section(
     data = []
     for next_level_node in level_node.find_child(LEVEL_KIND_FLAGS):
         next_level_title = clean_node(wxr, None, next_level_node.largs)
-        if next_level_title in IGNORED_SUBTITLES:
+        if next_level_title in ["參見", "参见", "延伸閱讀", "延伸阅读"]:
             continue
         elif next_level_node.kind == NodeKind.LEVEL3:
             local_pos_name = next_level_title
@@ -62,8 +52,7 @@ def parse_section(
                 )
             )
         elif next_level_node.kind == NodeKind.LEVEL4:
-            sense_text = next_level_title
-            sense_text = sense_text.removeprefix(SENSE_SUBTITLE_PREFIX)
+            sense_text = next_level_title.removeprefix("詞義：").strip()
             data.extend(
                 parse_section(
                     wxr,
@@ -207,7 +196,11 @@ def process_col_template(
             if span_tag.attrs.get("lang", "").endswith("-Latn"):
                 roman = clean_node(wxr, None, span_tag)
             elif "qualifier-content" in span_tag.attrs.get("class", ""):
-                raw_tags.append(clean_node(wxr, None, span_tag))
+                span_text = clean_node(wxr, None, span_tag)
+                for raw_tag in re.split(r"或|、", span_text):
+                    raw_tag = raw_tag.strip()
+                    if raw_tag != "":
+                        raw_tags.append(raw_tag)
             elif span_tag.attrs.get("lang", "") != "":
                 term_text = clean_node(wxr, None, span_tag)
                 term_data = ThesaurusTerm(

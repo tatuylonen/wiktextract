@@ -166,3 +166,44 @@ class TestZhThesaurus(TestCase):
                 ),
             ],
         )
+
+    def test_col3_tag(self):
+        self.wxr.wtp.add_page("Template:ws sense", 10, "{{{2}}}")
+        self.wxr.wtp.add_page(
+            "Template:col3",
+            10,
+            """<div class="list-switcher-wrapper"><div class="term-list columns-bg"><ul><li><span class="Hani" lang="zh">-{[[世#漢語|-{世}-]]}-</span> <span class="ib-brac qualifier-brac">(</span><span class="ib-content qualifier-content">書面或用於組詞</span><span class="ib-brac qualifier-brac">)</span></li><li><span class="Hani" lang="zh">-{[[天下#漢語|-{天下}-]]}-</span> <span class="ib-brac qualifier-brac">(</span><span class="ib-content qualifier-content">書面、比喻</span><span class="ib-brac qualifier-brac">)</span></li></ul></div></div>""",
+        )
+        page = Page(
+            title="類義詞庫:世界",
+            namespace_id=110,
+            body="""==漢語==
+===名詞===
+===={{ws sense|zh|地球上的所有地方或國家}}====
+=====近義詞=====
+{{col3|zh|天下<qq:書面、比喻>|世<qq:書面或用於組詞>}}""",
+        )
+        self.assertEqual(
+            extract_thesaurus_page(self.wxr, page),
+            [
+                ThesaurusTerm(
+                    entry="世界",
+                    language_code="zh",
+                    pos="noun",
+                    linkage="synonyms",
+                    term="世",
+                    tags=["literary"],
+                    raw_tags=["用於組詞"],
+                    sense="地球上的所有地方或國家",
+                ),
+                ThesaurusTerm(
+                    entry="世界",
+                    language_code="zh",
+                    pos="noun",
+                    linkage="synonyms",
+                    term="天下",
+                    tags=["literary", "figuratively"],
+                    sense="地球上的所有地方或國家",
+                ),
+            ],
+        )
