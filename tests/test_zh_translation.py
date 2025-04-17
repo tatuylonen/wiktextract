@@ -229,3 +229,34 @@ class TestZhTranslation(TestCase):
                 },
             ],
         )
+
+    def test_sub_page(self):
+        self.wxr.wtp.start_page("世界")
+        self.wxr.wtp.add_page(
+            "世界/翻譯",
+            0,
+            """==漢語==
+===名詞===
+{{trans-top|地球上的所有地方或國家}}
+* 阿迪格語：{{t|ady|дунае}}""",
+        )
+        page_data = [
+            WordEntry(word="世界", lang_code="zh", lang="漢語", pos="noun")
+        ]
+        wikitext = "{{see translation subpage|名詞}}"
+        node = self.wxr.wtp.parse(wikitext)
+        extract_translation(self.wxr, page_data, node)
+        self.assertEqual(
+            [
+                d.model_dump(exclude_defaults=True)
+                for d in page_data[0].translations
+            ],
+            [
+                {
+                    "lang_code": "ady",
+                    "lang": "阿迪格語",
+                    "word": "дунае",
+                    "sense": "地球上的所有地方或國家",
+                }
+            ],
+        )
