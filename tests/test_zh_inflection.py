@@ -6,11 +6,12 @@ from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.zh.inflection import extract_inflections
 from wiktextract.extractor.zh.models import WordEntry
 from wiktextract.extractor.zh.page import parse_page
-from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.wxr_context import WiktextractContext
 
 
-class TestInflection(TestCase):
+class TestZhInflection(TestCase):
+    maxDiff = None
+
     def setUp(self) -> None:
         self.wxr = WiktextractContext(
             Wtp(lang_code="zh"),
@@ -21,9 +22,6 @@ class TestInflection(TestCase):
 
     def tearDown(self) -> None:
         self.wxr.wtp.close_db_conn()
-        close_thesaurus_db(
-            self.wxr.thesaurus_db_path, self.wxr.thesaurus_db_conn
-        )
 
     def test_zh_forms(self):
         page_data = parse_page(

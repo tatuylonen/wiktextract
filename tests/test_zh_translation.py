@@ -5,21 +5,22 @@ from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.zh.models import WordEntry
 from wiktextract.extractor.zh.translation import extract_translation
-from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.wxr_context import WiktextractContext
 
 
 class TestZhTranslation(TestCase):
+    maxDiff = None
+
     def setUp(self) -> None:
         self.wxr = WiktextractContext(
-            Wtp(lang_code="zh"), WiktionaryConfig(dump_file_lang_code="zh")
+            Wtp(lang_code="zh"),
+            WiktionaryConfig(
+                capture_language_codes=None, dump_file_lang_code="zh"
+            ),
         )
 
     def tearDown(self) -> None:
         self.wxr.wtp.close_db_conn()
-        close_thesaurus_db(
-            self.wxr.thesaurus_db_path, self.wxr.thesaurus_db_conn
-        )
 
     def test_t_template(self):
         self.wxr.wtp.start_page("太陽風")
@@ -227,5 +228,36 @@ class TestZhTranslation(TestCase):
                     "word": "patližán",
                     "tags": ["masculine", "colloquial"],
                 },
+            ],
+        )
+
+    def test_sub_page(self):
+        self.wxr.wtp.start_page("世界")
+        self.wxr.wtp.add_page(
+            "世界/翻譯",
+            0,
+            """==漢語==
+===名詞===
+{{trans-top|地球上的所有地方或國家}}
+* 阿迪格語：{{t|ady|дунае}}""",
+        )
+        page_data = [
+            WordEntry(word="世界", lang_code="zh", lang="漢語", pos="noun")
+        ]
+        wikitext = "{{see translation subpage|名詞}}"
+        node = self.wxr.wtp.parse(wikitext)
+        extract_translation(self.wxr, page_data, node)
+        self.assertEqual(
+            [
+                d.model_dump(exclude_defaults=True)
+                for d in page_data[0].translations
+            ],
+            [
+                {
+                    "lang_code": "ady",
+                    "lang": "阿迪格語",
+                    "word": "дунае",
+                    "sense": "地球上的所有地方或國家",
+                }
             ],
         )

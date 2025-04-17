@@ -1,5 +1,3 @@
-from typing import Optional, Union
-
 from mediawiki_langcodes import code_to_name, name_to_code
 from wikitextprocessor.parser import (
     LEVEL_KIND_FLAGS,
@@ -171,22 +169,21 @@ def translation_subpage(
     if subpage is None:
         return
 
-    root = wxr.wtp.parse(subpage.body, pre_expand=True)
+    root = wxr.wtp.parse(subpage.body)
     target_section_node = (
-        root
-        if target_section is None
-        else find_subpage_section(wxr, root, target_section)
+        find_subpage_section(wxr, root, target_section) or root
     )
-    translation_node = find_subpage_section(wxr, target_section_node)
-    if translation_node is not None:
-        extract_translation(wxr, page_data, translation_node, is_subpage=True)
+    if target_section_node is not None:
+        extract_translation(
+            wxr, page_data, target_section_node, is_subpage=True
+        )
 
 
 def find_subpage_section(
     wxr: WiktextractContext,
-    node: Union[WikiNode, str],
-    target_section: Union[str, None] = None,
-) -> Optional[WikiNode]:
+    node: WikiNode | str,
+    target_section: str | None = None,
+) -> WikiNode | None:
     if not isinstance(node, WikiNode):
         return None
     for level_node in node.find_child_recursively(LEVEL_KIND_FLAGS):

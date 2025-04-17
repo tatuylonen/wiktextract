@@ -1,3 +1,4 @@
+import re
 from collections import defaultdict
 
 from wikitextprocessor import (
@@ -35,13 +36,9 @@ def extract_linkage_section(
                 sense = clean_node(wxr, None, node).strip("()： ")
             elif node.template_name == "zh-dial":
                 linkage_list.extend(extract_zh_dial_template(wxr, node, sense))
-            elif node.template_name.endswith("-saurus"):
-                linkage_list.extend(
-                    extract_saurus_template(
-                        wxr, page_data, node, linkage_type, sense
-                    )
-                )
-            elif node.template_name.startswith("col"):
+            elif node.template_name.startswith(
+                "col"
+            ) or node.template_name.endswith("-saurus"):
                 linkage_list.extend(
                     process_linkage_col_template(wxr, node, sense)
                 )
@@ -99,51 +96,6 @@ def process_linkage_list_item(
                 linkage_list.append(linkage_data)
                 raw_tags.clear()
     return sense, linkage_list
-
-
-def extract_saurus_template(
-    wxr: WiktextractContext,
-    page_data: list[WordEntry],
-    node: TemplateNode,
-    linkage_type: str,
-    sense: str,
-) -> list[Linkage]:
-    """
-    Extract data from template names end with "-saurus", like "zh-syn-saurus"
-    and "zh-ant-saurus". These templates get data from thesaurus pages, search
-    the thesaurus database to avoid parse these pages again.
-
-    https://zh.wiktionary.org/wiki/Template:Syn-saurus
-    """
-    from wiktextract.thesaurus import search_thesaurus
-
-    linkage_data = []
-    if node.template_name in ("zh-syn-saurus", "zh-ant-saurus"):
-        # obsolete templates
-        thesaurus_page_title = node.template_parameters.get(1)
-    else:
-        thesaurus_page_title = node.template_parameters.get(2)
-
-    for thesaurus in search_thesaurus(
-        wxr.thesaurus_db_conn,
-        thesaurus_page_title,
-        page_data[-1].lang_code,
-        page_data[-1].pos,
-        linkage_type,
-    ):
-        if thesaurus.term == wxr.wtp.title:
-            continue
-        linkage_data.append(
-            Linkage(
-                word=thesaurus.term,
-                roman=thesaurus.roman,
-                tags=thesaurus.tags,
-                raw_tags=thesaurus.raw_tags,
-                sense=sense,
-            )
-        )
-
-    return linkage_data
 
 
 def extract_zh_dial_template(
@@ -291,20 +243,43 @@ def process_l_template(
 def process_linkage_col_template(
     wxr: WiktextractContext, template_node: TemplateNode, sense: str
 ) -> list[Linkage]:
-    from .thesaurus import process_col_template
-
+    # https://zh.wiktionary.org/wiki/Template:Col3
     linkage_list = []
-    for data in process_col_template(wxr, "", "", "", "", "", template_node):
-        linkage_data = Linkage(
-            word=data.term,
-            roman=data.roman,
-            tags=data.tags,
-            raw_tags=data.raw_tags,
-            sense=sense,
-        )
-        if len(linkage_data.word) > 0:
-            translate_raw_tags(linkage_data)
-            linkage_list.append(linkage_data)
+    expanded_template = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(template_node), expand_all=True
+    )
+    for ui_tag in expanded_template.find_html_recursively("li"):
+        current_data = []
+        roman = ""
+        raw_tags = []
+        for span_tag in ui_tag.find_html("span"):
+            span_lang = span_tag.attrs.get("lang", "")
+            if span_lang.endswith("-Latn"):
+                roman = clean_node(wxr, None, span_tag)
+            elif "qualifier-content" in span_tag.attrs.get("class", ""):
+                span_text = clean_node(wxr, None, span_tag)
+                for raw_tag in re.split(r"或|、", span_text):
+                    raw_tag = raw_tag.strip()
+                    if raw_tag != "":
+                        raw_tags.append(raw_tag)
+            elif span_lang != "":
+                l_data = Linkage(
+                    word=clean_node(wxr, None, span_tag), sense=sense
+                )
+                class_names = span_tag.attrs.get("class", "")
+                if class_names == "Hant":
+                    l_data.tags.append("Traditional Chinese")
+                elif class_names == "Hans":
+                    l_data.tags.append("Simplified Chinese")
+                if l_data.word != "":
+                    current_data.append(l_data)
+
+        for data in current_data:
+            data.raw_tags.extend(raw_tags)
+            data.roman = roman
+            translate_raw_tags(data)
+        linkage_list.extend(current_data)
+
     return linkage_list
 
 

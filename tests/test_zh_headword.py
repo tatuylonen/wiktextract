@@ -1,26 +1,27 @@
 from unittest import TestCase
-from unittest.mock import Mock
 
 from wikitextprocessor import Wtp
 
+from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.zh.headword_line import (
     extract_headword_line_template,
     extract_tlb_template,
 )
 from wiktextract.extractor.zh.models import WordEntry
-from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.wxr_context import WiktextractContext
 
 
 class TestHeadword(TestCase):
     def setUp(self):
-        self.wxr = WiktextractContext(Wtp(lang_code="zh"), Mock())
+        self.wxr = WiktextractContext(
+            Wtp(lang_code="zh"),
+            WiktionaryConfig(
+                capture_language_codes=None, dump_file_lang_code="zh"
+            ),
+        )
 
     def tearDown(self):
         self.wxr.wtp.close_db_conn()
-        close_thesaurus_db(
-            self.wxr.thesaurus_db_path, self.wxr.thesaurus_db_conn
-        )
 
     def test_english_headword(self) -> None:
         # https://zh.wiktionary.org/wiki/manga#字源1

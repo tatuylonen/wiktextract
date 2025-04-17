@@ -10,11 +10,12 @@ from wiktextract.extractor.zh.page import (
     parse_page,
     parse_section,
 )
-from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.wxr_context import WiktextractContext
 
 
-class TestGloss(TestCase):
+class TestZhGloss(TestCase):
+    maxDiff = None
+
     def setUp(self) -> None:
         self.wxr = WiktextractContext(
             Wtp(lang_code="zh"),
@@ -25,9 +26,6 @@ class TestGloss(TestCase):
 
     def tearDown(self) -> None:
         self.wxr.wtp.close_db_conn()
-        close_thesaurus_db(
-            self.wxr.thesaurus_db_path, self.wxr.thesaurus_db_conn
-        )
 
     def test_example_list(self) -> None:
         page_data = [
