@@ -56,9 +56,20 @@ class TestElGlosses(TestCase):
         # print(f"{expected=}")
         self.assertEqual(received, expected)
 
-    def test_inflection_noun(self) -> None:
+    def test_inflection_noun1(self) -> None:
         # https://el.wiktionary.org/wiki/κόρφο
         raw = """* {{πτώσηΑεν|κόρφος}}"""
+        expected = [
+            {
+                "form_of": [{"word": "κόρφος"}],
+                "tags": ["accusative", "singular"],
+            }
+        ]
+        self.mktest_sense(raw, expected)
+
+    def test_inflection_noun2(self) -> None:
+        # https://el.wiktionary.org/wiki/κόρφο
+        raw = """* {{πτώσηΑεν|κόρφος|el}}"""
         expected = [
             {
                 "form_of": [{"word": "κόρφος"}],
