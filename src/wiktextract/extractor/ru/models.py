@@ -45,6 +45,7 @@ class Sound(BaseModelWrap):
     ogg_url: str = ""
     oga_url: str = ""
     mp3_url: str = ""
+    opus_url: str = ""
     flac_url: str = ""
     tags: list[str] = Field(
         default=[], description="Specifying the variant of the pronunciation"
