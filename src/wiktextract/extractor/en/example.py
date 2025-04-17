@@ -75,7 +75,7 @@ def extract_example_list_item(
                     wxr,
                     template_node,
                     sense_data,
-                    parent_data,
+                    deepcopy(parent_data),
                 )
             )
 
