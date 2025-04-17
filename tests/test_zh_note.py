@@ -1,23 +1,26 @@
 from unittest import TestCase
-from unittest.mock import Mock
 
 from wikitextprocessor import Wtp
 
+from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.zh.models import WordEntry
 from wiktextract.extractor.zh.note import extract_note
-from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.wxr_context import WiktextractContext
 
 
-class TestNote(TestCase):
+class TestZhNote(TestCase):
+    maxDiff = None
+
     def setUp(self):
-        self.wxr = WiktextractContext(Wtp(lang_code="zh"), Mock())
+        self.wxr = WiktextractContext(
+            Wtp(lang_code="zh"),
+            WiktionaryConfig(
+                capture_language_codes=None, dump_file_lang_code="zh"
+            ),
+        )
 
     def tearDown(self):
         self.wxr.wtp.close_db_conn()
-        close_thesaurus_db(
-            self.wxr.thesaurus_db_path, self.wxr.thesaurus_db_conn
-        )
 
     def test_note_list(self):
         # https://zh.wiktionary.org/wiki/オタク

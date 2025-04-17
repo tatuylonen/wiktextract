@@ -6,11 +6,10 @@ from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.zh.linkage import extract_linkage_section
 from wiktextract.extractor.zh.models import Sense, WordEntry
 from wiktextract.extractor.zh.page import parse_page
-from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.wxr_context import WiktextractContext
 
 
-class TestLinkage(TestCase):
+class TestZhLinkage(TestCase):
     maxDiff = None
 
     def setUp(self):
@@ -23,9 +22,6 @@ class TestLinkage(TestCase):
 
     def tearDown(self):
         self.wxr.wtp.close_db_conn()
-        close_thesaurus_db(
-            self.wxr.thesaurus_db_path, self.wxr.thesaurus_db_conn
-        )
 
     def test_sense_term_list(self):
         self.wxr.wtp.add_page(
@@ -403,4 +399,27 @@ class TestLinkage(TestCase):
         self.assertEqual(
             data[0]["synonyms"],
             [{"word": "duck", "sense": "肉丸", "tags": ["slang", "obsolete"]}],
+        )
+
+    def test_syn_saurus(self):
+        self.wxr.wtp.add_page(
+            "Template:syn-saurus",
+            10,
+            """<div class="list-switcher-wrapper"><div class="term-list columns-bg"><ul><li><span class="Hani" lang="zh">-{[[世#漢語|-{世}-]]}-</span> <span class="ib-brac qualifier-brac">(</span><span class="ib-content qualifier-content">書面或用於組詞</span><span class="ib-brac qualifier-brac">)</span></li><li><span class="Hani" lang="zh">-{[[天下#漢語|-{天下}-]]}-</span> <span class="ib-brac qualifier-brac">(</span><span class="ib-content qualifier-content">書面、比喻</span><span class="ib-brac qualifier-brac">)</span></li></ul></div></div>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "世界",
+            """==漢語==
+===名词===
+# [[地球]]上的[[所有]][[地方]]或[[國家]]
+====同義詞====
+{{syn-saurus|zh|世界}}""",
+        )
+        self.assertEqual(
+            data[0]["synonyms"],
+            [
+                {"word": "世", "tags": ["literary"], "raw_tags": ["用於組詞"]},
+                {"word": "天下", "tags": ["literary", "figuratively"]},
+            ],
         )

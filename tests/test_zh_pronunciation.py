@@ -6,7 +6,6 @@ from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.zh.models import WordEntry
 from wiktextract.extractor.zh.page import parse_page
 from wiktextract.extractor.zh.pronunciation import extract_pronunciation
-from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.wxr_context import WiktextractContext
 
 
@@ -23,9 +22,6 @@ class TestPronunciation(TestCase):
 
     def tearDown(self):
         self.wxr.wtp.close_db_conn()
-        close_thesaurus_db(
-            self.wxr.thesaurus_db_path, self.wxr.thesaurus_db_conn
-        )
 
     def test_homophone_table(self):
         self.wxr.wtp.start_page("大家")

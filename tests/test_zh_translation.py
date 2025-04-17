@@ -5,21 +5,22 @@ from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.zh.models import WordEntry
 from wiktextract.extractor.zh.translation import extract_translation
-from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.wxr_context import WiktextractContext
 
 
 class TestZhTranslation(TestCase):
+    maxDiff = None
+
     def setUp(self) -> None:
         self.wxr = WiktextractContext(
-            Wtp(lang_code="zh"), WiktionaryConfig(dump_file_lang_code="zh")
+            Wtp(lang_code="zh"),
+            WiktionaryConfig(
+                capture_language_codes=None, dump_file_lang_code="zh"
+            ),
         )
 
     def tearDown(self) -> None:
         self.wxr.wtp.close_db_conn()
-        close_thesaurus_db(
-            self.wxr.thesaurus_db_path, self.wxr.thesaurus_db_conn
-        )
 
     def test_t_template(self):
         self.wxr.wtp.start_page("太陽風")
