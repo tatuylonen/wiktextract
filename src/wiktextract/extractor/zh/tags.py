@@ -259,6 +259,7 @@ LABEL_TAGS = {
     "主要用於否定複數": ["negative", "plural"],
     "數詞縮寫": ["numeral", "abbreviation"],
     "主要用於肯定": "positive",
+    "古典": "Classical",
 }
 
 # example sentence template

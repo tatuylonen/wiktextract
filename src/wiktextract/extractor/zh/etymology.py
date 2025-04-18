@@ -10,11 +10,8 @@ from ...wxr_context import WiktextractContext
 from .models import Example, WordEntry
 
 
-def extract_etymology(
-    wxr: WiktextractContext,
-    page_data: list[WordEntry],
-    base_data: WordEntry,
-    level_node: WikiNode,
+def extract_etymology_section(
+    wxr: WiktextractContext, base_data: WordEntry, level_node: WikiNode
 ) -> None:
     from .example import extract_template_zh_x
 

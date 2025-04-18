@@ -15,15 +15,9 @@ from .models import Sound, WordEntry
 from .tags import translate_raw_tags
 
 
-def extract_pronunciation(
-    wxr: WiktextractContext,
-    page_data: list[WordEntry],
-    base_data: WordEntry,
-    level_node: WikiNode,
-) -> tuple[list[Sound], list[str]]:
-    if len(base_data.sounds) > 0:
-        base_data.sounds.clear()
-
+def extract_pronunciation_section(
+    wxr: WiktextractContext, base_data: WordEntry, level_node: WikiNode
+) -> None:
     for template_node in level_node.find_child(NodeKind.TEMPLATE):
         new_sounds, new_cats = process_pron_template(wxr, template_node)
         base_data.sounds.extend(new_sounds)

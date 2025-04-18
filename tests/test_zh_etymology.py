@@ -3,8 +3,9 @@ from unittest import TestCase
 from wikitextprocessor import Wtp
 
 from wiktextract.config import WiktionaryConfig
-from wiktextract.extractor.zh.etymology import extract_etymology
+from wiktextract.extractor.zh.etymology import extract_etymology_section
 from wiktextract.extractor.zh.models import WordEntry
+from wiktextract.extractor.zh.page import parse_page
 from wiktextract.wxr_context import WiktextractContext
 
 
@@ -35,15 +36,12 @@ class TestNote(TestCase):
         base_data = WordEntry(
             lang="漢語", lang_code="zh", word="一刻千金", pos="phrase"
         )
-        page_data = [base_data]
-        extract_etymology(self.wxr, page_data, base_data, root.children[0])
-        self.assertEqual(
-            page_data[0].etymology_text, "源自宋．蘇軾《春夜》詩："
-        )
+        extract_etymology_section(self.wxr, base_data, root.children[0])
+        self.assertEqual(base_data.etymology_text, "源自宋．蘇軾《春夜》詩：")
         self.assertEqual(
             [
                 e.model_dump(exclude_defaults=True)
-                for e in page_data[0].etymology_examples
+                for e in base_data.etymology_examples
             ],
             [
                 {
@@ -88,13 +86,12 @@ class TestNote(TestCase):
         base_data = WordEntry(
             lang="漢語", lang_code="zh", word="焚膏繼晷", pos="phrase"
         )
-        page_data = [base_data]
-        extract_etymology(self.wxr, page_data, base_data, root.children[0])
-        self.assertEqual(page_data[0].etymology_text, "出自唐·韓愈《進學解》：")
+        extract_etymology_section(self.wxr, base_data, root.children[0])
+        self.assertEqual(base_data.etymology_text, "出自唐·韓愈《進學解》：")
         self.assertEqual(
             [
                 e.model_dump(exclude_defaults=True)
-                for e in page_data[0].etymology_examples
+                for e in base_data.etymology_examples
             ],
             [
                 {
@@ -128,3 +125,49 @@ class TestNote(TestCase):
                 },
             ],
         )
+
+    def test_etymology_sections(self):
+        self.wxr.wtp.add_page(
+            "Template:zh-x",
+            10,
+            """<div class="vsSwitcher" data-toggle-category="usage examples" style="border-left: 1px solid #930; border-left-width: 2px; padding-left: 0.8em;"><dl class="zhusex"><span lang="zh-Hant" class="Hant">-{<!-- -->[[隹#漢語|隹]][[珷#漢語|珷]][[王#漢語|王]][[既#漢語|既]][[克#漢語|克]][[大邑商#漢語|大邑商]]，[[𠟭#漢語|𠟭]][[廷#漢語|廷]][[吿#漢語|吿]][[于#漢語|于]][[天#漢語|天]]，[[曰#漢語|曰]]：[[余#漢語|余]][[𠀠#漢語|𠀠]][[宅#漢語|宅]][[𢆶#漢語|𢆶]]<b>𠁩</b><b>或</b>，[[自#漢語|自]][[之#漢語|之]][[辥#漢語|辥]][[民#漢語|民]]。<!-- -->}-</span><span class="vsHide"> <span style="color:darkgreen; font-size:x-small;">&#91;[[w:上古漢語|早期上古漢語]]，[[w:繁体中文|繁體]]&#93;</span></span><span class="vsToggleElement" style="color:darkgreen; font-size:x-small;padding-left:10px"></span><hr><span class="vsHide"><span lang="zh-Hans" class="Hans">-{<!-- -->[[隹#漢語|隹]][[珷#漢語|珷]][[王#漢語|王]][[既#漢語|既]][[克#漢語|克]][[大邑商#漢語|大邑商]]，[[𠟭#漢語|𠟭]][[廷#漢語|廷]][[告#漢語|告]][[于#漢語|于]][[天#漢語|天]]，[[曰#漢語|曰]]：[[余#漢語|余]][[𠀠#漢語|𠀠]][[宅#漢語|宅]][[𢆶#漢語|𢆶]]<b>𠁩</b><b>或</b>，[[自#漢語|自]][[之#漢語|之]][[辥#漢語|辥]][[民#漢語|民]]。<!-- -->}-</span> <span style="color:darkgreen; font-size:x-small;">&#91;[[w:上古漢語|早期上古漢語]]，[[w:简体中文|簡體]]&#93;</span></span><dd><span class="vsHide"><small>出自：[[:s:何尊銘文|何尊銘文]]</small></span></dd><dd><span class="vsHide"><span lang="zh-Latn" style="color:#404D52"><i>Wéi Wǔwáng jì kè Dàyìshāng, cè tíng gào yú Tiān, yuē: yú qí zhái zī <b>Zhōng</b><b>guó</b>, zì zhī yì mín.</i></span> <span style="color:darkgreen; font-size:x-small;">&#91;[[w:漢語拼音|漢語拼音]]&#93;</span></span></dd><dd>武王克商後告祭於天，說：「余入住天下中心，治理民眾。」</dd></dl>[[Category:有引文的文言文詞]]</div>""",
+        )
+        self.wxr.wtp.add_page(
+            "Template:obor",
+            10,
+            """[[Appendix:Glossary#形譯詞|形譯詞]]自<span class="etyl">[[w:日语|日語]][[Category:源自日語的漢語借詞|丨03囗08]]</span> """,
+        )
+        page_data = parse_page(
+            self.wxr,
+            "中國",
+            """==漢語==
+===詞源1===
+最早出現於西周青銅器何尊的銘文。參見中國的稱號。
+{{zh-x|隹{wéi} ^珷-王 既 克 ^大邑商，𠟭{cè} 廷 吿{gào} 于 ^天，曰：余 𠀠{qí} 宅 𢆶{zī} ^'''@𠁩'''{zhōng}'''@或'''{guó}，自 之 辥{yì} 民。|武王克商後告祭於天，說：「余入住天下中心，治理民眾。」|CL-PC|ref=[[:s:何尊銘文|何尊銘文]]|collapsed=y}}
+====專有名詞====
+# 位於東亞的國家，首都為北京
+====名詞====
+# [[朝廷]]
+
+===詞源2===
+{{obor|zh|ja|-}}
+====專有名詞====
+# {{zh-div|地方|地區}} 日本中國地區，本州西部地區""",
+        )
+        self.assertEqual(
+            page_data[0]["etymology_text"],
+            "最早出現於西周青銅器何尊的銘文。參見中國的稱號。",
+        )
+        self.assertEqual(
+            page_data[0]["etymology_text"], page_data[1]["etymology_text"]
+        )
+        self.assertEqual(page_data[0]["categories"], ["有引文的文言文詞"])
+        self.assertEqual(page_data[0]["categories"], page_data[1]["categories"])
+        self.assertEqual(len(page_data[0]["etymology_examples"]), 2)
+        self.assertEqual(
+            page_data[0]["etymology_examples"],
+            page_data[1]["etymology_examples"],
+        )
+        self.assertEqual(page_data[2]["etymology_text"], "形譯詞自日語")
+        self.assertEqual(page_data[2]["categories"], ["源自日語的漢語借詞"])
+        self.assertTrue("etymology_examples" not in page_data[2])

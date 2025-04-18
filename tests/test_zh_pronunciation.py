@@ -5,7 +5,7 @@ from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.zh.models import WordEntry
 from wiktextract.extractor.zh.page import parse_page
-from wiktextract.extractor.zh.pronunciation import extract_pronunciation
+from wiktextract.extractor.zh.pronunciation import extract_pronunciation_section
 from wiktextract.wxr_context import WiktextractContext
 
 
@@ -40,8 +40,7 @@ class TestPronunciation(TestCase):
         base_data = WordEntry(
             word="大家", lang_code="zh", lang="漢語", pos="noun"
         )
-        page_data = [base_data.model_copy(deep=True)]
-        extract_pronunciation(self.wxr, page_data, base_data, root)
+        extract_pronunciation_section(self.wxr, base_data, root)
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in base_data.sounds],
             [
@@ -69,8 +68,7 @@ class TestPronunciation(TestCase):
         base_data = WordEntry(
             word="大家", lang_code="ja", lang="日語", pos="noun"
         )
-        page_data = [base_data.model_copy(deep=True)]
-        extract_pronunciation(self.wxr, page_data, base_data, root)
+        extract_pronunciation_section(self.wxr, base_data, root)
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in base_data.sounds],
             [
@@ -89,8 +87,7 @@ class TestPronunciation(TestCase):
         base_data = WordEntry(
             word="hello", lang_code="en", lang="英語", pos="intj"
         )
-        page_data = [base_data.model_copy(deep=True)]
-        extract_pronunciation(self.wxr, page_data, base_data, root)
+        extract_pronunciation_section(self.wxr, base_data, root)
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in base_data.sounds],
             [
@@ -194,7 +191,7 @@ class TestPronunciation(TestCase):
                 self.wxr,
                 "大家",
                 """==漢語==
-===發音===
+===發音1===
 {{zh-pron
 |m=dàjiā, dà'ā
 |cat=n
