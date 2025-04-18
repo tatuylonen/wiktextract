@@ -230,9 +230,13 @@ class TestPronunciation(TestCase):
                     "senses": [{"glosses": ["眾人，某個範圍中所有的人"]}],
                     "sounds": [
                         {
-                            "zh_pron": "dàjiā, dà'ā",
+                            "zh_pron": "dàjiā",
                             "tags": ["Mandarin", "Pinyin"],
-                        }
+                        },
+                        {
+                            "zh_pron": "dà'ā",
+                            "tags": ["Mandarin", "Pinyin"],
+                        },
                     ],
                     "word": "大家",
                 },

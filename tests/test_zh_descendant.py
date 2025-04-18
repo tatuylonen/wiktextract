@@ -4,8 +4,8 @@ from wikitextprocessor import Wtp
 
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.zh.descendant import extract_descendant_section
-from wiktextract.extractor.zh.page import parse_page
 from wiktextract.extractor.zh.models import WordEntry
+from wiktextract.extractor.zh.page import parse_page
 from wiktextract.wxr_context import WiktextractContext
 
 
