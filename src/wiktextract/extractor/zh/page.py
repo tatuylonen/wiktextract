@@ -20,7 +20,7 @@ from .headword_line import extract_pos_head_line_nodes
 from .inflection import extract_inflections
 from .linkage import extract_linkage_section
 from .models import Form, Sense, WordEntry
-from .note import extract_note
+from .note import extract_note_section
 from .pronunciation import extract_pronunciation
 from .section_titles import (
     DESCENDANTS_TITLES,
@@ -28,7 +28,6 @@ from .section_titles import (
     IGNORED_TITLES,
     INFLECTION_TITLES,
     LINKAGE_TITLES,
-    NOTES_TITLES,
     POS_TITLES,
     PRONUNCIATION_TITLES,
     TRANSLATIONS_TITLES,
@@ -102,9 +101,9 @@ def parse_section(
         extract_descendant_section(
             wxr, level_node, page_data if len(page_data) > 0 else [base_data]
         )
-    elif subtitle in NOTES_TITLES:
-        extract_note(
-            wxr, page_data if len(page_data) > 0 else [base_data], level_node
+    elif subtitle in ["使用說明", "用法說明"]:
+        extract_note_section(
+            wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
         )
     else:
         wxr.wtp.debug(
