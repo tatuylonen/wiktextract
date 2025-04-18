@@ -121,10 +121,12 @@ def process_zh_pron_list_item(
                         ")"
                     ):
                         raw_tag_text = raw_tag_text.strip("()")
-                    raw_tags = re.split(r"，|：", raw_tag_text)
-                    current_tags.extend(
-                        [t.strip() for t in raw_tags if len(t.strip()) > 0]
-                    )
+                    for raw_tag in re.split(r"，|：|、", raw_tag_text):
+                        raw_tag = raw_tag.strip()
+                        if raw_tag.startswith("(") and raw_tag.endswith(")"):
+                            raw_tag = raw_tag.strip("() ")
+                        if raw_tag != "":
+                            current_tags.append(raw_tag)
                 elif node.tag == "span":
                     zh_pron = clean_node(wxr, None, node)
                     if len(zh_pron) > 0:
