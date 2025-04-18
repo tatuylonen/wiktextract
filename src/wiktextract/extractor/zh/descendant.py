@@ -21,12 +21,15 @@ def extract_descendant_section(
         if node.template_name.lower() == "cjkv":
             desc_list.extend(process_cjkv_template(wxr, node))
 
-    if level_node.kind == NodeKind.LEVEL3:
-        for data in page_data:
-            if data.lang_code == page_data[-1].lang_code:
-                data.descendants.extend(desc_list)
-    elif len(page_data) > 0:
-        page_data[-1].descendants.extend(desc_list)
+    page_data[-1].descendants.extend(desc_list)
+    for data in page_data[:-1]:
+        if (
+            data.lang_code == page_data[-1].lang_code
+            and data.sounds == page_data[-1].sounds
+            and data.etymology_text == page_data[-1].etymology_text
+            and data.pos_level == page_data[-1].pos_level == level_node.kind
+        ):
+            data.descendants.extend(desc_list)
 
 
 def process_cjkv_template(

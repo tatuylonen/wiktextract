@@ -5,7 +5,7 @@ from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.zh.models import WordEntry
 from wiktextract.extractor.zh.page import parse_page
-from wiktextract.extractor.zh.pronunciation import extract_pronunciation
+from wiktextract.extractor.zh.pronunciation import extract_pronunciation_section
 from wiktextract.wxr_context import WiktextractContext
 
 
@@ -40,8 +40,7 @@ class TestPronunciation(TestCase):
         base_data = WordEntry(
             word="大家", lang_code="zh", lang="漢語", pos="noun"
         )
-        page_data = [base_data.model_copy(deep=True)]
-        extract_pronunciation(self.wxr, page_data, base_data, root)
+        extract_pronunciation_section(self.wxr, base_data, root)
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in base_data.sounds],
             [
@@ -69,8 +68,7 @@ class TestPronunciation(TestCase):
         base_data = WordEntry(
             word="大家", lang_code="ja", lang="日語", pos="noun"
         )
-        page_data = [base_data.model_copy(deep=True)]
-        extract_pronunciation(self.wxr, page_data, base_data, root)
+        extract_pronunciation_section(self.wxr, base_data, root)
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in base_data.sounds],
             [
@@ -89,8 +87,7 @@ class TestPronunciation(TestCase):
         base_data = WordEntry(
             word="hello", lang_code="en", lang="英語", pos="intj"
         )
-        page_data = [base_data.model_copy(deep=True)]
-        extract_pronunciation(self.wxr, page_data, base_data, root)
+        extract_pronunciation_section(self.wxr, base_data, root)
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in base_data.sounds],
             [
@@ -194,7 +191,7 @@ class TestPronunciation(TestCase):
                 self.wxr,
                 "大家",
                 """==漢語==
-===發音===
+===發音1===
 {{zh-pron
 |m=dàjiā, dà'ā
 |cat=n
@@ -233,9 +230,13 @@ class TestPronunciation(TestCase):
                     "senses": [{"glosses": ["眾人，某個範圍中所有的人"]}],
                     "sounds": [
                         {
-                            "zh_pron": "dàjiā, dà'ā",
+                            "zh_pron": "dàjiā",
                             "tags": ["Mandarin", "Pinyin"],
-                        }
+                        },
+                        {
+                            "zh_pron": "dà'ā",
+                            "tags": ["Mandarin", "Pinyin"],
+                        },
                     ],
                     "word": "大家",
                 },
@@ -260,6 +261,50 @@ class TestPronunciation(TestCase):
                         {"zh_pron": "dàgū", "tags": ["Mandarin", "Pinyin"]}
                     ],
                     "word": "大家",
+                },
+            ],
+        )
+
+    def test_split_tag(self):
+        self.wxr.wtp.add_page(
+            "Template:zh-pron",
+            10,
+            """* [[w:莆仙語|莆仙語]] <small>([[Wiktionary:關於漢語/莆仙語|莆仙話拼音]])：</small><span>doeng<sup>1</sup> gorh<sup>6</sup> / dyoeng<sup>1</sup> gorh<sup>6</sup></span>
+* [[w:閩南語|閩南語]]
+** <small>([[w:泉漳片|泉漳話]]：[[w:廈門話|廈門]]、[[w:泉州話|泉州]]、[[w:漳州話|漳州]]、[[w:臺灣話|臺灣話]]（常用）、[[w:檳城福建話|檳城]])</small>
+*** <small>[[w:白話字|白話字]]</small>：<span><span class="form-of poj-form-of" lang="nan-hbl">[[Tiong-kok#泉漳話|Tiong-kok]]</span></span>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "中國",
+            """==漢語==
+===發音===
+{{zh-pron
+|m=Zhōngguó
+|cat=pn,n
+}}
+===專有名詞===
+# gloss""",
+        )
+        self.assertEqual(
+            data[0]["sounds"],
+            [
+                {
+                    "raw_tags": ["莆仙語", "莆仙話拼音"],
+                    "zh_pron": "doeng¹ gorh⁶ / dyoeng¹ gorh⁶",
+                },
+                {
+                    "raw_tags": [
+                        "泉漳話",
+                        "廈門",
+                        "泉州",
+                        "漳州",
+                        "臺灣話（常用）",
+                        "檳城",
+                        "白話字",
+                    ],
+                    "tags": ["Southern Min"],
+                    "zh_pron": "Tiong-kok",
                 },
             ],
         )

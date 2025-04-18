@@ -36,8 +36,8 @@ def extract_linkage_section(
                 sense = clean_node(wxr, None, node).strip("()： ")
             elif node.template_name == "zh-dial":
                 linkage_list.extend(extract_zh_dial_template(wxr, node, sense))
-            elif node.template_name.startswith(
-                "col"
+            elif re.fullmatch(
+                r"(?:col|der|rel)\d", node.template_name, re.I
             ) or node.template_name.endswith("-saurus"):
                 linkage_list.extend(
                     process_linkage_col_template(wxr, node, sense)
@@ -47,14 +47,15 @@ def extract_linkage_section(
                     extract_ja_r_multi_template(wxr, node, sense)
                 )
 
-    if level_node.kind == NodeKind.LEVEL3:
-        for data in page_data:
-            if data.lang_code == page_data[-1].lang_code:
-                pre_linkage_list = getattr(data, linkage_type)
-                pre_linkage_list.extend(linkage_list)
-    elif len(page_data) > 0:
-        pre_linkage_list = getattr(page_data[-1], linkage_type)
-        pre_linkage_list.extend(linkage_list)
+    getattr(page_data[-1], linkage_type).extend(linkage_list)
+    for data in page_data[:-1]:
+        if (
+            data.lang_code == page_data[-1].lang_code
+            and data.sounds == page_data[-1].sounds
+            and data.etymology_text == page_data[-1].etymology_text
+            and data.pos_level == page_data[-1].pos_level == level_node.kind
+        ):
+            getattr(data, linkage_type).extend(linkage_list)
 
 
 def process_linkage_list_item(

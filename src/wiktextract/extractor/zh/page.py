@@ -14,21 +14,20 @@ from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from ...wxr_logging import logger
 from .descendant import extract_descendant_section
-from .etymology import extract_etymology
+from .etymology import extract_etymology_section
 from .gloss import extract_gloss
 from .headword_line import extract_pos_head_line_nodes
 from .inflection import extract_inflections
 from .linkage import extract_linkage_section
 from .models import Form, Sense, WordEntry
-from .note import extract_note
-from .pronunciation import extract_pronunciation
+from .note import extract_note_section
+from .pronunciation import extract_pronunciation_section
 from .section_titles import (
     DESCENDANTS_TITLES,
     ETYMOLOGY_TITLES,
     IGNORED_TITLES,
     INFLECTION_TITLES,
     LINKAGE_TITLES,
-    NOTES_TITLES,
     POS_TITLES,
     PRONUNCIATION_TITLES,
     TRANSLATIONS_TITLES,
@@ -61,9 +60,13 @@ def parse_section(
     elif wxr.config.capture_etymologies and subtitle.startswith(
         tuple(ETYMOLOGY_TITLES)
     ):
-        extract_etymology(wxr, page_data, base_data, level_node)
+        if level_node.contain_node(LEVEL_KIND_FLAGS):
+            base_data = base_data.model_copy(deep=True)
+        extract_etymology_section(wxr, base_data, level_node)
     elif wxr.config.capture_pronunciation and subtitle in PRONUNCIATION_TITLES:
-        extract_pronunciation(wxr, page_data, base_data, level_node)
+        if level_node.contain_node(LEVEL_KIND_FLAGS):
+            base_data = base_data.model_copy(deep=True)
+        extract_pronunciation_section(wxr, base_data, level_node)
     elif wxr.config.capture_linkages and subtitle in LINKAGE_TITLES:
         is_descendant_section = False
         if subtitle in DESCENDANTS_TITLES:
@@ -102,9 +105,9 @@ def parse_section(
         extract_descendant_section(
             wxr, level_node, page_data if len(page_data) > 0 else [base_data]
         )
-    elif subtitle in NOTES_TITLES:
-        extract_note(
-            wxr, page_data if len(page_data) > 0 else [base_data], level_node
+    elif subtitle in ["使用說明", "用法說明"]:
+        extract_note_section(
+            wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
         )
     else:
         wxr.wtp.debug(
@@ -131,6 +134,7 @@ def process_pos_block(
     base_data.pos = pos_type
     page_data.append(base_data.model_copy(deep=True))
     page_data[-1].pos_title = pos_title
+    page_data[-1].pos_level = level_node.kind
     page_data[-1].tags.extend(pos_data.get("tags", []))
     first_gloss_list_index = len(level_node.children)
     for index, child in enumerate(level_node.children):

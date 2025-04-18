@@ -1,4 +1,5 @@
 from pydantic import BaseModel, ConfigDict, Field
+from wikitextprocessor import NodeKind
 
 
 class ChineseBaseModel(BaseModel):
@@ -139,6 +140,7 @@ class WordEntry(ChineseBaseModel):
     lang: str = Field(description="Localized language name")
     pos: str = Field(description="Part of speech type")
     pos_title: str = ""
+    pos_level: NodeKind = Field(default=NodeKind.ROOT, exclude=True)
     etymology_text: str = ""
     etymology_examples: list[Example] = []
     senses: list[Sense] = Field(default=[], description="Sense list")
