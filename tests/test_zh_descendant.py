@@ -4,6 +4,7 @@ from wikitextprocessor import Wtp
 
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.zh.descendant import extract_descendant_section
+from wiktextract.extractor.zh.page import parse_page
 from wiktextract.extractor.zh.models import WordEntry
 from wiktextract.wxr_context import WiktextractContext
 
@@ -237,4 +238,31 @@ class TestDescendant(TestCase):
                     "roman": "中文",
                 },
             ],
+        )
+
+    def test_level4_pos_desc(self):
+        self.wxr.wtp.add_page(
+            "Template:desc",
+            10,
+            '<span class="desc-arr" title="借詞">→</span> 布依語: <span class="Latn" lang="pcc">-{[[Zungyguef#布依語|-{Zungyguef}-]]}-</span>',
+        )
+        page_data = parse_page(
+            self.wxr,
+            "中國",
+            """==漢語==
+===詞源1===
+etymology
+====專有名詞====
+# gloss 1
+====名詞====
+# gloss 2
+====派生詞====
+* {{desc|bor=1|pcc|Zungyguef}}""",
+        )
+        self.assertEqual(
+            page_data[0]["descendants"],
+            [{"lang": "布依語", "lang_code": "pcc", "word": "Zungyguef"}],
+        )
+        self.assertEqual(
+            page_data[0]["descendants"], page_data[1]["descendants"]
         )

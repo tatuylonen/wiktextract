@@ -423,3 +423,38 @@ class TestZhLinkage(TestCase):
                 {"word": "天下", "tags": ["literary", "figuratively"]},
             ],
         )
+
+    def test_qingming(self):
+        self.wxr.wtp.add_page(
+            "Template:col3",
+            10,
+            """<div class="list-switcher-wrapper"><div class="term-list columns-bg"><ul><li><span class="Hani" lang="zh">{{{2}}}</span></li></ul></div></div>""",
+        )
+        self.wxr.wtp.add_page(
+            "Template:zh-pron",
+            10,
+            """* [[w:官話|官話]]
+*:<small>([[w:漢語拼音|拼音]])</small>：<span class="form-of pinyin-ts-form-of" lang="cmn" style="font-family: Consolas, monospace;">[[qīngmíng#官話|qīngmíng]]</span>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "清明",
+            """==漢語==
+===發音1===
+{{zh-pron
+|m=qīngmíng
+|cat=a
+}}
+====形容詞====
+# [[清澈]][[明淨]]
+=====衍生詞=====
+{{col3|zh|神志清明}}
+
+===發音2===
+====專有名詞====
+# [[二十四節氣]]之一
+====衍生詞====
+{{col3|zh|清明菜}}""",
+        )
+        self.assertEqual(data[0]["derived"], [{"word": "神志清明"}])
+        self.assertEqual(data[1]["derived"], [{"word": "清明菜"}])

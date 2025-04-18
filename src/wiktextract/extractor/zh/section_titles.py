@@ -179,6 +179,7 @@ POS_TITLES: dict[str, POSSubtitleData] = {
     },
     "首字母縮略詞": {"pos": "abbrev", "tags": ["abbreviation"]},
     "首字母缩略词": {"pos": "abbrev", "tags": ["abbreviation"]},
+    "詞根": {"pos": "root", "tags": ["morpheme"]},
 }
 
 # map title to pydantic field

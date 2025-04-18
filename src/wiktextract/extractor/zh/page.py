@@ -134,6 +134,7 @@ def process_pos_block(
     base_data.pos = pos_type
     page_data.append(base_data.model_copy(deep=True))
     page_data[-1].pos_title = pos_title
+    page_data[-1].pos_level = level_node.kind
     page_data[-1].tags.extend(pos_data.get("tags", []))
     first_gloss_list_index = len(level_node.children)
     for index, child in enumerate(level_node.children):
