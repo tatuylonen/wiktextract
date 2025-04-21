@@ -27,7 +27,7 @@ POS_TEMPLATE_NAMES: dict[str, POSSubtitleData] = {
     "onomatop": {"pos": "onomatopeia", "tags": ["onomatopoeic"]},
     "part": {"pos": "particle"},
     "phrase": {"pos": "phrase"},
-    "predic": {"pos": "adj"},
+    "predic": {"pos": "adj", "tags": ["predicative"]},
     "prep": {"pos": "prep"},
     "suffix": {"pos": "suffix", "tags": ["morpheme"]},
     "буква": {"pos": "character"},
@@ -50,6 +50,7 @@ POS_TEMPLATE_NAMES: dict[str, POSSubtitleData] = {
     "част": {"pos": "particle"},
     "числ": {"pos": "num"},
     "предл": {"pos": "prep"},
+    "intro": {"pos": "adv"},
 }
 
 LINKAGE_TITLES: dict[str, str] = {
