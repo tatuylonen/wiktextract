@@ -144,7 +144,7 @@ def match_sense_index(sense_idx: str, sense: Sense) -> bool:
 
     if sense_idx == sense.sense_index:
         return True
-    first_number_str = re.split(r",|\.|-", sense.sense_index, maxsplit=1)[0]
+    first_number_str = re.split(r",|\.|-|–", sense.sense_index, maxsplit=1)[0]
     first_number = 0
     if first_number_str.isdigit():
         first_number = int(first_number_str)
@@ -155,8 +155,8 @@ def match_sense_index(sense_idx: str, sense: Sense) -> bool:
         try_idx = try_idx.strip()
         if try_idx == sense.sense_index:
             return True
-        elif re.fullmatch(r"\d+-\d+", try_idx):
-            start_str, end_str = try_idx.split("-")
+        elif re.fullmatch(r"\d+[\-–]\d+", try_idx):
+            start_str, end_str = re.split(r"-|–", try_idx, maxsplit=1)
             if int(start_str) <= first_number and first_number <= int(end_str):
                 return True
 

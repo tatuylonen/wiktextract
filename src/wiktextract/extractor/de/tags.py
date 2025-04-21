@@ -341,6 +341,9 @@ INFLECTION_TABLE_TAGS = {
     "regelmäßig": "regular",
     "untrennbar": "inseparable",
     "trennbar": "separable",
+    # Vorlage:Deutsch Nachname Übersicht
+    "Singular m": ["singular", "masculine"],
+    "Singular f": ["singular", "feminine"],
 }
 
 GRAMMATICAL_TAGS = {

@@ -10,7 +10,10 @@ from .etymology import extract_etymology
 from .example import extract_examples
 from .form import extracrt_form_section
 from .gloss import extract_glosses
-from .inflection import extract_inf_table_template
+from .inflection import (
+    extract_deutsch_nachname_template,
+    extract_inf_table_template,
+)
 from .linkage import extract_linkages
 from .models import Sense, WordEntry
 from .pronunciation import extract_pronunciation_section
@@ -85,6 +88,12 @@ def parse_section(
             )
         elif section_name == "Worttrennung":
             extract_hyphenation_section(
+                wxr,
+                page_data[-1] if len(page_data) > 0 else base_data,
+                level_node,
+            )
+        elif section_name == "Anmerkung":
+            extract_note_section(
                 wxr,
                 page_data[-1] if len(page_data) > 0 else base_data,
                 level_node,
@@ -187,6 +196,10 @@ def process_pos_section(
             if raw_tag != "":
                 page_data[-1].raw_tags.append(raw_tag)
 
+    for node in level_node.find_child(NodeKind.TEMPLATE):
+        if node.template_name == "Deutsch Nachname Übersicht":
+            extract_deutsch_nachname_template(wxr, page_data[-1], node)
+
     wxr.wtp.start_subsection(clean_node(wxr, page_data[-1], level_node.largs))
 
     for level_4_node in level_node.find_child(NodeKind.LEVEL4):
@@ -287,3 +300,13 @@ def extract_hyphenation_section(
                     word_entry.hyphenation += node.strip()
     if word_entry.hyphenation == "?":
         word_entry.hyphenation = ""
+
+
+def extract_note_section(
+    wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
+) -> None:
+    for list_node in level_node.find_child(NodeKind.LIST):
+        for list_item in list_node.find_child(NodeKind.LIST_ITEM):
+            note = clean_node(wxr, None, list_item.children)
+            if note != "":
+                word_entry.notes.append(note)

@@ -171,3 +171,4 @@ class WordEntry(BaseModelWrap):
     forms: list[Form] = []
     meronyms: list[Linkage] = []
     hyphenation: str = ""
+    notes: list[str] = []
