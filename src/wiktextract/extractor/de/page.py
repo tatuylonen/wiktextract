@@ -89,6 +89,12 @@ def parse_section(
                 page_data[-1] if len(page_data) > 0 else base_data,
                 level_node,
             )
+        elif section_name == "Anmerkung":
+            extract_note_section(
+                wxr,
+                page_data[-1] if len(page_data) > 0 else base_data,
+                level_node,
+            )
 
 
 FORM_POS = {
@@ -287,3 +293,13 @@ def extract_hyphenation_section(
                     word_entry.hyphenation += node.strip()
     if word_entry.hyphenation == "?":
         word_entry.hyphenation = ""
+
+
+def extract_note_section(
+    wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
+) -> None:
+    for list_node in level_node.find_child(NodeKind.LIST):
+        for list_item in list_node.find_child(NodeKind.LIST_ITEM):
+            note = clean_node(wxr, None, list_item.children)
+            if note != "":
+                word_entry.notes.append(note)
