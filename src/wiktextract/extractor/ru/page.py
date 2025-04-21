@@ -96,6 +96,17 @@ def get_pos_from_template(
         if pos_text in POS_TITLES:
             return POS_TITLES[pos_text]
 
+    if template_name.startswith("прил ru"):
+        pos_arg = clean_node(
+            wxr, None, template_node.template_parameters.get("часть речи", "")
+        ).lower()
+        if pos_arg != "":
+            for pos_string in POS_TITLES.keys():
+                if pos_string in pos_arg:
+                    return POS_TITLES[pos_string]
+        else:
+            return {"pos": "adj"}
+
     for part in template_name.split(maxsplit=2):
         for subpart in part.split("-", maxsplit=2):
             if subpart in POS_TEMPLATE_NAMES:
