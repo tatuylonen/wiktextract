@@ -137,14 +137,18 @@ def process_noun_table(
                     row_header = cell_text
             else:
                 for form_text in cell_text.splitlines():
+                    form_text = form_text.strip()
+                    if form_text.startswith("(") and form_text.endswith(")"):
+                        form_text = form_text.strip("() ")
+                    if form_text in ["—", "", "?", wxr.wtp.title]:
+                        continue
                     form = Form(form=form_text)
                     if len(row_header) > 0:
                         form.raw_tags.append(row_header)
                     if col_index < len(column_headers):
                         form.raw_tags.append(column_headers[col_index])
-                    if form.form not in ["—", "", "?"]:
-                        translate_raw_tags(form)
-                        word_entry.forms.append(form)
+                    translate_raw_tags(form)
+                    word_entry.forms.append(form)
 
     clean_node(wxr, word_entry, expanded_template)  # category links
 
@@ -188,3 +192,19 @@ def process_adj_table(
                         form.raw_tags.append(column_headers[col_index])
                     translate_raw_tags(form)
                     word_entry.forms.append(form)
+
+
+def extract_deutsch_nachname_template(
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+) -> None:
+    # Vorlage:Deutsch Nachname Übersicht
+    from .page import extract_note_section
+
+    process_noun_table(wxr, word_entry, t_node)
+    expanded_template = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for level_node in expanded_template.find_child(NodeKind.LEVEL4):
+        section_text = clean_node(wxr, None, level_node.largs)
+        if section_text == "Anmerkung":
+            extract_note_section(wxr, word_entry, level_node)
