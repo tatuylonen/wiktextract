@@ -92,13 +92,18 @@ def parse_wikitext_forms_table(
     column_headers = []
     for table_row in table_node.find_child(NodeKind.TABLE_ROW):
         row_headers = []
+        has_data_cell = table_row.contain_node(NodeKind.TABLE_CELL)
         for col_index, table_cell in enumerate(
             table_row.find_child(
                 NodeKind.TABLE_HEADER_CELL | NodeKind.TABLE_CELL
             )
         ):
             if table_cell.kind == NodeKind.TABLE_HEADER_CELL:
-                column_headers.append(clean_node(wxr, None, table_cell))
+                cell_text = clean_node(wxr, None, table_cell)
+                if not has_data_cell:
+                    column_headers.append(cell_text)
+                else:
+                    row_headers.append(cell_text)
             elif table_cell.kind == NodeKind.TABLE_CELL:
                 cell_text = clean_node(  # remove cursed <tr> tag
                     wxr,

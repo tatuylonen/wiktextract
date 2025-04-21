@@ -279,6 +279,9 @@ GRAMMATICAL_TAGS = {
     "т.": "instrumental",
     "п.": "prepositional",
     "кратк. форма": "short-form",
+    # Шаблон:мест ru п1*b
+    "с.": "neuter",
+    "в. (^(одуш.)/_(неодуш.))": ["accusative", "animate", "inanimate"],
 }
 
 # Прочие сокращения
