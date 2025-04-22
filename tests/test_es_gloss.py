@@ -178,7 +178,7 @@ class TestESGloss(unittest.TestCase):
                     "lang": "Inglés",
                     "lang_code": "en",
                     "pos": "noun",
-                    "pos_title": "forma sustantiva",
+                    "pos_title": "Forma sustantiva",
                     "senses": [
                         {
                             "glosses": ["Forma del plural de apple."],
@@ -214,7 +214,7 @@ class TestESGloss(unittest.TestCase):
                     "lang": "Español",
                     "lang_code": "es",
                     "pos": "verb",
-                    "pos_title": "forma verbal",
+                    "pos_title": "Forma verbal",
                     "senses": [
                         {
                             "glosses": [
@@ -251,7 +251,7 @@ class TestESGloss(unittest.TestCase):
                     "lang": "Bretón",
                     "lang_code": "br",
                     "pos": "suffix",
-                    "pos_title": "sufijo verbal",
+                    "pos_title": "Sufijo verbal",
                     "senses": [
                         {
                             "glosses": [
@@ -260,6 +260,44 @@ class TestESGloss(unittest.TestCase):
                         }
                     ],
                     "word": "-fe",
+                }
+            ],
+        )
+
+    def test_forma_verbo_another_section_order(self):
+        self.wxr.wtp.add_page("Plantilla:lengua", 10, "Español")
+        self.wxr.wtp.add_page(
+            "Plantilla:forma verbo",
+            10,
+            """<span class="definicion-impropia">[[primera persona#Español|Primera persona]] del singular&nbsp;(yo)&nbsp;del <span style="" class="">[[presente#Español|presente]]</span>&nbsp;de <span style="" class="">[[modo indicativo#Español|indicativo]]</span>&nbsp;de&nbsp;</span><span style="" class="">[[caminar#Español|caminar]]</span>[[Categoría:ES:Formas verbales en indicativo]]""",
+        )
+        self.assertEqual(
+            parse_page(
+                self.wxr,
+                "camino",
+                """== {{lengua|es}} ==
+=== Forma verbal ===
+==== Forma flexiva ====
+;1: {{forma verbo|caminar|p=1s|t=presente|m=indicativo}}""",
+            ),
+            [
+                {
+                    "lang": "Español",
+                    "lang_code": "es",
+                    "pos": "verb",
+                    "pos_title": "Forma flexiva",
+                    "senses": [
+                        {
+                            "categories": ["ES:Formas verbales en indicativo"],
+                            "glosses": [
+                                "Primera persona del singular (yo) del presente de indicativo de caminar"
+                            ],
+                            "form_of": [{"word": "caminar"}],
+                            "sense_index": "1",
+                        }
+                    ],
+                    "tags": ["form-of"],
+                    "word": "camino",
                 }
             ],
         )
