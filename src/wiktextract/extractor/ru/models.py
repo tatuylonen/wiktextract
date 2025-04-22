@@ -159,3 +159,4 @@ class WordEntry(BaseModelWrap):
     metagrams: list[Linkage] = []
     proverbs: list[Linkage] = []
     literal_meaning: str = ""
+    hyphenation: str = ""

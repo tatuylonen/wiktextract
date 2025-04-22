@@ -162,12 +162,18 @@ def extract_morphological_section(
                 "мест ru ",
                 "числ ru ",
                 "числ-",
+                "прич ru ",
+                "Фам ru ",
+                "падежи ",
             )
         ):
             for table_node in expanded_template.find_child(NodeKind.TABLE):
                 parse_wikitext_forms_table(wxr, page_data[-1], table_node)
             for table_tag in expanded_template.find_html("table"):
                 parse_html_forms_table(wxr, page_data[-1], table_tag)
+            page_data[-1].hyphenation = clean_node(
+                wxr, None, child_node.template_parameters.get("слоги", "")
+            )
 
         for node in expanded_template.children:
             node_text = clean_node(wxr, page_data[-1], node)
