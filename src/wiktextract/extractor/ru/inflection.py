@@ -42,6 +42,13 @@ def parse_html_forms_table(
         else:
             col_index = 0
             has_rowspan = False
+            for th_element in tr_element.find_html("th"):
+                header_text = ""
+                for header_link in th_element.find_child(NodeKind.LINK):
+                    header_text = clean_node(wxr, None, header_link)
+                header_span = int(th_element.attrs.get("rowspan", "1"))
+                row_headers.append(TableHeader(header_text, 0, header_span))
+
             for td_element in tr_element.find_html("td"):
                 if td_element.attrs.get("bgcolor") == "#EEF9FF":
                     # this is a td tag but contains header text
@@ -137,6 +144,10 @@ def parse_wikitext_forms_table(
         # tr tag could be after or inside table cell node: Шаблон:сущ cu (-а)
         for tr_tag in table_row.find_html_recursively("tr"):
             row_headers = []
+            has_th_tag = False
+            for th_tag in tr_tag.find_html("th"):
+                row_headers.append(clean_node(wxr, None, th_tag))
+                has_th_tag = True
             for td_index, td_tag in enumerate(tr_tag.find_html("td")):
                 if td_tag.contain_node(NodeKind.LINK):
                     for link_node in td_tag.find_child(NodeKind.LINK):
@@ -158,7 +169,7 @@ def parse_wikitext_forms_table(
                         clean_node(wxr, None, td_tag),
                         row_headers,
                         [] if "colspan" in td_tag.attrs else column_headers,
-                        td_index,
+                        td_index + 1 if has_th_tag else td_index,
                     )
 
 
