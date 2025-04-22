@@ -99,8 +99,10 @@ def parse_section(
     """
 
     categories = {}
-    section_title = clean_node(wxr, categories, level_node.largs).lower()
-    wxr.wtp.start_subsection(section_title)
+    section_title = clean_node(wxr, categories, level_node.largs)
+    original_section_title = section_title
+    section_title = section_title.lower()
+    wxr.wtp.start_subsection(original_section_title)
 
     pos_template_name = ""
     for level_node_template in level_node.find_content(NodeKind.TEMPLATE):
@@ -113,13 +115,14 @@ def parse_section(
             pos_template_name, POS_TITLES.get(section_title)
         )
         pos_type = pos_data["pos"]
-        if section_title != "forma flexiva":
-            page_data.append(base_data.model_copy(deep=True))
-            page_data[-1].pos = pos_type
-            page_data[-1].pos_title = section_title
-            page_data[-1].tags.extend(pos_data.get("tags", []))
-            page_data[-1].categories.extend(categories.get("categories", []))
-            process_pos_block(wxr, page_data, level_node)
+        page_data.append(base_data.model_copy(deep=True))
+        page_data[-1].pos = pos_type
+        page_data[-1].pos_title = original_section_title
+        page_data[-1].tags.extend(pos_data.get("tags", []))
+        page_data[-1].categories.extend(categories.get("categories", []))
+        process_pos_block(wxr, page_data, level_node)
+        if len(page_data[-1].senses) == 0 and "form-of" in page_data[-1].tags:
+            page_data.pop()
     elif (
         section_title.startswith("etimología")
         and wxr.config.capture_etymologies
@@ -206,7 +209,9 @@ def process_pos_block(
         process_sense_children(wxr, page_data, sense_children)
     else:
         sense = Sense()
-        gloss_text = clean_node(wxr, sense, pos_level_node.children)
+        gloss_text = clean_node(
+            wxr, sense, list(pos_level_node.invert_find_child(LEVEL_KIND_FLAGS))
+        )
         if len(gloss_text) > 0:
             sense.glosses.append(gloss_text)
             page_data[-1].senses.append(sense)
