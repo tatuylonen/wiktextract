@@ -162,6 +162,7 @@ def extract_morphological_section(
                 "мест ru ",
                 "числ ru ",
                 "числ-",
+                "прич ru ",
             )
         ):
             for table_node in expanded_template.find_child(NodeKind.TABLE):
