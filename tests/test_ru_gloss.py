@@ -133,6 +133,7 @@ class TestRUGloss(unittest.TestCase):
     def test_gloss_under_sounds_section(self):
         self.wxr.wtp.start_page("туп")
         self.wxr.wtp.add_page("Шаблон:-tt-", 10, "Татарский")
+        self.wxr.wtp.add_page("Шаблон:по слогам", 10, "туп")
         self.assertEqual(
             parse_page(
                 self.wxr,
@@ -148,6 +149,7 @@ class TestRUGloss(unittest.TestCase):
             ),
             [
                 {
+                    "hyphenation": "туп",
                     "lang": "Татарский",
                     "lang_code": "tt",
                     "word": "туп",
@@ -168,6 +170,11 @@ class TestRUGloss(unittest.TestCase):
             "Шаблон:гл ru 1a",
             10,
             "[[глагол|Глагол]], [[несовершенный вид]], [[Категория:Русские лексемы]][[Категория:Русские глаголы]][[Категория:Русские глаголы несовершенного вида]] [[непереходный]][[Категория:Русские непереходные глаголы]],    тип спряжения по [[Викисловарь:Использование словаря Зализняка|классификации А.&#160;Зализняка]]&#160;—&#32;1a.      Соответствующий глагол совершенного вида&#160;—&#32;[[прыгнуть]].[[Категория:Глаголы в видовых парах]][[Категория:Глаголы, спряжение 1a]]",
+        )
+        self.wxr.wtp.add_page(
+            "Шаблон:по-слогам",
+            10,
+            'пры́<span class="hyph" style="color:lightgreen;">-</span>гать',
         )
         self.wxr.wtp.add_page("Шаблон:авиац.", 10, "авиац.")
         self.assertEqual(
@@ -208,6 +215,7 @@ class TestRUGloss(unittest.TestCase):
                         }
                     ],
                     "tags": ["imperfective", "intransitive"],
+                    "hyphenation": "пры́-гать",
                 },
             ],
         )

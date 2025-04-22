@@ -16,6 +16,9 @@ class TableHeader:
     span: int
 
 
+# Викисловарь:Шаблоны словоизменений
+
+
 def parse_html_forms_table(
     wxr: WiktextractContext, word_entry: WordEntry, table_tag: HTMLNode
 ):
