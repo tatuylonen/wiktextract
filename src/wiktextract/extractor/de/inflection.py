@@ -19,8 +19,10 @@ def extract_inf_table_template(
             "Nachname Übersicht",
             "Toponym Übersicht",
             "Eigenname Übersicht",
+            "Vorname Übersicht m",
+            "Name Übersicht",
         )
-    ):
+    ) or re.search(r" Personalpronomen \d$", t_node.template_name):
         process_noun_table(wxr, word_entry, t_node)
     elif t_node.template_name.endswith(
         ("Adjektiv Übersicht", "Adverb Übersicht")
@@ -135,15 +137,24 @@ def process_noun_table(
     for table_row in table_node.find_child(NodeKind.TABLE_ROW):
         row_header = ""
         is_header_row = not table_row.contain_node(NodeKind.TABLE_CELL)
-        for col_index, table_cell in enumerate(
-            table_row.find_child(
-                NodeKind.TABLE_HEADER_CELL | NodeKind.TABLE_CELL
-            )
+        col_index = 0
+        for table_cell in table_row.find_child(
+            NodeKind.TABLE_HEADER_CELL | NodeKind.TABLE_CELL
         ):
             cell_text = clean_node(wxr, None, table_cell)
+            if cell_text == "":
+                continue
             if table_cell.kind == NodeKind.TABLE_HEADER_CELL:
                 if is_header_row:
-                    column_headers.append(re.sub(r"\s*\d+$", "", cell_text))
+                    colspan = int(table_cell.attrs.get("colspan", "1"))
+                    column_headers.append(
+                        RowspanHeader(
+                            re.sub(r"\s*\d+$", "", cell_text),
+                            col_index,
+                            colspan,
+                        )
+                    )
+                    col_index += colspan
                 else:
                     row_header = cell_text
             else:
@@ -156,10 +167,16 @@ def process_noun_table(
                     form = Form(form=form_text)
                     if len(row_header) > 0:
                         form.raw_tags.append(row_header)
-                    if col_index < len(column_headers):
-                        form.raw_tags.append(column_headers[col_index])
+                    for col_header in column_headers:
+                        if (
+                            col_header.text not in ("", "—")
+                            and col_index >= col_header.index
+                            and col_index < col_header.index + col_header.span
+                        ):
+                            form.raw_tags.append(col_header.text)
                     translate_raw_tags(form)
                     word_entry.forms.append(form)
+                col_index += 1
 
     clean_node(wxr, word_entry, expanded_template)  # category links
     # Vorlage:Deutsch Nachname Übersicht
