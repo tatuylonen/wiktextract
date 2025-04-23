@@ -45,7 +45,11 @@ def parse_flexion_page(
                     if raw_tag in section_str:
                         shared_raw_tags.append(raw_tag)
             case NodeKind.TEMPLATE:
-                if node.template_name.startswith("Deklinationsseite"):
+                if node.template_name == "Deklinationsseite Numerale":
+                    extract_deklinationsseite_numerale_template(
+                        wxr, word_entry, node, page_title
+                    )
+                elif node.template_name.startswith("Deklinationsseite"):
                     process_deklinationsseite_template(
                         wxr, word_entry, node, page_title
                     )
@@ -277,3 +281,107 @@ def process_deutsch_verb_table(
                         translate_raw_tags(form)
                         word_entry.forms.append(form)
                     col_index += 1
+
+
+def extract_deklinationsseite_numerale_template(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    t_node: TemplateNode,
+    page_tite: str,
+) -> None:
+    # https://de.wiktionary.org/wiki/Vorlage:Deklinationsseite_Numerale
+    expanded_template = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for table in expanded_template.find_child(NodeKind.TABLE):
+        col_headers = []
+        for row in table.find_child(NodeKind.TABLE_ROW):
+            row_header = ""
+            row_has_data = row.contain_node(NodeKind.TABLE_CELL)
+            col_index = 0
+            for cell in row.find_child(
+                NodeKind.TABLE_HEADER_CELL | NodeKind.TABLE_CELL
+            ):
+                cell_text = clean_node(wxr, None, cell)
+                if cell_text == "":
+                    continue
+                if cell.kind == NodeKind.TABLE_HEADER_CELL:
+                    if row_has_data:
+                        row_header = cell_text
+                    else:
+                        col_span = int(cell.attrs.get("colspan", "1"))
+                        if col_index == 0 and not row_has_data:
+                            col_headers.clear()  # new table
+                        col_headers.append(
+                            SpanHeader(cell_text, col_index, col_span)
+                        )
+                        col_index += col_span
+                else:
+                    word_nodes = []
+                    raw_tags = []
+                    for cell_child in cell.children:
+                        if (
+                            isinstance(cell_child, HTMLNode)
+                            and cell_child.tag == "br"
+                        ):
+                            word = clean_node(wxr, None, word_nodes)
+                            if word != "":
+                                deklinationsseite_numerale_add_form(
+                                    word_entry,
+                                    word,
+                                    page_tite,
+                                    raw_tags,
+                                    col_index,
+                                    row_header,
+                                    col_headers,
+                                )
+                                word_nodes.clear()
+                        elif (
+                            isinstance(cell_child, WikiNode)
+                            and cell_child.kind == NodeKind.ITALIC
+                        ):
+                            raw_tag = clean_node(wxr, None, cell_child).strip(
+                                ": "
+                            )
+                            if raw_tag != "":
+                                raw_tags.append(raw_tag)
+                        else:
+                            word_nodes.append(cell_child)
+                    word = clean_node(wxr, None, word_nodes)
+                    if word != "":
+                        deklinationsseite_numerale_add_form(
+                            word_entry,
+                            word,
+                            page_tite,
+                            raw_tags,
+                            col_index,
+                            row_header,
+                            col_headers,
+                        )
+                    col_index += 1
+
+
+def deklinationsseite_numerale_add_form(
+    word_entry: WordEntry,
+    word: str,
+    source: str,
+    raw_tags: list[str],
+    index: int,
+    row_header: str,
+    col_headers: list[SpanHeader],
+) -> None:
+    form = Form(
+        form=word,
+        source=source,
+        raw_tags=raw_tags,
+    )
+    if row_header != "":
+        form.raw_tags.append(row_header)
+    for col_header in col_headers:
+        if (
+            index >= col_header.index
+            and index < col_header.index + col_header.span
+        ):
+            form.raw_tags.append(col_header.text)
+    translate_raw_tags(form)
+    word_entry.forms.append(form)

@@ -344,6 +344,10 @@ INFLECTION_TABLE_TAGS = {
     # Vorlage:Deutsch Nachname Übersicht
     "Singular m": ["singular", "masculine"],
     "Singular f": ["singular", "feminine"],
+    # Vorlage:Deklinationsseite Numerale
+    "bestimmt": "definite",
+    "unbestimmt": "indefinite",
+    "mit Possessivpronomen": ["possessive", "pronoun"],
 }
 
 GRAMMATICAL_TAGS = {

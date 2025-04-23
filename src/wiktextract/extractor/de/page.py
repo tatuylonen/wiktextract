@@ -199,8 +199,7 @@ def process_pos_section(
         parse_section(wxr, page_data, base_data, level_4_node)
 
     for template_node in level_node.find_child(NodeKind.TEMPLATE):
-        if template_node.template_name.endswith("Übersicht"):
-            extract_inf_table_template(wxr, page_data[-1], template_node)
+        extract_inf_table_template(wxr, page_data[-1], template_node)
 
     if not level_node.contain_node(NodeKind.LEVEL4):
         extract_glosses(wxr, page_data[-1], level_node)

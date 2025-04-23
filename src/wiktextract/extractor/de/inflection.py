@@ -11,18 +11,26 @@ from .tags import translate_raw_tags
 
 
 def extract_inf_table_template(
-    wxr: WiktextractContext,
-    word_entry: WordEntry,
-    template_node: TemplateNode,
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
 ) -> None:
-    if template_node.template_name.endswith(
-        ("Substantiv Übersicht", "Nachname Übersicht", "Toponym Übersicht")
+    if t_node.template_name.endswith(
+        (
+            "Substantiv Übersicht",
+            "Nachname Übersicht",
+            "Toponym Übersicht",
+            "Eigenname Übersicht",
+        )
     ):
-        process_noun_table(wxr, word_entry, template_node)
-    elif template_node.template_name.endswith("Adjektiv Übersicht"):
-        process_adj_table(wxr, word_entry, template_node)
-    elif template_node.template_name.endswith("Verb Übersicht"):
-        process_verb_table(wxr, word_entry, template_node)
+        process_noun_table(wxr, word_entry, t_node)
+    elif t_node.template_name.endswith(
+        ("Adjektiv Übersicht", "Adverb Übersicht")
+    ):
+        process_adj_table(wxr, word_entry, t_node)
+    elif (
+        t_node.template_name.endswith("Verb Übersicht")
+        or t_node.template_name == "Kardinalzahl 2-12"
+    ):
+        process_verb_table(wxr, word_entry, t_node)
 
 
 @dataclass
@@ -33,9 +41,7 @@ class RowspanHeader:
 
 
 def process_verb_table(
-    wxr: WiktextractContext,
-    word_entry: WordEntry,
-    template_node: TemplateNode,
+    wxr: WiktextractContext, word_entry: WordEntry, template_node: TemplateNode
 ) -> None:
     # Vorlage:Deutsch Verb Übersicht
     expanded_template = wxr.wtp.parse(
@@ -60,9 +66,9 @@ def process_verb_table(
                 for link_node in table_cell.find_child_recursively(
                     NodeKind.LINK
                 ):
-                    parse_flexion_page(
-                        wxr, word_entry, clean_node(wxr, None, link_node)
-                    )
+                    link_text = clean_node(wxr, None, link_node)
+                    if link_text.startswith("Flexion:"):
+                        parse_flexion_page(wxr, word_entry, link_text)
             elif table_cell.kind == NodeKind.TABLE_HEADER_CELL:
                 if cell_text == "":
                     continue
@@ -87,6 +93,9 @@ def process_verb_table(
                         cell_line = cell_line.strip()
                         if cell_line == "":
                             continue
+                        elif cell_line.startswith("Flexion:"):
+                            parse_flexion_page(wxr, word_entry, cell_line)
+                            continue
                         for p in person.split(","):
                             p = p.strip()
                             form_text = cell_line
@@ -110,9 +119,7 @@ def process_verb_table(
 
 
 def process_noun_table(
-    wxr: WiktextractContext,
-    word_entry: WordEntry,
-    template_node: TemplateNode,
+    wxr: WiktextractContext, word_entry: WordEntry, template_node: TemplateNode
 ) -> None:
     # Vorlage:Deutsch Substantiv Übersicht
     from .page import extract_note_section
@@ -163,9 +170,7 @@ def process_noun_table(
 
 
 def process_adj_table(
-    wxr: WiktextractContext,
-    word_entry: WordEntry,
-    template_node: TemplateNode,
+    wxr: WiktextractContext, word_entry: WordEntry, template_node: TemplateNode
 ) -> None:
     # Vorlage:Deutsch Adjektiv Übersicht
     expanded_template = wxr.wtp.parse(
