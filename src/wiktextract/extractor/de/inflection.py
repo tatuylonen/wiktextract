@@ -15,7 +15,9 @@ def extract_inf_table_template(
     word_entry: WordEntry,
     template_node: TemplateNode,
 ) -> None:
-    if template_node.template_name.endswith("Substantiv Übersicht"):
+    if template_node.template_name.endswith(
+        ("Substantiv Übersicht", "Nachname Übersicht", "Toponym Übersicht")
+    ):
         process_noun_table(wxr, word_entry, template_node)
     elif template_node.template_name.endswith("Adjektiv Übersicht"):
         process_adj_table(wxr, word_entry, template_node)
@@ -113,6 +115,8 @@ def process_noun_table(
     template_node: TemplateNode,
 ) -> None:
     # Vorlage:Deutsch Substantiv Übersicht
+    from .page import extract_note_section
+
     expanded_template = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(template_node), expand_all=True
     )
@@ -151,6 +155,11 @@ def process_noun_table(
                     word_entry.forms.append(form)
 
     clean_node(wxr, word_entry, expanded_template)  # category links
+    # Vorlage:Deutsch Nachname Übersicht
+    for level_node in expanded_template.find_child(NodeKind.LEVEL4):
+        section_text = clean_node(wxr, None, level_node.largs)
+        if section_text.startswith("Anmerkung"):
+            extract_note_section(wxr, word_entry, level_node)
 
 
 def process_adj_table(
@@ -192,19 +201,3 @@ def process_adj_table(
                         form.raw_tags.append(column_headers[col_index])
                     translate_raw_tags(form)
                     word_entry.forms.append(form)
-
-
-def extract_deutsch_nachname_template(
-    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
-) -> None:
-    # Vorlage:Deutsch Nachname Übersicht
-    from .page import extract_note_section
-
-    process_noun_table(wxr, word_entry, t_node)
-    expanded_template = wxr.wtp.parse(
-        wxr.wtp.node_to_wikitext(t_node), expand_all=True
-    )
-    for level_node in expanded_template.find_child(NodeKind.LEVEL4):
-        section_text = clean_node(wxr, None, level_node.largs)
-        if section_text == "Anmerkung":
-            extract_note_section(wxr, word_entry, level_node)
