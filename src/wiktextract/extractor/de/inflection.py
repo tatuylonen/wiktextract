@@ -10,19 +10,29 @@ from .models import Form, WordEntry
 from .tags import translate_raw_tags
 
 
+# Kategorie:Wiktionary:Flexionstabelle (Deutsch)
+
+
 def extract_inf_table_template(
     wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
 ) -> None:
-    if t_node.template_name.endswith(
-        (
-            "Substantiv Übersicht",
-            "Nachname Übersicht",
-            "Toponym Übersicht",
-            "Eigenname Übersicht",
-            "Vorname Übersicht m",
-            "Name Übersicht",
+    if (
+        "Substantiv Übersicht" in t_node.template_name
+        or t_node.template_name.endswith(
+            (
+                "Nachname Übersicht",
+                "Eigenname Übersicht",
+                "Vorname Übersicht m",
+                "Name Übersicht",
+                "Pronomina-Tabelle",
+                "Pronomen Übersicht",
+                "adjektivisch Übersicht",
+                "Substantiv Dialekt",
+                "Toponym Übersicht",
+            )
         )
-    ) or re.search(r" Personalpronomen \d$", t_node.template_name):
+        or re.search(r" Personalpronomen \d$", t_node.template_name)
+    ):
         process_noun_table(wxr, word_entry, t_node)
     elif t_node.template_name.endswith(
         ("Adjektiv Übersicht", "Adverb Übersicht")
@@ -134,9 +144,11 @@ def process_noun_table(
         return
     table_node = table_nodes[0]
     column_headers = []
+    table_header = ""
     for table_row in table_node.find_child(NodeKind.TABLE_ROW):
         row_header = ""
         is_header_row = not table_row.contain_node(NodeKind.TABLE_CELL)
+        row_has_header = table_row.contain_node(NodeKind.TABLE_HEADER_CELL)
         col_index = 0
         for table_cell in table_row.find_child(
             NodeKind.TABLE_HEADER_CELL | NodeKind.TABLE_CELL
@@ -157,6 +169,10 @@ def process_noun_table(
                     col_index += colspan
                 else:
                     row_header = cell_text
+            elif not row_has_header:
+                # Vorlage:Deutsch adjektivisch Übersicht
+                table_header = cell_text
+                column_headers.clear()
             else:
                 for form_text in cell_text.splitlines():
                     form_text = form_text.strip()
@@ -165,6 +181,8 @@ def process_noun_table(
                     if form_text in ["—", "", "?", wxr.wtp.title]:
                         continue
                     form = Form(form=form_text)
+                    if table_header != "":
+                        form.raw_tags.append(table_header)
                     if len(row_header) > 0:
                         form.raw_tags.append(row_header)
                     for col_header in column_headers:
