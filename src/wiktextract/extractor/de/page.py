@@ -10,10 +10,7 @@ from .etymology import extract_etymology
 from .example import extract_examples
 from .form import extracrt_form_section
 from .gloss import extract_glosses
-from .inflection import (
-    extract_deutsch_nachname_template,
-    extract_inf_table_template,
-)
+from .inflection import extract_inf_table_template
 from .linkage import extract_linkages
 from .models import Sense, WordEntry
 from .pronunciation import extract_pronunciation_section
@@ -196,18 +193,13 @@ def process_pos_section(
             if raw_tag != "":
                 page_data[-1].raw_tags.append(raw_tag)
 
-    for node in level_node.find_child(NodeKind.TEMPLATE):
-        if node.template_name == "Deutsch Nachname Übersicht":
-            extract_deutsch_nachname_template(wxr, page_data[-1], node)
-
     wxr.wtp.start_subsection(clean_node(wxr, page_data[-1], level_node.largs))
 
     for level_4_node in level_node.find_child(NodeKind.LEVEL4):
         parse_section(wxr, page_data, base_data, level_4_node)
 
     for template_node in level_node.find_child(NodeKind.TEMPLATE):
-        if template_node.template_name.endswith("Übersicht"):
-            extract_inf_table_template(wxr, page_data[-1], template_node)
+        extract_inf_table_template(wxr, page_data[-1], template_node)
 
     if not level_node.contain_node(NodeKind.LEVEL4):
         extract_glosses(wxr, page_data[-1], level_node)

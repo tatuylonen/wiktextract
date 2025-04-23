@@ -10,17 +10,39 @@ from .models import Form, WordEntry
 from .tags import translate_raw_tags
 
 
+# Kategorie:Wiktionary:Flexionstabelle (Deutsch)
+
+
 def extract_inf_table_template(
-    wxr: WiktextractContext,
-    word_entry: WordEntry,
-    template_node: TemplateNode,
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
 ) -> None:
-    if template_node.template_name.endswith("Substantiv Übersicht"):
-        process_noun_table(wxr, word_entry, template_node)
-    elif template_node.template_name.endswith("Adjektiv Übersicht"):
-        process_adj_table(wxr, word_entry, template_node)
-    elif template_node.template_name.endswith("Verb Übersicht"):
-        process_verb_table(wxr, word_entry, template_node)
+    if (
+        "Substantiv Übersicht" in t_node.template_name
+        or t_node.template_name.endswith(
+            (
+                "Nachname Übersicht",
+                "Eigenname Übersicht",
+                "Vorname Übersicht m",
+                "Name Übersicht",
+                "Pronomina-Tabelle",
+                "Pronomen Übersicht",
+                "adjektivisch Übersicht",
+                "Substantiv Dialekt",
+                "Toponym Übersicht",
+            )
+        )
+        or re.search(r" Personalpronomen \d$", t_node.template_name)
+    ):
+        process_noun_table(wxr, word_entry, t_node)
+    elif t_node.template_name.endswith(
+        ("Adjektiv Übersicht", "Adverb Übersicht")
+    ):
+        process_adj_table(wxr, word_entry, t_node)
+    elif (
+        t_node.template_name.endswith("Verb Übersicht")
+        or t_node.template_name == "Kardinalzahl 2-12"
+    ):
+        process_verb_table(wxr, word_entry, t_node)
 
 
 @dataclass
@@ -31,9 +53,7 @@ class RowspanHeader:
 
 
 def process_verb_table(
-    wxr: WiktextractContext,
-    word_entry: WordEntry,
-    template_node: TemplateNode,
+    wxr: WiktextractContext, word_entry: WordEntry, template_node: TemplateNode
 ) -> None:
     # Vorlage:Deutsch Verb Übersicht
     expanded_template = wxr.wtp.parse(
@@ -58,9 +78,9 @@ def process_verb_table(
                 for link_node in table_cell.find_child_recursively(
                     NodeKind.LINK
                 ):
-                    parse_flexion_page(
-                        wxr, word_entry, clean_node(wxr, None, link_node)
-                    )
+                    link_text = clean_node(wxr, None, link_node)
+                    if link_text.startswith("Flexion:"):
+                        parse_flexion_page(wxr, word_entry, link_text)
             elif table_cell.kind == NodeKind.TABLE_HEADER_CELL:
                 if cell_text == "":
                     continue
@@ -85,6 +105,9 @@ def process_verb_table(
                         cell_line = cell_line.strip()
                         if cell_line == "":
                             continue
+                        elif cell_line.startswith("Flexion:"):
+                            parse_flexion_page(wxr, word_entry, cell_line)
+                            continue
                         for p in person.split(","):
                             p = p.strip()
                             form_text = cell_line
@@ -108,11 +131,11 @@ def process_verb_table(
 
 
 def process_noun_table(
-    wxr: WiktextractContext,
-    word_entry: WordEntry,
-    template_node: TemplateNode,
+    wxr: WiktextractContext, word_entry: WordEntry, template_node: TemplateNode
 ) -> None:
     # Vorlage:Deutsch Substantiv Übersicht
+    from .page import extract_note_section
+
     expanded_template = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(template_node), expand_all=True
     )
@@ -121,20 +144,35 @@ def process_noun_table(
         return
     table_node = table_nodes[0]
     column_headers = []
+    table_header = ""
     for table_row in table_node.find_child(NodeKind.TABLE_ROW):
         row_header = ""
         is_header_row = not table_row.contain_node(NodeKind.TABLE_CELL)
-        for col_index, table_cell in enumerate(
-            table_row.find_child(
-                NodeKind.TABLE_HEADER_CELL | NodeKind.TABLE_CELL
-            )
+        row_has_header = table_row.contain_node(NodeKind.TABLE_HEADER_CELL)
+        col_index = 0
+        for table_cell in table_row.find_child(
+            NodeKind.TABLE_HEADER_CELL | NodeKind.TABLE_CELL
         ):
             cell_text = clean_node(wxr, None, table_cell)
+            if cell_text == "":
+                continue
             if table_cell.kind == NodeKind.TABLE_HEADER_CELL:
                 if is_header_row:
-                    column_headers.append(re.sub(r"\s*\d+$", "", cell_text))
+                    colspan = int(table_cell.attrs.get("colspan", "1"))
+                    column_headers.append(
+                        RowspanHeader(
+                            re.sub(r"\s*\d+$", "", cell_text),
+                            col_index,
+                            colspan,
+                        )
+                    )
+                    col_index += colspan
                 else:
                     row_header = cell_text
+            elif not row_has_header:
+                # Vorlage:Deutsch adjektivisch Übersicht
+                table_header = cell_text
+                column_headers.clear()
             else:
                 for form_text in cell_text.splitlines():
                     form_text = form_text.strip()
@@ -143,20 +181,31 @@ def process_noun_table(
                     if form_text in ["—", "", "?", wxr.wtp.title]:
                         continue
                     form = Form(form=form_text)
+                    if table_header != "":
+                        form.raw_tags.append(table_header)
                     if len(row_header) > 0:
                         form.raw_tags.append(row_header)
-                    if col_index < len(column_headers):
-                        form.raw_tags.append(column_headers[col_index])
+                    for col_header in column_headers:
+                        if (
+                            col_header.text not in ("", "—")
+                            and col_index >= col_header.index
+                            and col_index < col_header.index + col_header.span
+                        ):
+                            form.raw_tags.append(col_header.text)
                     translate_raw_tags(form)
                     word_entry.forms.append(form)
+                col_index += 1
 
     clean_node(wxr, word_entry, expanded_template)  # category links
+    # Vorlage:Deutsch Nachname Übersicht
+    for level_node in expanded_template.find_child(NodeKind.LEVEL4):
+        section_text = clean_node(wxr, None, level_node.largs)
+        if section_text.startswith("Anmerkung"):
+            extract_note_section(wxr, word_entry, level_node)
 
 
 def process_adj_table(
-    wxr: WiktextractContext,
-    word_entry: WordEntry,
-    template_node: TemplateNode,
+    wxr: WiktextractContext, word_entry: WordEntry, template_node: TemplateNode
 ) -> None:
     # Vorlage:Deutsch Adjektiv Übersicht
     expanded_template = wxr.wtp.parse(
@@ -192,19 +241,3 @@ def process_adj_table(
                         form.raw_tags.append(column_headers[col_index])
                     translate_raw_tags(form)
                     word_entry.forms.append(form)
-
-
-def extract_deutsch_nachname_template(
-    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
-) -> None:
-    # Vorlage:Deutsch Nachname Übersicht
-    from .page import extract_note_section
-
-    process_noun_table(wxr, word_entry, t_node)
-    expanded_template = wxr.wtp.parse(
-        wxr.wtp.node_to_wikitext(t_node), expand_all=True
-    )
-    for level_node in expanded_template.find_child(NodeKind.LEVEL4):
-        section_text = clean_node(wxr, None, level_node.largs)
-        if section_text == "Anmerkung":
-            extract_note_section(wxr, word_entry, level_node)

@@ -411,3 +411,7 @@ class CleanTests(unittest.TestCase):
             clean_value(self.wxr, '<span class="a<nowiki/> b">text</span>'),
             "text",
         )
+
+    def test_html_numeric_character(self):
+        # https://de.wiktionary.org/wiki/Sonne
+        self.assertEqual(clean_value(self.wxr, "[[&#x2609;]]"), "☉")
