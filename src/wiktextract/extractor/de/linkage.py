@@ -1,5 +1,4 @@
 import re
-from typing import Optional
 
 from wikitextprocessor.parser import LevelNode, NodeKind, TemplateNode, WikiNode
 
@@ -19,8 +18,7 @@ def extract_linkages(
     linkage_list = []
     for list_item in level_node.find_child_recursively(NodeKind.LIST_ITEM):
         process_linkage_list_item(wxr, list_item, linkage_list, linkage_type)
-    pre_list = getattr(word_entry, linkage_type)
-    pre_list.extend(linkage_list)
+    getattr(word_entry, linkage_type).extend(linkage_list)
 
 
 def process_linkage_list_item(
@@ -70,8 +68,7 @@ def process_linkage_list_item(
             word = clean_node(wxr, None, child)
             if not word.startswith("Verzeichnis:") and len(word) > 0:
                 # https://de.wiktionary.org/wiki/Wiktionary:Verzeichnis
-                # Links to this namesapce pages are ignored,
-                # should find what it contains later
+                # ignore index namespace links
                 linkage = Linkage(
                     word=word, sense_index=sense_idx, raw_tags=raw_tags
                 )
@@ -82,20 +79,6 @@ def process_linkage_list_item(
         linkage_list[-1].note = clean_node(wxr, None, note_nodes).strip(
             "–—―‒- "
         )
-
-
-def process_link(
-    wxr: WiktextractContext,
-    sense_idx: str,
-    link_node: WikiNode,
-) -> Optional[Linkage]:
-    word = clean_node(wxr, None, link_node)
-    if word.startswith("Verzeichnis:") or len(word) == 0:
-        # https://de.wiktionary.org/wiki/Wiktionary:Verzeichnis
-        # Links to this namesapce pages are ignored,
-        # should find what it contains later
-        return None
-    return Linkage(word=word, sense_index=sense_idx)
 
 
 def contains_dash(text: str) -> bool:
