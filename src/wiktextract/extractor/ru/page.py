@@ -17,6 +17,7 @@ from .etymology import extract_etymology
 from .gloss import extract_gloss, process_meaning_template
 from .inflection import parse_html_forms_table, parse_wikitext_forms_table
 from .linkage import (
+    extract_alt_form_section,
     extract_linkages,
     extract_phrase_section,
     process_related_block_template,
@@ -258,6 +259,8 @@ def parse_section(
         pass
     elif section_title == "омофоны" and wxr.config.capture_pronunciation:
         extract_homophone_section(wxr, page_data[-1], level_node)
+    elif section_title == "варианты написания":
+        extract_alt_form_section(wxr, page_data[-1], level_node)
     else:
         wxr.wtp.debug(
             f"Unprocessed section {section_title}",

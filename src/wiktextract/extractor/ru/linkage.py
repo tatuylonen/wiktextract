@@ -1,5 +1,6 @@
 from wikitextprocessor import (
     HTMLNode,
+    LevelNode,
     NodeKind,
     TemplateNode,
     WikiNode,
@@ -7,7 +8,7 @@ from wikitextprocessor import (
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
-from .models import Linkage, WordEntry
+from .models import Form, Linkage, WordEntry
 from .section_titles import LINKAGE_TITLES
 from .tags import translate_raw_tags
 
@@ -16,7 +17,7 @@ def extract_linkages(
     wxr: WiktextractContext,
     word_entry: WordEntry,
     linkage_type: str,
-    level_node: WikiNode,
+    level_node: LevelNode,
 ):
     if linkage_type not in word_entry.model_fields:
         wxr.wtp.debug(
@@ -208,3 +209,12 @@ def process_semantics_template(
                     getattr(word_entry, LINKAGE_TITLES[key]).append(
                         Linkage(word=word, sense_index=sense_index)
                     )
+
+
+def extract_alt_form_section(
+    wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
+) -> None:
+    for link_node in level_node.find_child_recursively(NodeKind.LINK):
+        word = clean_node(wxr, None, link_node)
+        if word != "":
+            word_entry.forms.append(Form(form=word))
