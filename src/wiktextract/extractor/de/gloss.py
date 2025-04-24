@@ -1,3 +1,5 @@
+import re
+
 from wikitextprocessor.parser import LevelNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
@@ -35,7 +37,12 @@ def process_gloss_list_item(
 ) -> Sense:
     for list_item_node in list_node.find_child(NodeKind.LIST_ITEM):
         item_type = list_item_node.sarg
-        if item_type.endswith("*"):
+        if (
+            "form-of" in word_entry.tags
+            or section_title == "Grammatische Merkmale"
+        ):
+            process_form_of_list_item(wxr, word_entry, list_item_node)
+        elif item_type.endswith("*"):
             # only contains modifier template
             has_tag_template = False
             for template in list_item_node.find_child(NodeKind.TEMPLATE):
@@ -45,13 +52,7 @@ def process_gloss_list_item(
                 parent_sense = Sense()
                 parent_sense.raw_tags.append(raw_tag)
                 has_tag_template = True
-            # or form-of word
-            if (
-                "form-of" in word_entry.tags
-                or section_title == "Grammatische Merkmale"
-            ):
-                process_form_of_list_item(wxr, word_entry, list_item_node)
-            elif not has_tag_template:
+            if not has_tag_template:
                 new_sense = Sense()
                 gloss_text = clean_node(wxr, new_sense, list_item_node.children)
                 if len(gloss_text) > 0:
@@ -94,9 +95,12 @@ def process_gloss_list_item(
                     and gloss_node.kind == NodeKind.ITALIC
                 ):
                     italic_text = clean_node(wxr, None, gloss_node)
-                    if italic_text.endswith(":"):
-                        for raw_tag in italic_text.removesuffix(":").split(
-                            ", "
+                    if italic_text.endswith(":") or (
+                        italic_text.startswith("(")
+                        and italic_text.endswith(")")
+                    ):
+                        for raw_tag in re.split(
+                            r":|,", italic_text.strip(":() ")
                         ):
                             raw_tag = raw_tag.strip()
                             if len(raw_tag) > 0:
@@ -126,7 +130,9 @@ def process_gloss_list_item(
                 )
 
             if len(gloss_text) > 0:
-                sense_data.glosses.append(gloss_text.removeprefix(", "))
+                sense_data.glosses.append(
+                    re.sub(r"^[,—]*\s*", "", gloss_text.strip())
+                )
                 translate_raw_tags(sense_data)
                 word_entry.senses.append(sense_data)
 

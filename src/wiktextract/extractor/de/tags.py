@@ -219,6 +219,10 @@ K_TEMPLATE_TAGS = {
     "Finanzwesen": "finance",
     "juristisch": "law",
     "Physik": "physics",
+    "abstrakt": "abstract",
+    "gegenständlich": "objective",
+    "personifiziert": "personal",
+    "kirchlich": "Ecclesiastical",
 }
 
 GENDER_TAGS = {
@@ -408,6 +412,8 @@ K_TEMPLATE_TOPICS = {
     "Fußball": "football",
     "Kartenspiel": "card-games",
     "Theoretische Informatik": "computing",
+    "militärisch": "military",
+    "Taxonomie": "taxonomy",
 }
 
 

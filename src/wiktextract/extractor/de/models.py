@@ -103,6 +103,7 @@ class Sense(BaseModelWrap):
     )
     topics: list[str] = []
     form_of: list[AltForm] = []
+    alt_of: list[AltForm] = []
 
 
 class Sound(BaseModelWrap):
