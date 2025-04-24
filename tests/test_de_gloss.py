@@ -431,3 +431,28 @@ Indikativ Präsens Aktiv des Verbs '''[[amar]]'''""",
                 }
             ],
         )
+
+    def test_italic_parenthesis_tag(self):
+        page_data = parse_page(
+            self.wxr,
+            "ordo",
+            """== ōrdo ({{Sprache|Latein}}) ==
+=== {{Wortart|Substantiv|Latein}} ===
+==== Bedeutungen ====
+:[2] ''militärisch:''
+::— ''(abstrakt: Militär-Gruppierung, Legion)'' [[Glied]], [[Zenturie]], [[Abteilung]], [[Abteilungsglied]], [[Kompanie]]""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"],
+            [
+                {
+                    "tags": ["abstract"],
+                    "topics": ["military"],
+                    "glosses": [
+                        "Glied, Zenturie, Abteilung, Abteilungsglied, Kompanie"
+                    ],
+                    "raw_tags": ["Militär-Gruppierung", "Legion"],
+                    "sense_index": "2",
+                }
+            ],
+        )

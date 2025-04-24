@@ -1,3 +1,5 @@
+import re
+
 from wikitextprocessor.parser import LevelNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
@@ -94,9 +96,12 @@ def process_gloss_list_item(
                     and gloss_node.kind == NodeKind.ITALIC
                 ):
                     italic_text = clean_node(wxr, None, gloss_node)
-                    if italic_text.endswith(":"):
-                        for raw_tag in italic_text.removesuffix(":").split(
-                            ", "
+                    if italic_text.endswith(":") or (
+                        italic_text.startswith("(")
+                        and italic_text.endswith(")")
+                    ):
+                        for raw_tag in re.split(
+                            r":|,", italic_text.strip(":() ")
                         ):
                             raw_tag = raw_tag.strip()
                             if len(raw_tag) > 0:
@@ -126,7 +131,9 @@ def process_gloss_list_item(
                 )
 
             if len(gloss_text) > 0:
-                sense_data.glosses.append(gloss_text.removeprefix(", "))
+                sense_data.glosses.append(
+                    re.sub(r"^[,—]*\s*", "", gloss_text.strip())
+                )
                 translate_raw_tags(sense_data)
                 word_entry.senses.append(sense_data)
 
