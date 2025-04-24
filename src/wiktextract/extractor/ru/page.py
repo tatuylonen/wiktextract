@@ -18,9 +18,8 @@ from .gloss import extract_gloss, process_meaning_template
 from .inflection import parse_html_forms_table, parse_wikitext_forms_table
 from .linkage import (
     extract_alt_form_section,
-    extract_linkages,
+    extract_linkage_section,
     extract_phrase_section,
-    process_related_block_template,
 )
 from .models import AltForm, Form, Sense, Sound, WordEntry
 from .pronunciation import (
@@ -229,13 +228,6 @@ def parse_section(
         process_semantic_section(wxr, page_data, level_node)
     elif section_title in ("значение", "значения"):
         extract_gloss(wxr, page_data[-1], level_node)
-    elif section_title == "родственные слова" and wxr.config.capture_linkages:
-        # Word family
-        for template_node in level_node.find_child(NodeKind.TEMPLATE):
-            if template_node.template_name == "родств-блок":
-                process_related_block_template(
-                    wxr, page_data[-1], template_node
-                )
     elif section_title == "этимология" and wxr.config.capture_etymologies:
         extract_etymology(wxr, page_data[-1], level_node)
     elif (
@@ -255,7 +247,7 @@ def parse_section(
     ):
         extract_translations(wxr, page_data[-1], level_node)
     elif section_title in LINKAGE_TITLES and wxr.config.capture_linkages:
-        extract_linkages(
+        extract_linkage_section(
             wxr, page_data[-1], LINKAGE_TITLES[section_title], level_node
         )
     elif section_title == "библиография":

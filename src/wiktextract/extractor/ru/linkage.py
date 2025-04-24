@@ -13,18 +13,12 @@ from .section_titles import LINKAGE_TITLES
 from .tags import translate_raw_tags
 
 
-def extract_linkages(
+def extract_linkage_section(
     wxr: WiktextractContext,
     word_entry: WordEntry,
     linkage_type: str,
     level_node: LevelNode,
-):
-    if linkage_type not in word_entry.model_fields:
-        wxr.wtp.debug(
-            f"Linkage type {linkage_type} not defined for word entry",
-            sortid="extractor/ru/linkage/extract_linkages/10",
-        )
-        return
+) -> None:
     sense_index = 0
     for list_item in level_node.find_child_recursively(NodeKind.LIST_ITEM):
         if list_item.sarg == "#":
@@ -50,6 +44,12 @@ def extract_linkages(
             getattr(word_entry, linkage_type).append(linkage)
             linkage = Linkage(sense_index=sense_index)
 
+    for t_node in level_node.find_child(NodeKind.TEMPLATE):
+        if t_node.template_name == "родств-блок":
+            process_related_block_template(
+                wxr, word_entry, t_node, linkage_type
+            )
+
 
 def find_linkage_tag(
     wxr: WiktextractContext,
@@ -66,12 +66,15 @@ def find_linkage_tag(
 
 
 def process_related_block_template(
-    wxr: WiktextractContext, word_entry: WordEntry, template_node: TemplateNode
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    t_node: TemplateNode,
+    l_type: str,
 ) -> None:
     # "Родственные слова" section
     # Шаблон:родств-блок
     expanded_template = wxr.wtp.parse(
-        wxr.wtp.node_to_wikitext(template_node), expand_all=True
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
     )
     for table_node in expanded_template.find_child(NodeKind.TABLE):
         table_header = ""
@@ -111,7 +114,9 @@ def process_related_block_template(
                                         linkage.raw_tags.append(row_header)
                                     if linkage.word != "":
                                         translate_raw_tags(linkage)
-                                        word_entry.related.append(linkage)
+                                        getattr(word_entry, l_type).append(
+                                            linkage
+                                        )
 
 
 def extract_phrase_section(
