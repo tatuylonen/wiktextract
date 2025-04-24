@@ -212,9 +212,12 @@ def process_semantics_template(
 
 
 def extract_alt_form_section(
-    wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    level_node: LevelNode,
+    tags: list[str],
 ) -> None:
     for link_node in level_node.find_child_recursively(NodeKind.LINK):
         word = clean_node(wxr, None, link_node)
         if word != "":
-            word_entry.forms.append(Form(form=word))
+            word_entry.forms.append(Form(form=word, tags=tags))

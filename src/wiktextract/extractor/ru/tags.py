@@ -282,6 +282,11 @@ GRAMMATICAL_TAGS = {
     # Шаблон:мест ru п1*b
     "с.": "neuter",
     "в. (^(одуш.)/_(неодуш.))": ["accusative", "animate", "inanimate"],
+    # Шаблон:словоформы tt
+    "прит.": "possessive",
+    "1-е": "first-person",
+    "2-е": "second-person",
+    "3-е": "third-person",
 }
 
 # Прочие сокращения

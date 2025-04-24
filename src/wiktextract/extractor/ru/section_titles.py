@@ -67,3 +67,12 @@ LINKAGE_TITLES: dict[str, str] = {
     "конверсивы": "antonyms",
     "метаграммы": "metagrams",  # https://ru.wikipedia.org/wiki/Метаграммы
 }
+
+ALT_FORM_SECTIONS = {
+    "кириллица (кирилча)": ["Cyrillic"],
+    "кириллица": ["Cyrillic"],
+    "варианты написания": [],
+    'арабица (عربچه)': ["Arabic"],
+    "латиница (latinça)": ["Latin"],
+    "альтернативные формы": [],
+}
