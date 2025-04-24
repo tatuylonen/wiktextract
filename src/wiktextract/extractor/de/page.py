@@ -167,6 +167,7 @@ def process_pos_section(
                     f"Unknown Wortart template POS argument: {pos_argument}",
                     sortid="extractor/de/page/process_pos_section/55",
                 )
+                pos_data_list.append({"pos": "unknown"})
 
     if len(pos_data_list) == 0:
         return
