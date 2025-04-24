@@ -4,7 +4,7 @@ from wikitextprocessor import Wtp
 
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.ru.linkage import (
-    extract_linkages,
+    extract_linkage_section,
     process_related_block_template,
 )
 from wiktextract.extractor.ru.models import WordEntry
@@ -45,7 +45,9 @@ class TestLinkage(TestCase):
         root = self.wxr.wtp.parse(
             "# {{помета|экзоэтнонимы}}: [[кацап]], [[москаль]], [[шурави]]; {{собир.|-}}, {{уничиж.|-}}: [[русня]]"
         )
-        extract_linkages(self.wxr, word_entry, "synonyms", root.children[0])
+        extract_linkage_section(
+            self.wxr, word_entry, "synonyms", root.children[0]
+        )
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in word_entry.synonyms],
             [
@@ -88,7 +90,9 @@ class TestLinkage(TestCase):
 |}""",
         )
         root = self.wxr.wtp.parse("{{родств-блок}}")
-        process_related_block_template(self.wxr, word_entry, root.children[0])
+        process_related_block_template(
+            self.wxr, word_entry, root.children[0], "related"
+        )
         self.assertEqual(
             [r.model_dump(exclude_defaults=True) for r in word_entry.related],
             [

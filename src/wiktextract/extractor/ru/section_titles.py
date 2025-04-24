@@ -60,10 +60,22 @@ LINKAGE_TITLES: dict[str, str] = {
     "гиперонимы": "hypernyms",
     "гипонимы": "hyponyms",
     "дериваты": "derived",
+    "производные слова": "derived",
     "меронимы": "meronyms",
     "синонимы": "synonyms",
     "согипонимы": "coordinate_terms",
     "холонимы": "holonyms",
     "конверсивы": "antonyms",
     "метаграммы": "metagrams",  # https://ru.wikipedia.org/wiki/Метаграммы
+    "родственные слова": "related",
+}
+
+ALT_FORM_SECTIONS = {
+    "кириллица (кирилча)": ["Cyrillic"],
+    "кириллица": ["Cyrillic"],
+    "варианты написания": [],
+    "арабица (عربچه)": ["Arabic"],
+    "латиница (latinça)": ["Latin"],
+    "альтернативные формы": [],
+    "фонетические варианты": ["phonetic"],
 }

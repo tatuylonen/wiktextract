@@ -17,16 +17,21 @@ from .etymology import extract_etymology
 from .gloss import extract_gloss, process_meaning_template
 from .inflection import parse_html_forms_table, parse_wikitext_forms_table
 from .linkage import (
-    extract_linkages,
+    extract_alt_form_section,
+    extract_linkage_section,
     extract_phrase_section,
-    process_related_block_template,
 )
 from .models import AltForm, Form, Sense, Sound, WordEntry
 from .pronunciation import (
     extract_homophone_section,
     extract_pronunciation_section,
 )
-from .section_titles import LINKAGE_TITLES, POS_TEMPLATE_NAMES, POS_TITLES
+from .section_titles import (
+    ALT_FORM_SECTIONS,
+    LINKAGE_TITLES,
+    POS_TEMPLATE_NAMES,
+    POS_TITLES,
+)
 from .tags import MORPHOLOGICAL_TEMPLATE_TAGS
 from .translation import extract_translations
 
@@ -167,7 +172,9 @@ def extract_morphological_section(
                 "падежи ",
             )
         ):
-            for table_node in expanded_template.find_child(NodeKind.TABLE):
+            for table_node in expanded_template.find_child_recursively(
+                NodeKind.TABLE
+            ):
                 parse_wikitext_forms_table(wxr, page_data[-1], table_node)
             for table_tag in expanded_template.find_html("table"):
                 parse_html_forms_table(wxr, page_data[-1], table_tag)
@@ -221,13 +228,6 @@ def parse_section(
         process_semantic_section(wxr, page_data, level_node)
     elif section_title in ("значение", "значения"):
         extract_gloss(wxr, page_data[-1], level_node)
-    elif section_title == "родственные слова" and wxr.config.capture_linkages:
-        # Word family
-        for template_node in level_node.find_child(NodeKind.TEMPLATE):
-            if template_node.template_name == "родств-блок":
-                process_related_block_template(
-                    wxr, page_data[-1], template_node
-                )
     elif section_title == "этимология" and wxr.config.capture_etymologies:
         extract_etymology(wxr, page_data[-1], level_node)
     elif (
@@ -247,7 +247,7 @@ def parse_section(
     ):
         extract_translations(wxr, page_data[-1], level_node)
     elif section_title in LINKAGE_TITLES and wxr.config.capture_linkages:
-        extract_linkages(
+        extract_linkage_section(
             wxr, page_data[-1], LINKAGE_TITLES[section_title], level_node
         )
     elif section_title == "библиография":
@@ -258,6 +258,10 @@ def parse_section(
         pass
     elif section_title == "омофоны" and wxr.config.capture_pronunciation:
         extract_homophone_section(wxr, page_data[-1], level_node)
+    elif section_title in ALT_FORM_SECTIONS:
+        extract_alt_form_section(
+            wxr, page_data[-1], level_node, ALT_FORM_SECTIONS[section_title]
+        )
     else:
         wxr.wtp.debug(
             f"Unprocessed section {section_title}",
