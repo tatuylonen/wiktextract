@@ -12,7 +12,7 @@ from .form import extracrt_form_section
 from .gloss import extract_glosses
 from .inflection import extract_inf_table_template
 from .linkage import extract_linkages
-from .models import Sense, WordEntry
+from .models import AltForm, Sense, WordEntry
 from .pronunciation import extract_pronunciation_section
 from .section_titles import FORM_TITLES, LINKAGE_TITLES, POS_SECTIONS
 from .tags import translate_raw_tags
@@ -199,8 +199,10 @@ def process_pos_section(
     for level_4_node in level_node.find_child(NodeKind.LEVEL4):
         parse_section(wxr, page_data, base_data, level_4_node)
 
-    for template_node in level_node.find_child(NodeKind.TEMPLATE):
-        extract_inf_table_template(wxr, page_data[-1], template_node)
+    for t_node in level_node.find_child(NodeKind.TEMPLATE):
+        extract_inf_table_template(wxr, page_data[-1], t_node)
+        if t_node.template_name in ["Alte Schreibweise", "Alte Schreibung"]:
+            extract_old_spell_template(wxr, page_data[-1], t_node)
 
     if not level_node.contain_node(NodeKind.LEVEL4):
         extract_glosses(wxr, page_data[-1], level_node)
@@ -240,16 +242,25 @@ def parse_page(
                 ):
                     continue
                 base_data = WordEntry(
-                    lang=lang_name, lang_code=lang_code, word=page_title
+                    lang=lang_name,
+                    lang_code=lang_code,
+                    word=page_title,
+                    pos="unknown",
                 )
                 clean_node(wxr, base_data, subtitle_template)
                 for level3_node in level2_node.find_child(NodeKind.LEVEL3):
                     parse_section(wxr, page_data, base_data, level3_node)
-                for template_node in level2_node.find_child(NodeKind.TEMPLATE):
-                    if template_node.template_name == "Ähnlichkeiten Umschrift":
+                for t_node in level2_node.find_child(NodeKind.TEMPLATE):
+                    if t_node.template_name == "Ähnlichkeiten Umschrift":
                         process_umschrift_template(
-                            wxr, page_data, base_data, template_node
+                            wxr, page_data, base_data, t_node
                         )
+                    elif t_node.template_name in [
+                        "Alte Schreibweise",
+                        "Alte Schreibung",
+                    ]:
+                        extract_old_spell_template(wxr, base_data, t_node)
+                        page_data.append(base_data)
 
     for data in page_data:
         if len(data.senses) == 0:
@@ -303,3 +314,16 @@ def extract_note_section(
             note = clean_node(wxr, None, list_item.children)
             if note != "":
                 word_entry.notes.append(note)
+
+
+def extract_old_spell_template(
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+) -> None:
+    # https://de.wiktionary.org/wiki/Vorlage:Alte_Schreibweise
+    word = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
+    if word != "":
+        word_entry.senses.append(Sense(alt_of=[AltForm(word=word)]))
+    for tag in ["alt-of", "obsolete", "no-gloss"]:
+        if tag not in word_entry.tags:
+            word_entry.tags.append(tag)
+    clean_node(wxr, word_entry, t_node)

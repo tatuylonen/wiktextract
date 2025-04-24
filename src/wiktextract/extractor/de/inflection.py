@@ -9,7 +9,6 @@ from .flexion import parse_flexion_page
 from .models import Form, WordEntry
 from .tags import translate_raw_tags
 
-
 # Kategorie:Wiktionary:Flexionstabelle (Deutsch)
 
 
