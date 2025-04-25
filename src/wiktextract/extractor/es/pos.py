@@ -29,7 +29,16 @@ def extract_pos_section(
                 for list_item in node.find_child(NodeKind.LIST_ITEM):
                     extract_gloss_list_item(wxr, word_entry, list_item, Sense())
             elif re.fullmatch(r":+;", node.sarg) is not None:  # nested gloss
-                pass
+                parent_sense = Sense()
+                parent_gloss_num = len(node.sarg) - 1
+                for sense in word_entry.senses[::-1]:
+                    if len(sense.glosses) == parent_gloss_num:
+                        parent_sense = sense
+                        break
+                for list_item in node.find_child(NodeKind.LIST_ITEM):
+                    sense = parent_sense.model_copy(deep=True)
+                    sense.sense_index = ""
+                    extract_gloss_list_item(wxr, word_entry, list_item, sense)
         elif isinstance(node, TemplateNode):
             if node.template_name.startswith("inflect."):
                 process_inflect_template(wxr, word_entry, node)
@@ -90,6 +99,15 @@ def extract_gloss_list_item(
         sense.glosses.append(gloss_text)
         translate_raw_tags(sense)
         word_entry.senses.append(sense)
+
+    for node in list_item.definition:
+        if isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
+            for child_list_item in node.find_child(NodeKind.LIST_ITEM):
+                child_sense = sense.model_copy(deep=True)
+                child_sense.sense_index = ""
+                extract_gloss_list_item(
+                    wxr, word_entry, child_list_item, child_sense
+                )
 
 
 def process_forma_template(

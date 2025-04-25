@@ -219,3 +219,59 @@ class TestESGloss(unittest.TestCase):
                 }
             ],
         )
+
+    def test_nested_list(self):
+        self.wxr.wtp.add_page(
+            "Plantilla:csem",
+            10,
+            "Sentimientos[[Categoría:LA:Sentimientos|IRA]]",
+        )
+        self.wxr.wtp.add_page(
+            "Plantilla:uso",
+            10,
+            ":*'''Uso:''' literario[[Categoría:LA:Términos literarios|IRA]]",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "ira",
+            """== {{lengua|la}} ==
+==== {{sustantivo femenino|la}} ====
+;1 {{csem|leng=la|sentimientos}}: Ira, [[furia]], [[rabia]], [[indignación]].
+:;d: Dícese de armas o similar.
+{{uso|leng=la|poético}}.
+:;e: Frenesí.
+;2: Sentimientos de [[desagrado]] mutuo, de [[hostilidad]] mutua.""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"],
+            [
+                {
+                    "categories": ["LA:Sentimientos"],
+                    "glosses": ["Ira, furia, rabia, indignación."],
+                    "sense_index": "1",
+                    "raw_tags": ["Sentimientos"],
+                },
+                {
+                    "categories": ["LA:Sentimientos", "LA:Términos literarios"],
+                    "glosses": [
+                        "Ira, furia, rabia, indignación.",
+                        "Dícese de armas o similar.",
+                    ],
+                    "sense_index": "d",
+                    "tags": ["literary"],
+                    "raw_tags": ["Sentimientos"],
+                },
+                {
+                    "categories": ["LA:Sentimientos"],
+                    "glosses": ["Ira, furia, rabia, indignación.", "Frenesí."],
+                    "sense_index": "e",
+                    "raw_tags": ["Sentimientos"],
+                },
+                {
+                    "glosses": [
+                        "Sentimientos de desagrado mutuo, de hostilidad mutua."
+                    ],
+                    "sense_index": "2",
+                },
+            ],
+        )
