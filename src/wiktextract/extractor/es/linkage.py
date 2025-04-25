@@ -1,4 +1,5 @@
 from wikitextprocessor.parser import (
+    LEVEL_KIND_FLAGS,
     LevelNode,
     NodeKind,
     TemplateNode,
@@ -8,7 +9,7 @@ from wikitextprocessor.parser import (
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
-from .models import Linkage, WordEntry
+from .models import Form, Linkage, WordEntry
 from .section_titles import LINKAGE_TITLES
 
 
@@ -107,3 +108,22 @@ def process_linkage_list_children(
                 if len(word_entry.senses) > 0:
                     linkage_data.sense_index = word_entry.senses[-1].sense_index
                 getattr(word_entry, linkage_type).append(linkage_data)
+
+
+def extract_alt_form_section(
+    wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
+) -> None:
+    has_link = False
+    for link_node in level_node.find_child(NodeKind.LINK):
+        word = clean_node(wxr, None, link_node)
+        has_link = True
+        if word != "":
+            word_entry.forms.append(Form(form=word, tags=["alt-of"]))
+    if not has_link:
+        section_text = clean_node(
+            wxr, None, list(level_node.invert_find_child(LEVEL_KIND_FLAGS))
+        ).removesuffix(".")
+        for word in section_text.split(","):
+            word = word.strip()
+            if word != "":
+                word_entry.forms.append(Form(form=word, tags=["alt-of"]))

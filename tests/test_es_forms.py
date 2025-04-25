@@ -4,6 +4,7 @@ from wikitextprocessor import Wtp
 
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.es.inflection import extract_inflection
+from wiktextract.extractor.es.page import parse_page
 from wiktextract.extractor.es.models import WordEntry
 from wiktextract.wxr_context import WiktextractContext
 
@@ -88,4 +89,34 @@ class TestESInflection(TestCase):
                 {"form": "feliz", "tags": ["feminine", "singular"]},
                 {"form": "felices", "tags": ["feminine", "plural"]},
             ],
+        )
+
+    def test_alt_form_section(self):
+        page_data = parse_page(
+            self.wxr,
+            "kóutua",
+            """== {{lengua|yag}} ==
+=== Formas alternativas ===
+koutu, koute.
+=== Pronombre interrogativo ===
+;1: Qué.""",
+        )
+        self.assertEqual(
+            page_data[0]["forms"],
+            [
+                {"form": "koutu", "tags": ["alt-of"]},
+                {"form": "koute", "tags": ["alt-of"]},
+            ],
+        )
+        page_data = parse_page(
+            self.wxr,
+            "sina",
+            """== {{lengua|yag}} ==
+=== Formas alternativas ===
+[[sin]]
+=== Pronombre interrogativo ===
+;1: Tu""",
+        )
+        self.assertEqual(
+            page_data[0]["forms"], [{"form": "sin", "tags": ["alt-of"]}]
         )

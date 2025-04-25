@@ -43,8 +43,22 @@ POS_TITLES: dict[str, POSSubtitleData] = {
     "dígrafo": {"pos": "character"},
     "expresión": {"pos": "phrase"},
     "forma adjetiva": {"pos": "adj", "tags": ["form-of"]},
+    "forma adjetiva y de participio": {
+        "pos": "participle",
+        "tags": ["adjective", "form-of"],
+    },
+    "forma adjetiva y sustantiva": {"pos": "adj", "tags": ["noun", "form-of"]},
+    "forma de adjetivo ordinal": {"pos": "num", "tags": ["form-of", "ordinal"]},
     "forma de participio": {"pos": "participle", "tags": ["form-of"]},
     "forma de sufijo": {"pos": "suffix", "tags": ["form-of"]},
+    "forma de locución sustantiva femenina": {
+        "pos": "phrase",
+        "tags": ["form-of", "feminine", "noun"],
+    },
+    "forma de locución sustantiva masculina": {
+        "pos": "phrase",
+        "tags": ["form-of", "masculine", "noun"],
+    },
     "forma flexiva": {"pos": "verb", "tags": ["form-of"]},
     "forma pronominal": {"pos": "pron", "tags": ["form-of"]},
     "forma sustantiva femenina": {
@@ -55,10 +69,19 @@ POS_TITLES: dict[str, POSSubtitleData] = {
         "pos": "noun",
         "tags": ["form-of", "masculine"],
     },
+    "forma sustantiva femenina o masculina": {
+        "pos": "noun",
+        "tags": ["form-of", "feminine", "masculine"],
+    },
+    "forma sustantiva femenina y masculina": {
+        "pos": "noun",
+        "tags": ["form-of", "feminine", "masculine"],
+    },
     "forma sustantiva neutra": {"pos": "noun", "tags": ["form-of", "neuter"]},
     "forma sustantiva": {"pos": "noun", "tags": ["form-of"]},
     "forma sustantiva plural": {"pos": "noun", "tags": ["form-of", "plural"]},
     "forma verbal": {"pos": "verb", "tags": ["form-of"]},
+    "forma mutada": {"pos": "unknown", "tags": ["form-of"]},
     "infijo": {"pos": "infix", "tags": ["morpheme"]},
     "interjección": {"pos": "intj"},
     "letra": {"pos": "character"},
@@ -138,6 +161,8 @@ LINKAGE_TITLES: dict[str, str] = {
     "sinónimo": "synonyms",
 }
 
-IGNORED_TITLES: frozenset[str] = frozenset(["véase también"])
+IGNORED_TITLES: frozenset[str] = frozenset(
+    ["véase también", "referencias y notas"]
+)
 
 TRANSLATIONS_TITLES: frozenset[str] = frozenset(["traducciones", "traducción"])

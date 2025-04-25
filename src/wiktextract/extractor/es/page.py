@@ -14,7 +14,11 @@ from .etymology import process_etymology_block
 from .example import extract_example
 from .gloss import extract_gloss, process_ambito_template, process_uso_template
 from .inflection import extract_inflection
-from .linkage import extract_linkage_section, process_linkage_template
+from .linkage import (
+    extract_alt_form_section,
+    extract_linkage_section,
+    process_linkage_template,
+)
 from .models import Sense, WordEntry
 from .pronunciation import process_pron_graf_template
 from .section_titles import (
@@ -144,6 +148,10 @@ def parse_section(
         if len(page_data) == 0:
             page_data.append(base_data.model_copy(deep=True))
         extract_conjugation_section(wxr, page_data, level_node)
+    elif section_title == "formas alternativas":
+        extract_alt_form_section(
+            wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
+        )
     else:
         wxr.wtp.debug(
             f"Unprocessed section: {section_title}",
@@ -312,6 +320,9 @@ def parse_page(
         categories = {}
         lang_code = "unknown"
         lang_name = "unknown"
+        section_title = clean_node(wxr, None, level2_node.largs)
+        if section_title.lower() == "referencias y notas":
+            continue
         for subtitle_template in level2_node.find_content(NodeKind.TEMPLATE):
             # https://es.wiktionary.org/wiki/Plantilla:lengua
             # https://es.wiktionary.org/wiki/Apéndice:Códigos_de_idioma
