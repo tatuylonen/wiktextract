@@ -159,6 +159,7 @@ LINKAGE_TITLES: dict[str, str] = {
     "relacionado": "related",
     "refranes": "proverbs",
     "sinónimo": "synonyms",
+    "derivados": "derived",
 }
 
 IGNORED_TITLES: frozenset[str] = frozenset(

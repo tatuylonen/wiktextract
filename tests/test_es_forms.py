@@ -3,9 +3,9 @@ from unittest import TestCase
 from wikitextprocessor import Wtp
 
 from wiktextract.config import WiktionaryConfig
-from wiktextract.extractor.es.inflection import extract_inflection
-from wiktextract.extractor.es.page import parse_page
+from wiktextract.extractor.es.inflection import process_inflect_template
 from wiktextract.extractor.es.models import WordEntry
+from wiktextract.extractor.es.page import parse_page
 from wiktextract.wxr_context import WiktextractContext
 
 
@@ -35,14 +35,12 @@ class TestESInflection(TestCase):
 |}""",
         )
         root = self.wxr.wtp.parse("{{inflect.es.sust.reg|diccionario}}")
-        page_data = [
-            WordEntry(
-                word="diccionario", pos="noun", lang="Español", lang_code="es"
-            )
-        ]
-        extract_inflection(self.wxr, page_data, root.children[0])
+        data = WordEntry(
+            word="diccionario", pos="noun", lang="Español", lang_code="es"
+        )
+        process_inflect_template(self.wxr, data, root.children[0])
         self.assertEqual(
-            page_data[-1].model_dump(exclude_defaults=True)["forms"],
+            data.model_dump(exclude_defaults=True)["forms"],
             [
                 {"form": "diccionario", "tags": ["singular"]},
                 {"form": "diccionarios", "tags": ["plural"]},
@@ -73,12 +71,12 @@ class TestESInflection(TestCase):
         root = self.wxr.wtp.parse(
             "{{inflect.es.adj.no-género-cons|feli|z|sup=felicísimo}}"
         )
-        page_data = [
-            WordEntry(word="feliz", pos="adj", lang="Español", lang_code="es")
-        ]
-        extract_inflection(self.wxr, page_data, root.children[0])
+        data = WordEntry(
+            word="feliz", pos="adj", lang="Español", lang_code="es"
+        )
+        process_inflect_template(self.wxr, data, root.children[0])
         self.assertEqual(
-            page_data[-1].model_dump(exclude_defaults=True)["forms"],
+            data.model_dump(exclude_defaults=True)["forms"],
             [
                 {"form": "feliz", "tags": ["masculine", "singular"]},
                 {"form": "felices", "tags": ["masculine", "plural"]},

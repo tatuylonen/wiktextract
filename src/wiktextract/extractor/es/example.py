@@ -2,7 +2,6 @@ from wikitextprocessor.parser import (
     NodeKind,
     TemplateNode,
     WikiNode,
-    WikiNodeChildrenList,
 )
 
 from ...page import clean_node
@@ -55,9 +54,9 @@ def process_ejemplo_template(
                     extra_node_kind=NodeKind.ITALIC,
                 )
         elif "trad" == span_class:
-            example_data.translation = clean_node(
-                wxr, None, span_tag
-            ).removeprefix("Traducción: ")
+            example_data.translation = (
+                clean_node(wxr, None, span_tag).removeprefix("→").strip()
+            )
         elif "ref" == span_class:
             example_data.ref = clean_node(wxr, None, span_tag)
 
@@ -82,84 +81,3 @@ def process_ejemplo_template(
             template_data.args[str(arg)] = clean_node(wxr, None, value)
         example_data.example_templates.append(template_data)
         sense_data.examples.append(example_data)
-
-
-def extract_example(
-    wxr: WiktextractContext,
-    sense_data: Sense,
-    nodes: WikiNodeChildrenList,
-):
-    text_nodes: WikiNodeChildrenList = []
-    for node in nodes:
-        if isinstance(node, WikiNode) and node.kind == NodeKind.TEMPLATE:
-            if node.template_name == "ejemplo":
-                process_ejemplo_template(wxr, sense_data, node)
-            else:
-                text_nodes.append(node)
-        elif isinstance(node, WikiNode) and node.kind == NodeKind.URL:
-            if len(sense_data.examples) > 0:
-                sense_data.examples[-1].ref = clean_node(wxr, None, node)
-        else:
-            text_nodes.append(node)
-
-    if len(sense_data.examples) == 0 and len(text_nodes) > 0:
-        example = Example(text=clean_node(wxr, None, text_nodes))
-        sense_data.examples.append(example)
-    elif len(text_nodes) > 0:
-        wxr.wtp.debug(
-            f"Unprocessed nodes from example group: {text_nodes}",
-            sortid="extractor/es/example/extract_example/87",
-        )
-
-
-def process_example_list(
-    wxr: WiktextractContext,
-    sense_data: Sense,
-    list_item: WikiNode,
-):
-    for sub_list_item in list_item.find_child_recursively(NodeKind.LIST_ITEM):
-        example_data = Example(text="")
-        text_nodes: WikiNodeChildrenList = []
-        for child in sub_list_item.children:
-            # "cita *" templates are obsolete
-            if isinstance(
-                child, TemplateNode
-            ) and child.template_name.startswith("cita "):
-                example_data.ref = clean_node(wxr, None, child)
-            elif (
-                isinstance(child, TemplateNode)
-                and child.template_name == "referencia incompleta"
-            ):
-                # ignore empty ref template
-                continue
-            else:
-                text_nodes.append(child)
-        example_data.text = clean_node(wxr, None, text_nodes)
-        if len(example_data.text) > 0:
-            calculate_bold_offsets(
-                wxr,
-                wxr.wtp.parse(wxr.wtp.node_to_wikitext(text_nodes)),
-                example_data.text,
-                example_data,
-                "bold_text_offsets",
-                extra_node_kind=NodeKind.ITALIC,
-            )
-            sense_data.examples.append(example_data)
-
-    # If no example was found in sublists,
-    # assume example is in list_item.children directly.
-    if len(sense_data.examples) == 0:
-        text = clean_node(wxr, None, list_item.children).removeprefix(
-            "Ejemplo: "
-        )
-        if len(text) > 0:
-            example_data = Example(text=text)
-            calculate_bold_offsets(
-                wxr,
-                wxr.wtp.parse(wxr.wtp.node_to_wikitext(list_item.children)),
-                text,
-                example_data,
-                "bold_text_offsets",
-                extra_node_kind=NodeKind.ITALIC,
-            )
-            sense_data.examples.append(example_data)

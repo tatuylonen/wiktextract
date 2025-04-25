@@ -8,6 +8,8 @@ from wiktextract.wxr_context import WiktextractContext
 
 
 class TestESPage(unittest.TestCase):
+    maxDiff = None
+
     def setUp(self) -> None:
         self.wxr = WiktextractContext(
             Wtp(lang_code="es"),

@@ -6,23 +6,12 @@ from .models import Form, WordEntry
 from .tags import translate_raw_tags
 
 
-def extract_inflection(
-    wxr: WiktextractContext,
-    page_data: list[WordEntry],
-    template_node: TemplateNode,
-) -> None:
-    if template_node.template_name.startswith("inflect."):
-        process_inflect_template(wxr, page_data, template_node)
-
-
 def process_inflect_template(
-    wxr: WiktextractContext,
-    page_data: list[WordEntry],
-    template_node: TemplateNode,
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
 ) -> None:
     # https://es.wiktionary.org/wiki/Plantilla:inflect.es.sust.reg
     expanded_node = wxr.wtp.parse(
-        wxr.wtp.node_to_wikitext(template_node), expand_all=True
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
     )
     table_nodes = list(expanded_node.find_child(NodeKind.TABLE))
     if len(table_nodes) == 0:
@@ -63,5 +52,5 @@ def process_inflect_template(
                     form.raw_tags.append(col_headers[col_index])
                 if len(form.form) > 0:
                     translate_raw_tags(form)
-                    page_data[-1].forms.append(form)
+                    word_entry.forms.append(form)
                 col_index += 1
