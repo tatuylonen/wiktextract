@@ -5,7 +5,6 @@ from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.es.linkage import (
     extract_linkage_section,
-    process_linkage_list_children,
     process_linkage_template,
 )
 from wiktextract.extractor.es.models import WordEntry
@@ -83,30 +82,6 @@ class TestESLinkage(unittest.TestCase):
                     word_entry.model_dump(exclude_defaults=True)["synonyms"],
                     case["expected"],
                 )
-
-    def test_process_linkage_list_children(self):
-        # https://es.wiktionary.org/wiki/abalanzar
-        self.wxr.wtp.start_page("abalanzar")
-        word_entry = WordEntry(word="abalanzar", lang="Español", lang_code="es")
-        root = self.wxr.wtp.parse(
-            ":*'''Sinónimos:''' [[balancear]], [[contrapesar]], [[equilibrar]], [[nivelar]] [[estabilizar]]"
-        )
-        process_linkage_list_children(
-            self.wxr,
-            word_entry,
-            root.children[0].children[0].children[1:],
-            "synonyms",
-        )
-        self.assertEqual(
-            word_entry.model_dump(exclude_defaults=True)["synonyms"],
-            [
-                {"word": "balancear"},
-                {"word": "contrapesar"},
-                {"word": "equilibrar"},
-                {"word": "nivelar"},
-                {"word": "estabilizar"},
-            ],
-        )
 
     def test_two_words_in_a_list(self):
         self.wxr.wtp.start_page("perro")

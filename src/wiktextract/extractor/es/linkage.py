@@ -1,14 +1,14 @@
 from wikitextprocessor.parser import (
+    LEVEL_KIND_FLAGS,
     LevelNode,
     NodeKind,
     TemplateNode,
     WikiNode,
-    WikiNodeChildrenList,
 )
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
-from .models import Linkage, WordEntry
+from .models import Form, Linkage, WordEntry
 from .section_titles import LINKAGE_TITLES
 
 
@@ -46,36 +46,31 @@ def extract_linkage_section(
 
 
 def process_linkage_template(
-    wxr: WiktextractContext,
-    word_entry: WordEntry,
-    template_node: WikiNode,
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
 ):
     # https://es.wiktionary.org/wiki/Plantilla:sinónimo
-    linkage_type = LINKAGE_TITLES.get(
-        template_node.template_name.removesuffix("s")
-    )
+    linkage_type = LINKAGE_TITLES.get(t_node.template_name.removesuffix("s"))
     for index in range(1, 41):
-        if index not in template_node.template_parameters:
+        if index not in t_node.template_parameters:
             break
         linkage_data = Linkage(
-            word=clean_node(wxr, None, template_node.template_parameters[index])
+            word=clean_node(wxr, None, t_node.template_parameters[index])
         )
         if len(word_entry.senses) > 0:
             linkage_data.sense_index = word_entry.senses[-1].sense_index
+            linkage_data.sense = " ".join(word_entry.senses[-1].glosses)
         getattr(word_entry, linkage_type).append(linkage_data)
         process_linkage_template_parameter(
-            wxr, linkage_data, template_node, f"nota{index}"
+            wxr, linkage_data, t_node, f"nota{index}"
         )
         process_linkage_template_parameter(
-            wxr, linkage_data, template_node, f"alt{index}"
+            wxr, linkage_data, t_node, f"alt{index}"
         )
         if index == 1:
             process_linkage_template_parameter(
-                wxr, linkage_data, template_node, "nota"
+                wxr, linkage_data, t_node, "nota"
             )
-            process_linkage_template_parameter(
-                wxr, linkage_data, template_node, "alt"
-            )
+            process_linkage_template_parameter(wxr, linkage_data, t_node, "alt")
 
 
 def process_linkage_template_parameter(
@@ -92,18 +87,20 @@ def process_linkage_template_parameter(
             linkage_data.alternative_spelling = value
 
 
-def process_linkage_list_children(
-    wxr: WiktextractContext,
-    word_entry: WordEntry,
-    nodes: WikiNodeChildrenList,
-    linkage_type: str,
-):
-    # under gloss list
-    for node in nodes:
-        if isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
-            word = clean_node(wxr, None, node)
-            if len(word) > 0:
-                linkage_data = Linkage(word=word)
-                if len(word_entry.senses) > 0:
-                    linkage_data.sense_index = word_entry.senses[-1].sense_index
-                getattr(word_entry, linkage_type).append(linkage_data)
+def extract_alt_form_section(
+    wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
+) -> None:
+    has_link = False
+    for link_node in level_node.find_child(NodeKind.LINK):
+        word = clean_node(wxr, None, link_node)
+        has_link = True
+        if word != "":
+            word_entry.forms.append(Form(form=word, tags=["alt-of"]))
+    if not has_link:
+        section_text = clean_node(
+            wxr, None, list(level_node.invert_find_child(LEVEL_KIND_FLAGS))
+        ).removesuffix(".")
+        for word in section_text.split(","):
+            word = word.strip()
+            if word != "":
+                word_entry.forms.append(Form(form=word, tags=["alt-of"]))

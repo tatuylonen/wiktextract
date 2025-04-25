@@ -1,15 +1,8 @@
 import unittest
-from typing import List
 
 from wikitextprocessor import Wtp
 
 from wiktextract.config import WiktionaryConfig
-from wiktextract.extractor.es.gloss import (
-    extract_gloss,
-    process_ambito_template,
-    process_uso_template,
-)
-from wiktextract.extractor.es.models import Sense, WordEntry
 from wiktextract.extractor.es.page import parse_page
 from wiktextract.wxr_context import WiktextractContext
 
@@ -26,77 +19,6 @@ class TestESGloss(unittest.TestCase):
     def tearDown(self) -> None:
         self.wxr.wtp.close_db_conn()
 
-    def get_default_page_data(self) -> List[WordEntry]:
-        return [WordEntry(word="test", lang_code="es", lang="Language")]
-
-    def test_es_extract_glosses(self):
-        # https://es.wiktionary.org/wiki/ayudar
-
-        self.wxr.wtp.add_page("Plantilla:plm", 10, "Contribuir")
-        self.wxr.wtp.start_page("")
-
-        root = self.wxr.wtp.parse(
-            """;1: {{plm|contribuir}} [[esfuerzo]] o [[recurso]]s para la [[realización]] de algo.
-;2: Por antonomasia, [[cooperar]] a que alguno [[salir|salga]] de una [[situación]] [[dificultoso|dificultosa]]"""  # noqa: E501
-        )
-
-        page_data = self.get_default_page_data()
-
-        extract_gloss(self.wxr, page_data, root.children[0])
-
-        self.assertEqual(
-            page_data[0].model_dump(exclude_defaults=True)["senses"],
-            [
-                {
-                    "glosses": [
-                        "Contribuir esfuerzo o recursos para la realización "
-                        "de algo."
-                    ],
-                    "sense_index": "1",
-                },
-                {
-                    "glosses": [
-                        "Por antonomasia, cooperar a que alguno salga"
-                        " de una situación dificultosa"
-                    ],
-                    "sense_index": "2",
-                },
-            ],
-        )
-
-    def test_es_extract_gloss_categories(self):
-        # https://es.wiktionary.org/wiki/amor
-        self.wxr.wtp.add_page("Plantilla:plm", 10, "Sentimiento")
-        self.wxr.wtp.add_page(
-            "Plantilla:sentimientos",
-            10,
-            "Humanidades. [[Categoría:ES:Sentimientos]]",
-        )
-        self.wxr.wtp.start_page("")
-
-        root = self.wxr.wtp.parse(
-            ";1 {{sentimientos}}: {{plm|sentimiento}} [[afectivo]] de [[atracción]], [[unión]] y [[afinidad]] que se experimenta hacia una persona, animal o cosa"
-        )
-
-        page_data = self.get_default_page_data()
-
-        extract_gloss(self.wxr, page_data, root.children[0])
-
-        self.assertEqual(
-            page_data[0].model_dump(exclude_defaults=True)["senses"],
-            [
-                {
-                    "glosses": [
-                        "Sentimiento afectivo de atracción, unión y afinidad "
-                        "que se experimenta hacia una persona, animal o cosa"
-                    ],
-                    "sense_index": "1",
-                    "raw_tags": ["Humanidades"],
-                    "categories": ["ES:Sentimientos"],
-                }
-            ],
-        )
-
     def test_gloss_topics(self):
         self.wxr.wtp.start_page("helicóptero")
         self.wxr.wtp.add_page(
@@ -104,18 +26,18 @@ class TestESGloss(unittest.TestCase):
             10,
             "Aeronáutica, vehículos[[Categoría:ES:Aeronáutica|HELICOPTERO]][[Categoría:ES:Vehículos|HELICOPTERO]]",
         )
-        page_data = [
-            WordEntry(lang_code="es", lang="Español", word="helicóptero")
-        ]
-        root = self.wxr.wtp.parse(
-            ";1 {{csem|aeronáutica|vehículos}}: Vehículo para desplazarse por el aire"
+        page_data = parse_page(
+            self.wxr,
+            "helicóptero",
+            """== {{lengua|es}} ==
+=== {{sustantivo masculino|es}} ===
+;1 {{csem|aeronáutica|vehículos}}: Vehículo para desplazarse por el aire,""",
         )
-        extract_gloss(self.wxr, page_data, root.children[0])
         self.assertEqual(
-            page_data[0].model_dump(exclude_defaults=True)["senses"],
+            page_data[0]["senses"],
             [
                 {
-                    "glosses": ["Vehículo para desplazarse por el aire"],
+                    "glosses": ["Vehículo para desplazarse por el aire,"],
                     "sense_index": "1",
                     "topics": ["aeronautics", "vehicles"],
                     "categories": ["ES:Aeronáutica", "ES:Vehículos"],
@@ -123,40 +45,35 @@ class TestESGloss(unittest.TestCase):
             ],
         )
 
-    def test_uso_template(self):
-        self.wxr.wtp.start_page("domingo")
-        sense = Sense()
+    def test_uso_ambito_templates(self):
         self.wxr.wtp.add_page(
             "Plantilla:uso",
             10,
             ":*'''Uso:''' coloquial, despectivo[[Categoría:ES:Términos coloquiales|DOMINGO]][[Categoría:ES:Términos despectivos|DOMINGO]]",
         )
-        root = self.wxr.wtp.parse("{{uso|coloquial|despectivo}}")
-        process_uso_template(self.wxr, sense, root.children[0])
-        self.assertEqual(
-            sense.model_dump(exclude_defaults=True),
-            {
-                "categories": [
-                    "ES:Términos coloquiales",
-                    "ES:Términos despectivos",
-                ],
-                "tags": ["colloquial", "derogatory"],
-            },
+        page_data = parse_page(
+            self.wxr,
+            "domingo",
+            """== {{lengua|es}} ==
+=== Etimología 2 ===
+==== {{sustantivo masculino|es}} ====
+;1: Marido dominado por
+{{uso|coloquial|despectivo}}
+{{ámbito|Bolivia}}""",
         )
-
-    def test_ambito_template(self):
-        self.wxr.wtp.start_page("domingo")
-        sense = Sense()
-        self.wxr.wtp.add_page(
-            "Plantilla:ámbito",
-            10,
-            ":*'''Ámbito:''' México[[Categoría:ES:México|DOMINGO]]",
-        )
-        root = self.wxr.wtp.parse("{{ámbito|México}}")
-        process_ambito_template(self.wxr, sense, root.children[0])
         self.assertEqual(
-            sense.model_dump(exclude_defaults=True),
-            {"categories": ["ES:México"], "tags": ["Mexico"]},
+            page_data[0]["senses"],
+            [
+                {
+                    "categories": [
+                        "ES:Términos coloquiales",
+                        "ES:Términos despectivos",
+                    ],
+                    "tags": ["colloquial", "derogatory", "Bolivia"],
+                    "glosses": ["Marido dominado por"],
+                    "sense_index": "1",
+                }
+            ],
         )
 
     def test_form_of(self):
@@ -227,6 +144,7 @@ class TestESGloss(unittest.TestCase):
                                 {"word": "amigarse"},
                             ],
                             "sense_index": "1",
+                            "tags": ["form-of"],
                         }
                     ],
                     "tags": ["form-of"],
@@ -299,5 +217,61 @@ class TestESGloss(unittest.TestCase):
                     "tags": ["form-of"],
                     "word": "camino",
                 }
+            ],
+        )
+
+    def test_nested_list(self):
+        self.wxr.wtp.add_page(
+            "Plantilla:csem",
+            10,
+            "Sentimientos[[Categoría:LA:Sentimientos|IRA]]",
+        )
+        self.wxr.wtp.add_page(
+            "Plantilla:uso",
+            10,
+            ":*'''Uso:''' literario[[Categoría:LA:Términos literarios|IRA]]",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "ira",
+            """== {{lengua|la}} ==
+==== {{sustantivo femenino|la}} ====
+;1 {{csem|leng=la|sentimientos}}: Ira, [[furia]], [[rabia]], [[indignación]].
+:;d: Dícese de armas o similar.
+{{uso|leng=la|poético}}.
+:;e: Frenesí.
+;2: Sentimientos de [[desagrado]] mutuo, de [[hostilidad]] mutua.""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"],
+            [
+                {
+                    "categories": ["LA:Sentimientos"],
+                    "glosses": ["Ira, furia, rabia, indignación."],
+                    "sense_index": "1",
+                    "raw_tags": ["Sentimientos"],
+                },
+                {
+                    "categories": ["LA:Sentimientos", "LA:Términos literarios"],
+                    "glosses": [
+                        "Ira, furia, rabia, indignación.",
+                        "Dícese de armas o similar.",
+                    ],
+                    "sense_index": "d",
+                    "tags": ["literary"],
+                    "raw_tags": ["Sentimientos"],
+                },
+                {
+                    "categories": ["LA:Sentimientos"],
+                    "glosses": ["Ira, furia, rabia, indignación.", "Frenesí."],
+                    "sense_index": "e",
+                    "raw_tags": ["Sentimientos"],
+                },
+                {
+                    "glosses": [
+                        "Sentimientos de desagrado mutuo, de hostilidad mutua."
+                    ],
+                    "sense_index": "2",
+                },
             ],
         )
