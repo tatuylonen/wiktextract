@@ -18,7 +18,9 @@ class TestESLinkage(unittest.TestCase):
     def setUp(self) -> None:
         self.wxr = WiktextractContext(
             Wtp(lang_code="es"),
-            WiktionaryConfig(dump_file_lang_code="es"),
+            WiktionaryConfig(
+                dump_file_lang_code="es", capture_language_codes=None
+            ),
         )
 
     def tearDown(self) -> None:
