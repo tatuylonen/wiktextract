@@ -169,3 +169,5 @@ class WordEntry(BaseModelWrap):
     extra_sounds: dict[str, str] = {}
     forms: list[Form] = []
     hyphenation: str = ""
+    cognates: list[Linkage] = []
+    morphologies: list[Linkage] = []
