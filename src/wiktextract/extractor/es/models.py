@@ -145,16 +145,6 @@ class WordEntry(BaseModelWrap):
     etymology_text: str = Field(
         default="", description="Etymology section as cleaned text."
     )
-    etymology_templates: list[TemplateData] = Field(
-        default=[],
-        description="Templates and their arguments and expansions from the "
-        "etymology section.",
-    )
-    etymology_number: int = Field(
-        default=0,
-        description="For words with multiple numbered etymologies, this "
-        "contains the number of the etymology under which this entry appeared.",
-    )
     antonyms: list[Linkage] = []
     compounds: list[Linkage] = []
     derived: list[Linkage] = []
@@ -169,3 +159,5 @@ class WordEntry(BaseModelWrap):
     extra_sounds: dict[str, str] = {}
     forms: list[Form] = []
     hyphenation: str = ""
+    cognates: list[Linkage] = []
+    morphologies: list[Linkage] = []

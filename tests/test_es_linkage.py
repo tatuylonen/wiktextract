@@ -8,14 +8,19 @@ from wiktextract.extractor.es.linkage import (
     process_linkage_template,
 )
 from wiktextract.extractor.es.models import WordEntry
+from wiktextract.extractor.es.page import parse_page
 from wiktextract.wxr_context import WiktextractContext
 
 
 class TestESLinkage(unittest.TestCase):
+    maxDiff = None
+
     def setUp(self) -> None:
         self.wxr = WiktextractContext(
             Wtp(lang_code="es"),
-            WiktionaryConfig(dump_file_lang_code="es"),
+            WiktionaryConfig(
+                dump_file_lang_code="es", capture_language_codes=None
+            ),
         )
 
     def tearDown(self) -> None:
@@ -102,4 +107,25 @@ class TestESLinkage(unittest.TestCase):
                     "sense": "sándwich de salchicha de Viena",
                 },
             ],
+        )
+
+    def test_derivad_template(self):
+        self.wxr.wtp.add_page(
+            "Plantilla:derivad",
+            10,
+            """*'''Derivados:''' <span style="" class="">[[audiolibro#Español|audiolibro]]</span>, <span style="" class="">[[libracho#Español|libracho]]</span>""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "libro",
+            """== {{lengua|es}} ==
+=== Etimología 1 ===
+==== {{sustantivo masculino|es}} ====
+;1: Conjunto de
+==== Información adicional ====
+{{derivad|audiolibro|libracho}}""",
+        )
+        self.assertEqual(
+            page_data[0]["derived"],
+            [{"word": "audiolibro"}, {"word": "libracho"}],
         )

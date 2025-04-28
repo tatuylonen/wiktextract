@@ -9,8 +9,12 @@ from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from ...wxr_logging import logger
 from .conjugation import extract_conjugation_section
-from .etymology import process_etymology_block
-from .linkage import extract_alt_form_section, extract_linkage_section
+from .etymology import extract_etymology_section
+from .linkage import (
+    extract_additional_information_section,
+    extract_alt_form_section,
+    extract_linkage_section,
+)
 from .models import Sense, WordEntry
 from .pos import extract_pos_section
 from .pronunciation import process_pron_graf_template
@@ -47,6 +51,7 @@ def parse_section(
     pos_template_name = ""
     for level_node_template in level_node.find_content(NodeKind.TEMPLATE):
         pos_template_name = level_node_template.template_name
+        break
 
     if section_title in IGNORED_TITLES:
         pass
@@ -67,7 +72,9 @@ def parse_section(
         section_title.startswith("etimología")
         and wxr.config.capture_etymologies
     ):
-        process_etymology_block(wxr, base_data, level_node)
+        if level_node.contain_node(LEVEL_KIND_FLAGS):
+            base_data = base_data.model_copy(deep=True)
+        extract_etymology_section(wxr, base_data, level_node)
     elif (
         section_title in TRANSLATIONS_TITLES and wxr.config.capture_translations
     ):
@@ -86,6 +93,10 @@ def parse_section(
         extract_conjugation_section(wxr, page_data, level_node)
     elif section_title == "formas alternativas":
         extract_alt_form_section(
+            wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
+        )
+    elif section_title == "información adicional":
+        extract_additional_information_section(
             wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
         )
     else:

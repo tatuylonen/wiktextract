@@ -104,3 +104,36 @@ def extract_alt_form_section(
             word = word.strip()
             if word != "":
                 word_entry.forms.append(Form(form=word, tags=["alt-of"]))
+
+
+def extract_additional_information_section(
+    wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
+) -> None:
+    for node in level_node.children:
+        if isinstance(node, TemplateNode) and node.template_name in [
+            "cognados",
+            "derivad",
+            "morfología",
+        ]:
+            extract_cognados_template(wxr, word_entry, node)
+
+
+def extract_cognados_template(
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+) -> None:
+    # https://es.wiktionary.org/wiki/Plantilla:cognados
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    l_list = []
+    for span_tag in expanded_node.find_html_recursively("span"):
+        word = clean_node(wxr, None, span_tag)
+        if word != "":
+            l_list.append(Linkage(word=word))
+
+    if t_node.template_name == "cognados":
+        word_entry.cognates.extend(l_list)
+    elif t_node.template_name == "derivad":
+        word_entry.derived.extend(l_list)
+    elif t_node.template_name == "morfología":
+        word_entry.morphologies.extend(l_list)
