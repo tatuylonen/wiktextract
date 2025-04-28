@@ -1101,7 +1101,7 @@ def parse_language(
             elif t == "romanization":
                 data_append(pos_data, "tags", "romanization")
         if (
-            HEAD_TAG_RE.fullmatch(name) is not None
+            HEAD_TAG_RE.search(name) is not None
             or name in WORD_LEVEL_HEAD_TEMPLATES
         ):
             args_ht = clean_template_args(wxr, ht)
