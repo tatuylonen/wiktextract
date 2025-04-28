@@ -144,7 +144,7 @@ def analyze_template(wtp: Wtp, page: Page) -> tuple[set[str], bool]:
                  (\|  |  \}\})            # | or }}""",
         unpaired_text,
     ):
-        called_template = m.group(3)
+        called_template = m.group(3).strip()
         called_template = re.sub(r"(?si)<nowiki\s*/>", "", called_template)
         if len(called_template) > 0:
             included_templates.add(called_template)
