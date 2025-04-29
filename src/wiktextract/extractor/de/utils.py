@@ -10,4 +10,4 @@ def extract_sense_index(node_text: str) -> tuple[str, str]:
     else:
         sense_idx = ""
 
-    return sense_idx, node_text
+    return sense_idx, re.sub(r"^[,—]*\s*", "", node_text.strip())

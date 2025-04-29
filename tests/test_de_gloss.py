@@ -96,6 +96,30 @@ class TestDEGloss(unittest.TestCase):
             ],
         )
 
+        self.wxr.wtp.add_page("Vorlage:ugs.", 10, "''[[umgangssprachlich]]''")
+        page_data = parse_page(
+            self.wxr,
+            "patzig",
+            """== patzig ({{Sprache|Deutsch}}) ==
+=== {{Wortart|Adjektiv|Deutsch}} ===
+====Bedeutungen====
+:[1] {{ugs.}}, ''[[pejorativ]] ([[abwertend]]):''
+::[a] als [[Person]]: im [[Gehabe]] [[unangepasst]], [[dominant]] [[auftreten]]d""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"],
+            [
+                {
+                    "glosses": [
+                        "als Person: im Gehabe unangepasst, dominant auftretend"
+                    ],
+                    "sense_index": "1a",
+                    "tags": ["colloquial"],
+                    "raw_tags": ["pejorativ (abwertend)"],
+                }
+            ],
+        )
+
     def test_k_template_ft_arg(self):
         self.wxr.wtp.add_page(
             "Vorlage:K",
