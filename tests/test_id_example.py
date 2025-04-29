@@ -66,3 +66,37 @@ class TestIdExample(TestCase):
                 }
             ],
         )
+
+    def test_obsolete_list(self):
+        page_data = parse_page(
+            self.wxr,
+            "I",
+            """==bahasa Inggris==
+===Pronomina===
+# [[saya]] (formal)
+#: '''''I''' am Australian''
+#:: '''''saya''' orang Australi''
+#:: '''''saya''' orang Australia''""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"],
+            [
+                {
+                    "glosses": ["saya (formal)"],
+                    "examples": [
+                        {
+                            "text": "I am Australian",
+                            "bold_text_offsets": [(0, 1)],
+                            "translation": "saya orang Australi",
+                            "bold_translation_offsets": [(0, 4)],
+                        },
+                        {
+                            "text": "I am Australian",
+                            "bold_text_offsets": [(0, 1)],
+                            "translation": "saya orang Australia",
+                            "bold_translation_offsets": [(0, 4)],
+                        },
+                    ],
+                }
+            ],
+        )
