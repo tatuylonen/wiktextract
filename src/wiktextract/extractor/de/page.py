@@ -309,11 +309,12 @@ def extract_hyphenation_section(
 def extract_note_section(
     wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
 ) -> None:
-    for list_node in level_node.find_child(NodeKind.LIST):
-        for list_item in list_node.find_child(NodeKind.LIST_ITEM):
-            note = clean_node(wxr, None, list_item.children)
-            if note != "":
-                word_entry.notes.append(note)
+    for list_item in level_node.find_child_recursively(NodeKind.LIST_ITEM):
+        note = clean_node(
+            wxr, None, list(list_item.invert_find_child(NodeKind.LIST))
+        )
+        if note != "":
+            word_entry.notes.append(note)
 
 
 def extract_old_spell_template(
