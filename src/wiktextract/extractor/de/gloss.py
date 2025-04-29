@@ -99,8 +99,10 @@ def process_gloss_list_item(
                         italic_text.startswith("(")
                         and italic_text.endswith(")")
                     ):
+                        if not italic_text.endswith(":"):
+                            italic_text = italic_text.strip("() ")
                         for raw_tag in re.split(
-                            r":|,", italic_text.strip(":() ")
+                            r":|,", italic_text.strip(": ")
                         ):
                             raw_tag = raw_tag.strip()
                             if len(raw_tag) > 0:
@@ -123,16 +125,14 @@ def process_gloss_list_item(
                 ):
                     sense_idx = parent_sense.sense_index + sense_idx
                 sense_data.sense_index = sense_idx
-            elif len(gloss_text.strip()) > 0:
+            elif len(gloss_text) > 0:
                 wxr.wtp.debug(
                     "Failed to extract sense number from gloss node",
                     sortid="extractor/de/glosses/extract_glosses/28",
                 )
 
             if len(gloss_text) > 0:
-                sense_data.glosses.append(
-                    re.sub(r"^[,—]*\s*", "", gloss_text.strip())
-                )
+                sense_data.glosses.append(gloss_text)
                 translate_raw_tags(sense_data)
                 word_entry.senses.append(sense_data)
 
