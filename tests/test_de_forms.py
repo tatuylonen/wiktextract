@@ -6,6 +6,7 @@ from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.de.form import extracrt_form_section
 from wiktextract.extractor.de.inflection import extract_inf_table_template
 from wiktextract.extractor.de.models import WordEntry
+from wiktextract.extractor.de.page import parse_page
 from wiktextract.wxr_context import WiktextractContext
 
 
@@ -357,6 +358,74 @@ class TestDeForms(TestCase):
                 {
                     "form": "Hahnen",
                     "tags": ["variant", "Swiss Standard German"],
+                },
+            ],
+        )
+
+    def test_transcription_section(self):
+        self.wxr.wtp.add_page(
+            "Vorlage:DIN 31634",
+            10,
+            "''[[Wiktionary:Altgriechisch/Umschrift|DIN 31634]]:''",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "ἄνθρωπος",
+            """== {{Polytonisch|ἄνθρωπος}} ({{Sprache|Altgriechisch}}) ==
+=== {{Wortart|Substantiv|Altgriechisch}}, {{m}} ===
+====Umschrift====
+:{{DIN 31634}} anthrōpos
+====Bedeutungen====
+:[1] [[Mensch]]""",
+        )
+        self.assertEqual(
+            page_data[0]["forms"],
+            [
+                {
+                    "form": "anthrōpos",
+                    "tags": ["transcription"],
+                    "raw_tags": ["DIN 31634"],
+                }
+            ],
+        )
+
+        page_data = parse_page(
+            self.wxr,
+            "فه‌رهه‌نگ",
+            """== فه‌رهه‌نگ ({{Sprache|Kurdisch}}) ==
+=== {{Wortart|Substantiv|Kurdisch}} ===
+====Umschrift====
+:ferheng
+====Bedeutungen====
+:[1] [[Wörterbuch]], [[Lexikon]]""",
+        )
+        self.assertEqual(
+            page_data[0]["forms"],
+            [{"form": "ferheng", "tags": ["transcription"]}],
+        )
+
+        page_data = parse_page(
+            self.wxr,
+            "日本",
+            """== 日本 ({{Sprache|Japanisch}}) ==
+=== {{Wortart|Substantiv|Japanisch}}, {{Wortart|Eigenname|Japanisch}} ===
+====Umschrift====
+:[[Hilfe:Hepburn-shiki|Hepburn]]: [[nippon]], [[nihon]]
+====Bedeutungen====
+:[1] [[Japan]]""",
+        )
+        self.assertEqual(
+            page_data[0]["forms"],
+            [
+                {
+                    "form": "nippon",
+                    "tags": ["transcription"],
+                    "raw_tags": ["Hepburn"],
+                },
+                {
+                    "form": "nihon",
+                    "tags": ["transcription"],
+                    "raw_tags": ["Hepburn"],
                 },
             ],
         )

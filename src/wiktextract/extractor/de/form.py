@@ -34,3 +34,24 @@ def extracrt_form_section(
                     )
                     translate_raw_tags(form_data)
                     word_entry.forms.append(form_data)
+
+
+def extract_transcription_section(
+    wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
+) -> None:
+    for list_item in level_node.find_child_recursively(NodeKind.LIST_ITEM):
+        text = clean_node(
+            wxr, None, list(list_item.invert_find_child(NodeKind.LIST))
+        )
+        raw_tag = ""
+        if ":" in text:
+            raw_tag = text[: text.index(":")].strip()
+            text = text[text.index(":") + 1 :].strip()
+        for roman in text.split(","):
+            roman = roman.strip()
+            if roman != "":
+                form = Form(form=roman, tags=["transcription"])
+                if raw_tag != "":
+                    form.raw_tags.append(raw_tag)
+                    translate_raw_tags(form)
+                word_entry.forms.append(form)
