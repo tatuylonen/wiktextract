@@ -115,12 +115,11 @@ def process_deklinationsseite_template(
                             form_text = ""
                             if article not in ("", "—"):
                                 form_text = article + " "
-                            form_text += cell_text
-                            form = Form(form=form_text, source=page_tite)
+                            raw_tags = []
                             if h4_text != "":
-                                form.raw_tags.append(h4_text)
+                                raw_tags.append(h4_text)
                             if row_header != "":
-                                form.raw_tags.append(row_header)
+                                raw_tags.append(row_header)
                             for col_header in col_headers:
                                 if (
                                     col_header.text not in ("", "—")
@@ -128,10 +127,16 @@ def process_deklinationsseite_template(
                                     and col_index
                                     < col_header.index + col_header.span
                                 ):
-                                    form.raw_tags.append(col_header.text)
-                            if form.form not in ("", "—"):
-                                translate_raw_tags(form)
-                                word_entry.forms.append(form)
+                                    raw_tags.append(col_header.text)
+                            for line in cell_text.splitlines():
+                                form = Form(
+                                    form=form_text + line,
+                                    source=page_tite,
+                                    raw_tags=raw_tags,
+                                )
+                                if form.form not in ("", "—"):
+                                    translate_raw_tags(form)
+                                    word_entry.forms.append(form)
                         col_index += int(cell_node.attrs.get("colspan", "1"))
 
 

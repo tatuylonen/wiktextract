@@ -6,9 +6,9 @@ from wikitextprocessor.parser import LevelNode, NodeKind, TemplateNode, WikiNode
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from ...wxr_logging import logger
-from .etymology import extract_etymology
+from .etymology import extract_etymology_section
 from .example import extract_examples
-from .form import extracrt_form_section
+from .form import extracrt_form_section, extract_transcription_section
 from .gloss import extract_glosses
 from .inflection import extract_inf_table_template
 from .linkage import extract_linkages
@@ -71,7 +71,7 @@ def parse_section(
                 LINKAGE_TITLES[section_name],
             )
         elif wxr.config.capture_etymologies and section_name == "Herkunft":
-            extract_etymology(
+            extract_etymology_section(
                 wxr,
                 page_data[-1] if len(page_data) > 0 else base_data,
                 level_node,
@@ -91,6 +91,12 @@ def parse_section(
             )
         elif section_name == "Anmerkung":
             extract_note_section(
+                wxr,
+                page_data[-1] if len(page_data) > 0 else base_data,
+                level_node,
+            )
+        elif section_name == "Umschrift":
+            extract_transcription_section(
                 wxr,
                 page_data[-1] if len(page_data) > 0 else base_data,
                 level_node,
@@ -309,11 +315,12 @@ def extract_hyphenation_section(
 def extract_note_section(
     wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
 ) -> None:
-    for list_node in level_node.find_child(NodeKind.LIST):
-        for list_item in list_node.find_child(NodeKind.LIST_ITEM):
-            note = clean_node(wxr, None, list_item.children)
-            if note != "":
-                word_entry.notes.append(note)
+    for list_item in level_node.find_child_recursively(NodeKind.LIST_ITEM):
+        note = clean_node(
+            wxr, None, list(list_item.invert_find_child(NodeKind.LIST))
+        )
+        if note != "":
+            word_entry.notes.append(note)
 
 
 def extract_old_spell_template(

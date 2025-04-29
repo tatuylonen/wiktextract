@@ -19,7 +19,6 @@ class TestDEPage(unittest.TestCase):
                 dump_file_lang_code="de", capture_language_codes=None
             ),
         )
-        self.maxDiff = None
 
     def tearDown(self) -> None:
         self.wxr.wtp.close_db_conn()

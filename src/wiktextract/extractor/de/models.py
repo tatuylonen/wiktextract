@@ -168,7 +168,7 @@ class WordEntry(BaseModelWrap):
     raw_tags: list[str] = []
     categories: list[str] = []
     redirects: list[str] = []
-    etymology_text: str = ""
+    etymology_texts: list[str] = []
     forms: list[Form] = []
     meronyms: list[Linkage] = []
     hyphenation: str = ""
