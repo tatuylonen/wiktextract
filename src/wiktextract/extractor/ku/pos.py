@@ -292,7 +292,9 @@ def extract_navdêr_template_form(
 ) -> None:
     if arg_name not in t_node.template_parameters:
         return
-    form = Form(form=t_node.template_parameters[arg_name])
+    form = Form(
+        form=clean_node(wxr, None, t_node.template_parameters[arg_name])
+    )
     if isinstance(tag, str):
         form.tags.append(tag)
     elif isinstance(tag, list):
