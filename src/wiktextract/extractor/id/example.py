@@ -32,9 +32,12 @@ def extract_example_list_item(
             if node.kind == NodeKind.ITALIC:
                 italic_node = node
             elif node.kind == NodeKind.LIST and italic_node is not None:
+                italic_text = clean_node(wxr, None, italic_node)
+                if italic_text == "":
+                    continue
                 for child_list_item in node.find_child(NodeKind.LIST_ITEM):
                     e_data = Example(
-                        text=clean_node(wxr, None, italic_node),
+                        text=italic_text,
                         translation=clean_node(
                             wxr, sense, child_list_item.children
                         ),
@@ -53,9 +56,8 @@ def extract_example_list_item(
                         e_data,
                         "bold_translation_offsets",
                     )
-                    if e_data.text != "":
-                        sense.examples.append(e_data)
-                        italic_node = None
+                    sense.examples.append(e_data)
+                italic_node = None
 
     if italic_node is not None:
         e_data = Example(text=clean_node(wxr, None, italic_node))
