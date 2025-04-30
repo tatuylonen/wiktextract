@@ -29,9 +29,15 @@ def extract_translation_list_item(
     sense: str,
 ) -> None:
     lang_name = "unknown"
-    for node in list_item.children:
+    after_colon = False
+    for index, node in enumerate(list_item.children):
         if isinstance(node, str) and ":" in node and lang_name == "unknown":
-            lang_name = node[: node.index(":")].strip()
+            lang_name = clean_node(
+                wxr,
+                None,
+                list_item.children[:index] + [node[: node.rindex(":")]],
+            ).strip(": ")
+            after_colon = True
         elif isinstance(node, TemplateNode) and node.template_name in [
             "ç",
             "çeviri",
@@ -42,13 +48,17 @@ def extract_translation_list_item(
                 extract_translation_list_item(
                     wxr, word_entry, child_list_item, sense
                 )
-        elif isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
+        elif (
+            after_colon
+            and isinstance(node, WikiNode)
+            and node.kind == NodeKind.LINK
+        ):
             word = clean_node(wxr, None, node)
             if word != "":
                 word_entry.translations.append(
                     Translation(
                         word=word,
-                        lang=lang_name,
+                        lang=lang_name or "unknown",
                         lang_code=name_to_code(lang_name, "tr") or "unknown",
                     )
                 )
@@ -68,7 +78,7 @@ def extract_çeviri_template(
         wxr.wtp.node_to_wikitext(t_node), expand_all=True
     )
     tr_data = Translation(
-        word="", lang_code=lang_code, lang=lang_name, sense=sense
+        word="", lang_code=lang_code, lang=lang_name or "unknown", sense=sense
     )
     for span_tag in expanded_node.find_html(
         "span", attr_name="lang", attr_value=lang_code
