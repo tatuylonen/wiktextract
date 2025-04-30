@@ -84,7 +84,7 @@ Foo.
             title="Template:verb",
             namespace_id=10,
             body="""{| border="0" width="100%25" class="inflection-table+inflection-noun-run-~-~-~-~-~-~"
-|- 
+|-
 | bgcolor="%23e2e2ff" valign="top" width="49%25" style="padding-left%3A1em%3B" |
 singular<br>
 '''[[run]]'''
@@ -110,7 +110,7 @@ plural<br>
             ],
             "pos": "noun",
             "senses": [{"glosses": ["Foo."]}],
-            "head_templates": [ { "name": "noun", "expansion": "[POS TABLE]" } ]
+            "head_templates": [{"name": "noun", "expansion": "[POS TABLE]"}],
         }
         self.process_test(pos, should_be)
 
@@ -120,7 +120,7 @@ plural<br>
             title="Template:verb",
             namespace_id=10,
             body="""{| border="0" width="100%25" class="inflection-table+inflection-noun-run-~-~-~-~-~-~"
-|- 
+|-
 | bgcolor="%23e2e2ff" valign="top" width="49%25" style="padding-left%3A1em%3B" |
 singular<br>
 '''[[run]]'''
@@ -147,7 +147,7 @@ Foo.
             ],
             "pos": "noun",
             "senses": [{"glosses": ["Foo."]}],
-            "head_templates": [ { "name": "noun", "expansion": "[POS TABLE]" } ]
+            "head_templates": [{"name": "noun", "expansion": "[POS TABLE]"}],
         }
         self.process_test(pos, should_be)
 
@@ -240,18 +240,9 @@ Foo.
         }
         self.process_test(pos, should_be)
 
-    @patch(
-        "wikitextprocessor.Wtp.get_page",
-        side_effect=[
-            Page(title="Template:baz", namespace_id=10, body="(baz)"),
-            Page(
-                title="Template:comparative",
-                namespace_id=10,
-                body="(comparative)",
-            ),
-        ],
-    )
-    def test_tags3(self, mock) -> None:
+    def test_tags3(self) -> None:
+        self.wxr.wtp.add_page("Template:baz", 10, "(baz)")
+        self.wxr.wtp.add_page("Template:comparative", 10, "(comparative)")
         pos = """==Noun==
 # {{baz}} {{comparative}} Foo.
 """
@@ -268,17 +259,10 @@ Foo.
         }
         self.process_test(pos, should_be)
 
-    @patch(
-        "wikitextprocessor.Wtp.get_page",
-        side_effect=[
-            Page(
-                title="Template:baz comparative",
-                namespace_id=10,
-                body="(baz, comparative)",
-            ),
-        ],
-    )
-    def test_tags4(self, mock) -> None:
+    def test_tags4(self) -> None:
+        self.wxr.wtp.add_page(
+            "Template:baz comparative", 10, "(baz, comparative)"
+        )
         pos = """==Noun==
 # {{baz comparative}} Foo.
 """
@@ -295,13 +279,8 @@ Foo.
         }
         self.process_test(pos, should_be)
 
-    @patch(
-        "wikitextprocessor.Wtp.get_page",
-        side_effect=[
-            Page(title="Template:syn", namespace_id=10, body=""),
-        ],
-    )
-    def test_synonyms1(self, mock) -> None:
+    def test_synonyms1(self) -> None:
+        self.wxr.wtp.add_page("Template:syn", 10, "")
         pos = """==Noun==
 # Foo. {{syn|bar|baz}}
 """
@@ -320,13 +299,8 @@ Foo.
         }
         self.process_test(pos, should_be)
 
-    @patch(
-        "wikitextprocessor.Wtp.get_page",
-        side_effect=[
-            Page(title="Template:syn", namespace_id=10, body=""),
-        ],
-    )
-    def test_synonyms2(self, mock) -> None:
+    def test_synonyms2(self) -> None:
+        self.wxr.wtp.add_page("Template:syn", 10, "")
         pos = """==Noun==
 # Foo. {{syn||bar|baz|}}
 """

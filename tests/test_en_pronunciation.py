@@ -1,7 +1,6 @@
 from unittest import TestCase
-from unittest.mock import patch
 
-from wikitextprocessor import Page, Wtp
+from wikitextprocessor import Wtp
 
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.en.pronunciation import parse_pronunciation
@@ -23,40 +22,30 @@ class TestPronunciation(TestCase):
             self.wxr.thesaurus_db_path, self.wxr.thesaurus_db_conn
         )
 
-    test1_templates = [
-        ("enPR", "(Received Pronunciation) enPR: föö"),
-        ("IPA", "IPA⁽ᵏᵉʸ⁾: /foo/"),
-        ("IPA", "(Received Pronunciation) IPA⁽ᵏᵉʸ⁾: /bar/"),
-        ("enPR", "enPR: bär"),
-        ("IPA", "(Northern England, Scotland) IPA⁽ᵏᵉʸ⁾: /baz/"),
-        # The Template:audio calls have no calls to get_page() because
-        # parse_pronunciation_template_fn skips them; clean_value()
-        # is called on argument 3, but that doesn't contain templates here
-        # ("audio", "Audio (UK):	"),
-        ("enPR", "(US) enPR: vöö"),
-        ("IPA", "IPA⁽ᵏᵉʸ⁾: /voo/"),
-        # ("audio", "Audio (US):	"),
-        ("homophones", "Homophone: feu"),
-        ("rhymes", "Rhymes: -oo, -öö"),
-        (
-            "IPA",
-            "(Received Pronunciation, ergative) IPA⁽ᵏᵉʸ⁾: (Caribbean, note-fodder causes everything to be a note) /foobar/ (singular), (note-text) foobaz (ipa accepts parens) (Cajun, dual), barbar, barbaz; baz, bazfoo (singular) (US, paucal)",
-        ),
-    ]
-    test1_pages = [
-        Page(title=title, namespace_id=10, body=body)
-        for (title, body) in test1_templates
-    ]
-
-    # for page in test1_pages:
-    #     print(f"== {page}")
-
-    @patch(
-        "wikitextprocessor.Wtp.get_page",
-        side_effect=test1_pages,
-    )
-    def test1(self, mock_get_page):
+    def test1(self):
         self.wxr.wtp.start_page("foo")
+        self.wxr.wtp.add_page(
+            "Template:enPR",
+            10,
+            """{{#switch:{{{1}}}
+| föö = (Received Pronunciation) enPR: föö
+| bär = enPR: bär
+| vöö = (US) enPR: vöö
+}}""",
+        )
+        self.wxr.wtp.add_page(
+            "Template:IPA",
+            10,
+            """{{#switch:{{{2}}}
+| /foo/ = IPA⁽ᵏᵉʸ⁾: /foo/
+| /bar/ = (Received Pronunciation) IPA⁽ᵏᵉʸ⁾: /bar/
+| /baz/ = (Northern England, Scotland) IPA⁽ᵏᵉʸ⁾: /baz/
+| /voo/ = IPA⁽ᵏᵉʸ⁾: /voo/
+| foobar = (Received Pronunciation, ergative) IPA⁽ᵏᵉʸ⁾: (Caribbean, note-fodder causes everything to be a note) /foobar/ (singular), (note-text) foobaz (ipa accepts parens) (Cajun, dual), barbar, barbaz; baz, bazfoo (singular) (US, paucal)
+}}""",
+        )
+        self.wxr.wtp.add_page("Template:homophones", 10, "Homophone: feu")
+        self.wxr.wtp.add_page("Template:rhymes", 10, "Rhymes: -oo, -öö")
         tree = self.wxr.wtp.parse("""=== Pronunciation ===
 * Noun:
 * {{enPR|föö|a=RP}}, {{IPA|en|/foo/}}
@@ -186,20 +175,12 @@ class TestPronunciation(TestCase):
             },
         )
 
-    test2_templates = [
-        ("enPR", "(Received Pronunciation) enPR: föö"),
-    ]
-    test1_pages = [
-        Page(title=title, namespace_id=10, body=body)
-        for (title, body) in test1_templates
-    ]
-
-    @patch(
-        "wikitextprocessor.Wtp.get_page",
-        side_effect=test1_pages,
-    )
-    def test2(self, mock_get_page):
+    def test2(self):
         self.wxr.wtp.start_page("baz")
+        self.wxr.wtp.add_page(
+            "Template:enPR", 10, "(Received Pronunciation) enPR: föö"
+        )
+        self.wxr.wtp.add_page("Template:IPA", 10, "IPA⁽ᵏᵉʸ⁾: /foo/")
         tree = self.wxr.wtp.parse("""=== Pronunciation ===
 * Noun:
 * {{enPR|föö|a=RP}}, {{IPA|en|/foo/}}
@@ -255,26 +236,13 @@ class TestPronunciation(TestCase):
             },
         )
 
-    test1_templates = [
-        (
-            "IPA",
-            "(Received Pronunciation, ergative) IPA⁽ᵏᵉʸ⁾: (Caribbean, note-fodder causes everything to be a note) /foobar/ (singular), (note-text) foobaz (ipa accepts parens) (Cajun, dual), barbar, barbaz; baz, bazfoo (singular) (US, paucal)",
-        ),
-    ]
-    test1_pages = [
-        Page(title=title, namespace_id=10, body=body)
-        for (title, body) in test1_templates
-    ]
-
-    # for page in test1_pages:
-    #     print(f"== {page}")
-
-    @patch(
-        "wikitextprocessor.Wtp.get_page",
-        side_effect=test1_pages,
-    )
-    def test_split_args(self, mock_get_page):
+    def test_split_args(self):
         self.wxr.wtp.start_page("foo")
+        self.wxr.wtp.add_page(
+            "IPA",
+            10,
+            "(Received Pronunciation, ergative) IPA⁽ᵏᵉʸ⁾: (Caribbean, note-fodder causes everything to be a note) /foobar/ (singular), (note-text) foobaz (ipa accepts parens) (Cajun, dual), barbar, barbaz; baz, bazfoo (singular) (US, paucal)",
+        )
         tree = self.wxr.wtp.parse("""=== Pronunciation ===
 * {{IPA|en|foobar|foobaz (ipa accepts parens)|barbar|barbaz|;|baz|bazfoo|a=RP|aa=US|q=ergative|qq=paucal|q1=note-fodder causes everything to be a note|qq1=singular|a1=Caribbean|aa2=Cajun|q2=note-text|qq2=dual|qq6=singular}}
 """)
