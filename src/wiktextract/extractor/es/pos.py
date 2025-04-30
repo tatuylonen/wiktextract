@@ -13,7 +13,7 @@ from ...wxr_context import WiktextractContext
 from .example import process_ejemplo_template
 from .inflection import process_inflect_template
 from .linkage import process_linkage_template
-from .models import AltForm, Sense, WordEntry
+from .models import AltForm, Form, Sense, WordEntry
 from .section_titles import LINKAGE_TITLES
 from .tags import translate_raw_tags
 
@@ -42,6 +42,8 @@ def extract_pos_section(
         elif isinstance(node, TemplateNode):
             if node.template_name.startswith("inflect."):
                 process_inflect_template(wxr, word_entry, node)
+            elif node.template_name in ["es.sust", "es.adj", "es.v"]:
+                extract_pos_header_template(wxr, word_entry, node)
             elif node.template_name.removesuffix("s") in LINKAGE_TITLES:
                 process_linkage_template(wxr, word_entry, node)
             elif node.template_name == "ejemplo" and len(word_entry.senses) > 0:
@@ -87,7 +89,7 @@ def extract_gloss_list_item(
     gloss_nodes = []
     for node in list_item.definition:
         if isinstance(node, TemplateNode) and node.template_name.startswith(
-            ("f.", "forma ")
+            ("f.", "forma ", "plural")
         ):
             process_forma_template(wxr, sense, node)
             gloss_nodes.append(node)
@@ -165,3 +167,25 @@ def process_ambito_template(
                     sense.tags.extend(tr_tags)
 
     clean_node(wxr, sense, t_node)  # save category links
+
+
+def extract_pos_header_template(
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+) -> None:
+    # https://es.wiktionary.org/wiki/Plantilla:es.sust
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    raw_tag = ""
+    for node in expanded_node.children:
+        if isinstance(node, str) and node.strip().endswith(":"):
+            raw_tag = clean_node(wxr, None, node).strip(": ¦")
+        elif isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
+            form = Form(form=clean_node(wxr, None, node))
+            if form.form == "":
+                continue
+            if raw_tag != "":
+                for r_tag in raw_tag.split():
+                    form.raw_tags.append(r_tag)
+                translate_raw_tags(form)
+            word_entry.forms.append(form)
