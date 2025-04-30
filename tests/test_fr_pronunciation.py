@@ -162,13 +162,13 @@ class TestPronunciation(TestCase):
         )
         page_data = [base_data]
         self.wxr.wtp.start_page("dictionnaire")
-        root = self.wxr.wtp.parse(
-            "=== {{S|prononciation}} ===\n* {{pron-rimes|dik.sjɔ.nɛʁ|fr}}"
-        )
         self.wxr.wtp.add_page(
             "Modèle:pron-rimes",
             10,
             'La prononciation <span class="API" title="Prononciation API">\\dik.sjɔ.nɛʁ\\</span> rime avec les [[Annexe:Rimes en français en \\ɛʁ\\|mots qui finissent en <span class="API" title="Prononciation API">\\ɛʁ\\</span>]].[[Catégorie:Rimes en français en \\ɛʁ\\]]',
+        )
+        root = self.wxr.wtp.parse(
+            "=== {{S|prononciation}} ===\n* {{pron-rimes|dik.sjɔ.nɛʁ|fr}}"
         )
         extract_pronunciation(self.wxr, page_data, root.children[0], base_data)
         data = page_data[0].model_dump(exclude_defaults=True)
@@ -182,9 +182,6 @@ class TestPronunciation(TestCase):
         base_data = WordEntry(word="作", lang_code="zh", lang="Chinois")
         page_data = [base_data]
         self.wxr.wtp.start_page("作")
-        root = self.wxr.wtp.parse(
-            "=== {{S|prononciation}} ===\n{{cmn-pron|zuō|zuó|zuò}}"
-        )
         self.wxr.wtp.add_page(
             "Modèle:pinyin",
             10,
@@ -210,6 +207,9 @@ class TestPronunciation(TestCase):
 ** {{Wade}} : {{lang|zh-Latn|tso<sup>1</sup>, tso<sup>2</sup>, tso<sup>4</sup>}}
 ** {{Yale-zh}} : {{lang|zh-Latn|dzwō, dzwó, dzwò}}
 ** {{zhuyin}} : {{lang|zh-Bopomofo|ㄗㄨㄛ，ㄗㄨㄛˊ，ㄗㄨㄛˋ}}""",  # noqa: E501
+        )
+        root = self.wxr.wtp.parse(
+            "=== {{S|prononciation}} ===\n{{cmn-pron|zuō|zuó|zuò}}"
         )
         extract_pronunciation(self.wxr, page_data, root.children[0], base_data)
         self.assertEqual(

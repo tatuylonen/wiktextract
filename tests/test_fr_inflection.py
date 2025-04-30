@@ -442,7 +442,6 @@ class TestInflection(TestCase):
         # https://fr.wiktionary.org/wiki/new
         page_data = [WordEntry(word="new", lang_code="en", lang="Anglais")]
         self.wxr.wtp.start_page("new")
-        root = self.wxr.wtp.parse("{{en-adj-er|pron=ˈnu|pronGB=ˈnjuː}}")
         self.wxr.wtp.add_page(
             "Modèle:en-adj-er",
             10,
@@ -460,6 +459,7 @@ class TestInflection(TestCase):
 | <bdi lang="en" xml:lang="en" class="lang-en">[[newest#en|newest]]</bdi><br />[[Annexe:Prononciation/anglais|<span class="API" title="Prononciation API">\\ˈnu.ɪst\\</span>]]<small> ou </small>[[Annexe:Prononciation/anglais|<span class="API" title="Prononciation API">\\ˈnjuː.ɪst\\</span>]]
 |}""",  # noqa: E501
         )
+        root = self.wxr.wtp.parse("{{en-adj-er|pron=ˈnu|pronGB=ˈnjuː}}")
         extract_inflection(self.wxr, page_data, root.children[0])
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in page_data[-1].forms],
@@ -480,7 +480,6 @@ class TestInflection(TestCase):
     def test_fr_verbe_flexion(self):
         page_data = [WordEntry(word="dièse", lang_code="fr", lang="Français")]
         self.wxr.wtp.start_page("dièse")
-        root = self.wxr.wtp.parse("{{fr-verbe-flexion|diéser}}")
         self.wxr.wtp.add_page(
             "Modèle:fr-verbe-flexion",
             10,
@@ -494,6 +493,7 @@ class TestInflection(TestCase):
 | il/elle/on dièse
 |}""",
         )
+        root = self.wxr.wtp.parse("{{fr-verbe-flexion|diéser}}")
         extract_inflection(self.wxr, page_data, root.children[0])
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in page_data[-1].forms],
@@ -514,7 +514,6 @@ class TestInflection(TestCase):
             WordEntry(word="abbacarla", lang_code="it", lang="Italien")
         ]
         self.wxr.wtp.start_page("abbacarla")
-        root = self.wxr.wtp.parse("{{it-enclise|abbacare|abbacar|abbacando}}")
         self.wxr.wtp.add_page(
             "Modèle:it-enclise",
             10,
@@ -529,6 +528,7 @@ class TestInflection(TestCase):
 | <bdi>[[abbacargli#it|abbacargli]]</bdi>
 |}""",
         )
+        root = self.wxr.wtp.parse("{{it-enclise|abbacare|abbacar|abbacando}}")
         extract_inflection(self.wxr, page_data, root.children[0])
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in page_data[-1].forms],
@@ -551,7 +551,6 @@ class TestInflection(TestCase):
     def test_br_nom(self):
         page_data = [WordEntry(word="poltron", lang_code="br", lang="Breton")]
         self.wxr.wtp.start_page("poltron")
-        root = self.wxr.wtp.parse("{{br-nom|poltron|poltroned|poltronien}}")
         self.wxr.wtp.add_page(
             "Modèle:br-nom",
             10,
@@ -567,6 +566,7 @@ class TestInflection(TestCase):
 | [[poltronien#br|poltronien]]
 |}""",
         )
+        root = self.wxr.wtp.parse("{{br-nom|poltron|poltroned|poltronien}}")
         extract_inflection(self.wxr, page_data, root.children[0])
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in page_data[-1].forms],
@@ -624,7 +624,6 @@ class TestInflection(TestCase):
             WordEntry(word="abdikanta", lang_code="eo", lang="Espéranto")
         ]
         self.wxr.wtp.start_page("abdikanta")
-        root = self.wxr.wtp.parse("{{eo-conj|abdik|adp=1|sub=mf|subp=}}")
         self.wxr.wtp.add_page(
             "Modèle:eo-conj",
             10,
@@ -647,6 +646,7 @@ class TestInflection(TestCase):
 | [[abdikus#eo|abdikus]] || [[abdiku#eo|abdiku]]
 |}""",
         )
+        root = self.wxr.wtp.parse("{{eo-conj|abdik|adp=1|sub=mf|subp=}}")
         extract_inflection(self.wxr, page_data, root.children[0])
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in page_data[-1].forms],
