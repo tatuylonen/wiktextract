@@ -102,3 +102,34 @@ class TestTrTranslation(TestCase):
                 {"lang": "İngilizce", "lang_code": "en", "word": "be hungry"},
             ],
         )
+
+    def test_low_quality(self):
+        self.wxr.wtp.add_page(
+            "Şablon:ç",
+            10,
+            """{{#switch:{{{1}}}
+| ota = <span class="ota-Arab" lang="ota">[[تخمين#Osmanlı Türkçesi|تخمين]]</span>&lrm;<span class="tpos">&nbsp;[[:ota:تخمين|(ota)]]</span>
+| ug = <span class="Latn" lang="ug">[[kəbi#Uygurca|kəbi]]</span><span class="tpos">&nbsp;[[:ug:kəbi|(ug)]]</span>
+}}""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "tahmin",
+            """==Türkçe==
+===Ad===
+# [[akla]]
+====Çeviriler====
+* :Osmanlı Türkçesi: {{ç|ota|تخمين}}
+*[[Uygurca]]: {{ç|ug|kəbi}}""",
+        )
+        self.assertEqual(
+            page_data[0]["translations"],
+            [
+                {
+                    "lang": "Osmanlı Türkçesi",
+                    "lang_code": "ota",
+                    "word": "تخمين",
+                },
+                {"lang": "Uygurca", "lang_code": "ug", "word": "kəbi"},
+            ],
+        )
