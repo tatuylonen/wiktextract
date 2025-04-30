@@ -118,3 +118,27 @@ koutu, koute.
         self.assertEqual(
             page_data[0]["forms"], [{"form": "sin", "tags": ["alt-of"]}]
         )
+
+    def test_pos_header(self):
+        self.wxr.wtp.add_page(
+            "Plantilla:es.sust",
+            10,
+            """'''gat<span style='color:Green; font-weight: bold;'>o</span>'''&ensp;¦&ensp;plural: [[gatos|gat<span style='color:Green; font-weight: bold;'>os</span>]]&ensp;¦&ensp;femenino: [[gata|gat<span style='color:Green; font-weight: bold;'>a</span>]]&ensp;¦&ensp;femenino plural: [[gatas|gat<span style='color:Green; font-weight: bold;'>as</span>]]""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "goto",
+            """== {{lengua|es}} ==
+=== Etimología 1 ===
+==== Sustantivo femenino y masculino ====
+{{es.sust|mf}}
+;1: Animal""",
+        )
+        self.assertEqual(
+            page_data[0]["forms"],
+            [
+                {"form": "gatos", "tags": ["plural"]},
+                {"form": "gata", "tags": ["feminine"]},
+                {"form": "gatas", "tags": ["feminine", "plural"]},
+            ],
+        )
