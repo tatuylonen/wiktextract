@@ -79,7 +79,7 @@ class TestTrGloss(TestCase):
                             "text": "Der Zahnarzt entfernte ihr drei Zähne.",
                             "bold_text_offsets": [(32, 37)],
                             "translation": "Diş hekimi dişlerinden üçünü çıkardı.",
-                            "bold_translation_offsets": [(14, 20)],
+                            "bold_translation_offsets": [(11, 17)],
                         }
                     ],
                     "glosses": ["diş"],

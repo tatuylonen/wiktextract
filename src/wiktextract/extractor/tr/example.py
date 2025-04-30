@@ -95,7 +95,7 @@ def extract_ux_template(
         calculate_bold_offsets(
             wxr,
             wxr.wtp.parse(wxr.wtp.node_to_wikitext(third_arg)),
-            third_arg,
+            tr_value,
             example,
             "bold_translation_offsets",
         )
