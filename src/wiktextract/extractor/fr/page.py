@@ -2,6 +2,7 @@ from typing import Any
 
 from wikitextprocessor.parser import (
     LEVEL_KIND_FLAGS,
+    LevelNode,
     NodeKind,
     TemplateNode,
     WikiNode,
@@ -40,7 +41,7 @@ def parse_section(
     wxr: WiktextractContext,
     page_data: list[WordEntry],
     base_data: WordEntry,
-    level_node: WikiNode,
+    level_node: LevelNode,
 ) -> EtymologyData | None:
     etymology_data = None
     for level_node_template in level_node.find_content(NodeKind.TEMPLATE):
@@ -131,7 +132,7 @@ def process_pos_block(
     wxr: WiktextractContext,
     page_data: list[WordEntry],
     base_data: WordEntry,
-    pos_title_node: WikiNode,
+    pos_title_node: LevelNode,
     pos_argument: str,
     pos_title: str,
 ):
@@ -178,7 +179,7 @@ def process_pos_block(
                     extract_inflection(wxr, page_data, child)
             elif child.kind == NodeKind.BOLD and form_line_start == 0:
                 form_line_start = index + 1
-            elif child.kind == NodeKind.LIST:
+            elif child.kind == NodeKind.LIST and child.sarg.startswith("#"):
                 if index < gloss_start:
                     gloss_start = index
                 extract_gloss(wxr, page_data, child)
