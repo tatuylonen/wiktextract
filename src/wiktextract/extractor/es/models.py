@@ -162,3 +162,4 @@ class WordEntry(BaseModelWrap):
     hyphenation: str = ""
     cognates: list[Linkage] = []
     morphologies: list[Linkage] = []
+    descendants: list[Translation] = []

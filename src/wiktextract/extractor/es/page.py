@@ -81,7 +81,16 @@ def parse_section(
         if len(page_data) == 0:
             page_data.append(base_data.model_copy(deep=True))
         extract_translation_section(wxr, page_data, level_node)
-    elif section_title in LINKAGE_TITLES:
+    elif section_title == "descendientes":
+        if len(page_data) == 0:
+            page_data.append(base_data.model_copy(deep=True))
+        extract_translation_section(wxr, page_data, level_node, False)
+    elif (
+        section_title in LINKAGE_TITLES
+        or section_title.removesuffix("s") in LINKAGE_TITLES
+    ):
+        if section_title not in LINKAGE_TITLES:
+            section_title = section_title.removesuffix("s")
         if len(page_data) == 0:
             page_data.append(base_data.model_copy(deep=True))
         extract_linkage_section(
@@ -123,7 +132,6 @@ def parse_page(
     # https://es.wiktionary.org/wiki/Wikcionario:Estructura
     if wxr.config.verbose:
         logger.info(f"Parsing page: {page_title}")
-
     wxr.wtp.start_page(page_title)
     tree = wxr.wtp.parse(page_text)
     page_data: list[WordEntry] = []

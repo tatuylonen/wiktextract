@@ -11,20 +11,23 @@ from .tags import translate_raw_tags
 
 
 def extract_translation_section(
-    wxr: WiktextractContext, page_data: list[WordEntry], level_node: LevelNode
+    wxr: WiktextractContext,
+    page_data: list[WordEntry],
+    level_node: LevelNode,
+    is_translation: bool = True,
 ) -> None:
     tr_data = []
     cats = []
     sense = ""
     sense_index = ""
     for t_node in level_node.find_child(NodeKind.TEMPLATE):
-        if t_node.template_name == "t":
+        if t_node.template_name in ["t", "d"]:
             new_tr_list, new_cats = process_t_template(
                 wxr, t_node, sense, sense_index
             )
             tr_data.extend(new_tr_list)
             cats.extend(new_cats)
-        elif t_node.template_name == "trad-arriba":
+        elif t_node.template_name == "trad-arriba" and is_translation:
             sense = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
             m = re.match(r"\[([\d.a-z]+)\]", sense)
             if m is not None:
@@ -36,7 +39,10 @@ def extract_translation_section(
             data.lang_code == page_data[-1].lang_code
             and data.etymology_text == page_data[-1].etymology_text
         ):
-            data.translations.extend(tr_data)
+            if is_translation:
+                data.translations.extend(tr_data)
+            else:
+                data.descendants.extend(tr_data)
             data.categories.extend(cats)
 
 
@@ -74,7 +80,10 @@ def process_t_template(
         lang_name = code_to_name(lang_code, "es")
 
     for tr_index in itertools.count(1):
-        if "t" + str(tr_index) not in template_node.template_parameters:
+        if (
+            "t" + str(tr_index) not in template_node.template_parameters
+            and "d" + str(tr_index) not in template_node.template_parameters
+        ):
             break
         tr_data = Translation(
             lang_code=lang_code,
@@ -85,6 +94,7 @@ def process_t_template(
         )
         for param_prefix, field in (
             ("t", "word"),
+            ("d", "word"),
             ("a", "sense_index"),
             ("tl", "roman"),
             ("nota", "raw_tags"),
@@ -103,7 +113,7 @@ def process_t_template(
                 value = T_NUMBERS.get(value)
             elif param_prefix == "a" and value != "":
                 sense_index = value
-            if value is None:
+            if value is None or value == "":
                 continue
 
             pre_value = getattr(tr_data, field)
