@@ -36,6 +36,7 @@ class Translation(BaseModelWrap):
     roman: str = Field(
         default="", description="Transliteration in roman characters"
     )
+    sense: str = ""
 
 
 class TemplateData(BaseModelWrap):

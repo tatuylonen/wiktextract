@@ -4,15 +4,20 @@ from wikitextprocessor import Wtp
 
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.es.models import WordEntry
+from wiktextract.extractor.es.page import parse_page
 from wiktextract.extractor.es.translation import extract_translation_section
 from wiktextract.wxr_context import WiktextractContext
 
 
 class TestESTranslation(unittest.TestCase):
+    maxDiff = None
+
     def setUp(self) -> None:
         self.wxr = WiktextractContext(
             Wtp(lang_code="es"),
-            WiktionaryConfig(dump_file_lang_code="es"),
+            WiktionaryConfig(
+                dump_file_lang_code="es", capture_language_codes=None
+            ),
         )
 
     def tearDown(self) -> None:
@@ -88,3 +93,34 @@ class TestESTranslation(unittest.TestCase):
                 },
             ],
         )
+
+    def test_trad_arriba(self):
+        self.wxr.wtp.add_page(
+            "Plantilla:t",
+            10,
+            "* Ainu: [[カメラ#Ainu|カメラ]] <sup>[[:ain:カメラ|(ain)]]</sup>[[Categoría:Español-Ainu]]",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "cámara",
+            """== {{lengua|es}} ==
+=== Etimología 1 ===
+==== Sustantivo femenino ====
+;1: Aparato
+==== Traducciones ====
+{{trad-arriba|[1] aparato capturador de imágenes estáticas}}
+{{t|ain|t1=カメラ}}""",
+        )
+        self.assertEqual(
+            page_data[0]["translations"],
+            [
+                {
+                    "word": "カメラ",
+                    "lang": "Ainu",
+                    "lang_code": "ain",
+                    "sense": "aparato capturador de imágenes estáticas",
+                    "sense_index": "1",
+                }
+            ],
+        )
+        self.assertEqual(page_data[0]["categories"], ["Español-Ainu"])
