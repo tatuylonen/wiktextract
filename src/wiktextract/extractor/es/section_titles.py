@@ -48,6 +48,14 @@ POS_TITLES: dict[str, POSSubtitleData] = {
         "tags": ["adjective", "form-of"],
     },
     "forma adjetiva y sustantiva": {"pos": "adj", "tags": ["noun", "form-of"]},
+    "forma adjetiva y de sustantivo masculino": {
+        "pos": "adj",
+        "tags": ["noun", "masculine", "form-of"],
+    },
+    "forma adjetiva y sustantiva masculina": {
+        "pos": "adj",
+        "tags": ["noun", "masculine", "form-of"],
+    },
     "forma de adjetivo ordinal": {"pos": "num", "tags": ["form-of", "ordinal"]},
     "forma de participio": {"pos": "participle", "tags": ["form-of"]},
     "forma de sufijo": {"pos": "suffix", "tags": ["form-of"]},
@@ -163,7 +171,7 @@ LINKAGE_TITLES: dict[str, str] = {
 }
 
 IGNORED_TITLES: frozenset[str] = frozenset(
-    ["véase también", "referencias y notas"]
+    ["véase también", "referencias y notas", "enlaces externos"]
 )
 
 TRANSLATIONS_TITLES: frozenset[str] = frozenset(["traducciones", "traducción"])

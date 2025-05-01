@@ -36,6 +36,7 @@ class Translation(BaseModelWrap):
     roman: str = Field(
         default="", description="Transliteration in roman characters"
     )
+    sense: str = ""
 
 
 class TemplateData(BaseModelWrap):
@@ -161,3 +162,4 @@ class WordEntry(BaseModelWrap):
     hyphenation: str = ""
     cognates: list[Linkage] = []
     morphologies: list[Linkage] = []
+    descendants: list[Translation] = []
