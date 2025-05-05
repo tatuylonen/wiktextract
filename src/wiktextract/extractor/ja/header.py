@@ -65,15 +65,7 @@ def extract_header_nodes(
             if node.kind == NodeKind.BOLD:
                 is_first_bold = False
             raw_tags.clear()
-    texts = clean_node(wxr, word_entry, expanded_nodes)
-    for form_text in re.findall(r"[（【][^（）【】]+[）】]", texts):
-        add_form_data(
-            expanded_nodes,
-            form_text.strip("（）【】 "),
-            extracted_forms,
-            word_entry,
-            [],
-        )
+    clean_node(wxr, word_entry, expanded_nodes)
     translate_raw_tags(word_entry)
 
 
