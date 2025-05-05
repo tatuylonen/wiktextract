@@ -33,8 +33,9 @@ def extract_header_nodes(
     for node in expanded_nodes.find_child_recursively(
         NodeKind.HTML | NodeKind.BOLD | NodeKind.ITALIC
     ):
-        if isinstance(node, HTMLNode) and "gender" in node.attrs.get(
-            "class", ""
+        if (
+            isinstance(node, HTMLNode)
+            and "gender" in node.attrs.get("class", "").split()
         ):
             raw_tag_text = clean_node(wxr, None, node)
             for raw_tag in raw_tag_text.split():

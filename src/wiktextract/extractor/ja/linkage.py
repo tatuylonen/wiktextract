@@ -4,7 +4,7 @@ from wikitextprocessor.parser import LevelNode, NodeKind, TemplateNode, WikiNode
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from ..ruby import extract_ruby
-from .models import Descendant, Linkage, WordEntry
+from .models import Descendant, Form, Linkage, WordEntry
 from .section_titles import LINKAGES
 from .tags import translate_raw_tags
 
@@ -213,4 +213,28 @@ def extract_l_template(
 
     if l_data.word != "":
         translate_raw_tags(l_data)
-        getattr(word_entry, l_type).append(l_data)
+        if l_type == "forms":
+            word_entry.forms.append(
+                Form(
+                    form=l_data.word,
+                    tags=l_data.tags,
+                    raw_tags=l_data.raw_tags,
+                    roman=l_data.roman,
+                )
+            )
+        else:
+            getattr(word_entry, l_type).append(l_data)
+
+
+def extract_alt_form_section(
+    wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
+) -> None:
+    for node in level_node.find_child_recursively(
+        NodeKind.LINK | NodeKind.TEMPLATE
+    ):
+        if node.kind == NodeKind.LINK:
+            word = clean_node(wxr, None, node)
+            if word != "":
+                word_entry.forms.append(Form(form=word, tags=["alt-of"]))
+        elif isinstance(node, TemplateNode) and node.template_name == "l":
+            extract_l_template(wxr, word_entry, node, "forms")

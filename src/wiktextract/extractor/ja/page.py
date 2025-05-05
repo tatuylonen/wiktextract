@@ -8,7 +8,7 @@ from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .conjugation import extract_conjugation_section
 from .etymology import extract_etymology_section
-from .linkage import extract_linkage_section
+from .linkage import extract_alt_form_section, extract_linkage_section
 from .models import Sense, WordEntry
 from .pos import parse_pos_section
 from .section_titles import LINKAGES, POS_DATA
@@ -66,6 +66,17 @@ def parse_section(
                 page_data[-1] if len(page_data) > 0 else base_data,
                 level_node,
             )
+            break
+        elif title_text == "異表記":  # "異表記・別形", Template:alter
+            extract_alt_form_section(
+                wxr,
+                page_data[-1]
+                if len(page_data) > 0
+                and page_data[-1].lang_code == base_data.lang_code
+                else base_data,
+                level_node,
+            )
+            break
 
     for next_level in level_node.find_child(LEVEL_KIND_FLAGS):
         parse_section(wxr, page_data, base_data, next_level)

@@ -41,6 +41,7 @@ class Form(JapaneseBaseModel):
     form: str = ""
     tags: list[str] = []
     raw_tags: list[str] = []
+    roman: str = ""
 
 
 class Sound(JapaneseBaseModel):
@@ -128,3 +129,4 @@ class WordEntry(JapaneseBaseModel):
     coordinate_terms: list[Linkage] = []
     cognates: list[Descendant] = []
     descendants: list[Descendant] = []
+    anagrams: list[Linkage] = []

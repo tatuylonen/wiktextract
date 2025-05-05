@@ -9,6 +9,7 @@ TAGS = {
     "複数": "plural",
     "不変": "invariable",
     "男性複数": ["masculine", "plural"],
+    "女性複数": ["feminine", "plural"],
     # テンプレート:context/data
     "くだけた表現": "informal",
     "しばしば": "often",
