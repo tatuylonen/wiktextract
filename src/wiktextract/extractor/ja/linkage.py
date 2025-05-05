@@ -1,10 +1,16 @@
 from mediawiki_langcodes import code_to_name, name_to_code
-from wikitextprocessor.parser import LevelNode, NodeKind, TemplateNode, WikiNode
+from wikitextprocessor import (
+    HTMLNode,
+    LevelNode,
+    NodeKind,
+    TemplateNode,
+    WikiNode,
+)
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from ..ruby import extract_ruby
-from .models import Descendant, Linkage, WordEntry
+from .models import Descendant, Form, Linkage, WordEntry
 from .section_titles import LINKAGES
 from .tags import translate_raw_tags
 
@@ -61,6 +67,8 @@ def process_linkage_list_item(
                 getattr(word_entry, linkage_type).append(
                     Linkage(word=word, ruby=ruby, sense=sense)
                 )
+        elif isinstance(node, TemplateNode) and node.template_name == "l":
+            extract_l_template(wxr, word_entry, node, linkage_type)
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
             word = clean_node(wxr, None, node)
             if len(word) > 0:
@@ -132,6 +140,8 @@ def process_desc_list_item(
             if desc_data.word != "":
                 translate_raw_tags(desc_data)
                 desc_list.append(desc_data)
+        elif isinstance(child, TemplateNode) and child.template_name == "desc":
+            desc_list.extend(extract_desc_template(wxr, child))
         elif isinstance(child, WikiNode) and child.kind == NodeKind.LIST:
             for next_list_item in child.find_child(NodeKind.LIST_ITEM):
                 process_desc_list_item(wxr, next_list_item, desc_list)
@@ -174,3 +184,94 @@ def extract_gloss_list_linkage_template(
                     else "",
                 )
             )
+
+
+def extract_l_template(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    t_node: TemplateNode,
+    l_type: str,
+) -> None:
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    lang_code = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
+    l_data = Linkage(word="")
+    for span_tag in expanded_node.find_html("span"):
+        span_lang = span_tag.attrs.get("lang", "")
+        span_class = span_tag.attrs.get("class", "")
+        if span_lang == lang_code:
+            l_data.word = clean_node(wxr, None, span_tag)
+        elif span_lang == lang_code + "-Latn":
+            l_data.roman = clean_node(wxr, None, span_tag)
+        elif span_class == "gender":
+            raw_tag = clean_node(wxr, None, span_tag)
+            if raw_tag != "":
+                l_data.raw_tags.append(raw_tag)
+
+    if "lit" in t_node.template_parameters:
+        l_data.literal_meaning = clean_node(
+            wxr, None, t_node.template_parameters["t"]
+        )
+    for arg_name in (4, "gloss", "t"):
+        if arg_name in t_node.template_parameters:
+            l_data.sense = clean_node(
+                wxr, None, t_node.template_parameters[arg_name]
+            )
+
+    if l_data.word != "":
+        translate_raw_tags(l_data)
+        if l_type == "forms":
+            word_entry.forms.append(
+                Form(
+                    form=l_data.word,
+                    tags=l_data.tags,
+                    raw_tags=l_data.raw_tags,
+                    roman=l_data.roman,
+                )
+            )
+        else:
+            getattr(word_entry, l_type).append(l_data)
+
+
+def extract_alt_form_section(
+    wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
+) -> None:
+    for node in level_node.find_child_recursively(
+        NodeKind.LINK | NodeKind.TEMPLATE
+    ):
+        if node.kind == NodeKind.LINK:
+            word = clean_node(wxr, None, node)
+            if word != "":
+                word_entry.forms.append(Form(form=word, tags=["alt-of"]))
+        elif isinstance(node, TemplateNode) and node.template_name == "l":
+            extract_l_template(wxr, word_entry, node, "forms")
+
+
+def extract_desc_template(
+    wxr: WiktextractContext, t_node: TemplateNode
+) -> list[Descendant]:
+    d_list = []
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    lang_code = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
+    lang_name = "unknown"
+    for node in expanded_node.children:
+        if isinstance(node, str) and node.strip().endswith(":"):
+            lang_name = node.strip(": ")
+        elif (
+            isinstance(node, HTMLNode)
+            and node.tag == "span"
+            and lang_code == node.attrs.get("lang", "")
+        ):
+            for link_node in node.find_child(NodeKind.LINK):
+                word = clean_node(wxr, None, link_node)
+                if word != "":
+                    d_list.append(
+                        Descendant(
+                            lang=lang_name, lang_code=lang_code, word=word
+                        )
+                    )
+
+    return d_list

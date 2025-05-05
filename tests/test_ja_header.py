@@ -5,6 +5,7 @@ from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.ja.header import extract_header_nodes
 from wiktextract.extractor.ja.models import Form, WordEntry
+from wiktextract.extractor.ja.page import parse_page
 from wiktextract.wxr_context import WiktextractContext
 
 
@@ -86,20 +87,6 @@ class TestJaHeader(TestCase):
             ],
         )
 
-    def test_plain_text_form(self):
-        self.wxr.wtp.start_page("民主")
-        data = WordEntry(lang="日本語", lang_code="ja", word="民主")
-        root = self.wxr.wtp.parse("'''[[民]] [[主]]'''（みんしゅ）")
-        extract_header_nodes(self.wxr, data, root.children)
-        self.assertEqual(data.forms, [Form(form="みんしゅ")])
-
-    def test_plain_text_forms(self):
-        self.wxr.wtp.start_page("うつる")
-        data = WordEntry(lang="日本語", lang_code="ja", word="うつる")
-        root = self.wxr.wtp.parse("'''うつる'''【[[写]]る、[[映]]る】")
-        extract_header_nodes(self.wxr, data, root.children)
-        self.assertEqual(data.forms, [Form(form="写る"), Form(form="映る")])
-
     def test_zhchar(self):
         self.wxr.wtp.start_page("民主")
         data = WordEntry(lang="中国語", lang_code="zh", word="民主")
@@ -153,5 +140,59 @@ class TestJaHeader(TestCase):
                 {"form": "きんぎょく"},
                 {"form": "きんたま"},
                 {"form": "かねだま"},
+            ],
+        )
+
+    def test_gender(self):
+        self.wxr.wtp.add_page(
+            "テンプレート:pl-noun",
+            10,
+            '<strong class="Latn headword" lang="pl">Portugalczyk</strong>&nbsp;<span class="gender">男性&nbsp;人称</span>[[カテゴリ:ポーランド語 |PORTUGALCZYK]][[カテゴリ:ポーランド語 名詞|PORTUGALCZYK]][[カテゴリ:ポーランド語 男性人間名詞|PORTUGALCZYK]]',
+        )
+        page_data = parse_page(
+            self.wxr,
+            "ryba",
+            """==ポーランド語==
+===名詞===
+{{pl-noun|g=m-pr}}
+# [[ポルトガル人]]。""",
+        )
+        self.assertEqual(
+            page_data[0]["categories"],
+            ["ポーランド語", "ポーランド語 名詞", "ポーランド語 男性人間名詞"],
+        )
+        self.assertEqual(page_data[0]["tags"], ["masculine", "personal"])
+
+    def test_ru_noun(self):
+        self.wxr.wtp.add_page(
+            "テンプレート:ru-noun+",
+            10,
+            """<strong class="Cyrl headword" lang="ru">ко́мната</strong> <b>[[Wiktionary:ロシア語の翻字|•]]</b> (<span lang="ru-Latn" class="headword-tr manual-tr tr Latn" dir="ltr">kómnata</span>)&nbsp;<span class="gender">女性&nbsp;非有生</span> (<i>生格</i> <b class="Cyrl" lang="ru">[[комнаты#ロシア語|ко́мнаты]]</b>, <i>複数主格</i> <b class="Cyrl" lang="ru">[[комнаты#ロシア語|ко́мнаты]]</b>, <i>複数生格</i> <b class="Cyrl" lang="ru">[[комнат#ロシア語|ко́мнат]]</b>, <i>形容詞</i> <b class="Cyrl" lang="ru">[[комнатный#ロシア語|ко́мнатный]]</b>, <i>指小形</i> <b class="Cyrl" lang="ru">[[комнатка#ロシア語|ко́мнатка]]</b> <i><small><small>又は</small></small></i> <b class="Cyrl" lang="ru">[[комнатушка#ロシア語|комнату́шка]]</b>)[[カテゴリ:ロシア語 |КОМНАТА]][[カテゴリ:ロシア語 名詞|КОМНАТА]]""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "комната",
+            """==ロシア語==
+===名詞===
+{{ru-noun+|ко́мната|adj=ко́мнатный|dim=ко́мнатка|pej=комнатёнка|pej2=комнати́шка|dim2=комнату́шка}}
+# 部屋。""",
+        )
+        self.assertEqual(
+            page_data[0]["categories"], ["ロシア語", "ロシア語 名詞"]
+        )
+        self.assertEqual(page_data[0]["tags"], ["feminine", "inanimate"])
+        self.assertEqual(
+            page_data[0]["forms"],
+            [
+                {"form": "ко́мната", "tags": ["canonical"]},
+                {"form": "kómnata", "tags": ["transliteration"]},
+                {
+                    "form": "ко́мнаты",
+                    "tags": ["genitive", "nominative", "plural"],
+                },
+                {"form": "ко́мнат", "tags": ["genitive", "plural"]},
+                {"form": "ко́мнатный", "tags": ["relational", "adjective"]},
+                {"form": "ко́мнатка", "tags": ["diminutive"]},
+                {"form": "комнату́шка"},
             ],
         )

@@ -241,3 +241,52 @@ etymology text
                 {"word": "esőerdő", "sense": "森林、森、林。"},
             ],
         )
+
+    def test_l_section_above_pos(self):
+        self.wxr.wtp.add_page("テンプレート:sk", 10, "スロヴァキア語")
+        self.wxr.wtp.add_page(
+            "テンプレート:l",
+            10,
+            '<span class="Latn" lang="sk">[[ryba#スロヴァキア語|ryba]]</span>',
+        )
+        page_data = parse_page(
+            self.wxr,
+            "ryba",
+            """==スロヴァキア語==
+===名詞===
+# 魚。
+
+==チェコ語==
+===同系語===
+* [[{{sk}}]]: {{l|sk|ryba}}
+===名詞===
+# 魚。""",
+        )
+        self.assertTrue("cognates" not in page_data[0])
+        self.assertEqual(
+            page_data[1]["cognates"],
+            [{"word": "ryba", "lang": "スロヴァキア語", "lang_code": "sk"}],
+        )
+
+    def test_desc_template(self):
+        self.wxr.wtp.add_page(
+            "テンプレート:desc",
+            10,
+            'ノルマン語: <span class="Latn" lang="nrf">[[plyie#ノルマン語|plyie]], [[pllie#ノルマン語|pllie]]</span>',
+        )
+        page_data = parse_page(
+            self.wxr,
+            "pluie",
+            """==古フランス語==
+===名詞===
+# 雨。
+====諸言語への影響====
+* {{desc|nrf|[[plyie]], [[pllie]]}}""",
+        )
+        self.assertEqual(
+            page_data[0]["descendants"],
+            [
+                {"lang": "ノルマン語", "lang_code": "nrf", "word": "plyie"},
+                {"lang": "ノルマン語", "lang_code": "nrf", "word": "pllie"},
+            ],
+        )
