@@ -52,7 +52,10 @@ def parse_section(
         elif title_text in LINKAGES and wxr.config.capture_linkages:
             extract_linkage_section(
                 wxr,
-                page_data[-1] if len(page_data) > 0 else base_data,
+                page_data[-1]
+                if len(page_data) > 0
+                and page_data[-1].lang_code == base_data.lang_code
+                else base_data,
                 level_node,
                 LINKAGES[title_text],
             )
