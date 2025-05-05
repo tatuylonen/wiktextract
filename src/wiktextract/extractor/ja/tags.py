@@ -217,6 +217,7 @@ TAGS = {
     "集合名詞": "collective",
     "集合的に": "collective",
     "非人称": "impersonal",
+    "人称": "personal",
     "非標準": "uncommon",
     "頭字語": "initialism",
     "首都": "uppercase",

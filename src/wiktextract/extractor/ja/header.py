@@ -33,6 +33,13 @@ def extract_header_nodes(
     for node in expanded_nodes.find_child_recursively(
         NodeKind.HTML | NodeKind.BOLD | NodeKind.ITALIC
     ):
+        if isinstance(node, HTMLNode) and "gender" in node.attrs.get(
+            "class", ""
+        ):
+            raw_tag_text = clean_node(wxr, None, node)
+            for raw_tag in raw_tag_text.split():
+                if raw_tag != "":
+                    word_entry.raw_tags.append(raw_tag)
         if isinstance(node, HTMLNode) and not (
             node.tag in ["strong", "small"]
             or "headword" in node.attrs.get("class", "")
@@ -66,6 +73,7 @@ def extract_header_nodes(
             word_entry,
             [],
         )
+    translate_raw_tags(word_entry)
 
 
 def add_form_data(

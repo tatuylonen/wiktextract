@@ -5,6 +5,7 @@ from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.ja.header import extract_header_nodes
 from wiktextract.extractor.ja.models import Form, WordEntry
+from wiktextract.extractor.ja.page import parse_page
 from wiktextract.wxr_context import WiktextractContext
 
 
@@ -155,3 +156,23 @@ class TestJaHeader(TestCase):
                 {"form": "かねだま"},
             ],
         )
+
+    def test_gender(self):
+        self.wxr.wtp.add_page(
+            "テンプレート:pl-noun",
+            10,
+            '<strong class="Latn headword" lang="pl">Portugalczyk</strong>&nbsp;<span class="gender">男性&nbsp;人称</span>[[カテゴリ:ポーランド語 |PORTUGALCZYK]][[カテゴリ:ポーランド語 名詞|PORTUGALCZYK]][[カテゴリ:ポーランド語 男性人間名詞|PORTUGALCZYK]]',
+        )
+        page_data = parse_page(
+            self.wxr,
+            "ryba",
+            """==ポーランド語==
+===名詞===
+{{pl-noun|g=m-pr}}
+# [[ポルトガル人]]。""",
+        )
+        self.assertEqual(
+            page_data[0]["categories"],
+            ["ポーランド語", "ポーランド語 名詞", "ポーランド語 男性人間名詞"],
+        )
+        self.assertEqual(page_data[0]["tags"], ["masculine", "personal"])
