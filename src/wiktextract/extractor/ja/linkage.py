@@ -61,6 +61,8 @@ def process_linkage_list_item(
                 getattr(word_entry, linkage_type).append(
                     Linkage(word=word, ruby=ruby, sense=sense)
                 )
+        elif isinstance(node, TemplateNode) and node.template_name == "l":
+            extract_l_template(wxr, word_entry, node, linkage_type)
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
             word = clean_node(wxr, None, node)
             if len(word) > 0:
@@ -174,3 +176,41 @@ def extract_gloss_list_linkage_template(
                     else "",
                 )
             )
+
+
+def extract_l_template(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    t_node: TemplateNode,
+    l_type: str,
+) -> None:
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    lang_code = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
+    l_data = Linkage(word="")
+    for span_tag in expanded_node.find_html("span"):
+        span_lang = span_tag.attrs.get("lang", "")
+        span_class = span_tag.attrs.get("class", "")
+        if span_lang == lang_code:
+            l_data.word = clean_node(wxr, None, span_tag)
+        elif span_lang == lang_code + "-Latn":
+            l_data.roman = clean_node(wxr, None, span_tag)
+        elif span_class == "gender":
+            raw_tag = clean_node(wxr, None, span_tag)
+            if raw_tag != "":
+                l_data.raw_tags.append(raw_tag)
+
+    if "lit" in t_node.template_parameters:
+        l_data.literal_meaning = clean_node(
+            wxr, None, t_node.template_parameters["t"]
+        )
+    for arg_name in (4, "gloss", "t"):
+        if arg_name in t_node.template_parameters:
+            l_data.sense = clean_node(
+                wxr, None, t_node.template_parameters[arg_name]
+            )
+
+    if l_data.word != "":
+        translate_raw_tags(l_data)
+        getattr(word_entry, l_type).append(l_data)

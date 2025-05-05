@@ -79,6 +79,8 @@ class Linkage(JapaneseBaseModel):
     raw_tags: list[str] = []
     ruby: list[tuple[str, ...]] = []
     sense: str = ""
+    roman: str = ""
+    literal_meaning: str = ""
 
 
 class Descendant(JapaneseBaseModel):
