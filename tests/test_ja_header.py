@@ -176,3 +176,37 @@ class TestJaHeader(TestCase):
             ["ポーランド語", "ポーランド語 名詞", "ポーランド語 男性人間名詞"],
         )
         self.assertEqual(page_data[0]["tags"], ["masculine", "personal"])
+
+    def test_ru_noun(self):
+        self.wxr.wtp.add_page(
+            "テンプレート:ru-noun+",
+            10,
+            """<strong class="Cyrl headword" lang="ru">ко́мната</strong> <b>[[Wiktionary:ロシア語の翻字|•]]</b> (<span lang="ru-Latn" class="headword-tr manual-tr tr Latn" dir="ltr">kómnata</span>)&nbsp;<span class="gender">女性&nbsp;非有生</span> (<i>生格</i> <b class="Cyrl" lang="ru">[[комнаты#ロシア語|ко́мнаты]]</b>, <i>複数主格</i> <b class="Cyrl" lang="ru">[[комнаты#ロシア語|ко́мнаты]]</b>, <i>複数生格</i> <b class="Cyrl" lang="ru">[[комнат#ロシア語|ко́мнат]]</b>, <i>形容詞</i> <b class="Cyrl" lang="ru">[[комнатный#ロシア語|ко́мнатный]]</b>, <i>指小形</i> <b class="Cyrl" lang="ru">[[комнатка#ロシア語|ко́мнатка]]</b> <i><small><small>又は</small></small></i> <b class="Cyrl" lang="ru">[[комнатушка#ロシア語|комнату́шка]]</b>)[[カテゴリ:ロシア語 |КОМНАТА]][[カテゴリ:ロシア語 名詞|КОМНАТА]]""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "комната",
+            """==ロシア語==
+===名詞===
+{{ru-noun+|ко́мната|adj=ко́мнатный|dim=ко́мнатка|pej=комнатёнка|pej2=комнати́шка|dim2=комнату́шка}}
+# 部屋。""",
+        )
+        self.assertEqual(
+            page_data[0]["categories"], ["ロシア語", "ロシア語 名詞"]
+        )
+        self.assertEqual(page_data[0]["tags"], ["feminine", "inanimate"])
+        self.assertEqual(
+            page_data[0]["forms"],
+            [
+                {"form": "ко́мната", "tags": ["canonical"]},
+                {"form": "kómnata", "tags": ["transliteration"]},
+                {
+                    "form": "ко́мнаты",
+                    "tags": ["genitive", "nominative", "plural"],
+                },
+                {"form": "ко́мнат", "tags": ["genitive", "plural"]},
+                {"form": "ко́мнатный", "tags": ["relational", "adjective"]},
+                {"form": "ко́мнатка", "tags": ["diminutive"]},
+                {"form": "комнату́шка"},
+            ],
+        )

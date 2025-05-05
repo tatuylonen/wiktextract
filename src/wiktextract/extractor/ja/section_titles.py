@@ -33,6 +33,7 @@ POS_DATA = {
     "略語": {"pos": "abbrev", "tags": ["abbreviation"]},
     "頭字語": {"pos": "abbrev", "tags": ["abbreviation"]},
     "ことわざ": {"pos": "proverb"},
+    "感動詞": {"pos": "intj"},
 }
 
 LINKAGES = {

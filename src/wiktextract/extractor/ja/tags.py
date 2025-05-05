@@ -234,6 +234,19 @@ TAGS = {
     "広東語": "Cantonese",
     "閩南語": "Min-Nan",
     "客家語": "Hakka",
+    # モジュール:gender and number
+    "非有生": "inanimate",
+    "有生": "animate",
+    "男性人間": "virile",
+    "非男性人間": "nonvirile",
+    # Template:ru-noun+
+    "生格": "genitive",
+    "複数主格": ["nominative", "plural"],
+    "複数生格": ["genitive", "plural"],
+    "形容詞": ["relational", "adjective"],
+    "指小形": "diminutive",
+    "不完了体": "imperfective",
+    "完了体": "perfective",
 }
 
 TOPICS = {
