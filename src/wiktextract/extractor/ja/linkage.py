@@ -1,5 +1,11 @@
 from mediawiki_langcodes import code_to_name, name_to_code
-from wikitextprocessor.parser import LevelNode, NodeKind, TemplateNode, WikiNode
+from wikitextprocessor import (
+    HTMLNode,
+    LevelNode,
+    NodeKind,
+    TemplateNode,
+    WikiNode,
+)
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -134,6 +140,8 @@ def process_desc_list_item(
             if desc_data.word != "":
                 translate_raw_tags(desc_data)
                 desc_list.append(desc_data)
+        elif isinstance(child, TemplateNode) and child.template_name == "desc":
+            desc_list.extend(extract_desc_template(wxr, child))
         elif isinstance(child, WikiNode) and child.kind == NodeKind.LIST:
             for next_list_item in child.find_child(NodeKind.LIST_ITEM):
                 process_desc_list_item(wxr, next_list_item, desc_list)
@@ -238,3 +246,32 @@ def extract_alt_form_section(
                 word_entry.forms.append(Form(form=word, tags=["alt-of"]))
         elif isinstance(node, TemplateNode) and node.template_name == "l":
             extract_l_template(wxr, word_entry, node, "forms")
+
+
+def extract_desc_template(
+    wxr: WiktextractContext, t_node: TemplateNode
+) -> list[Descendant]:
+    d_list = []
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    lang_code = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
+    lang_name = "unknown"
+    for node in expanded_node.children:
+        if isinstance(node, str) and node.strip().endswith(":"):
+            lang_name = node.strip(": ")
+        elif (
+            isinstance(node, HTMLNode)
+            and node.tag == "span"
+            and lang_code == node.attrs.get("lang", "")
+        ):
+            for link_node in node.find_child(NodeKind.LINK):
+                word = clean_node(wxr, None, link_node)
+                if word != "":
+                    d_list.append(
+                        Descendant(
+                            lang=lang_name, lang_code=lang_code, word=word
+                        )
+                    )
+
+    return d_list
