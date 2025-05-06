@@ -1,4 +1,10 @@
-from wikitextprocessor.parser import LevelNode, NodeKind, TemplateNode, WikiNode
+from wikitextprocessor.parser import (
+    LEVEL_KIND_FLAGS,
+    LevelNode,
+    NodeKind,
+    TemplateNode,
+    WikiNode,
+)
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -128,3 +134,22 @@ def find_form_of_data(
             if form_of != "":
                 sense.form_of.append(AltForm(word=form_of))
                 break
+
+
+def extract_note_section(
+    wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
+) -> None:
+    has_list = False
+    for list_item in level_node.find_child_recursively(NodeKind.LIST_ITEM):
+        has_list = True
+        note = clean_node(wxr, word_entry, list_item.children)
+        if note != "":
+            word_entry.notes.append(note)
+    if not has_list:
+        note = clean_node(
+            wxr,
+            word_entry,
+            list(level_node.invert_find_child(LEVEL_KIND_FLAGS)),
+        )
+        if note != "":
+            word_entry.notes.append(note)

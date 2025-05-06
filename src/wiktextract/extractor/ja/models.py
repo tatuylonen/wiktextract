@@ -130,3 +130,4 @@ class WordEntry(JapaneseBaseModel):
     cognates: list[Descendant] = []
     descendants: list[Descendant] = []
     anagrams: list[Linkage] = []
+    notes: list[str] = []

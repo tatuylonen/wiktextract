@@ -10,7 +10,7 @@ from .conjugation import extract_conjugation_section
 from .etymology import extract_etymology_section
 from .linkage import extract_alt_form_section, extract_linkage_section
 from .models import Sense, WordEntry
-from .pos import parse_pos_section
+from .pos import extract_note_section, parse_pos_section
 from .section_titles import LINKAGES, POS_DATA
 from .sound import extract_sound_section
 from .translation import extract_translation_section
@@ -74,6 +74,13 @@ def parse_section(
                 if len(page_data) > 0
                 and page_data[-1].lang_code == base_data.lang_code
                 else base_data,
+                level_node,
+            )
+            break
+        elif title_text == "用法":
+            extract_note_section(
+                wxr,
+                page_data[-1] if len(page_data) > 0 else base_data,
                 level_node,
             )
             break
