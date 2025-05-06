@@ -55,9 +55,10 @@ def process_translation_list_item(
                 else:
                     lang_code = node.template_name
             elif node.template_name.lower() in ["t+", "t", "t-", "l", "lang"]:
-                last_tr = process_t_template(
+                for tr_data in process_t_template(
                     wxr, word_entry, node, sense_text, lang_name, lang_code
-                )
+                ):
+                    last_tr = tr_data
             elif node.template_name.lower() == "archar":
                 tr_data = Translation(
                     word=clean_node(wxr, None, node),
@@ -139,8 +140,28 @@ def process_t_template(
     sense_text: str,
     lang_name: str,
     lang_code: str,
-) -> Optional[Translation]:
+) -> list[Translation]:
     # https://ja.wiktionary.org/wiki/テンプレート:t
+    second_arg = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(node.template_parameters.get(2, ""))
+    )
+    for t_node in second_arg.find_child(NodeKind.TEMPLATE):
+        if t_node.template_name == "zh-l":
+            from .linkage import extract_zh_l_template
+
+            tr_list = []
+            for l_data in extract_zh_l_template(wxr, t_node):
+                tr_data = Translation(
+                    word=l_data.word,
+                    tags=l_data.tags,
+                    roman=l_data.roman,
+                    lang=lang_name,
+                    lang_code=lang_code,
+                )
+                tr_list.append(tr_data)
+                word_entry.translations.append(tr_data)
+            return tr_list
+
     tr_word = clean_node(wxr, None, node.template_parameters.get(2, ""))
     if "alt" in node.template_parameters:
         tr_word = clean_node(wxr, None, node.template_parameters["alt"])
@@ -166,8 +187,8 @@ def process_t_template(
             tags=tags,
         )
         word_entry.translations.append(tr_data)
-        return tr_data
-    return None
+        return [tr_data]
+    return []
 
 
 def process_zh_ts_template(

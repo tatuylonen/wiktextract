@@ -28,11 +28,13 @@ def extract_sound_section(
     if level_node.kind == NodeKind.LEVEL3:
         base_data.sounds.extend(sounds)
         base_data.categories.extend(cats.get("categories", []))
-
-    for data in page_data:
-        if data.lang_code == base_data.lang_code:
-            data.sounds.extend(sounds)
-            data.categories.extend(cats.get("categories", []))
+        for data in page_data:
+            if data.lang_code == base_data.lang_code:
+                data.sounds.extend(sounds)
+                data.categories.extend(cats.get("categories", []))
+    else:
+        page_data[-1].sounds.extend(sounds)
+        page_data[-1].categories.extend(cats.get("categories", []))
 
 
 def process_sound_template(
