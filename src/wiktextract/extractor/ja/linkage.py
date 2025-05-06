@@ -71,6 +71,10 @@ def process_linkage_list_item(
             l_data = extract_l_template(wxr, node)
             if l_data.word != "":
                 getattr(word_entry, linkage_type).append(l_data)
+        elif isinstance(node, TemplateNode) and node.template_name == "zh-l":
+            getattr(word_entry, linkage_type).extend(
+                extract_zh_l_template(wxr, node)
+            )
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
             word = clean_node(wxr, None, node)
             if len(word) > 0:
@@ -280,6 +284,9 @@ def extract_zh_l_template(
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(t_node), expand_all=True
     )
+    roman = ""
+    for i_tag in expanded_node.find_html("i"):
+        roman = clean_node(wxr, None, i_tag)
     for index, span_tag in enumerate(
         expanded_node.find_html("span", attr_name="lang", attr_value="zh")
     ):
@@ -293,10 +300,7 @@ def extract_zh_l_template(
                         if index == 0
                         else "Simplified Chinese"
                     ],
+                    roman=roman,
                 )
             )
-    for i_tag in expanded_node.find_html("i"):
-        roman = clean_node(wxr, None, i_tag)
-        for data in l_list:
-            data.roman = roman
     return l_list

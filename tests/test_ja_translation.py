@@ -237,3 +237,36 @@ class TestJaTransaltion(TestCase):
                 },
             ],
         )
+
+    def test_zh_l(self):
+        self.wxr.wtp.start_page("音楽")
+        self.wxr.wtp.add_page("テンプレート:T", 10, "広東語")
+        self.wxr.wtp.add_page(
+            "テンプレート:zh-l",
+            10,
+            '<span class="Hani" lang="zh">[[音樂#中国語|音樂]]</span>／<span class="Hani" lang="zh">[[音乐#中国語|音乐]]</span> (<i lang="zh-Latn" class="tr Latn">jam<sup>1</sup> ngok<sup>6</sup></i>)',
+        )
+        data = WordEntry(word="音楽", lang="日本語", lang_code="ja", pos="noun")
+        root = self.wxr.wtp.parse(
+            "*{{T|yue}}: {{t|yue|{{zh-l|音樂|tr=jam{{supra|1}} ngok{{supra|6}}}}}}"
+        )
+        extract_translation_section(self.wxr, data, root)
+        self.assertEqual(
+            [t.model_dump(exclude_defaults=True) for t in data.translations],
+            [
+                {
+                    "lang": "広東語",
+                    "lang_code": "yue",
+                    "word": "音樂",
+                    "tags": ["Traditional Chinese"],
+                    "roman": "jam¹ ngok⁶",
+                },
+                {
+                    "lang": "広東語",
+                    "lang_code": "yue",
+                    "word": "音乐",
+                    "tags": ["Simplified Chinese"],
+                    "roman": "jam¹ ngok⁶",
+                },
+            ],
+        )
