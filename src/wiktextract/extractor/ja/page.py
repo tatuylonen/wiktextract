@@ -22,7 +22,9 @@ def parse_section(
     base_data: WordEntry,
     level_node: LevelNode,
 ) -> None:
-    title_texts = clean_node(wxr, None, level_node.largs)
+    title_texts = re.sub(
+        r"[\s\d]+$", "", clean_node(wxr, None, level_node.largs)
+    )
     for title_text in re.split(r"：|:|・", title_texts):
         if title_text in POS_DATA:
             pre_len = len(page_data)
@@ -77,7 +79,7 @@ def parse_section(
                 level_node,
             )
             break
-        elif title_text == "用法":
+        elif title_text in ["用法", "注意点", "留意点", "注意"]:
             extract_note_section(
                 wxr,
                 page_data[-1] if len(page_data) > 0 else base_data,
