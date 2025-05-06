@@ -164,6 +164,11 @@ class TestJaLinkage(TestCase):
         )
         self.wxr.wtp.add_page("テンプレート:roa-opt", 10, "古ポルトガル語")
         self.wxr.wtp.add_page("テンプレート:pt", 10, "ポルトガル語")
+        self.wxr.wtp.add_page(
+            "テンプレート:l",
+            10,
+            '<span class="Latn" lang="{{{1}}}">[[{{{2}}}]]</span>',
+        )
         root = self.wxr.wtp.parse("""* {{roa-opt}}: {{l|roa-opt|coor}}
 ** {{pt}}: {{l|pt|cor}}""")
         extract_linkage_section(self.wxr, data, root, "descendants")
@@ -288,5 +293,43 @@ etymology text
             [
                 {"lang": "ノルマン語", "lang_code": "nrf", "word": "plyie"},
                 {"lang": "ノルマン語", "lang_code": "nrf", "word": "pllie"},
+            ],
+        )
+
+    def test_zh_l(self):
+        self.wxr.wtp.add_page(
+            "テンプレート:desc",
+            10,
+            '<span class="desc-arr" title="borrowed">→</span> 中国語:',
+        )
+        self.wxr.wtp.add_page(
+            "テンプレート:zh-l",
+            10,
+            '<span class="Hani" lang="zh">[[蘿莉控#中国語|蘿莉控]]</span>／<span class="Hani" lang="zh">[[萝莉控#中国語|萝莉控]]</span>',
+        )
+        page_data = parse_page(
+            self.wxr,
+            "ロリコン",
+            """==日本語==
+===名詞===
+# sense
+====諸言語への影響====
+* {{desc|bor=y|zh|-}} {{zh-l|蘿莉控}}""",
+        )
+        self.assertEqual(
+            page_data[0]["descendants"],
+            [
+                {
+                    "lang": "中国語",
+                    "lang_code": "zh",
+                    "word": "蘿莉控",
+                    "tags": ["Traditional Chinese"],
+                },
+                {
+                    "lang": "中国語",
+                    "lang_code": "zh",
+                    "word": "萝莉控",
+                    "tags": ["Simplified Chinese"],
+                },
             ],
         )
