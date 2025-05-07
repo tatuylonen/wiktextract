@@ -175,3 +175,21 @@ class TestItGloss(TestCase):
             data[0]["senses"],
             [{"glosses": ["plurale di cane"], "form_of": [{"word": "cane"}]}],
         )
+
+    def test_nested_list(self):
+        self.wxr.wtp.add_page("Template:-it-", 10, "Italiano")
+        data = parse_page(
+            self.wxr,
+            "gufo",
+            """== {{-it-}} ==
+===Sostantivo===
+# [[uccello]] [[rapace]]
+## gufo comune""",
+        )
+        self.assertEqual(
+            data[0]["senses"],
+            [
+                {"glosses": ["uccello rapace"]},
+                {"glosses": ["uccello rapace", "gufo comune"]},
+            ],
+        )

@@ -64,7 +64,19 @@ def extract_pos_section_nodes(
                     wxr, page_data[-1], level_node.children[:index]
                 )
             for list_item in node.find_child(NodeKind.LIST_ITEM):
-                extract_gloss_list_item(wxr, page_data[-1], list_item)
+                parent_sense = None
+                if node.sarg.endswith("##") and len(page_data[-1].senses) > 0:
+                    p_glosses_len = len(node.sarg) - 1
+                    for sense in page_data[-1].senses:
+                        if (
+                            sense.glosses
+                            == page_data[-1].senses[-1].glosses[:p_glosses_len]
+                        ):
+                            parent_sense = sense
+                            break
+                extract_gloss_list_item(
+                    wxr, page_data[-1], list_item, parent_sense
+                )
         elif isinstance(node, LevelNode):
             title_text = clean_node(wxr, None, node.largs)
             if title_text in POS_DATA and title_text not in LINKAGE_SECTIONS:
@@ -142,11 +154,18 @@ def extract_gloss_list_item(
     wxr: WiktextractContext,
     word_entry: WordEntry,
     list_item: WikiNode,
+    parent_sense: Sense | None = None,
 ) -> None:
     create_new_sense = (
         False if list_item.sarg == "::" and len(word_entry.senses) > 0 else True
     )
-    sense = Sense() if create_new_sense else word_entry.senses[-1]
+    if not create_new_sense:
+        sense = word_entry.senses[-1]
+    elif parent_sense is None:
+        sense = Sense()
+    else:
+        sense = parent_sense.model_copy(deep=True)
+
     gloss_nodes = []
     for child in list_item.children:
         if isinstance(child, TemplateNode):
@@ -197,10 +216,13 @@ def extract_gloss_list_item(
         or len(sense.examples) > 0
     ):
         translate_raw_tags(sense)
-        if len(sense.glosses) == 0:
-            sense.tags.append("no-gloss")
         if create_new_sense:
             word_entry.senses.append(sense)
+
+    for child_list in list_item.find_child(NodeKind.LIST):
+        if child_list.sarg.startswith("#") and child_list.sarg.endswith("#"):
+            for child_list_item in child_list.find_child(NodeKind.LIST_ITEM):
+                extract_gloss_list_item(wxr, word_entry, child_list_item, sense)
 
 
 def extract_pos_header_line_nodes(

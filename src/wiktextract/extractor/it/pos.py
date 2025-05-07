@@ -57,7 +57,7 @@ def extract_pos_section(
     pos_title: str,
 ) -> None:
     add_new_pos_data(wxr, page_data, base_data, level_node, pos_title)
-    first_gloss_list_index = len(level_node.children)
+    last_gloss_list_index = 0
     for index, node in enumerate(level_node.children):
         if (
             isinstance(node, WikiNode)
@@ -67,8 +67,12 @@ def extract_pos_section(
         ):
             for list_item in node.find_child(NodeKind.LIST_ITEM):
                 extract_gloss_list_item(wxr, page_data[-1], list_item)
-            if index < first_gloss_list_index:
-                first_gloss_list_index = index
+            extract_tag_form_line_nodes(
+                wxr,
+                page_data[-1],
+                level_node.children[last_gloss_list_index:index],
+            )
+            last_gloss_list_index = index + 1
         elif (
             isinstance(node, TemplateNode)
             and node.template_name in POS_SUBSECTION_TEMPLATES
@@ -80,18 +84,17 @@ def extract_pos_section(
             raw_tag = clean_node(wxr, page_data[-1], node).strip("= \n")
             page_data[-1].raw_tags.append(raw_tag)
 
-    extract_tag_form_line_nodes(
-        wxr, page_data[-1], level_node.children[:first_gloss_list_index]
-    )
-
 
 def extract_gloss_list_item(
     wxr: WiktextractContext,
     word_entry: WordEntry,
     list_item: WikiNode,
+    parent_sense: Sense | None = None,
 ) -> None:
     gloss_nodes = []
-    sense = Sense()
+    sense = (
+        Sense() if parent_sense is None else parent_sense.model_copy(deep=True)
+    )
     for node in list_item.children:
         if isinstance(node, TemplateNode):
             t_str = clean_node(wxr, sense, node)
@@ -130,6 +133,11 @@ def extract_gloss_list_item(
         if "form-of" in word_entry.tags:
             extract_form_of_word(wxr, sense, list_item)
         word_entry.senses.append(sense)
+
+    for list_node in list_item.find_child(NodeKind.LIST):
+        if list_node.sarg.startswith("#") and list_node.sarg.endswith("#"):
+            for child_list_item in list_node.find_child(NodeKind.LIST_ITEM):
+                extract_gloss_list_item(wxr, word_entry, child_list_item, sense)
 
 
 def extract_form_of_word(
