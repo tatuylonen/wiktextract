@@ -441,3 +441,39 @@ class TestNlGloss(TestCase):
                 }
             ],
         )
+
+    def test_nested_lists(self):
+        data = parse_page(
+            self.wxr,
+            "water",
+            """==Nederlands==
+====Zelfstandig naamwoord====
+#vloeistof die zelf helder is
+## gebruikt als drank
+{{bijv-1|Een mens kan geen dag overleven zonder '''water'''.|#}}
+##vloeistof waarvan de moleculen bestaan uit één atoom zuurstof en twee atomen waterstof (H<sub>2</sub>O)""",
+        )
+        self.assertEqual(
+            data[0]["senses"],
+            [
+                {"glosses": ["vloeistof die zelf helder is"]},
+                {
+                    "examples": [
+                        {
+                            "bold_text_offsets": [(39, 44)],
+                            "text": "Een mens kan geen dag overleven zonder water.",
+                        }
+                    ],
+                    "glosses": [
+                        "vloeistof die zelf helder is",
+                        "gebruikt als drank",
+                    ],
+                },
+                {
+                    "glosses": [
+                        "vloeistof die zelf helder is",
+                        "vloeistof waarvan de moleculen bestaan uit één atoom zuurstof en twee atomen waterstof (H₂O)",
+                    ],
+                },
+            ],
+        )

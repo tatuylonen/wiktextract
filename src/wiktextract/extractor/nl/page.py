@@ -190,6 +190,9 @@ def parse_page(
                         data.categories.extend(e_data.categories)
 
     for data in page_data:
+        for sense in data.senses:
+            if len(sense.glosses) == 0:
+                sense.tags.append("no-gloss")
         if len(data.senses) == 0:
             data.senses.append(Sense(tags=["no-gloss"]))
     return [m.model_dump(exclude_defaults=True) for m in page_data]
