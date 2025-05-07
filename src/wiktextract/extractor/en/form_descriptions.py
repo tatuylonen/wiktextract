@@ -1763,6 +1763,8 @@ def add_related(
 # they are taggable words and their distw() is too big, like clipping from clip
 WORDS_WITH_TAG_LOOKING_FORMS: dict[str, list[str]] = {
     "clip": ["clipping"],  # XXX remember to change me back to clipping after
+    "English": ["English", "Englishes"],
+    "common": ["common", "commoner"],
     # tests.
 }
 
@@ -2469,6 +2471,7 @@ def parse_word_head(
                             break
                         # Bad division, try deeper
                         continue
+                    # print(f"{parts[i-1]=}, {parts=}")
                     if (
                         i > 1
                         and len(parts[i - 1]) >= 4
@@ -2490,7 +2493,8 @@ def parse_word_head(
                         # This breaks if we want to detect stuff that
                         # actually gets an extra space-separated word when
                         # 'inflected'.
-                        and len(titleparts) >= len(parts[i - 1 :])
+                        and (len(titleparts) >= len(parts[i - 1 :]) or
+                            "or" in parts[i-1:])
                     ):
                         # print(f"Reached; {parts=}, {parts[i-1]=}")
                         alt_related = related
@@ -2567,14 +2571,17 @@ def parse_word_head(
             if not tagsets:
                 continue
 
+            # print(f"{alts=}, {related=}")
+
             assert isinstance(related, (list, tuple))
             related_str = " ".join(related)
             if "or" in titleparts:
                 alts = [related_str]
             else:
                 alts = split_at_comma_semi(
-                    related_str, separators=[" or "], skipped=links
+                    related_str, separators=[r"\bor\b"], skipped=links
                 )
+                # print(f"{related_str=}, {alts=}")
                 if not alts:
                     alts = [""]
             for related_str in alts:
