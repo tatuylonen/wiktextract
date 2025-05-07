@@ -89,9 +89,12 @@ def extract_gloss_list_item(
     wxr: WiktextractContext,
     word_entry: WordEntry,
     list_item: WikiNode,
+    parent_sense: Sense | None = None,
 ) -> None:
     gloss_nodes = []
-    sense = Sense()
+    sense = (
+        Sense() if parent_sense is None else parent_sense.model_copy(deep=True)
+    )
     for node in list_item.children:
         if isinstance(node, TemplateNode):
             t_str = clean_node(wxr, sense, node)
@@ -130,6 +133,11 @@ def extract_gloss_list_item(
         if "form-of" in word_entry.tags:
             extract_form_of_word(wxr, sense, list_item)
         word_entry.senses.append(sense)
+
+    for list_node in list_item.find_child(NodeKind.LIST):
+        if list_node.sarg.startswith("#") and list_node.sarg.endswith("#"):
+            for child_list_item in list_node.find_child(NodeKind.LIST_ITEM):
+                extract_gloss_list_item(wxr, word_entry, child_list_item, sense)
 
 
 def extract_form_of_word(
