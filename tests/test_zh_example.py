@@ -184,7 +184,7 @@ class TestExample(TestCase):
         )
         sense_data = Sense()
         root = self.wxr.wtp.parse("""#* {{quote-book|zh}}
-#*: {{zh-x}}""")
+#*: {{zh-x|如果 唔係 今日 拆穿 你 槓嘢\槓{lung5}野，畀\俾 你 混 咗\左 入 稅局{guk6-2} 重{zung6} 死人 呀！|如果不是今天揭穿你的老底，給你混進稅務局就更'''糟糕'''了！|C-GZ}}""")
         extract_example_list_item(
             self.wxr, sense_data, root.children[0].children[0], []
         )
