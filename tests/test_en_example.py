@@ -60,3 +60,38 @@ class TestEnExample(TestCase):
                 },
             ],
         )
+
+    def test_zh_x_arg(self):
+        self.wxr.wtp.add_page("Template:w", 10, "{{{2}}}")
+        self.wxr.wtp.add_page(
+            "Template:zh-x",
+            10,
+            """<span lang="zh-Hant" class="Hant">[[曹#Chinese|曹]]<b>大家</b></span>&nbsp; ―&nbsp; <span lang="zh-Latn"><i>Cáo <b>Dàgū</b></i></span>&nbsp; ―&nbsp; [[w:Ban Zhao|'''Madame''' Cao]][[Category:Mandarin terms with usage examples]]""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "大家",
+            """==Chinese==
+===Noun===
+# gloss
+#: {{zh-x|^曹 ^大家{gū}|{{w|Ban Zhao|'''Madame''' Cao}}}}""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"][0]["categories"],
+            ["Mandarin terms with usage examples"],
+        )
+        self.assertEqual(
+            page_data[0]["senses"][0]["examples"],
+            [
+                {
+                    "text": "曹大家",
+                    "bold_text_offsets": [(1, 3)],
+                    "english": "Madame Cao",
+                    "bold_english_offsets": [(0, 6)],
+                    "roman": "Cáo Dàgū",
+                    "bold_roman_offsets": [(4, 8)],
+                    "type": "example",
+                    "raw_tags": ["Traditional Chinese"],
+                }
+            ],
+        )

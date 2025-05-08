@@ -166,7 +166,8 @@ def extract_template_ja_usex(
             "bold_roman_offsets",
         )
     tr_arg = wxr.wtp.parse(
-        wxr.wtp.node_to_wikitext(node.template_parameters.get(3, ""))
+        wxr.wtp.node_to_wikitext(node.template_parameters.get(3, "")),
+        expand_all=True,
     )
     example_data["english"] = clean_node(wxr, None, tr_arg)
     calculate_bold_offsets(
@@ -177,7 +178,8 @@ def extract_template_ja_usex(
         "bold_english_offsets",
     )
     lit_arg = wxr.wtp.parse(
-        wxr.wtp.node_to_wikitext(node.template_parameters.get("lit", ""))
+        wxr.wtp.node_to_wikitext(node.template_parameters.get("lit", "")),
+        expand_all=True,
     )
     example_data["literal_meaning"] = clean_node(wxr, None, lit_arg)
     calculate_bold_offsets(
@@ -204,27 +206,40 @@ def extract_template_zh_x(
     clean_node(wxr, sense_data, expanded_node)
     has_dl_tag = False
     results = []
+    example_data = deepcopy(parent_example)
+    tr_arg = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(template_node.template_parameters.get(2, "")),
+        expand_all=True,
+    )
+    example_data["english"] = clean_node(wxr, None, tr_arg)
+    calculate_bold_offsets(
+        wxr,
+        tr_arg,
+        example_data["english"],
+        example_data,
+        "bold_english_offsets",
+    )
+    lit_arg = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(
+            template_node.template_parameters.get("lit", "")
+        ),
+        expand_all=True,
+    )
+    example_data["literal_meaning"] = clean_node(wxr, None, lit_arg)
+    calculate_bold_offsets(
+        wxr,
+        tr_arg,
+        example_data["literal_meaning"],
+        example_data,
+        "bold_literal_offsets",
+    )
     for dl_tag in expanded_node.find_html_recursively("dl"):
         has_dl_tag = True
-        example_data = deepcopy(parent_example)
-        tr_arg = wxr.wtp.parse(
-            wxr.wtp.node_to_wikitext(
-                template_node.template_parameters.get(2, "")
-            )
-        )
-        example_data["english"] = clean_node(wxr, None, tr_arg)
-        calculate_bold_offsets(
-            wxr,
-            tr_arg,
-            example_data["english"],
-            example_data,
-            "bold_english_offsets",
-        )
         for dd_tag in dl_tag.find_html("dd"):
             dd_text = clean_node(wxr, None, dd_tag)
             if dd_text.startswith("From:"):
                 example_data["ref"] = dd_text.removeprefix("From:")
-            else:
+            elif not dd_text.startswith("(literally,"):
                 for span_tag in dd_tag.find_html_recursively(
                     "span", attr_name="lang", attr_value="Latn"
                 ):
@@ -249,7 +264,6 @@ def extract_template_zh_x(
 
     # no source, single line example
     if not has_dl_tag:
-        example_data = deepcopy(parent_example)
         for span_tag in expanded_node.find_html(
             "span", attr_name="lang", attr_value="Latn"
         ):
@@ -266,32 +280,6 @@ def extract_template_zh_x(
             span_text = clean_node(wxr, None, span_tag)
             if span_text.startswith("[") and span_text.endswith("]"):
                 example_data["raw_tags"].append(span_text.strip("[]"))
-        tr_arg = wxr.wtp.parse(
-            wxr.wtp.node_to_wikitext(
-                template_node.template_parameters.get(2, "")
-            )
-        )
-        example_data["english"] = clean_node(wxr, None, tr_arg)
-        calculate_bold_offsets(
-            wxr,
-            tr_arg,
-            example_data["english"],
-            example_data,
-            "bold_english_offsets",
-        )
-        lit_arg = wxr.wtp.parse(
-            wxr.wtp.node_to_wikitext(
-                template_node.template_parameters.get("lit", "")
-            )
-        )
-        example_data["literal_meaning"] = clean_node(wxr, None, lit_arg)
-        calculate_bold_offsets(
-            wxr,
-            tr_arg,
-            example_data["literal_meaning"],
-            example_data,
-            "bold_literal_offsets",
-        )
         for span_tag in expanded_node.find_html("span"):
             span_lang = span_tag.attrs.get("lang", "")
             if span_lang in ["zh-Hant", "zh-Hans"]:
@@ -303,7 +291,7 @@ def extract_template_zh_x(
                         wxr,
                         span_tag,
                         example_text,
-                        example_data,
+                        new_example,
                         "bold_text_offsets",
                     )
                     new_example["tags"].append(
