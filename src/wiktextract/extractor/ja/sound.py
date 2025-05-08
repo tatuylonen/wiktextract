@@ -32,9 +32,12 @@ def extract_sound_section(
             if data.lang_code == base_data.lang_code:
                 data.sounds.extend(sounds)
                 data.categories.extend(cats.get("categories", []))
-    else:
+    elif len(page_data) > 0:
         page_data[-1].sounds.extend(sounds)
         page_data[-1].categories.extend(cats.get("categories", []))
+    else:
+        base_data.sounds.extend(sounds)
+        base_data.categories.extend(cats.get("categories", []))
 
 
 def process_sound_template(
