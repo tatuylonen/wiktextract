@@ -96,6 +96,16 @@ def process_linkage_list_item(
                 translate_raw_tags(linkage_data)
                 linkage_list.append(linkage_data)
                 raw_tags.clear()
+        elif (
+            isinstance(item_child, WikiNode)
+            and item_child.kind == NodeKind.LIST
+        ):
+            for child_list_item in item_child.find_child(NodeKind.LIST_ITEM):
+                _, new_list = process_linkage_list_item(
+                    wxr, child_list_item, sense
+                )
+                linkage_list.extend(new_list)
+
     return sense, linkage_list
 
 
