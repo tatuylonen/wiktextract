@@ -55,6 +55,9 @@ def extract_example_list_item(
             if t_node.template_name in ["ux", "uxi"]:
                 process_ux_template(wxr, t_node, sense)
                 has_example_template = True
+            elif t_node.template_name in ["quote", "quote-book"]:
+                extract_quote_template(wxr, t_node, sense)
+                has_example_template = True
         if has_example_template:
             return
         for bold_index, bold_node in list_item.find_child(NodeKind.BOLD, True):
@@ -146,6 +149,54 @@ def process_ux_template(
                 example,
                 "bold_translation_offsets",
             )
+    if example.text != "":
+        sense.examples.append(example)
+    clean_node(wxr, sense, t_node)
+
+
+def extract_quote_template(
+    wxr: WiktextractContext, t_node: TemplateNode, sense: Sense
+) -> None:
+    # https://ja.wiktionary.org/wiki/テンプレート:quote
+    example = Example()
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for span_tag in expanded_node.find_html_recursively("span"):
+        span_tag_class = span_tag.attrs.get("class", "")
+        if " e-quotation" in span_tag_class:
+            example.text = clean_node(wxr, None, span_tag)
+            calculate_bold_offsets(
+                wxr,
+                span_tag,
+                example.text,
+                example,
+                "bold_text_offsets",
+            )
+        elif "e-transliteration" in span_tag_class:
+            example.roman = clean_node(wxr, None, span_tag)
+            calculate_bold_offsets(
+                wxr,
+                span_tag,
+                example.roman,
+                example,
+                "bold_roman_offsets",
+            )
+        elif "e-translation" in span_tag_class:
+            example.translation = clean_node(wxr, None, span_tag)
+            calculate_bold_offsets(
+                wxr,
+                span_tag,
+                example.translation,
+                example,
+                "bold_translation_offsets",
+            )
+        elif "cited-source" in span_tag_class:
+            example.ref = clean_node(wxr, None, span_tag)
+
+    for ref_tag in expanded_node.find_html_recursively("ref"):
+        example.ref = clean_node(wxr, None, ref_tag.children)
+
     if example.text != "":
         sense.examples.append(example)
     clean_node(wxr, sense, t_node)
