@@ -91,6 +91,8 @@ class Sound(ChineseBaseModel):
     raw_tags: list[str] = []
     homophone: str = ""
     enpr: str = Field(default="", description="English pronunciation")
+    other: str = ""
+    roman: str = ""
 
 
 class Translation(ChineseBaseModel):
