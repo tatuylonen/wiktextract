@@ -34,11 +34,16 @@ def extract_etymology_section(
             ):
                 base_data.etymology_examples.append(example_data)
             clean_node(wxr, base_data, etymology_node)
-        elif (
-            isinstance(etymology_node, TemplateNode)
-            and etymology_node.template_name.lower() == "rfe"
-        ):
-            pass  # missing etymology
+        elif isinstance(
+            etymology_node, TemplateNode
+        ) and etymology_node.template_name.lower() in [
+            "rfe",  # missing etymology
+            "zh-forms",
+            "zh-wp",
+            "wp",
+            "wikipedia",
+        ]:
+            pass
         elif (
             isinstance(etymology_node, WikiNode)
             and etymology_node.kind == NodeKind.LIST
