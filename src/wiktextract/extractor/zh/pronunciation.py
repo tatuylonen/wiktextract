@@ -66,6 +66,10 @@ def process_pron_template(
         sounds.extend(process_ipa_template(wxr, template_node, raw_tags))
     elif template_name == "enpr":
         sounds.extend(process_enpr_template(wxr, template_node, raw_tags))
+    elif template_name == "ja-pron":
+        new_sounds, new_cats = extract_ja_pron_template(wxr, template_node)
+        sounds.extend(new_sounds)
+        categories.extend(new_cats)
     return sounds, categories
 
 
@@ -250,3 +254,33 @@ def process_enpr_template(
         )
         sounds.append(sound)
     return sounds
+
+
+def extract_ja_pron_template(
+    wxr: WiktextractContext, t_node: TemplateNode
+) -> tuple[list[Sound], list[str]]:
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    cats = {}
+    sounds = []
+    for li_tag in expanded_node.find_html_recursively("li"):
+        sound = Sound()
+        for span_tag in li_tag.find_html("span"):
+            span_class = span_tag.attrs.get("class", "")
+            if "usage-label-accent" in span_class:
+                raw_tag = clean_node(wxr, None, span_tag).strip("() ")
+                if raw_tag != "":
+                    sound.raw_tags.append(raw_tag)
+            elif "IPA" in span_class:
+                sound.ipa = clean_node(wxr, None, span_tag)
+            elif "Latn" in span_class:
+                sound.roman = clean_node(wxr, None, span_tag)
+            elif span_tag.attrs.get("lang", "") == "ja":
+                sound.other = clean_node(wxr, None, span_tag)
+        if sound.ipa != "" or sound.other != "":
+            translate_raw_tags(sound)
+            sounds.append(sound)
+
+    clean_node(wxr, cats, expanded_node)
+    return sounds, cats.get("categories", [])
