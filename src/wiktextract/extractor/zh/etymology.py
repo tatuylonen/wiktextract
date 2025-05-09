@@ -11,7 +11,10 @@ from .models import Example, WordEntry
 
 
 def extract_etymology_section(
-    wxr: WiktextractContext, base_data: WordEntry, level_node: WikiNode
+    wxr: WiktextractContext,
+    page_data: list[WordEntry],
+    base_data: WordEntry,
+    level_node: WikiNode,
 ) -> None:
     from .example import extract_template_zh_x
 
@@ -53,6 +56,17 @@ def extract_etymology_section(
                     clean_node(wxr, base_data, template_node)
             if not has_zh_x:
                 etymology_nodes.append(etymology_node)
+        elif isinstance(
+            etymology_node, TemplateNode
+        ) and etymology_node.template_name in [
+            "ja-see",
+            "ja-see-kango",
+            "zh-see",
+        ]:
+            from .page import process_soft_redirect_template
+
+            page_data.append(base_data.model_copy(deep=True))
+            process_soft_redirect_template(wxr, etymology_node, page_data[-1])
         else:
             etymology_nodes.append(etymology_node)
 

@@ -62,7 +62,7 @@ def parse_section(
     ):
         if level_node.contain_node(LEVEL_KIND_FLAGS):
             base_data = base_data.model_copy(deep=True)
-        extract_etymology_section(wxr, base_data, level_node)
+        extract_etymology_section(wxr, page_data, base_data, level_node)
     elif wxr.config.capture_pronunciation and subtitle in PRONUNCIATION_TITLES:
         if level_node.contain_node(LEVEL_KIND_FLAGS):
             base_data = base_data.model_copy(deep=True)
@@ -228,7 +228,7 @@ def parse_page(
             parse_section(wxr, page_data, base_data, level3_node)
         if not level2_node.contain_node(NodeKind.LEVEL3):
             page_data.append(base_data.model_copy(deep=True))
-            process_low_quality_page(wxr, level2_node, page_data)
+            process_low_quality_page(wxr, level2_node, page_data[-1])
             if page_data[-1] == base_data:
                 page_data.pop()
 
@@ -240,49 +240,45 @@ def parse_page(
 
 
 def process_low_quality_page(
-    wxr: WiktextractContext,
-    level_node: WikiNode,
-    page_data: list[WordEntry],
+    wxr: WiktextractContext, level_node: WikiNode, word_entry: WordEntry
 ) -> None:
     is_soft_redirect = False
     for template_node in level_node.find_child(NodeKind.TEMPLATE):
         if template_node.template_name in ("ja-see", "ja-see-kango", "zh-see"):
-            process_soft_redirect_template(wxr, template_node, page_data)
+            process_soft_redirect_template(wxr, template_node, word_entry)
             is_soft_redirect = True
 
     if not is_soft_redirect:  # only have a gloss text
-        gloss_text = clean_node(wxr, page_data[-1], level_node.children)
+        gloss_text = clean_node(wxr, word_entry, level_node.children)
         if len(gloss_text) > 0:
-            for cat in page_data[-1].categories:
-                cat = cat.removeprefix(page_data[-1].lang).strip()
+            for cat in word_entry.categories:
+                cat = cat.removeprefix(word_entry.lang).strip()
                 if cat in POS_TITLES:
                     pos_data = POS_TITLES[cat]
-                    page_data[-1].pos = pos_data["pos"]
-                    page_data[-1].tags.extend(pos_data.get("tags", []))
+                    word_entry.pos = pos_data["pos"]
+                    word_entry.tags.extend(pos_data.get("tags", []))
                     break
-            page_data[-1].senses.append(Sense(glosses=[gloss_text]))
+            word_entry.senses.append(Sense(glosses=[gloss_text]))
 
 
 def process_soft_redirect_template(
-    wxr: WiktextractContext,
-    template_node: TemplateNode,
-    page_data: list[WordEntry],
+    wxr: WiktextractContext, t_node: TemplateNode, word_entry: WordEntry
 ) -> None:
     # https://zh.wiktionary.org/wiki/Template:Ja-see
     # https://zh.wiktionary.org/wiki/Template:Ja-see-kango
     # https://zh.wiktionary.org/wiki/Template:Zh-see
-    template_name = template_node.template_name.lower()
+    template_name = t_node.template_name.lower()
     if template_name == "zh-see":
-        page_data[-1].redirects.append(
-            clean_node(wxr, None, template_node.template_parameters.get(1, ""))
+        word_entry.redirects.append(
+            clean_node(wxr, None, t_node.template_parameters.get(1, ""))
         )
     elif template_name in ("ja-see", "ja-see-kango"):
-        for key, value in template_node.template_parameters.items():
+        for key, value in t_node.template_parameters.items():
             if isinstance(key, int):
-                page_data[-1].redirects.append(clean_node(wxr, None, value))
+                word_entry.redirects.append(clean_node(wxr, None, value))
 
-    if page_data[-1].pos == "unknown":
-        page_data[-1].pos = "soft-redirect"
+    if word_entry.pos == "unknown":
+        word_entry.pos = "soft-redirect"
 
 
 def process_zh_forms(

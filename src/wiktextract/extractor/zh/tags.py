@@ -260,6 +260,7 @@ LABEL_TAGS = {
     "數詞縮寫": ["numeral", "abbreviation"],
     "主要用於肯定": "positive",
     "古典": "Classical",
+    "中國大陸": "Mainland-China",
 }
 
 # example sentence template
