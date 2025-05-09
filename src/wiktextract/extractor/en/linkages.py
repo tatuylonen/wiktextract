@@ -14,6 +14,7 @@ from ...tags import linkage_beginning_tags
 from ...wxr_context import WiktextractContext
 from .form_descriptions import (
     classify_desc,
+    decode_tags,
     head_final_bantu_langs,
     head_final_bantu_re,
     head_final_numeric_langs,
@@ -1081,6 +1082,7 @@ def extract_l_template(
     lang_code = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
     for span_tag in expanded_node.find_html("span"):
         span_lang = span_tag.attrs.get("lang", "")
+        span_class = span_tag.attrs.get("class", "")
         if span_lang == lang_code:
             word = clean_node(wxr, None, span_tag)
             if word != "":
@@ -1090,4 +1092,13 @@ def extract_l_template(
             roman = clean_node(wxr, None, span_tag)
             if roman != "":
                 forms[-1]["roman"] = roman
+        elif "label-content" in span_class and len(forms) > 0:
+            tag_text = clean_node(wxr, None, span_tag)
+            if classify_desc(tag_text) == "tags":
+                tagsets1, _ = decode_tags(tag_text)
+                tags: list[str] = []
+                for ts in tagsets1:
+                    tags.extend(ts)
+                for form in forms:
+                    form["tags"].extend(tags)
     data_extend(word_entry, "forms", forms)
