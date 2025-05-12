@@ -463,6 +463,8 @@ def translate_raw_tags(data: WordEntry) -> None:
                 data.topics.append(tr_data)
             elif isinstance(tr_data, list):
                 data.topics.extend(tr_data)
+            else:
+                raw_tags.append(raw_tag)
         else:
             raw_tags.append(raw_tag)
     data.raw_tags = raw_tags

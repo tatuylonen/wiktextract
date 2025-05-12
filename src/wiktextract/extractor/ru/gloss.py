@@ -36,11 +36,18 @@ def extract_gloss(
     wxr: WiktextractContext, word_entry: WordEntry, level_node: WikiNode
 ) -> None:
     has_gloss_list = False
+    section_title = clean_node(wxr, None, level_node.largs)
     for list_node in level_node.find_child(NodeKind.LIST):
         for sense_index, list_item in enumerate(
             list_node.find_child(NodeKind.LIST_ITEM), 1
         ):
-            process_gloss_list_item(wxr, word_entry, list_item, sense_index)
+            process_gloss_list_item(
+                wxr,
+                word_entry,
+                list_item,
+                sense_index,
+                section_title=section_title,
+            )
         has_gloss_list = True
     if not has_gloss_list:
         node = wxr.wtp.parse(
@@ -48,7 +55,9 @@ def extract_gloss(
                 list(level_node.invert_find_child(LEVEL_KIND_FLAGS))
             )
         )
-        process_gloss_list_item(wxr, word_entry, node, 1)
+        process_gloss_list_item(
+            wxr, word_entry, node, 1, section_title=section_title
+        )
 
 
 def process_gloss_list_item(
@@ -57,10 +66,13 @@ def process_gloss_list_item(
     list_item: WikiNode,
     sense_index: int,
     parent_sense: Sense | None = None,
+    section_title: str = "",
 ) -> None:
     sense = (
         Sense() if parent_sense is None else parent_sense.model_copy(deep=True)
     )
+    if section_title not in ["", "Значение", "Значения"]:
+        sense.raw_tags.append(section_title)
     gloss_nodes = []
     for child in list_item.children:
         if isinstance(child, TemplateNode):
