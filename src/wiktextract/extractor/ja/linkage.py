@@ -214,7 +214,7 @@ def extract_l_template(
 
     if "lit" in t_node.template_parameters:
         l_data.literal_meaning = clean_node(
-            wxr, None, t_node.template_parameters["t"]
+            wxr, None, t_node.template_parameters["lit"]
         )
     for arg_name in (4, "gloss", "t"):
         if arg_name in t_node.template_parameters:
@@ -244,6 +244,7 @@ def extract_alt_form_section(
                         tags=l_data.tags,
                         raw_tags=l_data.raw_tags,
                         roman=l_data.roman,
+                        literal_meaning=l_data.literal_meaning,
                     )
                 )
 
