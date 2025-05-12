@@ -61,7 +61,7 @@ from .info_templates import (
     parse_info_template_arguments,
     parse_info_template_node,
 )
-from .linkages import parse_linkage_item_text, extract_alt_form_section
+from .linkages import extract_alt_form_section, parse_linkage_item_text
 from .parts_of_speech import PARTS_OF_SPEECH
 from .section_titles import (
     COMPOUNDS_TITLE,
@@ -760,6 +760,7 @@ def parse_sense_linkage(
     data: SenseData,
     name: str,
     ht: TemplateArgs,
+    pos: str,
 ) -> None:
     """Parses a linkage (synonym, etc) specified in a word sense."""
     assert isinstance(wxr, WiktextractContext)
@@ -770,12 +771,32 @@ def parse_sense_linkage(
     for i in range(2, 20):
         w = ht.get(i) or ""
         w = clean_node(wxr, data, w)
+        is_thesaurus = False
         for alias in ns_title_prefix_tuple(wxr, "Thesaurus"):
             if w.startswith(alias):
+                is_thesaurus = True
                 w = w[len(alias) :]
+                if w != wxr.wtp.title:
+                    from ...thesaurus import search_thesaurus
+
+                    lang_code = clean_node(wxr, None, ht.get(1, ""))
+                    for t_data in search_thesaurus(
+                        wxr.thesaurus_db_conn, w, lang_code, pos, field
+                    ):
+                        l_data = {
+                            "word": t_data.term,
+                            "source": "Thesaurus:" + w,
+                        }
+                        if len(t_data.tags) > 0:
+                            l_data["tags"] = t_data.tags
+                        if len(t_data.raw_tags) > 0:
+                            l_data["raw_tags"] = t_data.raw_tags
+                        data_append(data, field, l_data)
                 break
         if not w:
             break
+        if is_thesaurus:
+            continue
         tags: list[str] = []
         topics: list[str] = []
         english: Optional[str] = None
@@ -1831,7 +1852,7 @@ def parse_language(
                 data_append(sense_base, "senseid", langid + ":" + arg)
             if name in sense_linkage_templates:
                 # print(f"SENSE_TEMPLATE_FN: {name}")
-                parse_sense_linkage(wxr, sense_base, name, ht)
+                parse_sense_linkage(wxr, sense_base, name, ht, pos)
                 return ""
             if name == "†" or name == "zh-obsolete":
                 data_append(sense_base, "tags", "obsolete")
