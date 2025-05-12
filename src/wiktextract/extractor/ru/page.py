@@ -37,11 +37,9 @@ from .translation import extract_translations
 
 
 def process_semantic_section(
-    wxr: WiktextractContext,
-    page_data: list[WordEntry],
-    semantic_level_node: WikiNode,
+    wxr: WiktextractContext, page_data: list[WordEntry], level_node: LevelNode
 ):
-    for list_node in semantic_level_node.find_child(NodeKind.LIST):
+    for list_node in level_node.find_child(NodeKind.LIST):
         for template_node in list_node.find_child_recursively(
             NodeKind.TEMPLATE
         ):
@@ -226,7 +224,12 @@ def parse_section(
         extract_pronunciation_section(wxr, page_data[-1], level_node)
     elif section_title == "семантические свойства":  # Semantic properties
         process_semantic_section(wxr, page_data, level_node)
-    elif section_title in ("значение", "значения"):
+    elif section_title in [
+        "значение",
+        "значения",
+        "как самостоятельный глагол",
+        "в значении вспомогательного глагола или связки",
+    ]:
         extract_gloss(wxr, page_data[-1], level_node)
     elif section_title == "этимология" and wxr.config.capture_etymologies:
         extract_etymology(wxr, page_data[-1], level_node)

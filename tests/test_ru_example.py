@@ -80,12 +80,13 @@ class TestRUExample(unittest.TestCase):
         )
         self.wxr.wtp.start_page("Abad")
         root = self.wxr.wtp.parse(
-            "(английская [[фамилия]]) {{english surname example}}"
+            """==== Значение ====
+# (английская [[фамилия]]) {{english surname example}}"""
         )
         word_entry = WordEntry(
             lang="Английский", lang_code="en", pos="prop", word="Abad"
         )
-        extract_gloss(self.wxr, word_entry, root)
+        extract_gloss(self.wxr, word_entry, root.children[0])
         data = word_entry.model_dump(exclude_defaults=True)
         self.assertEqual(
             data["senses"][0],
