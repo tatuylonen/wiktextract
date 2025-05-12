@@ -39,6 +39,11 @@ def extract_pos_section(
                     sense = parent_sense.model_copy(deep=True)
                     sense.sense_index = ""
                     extract_gloss_list_item(wxr, word_entry, list_item, sense)
+            elif node.sarg == ":" and len(word_entry.senses) > 0:
+                for list_item in node.find_child(NodeKind.LIST_ITEM):
+                    extract_gloss_list_item(
+                        wxr, word_entry, list_item, word_entry.senses[-1]
+                    )
         elif isinstance(node, TemplateNode):
             if node.template_name.startswith("inflect."):
                 process_inflect_template(wxr, word_entry, node)
@@ -69,25 +74,28 @@ def extract_gloss_list_item(
     list_item: WikiNode,
     sense: Sense,
 ) -> None:
-    if list_item.definition is None:
-        return
-    raw_tag_text = clean_node(wxr, sense, list_item.children)
-    for index, node in enumerate(list_item.children):
-        if isinstance(node, str) and sense.sense_index == "":
-            m = re.search(r"[\d.a-z]+", node)
-            if m is not None:
-                sense.sense_index = m.group(0)
-                raw_tag_text = clean_node(
-                    wxr, sense, list_item.children[index + 1 :]
-                )
-                break
-    for raw_tag in raw_tag_text.split(","):
-        raw_tag = raw_tag.strip()
-        if raw_tag != "":
-            sense.raw_tags.append(raw_tag)
+    if list_item.sarg.endswith(";"):
+        raw_tag_text = clean_node(wxr, sense, list_item.children)
+        for index, node in enumerate(list_item.children):
+            if isinstance(node, str) and sense.sense_index == "":
+                m = re.search(r"[\d.a-z]+", node)
+                if m is not None:
+                    sense.sense_index = m.group(0)
+                    raw_tag_text = clean_node(
+                        wxr, sense, list_item.children[index + 1 :]
+                    )
+                    break
+        for raw_tag in raw_tag_text.split(","):
+            raw_tag = raw_tag.strip()
+            if raw_tag != "":
+                sense.raw_tags.append(raw_tag)
 
     gloss_nodes = []
-    for node in list_item.definition:
+    for node in (
+        list_item.definition
+        if list_item.definition is not None
+        else list_item.children
+    ):
         if isinstance(node, TemplateNode) and node.template_name.startswith(
             ("f.", "forma ", "plural")
         ):
@@ -100,9 +108,14 @@ def extract_gloss_list_item(
     if gloss_text != "":
         sense.glosses.append(gloss_text)
         translate_raw_tags(sense)
-        word_entry.senses.append(sense)
+        if list_item.sarg.endswith(";"):
+            word_entry.senses.append(sense)
 
-    for node in list_item.definition:
+    for node in (
+        list_item.definition
+        if list_item.definition is not None
+        else list_item.children
+    ):
         if isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
             for child_list_item in node.find_child(NodeKind.LIST_ITEM):
                 child_sense = sense.model_copy(deep=True)

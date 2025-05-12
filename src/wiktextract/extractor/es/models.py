@@ -39,17 +39,6 @@ class Translation(BaseModelWrap):
     sense: str = ""
 
 
-class TemplateData(BaseModelWrap):
-    name: str = Field(default="", description="Template's name.")
-    args: dict[str, str] = Field(
-        default={}, description="Arguments given to the template, if any."
-    )
-    expansion: str = Field(
-        default="",
-        description="The result of expanding the template.",
-    )
-
-
 class Example(BaseModelWrap):
     text: str = Field(description="Example usage sentence")
     bold_text_offsets: list[tuple[int, int]] = []
@@ -58,7 +47,6 @@ class Example(BaseModelWrap):
     )
     bold_translation_offsets: list[tuple[int, int]] = []
     ref: str = ""
-    example_templates: list[TemplateData] = []
 
 
 class AltForm(BaseModelWrap):
@@ -78,9 +66,6 @@ class Sense(BaseModelWrap):
         default=[], description="Category links on the page"
     )
     examples: list[Example] = Field(default=[], description="List of examples")
-    # subsenses: list["Sense"] = Field(
-    #     default=[], description="List of subsenses"
-    # )
     sense_index: str = Field(
         default="", description="Sense number used in Wiktionary"
     )
