@@ -42,6 +42,7 @@ class Form(JapaneseBaseModel):
     tags: list[str] = []
     raw_tags: list[str] = []
     roman: str = ""
+    literal_meaning: str = ""
 
 
 class Sound(JapaneseBaseModel):

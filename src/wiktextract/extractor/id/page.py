@@ -69,7 +69,7 @@ def parse_page(
     page_data: list[WordEntry] = []
     for level2_node in tree.find_child(NodeKind.LEVEL2):
         cats = {}
-        lang_name = clean_node(wxr, cats, level2_node.largs)
+        lang_name = clean_node(wxr, cats, level2_node.largs) or "unknown"
         lang_code = (
             name_to_code(lang_name.removeprefix("bahasa "), "id") or "unknown"
         )

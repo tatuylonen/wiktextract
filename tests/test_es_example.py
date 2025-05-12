@@ -13,7 +13,9 @@ class TestESExample(unittest.TestCase):
     def setUp(self) -> None:
         self.wxr = WiktextractContext(
             Wtp(lang_code="es"),
-            WiktionaryConfig(dump_file_lang_code="es"),
+            WiktionaryConfig(
+                dump_file_lang_code="es", capture_language_codes=None
+            ),
         )
 
     def tearDown(self) -> None:
@@ -35,7 +37,6 @@ class TestESExample(unittest.TestCase):
 {{ejemplo|And He has on His robe and on His thigh a name written: KING OF KINGS AND '''LORD''' OF LORDS.|c=libro|v=New King James|t=Bible|pasaje=Revelation 19:16|u=https://www.biblegateway.com/passage/?search=Apocalipsis+19&version=NKJV|trad=Y en su vestidura y en su muslo tiene escrito este nombre: REY DE REYES Y '''SEÑOR''' DE SEÑORES.|tradc=libro|tradv=Reina-Valera 1995|tradt=Biblia|tradpasaje=Apocalipsis 19:16|tradu=https://www.biblegateway.com/passage/?search=Apocalipsis+19&version=RVR1960}}""",
         )
         dump_data = page_data[0]["senses"][0]["examples"]
-        del dump_data[0]["example_templates"]
         self.assertEqual(
             dump_data,
             [

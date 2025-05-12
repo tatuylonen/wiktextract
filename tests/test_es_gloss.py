@@ -275,3 +275,17 @@ class TestESGloss(unittest.TestCase):
                 },
             ],
         )
+
+    def test_subsequent_def_list_in_description_list(self):
+        page_data = parse_page(
+            self.wxr,
+            "pez",
+            """== {{lengua|la}} ==
+==== {{sufijo|es}} ====
+;1: Cualquiera
+:La [[respiración]]""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"],
+            [{"glosses": ["Cualquiera", "La respiración"], "sense_index": "1"}],
+        )
