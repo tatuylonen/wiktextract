@@ -2507,7 +2507,7 @@ def parse_language(
                 )
 
     def get_subpage_section(
-        title: str, subtitle: str, seq: Union[list[str], tuple[str, ...]]
+        title: str, subtitle: str, seqs: list[Union[list[str], tuple[str, ...]]]
     ) -> Optional[Union[WikiNode, str]]:
         """Loads a subpage of the given page, and finds the section
         for the given language, part-of-speech, and section title.  This
@@ -2515,9 +2515,10 @@ def parse_language(
         assert isinstance(language, str)
         assert isinstance(title, str)
         assert isinstance(subtitle, str)
-        assert isinstance(seq, (list, tuple))
-        for x in seq:
-            assert isinstance(x, str)
+        assert isinstance(seqs, (list, tuple))
+        for seq in seqs:
+            for x in seq:
+                assert isinstance(x, str)
         subpage_title = word + "/" + subtitle
         subpage_content = wxr.wtp.get_page_body(subpage_title, 0)
         if subpage_content is None:
@@ -2557,7 +2558,8 @@ def parse_language(
             do_not_pre_expand=DO_NOT_PRE_EXPAND_TEMPLATES,
         )
         assert tree.kind == NodeKind.ROOT
-        ret = recurse(tree, seq)
+        for seq in seqs:
+            ret = recurse(tree, seq)
         if ret is None:
             wxr.wtp.debug(
                 "Failed to find subpage section {}/{} seq {}".format(
@@ -3216,22 +3218,26 @@ def parse_language(
                     subnode = get_subpage_section(
                         wxr.wtp.title or "MISSING_TITLE",
                         TRANSLATIONS_TITLE,
-                        seq,
+                        [seq],
                     )
-                    if subnode is not None and isinstance(subnode, WikiNode):
-                        parse_translations(data, subnode)
-                    else:
+                    if subnode is None or not isinstance(subnode, WikiNode):
                         # Failed to find the normal subpage section
-                        seq = [TRANSLATIONS_TITLE]
+                        # seq with sub and pos
+                        pos = wxr.wtp.subsection or "MISSING_SUBSECTION"
+                        # print(f"{language=}, {pos=}, {TRANSLATIONS_TITLE=}")
+                        seqs: list[list[str] | tuple[str, ...]] = [
+                                [TRANSLATIONS_TITLE],
+                                [language, pos],
+                            ]
                         subnode = get_subpage_section(
                             wxr.wtp.title or "MISSING_TITLE",
                             TRANSLATIONS_TITLE,
-                            seq,
+                            seqs,
                         )
-                        if subnode is not None and isinstance(
-                            subnode, WikiNode
-                        ):
-                            parse_translations(data, subnode)
+                    if subnode is not None and isinstance(
+                        subnode, WikiNode
+                    ):
+                        parse_translations(data, subnode)
                     return ""
                 if name in (
                     "c",
@@ -3383,7 +3389,7 @@ def parse_language(
                             subnode = get_subpage_section(
                                 wxr.wtp.title,
                                 TRANSLATIONS_TITLE,
-                                seq,
+                                [seq],
                             )
                             if subnode is not None and isinstance(
                                 subnode, WikiNode
