@@ -4326,6 +4326,7 @@ xlat_tags_map: Dict[str, Union[str, List[str]]] = {
     "verbs": "verb",
     "prepositions": "prepositional",
     "postpositions": "postpositional",
+    "postposition": "postpositional",
     "interjections": "interjection",
     "Abbreviations": "abbreviation",
     "abbreviations": "abbreviation",
