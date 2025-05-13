@@ -83,14 +83,17 @@ def process_gloss_list_item(
             elif child.template_name in TAG_GLOSS_TEMPLATES:
                 sense.tags.append(TAG_GLOSS_TEMPLATES[child.template_name])
                 gloss_nodes.append(child)
-            elif (
-                child.template_name.endswith(".")
-                or child.template_name == "помета"
-            ):
-                # Assume node is tag template
+            elif child.template_name.endswith("."):
                 raw_tag = clean_node(wxr, sense, child)
                 if raw_tag != "":
                     sense.raw_tags.append(raw_tag)
+            elif child.template_name == "помета":
+                if "nocolor" in child.template_parameters:
+                    gloss_nodes.append(child)
+                else:
+                    raw_tag = clean_node(wxr, sense, child)
+                    if raw_tag != "":
+                        sense.raw_tags.append(raw_tag)
             elif child.template_name == "значение":
                 process_meaning_template(wxr, sense, word_entry, child)
             elif child.template_name.lower() not in IGNORED_TEMPLATES:
