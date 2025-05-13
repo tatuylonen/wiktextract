@@ -124,6 +124,18 @@ def process_pos(
             glosses_lists.append(line[0])
 
     if glosses_index is None:
+        # if nothing found, accept ":" nodes
+        for i, line in enumerate(node_lines):
+            if (
+                len(line) == 1
+                and isinstance(line[0], WikiNode)
+                and line[0].kind == NodeKind.LIST
+            ):
+                if glosses_index is None:
+                    glosses_index = i
+                glosses_lists.append(line[0])
+
+    if glosses_index is None:
         # Could not find any glosses.
         # logger.info(f"  ////  {wxr.wtp.title}\n  MISSING GLOSSES")
         wxr.wtp.warning("Missing glosses", sortid="pos/20250121")
