@@ -37,30 +37,9 @@ def extract_etymology(
             level_node_index = node_index
         elif node.kind == NodeKind.LIST:
             for etymology_item in node.find_child(NodeKind.LIST_ITEM):
-                etymology_data = find_pos_in_etymology_list(wxr, etymology_item)
-                if etymology_data is not None:
-                    pos_id, pos_title, etymology_text, categories = (
-                        etymology_data
-                    )
-                    if len(etymology_text) > 0:
-                        etymology_dict[(pos_id, pos_title)].texts.append(
-                            etymology_text
-                        )
-                        etymology_dict[(pos_id, pos_title)].categories.extend(
-                            categories
-                        )
-                else:
-                    categories = {}
-                    etymology_text = clean_node(
-                        wxr, categories, etymology_item.children
-                    )
-                    if len(etymology_text) > 0:
-                        etymology_dict[(pos_id, pos_title)].texts.append(
-                            etymology_text
-                        )
-                        etymology_dict[(pos_id, pos_title)].categories.extend(
-                            categories.get("categories", [])
-                        )
+                pos_id, pos_title = extract_etymology_list_item(
+                    wxr, etymology_item, etymology_dict, pos_id, pos_title
+                )
 
     if len(etymology_dict) == 0:
         categories = {}
@@ -80,6 +59,39 @@ def extract_etymology(
         del etymology_dict[("", "")]
 
     return etymology_dict
+
+
+def extract_etymology_list_item(
+    wxr: WiktextractContext,
+    list_item: WikiNode,
+    etymology_dict: EtymologyDict,
+    pos_id: str,
+    pos_title: str,
+) -> tuple[str, str]:
+    etymology_data = find_pos_in_etymology_list(wxr, list_item)
+    if etymology_data is not None:
+        pos_id, pos_title, etymology_text, categories = etymology_data
+        if len(etymology_text) > 0:
+            etymology_dict[(pos_id, pos_title)].texts.append(etymology_text)
+            etymology_dict[(pos_id, pos_title)].categories.extend(categories)
+    else:
+        categories = {}
+        etymology_text = clean_node(
+            wxr, categories, list(list_item.invert_find_child(NodeKind.LIST))
+        )
+        if len(etymology_text) > 0:
+            etymology_dict[(pos_id, pos_title)].texts.append(etymology_text)
+            etymology_dict[(pos_id, pos_title)].categories.extend(
+                categories.get("categories", [])
+            )
+
+    for child_list in list_item.find_child(NodeKind.LIST):
+        for child_list_item in child_list.find_child(NodeKind.LIST_ITEM):
+            extract_etymology_list_item(
+                wxr, child_list_item, etymology_dict, pos_id, pos_title
+            )
+
+    return pos_id, pos_title
 
 
 def find_pos_in_etymology_list(
@@ -118,7 +130,16 @@ def find_pos_in_etymology_list(
                             clean_node(
                                 wxr,
                                 categories,
-                                list_item_node.children[index + 1 :],
+                                [
+                                    n
+                                    for n in list_item_node.children[
+                                        index + 1 :
+                                    ]
+                                    if not (
+                                        isinstance(n, WikiNode)
+                                        and n.kind == NodeKind.LIST
+                                    )
+                                ],
                             ),
                             categories.get("categories", []),
                         )
@@ -132,7 +153,15 @@ def find_pos_in_etymology_list(
                 pos_id,
                 clean_node(wxr, None, node).strip(": "),
                 clean_node(
-                    wxr, categories, list_item_node.children[index + 1 :]
+                    wxr,
+                    categories,
+                    [
+                        n
+                        for n in list_item_node.children[index + 1 :]
+                        if not (
+                            isinstance(n, WikiNode) and n.kind == NodeKind.LIST
+                        )
+                    ],
                 ),
                 categories.get("categories", []),
             )
@@ -148,7 +177,14 @@ def find_pos_in_etymology_list(
                         clean_node(
                             wxr,
                             categories,
-                            list_item_node.children[index + 1 :],
+                            [
+                                n
+                                for n in list_item_node.children[index + 1 :]
+                                if not (
+                                    isinstance(n, WikiNode)
+                                    and n.kind == NodeKind.LIST
+                                )
+                            ],
                         ).lstrip(") "),
                         categories.get("categories", []),
                     )
@@ -164,7 +200,14 @@ def find_pos_in_etymology_list(
                     clean_node(
                         wxr,
                         categories,
-                        list_item_node.children[index + 1 :],
+                        [
+                            n
+                            for n in list_item_node.children[index + 1 :]
+                            if not (
+                                isinstance(n, WikiNode)
+                                and n.kind == NodeKind.LIST
+                            )
+                        ],
                     ),
                     categories.get("categories", []),
                 )

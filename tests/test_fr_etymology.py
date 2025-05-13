@@ -9,7 +9,7 @@ from wiktextract.extractor.fr.etymology import (
     insert_etymology_data,
 )
 from wiktextract.extractor.fr.models import WordEntry
-from wiktextract.extractor.fr.page import parse_section
+from wiktextract.extractor.fr.page import parse_page, parse_section
 from wiktextract.wxr_context import WiktextractContext
 
 
@@ -18,7 +18,10 @@ class TestEtymology(TestCase):
 
     def setUp(self) -> None:
         self.wxr = WiktextractContext(
-            Wtp(lang_code="fr"), WiktionaryConfig(dump_file_lang_code="fr")
+            Wtp(lang_code="fr"),
+            WiktionaryConfig(
+                dump_file_lang_code="fr", capture_language_codes=None
+            ),
         )
 
     def tearDown(self) -> None:
@@ -436,3 +439,16 @@ class TestEtymology(TestCase):
                 }
             ],
         )
+
+    def test_nested_list(self):
+        data = parse_page(
+            self.wxr,
+            "alcool",
+            """== {{langue|fr}} ==
+=== {{S|étymologie}} ===
+: list 1
+:: list 2
+=== {{S|nom|fr}} ===
+# [[poudre|Poudre]] très [[fin]]e.""",
+        )
+        self.assertEqual(data[0]["etymology_texts"], ["list 1", "list 2"])
