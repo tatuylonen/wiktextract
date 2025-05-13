@@ -183,7 +183,7 @@ def check_error(
         called_from = "wiktionary/179/20240425"
     else:
         called_from = "wiktionary/179/20240425" + called_from
-    msg += ": " + json.dumps(dt, sort_keys=True, ensure_ascii=False)
+    # msg += ": " + json.dumps(dt, sort_keys=True, ensure_ascii=False)
     prefix = word or ""
     if lang:
         prefix += "/" + lang
@@ -289,7 +289,7 @@ def check_str_fields(
     assert isinstance(item, dict)
     for field in fields:
         v = item.get(field)
-        if v is None:
+        if field not in item:
             if mandatory:
                 check_error(
                     wxr,
@@ -297,8 +297,7 @@ def check_str_fields(
                     word,
                     lang,
                     pos,
-                    "{!r} should be a{} string (it is a "
-                    "mandatory field): {}".format(
+                    "{!r} is missing and should be a{} string: {}".format(
                         field,
                         "" if empty_ok else " non-empty",
                         json.dumps(item, sort_keys=True, ensure_ascii=False),
