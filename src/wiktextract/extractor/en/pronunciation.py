@@ -812,6 +812,8 @@ def parse_pronunciation(
                     m = re.search(r"__AUDIO_IGNORE_THIS__(\d+)__", text)
                     assert m
                     idx = int(m.group(1))
+                    if idx >= len(audios):
+                        continue
                     if not audios[idx].get("audio-ipa"):
                         audios[idx]["audio-ipa"] = v
                     if prefix:
