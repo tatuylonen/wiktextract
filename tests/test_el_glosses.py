@@ -36,6 +36,7 @@ class TestElGlosses(TestCase):
 
         Test suite:
         * linkage in a not (":" or "*")-ending LIST_ITEM
+        * linkage in a list with a single ":"
         * linkage inside synonym
         * linkage without gloss
         * linkage without gloss, but one quote
@@ -80,6 +81,16 @@ class TestElGlosses(TestCase):
                     "tags": ["no-gloss"],
                 },
             ],
+        }
+        self.mktest_bl_linkage(raw, expected)
+
+    def test_bl_linkage_list_with_single_colon_item(self) -> None:
+        # https://el.wiktionary.org/wiki/αναμαλλιασμένος
+        raw = """: {{βλ|αναμαλλιάζω}}"""
+        expected = {
+            "senses": [
+                {"related": [{"word": "αναμαλλιάζω"}], "tags": ["no-gloss"]}
+            ]
         }
         self.mktest_bl_linkage(raw, expected)
 
