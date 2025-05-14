@@ -220,7 +220,7 @@ def parse_page(
                         tags,
                         section_num,
                         sublevel,
-                        base_data.copy(deep=True),
+                        base_data.model_copy(deep=True),
                     )
                 )
 
