@@ -58,7 +58,6 @@ PRON_TEMPLATES = frozenset(
         "pron-recons",  # use "pron"
         "prononciation reconstruite",  # redirect to "pron-recons"
         "pron recons",  # redirect to "pron-recons"
-        "lang",  # used in template "cmn-pron", which expands to list of Pinyin
     ]
 )
 
@@ -90,6 +89,7 @@ def process_pron_list_item(
                     current_raw_tags,
                     after_colon,
                     list_item_node.children[child_index - 1 : child_index],
+                    lang_code,
                 )
             )
         elif isinstance(list_item_child, WikiNode):
@@ -129,25 +129,28 @@ def process_pron_list_item(
 
 def process_sound_list_item_templates(
     wxr: WiktextractContext,
-    template_node: TemplateNode,
+    t_node: TemplateNode,
     raw_tags: list[str],
     after_colon: bool,
     pre_nodes: list[WikiNode],
+    lang_code: str,
 ) -> list[Sound]:
-    if template_node.template_name in PRON_TEMPLATES:
-        return process_pron_template(wxr, template_node, raw_tags, pre_nodes)
-    elif template_node.template_name in {
+    if t_node.template_name in PRON_TEMPLATES or t_node.template_name == "lang":
+        return process_pron_template(
+            wxr, t_node, raw_tags, lang_code, pre_nodes
+        )
+    elif t_node.template_name in {
         "écouter",
         "audio",
         "pron-rég",
     }:
-        return [process_ecouter_template(wxr, template_node, raw_tags)]
-    elif template_node.template_name == "pron-rimes":
-        return [process_pron_rimes_template(wxr, template_node, raw_tags)]
-    elif template_node.template_name in ASPIRATED_H_TEMPLATES:
+        return [process_ecouter_template(wxr, t_node, raw_tags)]
+    elif t_node.template_name == "pron-rimes":
+        return [process_pron_rimes_template(wxr, t_node, raw_tags)]
+    elif t_node.template_name in ASPIRATED_H_TEMPLATES:
         pass
     elif not after_colon:  # location
-        raw_tag = clean_node(wxr, None, template_node)
+        raw_tag = clean_node(wxr, None, t_node)
         raw_tags.append(raw_tag)
 
     return []
@@ -155,20 +158,20 @@ def process_sound_list_item_templates(
 
 def process_pron_template(
     wxr: WiktextractContext,
-    template_node: TemplateNode,
+    t_node: TemplateNode,
     raw_tags: list[str],
+    lang_code: str,
     previous_nodes: list[WikiNode] = [],
 ) -> list[Sound]:
     if (
-        template_node.template_name in PRON_TEMPLATES
-        and isinstance(template_node.template_parameters.get(1, ""), str)
-        and len(template_node.template_parameters.get(1, "")) == 0
+        t_node.template_name in PRON_TEMPLATES
+        and clean_node(wxr, None, t_node.template_parameters.get(1, "")) == ""
     ):
         # some pages don't pass IPA parameter to the "pron" template
         # and expand to an edit link for adding the missing data.
         return []
     sounds_list = []
-    pron_texts = clean_node(wxr, None, template_node)
+    pron_texts = clean_node(wxr, None, t_node)
     # https://en.wikipedia.org/wiki/Aspirated_h
     # https://fr.wiktionary.org/wiki/Modèle:h_aspiré
     aspirated_h = ""
@@ -177,7 +180,7 @@ def process_pron_template(
             aspirated_h = clean_node(wxr, None, previous_nodes[-1])
 
     if len(pron_texts) > 0:
-        use_key = "zh_pron" if template_node.template_name == "lang" else "ipa"
+        use_key = "zh_pron" if lang_code == "zh" else "ipa"
         prons = set()
         for pron_text in re.split(",|，", pron_texts):
             pron_text = pron_text.strip()

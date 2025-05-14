@@ -36,7 +36,11 @@ def extract_form_line(
             elif node.template_name in PRON_TEMPLATES:
                 page_data[-1].sounds.extend(
                     process_pron_template(
-                        wxr, node, [], nodes[index - 1 : index]
+                        wxr,
+                        node,
+                        [],
+                        page_data[-1].lang_code,
+                        nodes[index - 1 : index],
                     )
                 )
             elif node.template_name == "équiv-pour":
