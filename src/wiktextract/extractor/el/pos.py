@@ -515,8 +515,15 @@ def extract_form_of_templates(
 ) -> None:
     """Parse form_of for nouns, adjectives and verbs.
 
+    Supports:
+    * κλ             | generic                | form_of
+    * πτώση/πτώσεις  | nouns, adjectives etc. | form_of and tags
+    * ρημ τύπος      | verbs                  | form_of
+
     * References:
+    https://el.wiktionary.org/wiki/Πρότυπο:κλ
     https://el.wiktionary.org/wiki/Κατηγορία:Πρότυπα_για_κλιτικούς_τύπους
+    https://el.wiktionary.org/wiki/Πρότυπο:ρημ_τύπος
     """
 
     # For the moment...
@@ -531,23 +538,38 @@ def extract_form_of_templates(
     if not isinstance(t_node, TemplateNode):
         return
 
-    # Nouns and adjectives
     t_name = t_node.template_name
+
+    # Generic
+    if t_name == "κλ":
+        t_args = t_node.template_parameters
+        if 2 not in t_args:
+            wxr.wtp.warning(
+                "Form-of template does not have lemma data: "
+                f"{t_name}, {t_args=}",
+                sortid="pos/535/20250416",
+            )
+            return
+        lemma = clean_node(wxr, None, t_args[2])
+        form_of = FormOf(word=lemma)
+        parent_sense.form_of.append(form_of)
+
+    # Nouns and adjectives
     inflection_t_names = ("πτώσεις", "πτώση")
     if any(name in t_name for name in inflection_t_names):
         return extract_form_of_templates_ptosi(wxr, parent_sense, t_node)
 
     # Verbs
-    # https://el.wiktionary.org/wiki/Πρότυπο:ρημ_τύπος
     if t_name == "ρημ τύπος":
         t_args = t_node.template_parameters
         if 2 not in t_args:
-            wxr.wtp.warning("Form-of template does not have lemma data: "
-                            f"{t_name}, {t_args=}",
-                            sortid="pos/535/20250416")
+            wxr.wtp.warning(
+                "Form-of template does not have lemma data: "
+                f"{t_name}, {t_args=}",
+                sortid="pos/535/20250416",
+            )
             return
         lemma = clean_node(wxr, None, t_args[2])
-
         form_of = FormOf(word=lemma)
         parent_sense.form_of.append(form_of)
 
@@ -561,7 +583,7 @@ def extract_form_of_templates_ptosi(
     * [gender του] πτώση-πτώσεις templates
 
     Notes:
-    * πτώση has exactly one case, πτώση as at least two cases
+    * πτώση has exactly one case, πτώσεις as at least two cases
     """
     t_name = t_node.template_name
     inflection_t_names = ("πτώσεις", "πτώση")
@@ -620,9 +642,10 @@ def extract_form_of_templates_ptosi(
     t_args = t_node.template_parameters
 
     if 1 not in t_args:
-        wxr.wtp.warning("Form-of template does not have lemma data: "
-                        f"{t_name}, {t_args=}",
-                        sortid="pos/620/20250416")
+        wxr.wtp.warning(
+            f"Form-of template does not have lemma data: {t_name}, {t_args=}",
+            sortid="pos/620/20250416",
+        )
         return
 
     lemma = clean_node(wxr, None, t_args[1])
