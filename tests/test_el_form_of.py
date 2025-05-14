@@ -135,3 +135,15 @@ class TestElGlosses(TestCase):
         raw = """* {{ρημ τύπος|α' ενικό [[οριστική]]ς αορίστου|ξεκινώ}}"""
         expected = [{"form_of": [{"word": "ξεκινώ"}]}]
         self.mktest_sense(raw, expected)
+
+    def test_form_of_generic_template_noun(self) -> None:
+        # https://el.wiktionary.org/wiki/εδάφη
+        raw = "* {{κλ||έδαφος|π=οακ|α=π}}"
+        expected = [{"form_of": [{"word": "έδαφος"}]}]
+        self.mktest_sense(raw, expected)
+
+    def test_form_of_generic_template_verb(self) -> None:
+        # https://el.wiktionary.org/wiki/πλανεύτηκα
+        raw = "* {{κλ||πλανεύω|π=1ε|ε=ορ|χ=αορ|φ=π|φ+=πλανεύομαι}}"
+        expected = [{"form_of": [{"word": "πλανεύω"}]}]
+        self.mktest_sense(raw, expected)
