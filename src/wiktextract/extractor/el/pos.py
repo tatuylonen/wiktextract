@@ -525,19 +525,12 @@ def extract_form_of_templates(
     https://el.wiktionary.org/wiki/Κατηγορία:Πρότυπα_για_κλιτικούς_τύπους
     https://el.wiktionary.org/wiki/Πρότυπο:ρημ_τύπος
     """
-
-    # For the moment...
-    # Be sure that we only contain a single non-string node!
-    compact_contents = [
-        elt for elt in contents if isinstance(elt, WikiNode) or elt.strip()
-    ]
-    if len(compact_contents) != 1:
+    # Be sure that we only contain a single template node!
+    t_nodes = [elt for elt in contents if isinstance(elt, TemplateNode)]
+    if len(t_nodes) != 1:
         return
 
-    t_node = compact_contents[0]
-    if not isinstance(t_node, TemplateNode):
-        return
-
+    t_node = t_nodes[0]
     t_name = t_node.template_name
 
     # Generic
@@ -572,6 +565,12 @@ def extract_form_of_templates(
         lemma = clean_node(wxr, None, t_args[2])
         form_of = FormOf(word=lemma)
         parent_sense.form_of.append(form_of)
+        # Discard useless information by keeping only the single template node.
+        # Cf. https://el.wiktionary.org/wiki/συμβουλέψω
+        # This will discard the following parts that offer no value:
+        # * (''να, ας, αν, ίσως κλπ'')
+        # * '''θα συμβουλέψω''':
+        contents[:] = t_nodes
 
 
 def extract_form_of_templates_ptosi(
