@@ -572,7 +572,6 @@ class TestFrGloss(TestCase):
             ),
             {
                 "senses": [
-                    {"tags": ["no-gloss"], "topics": ["mathematics"]},
                     {
                         "glosses": ["Application affine"],
                         "topics": ["mathematics"],

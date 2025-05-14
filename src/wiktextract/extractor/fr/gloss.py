@@ -22,12 +22,12 @@ def extract_gloss(
                 NodeKind.LIST, include_empty_str=True
             )
         )
-        gloss_data = Sense()
-        if parent_sense is not None:
-            gloss_data.glosses.extend(parent_sense.glosses)
-            gloss_data.tags.extend(parent_sense.tags)
-            gloss_data.raw_tags.extend(parent_sense.raw_tags)
-            gloss_data.topics.extend(parent_sense.topics)
+        gloss_data = (
+            parent_sense.model_copy(deep=True)
+            if parent_sense is not None
+            else Sense()
+        )
+        gloss_data.examples.clear()
         # process modifier, theme tempaltes before gloss text
         # https://fr.wiktionary.org/wiki/Wiktionnaire:Liste_de_tous_les_modèles/Précisions_de_sens
         tag_indexes = set()
@@ -87,7 +87,8 @@ def extract_gloss(
         gloss_data.note = clean_node(
             wxr, gloss_data, gloss_only_nodes[note_index + 1 :]
         ).strip(" ().")
-        page_data[-1].senses.append(gloss_data)
+        if len(gloss_data.glosses) > 0:
+            page_data[-1].senses.append(gloss_data)
 
         for nest_gloss_list in list_item_node.find_child(NodeKind.LIST):
             if nest_gloss_list.sarg.endswith("#"):
@@ -96,8 +97,6 @@ def extract_gloss(
                 extract_examples(wxr, gloss_data, nest_gloss_list)
 
         translate_raw_tags(gloss_data)
-        if len(gloss_data.glosses) == 0:
-            gloss_data.tags.append("no-gloss")
 
 
 def extract_examples(
