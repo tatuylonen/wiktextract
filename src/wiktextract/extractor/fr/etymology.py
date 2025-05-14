@@ -77,7 +77,13 @@ def extract_etymology_list_item(
     else:
         categories = {}
         etymology_text = clean_node(
-            wxr, categories, list(list_item.invert_find_child(NodeKind.LIST))
+            wxr,
+            categories,
+            list(
+                list_item.invert_find_child(
+                    NodeKind.LIST, include_empty_str=True
+                )
+            ),
         )
         if len(etymology_text) > 0:
             etymology_dict[(pos_id, pos_title)].texts.append(etymology_text)
@@ -292,7 +298,13 @@ def extract_etymology_example_list_item(
     if not has_exemple_template:
         if time == "" and list_item.contain_node(NodeKind.LIST):
             note = clean_node(
-                wxr, base_data, list(list_item.invert_find_child(NodeKind.LIST))
+                wxr,
+                base_data,
+                list(
+                    list_item.invert_find_child(
+                        NodeKind.LIST, include_empty_str=True
+                    )
+                ),
             )
             for next_list in list_item.find_child(NodeKind.LIST):
                 for next_list_item in next_list.find_child(NodeKind.LIST_ITEM):
