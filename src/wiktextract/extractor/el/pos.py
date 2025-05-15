@@ -565,12 +565,6 @@ def extract_form_of_templates(
         lemma = clean_node(wxr, None, t_args[2])
         form_of = FormOf(word=lemma)
         parent_sense.form_of.append(form_of)
-        # Discard useless information by keeping only the single template node.
-        # Cf. https://el.wiktionary.org/wiki/συμβουλέψω
-        # This will discard the following parts that offer no value:
-        # * (''να, ας, αν, ίσως κλπ'')
-        # * '''θα συμβουλέψω''':
-        contents[:] = t_nodes
 
 
 def extract_form_of_templates_ptosi(

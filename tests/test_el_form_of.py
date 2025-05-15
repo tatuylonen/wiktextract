@@ -139,7 +139,12 @@ class TestElGlosses(TestCase):
     def test_form_of_verb_template1_with_noise1(self) -> None:
         # https://el.wiktionary.org/wiki/συμβουλέψω
         raw = """# (''να, ας, αν, ίσως κλπ'') {{ρημ τύπος|α' ενικό [[Παράρτημα:Ρηματικοί τύποι (ελληνικά)#Υποτακτική|υποτακτικής]] αορίστου|συμβουλεύω}}"""
-        expected = [{"form_of": [{"word": "συμβουλεύω"}]}]
+        expected = [
+            {
+                "raw_tags": ["να", "ας", "αν", "ίσως κλπ"],
+                "form_of": [{"word": "συμβουλεύω"}],
+            }
+        ]
         self.mktest_sense(raw, expected)
 
     def test_form_of_verb_template1_with_noise2(self) -> None:
