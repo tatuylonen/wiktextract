@@ -130,10 +130,27 @@ class TestElGlosses(TestCase):
         ]
         self.mktest_sense(raw, expected)
 
-    def test_inflection_verb(self) -> None:
+    def test_form_of_verb_template1(self) -> None:
         # https://el.wiktionary.org/wiki/ξεκίνησα
         raw = """* {{ρημ τύπος|α' ενικό [[οριστική]]ς αορίστου|ξεκινώ}}"""
         expected = [{"form_of": [{"word": "ξεκινώ"}]}]
+        self.mktest_sense(raw, expected)
+
+    def test_form_of_verb_template1_with_noise1(self) -> None:
+        # https://el.wiktionary.org/wiki/συμβουλέψω
+        raw = """# (''να, ας, αν, ίσως κλπ'') {{ρημ τύπος|α' ενικό [[Παράρτημα:Ρηματικοί τύποι (ελληνικά)#Υποτακτική|υποτακτικής]] αορίστου|συμβουλεύω}}"""
+        expected = [
+            {
+                "raw_tags": ["να", "ας", "αν", "ίσως κλπ"],
+                "form_of": [{"word": "συμβουλεύω"}],
+            }
+        ]
+        self.mktest_sense(raw, expected)
+
+    def test_form_of_verb_template1_with_noise2(self) -> None:
+        # https://el.wiktionary.org/wiki/συμβουλέψω
+        raw = """# '''θα συμβουλέψω''': {{ρημ τύπος|α' ενικό οριστικής στιγμιαίου μέλλοντα|συμβουλεύω}}"""
+        expected = [{"form_of": [{"word": "συμβουλεύω"}]}]
         self.mktest_sense(raw, expected)
 
     def test_form_of_generic_template_noun(self) -> None:
