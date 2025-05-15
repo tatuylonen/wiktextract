@@ -180,6 +180,8 @@ POS_TITLES: dict[str, POSSubtitleData] = {
     "首字母縮略詞": {"pos": "abbrev", "tags": ["abbreviation"]},
     "首字母缩略词": {"pos": "abbrev", "tags": ["abbreviation"]},
     "詞根": {"pos": "root", "tags": ["morpheme"]},
+    "汉字词": {"pos": "noun"},  # low quality Korean pages created by bot
+    "漢字詞": {"pos": "noun"},
 }
 
 # map title to pydantic field
@@ -366,6 +368,7 @@ IGNORED_TITLES: frozenset[str] = frozenset(
         "外部鏈接",
         "外部链接",
         "外部連結",
+        "統計",
     ]
 )
 
@@ -399,4 +402,6 @@ PRONUNCIATION_TITLES: frozenset[str] = frozenset(
 
 TRANSLATIONS_TITLES: frozenset[str] = frozenset(["翻譯", "翻译"])
 
-DESCENDANTS_TITLES: frozenset[str] = frozenset(["派生語彙", "派生詞"])
+DESCENDANTS_TITLES: frozenset[str] = frozenset(
+    ["派生語彙", "派生语汇", "派生詞", "派生語詞", "派生语词"]
+)

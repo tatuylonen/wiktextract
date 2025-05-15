@@ -105,7 +105,7 @@ def parse_section(
         extract_descendant_section(
             wxr, level_node, page_data if len(page_data) > 0 else [base_data]
         )
-    elif subtitle in ["使用說明", "用法說明"]:
+    elif subtitle in ["使用說明", "用法說明", "用法说明", "使用注意"]:
         extract_note_section(
             wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
         )
