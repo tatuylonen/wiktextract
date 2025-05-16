@@ -386,6 +386,7 @@ xlat_head_map = {
     "pa class": "class-16",
     "mu class": "class-18",
     "m or f by sense": "masculine feminine by-personal-gender",
+    "superlative dubious": "",
 }
 
 # Languages that can have head-final numeric class indicators.  They are mostly

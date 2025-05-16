@@ -9,9 +9,9 @@ import html
 import itertools
 import re
 import unicodedata
-from typing import Optional, Union
+from typing import Generator, Optional, Union
 
-from wikitextprocessor import MAGIC_FIRST, NodeKind, WikiNode
+from wikitextprocessor import MAGIC_FIRST, HTMLNode, NodeKind, WikiNode
 
 from ...clean import clean_value
 from ...datautils import data_append, freeze, split_at_comma_semi
@@ -3157,18 +3157,28 @@ def handle_wikitext_or_html_table(
                     # rows, so we skip it and just process the hidden data.
                     continue
 
+                # if (
+                #     len(node.children) == 1
+                #     and node.children[0].attrs.get("class") == "separator"
+                # ):
+                #     print("------------------ skip separator")
+                # continue
+
                 # Parse a table row.
                 row = []
                 style = None
                 row_has_nonempty_cells = False
                 # Have nonempty cell not from rowspan
-                for col in node.children:
+                for col in get_table_cells(node):
                     # loop through each cell in the ROW
-                    if not isinstance(col, WikiNode):
-                        # This skip is not used for counting,
-                        # "None" is not used in
-                        # indexing or counting or looping.
-                        continue
+
+                    # The below skip is not needed anymore, because we "skip" in
+                    # get_table_cells, but left here as a comment
+                    # if not isinstance(col, WikiNode):
+                    #     # This skip is not used for counting,
+                    #     # "None" is not used in
+                    #     # indexing or counting or looping.
+                    #     continue
                     if col.kind == NodeKind.HTML:
                         kind = col.sarg
                     else:
@@ -3416,6 +3426,35 @@ def handle_wikitext_or_html_table(
                 after,
                 depth,
             )
+
+
+def get_table_cells(node: WikiNode) -> Generator[WikiNode, None, None]:
+    """If a wikitext table cell contains HTML cells `<td>`, as they sometimes
+    do because it is easier to write wikitext conditionals that way,
+    those td-elements are parsed as child elements of the Wikitext cell.
+    This generator will yield wikitext and HTML direct children of
+    `node` and if a Wikitext TABLE_CELL has direct td-element children,
+    those are also yielded."""
+    for col in node.children:
+        if not isinstance(col, WikiNode):
+            continue
+        if any(
+            isinstance(c, HTMLNode) and c.sarg == "td" for c in col.children
+        ):
+            td_cells = []
+            content = []
+            for c in col.children:
+                if isinstance(c, HTMLNode) and c.sarg == "td":
+                    td_cells.append(c)
+                else:
+                    content.append(c)
+            # Remove td-elements from col so they are not returned twice
+            col.children = content
+            yield col
+            for c in td_cells:
+                yield c
+        else:
+            yield col
 
 
 def handle_html_table(
