@@ -197,7 +197,7 @@ class InflTests(unittest.TestCase):
                 {
                     "form": "wandered",
                     "source": "Conjugation",
-                    "tags": [ "past", "second-person", "singular"],
+                    "tags": ["past", "second-person", "singular"],
                 },
                 {
                     "form": "wanderedst",
@@ -3436,6 +3436,219 @@ class InflTests(unittest.TestCase):
                     "form": "wist",
                     "source": "Conjugation",
                     "tags": ["indicative", "past", "plural", "third-person"],
+                },
+            ],
+        }
+        self.assertEqual(expected, ret)
+
+    def test_English_verb5(self):
+        # Tables with td-cells that our parser puts inside wikitext cells
+        ret = self.xinfl(
+            "sit",
+            "English",
+            "verb",
+            "conjugation",
+            """
+sit
+English
+verb
+conjugation
+
+<div class="inflection-table-wrapper%2Binflection-table-grey%2B%2Binflection-table-collapsible%2Binflection-table-collapsed%2Bno-vc%2B" style="width%253A%2Bfit-content" data-toggle-category="inflection"><templatestyles src="Template%253Ainflection-table-top%252Fstyle.css">
+{| class="inflection-table%2B%2B"
+|+ 
+ class="inflection-table-title"
+ Conjugation of ''sit''
+|- 
+! [[Appendix:Glossary#infinitive|infinitive]]
+| colspan="3" | (<span class="Latn" lang="en">[[:to#English|to]]</span>) <span class="Latn" lang="en">[[:sit#English|sit]]</span>
+|- 
+| class="separator" colspan="999" |
+|- 
+!
+! [[Appendix:Glossary#present_tense|present tense]]
+! [[Appendix:Glossary#past_tense|past tense]]
+|- 
+! [[Appendix:Glossary#first-person|1st-person]] [[Appendix:Glossary#singular|singular]]<td style="max-width%253A%2B15em" rowspan="2"> <span class="Latn" lang="en">[[:sit#English|sit]]</span>
+	</td><td style="max-width%253A%2B15em" rowspan="1"> <span class="Latn%2Bform-of%2Blang-en%2Bspast-form-of%2B%2B%2B%2B%2B%2B%2B%2B" lang="en">[[:sat#English|sat]]</span>, <span class="Latn%2Bform-of%2Blang-en%2Bspast-form-of%2B%2B%2B%2B%2B%2B%2B%2B" lang="en">[[:sate#English|sate]]</span>&#x20;(''dated, poetic'')
+	  </td>
+|- 
+! [[Appendix:Glossary#second-person|2nd-person]] [[Appendix:Glossary#singular|singular]]
+<td style="max-width%253A%2B15em" rowspan="1"> <span class="Latn%2Bform-of%2Blang-en%2Bspast-form-of%2B%2B%2B%2B%2B%2B%2B%2B" lang="en">[[:sat#English|sat]]</span>, <span class="Latn%2Bform-of%2Blang-en%2Bspast-form-of%2B%2B%2B%2B%2B%2B%2B%2B" lang="en">[[:sate#English|sate]]</span>&#x20;(''dated, poetic''), <span class="Latn%2Bform-of%2Blang-en%2Bst-past-form-form-of%2B%2B%2B%2B%2B%2B%2B%2B" lang="en">[[:sattest#English|sattest]]</span>'''<sup>†</sup>'''
+		</td>
+|- 
+! [[Appendix:Glossary#third-person|3rd-person]] [[Appendix:Glossary#singular|singular]]
+<td style="max-width%253A%2B15em" rowspan="1"> <span class="Latn%2Bform-of%2Blang-en%2Bs-verb-form-form-of%2B%2B%2B%2B%2B%2B%2B%2B" lang="en">[[:sits#English|sits]]</span>
+		</td><td style="max-width%253A%2B15em" rowspan="2"> <span class="Latn%2Bform-of%2Blang-en%2Bspast-form-of%2B%2B%2B%2B%2B%2B%2B%2B" lang="en">[[:sat#English|sat]]</span>, <span class="Latn%2Bform-of%2Blang-en%2Bspast-form-of%2B%2B%2B%2B%2B%2B%2B%2B" lang="en">[[:sate#English|sate]]</span>&#x20;(''dated, poetic'')
+		</td>
+|- 
+! [[Appendix:Glossary#plural|plural]]
+<td style="max-width%253A%2B15em"> <span class="Latn" lang="en">[[:sit#English|sit]]</span>
+			</td>
+|- 
+| class="separator" colspan="999" |
+|- 
+! [[Appendix:Glossary#subjunctive|subjunctive]]
+<td style="max-width%253A%2B15em"> <span class="Latn" lang="en">[[:sit#English|sit]]</span>
+	</td><td style="max-width%253A%2B15em"><span class="Latn%2Bform-of%2Blang-en%2Bspast-form-of%2B%2B%2B%2B%2B%2B%2B%2B" lang="en">[[:sat#English|sat]]</span>, <span class="Latn%2Bform-of%2Blang-en%2Bspast-form-of%2B%2B%2B%2B%2B%2B%2B%2B" lang="en">[[:sate#English|sate]]</span>&#x20;(''dated, poetic'')
+	</td>
+|- 
+| class="separator" colspan="999" |
+|-
+! [[Appendix:Glossary#imperative|imperative]]
+<td style="max-width%253A%2B15em"> <span class="Latn" lang="en">[[:sit#English|sit]]</span>
+	</td>
+<td style="max-width%253A%2B15em">&mdash;</td>
+|-
+| class="separator" colspan="999" |
+|-
+! [[Appendix:Glossary#participle|participle]]s
+<td style="max-width%253A%2B15em"> <span class="Latn%2Bform-of%2Blang-en%2Bpres%257Cptcp-form-of%2B%2B%2B%2B%2B%2B%2B%2B" lang="en">[[:sitting#English|sitting]]</span>
+	</td>
+<td style="max-width%253A%2B15em"> <span class="Latn%2Bform-of%2Blang-en%2Bpast%257Cptcp-form-of%2B%2B%2B%2B%2B%2B%2B%2B" lang="en">[[:sat#English|sat]]</span>, <span class="Latn%2Bform-of%2Blang-en%2Bpast%257Cptcp-form-of%2B%2B%2B%2B%2B%2B%2B%2B" lang="en">[[:sitten#English|sitten]]</span>&#x20;(''archaic, dialectal'')
+	</td>
+|}
+<div class="inflection-table-notes">
+<div>
+</div>
+</div>
+</div>
+""",
+        )  # noqa: E501
+        expected = {
+            "forms": [
+                {
+                    "form": "no-table-tags",
+                    "source": "conjugation",
+                    "tags": ["table-tags"],
+                },
+                {
+                    "form": "sit",
+                    "source": "conjugation",
+                    "tags": ["infinitive"],
+                },
+                {
+                    "form": "sit",
+                    "source": "conjugation",
+                    "tags": ["first-person", "present", "singular"],
+                },
+                {
+                    "form": "sat",
+                    "source": "conjugation",
+                    "tags": ["first-person", "past", "singular"],
+                },
+                {
+                    "form": "sate",
+                    "source": "conjugation",
+                    "tags": [
+                        "dated",
+                        "first-person",
+                        "past",
+                        "poetic",
+                        "singular",
+                    ],
+                },
+                {
+                    "form": "sit",
+                    "source": "conjugation",
+                    "tags": ["present", "second-person", "singular"],
+                },
+                {
+                    "form": "sat",
+                    "source": "conjugation",
+                    "tags": ["past", "second-person", "singular"],
+                },
+                {
+                    "form": "sate",
+                    "source": "conjugation",
+                    "tags": [
+                        "dated",
+                        "past",
+                        "poetic",
+                        "second-person",
+                        "singular",
+                    ],
+                },
+                {
+                    "form": "sattest",
+                    "source": "conjugation",
+                    "tags": ["past", "second-person", "singular"],
+                },
+                {
+                    "form": "sits",
+                    "source": "conjugation",
+                    "tags": ["present", "singular", "third-person"],
+                },
+                {
+                    "form": "sat",
+                    "source": "conjugation",
+                    "tags": ["past", "singular", "third-person"],
+                },
+                {
+                    "form": "sate",
+                    "source": "conjugation",
+                    "tags": [
+                        "dated",
+                        "past",
+                        "poetic",
+                        "singular",
+                        "third-person",
+                    ],
+                },
+                {
+                    "form": "sit",
+                    "source": "conjugation",
+                    "tags": ["plural", "present"],
+                },
+                {
+                    "form": "sat",
+                    "source": "conjugation",
+                    "tags": ["past", "plural"],
+                },
+                {
+                    "form": "sate",
+                    "source": "conjugation",
+                    "tags": ["dated", "past", "plural", "poetic"],
+                },
+                {
+                    "form": "sit",
+                    "source": "conjugation",
+                    "tags": ["present", "subjunctive"],
+                },
+                {
+                    "form": "sat",
+                    "source": "conjugation",
+                    "tags": ["past", "subjunctive"],
+                },
+                {
+                    "form": "sate",
+                    "source": "conjugation",
+                    "tags": ["dated", "past", "poetic", "subjunctive"],
+                },
+                {
+                    "form": "sit",
+                    "source": "conjugation",
+                    "tags": ["imperative", "present"],
+                },
+                {
+                    "form": "-",
+                    "source": "conjugation",
+                    "tags": ["imperative", "past"],
+                },
+                {
+                    "form": "sitting",
+                    "source": "conjugation",
+                    "tags": ["participle", "present"],
+                },
+                {
+                    "form": "sat",
+                    "source": "conjugation",
+                    "tags": ["participle", "past"],
+                },
+                {
+                    "form": "sitten",
+                    "source": "conjugation",
+                    "tags": ["archaic", "dialectal", "participle", "past"],
                 },
             ],
         }
