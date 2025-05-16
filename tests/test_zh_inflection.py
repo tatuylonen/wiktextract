@@ -111,21 +111,24 @@ class TestZhInflection(TestCase):
                     "hiragana": "ふはいすれ",
                     "roman": "fuhai sure",
                     "source": "inflection table",
-                    "raw_tags": ["活用形", "假定形", "仮定形"],
+                    "raw_tags": ["活用形"],
+                    "tags": ["hypothetical"],
                 },
                 {
                     "form": "腐敗せよ",
                     "hiragana": "ふはいせよ",
                     "roman": "fuhai seyo",
                     "source": "inflection table",
-                    "raw_tags": ["活用形", "命令形", "書面語"],
+                    "raw_tags": ["活用形"],
+                    "tags": ["imperative", "literary"],
                 },
                 {
                     "form": "腐敗しろ",
                     "hiragana": "ふはいしろ",
                     "roman": "fuhai shiro",
                     "source": "inflection table",
-                    "raw_tags": ["活用形", "命令形", "口語"],
+                    "raw_tags": ["活用形"],
+                    "tags": ["imperative", "colloquial"],
                 },
             ],
         )
@@ -161,7 +164,8 @@ class TestZhInflection(TestCase):
                     "form": "あさがえりし",
                     "roman": "asagaeri shi",
                     "source": "inflection table",
-                    "raw_tags": ["活用形", "未然形"],
+                    "raw_tags": ["活用形"],
+                    "tags": ["imperfective"],
                 }
             ],
         )
@@ -199,7 +203,8 @@ class TestZhInflection(TestCase):
                     "form": "ね",
                     "roman": "ne",
                     "source": "inflection table",
-                    "raw_tags": ["語幹形態", "假定形"],
+                    "raw_tags": ["語幹形態"],
+                    "tags": ["hypothetical"],
                 }
             ],
         )

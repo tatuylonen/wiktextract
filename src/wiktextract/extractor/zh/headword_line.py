@@ -150,14 +150,18 @@ def process_forms_text(
                         else:
                             raw_form_tags.append(gender)
 
-                form_data = Form(
-                    form=form,
-                    raw_tags=raw_form_tags,
-                    tags=form_tags,
-                    ruby=ruby_data,
-                )
-                translate_raw_tags(form_data)
-                word_entry.forms.append(form_data)
+                for f_str in form.split("／"):
+                    f_str = f_str.strip()
+                    if f_str == "":
+                        continue
+                    form_data = Form(
+                        form=f_str,
+                        raw_tags=raw_form_tags,
+                        tags=form_tags,
+                        ruby=ruby_data,
+                    )
+                    translate_raw_tags(form_data)
+                    word_entry.forms.append(form_data)
             elif (
                 node.tag == "span"
                 and "tr" in node.attrs.get("class", "")

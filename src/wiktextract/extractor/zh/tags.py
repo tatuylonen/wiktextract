@@ -3,27 +3,41 @@ from .topics import LABEL_TOPICS
 
 GENDER_TAGS: dict[str, str] = {
     "陰性": "feminine",
+    "阴性": "feminine",
+    "陰性形式": "feminine",
+    "陰性等價詞": "feminine",
     "陽性": "masculine",
+    "陽性形式": "masculine",
     "中性": "neuter",
+    "中性形式": "neuter",
 }
 
-NUMBER_TAGS: dict[str, str] = {
+NUMBER_TAGS: dict[str, str | list[str]] = {
     "單數": "singular",
+    "单数": "singular",
     "複數": "plural",
-    "定單數": "definite singular",
-    "不定複數": "indefinite plural",
-    "定複數": "definite plural",
-    "斜格複數": "oblique plural",
-    "主格單數": "nominative singular",
-    "主格複數": "nominative plural",
-    "屬格單數": "genitive singular",
-    "屬格複數": "genitive plural",
-    "陰性單數": "feminine singular",
-    "陽性單數": "masculine singular",
-    "陰性複數": "feminine plural",
-    "陽性複數": "masculine plural",
-    "中性複數": "neuter plural",
-    "中性單數": "neuter singular",
+    "复数": "plural",
+    "定單數": ["definite", "singular"],
+    "定单数": ["definite", "singular"],
+    "不定單數": ["indefinite", "singular"],
+    "不定单数": ["indefinite", "singular"],
+    "不定複數": ["indefinite", "plural"],
+    "不定复数": ["indefinite", "plural"],
+    "定複數": ["definite", "plural"],
+    "斜格複數": ["oblique", "plural"],
+    "主格單數": ["nominative", "singular"],
+    "主格複數": ["nominative", "plural"],
+    "屬格單數": ["genitive", "singular"],
+    "屬格複數": ["genitive", "plural"],
+    "陰性單數": ["feminine", "singular"],
+    "陽性單數": ["masculine", "singular"],
+    "陰性複數": ["feminine", "plural"],
+    "陽性複數": ["masculine", "plural"],
+    "中性複數": ["neuter", "plural"],
+    "中性單數": ["neuter", "singular"],
+    "賓格單數": ["accusative", "singular"],
+    "賓格複數": ["accusative", "plural"],
+    "無複數": "no-plural",
 }
 
 # https://en.wikipedia.org/wiki/Count_noun
@@ -34,13 +48,35 @@ COUNT_TAGS: dict[str, str] = {
 
 OTHER_TAGS: dict[str, str] = {
     "指小詞": "diminutive",
-    "變格類型": "declension pattern",
+    "指小": "diminutive",
+    "變格類型": "declension-pattern-of",
+    "屬格": "genitive",
+    "部分格": "partitive",
+    "個人": "person",
+    "無屈折": "indeclinable",
+    "諺文": "hangeul",
+    "漢字": "hanja",
+    # Template:cs-proper noun
+    "相關形容詞": ["relational", "adjective"],
+    "關係形容詞": ["relational", "adjective"],
+    "居民稱謂詞": "demonym",
+    "女性居民稱謂詞": ["feminine", "demonym"],
+    "定賓格": ["definite", "accusative"],
+    "定宾格": ["definite", "accusative"],
+    "拉丁字母拼寫": "romanization",
+    "定指賓格": ["definite", "accusative"],
+    "前元音和諧變體": "front-vowel-harmony",
 }
 
 VERB_TAGS: dict[str, str] = {
     "及物": "transitive",
     "不及物": "intransitive",
     "动宾结构": "verb-object",
+    "非完": "imperfective",
+    "完": "perfective",
+    "強變化": "strong",
+    "動名詞": "supine",
+    "命令式": "imperative",
 }
 
 # https://en.wikipedia.org/wiki/Japanese_grammar#Stem_forms
@@ -56,17 +92,17 @@ JA_STEM_FORMS: dict[str, str] = {
 }
 
 # https://en.wikipedia.org/wiki/Voice_(grammar)
-VOICE_TAGS: dict[str, str] = {
+VOICE_TAGS: dict[str, str | list[str]] = {
     "被動形": "passive",
     "使役形": "causative",
     "可能形": "potential",
     "意志形": "volitional",
     "否定形": "negative",
-    "否定連用形": "negative continuative",
+    "否定連用形": ["negative", "continuative"],
     "尊敬形": "formal",
     "完成形": "perfective",
     "接續形": "conjunctive",
-    "條件形": "hypothetical conditional",
+    "條件形": ["hypothetical", "conditional"],
 }
 
 COMPARISON_TAGS: dict[str, str] = {
@@ -74,6 +110,30 @@ COMPARISON_TAGS: dict[str, str] = {
     "原级": "positive",
     "比較級": "comparative",
     "最高級": "superlative",
+}
+
+TENSE_TAGS = {
+    "過去時": "preterite",
+    "過去式": "past",
+    "過去分詞": ["past", "participle"],
+    "現在時": "present",
+    "第三人稱單數現在時": ["third-person", "singular", "present"],
+    "助動詞": "auxiliary",
+    # Template:de-verb
+    "弱變化": "weak",
+    "弱变化": "weak",
+    "第三人稱單數簡單現在時": ["third-person", "singular", "present"],
+    "現在分詞": ["present", "participle"],
+    "一般過去時及過去分詞": ["past", "participle"],
+    # Template:it-verb
+    "第一人稱單數 現在時": ["first-person", "singular", "present"],
+    "第一人稱單數 先過去時": ["first-person", "singular", "past", "historic"],
+    # Template:de-adj
+    "強變化主格陽性單數": ["strong", "nominative", "masculine", "singular"],
+    # Template:la-verb
+    "现在时不定式": ["present", "infinitive"],
+    "完成时主动式": ["perfect", "active"],
+    "目的动名词": "supine",
 }
 
 GRAMMATICAL_TAGS: dict[str, str] = {
@@ -85,6 +145,7 @@ GRAMMATICAL_TAGS: dict[str, str] = {
     **JA_STEM_FORMS,
     **VOICE_TAGS,
     **COMPARISON_TAGS,
+    **TENSE_TAGS,
 }
 
 # https://zh.wiktionary.org/wiki/Template:Label
@@ -123,7 +184,7 @@ LABEL_TAGS = {
     "中間被動語態": "mediopassive",
     "中間語態": "middle",
     "主動語態": "active",
-    "主要用於否定": "usually with-negation",
+    "主要用於否定": ["usually", "with-negation"],
     "交互": "reciprocal",
     "以單數形式": "singular",
     "以複數形式": "in-plural",
@@ -147,10 +208,10 @@ LABEL_TAGS = {
     "口語": "colloquial",
     "古舊": "archaic",
     "可數": "countable",
-    "同性戀俚語": "slang LGBT",
+    "同性戀俚語": ["slang", "LGBT"],
     "名詞化": "noun-from-verb",
-    "唯單": "singular singular-only singular",
-    "唯複": "plural plural-only",
+    "唯單": "singular-only",
+    "唯複": "plural-only",
     "國際音標": "IPA",
     "基數詞": "cardinal",
     "大寫": "capitalized",
@@ -172,7 +233,7 @@ LABEL_TAGS = {
     "性別中立": "gender-neutral",
     "情態": "modal",
     "愛稱": "endearing",
-    "所有格代詞": "possessive pronoun without-noun",
+    "所有格代詞": ["possessive", "pronoun", "without-noun"],
     "押韻俚語": "slang",
     "抽象名詞": "abstract-noun",
     "擬態詞": "ideophonic",
@@ -196,7 +257,7 @@ LABEL_TAGS = {
     "祈使語氣": "imperative",
     "禮貌": "polite",
     "種族歧視語": "slur",
-    "粉絲用語": "slang lifestyle",
+    "粉絲用語": ["slang", "lifestyle"],
     "粗俗": "vulgar",
     "系動詞": "copulative",
     "網路用語": "Internet",
@@ -229,7 +290,7 @@ LABEL_TAGS = {
     "非標準形式": "nonstandard",
     "非正式": "informal",
     "首字母縮略詞": "initialism",
-    "駭客語": "Leet Internet",
+    "駭客語": ["Leet", "Internet"],
     "高語域": "honorific",
     "中醫": "Traditional-Chinese-Medicine",
     "修辭學": "rhetoric",
@@ -261,6 +322,7 @@ LABEL_TAGS = {
     "主要用於肯定": "positive",
     "古典": "Classical",
     "中國大陸": "Mainland-China",
+    "書面語": "literary",
 }
 
 # example sentence template
@@ -369,7 +431,7 @@ TEMPLATE_TAG_ARGS = {
     "d": "dual number",
     "p": "plural number",
     # Verb qualifiers
-    "impf": "imperfective aspect",
-    "pf": "perfective aspect",
-    "mf": "masculine feminine",
+    "impf": "imperfective",
+    "pf": "perfective",
+    "mf": ["masculine", "feminine"],
 }

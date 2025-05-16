@@ -5,6 +5,7 @@ from wikitextprocessor import NodeKind, WikiNode
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .models import Form, WordEntry
+from .tags import translate_raw_tags
 
 # https://zh.wiktionary.org/wiki/Category:日語變格表模板
 JAPANESE_INFLECTION_TEMPLATE_PREFIXES = (
@@ -115,6 +116,7 @@ def extract_ja_inf_table(
                 )
                 if small_tag is not None:
                     form_data.raw_tags.append(small_tag)
+                translate_raw_tags(form_data)
                 page_data[-1].forms.append(form_data)
 
     for form_data in page_data[-1].forms:
@@ -122,3 +124,4 @@ def extract_ja_inf_table(
             for index, raw_tag in enumerate(form_data.raw_tags):
                 if raw_tag in small_tags_dict:
                     form_data.raw_tags[index] = small_tags_dict[raw_tag]
+                    translate_raw_tags(form_data)
