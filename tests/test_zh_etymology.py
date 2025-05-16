@@ -36,7 +36,9 @@ class TestNote(TestCase):
         base_data = WordEntry(
             lang="漢語", lang_code="zh", word="一刻千金", pos="phrase"
         )
-        extract_etymology_section(self.wxr, [base_data], base_data, root.children[0])
+        extract_etymology_section(
+            self.wxr, [base_data], base_data, root.children[0]
+        )
         self.assertEqual(base_data.etymology_text, "源自宋．蘇軾《春夜》詩：")
         self.assertEqual(
             [
@@ -86,7 +88,9 @@ class TestNote(TestCase):
         base_data = WordEntry(
             lang="漢語", lang_code="zh", word="焚膏繼晷", pos="phrase"
         )
-        extract_etymology_section(self.wxr, [base_data], base_data, root.children[0])
+        extract_etymology_section(
+            self.wxr, [base_data], base_data, root.children[0]
+        )
         self.assertEqual(base_data.etymology_text, "出自唐·韓愈《進學解》：")
         self.assertEqual(
             [

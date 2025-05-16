@@ -183,7 +183,7 @@ class TestExample(TestCase):
             """<dl class="zhusex"><span lang="zh-Hant" class="Hant">-{<!-- -->[[如果#漢語|如果]][[唔係#漢語|唔係]][[今日#漢語|今日]][[拆穿#漢語|拆穿]][[你#漢語|你]][[槓嘢#漢語|槓野]]，[[畀#漢語|俾]][[你#漢語|你]][[混#漢語|混]][[咗#漢語|左]][[入#漢語|入]][[稅局#漢語|稅局]][[重#漢語|重]]<b>死人</b>[[呀#漢語|呀]]！<!-- -->}-</span> <span style="color:darkgreen; font-size:x-small;">&#91;[[w:廣州話|廣州話]]，[[w:繁体中文|繁體]]&#93;</span><br><span lang="zh-Hans" class="Hans">-{<!-- -->[[如果#漢語|如果]][[唔系#漢語|唔系]][[今日#漢語|今日]][[拆穿#漢語|拆穿]][[你#漢語|你]][[杠嘢#漢語|杠野]]，[[畀#漢語|俾]][[你#漢語|你]][[混#漢語|混]][[咗#漢語|左]][[入#漢語|入]][[税局#漢語|税局]][[重#漢語|重]]<b>死人</b>[[呀#漢語|呀]]！<!-- -->}-</span> <span style="color:darkgreen; font-size:x-small;">&#91;[[w:廣州話|廣州話]]，[[w:简体中文|簡體]]&#93;</span><dd><span lang="zh-Latn" style="color:#404D52"><i>jyu<sup>4</sup> gwo<sup>2</sup> m<sup>4</sup> hai<sup>6</sup> gam<sup>1</sup> jat<sup>6</sup> caak<sup>3</sup> cyun<sup>1</sup> nei<sup>5</sup> lung<sup>5</sup> je<sup>5</sup>, bei<sup>2</sup> nei<sup>5</sup> wan<sup>6</sup> zo<sup>2</sup> jap<sup>6</sup> seoi<sup>3</sup> guk<sup>6-2</sup> zung<sup>6</sup> <b>sei<sup>2</sup> jan<sup>4</sup></b> aa<sup>3</sup>!</i></span> <span style="color:darkgreen; font-size:x-small;">&#91;[[w:廣州話拼音方案|廣州話拼音]]&#93;</span></dd><dd>如果不是今天揭穿你的老底，給你混進稅務局就更'''糟糕'''了！</dd></dl>[[Category:有使用例的粵語詞]]""",
         )
         sense_data = Sense()
-        root = self.wxr.wtp.parse("""#* {{quote-book|zh}}
+        root = self.wxr.wtp.parse(r"""#* {{quote-book|zh}}
 #*: {{zh-x|如果 唔係 今日 拆穿 你 槓嘢\槓{lung5}野，畀\俾 你 混 咗\左 入 稅局{guk6-2} 重{zung6} 死人 呀！|如果不是今天揭穿你的老底，給你混進稅務局就更'''糟糕'''了！|C-GZ}}""")
         extract_example_list_item(
             self.wxr, sense_data, root.children[0].children[0], []
