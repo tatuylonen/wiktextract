@@ -3439,19 +3439,20 @@ def get_table_cells(node: WikiNode) -> Generator[WikiNode, None, None]:
         if not isinstance(col, WikiNode):
             continue
         if any(
-            isinstance(c, HTMLNode) and c.sarg == "td" for c in col.children
+            isinstance(c, HTMLNode) and c.sarg in ("th", "td")
+            for c in col.children
         ):
-            td_cells = []
+            html_cells = []
             content = []
             for c in col.children:
-                if isinstance(c, HTMLNode) and c.sarg == "td":
-                    td_cells.append(c)
+                if isinstance(c, HTMLNode) and c.sarg in ("th", "td"):
+                    html_cells.append(c)
                 else:
                     content.append(c)
             # Remove td-elements from col so they are not returned twice
             col.children = content
             yield col
-            for c in td_cells:
+            for c in html_cells:
                 yield c
         else:
             yield col
