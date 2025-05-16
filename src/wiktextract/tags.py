@@ -2702,6 +2702,7 @@ uppercase_tags = set(
         "Palladius",
         "PFS",
         "Hanyu Pinyin",
+        "IUPAC",  # International Union of Pure and Applied Chemistry
     ]
 )
 
@@ -3750,6 +3751,8 @@ xlat_tags_map: Dict[str, Union[str, List[str]]] = {
     "third active infinitive": "infinitive-iii active",
     "third passive infinitive": "infinitive-iii passive",
     "British spelling": "UK",
+    "American spelling": "US",
+    "IUPAC spelling": "IUPAC",
     "Roman spelling": "romanization",
     "Perso-Arabic spelling": "Perso-Arabic",
     "Arabic/Persian": "Arabic Persian",
@@ -4092,7 +4095,6 @@ xlat_tags_map: Dict[str, Union[str, List[str]]] = {
     "eye dialect spelling of": "alt-of pronunciation-spelling",
     "alternative or obsolete spelling of": "alt-of obsolete alternative",
     "obsolete and rare": "obsolete rare",
-    "American spelling": "US",
     "Canadian spelling": "Canada",
     "name of the": "alt-of name",  # E.g. .. letter | Latin-script letter
     "alternative name of": "alt-of alternative name",
