@@ -320,6 +320,7 @@ LINKAGE_TITLES: dict[str, str] = {
     "部分詞": "meronyms",
     "關聯詞": "related",
     "關聯詞彙": "related",
+    "短語": "derived",
 }
 
 ETYMOLOGY_TITLES: frozenset[str] = frozenset(
