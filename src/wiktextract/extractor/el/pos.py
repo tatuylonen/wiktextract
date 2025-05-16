@@ -511,7 +511,7 @@ def bold_node_fn(
 
 
 def extract_form_of_templates(
-    wxr: WiktextractContext, parent_sense: Sense, contents: list[str | WikiNode]
+    wxr: WiktextractContext, parent_sense: Sense, t_node: TemplateNode
 ) -> None:
     """Parse form_of for nouns, adjectives and verbs.
 
@@ -525,12 +525,6 @@ def extract_form_of_templates(
     https://el.wiktionary.org/wiki/Κατηγορία:Πρότυπα_για_κλιτικούς_τύπους
     https://el.wiktionary.org/wiki/Πρότυπο:ρημ_τύπος
     """
-    # Be sure that we only contain a single template node!
-    t_nodes = [elt for elt in contents if isinstance(elt, TemplateNode)]
-    if len(t_nodes) != 1:
-        return
-
-    t_node = t_nodes[0]
     t_name = t_node.template_name
 
     # Generic
@@ -658,7 +652,9 @@ def parse_gloss(
     if len(contents) == 0:
         return False
 
-    extract_form_of_templates(wxr, parent_sense, contents)
+    for t_node in contents:
+        if isinstance(t_node, TemplateNode):
+            extract_form_of_templates(wxr, parent_sense, t_node)
 
     template_tags: list[str] = []
     synonyms: list[Linkage] = []
