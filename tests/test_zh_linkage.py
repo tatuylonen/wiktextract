@@ -458,3 +458,25 @@ class TestZhLinkage(TestCase):
         )
         self.assertEqual(data[0]["derived"], [{"word": "神志清明"}])
         self.assertEqual(data[1]["derived"], [{"word": "清明菜"}])
+
+    def test_l_template(self):
+        self.wxr.wtp.add_page(
+            "Template:l",
+            10,
+            """<span class="Kore" lang="ko">-{<!-- -->[[2차원#朝鮮語|-{2차원}-]]}-</span> <span class="mention-gloss-paren annotation-paren">(</span><span lang="ko-Latn" class="tr Latn">-{<!---->ichawon<!---->}-</span>，<span class="mention-gloss-double-quote">“</span><span class="mention-gloss">虚构世界</span><span class="mention-gloss-double-quote">”</span><span class="mention-gloss-paren annotation-paren">)</span>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "0차원",
+            """==朝鮮語==
+===名詞===
+# [[零次元]]
+====同类词汇====
+{{top2}}
+* {{l|ko|2차원|tr=ichawon|t=虚构世界}}
+{{bottom}}""",
+        )
+        self.assertEqual(
+            data[0]["coordinate_terms"],
+            [{"word": "2차원", "roman": "ichawon", "sense": "虚构世界"}],
+        )

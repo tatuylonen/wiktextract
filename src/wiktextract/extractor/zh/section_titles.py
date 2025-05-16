@@ -245,7 +245,7 @@ LINKAGE_TITLES: dict[str, str] = {
     "同位詞": "coordinate_terms",
     "同意詞": "synonyms",
     "同根词": "related",
-    "同类词汇": "related",
+    "同类词汇": "coordinate_terms",
     "同級詞彙": "coordinate_terms",
     "同義字": "related",
     "同義詞": "synonyms",

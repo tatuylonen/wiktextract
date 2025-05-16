@@ -232,22 +232,33 @@ def process_expanded_ja_r_node(
 
 def process_l_template(
     wxr: WiktextractContext,
-    template_node: TemplateNode,
+    t_node: TemplateNode,
     sense: str,
     raw_tags: list[str] = [],
 ) -> None:
     # https://zh.wiktionary.org/wiki/Template:l
     expanded_node = wxr.wtp.parse(
-        wxr.wtp.node_to_wikitext(template_node), expand_all=True
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
     )
     linkage_list = []
-    for span_tag in expanded_node.find_html("span", attr_name="lang"):
-        linkage_data = Linkage(
-            sense=sense, raw_tags=raw_tags, word=clean_node(wxr, None, span_tag)
-        )
-        if len(linkage_data.word) > 0:
-            translate_raw_tags(linkage_data)
-            linkage_list.append(linkage_data)
+    lang_code = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
+    for span_tag in expanded_node.find_html("span"):
+        span_lang = span_tag.attrs.get("lang", "")
+        span_class = span_tag.attrs.get("class", "")
+        if span_lang == lang_code:
+            linkage_data = Linkage(
+                sense=sense,
+                raw_tags=raw_tags,
+                word=clean_node(wxr, None, span_tag),
+            )
+            if len(linkage_data.word) > 0:
+                translate_raw_tags(linkage_data)
+                linkage_list.append(linkage_data)
+        elif span_lang.endswith("-Latn") and len(linkage_list) > 0:
+            linkage_list[-1].roman = clean_node(wxr, None, span_tag)
+        elif "mention-gloss" == span_class and len(linkage_list) > 0:
+            linkage_list[-1].sense = clean_node(wxr, None, span_tag)
+
     return linkage_list
 
 
