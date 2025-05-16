@@ -37,6 +37,7 @@ class TestElGlosses(TestCase):
         Test suite:
         * linkage in a not (":" or "*")-ending LIST_ITEM
         * linkage in a list with a single ":"
+        * linkage together with another template
         * linkage inside synonym
         * linkage without gloss
         * linkage without gloss, but one quote
@@ -91,6 +92,21 @@ class TestElGlosses(TestCase):
             "senses": [
                 {"related": [{"word": "αναμαλλιάζω"}], "tags": ["no-gloss"]}
             ]
+        }
+        self.mktest_bl_linkage(raw, expected)
+
+    def test_bl_linkage_with_another_template(self) -> None:
+        # https://el.wiktionary.org/wiki/επωτίδες
+        raw = """* {{πτώσειςΟΑΚπλ|επωτίδα}} {{βλ|όρος=το αρχαίο|ἐπωτίδες}}"""
+        expected = {
+            "senses": [
+                {
+                    "glosses": [":Πρότυπο:πτώσειςΟΑΚπλ"],
+                    "tags": ["accusative", "nominative", "plural", "vocative"],
+                    "form_of": [{"word": "επωτίδα"}],
+                    "related": [{"word": "ἐπωτίδες"}],
+                }
+            ],
         }
         self.mktest_bl_linkage(raw, expected)
 
