@@ -153,6 +153,18 @@ class TestElGlosses(TestCase):
         expected = [{"form_of": [{"word": "συμβουλεύω"}]}]
         self.mktest_sense(raw, expected)
 
+    def test_form_of_verb_participle1(self) -> None:
+        # https://el.wiktionary.org/wiki/καταρτισμένος
+        raw = """* {{μτχππ|καταρτίζω}}"""
+        expected = [{"form_of": [{"word": "καταρτίζω"}]}]
+        self.mktest_sense(raw, expected)
+
+    def test_form_of_verb_participle2(self) -> None:
+        # https://el.wiktionary.org/wiki/διαδεχθείς
+        raw = """* {{μτχα|διαδέχομαι|παθ=1|χ+=διαδέχθηκα|00=-}}"""
+        expected = [{"form_of": [{"word": "διαδέχομαι"}]}]
+        self.mktest_sense(raw, expected)
+
     def test_form_of_generic_template_noun(self) -> None:
         # https://el.wiktionary.org/wiki/εδάφη
         raw = "* {{κλ||έδαφος|π=οακ|α=π}}"
