@@ -231,6 +231,10 @@ def is_ipa_text(text: str) -> bool:
     # check if the text is IPA, used for inflection table cell text
     if text.startswith("\\") and text.endswith("\\"):
         return True
+    if text.startswith("/") and text.endswith("/"):
+        return True
+    if text.startswith("[") and text.endswith("]"):
+        return True
     if text.startswith("ou ") and text.endswith("\\"):
         # some inflection table template like "en-nom-rég" might have a second
         # ipa text in a new line

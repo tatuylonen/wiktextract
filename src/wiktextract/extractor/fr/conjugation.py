@@ -136,7 +136,11 @@ def process_expanded_conj_template(
     node: WikiNode,
     conj_page_title: str,
 ) -> None:
-    h3_text = ""
+    h3_text = (
+        clean_node(wxr, None, node.largs)
+        if node.kind == NodeKind.LEVEL3
+        else ""
+    )
     for child in node.find_child(NodeKind.HTML | LEVEL_KIND_FLAGS):
         if child.kind in LEVEL_KIND_FLAGS:
             process_expanded_conj_template(wxr, entry, child, conj_page_title)
@@ -154,6 +158,15 @@ def process_expanded_conj_template(
                     )
 
 
+@dataclass
+class TableHeader:
+    text: str
+    col_index: int = 0
+    colspan: int = 0
+    row_index: int = 0
+    rowspan: int = 0
+
+
 def process_fr_conj_modes_table(
     wxr: WiktextractContext,
     entry: WordEntry,
@@ -161,40 +174,65 @@ def process_fr_conj_modes_table(
     conj_page_title: str,
 ) -> None:
     # the first "Modes impersonnels" table
-    added_forms = {f.form for f in entry.forms}
 
     for table_node in div_node.find_child(NodeKind.TABLE):
-        for row_index, row in enumerate(
-            table_node.find_child(NodeKind.TABLE_ROW)
-        ):
-            if row_index == 0:
-                continue  # skip header
+        col_headers = []
+        for row in table_node.find_child(NodeKind.TABLE_ROW):
+            row_header = ""
+            is_header_row = not row.contain_node(NodeKind.TABLE_CELL)
+            col_index = 0
             form_text = ""
-            tags = []
-            for cell_index, cell in enumerate(
-                row.find_child(NodeKind.TABLE_CELL)
+            for node in row.find_child(
+                NodeKind.TABLE_HEADER_CELL | NodeKind.TABLE_CELL
             ):
-                if cell_index == 0:
-                    tags.append(clean_node(wxr, None, cell))
-                elif cell_index % 3 == 0:
-                    form = Form(
-                        form=form_text,
-                        raw_tags=tags.copy(),
-                        ipas=[clean_node(wxr, None, cell)],
-                        source=conj_page_title,
-                    )
-                    form.raw_tags.append(
-                        "Présent" if cell_index == 3 else "Passé"
-                    )
-                    translate_raw_tags(form)
-                    if form.form not in added_forms:
-                        entry.forms.append(form)
-                        added_forms.add(form.form)
-                    form_text = ""
+                if node.kind == NodeKind.TABLE_HEADER_CELL or (
+                    node.contain_node(NodeKind.BOLD) and col_index == 0
+                ):
+                    if is_header_row:
+                        header_text = clean_node(wxr, None, node)
+                        if header_text == "Mode":
+                            continue
+                        else:
+                            colspan = 1
+                            colspan_str = node.attrs.get("colspan", "1")
+                            if re.fullmatch(r"\d+", colspan_str) is not None:
+                                colspan = int(colspan_str)
+                            col_headers.append(
+                                TableHeader(header_text, col_index, colspan)
+                            )
+                            col_index += colspan
+                    else:
+                        row_header = clean_node(wxr, None, node)
                 else:
-                    if len(form_text) > 0 and not form_text.endswith("’"):
-                        form_text += " "
-                    form_text += clean_node(wxr, None, cell)
+                    node_text = clean_node(wxr, None, node)
+                    if (
+                        node_text.endswith(("]", "\\", "Prononciation ?"))
+                        and form_text != ""
+                    ):
+                        form = Form(
+                            form=form_text,
+                            ipas=[node_text]
+                            if node_text.endswith(("]", "\\"))
+                            else [],
+                            source=conj_page_title,
+                        )
+                        if row_header != "":
+                            form.raw_tags.append(row_header)
+                        for col_header in col_headers:
+                            if (
+                                col_index >= col_header.col_index
+                                and col_index
+                                < col_header.col_index + col_header.colspan
+                            ):
+                                form.raw_tags.append(col_header.text)
+                        translate_raw_tags(form)
+                        entry.forms.append(form)
+                        form_text = ""
+                    elif node_text != "":
+                        if not form_text.endswith("’") and form_text != "":
+                            form_text += " "
+                        form_text += node_text
+                    col_index += 1
 
 
 def process_fr_conj_table(
@@ -233,7 +271,7 @@ def process_fr_conj_html_table(
     h3_text: str,
     conj_page_title: str,
 ):
-    tags = [h3_text]
+    tags = [h3_text] if h3_text != "" else []
     for tr_index, tr_node in enumerate(table_node.find_html_recursively("tr")):
         if tr_index == 0:
             tags.append(clean_node(wxr, None, tr_node.children))
@@ -266,7 +304,7 @@ def process_fr_conj_wiki_table(
     h3_text: str,
     conj_page_title: str,
 ):
-    tags = [h3_text]
+    tags = [h3_text] if h3_text != "" else []
     for row_index, row in enumerate(table_node.find_child(NodeKind.TABLE_ROW)):
         if row_index == 0:
             tags.append(clean_node(wxr, None, row.children))
@@ -277,14 +315,18 @@ def process_fr_conj_wiki_table(
             ):
                 cell_text = clean_node(wxr, None, cell)
                 if cell_index < 2:
-                    if cell_text == "—":
+                    if cell_text == "—" or cell_text.endswith(
+                        "Prononciation ?"
+                    ):
                         continue
-                    if cell_text.startswith("-"):
+                    if cell_text.startswith(
+                        "-"
+                    ) and not form.form.strip().endswith(")"):
                         form.form = form.form.strip()
                     form.form += cell_text
                     if cell_index == 0 and len(cell_text) > 0:
                         form.form += " "
-                else:
+                elif not cell_text.endswith("Prononciation ?"):
                     form.ipas.append(cell_text)
 
             if len(form.form) > 0:
@@ -469,15 +511,6 @@ def extract_ku_conj_trans_table_node(
                 entry.forms.append(form)
                 col_index += 1
         last_row_has_header = current_row_has_header
-
-
-@dataclass
-class TableHeader:
-    text: str
-    col_index: int = 0
-    colspan: int = 0
-    row_index: int = 0
-    rowspan: int = 0
 
 
 def extract_ko_conj_template(

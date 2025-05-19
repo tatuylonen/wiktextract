@@ -99,7 +99,7 @@ class TestNotes(TestCase):
                     "form": "j’ai lancé",
                     "ipas": ["\\ʒ‿e lɑ̃.se\\"],
                     "source": "Conjugaison:français/lancer",
-                    "tags": ["indicative", "past multiword-construction"],
+                    "tags": ["indicative", "past", "multiword-construction"],
                 },
             ],
         )

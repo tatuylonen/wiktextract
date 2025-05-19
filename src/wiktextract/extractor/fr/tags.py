@@ -28,6 +28,12 @@ GENDER_TAGS: dict[str, str | list[str]] = {
     "poli négatif": ["polite", "negative"],
     "poli passé": ["polite", "past"],
     "poli négatif passé": ["polite", "negative", "past"],
+    # Template:m
+    "masculin animé": ["masculine", "animate"],
+    "masculin inanimé": ["masculine", "inanimate"],
+    # Template:f
+    "féminin animé": ["feminine", "animate"],
+    "féminin inanimé": ["feminine", "inanimate"],
 }
 
 # https://en.wikipedia.org/wiki/Grammatical_number
@@ -97,6 +103,11 @@ VERB_FORM_TAGS: dict[str, str | list[str]] = {
     "affirmatif": "affirmative",
     "négatif": "negative",
     "adverbial": "adverbial",
+    # Template:bg-verbe186
+    "aoriste": "aorist",
+    "participe passé passif": ["participle", "past", "passive"],
+    "participe passé actif": ["participle", "past", "active"],
+    "participe imparfait": ["participle", "imperfect"],
 }
 
 # https://en.wikipedia.org/wiki/Grammatical_case
@@ -113,6 +124,11 @@ CASE_TAGS: dict[str, str | list[str]] = {
     "comitatif": "comitative",
     "essif": "essive",
     "illatif": "illative",
+    # Template:ro-nom-tab
+    "nominatif accusatif": ["nominative", "accusative"],
+    "datif génitif": ["dative", "genitive"],
+    # Template:ko-nom
+    "nominatif / attributif": ["nominative", "attributive"],
 }
 
 # https://en.wikipedia.org/wiki/Grammatical_tense
@@ -123,10 +139,10 @@ TENSE_TAGS: dict[str, str | list[str]] = {
     "futur": "future",
     "futur simple": "future",
     # https://en.wikipedia.org/wiki/Passé_composé
-    "passé composé": "past multiword-construction",
+    "passé composé": ["past", "multiword-construction"],
     "plus-que-parfait": "pluperfect",
-    "passé antérieur": "past anterior",
-    "futur antérieur": "future perfect",
+    "passé antérieur": ["past", "anterior"],
+    "futur antérieur": ["future", "perfect"],
     "prétérit": "preterite",
     "présent simple, 3ᵉ pers. sing.": ["present", "third-person", "singular"],
     "participe passé": ["participle", "past"],
@@ -217,6 +233,15 @@ OTHER_GRAMMATICAL_TAGS: dict[str, str] = {
     # Modèle:ku-conj-trans
     "forme affirmative": "affirmative",
     "forme négative": "negative",
+    # Modèle:bg-nom
+    "forme de base": "base-form",
+    "pluriel numéral": ["plural", "numeral"],
+    "animé": "animate",
+    "inanimé": "inanimate",
+    # Template:ko-nom
+    "hangeul": "hangeul",
+    "hanja": "hanja",
+    "avec clitique": "clitic",
 }
 
 # template text before gloss
