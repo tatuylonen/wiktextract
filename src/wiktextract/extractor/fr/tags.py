@@ -103,6 +103,11 @@ VERB_FORM_TAGS: dict[str, str | list[str]] = {
     "affirmatif": "affirmative",
     "négatif": "negative",
     "adverbial": "adverbial",
+    # Template:bg-verbe186
+    "aoriste": "aorist",
+    "participe passé passif": ["participle", "past", "passive"],
+    "participe passé actif": ["participle", "past", "active"],
+    "participe imparfait": ["participle", "imperfect"],
 }
 
 # https://en.wikipedia.org/wiki/Grammatical_case
@@ -119,6 +124,11 @@ CASE_TAGS: dict[str, str | list[str]] = {
     "comitatif": "comitative",
     "essif": "essive",
     "illatif": "illative",
+    # Template:ro-nom-tab
+    "nominatif accusatif": ["nominative", "accusative"],
+    "datif génitif": ["dative", "genitive"],
+    # Template:ko-nom
+    "nominatif / attributif": ["nominative", "attributive"],
 }
 
 # https://en.wikipedia.org/wiki/Grammatical_tense
@@ -228,6 +238,10 @@ OTHER_GRAMMATICAL_TAGS: dict[str, str] = {
     "pluriel numéral": ["plural", "numeral"],
     "animé": "animate",
     "inanimé": "inanimate",
+    # Template:ko-nom
+    "hangeul": "hangeul",
+    "hanja": "hanja",
+    "avec clitique": "clitic",
 }
 
 # template text before gloss

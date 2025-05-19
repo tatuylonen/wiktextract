@@ -9,6 +9,8 @@ from wiktextract.wxr_context import WiktextractContext
 
 
 class TestInflection(TestCase):
+    maxDiff = None
+
     def setUp(self) -> None:
         self.wxr = WiktextractContext(
             Wtp(lang_code="fr"), WiktionaryConfig(dump_file_lang_code="fr")
@@ -352,24 +354,18 @@ class TestInflection(TestCase):
             [
                 {
                     "form": "fenilul",
-                    "tags": ["singular"],
-                    "raw_tags": [
-                        "articulé",
-                        "Nominatif Accusatif",
-                    ],
+                    "tags": ["singular", "nominative", "accusative"],
+                    "raw_tags": ["articulé"],
                 },
                 {
                     "form": "fenili",
-                    "tags": ["plural"],
-                    "raw_tags": [
-                        "non articulé",
-                        "Nominatif Accusatif",
-                    ],
+                    "tags": ["plural", "nominative", "accusative"],
+                    "raw_tags": ["non articulé"],
                 },
                 {
                     "form": "fenilii",
-                    "tags": ["plural"],
-                    "raw_tags": ["articulé", "Nominatif Accusatif"],
+                    "tags": ["plural", "nominative", "accusative"],
+                    "raw_tags": ["articulé"],
                 },
                 {"form": "fenilule", "tags": ["singular", "vocative"]},
                 {"form": "fenililor", "tags": ["plural", "vocative"]},
