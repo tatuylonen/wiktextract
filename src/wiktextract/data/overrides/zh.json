@@ -706,5 +706,25 @@
     "body": "{{#if:{{{n|}}}|{{-n p-|德語}}[[分類:德語專有名詞]]|{{-n-|德語}}[[分類:德語名詞]]}}[[分類:德語]]\n{{#if:{{{1|}}}|[[分類:德語{{#switch:{{{1}}}|m=陽性|n=中性|f=陰性}}名詞]]}}\n{{#if:{{{2|}}}|[[分類:德語{{#switch:{{{2}}}|a=可數|b=不可數}}名詞]]}}\n{{#switch:{{{1}}}|m=<mark background-color=\"882222\">〔陽〕</mark>/中/陰/唯複|n=陽/<mark background-color=\"882222\">〔中〕</mark>/陰/唯複|f=陽/中/<mark background-color=\"882222\">〔陰〕</mark>/唯複|p=陽/中/陰/<mark background-color=\"882222\">〔唯複〕</mark>}}&nbsp;&nbsp;&nbsp;通常&nbsp;{{#switch:{{{2}}}|a=<mark background-color=\"882222\">〔可數〕</mark>/不可數|b=可數/<mark background-color=\"882222\">〔不可數〕</mark>}}",
     "namespace_id": 10,
     "need_pre_expand": true
+  },
+  "Template:日語-題": {
+    "body": "==日語==\n[[分類:日语]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:ja2": {
+    "body": "==日語==\n[[分類:日语]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  }
+  "Template:瑞典語": {
+    "body": "==瑞典語==\n[[分類:拉丁文字]][[分類:瑞典語]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Template:-sv-": {
+    "body": "==瑞典語==\n[[分類:拉丁文字]][[分類:瑞典語]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
   }
 }
