@@ -1761,11 +1761,17 @@ def add_related(
 
 # Issue #967, in English word forms sometimes forms are skipped because
 # they are taggable words and their distw() is too big, like clipping from clip
-WORDS_WITH_TAG_LOOKING_FORMS: dict[str, list[str]] = {
+WORDS_WITH_FALSE_POSITIVE_TAGS: dict[str, list[str]] = {
     "clip": ["clipping"],  # XXX remember to change me back to clipping after
     "English": ["English", "Englishes"],
     "common": ["common", "commoner"],
     # tests.
+}
+
+WORDS_WITH_FALSE_POSITIVE_FORMS: dict[str, list[str]] = {
+    "unaccountability": ["countable", "uncountable"],
+    "uncountability": ["countable", "uncountable"],
+    "plural": ["plurals",],
 }
 
 FALSE_POSITIVE_MISSING_FORMS: dict[str, list[str]] = {}
@@ -1813,8 +1819,9 @@ def parse_word_head(
         # spaces, replace word_re with a modified local scope pattern
         # print(f"links {list((c, ord(c)) for link in links for c in link)=}")
         word_re = re.compile(
-            r"\b" +  # In case we have forms that are longer and contain links
-                # or words as a substring...
+            r"\b"  # In case we have forms that are longer and contain links
+            +
+            # or words as a substring...
             r"\b|\b".join(
                 sorted((re.escape(s) for s in links), key=lambda x: -len(x))
             )
@@ -2480,10 +2487,17 @@ def parse_word_head(
                             or (
                                 wxr.wtp.section == "English"
                                 and wxr.wtp.title
-                                in WORDS_WITH_TAG_LOOKING_FORMS
+                                in WORDS_WITH_FALSE_POSITIVE_TAGS
                                 and parts[i - 1]
-                                in WORDS_WITH_TAG_LOOKING_FORMS[wxr.wtp.title]
+                                in WORDS_WITH_FALSE_POSITIVE_TAGS[wxr.wtp.title]
                             )
+                        )
+                        # Fixes 'unaccountability' wiktext #1196
+                        and not (
+                            wxr.wtp.section == "English"
+                            and wxr.wtp.title in WORDS_WITH_FALSE_POSITIVE_FORMS
+                            and parts[i - 1]
+                            in WORDS_WITH_FALSE_POSITIVE_FORMS[wxr.wtp.title]
                         )
                         # Fixes wiktextract #983, where "participle"
                         # was too close to "Martinize" and so this accepted
@@ -2493,8 +2507,10 @@ def parse_word_head(
                         # This breaks if we want to detect stuff that
                         # actually gets an extra space-separated word when
                         # 'inflected'.
-                        and (len(titleparts) >= len(parts[i - 1 :]) or
-                            "or" in parts[i-1:])
+                        and (
+                            len(titleparts) >= len(parts[i - 1 :])
+                            or "or" in parts[i - 1 :]
+                        )
                     ):
                         # print(f"Reached; {parts=}, {parts[i-1]=}")
                         alt_related = related
