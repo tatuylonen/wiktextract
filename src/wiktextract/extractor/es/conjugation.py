@@ -14,11 +14,7 @@ def extract_conjugation_section(
     forms = []
     cats = []
     for t_node in level_node.find_child(NodeKind.TEMPLATE):
-        if "es.v.conj." in t_node.template_name:
-            new_forms, new_cats = process_es_v_conj_template(wxr, t_node)
-            forms.extend(new_forms)
-            cats.extend(new_cats)
-        elif t_node.template_name == "es.v":
+        if t_node.template_name == "es.v":
             new_forms, new_cats = process_es_v_template(wxr, t_node)
             forms.extend(new_forms)
             cats.extend(new_cats)
@@ -38,97 +34,6 @@ class SpanHeader:
     text: str
     index: int
     span: int
-
-
-def process_es_v_conj_template(
-    wxr: WiktextractContext, template_node: TemplateNode
-) -> tuple[list[Form], list[str]]:
-    # https://es.wiktionary.org/wiki/Plantilla:es.v.conj
-    forms = []
-    cats = {}
-    expanded_node = wxr.wtp.parse(
-        wxr.wtp.node_to_wikitext(template_node), expand_all=True
-    )
-    clean_node(wxr, cats, expanded_node)
-    table_nodes = list(expanded_node.find_child(NodeKind.TABLE))
-    if len(table_nodes) == 0:
-        return
-    table_node = table_nodes[0]
-    col_headers = []
-    color_col_headers = []
-    color_table_headers = []
-    row_header = SpanHeader("", 0, 0)
-    for row in table_node.find_child(NodeKind.TABLE_ROW):
-        row_header.span -= 1
-        if row_header.span <= 0:
-            row_header = SpanHeader("", 0, 0)
-        all_header_row = not row.contain_node(NodeKind.TABLE_CELL)
-        col_header_index = 0
-        col_cell_index = 0
-        for cell in row.find_child(
-            NodeKind.TABLE_HEADER_CELL | NodeKind.TABLE_CELL
-        ):
-            cell_text = clean_node(wxr, None, cell)
-            colspan = int(cell.attrs.get("colspan", "1"))
-            if cell.kind == NodeKind.TABLE_HEADER_CELL:
-                if (
-                    # ignore empty header in the second row
-                    # but not the last table
-                    cell_text == "" and len(color_table_headers) == 0
-                ) or cell_text in ["número:", "persona:"]:
-                    continue
-                elif all_header_row:
-                    if cell_text.startswith("Formas "):  # new table
-                        col_headers.clear()
-                        row_header = SpanHeader("", 0, 0)
-                    if "background:" in cell.attrs.get("style", ""):
-                        if cell_text.startswith("Modo "):
-                            color_col_headers.clear()
-                            color_table_headers.clear()
-                            color_table_headers.append(cell_text)
-                        elif cell_text.startswith("Tiempos "):
-                            if len(color_table_headers) > 1:
-                                color_table_headers.pop()
-                            color_table_headers.append(cell_text)
-                        else:
-                            color_col_headers.append(
-                                SpanHeader(cell_text, col_header_index, colspan)
-                            )
-                            col_header_index += colspan
-                    else:
-                        col_headers.append(
-                            SpanHeader(cell_text, col_header_index, colspan)
-                        )
-                        col_header_index += colspan
-                else:
-                    row_header = SpanHeader(
-                        cell_text, 0, int(cell.attrs.get("rowspan", "1"))
-                    )
-                    col_cell_index += colspan - 1
-            elif cell_text == "" or "background-color:" in cell.attrs.get(
-                "style", ""
-            ):
-                continue  # ignore end notes
-            else:
-                for line in cell_text.splitlines():
-                    form = Form(form=line)
-                    for col_header_list in [col_headers, color_col_headers]:
-                        for col_head in col_header_list:
-                            if (
-                                col_cell_index >= col_head.index
-                                and col_cell_index
-                                < col_head.index + col_head.span
-                                and col_head.text != ""
-                            ):
-                                form.raw_tags.append(col_head.text)
-                    form.raw_tags.extend(color_table_headers)
-                    if row_header.text != "":
-                        form.raw_tags.extend(row_header.text.split(" o "))
-                    if form.form != "":
-                        translate_raw_tags(form)
-                        forms.append(form)
-                col_cell_index += colspan
-    return forms, cats.get("categories", [])
 
 
 def process_es_v_template(
