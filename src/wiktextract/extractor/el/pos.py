@@ -519,11 +519,13 @@ def extract_form_of_templates(
     * κλ             | generic                | form_of
     * πτώση/πτώσεις  | nouns, adjectives etc. | form_of and tags
     * ρημ τύπος      | verbs                  | form_of
+    * μτχ            | verbs                  | form_of
 
     * References:
     https://el.wiktionary.org/wiki/Πρότυπο:κλ
     https://el.wiktionary.org/wiki/Κατηγορία:Πρότυπα_για_κλιτικούς_τύπους
     https://el.wiktionary.org/wiki/Πρότυπο:ρημ_τύπος
+    https://el.wiktionary.org/wiki/Κατηγορία:Πρότυπα_για_μετοχές
     """
     t_name = t_node.template_name
 
@@ -557,6 +559,18 @@ def extract_form_of_templates(
             )
             return
         lemma = clean_node(wxr, None, t_args[2])
+        form_of = FormOf(word=lemma)
+        parent_sense.form_of.append(form_of)
+    if t_name.startswith("μτχ"):
+        t_args = t_node.template_parameters
+        if 1 not in t_args:
+            wxr.wtp.warning(
+                "Form-of template does not have lemma data: "
+                f"{t_name}, {t_args=}",
+                sortid="pos/570/20250517",
+            )
+            return
+        lemma = clean_node(wxr, None, t_args[1])
         form_of = FormOf(word=lemma)
         parent_sense.form_of.append(form_of)
 
