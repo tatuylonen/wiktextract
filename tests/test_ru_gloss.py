@@ -203,7 +203,6 @@ class TestRUGloss(unittest.TestCase):
                         "Глаголы в видовых парах",
                         "Глаголы, спряжение 1a",
                     ],
-                    "forms": [{"form": "прыгнуть", "tags": ["perfective"]}],
                     "lang": "Русский",
                     "lang_code": "ru",
                     "word": "прыгать",

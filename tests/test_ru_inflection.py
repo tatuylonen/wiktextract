@@ -4,7 +4,10 @@ from wikitextprocessor import Wtp
 
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.ru.models import WordEntry
-from wiktextract.extractor.ru.page import extract_morphological_section
+from wiktextract.extractor.ru.page import (
+    extract_morphological_section,
+    parse_page,
+)
 from wiktextract.wxr_context import WiktextractContext
 
 
@@ -13,7 +16,10 @@ class TestLinkage(TestCase):
 
     def setUp(self) -> None:
         self.wxr = WiktextractContext(
-            Wtp(lang_code="ru"), WiktionaryConfig(dump_file_lang_code="ru")
+            Wtp(lang_code="ru"),
+            WiktionaryConfig(
+                dump_file_lang_code="ru", capture_language_codes=None
+            ),
         )
 
     def tearDown(self) -> None:
@@ -241,5 +247,37 @@ class TestLinkage(TestCase):
                 {"form": "водѹ", "tags": ["locative", "dual"]},
                 {"form": "водахъ", "tags": ["locative", "plural"]},
                 {"form": "водо", "tags": ["vocative", "singular"]},
+            ],
+        )
+
+    def test_comparative_forms(self):
+        self.wxr.wtp.add_page("Шаблон:-ru-", 10, "Русский")
+        self.wxr.wtp.add_page(
+            "Шаблон:прил ru 1*a",
+            10,
+            "[[прилагательное|Прилагательное]], [[качественное прилагательное|качественное]], тип склонения по [[Викисловарь:Использование словаря Зализняка|классификации А.&#160;Зализняка]]&#160;— 1*a. Сравнительная степень&nbsp;— ''[[опаснее#опа́снее|опа́снее]], [[опасней#опа́сней|опа́сней]].''",
+        )
+        data = parse_page(
+            self.wxr,
+            "опасный",
+            """= {{-ru-}} =
+=== Морфологические и синтаксические свойства ===
+{{прил ru 1*a
+|основа=опа́сн
+|основа1=опа́сен
+|тип=качественное
+|слоги={{по слогам|о|.|па́с|ный}}
+|степень=1
+|краткая=
+}}
+=== Семантические свойства ===
+==== Значение ====
+# [[способный]] причинить [[вред]], угрожающий [[несчастье]]м {{пример|}}""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {"form": "опа́снее", "tags": ["comparative"]},
+                {"form": "опа́сней", "tags": ["comparative"]},
             ],
         )
