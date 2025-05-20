@@ -190,3 +190,25 @@ def add_form_data(
     if len(form.form) > 0 and form.form != "—":
         translate_raw_tags(form)
         word_entry.forms.append(form)
+
+
+def extract_прил_ru_comparative_forms(
+    wxr: WiktextractContext, word_entry: WordEntry, expanded_node: WikiNode
+) -> None:
+    after_comparative = False
+    for node in expanded_node.children:
+        if isinstance(node, str):
+            node_str = clean_node(wxr, None, node)
+            if node_str.endswith("Сравнительная степень —"):
+                after_comparative = True
+        elif (
+            after_comparative
+            and isinstance(node, WikiNode)
+            and node.kind == NodeKind.ITALIC
+        ):
+            for link_node in node.find_child(NodeKind.LINK):
+                form = clean_node(wxr, None, link_node)
+                if form != "":
+                    word_entry.forms.append(
+                        Form(form=form, tags=["comparative"])
+                    )
