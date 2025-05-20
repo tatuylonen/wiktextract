@@ -249,16 +249,22 @@ def process_low_quality_page(
             is_soft_redirect = True
 
     if not is_soft_redirect:  # only have a gloss text
-        gloss_text = clean_node(wxr, word_entry, level_node.children)
-        if len(gloss_text) > 0:
-            for cat in word_entry.categories:
-                cat = cat.removeprefix(word_entry.lang).strip()
-                if cat in POS_TITLES:
-                    pos_data = POS_TITLES[cat]
-                    word_entry.pos = pos_data["pos"]
-                    word_entry.tags.extend(pos_data.get("tags", []))
-                    break
-            word_entry.senses.append(Sense(glosses=[gloss_text]))
+        has_gloss_list = False
+        for list_node in level_node.find_child(NodeKind.LIST):
+            if list_node.sarg == "#":
+                extract_gloss(wxr, [word_entry], list_node, Sense())
+                has_gloss_list = True
+        if not has_gloss_list:
+            gloss_text = clean_node(wxr, word_entry, level_node.children)
+            if len(gloss_text) > 0:
+                for cat in word_entry.categories:
+                    cat = cat.removeprefix(word_entry.lang).strip()
+                    if cat in POS_TITLES:
+                        pos_data = POS_TITLES[cat]
+                        word_entry.pos = pos_data["pos"]
+                        word_entry.tags.extend(pos_data.get("tags", []))
+                        break
+                word_entry.senses.append(Sense(glosses=[gloss_text]))
 
 
 def process_soft_redirect_template(
