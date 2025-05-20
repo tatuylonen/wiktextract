@@ -853,6 +853,7 @@ class HeadTests(unittest.TestCase):
         # Check if language section is "English", then if the checked
         # word starts with the title ([clip]ping) accept that even if
         # the distw is high (in this case, clipping and clip -> 0.5 distw())
+        # THIS WORKS WITH A MANUAL WHITELIST
         data = {}
         self.maxDiff = 10000
         self.wxr.wtp.start_page("clip")
@@ -878,6 +879,37 @@ class HeadTests(unittest.TestCase):
                     {"form": "clipping", "tags": ["participle", "present"]},
                     {"form": "clipped", "tags": ["participle", "past"]},
                     {"form": "clipped", "tags": ["past"]},
+                ],
+            },
+        )
+
+    def test_english_tags_that_look_like_forms1(self):
+        # Issue #1196
+        # Specifically only for English words
+        # THIS WORKS WITH A MANUAL BLACKLIST
+        data = {}
+        self.maxDiff = 10000
+        self.wxr.wtp.start_page("unaccountability")
+        self.wxr.wtp.start_section("English")
+        self.wxr.wtp.start_subsection("noun")
+        parse_word_head(
+            self.wxr,
+            "noun",
+            "unaccountability (countable and uncountable, plural unaccountabilities) ",
+            data,
+            False,
+            None,
+        )
+        # print(json.dumps(data, indent=2, sort_keys=True))
+        self.assertEqual(
+            data,
+            {
+                "forms": [
+                    {"form": "unaccountabilities", "tags": ["plural"]},
+                ],
+                "tags": [
+                    "countable",
+                    "uncountable",
                 ],
             },
         )
