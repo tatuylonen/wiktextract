@@ -1771,7 +1771,6 @@ WORDS_WITH_FALSE_POSITIVE_TAGS: dict[str, list[str]] = {
 WORDS_WITH_FALSE_POSITIVE_FORMS: dict[str, list[str]] = {
     "unaccountability": ["countable", "uncountable"],
     "uncountability": ["countable", "uncountable"],
-    "plural": ["plurals",],
 }
 
 FALSE_POSITIVE_MISSING_FORMS: dict[str, list[str]] = {}
