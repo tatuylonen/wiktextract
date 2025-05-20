@@ -25,7 +25,7 @@ def extract_form_line(
     gender and inflection forms.
     """
     IGNORE_TEMPLATES = frozenset(
-        ["voir-conj", "genre ?", "nombre ?", "pluriel ?"]
+        ["voir-conj", "genre ?", "nombre ?", "pluriel ?", "réf"]
     )
 
     pre_template_name = ""
@@ -112,6 +112,7 @@ def process_equiv_pour_template(
     gender_tags = {
         "un homme": "masculine",
         "une femme": "feminine",
+        "des femmes": "feminine",
         "le mâle": "masculine",
         "la femelle": "feminine",
         "un garçon": "masculine",

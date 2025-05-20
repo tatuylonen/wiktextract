@@ -34,6 +34,9 @@ GENDER_TAGS: dict[str, str | list[str]] = {
     # Template:f
     "féminin animé": ["feminine", "animate"],
     "féminin inanimé": ["feminine", "inanimate"],
+    # Template:n
+    "neutre animé": ["neuter", "animate"],
+    "neutre inanimé": ["neuter", "inanimate"],
 }
 
 # https://en.wikipedia.org/wiki/Grammatical_number
@@ -108,6 +111,10 @@ VERB_FORM_TAGS: dict[str, str | list[str]] = {
     "participe passé passif": ["participle", "past", "passive"],
     "participe passé actif": ["participle", "past", "active"],
     "participe imparfait": ["participle", "imperfect"],
+    "auxiliaire": "auxiliary",
+    "bitransitif": "ditransitive",
+    "déterminé": "determinate",
+    "indéterminé": "indeterminate",
 }
 
 # https://en.wikipedia.org/wiki/Grammatical_case
@@ -181,6 +188,8 @@ COMPARISON_TAGS: dict[str, str] = {
     "positif": "positive",
     "comparatif": "comparative",
     "superlatif": "superlative",
+    "non comparable": "not-comparable",
+    "superlatif absolu": ["superlative", "absolute"],
 }
 
 # https://en.wikipedia.org/wiki/Occitan_language#Writing_system
@@ -221,6 +230,7 @@ OTHER_GRAMMATICAL_TAGS: dict[str, str] = {
     "réciproque": "reciprocal",  # Modèle:réciproque
     "impersonnel": "impersonal",  # Modèle:impers
     "transitif": "transitive",  # Modèle:t
+    "transitif indirect": ["transitive", "indirect"],  # Modèle:transitif indir
     "intransitif": "intransitive",  # Modèle:i
     "injurieux": "offensive",  # Modèle:injurieux
     # Modèle:zh-formes
@@ -242,6 +252,21 @@ OTHER_GRAMMATICAL_TAGS: dict[str, str] = {
     "hangeul": "hangeul",
     "hanja": "hanja",
     "avec clitique": "clitic",
+    "indéclinable": "indeclinable",
+    "toponyme": "toponymic",
+    "applicatif": "applicative",
+    "causatif": "causative",
+    "sigle": "abbreviation",
+    "attributif": "attributive",
+    "prédicatif": "predicative",
+    # Template:cy-mut
+    "non muté": "unmutated",
+    "lénition": "lenition",
+    "nasalisation": "nasalization",
+    "syllabaire": "Syllabics",
+    "par ellipse": "ellipsis",  # Template:ellipse
+    "ironique": "ironic",
+    "suffixe": "suffix",
 }
 
 # template text before gloss
@@ -288,6 +313,7 @@ SENSE_TAGS: dict[str, str] = {
     "proverbe": "proverb",
     "collectivement": "collectively",
     "courant": "common",  # Modèle:courant
+    "adjectif attribut": ["adjective", "attributive"],
 }
 
 # https://en.wikipedia.org/wiki/Voice_(grammar)
@@ -301,6 +327,7 @@ VOICE_TAGS: dict[str, str | list[str]] = {
     "substantif passif": ["subsuntive", "passive"],
     "actif": "active",
     "passif": "passive",
+    "adverbe": "adverb",
 }
 
 # Module:lexique/data
