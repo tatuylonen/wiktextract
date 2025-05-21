@@ -160,7 +160,7 @@ def process_noun_table(
             if cell_text == "":
                 continue
             if table_cell.kind == NodeKind.TABLE_HEADER_CELL:
-                if cell_text == "Kasus":
+                if cell_text in ["Kasus", "Utrum"]:
                     continue
                 elif is_header_row:
                     colspan = int(table_cell.attrs.get("colspan", "1"))
@@ -183,7 +183,7 @@ def process_noun_table(
                     form_text = form_text.strip()
                     if form_text.startswith("(") and form_text.endswith(")"):
                         form_text = form_text.strip("() ")
-                    if form_text in ["—", "", "?", wxr.wtp.title]:
+                    if form_text in ["—", "–", "", "?", wxr.wtp.title]:
                         continue
                     form = Form(form=form_text)
                     if table_header != "":
