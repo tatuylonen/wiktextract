@@ -42,6 +42,8 @@ def extract_inf_table_template(
         or t_node.template_name == "Kardinalzahl 2-12"
     ):
         process_verb_table(wxr, word_entry, t_node)
+    elif t_node.template_name == "Deutsch Possessivpronomen":
+        extract_pronoun_table(wxr, word_entry, t_node)
 
 
 @dataclass
@@ -240,3 +242,72 @@ def process_adj_table(
                         form.raw_tags.append(column_headers[col_index])
                     translate_raw_tags(form)
                     word_entry.forms.append(form)
+
+
+def extract_pronoun_table(
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+) -> None:
+    # Vorlage:Deutsch Possessivpronomen
+    expanded_template = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    table_nodes = list(expanded_template.find_child(NodeKind.TABLE))
+    if len(table_nodes) == 0:
+        return
+    table_node = table_nodes[0]
+    col_headers = []
+    table_header = ""
+    for row in table_node.find_child(NodeKind.TABLE_ROW):
+        row_header = ""
+        row_has_data = row.contain_node(NodeKind.TABLE_CELL)
+        col_index = 0
+        article = ""
+        for cell in row.find_child(
+            NodeKind.TABLE_HEADER_CELL | NodeKind.TABLE_CELL
+        ):
+            cell_text = clean_node(wxr, None, cell)
+            if cell.kind == NodeKind.TABLE_HEADER_CELL:
+                if cell_text == "":
+                    continue
+                elif row_has_data:
+                    row_header = cell_text
+                elif len(list(row.find_child(NodeKind.TABLE_HEADER_CELL))) == 1:
+                    table_header = cell_text
+                    col_headers.clear()  # new table
+                    article = ""
+                else:
+                    colspan = 1
+                    colspan_str = cell.attrs.get("colspan", "1")
+                    if re.fullmatch(r"\d+", colspan_str):
+                        colspan = int(colspan_str)
+                    if cell_text != "—":
+                        col_headers.append(
+                            RowspanHeader(cell_text, col_index, colspan)
+                        )
+                    col_index += colspan
+            elif cell.kind == NodeKind.TABLE_CELL:
+                if col_index % 2 == 0:
+                    article = cell_text
+                else:
+                    form_str = (
+                        article + " " + cell_text
+                        if article not in ["", "—"]
+                        else cell_text
+                    )
+                    form = Form(form=form_str)
+                    if table_header != "":
+                        form.raw_tags.append(table_header)
+                    if row_header != "":
+                        form.raw_tags.append(row_header)
+                    for header in col_headers:
+                        if (
+                            col_index >= header.index
+                            and col_index < header.index + header.span
+                            and header.text != "Wortform"
+                        ):
+                            form.raw_tags.append(header.text)
+                    translate_raw_tags(form)
+                    if form.form != wxr.wtp.title:
+                        word_entry.forms.append(form)
+                    article = ""
+                col_index += 1

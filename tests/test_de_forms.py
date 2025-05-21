@@ -429,3 +429,114 @@ class TestDeForms(TestCase):
                 },
             ],
         )
+
+    def test_pron_table(self):
+        self.wxr.wtp.add_page(
+            "Vorlage:Deutsch Possessivpronomen",
+            10,
+            """{| class="wikitable float-right"
+! style="background-color:#c6e2ff;" colspan="9" | attributiv (vor Substantiv)
+|-
+! rowspan="3" |
+! colspan="6" | [[Hilfe:Singular|Singular]]
+! colspan="2" | [[Hilfe:Plural|Plural]]
+|-
+! colspan="2" | [[Hilfe:Maskulinum|Maskulinum]]
+! colspan="2" | [[Hilfe:Femininum|Femininum]]
+! colspan="2" | [[Hilfe:Neutrum|Neutrum]]
+! colspan="2" | —
+|-
+! style="background:#F9F9F9" | [[Hilfe:Artikel|Artikel]]
+! style="background:#F9F9F9" | [[Hilfe:Wortform|Wortform]]
+! style="background:#F9F9F9" | [[Hilfe:Artikel|Artikel]]
+! style="background:#F9F9F9" | [[Hilfe:Wortform|Wortform]]
+! style="background:#F9F9F9" | [[Hilfe:Artikel|Artikel]]
+! style="background:#F9F9F9" | [[Hilfe:Wortform|Wortform]]
+! style="background:#F9F9F9" | [[Hilfe:Artikel|Artikel]]
+! style="background:#F9F9F9" | [[Hilfe:Wortform|Wortform]]
+|-
+! style="text-align:left" | [[Hilfe:Nominativ|Nominativ]]
+| style="text-align:center" | —
+| mein
+| style="text-align:center" | —
+| [[meine|meine]]
+| style="text-align:center" | —
+| mein
+| style="text-align:center" | —
+| [[meine|meine]]
+|-
+! style="background-color:#c6e2ff;" colspan="9" | nicht attributiv, mit Artikel
+|-
+! rowspan="3" |
+! colspan="6" | [[Hilfe:Singular|Singular]]
+! colspan="2" | [[Hilfe:Plural|Plural]]
+|-
+! colspan="2" | [[Hilfe:Maskulinum|Maskulinum]]
+! colspan="2" | [[Hilfe:Femininum|Femininum]]
+! colspan="2" | [[Hilfe:Neutrum|Neutrum]]
+! colspan="2" | —
+|-
+! style="background:#F9F9F9" | [[Hilfe:Artikel|Artikel]]
+! style="background:#F9F9F9" | [[Hilfe:Wortform|Wortform]]
+! style="background:#F9F9F9" | [[Hilfe:Artikel|Artikel]]
+! style="background:#F9F9F9" | [[Hilfe:Wortform|Wortform]]
+! style="background:#F9F9F9" | [[Hilfe:Artikel|Artikel]]
+! style="background:#F9F9F9" | [[Hilfe:Wortform|Wortform]]
+! style="background:#F9F9F9" | [[Hilfe:Artikel|Artikel]]
+! style="background:#F9F9F9" | [[Hilfe:Wortform|Wortform]]
+|-
+! style="text-align:left" | [[Hilfe:Nominativ|Nominativ]]
+| der
+| [[meine|meine]]
+| die
+| [[meine|meine]]
+| das
+| [[meine|meine]]
+| die
+| [[meinen|meinen]]
+|}""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "mein",
+            """== mein ({{Sprache|Deutsch}}) ==
+=== {{Wortart|Possessivpronomen|Deutsch}}, ''1. Person Singular'' ===
+{{Deutsch Possessivpronomen|mein}}
+====Bedeutungen====
+:[1] zeigt den Besitz""",
+        )
+        self.assertEqual(
+            page_data[0]["forms"],
+            [
+                {
+                    "form": "meine",
+                    "tags": ["nominative", "singular", "feminine"],
+                    "raw_tags": ["attributiv (vor Substantiv)"],
+                },
+                {
+                    "form": "meine",
+                    "tags": ["nominative", "plural"],
+                    "raw_tags": ["attributiv (vor Substantiv)"],
+                },
+                {
+                    "form": "der meine",
+                    "tags": ["nominative", "singular", "masculine"],
+                    "raw_tags": ["nicht attributiv, mit Artikel"],
+                },
+                {
+                    "form": "die meine",
+                    "tags": ["nominative", "singular", "feminine"],
+                    "raw_tags": ["nicht attributiv, mit Artikel"],
+                },
+                {
+                    "form": "das meine",
+                    "tags": ["nominative", "singular", "neuter"],
+                    "raw_tags": ["nicht attributiv, mit Artikel"],
+                },
+                {
+                    "form": "die meinen",
+                    "tags": ["nominative", "plural"],
+                    "raw_tags": ["nicht attributiv, mit Artikel"],
+                },
+            ],
+        )
