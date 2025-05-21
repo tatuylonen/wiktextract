@@ -160,7 +160,10 @@ def process_noun_table(
             if cell_text == "":
                 continue
             if table_cell.kind == NodeKind.TABLE_HEADER_CELL:
-                if cell_text in ["Kasus", "Utrum"]:
+                if (
+                    cell_text in ["Kasus", "Utrum", "m", "f", "m, f"]
+                    and col_index == 0
+                ):
                     continue
                 elif is_header_row:
                     colspan = int(table_cell.attrs.get("colspan", "1"))
