@@ -306,7 +306,6 @@ class TestDeForms(TestCase):
                 {"form": "sieh!", "tags": ["imperative", "singular"]},
                 {"form": "seht!", "tags": ["imperative", "plural"]},
                 {"form": "gesehen", "tags": ["participle-2", "perfect"]},
-                {"form": "sehen", "tags": ["participle-2", "perfect"]},
                 {"form": "haben", "tags": ["auxiliary", "perfect"]},
                 {
                     "form": "sehen",

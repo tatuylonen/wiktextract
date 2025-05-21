@@ -104,7 +104,7 @@ def process_verb_table(
                 else:
                     for cell_line in cell_text.splitlines():
                         cell_line = cell_line.strip()
-                        if cell_line == "":
+                        if cell_line in ["", "—"]:
                             continue
                         elif cell_line.startswith("Flexion:"):
                             parse_flexion_page(wxr, word_entry, cell_line)
@@ -114,6 +114,8 @@ def process_verb_table(
                             form_text = cell_line
                             if p != "":
                                 form_text = p + " " + cell_line
+                            if form_text == wxr.wtp.title:
+                                continue
                             form = Form(form=form_text)
                             if col_index < len(col_headers):
                                 form.raw_tags.append(col_headers[col_index])
@@ -158,7 +160,12 @@ def process_noun_table(
             if cell_text == "":
                 continue
             if table_cell.kind == NodeKind.TABLE_HEADER_CELL:
-                if is_header_row:
+                if (
+                    cell_text in ["Kasus", "Utrum", "m", "f", "m, f"]
+                    and col_index == 0
+                ):
+                    continue
+                elif is_header_row:
                     colspan = int(table_cell.attrs.get("colspan", "1"))
                     column_headers.append(
                         RowspanHeader(
@@ -179,7 +186,7 @@ def process_noun_table(
                     form_text = form_text.strip()
                     if form_text.startswith("(") and form_text.endswith(")"):
                         form_text = form_text.strip("() ")
-                    if form_text in ["—", "", "?", wxr.wtp.title]:
+                    if form_text in ["—", "–", "-", "", "?", wxr.wtp.title]:
                         continue
                     form = Form(form=form_text)
                     if table_header != "":
