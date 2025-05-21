@@ -186,7 +186,7 @@ def process_noun_table(
                     form_text = form_text.strip()
                     if form_text.startswith("(") and form_text.endswith(")"):
                         form_text = form_text.strip("() ")
-                    if form_text in ["—", "–", "", "?", wxr.wtp.title]:
+                    if form_text in ["—", "–", "-", "", "?", wxr.wtp.title]:
                         continue
                     form = Form(form=form_text)
                     if table_header != "":

@@ -239,6 +239,8 @@ NUMBER_TAGS = {
     # Vorlage:Deutsch Substantiv Übersicht
     "Singular": "singular",
     "Plural": "plural",
+    "Pl.": "plural",
+    "Dual": "dual",
 }
 
 CASE_TAGS = {
@@ -247,6 +249,22 @@ CASE_TAGS = {
     "Genitiv": "genitive",
     "Dativ": "dative",
     "Akkusativ": "accusative",
+    # Template:Polnisch Substantiv Übersicht
+    "Lokativ": "locative",
+    "Vokativ": "vocative",
+    "Dativ Singular": ["dative", "singular"],
+    "Genitiv Singular": ["genitive", "singular"],
+    # Template:Finnisch Substantiv Übersicht
+    "Inessiv": "inessive",
+    "Elativ": "elative",
+    "Illativ": "illative",
+    "Adessiv": "adessive",
+    "Allativ": "allative",
+    "Essiv": "essive",
+    "Translativ": "translative",
+    "Abessiv": "abessive",
+    "Instruktiv": "instructive",
+    "Komitativ": "comitative",
 }
 
 COMPARISON_TAGS = {
@@ -275,6 +293,18 @@ OTHER_TAGS = {
     "erweitert": "extended",
     "zeitlich": "temporal",
     "indeklinabel": "indeclinable",
+    "östlich": "Eastern",
+    "westlich": "Western",
+    "britisch": "British",
+    "Substantive": "noun",
+    "Substantiv": "noun",
+    "historisch": "historical",
+    "wörtlich": "literally",
+    "Adjektiv": "adjective",
+    "gehoben": "literary",
+    "Nebenform von": "variant",
+    "Verben": "verb",
+    "regional": "regional",
 }
 
 TENSE_TAGS = {
@@ -285,6 +315,10 @@ TENSE_TAGS = {
     "Futur I": "future-i",
     "Futur II": "future-ii",
     "Plusquamperfekt": "pluperfect",
+    # Template:Kroatisch Verb Übersicht
+    "perfektiv": "perfective",
+    "imperfektiv": "imperfective",
+    "Imperfekt": "imperfect",
 }
 
 MOOD_TAGS = {
@@ -305,6 +339,9 @@ VERB_FORM_TAGS = {
     "Infinitiv": "infinitive",
     "Partizipien": "participle",
     "unregelmäßig": "irregular",
+    "Aorist": "aorist",
+    # Template:Dänisch Verb Übersicht
+    "Partizip Perfekt": ["participle", "perfect"],
 }
 
 VOICE_TAGS = {
@@ -352,6 +389,8 @@ INFLECTION_TABLE_TAGS = {
     "bestimmt": "definite",
     "unbestimmt": "indefinite",
     "mit Possessivpronomen": ["possessive", "pronoun"],
+    # Template:Kroatisch Verb Übersicht
+    "Partizip Präteritum Aktiv": ["past", "participle", "active"],
 }
 
 GRAMMATICAL_TAGS = {
