@@ -10,7 +10,7 @@ from .etymology import extract_etymology_section
 from .example import extract_examples
 from .form import extracrt_form_section, extract_transcription_section
 from .gloss import extract_glosses
-from .inflection import extract_inf_table_template
+from .inflection import extract_inf_table_template, process_noun_table
 from .linkage import extract_linkages
 from .models import AltForm, Sense, WordEntry
 from .pronunciation import extract_pronunciation_section
@@ -209,6 +209,10 @@ def process_pos_section(
         extract_inf_table_template(wxr, page_data[-1], t_node)
         if t_node.template_name in ["Alte Schreibweise", "Alte Schreibung"]:
             extract_old_spell_template(wxr, page_data[-1], t_node)
+
+    for table_node in level_node.find_child(NodeKind.TABLE):
+        # page "beide"
+        process_noun_table(wxr, page_data[-1], table_node)
 
     if not level_node.contain_node(NodeKind.LEVEL4):
         extract_glosses(wxr, page_data[-1], level_node)
