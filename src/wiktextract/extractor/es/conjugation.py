@@ -88,6 +88,7 @@ def process_es_v_template(
             col_headers.clear()  # new table
 
         col_index = 0
+        is_archaic_row = False
         for cell in row.find_child(
             NodeKind.TABLE_HEADER_CELL | NodeKind.TABLE_CELL
         ):
@@ -106,6 +107,7 @@ def process_es_v_template(
                     )
                     col_index += colspan
                 else:
+                    is_archaic_row = cell_text.endswith("^†")
                     row_header = cell_text.removesuffix("^†").strip()
             else:
                 cell_nodes = []
@@ -130,6 +132,8 @@ def process_es_v_template(
                             )
                     if row_header != "":
                         form.raw_tags.append(row_header)
+                    if is_archaic_row:
+                        form.tags.append("archaic")
                     if form.form not in ["", "―"]:
                         translate_raw_tags(form)
                         forms.append(form)
