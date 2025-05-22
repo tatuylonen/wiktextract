@@ -157,26 +157,27 @@ def process_noun_table(
             NodeKind.TABLE_HEADER_CELL | NodeKind.TABLE_CELL
         ):
             cell_text = clean_node(wxr, None, table_cell)
-            if cell_text == "":
-                continue
             if table_cell.kind == NodeKind.TABLE_HEADER_CELL:
                 if (
-                    cell_text in ["Kasus", "Utrum", "m", "f", "m, f"]
+                    cell_text in ["", "Kasus", "Utrum", "m", "f", "m, f"]
                     and col_index == 0
                 ):
                     continue
                 elif is_header_row:
                     colspan = int(table_cell.attrs.get("colspan", "1"))
-                    column_headers.append(
-                        RowspanHeader(
-                            re.sub(r"\s*\d+$", "", cell_text),
-                            col_index,
-                            colspan,
+                    if cell_text != "":
+                        column_headers.append(
+                            RowspanHeader(
+                                re.sub(r"\s*\d+$", "", cell_text),
+                                col_index,
+                                colspan,
+                            )
                         )
-                    )
                     col_index += colspan
                 else:
                     row_header = cell_text
+            elif cell_text == "":
+                continue
             elif not row_has_header:
                 # Vorlage:Deutsch adjektivisch Übersicht
                 table_header = cell_text
