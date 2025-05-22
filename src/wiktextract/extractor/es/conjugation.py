@@ -36,6 +36,31 @@ class SpanHeader:
     span: int
 
 
+# https://en.wikipedia.org/wiki/Spanish_pronouns
+PRONOUN_TAGS = {
+    "yo": ["first-person", "singular"],
+    "que yo": ["first-person", "singular"],
+    "tú": ["second-person", "singular"],
+    "que tú": ["second-person", "singular"],
+    "(tú)": ["second-person", "singular"],
+    "vos": ["second-person", "singular", "vos-form"],
+    "que vos": ["second-person", "singular", "vos-form"],
+    "(vos)": ["second-person", "singular", "vos-form"],
+    "él, ella, usted": ["third-person", "singular"],
+    "que él, que ella, que usted": ["third-person", "singular"],
+    "(usted)": ["third-person", "singular"],
+    "nosotros": ["first-person", "plural"],
+    "que nosotros": ["first-person", "plural"],
+    "(nosotros)": ["first-person", "plural"],
+    "vosotros": ["second-person", "plural"],
+    "que vosotros": ["second-person", "plural"],
+    "(vosotros)": ["second-person", "plural"],
+    "ustedes, ellos": ["third-person", "plural"],
+    "que ustedes, que ellos": ["third-person", "plural"],
+    "(ustedes)": ["third-person", "plural"],
+}
+
+
 def process_es_v_template(
     wxr: WiktextractContext, template_node: TemplateNode
 ) -> tuple[list[Form], list[str]]:
@@ -63,6 +88,7 @@ def process_es_v_template(
             col_headers.clear()  # new table
 
         col_index = 0
+        is_archaic_row = False
         for cell in row.find_child(
             NodeKind.TABLE_HEADER_CELL | NodeKind.TABLE_CELL
         ):
@@ -81,6 +107,7 @@ def process_es_v_template(
                     )
                     col_index += colspan
                 else:
+                    is_archaic_row = cell_text.endswith("^†")
                     row_header = cell_text.removesuffix("^†").strip()
             else:
                 cell_nodes = []
@@ -100,8 +127,13 @@ def process_es_v_template(
                             and col_index < col_head.index + col_head.span
                         ):
                             form.raw_tags.append(col_head.text)
+                            form.tags.extend(
+                                PRONOUN_TAGS.get(col_head.text, [])
+                            )
                     if row_header != "":
                         form.raw_tags.append(row_header)
+                    if is_archaic_row:
+                        form.tags.append("archaic")
                     if form.form not in ["", "―"]:
                         translate_raw_tags(form)
                         forms.append(form)

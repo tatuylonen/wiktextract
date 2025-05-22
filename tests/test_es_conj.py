@@ -73,12 +73,24 @@ etymology text
                 {"form": "haber dado", "tags": ["impersonal", "infinitive"]},
                 {
                     "form": "diera",
-                    "tags": ["subjunctive", "past", "imperfect"],
+                    "tags": [
+                        "first-person",
+                        "singular",
+                        "subjunctive",
+                        "past",
+                        "imperfect",
+                    ],
                     "raw_tags": ["que yo"],
                 },
                 {
                     "form": "diese",
-                    "tags": ["subjunctive", "past", "imperfect"],
+                    "tags": [
+                        "first-person",
+                        "singular",
+                        "subjunctive",
+                        "past",
+                        "imperfect",
+                    ],
                     "raw_tags": ["que yo"],
                 },
             ],
