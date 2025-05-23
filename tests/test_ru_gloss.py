@@ -56,9 +56,21 @@ class TestRUGloss(unittest.TestCase):
             },
         ]
 
-        self.wxr.wtp.add_page("Шаблон:разг.", 10, "разг.")
-        self.wxr.wtp.add_page("Шаблон:неодобр.", 10, "неодобр.")
-        self.wxr.wtp.add_page("Шаблон:пренебр.", 10, "пренебр.")
+        self.wxr.wtp.add_page(
+            "Шаблон:разг.",
+            10,
+            '[[Викисловарь:Условные сокращения|<span style="font-style: italic;background-color:#CCFFFF;cursor:help;" title="разговорное">разг.</span>]]',
+        )
+        self.wxr.wtp.add_page(
+            "Шаблон:неодобр.",
+            10,
+            '[[Викисловарь:Условные сокращения|<span style="font-style: italic;background-color:#CCFFFF;cursor:help;" title="неодобрительное">неодобр.</span>]]',
+        )
+        self.wxr.wtp.add_page(
+            "Шаблон:пренебр.",
+            10,
+            '[[Викисловарь:Условные сокращения|<span style="font-style: italic;background-color:#CCFFFF;cursor:help;" title="пренебрежительное">пренебр.</span>]]',
+        )
         self.wxr.wtp.add_page("Шаблон:помета", 10, "часто мн. ч.")
 
         for case in test_cases:
@@ -176,7 +188,11 @@ class TestRUGloss(unittest.TestCase):
             10,
             'пры́<span class="hyph" style="color:lightgreen;">-</span>гать',
         )
-        self.wxr.wtp.add_page("Шаблон:авиац.", 10, "авиац.")
+        self.wxr.wtp.add_page(
+            "Шаблон:авиац.",
+            10,
+            '[[Викисловарь:Условные сокращения|<span style="font-style: italic;background-color:#CCFFFF;cursor:help;" title="авиационный термин">авиац.</span>]][[Категория:Авиационные термины/ru|африканочка]]',
+        )
         self.assertEqual(
             parse_page(
                 self.wxr,
@@ -209,6 +225,7 @@ class TestRUGloss(unittest.TestCase):
                     "pos": "verb",
                     "senses": [
                         {
+                            "categories": ["Авиационные термины/ru"],
                             "glosses": ["то же"],
                             "topics": ["aeronautics"],
                         }
@@ -221,7 +238,11 @@ class TestRUGloss(unittest.TestCase):
 
     def test_gloss_slang_topic(self):
         self.wxr.wtp.start_page("фуражка")
-        self.wxr.wtp.add_page("Шаблон:воен. жарг.", 10, "воен. жарг.")
+        self.wxr.wtp.add_page(
+            "Шаблон:воен. жарг.",
+            10,
+            '[[Викисловарь:Условные сокращения|<span style="font-style: italic;background-color:#CCFFFF;cursor:help;" title="военный жаргон">воен. жарг.</span>]][[Категория:Военный жаргон/ru|африканочка]]',
+        )
         self.assertEqual(
             parse_page(
                 self.wxr,
@@ -241,6 +262,7 @@ class TestRUGloss(unittest.TestCase):
                     "pos": "noun",
                     "senses": [
                         {
+                            "categories": ["Военный жаргон/ru"],
                             "glosses": ["то же, что фуражная шапка"],
                             "tags": ["slang"],
                             "topics": ["military"],
@@ -394,5 +416,32 @@ class TestRUGloss(unittest.TestCase):
                         "сохранять новизну, не устаревать",
                     ]
                 },
+            ],
+        )
+
+    def test_not_tag_dot_template(self):
+        self.wxr.wtp.add_page("Шаблон:-en-", 10, "Английский")
+        self.wxr.wtp.add_page(
+            "Шаблон:аббр.",
+            10,
+            '[[Викисловарь:Условные сокращения|<span style="font-style: italic;cursor:help;" title="сокращённое">сокр.</span>]][[Категория:Аббревиатуры/en|африканочка]]&#x0020;от [[what you see is what you get]]&#x003B; что видишь, то и получишь',
+        )
+        page_data = parse_page(
+            self.wxr,
+            "WYSIWYG",
+            """= {{-en-}} =
+=== Семантические свойства ===
+==== Значение ====
+# {{аббр.|en|what you see is what you get|что видишь, то и получишь}}""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"],
+            [
+                {
+                    "glosses": [
+                        "сокр. от what you see is what you get; что видишь, то и получишь"
+                    ],
+                    "categories": ["Аббревиатуры/en"],
+                }
             ],
         )

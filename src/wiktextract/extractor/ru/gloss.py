@@ -83,10 +83,11 @@ def process_gloss_list_item(
             elif child.template_name in TAG_GLOSS_TEMPLATES:
                 sense.tags.append(TAG_GLOSS_TEMPLATES[child.template_name])
                 gloss_nodes.append(child)
-            elif child.template_name.endswith("."):
-                raw_tag = clean_node(wxr, sense, child)
-                if raw_tag != "":
-                    sense.raw_tags.append(raw_tag)
+            elif child.template_name.endswith(".") or child.template_name in [
+                "причастие",
+                "умласк",
+            ]:
+                extract_dot_template(wxr, sense, child, gloss_nodes)
             elif child.template_name == "помета":
                 if "nocolor" in child.template_parameters:
                     gloss_nodes.append(child)
@@ -177,3 +178,30 @@ def process_meaning_template(
 
     clean_node(wxr, sense, template_node)
     return sense
+
+
+def extract_dot_template(
+    wxr: WiktextractContext,
+    sense: Sense,
+    t_node: TemplateNode,
+    gloss_nodes: list[WikiNode | str],
+) -> None:
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for node in expanded_node.children:
+        if isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
+            is_tag = False
+            for span_tag in node.find_html_recursively("span"):
+                if "background-color:#CCFFFF" in span_tag.attrs.get(
+                    "style", ""
+                ):
+                    raw_tag = clean_node(wxr, None, node)
+                    if raw_tag != "":
+                        sense.raw_tags.append(raw_tag)
+                    is_tag = True
+                    break
+            if not is_tag:
+                gloss_nodes.append(node)
+        else:
+            gloss_nodes.append(node)
