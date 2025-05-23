@@ -182,6 +182,10 @@ def process_noun_table(
                 # Vorlage:Deutsch adjektivisch Übersicht
                 table_header = cell_text
                 column_headers.clear()
+                for link_node in table_cell.find_child(NodeKind.LINK):
+                    link_text = clean_node(wxr, None, link_node)
+                    if link_text.startswith("Flexion:"):
+                        parse_flexion_page(wxr, word_entry, link_text)
             else:
                 for form_text in cell_text.splitlines():
                     form_text = form_text.strip()

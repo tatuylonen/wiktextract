@@ -287,6 +287,15 @@ GRAMMATICAL_TAGS = {
     "1-е": "first-person",
     "2-е": "second-person",
     "3-е": "third-person",
+    # Template:гл ru ^bСВ
+    "пр. действ. прош.": ["active", "participle", "past"],
+    "деепр. прош.": ["adverbial", "participle", "past"],
+    "пр. страд. прош.": ["passive", "participle", "past"],
+    "прич. страд. прош.": ["passive", "participle", "past"],
+    # Template:гл ru 2a
+    "пр. действ. наст.": ["active", "participle", "present"],
+    "деепр. наст.": ["adverbial", "participle", "present"],
+    "пр. страд. наст.": ["passive", "participle", "present"],
 }
 
 # Прочие сокращения
@@ -300,6 +309,31 @@ OTHER_TAGS = {
     "общая": "indefinite",
     "опред.": "definite",
     "счётн.": "count-form",
+    "наречия": "adverb",
+    "имена собственные": "proper-noun",
+    "причастия": "participle",
+    "деепричастия": ["adverbial", "participle"],
+    "топонимы": "toponymic",
+    "неопр.": "indefinite",
+    "опр.": "definite",
+    "imperfectum": "imperfect",
+    "perfectum": "perfect",
+    "gerundium": "gerund",
+    "gerundivum": "gerundive",
+    "plusquamperfectum": "pluperfect",
+    "инфинитив": "infinitive",
+    "герундий": "gerund",
+    "предикативы": "predicative",
+    "сша": "USA",
+    "превосх. формы": "superior",
+    "местоимения": "pronoun",
+    "ум.-ласк.": "diminutive",
+    "междометия": "interjection",
+    # Template:гл cu IV
+    "аорист": "aorist",
+    "нетемат.": "non-thematic",
+    "темат.": "thematic",
+    "предлоги": "prepositional",
 }
 
 CASE_TAGS = {
@@ -321,6 +355,16 @@ CASE_TAGS = {
     # "м.": "locative",  # conflict with gender tag
     "местный": "locative",
     "зв.": "vocative",
+    # Template:падежи la 3
+    "абл.": "ablative",
+    "вок.": "vocative",
+    # Template:гл la 1
+    "supinum i": "supine-i",
+    "supinum ii": "supine-ii",
+    # Template:падежи tr
+    "вин.": "accusative",
+    "мест.": "locative",
+    "род.": "genitive",
 }
 
 TENSE_TAGS = {
@@ -329,11 +373,30 @@ TENSE_TAGS = {
     "будущ.": "future",
     "прош.": "past",
     "будущее": "future",
+    # Template:гл la 1
+    "praesens": "present",
+    "futūrum i": "future-i",
+    "futūrum ii": "future-ii",
+    "infīnitivus praesentis actīvi": ["infinitive", "present", "active"],
+    "infīnitivus praesentis passīvi": ["infinitive", "present", "passive"],
+    "participium praesentis actīvi": ["participle", "present", "active"],
+    "infīnitivus perfecti actīvi": ["infinitive", "perfect", "active"],
+    "participium perfecti passivi": ["participle", "perfect", "passive"],
+    "participium futuri activi": ["participle", "future", "active"],
+    # Template:гл en irreg
+    "прош. вр.": "past",
+    "прич. прош. вр.": ["past", "participle"],
+    # Template:гл ru 2a-ся
+    "наст./будущ.": ["present", "future"],
 }
 
 MOOD_TAGS = {
     # Шаблон:Гл-блок
     "повелит.": "imperative",
+    # Template:гл la 1
+    "indicatīvus": "indicative",
+    "coniunctīvus": "conjunctive",
+    "imperatīvus": "imperative",
 }
 
 PERSON_TAGS = {
@@ -341,9 +404,16 @@ PERSON_TAGS = {
     "я": ["first-person", "singular"],
     "ты": ["second-person", "singular"],
     "он\nона\nоно": ["third-person", "singular"],
+    "он\nона": ["third-person", "singular"],
     "мы": ["first-person", "plural"],
     "вы": ["second-person", "plural"],
     "они": ["third-person", "plural"],
+    # Template:гл la 1
+    "1 p.": "first-person",
+    "2 p.": "second-person",
+    "3 p.": "third-person",
+    # Template:гл en irreg
+    "3-е л. ед. ч.": ["third-person", "singular"],
 }
 
 VOICE_TAGS = {
@@ -351,12 +421,20 @@ VOICE_TAGS = {
     "пр. действ.": "active",
     "деепр.": "adverbial",
     "пр. страд.": "passive",
+    # Template:гл la 1
+    "act.": "active",
+    "pass.": "passive",
 }
 
 NUMBER_TAGS = {
     # Шаблон:сущ cu (-а)
     "дв. ч.": "dual",
     "часто мн. ч.": ["often", "plural"],
+    # Template:гл la 1
+    "sing.": "singular",
+    "plur.": "plural",
+    "sg.": "singular",
+    "pl.": "plural",
 }
 
 TRANSLATION_TAGS = {

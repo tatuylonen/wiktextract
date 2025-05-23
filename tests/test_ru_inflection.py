@@ -123,15 +123,15 @@ class TestLinkage(TestCase):
 ! bgcolor="#eef9ff" | [[множественное число|мн.&nbsp;ч.]]
 |-
 |-
-| bgcolor="#eef9ff" | [[неопределённый|общая]]
+! bgcolor="#eef9ff" | [[неопределённый|общая]]
 | bgcolor="#ffffff" | публицист
 | bgcolor="#ffffff" | публицисти
 |-
-| bgcolor="#eef9ff" | [[определённый|опред.]]
+! bgcolor="#eef9ff" | [[определённый|опред.]]
 | bgcolor="#ffffff" | публициста <br>публицистът
 | bgcolor="#ffffff" | публицистите
 |-
-| bgcolor="#eef9ff" | [[счётная форма|счётн.]]</td>
+! bgcolor="#eef9ff" | [[счётная форма|счётн.]]</td>
 | colspan="2" bgcolor="#ffffff"  | публициста
 |-
 | bgcolor="#eef9ff" | [[звательный|зват.]]
@@ -222,12 +222,12 @@ class TestLinkage(TestCase):
 ! bgcolor="#EEF9FF" | [[двойственное число|дв. ч.]]
 ! bgcolor="#EEF9FF" | [[множественное число|мн. ч.]]
 |-
-| bgcolor="#EEF9FF" | [[местный|М.]]
+! bgcolor="#EEF9FF" | [[местный|М.]]
 | lang="cu" | водѣ
 | lang="cu" | водѹ
 | lang="cu" | водахъ
 <tr>
-<td bgcolor="#EEF9FF"> [[звательный|Зв.]]</td>
+<th bgcolor="#EEF9FF"> [[звательный|Зв.]]</th>
 <td lang="cu"> водо
 <td align="center"> — </td>
 <td align="center"> — </td>

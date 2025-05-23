@@ -92,7 +92,7 @@ def process_gloss_list_item(
                     gloss_nodes.append(child)
                 else:
                     raw_tag = clean_node(wxr, sense, child)
-                    if raw_tag != "":
+                    if raw_tag not in ["", "?"]:
                         sense.raw_tags.append(raw_tag)
             elif child.template_name == "значение":
                 process_meaning_template(wxr, sense, word_entry, child)
