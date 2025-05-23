@@ -66,8 +66,14 @@ def parse_section(
         page_data[-1].tags.extend(pos_data.get("tags", []))
         page_data[-1].categories.extend(categories.get("categories", []))
         extract_pos_section(wxr, page_data[-1], level_node)
-        if len(page_data[-1].senses) == 0 and "form-of" in page_data[-1].tags:
-            page_data.pop()
+        if len(page_data[-1].senses) == 0:
+            if "form-of" in page_data[-1].tags:
+                page_data.pop()
+            elif section_title in LINKAGE_TITLES:
+                page_data.pop()
+                extract_linkage_section(
+                    wxr, page_data, level_node, LINKAGE_TITLES[section_title]
+                )
     elif (
         section_title.startswith("etimología")
         and wxr.config.capture_etymologies
