@@ -113,7 +113,14 @@ def parse_wikitext_forms_table(
                 if not has_data_cell:
                     column_headers.append(cell_text)
                 else:
-                    row_headers.append(cell_text)
+                    if cell_text == "М." and table_cell.contain_node(
+                        NodeKind.LINK
+                    ):
+                        for link_node in table_cell.find_child(NodeKind.LINK):
+                            row_headers.append(link_node.largs[0][0])
+                            break
+                    else:
+                        row_headers.append(cell_text)
             elif table_cell.kind == NodeKind.TABLE_CELL:
                 cell_text = clean_node(  # remove cursed <tr> tag
                     wxr,
@@ -187,7 +194,7 @@ def add_form_data(
     form.raw_tags.extend(row_headers)
     if col_index < len(col_headers) and col_headers[col_index] != "":
         form.raw_tags.append(col_headers[col_index])
-    if len(form.form) > 0 and form.form != "—":
+    if form.form not in ["", "—", "-"]:
         translate_raw_tags(form)
         word_entry.forms.append(form)
 
