@@ -102,6 +102,7 @@ POS_TITLES: dict[str, POSSubtitleData] = {
     "locución sustantiva": {"pos": "phrase"},
     "locución verbal": {"pos": "phrase"},
     "locución": {"pos": "phrase"},
+    "numeral": {"pos": "num"},
     "nombre propios": {"pos": "name"},
     "onomatopeya": {"pos": "noun"},
     "partícula": {"pos": "particle"},
@@ -122,6 +123,8 @@ POS_TITLES: dict[str, POSSubtitleData] = {
     "pronombre posesivo": {"pos": "pron", "tags": ["possessive"]},
     "pronombre relativo": {"pos": "pron", "tags": ["relative"]},
     "pronombre": {"pos": "pron"},
+    "raíz": {"pos": "root"},
+    "raíz verbal": {"pos": "root", "tags": ["verb"]},
     "refrán": {"pos": "proverb"},
     "sigla": {"pos": "abbrev"},
     "símbolo": {"pos": "symbol"},
@@ -144,6 +147,8 @@ POS_TITLES: dict[str, POSSubtitleData] = {
     "sustantivo neutro": {"pos": "noun", "tags": ["neuter"]},
     "sustantivo propio": {"pos": "name"},
     "sustantivo propio/pruebas": {"pos": "name"},
+    "sustantivo propio y femenino": {"pos": "name", "tags": ["feminine"]},
+    "sustantivo propio y masculino": {"pos": "name", "tags": ["masculine"]},
     "sustantivo": {"pos": "noun"},
     "verbo auxiliar": {"pos": "verb", "tags": ["auxiliary"]},
     "verbo impersonal": {"pos": "verb", "tags": ["impersonal"]},
@@ -168,6 +173,7 @@ LINKAGE_TITLES: dict[str, str] = {
     "refranes": "proverbs",
     "sinónimo": "synonyms",
     "derivados": "derived",
+    "locución": "related",
 }
 
 IGNORED_TITLES: frozenset[str] = frozenset(
