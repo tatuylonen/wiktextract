@@ -56,7 +56,9 @@ def process_translation_list_item(
     list_item: WikiNode,
     sense: str,
 ) -> None:
-    tr_data = Translation(word="", sense=sense)
+    tr_data = Translation(
+        word="", sense=sense, lang="unknown", lang_code="unknown"
+    )
 
     for child_index, child in enumerate(list_item.filter_empty_str_child()):
         if child_index == 0:
