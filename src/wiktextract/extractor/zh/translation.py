@@ -114,7 +114,11 @@ def process_translation_list_item(
                     ) or arg_key == "g":  # template "l" uses the "g" arg
                         for tag_arg in arg_value.split("-"):
                             if tag_arg in TEMPLATE_TAG_ARGS:
-                                tr_data.tags.append(TEMPLATE_TAG_ARGS[tag_arg])
+                                tag = TEMPLATE_TAG_ARGS[tag_arg]
+                                if isinstance(tag, str):
+                                    tr_data.tags.append(tag)
+                                elif isinstance(tag, list):
+                                    tr_data.tags.extend(tag)
 
             elif template_name == "t-needed":
                 # ignore empty translation
