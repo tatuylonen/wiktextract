@@ -45,12 +45,11 @@ def extract_headword_line_template(
                 forms_start_index = index + 1
                 class_names = span_child.attrs.get("class", "")
                 if "headword-tr" in class_names:
-                    word_entry.forms.append(
-                        Form(
-                            form=clean_node(wxr, word_entry, span_child),
-                            tags=["romanization"],
+                    form = clean_node(wxr, word_entry, span_child)
+                    if form != "":
+                        word_entry.forms.append(
+                            Form(form=form, tags=["romanization"])
                         )
-                    )
                 elif "gender" in class_names:
                     for abbr_tag in span_child.find_html("abbr"):
                         gender = abbr_tag.children[0]
