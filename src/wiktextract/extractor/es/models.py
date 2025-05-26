@@ -142,6 +142,7 @@ class WordEntry(BaseModelWrap):
     synonyms: list[Linkage] = []
     proverbs: list[Linkage] = []
     tags: list[str] = []
+    raw_tags: list[str] = []
     extra_sounds: dict[str, str] = {}
     forms: list[Form] = []
     hyphenation: str = ""

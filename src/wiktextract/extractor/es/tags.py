@@ -677,6 +677,7 @@ NUMBER_TAGS = {
     # "inflect.*" templates
     "singular": "singular",
     "plural": "plural",
+    "dual": "dual",
 }
 
 GENDER_TAGS = {
@@ -733,6 +734,15 @@ TABLE_TAGS = {
     "modo subjuntivo": "subjunctive",
     "modo imperativo": "imperative",
     "pretérito": "preterite",
+    # Template:inflect.ine.sust.atem.his.mf-C
+    "nominativo": "nominative",
+    "vocativo": "vocative",
+    "acusativo": "accusative",
+    "genitivo": "genitive",
+    "ablativo": "ablative",
+    "dativo": "dative",
+    "locativo": "locative",
+    "instrumental": "instrumental",
 }
 
 
@@ -748,6 +758,7 @@ ALL_TAGS = {
     "negativo": "negative",
     "simples": "simple",
     "compuestas": "compound",
+    "invariante": "invariable",
 }
 
 
