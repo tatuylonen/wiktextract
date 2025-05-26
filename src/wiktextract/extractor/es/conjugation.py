@@ -73,7 +73,7 @@ def process_es_v_template(
     clean_node(wxr, cats, expanded_node)
     table_nodes = list(expanded_node.find_child_recursively(NodeKind.TABLE))
     if len(table_nodes) == 0:
-        return
+        return [], []
     table_node = table_nodes[0]
     col_headers = []
     for row in table_node.find_child(NodeKind.TABLE_ROW):
