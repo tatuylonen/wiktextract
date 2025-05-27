@@ -5,7 +5,7 @@ from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .models import AltForm, Sense, WordEntry
-from .tags import translate_raw_tags
+from .tags import TAGS, translate_raw_tags
 
 # All POS categories
 # https://pl.wiktionary.org/wiki/Kategoria:Części_mowy_wg_języków
@@ -161,6 +161,8 @@ def process_pos_line_italic_node(
                     if text in POS_DATA:
                         update_pos_data(page_data[-1], text, POS_DATA[text])
                         has_pos = True
+                    elif text in TAGS:
+                        page_data[-1].raw_tags.append(text)
                     else:
                         for t in text.split():
                             if t in POS_DATA:

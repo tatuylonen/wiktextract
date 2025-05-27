@@ -179,13 +179,20 @@ def extract_odmiana_przymiotnik_polski_table(
                         isinstance(th_child, WikiNode)
                         and th_child.kind == NodeKind.BOLD
                     ):
+                        raw_tag = clean_node(wxr, None, raw_tag_nodes)
                         form = Form(
                             form=clean_node(wxr, None, th_child),
-                            raw_tags=[clean_node(wxr, None, raw_tag_nodes)],
                             sense_index=sense_index,
                         )
-                        translate_raw_tags(form)
-                        forms.append(form)
+                        if raw_tag != "":
+                            form.raw_tags.append(raw_tag)
+                            translate_raw_tags(form)
+                        if form.form not in [
+                            "",
+                            "nie stopniuje się",
+                            wxr.wtp.title,
+                        ]:
+                            forms.append(form)
                     else:
                         raw_tag_nodes.append(th_child)
             else:
