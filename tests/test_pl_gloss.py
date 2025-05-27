@@ -259,3 +259,37 @@ class TestPlGloss(TestCase):
                 "sense_index": "1.1",
             },
         )
+
+    def test_punt_pos(self):
+        self.wxr.wtp.add_page(
+            "Szablon:użycie międzynarodowe",
+            10,
+            '<span class="lang-code primary-lang-code lang-code-inter" id="inter">[[:Kategoria:Użycie międzynarodowe|użycie międzynarodowe]]</span>',
+        )
+        self.wxr.wtp.add_page(
+            "Szablon:język polski",
+            10,
+            '<span class="lang-code primary-lang-code lang-code-pl" id="pl">[[Słownik języka polskiego|język polski]]</span>',
+        )
+        data = parse_page(
+            self.wxr,
+            "'",
+            """== ' ({{użycie międzynarodowe}}) ==
+===znaczenia===
+''symbol''
+: (1.1) [[apostrof]]
+
+== ' ({{język polski}}) ==
+===znaczenia===
+''znak interpunkcyjny''
+: (1.1) stosowany""",
+        )
+        self.assertEqual(
+            data[0]["senses"], [{"glosses": ["apostrof"], "sense_index": "1.1"}]
+        )
+        self.assertEqual(data[0]["lang"], "użycie międzynarodowe")
+        self.assertEqual(
+            data[1]["senses"],
+            [{"glosses": ["stosowany"], "sense_index": "1.1"}],
+        )
+        self.assertEqual(data[1]["lang"], "język polski")

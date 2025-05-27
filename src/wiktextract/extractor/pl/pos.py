@@ -51,6 +51,7 @@ POS_DATA = {
     "zaimka": {"pos": "pron"},
     "zaimek": {"pos": "pron"},
     "zaimkowy": {"pos": "pron"},
+    "znak interpunkcyjny": {"pos": "punct", "tags": ["punctuation"]},
 }
 
 # Category:Proverb Templates
@@ -111,13 +112,18 @@ def process_pos_line_italic_node(
                 if not is_pos and child_text not in IGNORE_POS_LINE_TEXT:
                     page_data[-1].raw_tags.append(child_text)
         elif isinstance(child, str):
-            for text in child.strip(", ").split():
-                text = text.strip(", ")
-                if text in POS_DATA:
-                    update_pos_data(page_data[-1], text, POS_DATA[text])
-                    has_pos = True
-                elif text not in IGNORE_POS_LINE_TEXT:
-                    page_data[-1].raw_tags.append(text)
+            if child.strip() in POS_DATA:
+                child = child.strip()
+                update_pos_data(page_data[-1], child, POS_DATA[child])
+                has_pos = True
+            else:
+                for text in child.strip(", ").split():
+                    text = text.strip(", ")
+                    if text in POS_DATA:
+                        update_pos_data(page_data[-1], text, POS_DATA[text])
+                        has_pos = True
+                    elif text not in IGNORE_POS_LINE_TEXT:
+                        page_data[-1].raw_tags.append(text)
     translate_raw_tags(page_data[-1])
     if not has_pos:
         page_data.pop()
