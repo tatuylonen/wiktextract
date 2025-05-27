@@ -274,7 +274,7 @@ class CleanTests(unittest.TestCase):
         v = r"<math>x^\infty</math>"
         v = clean_value(self.wxr, v)
         print(ascii(v))
-        self.assertEqual(v, "x\u2002᪲")
+        self.assertEqual(v, "x ᪲")
 
     def test_cv_math8(self):
         v = r"<math>4 7</math>"

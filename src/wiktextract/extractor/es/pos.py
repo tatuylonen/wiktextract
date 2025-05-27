@@ -192,7 +192,7 @@ def extract_pos_header_template(
     raw_tag = ""
     for node in expanded_node.children:
         if isinstance(node, str) and node.strip().endswith(":"):
-            raw_tag = clean_node(wxr, None, node).strip(": ¦")
+            raw_tag = clean_node(wxr, None, node).strip(": ¦()")
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
             form = Form(form=clean_node(wxr, None, node))
             if form.form == "":
@@ -202,3 +202,7 @@ def extract_pos_header_template(
                     form.raw_tags.append(r_tag)
                 translate_raw_tags(form)
             word_entry.forms.append(form)
+        elif isinstance(node, WikiNode) and node.kind == NodeKind.ITALIC:
+            r_tag = clean_node(wxr, None, node)
+            if r_tag != "":
+                word_entry.raw_tags.append(r_tag)

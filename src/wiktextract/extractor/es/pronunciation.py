@@ -4,6 +4,7 @@ from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from ..share import set_sound_file_url_fields
 from .models import Sound, WordEntry
+from .tags import translate_raw_tags
 
 # translate table row header to sound model field
 PRON_GRAF_HEADER_MAP = {
@@ -84,11 +85,13 @@ def process_pron_graf_ipa_cell(
         ):
             if not header_text.startswith("pronunciación"):  # location
                 sound.raw_tags.append(header_text.removesuffix(" (AFI)"))
+            translate_raw_tags(sound)
             word_entry.sounds.append(sound.model_copy(deep=True))
             sound = Sound()
     if sound != Sound():
         if not header_text.startswith("pronunciación"):
             sound.raw_tags.append(header_text.removesuffix(" (AFI)"))
+        translate_raw_tags(sound)
         word_entry.sounds.append(sound)
 
 

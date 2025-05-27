@@ -40,7 +40,7 @@ class TestPlExample(TestCase):
                 "examples": [
                     {
                         "text": "Passionately enamored of this shadow of a dream",
-                        'bold_text_offsets': [(42, 47)],
+                        "bold_text_offsets": [(42, 47)],
                         "ref": "Washington Irving",
                         "translation": "Gorąco zakochany w cieniu ze snów",
                         "bold_translation_offsets": [(29, 33)],
@@ -77,7 +77,7 @@ class TestPlExample(TestCase):
                 "examples": [
                     {
                         "text": "It is said that a dog is a human's best friend.",
-                        'bold_text_offsets': [(18, 21)],
+                        "bold_text_offsets": [(18, 21)],
                         "translation": "Mówi się, że pies jest najlepszym przyjacielem człowieka.",
                         "bold_translation_offsets": [(13, 17)],
                     }
@@ -126,7 +126,7 @@ class TestPlExample(TestCase):
                 "examples": [
                     {
                         "text": "我喜欢在硬地场上打球。",
-                        'bold_text_offsets': [(1, 3)],
+                        "bold_text_offsets": [(1, 3)],
                         "roman": "wǒ xǐhuān zài yìng dìchǎng shàng dǎqiú",
                         "translation": "Lubię grać na twardych kortach.",
                         "bold_translation_offsets": [(0, 5)],
@@ -160,7 +160,7 @@ class TestPlExample(TestCase):
                 "examples": [
                     {
                         "text": "V jazyce metafor je oko nejčastěji spojováno s duší (jakožto její okno).",
-                        'bold_text_offsets': [(20, 23)],
+                        "bold_text_offsets": [(20, 23)],
                         "translation": "W języku metafor oko najczęściej łączone jest z duszą (jako jej okno).",
                         "bold_translation_offsets": [(17, 20)],
                         "ref": "z Internetu",
@@ -200,7 +200,7 @@ class TestPlExample(TestCase):
                 "examples": [
                     {
                         "text": "我讨厌这房子，跟坟墓差不多！",
-                        'bold_text_offsets': [(4, 6)],
+                        "bold_text_offsets": [(4, 6)],
                         "roman": "wǒ tǎoyàn zhè fángzi gēn fénmù chàbùduō",
                         "translation": "Nienawidzę tego miejsca, tu jest jak w grobowcu!",
                         "bold_translation_offsets": [(16, 23)],

@@ -374,6 +374,12 @@ TAGS = {
     "multenombro (virtuala)": ["plural", "virtual"],
     # pos line
     "nieprzechodni": "intransitive",
+    "czas.": "verb",
+    "ndk.": "imperfective",
+    "dk.": "perfective",
+    "wspólny": "common",
+    "męskoosobowy": "masculine",
+    "daw.": "dated",
 }
 
 TOPICS = {

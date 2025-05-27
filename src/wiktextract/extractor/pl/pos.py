@@ -5,7 +5,7 @@ from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .models import AltForm, Sense, WordEntry
-from .tags import translate_raw_tags
+from .tags import TAGS, translate_raw_tags
 
 # All POS categories
 # https://pl.wiktionary.org/wiki/Kategoria:Części_mowy_wg_języków
@@ -29,12 +29,14 @@ POS_DATA = {
     "phrasal verb (czasownik frazowy)": {"pos": "verb", "tags": ["phrase"]},
     "przedimek": {"pos": "article"},
     "przedrostek": {"pos": "prefix", "tags": ["morpheme"]},
+    "przedrostkowy": {"pos": "prefix", "tags": ["morpheme"]},
     "przyimek": {"pos": "prep"},
     "przyimkowa": {"pos": "prep_phrase"},
     "przymiotnik": {"pos": "adj"},
     "przymiotnikowym": {"pos": "adj"},
     "przymiotnikowa": {"pos": "adj_phrase"},
     "przyrostek": {"pos": "suffix", "tags": ["morpheme"]},
+    "przyrostkowy": {"pos": "suffix", "tags": ["morpheme"]},
     "przysłówek": {"pos": "adv"},
     "przysłówkowa": {"pos": "adv_phrase"},
     "pytajny": {"pos": "pron", "tags": ["interrogative"]},  # "zaimek pytajny"
@@ -42,6 +44,7 @@ POS_DATA = {
     "rzeczownik": {"pos": "noun"},
     "rzeczownikowa": {"pos": "noun"},
     "skrótowiec": {"pos": "abbrev", "tags": ["abbreviation"]},
+    "skrót": {"pos": "abbrev", "tags": ["abbreviation"]},
     "spójnik": {"pos": "conj"},
     "symbol": {"pos": "symbol"},
     "wrostek": {"pos": "infix", "tags": ["morpheme"]},
@@ -51,6 +54,29 @@ POS_DATA = {
     "zaimka": {"pos": "pron"},
     "zaimek": {"pos": "pron"},
     "zaimkowy": {"pos": "pron"},
+    "znak interpunkcyjny": {"pos": "punct", "tags": ["punctuation"]},
+    "dopełniacz saksoński": {"pos": "unknown"},
+    "forma ściągnięta": {
+        "pos": "contraction",
+        "tags": ["contraction", "form-of"],
+    },
+    "słowotwórczy": {"pos": "unknown", "tags": ["morpheme"]},
+    "liczebnik porządkowy": {"pos": "adj", "tags": ["ordinal"]},
+    "liczebnik główny": {"pos": "adj", "tags": ["cardinal"]},
+    "litera": {"pos": "character", "tags": ["letter"]},
+    "związek frazeologiczny": {"pos": "phrase", "tags": ["idiomatic"]},
+    "związek wyrazów": {"pos": "unknown"},
+    "sentencja łacińska": {"pos": "unknown"},
+    "imiesłów": {"pos": "verb", "tags": ["participle"]},
+    "postpozycja": {"pos": "postp"},
+    "zwrot": {"pos": "phrase"},
+    "słowo pomocnicze": {"pos": "unknown"},
+    "wyrażenie": {"pos": "phrase"},
+    "czasownik frazowy": {"pos": "verb", "tags": ["phrasal"]},
+    "zaimek osobowy": {"pos": "pron", "tags": ["person"]},
+    "zaimek pytajny": {"pos": "pron", "tags": ["interrogative"]},
+    "zbitka": {"pos": "unknown"},
+    "nazwa własna": {"pos": "name"},
 }
 
 # Category:Proverb Templates
@@ -69,14 +95,23 @@ def extract_pos_section(
     base_data: WordEntry,
     level_node: LevelNode,
 ) -> None:
+    has_pos = False
+    last_node_is_list = True
     for node in level_node.find_child(NodeKind.ITALIC | NodeKind.LIST):
         if node.kind == NodeKind.ITALIC:
-            process_pos_line_italic_node(wxr, page_data, base_data, node)
+            if last_node_is_list:
+                new_has_pos = process_pos_line_italic_node(
+                    wxr, page_data, base_data, node
+                )
+                if new_has_pos:
+                    has_pos = True
+            last_node_is_list = False
         elif node.kind == NodeKind.LIST:
+            if not has_pos:
+                page_data.append(base_data.model_copy(deep=True))
             for list_item in node.find_child(NodeKind.LIST_ITEM):
-                if len(page_data) == 0:
-                    page_data.append(base_data.model_copy(deep=True))
                 process_gloss_list_item(wxr, page_data[-1], list_item)
+            last_node_is_list = True
 
 
 def process_pos_line_italic_node(
@@ -84,7 +119,7 @@ def process_pos_line_italic_node(
     page_data: list[WordEntry],
     base_data: WordEntry,
     italic_node: WikiNode,
-) -> None:
+) -> bool:
     has_pos = False
     page_data.append(base_data.model_copy(deep=True))
     for child in italic_node.children:
@@ -102,25 +137,43 @@ def process_pos_line_italic_node(
                 update_pos_data(page_data[-1], child_text, POS_DATA[child_text])
                 has_pos = True
             else:
-                is_pos = False
                 for prefix, pos_data in POS_PREFIXES.items():
                     if child_text.startswith(prefix):
                         update_pos_data(page_data[-1], child_text, pos_data)
-                        is_pos = True
+                        has_pos = True
                         break
-                if not is_pos and child_text not in IGNORE_POS_LINE_TEXT:
+                if not has_pos:
+                    for text in child_text.split():
+                        if text in POS_DATA:
+                            update_pos_data(page_data[-1], text, POS_DATA[text])
+                            has_pos = True
+                            break
+                if not has_pos and child_text not in IGNORE_POS_LINE_TEXT:
                     page_data[-1].raw_tags.append(child_text)
         elif isinstance(child, str):
-            for text in child.strip(", ").split():
-                text = text.strip(", ")
-                if text in POS_DATA:
-                    update_pos_data(page_data[-1], text, POS_DATA[text])
-                    has_pos = True
-                elif text not in IGNORE_POS_LINE_TEXT:
-                    page_data[-1].raw_tags.append(text)
+            if child.strip() in POS_DATA:
+                child = child.strip()
+                update_pos_data(page_data[-1], child, POS_DATA[child])
+                has_pos = True
+            else:
+                for text in child.strip(", ").split(","):
+                    text = text.strip()
+                    if text in POS_DATA:
+                        update_pos_data(page_data[-1], text, POS_DATA[text])
+                        has_pos = True
+                    elif text in TAGS:
+                        page_data[-1].raw_tags.append(text)
+                    else:
+                        for t in text.split():
+                            if t in POS_DATA:
+                                update_pos_data(page_data[-1], t, POS_DATA[t])
+                                has_pos = True
+                            elif t not in IGNORE_POS_LINE_TEXT:
+                                page_data[-1].raw_tags.append(t)
     translate_raw_tags(page_data[-1])
     if not has_pos:
         page_data.pop()
+    return has_pos
 
 
 def update_pos_data(

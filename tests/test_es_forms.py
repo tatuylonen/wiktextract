@@ -142,3 +142,24 @@ koutu, koute.
                 {"form": "gatas", "tags": ["feminine", "plural"]},
             ],
         )
+
+    def test_es_adj_tag(self):
+        self.wxr.wtp.add_page(
+            "Plantilla:es.adj",
+            10,
+            """'''-abl<span style='color:Green; font-weight: bold;'>e</span>''' (''sin género'')&ensp;¦&ensp;plural: [[-ables|-abl<span style='color:Green; font-weight: bold;'>es</span>]]""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "-able",
+            """== {{lengua|es}} ==
+=== Etimología 1 ===
+==== Sufijo femenino y masculino ====
+{{es.adj|ng}}
+;1: gloss""",
+        )
+        self.assertEqual(page_data[0]["raw_tags"], ["sin género"])
+        self.assertEqual(
+            page_data[0]["forms"],
+            [{"form": "-ables", "tags": ["plural"]}],
+        )

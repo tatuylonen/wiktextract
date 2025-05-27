@@ -55,9 +55,9 @@ def parse_section(
 
     if section_title in IGNORED_TITLES:
         pass
-    elif pos_template_name in POS_TITLES or section_title in POS_TITLES:
+    elif section_title in POS_TITLES or pos_template_name in POS_TITLES:
         pos_data = POS_TITLES.get(
-            pos_template_name, POS_TITLES.get(section_title)
+            section_title, POS_TITLES.get(pos_template_name)
         )
         pos_type = pos_data["pos"]
         page_data.append(base_data.model_copy(deep=True))

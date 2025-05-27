@@ -130,6 +130,10 @@ POS_TITLES: dict[str, POSSubtitleData] = {
     "símbolo": {"pos": "symbol"},
     "sufijo flexivo": {"pos": "suffix"},
     "sufijo": {"pos": "suffix"},
+    "sufijo femenino y masculino": {
+        "pos": "suffix",
+        "tags": ["masculine", "feminine"],
+    },
     "sustantivo ambiguo": {"pos": "noun", "tags": ["masculine", "feminine"]},
     "sustantivo animado": {"pos": "noun", "tags": ["animate"]},
     "sustantivo común": {"pos": "noun"},

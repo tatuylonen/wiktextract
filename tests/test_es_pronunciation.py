@@ -50,7 +50,7 @@ class TestESPronunciation(unittest.TestCase):
                 {
                     "ipa": "[aˈmi.ɣ̞o]",
                     "audio": "LL-Q1321 (spa)-AdrianAbdulBaha-amigo.wav",
-                    "raw_tags": ["Colombia"],
+                    "tags": ["Colombia"],
                 },
                 {
                     "rhymes": "i.ɡo",
