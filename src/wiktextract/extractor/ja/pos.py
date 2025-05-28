@@ -42,8 +42,9 @@ def parse_pos_section(
     extract_header_nodes(
         wxr, page_data[-1], level_node.children[:gloss_list_start]
     )
+    old_forms_len = len(page_data[-1].forms)
     extract_conjugation_section(wxr, page_data[-1], level_node)
-    if gloss_list_start == 0 and len(page_data[-1].forms) == 0:
+    if gloss_list_start == 0 and len(page_data[-1].forms) == old_forms_len:
         page_data.pop()
 
 

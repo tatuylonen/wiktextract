@@ -55,4 +55,5 @@ LINKAGES = {
     "同系語": "cognates",
     "諸言語への影響": "descendants",
     "アナグラム": "anagrams",
+    "ことわざ": "proverbs",
 }
