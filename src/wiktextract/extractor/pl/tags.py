@@ -330,6 +330,7 @@ TAGS = {
     "żywotny": "animate",
     "dzierżawczy": "possessive",
     "niedokonany": "imperfective",
+    "dokonany": "perfective",
     "relacyjny": "relational",
     # "odmiana-rzeczownik-polski" template
     "liczba pojedyncza": "singular",
@@ -356,16 +357,21 @@ TAGS = {
     "czas przeszły": "past",
     "tryb rozkazujący": "imperative",
     "czas przyszły": "future",
+    "czas przyszły prosty": "future",
     "czas zaprzeszły": "pluperfect",
     "forma bezosobowa": "impersonal",
     "czasu przeszłego": "past",
     "tryb przypuszczający": "conditional",
     "imiesłów przymiotnikowy czynny": ["active", "participle"],
+    "imiesłów przymiotnikowy bierny": ["passive", "participle"],
     "imiesłów przysłówkowy współczesny": [
         "contemporary",
         "adverbial",
         "participle",
     ],
+    "imiesłów przymiotnikowy przeszły": ["past", "participle"],
+    "imiesłów przysłówkowy uprzedni": ["anterior", "adverbial", "participle"],
+    "rzeczownik odczasownikowy": "gerund",
     # "odmiana-rzeczownik-esperanto" template
     "ununombro": "singular",
     "multenombro": "plural",
@@ -380,6 +386,18 @@ TAGS = {
     "wspólny": "common",
     "męskoosobowy": "masculine",
     "daw.": "dated",
+    "zwrotny": "reflexive",
+    "czasownikowa": "verb",
+    "nieprzechodnia": "intransitive",
+    "słaby": "weak",
+    "bryt.": "British-English",
+    "niemęskoosobowy": "nonvirile",
+    "nazwa własna": "proper-noun",
+    "jakościowy": "qualitative",
+    "policzalna": "countable",
+    "mocny": "strong",
+    "temat": "stem",
+    "niedokonana": "imperfective",
 }
 
 TOPICS = {
@@ -564,6 +582,7 @@ TOPICS = {
     "zeg.": "horology",
     "zool.": "zoology",
     "żegl.": "sailing",
+    "ogrod.": "horticulture",
 }
 
 
