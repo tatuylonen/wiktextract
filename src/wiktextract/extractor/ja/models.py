@@ -132,3 +132,4 @@ class WordEntry(JapaneseBaseModel):
     descendants: list[Descendant] = []
     anagrams: list[Linkage] = []
     notes: list[str] = []
+    proverbs: list[Descendant] = []

@@ -203,3 +203,28 @@ class TestJaGloss(TestCase):
                 }
             ],
         )
+
+    def test_lb(self):
+        self.wxr.wtp.add_page(
+            "テンプレート:lb",
+            10,
+            '<span class="ib-brac"><span class="qualifier-brac"> (</span></span><span class="ib-content"><span class="qualifier-content">他動詞<span class="ib-comma"><span class="qualifier-comma">,</span></span>&#32;[[カテゴリ:ハンガリー語 他動詞]]演算</span></span><span class="ib-brac"><span class="qualifier-brac">) </span></span>',
+        )
+        page_data = parse_page(
+            self.wxr,
+            "ad",
+            """=={{hu}}==
+===動詞===
+# {{lb|hu|transitive|演算}} hozzáad「足す」の類義語。""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"],
+            [
+                {
+                    "categories": ["ハンガリー語 他動詞"],
+                    "glosses": ["hozzáad「足す」の類義語。"],
+                    "tags": ["transitive"],
+                    "topics": ["arithmetic"],
+                }
+            ],
+        )

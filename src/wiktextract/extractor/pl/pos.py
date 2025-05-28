@@ -77,6 +77,10 @@ POS_DATA = {
     "zaimek pytajny": {"pos": "pron", "tags": ["interrogative"]},
     "zbitka": {"pos": "unknown"},
     "nazwa własna": {"pos": "name"},
+    "rzeczownik odczasownikowy": {
+        "pos": "verb",
+        "tags": ["participle", "gerund"],
+    },
 }
 
 # Category:Proverb Templates
@@ -86,7 +90,7 @@ POS_PREFIXES = {
     "sentencja": {"pos": "phrase"},
 }
 
-IGNORE_POS_LINE_TEXT = frozenset(["rodzaj"])
+IGNORE_POS_LINE_TEXT = frozenset(["rodzaj", "lub"])
 
 
 def extract_pos_section(

@@ -42,8 +42,9 @@ def parse_pos_section(
     extract_header_nodes(
         wxr, page_data[-1], level_node.children[:gloss_list_start]
     )
+    old_forms_len = len(page_data[-1].forms)
     extract_conjugation_section(wxr, page_data[-1], level_node)
-    if gloss_list_start == 0 and len(page_data[-1].forms) == 0:
+    if gloss_list_start == 0 and len(page_data[-1].forms) == old_forms_len:
         page_data.pop()
 
 
@@ -81,6 +82,8 @@ def process_gloss_list_item(
                 )
             elif gloss_node.template_name == "wp":
                 continue
+            elif gloss_node.template_name == "lb":
+                extract_lb_template(wxr, sense_data, gloss_node)
             else:
                 gloss_only_nodes.append(gloss_node)
         else:
@@ -156,3 +159,13 @@ def extract_note_section(
         )
         if note != "":
             word_entry.notes.append(note)
+
+
+def extract_lb_template(
+    wxr: WiktextractContext, sense: Sense, t_node: TemplateNode
+) -> None:
+    text = clean_node(wxr, sense, t_node).strip("() ")
+    for raw_tag in text.split(","):
+        raw_tag = raw_tag.strip()
+        if raw_tag != "":
+            sense.raw_tags.append(raw_tag)

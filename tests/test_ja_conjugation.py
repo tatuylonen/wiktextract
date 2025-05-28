@@ -53,20 +53,35 @@ class TestJaConjugation(TestCase):
         self.assertEqual(
             [f.model_dump(exclude_defaults=True) for f in word_entry.forms],
             [
-                {"form": "ぜれ", "raw_tags": ["ザ行下一段活用", "仮定形"]},
-                {"form": "ぜろ", "raw_tags": ["ザ行下一段活用", "命令形"]},
-                {"form": "ぜよ", "raw_tags": ["ザ行下一段活用", "命令形"]},
+                {
+                    "form": "ぜれ",
+                    "raw_tags": ["ザ行下一段活用"],
+                    "tags": ["hypothetical"],
+                },
+                {
+                    "form": "ぜろ",
+                    "raw_tags": ["ザ行下一段活用"],
+                    "tags": ["imperative"],
+                },
+                {
+                    "form": "ぜよ",
+                    "raw_tags": ["ザ行下一段活用"],
+                    "tags": ["imperative"],
+                },
                 {
                     "form": "まぜろ",
-                    "raw_tags": ["各活用形の基礎的な結合例", "語形", "命令"],
+                    "raw_tags": ["各活用形の基礎的な結合例", "語形"],
+                    "tags": ["imperative"],
                 },
                 {
                     "form": "まぜよ",
-                    "raw_tags": ["各活用形の基礎的な結合例", "語形", "命令"],
+                    "raw_tags": ["各活用形の基礎的な結合例", "語形"],
+                    "tags": ["imperative"],
                 },
                 {
                     "form": "命令形のみ",
-                    "raw_tags": ["各活用形の基礎的な結合例", "結合", "命令"],
+                    "raw_tags": ["各活用形の基礎的な結合例", "結合"],
+                    "tags": ["imperative"],
                 },
             ],
         )

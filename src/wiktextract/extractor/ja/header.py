@@ -38,7 +38,8 @@ def extract_header_nodes(
             and "gender" in node.attrs.get("class", "").split()
         ):
             raw_tag_text = clean_node(wxr, None, node)
-            for raw_tag in raw_tag_text.split():
+            for raw_tag in re.split(r"\s|,", raw_tag_text):
+                raw_tag = raw_tag.strip()
                 if raw_tag != "":
                     word_entry.raw_tags.append(raw_tag)
         if isinstance(node, HTMLNode) and not (

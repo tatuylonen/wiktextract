@@ -3,6 +3,7 @@ from wikitextprocessor import LevelNode, NodeKind, TemplateNode
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .models import Form, WordEntry
+from .tags import translate_raw_tags
 
 
 def extract_conjugation_section(
@@ -78,4 +79,5 @@ def extract_ja_conjugation_table_template(
                                     )
                                 if len(row_header) > 0:
                                     form.raw_tags.append(row_header)
+                                translate_raw_tags(form)
                                 word_entry.forms.append(form)
