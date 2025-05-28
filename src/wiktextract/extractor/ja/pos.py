@@ -82,6 +82,8 @@ def process_gloss_list_item(
                 )
             elif gloss_node.template_name == "wp":
                 continue
+            elif gloss_node.template_name == "lb":
+                extract_lb_template(wxr, sense_data, gloss_node)
             else:
                 gloss_only_nodes.append(gloss_node)
         else:
@@ -157,3 +159,13 @@ def extract_note_section(
         )
         if note != "":
             word_entry.notes.append(note)
+
+
+def extract_lb_template(
+    wxr: WiktextractContext, sense: Sense, t_node: TemplateNode
+) -> None:
+    text = clean_node(wxr, sense, t_node).strip("() ")
+    for raw_tag in text.split(","):
+        raw_tag = raw_tag.strip()
+        if raw_tag != "":
+            sense.raw_tags.append(raw_tag)

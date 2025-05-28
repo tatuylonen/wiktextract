@@ -496,6 +496,7 @@ TOPICS = {
     "魚類学": "ichthyology",
     "鳥類学": "ornithology",
     "麻雀": "mahjong",
+    "演算": "arithmetic",
 }
 
 
