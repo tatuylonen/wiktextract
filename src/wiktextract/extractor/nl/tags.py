@@ -94,6 +94,10 @@ GLOSS_TAGS = {
     "versterkend voorvoegsel": ["intensifier", "prefix"],
     "in een bijzin": "with-subordinate-clause",  # Sjabloon:ovt-mv-bijz
     "bij inversie": "inversion",  # Sjabloon:1ps
+    "Noord-Nederland": "Northern-Netherland",
+    "Vlaanderen": "Flanders",
+    "Brabant": "Brabant",
+    "Limburg": "Limburg",
 }
 
 TABLE_TAGS = {
@@ -112,6 +116,7 @@ TABLE_TAGS = {
     # Sjabloon:-nlverb-
     "onbepaalde wijs": "infinitive",
     "kort": "short-form",
+    "lang": "long-form",
     "onvoltooid": "imperfect",
     "tegenwoordig": "present",
     "toekomend": "future",
@@ -387,6 +392,7 @@ TOPICS = {
     # "wonen": "",
     "zoötomie": "zootomy",
     "zwemmen": "swimming",
+    "toponiem: land": "country",  # Template:land
 }
 
 

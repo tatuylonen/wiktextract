@@ -71,4 +71,5 @@ LINKAGE_SECTIONS = {
     "Rijmwoorden": "rhymes",
     "Synoniemen": "synonyms",
     "Typische woordcombinaties": "derived",
+    "Frase": "derived",
 }

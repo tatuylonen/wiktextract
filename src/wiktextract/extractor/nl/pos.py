@@ -133,7 +133,30 @@ def extract_pos_section_nodes(
                     "swe-adjc-",
                 )
             )
-            or node.template_name.endswith("verb-form")
+            or node.template_name.endswith(
+                (
+                    # Categorie:Werkwoordsvormsjablonen
+                    "verb-form",
+                    "-gw",
+                    "-lv",
+                    "-lv-vt",
+                    "-lv-vtd",
+                    "-onv-d",
+                    "-twt",
+                    "-vt",
+                    "-vt-onr",
+                    "-3ps",
+                    "-inf",
+                    "-lv-hv",
+                    "-twt-bv",
+                    "-twt-hv",
+                    "-vt-onr-bv",
+                    "-vt-onr-hv",
+                    "-vt-onr",
+                )
+            )
+            or node.template_name
+            in ["fra-deelwoord", "2ps-rus", "ww-kur", "ww-tur"]
         ):
             extract_verb_form_of_template(
                 wxr, page_data, base_data, forms_data, node
