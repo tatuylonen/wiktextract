@@ -168,9 +168,14 @@ class TestNlInflection(TestCase):
                 },
                 {
                     "form": "te achten",
-                    "raw_tags": ["lang"],
                     "source": "achten/vervoeging",
-                    "tags": ["active", "infinitive", "imperfect", "present"],
+                    "tags": [
+                        "active",
+                        "infinitive",
+                        "imperfect",
+                        "present",
+                        "long-form",
+                    ],
                 },
                 {
                     "form": "zullen achten",
@@ -185,9 +190,14 @@ class TestNlInflection(TestCase):
                 },
                 {
                     "form": "te zullen achten",
-                    "raw_tags": ["lang"],
                     "source": "achten/vervoeging",
-                    "tags": ["active", "infinitive", "imperfect", "future"],
+                    "tags": [
+                        "active",
+                        "infinitive",
+                        "imperfect",
+                        "future",
+                        "long-form",
+                    ],
                 },
                 {
                     "form": "achtend",
@@ -294,10 +304,15 @@ class TestNlInflection(TestCase):
                 },
                 {
                     "form": "te scheren",
-                    "raw_tags": ["lang"],
                     "sense": "rakelings langs iets bewegen",
                     "source": "scheren/vervoeging",
-                    "tags": ["active", "infinitive", "imperfect", "present"],
+                    "tags": [
+                        "active",
+                        "infinitive",
+                        "imperfect",
+                        "present",
+                        "long-form",
+                    ],
                 },
                 {"form": "scheerde", "ipa": "/sxɪːrdə/", "tags": ["past"]},
                 {
@@ -318,10 +333,15 @@ class TestNlInflection(TestCase):
                 },
                 {
                     "form": "te scheren",
-                    "raw_tags": ["lang"],
                     "sense": "rakelings langs iets bewegen",
                     "source": "scheren/vervoeging",
-                    "tags": ["active", "infinitive", "imperfect", "present"],
+                    "tags": [
+                        "active",
+                        "infinitive",
+                        "imperfect",
+                        "present",
+                        "long-form",
+                    ],
                 },
             ],
         )

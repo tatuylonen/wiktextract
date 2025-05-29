@@ -125,9 +125,38 @@ def extract_pos_section_nodes(
                     "tps",
                     "volt-d",
                     "eng-onv-d",
+                    # Categorie:Bijvoeglijknaamwoordsjablonen
+                    "dan-adjc-",
+                    "la-adjc-",
+                    "nno-adjc-",
+                    "nor-adjc-",
+                    "swe-adjc-",
                 )
             )
-            or node.template_name.endswith("verb-form")
+            or node.template_name.endswith(
+                (
+                    # Categorie:Werkwoordsvormsjablonen
+                    "verb-form",
+                    "-gw",
+                    "-lv",
+                    "-lv-vt",
+                    "-lv-vtd",
+                    "-onv-d",
+                    "-twt",
+                    "-vt",
+                    "-vt-onr",
+                    "-3ps",
+                    "-inf",
+                    "-lv-hv",
+                    "-twt-bv",
+                    "-twt-hv",
+                    "-vt-onr-bv",
+                    "-vt-onr-hv",
+                    "-vt-onr",
+                )
+            )
+            or node.template_name
+            in ["fra-deelwoord", "2ps-rus", "ww-kur", "ww-tur"]
         ):
             extract_verb_form_of_template(
                 wxr, page_data, base_data, forms_data, node
@@ -373,7 +402,13 @@ def extract_verb_form_of_template(
     extract_pos_section_nodes(
         wxr, page_data, base_data, forms_data, expanded_node
     )
-    form_of = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
+    form_of = clean_node(
+        wxr,
+        None,
+        t_node.template_parameters.get(
+            3 if t_node.template_name == "la-adjc-form" else 1, ""
+        ),
+    )
     for word_entry in page_data[orig_data_len - len(page_data) - 1 :]:
         for sense in word_entry.senses:
             sense.tags.append("form-of")

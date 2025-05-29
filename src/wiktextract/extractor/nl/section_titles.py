@@ -47,6 +47,9 @@ POS_DATA = {
     "Symbool": {"pos": "symbol"},
     "Werkwoord": {"pos": "verb"},
     "Betrekkelijk naamwoord": {"pos": "noun", "tags": ["relative"]},
+    "Als bijvoeglijk naamwoord": {"pos": "adj"},
+    "Als zelfstandig naamwoord met de derde declinatie": {"pos": "noun"},
+    "Als zelfstandig naamwoord met de tweede declinatie": {"pos": "noun"},
 }
 
 
@@ -68,4 +71,5 @@ LINKAGE_SECTIONS = {
     "Rijmwoorden": "rhymes",
     "Synoniemen": "synonyms",
     "Typische woordcombinaties": "derived",
+    "Frase": "derived",
 }
