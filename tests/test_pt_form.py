@@ -276,3 +276,24 @@ class TestPtForm(TestCase):
                 },
             ],
         )
+
+    def test_abbr(self):
+        self.wxr.wtp.add_page("Predefinição:-en-", 10, "Inglês")
+        data = parse_page(
+            self.wxr,
+            "Before Christ",
+            """={{-en-}}=
+==Locução adverbial==
+'''Before Christ'''
+# [[antes de Cristo]]
+
+===Sigla===
+* [[BC]], [[B.C.]]""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {"form": "BC", "tags": ["abbreviation"]},
+                {"form": "B.C.", "tags": ["abbreviation"]},
+            ],
+        )

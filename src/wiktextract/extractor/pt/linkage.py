@@ -10,7 +10,7 @@ from wikitextprocessor.parser import (
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
-from .models import Linkage, WordEntry
+from .models import Form, Linkage, WordEntry
 from .section_titles import LINKAGE_SECTIONS
 from .tags import translate_raw_tags
 
@@ -318,3 +318,27 @@ def extract_phraseology_list_item(
             extract_phraseology_list_item(
                 wxr, word_entry, next_list_item, sense, sense_index
             )
+
+
+FORM_SECTION_TAGS = {
+    "Sigla": "abbreviation",
+    "Abreviatura": "abbreviation",
+    "Símbolo": "symbol",
+    "Ordinal Equivalente": "ordinal",
+}
+
+
+def extract_forms_section(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    level_node: LevelNode,
+    section_text: str,
+) -> None:
+    for list_node in level_node.find_child(NodeKind.LIST):
+        for list_item in list_node.find_child(NodeKind.LIST_ITEM):
+            for link_node in list_item.find_child(NodeKind.LINK):
+                word = clean_node(wxr, None, link_node)
+                if word != "":
+                    word_entry.forms.append(
+                        Form(form=word, tags=[FORM_SECTION_TAGS[section_text]])
+                    )

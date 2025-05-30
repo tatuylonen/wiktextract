@@ -210,6 +210,7 @@ GLOSS_TAGS = {
     "reflexivo": "reflexive",
     "pronominal": "pronominal",
     "plural": "plural",
+    "Portugal": "Portugal",
 }
 
 OTHER_TAGS = {

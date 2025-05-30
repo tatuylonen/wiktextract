@@ -100,6 +100,7 @@ LINKAGE_SECTIONS = {
     "compostos": "derived",
     "vermos derivados": "derived",
     "expressões": "expressions",
+    "expressão": "expressions",
 }
 
 LINKAGE_TAGS = {
