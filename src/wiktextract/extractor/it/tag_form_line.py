@@ -38,9 +38,13 @@ ITALIC_TAGS = {
     "m": "masculine",
     "n": "neuter",
     "pl": "plural",
+    "plur": "plural",
     "sing": "singular",
     "prom": "common",
     "inv": "invariable",
+    "romaji": "Rōmaji",
+    "katakana": "katakana",
+    "hiragana": "hiragana",
 }
 
 
@@ -50,7 +54,10 @@ def extract_italic_tag_node(
     # https://it.wiktionary.org/wiki/Wikizionario:Genere
     italic_str = clean_node(wxr, None, node)
     for raw_tag in italic_str.split():
-        if raw_tag in ITALIC_TAGS:
+        raw_tag = raw_tag.strip(",")
+        if raw_tag == "e":  # and
+            continue
+        elif raw_tag in ITALIC_TAGS:
             word_entry.tags.append(ITALIC_TAGS[raw_tag])
         else:
             word_entry.raw_tags.append(raw_tag)

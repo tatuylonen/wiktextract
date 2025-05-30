@@ -37,6 +37,17 @@ FORM_LINE_TEMPLATE_TAGS = {
     # https://it.wiktionary.org/wiki/Template:A_cmp
     "comparativo": "comparative",
     "superlativo": "superlative",
+    "plur": "plural",
+    "Participio presente": ["present", "participle"],
+    "Participio passato": ["past", "participle"],
+    "Intransitivo pronominale": ["intransitive", "pronominal"],  # Template:inpr
+    "Deponente": "deponent",
+    "Ausiliare": "auxiliary",
+    "Passivo": "passive",
+    "Reciproco": "reciprocal",
+    "Riflessivo": "reflexive",
+    "Attivo": "active",
+    "Riflessivo pronominale": ["reflexive", "pronominal"],
 }
 
 # https://it.wiktionary.org/wiki/Template:Term/d
@@ -208,12 +219,20 @@ GLOSS_LIST_TEMPATE_TAGS = {
     "volgare": "vulgar",  # Template:Vulg
 }
 
+OTHER_TAGS = {
+    "Transitivo": "transitive",
+    "Intransitivo": "intransitive",
+    "toponimo": "toponymic",
+    "classe": "class",
+}
+
 
 TAGS = {
     **TABLE_TAGS,
     **FORM_LINE_TEMPLATE_TAGS,
     **TERM_TEMPLATE_TAGS,
     **GLOSS_LIST_TEMPATE_TAGS,
+    **OTHER_TAGS,
 }
 
 
