@@ -320,8 +320,19 @@ def extract_phraseology_list_item(
             )
 
 
-def extract_abbr_section(
-    wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
+FORM_SECTION_TAGS = {
+    "Sigla": "abbreviation",
+    "Abreviatura": "abbreviation",
+    "Símbolo": "symbol",
+    "Ordinal Equivalente": "ordinal",
+}
+
+
+def extract_forms_section(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    level_node: LevelNode,
+    section_text: str,
 ) -> None:
     for list_node in level_node.find_child(NodeKind.LIST):
         for list_item in list_node.find_child(NodeKind.LIST_ITEM):
@@ -329,5 +340,5 @@ def extract_abbr_section(
                 word = clean_node(wxr, None, link_node)
                 if word != "":
                     word_entry.forms.append(
-                        Form(form=word, tags=["abbreviation"])
+                        Form(form=word, tags=[FORM_SECTION_TAGS[section_text]])
                     )
