@@ -69,8 +69,7 @@ class TestPtGloss(TestCase):
                                 "Coloquialismo (Português)",
                             ],
                             "glosses": ['gênio do mal em geral ("capeta")'],
-                            "raw_tags": ["popular"],
-                            "tags": ["Brazil"],
+                            "tags": ["Brazil", "popular"],
                             "examples": [
                                 {
                                     "text": "O cão em forma de gente.",

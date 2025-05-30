@@ -99,7 +99,7 @@ class TestItGloss(TestCase):
                         "Verbi deponenti_in_latino",
                     ],
                     "senses": [{"glosses": ["venir meno"]}],
-                    "raw_tags": ["Intransitivo", "Deponente"],
+                    "tags": ["intransitive", "deponent"],
                 }
             ],
         )
@@ -144,7 +144,7 @@ class TestItGloss(TestCase):
                         "Verbi ausiliari_in_italiano",
                     ],
                     "senses": [{"glosses": ["serve per la coniugazione"]}],
-                    "raw_tags": ["Ausiliare"],
+                    "tags": ["auxiliary"],
                 },
                 {
                     "lang": "Italiano",
@@ -157,7 +157,7 @@ class TestItGloss(TestCase):
                         "Verbi intransitivi_in_latino",
                     ],
                     "senses": [{"glosses": ["Questo verbo serve per dire"]}],
-                    "raw_tags": ["Intransitivo"],
+                    "tags": ["intransitive"],
                 },
             ],
         )

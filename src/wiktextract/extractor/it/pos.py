@@ -83,6 +83,7 @@ def extract_pos_section(
                 )
             raw_tag = clean_node(wxr, page_data[-1], node).strip("= \n")
             page_data[-1].raw_tags.append(raw_tag)
+            translate_raw_tags(page_data[-1])
 
 
 def extract_gloss_list_item(

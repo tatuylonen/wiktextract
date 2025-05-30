@@ -7,6 +7,9 @@ HEAD_LINE_TAGS = {
     "género comum": "common",
     "dois géneros": "dual",
     "comum aos dois géneros": ["common", "dual"],
+    # Predefinição:gramática/core
+    # {{int:}} not implemented
+    "comum aos dois gêneros": ["common", "dual"],
     "neutro": "neutral",
     "masculino plural": ["masculine", "plural"],
     "masculino singular": ["masculine", "singular"],
@@ -28,6 +31,9 @@ HEAD_LINE_TAGS = {
     "comum aos dois géneros plural": ["common", "plural"],
     "comum aos dois géneros singular": ["common", "singular"],
     "comum aos dois géneros e aos dois números": "common",
+    "comum aos dois gêneros plural": ["common", "plural"],
+    "comum aos dois gêneros singular": ["common", "singular"],
+    "comum aos dois gêneros e aos dois números": "common",
     "neutro plural": ["neutral", "plural"],
     "neutro singular": ["neutral", "singular"],
     "neutro de dois números": "neutral",
@@ -211,6 +217,9 @@ GLOSS_TAGS = {
     "pronominal": "pronominal",
     "plural": "plural",
     "Portugal": "Portugal",
+    "grafia brasileira": "Brazilian",
+    "grafia portuguesa": "Portuguese",
+    "grafia lusitana": "Lusitanian",
 }
 
 OTHER_TAGS = {
@@ -221,6 +230,9 @@ OTHER_TAGS = {
         "superlative",
         "superior",
     ],
+    "Gentílico": "demonym",
+    "Galiza": "Galicia",
+    "popular": "popular",
 }
 
 TAGS = {**HEAD_LINE_TAGS, **TABLE_TAGS, **GLOSS_TAGS, **OTHER_TAGS}
@@ -284,6 +296,11 @@ TOPICS = {
     "videojogo": "video-games",
     "vídeo game": "video-games",
     "viticultura": "viticulture",
+    "País": "country",
+    "religião": "religion",
+    "antropônimo": "anthroponym",
+    "Cristianismo": "Christianity",
+    "medicina": "medicine",
 }
 
 
