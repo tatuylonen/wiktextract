@@ -49,6 +49,13 @@ def parse_section(
                 page_data[-1] if len(page_data) > 0 else base_data,
                 level_node,
             )
+        elif len(page_data[-1].senses) == 0 and title_text == "Expressão":
+            page_data.pop()
+            extract_expression_section(
+                wxr,
+                page_data[-1] if len(page_data) > 0 else base_data,
+                level_node,
+            )
     elif title_text in ["Tradução", "Traduções", "Cognatos", "Descendentes"]:
         extract_translation_section(
             wxr,
