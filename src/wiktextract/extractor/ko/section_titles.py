@@ -34,6 +34,7 @@ POS_DATA = {
     "재귀동사": {"pos": "verb", "tags": ["reflexive"]},
     "보조형용사": {"pos": "adj", "tags": ["auxiliary"]},
     "고유명사": {"pos": "name"},
+    "고유 명사": {"pos": "name"},
     "개사": {"pos": "unknown"},
     "간지": {"pos": "unknown"},
     "이곳에 품사를 입력하세요": {"pos": "unknown"},
@@ -63,6 +64,7 @@ POS_DATA = {
     "한자": {"pos": "character", "tags": ["Hanja"]},
     "학명": {"pos": "name"},
     "이태동사": {"pos": "verb"},
+    "어구": {"pos": "phrase"},
 }
 
 LINKAGE_SECTIONS = {

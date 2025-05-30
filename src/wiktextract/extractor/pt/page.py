@@ -11,6 +11,7 @@ from ...wxr_context import WiktextractContext
 from .etymology import extract_etymology_section
 from .inflection import extract_conjugation_section, extract_degree_section
 from .linkage import (
+    extract_abbr_section,
     extract_expression_section,
     extract_linkage_section,
     extract_phraseology_section,
@@ -41,6 +42,13 @@ def parse_section(
             title_text,
             cats.get("categories", []),
         )
+        if len(page_data[-1].senses) == 0 and title_text == "Sigla":
+            page_data.pop()
+            extract_abbr_section(
+                wxr,
+                page_data[-1] if len(page_data) > 0 else base_data,
+                level_node,
+            )
     elif title_text in ["Tradução", "Traduções", "Cognatos", "Descendentes"]:
         extract_translation_section(
             wxr,
