@@ -41,7 +41,11 @@ class TestItLinkage(TestCase):
             [
                 {"word": "animale"},
                 {"word": "amico dell’uomo"},
-                {"word": "forte", "raw_tags": ["senso figurato", "di freddo"]},
+                {
+                    "word": "forte",
+                    "tags": ["figuratively"],
+                    "raw_tags": ["di freddo"],
+                },
                 {"word": "intenso"},
             ],
         )

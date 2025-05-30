@@ -3,6 +3,7 @@ from wikitextprocessor import LevelNode, NodeKind, WikiNode
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .models import Linkage, WordEntry
+from .tags import translate_raw_tags
 
 
 def extract_linkage_section(
@@ -19,6 +20,9 @@ def extract_linkage_section(
                 if linkage_type == "proverbs"
                 else extract_linkage_list_item(wxr, list_item)
             )
+
+    for l_data in linkages:
+        translate_raw_tags(l_data)
 
     for data in page_data:
         if data.lang_code == page_data[-1].lang_code:
@@ -52,7 +56,6 @@ def extract_linkage_list_item(
                 elif word_str != "":
                     linkages.append(Linkage(word=word_str, raw_tags=raw_tags))
                     raw_tags.clear()
-
     return linkages
 
 
