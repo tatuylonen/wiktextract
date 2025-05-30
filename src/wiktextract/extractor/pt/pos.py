@@ -1,6 +1,7 @@
 import re
 
-from wikitextprocessor import (
+from wikitextprocessor.parser import (
+    LEVEL_KIND_FLAGS,
     LevelNode,
     NodeKind,
     TemplateNode,
@@ -46,6 +47,24 @@ def extract_pos_section(
     for t_node in level_node.find_child(NodeKind.TEMPLATE):
         if t_node.template_name.startswith("flex."):
             extract_flex_template(wxr, page_data[-1], t_node)
+
+    base_data_pos = page_data[-1].model_copy(deep=True)
+    first_child_section = True
+    for child_level_node in level_node.find_child(LEVEL_KIND_FLAGS):
+        child_section = clean_node(wxr, None, child_level_node.largs)
+        if child_section in ["Brasil", "Portugal"]:
+            page_data.append(base_data_pos.model_copy(deep=True))
+            if first_child_section:
+                page_data.pop()
+                first_child_section = False
+            page_data[-1].raw_tags.append(child_section)
+            for list_node in child_level_node.find_child(NodeKind.LIST):
+                if list_node.sarg.startswith("#") and list_node.sarg.endswith(
+                    "#"
+                ):
+                    for list_item in list_node.find_child(NodeKind.LIST_ITEM):
+                        extract_gloss_list_item(wxr, page_data[-1], list_item)
+            translate_raw_tags(page_data[-1])
 
 
 def extract_gloss_list_item(

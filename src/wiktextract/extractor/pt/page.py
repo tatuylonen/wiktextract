@@ -113,6 +113,8 @@ def parse_section(
         "na internet",
         "galeria",
         "galeria de imagens",
+        "brasil",
+        "portugal",
     ]:
         wxr.wtp.debug(f"unknown section: {title_text}")
 

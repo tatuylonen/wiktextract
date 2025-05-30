@@ -134,3 +134,54 @@ class TestPtGloss(TestCase):
                 }
             ],
         )
+
+    def test_location_section(self):
+        self.wxr.wtp.add_page("Predefinição:-pt-", 10, "Português")
+        self.wxr.wtp.add_page("Predefinição:pr", 10, "''próprio''")
+        data = parse_page(
+            self.wxr,
+            "Milagres",
+            """={{-pt-}}=
+==Substantivo==
+'''Milagres''', {{pr}}
+===Brasil===
+# [[município]] [[brasileiro]] do [[estado]] da [[Bahia]]
+
+===Portugal===
+# freguesia [[portuguesa]] de [[Leiria]]""",
+        )
+        self.assertEqual(
+            data,
+            [
+                {
+                    "lang": "Português",
+                    "lang_code": "pt",
+                    "pos": "noun",
+                    "pos_title": "Substantivo",
+                    "senses": [
+                        {
+                            "glosses": [
+                                "município brasileiro do estado da Bahia"
+                            ],
+                        }
+                    ],
+                    "raw_tags": ["próprio"],
+                    "tags": ["Brazil"],
+                    "word": "Milagres",
+                },
+                {
+                    "lang": "Português",
+                    "lang_code": "pt",
+                    "pos": "noun",
+                    "pos_title": "Substantivo",
+                    "senses": [
+                        {
+                            "glosses": ["freguesia portuguesa de Leiria"],
+                        }
+                    ],
+                    "raw_tags": ["próprio"],
+                    "tags": ["Portugal"],
+                    "word": "Milagres",
+                },
+            ],
+        )

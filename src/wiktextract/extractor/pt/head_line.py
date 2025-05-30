@@ -12,10 +12,21 @@ def extract_head_line_nodes(
     nodes: list[WikiNode | str],
 ) -> None:
     for node in nodes:
-        if isinstance(node, TemplateNode):
-            match node.template_name:
-                case "g" | "gramática":
-                    extract_gramática_template(wxr, word_entry, node)
+        if isinstance(node, TemplateNode) and node.template_name in [
+            "g",
+            "gramática",
+            "gênero",
+            "m",
+            "f",
+            "n",
+            "c",
+            "c2g",
+            "pr",
+            "c.",
+            "fp",
+            "mp",
+        ]:
+            extract_gramática_template(wxr, word_entry, node)
 
 
 def extract_gramática_template(
