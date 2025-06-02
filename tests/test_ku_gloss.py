@@ -202,9 +202,18 @@ class TestKuGloss(TestCase):
 
     def test_bnr_no_list(self):
         # low quality page
-        self.wxr.wtp.add_page("Şablon:ziman", 10, "Tirkî")
+        self.wxr.wtp.add_page(
+            "Şablon:ziman",
+            10,
+            '<span class="besazimani" id="tr">[[:Kategorî:Tirkî|Tirkî]][[Kategorî:Tirkî]]</span>',
+        )
         self.wxr.wtp.add_page(
             "Şablon:bnr", 10, "''Binêre'' '''[[nodullamak]]'''."
+        )
+        self.wxr.wtp.add_page(
+            "Şablon:lêker",
+            10,
+            '<span class="headword-line"><strong class="Latn headword" lang="tr">-{modullamak}-</strong></span>[[Category:Lema bi tirkî|MODULLAMAK]][[Category:Lêker bi tirkî|MODULLAMAK]]',
         )
         page_data = parse_page(
             self.wxr,
@@ -222,4 +231,8 @@ class TestKuGloss(TestCase):
                     "tags": ["alt-of"],
                 }
             ],
+        )
+        self.assertEqual(
+            page_data[0]["categories"],
+            ["Tirkî", "Lema bi tirkî", "Lêker bi tirkî"],
         )

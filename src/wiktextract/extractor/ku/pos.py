@@ -203,7 +203,7 @@ def extract_pos_header_nodes(
             )
             if form.form not in ["", "-"]:
                 word_entry.forms.append(form)
-                clean_node(wxr, word_entry, node)
+            clean_node(wxr, word_entry, node)
         if isinstance(node, TemplateNode) and node.template_name in [
             "navdêr",
             "serenav",
