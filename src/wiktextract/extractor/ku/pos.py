@@ -14,36 +14,6 @@ from .models import AltForm, Form, Sense, WordEntry
 from .section_titles import POS_DATA
 from .tags import TAGS, translate_raw_tags
 
-
-def extract_pos_section(
-    wxr: WiktextractContext,
-    page_data: list[WordEntry],
-    base_data: WordEntry,
-    level_node: LevelNode,
-    pos_title: str,
-) -> None:
-    page_data.append(base_data.model_copy(deep=True))
-    page_data[-1].pos_title = pos_title
-    pos_data = POS_DATA[pos_title]
-    page_data[-1].pos = pos_data["pos"]
-    page_data[-1].tags.extend(pos_data.get("tags", []))
-
-    gloss_list_index = len(level_node.children)
-    for index, list_node in level_node.find_child(NodeKind.LIST, True):
-        for list_item in list_node.find_child(NodeKind.LIST_ITEM):
-            if list_node.sarg.startswith("#") and list_node.sarg.endswith("#"):
-                extract_gloss_list_item(wxr, page_data[-1], list_item)
-                if index < gloss_list_index:
-                    gloss_list_index = index
-
-    extract_pos_header_nodes(
-        wxr, page_data[-1], level_node.children[:gloss_list_index]
-    )
-    for t_node in level_node.find_child(NodeKind.TEMPLATE):
-        if t_node.template_name == "binêre/el":
-            extract_binêre_el_template(wxr, page_data[-1], t_node)
-
-
 FORM_OF_TEMPLATES = frozenset(
     [
         "formeke peyvê",
@@ -79,6 +49,45 @@ FORM_OF_TEMPLATE_SUFFIXES = (
     "-dema-niha-p",
     "-fermanî",
 )
+
+
+def extract_pos_section(
+    wxr: WiktextractContext,
+    page_data: list[WordEntry],
+    base_data: WordEntry,
+    level_node: LevelNode,
+    pos_title: str,
+) -> None:
+    page_data.append(base_data.model_copy(deep=True))
+    page_data[-1].pos_title = pos_title
+    pos_data = POS_DATA[pos_title]
+    page_data[-1].pos = pos_data["pos"]
+    page_data[-1].tags.extend(pos_data.get("tags", []))
+
+    gloss_list_index = len(level_node.children)
+    for index, list_node in level_node.find_child(NodeKind.LIST, True):
+        for list_item in list_node.find_child(NodeKind.LIST_ITEM):
+            if list_node.sarg.startswith("#") and list_node.sarg.endswith("#"):
+                extract_gloss_list_item(wxr, page_data[-1], list_item)
+                if index < gloss_list_index:
+                    gloss_list_index = index
+
+    extract_pos_header_nodes(
+        wxr, page_data[-1], level_node.children[:gloss_list_index]
+    )
+    for t_node in level_node.find_child(NodeKind.TEMPLATE):
+        if t_node.template_name == "binêre/el":
+            extract_binêre_el_template(wxr, page_data[-1], t_node)
+        elif (
+            t_node.template_name in FORM_OF_TEMPLATES
+            or t_node.template_name.endswith(FORM_OF_TEMPLATE_SUFFIXES)
+        ):
+            sense = Sense()
+            extract_form_of_template(wxr, sense, t_node)
+            gloss = clean_node(wxr, sense, t_node)
+            if gloss != "":
+                sense.glosses.append(gloss)
+            page_data[-1].senses.append(sense)
 
 
 def extract_gloss_list_item(
