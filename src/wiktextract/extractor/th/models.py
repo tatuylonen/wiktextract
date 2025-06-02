@@ -139,4 +139,5 @@ class WordEntry(ThaiBaseModel):
     sounds: list[Sound] = []
     hyphenation: list[str] = []
     abbreviations: list[Linkage] = []
+    proverbs: list[Linkage] = []
     notes: list[str] = []

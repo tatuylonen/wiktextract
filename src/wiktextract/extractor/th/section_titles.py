@@ -62,4 +62,5 @@ LINKAGE_SECTIONS = {
     "ตัวอักษรที่เกี่ยวข้อง": "related",
     "วลี": "derived",
     "คำผสม": "derived",
+    "สุภาษิต": "proverbs",
 }
