@@ -1,4 +1,5 @@
 import itertools
+import re
 
 from wikitextprocessor import (
     LevelNode,
@@ -116,7 +117,7 @@ def extract_label_template(
         "span", attr_name="class", attr_value="ib-content"
     ):
         span_str = clean_node(wxr, None, span_tag)
-        for raw_tag in span_str.split(","):
+        for raw_tag in re.split(r",| หรือ ", span_str):
             raw_tag = raw_tag.strip()
             if raw_tag != "":
                 sense.raw_tags.append(raw_tag)
