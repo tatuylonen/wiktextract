@@ -114,6 +114,19 @@ LABEL_TAGS = {
     "กรีซโบราณ": "Ancient Greek",
     "โรมโบราณ": "Ancient Rome",
     "สะกดผิด": "misspelling",
+    # Template:zh-mw
+    # Module:zh/templates
+    "จีนกลาง": "Mandarin",
+    "กวางตุ้ง": "Cantonese",
+    "กั้น": "Gan",
+    "แคะ": "Hakka",
+    "จิ้น": "Jin",
+    "หมิ่นเหนือ": "Northern-Min",
+    "หมิ่นตะวันออก": "Eastern-Min",
+    "หมิ่นใต้": "Hokkien",
+    "แต้จิ๋ว": "Teochew",
+    "อู๋": "Wu",
+    "เซียง": "Xiang",
 }
 
 
