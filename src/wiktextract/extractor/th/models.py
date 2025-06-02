@@ -58,6 +58,12 @@ class AltForm(ThaiBaseModel):
     roman: str = ""
 
 
+class Classifier(ThaiBaseModel):
+    classifier: str = ""
+    tags: list[str] = []
+    raw_tags: list[str] = []
+
+
 class Sense(ThaiBaseModel):
     glosses: list[str] = []
     tags: list[str] = []
@@ -68,6 +74,7 @@ class Sense(ThaiBaseModel):
     form_of: list[AltForm] = []
     alt_of: list[AltForm] = []
     topics: list[str] = []
+    classifiers: list[Classifier] = []
 
 
 class Form(ThaiBaseModel):
@@ -139,4 +146,5 @@ class WordEntry(ThaiBaseModel):
     sounds: list[Sound] = []
     hyphenation: list[str] = []
     abbreviations: list[Linkage] = []
+    proverbs: list[Linkage] = []
     notes: list[str] = []

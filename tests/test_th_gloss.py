@@ -391,3 +391,21 @@ class TestThGloss(TestCase):
             page_data[0]["forms"],
             [{"form": "khao na pet", "tags": ["romanization", "RTGS"]}],
         )
+
+    def test_lb_or(self):
+        self.wxr.wtp.add_page(
+            "แม่แบบ:lb",
+            10,
+            """<span class="usage-label-sense"><span class="ib-brac">(</span><span class="ib-content">[[Appendix:Glossary#ภาษาหนังสือ|ภาษาหนังสือ]]&#32;หรือ&#32;[[Appendix:Glossary#ภาษาถิ่น|ภาษาถิ่น]]</span><span class="ib-brac">)</span></span>""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "日頭",
+            """== ภาษาจีน ==
+=== คำนาม ===
+# {{lb|zh|literary|or|dialectal}} [[ดวงอาทิตย์]]""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"],
+            [{"glosses": ["ดวงอาทิตย์"], "tags": ["literary", "dialect"]}],
+        )

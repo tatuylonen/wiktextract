@@ -1,4 +1,5 @@
 import itertools
+import re
 
 from wikitextprocessor import (
     LevelNode,
@@ -10,7 +11,7 @@ from wikitextprocessor import (
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .example import extract_example_list_item
-from .models import AltForm, Form, Sense, WordEntry
+from .models import AltForm, Classifier, Form, Sense, WordEntry
 from .section_titles import POS_DATA
 from .tags import translate_raw_tags
 
@@ -82,6 +83,8 @@ def extract_gloss_list_item(
         ):
             extract_form_of_template(wxr, word_entry, sense, node)
             has_form_of_template = True
+        elif isinstance(node, TemplateNode) and node.template_name == "zh-mw":
+            extract_zh_mw_template(wxr, node, sense)
         elif not (isinstance(node, WikiNode) and node.kind == NodeKind.LIST):
             gloss_nodes.append(node)
 
@@ -116,7 +119,7 @@ def extract_label_template(
         "span", attr_name="class", attr_value="ib-content"
     ):
         span_str = clean_node(wxr, None, span_tag)
-        for raw_tag in span_str.split(","):
+        for raw_tag in re.split(r",| หรือ ", span_str):
             raw_tag = raw_tag.strip()
             if raw_tag != "":
                 sense.raw_tags.append(raw_tag)
@@ -270,3 +273,39 @@ def extract_usage_note_section(
             note_str = clean_node(wxr, None, list_item.children)
             if note_str != "":
                 word_entry.notes.append(note_str)
+
+
+def extract_zh_mw_template(
+    wxr: WiktextractContext, t_node: TemplateNode, sense: Sense
+) -> None:
+    # Chinese inline classifier template
+    # copied from zh edition code
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    classifiers = []
+    last_word = ""
+    for span_tag in expanded_node.find_html_recursively("span"):
+        span_class = span_tag.attrs.get("class", "")
+        if span_class in ["Hani", "Hant", "Hans"]:
+            word = clean_node(wxr, None, span_tag)
+            if word != "／":
+                classifier = Classifier(classifier=word)
+                if span_class == "Hant":
+                    classifier.tags.append("Traditional Chinese")
+                elif span_class == "Hans":
+                    classifier.tags.append("Simplified Chinese")
+
+                if len(classifiers) > 0 and last_word != "／":
+                    sense.classifiers.extend(classifiers)
+                    classifiers.clear()
+                classifiers.append(classifier)
+            last_word = word
+        elif "title" in span_tag.attrs:
+            raw_tag = clean_node(wxr, None, span_tag.attrs["title"])
+            if len(raw_tag) > 0:
+                for classifier in classifiers:
+                    classifier.raw_tags.append(raw_tag)
+    sense.classifiers.extend(classifiers)
+    for classifier in sense.classifiers:
+        translate_raw_tags(classifier)
