@@ -180,3 +180,22 @@ class TestKuGloss(TestCase):
                 }
             ],
         )
+
+    def test_binêre_el(self):
+        self.wxr.wtp.add_page("Şablon:ziman", 10, "Almanî")
+        page_data = parse_page(
+            self.wxr,
+            "Cultur",
+            """== {{ziman|de}} ==
+=== Navdêr ===
+{{binêre/el|Kultur}}""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"],
+            [
+                {
+                    "alt_of": [{"word": "Kultur"}],
+                    "tags": ["no-gloss", "alt-of", "obsolete"],
+                }
+            ],
+        )

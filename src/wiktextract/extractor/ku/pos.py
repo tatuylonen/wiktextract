@@ -39,6 +39,9 @@ def extract_pos_section(
     extract_pos_header_nodes(
         wxr, page_data[-1], level_node.children[:gloss_list_index]
     )
+    for t_node in level_node.find_child(NodeKind.TEMPLATE):
+        if t_node.template_name == "binêre/el":
+            extract_binêre_el_template(wxr, page_data[-1], t_node)
 
 
 FORM_OF_TEMPLATES = frozenset(
@@ -439,3 +442,19 @@ def extract_rehê_dema_niha_template(
             sense.form_of.append(AltForm(word=word))
             if "form-of" not in sense.tags:
                 sense.tags.append("form-of")
+
+
+def extract_binêre_el_template(
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+) -> None:
+    first_arg = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
+    if first_arg != "":
+        sense = (
+            word_entry.senses[-1]
+            if len(word_entry.senses) > 0
+            else Sense(tags=["no-gloss"])
+        )
+        sense.alt_of.append(AltForm(word=first_arg))
+        sense.tags.extend(["alt-of", "obsolete"])
+        if len(word_entry.senses) == 0:
+            word_entry.senses.append(sense)
