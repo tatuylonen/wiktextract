@@ -64,6 +64,8 @@ def parse_page(
     # page layout
     # https://id.wiktionary.org/wiki/Wikikamus:Penjelasan_tataletak_entri
     # https://id.wiktionary.org/wiki/Wikikamus:Format_Kamus
+    if page_title.startswith(("Portal:", "Rekonstruksi:", "Thesaurus:", "WK:")):
+        return []
     wxr.wtp.start_page(page_title)
     tree = wxr.wtp.parse(page_text, pre_expand=True)
     page_data: list[WordEntry] = []
