@@ -42,7 +42,10 @@ def extract_linkage_list_item(
 ) -> None:
     l_list = []
     for node in list_item.children:
-        if isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
+        if (isinstance(node, WikiNode) and node.kind == NodeKind.LINK) or (
+            isinstance(node, TemplateNode)
+            and node.template_name in ["bağlantı", "l", "b"]
+        ):
             l_data = Linkage(
                 word=clean_node(wxr, None, node), sense=sense, tags=tags
             )

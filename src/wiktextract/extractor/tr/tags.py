@@ -96,6 +96,9 @@ POS_HEADER_TAGS = {
     "üçüncü tekil kişi geniş zaman": ["third-person", "singular", "present"],
     "şimdiki zaman": "present",
     "geçmiş zaman ve yakın geçmiş zaman": "past",
+    "sayılabilen ve sayılamayan": ["countable", "uncountable"],
+    "sayılabilen": "countable",
+    "sayılamayan": "uncountable",
     # Şablon:de-ad
     "tamlayan hâli": "genitive",
     "dişil": "feminine",

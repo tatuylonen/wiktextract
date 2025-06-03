@@ -469,3 +469,36 @@ Nerede olursanız olun, sağlam ve tahkim edilmiş kaleler içinde bulunsanız b
                 }
             ],
         )
+
+    def test_en_ad_tags(self):
+        self.wxr.wtp.add_page(
+            "Şablon:en-ad",
+            10,
+            """<strong class="Latn headword" lang="en">AIS</strong> (''[[Ek:Açıklamalar#sayılabilen|sayılabilen]] ve [[Ek:Açıklamalar#sayılamayan|sayılamayan]]'', ''çoğulu'' <b class="Latn" lang="en">[[AISs#İngilizce|AISs]]</b> ''veya'' <b class="Latn" lang="en">[[AISes#İngilizce|AISes]]</b> ''veya'' <b class="Latn" lang="en">[[AIS's#İngilizce|AIS's]]</b>)[[Category:İngilizce sözcükler]]""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "AIS",
+            """==İngilizce==
+===Kısaltma===
+{{en-ad|~|s|AISes|AIS's}}
+# sense""",
+        )
+        self.assertEqual(page_data[0]["categories"], ["İngilizce sözcükler"])
+        self.assertEqual(
+            page_data[0]["forms"],
+            [
+                {
+                    "form": "AISs",
+                    "tags": ["countable", "uncountable", "plural"],
+                },
+                {
+                    "form": "AISes",
+                    "tags": ["countable", "uncountable", "plural"],
+                },
+                {
+                    "form": "AIS's",
+                    "tags": ["countable", "uncountable", "plural"],
+                },
+            ],
+        )

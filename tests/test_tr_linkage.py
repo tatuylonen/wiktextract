@@ -108,3 +108,22 @@ class TestTrLinkage(TestCase):
             page_data[0]["synonyms"],
             [{"word": "فَضَاء", "sense": "gök, sema dış uzay", "roman": "faḍāʾ"}],
         )
+
+    def test_l_template(self):
+        self.wxr.wtp.add_page(
+            "Şablon:l",
+            10,
+            '<span class="Latn" lang="tr">[[BK#Türkçe|BK]]</span>',
+        )
+        page_data = parse_page(
+            self.wxr,
+            "Birleşik Krallık",
+            """==Türkçe==
+===Özel ad===
+# [[İngiltere]]
+====Kısaltma====
+* {{l|tr|BK}}""",
+        )
+        self.assertEqual(
+            page_data[0]["related"], [{"tags": ["abbreviation"], "word": "BK"}]
+        )

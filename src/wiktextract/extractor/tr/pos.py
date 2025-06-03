@@ -182,18 +182,24 @@ def extract_pos_header_template(
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(t_node), expand_all=True
     )
-    form_raw_tag = ""
+    raw_tags = []
+    last_italic_is_or = False
     for node in expanded_node.children:
         if isinstance(node, WikiNode) and node.kind == NodeKind.ITALIC:
-            form_raw_tag = clean_node(wxr, None, node)
+            raw_tag = clean_node(wxr, None, node)
+            if raw_tag not in ["", "veya"]:
+                raw_tags.append(raw_tag)
+            last_italic_is_or = raw_tag == "veya"
         elif isinstance(node, HTMLNode) and node.tag == "b":
             word = clean_node(wxr, None, node)
             if word != "":
-                form = Form(form=word)
-                if form_raw_tag != "":
-                    form.raw_tags.append(form_raw_tag)
-                    translate_raw_tags(form)
+                form = Form(form=word, raw_tags=raw_tags)
+                if last_italic_is_or:
+                    form.raw_tags.extend(word_entry.forms[-1].raw_tags)
+                    form.tags.extend(word_entry.forms[-1].tags)
+                translate_raw_tags(form)
                 word_entry.forms.append(form)
+                raw_tags.clear()
         elif (
             isinstance(node, HTMLNode)
             and node.tag == "span"
