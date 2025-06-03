@@ -26,6 +26,7 @@ def extract_ku_form_template(
         elif index == 1:
             form.form = clean_node(wxr, None, span_tag)
     if form.form != "":
+        translate_raw_tags(form)
         if linkage_type == "":
             word_entry.forms.append(form)
         else:

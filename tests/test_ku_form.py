@@ -127,17 +127,22 @@ class TestKuForm(TestCase):
             [
                 {
                     "form": "dibînim",
-                    "tags": ["transitive", "present"],
+                    "tags": [
+                        "transitive",
+                        "present",
+                        "first-person",
+                        "singular",
+                    ],
                     "raw_tags": ["ez"],
                 },
                 {
                     "form": "dît",
-                    "tags": ["transitive", "past"],
+                    "tags": ["transitive", "past", "first-person", "singular"],
                     "raw_tags": ["min"],
                 },
                 {
                     "form": "dî",
-                    "tags": ["transitive", "past"],
+                    "tags": ["transitive", "past", "first-person", "singular"],
                     "raw_tags": ["min"],
                 },
             ],

@@ -4,6 +4,7 @@ from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from ..share import set_sound_file_url_fields
 from .models import Sound, WordEntry
+from .tags import translate_raw_tags
 
 
 def extract_sound_section(
@@ -58,11 +59,14 @@ def extract_deng_template(
             4, t_node.template_parameters.get("dever", "")
         ),
     )
-    if raw_tag != "":
-        sound.raw_tags.append(raw_tag)
+    for r_tag in raw_tag.split(","):
+        r_tag = r_tag.strip()
+        if r_tag != "":
+            sound.raw_tags.append(r_tag)
     filename = clean_node(wxr, None, t_node.template_parameters.get(2, ""))
     if filename != "":
         set_sound_file_url_fields(wxr, filename, sound)
+        translate_raw_tags(sound)
         word_entry.sounds.append(sound)
     clean_node(wxr, word_entry, t_node)
 
