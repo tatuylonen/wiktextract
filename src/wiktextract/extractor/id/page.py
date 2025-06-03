@@ -43,6 +43,8 @@ def parse_section(
             level_node,
             LINKAGE_SECTIONS[title_text],
         )
+    else:
+        wxr.wtp.debug(f"Unknown section: {title_text}", sortid="id/page/47")
 
     for next_level in level_node.find_child(LEVEL_KIND_FLAGS):
         parse_section(wxr, page_data, base_data, next_level)
@@ -64,6 +66,8 @@ def parse_page(
     # page layout
     # https://id.wiktionary.org/wiki/Wikikamus:Penjelasan_tataletak_entri
     # https://id.wiktionary.org/wiki/Wikikamus:Format_Kamus
+    if page_title.startswith(("Portal:", "Rekonstruksi:", "Thesaurus:", "WK:")):
+        return []
     wxr.wtp.start_page(page_title)
     tree = wxr.wtp.parse(page_text, pre_expand=True)
     page_data: list[WordEntry] = []
