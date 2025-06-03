@@ -31,6 +31,7 @@ TABLE_TAGS = {
     "Çemandî": "oblique",
     "Nîşandera çemandî": ["demonstrative", "oblique"],
     "Bangkirin": "vocative",
+    "Bangkirî": "vocative",
     "Binavkirî": "definite",
     "Nebinavkirî": "indefinite",
     "Mê (yj.)": ["feminine", "singular"],
@@ -237,9 +238,32 @@ GLOSS_TAGS = {
     # "qebe": "",
     "wêjeyî": "literary",
     # "xirab": "bad",
+    "kurdî-erebî": "Kurdish-Arabic",
+    "kurdî-krîlî": "Kurdish-Creole",
 }
 
-TAGS = {**GENDER_NUMBER_TAGS, **TABLE_TAGS, **GLOSS_TAGS}
+SOUND_TAGS = {
+    "DYA": "USA",
+    "Teksas": "Texas",
+    "Berlîn": "Berlin",
+    "Almanya": "Germany",
+    "Connecticut": "Connecticut",
+    "QY": "UK",
+    "Başûrê Îngilistanê": "Southern-England",
+    "Bidlîs": "Bitlis",
+    "London": "London",
+    "Awistirya": "Austria",
+    "Îzmîr": "İzmir",
+    "Tirkiye": "Turkey",
+    "Awistralya": "Australia",
+    "Lyon": "Lyon",
+    "Fransa": "France",
+    "Îran": "Iran",
+    "Îtalya": "Italy",
+    "Çîn": "China",
+}
+
+TAGS = {**GENDER_NUMBER_TAGS, **TABLE_TAGS, **GLOSS_TAGS, **SOUND_TAGS}
 
 TOPICS = {
     # Modul:dara_kategoriyan/ferhengokkatbike/dane/ferhengok
@@ -420,17 +444,33 @@ TOPICS = {
 }
 
 
+PRONOUN_TAGS = {
+    # Template:ku-tewîn-lk
+    # https://en.wikipedia.org/wiki/Kurdish_grammar
+    "ez": ["first-person", "singular"],
+    "tu": ["second-person", "singular"],
+    "ew": ["third-person", "singular"],
+    "em, hûn, ew": ["first-person", "second-person", "third-person", "plural"],
+    "min": ["first-person", "singular"],
+    "te": ["second-person", "singular"],
+    "wê/wî": ["third-person", "singular"],
+    "me, we, wan": ["first-person", "second-person", "third-person", "plural"],
+}
+
+
 def translate_raw_tags(data: WordEntry) -> None:
     raw_tags = []
     for raw_tag in data.raw_tags:
         has_tag = False
-        if raw_tag in TAGS and hasattr(data, "tags"):
-            tr_tag = TAGS[raw_tag]
-            if isinstance(tr_tag, str):
-                data.tags.append(tr_tag)
-            elif isinstance(tr_tag, list):
-                data.tags.extend(tr_tag)
-            has_tag = True
+        for index, tag_dict in enumerate([TAGS, PRONOUN_TAGS]):
+            if raw_tag in tag_dict and hasattr(data, "tags"):
+                tr_tag = tag_dict[raw_tag]
+                if isinstance(tr_tag, str):
+                    data.tags.append(tr_tag)
+                elif isinstance(tr_tag, list):
+                    data.tags.extend(tr_tag)
+                if index == 0:
+                    has_tag = True
         if raw_tag in TOPICS and hasattr(data, "topics"):
             topic = TOPICS[raw_tag]
             if isinstance(topic, str):

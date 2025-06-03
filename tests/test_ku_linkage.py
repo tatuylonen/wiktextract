@@ -39,7 +39,7 @@ class TestKuLinkage(TestCase):
         )
         self.assertEqual(
             page_data[0]["forms"],
-            [{"form": "کووچک", "raw_tags": ["kurdî-erebî"]}],
+            [{"form": "کووچک", "tags": ["Kurdish-Arabic"]}],
         )
 
     def test_kol_text(self):
