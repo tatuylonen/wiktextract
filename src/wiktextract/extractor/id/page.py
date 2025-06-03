@@ -43,6 +43,8 @@ def parse_section(
             level_node,
             LINKAGE_SECTIONS[title_text],
         )
+    else:
+        wxr.wtp.debug(f"Unknown section: {title_text}", sortid="id/page/47")
 
     for next_level in level_node.find_child(LEVEL_KIND_FLAGS):
         parse_section(wxr, page_data, base_data, next_level)

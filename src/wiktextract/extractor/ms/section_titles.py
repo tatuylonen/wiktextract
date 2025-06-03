@@ -16,6 +16,20 @@ POS_DATA = {
     "Kata seru": {"pos": "intj"},
     "Kata tugas": {"pos": "unknown"},
     "Perumian": {"pos": "romanization"},
+    "Akhiran": {"pos": "suffix", "tags": ["morpheme"]},
+    "Kata bilangan": {"pos": "num", "tags": ["number"]},
+    "Kata imbuhan akhir": {"pos": "suffix", "tags": ["morpheme"]},
+    "Awalan": {"pos": "prefix", "tags": ["morpheme"]},
+    "Kata imbuhan": {"pos": "prefix", "tags": ["morpheme"]},
+    "Simbol": {"pos": "symbol"},
+    "Kata nama khas": {"pos": "name"},
+    "Kata Tanya": {"pos": "pron", "tags": ["interrogative"]},
+    "Kata tanya": {"pos": "pron", "tags": ["interrogative"]},
+    "Kata adjektif": {"pos": "adj"},
+    "Kata Adjektif": {"pos": "adj"},
+    "Singkatan": {"pos": "abbrev", "tags": ["abbreviation"]},
+    "Kata ganda": {"pos": "noun", "tags": ["plural"]},
+    "Kata benda": {"pos": "noun"},
 }
 
 FORM_SECTIONS = {

@@ -40,6 +40,8 @@ def parse_section(
         extract_translation_section(wxr, page_data, base_data, level_node)
     elif title_text == "Sebutan":
         extract_sound_section(wxr, page_data, base_data, level_node)
+    else:
+        wxr.wtp.debug(f"Unknown section: {title_text}", sortid="ms/page/44")
 
     for next_level in level_node.find_child(LEVEL_KIND_FLAGS):
         parse_section(wxr, page_data, base_data, next_level)
