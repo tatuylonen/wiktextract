@@ -69,15 +69,26 @@ LB_TAGS = {
     "Politik Malaysia": "Malaysia",
     "retorik": "rhetoric",
     "Kesatuan Soviet": "Soviet Union",
+    "peribahasa": "proverb",
 }
 
 POS_HEADER_TAGS = {
     "ejaan Jawi": "Jawi",
+    "genitif": "genitive",
+    "jamak": "plural",
+    "terbilang dan tidak terbilang": ["countable", "uncountable"],
+    "bentuk jamak": "plural",
+    "Ejaan bahasa Urdu": "Urdu",
+    "partitif": "partitive",
 }
 
 SOUND_TAGS = {
     "Received Pronunciation": "Received-Pronunciation",
     "General American": "General-American",
+    "UK": "UK",
+    "A.S.": "General-American",
+    "Pinyin": "Pinyin",
+    "Wade-Giles": "Wade-Giles",
 }
 
 

@@ -43,7 +43,7 @@ def extract_pos_section(
 ) -> None:
     page_data.append(base_data.model_copy(deep=True))
     page_data[-1].pos_title = pos_title
-    pos_data = POS_DATA[pos_title]
+    pos_data = POS_DATA[pos_title.lower()]
     page_data[-1].pos = pos_data["pos"]
     page_data[-1].tags.extend(pos_data.get("tags", []))
 
@@ -130,7 +130,7 @@ def extract_pos_header_template(
     pos_tags = []
     for cat in cats.get("categories", []):
         for pos_title, pos_data in POS_DATA.items():
-            if cat.startswith(pos_title):
+            if cat.lower().startswith(pos_title):
                 pos_type = pos_data["pos"]
                 pos_tags = pos_data.get("tags", [])
                 break

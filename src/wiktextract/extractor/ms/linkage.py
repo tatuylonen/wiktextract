@@ -37,7 +37,7 @@ def extract_linkage_section(
     level_node: LevelNode,
 ) -> None:
     l_dict = defaultdict(list)
-    linkage_name = clean_node(wxr, None, level_node.largs)
+    linkage_name = clean_node(wxr, None, level_node.largs).lower()
     for list_node in level_node.find_child(NodeKind.LIST):
         for list_item in list_node.find_child(NodeKind.LIST_ITEM):
             new_l_name = extract_linkage_list_item(
@@ -66,7 +66,7 @@ def extract_linkage_list_item(
     list_item: WikiNode,
 ) -> str:
     if list_item.definition is not None and len(list_item.definition) > 0:
-        linkage_name = clean_node(wxr, None, list_item.children)
+        linkage_name = clean_node(wxr, None, list_item.children).lower()
         if linkage_name not in LINKAGE_SECTIONS:
             return ""
         for node in list_item.definition:
@@ -83,6 +83,10 @@ def extract_linkage_list_item(
                         l_dict[LINKAGE_SECTIONS[linkage_name]].append(
                             Linkage(word=word)
                         )
+    elif list_item.contain_node(NodeKind.BOLD):
+        extract_proverb_list(
+            wxr, l_dict, list_item, LINKAGE_SECTIONS[linkage_name]
+        )
     else:
         sense = ""
         for node in list_item.children:
@@ -95,7 +99,7 @@ def extract_linkage_list_item(
                         Linkage(word=word, sense=sense)
                     )
             elif isinstance(node, str) and node.strip().endswith(":"):
-                new_linkage_name = node.strip("(): ").capitalize()
+                new_linkage_name = node.strip("(): ").lower()
                 if new_linkage_name in LINKAGE_SECTIONS:
                     linkage_name = new_linkage_name
 
@@ -143,3 +147,28 @@ def extract_nyms_template(
                 getattr(
                     word_entry, LINKAGE_TEMPLATES[t_node.template_name]
                 ).append(l_data)
+
+
+def extract_proverb_list(
+    wxr: WiktextractContext,
+    l_dict: dict[str, list[Linkage]],
+    list_item: WikiNode,
+    linkage_type: str,
+) -> None:
+    proverbs = []
+    after_bold = False
+    sense = ""
+    for index, node in enumerate(list_item.children):
+        if isinstance(node, WikiNode) and node.kind == NodeKind.BOLD:
+            proverb = clean_node(wxr, None, node)
+            if proverb != "":
+                proverbs.append(proverb)
+            after_bold = True
+        elif after_bold and isinstance(node, str) and ":" in node:
+            sense = clean_node(
+                wxr,
+                None,
+                [node[node.index(":") + 1 :]] + list_item.children[index + 1 :],
+            )
+    for proverb in proverbs:
+        l_dict[linkage_type].append(Linkage(word=proverb, sense=sense))

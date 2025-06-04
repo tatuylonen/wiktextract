@@ -143,3 +143,41 @@ Daripada
         self.assertEqual(
             page_data[0]["antonyms"], [{"word": "tagal"}, {"word": "pagawi"}]
         )
+
+    def test_proverb(self):
+        self.wxr.wtp.add_page("Templat:konteks", 10, "(kiasan)")
+        page_data = parse_page(
+            self.wxr,
+            "anjing",
+            """==Bahasa Melayu==
+===Takrifan===
+# sense
+====Kata majmuk====
+*'''anjing hitam''': {{konteks|ms|kiasan}} orang jahat yang sentiasa menunjuk-nunjukkan keburukannya kepada umum.
+
+===Terbitan===
+====Peribahasa====
+*'''anjing menyalak bukit mahukah runtuh''', '''beberapa pun anjing menyalak bukit bolehkah runtuh''': bagaimanapun orang yang jahat mencela orang yang baik tidak akan ada akibatnya.""",
+        )
+        self.assertEqual(
+            page_data[0]["derived"],
+            [
+                {
+                    "word": "anjing hitam",
+                    "sense": "(kiasan) orang jahat yang sentiasa menunjuk-nunjukkan keburukannya kepada umum.",
+                }
+            ],
+        )
+        self.assertEqual(
+            page_data[0]["proverbs"],
+            [
+                {
+                    "word": "anjing menyalak bukit mahukah runtuh",
+                    "sense": "bagaimanapun orang yang jahat mencela orang yang baik tidak akan ada akibatnya.",
+                },
+                {
+                    "word": "beberapa pun anjing menyalak bukit bolehkah runtuh",
+                    "sense": "bagaimanapun orang yang jahat mencela orang yang baik tidak akan ada akibatnya.",
+                },
+            ],
+        )
