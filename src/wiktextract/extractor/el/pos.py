@@ -1,5 +1,6 @@
 import re
 from collections.abc import Iterator
+from typing import TypeAlias
 from unicodedata import name as unicode_name
 
 from wikitextprocessor import (
@@ -671,8 +672,6 @@ def parse_gloss(
             extract_form_of_templates(wxr, parent_sense, t_node)
 
     template_tags: list[str] = []
-    synonyms: list[Linkage] = []
-    antonyms: list[Linkage] = []
 
     bl_linkages: list[Linkage] = []
     no_gloss_but_keep_anyway = False
@@ -730,12 +729,6 @@ def parse_gloss(
 
     text = re.sub(r"__/?[IB]__", "", text)
 
-    if len(synonyms) > 0:
-        parent_sense.synonyms = synonyms
-
-    if len(antonyms) > 0:
-        parent_sense.antonyms = antonyms
-
     if len(template_tags) > 0:
         parent_sense.raw_tags.extend(template_tags)
 
@@ -750,14 +743,30 @@ def parse_gloss(
     return False
 
 
+Related: TypeAlias = Linkage
+Synonym: TypeAlias = Linkage
+Antonym: TypeAlias = Linkage
+
+
 def recurse_glosses1(
     wxr: WiktextractContext,
     parent_sense: Sense,
     node: WikiNode,
-) -> list[Example | Sense]:
+) -> tuple[
+    list[Sense],
+    list[Example],
+    list[Related],
+    list[Synonym],
+    list[Antonym],
+]:
     """Helper function for recurse_glosses"""
+    # print(f"{node=}")
 
-    ret: list[Example | Sense] = []
+    ret_senses: list[Sense] = []
+    ret_examples: list[Example] = []
+    ret_related: list[Related] = []
+    ret_synonyms: list[Synonym] = []
+    ret_antonyms: list[Antonym] = []
     found_gloss = False
 
     # Pydantic stuff doesn't play nice with Tatu's manual dict manipulation
@@ -765,25 +774,41 @@ def recurse_glosses1(
     # content and apply to `parent_sense`.
     dummy_parent: dict = {}
 
-    bl_linkages: list[Linkage] = []
+    related_linkages: list[Linkage] = []
     example_is_synonym = False
+    example_is_antonym = False
 
     def bl_template_handler_fn(name: str, ht: TemplateArgs) -> str | None:
-        nonlocal bl_linkages
+        nonlocal related_linkages
         nonlocal example_is_synonym
+        nonlocal example_is_antonym
+        # Sometimes the bl-templates point to synonyms or antonyms, instead
+        # of just "related"; we save them, and if example_is_xxxnym is true,
+        # we later return them as xxxnyms.
         if name == "βλ":
             for k, v in ht.items():
                 if isinstance(k, int):
-                    bl_linkages.append(Linkage(word=clean_node(wxr, None, v)))
+                    related_linkages.append(
+                        Linkage(word=clean_node(wxr, None, v))
+                    )
             return ""
         if name == "συνων":
-            # The following example is a synonym
             example_is_synonym = True
+            return ""
+        if name == "αντων":
+            example_is_antonym = True
             return ""
         return None
 
     # List nodes contain only LIST_ITEM nodes, which may contain sub-LIST nodes.
     if node.kind == NodeKind.LIST:
+        list_ret: tuple[
+            list[Sense],
+            list[Example],
+            list[Related],
+            list[Synonym],
+            list[Antonym],
+        ] = ([], [], [], [], [])
         for child in node.children:
             if isinstance(child, str) or child.kind != NodeKind.LIST_ITEM:
                 # This should never happen
@@ -792,9 +817,20 @@ def recurse_glosses1(
                     sortid="simple/pos/44",
                 )
                 continue
-            ret.extend(
-                recurse_glosses1(wxr, parent_sense.model_copy(deep=True), child)
-            )
+            (
+                senses,
+                examples,
+                related,
+                synonyms,
+                antonyms,
+            ) = recurse_glosses1(wxr, parent_sense.model_copy(deep=True), child)
+            list_ret[0].extend(senses)
+            list_ret[1].extend(examples)
+            list_ret[2].extend(related)
+            list_ret[3].extend(synonyms)
+            list_ret[4].extend(antonyms)
+        return list_ret
+
     elif node.kind == NodeKind.LIST_ITEM:
         # Split at first LIST node found
         split_at = next(
@@ -820,19 +856,49 @@ def recurse_glosses1(
                 wxr, dummy_parent, contents, template_fn=bl_template_handler_fn
             ).strip("⮡ \n")
 
-            if len(bl_linkages) > 0:
+            # print(f"{contents=}, {text=}, {related_linkages=}")
+
+
+            if example_is_synonym or example_is_antonym:
+                link_linkages = []
+                for snode in contents:
+                    if not isinstance(snode, WikiNode):
+                        continue
+                    if snode.kind == NodeKind.LINK:
+                        link_linkages.append(
+                            Linkage(
+                                word=clean_node(wxr, None, snode.largs[0][0])
+                            )
+                        )
+                    else:
+                        for link in snode.find_child_recursively(NodeKind.LINK):
+                            link_linkages.append(
+                                Linkage(
+                                    word=clean_node(
+                                        wxr, None, snode.largs[0][0]
+                                    )
+                                )
+                            )
+
+                # print("=====")
+                # print(f"{link_linkages=}")
+
                 if example_is_synonym:
-                    parent_sense.synonyms.extend(bl_linkages)
-                else:
-                    parent_sense.related.extend(bl_linkages)
-                bl_linkages = []
-                if not text.strip():
-                    return [parent_sense]
+                    return [], [], [], link_linkages + related_linkages, []
+                elif example_is_antonym:
+                    return [], [], [], [], link_linkages + related_linkages
+
+            if len(related_linkages) > 0:
+                # parent_sense.related.extend(bl_linkages)
+                # related_linkages = []
+                # if not text.strip():
+                return [], [], related_linkages, [], []
 
             example_is_synonym = False
+            example_is_antonym = False
 
             if not text.strip():
-                return []
+                return [], [], [], [], []
 
             example = Example(text=text)
             # logger.debug(f"{wxr.wtp.title}/example\n{text}")
@@ -848,7 +914,7 @@ def recurse_glosses1(
                     parent_sense.categories.extend(v)
             dummy_parent = {}
 
-            return [example]
+            return [], [example], [], [], []
 
         found_gloss = parse_gloss(wxr, parent_sense, contents)
 
@@ -860,17 +926,19 @@ def recurse_glosses1(
                     sortid="simple/pos/82",
                 )
                 continue
-            for r in recurse_glosses1(
-                wxr, parent_sense.model_copy(deep=True), sl
-            ):
-                if isinstance(r, Example):
-                    parent_sense.examples.append(r)
-                elif isinstance(r, Sense):
-                    ret.append(r)
-                else:
-                    logger.error(f"Unreachable, unexpected type: {type(r)}")
-
-    if len(ret) > 0:
+            (
+                senses,
+                examples,
+                related,
+                synonyms,
+                antonyms,
+            ) = recurse_glosses1(wxr, parent_sense.model_copy(deep=True), sl)
+            ret_senses.extend(senses)
+            ret_examples.extend(examples)
+            ret_related.extend(related)
+            ret_synonyms.extend(synonyms)
+            ret_antonyms.extend(antonyms)
+    if len(ret_senses) > 0:
         # the recursion returned actual senses from below, so we will
         # ignore everything else (incl. any example data that might have
         # been given to parent_sense) and return that instead.
@@ -880,14 +948,24 @@ def recurse_glosses1(
         #     isinstance(r, Sense) and r.raw_tags == ["no-gloss"] for r in ret
         # ):
         #     print(f"{ret=}")
-        ret = combine_senses_with_identical_glosses(ret)
-        return ret
+        return (
+            combine_senses_with_identical_glosses(ret_senses),
+            [],
+            [],
+            [],
+            [],
+        )
 
     # If nothing came from below, then this.
     if found_gloss is True or "no-gloss" in parent_sense.raw_tags:
-        return [parent_sense]
+        parent_sense.examples.extend(ret_examples)
+        parent_sense.related.extend(ret_related)
+        parent_sense.synonyms.extend(ret_synonyms)
+        parent_sense.antonyms.extend(ret_antonyms)
 
-    return []
+        return [parent_sense], [], [], [], []
+
+    return [], ret_examples, ret_related, ret_synonyms, ret_antonyms
 
 
 def recurse_glosses(
@@ -897,16 +975,23 @@ def recurse_glosses(
     base_sense = Sense()
     ret: list[Sense] = []
 
-    # recurse_glosses should return Senses. (yet it returns a Sense | Example)
-    for r in recurse_glosses1(wxr, base_sense, node):
-        if not isinstance(r, Sense):
-            wxr.wtp.error(
-                f"NOT Sense has bubbled to recurse_glosses: {type(r)=}",
-                sortid="simple/pos/glosses",
-            )
-            continue
-        convert_tags_in_sense(r)
-        ret.append(r)
+    senses, examples, related, synonyms, antonyms = recurse_glosses1(
+        wxr, base_sense, node
+    )
+    if (
+        len(examples) > 0
+        or len(related) > 0
+        or len(synonyms) > 0
+        or len(antonyms) > 0
+    ):
+        wxr.wtp.error(
+            "NOT Sense has bubbled to recurse_glosses: "
+            f"{examples=}, {related=}, {synonyms=}, {antonyms=}",
+            sortid="pos/glosses/966",
+        )
+    for sense in senses:
+        convert_tags_in_sense(sense)
+        ret.append(sense)
 
     return ret
 
@@ -1021,18 +1106,14 @@ def block_has_non_greek_text(text: str) -> bool:
 
 
 def combine_senses_with_identical_glosses(
-    orig_senses: list[Sense | Example],
-) -> list[Sense | Example]:
+    orig_senses: list[Sense],
+) -> list[Sense]:
     glosses_to_senses: dict[tuple[str, ...], list[Sense]] = {}
-    examples: list[Example] = []
     senses: list[Sense] = []
 
     found_identical_glosses = False
 
     for item in orig_senses:
-        if isinstance(item, Example):
-            examples.append(item)
-            continue
         glosses_key = tuple(item.glosses)
         if glosses_key not in glosses_to_senses:
             glosses_to_senses[glosses_key] = [item]
@@ -1049,4 +1130,4 @@ def combine_senses_with_identical_glosses(
             main_sense.merge(other_sense)
         senses.append(main_sense)
 
-    return senses + examples
+    return senses

@@ -64,6 +64,8 @@ class TestElGlosses(TestCase):
         dumped = data.model_dump(exclude_defaults=True)
         # print(f"{dumped=}")
         senses = {"senses": dumped["senses"]}
+        # print("-----------------------------------")
+        # print(f"{senses=}")
         self.assertEqual(senses, expected)
 
     def test_bl_linkage_irregular_list_item(self) -> None:
@@ -309,6 +311,80 @@ class TestElGlosses(TestCase):
                             "translation": "Ήταν το μυαλό της συνωμοσίας.",
                         },
                     ],
+                },
+            ],
+        }
+        dumped = data.model_dump(exclude_defaults=True)
+        self.assertEqual(dumped, test)
+
+    def test_synonyms_antonyms(self) -> None:
+            # https://el.wiktionary.org/wiki/ευχαριστώ
+            raw = """
+                # [[δείχνω]] σε κάποιον ότι τον [[ευγνωμονώ]] για κάτι που μου έκανε ή που μου έδωσε
+                #: {{πχ}}  ''Μπορείς να τον '''ευχαριστήσεις''' για όλο τον κόπο που έκανε!''
+                #: {{αντων}} [[δυσαρεστώ]], [[πικραίνω]], [[στενοχωρώ]]
+                # κάνω κάποιον να νιώσει όμορφα, [[ικανοποιώ]] κάποιον
+                #: {{συνων}} [[ικανοποιώ]], [[χαροποιώ]]
+                #: {{αντων}} [[δυσαρεστώ]], [[στενοχωρώ]]
+            """
+            expected = {
+                "senses": [
+                    {
+                        "glosses": [
+                            "δείχνω σε κάποιον ότι τον ευγνωμονώ για κάτι που μου έκανε ή που μου έδωσε"
+                        ],
+                        "examples": [
+                            {
+                                "text": ":Πρότυπο:πχ Μπορείς να τον ευχαριστήσεις για όλο τον κόπο που έκανε!"
+                            }
+                        ],
+                        "antonyms": [
+                            {"word": "δυσαρεστώ"},
+                            {"word": "πικραίνω"},
+                            {"word": "στενοχωρώ"},
+                        ],
+                    },
+                    {
+                        "glosses": [
+                            "κάνω κάποιον να νιώσει όμορφα, ικανοποιώ κάποιον"
+                        ],
+                        "synonyms": [{"word": "ικανοποιώ"}, {"word": "χαροποιώ"}],
+                        "antonyms": [{"word": "δυσαρεστώ"}, {"word": "στενοχωρώ"}],
+                    },
+                ],
+            }
+            self.mktest_bl_linkage(raw, expected)
+
+    def test_el_subglosses1(self) -> None:
+        self.wxr.wtp.start_page("brain")
+        data = WordEntry(lang="English", lang_code="en", word="brain")
+        root = self.wxr.wtp.parse(
+            """==={{ουσιαστικό|en}}===
+'''brain'''
+# bar
+## baz
+"""
+        )
+        pos_node = root.children[0]
+        process_pos(
+            self.wxr,
+            pos_node,  # type: ignore[arg-type]
+            data,
+            None,
+            "noun",
+            "ουσιαστικό",
+            pos_tags=[],
+        )
+        # print(f"{data.model_dump(exclude_defaults=True)}")
+        test = {
+            "word": "brain",
+            "forms": [{"form": "brain"}],
+            "lang_code": "en",
+            "lang": "English",
+            "pos": "noun",
+            "senses": [
+                {
+                    "glosses": ["bar", "baz"],
                 },
             ],
         }
