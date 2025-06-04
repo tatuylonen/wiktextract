@@ -83,6 +83,10 @@ def extract_linkage_list_item(
                         l_dict[LINKAGE_SECTIONS[linkage_name]].append(
                             Linkage(word=word)
                         )
+    elif list_item.contain_node(NodeKind.BOLD):
+        extract_proverb_list(
+            wxr, l_dict, list_item, LINKAGE_SECTIONS[linkage_name]
+        )
     else:
         sense = ""
         for node in list_item.children:
@@ -143,3 +147,28 @@ def extract_nyms_template(
                 getattr(
                     word_entry, LINKAGE_TEMPLATES[t_node.template_name]
                 ).append(l_data)
+
+
+def extract_proverb_list(
+    wxr: WiktextractContext,
+    l_dict: dict[str, list[Linkage]],
+    list_item: WikiNode,
+    linkage_type: str,
+) -> None:
+    proverbs = []
+    after_bold = False
+    sense = ""
+    for index, node in enumerate(list_item.children):
+        if isinstance(node, WikiNode) and node.kind == NodeKind.BOLD:
+            proverb = clean_node(wxr, None, node)
+            if proverb != "":
+                proverbs.append(proverb)
+            after_bold = True
+        elif after_bold and isinstance(node, str) and ":" in node:
+            sense = clean_node(
+                wxr,
+                None,
+                [node[node.index(":") + 1 :]] + list_item.children[index + 1 :],
+            )
+    for proverb in proverbs:
+        l_dict[linkage_type].append(Linkage(word=proverb, sense=sense))

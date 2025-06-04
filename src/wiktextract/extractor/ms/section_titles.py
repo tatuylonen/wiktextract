@@ -29,6 +29,11 @@ POS_DATA = {
     "kata ganda": {"pos": "noun", "tags": ["plural"]},
     "kata benda": {"pos": "noun"},
     "kata nama am": {"pos": "noun"},
+    "peribahasa": {"pos": "proverb"},
+    "frasa": {"pos": "phrase"},
+    "kata sendi nama": {"pos": "noun"},
+    "suku kata": {"pos": "syllable"},
+    "penjodoh bilangan": {"pos": "classifier"},
 }
 
 FORM_SECTIONS = {
@@ -47,4 +52,6 @@ LINKAGE_SECTIONS = {
     "kata terbitan": "derived",
     "anagram": "anagrams",
     "terbitan kata": "derived",
+    "peribahasa": "proverbs",
+    "istilah berkaitan": "related",
 }

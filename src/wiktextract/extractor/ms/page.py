@@ -25,8 +25,11 @@ def parse_section(
     title_text = title_text.rstrip(string.digits + string.whitespace + "IVX")
     lower_title = title_text.lower()
     if lower_title in POS_DATA:
+        old_data_len = len(page_data)
         extract_pos_section(wxr, page_data, base_data, level_node, title_text)
-    elif title_text == "Etimologi":
+        if len(page_data) == old_data_len and lower_title in LINKAGE_SECTIONS:
+            extract_linkage_section(wxr, page_data, base_data, level_node)
+    elif lower_title == "etimologi":
         extract_etymology_section(wxr, page_data, base_data, level_node)
     elif lower_title in FORM_SECTIONS:
         extract_form_section(
@@ -35,13 +38,13 @@ def parse_section(
             level_node,
             FORM_SECTIONS[lower_title],
         )
-    elif title_text == "Tesaurus" or lower_title in LINKAGE_SECTIONS:
+    elif lower_title == "tesaurus" or lower_title in LINKAGE_SECTIONS:
         extract_linkage_section(wxr, page_data, base_data, level_node)
-    elif title_text == "Terjemahan":
+    elif lower_title == "terjemahan":
         extract_translation_section(wxr, page_data, base_data, level_node)
-    elif title_text == "Sebutan":
+    elif lower_title == "sebutan":
         extract_sound_section(wxr, page_data, base_data, level_node)
-    elif lower_title == "nota penggunaan":
+    elif lower_title in ["nota penggunaan", "penggunaan"]:
         extract_note_section(
             wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
         )
@@ -71,6 +74,8 @@ def parse_page(
 ) -> list[dict[str, Any]]:
     # Page format
     # https://ms.wiktionary.org/wiki/Wikikamus:Memulakan_laman_baru#Format_laman
+    if page_title.startswith(("Portal:", "Reconstruction:")):
+        return []
     wxr.wtp.start_page(page_title)
     tree = wxr.wtp.parse(page_text, pre_expand=True)
     page_data: list[WordEntry] = []
