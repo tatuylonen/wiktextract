@@ -3229,18 +3229,18 @@ def handle_wikitext_or_html_table(
                     # print("COL:", col)
 
                     # Too many of these errors
-                    if colspan > 40:
-                        # wxr.wtp.error(
-                        #     f"Colspan {colspan} over 30, set to 1",
-                        #     sortid="inflection/20250113a",
-                        # )
-                        colspan = 1
-                    if rowspan > 40:
-                        # wxr.wtp.error(
-                        #     f"Rowspan {rowspan} over 30, set to 1",
-                        #     sortid="inflection/20250113b",
-                        # )
-                        rowspan = 1
+                    if colspan > 100:
+                      # wxr.wtp.error(
+                      #     f"Colspan {colspan} over 30, set to 1",
+                      #     sortid="inflection/20250113a",
+                      # )
+                      colspan = 100
+                    if rowspan > 100:
+                      # wxr.wtp.error(
+                      #     f"Rowspan {rowspan} over 30, set to 1",
+                      #     sortid="inflection/20250113b",
+                      # )
+                      rowspan = 100
 
                     # Process any nested tables recursively.
                     tables, rest = recursively_extract(
