@@ -354,3 +354,39 @@ class TestElGlosses(TestCase):
                 ],
             }
             self.mktest_bl_linkage(raw, expected)
+
+    def test_el_subglosses1(self) -> None:
+        self.wxr.wtp.start_page("brain")
+        data = WordEntry(lang="English", lang_code="en", word="brain")
+        root = self.wxr.wtp.parse(
+            """==={{ουσιαστικό|en}}===
+'''brain'''
+# bar
+## baz
+"""
+        )
+        pos_node = root.children[0]
+        process_pos(
+            self.wxr,
+            pos_node,  # type: ignore[arg-type]
+            data,
+            None,
+            "noun",
+            "ουσιαστικό",
+            pos_tags=[],
+        )
+        # print(f"{data.model_dump(exclude_defaults=True)}")
+        test = {
+            "word": "brain",
+            "forms": [{"form": "brain"}],
+            "lang_code": "en",
+            "lang": "English",
+            "pos": "noun",
+            "senses": [
+                {
+                    "glosses": ["bar", "baz"],
+                },
+            ],
+        }
+        dumped = data.model_dump(exclude_defaults=True)
+        self.assertEqual(dumped, test)
