@@ -183,7 +183,7 @@ def parse_page(
 
     # skip translation pages
     if page_title.endswith(
-        tuple("/" + tr_title for tr_title in TRANSLATIONS_TITLES)
+        tuple("/" + tr_title for tr_title in TRANSLATIONS_TITLES) + ("/衍生詞",)
     ):
         return []
 
