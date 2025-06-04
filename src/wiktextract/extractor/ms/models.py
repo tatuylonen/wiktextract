@@ -108,3 +108,4 @@ class WordEntry(MalayBaseModel):
     sounds: list[Sound] = []
     derived: list[Linkage] = []
     anagrams: list[Linkage] = []
+    notes: list[str] = []

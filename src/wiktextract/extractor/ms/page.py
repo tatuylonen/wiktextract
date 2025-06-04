@@ -41,6 +41,10 @@ def parse_section(
         extract_translation_section(wxr, page_data, base_data, level_node)
     elif title_text == "Sebutan":
         extract_sound_section(wxr, page_data, base_data, level_node)
+    elif lower_title == "nota penggunaan":
+        extract_note_section(
+            wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
+        )
     elif lower_title not in [
         "pautan luar",
         "rujukan",
@@ -118,3 +122,19 @@ def extract_etymology_section(
     else:
         page_data[-1].etymology_text = e_text
         page_data[-1].categories.extend(cats.get("categories", []))
+
+
+def extract_note_section(
+    wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
+) -> None:
+    has_list = False
+    for list_node in level_node.find_child(NodeKind.LIST):
+        has_list = True
+        for list_item in list_node.find_child(NodeKind.LIST_ITEM):
+            note = clean_node(wxr, None, list_item.children)
+            if note != "":
+                word_entry.notes.append(note)
+    if not has_list:
+        note = clean_node(wxr, None, level_node.children)
+        if note != "":
+            word_entry.notes.append(note)
