@@ -153,7 +153,11 @@ def parse_page(
 ) -> list[dict[str, Any]]:
     # page layout
     # https://pt.wiktionary.org/wiki/Wikcionário:Livro_de_estilo
-    if "/traduções" in page_title or page_title.startswith("Wikisaurus:"):
+    if (
+        "/traduções" in page_title
+        or "/tradução" in page_title
+        or page_title.startswith("Wikisaurus:")
+    ):
         # skip translation and thesaurus pages
         return []
     wxr.wtp.start_page(page_title)
