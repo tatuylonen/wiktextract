@@ -102,6 +102,8 @@ def parse_page(
 ) -> list[dict[str, Any]]:
     # page layout
     # https://ja.wiktionary.org/wiki/Wiktionary:スタイルマニュアル
+    if page_title.startswith(("Appendix:", "シソーラス:")):
+        return []
     wxr.wtp.start_page(page_title)
     tree = wxr.wtp.parse(page_text)
     page_data: list[WordEntry] = []
