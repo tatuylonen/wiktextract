@@ -23,24 +23,30 @@ def parse_section(
     title_text = clean_node(wxr, None, level_node.largs)
     wxr.wtp.start_subsection(title_text)
     title_text = title_text.rstrip(string.digits + string.whitespace + "IVX")
-    if title_text in POS_DATA:
+    lower_title = title_text.lower()
+    if lower_title in POS_DATA:
         extract_pos_section(wxr, page_data, base_data, level_node, title_text)
     elif title_text == "Etimologi":
         extract_etymology_section(wxr, page_data, base_data, level_node)
-    elif title_text in FORM_SECTIONS:
+    elif lower_title in FORM_SECTIONS:
         extract_form_section(
             wxr,
             page_data[-1] if len(page_data) > 0 else base_data,
             level_node,
-            FORM_SECTIONS[title_text],
+            FORM_SECTIONS[lower_title],
         )
-    elif title_text == "Tesaurus" or title_text in LINKAGE_SECTIONS:
+    elif title_text == "Tesaurus" or lower_title in LINKAGE_SECTIONS:
         extract_linkage_section(wxr, page_data, base_data, level_node)
     elif title_text == "Terjemahan":
         extract_translation_section(wxr, page_data, base_data, level_node)
     elif title_text == "Sebutan":
         extract_sound_section(wxr, page_data, base_data, level_node)
-    else:
+    elif lower_title not in [
+        "pautan luar",
+        "rujukan",
+        "bacaan lanjut",
+        "lihat juga",
+    ]:
         wxr.wtp.debug(f"Unknown section: {title_text}", sortid="ms/page/44")
 
     for next_level in level_node.find_child(LEVEL_KIND_FLAGS):
