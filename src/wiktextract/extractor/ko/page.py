@@ -143,6 +143,8 @@ def parse_page(
     # page layout
     # https://ko.wiktionary.org/wiki/위키낱말사전:문서_양식
     # https://ko.wiktionary.org/wiki/위키낱말사전:한국어_편집부
+    if page_title.startswith(("Appendix:", "T195546/NS111")):
+        return []
     wxr.wtp.start_page(page_title)
     tree = wxr.wtp.parse(page_text)
     page_data: list[WordEntry] = []
