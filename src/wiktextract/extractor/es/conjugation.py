@@ -112,30 +112,40 @@ def process_es_v_template(
             else:
                 cell_nodes = []
                 for node in cell.children:
-                    if not (
+                    if isinstance(node, HTMLNode) and node.tag == "sup":
+                        sup_tag = clean_node(wxr, None, node.children)
+                        if sup_tag != "" and len(forms) > 0:
+                            forms[-1].raw_tags.append(sup_tag)
+                            translate_raw_tags(forms[-1])
+                    elif (
+                        isinstance(node, WikiNode)
+                        and node.kind == NodeKind.LINK
+                    ):
+                        cell_nodes.append(node)
+                        form = Form(
+                            form=clean_node(wxr, None, cell_nodes).lstrip(", ")
+                        )
+                        for col_head in col_headers:
+                            if (
+                                col_index >= col_head.index
+                                and col_index < col_head.index + col_head.span
+                            ):
+                                form.raw_tags.append(col_head.text)
+                                form.tags.extend(
+                                    PRONOUN_TAGS.get(col_head.text, [])
+                                )
+                        if row_header != "":
+                            form.raw_tags.append(row_header)
+                        if is_archaic_row:
+                            form.tags.append("archaic")
+                        if form.form not in ["", "―"]:
+                            translate_raw_tags(form)
+                            forms.append(form)
+                        cell_nodes.clear()
+                    elif not (
                         isinstance(node, HTMLNode)
                         and "movil" in node.attrs.get("class", "")
                     ):
                         cell_nodes.append(node)  # hidden HTML tag
-                cell_text = clean_node(wxr, None, cell_nodes)
-                for word in cell_text.split(","):
-                    word = word.strip()
-                    form = Form(form=word)
-                    for col_head in col_headers:
-                        if (
-                            col_index >= col_head.index
-                            and col_index < col_head.index + col_head.span
-                        ):
-                            form.raw_tags.append(col_head.text)
-                            form.tags.extend(
-                                PRONOUN_TAGS.get(col_head.text, [])
-                            )
-                    if row_header != "":
-                        form.raw_tags.append(row_header)
-                    if is_archaic_row:
-                        form.tags.append("archaic")
-                    if form.form not in ["", "―"]:
-                        translate_raw_tags(form)
-                        forms.append(form)
                 col_index += 1
     return forms, cats.get("categories", [])
