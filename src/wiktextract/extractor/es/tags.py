@@ -794,6 +794,14 @@ SOUND_TAGS = {
     "londres": "London",
 }
 
+# Template:es.v
+ES_V_SUP_TAGS = {
+    "adj/adv": ["adjective", "adverb"],
+    "part": "participle",
+    "part/adj": ["participle", "adjective"],
+    "arg/uru": ["Argentina", "Uruguay"],
+}
+
 
 ALL_TAGS = {
     **NUMBER_TAGS,
@@ -804,6 +812,7 @@ ALL_TAGS = {
     **VERB_FORM_TAGS,
     **TABLE_TAGS,
     **SOUND_TAGS,
+    **ES_V_SUP_TAGS,
     "afirmativo": "affirmative",
     "negativo": "negative",
     "simples": "simple",

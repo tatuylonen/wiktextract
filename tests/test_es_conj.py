@@ -69,7 +69,6 @@ etymology text
         self.assertEqual(
             page_data[0]["forms"],
             [
-                {"form": "dar", "tags": ["impersonal", "infinitive"]},
                 {"form": "haber dado", "tags": ["impersonal", "infinitive"]},
                 {
                     "form": "diera",
@@ -136,3 +135,45 @@ etymology text
         )
         self.assertTrue("forms" in page_data[0])
         self.assertTrue("forms" not in page_data[1])
+
+    def test_sup_tag(self):
+        self.wxr.wtp.add_page(
+            "Plantilla:es.v",
+            10,
+            """<div>
+<div>'''Conjugación de ''adscribir'''''&emsp;&emsp;paradigma: inscribir (irregular)&nbsp;[<span class='fakelinks down'>▲</span><span class='fakelinks up'>▼</span>]</div>
+<div class='flex mw-collapsible-content'>
+{| class='flex wikitable'
+|- style='font-weight:bold;text-align:center;background:WhiteSmoke'
+! colspan=8 style='background:WhiteSmoke' | Formas no personales (verboides)
+|-
+! style='font-weight:bold;text-align:center;background:WhiteSmoke' | Participio
+| colspan=7 | [[adscrito|<span style='color:DarkGoldenrod; font-weight: bold;'>adscrito</span>]], [[adscripto|<span style='color:DarkGoldenrod; font-weight: bold;'>adscripto</span>]]<sup>ARG/URU</sup>
+|}
+</div>
+</div>""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "adscribir",
+            """== {{lengua|es}} ==
+=== {{verbo transitivo|es}} ===
+;1: gloss
+=== Conjugación ===
+{{es.v}}""",
+        )
+        self.assertEqual(
+            page_data[0]["forms"],
+            [
+                {"form": "adscrito", "tags": ["impersonal", "participle"]},
+                {
+                    "form": "adscripto",
+                    "tags": [
+                        "impersonal",
+                        "participle",
+                        "Argentina",
+                        "Uruguay",
+                    ],
+                },
+            ],
+        )
