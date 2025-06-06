@@ -35,7 +35,13 @@ def parse_section(
         extract_translation_section(
             wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
         )
-    elif title_text in ["Pelafalan", "Ejaan"]:
+    elif title_text in [
+        "Pelafalan",
+        "Ejaan",
+        "Pengucapan",
+        "Suara",
+        "Pemenggalan kata",
+    ]:
         extract_sound_section(
             wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
         )
@@ -46,7 +52,7 @@ def parse_section(
             level_node,
             LINKAGE_SECTIONS[title_text],
         )
-    elif title_text == "Penggunaan":
+    elif title_text in ["Penggunaan", "Catatan penggunaan", "Catatan"]:
         extract_usage_section(
             wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
         )
@@ -55,6 +61,8 @@ def parse_section(
         "Referensi",
         "Pranala luar",
         "Rujukan",
+        "Acuan",
+        "Bacaan lanjutan",
     ]:
         wxr.wtp.debug(f"Unknown section: {title_text}", sortid="id/page/47")
 
