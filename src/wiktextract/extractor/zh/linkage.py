@@ -12,7 +12,7 @@ from wikitextprocessor import (
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from ..ruby import extract_ruby
-from .models import Linkage, WordEntry
+from .models import Form, Linkage, WordEntry
 from .tags import translate_raw_tags
 
 
@@ -47,15 +47,29 @@ def extract_linkage_section(
                     extract_ja_r_multi_template(wxr, node, sense)
                 )
 
-    getattr(page_data[-1], linkage_type).extend(linkage_list)
-    for data in page_data[:-1]:
-        if (
-            data.lang_code == page_data[-1].lang_code
-            and data.sounds == page_data[-1].sounds
-            and data.etymology_text == page_data[-1].etymology_text
-            and data.pos_level == page_data[-1].pos_level == level_node.kind
-        ):
-            getattr(data, linkage_type).extend(linkage_list)
+    if linkage_type == "alt_forms":
+        forms = [
+            Form(
+                form=l_data.word,
+                sense=l_data.sense,
+                tags=l_data.tags + ["alternative"],
+                raw_tags=l_data.raw_tags,
+                roman=l_data.roman,
+                ruby=l_data.ruby,
+            )
+            for l_data in linkage_list
+        ]
+        page_data[-1].forms.extend(forms)
+    else:
+        getattr(page_data[-1], linkage_type).extend(linkage_list)
+        for data in page_data[:-1]:
+            if (
+                data.lang_code == page_data[-1].lang_code
+                and data.sounds == page_data[-1].sounds
+                and data.etymology_text == page_data[-1].etymology_text
+                and data.pos_level == page_data[-1].pos_level == level_node.kind
+            ):
+                getattr(data, linkage_type).extend(linkage_list)
 
 
 def process_linkage_list_item(

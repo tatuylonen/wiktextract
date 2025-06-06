@@ -31,6 +31,7 @@ from .section_titles import (
     POS_TITLES,
     PRONUNCIATION_TITLES,
     TRANSLATIONS_TITLES,
+    USAGE_NOTE_TITLES,
 )
 from .translation import extract_translation
 
@@ -105,7 +106,7 @@ def parse_section(
         extract_descendant_section(
             wxr, level_node, page_data if len(page_data) > 0 else [base_data]
         )
-    elif subtitle in ["使用說明", "用法說明", "用法说明", "使用注意"]:
+    elif subtitle in USAGE_NOTE_TITLES:
         extract_note_section(
             wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
         )

@@ -127,7 +127,7 @@ class TestZhLinkage(TestCase):
                     "pos": "name",
                     "pos_title": "專有名詞",
                     "senses": [{"glosses": ["偵探漫畫"]}],
-                    "synonyms": [{"word": "Tec"}],
+                    "forms": [{"form": "Tec", "tags": ["alternative"]}],
                     "word": "'Tec",
                 }
             ],
