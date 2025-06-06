@@ -9,7 +9,7 @@ from ...wxr_context import WiktextractContext
 from .etymology import extract_etymology_section
 from .linkage import extract_linkage_section
 from .models import Sense, WordEntry
-from .pos import extract_pos_section
+from .pos import extract_pos_section, extract_usage_section
 from .section_titles import LINKAGE_SECTIONS, POS_DATA
 from .sound import extract_sound_section
 from .translation import extract_translation_section
@@ -46,7 +46,16 @@ def parse_section(
             level_node,
             LINKAGE_SECTIONS[title_text],
         )
-    else:
+    elif title_text == "Penggunaan":
+        extract_usage_section(
+            wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
+        )
+    elif title_text not in [
+        "Bacaan lebih lanjut",
+        "Referensi",
+        "Pranala luar",
+        "Rujukan",
+    ]:
         wxr.wtp.debug(f"Unknown section: {title_text}", sortid="id/page/47")
 
     for next_level in level_node.find_child(LEVEL_KIND_FLAGS):

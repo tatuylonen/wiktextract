@@ -102,3 +102,4 @@ class WordEntry(IndonesianBaseModel):
     derived: list[Linkage] = []
     related: list[Linkage] = []
     proverbs: list[Linkage] = []
+    notes: list[str] = []

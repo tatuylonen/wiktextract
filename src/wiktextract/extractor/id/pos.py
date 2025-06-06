@@ -1,4 +1,5 @@
-from wikitextprocessor import (
+from wikitextprocessor.parser import (
+    LEVEL_KIND_FLAGS,
     HTMLNode,
     LevelNode,
     NodeKind,
@@ -197,3 +198,27 @@ def find_form_of_link(
     if form_of != "":
         sense.form_of.append(AltForm(word=form_of))
         sense.tags.append("form-of")
+
+
+def extract_usage_section(
+    wxr: WiktextractContext, word_entry: WordEntry, section_node: LevelNode
+) -> None:
+    non_list_nodes = []
+    for node in section_node.children:
+        if isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
+            for list_item in node.find_child_recursively(NodeKind.LIST_ITEM):
+                note = clean_node(
+                    wxr,
+                    word_entry,
+                    list(list_item.invert_find_child(NodeKind.LIST)),
+                )
+                if note != "":
+                    word_entry.notes.append(note)
+        elif isinstance(node, WikiNode) and node.kind in LEVEL_KIND_FLAGS:
+            break
+        else:
+            non_list_nodes.append(node)
+
+    note = clean_node(wxr, word_entry, non_list_nodes)
+    if note != "":
+        word_entry.notes.append(note)
