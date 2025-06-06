@@ -25,6 +25,15 @@ POS_DATA = {
     "Kontraksi": {"pos": "contraction", "tags": ["contraction"]},
     "Singkatan": {"pos": "abbrev", "tags": ["abbreviation"]},
     "Nama diri": {"pos": "name"},
+    "Arti": {"pos": "unknown"},
+    "Hanzi": {"pos": "character", "tags": ["hanzi"]},
+    "Kanji": {"pos": "character", "tags": ["kanji"]},
+    "Hanja": {"pos": "character", "tags": ["Hanja"]},
+    "Idiom": {"pos": "phrase", "tags": ["idiomatic"]},
+    "Karakter Han": {"pos": "character", "tags": ["han"]},
+    "Kata benda": {"pos": "noun"},
+    "Kata kerja": {"pos": "verb"},
+    "Simbol": {"pos": "symbol"},
 }
 
 
@@ -39,6 +48,10 @@ LINKAGE_SECTIONS = {
     "Turunan": "derived",
     "Peribahasa": "proverbs",
     "Variasi": "forms",
-    "Alternatif": "forms",
+    "Alternatif": "alt_forms",
     "Frasa turunan": "derived",
+    "Bentuk alternatif": "alt_forms",
+    "Lihat juga": "related",
+    "Kata majemuk": "derived",
+    "Ungkapan": "related",
 }

@@ -180,3 +180,20 @@ class TestIdGloss(TestCase):
                 }
             ],
         )
+
+    def test_usage_note(self):
+        page_data = parse_page(
+            self.wxr,
+            "kamu",
+            """==bahasa Indonesia==
+===Pronomina===
+# sense
+=== Penggunaan ===
+* list 1
+** list 2
+:Lihat pula penggunaan di lema [[-mu]]/[[-nya]].""",
+        )
+        self.assertEqual(
+            page_data[0]["notes"],
+            ["list 1", "list 2", "Lihat pula penggunaan di lema -mu/-nya."],
+        )

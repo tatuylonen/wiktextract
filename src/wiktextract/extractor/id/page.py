@@ -1,3 +1,4 @@
+import string
 from typing import Any
 
 from mediawiki_langcodes import name_to_code
@@ -8,7 +9,7 @@ from ...wxr_context import WiktextractContext
 from .etymology import extract_etymology_section
 from .linkage import extract_linkage_section
 from .models import Sense, WordEntry
-from .pos import extract_pos_section
+from .pos import extract_pos_section, extract_usage_section
 from .section_titles import LINKAGE_SECTIONS, POS_DATA
 from .sound import extract_sound_section
 from .translation import extract_translation_section
@@ -20,7 +21,9 @@ def parse_section(
     base_data: WordEntry,
     level_node: LevelNode,
 ) -> None:
-    title_text = clean_node(wxr, None, level_node.largs)
+    title_text = clean_node(wxr, None, level_node.largs).rstrip(
+        string.digits + string.whitespace
+    )
     wxr.wtp.start_subsection(title_text)
     if title_text in POS_DATA:
         extract_pos_section(wxr, page_data, base_data, level_node, title_text)
@@ -32,7 +35,13 @@ def parse_section(
         extract_translation_section(
             wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
         )
-    elif title_text in ["Pelafalan", "Ejaan"]:
+    elif title_text in [
+        "Pelafalan",
+        "Ejaan",
+        "Pengucapan",
+        "Suara",
+        "Pemenggalan kata",
+    ]:
         extract_sound_section(
             wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
         )
@@ -43,7 +52,18 @@ def parse_section(
             level_node,
             LINKAGE_SECTIONS[title_text],
         )
-    else:
+    elif title_text in ["Penggunaan", "Catatan penggunaan", "Catatan"]:
+        extract_usage_section(
+            wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
+        )
+    elif title_text not in [
+        "Bacaan lebih lanjut",
+        "Referensi",
+        "Pranala luar",
+        "Rujukan",
+        "Acuan",
+        "Bacaan lanjutan",
+    ]:
         wxr.wtp.debug(f"Unknown section: {title_text}", sortid="id/page/47")
 
     for next_level in level_node.find_child(LEVEL_KIND_FLAGS):
@@ -75,7 +95,8 @@ def parse_page(
         cats = {}
         lang_name = clean_node(wxr, cats, level2_node.largs) or "unknown"
         lang_code = (
-            name_to_code(lang_name.removeprefix("bahasa "), "id") or "unknown"
+            name_to_code(lang_name.lower().removeprefix("bahasa "), "id")
+            or "unknown"
         )
         wxr.wtp.start_section(lang_name)
         base_data = WordEntry(

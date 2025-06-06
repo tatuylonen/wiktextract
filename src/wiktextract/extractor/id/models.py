@@ -65,6 +65,7 @@ class Sound(IndonesianBaseModel):
     tags: list[str] = []
     raw_tags: list[str] = []
     roman: str = ""
+    rhymes: str = ""
 
 
 class Linkage(IndonesianBaseModel):
@@ -102,3 +103,5 @@ class WordEntry(IndonesianBaseModel):
     derived: list[Linkage] = []
     related: list[Linkage] = []
     proverbs: list[Linkage] = []
+    notes: list[str] = []
+    hyphenation: str = ""

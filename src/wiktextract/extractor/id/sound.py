@@ -34,6 +34,12 @@ def extract_sound_list_item(
                 raw_tag = clean_node(wxr, None, node).strip("()")
                 if raw_tag != "":
                     raw_tags.append(raw_tag)
+            elif node.template_name == "rhymes":
+                extract_rhymes_template(wxr, word_entry, node, raw_tags)
+        elif isinstance(node, str) and node.strip().startswith("Hifenasi:"):
+            word_entry.hyphenation = (
+                node.strip().removeprefix("Hifenasi:").strip()
+            )
 
 
 def extract_ipa_template(
@@ -79,3 +85,18 @@ def extract_ejaan_id_template(
     if sound.ipa != "":
         translate_raw_tags(sound)
         word_entry.sounds.append(sound)
+
+
+def extract_rhymes_template(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    t_node: TemplateNode,
+    raw_tags: list[str],
+) -> None:
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for link_node in expanded_node.find_child(NodeKind.LINK):
+        rhyme = clean_node(wxr, None, link_node)
+        if rhyme != "":
+            word_entry.sounds.append(Sound(rhymes=rhyme, raw_tags=raw_tags))
