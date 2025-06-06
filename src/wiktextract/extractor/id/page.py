@@ -87,7 +87,8 @@ def parse_page(
         cats = {}
         lang_name = clean_node(wxr, cats, level2_node.largs) or "unknown"
         lang_code = (
-            name_to_code(lang_name.removeprefix("bahasa "), "id") or "unknown"
+            name_to_code(lang_name.lower().removeprefix("bahasa "), "id")
+            or "unknown"
         )
         wxr.wtp.start_section(lang_name)
         base_data = WordEntry(
