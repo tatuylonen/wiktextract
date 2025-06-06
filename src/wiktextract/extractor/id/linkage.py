@@ -87,7 +87,7 @@ def extract_linkage_list_item(
             if l_data.word == wxr.wtp.title:
                 continue
             if l_type == "alt_forms":
-                l_data.tags.append("alt-of")
+                l_data.tags.append("alternative")
             word_entry.forms.append(
                 Form(
                     form=l_data.word, raw_tags=l_data.raw_tags, tags=l_data.tags

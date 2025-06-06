@@ -107,7 +107,7 @@ class TestIdLinkage(TestCase):
         self.assertEqual(
             page_data[0]["forms"],
             [
-                {"form": "deje", "tags": ["alt-of"]},
-                {"form": "daja", "tags": ["alt-of"]},
+                {"form": "deje", "tags": ["alternative"]},
+                {"form": "daja", "tags": ["alternative"]},
             ],
         )

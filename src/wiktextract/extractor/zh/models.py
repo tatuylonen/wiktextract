@@ -75,6 +75,7 @@ class Form(ChineseBaseModel):
     )
     hiragana: str = ""
     roman: str = ""
+    sense: str = ""
 
 
 class Sound(ChineseBaseModel):
