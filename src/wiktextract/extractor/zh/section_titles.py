@@ -182,6 +182,13 @@ POS_TITLES: dict[str, POSSubtitleData] = {
     "詞根": {"pos": "root", "tags": ["morpheme"]},
     "汉字词": {"pos": "noun"},  # low quality Korean pages created by bot
     "漢字詞": {"pos": "noun"},
+    "副動詞": {"pos": "converb"},
+    "字義": {"pos": "character"},
+    "含義": {"pos": "unknown"},
+    "含义": {"pos": "unknown"},
+    "形容词、副词": {"pos": "adj"},
+    "語素文字": {"pos": "character"},
+    "人名": {"pos": "name"},
 }
 
 # map title to pydantic field
@@ -263,6 +270,10 @@ LINKAGE_TITLES: dict[str, str] = {
     "整體詞": "holonyms",
     "替代寫法": "alt_forms",
     "替代形式": "alt_forms",
+    "其它拼寫": "alt_forms",
+    "其它拼写": "alt_forms",
+    "其它寫法": "alt_forms",
+    "其它写法": "alt_forms",
     "杂项": "various",
     "派生": "derived",
     "派生字": "derived",
@@ -349,6 +360,7 @@ IGNORED_TITLES: frozenset[str] = frozenset(
         "參考資料",
         "參考來源",
         "参考资料",
+        "参考資料",
         "参考",
         "參考",
         "參見",
@@ -361,6 +373,7 @@ IGNORED_TITLES: frozenset[str] = frozenset(
         "延伸閲讀",
         "延伸閱讀",
         "扩展阅读",
+        "擴展閱讀",
         "編碼",
         "编码",
         "回文",
@@ -370,6 +383,8 @@ IGNORED_TITLES: frozenset[str] = frozenset(
         "外部链接",
         "外部連結",
         "統計",
+        "統計數據",
+        "统计数据",
     ]
 )
 
@@ -404,5 +419,27 @@ PRONUNCIATION_TITLES: frozenset[str] = frozenset(
 TRANSLATIONS_TITLES: frozenset[str] = frozenset(["翻譯", "翻译"])
 
 DESCENDANTS_TITLES: frozenset[str] = frozenset(
-    ["派生語彙", "派生语汇", "派生詞", "派生語詞", "派生语词"]
+    [
+        "派生語彙",
+        "派生语汇",
+        "派生詞",
+        "派生語詞",
+        "派生语词",
+        "後代詞彙",
+        "后代词汇",
+        "後裔",
+        "后裔",
+    ]
 )
+
+USAGE_NOTE_TITLES = {
+    "使用說明",
+    "用法說明",
+    "用法说明",
+    "使用注意",
+    "使用註解",
+    "使用説明",
+    "使用備注",
+    "使用说明",
+    "用法",
+}
