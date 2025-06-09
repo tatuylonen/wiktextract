@@ -23,7 +23,7 @@ from .inflection import extract_inflection
 from .linkage import extract_linkage
 from .models import Sense, WordEntry
 from .note import extract_note, extract_recognition_rate_section
-from .pronunciation import extract_pronunciation
+from .pronunciation import extract_homophone_section, extract_pronunciation
 from .section_types import (
     ETYMOLOGY_SECTIONS,
     IGNORED_SECTIONS,
@@ -121,6 +121,19 @@ def parse_section(
                 )
             elif section_type == "attestations":
                 extract_etymology_examples(wxr, level_node, base_data)
+            elif section_type in ["homophones", "homo"]:
+                extract_homophone_section(
+                    wxr,
+                    page_data,
+                    base_data,
+                    level_node,
+                    title_categories.get("categories", []),
+                )
+            else:
+                wxr.wtp.debug(
+                    f"Unknown section: {section_type}",
+                    sortid="extractor/fr/page/parse_section/127",
+                )
 
     find_bottom_category_links(wxr, page_data, level_node)
     for next_level_node in level_node.find_child(LEVEL_KIND_FLAGS):

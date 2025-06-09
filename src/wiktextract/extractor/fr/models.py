@@ -61,6 +61,8 @@ class Sound(FrenchBaseModel):
     raw_tags: list[str] = []
     rhymes: str = ""
     categories: list[str] = Field(default=[], exclude=True)
+    homophone: str = ""
+    roman: str = ""
 
 
 class Translation(FrenchBaseModel):
