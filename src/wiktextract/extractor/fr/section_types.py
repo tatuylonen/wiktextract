@@ -142,11 +142,11 @@ POS_SECTIONS: dict[str, POSSubtitleData] = {
     "pronom-réfl": {"pos": "pron", "tags": ["person"]},
     "prov": {"pos": "proverb"},
     "proverbe": {"pos": "proverb"},
-    "pré-nom": {"pos": "name", "tags": ["first name"]},
+    "pré-nom": {"pos": "name", "tags": ["first-name"]},
     "pré-verbe": {"pos": "preverb"},
     "préf": {"pos": "prefix", "tags": ["morpheme"]},
     "préfixe": {"pos": "prefix", "tags": ["morpheme"]},
-    "prénom": {"pos": "name", "tags": ["first name"]},
+    "prénom": {"pos": "name", "tags": ["first-name"]},
     "prép": {"pos": "prep"},
     "préposition": {"pos": "prep"},
     "quantif": {"pos": "quantifier"},
@@ -230,6 +230,10 @@ LINKAGE_SECTIONS: dict[str, str] = {
     "vocabulaire proche": "related",
     "vocabulaire": "related",
     "gentilés": "related",
+    "diminutifs": "related",
+    "augmentatifs": "related",
+    "composés": "derived",
+    "noms vernaculaires": "related",
 }
 
 LINKAGE_TAGS = {
@@ -240,6 +244,10 @@ LINKAGE_TAGS = {
     "variantes dialectales": ["dialectal"],
     "variantes dialectes": ["dialectal"],
     "gentilés": ["demonym", "adjective"],
+    "diminutifs": ["diminutive"],
+    "augmentatifs": ["augmentative"],
+    "composés": ["compound"],
+    "noms vernaculaires": ["vernacular"],
 }
 
 IGNORED_SECTIONS: frozenset[str] = frozenset(
