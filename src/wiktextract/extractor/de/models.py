@@ -173,3 +173,4 @@ class WordEntry(BaseModelWrap):
     meronyms: list[Linkage] = []
     hyphenation: str = ""
     notes: list[str] = []
+    related: list[Linkage] = []

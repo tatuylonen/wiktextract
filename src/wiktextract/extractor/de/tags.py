@@ -305,6 +305,11 @@ OTHER_TAGS = {
     "Nebenform von": "variant",
     "Verben": "verb",
     "regional": "regional",
+    # Vorlage:CH&LI
+    "Schweiz und Liechtenstein": ["Switzerland", "Liechtenstein"],
+    "Switzerland and Liechtenstein": ["Switzerland", "Liechtenstein"],
+    "traditionell": "traditional",
+    "vereinfachte Schreibweise": "simplified",
 }
 
 TENSE_TAGS = {

@@ -1,4 +1,4 @@
-from wikitextprocessor.parser import LevelNode, NodeKind, WikiNode
+from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -34,6 +34,10 @@ def extracrt_form_section(
                     )
                     translate_raw_tags(form_data)
                     word_entry.forms.append(form_data)
+            elif isinstance(child, TemplateNode):
+                t_text = clean_node(wxr, word_entry, child)
+                if t_text.endswith(":"):
+                    raw_tags.append(t_text.removesuffix(":").strip())
 
 
 def extract_transcription_section(
