@@ -5,7 +5,7 @@ from wikitextprocessor.parser import NodeKind, TemplateNode, WikiNode
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from ..share import set_sound_file_url_fields
-from .models import Sound, WordEntry
+from .models import Linkage, Sound, WordEntry
 from .tags import translate_raw_tags
 
 
@@ -283,3 +283,52 @@ def process_cmn_pron_template(
             sounds_list.extend(process_pron_list_item(wxr, list_item, [], "zh"))
 
     return sounds_list
+
+
+def extract_homophone_section(
+    wxr: WiktextractContext,
+    page_data: list[WordEntry],
+    base_data: WordEntry,
+    level_node: WikiNode,
+    title_cats: list[str],
+) -> None:
+    sounds = []
+    for list_node in level_node.find_child(NodeKind.LIST):
+        for list_item in list_node.find_child(NodeKind.LIST_ITEM):
+            sounds.extend(extract_homophone_list_item(wxr, list_item))
+
+    if len(page_data) > 0:
+        for data in page_data:
+            if data.lang_code == base_data.lang_code:
+                data.sounds.extend(sounds)
+                data.categories.extend(title_cats)
+                for sound in sounds:
+                    data.categories.extend(sound.categories)
+    else:
+        base_data.sounds.extend(sounds)
+        base_data.categories.extend(title_cats)
+        for sound in sounds:
+            base_data.categories.extend(sound.categories)
+
+
+def extract_homophone_list_item(
+    wxr: WiktextractContext, list_item: WikiNode
+) -> list[Sound]:
+    sounds = []
+    for node in list_item.children:
+        if isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
+            word = clean_node(wxr, None, node)
+            if word != "":
+                sounds.append(Sound(homophone=word))
+        elif isinstance(node, TemplateNode) and node.template_name in [
+            "l",
+            "lien",
+        ]:
+            from .linkage import process_lien_template
+
+            l_data = Linkage(word="")
+            process_lien_template(wxr, node, l_data)
+            if l_data.word != "":
+                sounds.append(Sound(homophone=l_data.word, roman=l_data.roman))
+
+    return sounds

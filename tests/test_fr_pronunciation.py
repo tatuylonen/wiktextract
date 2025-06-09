@@ -233,3 +233,27 @@ class TestPronunciation(TestCase):
                 {"zh_pron": "ㄗㄨㄛˋ", "tags": ["Mandarin", "Bopomofo"]},
             ],
         )
+
+    def test_homophones(self):
+        self.wxr.wtp.add_page(
+            "Modèle:S",
+            10,
+            '{{#ifeq:{{{1}}}|homophones|<span class="" title="">Homophones</span>[[Catégorie:Mots ayant des homophones en okinawaïen|ちゅい]]|}}',
+        )
+        page_data = parse_page(
+            self.wxr,
+            "1人",
+            """== {{langue|ryu}} ==
+=== {{S|nom|ryu|clé=ちゅい}} ===
+# [[une|Une]] [[personne]].
+=== {{S|prononciation}} ===
+==== {{S|homophones|ryu|clé=ちゅい}} ====
+* {{lien|一年|ryu|tr=ichinin}}""",
+        )
+        self.assertEqual(
+            page_data[0]["categories"],
+            ["Mots ayant des homophones en okinawaïen"],
+        )
+        self.assertEqual(
+            page_data[0]["sounds"], [{"homophone": "一年", "roman": "ichinin"}]
+        )

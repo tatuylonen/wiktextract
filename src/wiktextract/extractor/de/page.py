@@ -101,6 +101,11 @@ def parse_section(
                 page_data[-1] if len(page_data) > 0 else base_data,
                 level_node,
             )
+        elif section_name not in ["Referenzen"]:
+            wxr.wtp.debug(
+                f"Unknown section: {section_name}",
+                sortid="extractor/de/page/parse_section/107",
+            )
 
 
 FORM_POS = {

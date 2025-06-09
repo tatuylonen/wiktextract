@@ -229,6 +229,7 @@ LINKAGE_SECTIONS: dict[str, str] = {
     "vocabulaire apparenté": "related",
     "vocabulaire proche": "related",
     "vocabulaire": "related",
+    "gentilés": "related",
 }
 
 LINKAGE_TAGS = {
@@ -238,6 +239,7 @@ LINKAGE_TAGS = {
     "variantes dial": ["dialectal"],
     "variantes dialectales": ["dialectal"],
     "variantes dialectes": ["dialectal"],
+    "gentilés": ["demonym", "adjective"],
 }
 
 IGNORED_SECTIONS: frozenset[str] = frozenset(
@@ -252,6 +254,8 @@ IGNORED_SECTIONS: frozenset[str] = frozenset(
         "bib",
         "citations",
         "cit",
+        "voir aussi",
+        "voir",
     ]
 )
 
