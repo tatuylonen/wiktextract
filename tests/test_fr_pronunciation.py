@@ -29,7 +29,11 @@ class TestPronunciation(TestCase):
             WordEntry(word="bonjour", lang_code="fr", lang="Français"),
             WordEntry(word="bonjour", lang_code="fr", lang="Français"),
         ]
-        self.wxr.wtp.add_page("Modèle:pron", 10, body="\\bɔ̃.ʒuʁ\\")
+        self.wxr.wtp.add_page(
+            "Modèle:pron",
+            10,
+            body='[[Annexe:Prononciation/français|<span class="API" title="Prononciation API">\\{{{1}}}\\</span>]]',
+        )
         self.wxr.wtp.start_page("bonjour")
         root = self.wxr.wtp.parse(
             """=== Prononciation ===
@@ -136,7 +140,11 @@ class TestPronunciation(TestCase):
     def test_paronymes_subsection(self):
         # https://fr.wiktionary.org/wiki/wagonnet
         self.wxr.wtp.add_page("Modèle:langue", 10, "Français")
-        self.wxr.wtp.add_page("Modèle:pron", 10, "\\{{{1|}}}\\")
+        self.wxr.wtp.add_page(
+            "Modèle:pron",
+            10,
+            '[[Annexe:Prononciation/français|<span class="API" title="Prononciation API">\\va.ɡɔ.nɛ\\</span>]]',
+        )
         data = parse_page(
             self.wxr,
             "wagonnet",
@@ -202,7 +210,7 @@ class TestPronunciation(TestCase):
             "Modèle:cmn-pron",
             10,
             """* '''mandarin''' [[Annexe:Prononciation/mandarin|<span class="API" title="Prononciation API">\\t͡su̯ɔ˥\\</span>]], [[Annexe:Prononciation/mandarin|<span class="API" title="Prononciation API">\\t͡su̯ɔ˧˥\\</span>]], [[Annexe:Prononciation/mandarin|<span class="API" title="Prononciation API">\\t͡su̯ɔ˥˩\\</span>]]
-** {{pinyin}} : {{lang|"zh-Latn-pinyin|zuō, zuó, zuò}}
+** {{pinyin}} : {{lang|zh-Latn-pinyin|zuō, zuó, zuò}}
 ** {{EFEO}} : {{lang|zh-Latn|tso, tso, tso}}
 ** {{Wade}} : {{lang|zh-Latn|tso<sup>1</sup>, tso<sup>2</sup>, tso<sup>4</sup>}}
 ** {{Yale-zh}} : {{lang|zh-Latn|dzwō, dzwó, dzwò}}

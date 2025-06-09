@@ -136,10 +136,12 @@ def process_sound_list_item_templates(
     pre_nodes: list[WikiNode],
     lang_code: str,
 ) -> list[Sound]:
-    if t_node.template_name in PRON_TEMPLATES or t_node.template_name == "lang":
+    if t_node.template_name in PRON_TEMPLATES:
         return process_pron_template(
             wxr, t_node, raw_tags, lang_code, pre_nodes
         )
+    elif t_node.template_name == "lang":
+        return extract_lang_template(wxr, t_node, raw_tags, lang_code)
     elif t_node.template_name in {
         "écouter",
         "audio",
@@ -172,7 +174,6 @@ def process_pron_template(
         # and expand to an edit link for adding the missing data.
         return []
     sounds_list = []
-    pron_texts = clean_node(wxr, None, t_node)
     # https://en.wikipedia.org/wiki/Aspirated_h
     # https://fr.wiktionary.org/wiki/Modèle:h_aspiré
     aspirated_h = ""
@@ -180,18 +181,39 @@ def process_pron_template(
         if previous_nodes[-1].template_name in ASPIRATED_H_TEMPLATES:
             aspirated_h = clean_node(wxr, None, previous_nodes[-1])
 
-    if len(pron_texts) > 0:
-        use_key = "zh_pron" if lang_code == "zh" else "ipa"
-        prons = set()
-        for pron_text in re.split(",|，", pron_texts):
-            pron_text = pron_text.strip()
-            if len(pron_text) > 0 and pron_text not in prons:
-                prons.add(pron_text)
-                sound = Sound(raw_tags=raw_tags[:])
-                setattr(sound, use_key, aspirated_h + pron_text)
-                translate_raw_tags(sound)
-                sounds_list.append(sound)
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for span_tag in expanded_node.find_html_recursively(
+        "span", attr_name="class", attr_value="API"
+    ):
+        ipa = clean_node(wxr, None, span_tag)
+        if ipa != "":
+            sound = Sound(raw_tags=raw_tags[:], ipa=aspirated_h + ipa)
+            translate_raw_tags(sound)
+            sounds_list.append(sound)
     return sounds_list
+
+
+def extract_lang_template(
+    wxr: WiktextractContext,
+    t_node: TemplateNode,
+    raw_tags: list[str],
+    lang_code: str,
+) -> list[Sound]:
+    sounds = []
+    field = "zh_pron" if lang_code == "zh" else "ipa"
+    pron_texts = clean_node(wxr, None, t_node)
+    prons = set()
+    for pron_text in re.split(",|，", pron_texts):
+        pron_text = pron_text.strip()
+        if len(pron_text) > 0 and pron_text not in prons:
+            prons.add(pron_text)
+            sound = Sound(raw_tags=raw_tags[:])
+            setattr(sound, field, pron_text)
+            translate_raw_tags(sound)
+            sounds.append(sound)
+    return sounds
 
 
 def process_ecouter_template(
