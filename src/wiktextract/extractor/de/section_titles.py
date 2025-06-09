@@ -100,6 +100,7 @@ LINKAGE_TITLES: dict[str, str] = {
     "Abgeleitete Symbole": "derived",
     "Geflügelte Worte": "proverbs",
     "Meronyme": "meronyms",
+    "Wortfamilie": "related",
 }
 
 FORM_TITLES = {
@@ -116,4 +117,6 @@ FORM_TITLES = {
     "Männliche Namensvarianten": ["masculine"],
     "Nicht mehr gültige Schreibweisen": ["obsolete"],
     "Symbole": ["symbol"],
+    "Alternative Schreibweisen": ["alternative"],
+    "Abkürzungen": ["abbreviation"],
 }

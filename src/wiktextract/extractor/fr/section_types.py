@@ -234,6 +234,8 @@ LINKAGE_SECTIONS: dict[str, str] = {
     "augmentatifs": "related",
     "composés": "derived",
     "noms vernaculaires": "related",
+    "écriture": "forms",
+    "anciennes orthographes": "forms",
 }
 
 LINKAGE_TAGS = {
@@ -248,6 +250,7 @@ LINKAGE_TAGS = {
     "augmentatifs": ["augmentative"],
     "composés": ["compound"],
     "noms vernaculaires": ["vernacular"],
+    "anciennes orthographes": ["archaic"],
 }
 
 IGNORED_SECTIONS: frozenset[str] = frozenset(
