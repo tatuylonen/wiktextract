@@ -239,7 +239,7 @@ GLOSS_TAGS = {
     "wêjeyî": "literary",
     # "xirab": "bad",
     "kurdî-erebî": "Kurdish-Arabic",
-    "kurdî-krîlî": "Kurdish-Creole",
+    "kurdî-krîlî": "Kurdish-Cyrillic",
 }
 
 SOUND_TAGS = {
