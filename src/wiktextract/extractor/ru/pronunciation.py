@@ -11,12 +11,11 @@ from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from ..share import set_sound_file_url_fields
 from .models import Sound, WordEntry
+from .tags import translate_raw_tags
 
 
 def process_transcription_template(
-    wxr: WiktextractContext,
-    word_entry: WordEntry,
-    template_node: WikiNode,
+    wxr: WiktextractContext, word_entry: WordEntry, template_node: WikiNode
 ):
     # https://ru.wiktionary.org/wiki/Шаблон:transcription
 
@@ -37,9 +36,7 @@ def process_transcription_template(
 
 
 def process_transcriptions_template(
-    wxr: WiktextractContext,
-    word_entry: WordEntry,
-    template_node: WikiNode,
+    wxr: WiktextractContext, word_entry: WordEntry, template_node: WikiNode
 ):
     # https://ru.wiktionary.org/wiki/Шаблон:transcriptions
 
@@ -72,9 +69,7 @@ def process_transcriptions_template(
 
 
 def process_transcription_ru_template(
-    wxr: WiktextractContext,
-    word_entry: WordEntry,
-    template_node: WikiNode,
+    wxr: WiktextractContext, word_entry: WordEntry, template_node: WikiNode
 ):
     # https://ru.wiktionary.org/wiki/Шаблон:transcription-ru
     sound = Sound()
@@ -102,9 +97,7 @@ def process_transcription_ru_template(
 
 
 def process_transcriptions_ru_template(
-    wxr: WiktextractContext,
-    word_entry: WordEntry,
-    template_node: WikiNode,
+    wxr: WiktextractContext, word_entry: WordEntry, template_node: WikiNode
 ):
     sound_sg = Sound()
     sound_pl = Sound()
@@ -226,9 +219,7 @@ TRANSCRIPTION_TEMPLATE_PROCESSORS = {
 
 
 def extract_pronunciation_section(
-    wxr: WiktextractContext,
-    word_entry: WordEntry,
-    level_node: LevelNode,
+    wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
 ) -> None:
     for child in level_node.find_child(NodeKind.TEMPLATE):
         template_name = child.template_name
@@ -252,9 +243,7 @@ def extract_pronunciation_section(
 
 
 def extract_homophone_section(
-    wxr: WiktextractContext,
-    word_entry: WordEntry,
-    level_node: LevelNode,
+    wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
 ) -> None:
     homophones = []
     for link_node in level_node.find_child_recursively(NodeKind.LINK):
@@ -264,3 +253,23 @@ def extract_homophone_section(
     if len(homophones) > 0:
         sound = Sound(homophones=homophones)
         word_entry.sounds.append(sound)
+
+
+def extract_rhyme_section(
+    wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
+) -> None:
+    for list_node in level_node.find_child(NodeKind.LIST):
+        for list_item in list_node.find_child(NodeKind.LIST_ITEM):
+            raw_tags = []
+            for node in list_item.children:
+                if isinstance(node, str) and node.strip().endswith(":"):
+                    for raw_tag in node.strip(": ").split(","):
+                        raw_tag = raw_tag.strip()
+                        if raw_tag != "":
+                            raw_tags.append(raw_tag)
+                elif isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
+                    rhyme = clean_node(wxr, None, node)
+                    if rhyme != "":
+                        sound = Sound(rhymes=rhyme, raw_tags=raw_tags)
+                        translate_raw_tags(sound)
+                        word_entry.sounds.append(sound)

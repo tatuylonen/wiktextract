@@ -29,6 +29,7 @@ from .models import AltForm, Form, Sense, Sound, WordEntry
 from .pronunciation import (
     extract_homophone_section,
     extract_pronunciation_section,
+    extract_rhyme_section,
 )
 from .section_titles import (
     ALT_FORM_SECTIONS,
@@ -259,7 +260,9 @@ def parse_section(
         extract_alt_form_section(
             wxr, page_data[-1], level_node, ALT_FORM_SECTIONS[section_title]
         )
-    else:
+    elif section_title == "рифмы":
+        extract_rhyme_section(wxr, page_data[-1], level_node)
+    elif section_title not in ["см. также", "смотреть также", "смотрите также"]:
         wxr.wtp.debug(
             f"Unprocessed section {section_title}",
             sortid="wixtextract/extractor/ru/page/parse_section/66",
