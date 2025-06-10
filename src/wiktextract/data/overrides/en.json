@@ -1,6 +1,0 @@
-{
-  "Template:lookfrom": {
-    "body": "<span class=\"plainlinks\">[https://en.wiktionary.org/w/index.php?title=Category:{{urlencode:{{langname|{{{1<noinclude>|en</noinclude>}}}}}}}+lemmas&from={{urlencode:{{{2|<includeonly>{{PAGENAME}}</includeonly><noinclude>mouth</noinclude>}}}}}#mw-pages {{langname|{{{1<noinclude>|en</noinclude>}}}}} terms starting with “{{{2|<includeonly>{{PAGENAME}}</includeonly><noinclude>mouth</noinclude>}}}”]</span>",
-    "namespace_id": 10
-  }
-}
