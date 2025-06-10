@@ -16,6 +16,7 @@ def extracrt_form_section(
     for list_item_node in level_node.find_child_recursively(NodeKind.LIST_ITEM):
         sense_idx = ""
         raw_tags = []
+        find_form = False
         for child in list_item_node.children:
             if isinstance(child, str) and child.startswith("["):
                 sense_idx, _ = extract_sense_index(child)
@@ -40,10 +41,23 @@ def extracrt_form_section(
                     translate_raw_tags(form_data)
                     word_entry.forms.append(form_data)
                     raw_tags.clear()
+                    find_form = True
             elif isinstance(child, TemplateNode):
                 t_text = clean_node(wxr, word_entry, child)
                 if t_text.endswith(":"):
                     raw_tags.append(t_text.removesuffix(":").strip())
+
+        if not find_form:  # plain text
+            word = clean_node(wxr, None, list_item_node.children)
+            if word != "":
+                form_data = Form(
+                    form=word,
+                    sense_index=sense_idx,
+                    raw_tags=raw_tags,
+                    tags=tags,
+                )
+                translate_raw_tags(form_data)
+                word_entry.forms.append(form_data)
 
 
 def extract_transcription_section(

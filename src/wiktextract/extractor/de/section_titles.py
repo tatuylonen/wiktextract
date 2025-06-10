@@ -120,4 +120,7 @@ FORM_TITLES = {
     "Alternative Schreibweisen": ["alternative"],
     "Abkürzungen": ["abbreviation"],
     "Vokalisierung": [],
+    "In arabischer Schrift": ["Arabic"],
+    "In kyrillischer Schrift": ["Cyrillic"],
+    "In lateinischer Schrift": ["Latin"],
 }
