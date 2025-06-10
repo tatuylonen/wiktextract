@@ -23,7 +23,12 @@ def extracrt_form_section(
                 raw_tag = clean_node(wxr, None, child)
                 if raw_tag.endswith(":"):
                     raw_tags.append(raw_tag.removesuffix(":").strip())
-            elif isinstance(child, WikiNode) and child.kind == NodeKind.LINK:
+            elif (
+                isinstance(child, WikiNode) and child.kind == NodeKind.LINK
+            ) or (
+                isinstance(child, TemplateNode)
+                and child.template_name in ["Arab", "Arabische Schrift"]
+            ):
                 form_text = clean_node(wxr, None, child)
                 if form_text != "":
                     form_data = Form(
@@ -34,6 +39,7 @@ def extracrt_form_section(
                     )
                     translate_raw_tags(form_data)
                     word_entry.forms.append(form_data)
+                    raw_tags.clear()
             elif isinstance(child, TemplateNode):
                 t_text = clean_node(wxr, word_entry, child)
                 if t_text.endswith(":"):
@@ -48,10 +54,10 @@ def extract_transcription_section(
             wxr, None, list(list_item.invert_find_child(NodeKind.LIST))
         )
         raw_tag = ""
-        if ":" in text:
-            raw_tag = text[: text.index(":")].strip()
-            text = text[text.index(":") + 1 :].strip()
         for roman in text.split(","):
+            if ":" in roman:
+                raw_tag = roman[: roman.index(":")].strip()
+                roman = roman[roman.index(":") + 1 :].strip()
             roman = roman.strip()
             if roman != "":
                 form = Form(form=roman, tags=["transcription"])

@@ -95,9 +95,6 @@ class Sense(BaseModelWrap):
     examples: list["Example"] = Field(
         default=[], description="List of examples"
     )
-    # subsenses: list["Sense"] = Field(
-    #     default=[], description="List of subsenses"
-    # )
     sense_index: str = Field(
         default="", description="Sense number used in Wiktionary"
     )
@@ -139,9 +136,8 @@ class WordEntry(BaseModelWrap):
 
     word: str = Field(description="word string")
     pos: str = Field(default="", description="Part of speech type")
-    pos_title: str = ""
     other_pos: list[str] = []
-    # pos_title: str = Field(default=None, description="Original POS title")
+    pos_title: str = Field(default="", description="Original POS title")
     lang_code: str = Field(
         description="Wiktionary language code", examples=["es"]
     )
@@ -149,10 +145,6 @@ class WordEntry(BaseModelWrap):
         description="Localized language name of the word", examples=["español"]
     )
     senses: list[Sense] = []
-    # categories: list[str] = Field(
-    #     default=[],
-    #     description="list of non-disambiguated categories for the word",
-    # )
     translations: list[Translation] = []
     sounds: list[Sound] = []
     antonyms: list[Linkage] = []

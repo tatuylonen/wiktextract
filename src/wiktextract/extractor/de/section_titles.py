@@ -119,4 +119,5 @@ FORM_TITLES = {
     "Symbole": ["symbol"],
     "Alternative Schreibweisen": ["alternative"],
     "Abkürzungen": ["abbreviation"],
+    "Vokalisierung": [],
 }
