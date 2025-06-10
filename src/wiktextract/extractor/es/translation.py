@@ -73,11 +73,11 @@ def process_t_template(
     # https://es.wiktionary.org/wiki/Plantilla:t
     tr_list = []
     cats = {}
-    lang_code = template_node.template_parameters.get(1, "")
+    lang_code = template_node.template_parameters.get(1, "") or "unknown"
     template_text = clean_node(wxr, cats, template_node)
     lang_name = template_text[: template_text.find(":")].strip("* ")
     if lang_name == "":  # in case Lua error
-        lang_name = code_to_name(lang_code, "es")
+        lang_name = code_to_name(lang_code, "es") or "unknown"
 
     for tr_index in itertools.count(1):
         if (

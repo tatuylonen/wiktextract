@@ -4,6 +4,7 @@ from typing import Callable
 from wikitextprocessor import Wtp
 
 from wiktextract.config import WiktionaryConfig
+from wiktextract.extractor.ru.page import parse_page
 from wiktextract.extractor.ru.models import WordEntry
 from wiktextract.extractor.ru.pronunciation import (
     process_transcription_grc_template,
@@ -21,7 +22,10 @@ class TestRUPronunciation(unittest.TestCase):
 
     def setUp(self) -> None:
         self.wxr = WiktextractContext(
-            Wtp(lang_code="ru"), WiktionaryConfig(dump_file_lang_code="ru")
+            Wtp(lang_code="ru"),
+            WiktionaryConfig(
+                dump_file_lang_code="ru", capture_language_codes=None
+            ),
         )
 
     def tearDown(self) -> None:
@@ -257,4 +261,23 @@ class TestRUPronunciation(unittest.TestCase):
                     "raw_tags": ["Константинопольское произношение"],
                 },
             ],
+        )
+
+    def test_rhyme_section(self):
+        page_data = parse_page(
+            self.wxr,
+            "",
+            """= {{-ru-}} =
+== {{з|ударение=вода́}} ==
+=== Морфологические и синтаксические свойства ===
+{{сущ-ru}}
+=== Произношение ===
+==== Рифмы ====
+* Ед. ч., им. п.: [[Рифмы:ˈda|-ˈd̪a]]
+==== Значение ====
+# [[влага]]""",
+        )
+        self.assertEqual(
+            page_data[0]["sounds"],
+            [{"rhymes": "-ˈd̪a", "tags": ["singular", "nominative"]}],
         )

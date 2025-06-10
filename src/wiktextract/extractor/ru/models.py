@@ -54,6 +54,7 @@ class Sound(BaseModelWrap):
     homophones: list[str] = Field(
         default=[], description="Words with same pronunciation"
     )
+    rhymes: str = ""
 
 
 class Example(BaseModelWrap):

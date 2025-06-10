@@ -63,6 +63,7 @@ LINKAGE_TITLES: dict[str, str] = {
     "производные слова": "derived",
     "меронимы": "meronyms",
     "синонимы": "synonyms",
+    "синоним": "synonyms",
     "согипонимы": "coordinate_terms",
     "холонимы": "holonyms",
     "конверсивы": "antonyms",
@@ -78,4 +79,5 @@ ALT_FORM_SECTIONS = {
     "латиница (latinça)": ["Latin"],
     "альтернативные формы": [],
     "фонетические варианты": ["phonetic"],
+    "словоформы": [],
 }
