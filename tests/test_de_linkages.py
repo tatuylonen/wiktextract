@@ -5,6 +5,7 @@ from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.de.linkage import extract_linkages
 from wiktextract.extractor.de.models import Sense, WordEntry
+from wiktextract.extractor.de.page import parse_page
 from wiktextract.wxr_context import WiktextractContext
 
 
@@ -13,7 +14,10 @@ class TestDELinkages(unittest.TestCase):
 
     def setUp(self) -> None:
         self.wxr = WiktextractContext(
-            Wtp(lang_code="de"), WiktionaryConfig(dump_file_lang_code="de")
+            Wtp(lang_code="de"),
+            WiktionaryConfig(
+                dump_file_lang_code="de", capture_language_codes=None
+            ),
         )
 
     def tearDown(self) -> None:
@@ -136,5 +140,28 @@ class TestDELinkages(unittest.TestCase):
             ],
             [
                 {"word": "Morgenland und Abendland", "sense_index": "1"},
+            ],
+        )
+
+    def test_descendant(self):
+        page_data = parse_page(
+            self.wxr,
+            "ordo",
+            """== ōrdo ({{Sprache|Latein}}) ==
+=== {{Wortart|Substantiv|Latein}}, {{m}} ===
+====Bedeutungen====
+:[1] ''gegenständlich:''
+====Entlehnungen====
+:[5b] ''deutsch:'' [[Ordination]]""",
+        )
+        self.assertEqual(
+            page_data[0]["descendants"],
+            [
+                {
+                    "lang": "deutsch",
+                    "lang_code": "de",
+                    "sense_index": "5b",
+                    "word": "Ordination",
+                }
             ],
         )

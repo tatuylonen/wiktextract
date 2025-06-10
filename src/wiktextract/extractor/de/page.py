@@ -11,7 +11,7 @@ from .example import extract_examples
 from .form import extracrt_form_section, extract_transcription_section
 from .gloss import extract_glosses
 from .inflection import extract_inf_table_template, process_noun_table
-from .linkage import extract_linkages
+from .linkage import extract_descendant_section, extract_linkages
 from .models import AltForm, Sense, WordEntry
 from .pronunciation import extract_pronunciation_section
 from .section_titles import FORM_TITLES, LINKAGE_TITLES, POS_SECTIONS
@@ -97,6 +97,12 @@ def parse_section(
             )
         elif section_name == "Umschrift":
             extract_transcription_section(
+                wxr,
+                page_data[-1] if len(page_data) > 0 else base_data,
+                level_node,
+            )
+        elif section_name == "Entlehnungen":
+            extract_descendant_section(
                 wxr,
                 page_data[-1] if len(page_data) > 0 else base_data,
                 level_node,
