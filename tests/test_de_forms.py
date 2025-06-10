@@ -539,3 +539,27 @@ class TestDeForms(TestCase):
                 },
             ],
         )
+
+    def test_plain_text_roman(self):
+        page_data = parse_page(
+            self.wxr,
+            "mein",
+            """== ولد ({{Sprache|Arabisch}}) ==
+=== {{Wortart|Verb|Arabisch}} ===
+====Umschrift====
+:[[Hilfe:DMG|DMG]]: walada, Imperfekt: yalidu, Imperativ: lid
+====Bedeutungen====
+:[1] [[gebären]]""",
+        )
+        self.assertEqual(
+            page_data[0]["forms"],
+            [
+                {
+                    "form": "walada",
+                    "raw_tags": ["DMG"],
+                    "tags": ["transcription"],
+                },
+                {"form": "yalidu", "tags": ["transcription", "imperfect"]},
+                {"form": "lid", "tags": ["transcription", "imperative"]},
+            ],
+        )

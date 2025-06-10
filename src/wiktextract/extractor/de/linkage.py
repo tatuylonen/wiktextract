@@ -1,10 +1,11 @@
 import re
 
-from wikitextprocessor.parser import LevelNode, NodeKind, TemplateNode, WikiNode
+from mediawiki_langcodes import name_to_code
+from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
-from .models import Linkage, WordEntry
+from .models import Descendant, Linkage, Translation, WordEntry
 from .tags import translate_raw_tags
 from .utils import extract_sense_index
 
@@ -83,3 +84,55 @@ def process_linkage_list_item(
 
 def contains_dash(text: str) -> bool:
     return re.search(r"[–—―‒-]", text) is not None
+
+
+def extract_descendant_section(
+    wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
+) -> None:
+    for list_node in level_node.find_child(NodeKind.LIST):
+        for list_item in list_node.find_child(NodeKind.LIST_ITEM):
+            extract_descendant_list_item(wxr, word_entry, list_item)
+
+
+def extract_descendant_list_item(
+    wxr: WiktextractContext, word_entry: WordEntry, list_item: WikiNode
+) -> None:
+    lang_name = "unknown"
+    lang_code = "unknown"
+    sense_index = ""
+    for node in list_item.children:
+        if isinstance(node, str) and node.strip().startswith("["):
+            sense_index, _ = extract_sense_index(node)
+        elif isinstance(node, WikiNode) and node.kind == NodeKind.ITALIC:
+            node_str = clean_node(wxr, None, node)
+            if node_str.endswith(":"):
+                lang_name = node_str.strip(": ")
+                lang_code = name_to_code(lang_name, "de") or "unknown"
+        elif isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
+            node_str = clean_node(wxr, None, node)
+            if node != "":
+                word_entry.descendants.append(
+                    Descendant(
+                        lang=lang_name,
+                        lang_code=lang_code,
+                        word=node_str,
+                        sense_index=sense_index,
+                    )
+                )
+        elif isinstance(node, TemplateNode) and node.template_name.startswith(
+            "Ü"
+        ):
+            from .translation import process_u_template
+
+            tr_data = Translation(lang=lang_name, lang_code=lang_code)
+            process_u_template(wxr, tr_data, node)
+            if tr_data.word != "":
+                word_entry.descendants.append(
+                    Descendant(
+                        lang=tr_data.lang,
+                        lang_code=tr_data.lang_code,
+                        word=tr_data.word,
+                        roman=tr_data.roman,
+                        sense_index=sense_index,
+                    )
+                )

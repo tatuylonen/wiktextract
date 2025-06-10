@@ -1,7 +1,7 @@
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class BaseModelWrap(BaseModel):
+class GermanBaseModel(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
         strict=True,
@@ -10,7 +10,7 @@ class BaseModelWrap(BaseModel):
     )
 
 
-class Linkage(BaseModelWrap):
+class Linkage(GermanBaseModel):
     word: str
     sense_index: str = ""
     note: str = ""
@@ -18,7 +18,7 @@ class Linkage(BaseModelWrap):
     tags: list[str] = []
 
 
-class Translation(BaseModelWrap):
+class Translation(GermanBaseModel):
     sense: str = Field(
         default="", description="A gloss of the sense being translated"
     )
@@ -40,7 +40,7 @@ class Translation(BaseModelWrap):
     notes: list[str] = Field(default=[], description="A list of notes")
 
 
-class Example(BaseModelWrap):
+class Example(GermanBaseModel):
     text: str = Field(default="", description="Example usage sentence")
     italic_text_offsets: list[tuple[int, int]] = []
     translation: str = Field(
@@ -83,11 +83,11 @@ class Example(BaseModelWrap):
     isbn: str = Field(default="", description="ISBN number")
 
 
-class AltForm(BaseModelWrap):
+class AltForm(GermanBaseModel):
     word: str
 
 
-class Sense(BaseModelWrap):
+class Sense(GermanBaseModel):
     glosses: list[str] = []
     raw_tags: list[str] = []
     tags: list[str] = []
@@ -95,9 +95,6 @@ class Sense(BaseModelWrap):
     examples: list["Example"] = Field(
         default=[], description="List of examples"
     )
-    # subsenses: list["Sense"] = Field(
-    #     default=[], description="List of subsenses"
-    # )
     sense_index: str = Field(
         default="", description="Sense number used in Wiktionary"
     )
@@ -106,7 +103,7 @@ class Sense(BaseModelWrap):
     alt_of: list[AltForm] = []
 
 
-class Sound(BaseModelWrap):
+class Sound(GermanBaseModel):
     ipa: str = Field(default="", description="International Phonetic Alphabet")
     audio: str = Field(default="", description="Audio file name")
     wav_url: str = Field(default="")
@@ -121,7 +118,7 @@ class Sound(BaseModelWrap):
     categories: list[str] = Field(default=[], exclude=True)
 
 
-class Form(BaseModelWrap):
+class Form(GermanBaseModel):
     form: str
     tags: list[str] = []
     raw_tags: list[str] = []
@@ -129,7 +126,15 @@ class Form(BaseModelWrap):
     sense_index: str = ""
 
 
-class WordEntry(BaseModelWrap):
+class Descendant(GermanBaseModel):
+    lang_code: str = Field(default="", description="Wiktionary language code")
+    lang: str = Field(default="", description="Language name")
+    word: str = ""
+    roman: str = ""
+    sense_index: str = ""
+
+
+class WordEntry(GermanBaseModel):
     """
     WordEntry is a dictionary containing lexical information of a single word
     extracted from Wiktionary with wiktextract.
@@ -139,9 +144,8 @@ class WordEntry(BaseModelWrap):
 
     word: str = Field(description="word string")
     pos: str = Field(default="", description="Part of speech type")
-    pos_title: str = ""
     other_pos: list[str] = []
-    # pos_title: str = Field(default=None, description="Original POS title")
+    pos_title: str = Field(default="", description="Original POS title")
     lang_code: str = Field(
         description="Wiktionary language code", examples=["es"]
     )
@@ -149,10 +153,6 @@ class WordEntry(BaseModelWrap):
         description="Localized language name of the word", examples=["español"]
     )
     senses: list[Sense] = []
-    # categories: list[str] = Field(
-    #     default=[],
-    #     description="list of non-disambiguated categories for the word",
-    # )
     translations: list[Translation] = []
     sounds: list[Sound] = []
     antonyms: list[Linkage] = []
@@ -174,3 +174,4 @@ class WordEntry(BaseModelWrap):
     hyphenation: str = ""
     notes: list[str] = []
     related: list[Linkage] = []
+    descendants: list[Descendant] = []
