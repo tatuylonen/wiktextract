@@ -103,7 +103,7 @@ class TestESGloss(unittest.TestCase):
                             "sense_index": "1",
                         }
                     ],
-                    "tags": ["form-of"],
+                    "tags": ["form-of", "substantive"],
                     "word": "apples",
                 }
             ],

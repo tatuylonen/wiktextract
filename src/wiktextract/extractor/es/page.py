@@ -53,27 +53,39 @@ def parse_section(
         pos_template_name = level_node_template.template_name
         break
 
+    pos_keys = [
+        section_title,
+        pos_template_name,
+        " ".join(section_title.split()[:2]),
+        section_title.split()[0],
+    ]
     if section_title in IGNORED_TITLES:
         pass
-    elif section_title in POS_TITLES or pos_template_name in POS_TITLES:
-        pos_data = POS_TITLES.get(
-            section_title, POS_TITLES.get(pos_template_name)
-        )
-        pos_type = pos_data["pos"]
-        page_data.append(base_data.model_copy(deep=True))
-        page_data[-1].pos = pos_type
-        page_data[-1].pos_title = original_section_title
-        page_data[-1].tags.extend(pos_data.get("tags", []))
-        page_data[-1].categories.extend(categories.get("categories", []))
-        extract_pos_section(wxr, page_data[-1], level_node)
-        if len(page_data[-1].senses) == 0:
-            if "form-of" in page_data[-1].tags:
-                page_data.pop()
-            elif section_title in LINKAGE_TITLES:
-                page_data.pop()
-                extract_linkage_section(
-                    wxr, page_data, level_node, LINKAGE_TITLES[section_title]
-                )
+    elif any(key in POS_TITLES for key in pos_keys):
+        pos_data = None
+        for key in pos_keys:
+            pos_data = POS_TITLES.get(key)
+            if pos_data is not None:
+                break
+        if pos_data is not None:
+            pos_type = pos_data["pos"]
+            page_data.append(base_data.model_copy(deep=True))
+            page_data[-1].pos = pos_type
+            page_data[-1].pos_title = original_section_title
+            page_data[-1].tags.extend(pos_data.get("tags", []))
+            page_data[-1].categories.extend(categories.get("categories", []))
+            extract_pos_section(wxr, page_data[-1], level_node, section_title)
+            if len(page_data[-1].senses) == 0:
+                if "form-of" in page_data[-1].tags:
+                    page_data.pop()
+                elif section_title in LINKAGE_TITLES:
+                    page_data.pop()
+                    extract_linkage_section(
+                        wxr,
+                        page_data,
+                        level_node,
+                        LINKAGE_TITLES[section_title],
+                    )
     elif (
         section_title.startswith("etimología")
         and wxr.config.capture_etymologies
