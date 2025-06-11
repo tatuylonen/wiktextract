@@ -15,12 +15,25 @@ from .inflection import process_inflect_template
 from .linkage import process_linkage_template
 from .models import AltForm, Form, Sense, WordEntry
 from .section_titles import LINKAGE_TITLES
-from .tags import translate_raw_tags
+from .tags import ALL_TAGS, translate_raw_tags
 
 
 def extract_pos_section(
-    wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    level_node: LevelNode,
+    section_title: str,
 ) -> None:
+    for raw_tag in section_title.split():
+        if raw_tag in ALL_TAGS:
+            tr_tag = ALL_TAGS[raw_tag]
+            if isinstance(tr_tag, str) and tr_tag not in word_entry.tags:
+                word_entry.tags.append(tr_tag)
+            elif isinstance(tr_tag, list):
+                for tag in tr_tag:
+                    if tag not in word_entry.tags:
+                        word_entry.tags.append(tag)
+
     has_list = False
     for node in level_node.children:
         if isinstance(node, WikiNode) and node.kind == NodeKind.LIST:

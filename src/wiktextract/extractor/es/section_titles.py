@@ -56,6 +56,11 @@ POS_TITLES: dict[str, POSSubtitleData] = {
         "pos": "adj",
         "tags": ["noun", "masculine", "form-of"],
     },
+    "forma adjetiva y de pronombre": {
+        "pos": "adj",
+        "tags": ["form-of", "pronoun"],
+    },
+    "forma adjetiva ordinal": {"pos": "adj", "tags": ["ordinal", "form-of"]},
     "forma de adjetivo ordinal": {"pos": "num", "tags": ["form-of", "ordinal"]},
     "forma de participio": {"pos": "participle", "tags": ["form-of"]},
     "forma de sufijo": {"pos": "suffix", "tags": ["form-of"]},
@@ -67,7 +72,9 @@ POS_TITLES: dict[str, POSSubtitleData] = {
         "pos": "phrase",
         "tags": ["form-of", "masculine", "noun"],
     },
+    "forma de sustantivo": {"pos": "noun", "tags": ["form-of"]},
     "forma flexiva": {"pos": "verb", "tags": ["form-of"]},
+    "formas flexivas": {"pos": "verb", "tags": ["form-of"]},
     "forma pronominal": {"pos": "pron", "tags": ["form-of"]},
     "forma sustantiva femenina": {
         "pos": "noun",
@@ -88,7 +95,16 @@ POS_TITLES: dict[str, POSSubtitleData] = {
     "forma sustantiva neutra": {"pos": "noun", "tags": ["form-of", "neuter"]},
     "forma sustantiva": {"pos": "noun", "tags": ["form-of"]},
     "forma sustantiva plural": {"pos": "noun", "tags": ["form-of", "plural"]},
+    "forma sustantiva ambigua": {"pos": "noun", "tags": ["form-of"]},
     "forma verbal": {"pos": "verb", "tags": ["form-of"]},
+    "forma verbal transitiva": {
+        "pos": "verb",
+        "tags": ["form-of", "transitive"],
+    },
+    "forma verbal y adjetiva": {
+        "pos": "verb",
+        "tags": ["form-of", "adjectival"],
+    },
     "forma mutada": {"pos": "unknown", "tags": ["form-of"]},
     "infijo": {"pos": "infix", "tags": ["morpheme"]},
     "interjección": {"pos": "intj"},
@@ -106,6 +122,7 @@ POS_TITLES: dict[str, POSSubtitleData] = {
     "nombre propios": {"pos": "name"},
     "onomatopeya": {"pos": "noun"},
     "partícula": {"pos": "particle"},
+    "participio": {"pos": "verb", "tags": ["participle"]},
     "postposición": {"pos": "postp"},
     "prefijo": {"pos": "prefix"},
     "preposición de ablativo": {"pos": "prep", "tags": ["ablative"]},
@@ -126,6 +143,7 @@ POS_TITLES: dict[str, POSSubtitleData] = {
     "raíz": {"pos": "root"},
     "raíz verbal": {"pos": "root", "tags": ["verb"]},
     "refrán": {"pos": "proverb"},
+    "sílaba": {"pos": "syllable"},
     "sigla": {"pos": "abbrev"},
     "símbolo": {"pos": "symbol"},
     "sufijo flexivo": {"pos": "suffix"},
@@ -144,6 +162,10 @@ POS_TITLES: dict[str, POSSubtitleData] = {
     "sustantivo femenino": {"pos": "noun", "tags": ["feminine"]},
     "sustantivo inanimado": {"pos": "noun", "tags": ["inanimate"]},
     "sustantivo masculino": {"pos": "noun", "tags": ["masculine"]},
+    "sustantivo masculino y femenino": {
+        "pos": "noun",
+        "tags": ["masculine", "feminine"],
+    },
     "sustantivo neutro y masculino": {
         "pos": "noun",
         "tags": ["neuter", "masculine"],
@@ -162,6 +184,7 @@ POS_TITLES: dict[str, POSSubtitleData] = {
     "verbo pronominal": {"pos": "verb", "tags": ["pronominal"]},
     "verbo transitivo": {"pos": "verb", "tags": ["transitive"]},
     "verbo": {"pos": "verb"},
+    "forma": {"pos": "unknown", "tags": ["form-of"]},
 }
 
 LINKAGE_TITLES: dict[str, str] = {
@@ -178,6 +201,7 @@ LINKAGE_TITLES: dict[str, str] = {
     "sinónimo": "synonyms",
     "derivados": "derived",
     "locución": "related",
+    "palabras relacionadas": "related",
 }
 
 IGNORED_TITLES: frozenset[str] = frozenset(

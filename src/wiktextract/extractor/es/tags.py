@@ -803,6 +803,16 @@ ES_V_SUP_TAGS = {
 }
 
 
+POS_TITLE_TAGS = {
+    "sustantiva": "substantive",
+    "femenina": "feminine",
+    "masculina": "masculine",
+    "ordinal": "ordinal",
+    "partitiva": "partitive",
+    "adjetiva": "adjectival",
+}
+
+
 ALL_TAGS = {
     **NUMBER_TAGS,
     **GENDER_TAGS,
@@ -813,6 +823,7 @@ ALL_TAGS = {
     **TABLE_TAGS,
     **SOUND_TAGS,
     **ES_V_SUP_TAGS,
+    **POS_TITLE_TAGS,
     "afirmativo": "affirmative",
     "negativo": "negative",
     "simples": "simple",
