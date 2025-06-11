@@ -47,7 +47,7 @@ def parse_section(
             LINKAGE_TYPES[title_text],
             base_data.lang_code,
         )
-    elif title_text == "uwagi":
+    elif title_text in ["uwagi", "składnia"]:
         extract_note_section(wxr, page_data, base_data, level_node)
     elif title_text == "odmiana" and wxr.config.capture_inflections:
         extract_inflection_section(
@@ -57,6 +57,11 @@ def parse_section(
         extract_zapis_section(wxr, base_data, level_node)
     elif title_text == "transliteracja":
         extract_transliteracja_section(wxr, base_data, level_node)
+    elif title_text not in ["źródła"]:
+        wxr.wtp.debug(
+            f"Unknown section: {title_text}",
+            sortid="extractor/pl/page/parse_section/63",
+        )
 
 
 def extract_zapis_section(

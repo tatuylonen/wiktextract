@@ -34,6 +34,7 @@ class Sense(PolishBaseModel):
     examples: list[Example] = []
     alt_of: list[AltForm] = []
     form_of: list[AltForm] = []
+    notes: list[str] = []
 
 
 class Translation(PolishBaseModel):
@@ -110,4 +111,3 @@ class WordEntry(PolishBaseModel):
     synonyms: list[Linkage] = []
     derived: list[Linkage] = []
     forms: list[Form] = []
-    notes: list[Note] = []

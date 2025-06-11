@@ -48,16 +48,10 @@ class TestPlNote(TestCase):
         ]
         extract_note_section(self.wxr, page_data, base_data, root)
         self.assertEqual(
-            [n.model_dump(exclude_defaults=True) for n in page_data[0].notes],
+            page_data[0].senses[0].notes,
             [
-                {
-                    "text": "zobacz też: Indeks:Polski - Ssaki",
-                    "sense_index": "1.1",
-                },
-                {
-                    "text": "zobacz też: Indeks:Polski - Rasy psów",
-                    "sense_index": "1.1",
-                },
+                "zobacz też: Indeks:Polski - Ssaki",
+                "zobacz też: Indeks:Polski - Rasy psów",
             ],
         )
-        self.assertEqual(page_data[1].notes, [])
+        self.assertEqual(page_data[1].senses[0].notes, [])
