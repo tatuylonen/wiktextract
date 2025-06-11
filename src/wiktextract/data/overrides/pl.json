@@ -85,12 +85,12 @@
     "need_pre_expand": true
   },
   "Szablon:ortografie": {
-    "body": "===ortografie===\n",
+    "body": "===zapisy w ortografiach alternatywnych===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },
   "Szablon:pochodne": {
-    "body": "===pochodne===\n",
+    "body": "===wyrazy pochodne===\n",
     "namespace_id": 10,
     "need_pre_expand": true
   },

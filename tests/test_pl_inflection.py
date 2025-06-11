@@ -435,5 +435,11 @@ class TestPlInflection(TestCase):
         extract_transliteracja_section(self.wxr, base_data, root.children[0])
         self.assertEqual(
             [f.model_dump(exclude_defaults=True) for f in base_data.forms],
-            [{"form": "aku", "sense_index": "1.1", "tags": ["romanization"]}],
+            [
+                {
+                    "form": "aku",
+                    "sense_index": "1.1",
+                    "tags": ["transliteration"],
+                }
+            ],
         )
