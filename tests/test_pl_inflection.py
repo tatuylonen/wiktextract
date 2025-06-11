@@ -8,6 +8,7 @@ from wiktextract.extractor.pl.models import Sense, WordEntry
 from wiktextract.extractor.pl.page import (
     extract_transliteracja_section,
     extract_zapis_section,
+    parse_page,
 )
 from wiktextract.wxr_context import WiktextractContext
 
@@ -441,5 +442,63 @@ class TestPlInflection(TestCase):
                     "sense_index": "1.1",
                     "tags": ["transliteration"],
                 }
+            ],
+        )
+
+    def test_alt_form_link(self):
+        page_data = parse_page(
+            self.wxr,
+            "grudzień",
+            """== grudzień ({{język wilamowski}}) ==
+===zapisy w ortografiach alternatywnych===
+: [[grudźyń]] • [[grüdźjyń]]
+===znaczenia===
+''rzeczownik, rodzaj męski''
+: (1.1) [[grudzień]]""",
+        )
+        self.assertEqual(
+            page_data[0]["forms"],
+            [
+                {"form": "grudźyń", "tags": ["alternative"]},
+                {"form": "grüdźjyń", "tags": ["alternative"]},
+            ],
+        )
+
+    def test_ortografie_template(self):
+        self.wxr.wtp.add_page(
+            "Szablon:ortografieTT",
+            10,
+            """''cyrylica:'' гәүдә
+:''Yaŋalif-2:'' gəwdə
+:''Yaŋalif (1920-1937):'' gəwdə""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "gäwdä",
+            """== gäwdä ({{język tatarski}}) ==
+===zapisy w ortografiach alternatywnych===
+ {{ortografieTT|Y2=gəwdə|Y=gəwdə|гәүдә}}
+===znaczenia===
+''rzeczownik''
+: (1.1) [[ciało]]""",
+        )
+        self.assertEqual(
+            page_data[0]["forms"],
+            [
+                {
+                    "form": "гәүдә",
+                    "tags": ["alternative"],
+                    "raw_tags": ["cyrylica"],
+                },
+                {
+                    "form": "gəwdə",
+                    "tags": ["alternative"],
+                    "raw_tags": ["Yaŋalif-2"],
+                },
+                {
+                    "form": "gəwdə",
+                    "tags": ["alternative"],
+                    "raw_tags": ["Yaŋalif (1920-1937)"],
+                },
             ],
         )
