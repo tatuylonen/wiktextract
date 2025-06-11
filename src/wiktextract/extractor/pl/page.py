@@ -18,7 +18,7 @@ from .linkage import LINKAGE_TYPES, extract_linkage_section
 from .models import Sense, WordEntry
 from .note import extract_note_section
 from .pos import extract_pos_section
-from .sound import extract_sound_section
+from .sound import extract_morphology_section, extract_sound_section
 from .translation import extract_translation_section
 
 
@@ -62,9 +62,18 @@ def parse_section(
         extract_zapis_section(wxr, base_data, level_node)
     elif title_text == "transliteracja":
         extract_transliteracja_section(wxr, base_data, level_node)
-    elif title_text in ["zapisy w ortografiach alternatywnych", "warianty"]:
+    elif title_text == "morfologia":
+        extract_morphology_section(wxr, base_data, level_node)
+    elif title_text in [
+        "zapisy w ortografiach alternatywnych",
+        "warianty",
+        "kody",
+        "kolejność",
+        "kreski",
+        "słowniki",
+    ]:
         extract_alt_form_section(wxr, base_data, level_node)
-    elif title_text not in ["źródła"]:
+    elif title_text not in ["źródła", "klucz"]:
         wxr.wtp.debug(
             f"Unknown section: {title_text}",
             sortid="extractor/pl/page/parse_section/63",

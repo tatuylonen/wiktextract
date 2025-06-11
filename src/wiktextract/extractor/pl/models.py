@@ -111,3 +111,4 @@ class WordEntry(PolishBaseModel):
     synonyms: list[Linkage] = []
     derived: list[Linkage] = []
     forms: list[Form] = []
+    hyphenation: str = ""

@@ -1,4 +1,4 @@
-from wikitextprocessor.parser import NodeKind, TemplateNode, WikiNode
+from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -66,3 +66,12 @@ def process_sound_template(
                 sound.tags.append("Bopomofo")
             translate_raw_tags(sound)
             base_data.sounds.append(sound)
+
+
+def extract_morphology_section(
+    wxr: WiktextractContext, base_data: WordEntry, level_node: LevelNode
+) -> None:
+    # "preformatted" node
+    for t_node in level_node.find_child_recursively(NodeKind.TEMPLATE):
+        if t_node.template_name == "morfeo":
+            base_data.hyphenation = clean_node(wxr, base_data, t_node)
