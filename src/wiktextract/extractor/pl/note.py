@@ -23,11 +23,12 @@ def extract_note_section(
             notes.append(note)
     for data in page_data:
         if data.lang_code == base_data.lang_code:
-            for note in notes:
-                if note.sense_index == "" or match_sense_index(
-                    note.sense_index, data
-                ):
-                    data.notes.append(note)
+            for sense in data.senses:
+                for note in notes:
+                    if note.sense_index == "" or match_sense_index(
+                        note.sense_index, sense
+                    ):
+                        sense.notes.append(note.text)
 
 
 def process_note_list_item(

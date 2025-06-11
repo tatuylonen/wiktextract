@@ -2,18 +2,23 @@ import itertools
 import re
 from typing import Any
 
-from wikitextprocessor.parser import LevelNode, NodeKind, TemplateNode, WikiNode
+from wikitextprocessor import LevelNode, NodeKind, TemplateNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .etymology import extract_etymology_section
 from .example import extract_example_section
+from .form import (
+    extract_alt_form_section,
+    extract_transliteracja_section,
+    extract_zapis_section,
+)
 from .inflection import extract_inflection_section
 from .linkage import LINKAGE_TYPES, extract_linkage_section
-from .models import Form, Sense, WordEntry
+from .models import Sense, WordEntry
 from .note import extract_note_section
 from .pos import extract_pos_section
-from .sound import extract_sound_section
+from .sound import extract_morphology_section, extract_sound_section
 from .translation import extract_translation_section
 
 
@@ -21,7 +26,7 @@ def parse_section(
     wxr: WiktextractContext,
     page_data: list[WordEntry],
     base_data: WordEntry,
-    level_node: WikiNode,
+    level_node: LevelNode,
 ) -> None:
     # title templates
     # https://pl.wiktionary.org/wiki/Kategoria:Szablony_szablonów_haseł
@@ -47,7 +52,7 @@ def parse_section(
             LINKAGE_TYPES[title_text],
             base_data.lang_code,
         )
-    elif title_text == "uwagi":
+    elif title_text in ["uwagi", "składnia"]:
         extract_note_section(wxr, page_data, base_data, level_node)
     elif title_text == "odmiana" and wxr.config.capture_inflections:
         extract_inflection_section(
@@ -57,41 +62,22 @@ def parse_section(
         extract_zapis_section(wxr, base_data, level_node)
     elif title_text == "transliteracja":
         extract_transliteracja_section(wxr, base_data, level_node)
-
-
-def extract_zapis_section(
-    wxr: WiktextractContext, base_data: WordEntry, level_node: LevelNode
-) -> None:
-    # get around "preformatted" node
-    for node in level_node.find_child_recursively(NodeKind.TEMPLATE):
-        if node.template_name == "ptrad":
-            form_text = clean_node(
-                wxr, None, node.template_parameters.get(1, "")
-            )
-            if form_text != "":
-                base_data.forms.append(
-                    Form(form=form_text, tags=["Traditional Chinese"])
-                )
-
-
-def extract_transliteracja_section(
-    wxr: WiktextractContext, base_data: WordEntry, level_node: LevelNode
-) -> None:
-    for list_item in level_node.find_child_recursively(NodeKind.LIST_ITEM):
-        for node in list_item.children:
-            if isinstance(node, str):
-                m = re.search(r"\([\d\s,-.]+\)", node)
-                if m is not None:
-                    sense_index = m.group(0).strip("()")
-                    roman = node[m.end() :].strip()
-                    if roman != "":
-                        base_data.forms.append(
-                            Form(
-                                form=roman,
-                                sense_index=sense_index,
-                                tags=["romanization"],
-                            )
-                        )
+    elif title_text == "morfologia":
+        extract_morphology_section(wxr, base_data, level_node)
+    elif title_text in [
+        "zapisy w ortografiach alternatywnych",
+        "warianty",
+        "kody",
+        "kolejność",
+        "kreski",
+        "słowniki",
+    ]:
+        extract_alt_form_section(wxr, base_data, level_node)
+    elif title_text not in ["źródła", "klucz"]:
+        wxr.wtp.debug(
+            f"Unknown section: {title_text}",
+            sortid="extractor/pl/page/parse_section/63",
+        )
 
 
 def parse_page(

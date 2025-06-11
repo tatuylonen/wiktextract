@@ -16,6 +16,7 @@ LINKAGE_TYPES = {
     "kolokacje": "related",
     "meronimy": "meronyms",
     "synonimy": "synonyms",
+    "wyrazy pochodne": "derived",
     "wyrazy pokrewne": "related",
     "związki frazeologiczne": "proverbs",
     "złożenia": "derived",
