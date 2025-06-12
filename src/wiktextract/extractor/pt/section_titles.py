@@ -2,6 +2,8 @@ POS_DATA = {
     "artigo": {"pos": "article"},
     "adjetivo": {"pos": "adj"},
     "advérbio": {"pos": "adv"},
+    "caractere": {"pos": "character"},
+    "caractere hiragana": {"pos": "character", "tags": ["hiragana"]},
     "conjunção": {"pos": "conj"},
     "interjeição": {"pos": "intj"},
     "numeral": {"pos": "num"},
@@ -46,10 +48,18 @@ POS_DATA = {
     "kanji": {"pos": "character", "tags": ["kanji"]},
     "pronome pessoal": {"pos": "pron", "tags": ["person"]},
     "pronome possessivo": {"pos": "det", "tags": ["possessive"]},
+    "antepositivo": {"pos": "prefix", "tags": ["morpheme"]},
+    "algarismo": {"pos": "num", "tags": ["number"]},
+    "expressão verbal": {"pos": "phrase", "tags": ["verb"]},
+    "forma de locução substantiva": {
+        "pos": "phrase",
+        "tags": ["noun", "form-of"],
+    },
 }
 
 
 LINKAGE_SECTIONS = {
+    "abreviações": "abbreviations",
     "antônimos": "antonyms",
     "antônimo": "antonyms",
     "antónimo": "antonyms",

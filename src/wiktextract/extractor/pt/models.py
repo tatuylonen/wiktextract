@@ -110,3 +110,4 @@ class WordEntry(PortugueseBaseModel):
     notes: list[str] = []
     cognates: list[Translation] = []
     descendants: list[Translation] = []
+    abbreviations: list[Linkage] = []
