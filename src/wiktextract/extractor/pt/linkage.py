@@ -325,6 +325,7 @@ FORM_SECTION_TAGS = {
     "Abreviatura": "abbreviation",
     "Símbolo": "symbol",
     "Ordinal Equivalente": "ordinal",
+    "Forma alternativa": "alternative",
 }
 
 
@@ -336,9 +337,24 @@ def extract_forms_section(
 ) -> None:
     for list_node in level_node.find_child(NodeKind.LIST):
         for list_item in list_node.find_child(NodeKind.LIST_ITEM):
-            for link_node in list_item.find_child(NodeKind.LINK):
-                word = clean_node(wxr, None, link_node)
-                if word != "":
-                    word_entry.forms.append(
-                        Form(form=word, tags=[FORM_SECTION_TAGS[section_text]])
+            for node in list_item.children:
+                if isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
+                    word = clean_node(wxr, None, node)
+                    if word != "":
+                        word_entry.forms.append(
+                            Form(
+                                form=word,
+                                tags=[FORM_SECTION_TAGS[section_text]],
+                            )
+                        )
+                elif (
+                    isinstance(node, TemplateNode)
+                    and node.template_name == "escopo2"
+                    and len(word_entry.forms) > 0
+                ):
+                    from .pos import extract_escopo2_template
+
+                    word_entry.forms[-1].raw_tags.extend(
+                        extract_escopo2_template(wxr, node)
                     )
+                    translate_raw_tags(word_entry.forms[-1])

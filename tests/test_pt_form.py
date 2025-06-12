@@ -297,3 +297,24 @@ class TestPtForm(TestCase):
                 {"form": "B.C.", "tags": ["abbreviation"]},
             ],
         )
+
+    def test_alt_form_section(self):
+        page_data = parse_page(
+            self.wxr,
+            "taxa",
+            """={{-pt-}}=
+==Substantivo==
+# pagamento
+===Forma alternativa===
+* [[dassa]] {{escopo2|Guiné-Bissau}}""",
+        )
+        self.assertEqual(
+            page_data[0]["forms"],
+            [
+                {
+                    "form": "dassa",
+                    "raw_tags": ["Guiné-Bissau"],
+                    "tags": ["alternative"],
+                }
+            ],
+        )

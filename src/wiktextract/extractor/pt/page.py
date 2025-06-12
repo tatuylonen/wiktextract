@@ -98,6 +98,13 @@ def parse_section(
         extract_degree_section(
             wxr, page_data[-1] if len(page_data) else base_data, level_node
         )
+    elif title_text in FORM_SECTION_TAGS:
+        extract_forms_section(
+            wxr,
+            page_data[-1] if len(page_data) > 0 else base_data,
+            level_node,
+            title_text,
+        )
     elif title_text.lower() not in [
         "ver também",
         "ligação externa",
