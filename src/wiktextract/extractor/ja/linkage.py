@@ -234,7 +234,7 @@ def extract_alt_form_section(
         if node.kind == NodeKind.LINK:
             word = clean_node(wxr, None, node)
             if word != "":
-                word_entry.forms.append(Form(form=word, tags=["alt-of"]))
+                word_entry.forms.append(Form(form=word, tags=["alternative"]))
         elif isinstance(node, TemplateNode) and node.template_name == "l":
             l_data = extract_l_template(wxr, node)
             if l_data.word != "":

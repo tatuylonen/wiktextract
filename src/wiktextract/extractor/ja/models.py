@@ -60,6 +60,7 @@ class Sound(JapaneseBaseModel):
     homophones: list[str] = []
     form: str = ""
     roman: str = ""
+    sense: str = ""
 
 
 class Translation(JapaneseBaseModel):
