@@ -502,3 +502,27 @@ class TestPlInflection(TestCase):
                 },
             ],
         )
+
+    def test_hep_template(self):
+        self.wxr.wtp.add_page(
+            "Szablon:hep", 10, "''transkrypcja w systemie Hepburna:'' ai"
+        )
+        page_data = parse_page(
+            self.wxr,
+            "あい",
+            """== {{ja|あい}} ({{język japoński}}) ==
+===transkrypcja===
+: {{hep|ai}}
+===znaczenia===
+''rzeczownik''
+: (1.1) {{zob|[[愛]]}} ''([[miłość]])''""",
+        )
+        self.assertEqual(
+            page_data[0]["forms"],
+            [
+                {
+                    "form": "ai",
+                    "tags": ["transcription", "Hepburn-romanization"],
+                }
+            ],
+        )

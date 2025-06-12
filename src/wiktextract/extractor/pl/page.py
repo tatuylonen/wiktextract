@@ -10,6 +10,7 @@ from .etymology import extract_etymology_section
 from .example import extract_example_section
 from .form import (
     extract_alt_form_section,
+    extract_transkrypcja_section,
     extract_transliteracja_section,
     extract_zapis_section,
 )
@@ -64,6 +65,8 @@ def parse_section(
         extract_transliteracja_section(wxr, base_data, level_node)
     elif title_text == "morfologia":
         extract_morphology_section(wxr, base_data, level_node)
+    elif title_text == "transkrypcja":
+        extract_transkrypcja_section(wxr, base_data, level_node)
     elif title_text in [
         "zapisy w ortografiach alternatywnych",
         "warianty",

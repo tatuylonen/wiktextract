@@ -93,3 +93,33 @@ def extract_ortografie_list_item(
                 form.raw_tags.append(raw_tag)
                 translate_raw_tags(form)
             base_data.forms.append(form)
+
+
+def extract_transkrypcja_section(
+    wxr: WiktextractContext, base_data: WordEntry, level_node: LevelNode
+) -> None:
+    for list_node in level_node.find_child(NodeKind.LIST):
+        for list_item in list_node.find_child(NodeKind.LIST_ITEM):
+            for t_node in list_item.find_child(NodeKind.TEMPLATE):
+                if t_node.template_name == "hep":
+                    extract_hep_template(wxr, base_data, t_node)
+
+
+def extract_hep_template(
+    wxr: WiktextractContext, base_data: WordEntry, t_node: TemplateNode
+) -> None:
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    raw_tag = ""
+    for node in expanded_node.children:
+        if isinstance(node, WikiNode) and node.kind == NodeKind.ITALIC:
+            node_str = clean_node(wxr, None, node)
+            if node_str.endswith(":"):
+                raw_tag = node_str.strip(":")
+        elif isinstance(node, str) and node.strip() != "":
+            form = Form(form=node.strip(), tags=["transcription"])
+            if raw_tag != "":
+                form.raw_tags.append(raw_tag)
+                translate_raw_tags(form)
+            base_data.forms.append(form)

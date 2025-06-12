@@ -398,6 +398,7 @@ TAGS = {
     "mocny": "strong",
     "temat": "stem",
     "niedokonana": "imperfective",
+    "transkrypcja w systemie Hepburna": "Hepburn-romanization",
 }
 
 TOPICS = {
