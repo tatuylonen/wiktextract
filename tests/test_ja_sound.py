@@ -189,3 +189,33 @@ class TestJaSound(TestCase):
                 {"zh_pron": "gī-lūn", "tags": ["Min-Nan"]},
             ],
         )
+
+    def test_homophone_section(self):
+        self.wxr.wtp.add_page(
+            "テンプレート:l",
+            10,
+            '<span class="Latn" lang="de">[[Essen#ドイツ語|Essen]]</span><span class="mention-gloss-double-quote">「</span><span class="mention-gloss">市</span><span class="mention-gloss-double-quote">」</span>',
+        )
+        page_data = parse_page(
+            self.wxr,
+            "essen",
+            """=={{de}}==
+===同音異義語===
+* {{l|de|Essen||市}}
+===動詞===
+# ～を[[たべる|食べる]]。""",
+        )
+        self.assertEqual(
+            page_data[0]["sounds"], [{"homophones": ["Essen"], "sense": "市"}]
+        )
+
+        page_data = parse_page(
+            self.wxr,
+            "alter",
+            """=={{L|en}}==
+===同音異義語===
+*[[altar]]
+===動詞===
+# 変える。""",
+        )
+        self.assertEqual(page_data[0]["sounds"], [{"homophones": ["altar"]}])

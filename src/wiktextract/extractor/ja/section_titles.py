@@ -35,6 +35,7 @@ POS_DATA = {
     "ことわざ": {"pos": "proverb"},
     "感動詞": {"pos": "intj"},
     "人名": {"pos": "name"},
+    "意義": {"pos": "unknown"},
 }
 
 LINKAGES = {

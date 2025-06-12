@@ -12,7 +12,7 @@ from .linkage import extract_alt_form_section, extract_linkage_section
 from .models import Sense, WordEntry
 from .pos import extract_note_section, parse_pos_section
 from .section_titles import LINKAGES, POS_DATA
-from .sound import extract_sound_section
+from .sound import extract_homophone_section, extract_sound_section
 from .translation import extract_translation_section
 
 
@@ -86,6 +86,15 @@ def parse_section(
                 level_node,
             )
             break
+        elif title_text == "同音異義語":
+            extract_homophone_section(wxr, page_data, base_data, level_node)
+            break
+    else:
+        if title_text not in ["脚注", "参照", "参考文献"]:
+            wxr.wtp.debug(
+                f"Unknown section: {title_text}",
+                sortid="extractor/ja/page/parse_section/93",
+            )
 
     for next_level in level_node.find_child(LEVEL_KIND_FLAGS):
         parse_section(wxr, page_data, base_data, next_level)

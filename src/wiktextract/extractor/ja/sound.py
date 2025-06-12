@@ -1,6 +1,6 @@
 import itertools
 
-from wikitextprocessor.parser import LevelNode, NodeKind, TemplateNode
+from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -201,3 +201,44 @@ def extract_zh_sounds(
         )
         translate_raw_tags(sound)
         sounds.append(sound)
+
+
+def extract_homophone_section(
+    wxr: WiktextractContext,
+    page_data: list[WordEntry],
+    base_data: WordEntry,
+    level_node: LevelNode,
+) -> None:
+    sounds = []
+    for list_node in level_node.find_child(NodeKind.LIST):
+        for list_item in list_node.find_child(NodeKind.LIST_ITEM):
+            for node in list_item.children:
+                if isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
+                    word = clean_node(wxr, None, node)
+                    if word != "":
+                        sounds.append(Sound(homophones=[word]))
+                elif (
+                    isinstance(node, TemplateNode) and node.template_name == "l"
+                ):
+                    from .linkage import extract_l_template
+
+                    l_data = extract_l_template(wxr, node)
+                    if l_data.word != "":
+                        sounds.append(
+                            Sound(
+                                homophones=[l_data.word],
+                                sense=l_data.sense,
+                                tags=l_data.tags,
+                                raw_tags=l_data.raw_tags,
+                            )
+                        )
+
+    if level_node.kind == NodeKind.LEVEL3:
+        base_data.sounds.extend(sounds)
+        for data in page_data:
+            if data.lang_code == base_data.lang_code:
+                data.sounds.extend(sounds)
+    elif len(page_data) > 0:
+        page_data[-1].sounds.extend(sounds)
+    else:
+        base_data.sounds.extend(sounds)
