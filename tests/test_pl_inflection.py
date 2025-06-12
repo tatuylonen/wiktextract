@@ -5,11 +5,7 @@ from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.pl.inflection import extract_inflection_section
 from wiktextract.extractor.pl.models import Sense, WordEntry
-from wiktextract.extractor.pl.page import (
-    extract_transliteracja_section,
-    extract_zapis_section,
-    parse_page,
-)
+from wiktextract.extractor.pl.page import parse_page
 from wiktextract.wxr_context import WiktextractContext
 
 
@@ -409,38 +405,49 @@ class TestPlInflection(TestCase):
         )
 
     def test_ptrad(self):
-        self.wxr.wtp.start_page("银行")
-        root = self.wxr.wtp.parse("===zapis===\n {{ptrad|銀行}}")
-        base_data = WordEntry(
-            word="银行",
-            lang="język chiński standardowy",
-            lang_code="zh",
-            pos="noun",
+        self.wxr.wtp.add_page(
+            "Szablon:pupr",
+            10,
+            """<span class="short-container">[[Aneks:Skróty używane w Wikisłowniku#U|<span class="short-wrapper" title="pismo chińskie uproszczone" data-expanded="pismo chińskie uproszczone"><span class="short-content">uproszcz.</span></span>]]</span><span lang="zh" xml:lang="zh"> 银行</span>""",
         )
-        extract_zapis_section(self.wxr, base_data, root.children[0])
+        self.wxr.wtp.add_page(
+            "Szablon:ptrad",
+            10,
+            """<span class="short-container">[[Aneks:Skróty używane w Wikisłowniku#T|<span class="short-wrapper" title="pismo chińskie tradycyjne" data-expanded="pismo chińskie tradycyjne"><span class="short-content">trad.</span></span>]]</span><span lang="zh" xml:lang="zh"> 銀行</span>""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "银行",
+            """== {{zh|银行}} ({{język chiński standardowy}}) ==
+===zapis===
+ {{pupr|银行}}, {{ptrad|銀行}}
+===znaczenia===
+''rzeczownik''
+: (1.1) [[bank]]""",
+        )
         self.assertEqual(
-            [f.model_dump(exclude_defaults=True) for f in base_data.forms],
-            [{"form": "銀行", "tags": ["Traditional Chinese"]}],
+            page_data[0]["forms"],
+            [{"form": "銀行", "tags": ["Traditional"]}],
         )
 
-    def test_transliteracja_section(self):
-        self.wxr.wtp.start_page("開く")
-        root = self.wxr.wtp.parse("""===transliteracja===
-: (1.1) aku""")
-        base_data = WordEntry(
-            word="開く",
-            lang="język japoński",
-            lang_code="ja",
-            pos="verb",
+    def test_transkrypcja_section(self):
+        page_data = parse_page(
+            self.wxr,
+            "開く",
+            """== {{ja|開く}} ({{język japoński}}) ==
+===transkrypcja===
+: (1.1) aku
+===znaczenia===
+''czasownik''
+: (1.1) [[otwierać się]], [[być]] [[otwarty]]m""",
         )
-        extract_transliteracja_section(self.wxr, base_data, root.children[0])
         self.assertEqual(
-            [f.model_dump(exclude_defaults=True) for f in base_data.forms],
+            page_data[0]["forms"],
             [
                 {
                     "form": "aku",
                     "sense_index": "1.1",
-                    "tags": ["transliteration"],
+                    "tags": ["transcription"],
                 }
             ],
         )
@@ -500,5 +507,50 @@ class TestPlInflection(TestCase):
                     "tags": ["alternative"],
                     "raw_tags": ["Yaŋalif (1920-1937)"],
                 },
+            ],
+        )
+
+    def test_hep_template(self):
+        self.wxr.wtp.add_page(
+            "Szablon:hep", 10, "''transkrypcja w systemie Hepburna:'' ai"
+        )
+        page_data = parse_page(
+            self.wxr,
+            "あい",
+            """== {{ja|あい}} ({{język japoński}}) ==
+===transkrypcja===
+: {{hep|ai}}
+===znaczenia===
+''rzeczownik''
+: (1.1) {{zob|[[愛]]}} ''([[miłość]])''""",
+        )
+        self.assertEqual(
+            page_data[0]["forms"],
+            [
+                {
+                    "form": "ai",
+                    "tags": ["transcription", "Hepburn-romanization"],
+                }
+            ],
+        )
+
+    def test_ko_forms(self):
+        page_data = parse_page(
+            self.wxr,
+            "연필",
+            """== {{ko|연필}} ({{język koreański}}) ==
+===transliteracja===
+ yeon.pil
+===znaczenia===
+''rzeczownik''
+: (1.1) [[ołówek]]
+===hanja===
+ [[鉛筆]]""",
+        )
+        self.assertEqual(
+            page_data[0]["forms"],
+            [
+                {"form": "yeon.pil", "tags": ["transliteration"]},
+                {"form": "鉛筆", "tags": ["hanja"]},
             ],
         )
