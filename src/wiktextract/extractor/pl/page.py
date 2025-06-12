@@ -8,12 +8,7 @@ from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .etymology import extract_etymology_section
 from .example import extract_example_section
-from .form import (
-    extract_alt_form_section,
-    extract_transkrypcja_section,
-    extract_transliteracja_section,
-    extract_zapis_section,
-)
+from .form import FORM_SECTIONS, extract_form_section
 from .inflection import extract_inflection_section
 from .linkage import LINKAGE_TYPES, extract_linkage_section
 from .models import Sense, WordEntry
@@ -59,23 +54,12 @@ def parse_section(
         extract_inflection_section(
             wxr, page_data, base_data.lang_code, level_node
         )
-    elif title_text == "zapis":
-        extract_zapis_section(wxr, base_data, level_node)
-    elif title_text == "transliteracja":
-        extract_transliteracja_section(wxr, base_data, level_node)
+    elif title_text in FORM_SECTIONS:
+        extract_form_section(
+            wxr, page_data, base_data, level_node, FORM_SECTIONS[title_text]
+        )
     elif title_text == "morfologia":
         extract_morphology_section(wxr, base_data, level_node)
-    elif title_text == "transkrypcja":
-        extract_transkrypcja_section(wxr, base_data, level_node)
-    elif title_text in [
-        "zapisy w ortografiach alternatywnych",
-        "warianty",
-        "kody",
-        "kolejność",
-        "kreski",
-        "słowniki",
-    ]:
-        extract_alt_form_section(wxr, base_data, level_node)
     elif title_text not in ["źródła", "klucz"]:
         wxr.wtp.debug(
             f"Unknown section: {title_text}",
