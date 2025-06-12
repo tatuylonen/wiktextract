@@ -276,6 +276,11 @@ TAGS = {
     "属格": "genitive",
     "ラテン文字": "romanization",
     "キリル文字": "Cyrillic",
+    # Template:de-noun
+    "複数形無し": "no-plural",
+    "複数形": "plural",
+    "指小辞無し": "no-diminutive",
+    "指小辞": "diminutive",
 }
 
 TOPICS = {

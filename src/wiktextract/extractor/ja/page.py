@@ -38,7 +38,10 @@ def parse_section(
                     wxr, page_data[-1], level_node, LINKAGES[title_text]
                 )
             break
-        elif title_text in ["語源", "由来"] and wxr.config.capture_etymologies:
+        elif (
+            title_text in ["語源", "由来", "字源", "出典"]
+            and wxr.config.capture_etymologies
+        ):
             extract_etymology_section(wxr, page_data, base_data, level_node)
             break
         elif title_text.startswith("発音") and wxr.config.capture_pronunciation:
@@ -69,7 +72,10 @@ def parse_section(
                 level_node,
             )
             break
-        elif title_text == "異表記":  # "異表記・別形", Template:alter
+        elif title_text in [
+            "異表記",
+            "別表記",
+        ]:  # "異表記・別形", Template:alter
             extract_alt_form_section(
                 wxr,
                 page_data[-1]
@@ -90,7 +96,7 @@ def parse_section(
             extract_homophone_section(wxr, page_data, base_data, level_node)
             break
     else:
-        if title_text not in ["脚注", "参照", "参考文献"]:
+        if title_text not in ["脚注", "参照", "参考文献", "参考"]:
             wxr.wtp.debug(
                 f"Unknown section: {title_text}",
                 sortid="extractor/ja/page/parse_section/93",

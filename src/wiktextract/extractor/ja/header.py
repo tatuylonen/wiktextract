@@ -53,6 +53,24 @@ def extract_header_nodes(
             if raw_tag != "又は" and raw_tag not in raw_tags:
                 # ignore "又は"(or) in "ja-noun" template
                 raw_tags.append(raw_tag)
+        elif (
+            isinstance(node, HTMLNode)
+            and node.tag == "span"
+            and "form-of" in node.attrs.get("class", "")
+        ):
+            for span_child in node.children:
+                if isinstance(span_child, str) and span_child.strip() != "":
+                    raw_tags.append(span_child.strip())
+                elif (
+                    isinstance(span_child, WikiNode)
+                    and span_child.kind == NodeKind.BOLD
+                ):
+                    word = clean_node(wxr, None, span_child)
+                    if word != "":
+                        add_form_data(
+                            node, word, extracted_forms, word_entry, raw_tags
+                        )
+                    raw_tags.clear()
         else:
             form_text = clean_node(wxr, None, node).strip("（）【】 ")
             add_form_data(
@@ -67,6 +85,8 @@ def extract_header_nodes(
                 is_first_bold = False
             raw_tags.clear()
     clean_node(wxr, word_entry, expanded_nodes)
+    if len(raw_tags) > 0:
+        word_entry.raw_tags.extend(raw_tags)
     translate_raw_tags(word_entry)
 
 
@@ -93,7 +113,9 @@ def add_form_data(
             or len(form_text) == 0
         ):
             continue
-        form = Form(form=form_text, raw_tags=raw_tags)
+        form = Form(
+            form=form_text, raw_tags=raw_tags if raw_tags != ["又は"] else []
+        )
         extracted_forms[form_text] = form
         if (
             node.kind == NodeKind.BOLD
@@ -109,4 +131,7 @@ def add_form_data(
         if "tr Latn" in node.attrs.get("class", ""):
             form.tags.append("transliteration")
         translate_raw_tags(form)
+        if raw_tags == ["又は"] and len(word_entry.forms) > 0:
+            form.tags = word_entry.forms[-1].tags
+            form.raw_tags = word_entry.forms[-1].raw_tags
         word_entry.forms.append(form)

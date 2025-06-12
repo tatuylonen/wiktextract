@@ -196,3 +196,46 @@ class TestJaHeader(TestCase):
                 {"form": "комнату́шка"},
             ],
         )
+
+    def test_de_noun_tag(self):
+        self.wxr.wtp.add_page(
+            "テンプレート:de-noun",
+            10,
+            """[[カテゴリ:ドイツ語]][[カテゴリ:ドイツ語 名詞]]<span lang="de" xml:lang="de">'''Silizium'''</span> <span class="gender n" title="neuter gender"><span>中性</span></span> (<span class="form-of genitive-form-of lang-de">属格'''<span lang="de" xml:lang="de">[[Siliziums]]</span>'''</span>, <span class="form-of plural-form-of lang-de">複数形無し</span>)""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "Silizium",
+            """==ドイツ語==
+===名詞===
+{{de-noun|g=n|Siliziums|-}}
+# [[珪素]]。""",
+        )
+        self.assertEqual(
+            page_data[0]["forms"], [{"form": "Siliziums", "tags": ["genitive"]}]
+        )
+        self.assertEqual(page_data[0]["tags"], ["neuter", "no-plural"])
+
+    def test_de_noun(self):
+        self.wxr.wtp.add_page(
+            "テンプレート:de-noun",
+            10,
+            """[[カテゴリ:ドイツ語]][[カテゴリ:ドイツ語 名詞]]<span lang="de" xml:lang="de">'''Montag'''</span> <span class="gender m" title="masculine gender"><span>男性</span></span> (<span class="form-of genitive-form-of lang-de">属格'''<span lang="de" xml:lang="de">[[Montages]]</span>'''<span class="form-of genitive-form-of lang-de"> 又は '''<span lang="de" xml:lang="de">[[Montags]]</span>'''</span></span>, <span class="form-of plural-form-of lang-de">複数形 '''<span lang="de" xml:lang="de">[[Montage]]</span>'''</span>)""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "Montag",
+            """==ドイツ語==
+===名詞===
+{{de-noun|g=m|genitive=Montages|genitive2=Montags|plural=Montage}}
+#[[月曜日]]。""",
+        )
+        self.assertEqual(
+            page_data[0]["forms"],
+            [
+                {"form": "Montages", "tags": ["genitive"]},
+                {"form": "Montags", "tags": ["genitive"]},
+                {"form": "Montage", "tags": ["plural"]},
+            ],
+        )
+        self.assertEqual(page_data[0]["tags"], ["masculine"])
