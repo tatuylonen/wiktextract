@@ -46,6 +46,7 @@ LINKAGE_SECTIONS = {
     "Sembol": "synonyms",
     "Birleşik sözcükler": "derived",
     "Kısaltma": "related",
+    "Yazılışlar": "forms",
 }
 
 LINKAGE_TAGS = {"Sembol": ["symbol"], "Kısaltma": ["abbreviation"]}

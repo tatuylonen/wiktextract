@@ -64,6 +64,11 @@ def parse_section(
         extract_inflection_section(
             wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
         )
+    elif title_text not in ["Kaynakça", "Ek okumalar"]:
+        wxr.wtp.debug(
+            f"Unknown section: {title_text}",
+            sortid="extractor/tr/page/parse_section/70",
+        )
 
     for next_level in level_node.find_child(LEVEL_KIND_FLAGS):
         parse_section(wxr, page_data, base_data, next_level)

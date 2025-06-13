@@ -39,6 +39,7 @@ class Form(TurkishBaseModel):
     form: str
     tags: list[str] = []
     raw_tags: list[str] = []
+    roman: str = ""
 
 
 class Sound(TurkishBaseModel):

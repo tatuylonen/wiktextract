@@ -2,7 +2,7 @@ from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
-from .models import Linkage, WordEntry
+from .models import Form, Linkage, WordEntry
 from .tags import translate_raw_tags
 
 
@@ -14,6 +14,7 @@ def extract_linkage_section(
     tags: list[str],
 ) -> None:
     sense = ""
+    l_list = []
     for node in level_node.children:
         if isinstance(node, TemplateNode) and node.template_name.lower() in [
             "üst",
@@ -23,23 +24,37 @@ def extract_linkage_section(
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
             for list_node in level_node.find_child(NodeKind.LIST):
                 for list_item in list_node.find_child(NodeKind.LIST_ITEM):
-                    extract_linkage_list_item(
-                        wxr, word_entry, list_item, l_type, tags, sense
+                    l_list.extend(
+                        extract_linkage_list_item(
+                            wxr, word_entry, list_item, tags, sense
+                        )
                     )
     for link_node in level_node.find_child(NodeKind.LINK):
         word = clean_node(wxr, None, link_node)
         if word != "":
-            getattr(word_entry, l_type).append(Linkage(word=word, tags=tags))
+            l_list.append(Linkage(word=word, tags=tags))
+
+    if l_type == "forms":
+        for l_data in l_list:
+            word_entry.forms.append(
+                Form(
+                    form=l_data.word,
+                    tags=l_data.tags,
+                    raw_tags=l_data.raw_tags,
+                    roman=l_data.roman,
+                )
+            )
+    else:
+        getattr(word_entry, l_type).extend(l_list)
 
 
 def extract_linkage_list_item(
     wxr: WiktextractContext,
     word_entry: WordEntry,
     list_item: WikiNode,
-    l_type: str,
     tags: list[str],
     sense: str,
-) -> None:
+) -> list[Linkage]:
     l_list = []
     for node in list_item.children:
         if (isinstance(node, WikiNode) and node.kind == NodeKind.LINK) or (
@@ -59,7 +74,7 @@ def extract_linkage_list_item(
                 if raw_tag != "":
                     l_list[-1].raw_tags.append(raw_tag)
                     translate_raw_tags(l_list[-1])
-    getattr(word_entry, l_type).extend(l_list)
+    return l_list
 
 
 GLOSS_LIST_LINKAGE_TEMPLATES = {
