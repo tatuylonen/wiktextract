@@ -51,13 +51,13 @@ class TestPtSound(TestCase):
             [
                 {
                     "ipa": "/ˈɔ.ʎʊ/",
-                    "tags": ["Brazil"],
+                    "tags": ["Brazil", "IPA"],
                     "raw_tags": ["Forma verbal"],
                 },
                 {
                     "ipa": '/"O.LU/',
                     "raw_tags": ["Forma verbal"],
-                    "tags": ["X-SAMPA", "Brazil"],
+                    "tags": ["Brazil", "X-SAMPA"],
                 },
             ],
         )

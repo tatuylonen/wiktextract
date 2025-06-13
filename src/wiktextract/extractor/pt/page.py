@@ -11,16 +11,20 @@ from ...wxr_context import WiktextractContext
 from .etymology import extract_etymology_section
 from .inflection import extract_conjugation_section, extract_degree_section
 from .linkage import (
-    FORM_SECTION_TAGS,
-    extract_forms_section,
     extract_expression_section,
+    extract_forms_section,
     extract_linkage_section,
     extract_phraseology_section,
 )
 from .models import Sense, WordEntry
 from .pos import extract_pos_section
 from .pronunciation import extract_pronunciation_section
-from .section_titles import LINKAGE_SECTIONS, LINKAGE_TAGS, POS_DATA
+from .section_titles import (
+    FORM_SECTION_TAGS,
+    LINKAGE_SECTIONS,
+    LINKAGE_TAGS,
+    POS_DATA,
+)
 from .translation import extract_translation_section
 
 
@@ -82,7 +86,7 @@ def parse_section(
         )
     elif title_text == "Etimologia":
         extract_etymology_section(wxr, page_data, level_node)
-    elif title_text == "Pronúncia":
+    elif title_text in ["Pronúncia", "Romanização"]:
         extract_pronunciation_section(wxr, page_data, level_node)
     elif title_text == "Fraseologia":
         extract_phraseology_section(
