@@ -2,7 +2,7 @@ from wikitextprocessor import LevelNode, NodeKind, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
-from .models import Linkage, WordEntry
+from .models import Form, Linkage, WordEntry
 from .tags import translate_raw_tags
 
 
@@ -74,3 +74,18 @@ def extract_proverb_list_item(
             )
             break
     return [proverb] if proverb.word != "" else []
+
+
+def extract_form_section(
+    wxr: WiktextractContext, page_data: list[WordEntry], level_node: LevelNode
+) -> None:
+    forms = []
+    for list_node in level_node.find_child(NodeKind.LIST):
+        for list_item in list_node.find_child(NodeKind.LIST_ITEM):
+            for link_node in list_item.find_child(NodeKind.LINK):
+                word = clean_node(wxr, None, link_node)
+                if word != "":
+                    forms.append(Form(form=word))
+    for data in page_data:
+        if data.lang_code == page_data[-1].lang_code:
+            data.forms.extend(forms)

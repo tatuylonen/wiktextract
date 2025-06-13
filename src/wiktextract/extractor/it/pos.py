@@ -42,6 +42,8 @@ def add_new_pos_data(
 ) -> None:
     page_data.append(base_data.model_copy(deep=True))
     page_data[-1].pos_title = pos_title
+    if pos_title.startswith("Trascrizione"):
+        pos_title = "Trascrizione"
     pos_data = POS_DATA[pos_title]
     page_data[-1].pos = pos_data["pos"]
     page_data[-1].tags.extend(pos_data.get("tags", []))
@@ -151,3 +153,24 @@ def extract_form_of_word(
         word = clean_node(wxr, None, node)
     if word != "":
         sense.form_of.append(AltForm(word=word))
+
+
+def extract_note_section(
+    wxr: WiktextractContext, page_data: list[WordEntry], level_node: LevelNode
+) -> None:
+    notes = []
+    has_list = False
+    for list_node in level_node.find_child(NodeKind.LIST):
+        has_list = True
+        for list_item in list_node.find_child(NodeKind.LIST_ITEM):
+            note = clean_node(wxr, None, list_item.children)
+            if note != "":
+                notes.append(note)
+    if not has_list:
+        note = clean_node(wxr, None, level_node.children)
+        if note != "":
+            notes.append(note)
+
+    for data in page_data:
+        if data.lang_code == page_data[-1].lang_code:
+            data.notes.extend(notes)

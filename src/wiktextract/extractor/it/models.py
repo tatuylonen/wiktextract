@@ -109,3 +109,4 @@ class WordEntry(ItalianBaseModel):
     hyponyms: list[Linkage] = []
     hypernyms: list[Linkage] = []
     proverbs: list[Linkage] = []
+    notes: list[str] = []

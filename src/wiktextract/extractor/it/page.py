@@ -5,9 +5,9 @@ from wikitextprocessor.parser import LEVEL_KIND_FLAGS, LevelNode, NodeKind
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .etymology import extract_citation_section, extract_etymology_section
-from .linkage import extract_linkage_section
+from .linkage import extract_form_section, extract_linkage_section
 from .models import Sense, WordEntry
-from .pos import extract_pos_section
+from .pos import extract_note_section, extract_pos_section
 from .section_titles import LINKAGE_SECTIONS, POS_DATA
 from .sound import extract_hyphenation_section, extract_pronunciation_section
 from .translation import extract_translation_section
@@ -20,7 +20,7 @@ def parse_section(
     level_node: LevelNode,
 ) -> None:
     title_text = clean_node(wxr, None, level_node.largs)
-    if title_text in POS_DATA:
+    if title_text in POS_DATA or title_text.startswith("Trascrizione"):
         wxr.wtp.start_subsection(title_text)
         extract_pos_section(wxr, page_data, base_data, level_node, title_text)
     elif title_text == "Traduzione":
@@ -42,6 +42,15 @@ def parse_section(
         wxr.wtp.start_subsection(title_text)
         extract_linkage_section(
             wxr, page_data, level_node, LINKAGE_SECTIONS[title_text]
+        )
+    elif title_text == "Uso / Precisazioni":
+        extract_note_section(wxr, page_data, level_node)
+    elif title_text in ["Variazione", "Forme flesse", "Variazioni", "Variante"]:
+        extract_form_section(wxr, page_data, level_node)
+    elif title_text not in ["Note / Riferimenti"]:
+        wxr.wtp.debug(
+            f"Unknown section: {title_text}",
+            sortid="extractor/it/page/parse_section/49",
         )
 
     for next_level in level_node.find_child(LEVEL_KIND_FLAGS):

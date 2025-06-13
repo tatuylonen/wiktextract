@@ -65,6 +65,7 @@ POS_DATA = {
     "Carattere hiragana": {"pos": "character", "tags": ["hiragana"]},
     "Confisso": {"pos": "affix"},
     "Kanji": {"pos": "character", "tags": ["kanji"]},
+    "Trascrizione": {"pos": "unknown", "tags": ["transcription", "form-of"]},
 }
 
 
