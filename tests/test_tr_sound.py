@@ -94,3 +94,20 @@ class TestTrSound(TestCase):
                 {"homophone": "qat"},
             ],
         )
+
+    def test_after_pos(self):
+        self.wxr.wtp.add_page(
+            "Şablon:h",
+            10,
+            "Heceleme: <span class='mention-Latn'>Ab‧düs‧sa‧met[[Kategori:Türkçe 4 heceli sözcükler]]</span>",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "Abdüssamet",
+            """==Türkçe==
+===Özel ad===
+#gloss
+====Heceleme====
+:{{h|e|Ab|düs|sa|met|k=1|dil=tr}}""",
+        )
+        self.assertEqual(page_data[0]["hyphenation"], "Ab‧düs‧sa‧met")

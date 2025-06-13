@@ -40,10 +40,18 @@ def parse_section(
         if level_node.contain_node(LEVEL_KIND_FLAGS):
             base_data = base_data.model_copy(deep=True)
         extract_etymology_section(wxr, base_data, level_node)
-    elif title_text == "Söyleniş":
+    elif title_text in ["Söyleniş", "Heceleme"]:
         if level_node.contain_node(LEVEL_KIND_FLAGS):
             base_data = base_data.model_copy(deep=True)
-        extract_sound_section(wxr, base_data, level_node)
+        extract_sound_section(
+            wxr,
+            page_data[-1]
+            if len(page_data) > 0
+            and page_data[-1].lang_code == base_data.lang_code
+            and not level_node.contain_node(LEVEL_KIND_FLAGS)
+            else base_data,
+            level_node,
+        )
     elif title_text == "Çeviriler":
         extract_translation_section(
             wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
