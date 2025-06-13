@@ -15,6 +15,7 @@ POS_DATA = {
     "verbo": {"pos": "verb"},
     "forma de substantivo": {"pos": "noun", "tags": ["form-of"]},
     "forma verbal": {"pos": "verb", "tags": ["form-of"]},
+    "locução": {"pos": "phrase"},
     "locução substantiva": {"pos": "phrase", "tags": ["substantive"]},
     "locução adjetiva": {"pos": "phrase", "tags": ["adjectival"]},
     "locução adverbial": {"pos": "phrase", "tags": ["adverbial"]},
@@ -55,6 +56,12 @@ POS_DATA = {
         "pos": "phrase",
         "tags": ["noun", "form-of"],
     },
+    "hanzi": {"pos": "character", "tags": ["hanzi"]},
+    "locução verbal": {"pos": "phrase", "tags": ["verb"]},
+    "hiragana": {"pos": "unknown", "tags": ["hiragana", "form-of"]},
+    "radical": {"pos": "root", "tags": ["morpheme"]},
+    "hantu": {"pos": "character", "tags": ["Hán-tự"]},
+    "sílaba": {"pos": "syllable"},
 }
 
 
@@ -111,6 +118,11 @@ LINKAGE_SECTIONS = {
     "vermos derivados": "derived",
     "expressões": "expressions",
     "expressão": "expressions",
+    "locuções e expressões": "expressions",
+    "exemplos de verbetes": "derived",
+    "verbo derivado": "derived",
+    "parônimo": "paronyms",
+    "palavras relacionadas": "related",
 }
 
 LINKAGE_TAGS = {
@@ -121,4 +133,18 @@ LINKAGE_TAGS = {
     "superlativo": ["superlative"],
     "aumentativo": ["augmentative"],
     "advérbios derivados": ["adverb"],
+    "verbo derivado": ["verb"],
+}
+
+FORM_SECTION_TAGS = {
+    "Sigla": "abbreviation",
+    "Abreviatura": "abbreviation",
+    "Símbolo": "symbol",
+    "Ordinal Equivalente": "ordinal",
+    "Forma alternativa": "alternative",
+    "Variante": "",
+    "Variantes": "",
+    "Variação": "",
+    "Grafias alternativas": "alternative",
+    "Grafia alternativa": "alternative",
 }

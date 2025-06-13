@@ -233,6 +233,9 @@ OTHER_TAGS = {
     "Gentílico": "demonym",
     "Galiza": "Galicia",
     "popular": "popular",
+    "Romanização": "romanization",
+    "X-SAMPA": "X-SAMPA",
+    "AFI": "IPA",
 }
 
 TAGS = {**HEAD_LINE_TAGS, **TABLE_TAGS, **GLOSS_TAGS, **OTHER_TAGS}

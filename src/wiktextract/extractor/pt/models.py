@@ -71,6 +71,7 @@ class Sound(PortugueseBaseModel):
     flac_url: str = ""
     tags: list[str] = []
     raw_tags: list[str] = []
+    zh_pron: str = ""
 
 
 class Form(PortugueseBaseModel):
@@ -111,3 +112,4 @@ class WordEntry(PortugueseBaseModel):
     cognates: list[Translation] = []
     descendants: list[Translation] = []
     abbreviations: list[Linkage] = []
+    paronyms: list[Linkage] = []

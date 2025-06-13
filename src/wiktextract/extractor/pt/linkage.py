@@ -11,7 +11,7 @@ from wikitextprocessor.parser import (
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .models import Form, Linkage, WordEntry
-from .section_titles import LINKAGE_SECTIONS
+from .section_titles import FORM_SECTION_TAGS, LINKAGE_SECTIONS
 from .tags import translate_raw_tags
 
 
@@ -150,17 +150,16 @@ def extract_linkage_list_item(
     raw_tags = []
     for node in list_item.children:
         if isinstance(node, TemplateNode):
-            match node.template_name:
-                case "link preto":
-                    word = clean_node(
-                        wxr, None, node.template_parameters.get(1, "")
-                    )
-                    if word != "":
-                        linkage_words.append(word)
-                case "escopo2":
-                    from .pos import extract_escopo2_template
+            if node.template_name.startswith("link "):
+                word = clean_node(
+                    wxr, None, node.template_parameters.get(1, "")
+                )
+                if word != "":
+                    linkage_words.append(word)
+            elif node.template_name == "escopo2":
+                from .pos import extract_escopo2_template
 
-                    raw_tags.extend(extract_escopo2_template(wxr, node))
+                raw_tags.extend(extract_escopo2_template(wxr, node))
         elif isinstance(node, WikiNode):
             match node.kind:
                 case NodeKind.LINK:
@@ -320,15 +319,6 @@ def extract_phraseology_list_item(
             )
 
 
-FORM_SECTION_TAGS = {
-    "Sigla": "abbreviation",
-    "Abreviatura": "abbreviation",
-    "Símbolo": "symbol",
-    "Ordinal Equivalente": "ordinal",
-    "Forma alternativa": "alternative",
-}
-
-
 def extract_forms_section(
     wxr: WiktextractContext,
     word_entry: WordEntry,
@@ -341,12 +331,11 @@ def extract_forms_section(
                 if isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
                     word = clean_node(wxr, None, node)
                     if word != "":
-                        word_entry.forms.append(
-                            Form(
-                                form=word,
-                                tags=[FORM_SECTION_TAGS[section_text]],
-                            )
-                        )
+                        form = Form(form=word)
+                        tag = FORM_SECTION_TAGS[section_text]
+                        if tag != "":
+                            form.tags.append(tag)
+                        word_entry.forms.append(form)
                 elif (
                     isinstance(node, TemplateNode)
                     and node.template_name == "escopo2"
@@ -358,3 +347,15 @@ def extract_forms_section(
                         extract_escopo2_template(wxr, node)
                     )
                     translate_raw_tags(word_entry.forms[-1])
+                elif isinstance(
+                    node, TemplateNode
+                ) and node.template_name.startswith("link "):
+                    word = clean_node(
+                        wxr, None, node.template_parameters.get(1, "")
+                    )
+                    if word != "":
+                        form = Form(form=word)
+                        tag = FORM_SECTION_TAGS[section_text]
+                        if tag != "":
+                            form.tags.append(tag)
+                        word_entry.forms.append(form)
