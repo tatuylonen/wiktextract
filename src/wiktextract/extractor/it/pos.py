@@ -42,6 +42,8 @@ def add_new_pos_data(
 ) -> None:
     page_data.append(base_data.model_copy(deep=True))
     page_data[-1].pos_title = pos_title
+    if pos_title.startswith("Trascrizione"):
+        pos_title = "Trascrizione"
     pos_data = POS_DATA[pos_title]
     page_data[-1].pos = pos_data["pos"]
     page_data[-1].tags.extend(pos_data.get("tags", []))
