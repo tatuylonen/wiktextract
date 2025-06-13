@@ -39,6 +39,7 @@ class Form(TurkishBaseModel):
     form: str
     tags: list[str] = []
     raw_tags: list[str] = []
+    roman: str = ""
 
 
 class Sound(TurkishBaseModel):
@@ -103,3 +104,4 @@ class WordEntry(TurkishBaseModel):
     proverbs: list[Linkage] = []
     idioms: list[Linkage] = []
     notes: list[str] = []
+    anagrams: list[Linkage] = []
