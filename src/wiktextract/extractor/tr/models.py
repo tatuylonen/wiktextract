@@ -104,3 +104,4 @@ class WordEntry(TurkishBaseModel):
     proverbs: list[Linkage] = []
     idioms: list[Linkage] = []
     notes: list[str] = []
+    anagrams: list[Linkage] = []

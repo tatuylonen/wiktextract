@@ -40,7 +40,7 @@ def parse_section(
         if level_node.contain_node(LEVEL_KIND_FLAGS):
             base_data = base_data.model_copy(deep=True)
         extract_etymology_section(wxr, base_data, level_node)
-    elif title_text in ["Söyleniş", "Heceleme"]:
+    elif title_text in ["Söyleniş", "Heceleme", "Söyleyiş"]:
         if level_node.contain_node(LEVEL_KIND_FLAGS):
             base_data = base_data.model_copy(deep=True)
         extract_sound_section(
@@ -72,7 +72,12 @@ def parse_section(
         extract_inflection_section(
             wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
         )
-    elif title_text not in ["Kaynakça", "Ek okumalar"]:
+    elif title_text not in [
+        "Kaynakça",
+        "Ek okumalar",
+        "Kaynaklar",
+        "Dış Bağlantılar",
+    ]:
         wxr.wtp.debug(
             f"Unknown section: {title_text}",
             sortid="extractor/tr/page/parse_section/70",

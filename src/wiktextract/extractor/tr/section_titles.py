@@ -28,6 +28,11 @@ POS_DATA = {
     "Hanja": {"pos": "character", "tags": ["Hanja"]},
     "Romanizasyon": {"pos": "romanization"},
     "Ortaç": {"pos": "verb", "tags": ["participle"]},
+    "İsim": {"pos": "name"},
+    "Kısaltmalar": {"pos": "abbrev", "tags": ["abbreviation"]},
+    "Sıral sayı": {"pos": "adj", "tags": ["ordinal"]},
+    "Yanlış": {"pos": "unknown"},
+    "Ön ek": {"pos": "prefix", "tags": ["morpheme"]},
 }
 
 LINKAGE_SECTIONS = {
@@ -47,6 +52,18 @@ LINKAGE_SECTIONS = {
     "Birleşik sözcükler": "derived",
     "Kısaltma": "related",
     "Yazılışlar": "forms",
+    "Bilimsel adı": "related",
+    "Ayrıca bakınız": "related",
+    "Farklı yazılışlar": "forms",
+    "Anagramlar": "anagrams",
+    "Sözcük birliktelikleri": "derived",
+    "Kelime birliktelikleri": "derived",
+    "İlgili kavramlar": "related",
+    "İlgili kelimeler": "related",
 }
 
-LINKAGE_TAGS = {"Sembol": ["symbol"], "Kısaltma": ["abbreviation"]}
+LINKAGE_TAGS = {
+    "Sembol": ["symbol"],
+    "Kısaltma": ["abbreviation"],
+    "Bilimsel adı": ["scientific", "name"],
+}
