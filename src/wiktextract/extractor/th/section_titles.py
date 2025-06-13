@@ -39,6 +39,8 @@ POS_DATA = {
     "คำกำหนด": {"pos": "det"},
     "จำนวนเชิงอันดับที่": {"pos": "adj", "tags": ["ordinal"]},
     "สุภาษิต": {"pos": "proverb"},
+    "รูปกริยาขยาย": {"pos": "verb", "tags": ["participle"]},
+    "ตัวกำหนด": {"pos": "det"},
 }
 
 
@@ -63,4 +65,5 @@ LINKAGE_SECTIONS = {
     "วลี": "derived",
     "คำผสม": "derived",
     "สุภาษิต": "proverbs",
+    "คำประสม": "derived",
 }
