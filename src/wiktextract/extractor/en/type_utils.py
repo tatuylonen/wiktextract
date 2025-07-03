@@ -156,7 +156,7 @@ class SenseData(TypedDict, total=False):
     meronyms: list[LinkageData]
     qualifier: str
     raw_glosses: list[str]
-    related: list[LinkageData]
+    related: list[LinkageData]  # also used for "alternative forms"
     senseid: list[str]
     synonyms: list[LinkageData]
     tags: list[str]

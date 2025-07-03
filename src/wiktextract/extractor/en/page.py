@@ -728,8 +728,11 @@ template_linkages: set[str] = {
     "der",
     "derived terms",
     "coordinate terms",
+    "cot",
     "rel",
     "col",
+    "inline alt forms",
+    "alti",
 }
 
 # Maps template name used in a word sense to a linkage field that it adds.
@@ -740,6 +743,10 @@ sense_linkage_templates: dict[str, str] = {
     "hyponyms": "hyponyms",
     "ant": "antonyms",
     "antonyms": "antonyms",
+    "alti": "related",
+    "inline alt forms": "related",
+    "coordinate terms": "coordinate_terms",
+    "cot": "coordinate_terms",
 }
 
 
