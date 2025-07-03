@@ -718,7 +718,7 @@ taxonomy_templates = {
 # Template names, this was exctracted from template_linkage_mappings,
 # because the code using template_linkage_mappings was actually not used
 # (but not removed).
-template_linkages: set[str] = {
+template_linkages_to_ignore_in_examples: set[str] = {
     "syn",
     "synonyms",
     "ant",
@@ -3876,7 +3876,7 @@ def parse_language(
                         usex_type = "quotation"
                     elif name in taxonomy_templates:
                         taxons.update(ht.get(1, "").split())
-                    for prefix in template_linkages:
+                    for prefix in template_linkages_to_ignore_in_examples:
                         if re.search(
                             r"(^|[-/\s]){}($|\b|[0-9])".format(prefix), name
                         ):
