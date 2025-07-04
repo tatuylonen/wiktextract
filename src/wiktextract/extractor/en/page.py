@@ -745,12 +745,16 @@ template_linkages_to_ignore_in_examples: set[str] = {
     "pf",
     "imperfectives",
     "impf",
+    "syndiff",
+    "synsee",
 }
 
 # Maps template name used in a word sense to a linkage field that it adds.
 sense_linkage_templates: dict[str, str] = {
     "syn": "synonyms",
     "synonyms": "synonyms",
+    "synsee": "synonyms",
+    "syndiff": "synonyms",
     "hyp": "hyponyms",
     "hyponyms": "hyponyms",
     "ant": "antonyms",
