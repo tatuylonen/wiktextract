@@ -65,17 +65,20 @@ def extract_example_list_item(
             "th-usex",
             "th-x",
             "th-xi",
+            "uxa",
             "collocation",
             "co",
             "coi",
-            "uxa",
         ]:
+            copy_of_parent_data = deepcopy(parent_data)
+            if template_node.template_name in ("collocation", "co", "coi"):
+                copy_of_parent_data["tags"].append("collocation")
             examples.append(
                 extract_ux_template(
                     wxr,
                     template_node,
                     sense_data,
-                    deepcopy(parent_data),
+                    copy_of_parent_data,
                 )
             )
 
