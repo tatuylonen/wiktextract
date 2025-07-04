@@ -89,6 +89,11 @@ class FormData(TypedDict, total=False):
     topics: list[str]
 
 
+class Hyphenation(TypedDict, total=False):
+    parts: list[str]
+    tags: list[str]
+
+
 SoundData = TypedDict(
     "SoundData",
     {
@@ -182,7 +187,8 @@ class WordData(TypedDict, total=False):
     forms: list[FormData]
     head_templates: list[TemplateData]
     holonyms: list[LinkageData]
-    hyphenation: list[str]
+    hyphenation: list[str]  # Being deprecated
+    hyphenations: list[Hyphenation]
     hypernyms: list[LinkageData]
     hyponyms: list[LinkageData]
     inflection_templates: list[TemplateData]

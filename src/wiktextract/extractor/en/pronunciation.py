@@ -11,9 +11,13 @@ from ...datautils import data_append, data_extend, split_at_comma_semi
 from ...page import LEVEL_KINDS, clean_node, is_panel_template
 from ...tags import valid_tags
 from ...wxr_context import WiktextractContext
-from .form_descriptions import classify_desc, parse_pronunciation_tags
+from .form_descriptions import (
+    classify_desc,
+    decode_tags,
+    parse_pronunciation_tags,
+)
 from .parts_of_speech import part_of_speech_map
-from .type_utils import SoundData, TemplateArgs, WordData
+from .type_utils import Hyphenation, SoundData, TemplateArgs, WordData
 from .zh_pron_tags import ZH_PRON_TAGS
 
 # Prefixes, tags, and regexp for finding romanizations from the pronuncation
@@ -97,8 +101,8 @@ def extract_pron_template(
     inside = 0
     current: list[str] = []
     for i, p in enumerate(re.split(r"(\s*,|;|\(|\)\s*)", pron_body)):
-    # Split the line on commas and semicolons outside of parens.
-    # This gives us lines with "(main-qualifier) /phon/ (post-qualifier, maybe)"
+        # Split the line on commas and semicolons outside of parens. This
+        # gives us lines with "(main-qualifier) /phon/ (post-qualifier, maybe)"
         # print(f"   {i=}, {p=}")
         comp = p.strip()
         if not p:
@@ -229,12 +233,14 @@ def parse_pronunciation(
     if have_etym and data is base_data:
         data = etym_data
     pron_templates: list[tuple[SoundData, list[SoundData]]] = []
+    hyphenations: list[Hyphenation] = []
     audios = []
     have_panel_templates = False
 
     def parse_pronunciation_template_fn(
         name: str, ht: TemplateArgs
     ) -> Optional[str]:
+        """Handle pronunciation and hyphenation templates"""
         # _template_fn handles templates *before* they are expanded;
         # this allows for special handling before all the work needed
         # for expansion is done.
@@ -305,6 +311,29 @@ def parse_pronunciation(
             #         parse_pronunciation_tags(wxr, country, pron)
             #     data_append(data, "sounds", pron)
             return "__AUDIO_IGNORE_THIS__" + str(len(audios) - 1) + "__"
+        if name in ("hyph", "hyphenation"):
+            # {{hyph|en|re|late|caption="Hyphenation UK:"}}
+            # {{hyphenation|it|quiè|to||qui|è|to||quié|to||qui|é|to}}
+            # and also nocaption=1
+            caption = clean_node(wxr, None, ht.get("caption", ""))
+            tagsets, _ = decode_tags(caption)
+            # flatten the tagsets into one; it would be really weird to have
+            # several tagsets for a hyphenation caption
+            tags = list(set(tag for tagset in tagsets for tag in tagset))
+            # We'll just ignore any errors from tags, it's not very important
+            # for hyphenation
+            tags = [tag for tag in tags if not tag.startswith("error")]
+            hyph_sequences: list[list[str]] = [[]]
+            for text in [
+                t for (k, t) in ht.items() if (isinstance(k, int) and k >= 2)
+            ]:
+                if not text:
+                    hyph_sequences.append([])
+                else:
+                    hyph_sequences[-1].append(clean_node(wxr, None, text))
+            for seq in hyph_sequences:
+                hyphenations.append(Hyphenation(parts=seq, tags=tags))
+            return ""
         return None
 
     def parse_pron_post_template_fn(
@@ -753,10 +782,16 @@ def parse_pronunciation(
                         data_append(data, "sounds", pron)
                         # have_pronunciations = True
 
+            # This regex-based hyphenation detection left as backup
             m = re.search(r"\b(Syllabification|Hyphenation): ([^\s,]*)", text)
             if m:
                 data_append(data, "hyphenation", m.group(2))
-                # have_pronunciations = True
+                data_append(
+                    data,
+                    "hyphenations",
+                    Hyphenation(parts=m.group(2).split(sep="-")),
+                )
+            # have_pronunciations = True
 
             # See if it contains a word prefix restricting which forms the
             # pronunciation applies to (see amica/Latin) and/or parenthesized
@@ -897,9 +932,13 @@ def parse_pronunciation(
                     audio["pos"] = active_pos  # type: ignore[typeddict-unknown-key]
             if audio not in data.get("sounds", ()):
                 data_append(data, "sounds", audio)
+
         # if audios:
         #     have_pronunciations = True
         audios = []
+
+        data_extend(data, "hyphenations", hyphenations)
+        hyphenations = []
 
     ## I have commented out the otherwise unused have_pronunciation
     ## toggles; uncomment them to use this debug print
