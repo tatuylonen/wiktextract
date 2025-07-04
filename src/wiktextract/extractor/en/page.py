@@ -733,6 +733,18 @@ template_linkages_to_ignore_in_examples: set[str] = {
     "col",
     "inline alt forms",
     "alti",
+    "comeronyms",
+    "holonyms",
+    "holo",
+    "hypernyms",
+    "hyper",
+    "meronyms,"
+    "mero",
+    "troponyms",
+    "perfectives",
+    "pf",
+    "imperfectives",
+    "impf",
 }
 
 # Maps template name used in a word sense to a linkage field that it adds.
@@ -747,6 +759,28 @@ sense_linkage_templates: dict[str, str] = {
     "inline alt forms": "related",
     "coordinate terms": "coordinate_terms",
     "cot": "coordinate_terms",
+    "comeronyms": "related",
+    "holonyms": "holonyms",
+    "holo": "holonyms",
+    "hypernyms": "hypernyms",
+    "hyper": "hypernyms",
+    "meronyms": "meronyms",
+    "mero": "meronyms",
+    "troponyms": "troponyms",
+    "perfectives": "related",
+    "pf": "related",
+    "imperfectives": "related",
+    "impf": "related",
+}
+
+sense_linkage_templates_tags: dict[str, list[str]] = {
+    "alti": ["alternative"],
+    "inline alt forms": ["alternative"],
+    "comeronyms": ["comeronym"],
+    "perfectives": ["perfective"],
+    "pf": ["perfective"],
+    "imperfectives": ["imperfective"],
+    "impf": ["imperfective"],
 }
 
 
@@ -775,6 +809,7 @@ def parse_sense_linkage(
     assert isinstance(name, str)
     assert isinstance(ht, dict)
     field = sense_linkage_templates[name]
+    field_tags = sense_linkage_templates_tags.get(name, [])
     for i in range(2, 20):
         w = ht.get(i) or ""
         w = clean_node(wxr, data, w)
@@ -837,6 +872,8 @@ def parse_sense_linkage(
             alt = m.group(1)
 
         dt = {"word": w}
+        if field_tags:
+            data_extend(dt, "tags", field_tags)
         if tags:
             data_extend(dt, "tags", tags)
         if topics:

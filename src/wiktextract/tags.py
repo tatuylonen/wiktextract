@@ -6400,6 +6400,7 @@ valid_tags = {
     "feminine-plural": "gender",  # Galician with different gender dep. on num.
     "masculine-plural": "gender",
     "collocation": "misc",
+    "comeronym": "misc",
 }
 
 for k, v in valid_tags.items():
