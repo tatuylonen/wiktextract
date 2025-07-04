@@ -313,3 +313,120 @@ class TestPronunciation(TestCase):
                 ]
             },
         )
+
+    def test_hyphenation_1(self):
+        self.wxr.wtp.start_page("baz")
+        self.wxr.wtp.add_page(
+            "Template:enPR", 10, "(Received Pronunciation) enPR: föö"
+        )
+        tree = self.wxr.wtp.parse("""=== Pronunciation ===
+* Noun:
+* {{hyphenation|en|foo|bar}}
+""")
+        out = {}
+        parse_pronunciation(self.wxr, tree.children[0], out, {}, {}, {}, "en")
+        # import pprint
+        # pprint.pp(out)
+
+        self.assertEqual(
+            out,
+            {
+                "hyphenations": [
+                    {
+                        "parts": ["foo", "bar"],
+                        "tags": [],
+                    },
+                ]
+            },
+        )
+
+    def test_hyphenation_2(self):
+        self.wxr.wtp.start_page("baz")
+        self.wxr.wtp.add_page(
+            "Template:enPR", 10, "(Received Pronunciation) enPR: föö"
+        )
+        tree = self.wxr.wtp.parse("""=== Pronunciation ===
+* Noun:
+* {{hyphenation|en|foo|bar||fo|obar}}
+""")
+        out = {}
+        parse_pronunciation(self.wxr, tree.children[0], out, {}, {}, {}, "en")
+        # import pprint
+        # pprint.pp(out)
+
+        self.assertEqual(
+            out,
+            {
+                "hyphenations": [
+                    {
+                        "parts": ["foo", "bar"],
+                        "tags": [],
+                    },
+                    {
+                        "parts": ["fo", "obar"],
+                        "tags": [],
+                    },
+                ]
+            },
+        )
+
+    def test_hyphenation_3(self):
+        self.wxr.wtp.start_page("baz")
+        self.wxr.wtp.add_page(
+            "Template:enPR", 10, "(Received Pronunciation) enPR: föö"
+        )
+        tree = self.wxr.wtp.parse("""=== Pronunciation ===
+* Noun:
+* {{hyphenation|en|foo|bar|caption=US}}
+""")
+        out = {}
+        parse_pronunciation(self.wxr, tree.children[0], out, {}, {}, {}, "en")
+        # import pprint
+        # pprint.pp(out)
+
+        self.assertEqual(
+            out,
+            {
+                "hyphenations": [
+                    {
+                        "parts": ["foo", "bar"],
+                        "tags": ["US"],
+                    },
+                ]
+            },
+        )
+
+    def test_hyphenation_4(self):
+        self.wxr.wtp.start_page("baz")
+        self.wxr.wtp.add_page(
+            "Template:enPR", 10, "(Received Pronunciation) enPR: föö"
+        )
+        tree = self.wxr.wtp.parse("""=== Pronunciation ===
+* Noun:
+* {{hyphenation|en|foo|bar||fo|obar||f|oobar|caption=US}}
+""")
+        out = {}
+        parse_pronunciation(self.wxr, tree.children[0], out, {}, {}, {}, "en")
+        # import pprint
+        # pprint.pp(out)
+
+        self.assertEqual(
+            out,
+            {
+                "hyphenations": [
+                    {
+                        "parts": ["foo", "bar"],
+                        "tags": ["US"],
+                    },
+                    {
+                        "parts": ["fo", "obar"],
+                        "tags": ["US"],
+                    },
+                    {
+                        "parts": ["f", "oobar"],
+                        "tags": ["US"],
+                    },
+                ]
+            },
+        )
+
