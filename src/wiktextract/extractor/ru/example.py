@@ -55,7 +55,7 @@ def process_пример_template(
             example.translation = value
         elif arg_name in ПРИМЕР_TEMPLATE_ARG_MAPPING:
             field_name = ПРИМЕР_TEMPLATE_ARG_MAPPING[arg_name]
-            if field_name in example.model_fields:
+            if hasattr(example, field_name):
                 setattr(example, field_name, value)
             else:
                 wxr.wtp.debug(
