@@ -202,6 +202,8 @@ def extract_dot_template(
                     is_tag = True
                     break
             if not is_tag:
-                gloss_nodes.append(node)
+                node_text = clean_node(wxr, sense, node)
+                if node_text != "":
+                    gloss_nodes.append(node_text)
         else:
             gloss_nodes.append(node)
