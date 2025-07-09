@@ -445,3 +445,25 @@ class TestRUGloss(unittest.TestCase):
                 }
             ],
         )
+
+    def test_remove_comma_between_tags(self):
+        self.wxr.wtp.add_page("Шаблон:-en-", 10, "Английский")
+        self.wxr.wtp.add_page(
+            "Шаблон:разг.",
+            10,
+            '[[Викисловарь:Условные сокращения|<span style="font-style: italic;background-color:#CCFFFF;cursor:help;" title="разговорное">разг.</span>]][[Категория:Разговорные выражения/en|change]]',
+        )
+        self.wxr.wtp.add_page(
+            "Шаблон:неисч.",
+            10,
+            '[[Викисловарь:Условные сокращения|<span style="font-style: italic;background-color:#CCFFFF;cursor:help;" title="неисчисляемое">неисч.</span>]][[Категория:Неисчисляемые существительные/en|change]]',
+        )
+        page_data = parse_page(
+            self.wxr,
+            "change",
+            """= {{-en-}} =
+=== Семантические свойства ===
+==== Значение ====
+# {{разг.|en}}, {{неисч.|en}} [[мелочь]]""",
+        )
+        self.assertEqual(page_data[0]["senses"][0]["glosses"], ["мелочь"])
