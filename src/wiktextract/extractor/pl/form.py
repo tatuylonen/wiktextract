@@ -116,13 +116,14 @@ def extract_ortografie_list_item(
     wxr: WiktextractContext, list_item: WikiNode, tags: list[str]
 ) -> list[Form]:
     forms = []
+    raw_tag = ""
     for node in list_item.children:
         if isinstance(node, WikiNode) and node.kind == NodeKind.ITALIC:
             node_str = clean_node(wxr, None, node)
-            if node_str.endswith(":"):
+            if node_str != "":
                 raw_tag = node_str.strip(": ")
         elif isinstance(node, str) and node.strip() != "":
-            form = Form(form=node.strip(), tags=tags)
+            form = Form(form=node.strip(":\n "), tags=tags)
             if raw_tag != "":
                 form.raw_tags.append(raw_tag)
                 translate_raw_tags(form)
