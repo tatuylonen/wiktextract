@@ -747,6 +747,11 @@ template_linkages_to_ignore_in_examples: set[str] = {
     "impf",
     "syndiff",
     "synsee",
+    # not linkage nor example templates
+    "sense",
+    "s",
+    "color panel",
+    "colour panel",
 }
 
 # Maps template name used in a word sense to a linkage field that it adds.
