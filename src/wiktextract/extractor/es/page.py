@@ -47,6 +47,8 @@ def parse_section(
     original_section_title = section_title
     section_title = section_title.lower()
     wxr.wtp.start_subsection(original_section_title)
+    if section_title == "":
+        return None
 
     pos_template_name = ""
     for level_node_template in level_node.find_content(NodeKind.TEMPLATE):

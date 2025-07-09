@@ -510,6 +510,28 @@ class TestPlInflection(TestCase):
             ],
         )
 
+        self.wxr.wtp.add_page("Szablon:ortografieBE", 10, "''łacinka'': -aść")
+        page_data = parse_page(
+            self.wxr,
+            "-асьць",
+            """== -асьць ({{język białoruski (taraszkiewica)}}) ==
+===zapisy w ortografiach alternatywnych===
+ {{ortografieBE}}
+===znaczenia===
+''przyrostek''
+: (1.1) [[-ość]]""",
+        )
+        self.assertEqual(
+            page_data[0]["forms"],
+            [
+                {
+                    "form": "-aść",
+                    "tags": ["alternative"],
+                    "raw_tags": ["łacinka"],
+                }
+            ],
+        )
+
     def test_hep_template(self):
         self.wxr.wtp.add_page(
             "Szablon:hep", 10, "''transkrypcja w systemie Hepburna:'' ai"
