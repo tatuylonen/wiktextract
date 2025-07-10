@@ -783,14 +783,26 @@ def parse_pronunciation(
                         # have_pronunciations = True
 
             # This regex-based hyphenation detection left as backup
-            m = re.search(r"\b(Syllabification|Hyphenation): ([^\s,]*)", text)
+            m = re.search(r"\b(Syllabification|Hyphenation): *([^\n.]*)", text)
             if m:
                 data_append(data, "hyphenation", m.group(2))
-                data_append(
-                    data,
-                    "hyphenations",
-                    Hyphenation(parts=m.group(2).split(sep="-")),
-                )
+                commaseparated = m.group(2).split(",")
+                if len(commaseparated) > 1:
+                    for h in commaseparated:
+                        # That second characters looks like a dash but it's
+                        # actually unicode decimal code 8231, hyphenation dash
+                        # Add more delimiters here if needed.
+                        parts = re.split(r"-|‧", h.strip())
+                        data_append(
+                            data, "hyphenations", Hyphenation(parts=parts)
+                        )
+                    ...
+                else:
+                    data_append(
+                        data,
+                        "hyphenations",
+                        Hyphenation(parts=m.group(2).split(sep="-")),
+                    )
             # have_pronunciations = True
 
             # See if it contains a word prefix restricting which forms the

@@ -430,3 +430,28 @@ class TestPronunciation(TestCase):
             },
         )
 
+    def test_hyphenation_regex(self):
+        self.wxr.wtp.start_page("quieto")
+        tree = self.wxr.wtp.parse("""=== Pronunciation ===
+* Hyphenation: quiè‧to, qui‧è‧to, quié‧to, qui‧é‧to
+""")
+        out = {}
+        parse_pronunciation(self.wxr, tree.children[0], out, {}, {}, {}, "en")
+        # import pprint
+        # pprint.pp(out)
+
+        self.assertEqual(
+            out,
+            {
+                # Remove `hyphenation` field if deprecated succesfully
+                  "hyphenation": [
+                    "quiè‧to, qui‧è‧to, quié‧to, qui‧é‧to"
+                  ],
+                "hyphenations": [
+                    {"parts": ["quiè", "to"]},
+                    {"parts": ["qui", "è", "to"]},
+                    {"parts": ["quié", "to"]},
+                    {"parts": ["qui", "é", "to"]},
+                ],
+            },
+        )
