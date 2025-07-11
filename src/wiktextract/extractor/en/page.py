@@ -738,7 +738,7 @@ template_linkages_to_ignore_in_examples: set[str] = {
     "holo",
     "hypernyms",
     "hyper",
-    "meronyms,"
+    "meronyms",
     "mero",
     "troponyms",
     "perfectives",
@@ -1616,6 +1616,7 @@ def parse_language(
                         links.append(ltext)
                 if word not in links:
                     links.append(word)
+
         if lang_code == "ja":
             exp = wxr.wtp.parse(
                 wxr.wtp.node_to_wikitext(header_nodes), expand_all=True
@@ -1635,9 +1636,51 @@ def parse_language(
                     rt = parse_ruby(wxr, r)
                     if rt is not None:
                         ruby.append(rt)
+        elif lang_code == "vi":
+            # Handle vi-readings templates that have a weird structures for
+            # Chu Nom vietnamese characters heads
+            # https://en.wiktionary.org/wiki/Template:vi-readings
+            new_header_nodes = []
+            related_readings: list[LinkageData] = []
+            for node in header_nodes:
+                if (
+                    isinstance(node, TemplateNode)
+                    and node.template_name == "vi-readings"
+                ):
+                    print(node.template_parameters)
+                    for parameter, tag in (
+                        ("hanviet", "han-viet-reading"),
+                        ("nom", "nom-reading"),
+                        # we ignore the fanqie parameter "phienthiet"
+                    ):
+                        arg = node.template_parameters.get(parameter)
+                        if arg is not None:
+                            text = clean_node(wxr, None, arg)
+                            for w in text.split(","):
+                                # ignore - separated references
+                                if "-" in w:
+                                    w = w[:w.index("-")]
+                                w = w.strip()
+                                related_readings.append(
+                                    LinkageData(
+                                        word=w, tags=[tag]
+                                    )
+                                )
+                    continue
+
+
+                # Skip the vi-reading template for the rest of the head parsing
+                new_header_nodes.append(node)
+            if len(related_readings) > 0:
+                data_extend(pos_data, "related", related_readings)
+                header_nodes = new_header_nodes
+
         header_text = clean_node(
             wxr, pos_data, header_nodes, post_template_fn=head_post_template_fn
         )
+
+        if not header_text.strip():
+            return
 
         term_label_tags: list[str] = []
         term_label_topics: list[str] = []
@@ -3279,17 +3322,15 @@ def parse_language(
                         pos = wxr.wtp.subsection or "MISSING_SUBSECTION"
                         # print(f"{language=}, {pos=}, {TRANSLATIONS_TITLE=}")
                         seqs: list[list[str] | tuple[str, ...]] = [
-                                [TRANSLATIONS_TITLE],
-                                [language, pos],
-                            ]
+                            [TRANSLATIONS_TITLE],
+                            [language, pos],
+                        ]
                         subnode = get_subpage_section(
                             wxr.wtp.title or "MISSING_TITLE",
                             TRANSLATIONS_TITLE,
                             seqs,
                         )
-                    if subnode is not None and isinstance(
-                        subnode, WikiNode
-                    ):
+                    if subnode is not None and isinstance(subnode, WikiNode):
                         parse_translations(data, subnode)
                     return ""
                 if name in (
