@@ -761,7 +761,7 @@ uppercase_tags = set(
         "Banatiski Gurbet",
         "Banawá",
         "Bangkok",
-        "Bangladesh", # bhai/English 20241113
+        "Bangladesh",  # bhai/English 20241113
         "Banten",
         "Banyamasan",
         "Barbados",
@@ -1175,7 +1175,7 @@ uppercase_tags = set(
         "Hijazi",  # Variant of Arabic
         "Hijazi Arabic",  # Variant of Arabic
         "Hinduism",
-        "Hinglish", # babu/English 20241113
+        "Hinglish",  # babu/English 20241113
         "Hokkien",  # Chinese dialect/language
         "Honduras",
         "Hong Kong",
@@ -4780,7 +4780,7 @@ xlat_tags_map: Dict[str, Union[str, List[str]]] = {
     "Dialectal or colloquial": "colloquial",
     "Rare except in very formal contexts": "rare formal",
     "alternative in würde normally preferred": "",
-    "sometimes derogatory": "sometimes derogatory", 
+    "sometimes derogatory": "sometimes derogatory",
 }
 
 # This mapping is applied to full descriptions before splitting by comma.
@@ -6401,6 +6401,11 @@ valid_tags = {
     "masculine-plural": "gender",
     "collocation": "misc",
     "comeronym": "misc",
+
+    # https://en.wiktionary.org/wiki/Template:vi-readings
+    "han-viet-reading": "misc",
+    "nom-reading": "misc",
+
 }
 
 for k, v in valid_tags.items():

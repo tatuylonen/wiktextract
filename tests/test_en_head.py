@@ -913,3 +913,45 @@ class HeadTests(unittest.TestCase):
                 ],
             },
         )
+
+    def test_vie_reading_template1(self):
+        # Issue #1272
+        data = {}
+        self.maxDiff = 10000
+        self.wxr.wtp.start_page("敎")
+        self.wxr.wtp.start_section("Vietnamese")
+        self.wxr.wtp.start_subsection("Han character")
+        data = parse_page(
+            self.wxr,
+            "敎",
+            """==Vietnamese==
+
+===Han character===
+{{vi-readings|rs=攴07
+|hanviet=giao-test, giáo-test
+|nom=dáo, dạy, giáo
+}}
+""",
+        )
+        # import json
+
+        # print(json.dumps(data, indent=2, sort_keys=True, ensure_ascii=False))
+        self.assertEqual(
+            data,
+            [
+                {
+                    "lang": "Vietnamese",
+                    "lang_code": "vi",
+                    "pos": "character",
+                    "related": [
+                        {"tags": ["han-viet-reading"], "word": "giao"},
+                        {"tags": ["han-viet-reading"], "word": "giáo"},
+                        {"tags": ["nom-reading"], "word": "dáo"},
+                        {"tags": ["nom-reading"], "word": "dạy"},
+                        {"tags": ["nom-reading"], "word": "giáo"},
+                    ],
+                    "senses": [{"raw_tags": ["han"], "tags": ["no-gloss"]}],
+                    "word": "敎",
+                }
+            ],
+        )
