@@ -134,6 +134,12 @@ class Descendant(GermanBaseModel):
     sense_index: str = ""
 
 
+class Hyphenation(GermanBaseModel):
+    parts: list[str] = []
+    tags: list[str] = []
+    raw_tags: list[str] = []
+
+
 class WordEntry(GermanBaseModel):
     """
     WordEntry is a dictionary containing lexical information of a single word
@@ -171,7 +177,7 @@ class WordEntry(GermanBaseModel):
     etymology_texts: list[str] = []
     forms: list[Form] = []
     meronyms: list[Linkage] = []
-    hyphenation: str = ""
+    hyphenations: list[Hyphenation] = []
     notes: list[str] = []
     related: list[Linkage] = []
     descendants: list[Descendant] = []

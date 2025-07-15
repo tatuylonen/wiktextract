@@ -121,7 +121,7 @@ def extract_reference(
                     continue
                 if key.lower() in LITERATUR_TEMPLATE_ARGS:
                     field = LITERATUR_TEMPLATE_ARGS[key.lower()]
-                    if field in example_data.model_fields:
+                    if hasattr(example_data, field):
                         setattr(
                             example_data, field, clean_node(wxr, None, value)
                         )
