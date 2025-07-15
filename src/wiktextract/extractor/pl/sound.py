@@ -3,7 +3,7 @@ from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from ..share import set_sound_file_url_fields
-from .models import Sound, WordEntry
+from .models import Hyphenation, Sound, WordEntry
 from .tags import translate_raw_tags
 
 SOUND_TAG_TEMPLATES = frozenset(["RP", "amer", "lp", "lm"])
@@ -74,4 +74,8 @@ def extract_morphology_section(
     # "preformatted" node
     for t_node in level_node.find_child_recursively(NodeKind.TEMPLATE):
         if t_node.template_name == "morfeo":
-            base_data.hyphenation = clean_node(wxr, base_data, t_node)
+            h_str = clean_node(wxr, base_data, t_node)
+            if h_str != "":
+                base_data.hyphenations.append(
+                    Hyphenation(parts=h_str.split("•"))
+                )
