@@ -83,7 +83,10 @@ def extract_linkage_list_item(
                         l_dict[LINKAGE_SECTIONS[linkage_name]].append(
                             Linkage(word=word)
                         )
-    elif list_item.contain_node(NodeKind.BOLD):
+    elif (
+        list_item.contain_node(NodeKind.BOLD)
+        and linkage_name in LINKAGE_SECTIONS
+    ):
         extract_proverb_list(
             wxr, l_dict, list_item, LINKAGE_SECTIONS[linkage_name]
         )
