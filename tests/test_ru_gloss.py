@@ -161,7 +161,7 @@ class TestRUGloss(unittest.TestCase):
             ),
             [
                 {
-                    "hyphenations": [{'parts': ['туп']}],
+                    "hyphenations": [{"parts": ["туп"]}],
                     "lang": "Татарский",
                     "lang_code": "tt",
                     "word": "туп",

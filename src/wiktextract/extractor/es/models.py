@@ -105,6 +105,12 @@ class Form(BaseModelWrap):
     row_span: int = Field(1, exclude=True)
 
 
+class Hyphenation(BaseModelWrap):
+    parts: list[str] = []
+    tags: list[str] = []
+    raw_tags: list[str] = []
+
+
 class WordEntry(BaseModelWrap):
     """
     WordEntry is a dictionary containing lexical information of a single word extracted from Wiktionary with wiktextract.
@@ -145,7 +151,7 @@ class WordEntry(BaseModelWrap):
     raw_tags: list[str] = []
     extra_sounds: dict[str, str] = {}
     forms: list[Form] = []
-    hyphenation: str = ""
+    hyphenations: list[Hyphenation] = []
     cognates: list[Linkage] = []
     morphologies: list[Linkage] = []
     descendants: list[Translation] = []

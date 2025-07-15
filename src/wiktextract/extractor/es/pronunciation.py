@@ -3,7 +3,7 @@ from wikitextprocessor import HTMLNode, NodeKind, TemplateNode, WikiNode
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from ..share import set_sound_file_url_fields
-from .models import Sound, WordEntry
+from .models import Hyphenation, Sound, WordEntry
 from .tags import translate_raw_tags
 
 # translate table row header to sound model field
@@ -36,8 +36,10 @@ def process_pron_graf_template(
         value_text = clean_node(wxr, None, value_node)
         if header_text.endswith(" (AFI)"):  # IPA
             process_pron_graf_ipa_cell(wxr, word_entry, value_node, header_text)
-        elif header_text == "silabación":
-            word_entry.hyphenation = value_text
+        elif header_text == "silabación" and value_text != "":
+            word_entry.hyphenations.append(
+                Hyphenation(parts=value_text.split("-"))
+            )
         elif header_text in PRON_GRAF_HEADER_MAP:
             sound = Sound()
             setattr(sound, PRON_GRAF_HEADER_MAP[header_text], value_text)
