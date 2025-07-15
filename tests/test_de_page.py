@@ -147,7 +147,9 @@ class TestDEPage(unittest.TestCase):
 ====Bedeutungen====
 :[1] {{K|veraltend}} Buch""",
         )
-        self.assertEqual(data[0]["hyphenation"], "Dik·ti·o·när")
+        self.assertEqual(
+            data[0]["hyphenations"], [{"parts": ["Dik", "ti", "o", "när"]}]
+        )
 
         data = parse_page(
             self.wxr,
@@ -160,7 +162,7 @@ class TestDEPage(unittest.TestCase):
 *{{Dativ-e}} Dativ Singular des Substantivs '''[[Hund]]'''
             """,
         )
-        self.assertEqual(data[0]["hyphenation"], "Hun·de")
+        self.assertEqual(data[0]["hyphenations"], [{"parts": ["Hun", "de"]}])
 
     def test_italic_tag_in_pos_title(self):
         self.wxr.wtp.add_page("Vorlage:Sprache", 10, "{{{1}}}")

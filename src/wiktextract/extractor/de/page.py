@@ -12,7 +12,7 @@ from .form import extracrt_form_section, extract_transcription_section
 from .gloss import extract_glosses
 from .inflection import extract_inf_table_template, process_noun_table
 from .linkage import extract_descendant_section, extract_linkages
-from .models import AltForm, Sense, WordEntry
+from .models import AltForm, Hyphenation, Sense, WordEntry
 from .pronunciation import extract_pronunciation_section
 from .section_titles import FORM_TITLES, LINKAGE_TITLES, POS_SECTIONS
 from .tags import translate_raw_tags
@@ -319,16 +319,17 @@ def process_umschrift_template(
 def extract_hyphenation_section(
     wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
 ) -> None:
+    h_str = ""
     for list_item in level_node.find_child_recursively(NodeKind.LIST_ITEM):
         for node in list_item.children:
             if isinstance(node, str):
                 if "," in node:
-                    word_entry.hyphenation = node[: node.index(",")].strip()
+                    h_str = node[: node.index(",")].strip()
                     break
                 else:
-                    word_entry.hyphenation += node.strip()
-    if word_entry.hyphenation == "?":
-        word_entry.hyphenation = ""
+                    h_str += node.strip()
+    if h_str not in ["?", ""]:
+        word_entry.hyphenations.append(Hyphenation(parts=h_str.split("·")))
 
 
 def extract_note_section(
