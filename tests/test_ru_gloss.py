@@ -161,7 +161,7 @@ class TestRUGloss(unittest.TestCase):
             ),
             [
                 {
-                    "hyphenation": "туп",
+                    "hyphenations": [{"parts": ["туп"]}],
                     "lang": "Татарский",
                     "lang_code": "tt",
                     "word": "туп",
@@ -231,7 +231,7 @@ class TestRUGloss(unittest.TestCase):
                         }
                     ],
                     "tags": ["imperfective", "intransitive"],
-                    "hyphenation": "пры́-гать",
+                    "hyphenations": [{"parts": ["пры́", "гать"]}],
                 },
             ],
         )

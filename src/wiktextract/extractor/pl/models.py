@@ -84,6 +84,12 @@ class Note(PolishBaseModel):
     text: str = Field(min_length=1)
 
 
+class Hyphenation(PolishBaseModel):
+    parts: list[str] = []
+    tags: list[str] = []
+    raw_tags: list[str] = []
+
+
 class WordEntry(PolishBaseModel):
     model_config = ConfigDict(title="Polish Wiktionary")
 
@@ -111,4 +117,4 @@ class WordEntry(PolishBaseModel):
     synonyms: list[Linkage] = []
     derived: list[Linkage] = []
     forms: list[Form] = []
-    hyphenation: str = ""
+    hyphenations: list[Hyphenation] = []

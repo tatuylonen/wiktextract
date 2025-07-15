@@ -4,6 +4,7 @@ from wikitextprocessor import Wtp
 
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.es.models import WordEntry
+from wiktextract.extractor.es.page import parse_page
 from wiktextract.extractor.es.pronunciation import process_pron_graf_template
 from wiktextract.wxr_context import WiktextractContext
 
@@ -12,7 +13,9 @@ class TestESPronunciation(unittest.TestCase):
     maxDiff = None
 
     def setUp(self) -> None:
-        conf = WiktionaryConfig(dump_file_lang_code="es")
+        conf = WiktionaryConfig(
+            dump_file_lang_code="es", capture_language_codes=None
+        )
         self.wxr = WiktextractContext(
             Wtp(lang_code="es", extension_tags=conf.allowed_html_tags), conf
         )
@@ -178,7 +181,6 @@ class TestESPronunciation(unittest.TestCase):
         )
 
     def test_pron_graf_hyphenation(self):
-        self.wxr.wtp.start_page("perro")
         self.wxr.wtp.add_page(
             "Plantilla:pron-graf",
             10,
@@ -191,12 +193,16 @@ class TestESPronunciation(unittest.TestCase):
 |[[:Categoría:ES:Rimas:e.ro|e.ro]][[Categoría:ES:Rimas:e.ro]]
 |}""",
         )
-        root = self.wxr.wtp.parse("{{pron-graf}}")
-        word_entry = WordEntry(word="perro", lang_code="es", lang="Español")
-        process_pron_graf_template(self.wxr, word_entry, root.children[0])
-        self.assertEqual(
-            word_entry.model_dump(exclude_defaults=True)["sounds"],
-            [{"rhymes": "e.ro"}],
+        self.wxr.wtp.add_page("Plantilla:lengua", 10, "Español")
+        self.wxr.wtp.add_page("Plantilla:sustantivo", 10, "Sustantivo")
+        data = parse_page(
+            self.wxr,
+            "perro",
+            """== {{lengua|es}} ==
+{{pron-graf|1audio1=LL-Q1321 (spa)-Rodelar-perro.wav}}
+=== {{sustantivo|es}} ===
+;1 {{csem|mamíferos|perros}}: Variedad doméstica""",
         )
-        self.assertEqual(word_entry.hyphenation, "pe-rro")
-        self.assertEqual(word_entry.categories, ["ES:Rimas:e.ro"])
+        self.assertEqual(data[0]["sounds"], [{"rhymes": "e.ro"}])
+        self.assertEqual(data[0]["hyphenations"], [{"parts": ["pe", "rro"]}])
+        self.assertEqual(data[0]["categories"], ["ES:Rimas:e.ro"])
