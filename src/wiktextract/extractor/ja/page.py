@@ -124,7 +124,11 @@ def parse_page(
     page_data: list[WordEntry] = []
     for level2_node in tree.find_child(NodeKind.LEVEL2):
         lang_name = clean_node(wxr, None, level2_node.largs)
-        lang_code = name_to_code(lang_name, "ja")
+        if lang_name == "":
+            lang_name = "unknown"
+            lang_code = "unknown"
+        else:
+            lang_code = name_to_code(lang_name, "ja")
         if lang_code == "":
             for template in level2_node.find_content(NodeKind.TEMPLATE):
                 if template.template_name == "L":

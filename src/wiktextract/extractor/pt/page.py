@@ -87,7 +87,9 @@ def parse_section(
     elif title_text == "Etimologia":
         extract_etymology_section(wxr, page_data, level_node)
     elif title_text in ["Pronúncia", "Romanização"]:
-        extract_pronunciation_section(wxr, page_data, level_node)
+        extract_pronunciation_section(
+            wxr, page_data if len(page_data) else [base_data], level_node
+        )
     elif title_text == "Fraseologia":
         extract_phraseology_section(
             wxr, page_data[-1] if len(page_data) else base_data, level_node

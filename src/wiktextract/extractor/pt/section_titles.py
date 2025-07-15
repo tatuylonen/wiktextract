@@ -62,6 +62,9 @@ POS_DATA = {
     "radical": {"pos": "root", "tags": ["morpheme"]},
     "hantu": {"pos": "character", "tags": ["Hán-tự"]},
     "sílaba": {"pos": "syllable"},
+    "interfixo": {"pos": "interfix", "tags": ["morpheme"]},
+    "acrônimo": {"pos": "abbrev", "tags": ["abbreviation"]},
+    "provérbio": {"pos": "proverb"},
 }
 
 

@@ -873,11 +873,7 @@ def recurse_glosses1(
                     else:
                         for link in snode.find_child_recursively(NodeKind.LINK):
                             link_linkages.append(
-                                Linkage(
-                                    word=clean_node(
-                                        wxr, None, snode.largs[0][0]
-                                    )
-                                )
+                                Linkage(word=clean_node(wxr, None, link))
                             )
 
                 # print("=====")
