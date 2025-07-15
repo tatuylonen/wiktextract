@@ -25,7 +25,7 @@ from .linkage import (
     extract_linkage_section,
     extract_phrase_section,
 )
-from .models import AltForm, Form, Sense, Sound, WordEntry
+from .models import AltForm, Form, Hyphenation, Sense, Sound, WordEntry
 from .pronunciation import (
     extract_homophone_section,
     extract_pronunciation_section,
@@ -176,9 +176,13 @@ def extract_morphological_section(
                 parse_wikitext_forms_table(wxr, page_data[-1], table_node)
             for table_tag in expanded_template.find_html("table"):
                 parse_html_forms_table(wxr, page_data[-1], table_tag)
-            page_data[-1].hyphenation = clean_node(
+            h_str = clean_node(
                 wxr, None, child_node.template_parameters.get("слоги", "")
             )
+            if h_str != "":
+                page_data[-1].hyphenations.append(
+                    Hyphenation(parts=h_str.split("-"))
+                )
 
         if child_node.template_name.startswith("прил ru"):
             extract_прил_ru_comparative_forms(
