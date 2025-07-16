@@ -117,6 +117,12 @@ class Descendant(ThaiBaseModel):
     sense: str = ""
 
 
+class Hyphenation(ThaiBaseModel):
+    parts: list[str] = []
+    tags: list[str] = []
+    raw_tags: list[str] = []
+
+
 class WordEntry(ThaiBaseModel):
     model_config = ConfigDict(title="Thai Wiktionary")
     word: str = Field(description="Word string", min_length=1)
@@ -144,7 +150,7 @@ class WordEntry(ThaiBaseModel):
     idioms: list[Linkage] = []
     coordinate_terms: list[Linkage] = []
     sounds: list[Sound] = []
-    hyphenation: list[str] = []
+    hyphenations: list[Hyphenation] = []
     abbreviations: list[Linkage] = []
     proverbs: list[Linkage] = []
     notes: list[str] = []
