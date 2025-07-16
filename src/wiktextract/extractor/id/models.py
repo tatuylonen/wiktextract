@@ -83,6 +83,12 @@ class Form(IndonesianBaseModel):
     raw_tags: list[str] = []
 
 
+class Hyphenation(IndonesianBaseModel):
+    parts: list[str] = []
+    tags: list[str] = []
+    raw_tags: list[str] = []
+
+
 class WordEntry(IndonesianBaseModel):
     model_config = ConfigDict(title="Indonesian Wiktionary")
     word: str = Field(description="Word string")
@@ -104,4 +110,4 @@ class WordEntry(IndonesianBaseModel):
     related: list[Linkage] = []
     proverbs: list[Linkage] = []
     notes: list[str] = []
-    hyphenation: str = ""
+    hyphenations: list[Hyphenation] = []
