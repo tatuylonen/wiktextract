@@ -83,4 +83,6 @@ class TestKuSound(TestCase):
 === Navdêr 1 ===
 # [[peyv|Peyvên]]""",
         )
-        self.assertEqual(page_data[0]["hyphenation"], "lê·ker")
+        self.assertEqual(
+            page_data[0]["hyphenations"], [{"parts": ["lê", "ker"]}]
+        )
