@@ -38,7 +38,9 @@ class TestTrSound(TestCase):
 ===Ad===
 # Yılın 31 gün süren beşinci ayı""",
         )
-        self.assertEqual(page_data[0]["hyphenation"], "ma‧yıs")
+        self.assertEqual(
+            page_data[0]["hyphenations"], [{"parts": ["ma", "yıs"]}]
+        )
         self.assertEqual(page_data[0]["sounds"][0], {"ipa": "/ma.ˈjɯs/"})
         self.assertEqual(page_data[0]["sounds"][1]["audio"], "mayıs.ogg")
         self.assertEqual(page_data[0]["sounds"][1]["raw_tags"], ["mayıs"])
@@ -110,4 +112,7 @@ class TestTrSound(TestCase):
 ====Heceleme====
 :{{h|e|Ab|düs|sa|met|k=1|dil=tr}}""",
         )
-        self.assertEqual(page_data[0]["hyphenation"], "Ab‧düs‧sa‧met")
+        self.assertEqual(
+            page_data[0]["hyphenations"],
+            [{"parts": ["Ab", "düs", "sa", "met"]}],
+        )

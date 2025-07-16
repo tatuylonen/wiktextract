@@ -79,6 +79,12 @@ class Linkage(TurkishBaseModel):
     sense: str = ""
 
 
+class Hyphenation(TurkishBaseModel):
+    parts: list[str] = []
+    tags: list[str] = []
+    raw_tags: list[str] = []
+
+
 class WordEntry(TurkishBaseModel):
     model_config = ConfigDict(title="Turkish Wiktionary")
     word: str = Field(description="Word string")
@@ -93,7 +99,7 @@ class WordEntry(TurkishBaseModel):
     forms: list[Form] = []
     etymology_texts: list[str] = []
     sounds: list[Sound] = []
-    hyphenation: str = ""
+    hyphenations: list[Hyphenation] = []
     translations: list[Translation] = []
     synonyms: list[Linkage] = []
     antonyms: list[Linkage] = []
