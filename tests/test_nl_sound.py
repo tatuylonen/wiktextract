@@ -59,7 +59,7 @@ class TestNlSound(TestCase):
 ====Werkwoord====
 # stappen""",
         )
-        self.assertEqual(data[0]["hyphenation"], "lo·pen")
+        self.assertEqual(data[0]["hyphenations"], [{"parts": ["lo", "pen"]}])
 
     def test_sound_section(self):
         data = parse_page(

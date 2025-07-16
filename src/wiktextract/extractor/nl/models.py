@@ -95,6 +95,12 @@ class Descendant(DutchBaseModel):
     descendants: list["Descendant"] = []
 
 
+class Hyphenation(DutchBaseModel):
+    parts: list[str] = []
+    tags: list[str] = []
+    raw_tags: list[str] = []
+
+
 class WordEntry(DutchBaseModel):
     model_config = ConfigDict(title="Dutch Wiktionary")
     word: str = Field(description="Word string", min_length=1)
@@ -124,7 +130,7 @@ class WordEntry(DutchBaseModel):
     rhymes: list[Linkage] = []
     synonyms: list[Linkage] = []
     translations: list[Translation] = []
-    hyphenation: str = ""
+    hyphenations: list[Hyphenation] = []
     forms: list[Form] = []
     notes: list[str] = []
     descendants: list[Descendant] = []

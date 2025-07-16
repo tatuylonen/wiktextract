@@ -3,7 +3,7 @@ from wikitextprocessor import LevelNode, NodeKind, TemplateNode
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from ..share import set_sound_file_url_fields
-from .models import Sound, WordEntry
+from .models import Hyphenation, Sound, WordEntry
 
 
 def extract_sound_section(
@@ -64,5 +64,7 @@ def extract_hyphenation_section(
     wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
 ) -> None:
     for list_item in level_node.find_child_recursively(NodeKind.LIST_ITEM):
-        word_entry.hyphenation = clean_node(wxr, None, list_item.children)
+        h_str = clean_node(wxr, None, list_item.children)
+        if h_str != "":
+            word_entry.hyphenations.append(Hyphenation(parts=h_str.split("·")))
         break
