@@ -1,0 +1,288 @@
+# Create new Wiktionary extractor guide
+
+## Learn wikitext
+
+Read [this document](https://en.wikipedia.org/wiki/Help:Wikitext) to learn the basic syntax of wikitext.
+
+## Find Wiktionary entry layout
+
+Every Wiktionary has their unique page layout, they usually have a document page of the layout and other rules. For example, here is English Wiktionary's document: [Wiktionary:Entry layout](https://en.wiktionary.org/wiki/Wiktionary:Entry_layout). After reading the layout document, try to edit some pages.
+
+## Choose which namespaces to use from dump file
+
+MediWiki pages are grouped in collections called "[namespaces](https://www.mediawiki.org/wiki/Help:Namespaces)". By default, "Main", "Template", "Module" namespaces are used. If data in other namespaces are needed, they should be added in a `config.json` file. For example, [here](https://github.com/tatuylonen/wiktextract/blob/master/src/wiktextract/data/fr/config.json) is the JSON file for French Wiktionary. All namespace names and ids can be found at the start of [dump file](https://dumps.wikimedia.org/backup-index.html). You maybe need to update the [namespace data file](https://github.com/tatuylonen/wikitextprocessor/tree/main/src/wikitextprocessor/data) in wikitextprocessor package, these files should be updated using this [script](https://github.com/tatuylonen/wikitextprocessor/blob/main/tools/get_namespaces.py).
+
+## Pre-expand section templates
+
+Some Wiktionary editions use templates to expand to section wikitext or HTML tags, these templates need to be expanded before parsing the page to nodes. Skip this step if the new Wiktionary doesn't have this problem.
+
+### Section template expands to wikitext
+
+Write a `analyze_template()` in file "analyze_template.py", this function checks all template pages and return `True` if the template need pre-expand. Example [file](https://github.com/tatuylonen/wiktextract/blob/master/src/wiktextract/extractor/nl/analyze_template.py) of Dutch Wiktionary.
+
+### Section template expands to HTML
+
+Templates can be overridden to expand to wikitext. Example [override file](https://github.com/tatuylonen/wiktextract/blob/master/src/wiktextract/data/overrides/id.json) for Indonesian Wiktionary. The new line character `\n` at the end of template body is for avoiding parsing text directly after the template as part of section node.
+
+## Create Pydantic model
+
+New extractor usually start from extracting definition lists. First we need to create [Pydantic](https://docs.pydantic.dev/latest/) model in file "models.py". Example file for Italian Wiktionary: [src/wiktextract/extractor/it/models.py](https://github.com/tatuylonen/wiktextract/blob/master/src/wiktextract/extractor/it/models.py)
+
+```python
+from pydantic import BaseModel, ConfigDict, Field
+
+class EnglishBaseModel(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+        strict=True,
+        validate_assignment=True,
+        validate_default=True,
+    )
+
+class Sense(EnglishBaseModel):
+    glosses: list[str] = []
+    categories: list[str] = []
+	topics: list[str] = []
+	tags: list[str] = []
+	raw_tags: list[str] = []
+
+class WordEntry(EnglishBaseModel):
+    model_config = ConfigDict(title="English Wiktionary")
+
+    word: str = Field(description="Word string")
+    lang_code: str = Field(description="Wiktionary language code")
+    lang: str = Field(description="Localized language name")
+    pos: str = Field(default="", description="Part of speech type")
+    pos_title: str = Field(
+        default="", description="Original POS title"
+    )
+    senses: list[Sense] = Field(default=[], description="Sense list")
+```
+
+## Create test
+
+Create test file in "tests" folder. For example, [tests/test_it_gloss.py](https://github.com/tatuylonen/wiktextract/blob/master/tests/test_it_gloss.py)
+
+```python
+from unittest import TestCase
+
+from wikitextprocessor import Wtp
+
+from wiktextract.config import WiktionaryConfig
+from wiktextract.extractor.en.page import parse_page
+from wiktextract.wxr_context import WiktextractContext
+
+
+class TestEnGloss(TestCase):
+    maxDiff = None
+
+    def setUp(self) -> None:
+        self.wxr = WiktextractContext(
+            Wtp(lang_code="en"),
+            WiktionaryConfig(
+                dump_file_lang_code="en", capture_language_codes=None
+            ),
+        )
+
+    def tearDown(self):
+        self.wxr.wtp.close_db_conn()
+
+    def test_gloss(self):
+        self.wxr.wtp.add_page(
+            "Template:lb",
+            10,
+            '<span class="usage-label-sense"><span class="ib-brac label-brac">(</span><span class="ib-content label-content">[[computing#Noun|computing]][[Category:en:Computing|DICTIONARY]]</span><span class="ib-brac label-brac">)</span></span>',
+        )
+        data = parse_page(
+            self.wxr,
+            "dictionary",
+            """== English ==
+===Noun===
+# {{lb|en|computing}} An [[associative array]]
+
+===Verb===
+# {{lb|en|transitive}} To [[look up]] in a dictionary.""",
+        )
+        self.assertEqual(
+            data,
+            [
+                {
+                    "lang": "English",
+                    "lang_code": "en",
+                    "word": "dictionary",
+                    "pos": "noun",
+                    "pos_title": "Noun",
+                    "senses": [
+                        {
+                            "glosses": ["An associative array"],
+                            "categories": ["en:Computing"],
+							"topics": ["computing"]
+                        }
+                    ],
+                },
+				{
+                    "lang": "English",
+                    "lang_code": "en",
+                    "word": "dictionary",
+                    "pos": "verb",
+                    "pos_title": "Verb",
+                    "senses": [
+                        {
+                            "glosses": ["To look up in a dictionary."],
+                            "categories": ["English transitive verbs"],
+							"tags": ["transitive"]
+                        }
+                    ],
+                }
+            ],
+        )
+```
+
+## Create "section_titles.py" file
+
+This file contains POS and other section titles data. Example file from Italian Wiktionary extractor: [src/wiktextract/extractor/it/section_titles.py](https://github.com/tatuylonen/wiktextract/blob/master/src/wiktextract/extractor/it/section_titles.py)
+
+```python
+POS_DATA = {
+	"Noun": {"pos": "noun"},
+	"Verb": {"pos": "verb"},
+}
+```
+
+## Create "page.py" file
+
+All extractors start from the `parse_page()` function in file "page.py". Example file from Italian Wiktionary extractor: [src/wiktextract/extractor/it/page.py](https://github.com/tatuylonen/wiktextract/blob/master/src/wiktextract/extractor/it/page.py)
+
+```python
+from typing import Any
+
+from mediawiki_langcodes import name_to_code
+from wikitextprocessor.parser import LEVEL_KIND_FLAGS, LevelNode, NodeKind
+
+from ...page import clean_node
+from ...wxr_context import WiktextractContext
+from .models import Sense, WordEntry
+from .pos import extract_pos_section
+from .section_titles import POS_DATA
+
+def parse_section(
+    wxr: WiktextractContext,
+    page_data: list[WordEntry],
+    base_data: WordEntry,
+    level_node: LevelNode,
+) -> None:
+    title_text = clean_node(wxr, None, level_node.largs)
+	if title_text in POS_DATA:
+        wxr.wtp.start_subsection(title_text)
+        extract_pos_section(wxr, page_data, base_data, level_node, title_text)
+
+def parse_page(
+    wxr: WiktextractContext, page_title: str, page_text: str
+) -> list[dict[str, Any]]:
+    # page layout
+    # https://en.wiktionary.org/wiki/Wiktionary:Entry_layout
+	wxr.wtp.start_page(page_title)
+	# `pre_expand` need to be `True` if some section templates need to
+	# be expanded before parsing
+    tree = wxr.wtp.parse(page_text, pre_expand=True)
+	page_data: list[WordEntry] = []
+	for level2_node in tree.find_child(NodeKind.LEVEL2):
+		lang_name = clean_node(wxr, None, level2_node.largs)
+		# language code can also be obtained from template name or parameter
+		lang_code = name_to_code(lang_name, "en")
+		base_data = WordEntry(
+            word=wxr.wtp.title,
+            lang_code=lang_code,
+            lang=lang_name,
+            pos="unknown",
+        )
+		for next_level_node in level2_node.find_child(LEVEL_KIND_FLAGS):
+            parse_section(wxr, page_data, base_data, next_level_node)
+
+	return [m.model_dump(exclude_defaults=True) for m in page_data]
+```
+
+## Create "pos.py" file
+
+Usually each section's code are in separate Python file. We'll create a new "pos.py" file to extract the POS section. Example file from Italian Wiktionary extractor: [src/wiktextract/extractor/it/pos.py](https://github.com/tatuylonen/wiktextract/blob/master/src/wiktextract/extractor/it/pos.py)
+
+```python
+from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
+
+from ...page import clean_node
+from ...wxr_context import WiktextractContext
+from .models import Sense, WordEntry
+from .section_titles import POS_DATA
+from .tags import translate_raw_tags
+
+def extract_pos_section(
+    wxr: WiktextractContext,
+    page_data: list[WordEntry],
+    base_data: WordEntry,
+    level_node: LevelNode,
+    pos_title: str,
+) -> None:
+	page_data.append(base_data.model_copy(deep=True))
+    page_data[-1].pos_title = pos_title
+	pos_data = POS_DATA[pos_title]
+    page_data[-1].pos = pos_data["pos"]
+    page_data[-1].tags.extend(pos_data.get("tags", []))
+
+	for node in level_node.children:
+		if (
+            isinstance(node, WikiNode)
+            and node.kind == NodeKind.LIST
+            and node.sarg.startswith("#")
+            and node.sarg.endswith("#")
+        ):
+            for list_item in node.find_child(NodeKind.LIST_ITEM):
+                extract_gloss_list_item(wxr, page_data[-1], list_item)
+
+
+def extract_gloss_list_item(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    list_item: WikiNode,
+) -> None:
+    gloss_nodes = []
+    sense = Sense()
+	for node in list_item.children:
+		if isinstance(node, TemplateNode) and node.template_name == "lb":
+			sense.raw_tags.append(clean_node(wxr, sense, node))
+		else:
+			gloss_nodes.append(node)
+	gloss_str = clean_node(wxr, sense, gloss_nodes)
+	if gloss_str != "":
+        sense.glosses.append(gloss_str)
+		translate_raw_tags(sense)
+		word_entry.senses.append(sense)
+```
+
+## Create "tags.py" file
+
+Tags data are added to the "raw_tags" field first, then we move tags that could be converted to tags used in English Wiktionary to "tags" or "topics" field.
+
+```python
+from .models import WordEntry
+
+TAGS = {
+	"transitive": "transitive"
+}
+
+TOPICS = {
+	"computing": "computing"
+}
+
+def translate_raw_tags(data: WordEntry) -> None:
+	raw_tags = []
+    for raw_tag in data.raw_tags:
+		if raw_tag in TAGS:
+			data.tags.append(TAGS[raw_tag])
+		elif raw_tag in TOPICS:
+			data.topics.append(TOPICS[raw_tag])
+	data.raw_tags = raw_tags
+```
+
+- English edition [sense tags](https://kaikki.org/dictionary/errors/mapping/index/senses/_list_/tags.html)
+- English edition [form tags](https://kaikki.org/dictionary/errors/mapping/index/forms/_list_/tags.html)
+- English edition [topics](https://github.com/tatuylonen/wiktextract/blob/master/src/wiktextract/topics.py)
