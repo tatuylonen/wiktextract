@@ -65,6 +65,12 @@ class Translation(MalayBaseModel):
     categories: list[str] = Field(default=[], exclude=True)
 
 
+class Hyphenation(MalayBaseModel):
+    parts: list[str] = []
+    tags: list[str] = []
+    raw_tags: list[str] = []
+
+
 class Sound(MalayBaseModel):
     zh_pron: str = Field(default="", description="Chinese word pronunciation")
     ipa: str = Field(default="", description="International Phonetic Alphabet")
@@ -82,7 +88,7 @@ class Sound(MalayBaseModel):
     roman: str = ""
     rhymes: str = ""
     categories: list[str] = Field(default=[], exclude=True)
-    hyphenation: str = Field(default="", exclude=True)
+    hyphenations: list[Hyphenation] = Field(default=[], exclude=True)
 
 
 class WordEntry(MalayBaseModel):
@@ -104,7 +110,7 @@ class WordEntry(MalayBaseModel):
     hypernyms: list[Linkage] = []
     coordinate_terms: list[Linkage] = []
     hyponyms: list[Linkage] = []
-    hyphenation: str = ""
+    hyphenations: list[Hyphenation] = []
     sounds: list[Sound] = []
     derived: list[Linkage] = []
     anagrams: list[Linkage] = []
