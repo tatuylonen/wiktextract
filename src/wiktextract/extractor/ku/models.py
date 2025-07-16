@@ -103,6 +103,12 @@ class Descendant(KurdishBaseModel):
     sense: str = ""
 
 
+class Hyphenation(KurdishBaseModel):
+    parts: list[str] = []
+    tags: list[str] = []
+    raw_tags: list[str] = []
+
+
 class WordEntry(KurdishBaseModel):
     model_config = ConfigDict(title="Kurdish Wiktionary")
     word: str = Field(description="Word string")
@@ -126,7 +132,7 @@ class WordEntry(KurdishBaseModel):
     anagrams: list[Linkage] = []
     rhymes: list[Linkage] = []
     sounds: list[Sound] = []
-    hyphenation: str = ""
+    hyphenations: list[Hyphenation] = []
     notes: list[str] = []
     descendants: list[Descendant] = []
     abbreviations: list[Linkage] = []

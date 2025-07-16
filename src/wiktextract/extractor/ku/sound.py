@@ -3,7 +3,7 @@ from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from ..share import set_sound_file_url_fields
-from .models import Sound, WordEntry
+from .models import Hyphenation, Sound, WordEntry
 from .tags import translate_raw_tags
 
 
@@ -86,5 +86,7 @@ def extract_ku_kîte(
                 + expanded_node.children[index + 1 :],
             ).strip()
             if hyphenation != "":
-                word_entry.hyphenation = hyphenation
+                word_entry.hyphenations.append(
+                    Hyphenation(parts=hyphenation.split("·"))
+                )
             break

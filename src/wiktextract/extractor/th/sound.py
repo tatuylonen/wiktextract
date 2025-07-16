@@ -12,7 +12,7 @@ from wikitextprocessor import (
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from ..share import set_sound_file_url_fields
-from .models import Sound, WordEntry
+from .models import Hyphenation, Sound, WordEntry
 from .tags import translate_raw_tags
 
 
@@ -204,7 +204,9 @@ def extract_lo_pron_template(
                         if span_lang == "lo" and field == "hyphenation":
                             span_str = clean_node(wxr, None, node)
                             if span_str != "":
-                                base_data.hyphenation.append(span_str)
+                                base_data.hyphenations.append(
+                                    Hyphenation(parts=span_str.split("-"))
+                                )
                 elif isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
                     link_str = clean_node(wxr, None, node)
                     if link_str == "สัทอักษรสากล":

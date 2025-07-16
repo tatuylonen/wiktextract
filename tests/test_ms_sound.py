@@ -71,7 +71,9 @@ class TestMsSound(TestCase):
                 {"rhymes": "-i"},
             ],
         )
-        self.assertEqual(page_data[0]["hyphenation"], "a‧ba‧di")
+        self.assertEqual(
+            page_data[0]["hyphenations"], [{"parts": ["a", "ba", "di"]}]
+        )
 
     def test_bendera(self):
         self.wxr.wtp.add_page(

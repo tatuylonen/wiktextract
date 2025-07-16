@@ -137,7 +137,7 @@ def extract_cls_template(
             break
         cls = clean_node(wxr, None, t_node.template_parameters[arg_name])
         if cls != "":
-            sense.classifiers.append(cls)
+            sense.classifiers.append(Classifier(classifier=cls))
     clean_node(wxr, sense, t_node)
 
 
@@ -153,7 +153,7 @@ def extract_th_noun_template(
     for b_tag in expanded_node.find_html_recursively("b"):
         cls = clean_node(wxr, None, b_tag)
         if cls != "":
-            word_entry.classifiers.append(cls)
+            word_entry.classifiers.append(Classifier(classifier=cls))
 
     clean_node(wxr, word_entry, expanded_node)
 

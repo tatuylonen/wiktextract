@@ -85,7 +85,7 @@ class TestThSound(unittest.TestCase):
 === คำนาม ===
 # [[ไทย]]""",
         )
-        self.assertEqual(data[0]["hyphenation"], ["ໄທ"])
+        self.assertEqual(data[0]["hyphenations"], [{"parts": ["ໄທ"]}])
         self.assertEqual(
             data[0]["sounds"],
             [

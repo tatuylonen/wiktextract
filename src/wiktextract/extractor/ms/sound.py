@@ -3,7 +3,7 @@ from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from ..share import set_sound_file_url_fields
-from .models import Sound, WordEntry
+from .models import Hyphenation, Sound, WordEntry
 from .tags import translate_raw_tags
 
 
@@ -22,8 +22,8 @@ def extract_sound_section(
 
     if len(page_data) == 0 or page_data[-1].lang_code != base_data.lang_code:
         for sound in sounds:
-            if sound.hyphenation != "":
-                base_data.hyphenation = sound.hyphenation
+            if len(sound.hyphenations) > 0:
+                base_data.hyphenations.extend(sound.hyphenations)
             else:
                 base_data.sounds.append(sound)
             for cat in sound.categories:
@@ -33,8 +33,8 @@ def extract_sound_section(
         for data in page_data:
             if data.lang_code == page_data[-1].lang_code:
                 for sound in sounds:
-                    if sound.hyphenation != "":
-                        data.hyphenation = sound.hyphenation
+                    if len(sound.hyphenations) > 0:
+                        data.hyphenations.extend(sound.hyphenations)
                     else:
                         data.sounds.append(sound)
                     for cat in sound.categories:
@@ -42,8 +42,8 @@ def extract_sound_section(
                             data.categories.append(cat)
     else:
         for sound in sounds:
-            if sound.hyphenation != "":
-                page_data[-1].hyphenation = sound.hyphenation
+            if len(sound.hyphenations) > 0:
+                page_data[-1].hyphenations.extend(sound.hyphenations)
             else:
                 page_data[-1].sounds.append(sound)
             for cat in sound.categories:
@@ -153,7 +153,9 @@ def extract_hyph_template(
     ):
         text = clean_node(wxr, None, span_tag)
         if text != "":
-            sounds.append(Sound(hyphenation=text))
+            sounds.append(
+                Sound(hyphenations=[Hyphenation(parts=text.split("‧"))])
+            )
     return sounds
 
 

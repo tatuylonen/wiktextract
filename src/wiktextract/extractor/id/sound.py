@@ -3,7 +3,7 @@ from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from ..share import set_sound_file_url_fields
-from .models import Sound, WordEntry
+from .models import Hyphenation, Sound, WordEntry
 from .tags import translate_raw_tags
 
 
@@ -37,8 +37,13 @@ def extract_sound_list_item(
             elif node.template_name == "rhymes":
                 extract_rhymes_template(wxr, word_entry, node, raw_tags)
         elif isinstance(node, str) and node.strip().startswith("Hifenasi:"):
-            word_entry.hyphenation = (
-                node.strip().removeprefix("Hifenasi:").strip()
+            word_entry.hyphenations.append(
+                Hyphenation(
+                    parts=node.strip()
+                    .removeprefix("Hifenasi:")
+                    .strip()
+                    .split("‧")
+                )
             )
 
 

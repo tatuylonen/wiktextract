@@ -3,7 +3,7 @@ from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from ..share import set_sound_file_url_fields
-from .models import Sound, WordEntry
+from .models import Hyphenation, Sound, WordEntry
 from .tags import translate_raw_tags
 
 
@@ -66,7 +66,9 @@ def extract_heceleme_template(
     ):
         hyphenation = clean_node(wxr, None, span_node)
         if hyphenation != "":
-            word_entry.hyphenation = hyphenation
+            word_entry.hyphenations.append(
+                Hyphenation(parts=hyphenation.split("‧"))
+            )
     clean_node(wxr, word_entry, expanded_node)
 
 

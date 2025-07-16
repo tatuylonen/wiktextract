@@ -74,7 +74,7 @@ class Sound(ItalianBaseModel):
 
 
 class Hyphenation(ItalianBaseModel):
-    hyphenation: str = ""
+    parts: list[str] = []
     sense: str = ""
 
 
