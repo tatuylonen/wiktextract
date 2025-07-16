@@ -70,7 +70,6 @@ class Sense(ThaiBaseModel):
     raw_tags: list[str] = []
     categories: list[str] = []
     examples: list[Example] = []
-    classifiers: list[str] = []
     form_of: list[AltForm] = []
     alt_of: list[AltForm] = []
     topics: list[str] = []
@@ -135,7 +134,7 @@ class WordEntry(ThaiBaseModel):
     tags: list[str] = []
     raw_tags: list[str] = []
     etymology_text: str = ""
-    classifiers: list[str] = []
+    classifiers: list[Classifier] = []
     forms: list[Form] = []
     translations: list[Translation] = []
     antonyms: list[Linkage] = []

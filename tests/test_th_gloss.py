@@ -74,7 +74,7 @@ class TestThGloss(TestCase):
                     "word": "กบ",
                     "lang": "ไทย",
                     "lang_code": "th",
-                    "classifiers": ["ตัว"],
+                    "classifiers": [{"classifier": "ตัว"}],
                 },
             ],
         )
@@ -122,7 +122,7 @@ class TestThGloss(TestCase):
                     "คำนามภาษาไทยที่ใช้คำลักษณนาม ตัว",
                     "คำนามภาษาไทยที่ใช้คำลักษณนาม อัน",
                 ],
-                "classifiers": ["ตัว", "อัน"],
+                "classifiers": [{"classifier": "ตัว"}, {"classifier": "อัน"}],
                 "glosses": ["อุปกรณ์ใช้เหลาดินสอ"],
             },
         )
@@ -147,7 +147,7 @@ class TestThGloss(TestCase):
             page_data[0],
             {
                 "categories": ["คำหลักภาษาไทย"],
-                "classifiers": ["กิ๊ก"],
+                "classifiers": [{"classifier": "กิ๊ก"}],
                 "senses": [{"glosses": ["กิกะไบต์, จิกะไบต์"]}],
                 "word": "กิ๊ก",
                 "pos": "noun",
