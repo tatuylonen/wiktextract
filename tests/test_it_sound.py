@@ -32,7 +32,7 @@ class TestItSound(TestCase):
 ===Sillabazione===
 ; cà | ne""",
         )
-        self.assertEqual(data[0]["hyphenations"], [{"hyphenation": "cà | ne"}])
+        self.assertEqual(data[0]["hyphenations"], [{"parts": ["cà", "ne"]}])
 
     def test_ipa_audio_templates(self):
         self.wxr.wtp.add_page("Template:-it-", 10, "Italiano")
@@ -66,11 +66,11 @@ class TestItSound(TestCase):
             data[0]["hyphenations"],
             [
                 {
-                    "hyphenation": "pè | sca",
+                    "parts": ["pè", "sca"],
                     "sense": "il frutto e significati correlati",
                 },
                 {
-                    "hyphenation": "pé | sca",
+                    "parts": ["pé", "sca"],
                     "sense": "l'atto del pescare e significati correlati",
                 },
             ],
@@ -89,10 +89,7 @@ class TestItSound(TestCase):
         )
         self.assertEqual(
             data[0]["hyphenations"],
-            [
-                {"hyphenation": "cè | spi | ta"},
-                {"hyphenation": "cé | spi | ta"},
-            ],
+            [{"parts": ["cè", "spi", "ta"]}, {"parts": ["cé", "spi", "ta"]}],
         )
 
     def test_sampa(self):

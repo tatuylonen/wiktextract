@@ -17,7 +17,11 @@ def extract_hyphenation_section(
                 for list_item in list_node.find_child(NodeKind.LIST_ITEM):
                     h_str = clean_node(wxr, None, list_item.children)
                     if h_str != "":
-                        hyphenations.append(Hyphenation(hyphenation=h_str))
+                        hyphenations.append(
+                            Hyphenation(
+                                parts=list(map(str.strip, h_str.split("|")))
+                            )
+                        )
                         break
             case "*":
                 for list_item in list_node.find_child(NodeKind.LIST_ITEM):
@@ -31,15 +35,20 @@ def extract_hyphenation_section(
                                     wxr, None, node
                                 ).strip("()")
                             case NodeKind.BOLD:
-                                h_data.hyphenation = clean_node(wxr, None, node)
-                    if h_data.hyphenation != "":
+                                h_str = clean_node(wxr, None, node)
+                                h_data.parts = list(
+                                    map(str.strip, h_str.split("|"))
+                                )
+                    if len(h_data.parts) > 0:
                         hyphenations.append(h_data)
 
     # no list
     for node in level_node.find_child(NodeKind.BOLD):
         h_str = clean_node(wxr, None, node)
         if h_str != "":
-            hyphenations.append(Hyphenation(hyphenation=h_str))
+            hyphenations.append(
+                Hyphenation(parts=list(map(str.strip, h_str.split("|"))))
+            )
 
     for data in page_data:
         if data.lang_code == page_data[-1].lang_code:
