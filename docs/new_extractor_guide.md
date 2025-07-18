@@ -10,7 +10,7 @@ Every Wiktionary has their unique page layout, they usually have a document page
 
 ## Choose which namespaces to use from dump file
 
-MediWiki pages are grouped in collections called "[namespaces](https://www.mediawiki.org/wiki/Help:Namespaces)". By default, "Main", "Template", "Module" namespaces are used. If pages in other namespaces are needed, they should be added in a `config.json` file. For example, [here](https://github.com/tatuylonen/wiktextract/blob/master/src/wiktextract/data/fr/config.json) is the JSON file for French Wiktionary. All namespace names and ids can be found at the start of [dump file](https://dumps.wikimedia.org/backup-index.html)("*-pages-articles.xml.bz2" file). You may need to update the [namespace data file](https://github.com/tatuylonen/wikitextprocessor/tree/main/src/wikitextprocessor/data) in wikitextprocessor package, these files should be updated using this [script](https://github.com/tatuylonen/wikitextprocessor/blob/main/tools/get_namespaces.py).
+MediWiki pages are grouped in collections called "[namespaces](https://www.mediawiki.org/wiki/Help:Namespaces)". By default, "Main", "Template", "Module" namespaces are used, their corresponding ids are `0`, `10`, `828`. "Main" namespace contains word pages, "Module" namespace contain Lua code used in templates. If pages in other namespaces are needed, they should be added in a `config.json` file. For example, [here](https://github.com/tatuylonen/wiktextract/blob/master/src/wiktextract/data/fr/config.json) is the JSON file for French Wiktionary. All namespace names and ids can be found at the start of [dump file](https://dumps.wikimedia.org/backup-index.html)("*-pages-articles.xml.bz2" file). You may need to update the [namespace data file](https://github.com/tatuylonen/wikitextprocessor/tree/main/src/wikitextprocessor/data) in wikitextprocessor package, these files should be updated using this [script](https://github.com/tatuylonen/wikitextprocessor/blob/main/tools/get_namespaces.py).
 
 ## Pre-expand section templates
 
@@ -27,6 +27,8 @@ Templates can be overridden to expand to wikitext. Example [override file](https
 ## Create Pydantic model
 
 New extractor usually start from extracting definition lists. First we need to create [Pydantic](https://docs.pydantic.dev/latest/) model in file "models.py". Example file for Italian Wiktionary: [src/wiktextract/extractor/it/models.py](https://github.com/tatuylonen/wiktextract/blob/master/src/wiktextract/extractor/it/models.py)
+
+The closer the new model is to existing extractor models, the better. English Wiktionary extractor doesn't use Pydantic, it's JSON structure can be viewed at [here](https://kaikki.org/dictionary/errors/mapping/index.html).
 
 ```python
 from pydantic import BaseModel, ConfigDict, Field
@@ -61,7 +63,7 @@ class WordEntry(EnglishBaseModel):
 
 ## Create "section_titles.py" file
 
-This file contains POS and other section titles data. Example file from Italian Wiktionary extractor: [src/wiktextract/extractor/it/section_titles.py](https://github.com/tatuylonen/wiktextract/blob/master/src/wiktextract/extractor/it/section_titles.py)
+This file contains POS and other section titles data. Example file from English Wiktionary extractor: [src/wiktextract/extractor/en/section_titles.py](https://github.com/tatuylonen/wiktextract/blob/master/src/wiktextract/extractor/en/section_titles.py)
 
 ```python
 POS_DATA = {
@@ -157,12 +159,33 @@ t_node.template_parameters
 # {1: 'en', 2: 'computing'}
 ```
 
+The `TemplateNode.template_parameters` dictionary values can't be used directly. If you want to find a node in a template parameter, the value must be parsed:
+
+```python
+parsed_arg = wxr.wtp.parse(wxr.wtp.node_to_wikitext(arg_value))
+```
+
+If text string is needed, `clean_node()` should be used:
+
+```python
+clean_node(wxr, None, t_node.template_parameters[1])
+```
+
 `LevelNode.find_content()` is used to find node inside the level node but not the child nodes:
 
 ```python
 root = wxr.wtp.parse("=={{lang|en}}==\ntext")
 for t_node in root.find_content(NodeKind.TEMPLATE):
     pass
+```
+
+Nodes inside level node wikitext are in `LevelNode.largs` list:
+
+```python
+root = wxr.wtp.parse("==English==\ntext")
+for level_node in root.find_child(NodeKind.LEVEL2):
+    print(clean_node(wxr, None, level_node.largs))
+    # "English"
 ```
 
 For description lists, term nodes are in the `WikiNode.children` attribute, definition nodes are in the `WikiNode.definition` attribute:
@@ -174,6 +197,17 @@ list_item.children
 # [' term ']
 list_item.definition
 # [' def']
+```
+
+`HTMLNode` has a `tag` property for the tag name, and `attrs` dictionary for HTML attributes:
+
+```python
+root = wxr.wtp.parse('<span class="span_class">text</span>')
+for span_tag in root.find_html("span"):
+    print(span_tag.tag)
+    # "span"
+    print(span_tag.attrs)
+    # {"class": "span_class"}
 ```
 
 ## Create "page.py" file
@@ -202,6 +236,10 @@ def parse_section(
     if title_text in POS_DATA:
         wxr.wtp.start_subsection(title_text)
         extract_pos_section(wxr, page_data, base_data, level_node, title_text)
+
+    for next_level_node in level_node.find_child(LEVEL_KIND_FLAGS):
+        parse_section(wxr, page_data, base_data, next_level_node)
+
 
 def parse_page(
     wxr: WiktextractContext, page_title: str, page_text: str
@@ -407,3 +445,5 @@ class TestEnGloss(TestCase):
             ],
         )
 ```
+
+`Wtp.add_page()` could be used to add templates required in test. If different expanded outputs are needed, we can use the [`#switch`](https://www.mediawiki.org/wiki/Help:Extension:ParserFunctions##switch) wikitext parser function to control the output.
