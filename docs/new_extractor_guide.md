@@ -573,3 +573,65 @@ def extract_linkage_section(
     else:
         getattr(page_data[-1], linkage_type).extend(linkage_data)
 ```
+
+## Extract nested gloss list
+
+Some editions have nested gloss lists:
+
+```wikitext
+== English ==
+=== Noun ===
+# gloss 1
+## gloss 2
+```
+
+Expected JSON output:
+
+```json
+{
+    "senses": [
+        {"glosses": ["gloss 1"]},
+        {"glosses": ["gloss 1", "gloss 2"]}
+    ]
+}
+```
+
+We could modify `extract_gloss_list_item()` function to extract gloss lists recursively:
+
+```python
+def extract_gloss_list_item(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    list_item: WikiNode,
+    parent_sense: Sense | None = None,
+) -> None:
+    sense = (
+        parent_sense.model_copy(deep=True)
+        if parent_sense is not None
+        else Sense()
+    )
+    gloss_nodes = []
+    for node in list_item.children:
+        if isinstance(node, TemplateNode) and node.template_name == "lb":
+            extract_lb_template(wxr, sense, node)
+        elif not (isinstance(node, WikiNode) and node.kind == NodeKind.LIST):
+            gloss_nodes.append(node)
+
+    gloss_str = clean_node(wxr, sense, gloss_nodes)
+    if gloss_str != "":
+        sense.glosses.append(gloss_str)
+        translate_raw_tags(sense)
+        word_entry.senses.append(sense)
+
+    for child_list in list_item.find_child(NodeKind.LIST):
+        if child_list.sarg.startswith("#") and child_list.sarg.endswith(
+            (":", "*")
+        ):
+            for e_list_item in child_list.find_child(NodeKind.LIST_ITEM):
+                # extract example or linkage data
+        elif child_list.sarg.startswith("#") and child_list.sarg.endswith("#"):
+            for child_list_item in child_list.find_child(NodeKind.LIST_ITEM):
+                extract_gloss_list_item(wxr, word_entry, child_list_item, sense)
+```
+
+Don't forget to add a test after updating extractor code for a new wikitext layout or template.
