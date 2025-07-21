@@ -28,7 +28,9 @@ Templates can be overridden to expand to wikitext. Example [override file](https
 
 New extractor usually start from extracting definition lists. First we need to create [Pydantic](https://docs.pydantic.dev/latest/) model in file "models.py". Example file for Italian Wiktionary: [src/wiktextract/extractor/it/models.py](https://github.com/tatuylonen/wiktextract/blob/master/src/wiktextract/extractor/it/models.py)
 
-The closer the new model is to existing extractor models, the better. English Wiktionary extractor doesn't use Pydantic, it's JSON structure can be viewed at [here](https://kaikki.org/dictionary/errors/mapping/index.html).
+The closer the new model is to existing extractor models, the better. English Wiktionary extractor doesn't use Pydantic, it's JSON structure can be viewed at [here](https://kaikki.org/dictionary/errors/mapping/index.html). Non-en extractor JSON schema files generated from Pydantic models are at [here](https://tatuylonen.github.io/wiktextract/).
+
+Pydantic model and fields should be added gradually with implementation code, directly copy all models from other extractors is not recommended.
 
 ```python
 from pydantic import BaseModel, ConfigDict, Field
@@ -365,7 +367,7 @@ def translate_raw_tags(data: WordEntry) -> None:
 
 ## Add test
 
-Create test file in "tests" folder. For example, [tests/test_it_gloss.py](https://github.com/tatuylonen/wiktextract/blob/master/tests/test_it_gloss.py)
+Create test file in "tests" folder. For example, [tests/test_it_gloss.py](https://github.com/tatuylonen/wiktextract/blob/master/tests/test_it_gloss.py). Tests should be included in the same git commit along with the extractor code, so it'll be more helpful for understanding the code when using git blame.
 
 ```python
 from unittest import TestCase
@@ -389,6 +391,7 @@ class TestEnGloss(TestCase):
         )
 
     def tearDown(self):
+        # remove temporary files
         self.wxr.wtp.close_db_conn()
 
     def test_gloss(self):
@@ -447,3 +450,103 @@ class TestEnGloss(TestCase):
 ```
 
 `Wtp.add_page()` could be used to add templates required in test. If different expanded outputs are needed, we can use the [`#switch`](https://www.mediawiki.org/wiki/Help:Extension:ParserFunctions##switch) wikitext parser function to control the output.
+
+## Extract etymology section
+
+POS sections could be under or at the same level of etymology section and pronunciation sections, we should be careful each section data are added to the right place according to the original wikitext section node structure.
+
+### POS section and etymology section at the same level
+
+```wikitext
+== Language ==
+=== Etymology ===
+etymology text
+=== POS 1 ===
+# gloss
+=== POS 2 ===
+# gloss
+```
+
+In this layout, two `WordEntry` should be created for each POS section and they share the same etymology section data.
+
+### POS section under etymology section
+
+```wikitext
+== Language ==
+=== Etymology 1 ===
+etymology 1
+==== POS 1 ====
+# gloss
+
+=== Etymology 2 ===
+etymology 2
+==== POS 2 ====
+# gloss
+```
+
+This layout also have two `WordEntry` for two POS sections but their etymology data are different.
+
+Because etymology section is always above POS section(assume page layout rules are strictly enforced), we could extract etymology data to `base_data` and make a copy of `base_data` if etymology section has child section to handle both layout cases:
+
+```python
+import string
+
+def parse_section(
+    wxr: WiktextractContext,
+    page_data: list[WordEntry],
+    base_data: WordEntry,
+    level_node: LevelNode,
+):
+    title_text = clean_node(wxr, None, level_node.largs)
+    title_text = title_text.rstrip(string.digits + string.whitespace)
+    if title_text in POS_DATA:
+        extract_pos_section(wxr, page_data, base_data, level_node, title_text)
+    elif title_text == "Etymology":
+        if level_node.contain_node(LEVEL_KIND_FLAGS):
+            base_data = base_data.model_copy(deep=True)
+        extract_etymology_section(wxr, base_data, level_node)
+
+    for next_level in level_node.find_child(LEVEL_KIND_FLAGS):
+        parse_section(wxr, page_data, base_data, next_level)
+
+
+def extract_etymology_section(
+    wxr: WiktextractContext, base_data: WordEntry, level_node: LevelNode
+):
+    base_data.etymology_text = clean_node(
+        wxr,
+        base_data,
+        list(level_node.invert_find_child(LEVEL_KIND_FLAGS)),
+    )
+```
+
+Other sections around POS section may also have similar problem if an edition has messy inconsistent layout. For example, linkage section could be under POS section or at the same level of POS section:
+
+```wikitext
+=== POS 1 ===
+# gloss
+==== Synonyms ====
+* [[word 1]]
+=== POS 2 ===
+# gloss
+=== Antonyms ===
+* [[word 2]]
+```
+
+"Antonyms" section data should be added to both `WordEntry`, while "Synonyms" section data should only be added to the first `WordEntry` for the first POS section. This can be done by checking the linkage section node type and `WordEntry.pos` and `WordEntry.lang_code` to make sure the data is added to the correct place:
+
+```python
+def extract_linkage_section(
+    wxr: WiktextractContext,
+    page_data: list[WordEntry],
+    level_node: LevelNode,
+    linkage_type: str,
+):
+    linkage_data = []
+    if level_node.kind == NodeKind.LEVEL3:
+        for data in page_data:
+            if data.lang_code == page_data[-1].lang_code:
+                getattr(data, linkage_type).extend(linkage_data)
+    else:
+        getattr(page_data[-1], linkage_type).extend(linkage_data)
+```
