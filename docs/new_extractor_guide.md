@@ -212,6 +212,29 @@ for span_tag in root.find_html("span"):
     # {"class": "span_class"}
 ```
 
+List type can be distinguished by checking the `WikiNode.sarg` attribute:
+
+```python
+root = wxr.wtp.parse("""===Noun===
+# gloss
+#: {{ux|en|example sentence}}
+#* {{quote-book|en|example sentence}}
+## child gloss
+##: {{ux|en|example}}""")
+
+first_list_item = next(root.find_child_recursively(NodeKind.LIST_ITEM))
+print(first_list_item.sarg)
+# "#"
+for child_list in first_list_item.find_child(NodeKind.LIST):
+    print(child_list.sarg)
+    # "#:", "#*", "##" or "##:"
+    if child_list.sarg.startswith("#") and child_list.sarg.endswith((":", "*")):
+        # extract example or linkage
+    elif child_list.sarg.startswith("#") and child_list.sarg.endswith("#")
+        for child_list_item in child_list.find_child(NodeKind.LIST_ITEM):
+            # extract nested gloss
+```
+
 ## Create "page.py" file
 
 All extractors start from the `parse_page()` function in file "page.py". Example file from Italian Wiktionary extractor: [src/wiktextract/extractor/it/page.py](https://github.com/tatuylonen/wiktextract/blob/master/src/wiktextract/extractor/it/page.py)
@@ -246,7 +269,7 @@ def parse_section(
 def parse_page(
     wxr: WiktextractContext, page_title: str, page_text: str
 ) -> list[dict[str, Any]]:
-    # page layout
+    # add page layout document link at here
     # https://en.wiktionary.org/wiki/Wiktionary:Entry_layout
     wxr.wtp.start_page(page_title)
     # `pre_expand` must be `True` if some section templates need to
