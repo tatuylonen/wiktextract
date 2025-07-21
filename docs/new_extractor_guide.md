@@ -6,7 +6,7 @@ Read [this document](https://en.wikipedia.org/wiki/Help:Wikitext) to learn the b
 
 ## Read Wiktionary entry layout document
 
-Every Wiktionary has their unique page layout, they usually have a document page of the layout and other rules. For example, here is English Wiktionary's document: [Wiktionary:Entry layout](https://en.wiktionary.org/wiki/Wiktionary:Entry_layout). After reading the layout document, try edit some pages.
+Every Wiktionary has their unique page layout, they usually have a document page of the layout and other rules. For example, here is English Wiktionary's document: [Wiktionary:Entry layout](https://en.wiktionary.org/wiki/Wiktionary:Entry_layout). After reading the layout document, try edit some pages or create a new page to test whether you have grasped Wiktionary editing. Writing Wiktionary extractor is like a reversed editing process.
 
 ## Choose which namespaces to use from dump file
 
@@ -22,7 +22,7 @@ Write a `analyze_template()` in file "analyze_template.py", this function checks
 
 ### Section template expands to HTML
 
-Templates can be overridden to expand to wikitext. Example [override file](https://github.com/tatuylonen/wiktextract/blob/master/src/wiktextract/data/overrides/id.json) for Indonesian Wiktionary. The new line character `\n` at the end of template body is for avoiding parsing text directly after the template as part of section node.
+Templates can be overridden to expand to wikitext. Example [override file](https://github.com/tatuylonen/wiktextract/blob/master/src/wiktextract/data/overrides/id.json) for Indonesian Wiktionary. The new line character `\n` at the end of template body is for avoiding parsing the section node as plain text if there are some texts immediately after the template at the same line in some pages.
 
 ## Create Pydantic model
 
@@ -230,7 +230,7 @@ for child_list in first_list_item.find_child(NodeKind.LIST):
     # "#:", "#*", "##" or "##:"
     if child_list.sarg.startswith("#") and child_list.sarg.endswith((":", "*")):
         # extract example or linkage
-    elif child_list.sarg.startswith("#") and child_list.sarg.endswith("#")
+    elif child_list.sarg.startswith("#") and child_list.sarg.endswith("#"):
         for child_list_item in child_list.find_child(NodeKind.LIST_ITEM):
             # extract nested gloss
 ```
@@ -322,8 +322,7 @@ def extract_pos_section(
         if (
             isinstance(node, WikiNode)
             and node.kind == NodeKind.LIST
-            and node.sarg.startswith("#")
-            and node.sarg.endswith("#")
+            and node.sarg == "#"
         ):
             for list_item in node.find_child(NodeKind.LIST_ITEM):
                 extract_gloss_list_item(wxr, page_data[-1], list_item)
@@ -359,6 +358,11 @@ def extract_lb_template(
     # save categories
     clean_node(wxr, sense, expanded_node)
 ```
+
+There are three ways to extract a template:
+- expand template, find data in expanded nodes: this method is used when data in only available when template is expanded or it's easier to extract data from node structure, for example, data may already separated in different nodes
+- don't expand template, find data in template parameters: this is used when a template only display the parameter and does nothing more than that. If a template expand nodes contain category links, it's still need to be expanded to get the category data
+- convert template node to text using `clean_node`: this is for expanded template text can be used directly or need minimal change
 
 ## Create "tags.py" file
 
