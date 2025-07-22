@@ -10,7 +10,7 @@ Every Wiktionary has their unique page layout, they usually have a document page
 
 ## Choose which namespaces to use from dump file
 
-MediWiki pages are grouped in collections called "[namespaces](https://www.mediawiki.org/wiki/Help:Namespaces)". By default, "Main", "Template", "Module" namespaces are used, their corresponding ids are `0`, `10`, `828`. "Main" namespace contains word pages, "Module" namespace contain Lua code used in templates. If pages in other namespaces are needed, they should be added in a `config.json` file. For example, [here](https://github.com/tatuylonen/wiktextract/blob/master/src/wiktextract/data/fr/config.json) is the JSON file for French Wiktionary. All namespace names and ids can be found at the start of [dump file](https://dumps.wikimedia.org/backup-index.html)("*-pages-articles.xml.bz2" file). You may need to update the [namespace data file](https://github.com/tatuylonen/wikitextprocessor/tree/main/src/wikitextprocessor/data) in wikitextprocessor package, these files should be updated using this [script](https://github.com/tatuylonen/wikitextprocessor/blob/main/tools/get_namespaces.py).
+MediWiki pages are grouped in collections called "[namespaces](https://www.mediawiki.org/wiki/Help:Namespaces)". By default, "Main", "Template", "Module" namespaces are used, their corresponding ids are `0`, `10`, `828`. "Main" namespace contains word pages, "Module" namespace contain Lua code used in templates. If pages in other namespaces are needed, they should be added in a `config.json` file, this JSON file can override some default attributes of the [`WiktionaryConfig`](https://github.com/tatuylonen/wiktextract/blob/master/src/wiktextract/config.py) class. For example, [here](https://github.com/tatuylonen/wiktextract/blob/master/src/wiktextract/data/fr/config.json) is the JSON file for French Wiktionary. All namespace names and ids can be found at the start of [dump file](https://dumps.wikimedia.org/backup-index.html)("*-pages-articles.xml.bz2" file). You may need to update the [namespace data file](https://github.com/tatuylonen/wikitextprocessor/tree/main/src/wikitextprocessor/data) in wikitextprocessor package, these files should be updated using this [script](https://github.com/tatuylonen/wikitextprocessor/blob/main/tools/get_namespaces.py).
 
 ## Pre-expand section templates
 
@@ -26,7 +26,9 @@ Templates can be overridden to expand to wikitext. Example [override file](https
 
 ## Create Pydantic model
 
-New extractor usually start from extracting definition lists. First we need to create [Pydantic](https://docs.pydantic.dev/latest/) model in file "models.py". Example file for Italian Wiktionary: [src/wiktextract/extractor/it/models.py](https://github.com/tatuylonen/wiktextract/blob/master/src/wiktextract/extractor/it/models.py)
+First we need to create [Pydantic](https://docs.pydantic.dev/latest/) models in file "models.py". Example file for Italian Wiktionary: [src/wiktextract/extractor/it/models.py](https://github.com/tatuylonen/wiktextract/blob/master/src/wiktextract/extractor/it/models.py)
+
+Extractor code files are located in path "src/wiktextract/extractor", this guide use English Wiktionary as example, so we'll create file "src/wiktextract/extractor/en/models.py".
 
 The closer the new model is to existing extractor models, the better. English Wiktionary extractor doesn't use Pydantic, it's JSON structure can be viewed at [here](https://kaikki.org/dictionary/errors/mapping/index.html). Non-en extractor JSON schema files generated from Pydantic models are at [here](https://tatuylonen.github.io/wiktextract/).
 
@@ -239,6 +241,8 @@ for child_list in first_list_item.find_child(NodeKind.LIST):
 
 All extractors start from the `parse_page()` function in file "page.py". Example file from Italian Wiktionary extractor: [src/wiktextract/extractor/it/page.py](https://github.com/tatuylonen/wiktextract/blob/master/src/wiktextract/extractor/it/page.py)
 
+We could start implement the extractor to extract the definition lists, the example wikitext and JSON output are in the following "[add test](#add-test)" section.
+
 ```python
 from typing import Any
 
@@ -281,7 +285,7 @@ def parse_page(
         # language code can also be obtained from template name or parameter
         lang_code = name_to_code(lang_name, "en")
         base_data = WordEntry(
-            word=wxr.wtp.title,
+            word=page_title,
             lang_code=lang_code,
             lang=lang_name,
             pos="unknown",
@@ -409,7 +413,7 @@ from wiktextract.wxr_context import WiktextractContext
 class TestEnGloss(TestCase):
     maxDiff = None
 
-    def setUp(self) -> None:
+    def setUp(self):
         self.wxr = WiktextractContext(
             Wtp(lang_code="en"),
             WiktionaryConfig(
@@ -477,6 +481,18 @@ class TestEnGloss(TestCase):
 ```
 
 `Wtp.add_page()` could be used to add templates required in test. If different expanded outputs are needed, we can use the [`#switch`](https://www.mediawiki.org/wiki/Help:Extension:ParserFunctions##switch) wikitext parser function to control the output.
+
+Run `make test` command to check all tests, command `python -m unittest tests/test_en_*` only run en edition tests.
+
+## Run `wiktwords` command
+
+Command `wiktwords` can be used to test a single Wiktionary page or multiple pages if `--path` option is passed several times:
+
+```
+wiktwords --all --all-languages --edition en --db-path en_20250720.db --human --out page.json --page="dictionary" enwiktionary-20250720-pages-articles.xml.bz2
+```
+
+The "*.bz2" dump file path must be passed at the first use, it could be omitted at subsequent usages because page texts are saved to "en_20250720.db" file.
 
 ## Extract etymology section
 
@@ -659,7 +675,7 @@ from wiktextract.wxr_context import WiktextractContext
 class TestEnForms(TestCase):
     maxDiff = None
 
-    def setUp(self) -> None:
+    def setUp(self):
         self.wxr = WiktextractContext(
             Wtp(lang_code="en"),
             WiktionaryConfig(
