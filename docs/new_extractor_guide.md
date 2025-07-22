@@ -639,3 +639,166 @@ def extract_gloss_list_item(
 ```
 
 Don't forget to add a test after updating extractor code for a new wikitext layout or template.
+
+## Extract conjugation table template
+
+Most editions have conjugation templates expand to wikitext table, HTML table or mix of wikitext and HTML tags. Some table templates don't use the correct wikitext or HTML tags, like using table cell wikitext(`|`) for header cell(`!`) or use `<td>` HTML tag for table header(should use `<th>`), these mistakes should be fixed on Wiktionary.
+
+First add test "tests/test_en_forms.py":
+
+```python
+from unittest import TestCase
+
+from wikitextprocessor import Wtp
+
+from wiktextract.config import WiktionaryConfig
+from wiktextract.extractor.en.page import parse_page
+from wiktextract.wxr_context import WiktextractContext
+
+
+class TestEnForms(TestCase):
+    maxDiff = None
+
+    def setUp(self) -> None:
+        self.wxr = WiktextractContext(
+            Wtp(lang_code="en"),
+            WiktionaryConfig(
+                dump_file_lang_code="en", capture_language_codes=None
+            ),
+        )
+
+    def tearDown(self):
+        self.wxr.wtp.close_db_conn()
+
+    def test_sv_conj_wk(self):
+        self.wxr.wtp.add_page(
+            "Template:sv-conj-wk",
+            10,
+            """<div>
+{| class="inflection-table  "
+|+ class="inflection-table-title" | Conjugation of <i class="Latn mention" lang="sv">läsa</i> (weak)
+|-
+! class="outer" |
+! colspan=2 class="outer" | active
+! colspan=2 class="outer" | passive
+|-
+! infinitive
+| colspan=2 | <span class="Latn" lang="sv">[[:läsa#Swedish|läsa]]</span>
+| colspan=2 | <span class="Latn" lang="sv">[[:läsas#Swedish|läsas]]</span>
+|}
+</div>[[Category:Swedish weak verbs|LÄSA]]"""
+        )
+        data = parse_page(
+            self.wxr,
+            "läsa",
+            """==Swedish==
+===Verb===
+# to [[read]] (text)
+====Conjugation====
+{{sv-conj-wk|läs|end=s}}"""
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [{"form": "läsas", "tags": ["infinitive", "passive"]}],
+        )
+        self.assertEqual(
+            data[0]["categories"], ["Swedish weak verbs"]
+        )
+```
+
+Add `Form` pydantic model to "src/wiktextract/extractor/en/models.py":
+
+```python
+class Form(EnglishBaseModel):
+    form: str = ""
+    tags: list[str] = []
+    raw_tags: list[str] = []
+
+class WordEntry(EnglishBaseModel):
+    forms: list[Form] = []
+```
+
+Implement table template extractor "src/wiktextract/extractor/en/conjugation.py":
+
+```python
+from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
+
+from ...page import clean_node
+from ...wxr_context import WiktextractContext
+from .models import Form, WordEntry
+from .tags import translate_raw_tags
+
+
+def extract_conjugation_section(
+    wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
+) -> None:
+    for t_node in level_node.find_child(NodeKind.TEMPLATE):
+        if t_node.template_name == "sv-conj-wk":
+            extract_sv_conj_wk_template(wxr, word_entry, t_node)
+
+
+def extract_sv_conj_wk_template(
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+) -> None:
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for table in expanded_node.find_child_recursively(NodeKind.TABLE):
+        col_headers = []
+        for row in table.find_child(NodeKind.TABLE_ROW):
+            row_header = ""
+            col_index = 0
+            is_header_row = not row.contain_node(NodeKind.TABLE_CELL)
+            for cell in row.find_child(
+                NodeKind.TABLE_HEADER_CELL | NodeKind.TABLE_CELL
+            ):
+                if cell.kind == NodeKind.TABLE_HEADER_CELL:
+                    if is_header_row:
+                        col_header = clean_node(wxr, None, cell)
+                        if col_header != "":
+                            col_headers.append(col_header)
+                    else:
+                        row_header = clean_node(wxr, None, cell)
+                else:
+                    word = clean_node(wxr, None, cell)
+                    if word not in ["", wxr.wtp.title]:
+                        form = Form(form=word)
+                        if row_header != "":
+                            form.raw_tags.append(row_header)
+                        if col_index < len(col_headers):
+                            form.raw_tags.append(col_headers[col_index])
+                        translate_raw_tags(form)
+                        word_entry.forms.append(form)
+                    col_index += 1
+
+    for link_node in expanded_node.find_child(NodeKind.LINK):
+        clean_node(wxr, word_entry, link_node)
+```
+
+Finally update "src/wiktextract/extractor/en/page.py":
+
+```python
+from .conjugation import extract_conjugation_section
+
+
+def parse_section(
+    wxr: WiktextractContext,
+    page_data: list[WordEntry],
+    base_data: WordEntry,
+    level_node: LevelNode,
+) -> None:
+    title_text = clean_node(wxr, None, level_node.largs)
+    if title_text in POS_DATA:
+        extract_pos_section(
+            wxr, page_data, base_data, level_node, title_text
+        )
+    elif title_text == "Conjugation":
+        extract_conjugation_section(
+            wxr,
+            page_data[-1] if len(page_data) > 0 else base_data,
+            level_node,
+        )
+
+    for next_level_node in level_node.find_child(LEVEL_KIND_FLAGS):
+        parse_section(wxr, page_data, base_data, next_level_node)
+```
