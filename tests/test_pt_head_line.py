@@ -38,3 +38,17 @@ class TestPtHeadLine(TestCase):
 # [[cruel]]""",
         )
         self.assertEqual(data[0]["tags"], ["masculine"])
+
+    def test_stressed_form(self):
+        self.wxr.wtp.add_page("Predefinição:-ru-", 10, "Russo")
+        data = parse_page(
+            self.wxr,
+            "абстрактность",
+            """={{-ru-}}=
+==Substantivo==
+'''абстра́ктность'''
+#[[abstratidade]]""",
+        )
+        self.assertEqual(
+            data[0]["forms"], [{"form": "абстра́ктность", "tags": ["canonical"]}]
+        )
