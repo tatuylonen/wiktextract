@@ -13,12 +13,20 @@ from .tags import TEMPLATE_TAG_ARGS, translate_raw_tags
 def extract_pos_head_line_nodes(
     wxr: WiktextractContext, word_entry: WordEntry, nodes: list[WikiNode | str]
 ) -> None:
+    is_first_bold = True
     for node in nodes:
         if isinstance(node, TemplateNode):
             if node.template_name in ["tlb", "term-label"]:
                 extract_tlb_template(wxr, word_entry, node)
             else:
                 extract_headword_line_template(wxr, word_entry, node)
+        elif (
+            isinstance(node, WikiNode)
+            and node.kind == NodeKind.BOLD
+            and is_first_bold
+        ):
+            process_headword_bold_node(wxr, word_entry, node)
+            is_first_bold = False
 
 
 def extract_headword_line_template(
@@ -62,14 +70,13 @@ def extract_headword_line_template(
                     for strong_node in span_child.find_html(
                         "strong", attr_name="class", attr_value="headword"
                     ):
-                        process_ja_headword(wxr, word_entry, strong_node)
+                        process_headword_bold_node(wxr, word_entry, strong_node)
             elif (
                 span_child.tag == "strong"
                 and "headword" in span_child.attrs.get("class", "")
             ):
                 forms_start_index = index + 1
-                if word_entry.lang_code == "ja":
-                    process_ja_headword(wxr, word_entry, span_child)
+                process_headword_bold_node(wxr, word_entry, span_child)
             elif span_child.tag == "b":
                 # this is a form <b> tag, already inside form parentheses
                 break
@@ -79,19 +86,24 @@ def extract_headword_line_template(
         )
 
 
-def process_ja_headword(
+def process_headword_bold_node(
     wxr: WiktextractContext, word_entry: WordEntry, strong_node: HTMLNode
 ) -> None:
     ruby_data, node_without_ruby = extract_ruby(wxr, strong_node)
     form = clean_node(wxr, word_entry, node_without_ruby)
     if (len(ruby_data) > 0 or form != word_entry.word) and len(form) > 0:
-        word_entry.forms.append(
-            Form(
-                form=clean_node(wxr, word_entry, node_without_ruby),
-                ruby=ruby_data,
-                tags=["canonical"],
+        if wxr.wtp.title.startswith("不支援的頁面名稱/"):
+            # Unsupported titles:
+            # https://zh.wiktionary.org/wiki/Appendix:不支援的頁面名稱
+            word_entry.word = form
+        else:
+            word_entry.forms.append(
+                Form(
+                    form=clean_node(wxr, word_entry, node_without_ruby),
+                    ruby=ruby_data,
+                    tags=["canonical"],
+                )
             )
-        )
 
 
 def extract_headword_forms(
