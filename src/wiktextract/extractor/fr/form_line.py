@@ -29,6 +29,7 @@ def extract_form_line(
     )
 
     pre_template_name = ""
+    first_bold = True
     for index, node in enumerate(nodes):
         if isinstance(node, TemplateNode):
             if node.template_name in IGNORE_TEMPLATES:
@@ -97,6 +98,13 @@ def extract_form_line(
                 page_data[-1].raw_tags.append(raw_tag)
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
             process_conj_link_node(wxr, node, page_data)
+        elif (
+            isinstance(node, WikiNode)
+            and node.kind == NodeKind.BOLD
+            and first_bold
+        ):
+            process_form_line_bold_node(wxr, node, page_data[-1])
+            first_bold = False
 
         translate_raw_tags(page_data[-1])
 
@@ -265,3 +273,15 @@ def process_lien_pronominal(
         if form.form != "":
             page_data[-1].forms.append(form)
     clean_node(wxr, page_data[-1], expanded_node)
+
+
+def process_form_line_bold_node(
+    wxr: WiktextractContext, bold_node: WikiNode, word_entry: WordEntry
+):
+    bold_str = clean_node(wxr, None, bold_node)
+    if wxr.wtp.title.startswith("Titres non pris en charge/"):
+        # Unsupported titles:
+        # https://fr.wiktionary.org/wiki/Annexe:Titres_non_pris_en_charge
+        word_entry.word = bold_str
+    elif bold_str != wxr.wtp.title:
+        word_entry.forms.append(Form(form=bold_str, tags=["canonical"]))

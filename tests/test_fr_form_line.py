@@ -3,12 +3,12 @@ from unittest import TestCase
 from wikitextprocessor import Wtp
 
 from wiktextract.config import WiktionaryConfig
-from wiktextract.extractor.fr.page import parse_page
 from wiktextract.extractor.fr.form_line import (
     extract_form_line,
     process_zh_mot_template,
 )
 from wiktextract.extractor.fr.models import WordEntry
+from wiktextract.extractor.fr.page import parse_page
 from wiktextract.wxr_context import WiktextractContext
 
 
@@ -253,3 +253,28 @@ class TestFormLine(TestCase):
                 {"ipa": "\\ɸi.t͡ɕui\\"},
             ],
         )
+
+    def test_stress_form(self):
+        page_data = parse_page(
+            self.wxr,
+            "абажурчике",
+            """== {{langue|ru}} ==
+=== {{S|nom|ru|flexion}} ===
+'''абажу́рчике''' {{pron||ru}} {{m|i}}
+# ''Locatif singulier de'' {{lien|абажурчик|ru|dif=абажу́рчик}}.""",
+        )
+        self.assertEqual(
+            page_data[0]["forms"],
+            [{"form": "абажу́рчике", "tags": ["canonical"]}],
+        )
+
+    def test_unsupported_title(self):
+        page_data = parse_page(
+            self.wxr,
+            "Titres non pris en charge/inférieur à 3",
+            """== {{langue|conv}} ==
+=== {{S|symbole|conv}} ===
+'''<3'''
+# {{lexique|Internet|conv}} {{lien|cœur|fr|nom|dif=Cœur}}.""",
+        )
+        self.assertEqual(page_data[0]["word"], "<3")
