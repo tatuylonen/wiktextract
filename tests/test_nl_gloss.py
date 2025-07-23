@@ -477,3 +477,16 @@ class TestNlGloss(TestCase):
                 },
             ],
         )
+
+    def test_stressed_form(self):
+        data = parse_page(
+            self.wxr,
+            "бобр",
+            """==Russisch==
+====Zelfstandig naamwoord====
+'''бо́бр''' {{m}}
+#{{knaagdieren|rus}} [[bever]]""",
+        )
+        self.assertEqual(
+            data[0]["forms"], [{"form": "бо́бр", "tags": ["canonical"]}]
+        )

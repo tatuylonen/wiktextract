@@ -9,7 +9,7 @@ from .example import (
     extract_example_list_item,
     extract_example_template,
 )
-from .models import AltForm, Sense, WordEntry
+from .models import AltForm, Form, Sense, WordEntry
 from .section_titles import LINKAGE_SECTIONS, POS_DATA
 from .tags import (
     GLOSS_TAG_TEMPLATES,
@@ -52,6 +52,7 @@ def extract_pos_section_nodes(
     level_node: LevelNode,
 ) -> None:
     gloss_list_start = 0
+    is_first_bold = True
     for index, node in enumerate(level_node.children):
         if (
             isinstance(node, WikiNode)
@@ -177,6 +178,13 @@ def extract_pos_section_nodes(
                     cats.get("categories", [])
                 )
                 translate_raw_tags(page_data[-1].senses[-1])
+        elif (
+            isinstance(node, WikiNode)
+            and node.kind == NodeKind.BOLD
+            and is_first_bold
+        ):
+            extract_form_line_bold_node(wxr, page_data[-1], node)
+            is_first_bold = None
 
 
 def extract_gloss_list_item(
@@ -416,3 +424,11 @@ def extract_verb_form_of_template(
                 sense.form_of.append(AltForm(word=form_of))
         extract_section_categories(wxr, word_entry, expanded_node)
         word_entry.tags.append("form-of")
+
+
+def extract_form_line_bold_node(
+    wxr: WiktextractContext, word_entry: WordEntry, bold_node: WikiNode
+):
+    word = clean_node(wxr, None, bold_node)
+    if word != "" and word != wxr.wtp.title:
+        word_entry.forms.append(Form(form=word, tags=["canonical"]))
