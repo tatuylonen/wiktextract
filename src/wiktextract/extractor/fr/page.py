@@ -172,6 +172,7 @@ def process_pos_block(
     gloss_start = len(child_nodes)
     lang_code = page_data[-1].lang_code
     has_gloss_list = False
+    is_first_bold = True
     for index, child in enumerate(child_nodes):
         if isinstance(child, WikiNode):
             if child.kind == NodeKind.TEMPLATE:
@@ -190,8 +191,8 @@ def process_pos_block(
                     form_line_start = index
                 elif template_name.startswith((f"{lang_code}-", "flex-ku-")):
                     extract_inflection(wxr, page_data, child)
-            elif child.kind == NodeKind.BOLD and form_line_start == 0:
-                form_line_start = index + 1
+            elif child.kind == NodeKind.BOLD and is_first_bold:
+                form_line_start = index
             elif child.kind == NodeKind.LIST and child.sarg.startswith("#"):
                 if index < gloss_start:
                     gloss_start = index
@@ -205,7 +206,7 @@ def process_pos_block(
     extract_form_line(wxr, page_data, form_line_nodes)
     if not has_gloss_list:
         gloss_text = clean_node(
-            wxr, None, child_nodes[form_line_start:level_node_index]
+            wxr, None, child_nodes[form_line_start + 1 : level_node_index]
         )
         if gloss_text != "":
             page_data[-1].senses.append(Sense(glosses=[gloss_text]))
@@ -237,7 +238,7 @@ def parse_page(
                 lang_name = clean_node(wxr, categories, subtitle_template)
                 wxr.wtp.start_section(lang_name)
                 base_data = WordEntry(
-                    word=wxr.wtp.title,
+                    word=page_title,
                     lang_code=lang_code,
                     lang=lang_name,
                     pos="unknown",
