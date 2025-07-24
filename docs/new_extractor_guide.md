@@ -166,7 +166,7 @@ t_node.template_parameters
 The `TemplateNode.template_parameters` dictionary values can't be used directly. If you want to find a node in a template parameter, the value must be parsed:
 
 ```python
-parsed_arg = wxr.wtp.parse(wxr.wtp.node_to_wikitext(arg_value))
+parsed_arg = wxr.wtp.parse(wxr.wtp.node_to_wikitext(arg_value), expand_all=True)
 ```
 
 If text string is needed, `clean_node()` should be used:
@@ -656,6 +656,180 @@ def extract_gloss_list_item(
 
 Don't forget to add a test after updating extractor code for a new wikitext layout or template.
 
+## Extract example list
+
+This example shows how to extract Japanese ruby data, add bold word offsets data, and how to handle example template under reference template layout.
+
+Add test "tests/test_en_example.py":
+
+```python
+def test_ja_usex(self):
+    self.wxr.wtp.add_page(
+        "Template:quote-web",
+        10,
+        """<div class="citation-whole"><span class="cited-source">'''2020''' December 3, <span class="Jpan" lang="ja">中舘尚人</span>, “<span class="Jpan" lang="ja">災害対応と不確実性のマネジメント：第1回 “ウィズ不確実性”の時代</span>”, in <cite><span class="Jpan" lang="ja">[[:w&#58;ja&#58;経済産業研究所|経済産業研究所]]</span></cite> &#91;<cite><span class="e-translation">The Research Institute of Economy, Trade and Industry</span></cite>&#93;&lrm;<sup>[https://www.rieti.go.jp/jp/columns/a01_0621.html]</sup>:</span></div>"""
+    )
+    self.wxr.wtp.add_page(
+        "Template:ja-usex",
+        10,
+        """<span lang="ja" class="Jpan"><span class="q-hellip-sp">&#32;</span><span class="q-hellip-b">[</span>…<span class="q-hellip-b">]</span><span class="q-hellip-b">&#32;</span>チリ<ruby>政府<rp>(</rp><rt>せいふ</rt><rp>)</rp></ruby>が<ruby>政治<rp>(</rp><rt>せいじ</rt><rp>)</rp></ruby>リスクを<ruby>犯<rp>(</rp><rt>おか</rt><rp>)</rp></ruby>して、<ruby>結果<rp>(</rp><rt>けっか</rt><rp>)</rp></ruby>を<ruby>約束<rp>(</rp><rt>やくそく</rt><rp>)</rp></ruby>したのは'''<ruby>大<rp>(</rp><rt>おお</rt><rp>)</rp></ruby>きい'''。</span><dl><dd><i><span class="tr"><Span class="q-hellip-sp">&#32;</span><span class="q-hellip-b">[</span>…<span class="q-hellip-b">]</span><span class="q-hellip-b">&#32;</span>chiri seifu ga seiji risuku o okashite, kekka o yakusoku shita no wa '''ōkii'''.</span></i></dd><dd>translation</dd></dl>[[Category:Japanese terms with usage examples|おおきい]][[Category:Japanese terms with usage examples|おおきい]]"""
+    )
+    data = parse_page(
+        self.wxr,
+        "大きい",
+        """==Japanese==
+===Adjective===
+# [[important]]; [[crucial]]
+#* {{quote-web|ja|date=2020-12-03|author=ja:中舘尚人|title=ja:災害対応と不確実性のマネジメント：第1回 “ウィズ不確実性”の時代|work=lw:ja:経済産業研究所|trans-work=The Research Institute of Economy, Trade and Industry|url=https://www.rieti.go.jp/jp/columns/a01_0621.html}}
+#*: {{ja-usex|{{...}}チリ政府が政治リスクを犯して、結果を約束したのは'''大きい'''。|{{...}}チリ せいふ が せいじ リスク を おかして、けっか を やくそく した の は '''おおき.い'''。|translation}}"""
+    )
+    self.assertEqual(
+        data[0]["senses"],
+            [
+                {
+                    "categories": ["Japanese terms with usage examples"],
+                    "examples": [
+                        {
+                            "bold_roman_offsets": [[73, 77]],
+                            "bold_text_offsets": [[28, 31]],
+                            "ref": "2020 December 3, 中舘尚人, “災害対応と不確実性のマネジメント：第1回 “ウィズ不確実性”の時代”, in 経済産業研究所 [The Research Institute of Economy, Trade and Industry]:",
+                            "roman": "[…] chiri seifu ga seiji risuku o okashite, kekka o yakusoku shita no wa ōkii.",
+                            "ruby": [
+                                ["政府", "せいふ"],
+                                ["政治", "せいじ"],
+                                ["犯", "おか"],
+                                ["結果", "けっか"],
+                                ["約束", "やくそく"],
+                                ["大", "おお"],
+                            ],
+                            "text": "[…] チリ政府が政治リスクを犯して、結果を約束したのは大きい。",
+                            "translation": "translation",
+                        }
+                    ],
+                    "glosses": ["important; crucial"],
+                }
+            ],
+    )
+```
+
+Add Pydantic model:
+
+```python
+class Example(EnglishBaseModel):
+    text: str
+    bold_text_offsets: list[tuple[int, int]] = []
+    translation: str = ""
+    bold_translation_offsets: list[tuple[int, int]] = []
+    roman: str = ""
+    bold_roman_offsets: list[tuple[int, int]] = []
+    ref = ""
+    ruby: list[tuple[str, ...]] = []
+
+
+class Sense(EnglishBaseModel):
+    examples: list[Example] = []
+```
+
+Add "src/src/wiktextract/extractor/en/example.py":
+
+```python
+from wikitextprocessor.parser import HTMLNode, NodeKind, TemplateNode, WikiNode
+
+from ...page import clean_node
+from ...wxr_context import WiktextractContext
+from ..ruby import extract_ruby
+from ..share import calculate_bold_offsets
+from .models import Example, Sense, WordEntry
+
+
+def extract_example_list_item(
+    wxr: WiktextractContext,
+    sense: Sense,
+    list_item: WikiNode,
+    word_entry: WordEntry,
+    ref: str = ""
+):
+    for node in list_item.children:
+        if isinstance(node, TemplateNode) and node.template_name.startwith("quote-"):
+            ref = extract_quote_template(wxr, sense, node)
+        elif isinstance(node, TemplateNode) and node.template_name == "ja-usex":
+            extract_ja_usex_template(wxr, sense, node, ref)
+        # linkage template like "synonyms" will be extracted at here
+        # elif isinstance(node, TemplateNode) and node.template_name in LINKAGE_TEMPLATES:
+        #     pass
+        elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
+            for child_list_item in node.find_child(NodeKind.LIST_ITEM):
+                extract_example_list_item(
+                    wxr, sense, child_list_item, word_entry, ref
+                )
+
+
+def extract_quote_template(
+    wxr: WiktextractContext, sense: Sense, t_node: TemplateNode
+) -> str:
+    example = Example(text="")
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(node), expand_all=True
+    )
+    for span_tag in expanded_node.find_html_recursively("span"):
+        span_class = span_tag.attrs.get("class", "")
+        if "cited-source" == span_class:
+            example_data.ref = clean_node(wxr, None, span_tag)
+        # other classes omitted
+    clean_node(wxr, sense, expanded_node)
+    if example.text != "":
+        sense.examples.append(example)
+    return example.ref
+
+
+def extract_ja_usex_template(
+    wxr: WiktextractContext, sense: Sense, t_node: TemplateNode, ref: str
+):
+    example = Example(text="", ref=ref)
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(node), expand_all=True
+    )
+    for span_tag in expanded_node.find_html(
+        "span", attr_name="class", attr_value="Jpan"
+    ):
+        ruby_data, node_without_ruby = extract_ruby(wxr, span_tag)
+        example_data.text = clean_node(wxr, None, node_without_ruby)
+        calculate_bold_offsets(
+            wxr,
+            wxr.wtp.parse(wxr.wtp.node_to_wikitext(node_without_ruby)),
+            example_data.text,
+            example_data,
+            "bold_text_offsets",
+        )
+        example_data.ruby = ruby_data
+    for span_tag in expanded_node.find_html_recursively(
+        "span", attr_name="class", attr_value="tr"
+    ):
+        example_data.roman = clean_node(wxr, None, span_tag)
+        calculate_bold_offsets(
+            wxr,
+            span_tag,
+            example_data.roman,
+            example_data,
+            "bold_roman_offsets",
+        )
+    tr_arg = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(node.template_parameters.get(3, "")),
+        expand_all=True,
+    )
+    example_data.translation = clean_node(wxr, None, tr_arg)
+    calculate_bold_offsets(
+        wxr,
+        tr_arg,
+        example_data.translation,
+        example_data,
+        "bold_translation_offsets",
+    )
+    clean_node(wxr, sense, expanded_node)
+    if example.text != "":
+        sense.examples.append(example)
+```
+
 ## Extract conjugation table template
 
 Most editions have conjugation templates expand to wikitext table, HTML table or mix of wikitext and HTML tags. Some table templates don't use the correct wikitext or HTML tags, like using table cell wikitext(`|`) for header cell(`!`) or use `<td>` HTML tag for table header(should use `<th>`), these mistakes should be fixed on Wiktionary.
@@ -663,29 +837,6 @@ Most editions have conjugation templates expand to wikitext table, HTML table or
 First add test "tests/test_en_forms.py":
 
 ```python
-from unittest import TestCase
-
-from wikitextprocessor import Wtp
-
-from wiktextract.config import WiktionaryConfig
-from wiktextract.extractor.en.page import parse_page
-from wiktextract.wxr_context import WiktextractContext
-
-
-class TestEnForms(TestCase):
-    maxDiff = None
-
-    def setUp(self):
-        self.wxr = WiktextractContext(
-            Wtp(lang_code="en"),
-            WiktionaryConfig(
-                dump_file_lang_code="en", capture_language_codes=None
-            ),
-        )
-
-    def tearDown(self):
-        self.wxr.wtp.close_db_conn()
-
     def test_sv_conj_wk(self):
         self.wxr.wtp.add_page(
             "Template:sv-conj-wk",
