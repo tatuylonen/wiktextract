@@ -209,6 +209,24 @@ def extract_pos_header_template(
                 gender_raw_tag = clean_node(wxr, None, abbr_tag)
                 if gender_raw_tag not in ["", "?"]:
                     word_entry.raw_tags.append(gender_raw_tag)
+        elif (
+            isinstance(node, HTMLNode)
+            and node.tag == "strong"
+            and "headword" in node.attrs.get("class", "")
+        ):
+            form_str = clean_node(wxr, None, node)
+            if form_str not in ["", wxr.wtp.title]:
+                word_entry.forms.append(Form(form=form_str, tags=["canonical"]))
+        elif (
+            isinstance(node, HTMLNode)
+            and node.tag == "span"
+            and "headword-tr" in node.attrs.get("class", "")
+        ):
+            roman = clean_node(wxr, None, node)
+            if roman != "":
+                word_entry.forms.append(
+                    Form(form=roman, tags=["transliteration"])
+                )
 
     clean_node(wxr, word_entry, expanded_node)
 
