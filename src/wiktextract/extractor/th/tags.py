@@ -127,6 +127,12 @@ LABEL_TAGS = {
     "แต้จิ๋ว": "Teochew",
     "อู๋": "Wu",
     "เซียง": "Xiang",
+    # Template:ru-noun+
+    "ช.": "masculine",
+    "อชีว.": "inanimate",
+    "สัมพันธการก": "genitive",
+    "กรรตุการกพหูพจน์": ["nominative", "plural"],
+    "สัมพันธการกพหูพจน์": ["genitive", "plural"],
 }
 
 

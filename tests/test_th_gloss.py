@@ -409,3 +409,41 @@ class TestThGloss(TestCase):
             page_data[0]["senses"],
             [{"glosses": ["ดวงอาทิตย์"], "tags": ["literary", "dialect"]}],
         )
+
+    def test_ru_noun_plus(self):
+        self.wxr.wtp.add_page(
+            "แม่แบบ:ru-noun+",
+            10,
+            """<span class="headword-line"><strong class="Cyrl headword" lang="ru">абза́ц</strong> (<span lang="ru" class="headword-tr tr" dir="ltr">อับซฺัต͜ซ</span>)&nbsp;<span class="gender"><abbr title="เพศชาย">ช.</abbr>&nbsp;<abbr title="ไม่มีชีวิต">อชีว.</abbr></span> (<i>สัมพันธการก</i> <b class="Cyrl" lang="ru">[[:абзаца#ภาษารัสเซีย|абза́ца]]</b>[[Category:รัสเซีย links with redundant wikilinks|АБЗАЦ]][[Category:รัสเซีย links with redundant alt parameters|АБЗАЦ]], <i>กรรตุการกพหูพจน์</i> <b class="Cyrl" lang="ru">[[:абзацы#ภาษารัสเซีย|абза́цы]]</b>[[Category:รัสเซีย links with redundant wikilinks|АБЗАЦ]][[Category:รัสเซีย links with redundant alt parameters|АБЗАЦ]], <i>สัมพันธการกพหูพจน์</i> <b class="Cyrl" lang="ru">[[:абзацев#ภาษารัสเซีย|абза́цев]]</b>[[Category:รัสเซีย links with redundant wikilinks|АБЗАЦ]][[Category:รัสเซีย links with redundant alt parameters|АБЗАЦ]])</span>[[Category:คำหลักภาษารัสเซีย|АБЗАЦ]][[Category:คำนามภาษารัสเซีย|АБЗАЦ]][[Category:รัสเซีย entries with incorrect language header|АБЗАЦ]][[Category:หน้าที่มีรายการ|АБЗАЦ]][[Category:หน้าที่มี 1 รายการ|АБЗАЦ]]""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "абзац",
+            """== ภาษารัสเซีย ==
+=== คำนาม ===
+{{ru-noun+|абза́ц}}
+# [[ย่อหน้า]]""",
+        )
+        self.assertEqual(
+            page_data[0]["forms"],
+            [
+                {"form": "абза́ц", "tags": ["canonical"]},
+                {"form": "อับซฺัต͜ซ", "tags": ["transliteration"]},
+                {"form": "абза́ца", "tags": ["genitive"]},
+                {"form": "абза́цы", "tags": ["nominative", "plural"]},
+                {"form": "абза́цев", "tags": ["genitive", "plural"]},
+            ],
+        )
+        self.assertEqual(page_data[0]["tags"], ["masculine", "inanimate"])
+        self.assertEqual(
+            page_data[0]["categories"],
+            [
+                "รัสเซีย links with redundant wikilinks",
+                "รัสเซีย links with redundant alt parameters",
+                "คำหลักภาษารัสเซีย",
+                "คำนามภาษารัสเซีย",
+                "รัสเซีย entries with incorrect language header",
+                "หน้าที่มีรายการ",
+                "หน้าที่มี 1 รายการ",
+            ],
+        )
