@@ -301,3 +301,26 @@ class TestKuForm(TestCase):
                 {"form": "aqiltirîn", "tags": ["superlative"]},
             ],
         )
+
+    def test_stressed_form(self):
+        self.wxr.wtp.add_page("Şablon:ziman", 10, "Rusî")
+        self.wxr.wtp.add_page(
+            "Şablon:navdêr",
+            10,
+            """<span class="headword-line"><strong class="Cyrl headword" lang="ru">-{а́втор}-</strong> (<span lang="ru-Latn" class="headword-tr tr Latn" dir="ltr">-{ávtor}-</span>)&nbsp;<span class="gender"><abbr title=nêr>n</abbr></span></span>[[Category:Lema bi rusî|АВТОР]][[Category:Navdêr bi rusî|АВТОР]][[Category:Madeyên zimanekî xelet bi kar tînin bi rusî|АВТОР]][[Category:Navdêrên nêr bi rusî|АВТОР]][[Category:Rûpelên bi madeyan|АВТОР]][[Category:Rûpelên bi 4 madeyan|АВТОР]]""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "автор",
+            """== {{ziman|ru}} ==
+=== Navdêr ===
+{{navdêr|ru|а́втор|z=n}}
+# [[nivîskar#ku|nivîskar]]""",
+        )
+        self.assertEqual(
+            page_data[0]["forms"],
+            [
+                {"form": "а́втор", "tags": ["canonical"]},
+                {"form": "ávtor", "tags": ["transliteration"]},
+            ],
+        )

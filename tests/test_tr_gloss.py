@@ -502,3 +502,26 @@ Nerede olursanız olun, sağlam ve tahkim edilmiş kaleler içinde bulunsanız b
                 },
             ],
         )
+
+    def test_stressed_form(self):
+        self.wxr.wtp.add_page(
+            "Şablon:başlık başı",
+            10,
+            """<strong class="Cyrl headword" lang="ru">аберра́нтен</strong> (<span lang="ru-Latn" class="headword-tr tr Latn" dir="ltr">aberránten</span>)[[Category:Rusça sözcükler|АБЕРРАНТЕН]][[Category:Rusça çekimli ön adlar|АБЕРРАНТЕН]]""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "аберрантен",
+            """==Rusça==
+===Ön ad===
+{{başlık başı|ru|çekimli ön ad|baş=аберра́нтен}}
+
+# {{çekim|dil=ru|аберра́нтный||kısa|e|t}}""",
+        )
+        self.assertEqual(
+            page_data[0]["forms"],
+            [
+                {"form": "аберра́нтен", "tags": ["canonical"]},
+                {"form": "aberránten", "tags": ["transliteration"]},
+            ],
+        )

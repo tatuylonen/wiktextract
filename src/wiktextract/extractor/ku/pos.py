@@ -292,6 +292,26 @@ def extract_navdêr_template(
             word_entry.forms.append(
                 Form(form=i_text.strip("() "), tags=["romanization"])
             )
+    for main_span_tag in expanded_node.find_html(
+        "span", attr_name="class", attr_value="headword-line"
+    ):
+        for strong_tag in main_span_tag.find_html(
+            "strong", attr_name="class", attr_value="headword"
+        ):
+            strong_str = clean_node(wxr, None, strong_tag)
+            if strong_str not in ["", wxr.wtp.title]:
+                word_entry.forms.append(
+                    Form(form=strong_str, tags=["canonical"])
+                )
+        for roman_span in main_span_tag.find_html(
+            "span", attr_name="class", attr_value="headword-tr"
+        ):
+            roman = clean_node(wxr, None, roman_span)
+            if roman != "":
+                word_entry.forms.append(
+                    Form(form=roman, tags=["transliteration"])
+                )
+
     clean_node(wxr, word_entry, expanded_node)
 
 
