@@ -830,6 +830,153 @@ def extract_ja_usex_template(
         sense.examples.append(example)
 ```
 
+## Extract sound file
+
+This example shows how to get sound file URLs.
+
+First add test:
+
+```python
+def test_audio(self):
+    self.wxr.wtp.add_page(
+        "Template:audio",
+        10,
+        """<table class="audiotable"><tr><td>Audio <span class="ib-brac qualifier-brac">(</span><span class="usage-label-accent"><span class="ib-content label-content">[[w:Received Pronunciation|Received Pronunciation]]</span></span><span class="ib-brac qualifier-brac">)</span><span class="ib-colon qualifier-colon">:</span></td><td class="audiofile">[[File:En-uk-dictionary.ogg|noicon|175px]]</td><td class="audiometa" style="font-size: 80%;">([[:File:En-uk-dictionary.ogg|file]])</td></tr></table>[[Category:English terms with audio pronunciation|DICTIONARY]]"""
+    )
+    self.wxr.wtp.add_page(
+        "Template:hyphenation",
+        10,
+        'Hyphenation: <span class="Latn" lang="en">dic‧tion‧a‧ry</span>, <span class="Latn" lang="en">dic‧tion‧ary</span>'
+    )
+    data = parse_page(
+        self.wxr,
+        "dictionary",
+        """==English==
+===Pronunciation===
+* {{audio|en|En-uk-dictionary.ogg|a=RP}}
+* {{hyphenation|en|dic|tion|a|ry||dic|tion|ary}}
+===Noun===
+# A [[reference work]]"""
+    )
+    self.assertEqual(
+        data[0]["sounds"],
+        [
+            {
+                "audio": "En-uk-dictionary.ogg",
+                "mp3_url": "https://upload.wikimedia.org/wikipedia/commons/transcoded/1/1f/En-uk-dictionary.ogg/En-uk-dictionary.ogg.mp3",
+                "ogg_url": "https://upload.wikimedia.org/wikipedia/commons/1/1f/En-uk-dictionary.ogg",
+                "tags": ["Received-Pronunciation"],
+            }
+        ]
+    )
+    self.assertEqual(
+        data[0]["categories"], ["English terms with audio pronunciation"]
+    )
+    self.assertEqual(
+        data[0]["hyphenations"],
+        [
+            {"parts": ["dic", "tion", "a", "ry"]},
+            {"parts": ["dic", "tion", "ary"]},
+        ],
+    )
+```
+
+Add Pydantic model:
+
+```python
+class Sound(EnglishBaseModel):
+    audio: str = ""
+    ogg_url: str = ""
+    mp3_url: str = ""
+    tags: list[str] = []
+
+class Hyphenation(EnglishBaseModel):
+    parts: list[str] = []
+
+class WordEntry(EnglishBaseModel):
+    sounds: list[Sound] = []
+    hyphenations: list[Hyphenation] = []
+```
+
+Wiktionary also use other audio file formats like WAV. This example only add `ogg_url` field for brevity.
+
+Add "src/wiktextract/extractor/en/sound.py":
+
+```python
+from ..share import set_sound_file_url_fields
+from .models import Hyphenation, Sound, WordEntry
+
+
+def extract_sound_section(
+    wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
+):
+    for list_node in level_node.find_child(NodeKind.LIST):
+        for list_item in list_node.find_child(NodeKind.LIST_ITEM):
+            extract_sound_list_item(wxr, word_entry, list_item)
+
+
+def extract_sound_list_item(
+    wxr: WiktextractContext, word_entry: WordEntry, list_item: WikiNode
+):
+    for t_node in list_item.find_child(NodeKind.TEMPLATE):
+        if t_node.template_name == "audio":
+            extract_audio_template(wxr, word_entry, t_node)
+        elif t_node.template_name == "hyphenation":
+             extract_hyphenation_template(wxr, word_entry, t_node)
+
+
+def extract_audio_template(
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+):
+    sound = Sound()
+    filename = clean_node(wxr, None, t_node.template_parameters.get(2, ""))
+    set_sound_file_url_fields(wxr, filename, sound)
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for span_tag in expanded_node.find_html_recursively(
+        "span", attr_name="class", attr_value="label-content"
+    ):
+        raw_tag = clean_node(wxr, None, span_tag)
+        if raw_tag != "":
+            sound.raw_tags.append(raw_tag)
+    translate_raw_tags(sound)
+    word_entry.sounds.append(sound)
+    clean_node(wxr, word_entry, expanded_node)
+
+
+def extract_hyphenation_template(
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+):
+    sound = Sound()
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    lang = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
+    for span_tag in expanded_node.find_html(
+        "span", attr_name="lang", attr_value=lang
+    ):
+        h_str = clean_node(wxr, None, span_tag)
+        h_data = Hyphenation(parts=h_str.split("‧"))
+        word_entry.hyphenations.append(h_data)
+```
+
+Finally update `parse_section()` in file "page.py":
+
+```python
+from .sound import extract_sound_section
+
+def parse_section(
+    wxr: WiktextractContext,
+    page_data: list[WordEntry],
+    base_data: WordEntry,
+    level_node: LevelNode,
+) -> None:
+    title_text = clean_node(wxr, None, level_node.largs)
+    if title_text == "Pronunciation":
+        extract_sound_section(wxr, base_data, level_node)
+```
+
 ## Extract conjugation table template
 
 Most editions have conjugation templates expand to wikitext table, HTML table or mix of wikitext and HTML tags. Some table templates don't use the correct wikitext or HTML tags, like using table cell wikitext(`|`) for header cell(`!`) or use `<td>` HTML tag for table header(should use `<th>`), these mistakes should be fixed on Wiktionary.
@@ -942,7 +1089,7 @@ def extract_sv_conj_wk_template(
         clean_node(wxr, word_entry, link_node)
 ```
 
-Finally update "src/wiktextract/extractor/en/page.py":
+Finally update `parse_section()` in "page.py":
 
 ```python
 from .conjugation import extract_conjugation_section
@@ -955,17 +1102,10 @@ def parse_section(
     level_node: LevelNode,
 ) -> None:
     title_text = clean_node(wxr, None, level_node.largs)
-    if title_text in POS_DATA:
-        extract_pos_section(
-            wxr, page_data, base_data, level_node, title_text
-        )
-    elif title_text == "Conjugation":
+    if title_text == "Conjugation":
         extract_conjugation_section(
             wxr,
             page_data[-1] if len(page_data) > 0 else base_data,
             level_node,
         )
-
-    for next_level_node in level_node.find_child(LEVEL_KIND_FLAGS):
-        parse_section(wxr, page_data, base_data, next_level_node)
 ```
