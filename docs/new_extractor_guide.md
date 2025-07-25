@@ -277,10 +277,11 @@ def parse_page(
     # https://en.wiktionary.org/wiki/Wiktionary:Entry_layout
     wxr.wtp.start_page(page_title)
     # `pre_expand` must be `True` if some section templates need to
-    # be expanded before parsing
-    tree = wxr.wtp.parse(page_text, pre_expand=True)
+    # be expanded before parsing:
+    # root = wxr.wtp.parse(page_text, pre_expand=True)
+    root = wxr.wtp.parse(page_text)
     page_data: list[WordEntry] = []
-    for level2_node in tree.find_child(NodeKind.LEVEL2):
+    for level2_node in root.find_child(NodeKind.LEVEL2):
         lang_name = clean_node(wxr, None, level2_node.largs)
         # language code can also be obtained from template name or parameter
         lang_code = name_to_code(lang_name, "en")
@@ -338,7 +339,7 @@ def extract_gloss_list_item(
     gloss_nodes = []
     sense = Sense()
     for node in list_item.children:
-        if isinstance(node, TemplateNode) and node.template_name == "lb":
+        if isinstance(node, TemplateNode) and node.template_name in ["lb", "label"]:
             extract_lb_template(wxr, sense, node)
         else:
             gloss_nodes.append(node)
@@ -352,6 +353,7 @@ def extract_gloss_list_item(
 def extract_lb_template(
     wxr: WiktextractContext, sense: Sense, t_node: TemplateNode
 ) -> None:
+    # https://en.wiktionary.org/wiki/Template:label
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(t_node), expand_all=True
     )
@@ -770,6 +772,7 @@ def extract_example_list_item(
 def extract_quote_template(
     wxr: WiktextractContext, sense: Sense, t_node: TemplateNode
 ) -> str:
+    # https://en.wiktionary.org/wiki/Template:quote-book
     example = Example(text="")
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(node), expand_all=True
@@ -788,6 +791,7 @@ def extract_quote_template(
 def extract_ja_usex_template(
     wxr: WiktextractContext, sense: Sense, t_node: TemplateNode, ref: str
 ):
+    # https://en.wiktionary.org/wiki/Template:ja-usex
     example = Example(text="", ref=ref)
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(node), expand_all=True
@@ -931,6 +935,7 @@ def extract_sound_list_item(
 def extract_audio_template(
     wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
 ):
+    # https://en.wiktionary.org/wiki/Template:audio
     sound = Sound()
     filename = clean_node(wxr, None, t_node.template_parameters.get(2, ""))
     set_sound_file_url_fields(wxr, filename, sound)
@@ -951,6 +956,7 @@ def extract_audio_template(
 def extract_hyphenation_template(
     wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
 ):
+    # https://en.wiktionary.org/wiki/Template:hyphenation
     sound = Sound()
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(t_node), expand_all=True
@@ -1077,6 +1083,7 @@ def extract_translation_section(
 def extract_multitrans_template(
     wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
 ):
+    # https://en.wiktionary.org/wiki/Template:multitrans
     data_arg = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(t_node.template_parameters.get("data", ""))
     )
@@ -1117,6 +1124,7 @@ def extract_t_template(
     lang_name: str,
     sense: str,
 ):
+    # https://en.wiktionary.org/wiki/Template:t
     lang_code = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
     t_data = Translation(lang=lang_name, lang_code=lang_code, sense=sense)
     expanded_node = wxr.wtp.parse(
@@ -1159,6 +1167,67 @@ def parse_section(
             level_node
         )
 ```
+
+### Translation subpage
+
+Some pages have [translation subpage](https://en.wiktionary.org/wiki/Category:Translation_subpages), for example: [book/translations](https://en.wiktionary.org/wiki/book/translations). These pages should be skipped in `parse_page()`:
+
+```python
+def parse_page(
+    wxr: WiktextractContext, page_title: str, page_text: str
+) -> list[dict[str, Any]]:
+    if page_title.endswith("/translations"):
+        return []
+```
+
+We could use `Wtp.get_page()` to get subpage wikitext:
+
+```python
+def extract_translation_section(
+    wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
+):
+    for node in level_node.children:
+        if (
+            isinstance(node, TemplateNode)
+            and node.template_name == "see translation subpage"
+        ):
+            extract_subpage_template(wxr, word_entry, node)
+
+
+def extract_subpage_template(
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+):
+    # https://en.wiktionary.org/wiki/Template:see_translation_subpage
+    pos = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
+    second_arg = clean_node(wxr, None, t_node.template_parameters.get(2, ""))
+    subpage_title = wxr.wtp.title + "/translations"
+    if second_arg != "":
+        subpage_title = second_arg
+    subpage = wxr.wtp.get_page(subpage_title, namespace_id=0)
+    if subpage is None:
+        return
+    root = wxr.wtp.parse(subpage.body)
+    if pos != "":
+        pos_section = get_subpage_section(wxr, root, pos)
+        if pos_section is None:
+            return
+        tr_section = get_subpage_section(wxr, pos_section, "Translations")
+    else:
+        tr_section = get_subpage_section(wxr, root, "Translations")
+    if tr_section is not None:
+        extract_translation_section(wxr, word_entry, tr_section)
+
+
+def get_subpage_section(
+    wxr: WiktextractContext, node: WikiNode, target_section: str
+) -> LevelNode | None:
+    for level_node in node.find_child_recursively(LEVEL_KIND_FLAGS):
+        section_title = clean_node(wxr, None, level_node.largs)
+        if section_title == target_section:
+            return level_node
+    return None
+```
+
 
 ## Extract conjugation table template
 
@@ -1237,6 +1306,7 @@ def extract_conjugation_section(
 def extract_sv_conj_wk_template(
     wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
 ) -> None:
+    # https://en.wiktionary.org/wiki/Template:sv-conj-wk
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(t_node), expand_all=True
     )
