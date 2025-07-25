@@ -649,6 +649,7 @@ def extract_gloss_list_item(
         ):
             for e_list_item in child_list.find_child(NodeKind.LIST_ITEM):
                 # extract example or linkage data
+                pass
         elif child_list.sarg.startswith("#") and child_list.sarg.endswith("#"):
             for child_list_item in child_list.find_child(NodeKind.LIST_ITEM):
                 extract_gloss_list_item(wxr, word_entry, child_list_item, sense)
@@ -747,10 +748,12 @@ def extract_example_list_item(
     sense: Sense,
     list_item: WikiNode,
     word_entry: WordEntry,
-    ref: str = ""
+    ref: str = "",
 ):
     for node in list_item.children:
-        if isinstance(node, TemplateNode) and node.template_name.startwith("quote-"):
+        if isinstance(node, TemplateNode) and node.template_name.startwith(
+            "quote-"
+        ):
             ref = extract_quote_template(wxr, sense, node)
         elif isinstance(node, TemplateNode) and node.template_name == "ja-usex":
             extract_ja_usex_template(wxr, sense, node, ref)
@@ -975,6 +978,186 @@ def parse_section(
     title_text = clean_node(wxr, None, level_node.largs)
     if title_text == "Pronunciation":
         extract_sound_section(wxr, base_data, level_node)
+```
+
+## Extract translation section
+
+First add test "tests/test_en_translation.py":
+
+```python
+def test_translation(self):
+    self.wxr.wtp.add_page(
+        "Template:tt+",
+        10,
+        '<span class="Arab" lang="ar">[[:قاموس#Arabic|قَامُوس]]</span><span class="tpos">&nbsp;[[:ar&#58;قاموس|(ar)]]</span>&nbsp;<span class="gender"><abbr title="masculine gender">m</abbr></span> <span class="mention-gloss-paren annotation-paren">(</span><span lang="ar-Latn" class="tr Latn">qāmūs</span><span class="mention-gloss-paren annotation-paren">)</span>[[Category:Terms with Arabic translations|DICTIONARY]]'
+    )
+    self.wxr.wtp.add_page(
+        "Template:tt",
+        10,
+        '<span class="Arab" lang="acw">[[:قاموس#Hijazi&#95;Arabic|قاموس]]</span>&nbsp;<span class="gender"><abbr title="masculine gender">m</abbr></span> <span class="mention-gloss-paren annotation-paren">(</span><span lang="acw-Latn" class="tr Latn">gāmūs</span><span class="mention-gloss-paren annotation-paren">)</span>[[Category:Terms with Hijazi Arabic translations|DICTIONARY]]'
+    )
+    data = parse_page(
+        self.wxr,
+        "ditionary",
+        """==English==
+===Noun===
+# A [[reference work]]
+====Translations====
+{{multitrans|data=
+{{trans-top|publication that explains the meanings of an ordered list of words}}
+* Arabic: {{tt+|ar|قَامُوس|m}}
+*: Hijazi Arabic: {{tt|acw|قاموس|m|tr=gāmūs}}
+}}"""
+    )
+    self.assertEqual(
+        data[0]["translations"],
+        [
+            {
+                "lang_code": "ar",
+                "lang": "Arabic",
+                "word": "قَامُوس",
+                "sense": "publication that explains the meanings of an ordered list of words",
+                "roman": "qāmūs",
+                "tags": ["masculine"],
+            },
+            {
+                "lang_code": "acw",
+                "lang": "Hijazi Arabic",
+                "word": "قاموس",
+                "sense": "publication that explains the meanings of an ordered list of words",
+                "roman": "gāmūs",
+                "tags": ["masculine"],
+            },
+        ]
+    )
+```
+
+Then create Pydantic model:
+
+```python
+class Translation(EnglishBaseModel):
+    lang_code: str = ""
+    lang: str = ""
+    word: str = ""
+    sense: str = ""
+    tags: list[str] = []
+    raw_tags: list[str] = []
+    roman: str = ""
+
+
+class WordEntry(EnglishBaseModel):
+    translations: list[Translation] = []
+```
+
+Implement extractor code "src/wiktextract/extractor/en/translation.py":
+
+```python
+from .models import Translation, WordEntry
+
+
+def extract_translation_section(
+    wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
+):
+    sense = ""
+    for node in level_node.children:
+        if (
+            isinstance(node, TemplateNode)
+            and node.template_name == "multitrans"
+        ):
+            extract_multitrans_template(wxr, word_entry, node)
+        elif (
+            isinstance(node, TemplateNode) and node.template_name == "trans-top"
+        ):
+            sense = clean_node(wxr, None, node.template_parameters.get(1, ""))
+        elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
+            for list_item in node.find_child(NodeKind.LIST_ITEM):
+                extract_translation_list_item(wxr, word_entry, node, sense)
+
+
+def extract_multitrans_template(
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+):
+    data_arg = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node.template_parameters.get("data", ""))
+    )
+    extract_translation_section(wxr, word_entry, data_arg)
+
+
+def extract_translation_list_item(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    list_item: WikiNode,
+    sense: str,
+):
+    lang_name = "unknown"
+    if node in list_item.children:
+        if (
+            isinstance(node, str)
+            and node.strip().endswith(":")
+            and lang_name == "unknown"
+        ):
+            lang_name = node.strip(": ")
+        elif isinstance(node, TemplateNode) and node.template_name in [
+            "t",
+            "tt+",
+            "tt",
+        ]:
+            extract_t_template(wxr, word_entry, node, lang_name, sense)
+        elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
+            for child_list_item in node.find_child(NodeKind.LIST_ITEM):
+                extract_translation_list_item(
+                    wxr, word_entry, child_list_item, sense
+                )
+
+
+def extract_t_template(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    t_node: TemplateNode,
+    lang_name: str,
+    sense: str,
+):
+    lang_code = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
+    t_data = Translation(lang=lang_name, lang_code=lang_code, sense=sense)
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for span_tag in expanded_node.find_html("span"):
+        span_lang = span_tag.attrs.get("lang", "")
+        span_class = span_tag.attrs.get("class", "")
+        if span_lang == lang_code:
+            t_data.word = clean_node(wxr, None, span_tag)
+        elif span_lang == f"{lang_code}-Latn":
+            t_data.roman = clean_node(wxr, None, span_tag)
+        elif span_class == "gender":
+            for abbr_tag in span_tag.find_html("abbr"):
+                raw_tag = clean_node(wxr, None, abbr_tag)
+                if raw_tag != "":
+                    t_data.raw_tags.append(raw_tag)
+    if t_data.word != "":
+        translate_raw_tags(t_data)
+        word_entry.translations.append(t_data)
+```
+
+Finally update `parse_section()`:
+
+```python
+from .translation import extract_translation_section
+
+
+def parse_section(
+    wxr: WiktextractContext,
+    page_data: list[WordEntry],
+    base_data: WordEntry,
+    level_node: LevelNode,
+) -> None:
+    title_text = clean_node(wxr, None, level_node.largs)
+    if title_text == "Translations":
+        extract_translation_section(
+            wxr,
+            page_data[-1] if len(page_data) > 0 else base_data,
+            level_node
+        )
 ```
 
 ## Extract conjugation table template
