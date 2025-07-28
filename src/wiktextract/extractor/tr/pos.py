@@ -60,6 +60,7 @@ FORM_OF_TEMPLATES = {
     "Sup.",
     "tr-çekim",
     "tr-çekim:m1",
+    "tr-ünlü-çekimi",
     "ad-hâl",
     "hâl",
     "çoğul ad",
