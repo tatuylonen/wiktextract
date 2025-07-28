@@ -83,8 +83,6 @@ def extract_example_list_item(
                     if len(sense_data.glosses) > 0
                     else "",
                 )
-            else:
-                example_data.text = clean_node(wxr, None, child)
 
         for next_list_item in list_item.find_child_recursively(
             NodeKind.LIST_ITEM
