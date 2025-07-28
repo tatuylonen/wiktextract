@@ -370,6 +370,8 @@ There are three ways to extract a template:
 - don't expand template, find data in template parameters: this is used when a template only display the parameter and does nothing more than that. If a template expand nodes contain category links, it's still need to be expanded to get the category data
 - convert template node to text using `clean_node`: this is for expanded template text can be used directly or need minimal change
 
+The first and second methods are sometimes used together when some data are easier to obtain from expanded nodes and some can be obtained directly from parameter without much change.
+
 ## Create "tags.py" file
 
 Tags data are added to the "raw_tags" field first, then we move tags that could be converted to tags used in English Wiktionary to "tags" or "topics" field.
@@ -957,7 +959,6 @@ def extract_hyphenation_template(
     wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
 ):
     # https://en.wiktionary.org/wiki/Template:hyphenation
-    sound = Sound()
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(t_node), expand_all=True
     )
@@ -1228,6 +1229,165 @@ def get_subpage_section(
     return None
 ```
 
+## Extract linkage sections
+
+Linkage sections contain data like synonym and antonym words. These data are saved to "synonyms" and "antonyms" fields. English Wiktionary linkage fields are in the `LINKAGE_TITLES` dictionary in file [src/wiktextract/extractor/en/section_titles.py](https://github.com/tatuylonen/wiktextract/blob/master/src/wiktextract/extractor/en/section_titles.py).
+
+First add test:
+
+```python
+def test_linkage(self):
+    self.wxr.wtp.add_page(
+        "Template:l",
+        10,
+        """<span class="Latn" lang="en">[[{{{2}}}]]</span>"""
+    )
+    self.wxr.wtp.add_page(
+        "Template:col4",
+        10,
+        """<div class="list-switcher-wrapper"><div class="list-switcher-header">Hyponyms of ''engine''</div><div class="term-list columns-bg"><ul><li><span class="Latn" lang="en">[[:aero engine#English|aero engine]]</span></li><li><span class="Latn" lang="en">[[:air engine#English|air engine]]</span></li></ul></div></div>"""
+    )
+    data = parse_page(
+        self.wxr,
+        "engine",
+        """==English==
+===Noun===
+# A large [[construction]] used in [[warfare]]
+
+====Synonyms====
+* {{l|en|motor}}
+* {{l|en|locomotive}}
+
+====Hyponyms====
+{{col3|en|title= Hyponyms of ''engine''
+|aero engine
+|air engine
+}}"""
+    )
+    self.assertEqual(
+        data[0]["synonyms"], [{"word": "motor"}, {"word": "locomotive"}]
+    )
+    self.assertEqual(
+        data[0]["hyponyms"], [{"word": "aero engine"}, {"word": "air engine"}]
+    )
+```
+
+Add linkage Pydantic model:
+
+```python
+class Linkage(EnglishBaseModel):
+    word: str = ""
+
+class WordEntry(EnglishBaseModel):
+    synonyms: list[Linkage] = []
+    hyponyms: list[Linkage] = []
+```
+
+Add linkage section titles to "section_titles.py":
+
+```python
+LINKAGE_TITLES = {
+    "Synonyms": "synonyms",
+    "Hyponyms": "hyponyms",
+}
+```
+
+Add section extractor code "src/wiktextract/extractor/en/linkages.py":
+
+```python
+import re
+from .models import Linkage, WordEntry
+
+
+def extract_linkage_section(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    level_node: LevelNode,
+    linkage_type: str,
+):
+    linkage_list = []
+    for node in level_node.children:
+        if isinstance(node, TemplateNode) and re.fullmatch(r"col\d", node.template_name):
+            linkage_list.extend(extract_col_template(wxr, node))
+        elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
+            for list_item in node.find_child(NodeKind.LIST_ITEM):
+                linkage_list.extend(extract_linkage_list_item(wxr, list_item))
+
+    getattr(word_entry, linkage_type).extend(linkage_list)
+
+
+def extract_linkage_list_item(
+    wxr: WiktextractContext, list_item: WikiNode
+) -> list[Linkage]:
+    l_list = []
+    for node in list_item.children:
+        if isinstance(node, TemplateNode) and node.template_name == "l":
+            l_list.extend(extract_l_template(wxr, node))
+
+    return l_list
+
+
+def extract_l_template(
+    wxr: WiktextractContext, t_node: TemplateNode
+) -> list[Linkage]:
+    # https://en.wiktionary.org/wiki/Template:link
+    l_list = []
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    lang = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
+    for span_tag in expanded_node.find_html(
+        "span", attr_name="lang", attr_value=lang
+    ):
+        word = clean_node(wxr, None, span_tag)
+        if word != "":
+            l_list.append(Linkage(word=word))
+    return l_list
+
+
+def extract_col_template(
+    wxr: WiktextractContext, t_node: TemplateNode
+) -> list[Linkage]:
+    # https://en.wiktionary.org/wiki/Template:col
+    l_list = []
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    lang = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
+    for li_tag in expanded_template.find_html_recursively("li"):
+        for span_tag in li_tag.find_html(
+            "span", attr_name="lang", attr_value=lang
+        ):
+            word = clean_node(wxr, None, span_tag)
+            if word != "":
+                l_list.append(Linkage(word=word))
+    return l_list
+```
+
+In this example, the linkage word could be extracted directly from template parameters. But in practice, we still need to find data in expanded node because gender tag, romanization and Traditional/Simplified Chinese data are only available in expanded nodes. Also some templates like [syn-saurus](https://en.wiktionary.org/wiki/Template:syn-saurus) and [zh-dial](https://en.wiktionary.org/wiki/Template:zh-dial), template parameter may not exist or useless and must be expanded.
+
+Finally update `parse_section()`:
+
+```python
+from .linkage import extract_linkage_section
+from .section_titles import LINKAGE_TITLES
+
+
+def parse_section(
+    wxr: WiktextractContext,
+    page_data: list[WordEntry],
+    base_data: WordEntry,
+    level_node: LevelNode,
+) -> None:
+    title_text = clean_node(wxr, None, level_node.largs)
+    if title_text in LINKAGE_TITLES:
+        extract_linkage_section(
+            wxr,
+            page_data[-1] if len(page_data) > 0 else base_data,
+            level_node,
+            LINKAGE_TITLES[title_text]
+        )
+```
 
 ## Extract conjugation table template
 
