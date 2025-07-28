@@ -133,6 +133,13 @@ for t_node in root.find_child_recursively(NodeKind.TEMPLATE):
     pass
 ```
 
+`NodeKind` is a `enum.Flag` class, these flags can be combined:
+
+```python
+for node in root.find_child(NodeKind.BOLD | NodeKind.LINK):
+    pass
+```
+
 Template can be expanded like this:
 
 ```python
