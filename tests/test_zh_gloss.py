@@ -690,3 +690,27 @@ class TestZhGloss(TestCase):
                 },
             ],
         )
+
+    def test_zh_altname(self):
+        self.wxr.wtp.add_page(
+            "Template:中文别名",
+            10,
+            '<span class="Hani" lang="zh">-{<!---->[[杜仲#漢語|杜仲]]<!---->}-</span> (<i><span class="tr Latn" lang="la">-{<!---->dùzhòng<!---->}-</span></i>)的別名。',
+        )
+        page_data = parse_page(
+            self.wxr,
+            "木棉",
+            """==漢語==
+===名詞===
+# {{中文别名|杜仲}}""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"],
+            [
+                {
+                    "alt_of": [{"word": "杜仲", "roman": "dùzhòng"}],
+                    "glosses": ["杜仲 (dùzhòng)的別名。"],
+                    "tags": ["alt-of"],
+                }
+            ],
+        )

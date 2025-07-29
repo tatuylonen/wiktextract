@@ -12,6 +12,24 @@ from .tags import translate_raw_tags
 
 # https://zh.wiktionary.org/wiki/Template:Label
 LABEL_TEMPLATES = frozenset(["lb", "lbl", "label"])
+
+# https://zh.wiktionary.org/wiki/Category:/Category:之形式模板
+FORM_OF_TEMPLATES = frozenset(
+    [
+        "alt case",
+        "alt formaltform",
+        "alt sp",
+        "construed with",
+        "honor alt case",
+        "missp",
+        "obs sp",
+        "rare sp",
+        "rfform",
+        "short for",
+        "stand sp",
+        "sup sp",
+    ]
+)
 ABBR_TEMPALTES = frozenset(
     [
         "之縮寫",
@@ -22,6 +40,9 @@ ABBR_TEMPALTES = frozenset(
         "zh-abbrev",
         "中文简称",
     ]
+)
+ZH_ALT_OF_TEMPLATES = frozenset(
+    ["zh-altname", "zh-alt-name", "中文別名", "中文别名"]
 )
 
 
@@ -41,7 +62,7 @@ def extract_gloss(
                 if node.template_name == "rfdef":
                     continue
                 raw_tag = clean_node(wxr, gloss_data, node)
-                if node.template_name in LABEL_TEMPLATES:
+                if node.template_name.lower() in LABEL_TEMPLATES:
                     for r_tag in re.split(r"，|或", raw_tag.strip("()")):
                         r_tag = r_tag.strip()
                         if r_tag != "":
@@ -49,9 +70,9 @@ def extract_gloss(
                 elif raw_tag.startswith("〈") and raw_tag.endswith("〉"):
                     raw_tags.append(raw_tag.strip("〈〉"))
                 elif (
-                    node.template_name in FORM_OF_TEMPLATES
+                    node.template_name
+                    in FORM_OF_TEMPLATES | ABBR_TEMPALTES | ZH_ALT_OF_TEMPLATES
                     or node.template_name.endswith((" of", " form", "-form"))
-                    or node.template_name.lower() in ABBR_TEMPALTES
                 ) and process_form_of_template(
                     wxr, node, gloss_data, page_data
                 ):
@@ -113,8 +134,9 @@ def process_form_of_template(
     # in `extract_gloss()`
     # https://en.wiktionary.org/wiki/Category:Form-of_templates
     # https://en.wiktionary.org/wiki/Category:Form-of_templates_by_language
-    is_alt_of = re.search(
-        r"^alt|alt[\s-]|alternative", t_node.template_name.lower()
+    is_alt_of = (
+        re.search(r"^alt|alt[\s-]|alternative", t_node.template_name.lower())
+        or t_node.template_name.lower() in ZH_ALT_OF_TEMPLATES
     )
     is_abbr = t_node.template_name.lower() in ABBR_TEMPALTES
     if is_alt_of:
@@ -129,7 +151,10 @@ def process_form_of_template(
     if t_node.template_name.endswith("-erhua form of"):
         process_erhua_form_of_template(wxr, expanded_template, sense)
         return True
-    elif t_node.template_name.lower() in ["zh-short", "zh-abbrev", "中文简称"]:
+    elif (
+        t_node.template_name.lower()
+        in {"zh-short", "zh-abbrev", "中文简称"} | ZH_ALT_OF_TEMPLATES
+    ):
         extract_zh_abbr_template(wxr, expanded_template, sense)
         return False
 
@@ -202,23 +227,6 @@ def process_erhua_form_of_template(
     sense.tags.append("Erhua")
     if len(gloss_text) > 0:
         sense.glosses.append(gloss_text)
-
-
-# https://zh.wiktionary.org/wiki/Category:/Category:之形式模板
-FORM_OF_TEMPLATES = {
-    "alt case",
-    "alt formaltform",
-    "alt sp",
-    "construed with",
-    "honor alt case",
-    "missp",
-    "obs sp",
-    "rare sp",
-    "rfform",
-    "short for",
-    "stand sp",
-    "sup sp",
-}
 
 
 def process_zh_mw_template(
