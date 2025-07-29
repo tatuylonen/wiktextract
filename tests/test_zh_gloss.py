@@ -649,3 +649,44 @@ class TestZhGloss(TestCase):
                 }
             ],
         )
+
+    def test_zh_abbr(self):
+        self.wxr.wtp.add_page(
+            "Template:zh-abbrev",
+            10,
+            '<span class="Hant" lang="zh-Hant">-{<!---->[[人工流產#漢語|人工流產]]<!---->}-</span><span class="Hani" lang="zh">-{<!---->／<!---->}-</span><span class="Hans" lang="zh-Hans">-{<!---->[[人工流产#漢語|人工流产]]<!---->}-</span> (<i><span class="tr Latn" lang="la">-{<!---->réngōng liúchǎn<!---->}-</span></i>)的簡稱。[[Category:漢語簡稱]]',
+        )
+        page_data = parse_page(
+            self.wxr,
+            "人流",
+            """==漢語==
+===名詞===
+# {{zh-obsolete}} 具有某种社会地位的同类人
+# {{zh-abbrev|人工流產}}""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"],
+            [
+                {
+                    "glosses": ["具有某种社会地位的同类人"],
+                    "tags": ["obsolete"],
+                },
+                {
+                    "alt_of": [
+                        {
+                            "word": "人工流產",
+                            "roman": "réngōng liúchǎn",
+                            "tags": ["Traditional-Chinese"],
+                        },
+                        {
+                            "word": "人工流产",
+                            "roman": "réngōng liúchǎn",
+                            "tags": ["Simplified-Chinese"],
+                        },
+                    ],
+                    "categories": ["漢語簡稱"],
+                    "glosses": ["人工流產／人工流产 (réngōng liúchǎn)的簡稱。"],
+                    "tags": ["alt-of", "abbreviation"],
+                },
+            ],
+        )

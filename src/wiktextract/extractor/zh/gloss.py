@@ -12,6 +12,17 @@ from .tags import translate_raw_tags
 
 # https://zh.wiktionary.org/wiki/Template:Label
 LABEL_TEMPLATES = frozenset(["lb", "lbl", "label"])
+ABBR_TEMPALTES = frozenset(
+    [
+        "之縮寫",
+        "abbreviation of",
+        "abbr of",
+        "abbrev of",
+        "zh-short",
+        "zh-abbrev",
+        "中文简称",
+    ]
+)
 
 
 def extract_gloss(
@@ -40,12 +51,16 @@ def extract_gloss(
                 elif (
                     node.template_name in FORM_OF_TEMPLATES
                     or node.template_name.endswith((" of", " form", "-form"))
+                    or node.template_name.lower() in ABBR_TEMPALTES
                 ) and process_form_of_template(
                     wxr, node, gloss_data, page_data
                 ):
                     pass
                 elif node.template_name == "zh-mw":
                     process_zh_mw_template(wxr, node, gloss_data)
+                elif node.template_name.lower() in ["zh-obsolete", "†", "zh-o"]:
+                    if "obsolete" not in gloss_data.tags:
+                        gloss_data.tags.append("obsolete")
                 else:
                     gloss_nodes.append(node)
             elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
@@ -90,7 +105,7 @@ def extract_gloss(
 
 def process_form_of_template(
     wxr: WiktextractContext,
-    template_node: TemplateNode,
+    t_node: TemplateNode,
     sense: Sense,
     page_data: list[WordEntry],
 ) -> bool:
@@ -99,15 +114,24 @@ def process_form_of_template(
     # https://en.wiktionary.org/wiki/Category:Form-of_templates
     # https://en.wiktionary.org/wiki/Category:Form-of_templates_by_language
     is_alt_of = re.search(
-        r"^alt|alt[\s-]|alternative", template_node.template_name.lower()
+        r"^alt|alt[\s-]|alternative", t_node.template_name.lower()
     )
-    sense.tags.append("alt-of" if is_alt_of else "form-of")
+    is_abbr = t_node.template_name.lower() in ABBR_TEMPALTES
+    if is_alt_of:
+        sense.tags.append("alt-of")
+    elif is_abbr:
+        sense.tags.extend(["alt-of", "abbreviation"])
+    else:
+        sense.tags.append("form-of")
     expanded_template = wxr.wtp.parse(
-        wxr.wtp.node_to_wikitext(template_node), expand_all=True
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
     )
-    if template_node.template_name.endswith("-erhua form of"):
+    if t_node.template_name.endswith("-erhua form of"):
         process_erhua_form_of_template(wxr, expanded_template, sense)
         return True
+    elif t_node.template_name.lower() in ["zh-short", "zh-abbrev", "中文简称"]:
+        extract_zh_abbr_template(wxr, expanded_template, sense)
+        return False
 
     form_of_words = []
     for i_tag in expanded_template.find_html_recursively("i"):
@@ -121,7 +145,7 @@ def process_form_of_template(
             break
     for form_of_word in form_of_words:
         form_of = AltForm(word=form_of_word)
-        if is_alt_of:
+        if is_alt_of or is_abbr:
             sense.alt_of.append(form_of)
         else:
             sense.form_of.append(form_of)
@@ -182,8 +206,8 @@ def process_erhua_form_of_template(
 
 # https://zh.wiktionary.org/wiki/Category:/Category:之形式模板
 FORM_OF_TEMPLATES = {
-    "alt case, altcaps",
-    "alt form, altform",
+    "alt case",
+    "alt formaltform",
     "alt sp",
     "construed with",
     "honor alt case",
@@ -231,3 +255,21 @@ def process_zh_mw_template(
     sense.classifiers.extend(classifiers)
     for classifier in sense.classifiers:
         translate_raw_tags(classifier)
+
+
+def extract_zh_abbr_template(
+    wxr: WiktextractContext, expanded_node: WikiNode, sense: Sense
+):
+    # https://zh.wiktionary.org/wiki/Template:Zh-short
+    roman = ""
+    for i_tag in expanded_node.find_html("i"):
+        roman = clean_node(wxr, None, i_tag)
+    for span_tag in expanded_node.find_html("span"):
+        span_class = span_tag.attrs.get("class", "")
+        alt_form = AltForm(word=clean_node(wxr, None, span_tag), roman=roman)
+        if span_class == "Hant":
+            alt_form.tags.append("Traditional-Chinese")
+        elif span_class == "Hans":
+            alt_form.tags.append("Simplified-Chinese")
+        if alt_form.word not in ["", "／"]:
+            sense.alt_of.append(alt_form)
