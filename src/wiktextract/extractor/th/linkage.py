@@ -57,9 +57,9 @@ def extract_col_template(
                 if word != "":
                     l_data.append(Linkage(word=word, source=source))
                     if span_class == "Hant":
-                        l_data[-1].tags.append("Traditional Chinese")
+                        l_data[-1].tags.append("Traditional-Chinese")
                     elif span_class == "Hans":
-                        l_data[-1].tags.append("Simplified Chinese")
+                        l_data[-1].tags.append("Simplified-Chinese")
         getattr(word_entry, linkage_type).extend(l_data)
 
 

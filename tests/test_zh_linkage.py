@@ -155,13 +155,13 @@ class TestZhLinkage(TestCase):
                 {
                     "raw_tags": ["漢字發音"],
                     "word": "讀音",
-                    "tags": ["Traditional Chinese"],
+                    "tags": ["Traditional-Chinese"],
                     "roman": "dúyīn",
                 },
                 {
                     "raw_tags": ["漢字發音"],
                     "word": "读音",
-                    "tags": ["Simplified Chinese"],
+                    "tags": ["Simplified-Chinese"],
                     "roman": "dúyīn",
                 },
             ],
@@ -349,12 +349,12 @@ class TestZhLinkage(TestCase):
             [
                 {
                     "word": "號頭",
-                    "tags": ["Traditional Chinese"],
+                    "tags": ["Traditional-Chinese"],
                     "sense": "月份",
                 },
                 {
                     "word": "号头",
-                    "tags": ["Simplified Chinese"],
+                    "tags": ["Simplified-Chinese"],
                     "sense": "月份",
                 },
             ],

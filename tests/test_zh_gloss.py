@@ -47,9 +47,11 @@ class TestZhGloss(TestCase):
         self.assertEqual(
             [s.model_dump(exclude_defaults=True) for s in page_data[0].senses],
             [
+                {"glosses": ["好玩的："]},
                 {"glosses": ["好玩的：", "有趣的，滑稽的，可笑的"]},
                 {"glosses": ["好玩的：", "奇怪的，不正常的"]},
                 {"glosses": ["好玩的：", "不合理的，不合邏輯的"]},
+                {"glosses": ["有趣的："], "tags": ["obsolete"]},
                 {
                     "glosses": ["有趣的：", "有趣的"],
                     "tags": ["obsolete"],
@@ -556,11 +558,11 @@ class TestZhGloss(TestCase):
                             "form_of": [
                                 {
                                     "word": "一會",
-                                    "tags": ["Traditional Chinese"],
+                                    "tags": ["Traditional-Chinese"],
                                 },
                                 {
                                     "word": "一会",
-                                    "tags": ["Simplified Chinese"],
+                                    "tags": ["Simplified-Chinese"],
                                 },
                             ],
                             "glosses": ["一會／一会 (yīhuì) 的兒化形式。"],
@@ -592,7 +594,7 @@ class TestZhGloss(TestCase):
                 {
                     "classifier": "臺",
                     "tags": [
-                        "Traditional Chinese",
+                        "Traditional-Chinese",
                         "Mandarin",
                         "Southern Min",
                         "Wu",
@@ -601,7 +603,7 @@ class TestZhGloss(TestCase):
                 {
                     "classifier": "台",
                     "tags": [
-                        "Simplified Chinese",
+                        "Simplified-Chinese",
                         "Mandarin",
                         "Southern Min",
                         "Wu",
@@ -646,6 +648,118 @@ class TestZhGloss(TestCase):
                     "categories": ["漢語書面用語", "漢語方言用語"],
                     "glosses": ["月亮"],
                     "tags": ["literary", "dialectal"],
+                }
+            ],
+        )
+
+    def test_zh_abbr(self):
+        self.wxr.wtp.add_page(
+            "Template:zh-abbrev",
+            10,
+            '<span class="Hant" lang="zh-Hant">-{<!---->[[人工流產#漢語|人工流產]]<!---->}-</span><span class="Hani" lang="zh">-{<!---->／<!---->}-</span><span class="Hans" lang="zh-Hans">-{<!---->[[人工流产#漢語|人工流产]]<!---->}-</span> (<i><span class="tr Latn" lang="la">-{<!---->réngōng liúchǎn<!---->}-</span></i>)的簡稱。[[Category:漢語簡稱]]',
+        )
+        page_data = parse_page(
+            self.wxr,
+            "人流",
+            """==漢語==
+===名詞===
+# {{zh-obsolete}} 具有某种社会地位的同类人
+# {{zh-abbrev|人工流產}}""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"],
+            [
+                {
+                    "glosses": ["具有某种社会地位的同类人"],
+                    "tags": ["obsolete"],
+                },
+                {
+                    "alt_of": [
+                        {
+                            "word": "人工流產",
+                            "roman": "réngōng liúchǎn",
+                            "tags": ["Traditional-Chinese"],
+                        },
+                        {
+                            "word": "人工流产",
+                            "roman": "réngōng liúchǎn",
+                            "tags": ["Simplified-Chinese"],
+                        },
+                    ],
+                    "categories": ["漢語簡稱"],
+                    "glosses": ["人工流產／人工流产 (réngōng liúchǎn)的簡稱。"],
+                    "tags": ["alt-of", "abbreviation"],
+                },
+            ],
+        )
+
+    def test_zh_altname(self):
+        self.wxr.wtp.add_page(
+            "Template:中文别名",
+            10,
+            '<span class="Hani" lang="zh">-{<!---->[[杜仲#漢語|杜仲]]<!---->}-</span> (<i><span class="tr Latn" lang="la">-{<!---->dùzhòng<!---->}-</span></i>)的別名。',
+        )
+        page_data = parse_page(
+            self.wxr,
+            "木棉",
+            """==漢語==
+===名詞===
+# {{中文别名|杜仲}}""",
+        )
+        self.assertEqual(
+            page_data[0]["senses"],
+            [
+                {
+                    "alt_of": [{"word": "杜仲", "roman": "dùzhòng"}],
+                    "glosses": ["杜仲 (dùzhòng)的別名。"],
+                    "tags": ["alt-of"],
+                }
+            ],
+        )
+
+    def test_alti(self):
+        self.wxr.wtp.add_page(
+            "Template:alti",
+            10,
+            """{{#switch: {{{1}}}
+| en = <span class="nyms 其他形式"><span class="defdate">其他形式：</span><span class="ib-brac qualifier-brac">(</span><span class="ib-content qualifier-content">縮寫</span><span class="ib-brac qualifier-brac">)</span> <span class="Latn" lang="en">-{<!-- -->[[RCS#英語|-{RCS}-]]}-</span></span>
+| mn = <span class="nyms 其他形式"><span class="defdate">其他形式：</span><span class="Cyrl" lang="mn">-{<!-- -->[[хамбургер#蒙古語|-{хамбургер}-]]}-</span> <span class="mention-gloss-paren annotation-paren">(</span><span lang="mn-Latn" class="tr Latn">-{<!---->xamburger<!---->}-</span><span class="mention-gloss-paren annotation-paren">)</span></span>
+}}""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "radar cross section",
+            """==英語==
+===名詞===
+# 雷達散射截面
+#: {{alti|en|RCS|q=縮寫}}""",
+        )
+        self.assertEqual(
+            page_data[0]["forms"],
+            [
+                {
+                    "form": "RCS",
+                    "tags": ["alternative", "abbreviation"],
+                    "sense": "雷達散射截面",
+                }
+            ],
+        )
+        page_data = parse_page(
+            self.wxr,
+            "гамбургер",
+            """==蒙古語==
+===名詞===
+# [[漢堡]]
+#: {{alti|mn|хамбургер}}""",
+        )
+        self.assertEqual(
+            page_data[0]["forms"],
+            [
+                {
+                    "form": "хамбургер",
+                    "tags": ["alternative"],
+                    "roman": "xamburger",
+                    "sense": "漢堡",
                 }
             ],
         )

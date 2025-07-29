@@ -150,14 +150,14 @@ class TestDescendant(TestCase):
                     "lang": "漢語",
                     "word": "吸貓",
                     "roman": "xīmāo",
-                    "tags": ["Traditional Chinese"],
+                    "tags": ["Traditional-Chinese"],
                 },
                 {
                     "lang_code": "zh",
                     "lang": "漢語",
                     "word": "吸猫",
                     "roman": "xīmāo",
-                    "tags": ["Simplified Chinese"],
+                    "tags": ["Simplified-Chinese"],
                 },
             ],
         )

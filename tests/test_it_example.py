@@ -138,7 +138,7 @@ class TestItExample(TestCase):
                             "roman": "yī ge kěnéng de shìjiàn",
                             "bold_roman_offsets": [(6, 12)],
                             "translation": "un evento possibile",
-                            "tags": ["Traditional Chinese"],
+                            "tags": ["Traditional-Chinese"],
                         },
                         {
                             "text": "一个可能的事件",
@@ -146,7 +146,7 @@ class TestItExample(TestCase):
                             "roman": "yī ge kěnéng de shìjiàn",
                             "bold_roman_offsets": [(6, 12)],
                             "translation": "un evento possibile",
-                            "tags": ["Simplified Chinese"],
+                            "tags": ["Simplified-Chinese"],
                         },
                     ],
                 }

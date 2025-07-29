@@ -192,7 +192,7 @@ class TestInflection(TestCase):
         extract_inflection(self.wxr, page_data, root.children[0])
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in page_data[-1].forms],
-            [{"tags": ["Traditional Chinese"], "form": "一萬"}],
+            [{"tags": ["Traditional-Chinese"], "form": "一萬"}],
         )
 
     def test_lt_décl_as(self):

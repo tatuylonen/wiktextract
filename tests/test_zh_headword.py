@@ -115,7 +115,7 @@ class TestHeadword(TestCase):
                     "lang_code": "grc",
                     "lang": "古希臘語",
                     "forms": [
-                        {'form': '-κρατίᾱς', 'tags': ['canonical']},
+                        {"form": "-κρατίᾱς", "tags": ["canonical"]},
                         {"form": "-kratíās", "tags": ["romanization"]},
                     ],
                     "tags": ["feminine"],

@@ -42,6 +42,7 @@ class Example(ChineseBaseModel):
 class AltForm(ChineseBaseModel):
     word: str
     tags: list[str] = []
+    roman: str = ""
 
 
 class Classifier(ChineseBaseModel):

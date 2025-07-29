@@ -297,9 +297,9 @@ def extract_zh_l_template(
                 Linkage(
                     word=word,
                     tags=[
-                        "Traditional Chinese"
+                        "Traditional-Chinese"
                         if index == 0
-                        else "Simplified Chinese"
+                        else "Simplified-Chinese"
                     ],
                     roman=roman,
                 )

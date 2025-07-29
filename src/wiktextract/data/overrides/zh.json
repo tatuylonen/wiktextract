@@ -726,5 +726,9 @@
     "body": "==瑞典語==\n[[分類:拉丁文字]][[分類:瑞典語]]\n",
     "namespace_id": 10,
     "need_pre_expand": true
+  },
+  "Template:中文别名": {
+    "redirect_to": "Template:Zh-altname",
+    "namespace_id": 10
   }
 }

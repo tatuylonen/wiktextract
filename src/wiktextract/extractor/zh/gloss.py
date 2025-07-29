@@ -13,6 +13,38 @@ from .tags import translate_raw_tags
 # https://zh.wiktionary.org/wiki/Template:Label
 LABEL_TEMPLATES = frozenset(["lb", "lbl", "label"])
 
+# https://zh.wiktionary.org/wiki/Category:/Category:之形式模板
+FORM_OF_TEMPLATES = frozenset(
+    [
+        "alt case",
+        "alt formaltform",
+        "alt sp",
+        "construed with",
+        "honor alt case",
+        "missp",
+        "obs sp",
+        "rare sp",
+        "rfform",
+        "short for",
+        "stand sp",
+        "sup sp",
+    ]
+)
+ABBR_TEMPALTES = frozenset(
+    [
+        "之縮寫",
+        "abbreviation of",
+        "abbr of",
+        "abbrev of",
+        "zh-short",
+        "zh-abbrev",
+        "中文简称",
+    ]
+)
+ZH_ALT_OF_TEMPLATES = frozenset(
+    ["zh-altname", "zh-alt-name", "中文別名", "中文别名"]
+)
+
 
 def extract_gloss(
     wxr: WiktextractContext,
@@ -30,7 +62,7 @@ def extract_gloss(
                 if node.template_name == "rfdef":
                     continue
                 raw_tag = clean_node(wxr, gloss_data, node)
-                if node.template_name in LABEL_TEMPLATES:
+                if node.template_name.lower() in LABEL_TEMPLATES:
                     for r_tag in re.split(r"，|或", raw_tag.strip("()")):
                         r_tag = r_tag.strip()
                         if r_tag != "":
@@ -38,7 +70,8 @@ def extract_gloss(
                 elif raw_tag.startswith("〈") and raw_tag.endswith("〉"):
                     raw_tags.append(raw_tag.strip("〈〉"))
                 elif (
-                    node.template_name in FORM_OF_TEMPLATES
+                    node.template_name
+                    in FORM_OF_TEMPLATES | ABBR_TEMPALTES | ZH_ALT_OF_TEMPLATES
                     or node.template_name.endswith((" of", " form", "-form"))
                 ) and process_form_of_template(
                     wxr, node, gloss_data, page_data
@@ -46,6 +79,9 @@ def extract_gloss(
                     pass
                 elif node.template_name == "zh-mw":
                     process_zh_mw_template(wxr, node, gloss_data)
+                elif node.template_name.lower() in ["zh-obsolete", "†", "zh-o"]:
+                    if "obsolete" not in gloss_data.tags:
+                        gloss_data.tags.append("obsolete")
                 else:
                     gloss_nodes.append(node)
             elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
@@ -71,11 +107,13 @@ def extract_gloss(
         if len(ruby_data) > 0:
             gloss_data.ruby = ruby_data
 
-        has_nested_gloss = False
+        translate_raw_tags(gloss_data)
+        if len(gloss_data.glosses) > 0:
+            page_data[-1].senses.append(gloss_data)
+
         if list_item_node.contain_node(NodeKind.LIST):
             for next_list in list_item_node.find_child(NodeKind.LIST):
                 if next_list.sarg.endswith("#"):  # nested gloss
-                    has_nested_gloss = True
                     extract_gloss(wxr, page_data, next_list, gloss_data)
                 else:
                     for e_list_item in next_list.find_child(NodeKind.LIST_ITEM):
@@ -83,14 +121,10 @@ def extract_gloss(
                             wxr, gloss_data, e_list_item, page_data[-1]
                         )
 
-        if not has_nested_gloss and len(gloss_data.glosses) > 0:
-            translate_raw_tags(gloss_data)
-            page_data[-1].senses.append(gloss_data)
-
 
 def process_form_of_template(
     wxr: WiktextractContext,
-    template_node: TemplateNode,
+    t_node: TemplateNode,
     sense: Sense,
     page_data: list[WordEntry],
 ) -> bool:
@@ -98,16 +132,29 @@ def process_form_of_template(
     # in `extract_gloss()`
     # https://en.wiktionary.org/wiki/Category:Form-of_templates
     # https://en.wiktionary.org/wiki/Category:Form-of_templates_by_language
-    is_alt_of = re.search(
-        r"^alt|alt[\s-]|alternative", template_node.template_name.lower()
+    is_alt_of = (
+        re.search(r"^alt|alt[\s-]|alternative", t_node.template_name.lower())
+        or t_node.template_name.lower() in ZH_ALT_OF_TEMPLATES
     )
-    sense.tags.append("alt-of" if is_alt_of else "form-of")
+    is_abbr = t_node.template_name.lower() in ABBR_TEMPALTES
+    if is_alt_of:
+        sense.tags.append("alt-of")
+    elif is_abbr:
+        sense.tags.extend(["alt-of", "abbreviation"])
+    else:
+        sense.tags.append("form-of")
     expanded_template = wxr.wtp.parse(
-        wxr.wtp.node_to_wikitext(template_node), expand_all=True
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
     )
-    if template_node.template_name.endswith("-erhua form of"):
+    if t_node.template_name.endswith("-erhua form of"):
         process_erhua_form_of_template(wxr, expanded_template, sense)
         return True
+    elif (
+        t_node.template_name.lower()
+        in {"zh-short", "zh-abbrev", "中文简称"} | ZH_ALT_OF_TEMPLATES
+    ):
+        extract_zh_abbr_template(wxr, expanded_template, sense)
+        return False
 
     form_of_words = []
     for i_tag in expanded_template.find_html_recursively("i"):
@@ -121,7 +168,7 @@ def process_form_of_template(
             break
     for form_of_word in form_of_words:
         form_of = AltForm(word=form_of_word)
-        if is_alt_of:
+        if is_alt_of or is_abbr:
             sense.alt_of.append(form_of)
         else:
             sense.form_of.append(form_of)
@@ -166,9 +213,9 @@ def process_erhua_form_of_template(
         span_text = clean_node(wxr, None, span_node)
         form = AltForm(word=span_text)
         if index == 0:
-            form.tags.append("Traditional Chinese")
+            form.tags.append("Traditional-Chinese")
         else:
-            form.tags.append("Simplified Chinese")
+            form.tags.append("Simplified-Chinese")
         if len(form.word) > 0:
             sense.form_of.append(form)
     gloss_text = clean_node(wxr, sense, expanded_node)
@@ -178,23 +225,6 @@ def process_erhua_form_of_template(
     sense.tags.append("Erhua")
     if len(gloss_text) > 0:
         sense.glosses.append(gloss_text)
-
-
-# https://zh.wiktionary.org/wiki/Category:/Category:之形式模板
-FORM_OF_TEMPLATES = {
-    "alt case, altcaps",
-    "alt form, altform",
-    "alt sp",
-    "construed with",
-    "honor alt case",
-    "missp",
-    "obs sp",
-    "rare sp",
-    "rfform",
-    "short for",
-    "stand sp",
-    "sup sp",
-}
 
 
 def process_zh_mw_template(
@@ -214,9 +244,9 @@ def process_zh_mw_template(
             if word != "／":
                 classifier = Classifier(classifier=word)
                 if span_class == "Hant":
-                    classifier.tags.append("Traditional Chinese")
+                    classifier.tags.append("Traditional-Chinese")
                 elif span_class == "Hans":
-                    classifier.tags.append("Simplified Chinese")
+                    classifier.tags.append("Simplified-Chinese")
 
                 if len(classifiers) > 0 and last_word != "／":
                     sense.classifiers.extend(classifiers)
@@ -231,3 +261,21 @@ def process_zh_mw_template(
     sense.classifiers.extend(classifiers)
     for classifier in sense.classifiers:
         translate_raw_tags(classifier)
+
+
+def extract_zh_abbr_template(
+    wxr: WiktextractContext, expanded_node: WikiNode, sense: Sense
+):
+    # https://zh.wiktionary.org/wiki/Template:Zh-short
+    roman = ""
+    for i_tag in expanded_node.find_html("i"):
+        roman = clean_node(wxr, None, i_tag)
+    for span_tag in expanded_node.find_html("span"):
+        span_class = span_tag.attrs.get("class", "")
+        alt_form = AltForm(word=clean_node(wxr, None, span_tag), roman=roman)
+        if span_class == "Hant":
+            alt_form.tags.append("Traditional-Chinese")
+        elif span_class == "Hans":
+            alt_form.tags.append("Simplified-Chinese")
+        if alt_form.word not in ["", "／"]:
+            sense.alt_of.append(alt_form)

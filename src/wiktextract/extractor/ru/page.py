@@ -463,14 +463,14 @@ def extract_zh_forms_template(
             continue
         if re.fullmatch(r"s\d*", p_name):
             form_data = Form(
-                form=clean_node(wxr, None, p_value), tags=["Simplified Chinese"]
+                form=clean_node(wxr, None, p_value), tags=["Simplified-Chinese"]
             )
             if form_data.form not in ["", wxr.wtp.title]:
                 base_data.forms.append(form_data)
         elif re.fullmatch(r"t\d*", p_name):
             form_data = Form(
                 form=clean_node(wxr, None, p_value),
-                tags=["Traditional Chinese"],
+                tags=["Traditional-Chinese"],
             )
             if form_data.form not in ["", wxr.wtp.title]:
                 base_data.forms.append(form_data)

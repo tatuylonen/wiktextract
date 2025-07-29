@@ -91,7 +91,7 @@ class TestEnExample(TestCase):
                     "roman": "Cáo Dàgū",
                     "bold_roman_offsets": [(4, 8)],
                     "type": "example",
-                    "raw_tags": ["Traditional Chinese"],
+                    "raw_tags": ["Traditional-Chinese"],
                 }
             ],
         )

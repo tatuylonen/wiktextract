@@ -4701,14 +4701,14 @@ def process_zh_forms_templates(
         if re.fullmatch(r"s\d*", p_name):
             form_data: FormData = {
                 "form": clean_node(wxr, None, p_value),
-                "tags": ["Simplified Chinese"],
+                "tags": ["Simplified-Chinese"],
             }
             if len(form_data["form"]) > 0:
                 base_data["forms"].append(form_data)
         elif re.fullmatch(r"t\d+", p_name):
             form_data = {
                 "form": clean_node(wxr, None, p_value),
-                "tags": ["Traditional Chinese"],
+                "tags": ["Traditional-Chinese"],
             }
             if len(form_data["form"]) > 0:
                 base_data["forms"].append(form_data)

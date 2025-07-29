@@ -211,7 +211,7 @@ def process_zh_ts_template(
                 lang=lang_name,
             )
             tr_data.tags = (
-                ["Traditional Chinese"] if arg == 1 else ["Simplified Chinese"]
+                ["Traditional-Chinese"] if arg == 1 else ["Simplified-Chinese"]
             )
             word_entry.translations.append(tr_data)
     return tr_data

@@ -61,7 +61,7 @@ class TestExample(TestCase):
                     "tags": [
                         "Pinyin",
                         "Classical Chinese",
-                        "Traditional Chinese",
+                        "Traditional-Chinese",
                     ],
                     "text": "王曰：「封，以厥庶民暨厥臣達大家，以厥臣達王惟邦君。」",
                     "bold_text_offsets": [(14, 16)],
@@ -75,7 +75,7 @@ class TestExample(TestCase):
                     "tags": [
                         "Pinyin",
                         "Classical Chinese",
-                        "Simplified Chinese",
+                        "Simplified-Chinese",
                     ],
                     "text": "王曰：「封，以厥庶民暨厥臣达大家，以厥臣达王惟邦君。」",
                     "bold_text_offsets": [(14, 16)],
@@ -105,14 +105,14 @@ class TestExample(TestCase):
                 {
                     "text": "中文授課",
                     "bold_text_offsets": [(0, 2)],
-                    "tags": ["Traditional Chinese"],
+                    "tags": ["Traditional-Chinese"],
                     "roman": "zhōngwén shòukè",
                     "bold_roman_offsets": [(0, 8)],
                 },
                 {
                     "text": "中文授课",
                     "bold_text_offsets": [(0, 2)],
-                    "tags": ["Simplified Chinese"],
+                    "tags": ["Simplified-Chinese"],
                     "roman": "zhōngwén shòukè",
                     "bold_roman_offsets": [(0, 8)],
                 },
@@ -197,7 +197,7 @@ class TestExample(TestCase):
                     "bold_text_offsets": [(20, 22)],
                     "roman": "jyu⁴ gwo² m⁴ hai⁶ gam¹ jat⁶ caak³ cyun¹ nei⁵ lung⁵ je⁵, bei² nei⁵ wan⁶ zo² jap⁶ seoi³ guk⁶⁻² zung⁶ sei² jan⁴ aa³!",
                     "bold_roman_offsets": [(99, 108)],
-                    "tags": ["Cantonese", "Pinyin", "Traditional Chinese"],
+                    "tags": ["Cantonese", "Pinyin", "Traditional-Chinese"],
                     "translation": "如果不是今天揭穿你的老底，給你混進稅務局就更糟糕了！",
                     "bold_translation_offsets": [(22, 24)],
                 },
@@ -207,7 +207,7 @@ class TestExample(TestCase):
                     "bold_text_offsets": [(20, 22)],
                     "roman": "jyu⁴ gwo² m⁴ hai⁶ gam¹ jat⁶ caak³ cyun¹ nei⁵ lung⁵ je⁵, bei² nei⁵ wan⁶ zo² jap⁶ seoi³ guk⁶⁻² zung⁶ sei² jan⁴ aa³!",
                     "bold_roman_offsets": [(99, 108)],
-                    "tags": ["Cantonese", "Pinyin", "Simplified Chinese"],
+                    "tags": ["Cantonese", "Pinyin", "Simplified-Chinese"],
                     "translation": "如果不是今天揭穿你的老底，給你混進稅務局就更糟糕了！",
                     "bold_translation_offsets": [(22, 24)],
                 },
@@ -238,7 +238,7 @@ class TestExample(TestCase):
                     "roman": "Hēinú Yùtiānlù",
                     "bold_roman_offsets": [(0, 5)],
                     "tags": [
-                        "Traditional Chinese",
+                        "Traditional-Chinese",
                         "Classical Chinese",
                         "Pinyin",
                     ],
@@ -252,7 +252,7 @@ class TestExample(TestCase):
                     "roman": "Hēinú Yùtiānlù",
                     "bold_roman_offsets": [(0, 5)],
                     "tags": [
-                        "Simplified Chinese",
+                        "Simplified-Chinese",
                         "Classical Chinese",
                         "Pinyin",
                     ],
@@ -407,7 +407,7 @@ class TestExample(TestCase):
                     "tags": [
                         "Pinyin",
                         "Standard Chinese",
-                        "Traditional Chinese",
+                        "Traditional-Chinese",
                     ],
                     "ref": "2012年，馬嘉蘭、臺灣文學中的性越界，編輯廖炳惠、孫康宜、王德威，《臺灣及其脈絡》第329頁",
                 },
@@ -417,7 +417,7 @@ class TestExample(TestCase):
                     "tags": [
                         "Pinyin",
                         "Standard Chinese",
-                        "Simplified Chinese",
+                        "Simplified-Chinese",
                     ],
                     "ref": "2012年，馬嘉蘭、臺灣文學中的性越界，編輯廖炳惠、孫康宜、王德威，《臺灣及其脈絡》第329頁",
                 },

@@ -227,8 +227,8 @@ TAGS = {
     "現在分詞": ["present", "participle"],
     "過去形": "past",
     "過去分詞": ["past", "participle"],
-    "繁": "Traditional Chinese",
-    "簡": "Simplified Chinese",
+    "繁": "Traditional-Chinese",
+    "簡": "Simplified-Chinese",
     # zh sound
     "ピンイン": "Pinyin",
     "注音符号": "Bopomofo",

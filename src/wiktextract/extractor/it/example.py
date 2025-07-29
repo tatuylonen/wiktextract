@@ -171,9 +171,9 @@ def extract_zh_tradsem(
                 "bold_text_offsets",
             )
             if arg_index == 1:
-                example.tags.append("Traditional Chinese")
+                example.tags.append("Traditional-Chinese")
             elif arg_index == 2:
-                example.tags.append("Simplified Chinese")
+                example.tags.append("Simplified-Chinese")
             examples.append(example)
 
     return examples

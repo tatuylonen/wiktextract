@@ -36,7 +36,7 @@ class TestZhInflection(TestCase):
         )
         self.assertEqual(
             page_data[0]["forms"],
-            [{"form": "维基词典", "tags": ["Simplified Chinese"]}],
+            [{"form": "维基词典", "tags": ["Simplified-Chinese"]}],
         )
 
     def test_zh_forms_lit(self):

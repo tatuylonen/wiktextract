@@ -294,9 +294,9 @@ def extract_zh_mw_template(
             if word != "／":
                 classifier = Classifier(classifier=word)
                 if span_class == "Hant":
-                    classifier.tags.append("Traditional Chinese")
+                    classifier.tags.append("Traditional-Chinese")
                 elif span_class == "Hans":
-                    classifier.tags.append("Simplified Chinese")
+                    classifier.tags.append("Simplified-Chinese")
 
                 if len(classifiers) > 0 and last_word != "／":
                     sense.classifiers.extend(classifiers)

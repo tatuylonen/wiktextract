@@ -200,9 +200,9 @@ def process_zh_l_template(
         )
         lang_attr = span_tag.attrs.get("lang", "")
         if lang_attr == "zh-Hant":
-            linkage_data.tags.append("Traditional Chinese")
+            linkage_data.tags.append("Traditional-Chinese")
         elif lang_attr == "zh-Hans":
-            linkage_data.tags.append("Simplified Chinese")
+            linkage_data.tags.append("Simplified-Chinese")
         if len(linkage_data.word) > 0 and linkage_data.word != "／":
             translate_raw_tags(linkage_data)
             linkage_list.append(linkage_data)
@@ -304,9 +304,9 @@ def process_linkage_col_template(
                 )
                 class_names = span_tag.attrs.get("class", "")
                 if class_names == "Hant":
-                    l_data.tags.append("Traditional Chinese")
+                    l_data.tags.append("Traditional-Chinese")
                 elif class_names == "Hans":
-                    l_data.tags.append("Simplified Chinese")
+                    l_data.tags.append("Simplified-Chinese")
                 if l_data.word != "":
                     current_data.append(l_data)
 
@@ -345,9 +345,9 @@ def process_linkage_templates_in_gloss(
                         raw_tags=raw_tags,
                     )
                     if span_class == "Hant":
-                        l_data.tags.append("Traditional Chinese")
+                        l_data.tags.append("Traditional-Chinese")
                     elif span_class == "Hans":
-                        l_data.tags.append("Simplified Chinese")
+                        l_data.tags.append("Simplified-Chinese")
                     if l_data.word != "":
                         l_list.append(l_data)
                 elif span_lang == f"{lang_code}-Latn" or "tr" in span_class:
