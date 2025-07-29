@@ -47,9 +47,11 @@ class TestZhGloss(TestCase):
         self.assertEqual(
             [s.model_dump(exclude_defaults=True) for s in page_data[0].senses],
             [
+                {"glosses": ["好玩的："]},
                 {"glosses": ["好玩的：", "有趣的，滑稽的，可笑的"]},
                 {"glosses": ["好玩的：", "奇怪的，不正常的"]},
                 {"glosses": ["好玩的：", "不合理的，不合邏輯的"]},
+                {"glosses": ["有趣的："], "tags": ["obsolete"]},
                 {
                     "glosses": ["有趣的：", "有趣的"],
                     "tags": ["obsolete"],
@@ -711,6 +713,53 @@ class TestZhGloss(TestCase):
                     "alt_of": [{"word": "杜仲", "roman": "dùzhòng"}],
                     "glosses": ["杜仲 (dùzhòng)的別名。"],
                     "tags": ["alt-of"],
+                }
+            ],
+        )
+
+    def test_alti(self):
+        self.wxr.wtp.add_page(
+            "Template:alti",
+            10,
+            """{{#switch: {{{1}}}
+| en = <span class="nyms 其他形式"><span class="defdate">其他形式：</span><span class="ib-brac qualifier-brac">(</span><span class="ib-content qualifier-content">縮寫</span><span class="ib-brac qualifier-brac">)</span> <span class="Latn" lang="en">-{<!-- -->[[RCS#英語|-{RCS}-]]}-</span></span>
+| mn = <span class="nyms 其他形式"><span class="defdate">其他形式：</span><span class="Cyrl" lang="mn">-{<!-- -->[[хамбургер#蒙古語|-{хамбургер}-]]}-</span> <span class="mention-gloss-paren annotation-paren">(</span><span lang="mn-Latn" class="tr Latn">-{<!---->xamburger<!---->}-</span><span class="mention-gloss-paren annotation-paren">)</span></span>
+}}""",
+        )
+        page_data = parse_page(
+            self.wxr,
+            "radar cross section",
+            """==英語==
+===名詞===
+# 雷達散射截面
+#: {{alti|en|RCS|q=縮寫}}""",
+        )
+        self.assertEqual(
+            page_data[0]["forms"],
+            [
+                {
+                    "form": "RCS",
+                    "tags": ["alternative", "abbreviation"],
+                    "sense": "雷達散射截面",
+                }
+            ],
+        )
+        page_data = parse_page(
+            self.wxr,
+            "гамбургер",
+            """==蒙古語==
+===名詞===
+# [[漢堡]]
+#: {{alti|mn|хамбургер}}""",
+        )
+        self.assertEqual(
+            page_data[0]["forms"],
+            [
+                {
+                    "form": "хамбургер",
+                    "tags": ["alternative"],
+                    "roman": "xamburger",
+                    "sense": "漢堡",
                 }
             ],
         )

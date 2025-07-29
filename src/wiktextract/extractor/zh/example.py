@@ -5,7 +5,7 @@ from ...wxr_context import WiktextractContext
 from ..ruby import extract_ruby
 from ..share import calculate_bold_offsets
 from .linkage import process_linkage_templates_in_gloss
-from .models import Example, Sense, WordEntry
+from .models import Example, Form, Sense, WordEntry
 from .tags import translate_raw_tags
 
 LINKAGE_TEMPLATES = {
@@ -13,10 +13,15 @@ LINKAGE_TEMPLATES = {
     "synonyms": "synonyms",
     "ant": "antonyms",
     "antonyms": "antonyms",
+    "antonym": "antonyms",
     "hyper": "hypernyms",
     "hypernyms": "hypernyms",
     "hypo": "hyponyms",
     "hyponyms": "hyponyms",
+    "cot": "coordinate_terms",
+    "coo": "coordinate_terms",
+    "coord": "coordinate_terms",
+    "coordinate terms": "coordinate_terms",
 }
 
 
@@ -73,16 +78,16 @@ def extract_example_list_item(
             elif template_name == "Q":
                 extract_template_Q(wxr, child, example_data)
                 clean_node(wxr, sense_data, child)  # add cat link
-            elif template_name in LINKAGE_TEMPLATES:
+            elif template_name.lower() in LINKAGE_TEMPLATES:
                 process_linkage_templates_in_gloss(
                     wxr,
                     word_entry,
                     child,
                     LINKAGE_TEMPLATES[template_name],
-                    sense_data.glosses[0]
-                    if len(sense_data.glosses) > 0
-                    else "",
+                    " ".join(sense_data.glosses),
                 )
+            elif template_name.lower() in ["inline alt forms", "alti"]:
+                extract_inline_alt_forms_template(wxr, word_entry, child)
 
         for next_list_item in list_item.find_child_recursively(
             NodeKind.LIST_ITEM
@@ -463,3 +468,32 @@ def extract_template_Q(
                     example_data,
                     "bold_" + field.split("_")[0] + "_offsets",
                 )
+
+
+def extract_inline_alt_forms_template(
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+):
+    sense = " ".join(word_entry.senses[-1].glosses)
+    forms = []
+    raw_tag = ""
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    lang = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
+    for span_tag in expanded_node.find_html_recursively("span"):
+        span_class = span_tag.attrs.get("class", "")
+        span_lang = span_tag.attrs.get("lang", "")
+        if "qualifier-content" in span_class:
+            raw_tag = clean_node(wxr, None, span_tag)
+        elif span_lang == lang:
+            word = clean_node(wxr, None, span_tag)
+            if word != "":
+                form = Form(form=word, sense=sense, tags=["alternative"])
+                if raw_tag != "":
+                    form.raw_tags.append(raw_tag)
+                    raw_tag = ""
+                    translate_raw_tags(form)
+                forms.append(form)
+        elif span_class == "tr Latn" and len(forms) > 0:
+            forms[-1].roman = clean_node(wxr, None, span_tag)
+    word_entry.forms.extend(forms)

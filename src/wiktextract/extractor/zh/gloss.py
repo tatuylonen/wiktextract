@@ -107,21 +107,19 @@ def extract_gloss(
         if len(ruby_data) > 0:
             gloss_data.ruby = ruby_data
 
-        has_nested_gloss = False
+        translate_raw_tags(gloss_data)
+        if len(gloss_data.glosses) > 0:
+            page_data[-1].senses.append(gloss_data)
+
         if list_item_node.contain_node(NodeKind.LIST):
             for next_list in list_item_node.find_child(NodeKind.LIST):
                 if next_list.sarg.endswith("#"):  # nested gloss
-                    has_nested_gloss = True
                     extract_gloss(wxr, page_data, next_list, gloss_data)
                 else:
                     for e_list_item in next_list.find_child(NodeKind.LIST_ITEM):
                         extract_example_list_item(
                             wxr, gloss_data, e_list_item, page_data[-1]
                         )
-
-        if not has_nested_gloss and len(gloss_data.glosses) > 0:
-            translate_raw_tags(gloss_data)
-            page_data[-1].senses.append(gloss_data)
 
 
 def process_form_of_template(
