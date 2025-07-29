@@ -234,8 +234,8 @@ OTHER_GRAMMATICAL_TAGS: dict[str, str] = {
     "intransitif": "intransitive",  # Modèle:i
     "injurieux": "offensive",  # Modèle:injurieux
     # Modèle:zh-formes
-    "simplifié": "Simplified Chinese",
-    "traditionnel": "Traditional Chinese",
+    "simplifié": "Simplified-Chinese",
+    "traditionnel": "Traditional-Chinese",
     # Modèle:flex-ku-nomf
     "ézafé principal": ["ezafe", "primary"],
     "ézafé secondaire": ["ezafe", "secondary"],

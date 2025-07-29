@@ -78,9 +78,9 @@ def extract_example_list_item(
                 new_example = example.model_copy(deep=True)
                 new_example.text = text
                 new_example.tags.append(
-                    "Traditional Chinese"
+                    "Traditional-Chinese"
                     if index == 0
-                    else "Simplified Chinese"
+                    else "Simplified-Chinese"
                 )
                 sense.examples.append(new_example)
         else:

@@ -97,7 +97,7 @@ class TestThExample(TestCase):
                         "bold_roman_offsets": [(0, 5)],
                         "translation": "ทุกคนยังสบายดี",
                         "bold_translation_offsets": [(0, 5)],
-                        "tags": ["Traditional Chinese"],
+                        "tags": ["Traditional-Chinese"],
                     },
                     {
                         "text": "大家都还行。",
@@ -106,7 +106,7 @@ class TestThExample(TestCase):
                         "bold_roman_offsets": [(0, 5)],
                         "translation": "ทุกคนยังสบายดี",
                         "bold_translation_offsets": [(0, 5)],
-                        "tags": ["Simplified Chinese"],
+                        "tags": ["Simplified-Chinese"],
                     },
                 ],
             },
@@ -143,8 +143,8 @@ class TestThExample(TestCase):
                         "bold_translation_offsets": [(0, 5)],
                         "tags": [
                             "Modern Standard Chinese",
-                            "Traditional Chinese",
-                            "Simplified Chinese",
+                            "Traditional-Chinese",
+                            "Simplified-Chinese",
                             "Pinyin",
                         ],
                     }
@@ -183,7 +183,7 @@ class TestThExample(TestCase):
                         "bold_translation_offsets": [(0, 5)],
                         "tags": [
                             "Modern Standard Chinese",
-                            "Traditional Chinese",
+                            "Traditional-Chinese",
                             "Pinyin",
                         ],
                     },
@@ -196,7 +196,7 @@ class TestThExample(TestCase):
                         "bold_translation_offsets": [(0, 5)],
                         "tags": [
                             "Modern Standard Chinese",
-                            "Simplified Chinese",
+                            "Simplified-Chinese",
                             "Pinyin",
                         ],
                     },

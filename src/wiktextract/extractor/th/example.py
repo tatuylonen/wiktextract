@@ -186,9 +186,9 @@ def extract_zh_x_no_dl_tag(
                 e_text = clean_node(wxr, None, span_tag)
                 example = Example(text=e_text)
                 example.tags.append(
-                    "Traditional Chinese"
+                    "Traditional-Chinese"
                     if lang == "zh-Hant"
-                    else "Simplified Chinese"
+                    else "Simplified-Chinese"
                 )
                 if example.text != "":
                     calculate_bold_offsets(

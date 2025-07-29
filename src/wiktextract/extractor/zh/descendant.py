@@ -112,11 +112,11 @@ def process_desc_list_item(
             data.lang_code = span_tag.attrs["lang"]
         span_lang = span_tag.attrs["lang"]
         if span_lang == "zh-Hant":
-            data.tags.append("Traditional Chinese")
+            data.tags.append("Traditional-Chinese")
         elif span_lang == "zh-Hans":
-            if "Traditional Chinese" in data.tags:
-                data.tags.remove("Traditional Chinese")
-            data.tags.append("Simplified Chinese")
+            if "Traditional-Chinese" in data.tags:
+                data.tags.remove("Traditional-Chinese")
+            data.tags.append("Simplified-Chinese")
         if data.roman == data.word:
             if old_word == "":
                 data.roman = ""

@@ -556,11 +556,11 @@ class TestZhGloss(TestCase):
                             "form_of": [
                                 {
                                     "word": "一會",
-                                    "tags": ["Traditional Chinese"],
+                                    "tags": ["Traditional-Chinese"],
                                 },
                                 {
                                     "word": "一会",
-                                    "tags": ["Simplified Chinese"],
+                                    "tags": ["Simplified-Chinese"],
                                 },
                             ],
                             "glosses": ["一會／一会 (yīhuì) 的兒化形式。"],
@@ -592,7 +592,7 @@ class TestZhGloss(TestCase):
                 {
                     "classifier": "臺",
                     "tags": [
-                        "Traditional Chinese",
+                        "Traditional-Chinese",
                         "Mandarin",
                         "Southern Min",
                         "Wu",
@@ -601,7 +601,7 @@ class TestZhGloss(TestCase):
                 {
                     "classifier": "台",
                     "tags": [
-                        "Simplified Chinese",
+                        "Simplified-Chinese",
                         "Mandarin",
                         "Southern Min",
                         "Wu",

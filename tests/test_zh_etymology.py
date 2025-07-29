@@ -51,7 +51,7 @@ class TestNote(TestCase):
                     "tags": [
                         "Pinyin",
                         "Classical Chinese",
-                        "Traditional Chinese",
+                        "Traditional-Chinese",
                     ],
                     "text": "春宵一刻直千金，花有清香月有陰。",
                     "bold_text_offsets": [(2, 4), (5, 7)],
@@ -64,7 +64,7 @@ class TestNote(TestCase):
                     "tags": [
                         "Pinyin",
                         "Classical Chinese",
-                        "Simplified Chinese",
+                        "Simplified-Chinese",
                     ],
                     "text": "春宵一刻直千金，花有清香月有阴。",
                     "bold_text_offsets": [(2, 4), (5, 7)],
@@ -103,7 +103,7 @@ class TestNote(TestCase):
                     "tags": [
                         "Pinyin",
                         "Classical Chinese",
-                        "Traditional Chinese",
+                        "Traditional-Chinese",
                     ],
                     "text": "焚膏油以繼晷，恆兀兀以窮年。",
                     "bold_text_offsets": [
@@ -119,7 +119,7 @@ class TestNote(TestCase):
                     "tags": [
                         "Pinyin",
                         "Classical Chinese",
-                        "Simplified Chinese",
+                        "Simplified-Chinese",
                     ],
                     "text": "焚膏油以继晷，恒兀兀以穷年。",
                     "bold_text_offsets": [(0, 1), (4, 5)],

@@ -4,8 +4,8 @@ EXAMPLE_TAGS = {
     # แม่แบบ:zh-x, มอดูล:zh-usex/data
     "MSC": "Modern Standard Chinese",
     "Pinyin": "Pinyin",
-    "trad.": "Traditional Chinese",
-    "simp.": "Simplified Chinese",
+    "trad.": "Traditional-Chinese",
+    "simp.": "Simplified-Chinese",
 }
 
 TRANSLATION_TAGS = {

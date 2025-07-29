@@ -323,13 +323,13 @@ etymology text
                     "lang": "中国語",
                     "lang_code": "zh",
                     "word": "蘿莉控",
-                    "tags": ["Traditional Chinese"],
+                    "tags": ["Traditional-Chinese"],
                 },
                 {
                     "lang": "中国語",
                     "lang_code": "zh",
                     "word": "萝莉控",
-                    "tags": ["Simplified Chinese"],
+                    "tags": ["Simplified-Chinese"],
                 },
             ],
         )

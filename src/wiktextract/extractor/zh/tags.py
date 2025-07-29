@@ -329,10 +329,10 @@ LABEL_TAGS = {
 # https://zh.wiktionary.org/wiki/Template:Zh-x
 # https://zh.wiktionary.org/wiki/Module:Zh-usex/data
 ZH_X_TAGS = {
-    "繁體": "Traditional Chinese",
-    "繁體和": "Traditional Chinese",
-    "簡體": "Simplified Chinese",
-    "繁體和簡體": ["Traditional Chinese", "Simplified Chinese"],
+    "繁體": "Traditional-Chinese",
+    "繁體和": "Traditional-Chinese",
+    "簡體": "Simplified-Chinese",
+    "繁體和簡體": ["Traditional-Chinese", "Simplified-Chinese"],
     "漢語拼音": "Pinyin",
     "粵拼": "Jyutping",
     "現代標準漢語": "Standard Chinese",

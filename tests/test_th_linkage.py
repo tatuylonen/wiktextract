@@ -119,12 +119,12 @@ class TestThLinkage(TestCase):
                 {
                     "word": "電腦遊戲",
                     "roman": "diànnǎo yóuxì",
-                    "tags": ["Traditional Chinese"],
+                    "tags": ["Traditional-Chinese"],
                 },
                 {
                     "word": "电脑游戏",
                     "roman": "diànnǎo yóuxì",
-                    "tags": ["Simplified Chinese"],
+                    "tags": ["Simplified-Chinese"],
                 },
             ],
         )

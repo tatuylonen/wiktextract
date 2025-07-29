@@ -305,9 +305,9 @@ def extract_template_zh_x(
                         "bold_text_offsets",
                     )
                     new_example.tags.append(
-                        "Traditional Chinese"
+                        "Traditional-Chinese"
                         if span_lang == "zh-Hant"
-                        else "Simplified Chinese"
+                        else "Simplified-Chinese"
                     )
                     translate_raw_tags(new_example)
                     results.append(new_example)
