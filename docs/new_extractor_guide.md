@@ -2,83 +2,25 @@
 
 ## Learn wikitext
 
-Read [this document](https://en.wikipedia.org/wiki/Help:Wikitext) to learn the basic syntax of wikitext.
+Read document [Help:Wikitext](https://en.wikipedia.org/wiki/Help:Wikitext) to learn the basic syntax of wikitext.
+
+More MediaWiki documents:
+- [Help:A quick guide to templates](https://en.wikipedia.org/wiki/Help:A_quick_guide_to_templates)
+- [Help:Template](https://en.wikipedia.org/wiki/Help:Template)
+- [Help:Transclusion](https://en.wikipedia.org/wiki/Help:Transclusion)
+- [Help:Extension:ParserFunctions](https://www.mediawiki.org/wiki/Help:Extension:ParserFunctions)
+- [Help:Magic words](https://www.mediawiki.org/wiki/Help:Magic_words)
+- [Extension:Scribunto/Lua reference manual](https://www.mediawiki.org/wiki/Extension:Scribunto/Lua_reference_manual)
 
 ## Read Wiktionary entry layout document
 
 Every Wiktionary has their unique page layout, they usually have a document page of the layout and other rules. For example, here is English Wiktionary's document: [Wiktionary:Entry layout](https://en.wiktionary.org/wiki/Wiktionary:Entry_layout). After reading the layout document, try edit some pages or create a new page to test whether you have grasped Wiktionary editing. Writing Wiktionary extractor is like a reversed editing process.
 
-## Choose which namespaces to use from dump file
-
-MediWiki pages are grouped in collections called "[namespaces](https://www.mediawiki.org/wiki/Help:Namespaces)". By default, "Main", "Template", "Module" namespaces are used, their corresponding ids are `0`, `10`, `828`. "Main" namespace contains word pages, "Module" namespace contain Lua code used in templates. If pages in other namespaces are needed, they should be added in a `config.json` file, this JSON file can override some default attributes of the [`WiktionaryConfig`](https://github.com/tatuylonen/wiktextract/blob/master/src/wiktextract/config.py) class. For example, [here](https://github.com/tatuylonen/wiktextract/blob/master/src/wiktextract/data/fr/config.json) is the JSON file for French Wiktionary. All namespace names and ids can be found at the start of [dump file](https://dumps.wikimedia.org/backup-index.html)("*-pages-articles.xml.bz2" file). You may need to update the [namespace data file](https://github.com/tatuylonen/wikitextprocessor/tree/main/src/wikitextprocessor/data) in wikitextprocessor package, these files should be updated using this [script](https://github.com/tatuylonen/wikitextprocessor/blob/main/tools/get_namespaces.py).
-
-## Pre-expand section templates
-
-Some Wiktionary editions use templates to expand to section wikitext or HTML tags, these templates need to be expanded before parsing the page to nodes. Skip this step if the new Wiktionary doesn't have this problem.
-
-### Section template expands to wikitext
-
-Write a `analyze_template()` in file "analyze_template.py", this function checks all template pages and return `True` if the template need pre-expand. Example [file](https://github.com/tatuylonen/wiktextract/blob/master/src/wiktextract/extractor/nl/analyze_template.py) of Dutch Wiktionary.
-
-### Section template expands to HTML
-
-Templates can be overridden to expand to wikitext. Example [override file](https://github.com/tatuylonen/wiktextract/blob/master/src/wiktextract/data/overrides/id.json) for Indonesian Wiktionary. The new line character `\n` at the end of template body is for avoiding parsing the section node as plain text if there are some texts immediately after the template at the same line in some pages.
-
-## Create Pydantic model
-
-First we need to create [Pydantic](https://docs.pydantic.dev/latest/) models in file "models.py". Example file for Italian Wiktionary: [src/wiktextract/extractor/it/models.py](https://github.com/tatuylonen/wiktextract/blob/master/src/wiktextract/extractor/it/models.py)
-
-Extractor code files are located in path "src/wiktextract/extractor", this guide use English Wiktionary as example, so we'll create file "src/wiktextract/extractor/en/models.py".
-
-The closer the new model is to existing extractor models, the better. English Wiktionary extractor doesn't use Pydantic, it's JSON structure can be viewed at [here](https://kaikki.org/dictionary/errors/mapping/index.html). Non-en extractor JSON schema files generated from Pydantic models are at [here](https://tatuylonen.github.io/wiktextract/).
-
-Pydantic model and fields should be added gradually with implementation code, directly copy all models from other extractors is not recommended.
-
-```python
-from pydantic import BaseModel, ConfigDict, Field
-
-class EnglishBaseModel(BaseModel):
-    model_config = ConfigDict(
-        extra="forbid",
-        strict=True,
-        validate_assignment=True,
-        validate_default=True,
-    )
-
-class Sense(EnglishBaseModel):
-    glosses: list[str] = []
-    categories: list[str] = []
-    topics: list[str] = []
-    tags: list[str] = []
-    raw_tags: list[str] = []
-
-class WordEntry(EnglishBaseModel):
-    model_config = ConfigDict(title="English Wiktionary")
-
-    word: str = Field(description="Word string")
-    lang_code: str = Field(description="Wiktionary language code")
-    lang: str = Field(description="Localized language name")
-    pos: str = Field(default="", description="Part of speech type")
-    pos_title: str = Field(
-        default="", description="Original POS title"
-    )
-    senses: list[Sense] = Field(default=[], description="Sense list")
-```
-
-## Create "section_titles.py" file
-
-This file contains POS and other section titles data. Example file from English Wiktionary extractor: [src/wiktextract/extractor/en/section_titles.py](https://github.com/tatuylonen/wiktextract/blob/master/src/wiktextract/extractor/en/section_titles.py)
-
-```python
-POS_DATA = {
-    "Noun": {"pos": "noun"},
-    "Verb": {"pos": "verb"},
-}
-```
-
 ## Learn wikitextprocessor parser API
 
-Here is a simplified wikitext of English Wiktionary page [dictionary](https://en.wiktionary.org/wiki/dictionary)
+[wikitextprocessor](https://github.com/tatuylonen/wikitextprocessor) is a wikitext parser that takes in wikitext and generates a parse-tree.
+
+Here is a simplified wikitext of English Wiktionary page [dictionary](https://en.wiktionary.org/wiki/dictionary) and we'll use wikitextprocessor library to parse it:
 
 ```wikitext
 ==English==
@@ -97,13 +39,13 @@ conf = WiktionaryConfig(
 wxr = WiktextractContext(wtp, conf)
 wxr.wtp.start_page("dictionary")
 root = wtp.parse(
-    """== English ==
+    """==English==
 ===Noun===
 # {{lb|en|computing}} An [[associative array]]"""
 )
 ```
 
-The level 3 POS node is the child of level 2 language node.
+The level 3 Part of Speech (POS) node(`===Noun===`) is the child of level 2 language node(`==English==`):
 
 ```python
 from wikitextprocessor.parser import print_tree
@@ -120,7 +62,7 @@ print_tree(root)
 #          TEMPLATE [['lb'], ['en'], ['computing']]
 #          ' An '
 #          LINK [['associative array']]
-root.children
+print(root.children)
 # [<LEVEL2(['English']){} '\n', <LEVEL3(['Noun']){} '\n', <LIST(#){} <LIST_ITEM(#){} ' ', <TEMPLATE(['lb'], ['en'], ['computing']){} >, ' An ', <LINK(['associative array']){} >>>>>]
 ```
 
@@ -133,7 +75,7 @@ for t_node in root.find_child_recursively(NodeKind.TEMPLATE):
     pass
 ```
 
-`NodeKind` is a `enum.Flag` class, these flags can be combined:
+`NodeKind` is a [`enum.Flag`](https://docs.python.org/3/library/enum.html#enum.Flag) class, these flags can be combined:
 
 ```python
 for node in root.find_child(NodeKind.BOLD | NodeKind.LINK):
@@ -148,6 +90,8 @@ expanded_node = wxr.wtp.parse(
 )
 ```
 
+`Wtp.parse()` accepts wikitext input not `WikiNode`, so we need to convert a parsed node to its wikitext using `Wtp.node_to_wikitext()`.
+
 MediaWiki's special page [Special:ExpandTemplates](https://en.wiktionary.org/wiki/Special:ExpandTemplates) can be used to obtain the expanded wikitext of a template, this is very helpful when writing extractor for template.
 
 `clean_node()` can be used to convert node to text:
@@ -155,7 +99,7 @@ MediaWiki's special page [Special:ExpandTemplates](https://en.wiktionary.org/wik
 ```python
 from wiktextract.page import clean_node
 
-clean_node(wxr, None, t_node)
+print(clean_node(wxr, None, t_node))
 # "(computing)"
 ```
 
@@ -164,9 +108,9 @@ The second argument of `clean_node()` is for saving [category links](https://en.
 Template name and parameters are available as properties of `TemplateNode` class:
 
 ```python
-t_node.template_name
+print(t_node.template_name)
 # "lb"
-t_node.template_parameters
+print(t_node.template_parameters)
 # {1: 'en', 2: 'computing'}
 ```
 
@@ -185,7 +129,7 @@ clean_node(wxr, None, t_node.template_parameters[1])
 `LevelNode.find_content()` is used to find node inside the level node but not the child nodes:
 
 ```python
-root = wxr.wtp.parse("=={{lang|en}}==\ntext")
+root = wxr.wtp.parse("=={{lang|en}}==\ntext in child node")
 for t_node in root.find_content(NodeKind.TEMPLATE):
     pass
 ```
@@ -193,7 +137,7 @@ for t_node in root.find_content(NodeKind.TEMPLATE):
 Nodes inside level node wikitext are in `LevelNode.largs` list:
 
 ```python
-root = wxr.wtp.parse("==English==\ntext")
+root = wxr.wtp.parse("==English==\ntext in child node")
 for level_node in root.find_child(NodeKind.LEVEL2):
     print(clean_node(wxr, None, level_node.largs))
     # "English"
@@ -204,9 +148,9 @@ For description lists, term nodes are in the `WikiNode.children` attribute, defi
 ```python
 root = wxr.wtp.parse("; term : definition")
 list_item = next(root.find_child_recursively(NodeKind.LIST_ITEM))
-list_item.children
+print(list_item.children)
 # [' term ']
-list_item.definition
+print(list_item.definition)
 # [' def']
 ```
 
@@ -244,11 +188,87 @@ for child_list in first_list_item.find_child(NodeKind.LIST):
             # extract nested gloss
 ```
 
+## Choose which namespaces to use from dump file
+
+MediWiki pages are grouped in collections called "[namespaces](https://www.mediawiki.org/wiki/Help:Namespaces)". By default, "Main", "Template", "Module" namespaces are used, their corresponding ids are `0`, `10`, `828`. "Main" namespace contains word pages, "Module" namespace contain Lua code used in templates. If pages in other namespaces are needed, they should be added in a `config.json` file, this JSON file can override some default attributes of the [`WiktionaryConfig`](https://github.com/tatuylonen/wiktextract/blob/master/src/wiktextract/config.py) class. For example, [here](https://github.com/tatuylonen/wiktextract/blob/master/src/wiktextract/data/fr/config.json) is the JSON file for French Wiktionary. All namespace names and ids can be found at the start of [dump file](https://dumps.wikimedia.org/backup-index.html)("*-pages-articles.xml.bz2" file). You may need to update the [namespace data file](https://github.com/tatuylonen/wikitextprocessor/tree/main/src/wikitextprocessor/data) in wikitextprocessor package, these files should be updated using this [script](https://github.com/tatuylonen/wikitextprocessor/blob/main/tools/get_namespaces.py).
+
+You could start with the default three namespaces than add the required namespace later when you encounter a Lua error or decide to extract pages in a namespace.
+
+## Pre-expand section templates
+
+Some Wiktionary editions use templates to expand to section wikitext or HTML tags, these templates need to be expanded before parsing the page wikitext to nodes. Skip this step if the new Wiktionary doesn't have this problem.
+
+Section templates must be expanded to section wikitext before being parsed, otherwise they'll still be parsed as template node and nodes under a section will not be parsed as section child.
+
+### Section template expands to wikitext
+
+Write a `analyze_template()` in file "analyze_template.py", this function checks all template pages and return `True` if the template need pre-expand. Example [file](https://github.com/tatuylonen/wiktextract/blob/master/src/wiktextract/extractor/nl/analyze_template.py) of Dutch Wiktionary.
+
+### Section template expands to HTML
+
+Because we relay on section nodes to distinguish their level number and group child nodes, if an edition uses HTML tags, we lost both information and also unable to know which HTML tag is the start of a section.
+
+Template body can be overridden in wikitext to solve this problem. Example [override file](https://github.com/tatuylonen/wiktextract/blob/master/src/wiktextract/data/overrides/id.json) for Indonesian Wiktionary. The new line character `\n` at the end of template body is for avoiding parsing the section node as plain text if there are some texts immediately after the template at the same line in some pages.
+
+## Create Pydantic model
+
+First we need to create [Pydantic](https://docs.pydantic.dev/latest/) models in file "models.py". Example file for Italian Wiktionary: [src/wiktextract/extractor/it/models.py](https://github.com/tatuylonen/wiktextract/blob/master/src/wiktextract/extractor/it/models.py)
+
+Extractor code files are located in path "src/wiktextract/extractor", this guide use English Wiktionary as example, so we'll create file "src/wiktextract/extractor/en/models.py".
+
+The closer the new model is to existing extractor models, the better. English Wiktionary extractor doesn't use Pydantic, it's JSON structure can be viewed at [here](https://kaikki.org/dictionary/errors/mapping/index.html). Non-en extractor JSON schema files generated from Pydantic models are at [here](https://tatuylonen.github.io/wiktextract/).
+
+Pydantic model and fields should be added gradually with implementation code, directly copy all models from other extractors is not recommended.
+
+```python
+from pydantic import BaseModel, ConfigDict, Field
+
+class EnglishBaseModel(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+        strict=True,
+        validate_assignment=True,
+        validate_default=True,
+    )
+
+# word definition saved at here
+class Sense(EnglishBaseModel):
+    glosses: list[str] = []
+    categories: list[str] = []
+    topics: list[str] = []
+    tags: list[str] = []
+    raw_tags: list[str] = []
+
+# main JSON object
+class WordEntry(EnglishBaseModel):
+    model_config = ConfigDict(title="English Wiktionary")
+
+    word: str = Field(description="Word string")
+    lang_code: str = Field(description="Wiktionary language code")
+    lang: str = Field(description="Localized language name")
+    pos: str = Field(default="", description="Part of speech type")
+    pos_title: str = Field(
+        default="", description="Original POS title"
+    )
+    senses: list[Sense] = Field(default=[], description="Sense list")
+```
+
+## Create "section_titles.py" file
+
+This file contains POS and other section titles data. Example file from English Wiktionary extractor: [src/wiktextract/extractor/en/section_titles.py](https://github.com/tatuylonen/wiktextract/blob/master/src/wiktextract/extractor/en/section_titles.py)
+
+```python
+POS_DATA = {
+    "Noun": {"pos": "noun"},
+    "Verb": {"pos": "verb"},
+}
+```
+
 ## Create "page.py" file
 
 All extractors start from the `parse_page()` function in file "page.py". Example file from Italian Wiktionary extractor: [src/wiktextract/extractor/it/page.py](https://github.com/tatuylonen/wiktextract/blob/master/src/wiktextract/extractor/it/page.py)
 
-We could start implement the extractor to extract the definition lists, the example wikitext and JSON output are in the following "[add test](#add-test)" section.
+We could start implement the extractor to extract the definition lists, the example wikitext and JSON output are in the following "[Add test](#add-test)" section.
 
 ```python
 from typing import Any
@@ -331,6 +351,7 @@ def extract_pos_section(
     page_data[-1].tags.extend(pos_data.get("tags", []))
 
     for node in level_node.children:
+        # Extract glosses: lists starting with "#" with senses for the words.
         if (
             isinstance(node, WikiNode)
             and node.kind == NodeKind.LIST
@@ -338,6 +359,8 @@ def extract_pos_section(
         ):
             for list_item in node.find_child(NodeKind.LIST_ITEM):
                 extract_gloss_list_item(wxr, page_data[-1], list_item)
+
+    # headword line templates like "head" should be handled here
 
 
 def extract_gloss_list_item(
@@ -381,7 +404,9 @@ The first and second methods are sometimes used together when some data are easi
 
 ## Create "tags.py" file
 
-Tags data are added to the "raw_tags" field first, then we move tags that could be converted to tags used in English Wiktionary to "tags" or "topics" field.
+Tags are the English-language linguistics terms that should be common and shared between Wiktionary editions. For example, gender tags like "feminine" and "masculine", number tags like "singular" and "plural".
+
+Tag data are added to the "raw_tags" field first, then we move tags that could be converted to tags to "tags" or "topics" field.
 
 ```python
 from .models import WordEntry
