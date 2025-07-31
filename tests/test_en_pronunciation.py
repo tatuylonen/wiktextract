@@ -3,6 +3,7 @@ from unittest import TestCase
 from wikitextprocessor import Wtp
 
 from wiktextract.config import WiktionaryConfig
+from wiktextract.extractor.en.page import parse_page
 from wiktextract.extractor.en.pronunciation import parse_pronunciation
 from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.wxr_context import WiktextractContext
@@ -13,7 +14,10 @@ class TestPronunciation(TestCase):
 
     def setUp(self) -> None:
         self.wxr = WiktextractContext(
-            Wtp(lang_code="en"), WiktionaryConfig(dump_file_lang_code="en")
+            Wtp(lang_code="en"),
+            WiktionaryConfig(
+                dump_file_lang_code="en", capture_language_codes=None
+            ),
         )
 
     def tearDown(self) -> None:
@@ -444,9 +448,7 @@ class TestPronunciation(TestCase):
             out,
             {
                 # Remove `hyphenation` field if deprecated succesfully
-                  "hyphenation": [
-                    "quiè‧to, qui‧è‧to, quié‧to, qui‧é‧to"
-                  ],
+                "hyphenation": ["quiè‧to, qui‧è‧to, quié‧to, qui‧é‧to"],
                 "hyphenations": [
                     {"parts": ["quiè", "to"]},
                     {"parts": ["qui", "è", "to"]},
@@ -454,4 +456,83 @@ class TestPronunciation(TestCase):
                     {"parts": ["qui", "é", "to"]},
                 ],
             },
+        )
+
+    def test_th_pron(self):
+        self.wxr.wtp.add_page(
+            "Template:th-pron",
+            10,
+            """<table>
+<tr><th>''[[w:Thai alphabet|Orthographic]]''</th><td colspan="2"><span lang="th" class="Thai th-reading">ฝรั่ง</span><br><small>f&thinsp;r&thinsp;ạ&thinsp;ˋ&thinsp;ŋ</small></td></tr>
+<tr><th colspan="2">''[[w:Thai alphabet|Phonemic]]''</th><td><div class="th-reading"><span lang="th" class="Thai ">ฝะ-หฺรั่ง</span><br><small>f&thinsp;a&thinsp;&ndash;&thinsp;h&thinsp;̥&thinsp;r&thinsp;ạ&thinsp;ˋ&thinsp;ŋ</small></div></td><td><div class="th-reading"><span><small>[colloquial]</small></span><br><span lang="th" class="Thai ">ฟะ-หฺรั่ง</span><br><small>v&thinsp;a&thinsp;&ndash;&thinsp;h&thinsp;̥&thinsp;r&thinsp;ạ&thinsp;ˋ&thinsp;ŋ</small></div></td></tr>
+<tr><th rowspan="2">''[[Wiktionary:Thai romanization|Romanization]]''</th><th colspan="1">''[[Wiktionary:Thai romanization|Paiboon]]''</th><td><span class="tr">fà-ràng</span></td><td style="border-right:0px"><span class="tr">fá-ràng</span></td></tr><tr><th colspan="1">''[[Wiktionary:Thai romanization|Royal Institute]]''</th><td><span class="tr">fa-rang</span></td><td style="border-right:0px"><span class="tr">fa-rang</span></td></tr>
+<tr><th colspan="2">(''[[w:Standard Thai|standard]]'') [[Wiktionary:International Phonetic Alphabet|IPA]]<sup>([[Appendix:Thai pronunciation|key]])</sup></th><td><span class="IPA">/fa˨˩.raŋ˨˩/</span><sup>([[:Category:Rhymes:Thai/aŋ|R]])</sup>[[Category:Rhymes:Thai/aŋ]]</td><td style="border-right:0px"><span class="IPA">/fa˦˥.raŋ˨˩/</span><sup>([[:Category:Rhymes:Thai/aŋ|R]])</sup>[[Category:Rhymes:Thai/aŋ]]</td></tr>
+<tr><th colspan="2">''Audio''</th><td>[[File:Th-farang.ogg|100px|center]]</td><td></td></tr>
+</table>[[Category:Thai terms with IPA pronunciation]][[Category:Thai 2-syllable words]][[Category:Thai 2-syllable words]][[Category:Thai terms with audio pronunciation]]""",
+        )
+        data = parse_page(
+            self.wxr,
+            "ฝรั่ง",
+            """==Thai==
+===Pronunciation===
+{{th-pron|ฝะ-หฺรั่ง|ฟะ-หฺรั่ง:colloquial}}
+===Noun===
+# [[farang]]; [[Westerner]].""",
+        )
+        self.assertEqual(
+            data[0]["sounds"],
+            [
+                {
+                    "other": "ฝรั่ง",
+                    "raw_tags": ["Orthographic"],
+                    "roman": "f r ạ ˋ ŋ",
+                },
+                {
+                    "other": "ฝะ-หฺรั่ง",
+                    "raw_tags": ["Phonemic"],
+                    "roman": "f a – h ̥ r ạ ˋ ŋ",
+                },
+                {
+                    "other": "ฟะ-หฺรั่ง",
+                    "raw_tags": ["Phonemic"],
+                    "tags": ["colloquial"],
+                    "roman": "v a – h ̥ r ạ ˋ ŋ",
+                },
+                {
+                    "other": "fà-ràng",
+                    "raw_tags": ["Paiboon"],
+                    "tags": ["romanization"],
+                },
+                {
+                    "other": "fá-ràng",
+                    "raw_tags": ["Paiboon"],
+                    "tags": ["romanization"],
+                },
+                {
+                    "other": "fa-rang",
+                    "raw_tags": ["Royal Institute"],
+                    "tags": ["romanization"],
+                },
+                {
+                    "other": "fa-rang",
+                    "raw_tags": ["Royal Institute"],
+                    "tags": ["romanization"],
+                },
+                {"ipa": "/fa˨˩.raŋ˨˩/"},
+                {"ipa": "/fa˦˥.raŋ˨˩/"},
+                {
+                    "audio": "Th-farang.ogg",
+                    "mp3_url": "https://upload.wikimedia.org/wikipedia/commons/transcoded/6/6b/Th-farang.ogg/Th-farang.ogg.mp3",
+                    "ogg_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Th-farang.ogg",
+                },
+            ],
+        )
+        self.assertEqual(
+            data[0]["categories"],
+            [
+                "Rhymes:Thai/aŋ",
+                "Thai terms with IPA pronunciation",
+                "Thai 2-syllable words",
+                "Thai terms with audio pronunciation",
+            ],
         )
