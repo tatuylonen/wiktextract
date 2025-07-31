@@ -2,15 +2,22 @@ import hashlib
 import re
 import urllib
 from copy import deepcopy
-from typing import Iterator, Optional, Union
+from dataclasses import dataclass
+from typing import Iterator
 
-from wikitextprocessor import NodeKind, TemplateNode, WikiNode
+from wikitextprocessor import (
+    LevelNode,
+    NodeKind,
+    TemplateNode,
+    WikiNode,
+)
 
 from ...clean import clean_value
 from ...datautils import data_append, data_extend, split_at_comma_semi
 from ...page import LEVEL_KINDS, clean_node, is_panel_template
 from ...tags import valid_tags
 from ...wxr_context import WiktextractContext
+from ..share import create_audio_url_dict
 from .form_descriptions import (
     classify_desc,
     decode_tags,
@@ -44,7 +51,7 @@ IPA_EXTRACT_RE = re.compile(IPA_EXTRACT)
 
 def extract_pron_template(
     wxr: WiktextractContext, tname: str, targs: TemplateArgs, expanded: str
-) -> Optional[tuple[SoundData, list[SoundData]]]:
+) -> tuple[SoundData, list[SoundData]] | None:
     """In post_template_fn, this is used to handle all enPR and IPA templates
     so that we can leave breadcrumbs in the text that can later be handled
     there. We return a `base_data`  so that if there are two
@@ -155,7 +162,7 @@ def extract_pron_template(
         new_entry.append("".join(entry[i1:i2]).strip())
         if not new_entry[-1]:
             wxr.wtp.error(
-                f"Missing IPA/enPRO sound data between qualifiers?" f"{entry=}",
+                f"Missing IPA/enPRO sound data between qualifiers?{entry=}",
                 sortid="en/pronunciation/153",
             )
         if i2 == -1:
@@ -186,7 +193,7 @@ def extract_pron_template(
 
 def parse_pronunciation(
     wxr: WiktextractContext,
-    node: WikiNode,
+    level_node: LevelNode,
     data: WordData,
     etym_data: WordData,
     have_etym: bool,
@@ -195,11 +202,18 @@ def parse_pronunciation(
 ) -> None:
     """Parses the pronunciation section from a language section on a
     page."""
-    assert isinstance(node, WikiNode)
-    if node.kind in LEVEL_KINDS:
-        contents = node.children
+    if level_node.kind in LEVEL_KINDS:
+        contents = []
+        for node in level_node.children:
+            if isinstance(node, TemplateNode):
+                if node.template_name == "th-pron":
+                    extract_th_pron_template(wxr, data, node)
+                else:
+                    contents.append(node)
+            else:
+                contents.append(node)
     else:
-        contents = [node]
+        contents = [level_node]
     # Remove subsections, such as Usage notes.  They may contain IPAchar
     # templates in running text, and we do not want to extract IPAs from
     # those.
@@ -215,13 +229,9 @@ def parse_pronunciation(
         isinstance(x, WikiNode) and x.kind == NodeKind.LIST for x in contents
     ):
         # expand all templates
-        new_contents: list[Union[str, WikiNode]] = []
+        new_contents: list[str | WikiNode] = []
         for lst in contents:
-            if (
-                isinstance(lst, TemplateNode)
-                and isinstance(lst.largs[0][0], str)
-                and lst.largs[0][0].strip() != "zh-pron"
-            ):
+            if isinstance(lst, TemplateNode) and lst.template_name != "zh-pron":
                 temp = wxr.wtp.node_to_wikitext(lst)
                 temp = wxr.wtp.expand(temp)
                 temp_parsed = wxr.wtp.parse(temp)
@@ -239,7 +249,7 @@ def parse_pronunciation(
 
     def parse_pronunciation_template_fn(
         name: str, ht: TemplateArgs
-    ) -> Optional[str]:
+    ) -> str | None:
         """Handle pronunciation and hyphenation templates"""
         # _template_fn handles templates *before* they are expanded;
         # this allows for special handling before all the work needed
@@ -338,7 +348,7 @@ def parse_pronunciation(
 
     def parse_pron_post_template_fn(
         name: str, ht: TemplateArgs, text: str
-    ) -> Optional[str]:
+    ) -> str | None:
         # _post_template_fn handles templates *after* the work to expand
         # them has been done; this is exactly the same as _template_fn,
         # except with the additional expanded text as an input, and
@@ -378,7 +388,7 @@ def parse_pronunciation(
             # pron_templates.
             if pron_t := extract_pron_template(wxr, name, ht, text):
                 pron_templates.append(pron_t)
-                return f"__PRON_TEMPLATE_{len(pron_templates)-1}__"
+                return f"__PRON_TEMPLATE_{len(pron_templates) - 1}__"
         return text
 
     def parse_expanded_zh_pron(
@@ -389,7 +399,7 @@ def parse_pronunciation(
     ) -> None:
         def generate_pron(
             v, new_parent_hdrs: list[str], new_specific_hdrs: list[str]
-        ) -> Optional[SoundData]:
+        ) -> SoundData | None:
             pron: SoundData = {}
             pron["tags"] = []
             pron["zh-pron"] = v.strip()
@@ -574,7 +584,7 @@ def parse_pronunciation(
                     )
 
     def parse_chinese_pron(
-        contents: Union[list[Union[WikiNode, str]], WikiNode, str],
+        contents: list[WikiNode | str] | WikiNode | str,
         unknown_header_tags: set[str],
     ) -> None:
         if isinstance(contents, list):
@@ -611,16 +621,12 @@ def parse_pronunciation(
                 sortid="pronunciations/296/20230324",
             )
 
-    def flattened_tree(
-        lines: list[Union[WikiNode, str]],
-    ) -> Iterator[Union[WikiNode, str]]:
+    def flattened_tree(lines: list[WikiNode | str]) -> Iterator[WikiNode | str]:
         assert isinstance(lines, list)
         for line in lines:
             yield from flattened_tree1(line)
 
-    def flattened_tree1(
-        node: Union[WikiNode, str],
-    ) -> Iterator[Union[WikiNode, str]]:
+    def flattened_tree1(node: WikiNode | str) -> Iterator[WikiNode | str]:
         assert isinstance(node, (WikiNode, str))
         if isinstance(node, str):
             yield node
@@ -651,7 +657,7 @@ def parse_pronunciation(
     # Kludge for templates that generate several lines, but haven't
     # been caught by earlier kludges...
     def split_cleaned_node_on_newlines(
-        contents: list[Union[WikiNode, str]],
+        contents: list[WikiNode | str],
     ) -> Iterator[str]:
         for litem in flattened_tree(contents):
             ipa_text = clean_node(
@@ -665,12 +671,12 @@ def parse_pronunciation(
                 yield line
 
     # have_pronunciations = False
-    active_pos: Optional[str] = None
+    active_pos: str | None = None
 
     for line in split_cleaned_node_on_newlines(contents):
         # print(f"{line=}")
-        prefix: Optional[str] = None
-        earlier_base_data: Optional[SoundData] = None
+        prefix: str | None = None
+        earlier_base_data: SoundData | None = None
         if not line:
             continue
 
@@ -957,3 +963,97 @@ def parse_pronunciation(
     # if not have_pronunciations and not have_panel_templates:
     #     wxr.wtp.debug("no pronunciations found from pronunciation section",
     #               sortid="pronunciations/533")
+
+
+@dataclass
+class TableHeader:
+    text: str
+    rowspan: int
+
+
+def extract_th_pron_template(
+    wxr: WiktextractContext, word_entry: WordData, t_node: TemplateNode
+):
+    # https://en.wiktionary.org/wiki/Template:th-pron
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    sounds = []
+    for table_tag in expanded_node.find_html("table"):
+        row_headers = []
+        for tr_tag in table_tag.find_html("tr"):
+            field = "other"
+            new_headers = []
+            for header in row_headers:
+                if header.rowspan > 1:
+                    header.rowspan -= 1
+                    new_headers.append(header)
+            row_headers = new_headers
+            for th_tag in tr_tag.find_html("th"):
+                header_str = clean_node(wxr, None, th_tag)
+                if header_str.startswith("(standard) IPA"):
+                    field = "ipa"
+                elif header_str.startswith("Homophones"):
+                    field = "homophone"
+                elif header_str == "Audio":
+                    field = "audio"
+                elif header_str != "":
+                    rowspan = 1
+                    rowspan_str = th_tag.attrs.get("rowspan", "1")
+                    if re.fullmatch(r"\d+", rowspan_str):
+                        rowspan = int(rowspan_str)
+                    row_headers.append(TableHeader(header_str, rowspan))
+
+            for td_tag in tr_tag.find_html("td"):
+                if field == "audio":
+                    for link_node in td_tag.find_child(NodeKind.LINK):
+                        filename = clean_node(wxr, None, link_node.largs[0])
+                        if filename != "":
+                            sound = create_audio_url_dict(filename)
+                            sounds.append(sound)
+                elif field == "homophone":
+                    for span_tag in td_tag.find_html_recursively(
+                        "span", attr_name="lang", attr_value="th"
+                    ):
+                        word = clean_node(wxr, None, span_tag)
+                        if word != "":
+                            sounds.append({"homophone": word})
+                else:
+                    raw_tag = ""
+                    for html_node in td_tag.find_child_recursively(
+                        NodeKind.HTML
+                    ):
+                        if html_node.tag == "small":
+                            node_str = clean_node(wxr, None, html_node)
+                            if node_str.startswith("[") and node_str.endswith(
+                                "]"
+                            ):
+                                raw_tag = node_str.strip("[]")
+                            elif len(sounds) > 0:
+                                sounds[-1]["roman"] = node_str
+                        elif html_node.tag == "span":
+                            node_str = clean_node(wxr, None, html_node)
+                            span_lang = html_node.attrs.get("lang", "")
+                            span_class = html_node.attrs.get("class", "")
+                            if node_str != "" and (
+                                span_lang == "th" or span_class in ["IPA", "tr"]
+                            ):
+                                sound = {field: node_str}
+                                if raw_tag != "":
+                                    if raw_tag in valid_tags:
+                                        data_append(sound, "tags", raw_tag)
+                                    else:
+                                        data_append(sound, "raw_tags", raw_tag)
+                                for header in row_headers:
+                                    if header.text.lower() in valid_tags:
+                                        data_append(
+                                            sound, "tags", header.text.lower()
+                                        )
+                                    else:
+                                        data_append(
+                                            sound, "raw_tags", header.text
+                                        )
+                                sounds.append(sound)
+
+    clean_node(wxr, word_entry, expanded_node)
+    data_extend(word_entry, "sounds", sounds)
