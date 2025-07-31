@@ -283,5 +283,5 @@ def process_form_line_bold_node(
         # Unsupported titles:
         # https://fr.wiktionary.org/wiki/Annexe:Titres_non_pris_en_charge
         word_entry.word = bold_str
-    elif bold_str != wxr.wtp.title:
+    elif bold_str not in [wxr.wtp.title, ""]:
         word_entry.forms.append(Form(form=bold_str, tags=["canonical"]))
