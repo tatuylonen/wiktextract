@@ -730,5 +730,9 @@
   "Template:中文别名": {
     "redirect_to": "Template:Zh-altname",
     "namespace_id": 10
+  },
+  "Template:語法": {
+    "redirect_to": "Template:语法",
+    "namespace_id": 10
   }
 }
