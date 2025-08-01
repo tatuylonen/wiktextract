@@ -120,20 +120,26 @@ def process_zh_pron_list_item(
                         wxr,
                         None,
                         list(node.invert_find_child(NodeKind.HTML)),
-                    )
+                    ).rstrip("：")
                     if raw_tag_text.startswith("(") and raw_tag_text.endswith(
                         ")"
                     ):
                         raw_tag_text = raw_tag_text.strip("()")
-                    for raw_tag in re.split(r",|，|：|、", raw_tag_text):
-                        raw_tag = raw_tag.strip()
-                        if raw_tag.startswith("(") and raw_tag.endswith(")"):
-                            raw_tag = raw_tag.strip("() ")
-                        if raw_tag != "":
-                            current_tags.append(raw_tag)
+                    if "(" not in raw_tag_text:
+                        for raw_tag in re.split(r",|，|：|、", raw_tag_text):
+                            raw_tag = raw_tag.strip()
+                            if raw_tag != "":
+                                current_tags.append(raw_tag)
+                    elif raw_tag_text != "":
+                        current_tags.append(raw_tag_text)
                 elif node.tag == "span":
                     span_text = clean_node(wxr, None, node)
-                    for zh_pron in span_text.split(","):
+                    pron_list = (
+                        span_text.split(",")
+                        if "(" not in span_text
+                        else [span_text]
+                    )
+                    for zh_pron in pron_list:
                         zh_pron = zh_pron.strip()
                         if len(zh_pron) > 0:
                             if "IPA" in node.attrs.get("class", ""):
