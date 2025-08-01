@@ -734,5 +734,69 @@
   "Template:語法": {
     "redirect_to": "Template:语法",
     "namespace_id": 10
+  },
+  "Template:詩": {
+    "redirect_to": "Template:诗",
+    "namespace_id": 10
+  },
+  "Template:中国大陆": {
+    "redirect_to": "Template:中國大陸",
+    "namespace_id": 10
+  },
+  "Template:分類": {
+    "redirect_to": "Template:分类",
+    "namespace_id": 10
+  },
+  "Template:舊": {
+    "redirect_to": "Template:旧",
+    "namespace_id": 10
+  },
+  "Template:之同义词": {
+    "redirect_to": "Template:之同義詞",
+    "namespace_id": 10
+  },
+  "Template:網": {
+    "redirect_to": "Template:网",
+    "namespace_id": 10
+  },
+  "Template:書": {
+    "redirect_to": "Template:书",
+    "namespace_id": 10
+  },
+  "Template:中文簡稱": {
+    "redirect_to": "Template:Zh-short",
+    "namespace_id": 10
+  },
+  "Template:謙": {
+    "redirect_to": "Template:谦",
+    "namespace_id": 10
+  },
+  "Template:貶": {
+    "redirect_to": "Template:贬",
+    "namespace_id": 10
+  },
+  "Template:粤": {
+    "redirect_to": "Template:粵",
+    "namespace_id": 10
+  },
+  "Template:幾何": {
+    "redirect_to": "Template:几何",
+    "namespace_id": 10
+  },
+  "Template:體": {
+    "redirect_to": "Template:体",
+    "namespace_id": 10
+  },
+  "Template:農": {
+    "redirect_to": "Template:农",
+    "namespace_id": 10
+  },
+  "Template:諷": {
+    "redirect_to": "Template:讽",
+    "namespace_id": 10
+  },
+  "Template:闽南": {
+    "redirect_to": "Template:閩南",
+    "namespace_id": 10
   }
 }
