@@ -308,3 +308,49 @@ class TestPronunciation(TestCase):
                 },
             ],
         )
+
+    def test_not_split_text_in_parentheses(self):
+        self.wxr.wtp.add_page(
+            "Template:zh-pron",
+            10,
+            """<div class="standard-box zhpron"><div class="vsSwitcher" data-toggle-category="發音">
+* [[w:官話|官話]]
+*: <small>([[w:東干語|東干語]]，[[w:东干语#東干語拼寫法|西里爾字母]]和[[Wiktionary:東干語轉寫|維基詞典轉寫]])</small>：<span style="font-family: Consolas, monospace;">[[даҗя#東干語|даҗя]] (daži͡a, III-I)</span>
+* [[w:閩南語|閩南語]]
+** <small>([[w:泉漳片|泉漳話]]：[[w:廈門話|廈門]]、[[w:泉州話|泉州]]、[[w:新加坡福建話|新加坡]])</small>
+*** <small>[[Wiktionary:國際音標|國際音標]] ([[w:廈門話|廈門]], [[w:新加坡福建話|新加坡]])</small>：<span class="IPA">/tai̯²²⁻²¹ ke⁴⁴/</span>
+</div></div>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "大家",
+            """==漢語==
+===發音1===
+{{zh-pron
+|m=dàjiā,dà'ā,2nb=口語
+|cat=n
+}}
+====名詞====
+# [[眾人]]""",
+        )
+        self.assertEqual(
+            data[0]["sounds"],
+            [
+                {
+                    "raw_tags": ["東干語", "西里爾字母和維基詞典轉寫"],
+                    "tags": ["Mandarin"],
+                    "zh_pron": "даҗя (daži͡a, III-I)",
+                },
+                {
+                    "ipa": "/tai̯²²⁻²¹ ke⁴⁴/",
+                    "raw_tags": [
+                        "泉漳話",
+                        "廈門",
+                        "泉州",
+                        "新加坡",
+                        "國際音標 (廈門, 新加坡)",
+                    ],
+                    "tags": ["Southern Min"],
+                },
+            ],
+        )

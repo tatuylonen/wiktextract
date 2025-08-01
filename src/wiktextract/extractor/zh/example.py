@@ -83,7 +83,7 @@ def extract_example_list_item(
                     wxr,
                     word_entry,
                     child,
-                    LINKAGE_TEMPLATES[template_name],
+                    LINKAGE_TEMPLATES[template_name.lower()],
                     " ".join(sense_data.glosses),
                 )
             elif template_name.lower() in ["inline alt forms", "alti"]:
