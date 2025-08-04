@@ -287,7 +287,7 @@ def parse_section(
     page_data: list[WordEntry],
     base_data: WordEntry,
     level_node: LevelNode,
-) -> None:
+):
     title_text = clean_node(wxr, None, level_node.largs)
     if title_text in POS_DATA:
         wxr.wtp.start_subsection(title_text)
@@ -343,7 +343,7 @@ def extract_pos_section(
     base_data: WordEntry,
     level_node: LevelNode,
     pos_title: str,
-) -> None:
+):
     page_data.append(base_data.model_copy(deep=True))
     page_data[-1].pos_title = pos_title
     pos_data = POS_DATA[pos_title]
@@ -365,7 +365,7 @@ def extract_pos_section(
 
 def extract_gloss_list_item(
     wxr: WiktextractContext, word_entry: WordEntry, list_item: WikiNode
-) -> None:
+):
     gloss_nodes = []
     sense = Sense()
     for node in list_item.children:
@@ -382,7 +382,7 @@ def extract_gloss_list_item(
 
 def extract_lb_template(
     wxr: WiktextractContext, sense: Sense, t_node: TemplateNode
-) -> None:
+):
     # https://en.wiktionary.org/wiki/Template:label
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(t_node), expand_all=True
@@ -402,6 +402,10 @@ There are three ways to extract a template:
 
 The first and second methods are sometimes used together when some data are easier to obtain from expanded nodes and some can be obtained directly from parameter without much change.
 
+### Headword line form
+
+Some editions use template to display forms data between POS section and gloss lists. For example, [ja-noun](https://en.wiktionary.org/wiki/Template:ja-noun) and [ru-noun+](https://en.wiktionary.org/wiki/Template:ru-noun+) in English Wiktionary. If the first bold word in expanded template has [`<ruby>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/ruby) annotations or in [stressed](https://en.wikipedia.org/wiki/Stress_(linguistics)) form and is different than the page title, a form data with "canonical" tag should be added. Example pages: [辞書](https://kaikki.org/dictionary/Japanese/meaning/辞/辞書/辞書.html), [словарь](https://kaikki.org/dictionary/Russian/meaning/с/сл/словарь.html)
+
 ## Create "tags.py" file
 
 Tags are the English-language linguistics terms that should be common and shared between Wiktionary editions. For example, gender tags like "feminine" and "masculine", number tags like "singular" and "plural".
@@ -418,7 +422,7 @@ TOPICS = {
     "computing": "computing"
 }
 
-def translate_raw_tags(data: WordEntry) -> None:
+def translate_raw_tags(data: WordEntry):
     raw_tags = []
     for raw_tag in data.raw_tags:
         if raw_tag in TAGS:
@@ -660,7 +664,7 @@ def extract_gloss_list_item(
     word_entry: WordEntry,
     list_item: WikiNode,
     parent_sense: Sense | None = None,
-) -> None:
+):
     sense = (
         parent_sense.model_copy(deep=True)
         if parent_sense is not None
@@ -1013,7 +1017,7 @@ def parse_section(
     page_data: list[WordEntry],
     base_data: WordEntry,
     level_node: LevelNode,
-) -> None:
+):
     title_text = clean_node(wxr, None, level_node.largs)
     if title_text == "Pronunciation":
         extract_sound_section(wxr, base_data, level_node)
@@ -1191,7 +1195,7 @@ def parse_section(
     page_data: list[WordEntry],
     base_data: WordEntry,
     level_node: LevelNode,
-) -> None:
+):
     title_text = clean_node(wxr, None, level_node.largs)
     if title_text == "Translations":
         extract_translation_section(
@@ -1258,7 +1262,6 @@ def get_subpage_section(
         section_title = clean_node(wxr, None, level_node.largs)
         if section_title == target_section:
             return level_node
-    return None
 ```
 
 ## Extract linkage sections
@@ -1275,7 +1278,7 @@ def test_linkage(self):
         """<span class="Latn" lang="en">[[{{{2}}}]]</span>"""
     )
     self.wxr.wtp.add_page(
-        "Template:col4",
+        "Template:col3",
         10,
         """<div class="list-switcher-wrapper"><div class="list-switcher-header">Hyponyms of ''engine''</div><div class="term-list columns-bg"><ul><li><span class="Latn" lang="en">[[:aero engine#English|aero engine]]</span></li><li><span class="Latn" lang="en">[[:air engine#English|air engine]]</span></li></ul></div></div>"""
     )
@@ -1410,7 +1413,7 @@ def parse_section(
     page_data: list[WordEntry],
     base_data: WordEntry,
     level_node: LevelNode,
-) -> None:
+):
     title_text = clean_node(wxr, None, level_node.largs)
     if title_text in LINKAGE_TITLES:
         extract_linkage_section(
@@ -1489,7 +1492,7 @@ from .tags import translate_raw_tags
 
 def extract_conjugation_section(
     wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
-) -> None:
+):
     for t_node in level_node.find_child(NodeKind.TEMPLATE):
         if t_node.template_name == "sv-conj-wk":
             extract_sv_conj_wk_template(wxr, word_entry, t_node)
@@ -1497,7 +1500,7 @@ def extract_conjugation_section(
 
 def extract_sv_conj_wk_template(
     wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
-) -> None:
+):
     # https://en.wiktionary.org/wiki/Template:sv-conj-wk
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(t_node), expand_all=True
@@ -1545,7 +1548,7 @@ def parse_section(
     page_data: list[WordEntry],
     base_data: WordEntry,
     level_node: LevelNode,
-) -> None:
+):
     title_text = clean_node(wxr, None, level_node.largs)
     if title_text == "Conjugation":
         extract_conjugation_section(

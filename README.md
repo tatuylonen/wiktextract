@@ -821,6 +821,10 @@ variants.  Also, the category tree data does not contain language
 prefixes (the tree is defined in Wiktionary without prefixes and then
 replicated for each language).
 
+## Implement new extractor
+
+Please read this [guide](docs/new_extractor_guide.md).
+
 ## Related packages
 
 The
