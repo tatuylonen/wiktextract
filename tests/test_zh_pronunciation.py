@@ -299,16 +299,18 @@ class TestPronunciation(TestCase):
                 },
                 {
                     "raw_tags": [
-                        "泉漳話",
-                        "廈門",
-                        "泉州",
                         "漳州",
                         "臺灣話",
                         "常用",
                         "檳城",
-                        "白話字",
                     ],
-                    "tags": ["Southern Min"],
+                    "tags": [
+                        "Min-Nan",
+                        "Hokkien",
+                        "Xiamen",
+                        "Quanzhou",
+                        "Phak-fa-su",
+                    ],
                     "zh_pron": "Tiong-kok",
                 },
             ],
@@ -348,8 +350,8 @@ class TestPronunciation(TestCase):
                 },
                 {
                     "ipa": "/tai̯²²⁻²¹ ke⁴⁴/",
-                    "raw_tags": ["泉漳話", "廈門", "泉州", "新加坡"],
-                    "tags": ["Southern Min", "IPA"],
+                    "raw_tags": ["新加坡"],
+                    "tags": ["Min-Nan", "Hokkien", "Xiamen", "Quanzhou", "IPA"],
                 },
             ],
         )
@@ -404,6 +406,103 @@ class TestPronunciation(TestCase):
                         "Guangzhou",
                         "Hong Kong",
                     ],
+                },
+            ],
+        )
+
+    def test_zh_pron_arrow(self):
+        self.wxr.wtp.add_page(
+            "Template:zh-pron",
+            10,
+            """<div class="standard-box zhpron"><div class="vsSwitcher" data-toggle-category="發音">
+* [[w:閩東語|閩東語]] <small>([[Wiktionary:關於漢語/閩東語|平話字]])</small>：<span style="font-family: Consolas, monospace;">mĕ̤k<sup>→maĕ̤h</sup>-lê / mĕk<sup>→mĕh</sup>-lê</span>
+* [[w:吳語|吳語]] <small>([[w:上海話|上海]]，[[Wiktionary:關於漢語/吳語|吳語學堂拼音]])</small>：<span class="zhpron-monospace"><sup>5</sup>meq-li; <sup>5</sup>moq-li</span><span class="vsToggleElement" style="float: right;"></span>
+<div class="vsHide" style="clear:right;">
+<hr>
+* [[w:官話|官話]]
+** <small>([[w:現代標準漢語|現代標準漢語]])</small><sup><small><abbr title="添加官話同音詞"><span class="plainlinks">[//zh.wiktionary.org/w/index.php?title=Module%3AZh%2Fdata%2Fcmn-hom%2F2&action=edit +]</span></abbr></small></sup>
+*** <small>[[w:漢語拼音|拼音]]</small>：<span class="form-of pinyin-ts-form-of" lang="cmn" class="zhpron-monospace"><span class="Latn" lang="cmn">-{<!-- -->[[mòlì#官話|-{mòlì}-]]}-</span> → mò<span style="background-color:#F5DEB3">li</span> <small>（輕尾聲異讀）</small></span>
+*** <small>[[w:注音符號|注音]]</small>：<span lang="cmn-Bopo" class="Bopo">ㄇㄛˋ ㄌㄧˋ → ㄇㄛˋ ˙ㄌㄧ</span> <small>（輕尾聲異讀）</small>
+*** <small>[[w:漢語西里爾字母轉寫系統|西里爾字母轉寫]]</small>：<span style="font-family: Consolas, monospace;"><span lang="cmn-Cyrl">моли</span> <span lang="cmn-Latn">(moli)</span></span>
+*** <small>漢語[[Wiktionary:國際音標|國際音標]] <sup>([[維基詞典:漢語發音表記|幫助]])</sup></small>：<span class="IPA">/mu̯ɔ⁵¹⁻⁵³ li⁵¹/ → /mu̯ɔ⁵¹ li¹/</span>[[Category:有輕聲異讀的官話詞|mòlì]]
+* [[w:閩東語|閩東語]]
+** <small>([[w:福州話|福州話]])</small>
+*** <small>[[Wiktionary:國際音標|國際音標]] <sup>([[w:福州話|幫助]])</sup></small>：<span class="IPA">/møyʔ⁵⁻²¹ l̃ɛi²⁴²/, /mɛiʔ⁵⁻²¹ l̃ɛi²⁴²/</span>
+</div></div>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "茉莉",
+            """==漢語==
+===發音===
+{{zh-pron
+|m=mòlì,tl=y
+|cat=n
+}}
+
+===名詞===
+
+# [[植物]]名。""",
+        )
+        self.assertEqual(
+            data[0]["sounds"],
+            [
+                {
+                    "tags": ["Min-Dong", "Foochow-Romanized"],
+                    "zh_pron": "mĕ̤k^(→maĕ̤h)-lê",
+                },
+                {
+                    "tags": ["Min-Dong", "Foochow-Romanized"],
+                    "zh_pron": "mĕk^(→mĕh)-lê",
+                },
+                {"tags": ["Wu", "Shanghai", "Wugniu"], "zh_pron": "⁵meq-li"},
+                {"tags": ["Wu", "Shanghai", "Wugniu"], "zh_pron": "⁵moq-li"},
+                {
+                    "tags": ["Mandarin", "Standard Chinese", "Pinyin"],
+                    "zh_pron": "mòlì",
+                },
+                {
+                    "tags": [
+                        "Mandarin",
+                        "Standard Chinese",
+                        "Pinyin",
+                        "toneless-final-syllable-variant",
+                    ],
+                    "zh_pron": "mòli",
+                },
+                {
+                    "tags": ["Mandarin", "Standard Chinese", "Bopomofo"],
+                    "zh_pron": "ㄇㄛˋ ㄌㄧˋ",
+                },
+                {
+                    "tags": [
+                        "Mandarin",
+                        "Standard Chinese",
+                        "Bopomofo",
+                        "toneless-final-syllable-variant",
+                    ],
+                    "zh_pron": "ㄇㄛˋ ˙ㄌㄧ",
+                },
+                {
+                    "roman": "moli",
+                    "tags": ["Mandarin", "Standard Chinese", "Palladius"],
+                    "zh_pron": "моли",
+                },
+                {
+                    "ipa": "/mu̯ɔ⁵¹⁻⁵³ li⁵¹/",
+                    "tags": ["Mandarin", "Standard Chinese", "Sinological-IPA"],
+                },
+                {
+                    "ipa": "/mu̯ɔ⁵¹ li¹/",
+                    "tags": ["Mandarin", "Standard Chinese", "Sinological-IPA"],
+                },
+                {
+                    "ipa": "/møyʔ⁵⁻²¹ l̃ɛi²⁴²/",
+                    "tags": ["Min-Dong", "Fuzhou", "IPA"],
+                },
+                {
+                    "ipa": "/mɛiʔ⁵⁻²¹ l̃ɛi²⁴²/",
+                    "tags": ["Min-Dong", "Fuzhou", "IPA"],
                 },
             ],
         )

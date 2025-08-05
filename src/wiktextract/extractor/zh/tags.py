@@ -351,9 +351,9 @@ ZH_TAGS = {
     "贛語": "Gan",
     "客家話": "Hakka",
     "晉語": "Jin",
-    "閩北語": "Northern Min",
-    "閩東語": "Eastern Min",
-    "閩南語": "Southern Min",
+    "閩北語": "Min-Bei",
+    "閩東語": "Min-Dong",
+    "閩南語": "Min-Nan",
     "潮州話": "Teochew",
     "湘語": "Xiang",
 }
@@ -379,6 +379,14 @@ ZH_PRON_TAGS = {
     "模仿白話字": "POJ",
     "標準粵語": "Standard-Cantonese",
     "廣州–香港話": ["Guangzhou", "Hong Kong"],
+    "福州話": "Fuzhou",
+    "平話字": "Foochow-Romanized",
+    "客家語": "Hakka",
+    "白話字": "Phak-fa-su",
+    "泉漳話": "Hokkien",
+    "泉州": "Quanzhou",
+    "廈門": "Xiamen",
+    "輕尾聲異讀": "toneless-final-syllable-variant",
 }
 
 

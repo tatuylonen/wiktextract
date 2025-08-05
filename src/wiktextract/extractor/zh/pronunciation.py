@@ -103,6 +103,7 @@ def process_zh_pron_list_item(
 ) -> list[Sound]:
     current_tags = raw_tags[:]
     sounds = []
+    is_first_small_tag = True
     for node in list_item_node.children:
         if isinstance(node, WikiNode):
             if node.kind == NodeKind.LINK:
@@ -118,41 +119,35 @@ def process_zh_pron_list_item(
             elif isinstance(node, HTMLNode):
                 if node.tag == "small":
                     # remove "幫助"(help) <sup> tag
-                    raw_tag_text = clean_node(
-                        wxr,
-                        None,
-                        [
-                            n
-                            for n in node.children
-                            if not (isinstance(n, HTMLNode) and n.tag == "sup")
-                        ],
-                    ).rstrip("：")
-                    current_tags.extend(split_zh_pron_raw_tag(raw_tag_text))
+                    if is_first_small_tag:
+                        raw_tag_text = clean_node(
+                            wxr,
+                            None,
+                            [
+                                n
+                                for n in node.children
+                                if not (
+                                    isinstance(n, HTMLNode) and n.tag == "sup"
+                                )
+                            ],
+                        ).rstrip("：")
+                        current_tags.extend(split_zh_pron_raw_tag(raw_tag_text))
+                    elif len(sounds) > 0:
+                        sounds[-1].raw_tags.extend(
+                            split_zh_pron_raw_tag(clean_node(wxr, None, node))
+                        )
+                    is_first_small_tag = False
                 elif node.tag == "span":
-                    span_text = clean_node(wxr, None, node)
-                    # split by comma and splash outside of parentheses
-                    pron_list = re.split(
-                        r"(?<!\([^()])[,|/](?![^()]*\))", span_text
-                    )
-                    for zh_pron in pron_list:
-                        zh_pron = zh_pron.strip()
-                        if len(zh_pron) > 0:
-                            if "IPA" in node.attrs.get("class", ""):
-                                sound = Sound(
-                                    ipa=zh_pron, raw_tags=current_tags
-                                )
-                            else:
-                                sound = Sound(
-                                    zh_pron=zh_pron, raw_tags=current_tags
-                                )
-                            sounds.append(sound)
+                    sounds.extend(extract_zh_pron_span(wxr, node, current_tags))
                 elif (
                     node.tag == "table"
                     and len(current_tags) > 0
                     and current_tags[-1] == "同音詞"
                 ):
                     sounds.extend(
-                        process_homophones_table(wxr, node, current_tags)
+                        extract_zh_pron_homophones_table(
+                            wxr, node, current_tags
+                        )
                     )
 
             elif node.kind == NodeKind.LIST:
@@ -197,23 +192,68 @@ def split_zh_pron_raw_tag(raw_tag_text: str) -> list[str]:
     return raw_tags
 
 
-def process_homophones_template(
-    wxr: WiktextractContext, template_node: TemplateNode
+def extract_zh_pron_span(
+    wxr: WiktextractContext, span_tag: HTMLNode, raw_tags: list[str]
 ) -> list[Sound]:
-    # https://zh.wiktionary.org/wiki/Template:homophones
     sounds = []
-    for word_index in itertools.count(2):
-        if word_index not in template_node.template_parameters:
-            break
-        homophone = clean_node(
-            wxr, None, template_node.template_parameters.get(word_index, "")
-        )
-        if len(homophone) > 0:
-            sounds.append(Sound(homophone=homophone))
+    small_tags = []
+    pron_nodes = []
+    roman = ""
+    for node in span_tag.children:
+        if isinstance(node, HTMLNode) and node.tag == "small":
+            small_tags = split_zh_pron_raw_tag(clean_node(wxr, None, node))
+        elif (
+            isinstance(node, HTMLNode)
+            and node.tag == "span"
+            and "-Latn" in node.attrs.get("lang", "")
+        ):
+            roman = clean_node(wxr, None, node).strip("() ")
+        else:
+            pron_nodes.append(node)
+    for zh_pron in split_zh_pron(clean_node(wxr, None, pron_nodes)):
+        zh_pron = zh_pron.strip()
+        if len(zh_pron) > 0:
+            if "IPA" in span_tag.attrs.get("class", ""):
+                sounds.append(
+                    Sound(ipa=zh_pron, roman=roman, raw_tags=raw_tags)
+                )
+            else:
+                sounds.append(
+                    Sound(zh_pron=zh_pron, roman=roman, raw_tags=raw_tags)
+                )
+    if len(sounds) > 0:
+        sounds[-1].raw_tags.extend(small_tags)
     return sounds
 
 
-def process_homophones_table(
+def split_zh_pron(zh_pron: str) -> list[str]:
+    # split by comma and other symbols that outside parentheses
+    parentheses = 0
+    pron_list = []
+    pron = ""
+    for c in zh_pron:
+        if (
+            (c in [",", ";", "→"] or (c == "/" and not zh_pron.startswith("/")))
+            and parentheses == 0
+            and len(pron.strip()) > 0
+        ):
+            pron_list.append(pron.strip())
+            pron = ""
+        elif c in ["(", "（"]:
+            parentheses += 1
+            pron += c
+        elif c in [")", "）"]:
+            parentheses -= 1
+            pron += c
+        else:
+            pron += c
+
+    if pron.strip() != "":
+        pron_list.append(pron)
+    return pron_list
+
+
+def extract_zh_pron_homophones_table(
     wxr: WiktextractContext, table: HTMLNode, raw_tags: list[str]
 ) -> list[Sound]:
     sounds = []
@@ -233,6 +273,22 @@ def process_homophones_table(
                 elif span_class == "Hans":
                     sound.tags.append("Simplified-Chinese")
                 sounds.append(sound)
+    return sounds
+
+
+def process_homophones_template(
+    wxr: WiktextractContext, template_node: TemplateNode
+) -> list[Sound]:
+    # https://zh.wiktionary.org/wiki/Template:homophones
+    sounds = []
+    for word_index in itertools.count(2):
+        if word_index not in template_node.template_parameters:
+            break
+        homophone = clean_node(
+            wxr, None, template_node.template_parameters.get(word_index, "")
+        )
+        if len(homophone) > 0:
+            sounds.append(Sound(homophone=homophone))
     return sounds
 
 

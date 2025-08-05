@@ -211,9 +211,8 @@ class TestZhLinkage(TestCase):
             },
         )
         self.assertEqual(data[1]["word"], "頭路")
-        self.assertEqual(
-            set(data[1]["raw_tags"]), {"客家語", "屏東（內埔，南四縣腔）"}
-        )
+        self.assertEqual(set(data[1]["raw_tags"]), {"屏東（內埔，南四縣腔）"})
+        self.assertEqual(set(data[1]["tags"]), {"Hakka"})
         self.assertEqual(data[2]["word"], "生活")
         self.assertEqual(set(data[2]["tags"]), {"Shanghai", "Wu"})
         self.assertEqual(data[3]["word"], "飯碗頭")

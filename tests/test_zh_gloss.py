@@ -596,7 +596,7 @@ class TestZhGloss(TestCase):
                     "tags": [
                         "Traditional-Chinese",
                         "Mandarin",
-                        "Southern Min",
+                        "Min-Nan",
                         "Wu",
                     ],
                 },
@@ -605,7 +605,7 @@ class TestZhGloss(TestCase):
                     "tags": [
                         "Simplified-Chinese",
                         "Mandarin",
-                        "Southern Min",
+                        "Min-Nan",
                         "Wu",
                     ],
                 },
