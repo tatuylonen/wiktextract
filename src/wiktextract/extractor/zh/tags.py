@@ -377,6 +377,8 @@ ZH_PRON_TAGS = {
     "廣東拼音": "Guangdong-Romanization",
     "國際音標": "IPA",
     "模仿白話字": "POJ",
+    "標準粵語": "Standard-Cantonese",
+    "廣州–香港話": ["Guangzhou", "Hong Kong"],
 }
 
 

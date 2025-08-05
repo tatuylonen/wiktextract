@@ -353,3 +353,57 @@ class TestPronunciation(TestCase):
                 },
             ],
         )
+
+    def test_homophone_table_character_forms(self):
+        self.wxr.wtp.add_page(
+            "Template:zh-pron",
+            10,
+            """<div><div class="vsSwitcher" data-toggle-category="發音">
+* [[w:粵語|粵語]]
+** <small>([[w:粵語|標準粵語]]，[[w:廣州話|廣州]]–[[w:香港粵語|香港話]])</small>
+*** <small>同音詞</small>: <table class="wikitable mw-collapsible mw-collapsed"><tr><th></th></tr><tr><td><div style="float: right; clear: right;"><sup><span class="plainlinks">[//zh.wiktionary.org/w/index.php?title=Module%3AYue-pron%2Fhom&action=edit edit]</span></sup></div><div style="visibility:hidden; float:left"><sup><span style="color:#FFF">edit</span></sup></div><span class="Hant" lang="yue">-{<!-- -->[[廚子#粵語|-{廚子}-]]}-</span><span class="Zsym mention" style="font-size:100%;">／</span><span class="Hans" lang="yue">-{<!-- -->[[厨子#粵語|-{厨子}-]]}-</span></td></tr></table>[[Category:有同音詞的粵語詞]]</div></div></div>
+""",
+        )
+        data = parse_page(
+            self.wxr,
+            "錘子",
+            """==漢語==
+===發音===
+{{zh-pron
+|m=chuízi
+|m-s=cui2zi3
+|c=ceoi4 zi2
+|cat=n,pron,det
+}}
+
+===名詞===
+
+# 由[[金屬]]""",
+        )
+        self.assertEqual(
+            data[0]["sounds"],
+            [
+                {
+                    "homophone": "廚子",
+                    "raw_tags": ["同音詞"],
+                    "tags": [
+                        "Traditional-Chinese",
+                        "Cantonese",
+                        "Standard-Cantonese",
+                        "Guangzhou",
+                        "Hong Kong",
+                    ],
+                },
+                {
+                    "homophone": "厨子",
+                    "raw_tags": ["同音詞"],
+                    "tags": [
+                        "Simplified-Chinese",
+                        "Cantonese",
+                        "Standard-Cantonese",
+                        "Guangzhou",
+                        "Hong Kong",
+                    ],
+                },
+            ],
+        )

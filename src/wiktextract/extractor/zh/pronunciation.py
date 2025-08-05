@@ -214,16 +214,25 @@ def process_homophones_template(
 
 
 def process_homophones_table(
-    wxr: WiktextractContext,
-    table_node: HTMLNode,
-    raw_tags: list[str],
+    wxr: WiktextractContext, table: HTMLNode, raw_tags: list[str]
 ) -> list[Sound]:
     sounds = []
-    for span_node in table_node.find_html_recursively("span", attr_name="lang"):
-        sound_data = Sound(
-            homophone=clean_node(wxr, None, span_node), raw_tags=raw_tags
-        )
-        sounds.append(sound_data)
+    for td_tag in table.find_html_recursively("td"):
+        for span_tag in td_tag.find_html("span"):
+            span_class = span_tag.attrs.get("class", "")
+            span_lang = span_tag.attrs.get("lang", "")
+            span_str = clean_node(wxr, None, span_tag)
+            if (
+                span_str not in ["", "／"]
+                and span_lang != ""
+                and span_class in ["Hant", "Hans", "Hani"]
+            ):
+                sound = Sound(homophone=span_str, raw_tags=raw_tags)
+                if span_class == "Hant":
+                    sound.tags.append("Traditional-Chinese")
+                elif span_class == "Hans":
+                    sound.tags.append("Simplified-Chinese")
+                sounds.append(sound)
     return sounds
 
 
