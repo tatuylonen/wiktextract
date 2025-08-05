@@ -56,8 +56,8 @@ class TestPronunciation(TestCase):
                 },
                 {
                     "ipa": "/sz̩⁵³/",
-                    "tags": ["Jin"],
-                    "raw_tags": ["太原話", "國際音標 (老派)"],
+                    "tags": ["Jin", "IPA"],
+                    "raw_tags": ["太原話", "老派"],
                 },
             ],
         )
@@ -291,7 +291,11 @@ class TestPronunciation(TestCase):
             [
                 {
                     "raw_tags": ["莆仙語", "莆仙話拼音"],
-                    "zh_pron": "doeng¹ gorh⁶ / dyoeng¹ gorh⁶",
+                    "zh_pron": "doeng¹ gorh⁶",
+                },
+                {
+                    "raw_tags": ["莆仙語", "莆仙話拼音"],
+                    "zh_pron": "dyoeng¹ gorh⁶",
                 },
                 {
                     "raw_tags": [
@@ -299,7 +303,8 @@ class TestPronunciation(TestCase):
                         "廈門",
                         "泉州",
                         "漳州",
-                        "臺灣話（常用）",
+                        "臺灣話",
+                        "常用",
                         "檳城",
                         "白話字",
                     ],
@@ -343,14 +348,8 @@ class TestPronunciation(TestCase):
                 },
                 {
                     "ipa": "/tai̯²²⁻²¹ ke⁴⁴/",
-                    "raw_tags": [
-                        "泉漳話",
-                        "廈門",
-                        "泉州",
-                        "新加坡",
-                        "國際音標 (廈門, 新加坡)",
-                    ],
-                    "tags": ["Southern Min"],
+                    "raw_tags": ["泉漳話", "廈門", "泉州", "新加坡"],
+                    "tags": ["Southern Min", "IPA"],
                 },
             ],
         )

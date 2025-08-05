@@ -106,38 +106,33 @@ def process_zh_pron_list_item(
     for node in list_item_node.children:
         if isinstance(node, WikiNode):
             if node.kind == NodeKind.LINK:
-                if len(node.largs) > 0 and node.largs[0][0].startswith("File:"):
-                    filename = node.largs[0][0].removeprefix("File:")
-                    sound_data = Sound()
+                link_str = clean_node(wxr, None, node.largs)
+                node_str = clean_node(wxr, None, node)
+                if link_str.startswith("File:"):
+                    filename = link_str.removeprefix("File:")
+                    sound_data = Sound(raw_tags=current_tags)
                     set_sound_file_url_fields(wxr, filename, sound_data)
                     sounds.append(sound_data)
-                else:
-                    current_tags.append(clean_node(wxr, None, node).strip("()"))
+                elif node_str != "":
+                    current_tags.append(node_str.strip("()"))
             elif isinstance(node, HTMLNode):
                 if node.tag == "small":
                     # remove "幫助"(help) <sup> tag
                     raw_tag_text = clean_node(
                         wxr,
                         None,
-                        list(node.invert_find_child(NodeKind.HTML)),
+                        [
+                            n
+                            for n in node.children
+                            if not (isinstance(n, HTMLNode) and n.tag == "sup")
+                        ],
                     ).rstrip("：")
-                    if raw_tag_text.startswith("(") and raw_tag_text.endswith(
-                        ")"
-                    ):
-                        raw_tag_text = raw_tag_text.strip("()")
-                    if "(" not in raw_tag_text:
-                        for raw_tag in re.split(r",|，|：|、", raw_tag_text):
-                            raw_tag = raw_tag.strip()
-                            if raw_tag != "":
-                                current_tags.append(raw_tag)
-                    elif raw_tag_text != "":
-                        current_tags.append(raw_tag_text)
+                    current_tags.extend(split_zh_pron_raw_tag(raw_tag_text))
                 elif node.tag == "span":
                     span_text = clean_node(wxr, None, node)
-                    pron_list = (
-                        span_text.split(",")
-                        if "(" not in span_text
-                        else [span_text]
+                    # split by comma and splash outside of parentheses
+                    pron_list = re.split(
+                        r"(?<!\([^()])[,|/](?![^()]*\))", span_text
                     )
                     for zh_pron in pron_list:
                         zh_pron = zh_pron.strip()
@@ -172,6 +167,34 @@ def process_zh_pron_list_item(
                         )
                     )
     return sounds
+
+
+def split_zh_pron_raw_tag(raw_tag_text: str) -> list[str]:
+    raw_tags = []
+    if raw_tag_text.startswith("(") and raw_tag_text.endswith(")"):
+        raw_tag_text = raw_tag_text.strip("()")
+    if raw_tag_text.startswith("（") and raw_tag_text.endswith("）"):
+        raw_tag_text = raw_tag_text.strip("（）")
+    if "(" not in raw_tag_text and "（" not in raw_tag_text:
+        for raw_tag in re.split(r",|，|：|、", raw_tag_text):
+            raw_tag = raw_tag.strip()
+            if raw_tag != "":
+                raw_tags.append(raw_tag)
+    else:
+        last_offset = 0
+        for match in re.finditer(r"\([^()]+\)|（[^（）]+）", raw_tag_text):
+            raw_tags.extend(
+                split_zh_pron_raw_tag(raw_tag_text[last_offset : match.start()])
+            )
+            raw_tags.extend(
+                split_zh_pron_raw_tag(
+                    raw_tag_text[match.start() + 1 : match.end() - 1]
+                )
+            )
+            last_offset = match.end()
+        raw_tags.extend(split_zh_pron_raw_tag(raw_tag_text[last_offset:]))
+
+    return raw_tags
 
 
 def process_homophones_template(

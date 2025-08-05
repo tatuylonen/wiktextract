@@ -400,7 +400,7 @@ def translate_raw_tags(data: WordEntry) -> WordEntry:
                 data.tags.extend(tr_tag)
         elif raw_tag in LABEL_TOPICS and hasattr(data, "topics"):
             data.topics.append(LABEL_TOPICS[raw_tag])
-        else:
+        elif raw_tag not in raw_tags:
             raw_tags.append(raw_tag)
     data.raw_tags = raw_tags
     return data
