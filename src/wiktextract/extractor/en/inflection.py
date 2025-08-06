@@ -1702,26 +1702,6 @@ def parse_simple_table(
         alts = list(
             re.sub(r"^\((in the sense [^)]*)\)\s+", "", x) for x in alts
         )
-        # Check for parenthesized alternatives, e.g. ripromettersi/Italian
-        if all(
-            re.match(r"\w+( \w+)* \(\w+( \w+)*(, \w+( \w+)*)*\)$", alt)
-            # word word* \(word word*(, word word*)*\)
-            and all(
-                distw([re.sub(r" \(.*", "", alt)], x) < 0.5
-                # Levenshtein distance
-                for x in re.sub(r".*\((.*)\)", r"\1", alt).split(", ")
-            )
-            # Extract from parentheses for testin
-            for alt in alts
-        ):
-            new_alts = []
-            for alt in alts:
-                # Replace parentheses before splitting
-                alt = alt.replace(" (", ", ")
-                alt = alt.replace(")", "")
-                for new_alt in alt.split(", "):
-                    new_alts.append(new_alt)
-            alts = new_alts
         return col, alts, split_extra_tags
 
     def handle_mixed_lines(alts: list[str]) -> list[tuple[str, str, str]]:
