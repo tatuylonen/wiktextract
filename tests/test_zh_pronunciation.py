@@ -56,8 +56,7 @@ class TestPronunciation(TestCase):
                 },
                 {
                     "ipa": "/sz̩⁵³/",
-                    "tags": ["Jin", "IPA"],
-                    "raw_tags": ["太原話", "老派"],
+                    "tags": ["Jin", "Taiyuan", "IPA", "dated"],
                 },
             ],
         )
@@ -344,14 +343,24 @@ class TestPronunciation(TestCase):
             data[0]["sounds"],
             [
                 {
-                    "raw_tags": ["東干語", "西里爾字母和維基詞典轉寫"],
-                    "tags": ["Mandarin"],
+                    "tags": [
+                        "Mandarin",
+                        "Dongan",
+                        "Cyrillic",
+                        "Wiktionary-specific",
+                    ],
                     "zh_pron": "даҗя (daži͡a, III-I)",
                 },
                 {
                     "ipa": "/tai̯²²⁻²¹ ke⁴⁴/",
-                    "raw_tags": ["新加坡"],
-                    "tags": ["Min-Nan", "Hokkien", "Xiamen", "Quanzhou", "IPA"],
+                    "tags": [
+                        "Min-Nan",
+                        "Hokkien",
+                        "Xiamen",
+                        "Quanzhou",
+                        "Singapore",
+                        "IPA",
+                    ],
                 },
             ],
         )
@@ -485,7 +494,7 @@ class TestPronunciation(TestCase):
                 },
                 {
                     "roman": "moli",
-                    "tags": ["Mandarin", "Standard Chinese", "Palladius"],
+                    "tags": ["Mandarin", "Standard Chinese", "Cyrillic"],
                     "zh_pron": "моли",
                 },
                 {
