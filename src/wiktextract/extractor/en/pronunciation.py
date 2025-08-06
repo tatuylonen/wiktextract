@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from typing import Iterator
 
 from wikitextprocessor import (
+    HTMLNode,
     LevelNode,
     NodeKind,
     TemplateNode,
@@ -25,7 +26,6 @@ from .form_descriptions import (
 )
 from .parts_of_speech import part_of_speech_map
 from .type_utils import Hyphenation, SoundData, TemplateArgs, WordData
-from .zh_pron_tags import ZH_PRON_TAGS
 
 # Prefixes, tags, and regexp for finding romanizations from the pronuncation
 # section
@@ -208,6 +208,8 @@ def parse_pronunciation(
             if isinstance(node, TemplateNode):
                 if node.template_name == "th-pron":
                     extract_th_pron_template(wxr, data, node)
+                elif node.template_name == "zh-pron":
+                    extract_zh_pron_template(wxr, data, node)
                 else:
                     contents.append(node)
             else:
@@ -231,7 +233,7 @@ def parse_pronunciation(
         # expand all templates
         new_contents: list[str | WikiNode] = []
         for lst in contents:
-            if isinstance(lst, TemplateNode) and lst.template_name != "zh-pron":
+            if isinstance(lst, TemplateNode):
                 temp = wxr.wtp.node_to_wikitext(lst)
                 temp = wxr.wtp.expand(temp)
                 temp_parsed = wxr.wtp.parse(temp)
@@ -390,236 +392,6 @@ def parse_pronunciation(
                 pron_templates.append(pron_t)
                 return f"__PRON_TEMPLATE_{len(pron_templates) - 1}__"
         return text
-
-    def parse_expanded_zh_pron(
-        node: WikiNode,
-        parent_hdrs: list[str],
-        specific_hdrs: list[str],
-        unknown_header_tags: set[str],
-    ) -> None:
-        def generate_pron(
-            v, new_parent_hdrs: list[str], new_specific_hdrs: list[str]
-        ) -> SoundData | None:
-            pron: SoundData = {}
-            pron["tags"] = []
-            pron["zh-pron"] = v.strip()
-            for hdr in new_parent_hdrs + new_specific_hdrs:
-                hdr = hdr.strip()
-                valid_hdr = re.sub(r"\s+", "-", hdr)
-                if hdr in ZH_PRON_TAGS:
-                    for tag in ZH_PRON_TAGS[hdr]:
-                        if tag not in pron["tags"]:
-                            pron["tags"].append(tag)
-                elif valid_hdr in valid_tags:
-                    if valid_hdr not in pron["tags"]:
-                        pron["tags"].append(valid_hdr)
-                else:
-                    unknown_header_tags.add(hdr)
-            # convert into normal IPA format if has the IPA flag
-            if "IPA" in pron["tags"]:
-                pron["ipa"] = v
-                del pron["zh-pron"]
-                pron["tags"].remove("IPA")
-            # convert into IPA but retain the Sinological-IPA tag
-            elif "Sinological-IPA" in pron["tags"]:
-                pron["ipa"] = v
-                del pron["zh-pron"]
-
-            if not (pron.get("zh-pron") or pron.get("ipa")):
-                return None
-            return pron
-
-        if isinstance(node, list):
-            for item in node:
-                parse_expanded_zh_pron(
-                    item, parent_hdrs, specific_hdrs, unknown_header_tags
-                )
-            return
-        if not isinstance(node, WikiNode):
-            return
-        if node.kind != NodeKind.LIST:
-            for item in node.children:
-                parse_expanded_zh_pron(
-                    item, parent_hdrs, specific_hdrs, unknown_header_tags
-                )
-            return
-        for item in node.children:
-            assert isinstance(item, WikiNode)
-            assert item.kind == NodeKind.LIST_ITEM
-            base_item = list(
-                x
-                for x in item.children
-                if not isinstance(x, WikiNode) or x.kind != NodeKind.LIST
-            )
-            text = clean_node(wxr, None, base_item)
-            # print(f"{parent_hdrs}  zhpron: {text}")  # XXX remove me
-            text = re.sub(r"(?s)\(Note:.*?\)", "", text)
-            # Kludge to clean up text like
-            # '(Standard Chinese, erhua-ed) (旋兒／旋儿)' where
-            # the hanzi are examples
-            hanzi_m = re.match(r"\s*(\([^()]*\))\s*\(([^()]*)\)\s*$", text)
-            if hanzi_m:
-                if re.search("[\u4e00-\u9fff]", hanzi_m.group(2)):
-                    text = hanzi_m.group(1)
-            new_parent_hdrs = list(parent_hdrs)
-            new_specific_hdrs = list(specific_hdrs)
-            # look no further, here be dragons...
-
-            if ": " in text or "：" in text:
-                parts = re.split(r": |：", text)
-                m = re.match(
-                    r"\s*\((([^():]+)\s*(:|：)?\s*([^():]*))\)\s*$", text
-                )
-                # Matches lines with stuff like "(Hokkien: Xiamen, Quanzhou)"
-                # thrown into new_parent_hdrs
-                if m:
-                    new_parent_hdrs.append(m.group(2).strip())
-                    for hdr in m.group(4).split(","):
-                        new_specific_hdrs.append(hdr.strip())
-                else:
-                    # if "Zhangzhou" in text:
-                    #     print("\nFOUND IN:", text, "\n")
-                    #     print("PARTS: ", repr(parts))
-                    # print(f"    PARTS: {parts}")
-                    extra_tags = parts[0]
-                    # Kludge to handle how (Hokkien: Locations) and
-                    # IPA (Specific Location) interact; this is why
-                    # specific_hdrs was introduced to the soup, just
-                    # to specify which are actual hierarchical higher
-                    # level tags (Min'nan, Hokkien, etc.) which should
-                    # always be present and then use specific_hdrs
-                    # for that list of misc sublocations and subdialects
-                    # that can be overridden by more specific stuff
-                    # later.
-                    m = re.match(r"\s*IPA\s*\((.*)\)\s*$", extra_tags)
-                    if m:
-                        new_parent_hdrs.append("IPA")
-                        new_specific_hdrs = [
-                            s.strip() for s in m.group(1).split(",")
-                        ]
-                        extra_tags = extra_tags[m.end() :]
-
-                    m = re.match(r"\s*\([^()]*,[^()]*\)\s*$", extra_tags)
-                    if m:
-                        extra_tags = extra_tags.strip()[1:-1]  # remove parens
-                        new_parent_hdrs.extend(
-                            s.strip() for s in extra_tags.split(",")
-                        )
-                    elif extra_tags:
-                        new_parent_hdrs.append(extra_tags)
-
-                    v = ":".join(parts[1:])
-
-                    #  check for phrases
-                    if ("，" in (wxr.wtp.title or "")) and len(
-                        v.split(" ")
-                    ) + v.count(",") == len(wxr.wtp.title or ""):
-                        # This just captures exact matches where you have
-                        # the pronunciation of the whole phrase and nothing
-                        # else. Split on spaces, then because we're not
-                        # splitting next to a comma we need to add the
-                        # count of commas so that it synchs up with the
-                        # unicode string length of the original hanzi,
-                        # where the comma is a separate character (unlike
-                        # in the split list, where it's part of a space-
-                        # separated string, like "teo⁴,".
-                        vals = [v]
-                        pron = generate_pron(
-                            v, new_parent_hdrs, new_specific_hdrs
-                        )
-
-                        if pron:
-                            pron["tags"] = list(sorted(pron["tags"]))
-                            if pron not in data.get("sounds", ()):
-                                data_append(data, "sounds", pron)
-                    elif "→" in v:
-                        vals = re.split("→", v)
-                        for v in vals:
-                            pron = generate_pron(
-                                v, new_parent_hdrs, new_specific_hdrs
-                            )
-                            if pron:
-                                m = re.match(
-                                    r"([^()]+)\s*\(toneless"
-                                    r" final syllable variant\)\s*",
-                                    v,
-                                )
-                                if m:
-                                    pron["zh-pron"] = m.group(1).strip()
-                                    pron["tags"].append(
-                                        "toneless-final-syllable-variant"
-                                    )
-
-                                pron["tags"] = list(sorted(pron["tags"]))
-                                if pron not in data.get("sounds", ()):
-                                    data_append(data, "sounds", pron)
-                    else:
-                        # split alternative pronunciations split
-                        # with "," or " / "
-                        vals = re.split(r"\s*,\s*|\s+/\s+", v)
-                        new_vals = []
-                        for v2 in vals:
-                            if v2.startswith("/") and v2.endswith("/"):
-                                # items like /kɛiŋ²¹³⁻⁵³ ^((Ø-))ŋuaŋ³³/
-                                new_vals.append(v2)
-                            else:
-                                # split in parentheses otherwise
-                                new_vals.extend(re.split(r"[()]", v2))
-                        vals = new_vals
-                        for v in vals:
-                            pron = generate_pron(
-                                v, new_parent_hdrs, new_specific_hdrs
-                            )
-                            if pron:
-                                pron["tags"] = list(sorted(pron["tags"]))
-                                if pron not in data.get("sounds", ()):
-                                    data_append(data, "sounds", pron)
-            else:
-                new_parent_hdrs.append(text)
-
-            for x in item.children:
-                if isinstance(x, WikiNode) and x.kind == NodeKind.LIST:
-                    parse_expanded_zh_pron(
-                        x, new_parent_hdrs, specific_hdrs, unknown_header_tags
-                    )
-
-    def parse_chinese_pron(
-        contents: list[WikiNode | str] | WikiNode | str,
-        unknown_header_tags: set[str],
-    ) -> None:
-        if isinstance(contents, list):
-            for item in contents:
-                parse_chinese_pron(item, unknown_header_tags)
-            return
-        if not isinstance(contents, WikiNode):
-            return
-        if contents.kind != NodeKind.TEMPLATE:
-            for item in contents.children:
-                parse_chinese_pron(item, unknown_header_tags)
-            return
-        if (
-            len(contents.largs[0]) == 1
-            and isinstance(contents.largs[0][0], str)
-            and contents.largs[0][0].strip() == "zh-pron"
-        ):
-            src = wxr.wtp.node_to_wikitext(contents)
-            expanded = wxr.wtp.expand(src, templates_to_expand={"zh-pron"})
-            parsed = wxr.wtp.parse(expanded)
-            parse_expanded_zh_pron(parsed, [], [], unknown_header_tags)
-        else:
-            for item in contents.children:
-                parse_chinese_pron(item, unknown_header_tags)
-            return
-
-    if lang_code == "zh":
-        unknown_header_tags: set[str] = set()
-        parse_chinese_pron(contents, unknown_header_tags)
-        for hdr in unknown_header_tags:
-            wxr.wtp.debug(
-                f"Zh-pron header not found in zh_pron_tags or tags: "
-                f"{repr(hdr)}",
-                sortid="pronunciations/296/20230324",
-            )
 
     def flattened_tree(lines: list[WikiNode | str]) -> Iterator[WikiNode | str]:
         assert isinstance(lines, list)
@@ -1057,3 +829,223 @@ def extract_th_pron_template(
 
     clean_node(wxr, word_entry, expanded_node)
     data_extend(word_entry, "sounds", sounds)
+
+
+def extract_zh_pron_template(
+    wxr: WiktextractContext, word_entry: WordData, t_node: TemplateNode
+):
+    # https://en.wiktionary.org/wiki/Template:zh-pron
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    seen_lists = set()
+    sounds = []
+    for list_node in expanded_node.find_child_recursively(NodeKind.LIST):
+        if list_node not in seen_lists:
+            for list_item in list_node.find_child(NodeKind.LIST_ITEM):
+                sounds.extend(
+                    extract_zh_pron_list_item(wxr, list_item, [], seen_lists)
+                )
+    clean_node(wxr, word_entry, expanded_node)
+    data_extend(word_entry, "sounds", sounds)
+
+
+def extract_zh_pron_list_item(
+    wxr: WiktextractContext,
+    list_item: WikiNode,
+    raw_tags: list[str],
+    seen_lists: set[WikiNode],
+) -> list[SoundData]:
+    current_tags = raw_tags[:]
+    sounds = []
+    is_first_small_tag = True
+    for node in list_item.children:
+        if isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
+            link_str = clean_node(wxr, None, node.largs)
+            node_str = clean_node(wxr, None, node)
+            if link_str.startswith("File:"):
+                sound = create_audio_url_dict(link_str.removeprefix("File:"))
+                sound["raw_tags"] = current_tags[:]
+                translate_zh_pron_raw_tags(sound)
+                sounds.append(sound)
+            elif node_str != "":
+                current_tags.append(node_str)
+        elif isinstance(node, HTMLNode):
+            if node.tag == "small":
+                if is_first_small_tag:
+                    raw_tag_text = clean_node(
+                        wxr,
+                        None,
+                        [
+                            n
+                            for n in node.children
+                            if not (isinstance(n, HTMLNode) and n.tag == "sup")
+                        ],
+                    )
+                    current_tags.extend(split_zh_pron_raw_tag(raw_tag_text))
+                elif len(sounds) > 0:
+                    data_extend(
+                        sounds[-1],
+                        "raw_tags",
+                        split_zh_pron_raw_tag(clean_node(wxr, None, node)),
+                    )
+                    translate_zh_pron_raw_tags(sounds[-1])
+                is_first_small_tag = False
+            elif node.tag == "span":
+                sounds.extend(extract_zh_pron_span(wxr, node, current_tags))
+            elif (
+                node.tag == "table"
+                and len(current_tags) > 0
+                and current_tags[-1] == "Homophones"
+            ):
+                sounds.extend(
+                    extract_zh_pron_homophone_table(wxr, node, current_tags)
+                )
+        elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
+            seen_lists.add(node)
+            for child_list_item in node.find_child(NodeKind.LIST_ITEM):
+                sounds.extend(
+                    extract_zh_pron_list_item(
+                        wxr, child_list_item, current_tags, seen_lists
+                    )
+                )
+
+    return sounds
+
+
+def extract_zh_pron_homophone_table(
+    wxr: WiktextractContext, table: HTMLNode, raw_tags: list[str]
+) -> list[SoundData]:
+    sounds = []
+    for td_tag in table.find_html_recursively("td"):
+        for span_tag in td_tag.find_html("span"):
+            span_class = span_tag.attrs.get("class", "")
+            span_lang = span_tag.attrs.get("lang", "")
+            span_str = clean_node(wxr, None, span_tag)
+            if (
+                span_str not in ["", "/"]
+                and span_lang != ""
+                and span_class in ["Hant", "Hans", "Hani"]
+            ):
+                sound = {"homophone": span_str, "raw_tags": raw_tags[:]}
+                if span_class == "Hant":
+                    data_append(sound, "tags", "Traditional-Chinese")
+                elif span_class == "Hans":
+                    data_append(sound, "tags", "Simplified-Chinese")
+                translate_zh_pron_raw_tags(sound)
+                sounds.append(sound)
+
+    return sounds
+
+
+def translate_zh_pron_raw_tags(sound: SoundData):
+    from .zh_pron_tags import ZH_PRON_TAGS
+
+    raw_tags = []
+    for raw_tag in sound.get("raw_tags", []):
+        if raw_tag in ZH_PRON_TAGS:
+            tr_tag = ZH_PRON_TAGS[raw_tag]
+            if isinstance(tr_tag, str):
+                data_append(sound, "tags", tr_tag)
+            elif isinstance(tr_tag, list) and tr_tag not in sound.get(
+                "tags", []
+            ):
+                data_extend(sound, "tags", tr_tag)
+        elif raw_tag in valid_tags:
+            if raw_tag not in sound.get("tags", []):
+                data_append(sound, "tags", raw_tag)
+        elif raw_tag not in raw_tags:
+            raw_tags.append(raw_tag)
+
+    if len(raw_tags) > 0:
+        sound["raw_tags"] = raw_tags
+    elif "raw_tags" in sound:
+        del sound["raw_tags"]
+
+
+def split_zh_pron_raw_tag(raw_tag_text: str) -> list[str]:
+    raw_tags = []
+    if raw_tag_text.startswith("(") and raw_tag_text.endswith(")"):
+        raw_tag_text = raw_tag_text.strip("()")
+    if "(" not in raw_tag_text:
+        for raw_tag in re.split(r",|:| and ", raw_tag_text):
+            raw_tag = raw_tag.strip()
+            if raw_tag != "":
+                raw_tags.append(raw_tag)
+    else:
+        last_offset = 0
+        for match in re.finditer(r"\([^()]+\)", raw_tag_text):
+            raw_tags.extend(
+                split_zh_pron_raw_tag(raw_tag_text[last_offset : match.start()])
+            )
+            raw_tags.extend(
+                split_zh_pron_raw_tag(
+                    raw_tag_text[match.start() + 1 : match.end() - 1]
+                )
+            )
+            last_offset = match.end()
+        raw_tags.extend(split_zh_pron_raw_tag(raw_tag_text[last_offset:]))
+
+    return raw_tags
+
+
+def extract_zh_pron_span(
+    wxr: WiktextractContext, span_tag: HTMLNode, raw_tags: list[str]
+) -> list[SoundData]:
+    sounds = []
+    small_tags = []
+    pron_nodes = []
+    roman = ""
+    for node in span_tag.children:
+        if isinstance(node, HTMLNode) and node.tag == "small":
+            small_tags = split_zh_pron_raw_tag(clean_node(wxr, None, node))
+        elif (
+            isinstance(node, HTMLNode)
+            and node.tag == "span"
+            and "-Latn" in node.attrs.get("lang", "")
+        ):
+            roman = clean_node(wxr, None, node).strip("() ")
+        else:
+            pron_nodes.append(node)
+    for zh_pron in split_zh_pron(clean_node(wxr, None, pron_nodes)):
+        zh_pron = zh_pron.strip()
+        if len(zh_pron) > 0:
+            if "IPA" in span_tag.attrs.get("class", ""):
+                sound = {"ipa": zh_pron, "raw_tags": raw_tags[:]}
+            else:
+                sound = {"zh_pron": zh_pron, "raw_tags": raw_tags[:]}
+            if roman != "":
+                sound["roman"] = roman
+            sounds.append(sound)
+    if len(sounds) > 0:
+        data_extend(sounds[-1], "raw_tags", small_tags)
+    for sound in sounds:
+        translate_zh_pron_raw_tags(sound)
+    return sounds
+
+
+def split_zh_pron(zh_pron: str) -> list[str]:
+    # split by comma and other symbols that outside parentheses
+    parentheses = 0
+    pron_list = []
+    pron = ""
+    for c in zh_pron:
+        if (
+            (c in [",", ";", "→"] or (c == "/" and not zh_pron.startswith("/")))
+            and parentheses == 0
+            and len(pron.strip()) > 0
+        ):
+            pron_list.append(pron.strip())
+            pron = ""
+        elif c == "(":
+            parentheses += 1
+            pron += c
+        elif c == ")":
+            parentheses -= 1
+            pron += c
+        else:
+            pron += c
+
+    if pron.strip() != "":
+        pron_list.append(pron)
+    return pron_list

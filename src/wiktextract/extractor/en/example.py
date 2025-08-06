@@ -18,7 +18,7 @@ def extract_example_list_item(
 ) -> list[ExampleData]:
     examples = []
     for template_node in list_item.find_child(NodeKind.TEMPLATE):
-        if template_node.template_name in ["zh-x", "zh-usex", "zh-q"]:
+        if template_node.template_name in ["zh-x", "zh-usex", "zh-q", "zh-co"]:
             examples.extend(
                 extract_template_zh_x(
                     wxr,

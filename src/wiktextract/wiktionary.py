@@ -353,7 +353,7 @@ def check_dict_list_fields(
                 lang,
                 pos,
                 "{!r} should be a list of dicts: {}".format(
-                    field, json.dumps(lst, sort_keys=True)
+                    field, json.dumps(lst, sort_keys=True, ensure_ascii=False)
                 ),
             )
             return False
@@ -366,7 +366,7 @@ def check_dict_list_fields(
                     lang,
                     pos,
                     "{!r} should be a list of dicts: {}".format(
-                        field, json.dumps(lst, sort_keys=True)
+                        field, json.dumps(x, sort_keys=True, ensure_ascii=False)
                     ),
                 )
                 return False
@@ -611,7 +611,7 @@ def check_json_data(wxr: WiktextractContext, dt: dict) -> None:
     # Check the "sounds" field
     # We will permit having any number of different types (ipa, enpr, etc)
     # in the same sound entry or in different sound entries.
-    sounds = dt.get("sounds") or []
+    sounds = dt.get("sounds", [])
     for item in sounds:
         check_str_fields(
             wxr,
