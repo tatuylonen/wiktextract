@@ -46,12 +46,12 @@ class TestPronunciation(TestCase):
             [
                 {
                     "homophone": "大姑",
-                    "tags": ["Mandarin", "Standard Chinese"],
+                    "tags": ["Mandarin", "Standard-Chinese"],
                     "raw_tags": ["同音詞"],
                 },
                 {
                     "homophone": "小姑",
-                    "tags": ["Mandarin", "Standard Chinese"],
+                    "tags": ["Mandarin", "Standard-Chinese"],
                     "raw_tags": ["同音詞"],
                 },
                 {
@@ -289,25 +289,23 @@ class TestPronunciation(TestCase):
             data[0]["sounds"],
             [
                 {
-                    "raw_tags": ["莆仙語", "莆仙話拼音"],
+                    "tags": ["Puxian-Min", "Pouseng-Ping'ing"],
                     "zh_pron": "doeng¹ gorh⁶",
                 },
                 {
-                    "raw_tags": ["莆仙語", "莆仙話拼音"],
+                    "tags": ["Puxian-Min", "Pouseng-Ping'ing"],
                     "zh_pron": "dyoeng¹ gorh⁶",
                 },
                 {
-                    "raw_tags": [
-                        "漳州",
-                        "臺灣話",
-                        "常用",
-                        "檳城",
-                    ],
                     "tags": [
                         "Min-Nan",
                         "Hokkien",
                         "Xiamen",
                         "Quanzhou",
+                        "Zhangzhou",
+                        "Taiwanese",
+                        "general",
+                        "Penang",
                         "Phak-fa-su",
                     ],
                     "zh_pron": "Tiong-kok",
@@ -467,26 +465,26 @@ class TestPronunciation(TestCase):
                 {"tags": ["Wu", "Shanghai", "Wugniu"], "zh_pron": "⁵meq-li"},
                 {"tags": ["Wu", "Shanghai", "Wugniu"], "zh_pron": "⁵moq-li"},
                 {
-                    "tags": ["Mandarin", "Standard Chinese", "Pinyin"],
+                    "tags": ["Mandarin", "Standard-Chinese", "Pinyin"],
                     "zh_pron": "mòlì",
                 },
                 {
                     "tags": [
                         "Mandarin",
-                        "Standard Chinese",
+                        "Standard-Chinese",
                         "Pinyin",
                         "toneless-final-syllable-variant",
                     ],
                     "zh_pron": "mòli",
                 },
                 {
-                    "tags": ["Mandarin", "Standard Chinese", "Bopomofo"],
+                    "tags": ["Mandarin", "Standard-Chinese", "Bopomofo"],
                     "zh_pron": "ㄇㄛˋ ㄌㄧˋ",
                 },
                 {
                     "tags": [
                         "Mandarin",
-                        "Standard Chinese",
+                        "Standard-Chinese",
                         "Bopomofo",
                         "toneless-final-syllable-variant",
                     ],
@@ -494,16 +492,16 @@ class TestPronunciation(TestCase):
                 },
                 {
                     "roman": "moli",
-                    "tags": ["Mandarin", "Standard Chinese", "Cyrillic"],
+                    "tags": ["Mandarin", "Standard-Chinese", "Cyrillic"],
                     "zh_pron": "моли",
                 },
                 {
                     "ipa": "/mu̯ɔ⁵¹⁻⁵³ li⁵¹/",
-                    "tags": ["Mandarin", "Standard Chinese", "Sinological-IPA"],
+                    "tags": ["Mandarin", "Standard-Chinese", "Sinological-IPA"],
                 },
                 {
                     "ipa": "/mu̯ɔ⁵¹ li¹/",
-                    "tags": ["Mandarin", "Standard Chinese", "Sinological-IPA"],
+                    "tags": ["Mandarin", "Standard-Chinese", "Sinological-IPA"],
                 },
                 {
                     "ipa": "/møyʔ⁵⁻²¹ l̃ɛi²⁴²/",
@@ -512,6 +510,49 @@ class TestPronunciation(TestCase):
                 {
                     "ipa": "/mɛiʔ⁵⁻²¹ l̃ɛi²⁴²/",
                     "tags": ["Min-Dong", "Fuzhou", "IPA"],
+                },
+            ],
+        )
+
+    def test_zh_pron_phonetic(self):
+        self.wxr.wtp.add_page(
+            "Template:zh-pron",
+            10,
+            """<div class="standard-box zhpron"><div class="vsSwitcher" data-toggle-category="發音">
+<div class="vsHide" style="clear:right;">
+<hr>
+* [[Wiktionary:關於漢語/莆仙語|莆仙語]]
+** <small>([[w:莆田話|莆田]])</small>
+*** <small>[[Wiktionary:關於漢語/莆仙語|莆仙話拼音]]</small>：<span class="zhpron-monospace">ging<sup>1</sup> li<sup>3</sup></span><span class="zhpron-monospace"> [<small>實際讀音</small>：ging<sup>5</sup> li<sup>3</sup>]</span>
+</div></div></div>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "經理",
+            """==漢語==
+===發音===
+{{zh-pron
+|m=jīnglǐ
+|cat=n,v
+}}
+===名詞===
+# [[公司]]""",
+        )
+        self.assertEqual(
+            data[0]["sounds"],
+            [
+                {
+                    "tags": ["Puxian-Min", "Putian", "Pouseng-Ping'ing"],
+                    "zh_pron": "ging¹ li³",
+                },
+                {
+                    "tags": [
+                        "Puxian-Min",
+                        "Putian",
+                        "Pouseng-Ping'ing",
+                        "phonetic",
+                    ],
+                    "zh_pron": "ging⁵ li³",
                 },
             ],
         )

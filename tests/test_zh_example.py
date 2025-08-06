@@ -60,7 +60,7 @@ class TestExample(TestCase):
                     "ref": "《尚書·梓材》",
                     "tags": [
                         "Pinyin",
-                        "Classical Chinese",
+                        "Classical-Chinese",
                         "Traditional-Chinese",
                     ],
                     "text": "王曰：「封，以厥庶民暨厥臣達大家，以厥臣達王惟邦君。」",
@@ -74,7 +74,7 @@ class TestExample(TestCase):
                     "ref": "《尚書·梓材》",
                     "tags": [
                         "Pinyin",
-                        "Classical Chinese",
+                        "Classical-Chinese",
                         "Simplified-Chinese",
                     ],
                     "text": "王曰：「封，以厥庶民暨厥臣达大家，以厥臣达王惟邦君。」",
@@ -239,7 +239,7 @@ class TestExample(TestCase):
                     "bold_roman_offsets": [(0, 5)],
                     "tags": [
                         "Traditional-Chinese",
-                        "Classical Chinese",
+                        "Classical-Chinese",
                         "Pinyin",
                     ],
                     "translation": "湯姆叔叔的小屋",
@@ -253,7 +253,7 @@ class TestExample(TestCase):
                     "bold_roman_offsets": [(0, 5)],
                     "tags": [
                         "Simplified-Chinese",
-                        "Classical Chinese",
+                        "Classical-Chinese",
                         "Pinyin",
                     ],
                     "translation": "湯姆叔叔的小屋",
@@ -406,7 +406,7 @@ class TestExample(TestCase):
                     "roman": "Tóngyàng shòudào huānyíng de",
                     "tags": [
                         "Pinyin",
-                        "Standard Chinese",
+                        "Standard-Chinese",
                         "Traditional-Chinese",
                     ],
                     "ref": "2012年，馬嘉蘭、臺灣文學中的性越界，編輯廖炳惠、孫康宜、王德威，《臺灣及其脈絡》第329頁",
@@ -416,7 +416,7 @@ class TestExample(TestCase):
                     "roman": "Tóngyàng shòudào huānyíng de",
                     "tags": [
                         "Pinyin",
-                        "Standard Chinese",
+                        "Standard-Chinese",
                         "Simplified-Chinese",
                     ],
                     "ref": "2012年，馬嘉蘭、臺灣文學中的性越界，編輯廖炳惠、孫康宜、王德威，《臺灣及其脈絡》第329頁",

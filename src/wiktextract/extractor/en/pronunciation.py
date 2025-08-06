@@ -1006,7 +1006,7 @@ def extract_zh_pron_span(
         else:
             pron_nodes.append(node)
     for zh_pron in split_zh_pron(clean_node(wxr, None, pron_nodes)):
-        zh_pron = zh_pron.strip()
+        zh_pron = zh_pron.strip("[]: ")
         if len(zh_pron) > 0:
             if "IPA" in span_tag.attrs.get("class", ""):
                 sound = {"ipa": zh_pron, "raw_tags": raw_tags[:]}
