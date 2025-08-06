@@ -965,11 +965,9 @@ def translate_zh_pron_raw_tags(sound: SoundData):
 
 def split_zh_pron_raw_tag(raw_tag_text: str) -> list[str]:
     raw_tags = []
-    if raw_tag_text.startswith("(") and raw_tag_text.endswith(")"):
-        raw_tag_text = raw_tag_text.strip("()")
     if "(" not in raw_tag_text:
         for raw_tag in re.split(r",|:| and ", raw_tag_text):
-            raw_tag = raw_tag.strip()
+            raw_tag = raw_tag.strip().removeprefix("incl. ").strip()
             if raw_tag != "":
                 raw_tags.append(raw_tag)
     else:

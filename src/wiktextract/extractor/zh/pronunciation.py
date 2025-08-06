@@ -166,13 +166,9 @@ def process_zh_pron_list_item(
 
 def split_zh_pron_raw_tag(raw_tag_text: str) -> list[str]:
     raw_tags = []
-    if raw_tag_text.startswith("(") and raw_tag_text.endswith(")"):
-        raw_tag_text = raw_tag_text.strip("()")
-    if raw_tag_text.startswith("（") and raw_tag_text.endswith("）"):
-        raw_tag_text = raw_tag_text.strip("（）")
     if "(" not in raw_tag_text and "（" not in raw_tag_text:
-        for raw_tag in re.split(r",|，|：|、", raw_tag_text):
-            raw_tag = raw_tag.strip()
+        for raw_tag in re.split(r",|，|：|、|和", raw_tag_text):
+            raw_tag = raw_tag.strip().removeprefix("包括").strip()
             if raw_tag != "":
                 raw_tags.append(raw_tag)
     else:
