@@ -7152,6 +7152,24 @@ infl_map: dict[str, InflMapNode] = {
     # new Finnish verb table stuff takaisinmallintaa/Finnish
     "plur.": "plural",
     "sing.": "singular",
+    # https://en.wiktionary.org/wiki/Template:ka-decl-noun
+    # Georgian postpositional forms
+    "dative-case postpositions": "",
+    "-ზე (-ze, “on”)": "on-position dative",
+    "-თან (-tan, “near”)": "near-position dative",
+    "-ში (-ši, “in”)": "in-position dative",
+    "-ვით (-vit, “like”)": "like-position dative",
+    "genitive-case postpositions": "",
+    "-თვის (-tvis, “for”)": "for-position genitive",
+    "-ებრ (-ebr, “like”)": "like-position genitive",
+    "-კენ (-ḳen, “towards”)": "towards-position genitive",
+    "-გან (-gan, “from/of”)": "from-position genitive",
+    "-ადმი (-admi, “in relation to”)": "in-relation-to-position genitive",
+    "instrumental-case postpositions": "",
+    "-დან (-dan, “from/since”)": "since-position instrumental",
+    "-ურთ (-urt, “together with”)": "together-with-position instrumental",
+    "adverbial-case postpositions": "",
+    "-მდე (-mde, “up to”)": "up-to-position adverbial",
 }
 
 

@@ -6411,6 +6411,23 @@ valid_tags = {
 
     # "zh-pron" template
     "phonetic": "misc",
+
+    # https://en.wiktionary.org/wiki/Template:ka-decl-noun
+    # some useful general "position" tags
+    # Because these postpositions don't seem to have any good
+    # single-word graecolatin terminology used for them
+    "on-position": "misc",
+    "near-position": "misc",
+    "in-position": "misc",
+    "like-position": "misc",
+    "for-position": "misc",
+    "towards-position": "misc",
+    "from-position": "misc",
+    "of-position": "misc",
+    "in-relation-to-position": "misc",
+    "since-position": "misc",
+    "together-with-position": "misc",
+    "up-to-position": "misc",
 }
 
 for k, v in valid_tags.items():
