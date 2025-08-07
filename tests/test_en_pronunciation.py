@@ -536,3 +536,38 @@ class TestPronunciation(TestCase):
                 "Thai terms with audio pronunciation",
             ],
         )
+
+    def test_zh_pron_erhua(self):
+        self.wxr.wtp.add_page(
+            "Template:zh-pron",
+            10,
+            """<div><div class="vsSwitcher" data-toggle-category="pronunciations">
+<div class="vsHide" style="clear:right;">
+<hr>
+* [[w:Mandarin Chinese|Mandarin]]
+** <small>(''[[w:Standard Chinese|Standard Chinese]], [[w:erhua|erhua]]-ed'') (<span class="Hant" lang="cmn">[[:旋兒#Mandarin|旋兒]]</span><span class="Zsym mention" style="font-size:100%;">&nbsp;/ </span><span class="Hans" lang="cmn">[[:旋儿#Mandarin|旋儿]]</span>)</small><sup><small><abbr title="Add Mandarin homophones"><span class="plainlinks">[//en.wiktionary.org/w/index.php?title=Module%3Azh%2Fdata%2Fcmn-hom%2F4&action=edit +]</span></abbr></small></sup>
+*** <small>''[[w:Pinyin|Hanyu Pinyin]]''</small>: <span class="form-of pinyin-ts-form-of" lang="cmn" class="zhpron-monospace"><span class="Latn" lang="cmn">[[:xuánr#Mandarin|xuánr]]</span></span>
+</div></div></div>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "旋",
+            """==Chinese==
+===Pronunciation 1===
+{{zh-pron
+|m=xuán,er=y
+|cat=v,n,adv
+}}
+====Definitions====
+# to [[revolve]]; to [[turn]]""",
+        )
+        self.assertEqual(
+            data[0]["sounds"],
+            [
+                {
+                    "raw_tags": ["旋兒 /旋儿"],
+                    "tags": ["Mandarin", "Standard-Chinese", "Erhua", "Pinyin"],
+                    "zh_pron": "xuánr",
+                }
+            ],
+        )

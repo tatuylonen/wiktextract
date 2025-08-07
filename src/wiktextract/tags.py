@@ -3419,8 +3419,8 @@ xlat_tags_map: Dict[str, Union[str, List[str]]] = {
     "governs the dative": "with-dative",
     "takes dative": "with-dative",
     "takes dative case": "with-dative",
-    "zhuyin": "bopomofo",
-    "Zhuyin": "bopomofo",
+    "zhuyin": "Bopomofo",
+    "Zhuyin": "Bopomofo",
     "East Midland": "East Midlands",
     "Yorkshire & East Midlands": "Yorkshire East-Midlands",
     "+ partitive": "with-partitive",
@@ -5150,7 +5150,7 @@ valid_tags = {
     "Tibetan": "script",  # Script
     "Tirhuta": "script",  # Script (historical: Maithili, Sanskrit)
     "Warang-Citi": "script",  # Script (Ho language, East India)
-    "bopomofo": "script",  # Mandarin phonetic symbols script
+    "Bopomofo": "script",  # Mandarin phonetic symbols script
     "Hán-Nôm": "detail",  # Vietnamese Latin spelling with diacritics?
     "IPA": "detail",
     "pre-1989-IPA": "detail",
@@ -6406,6 +6406,8 @@ valid_tags = {
     "han-viet-reading": "misc",
     "nom-reading": "misc",
 
+    "Traditional-Chinese": "script",
+    "Simplified-Chinese": "script",
 }
 
 for k, v in valid_tags.items():
