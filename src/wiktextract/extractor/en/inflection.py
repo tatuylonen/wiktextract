@@ -1809,6 +1809,38 @@ def parse_simple_table(
                 (alts[i], alts[i + 1], "") for i in range(0, len(alts), 2)
             )
             # evens
+        # Handle complex Georgian entries with alternative forms and*
+        # *romanizations. It's a bit of a mess. Remove this kludge if not
+        # needed anymore. NOTE THAT THE PARENTHESES ON THE WEBSITE ARE NOT
+        # DISPLAYED. They are put inside their own span elements that are
+        # then hidden with some CSS.
+        # https://en.wiktionary.org/wiki/%E1%83%90%E1%83%9B%E1%83%94%E1%83%A0%E1%83%98%E1%83%99%E1%83%98%E1%83%A1_%E1%83%A8%E1%83%94%E1%83%94%E1%83%A0%E1%83%97%E1%83%94%E1%83%91%E1%83%A3%E1%83%9A%E1%83%98_%E1%83%A8%E1%83%A2%E1%83%90%E1%83%A2%E1%83%94%E1%83%91%E1%83%98
+        # ამერიკის შეერთებულ შტატებს(ა) (ameriḳis šeertebul šṭaṭebs(a))
+        # The above should generate two alts entries, with two different
+        # parallel versions, one without (a) and with (a) at the end,
+        # for both the Georgian original and the romanization.
+        elif lang == "Georgian" and len(alts) == 1 and " (" in alts[0]:
+            orig, roman = re.split(r" \(", alts[0], maxsplit=1)
+            orig = orig.strip()
+            roman = roman.strip().removesuffix(")")
+            if "(" not in orig:
+                nalts = [(orig, roman, "")]
+            else:
+                nalts = []
+                nalts.append(
+                    (
+                        re.sub(r"\(.*?\)", "", orig),
+                        re.sub(r"\(.*?\)", "", roman),
+                        "",
+                    )
+                )
+                nalts.append(
+                    (
+                        re.sub(r"\(|\)", "", orig),
+                        re.sub(r"\(|\)", "", roman),
+                        "",
+                    )
+                )
         else:
             new_alts = []
             for alt in alts:
@@ -2457,7 +2489,6 @@ def parse_simple_table(
             if any("dummy-ignored-text-cell" in ts for ts in combined_coltags):
                 continue
 
-            # print("HAVE_TEXT:", repr(col))
             # Split the text into separate forms.  First simplify spaces except
             # newline.
             col = re.sub(r"[ \t\r]+", " ", col)
@@ -3210,17 +3241,17 @@ def handle_wikitext_or_html_table(
 
                     # Too many of these errors
                     if colspan > 100:
-                      # wxr.wtp.error(
-                      #     f"Colspan {colspan} over 30, set to 1",
-                      #     sortid="inflection/20250113a",
-                      # )
-                      colspan = 100
+                        # wxr.wtp.error(
+                        #     f"Colspan {colspan} over 30, set to 1",
+                        #     sortid="inflection/20250113a",
+                        # )
+                        colspan = 100
                     if rowspan > 100:
-                      # wxr.wtp.error(
-                      #     f"Rowspan {rowspan} over 30, set to 1",
-                      #     sortid="inflection/20250113b",
-                      # )
-                      rowspan = 100
+                        # wxr.wtp.error(
+                        #     f"Rowspan {rowspan} over 30, set to 1",
+                        #     sortid="inflection/20250113b",
+                        # )
+                        rowspan = 100
 
                     # Process any nested tables recursively.
                     tables, rest = recursively_extract(
