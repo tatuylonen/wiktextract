@@ -23,6 +23,7 @@ from .form_descriptions import (
     distw,
     parse_head_final_tags,
 )
+from .inflection_kludges import ka_decl_noun_template_cell
 from .inflectiondata import infl_map, infl_start_map, infl_start_re
 from .lang_specific_configs import get_lang_conf, lang_specific_tags
 from .table_headers_heuristics_data import LANGUAGES_WITH_CELLS_AS_HEADERS
@@ -1824,27 +1825,7 @@ def parse_simple_table(
             and len(alts) == 1
             and " (" in alts[0]
         ):
-            orig, roman = re.split(r" \(", alts[0], maxsplit=1)
-            orig = orig.strip()
-            roman = roman.strip().removesuffix(")")
-            if "(" not in orig:
-                nalts = [(orig, roman, "")]
-            else:
-                nalts = []
-                nalts.append(
-                    (
-                        re.sub(r"\(.*?\)", "", orig),
-                        re.sub(r"\(.*?\)", "", roman),
-                        "",
-                    )
-                )
-                nalts.append(
-                    (
-                        re.sub(r"\(|\)", "", orig),
-                        re.sub(r"\(|\)", "", roman),
-                        "",
-                    )
-                )
+            nalts = ka_decl_noun_template_cell(alts)
         else:
             new_alts = []
             for alt in alts:
