@@ -206,6 +206,7 @@ LABEL_TAGS = {
     "反問句": "rhetoric",
     "反身": "reflexive",
     "口語": "colloquial",
+    "口语": "colloquial",
     "古舊": "archaic",
     "可數": "countable",
     "同性戀俚語": ["slang", "LGBT"],
@@ -222,6 +223,8 @@ LABEL_TAGS = {
     "定語": "attributive",
     "實詞": "substantive",
     "尊敬": "honorific",
+    "敬語": "honorific",
+    "敬语": "honorific",
     "常用複數": "plural-normally",
     "幽默": "humorous",
     "序數詞": "ordinal",
@@ -241,6 +244,7 @@ LABEL_TAGS = {
     "新詞": "neologism",
     "方言": "dialectal",
     "書面": "literary",
+    "书面": "literary",
     "有比較級": "comparable",
     "有生": "animate",
     "正式": "formal",
@@ -430,6 +434,11 @@ ZH_PRON_TAGS = {
     "兒化": "Erhua",
 }
 
+ZH_DIAL_TAGS = {
+    "白話文": "Written-vernacular-Chinese",
+    "北京": "Beijing",
+}
+
 
 ALL_TAGS = {
     **GRAMMATICAL_TAGS,
@@ -437,6 +446,7 @@ ALL_TAGS = {
     **ZH_X_TAGS,
     **ZH_TAGS,
     **ZH_PRON_TAGS,
+    **ZH_DIAL_TAGS,
 }
 
 
