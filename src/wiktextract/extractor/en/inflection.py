@@ -1819,7 +1819,11 @@ def parse_simple_table(
         # The above should generate two alts entries, with two different
         # parallel versions, one without (a) and with (a) at the end,
         # for both the Georgian original and the romanization.
-        elif lang == "Georgian" and len(alts) == 1 and " (" in alts[0]:
+        elif (
+            tablecontext.template_name == "ka-decl-noun"
+            and len(alts) == 1
+            and " (" in alts[0]
+        ):
             orig, roman = re.split(r" \(", alts[0], maxsplit=1)
             orig = orig.strip()
             roman = roman.strip().removesuffix(")")
