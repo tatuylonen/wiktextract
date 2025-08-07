@@ -556,3 +556,50 @@ class TestPronunciation(TestCase):
                 },
             ],
         )
+
+    def test_zh_pron_pinyin_erhua_phonetic(self):
+        self.wxr.wtp.add_page(
+            "Template:zh-pron",
+            10,
+            """<div class="standard-box zhpron""><div class="vsSwitcher" data-toggle-category="發音">
+<div class="vsHide" style="clear:right;">
+<hr>
+* [[w:官話|官話]]
+** <small>([[w:現代標準漢語|現代標準漢語]], [[w:兒化|兒化]]) (<span class="Hant" lang="cmn">-{<!-- -->[[一丁點兒#官話|-{一丁點兒}-]]}-</span><span class="Zsym mention" style="font-size:100%;">／</span><span class="Hans" lang="cmn">-{<!-- -->[[一丁点儿#官話|-{一丁点儿}-]]}-</span>)</small><sup><small><abbr title="添加官話同音詞"><span class="plainlinks">[//zh.wiktionary.org/w/index.php?title=Module%3AZh%2Fdata%2Fcmn-hom%2F4&action=edit +]</span></abbr></small></sup>
+*** <small>[[w:漢語拼音|拼音]]</small>：<span class="form-of pinyin-t-form-of transliteration-一丁点" lang="cmn" class="zhpron-monospace"><span class="Latn" lang="cmn">-{<!-- -->[[yīdīngdiǎnr#官話|-{yīdīngdiǎnr}-]]}-</span> [實際讀音：<span style="background-color:#F5DEB3">yì</span>dīngdiǎnr][[Category:有一字而變調為第四聲的官話詞]]</span>
+</div></div></div>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "一丁點",
+            """==漢語==
+===發音===
+{{zh-pron
+|m=一dīngdiǎn,er=y
+|c=jat1 ding1 dim2
+|cat=a
+}}
+===形容詞===
+# 比喻[[稀少]]、極[[微小]]""",
+        )
+        self.assertEqual(
+            data[0]["sounds"],
+            [
+                {
+                    "raw_tags": ["一丁點兒／一丁点儿"],
+                    "tags": ["Mandarin", "Standard-Chinese", "Erhua", "Pinyin"],
+                    "zh_pron": "yīdīngdiǎnr",
+                },
+                {
+                    "raw_tags": ["一丁點兒／一丁点儿"],
+                    "tags": [
+                        "Mandarin",
+                        "Standard-Chinese",
+                        "Erhua",
+                        "Pinyin",
+                        "phonetic",
+                    ],
+                    "zh_pron": "yìdīngdiǎnr",
+                },
+            ],
+        )

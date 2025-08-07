@@ -994,7 +994,8 @@ def extract_zh_pron_span(
     small_tags = []
     pron_nodes = []
     roman = ""
-    for node in span_tag.children:
+    phonetic_pron = ""
+    for index, node in enumerate(span_tag.children):
         if isinstance(node, HTMLNode) and node.tag == "small":
             small_tags = split_zh_pron_raw_tag(clean_node(wxr, None, node))
         elif (
@@ -1003,6 +1004,11 @@ def extract_zh_pron_span(
             and "-Latn" in node.attrs.get("lang", "")
         ):
             roman = clean_node(wxr, None, node).strip("() ")
+        elif isinstance(node, str) and node.strip() == "[Phonetic:":
+            phonetic_pron = clean_node(
+                wxr, None, span_tag.children[index + 1 :]
+            ).strip("] ")
+            break
         else:
             pron_nodes.append(node)
     for zh_pron in split_zh_pron(clean_node(wxr, None, pron_nodes)):
@@ -1017,6 +1023,14 @@ def extract_zh_pron_span(
             sounds.append(sound)
     if len(sounds) > 0:
         data_extend(sounds[-1], "raw_tags", small_tags)
+    if phonetic_pron != "":
+        sound = {
+            "zh_pron": phonetic_pron,
+            "raw_tags": raw_tags[:] + ["Phonetic"],
+        }
+        if roman != "":
+            sound["roman"] = roman
+        sounds.append(sound)
     for sound in sounds:
         translate_zh_pron_raw_tags(sound)
     return sounds
