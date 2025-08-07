@@ -204,20 +204,20 @@ class TestZhLinkage(TestCase):
             s.model_dump(exclude_defaults=True) for s in page_data[0].synonyms
         ]
         self.assertEqual(
-            data[0],
-            {
-                "raw_tags": ["書面語 (白話文)"],
-                "word": "職業",
-            },
-        )
-        self.assertEqual(data[1]["word"], "頭路")
-        self.assertEqual(set(data[1]["raw_tags"]), {"屏東（內埔，南四縣腔）"})
-        self.assertEqual(set(data[1]["tags"]), {"Hakka"})
-        self.assertEqual(data[2]["word"], "生活")
-        self.assertEqual(set(data[2]["tags"]), {"Shanghai", "Wu"})
-        self.assertEqual(data[3]["word"], "飯碗頭")
-        self.assertEqual(
-            set(data[3]["tags"]), {"Shanghai", "Wu", "figuratively"}
+            data,
+            [
+                {
+                    "word": "職業",
+                    "tags": ["literary", "Written-vernacular-Chinese"],
+                },
+                {
+                    "word": "頭路",
+                    "tags": ["Hakka"],
+                    "raw_tags": ["屏東", "內埔", "南四縣腔"],
+                },
+                {"word": "生活", "tags": ["Wu", "Shanghai"]},
+                {"word": "飯碗頭", "tags": ["Wu", "Shanghai", "figuratively"]},
+            ],
         )
 
     def test_level_3_linkage_section(self):
@@ -478,4 +478,56 @@ class TestZhLinkage(TestCase):
         self.assertEqual(
             data[0]["coordinate_terms"],
             [{"word": "2차원", "roman": "ichawon", "sense": "虚构世界"}],
+        )
+
+    def test_zh_dial_note_tag(self):
+        self.wxr.wtp.add_page(
+            "Template:zh-dial",
+            10,
+            """	<div class="NavFrame" data-toggle-category="dialectal synonyms">
+	<div class="NavHead"><span class="Hani" lang="zh">-{<!-- -->[[死#漢語|-{死}-]]}-</span>的各地方言用詞[[Template:zh-dial-map/死|<small>&#91;地圖&#93;</small>]]
+</div>
+	<div class="NavContent" style="border-top:0">
+	{| class="wikitable"
+	|-
+	! 語言
+	! 地區
+	! 詞
+|-
+!rowspan=1 | 冀魯官話
+| [[w:濟南話|濟南]]
+| <span class="Hani" lang="zh">-{<!-- -->[[不在#漢語|-{不在}-]]}-</span>&nbsp;<span style="font-size:60%">†, ‡</span>、<span class="Hant" lang="zh">-{<!-- -->[[歸真#漢語|-{歸真}-]]}-</span>&nbsp;<span style="font-size:60%">回族用語</span>
+|-
+!rowspan=8 | 客家語
+| [[w:四縣話|屏東（內埔，南四縣腔）]]
+| <span class="Hani" lang="zh">-{<!-- -->[[往生#漢語|-{往生}-]]}-</span>&nbsp;<span style="font-size:60%">†</span>
+|-
+! <small>註解</small>
+| colspan=2|<small>† - 委婉; ‡ - 一般用於長者; ¤ - 幽默用語; § - 貶義/不尊重</small>
+|}</div></div>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "仙遊",
+            """==漢語==
+===動詞===
+# [[死]]，[[死亡]]
+====近義詞====
+{{zh-dial|死}}""",
+        )
+        self.assertEqual(
+            data[0]["synonyms"],
+            [
+                {
+                    "raw_tags": ["冀魯官話", "濟南", "一般用於長者"],
+                    "tags": ["euphemistic"],
+                    "word": "不在",
+                },
+                {"raw_tags": ["冀魯官話", "濟南", "回族用語"], "word": "歸真"},
+                {
+                    "raw_tags": ["屏東", "內埔", "南四縣腔"],
+                    "tags": ["Hakka", "euphemistic"],
+                    "word": "往生",
+                },
+            ],
         )
