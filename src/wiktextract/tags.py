@@ -6408,6 +6408,9 @@ valid_tags = {
 
     "Traditional-Chinese": "script",
     "Simplified-Chinese": "script",
+
+    # "zh-pron" template
+    "phonetic": "misc",
 }
 
 for k, v in valid_tags.items():

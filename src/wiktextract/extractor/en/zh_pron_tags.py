@@ -157,4 +157,5 @@ ZH_PRON_TAGS = {
     "Hanyu Pinyin": "Pinyin",
     "toneless final syllable variant": "toneless-final-syllable-variant",
     "Bàng-uâ-cê": "Foochow-Romanized",
+    "Phonetic": "phonetic",
 }

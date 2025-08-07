@@ -287,6 +287,7 @@ LABEL_TAGS = {
     "非完整體": "imperfective",
     "非常罕用": "rare",
     "非標準": "nonstandard",
+    "非标准": "nonstandard",
     "非標準形式": "nonstandard",
     "非正式": "informal",
     "首字母縮略詞": "initialism",
@@ -426,6 +427,7 @@ ZH_PRON_TAGS = {
     "臺灣話": "Taiwanese",
     "常用": "general",
     "檳城": "Penang",
+    "兒化": "Erhua",
 }
 
 
