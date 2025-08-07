@@ -23,6 +23,7 @@ from .form_descriptions import (
     distw,
     parse_head_final_tags,
 )
+from .inflection_kludges import ka_decl_noun_template_cell
 from .inflectiondata import infl_map, infl_start_map, infl_start_re
 from .lang_specific_configs import get_lang_conf, lang_specific_tags
 from .table_headers_heuristics_data import LANGUAGES_WITH_CELLS_AS_HEADERS
@@ -1702,26 +1703,6 @@ def parse_simple_table(
         alts = list(
             re.sub(r"^\((in the sense [^)]*)\)\s+", "", x) for x in alts
         )
-        # Check for parenthesized alternatives, e.g. ripromettersi/Italian
-        if all(
-            re.match(r"\w+( \w+)* \(\w+( \w+)*(, \w+( \w+)*)*\)$", alt)
-            # word word* \(word word*(, word word*)*\)
-            and all(
-                distw([re.sub(r" \(.*", "", alt)], x) < 0.5
-                # Levenshtein distance
-                for x in re.sub(r".*\((.*)\)", r"\1", alt).split(", ")
-            )
-            # Extract from parentheses for testin
-            for alt in alts
-        ):
-            new_alts = []
-            for alt in alts:
-                # Replace parentheses before splitting
-                alt = alt.replace(" (", ", ")
-                alt = alt.replace(")", "")
-                for new_alt in alt.split(", "):
-                    new_alts.append(new_alt)
-            alts = new_alts
         return col, alts, split_extra_tags
 
     def handle_mixed_lines(alts: list[str]) -> list[tuple[str, str, str]]:
@@ -1829,6 +1810,22 @@ def parse_simple_table(
                 (alts[i], alts[i + 1], "") for i in range(0, len(alts), 2)
             )
             # evens
+        # Handle complex Georgian entries with alternative forms and*
+        # *romanizations. It's a bit of a mess. Remove this kludge if not
+        # needed anymore. NOTE THAT THE PARENTHESES ON THE WEBSITE ARE NOT
+        # DISPLAYED. They are put inside their own span elements that are
+        # then hidden with some CSS.
+        # https://en.wiktionary.org/wiki/%E1%83%90%E1%83%9B%E1%83%94%E1%83%A0%E1%83%98%E1%83%99%E1%83%98%E1%83%A1_%E1%83%A8%E1%83%94%E1%83%94%E1%83%A0%E1%83%97%E1%83%94%E1%83%91%E1%83%A3%E1%83%9A%E1%83%98_%E1%83%A8%E1%83%A2%E1%83%90%E1%83%A2%E1%83%94%E1%83%91%E1%83%98
+        # ამერიკის შეერთებულ შტატებს(ა) (ameriḳis šeertebul šṭaṭebs(a))
+        # The above should generate two alts entries, with two different
+        # parallel versions, one without (a) and with (a) at the end,
+        # for both the Georgian original and the romanization.
+        elif (
+            tablecontext.template_name == "ka-decl-noun"
+            and len(alts) == 1
+            and " (" in alts[0]
+        ):
+            nalts = ka_decl_noun_template_cell(alts)
         else:
             new_alts = []
             for alt in alts:
@@ -2477,7 +2474,6 @@ def parse_simple_table(
             if any("dummy-ignored-text-cell" in ts for ts in combined_coltags):
                 continue
 
-            # print("HAVE_TEXT:", repr(col))
             # Split the text into separate forms.  First simplify spaces except
             # newline.
             col = re.sub(r"[ \t\r]+", " ", col)
@@ -3230,17 +3226,17 @@ def handle_wikitext_or_html_table(
 
                     # Too many of these errors
                     if colspan > 100:
-                      # wxr.wtp.error(
-                      #     f"Colspan {colspan} over 30, set to 1",
-                      #     sortid="inflection/20250113a",
-                      # )
-                      colspan = 100
+                        # wxr.wtp.error(
+                        #     f"Colspan {colspan} over 30, set to 1",
+                        #     sortid="inflection/20250113a",
+                        # )
+                        colspan = 100
                     if rowspan > 100:
-                      # wxr.wtp.error(
-                      #     f"Rowspan {rowspan} over 30, set to 1",
-                      #     sortid="inflection/20250113b",
-                      # )
-                      rowspan = 100
+                        # wxr.wtp.error(
+                        #     f"Rowspan {rowspan} over 30, set to 1",
+                        #     sortid="inflection/20250113b",
+                        # )
+                        rowspan = 100
 
                     # Process any nested tables recursively.
                     tables, rest = recursively_extract(
