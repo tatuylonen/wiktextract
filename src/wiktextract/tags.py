@@ -6428,6 +6428,13 @@ valid_tags = {
     "since-position": "misc",
     "together-with-position": "misc",
     "up-to-position": "misc",
+
+    # "zh-dial" template
+    "Written-vernacular-Chinese": "script",
+    "Northeastern-Mandarin": "script",
+    "Jiaoliao-Mandarin": "script",
+    "Central-Plains-Mandarin": "script",
+    "Lanyin-Mandarin": "script",
 }
 
 for k, v in valid_tags.items():

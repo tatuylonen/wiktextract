@@ -519,11 +519,15 @@ class TestZhLinkage(TestCase):
             data[0]["synonyms"],
             [
                 {
-                    "raw_tags": ["冀魯官話", "濟南", "一般用於長者"],
-                    "tags": ["euphemistic"],
+                    "raw_tags": ["一般用於長者"],
+                    "tags": ["Jilu-Mandarin", "Jinan", "euphemistic"],
                     "word": "不在",
                 },
-                {"raw_tags": ["冀魯官話", "濟南", "回族用語"], "word": "歸真"},
+                {
+                    "raw_tags": ["回族用語"],
+                    "tags": ["Jilu-Mandarin", "Jinan"],
+                    "word": "歸真",
+                },
                 {
                     "raw_tags": ["屏東", "內埔", "南四縣腔"],
                     "tags": ["Hakka", "euphemistic"],

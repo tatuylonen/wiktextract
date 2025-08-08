@@ -10,7 +10,7 @@ from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 
 from ...datautils import data_append, data_extend, split_at_comma_semi
 from ...page import clean_node
-from ...tags import linkage_beginning_tags
+from ...tags import linkage_beginning_tags, valid_tags
 from ...wxr_context import WiktextractContext
 from .form_descriptions import (
     classify_desc,
@@ -1102,3 +1102,111 @@ def extract_l_template(
                 for form in forms:
                     form["tags"].extend(tags)
     data_extend(word_entry, "forms", forms)
+
+
+ZH_DIAL_TAGS = {
+    "Classical Chinese": ["Classical-Chinese"],
+    "Formal": ["formal"],
+    "Written Standard Chinese": ["Written-vernacular-Chinese"],
+    "Northeastern Mandarin": ["Northeastern-Mandarin"],
+    "Jilu Mandarin": ["Jilu-Mandarin"],
+    "Jiaoliao Mandarin": ["Jiaoliao-Mandarin"],
+    "Central Plains Mandarin": ["Central-Plains-Mandarin"],
+    "Lanyin Mandarin": ["Lanyin-Mandarin"],
+    "Southwestern Mandarin": ["Southwestern-Mandarin"],
+    "Jianghuai Mandarin": ["Jianghuai-Mandarin"],
+    "Northern Min": ["Min-Bei"],
+    "Eastern Min": ["Min-Dong"],
+    "Southern Min": ["Min-Nan"],
+    "Zhongshan Min": ["Zhongshan-Min"],
+    "Southern Pinghua": ["Southern-Pinghua"],
+}
+
+
+def extract_zh_dial_template(
+    wxr: WiktextractContext, word_entry: WordData, t_node: TemplateNode, sense: str
+):
+    # https://en.wiktionary.org/wiki/Template:zh-dial
+    from .pronunciation import split_zh_pron_raw_tag
+
+    linkage_list = []
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for table_node in expanded_node.find_child_recursively(NodeKind.TABLE):
+        is_note_row = False
+        note_tags = {}
+        for row_node in table_node.find_child(NodeKind.TABLE_ROW):
+            for cell_node in row_node.find_child(
+                NodeKind.TABLE_HEADER_CELL | NodeKind.TABLE_CELL
+            ):
+                if cell_node.kind == NodeKind.TABLE_HEADER_CELL:
+                    is_note_row = clean_node(wxr, None, cell_node) == "Note"
+                elif is_note_row:
+                    for note_str in clean_node(wxr, None, cell_node).split(";"):
+                        if "-" in note_str:
+                            note_symbol, note = note_str.split("-", maxsplit=1)
+                            note_symbol = note_symbol.strip()
+                            note = note.strip()
+                            if note_symbol != "" and note != "":
+                                note_tags[note_symbol] = note
+        lang_tags = []
+        region_tags = []
+        for row_node in table_node.find_child(NodeKind.TABLE_ROW):
+            if not row_node.contain_node(NodeKind.TABLE_CELL):
+                continue  # skip header row
+            for header_node in row_node.find_child(NodeKind.TABLE_HEADER_CELL):
+                lang_tags = split_zh_pron_raw_tag(
+                    clean_node(wxr, None, header_node)
+                )
+            if lang_tags == ["Note"]:  # skip last note row
+                continue
+            for cell_node in row_node.find_child(NodeKind.TABLE_CELL):
+                for link_node in cell_node.find_child(NodeKind.LINK):
+                    region_tags = split_zh_pron_raw_tag(
+                        clean_node(wxr, None, link_node)
+                    )
+                for span_tag in cell_node.find_html("span"):
+                    span_text = clean_node(wxr, None, span_tag)
+                    if span_text == "":
+                        continue
+                    if (
+                        span_tag.attrs.get("lang", "") == "zh"
+                        and span_text != wxr.wtp.title
+                    ):
+                        l_data = {"word": span_text}
+                        if sense != "":
+                            l_data["sense"] = sense
+                        if len(lang_tags) > 0:
+                            data_extend(l_data, "raw_tags", lang_tags)
+                        if len(region_tags) > 0:
+                            data_extend(l_data, "raw_tags", region_tags)
+                        linkage_list.append(l_data)
+                    elif (
+                        span_tag.attrs.get("style", "") == "font-size:60%"
+                        and len(linkage_list) > 0
+                    ):
+                        for note_symbol in span_text.split(","):
+                            note_symbol = note_symbol.strip()
+                            raw_tag = note_symbol
+                            if note_symbol in note_tags:
+                                raw_tag = note_tags[note_symbol]
+                            if raw_tag != "":
+                                data_append(
+                                    linkage_list[-1], "raw_tags", raw_tag
+                                )
+
+        for l_data in linkage_list:
+            raw_tags = []
+            for raw_tag in l_data.get("raw_tags", []):
+                if raw_tag in ZH_DIAL_TAGS:
+                    data_extend(l_data, "tags", ZH_DIAL_TAGS[raw_tag])
+                elif raw_tag in valid_tags:
+                    data_append(l_data, "tags", raw_tag)
+                else:
+                    raw_tags.append(raw_tag)
+            if len(raw_tags) > 0:
+                l_data["raw_tags"] = raw_tags
+            elif "raw_tags" in l_data:
+                del l_data["raw_tags"]
+        data_extend(word_entry, "synonyms", linkage_list)
