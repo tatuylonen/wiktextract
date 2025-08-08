@@ -143,6 +143,11 @@ class EtymologyExample(TypedDict, total=False):
     type: str
 
 
+class AttestationData(TypedDict, total=False):
+    date: str
+    refs: list[str]
+    refns: list[str]
+
 class SenseData(TypedDict, total=False):
     alt_of: list[AltOf]
     antonyms: list[LinkageData]
@@ -169,6 +174,7 @@ class SenseData(TypedDict, total=False):
     topics: list[str]
     wikidata: list[str]
     wikipedia: list[str]
+    attestations: list[AttestationData]
 
 
 class WordData(TypedDict, total=False):
