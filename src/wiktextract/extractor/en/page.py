@@ -5,7 +5,6 @@
 import copy
 import html
 import re
-import sys
 from collections import defaultdict
 from functools import partial
 from typing import (
@@ -24,6 +23,7 @@ from wikitextprocessor.core import TemplateArgs, TemplateFnCallable
 from wikitextprocessor.parser import (
     LEVEL_KIND_FLAGS,
     GeneralNode,
+    LevelNode,
     NodeKind,
     TemplateNode,
     WikiNode,
@@ -61,7 +61,11 @@ from .info_templates import (
     parse_info_template_arguments,
     parse_info_template_node,
 )
-from .linkages import extract_alt_form_section, parse_linkage_item_text
+from .linkages import (
+    extract_alt_form_section,
+    extract_zh_dial_template,
+    parse_linkage_item_text,
+)
 from .parts_of_speech import PARTS_OF_SPEECH
 from .section_titles import (
     COMPOUNDS_TITLE,
@@ -459,15 +463,6 @@ PANEL_TEMPLATES: set[str] = {
     "zh-forms",
     "zh-hanzi-box",
     "no entry",
-}
-
-# lookup table for the tags of Chinese dialectal synonyms
-zh_tag_lookup: dict[str, list[str]] = {
-    "Formal": ["formal"],
-    "Written-Standard-Chinese": ["Standard-Chinese"],
-    "historical or Internet slang": ["historical", "internet-slang"],
-    "now usually derogatory or offensive": ["offensive", "derogatory"],
-    "lofty": [],
 }
 
 # Template name prefixes used for language-specific panel templates (i.e.,
@@ -1659,15 +1654,12 @@ def parse_language(
                             for w in text.split(","):
                                 # ignore - separated references
                                 if "-" in w:
-                                    w = w[:w.index("-")]
+                                    w = w[: w.index("-")]
                                 w = w.strip()
                                 related_readings.append(
-                                    LinkageData(
-                                        word=w, tags=[tag]
-                                    )
+                                    LinkageData(word=w, tags=[tag])
                                 )
                     continue
-
 
                 # Skip the vi-reading template for the rest of the head parsing
                 new_header_nodes.append(node)
@@ -2666,7 +2658,7 @@ def parse_language(
         return ret
 
     def parse_linkage(
-        data: WordData, field: str, linkagenode: WikiNode
+        data: WordData, field: str, linkagenode: LevelNode
     ) -> None:
         assert isinstance(data, dict)
         assert isinstance(field, str)
@@ -2934,165 +2926,29 @@ def parse_language(
                 return ""
             return None
 
-        def parse_zh_synonyms(
-            parsed: list[Union[WikiNode, str]],
-            data: list[LinkageData],
-            hdrs: list[str],
-            root_word: str,
-        ) -> None:
-            """Parses Chinese dialectal synonyms tables"""
-            for item in parsed:
-                if isinstance(item, WikiNode):
-                    if item.kind == NodeKind.TABLE_ROW:
-                        cleaned = clean_node(wxr, None, item.children)
-                        # print("cleaned:", repr(cleaned))
-                        if any(
-                            [
-                                "Variety" in cleaned,
-                                "Location" in cleaned,
-                                "Words" in cleaned,
-                            ]
-                        ):
-                            pass
-                        else:
-                            split = cleaned.split("\n")
-                            new_hdrs = split[:-1]
-                            if len(new_hdrs) == 2:
-                                hdrs = [new_hdrs[0]]
-                                new_hdrs.pop(0)
-                            combined_hdrs = [x.strip() for x in hdrs + new_hdrs]
-                            tags = []
-                            words = split[-1].split(",")
-                            for hdr in combined_hdrs:
-                                hdr = hdr.replace("(", ",")
-                                hdr = hdr.replace(")", "")
-                                hdr = hdr.replace("N.", "Northern,")
-                                hdr = hdr.replace("S.", "Southern,")
-                                new = hdr.split(",")
-                                for tag in sorted(new):
-                                    tag = tag.strip()
-                                    tag = tag.replace(" ", "-")
-                                    if tag in valid_tags:
-                                        tags.append(tag)
-                                    else:
-                                        if tag in zh_tag_lookup:
-                                            tags.extend(zh_tag_lookup[tag])
-                                        else:
-                                            print(
-                                                f"MISSING ZH SYNONYM TAG for "
-                                                f"root {root_word}, word "
-                                                f"{words}: {tag}"
-                                            )
-                                            sys.stdout.flush()
-
-                            for word in words:
-                                data.append(
-                                    {"word": word.strip(), "tags": tags}
-                                )
-                    elif item.kind == NodeKind.HTML:
-                        cleaned = clean_node(wxr, None, item.children)
-                        if "Synonyms of" in cleaned:
-                            cleaned = cleaned.replace("Synonyms of ", "")
-                            root_word = cleaned
-                        parse_zh_synonyms(item.children, data, hdrs, root_word)
-                    else:
-                        parse_zh_synonyms(item.children, data, hdrs, root_word)
-
-        def parse_zh_synonyms_list(
-            parsed: list[Union[WikiNode, str]],
-            data: list[LinkageData],
-            hdrs: list[str],
-            root_word: str,
-        ) -> None:
-            """Parses Chinese dialectal synonyms tables (list format)"""
-            for item in parsed:
-                if isinstance(item, WikiNode):
-                    if item.kind == NodeKind.LIST_ITEM:
-                        cleaned = clean_node(wxr, None, item.children)
-                        # print("cleaned:", repr(cleaned))
-                        if any(
-                            [
-                                "Variety" in cleaned,
-                                "Location" in cleaned,
-                                "Words" in cleaned,
-                            ]
-                        ):
-                            pass
-                        else:
-                            cleaned = cleaned.replace("(", ",")
-                            cleaned = cleaned.replace(")", "")
-                            split = cleaned.split(",")
-                            # skip empty words / titles
-                            if split[0] == "":
-                                continue
-                            words = split[0].split("/")
-                            new_hdrs = [x.strip() for x in split[1:]]
-                            tags = []
-                            roman = None
-                            for tag in sorted(new_hdrs):
-                                if tag in valid_tags:
-                                    tags.append(tag)
-                                elif tag in zh_tag_lookup:
-                                    tags.extend(zh_tag_lookup[tag])
-                                elif (
-                                    classify_desc(tag) == "romanization"
-                                    and roman is None
-                                ):
-                                    roman = tag
-                                else:
-                                    print(
-                                        f"MISSING ZH SYNONYM TAG "
-                                        f"(possibly pinyin) - root "
-                                        f"{root_word}, word {words}: {tag}"
-                                    )
-                                    sys.stdout.flush()
-
-                            for word in words:
-                                dt: LinkageData = {"word": word.strip()}
-                                if tags:
-                                    dt["tags"] = tags
-                                if roman is not None:
-                                    dt["roman"] = roman
-                                data.append(dt)
-                    elif item.kind == NodeKind.HTML:
-                        cleaned = clean_node(wxr, None, item.children)
-                        if cleaned.find("Synonyms of") >= 0:
-                            cleaned = cleaned.replace("Synonyms of ", "")
-                            root_word = cleaned
-                        parse_zh_synonyms_list(
-                            item.children, data, hdrs, root_word
-                        )
-                    else:
-                        parse_zh_synonyms_list(
-                            item.children, data, hdrs, root_word
-                        )
-
-        def contains_kind(
-            children: list[Union[WikiNode, str]], nodekind: NodeKind
-        ) -> bool:
-            assert isinstance(children, list)
-            for item in children:
-                if not isinstance(item, WikiNode):
-                    continue
-                if item.kind == nodekind:
-                    return True
-                elif contains_kind(item.children, nodekind):
-                    return True
-            return False
-
         # Main body of parse_linkage()
-        text = wxr.wtp.node_to_wikitext(linkagenode.children)
+        l_nodes = []
+        l_sense = ""
+        for node in linkagenode.children:
+            if (
+                isinstance(node, TemplateNode)
+                and node.template_name == "zh-dial"
+            ):
+                extract_zh_dial_template(wxr, data, node, l_sense)
+            elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
+                for list_item in node.find_child(NodeKind.LIST_ITEM):
+                    for t_node in list_item.find_child(NodeKind.TEMPLATE):
+                        if t_node.template_name in ["s", "sense"]:
+                            l_sense = clean_node(wxr, None, t_node).strip(
+                                "(): "
+                            )
+                l_nodes.append(node)
+            else:
+                l_nodes.append(node)
+        text = wxr.wtp.node_to_wikitext(l_nodes)
         parsed = wxr.wtp.parse(
             text, expand_all=True, template_fn=linkage_template_fn1
         )
-        if field == "synonyms" and lang_code == "zh":
-            synonyms: list[LinkageData] = []
-            if contains_kind(parsed.children, NodeKind.LIST):
-                parse_zh_synonyms_list(parsed.children, synonyms, [], "")
-            else:
-                parse_zh_synonyms(parsed.children, synonyms, [], "")
-            # print(json.dumps(synonyms, indent=4, ensure_ascii=False))
-            data_extend(data, "synonyms", synonyms)
         parse_linkage_recurse(parsed.children, field, None)
         if not data.get(field) and not have_panel_template:
             text = "".join(toplevel_text).strip()

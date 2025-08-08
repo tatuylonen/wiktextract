@@ -437,6 +437,16 @@ ZH_PRON_TAGS = {
 ZH_DIAL_TAGS = {
     "白話文": "Written-vernacular-Chinese",
     "北京": "Beijing",
+    "燕京官話": "Northeastern-Mandarin",
+    "冀魯官話": "Jilu-Mandarin",
+    "膠遼官話": "Jiaoliao-Mandarin",
+    "中原官話": "Central-Plains-Mandarin",
+    "蘭銀官話": "Lanyin-Mandarin",
+    "西南官話": "Southwestern-Mandarin",
+    "江淮官話": "Jianghuai-Mandarin",
+    "徽語": "Huizhou",
+    "南部平話": "Southern-Pinghua",
+    "濟南": "Jinan",
 }
 
 
