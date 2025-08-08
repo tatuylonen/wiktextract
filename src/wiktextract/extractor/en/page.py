@@ -1935,8 +1935,10 @@ def parse_language(
                 date = clean_node(wxr, None, ht.get(1, ()))
                 refs = []
                 named_refs = []
-                for k, v in ht.items():
-                    if isinstance(k, str) and "ref" in k:
+                for k, v in sorted(
+                    (k, v) for k, v in ht.items() if isinstance(k, str)
+                ):
+                    if "ref" in k:
                         ref_v = clean_node(wxr, None, v)
                         if "n" in k:
                             named_refs.append(ref_v)
@@ -1945,9 +1947,7 @@ def parse_language(
                 data_append(
                     sense_base,
                     "attestations",
-                    AttestationData(
-                        date=date, refs=refs, refns=named_refs
-                    ),
+                    AttestationData(date=date, refs=refs, refns=named_refs),
                 )
                 return ""
             if name == "senseid":
