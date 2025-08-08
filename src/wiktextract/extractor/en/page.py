@@ -81,6 +81,7 @@ from .section_titles import (
 )
 from .translations import parse_translation_item_text
 from .type_utils import (
+    AttestationData,
     DescendantData,
     ExampleData,
     FormData,
@@ -1931,6 +1932,23 @@ def parse_language(
                         return info_exp
                     return ""
             if name in ("defdate",):
+                date = clean_node(wxr, None, ht.get(1, ()))
+                refs = []
+                named_refs = []
+                for k, v in ht.items():
+                    if isinstance(k, str) and "ref" in k:
+                        ref_v = clean_node(wxr, None, v)
+                        if "n" in k:
+                            named_refs.append(ref_v)
+                        else:
+                            refs.append(ref_v)
+                data_append(
+                    sense_base,
+                    "attestations",
+                    AttestationData(
+                        date=date, refs=refs, refns=named_refs
+                    ),
+                )
                 return ""
             if name == "senseid":
                 langid = clean_node(wxr, None, ht.get(1, ()))

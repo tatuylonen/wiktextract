@@ -27,7 +27,7 @@ class EnPageTests(unittest.TestCase):
                 capture_compounds=True,
                 capture_redirects=True,
                 capture_examples=True,
-            )
+            ),
         )
 
     def tearDown(self) -> None:
@@ -902,6 +902,62 @@ alcance
                         },
                     ],
                     "word": "alcance",
+                }
+            ],
+        )
+
+    def test_defdate(self):
+        lst = parse_page(
+            self.wxr,
+            "foo",
+            """
+==Swedish==
+===Noun===
+foo
+
+# sense 1 {{defdate|19th century|ref=Reference Foo|refn=FOO}}
+# sense 2 {{defdate|20th century|ref=Reference Bar|refn=BAR}}
+""",
+        )
+        # XXX should also capture examples
+        self.assertEqual(
+            lst,
+            [
+                {
+                    "lang": "Swedish",
+                    "lang_code": "sv",
+                    "pos": "noun",
+                    "senses": [
+                        {
+                            "glosses": ["sense 1"],
+                            "attestations": [
+                                {
+                                    "date": "19th century",
+                                    "refns": [
+                                        "FOO",
+                                    ],
+                                    "refs": [
+                                        "Reference Foo",
+                                    ],
+                                },
+                            ],
+                        },
+                        {
+                            "glosses": ["sense 2"],
+                            "attestations": [
+                                {
+                                    "date": "20th century",
+                                    "refns": [
+                                        "BAR",
+                                    ],
+                                    "refs": [
+                                        "Reference Bar",
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                    "word": "foo",
                 }
             ],
         )
