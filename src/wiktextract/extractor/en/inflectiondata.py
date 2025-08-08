@@ -7170,6 +7170,8 @@ infl_map: dict[str, InflMapNode] = {
     "-ურთ (-urt, “together with”)": "together-with-position instrumental",
     "adverbial-case postpositions": "",
     "-მდე (-mde, “up to”)": "up-to-position adverbial",
+    # femeie/Romanian
+    "genitive-dative": "genitive dative",
 }
 
 
