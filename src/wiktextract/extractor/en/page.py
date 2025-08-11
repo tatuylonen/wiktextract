@@ -1140,11 +1140,11 @@ def parse_language(
         # print(f"{stack=}")
         if wxr.wtp.subsection is not None:
             return pos_data
+        if inside_level_four:
+            return level_four_data
         if stack[-1] == language:
             return base_data
-        if inside_level_four is False:
-            return etym_data
-        return level_four_data
+        return etym_data
 
     term_label_templates: list[TemplateData] = []
 

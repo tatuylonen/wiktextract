@@ -571,3 +571,109 @@ class TestPronunciation(TestCase):
                 }
             ],
         )
+
+    def test_zh_pron_section(self):
+        self.wxr.wtp.add_page(
+            "Template:zh-pron",
+            10,
+            """{{#switch:{{{cat}}}
+| pron = <div class="standard-box zhpron"><div class="vsSwitcher" data-toggle-category="pronunciations">
+* [[w:Mandarin Chinese|Mandarin]]
+*:<small>(''[[w:Pinyin|Pinyin]]'')</small>: <span class="form-of pinyin-ts-form-of" lang="cmn" class="zhpron-monospace">[[dàjiā#Mandarin|dàjiā]], [[dà'ā#Mandarin|dà'ā]]</span>
+</div></div>
+| n = <div class="standard-box zhpron"><div class="vsSwitcher" data-toggle-category="pronunciations">
+* [[w:Mandarin Chinese|Mandarin]]
+*:<small>(''[[w:Pinyin|Pinyin]]'')</small>: <span class="form-of pinyin-ts-form-of" lang="cmn" class="zhpron-monospace">[[dàgū#Mandarin|dàgū]]</span>
+</div></div>
+}}""",
+        )
+        data = parse_page(
+            self.wxr,
+            "大家",
+            """==Chinese==
+===Pronunciation 1===
+{{zh-pron
+|m=dàjiā,dà'ā,2nb=colloquial
+|cat=pron
+}}
+====Pronoun====
+# [[everyone]]
+
+===Pronunciation 3===
+{{zh-pron
+|m=dàgū
+|cat=n
+}}
+====Noun====
+# 大姑""",
+        )
+        self.assertEqual(
+            data[0]["sounds"],
+            [
+                {"tags": ["Mandarin", "Pinyin"], "zh_pron": "dàjiā"},
+                {"tags": ["Mandarin", "Pinyin"], "zh_pron": "dà'ā"},
+            ],
+        )
+        self.assertEqual(
+            data[1]["sounds"],
+            [{"tags": ["Mandarin", "Pinyin"], "zh_pron": "dàgū"}],
+        )
+
+    def test_zh_pron_under_glyph_origin_and_etymology(self):
+        self.wxr.wtp.add_page(
+            "Template:zh-pron",
+            10,
+            """{{#switch:{{{cat}}}
+| v,n = <div class="standard-box zhpron"><div class="vsSwitcher" data-toggle-category="pronunciations">
+* [[w:Mandarin Chinese|Mandarin]]
+*:<small>(''[[w:Pinyin|Pinyin]]'')</small>: <span class="form-of pinyin-ts-form-of" lang="cmn" class="zhpron-monospace">[[zuò#Mandarin|zuò]], [[zuó#Mandarin|zuó]] ([[zuo4|zuo<sup>4</sup>]], [[zuo2|zuo<sup>2</sup>]])</span>
+</div></div>
+| n,a = <div class="standard-box zhpron"><div class="vsSwitcher" data-toggle-category="pronunciations">
+* [[w:Mandarin Chinese|Mandarin]]
+*:<small>(''[[w:Pinyin|Pinyin]]'')</small>: <span class="form-of pinyin-ts-form-of" lang="cmn" class="zhpron-monospace">[[zuō#Mandarin|zuō]] ([[zuo1|zuo<sup>1</sup>]])</span>
+</div></div>
+}}""",
+        )
+        data = parse_page(
+            self.wxr,
+            "作",
+            """==Chinese==
+===Glyph origin===
+Phono-semantic compound
+===Etymology===
+Derivative: 做
+===Pronunciation 1===
+{{zh-pron
+|m=zuò,zuó,2nb=variant
+|cat=v,n
+}}
+====Definitions====
+# to [[get up]]
+
+===Pronunciation 2===
+{{zh-pron
+|m=zuō
+|cat=n,a
+}}
+====Definitions====
+# [[workshop]]""",
+        )
+        self.assertEqual(
+            data[0]["etymology_text"],
+            "Phono-semantic compound\nDerivative: 做",
+        )
+        self.assertEqual(
+            data[0]["sounds"],
+            [
+                {"tags": ["Mandarin", "Pinyin"], "zh_pron": "zuò"},
+                {"tags": ["Mandarin", "Pinyin"], "zh_pron": "zuó (zuo⁴, zuo²)"},
+            ],
+        )
+        self.assertEqual(
+            data[1]["etymology_text"],
+            "Phono-semantic compound\nDerivative: 做",
+        )
+        self.assertEqual(
+            data[1]["sounds"],
+            [{"tags": ["Mandarin", "Pinyin"], "zh_pron": "zuō (zuo¹)"}],
+        )
