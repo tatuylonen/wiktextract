@@ -143,10 +143,15 @@ class EtymologyExample(TypedDict, total=False):
     type: str
 
 
+class ReferenceData(TypedDict, total=False):
+    text: str
+    refn: str
+
+
 class AttestationData(TypedDict, total=False):
     date: str
-    refs: list[str]
-    refns: list[str]
+    references: list[ReferenceData]
+
 
 class SenseData(TypedDict, total=False):
     alt_of: list[AltOf]
