@@ -81,10 +81,12 @@ from .section_titles import (
 )
 from .translations import parse_translation_item_text
 from .type_utils import (
+    AttestationData,
     DescendantData,
     ExampleData,
     FormData,
     LinkageData,
+    ReferenceData,
     SenseData,
     SoundData,
     TemplateData,
@@ -1931,6 +1933,29 @@ def parse_language(
                         return info_exp
                     return ""
             if name in ("defdate",):
+                date = clean_node(wxr, None, ht.get(1, ()))
+                if part_two := ht.get(2):
+                    # Unicode mdash, not '-'
+                    date += "–" + clean_node(wxr, None, part_two)
+                refs: dict[str, ReferenceData] = {}
+                # ref, refn, ref2, ref2n, ref3, ref3n
+                # ref1 not valid
+                for k, v in sorted(
+                    (k, v) for k, v in ht.items() if isinstance(k, str)
+                ):
+                    if m := re.match(r"ref(\d?)(n?)", k):
+                        ref_v = clean_node(wxr, None, v)
+                        if m.group(1) not in refs:  # empty string or digit
+                            refs[m.group(1)] = ReferenceData()
+                        if m.group(2):
+                            refs[m.group(1)]["refn"] = ref_v
+                        else:
+                            refs[m.group(1)]["text"] = ref_v
+                data_append(
+                    sense_base,
+                    "attestations",
+                    AttestationData(date=date, references=list(refs.values())),
+                )
                 return ""
             if name == "senseid":
                 langid = clean_node(wxr, None, ht.get(1, ()))
