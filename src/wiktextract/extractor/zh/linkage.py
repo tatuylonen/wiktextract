@@ -55,6 +55,7 @@ def extract_linkage_section(
                 raw_tags=l_data.raw_tags,
                 roman=l_data.roman,
                 ruby=l_data.ruby,
+                attestations=l_data.attestations,
             )
             for l_data in linkage_list
         ]
@@ -92,11 +93,23 @@ def process_linkage_list_item(
                     process_ja_r_template(wxr, item_child, sense, raw_tags)
                 )
                 raw_tags.clear()
-            elif item_child.template_name in ["l", "link", "alter"]:
+            elif item_child.template_name.lower() in [
+                "l",
+                "link",
+                "alter",
+                "alt",
+            ]:
                 linkage_list.extend(
                     process_l_template(wxr, item_child, sense, raw_tags)
                 )
                 raw_tags.clear()
+            elif (
+                item_child.template_name.lower() in ["defdate", "datedef"]
+                and len(linkage_list) > 0
+            ):
+                from .gloss import extract_defdate_template
+
+                extract_defdate_template(wxr, linkage_list[-1], item_child)
         elif (
             isinstance(item_child, WikiNode)
             and item_child.kind == NodeKind.LINK

@@ -763,3 +763,24 @@ class TestZhGloss(TestCase):
                 }
             ],
         )
+
+    def test_defdate_in_gloss_list(self):
+        self.wxr.wtp.add_page(
+            "Template:defdate", 10, '<span class="defdate">（自17世紀）</span>'
+        )
+        data = parse_page(
+            self.wxr,
+            "academician",
+            """==英語==
+===名詞===
+# [[大學]][[教師]]；[[學者]] {{defdate|自17世紀}}""",
+        )
+        self.assertEqual(
+            data[0]["senses"],
+            [
+                {
+                    "glosses": ["大學教師；學者"],
+                    "attestations": [{"date": "自17世紀"}],
+                }
+            ],
+        )

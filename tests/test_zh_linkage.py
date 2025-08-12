@@ -535,3 +535,42 @@ class TestZhLinkage(TestCase):
                 },
             ],
         )
+
+    def test_defdate_in_alt_form_section(self):
+        self.wxr.wtp.add_page(
+            "Template:alt",
+            10,
+            '<span class="Latn" lang="en">-{<!-- -->[[putchamin#英語|-{putchamin}-]]}-</span> ',
+        )
+        self.wxr.wtp.add_page(
+            "Template:defdate",
+            10,
+            """<span class="defdate">（17–18世紀）<ref group="">ref 1</ref><ref name="ref name" group="">ref 2</ref></span>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "persimmon",
+            """==英語==
+===替代寫法===
+* {{alt|en|putchamin}} {{defdate|17|18世紀|ref=ref 1|ref2=ref 2|ref2n=ref name}}
+===名詞===
+# [[柿子]]""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {
+                    "attestations": [
+                        {
+                            "date": "17–18世紀",
+                            "references": [
+                                {"text": "ref 1"},
+                                {"text": "ref 2", "refn": "ref name"},
+                            ],
+                        }
+                    ],
+                    "form": "putchamin",
+                    "tags": ["alternative"],
+                }
+            ],
+        )
