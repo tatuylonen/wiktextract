@@ -7,7 +7,7 @@ from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from ..ruby import extract_ruby
 from .example import extract_example_list_item
-from .models import AltForm, Classifier, Sense, WordEntry
+from .models import AltForm, Classifier, Linkage, Sense, WordEntry
 from .tags import translate_raw_tags
 
 # https://zh.wiktionary.org/wiki/Template:Label
@@ -82,6 +82,8 @@ def extract_gloss(
                 elif node.template_name.lower() in ["zh-obsolete", "†", "zh-o"]:
                     if "obsolete" not in gloss_data.tags:
                         gloss_data.tags.append("obsolete")
+                elif node.template_name.lower() in ["defdate", "datedef"]:
+                    extract_defdate_template(wxr, gloss_data, node)
                 else:
                     gloss_nodes.append(node)
             elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
@@ -279,3 +281,24 @@ def extract_zh_abbr_template(
             alt_form.tags.append("Simplified-Chinese")
         if alt_form.word not in ["", "／"]:
             sense.alt_of.append(alt_form)
+
+
+def extract_defdate_template(
+    wxr: WiktextractContext, sense: Sense | Linkage, t_node: TemplateNode
+):
+    from .models import AttestationData, ReferenceData
+
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    date = clean_node(wxr, None, expanded_node).strip("（） ")
+    if date != "":
+        attestation = AttestationData(date=date)
+        for ref_tag in expanded_node.find_html_recursively("ref"):
+            ref_text = clean_node(wxr, None, ref_tag.children)
+            ref_name = ref_tag.attrs.get("name", "")
+            if ref_text != "":
+                attestation.references.append(
+                    ReferenceData(text=ref_text, refn=ref_name)
+                )
+        sense.attestations.append(attestation)

@@ -51,6 +51,16 @@ class Classifier(ChineseBaseModel):
     raw_tags: list[str] = []
 
 
+class ReferenceData(ChineseBaseModel):
+    text: str
+    refn: str = ""
+
+
+class AttestationData(ChineseBaseModel):
+    date: str
+    references: list[ReferenceData] = []
+
+
 class Sense(ChineseBaseModel):
     glosses: list[str] = []
     tags: list[str] = []
@@ -64,6 +74,7 @@ class Sense(ChineseBaseModel):
     alt_of: list[AltForm] = []
     form_of: list[AltForm] = []
     classifiers: list[Classifier] = []
+    attestations: list[AttestationData] = []
 
 
 class Form(ChineseBaseModel):
@@ -77,6 +88,7 @@ class Form(ChineseBaseModel):
     hiragana: str = ""
     roman: str = ""
     sense: str = ""
+    attestations: list[AttestationData] = []
 
 
 class Sound(ChineseBaseModel):
@@ -121,6 +133,7 @@ class Linkage(ChineseBaseModel):
     ruby: list[tuple[str, ...]] = Field(
         default=[], description="Japanese Kanji and furigana"
     )
+    attestations: list[AttestationData] = []
 
 
 class Descendant(ChineseBaseModel):
