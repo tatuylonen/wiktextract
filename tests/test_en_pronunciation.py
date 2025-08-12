@@ -677,3 +677,35 @@ Derivative: 做
             data[1]["sounds"],
             [{"tags": ["Mandarin", "Pinyin"], "zh_pron": "zuō (zuo¹)"}],
         )
+
+    def test_sound_before_etymology(self):
+        self.wxr.wtp.add_page(
+            "Template:IPA",
+            10,
+            """[[Wiktionary:International Phonetic Alphabet|IPA]]<sup>([[Appendix:English pronunciation|key]])</sup>:&#32;<span class="IPA">/ˈtiː/</span>[[Category:English 1-syllable words|TEE]][[Category:English terms with IPA pronunciation|TEE]]""",
+        )
+        data = parse_page(
+            self.wxr,
+            "tee",
+            """==English==
+===Pronunciation===
+* {{IPA|en|/ˈtiː/}}
+
+===Etymology 1===
+Etymology 1
+====Noun====
+# The name of the Latin-script letter T/t.
+====Verb====
+# To redirect output to multiple destinations.
+
+===Etymology 2===
+Etymology 2
+====Noun====
+# A flat area of ground""",
+        )
+        self.assertEqual(data[0]["etymology_text"], "Etymology 1")
+        self.assertEqual(data[0]["etymology_text"], data[1]["etymology_text"])
+        self.assertEqual(data[2]["etymology_text"], "Etymology 2")
+        self.assertEqual(data[0]["sounds"], [{"ipa": "/ˈtiː/"}])
+        self.assertEqual(data[0]["sounds"], data[1]["sounds"])
+        self.assertEqual(data[0]["sounds"], data[2]["sounds"])

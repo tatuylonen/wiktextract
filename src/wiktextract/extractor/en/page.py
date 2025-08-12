@@ -1099,7 +1099,7 @@ def parse_language(
         pos_datas = []
         wxr.wtp.start_subsection(None)
 
-    def push_level_four_section() -> None:
+    def push_level_four_section(clear_sound_data: bool) -> None:
         """Starts collecting data for a new level four sections, which
         is usually virtual and empty, unless the article has Chinese
         'Pronunciation' sections that are etymology-section-like but
@@ -1120,7 +1120,8 @@ def parse_language(
         for data in etym_datas:
             merge_base(data, etym_data)
             page_datas.append(data)
-        level_four_data = {}
+        if clear_sound_data:
+            level_four_data = {}
         level_four_datas = []
         etym_datas = []
 
@@ -1131,9 +1132,12 @@ def parse_language(
         nonlocal have_etym
         nonlocal inside_level_four
         have_etym = True
-        push_level_four_section()
+        push_level_four_section(False)
         inside_level_four = False
-        etym_data = {}
+        # etymology section could under pronunciation section
+        etym_data = (
+            copy.deepcopy(level_four_data) if len(level_four_data) > 0 else {}
+        )
 
     def select_data() -> WordData:
         """Selects where to store data (pos or etym) based on whether we
@@ -3698,7 +3702,7 @@ def parse_language(
                 if t.startswith(PRONUNCIATION_TITLE + " "):
                     # Pronunciation 1, etc, are used in Chinese Glyphs,
                     # and each of them may have senses under Definition
-                    push_level_four_section()
+                    push_level_four_section(True)
                     wxr.wtp.start_subsection(None)
                 if wxr.config.capture_pronunciation:
                     data = select_data()
