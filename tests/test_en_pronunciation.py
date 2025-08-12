@@ -677,3 +677,77 @@ Derivative: 做
             data[1]["sounds"],
             [{"tags": ["Mandarin", "Pinyin"], "zh_pron": "zuō (zuo¹)"}],
         )
+
+    def test_sound_before_etymology(self):
+        self.wxr.wtp.add_page(
+            "Template:IPA",
+            10,
+            """[[Wiktionary:International Phonetic Alphabet|IPA]]<sup>([[Appendix:English pronunciation|key]])</sup>:&#32;<span class="IPA">/ˈtiː/</span>[[Category:English 1-syllable words|TEE]][[Category:English terms with IPA pronunciation|TEE]]""",
+        )
+        data = parse_page(
+            self.wxr,
+            "tee",
+            """==English==
+===Pronunciation===
+* {{IPA|en|/ˈtiː/}}
+
+===Etymology 1===
+Etymology 1
+====Noun====
+# The name of the Latin-script letter T/t.
+====Verb====
+# To redirect output to multiple destinations.
+
+===Etymology 2===
+Etymology 2
+====Noun====
+# A flat area of ground""",
+        )
+        self.assertEqual(data[0]["etymology_text"], "Etymology 1")
+        self.assertEqual(data[0]["etymology_text"], data[1]["etymology_text"])
+        self.assertEqual(data[2]["etymology_text"], "Etymology 2")
+        self.assertEqual(data[0]["sounds"], [{"ipa": "/ˈtiː/"}])
+        self.assertEqual(data[0]["sounds"], data[1]["sounds"])
+        self.assertEqual(data[0]["sounds"], data[2]["sounds"])
+
+    def test_zh_pron_nested_parentheses(self):
+        self.wxr.wtp.add_page(
+            "Template:zh-pron",
+            10,
+            """<div class="standard-box zhpron"><div class="vsSwitcher" data-toggle-category="pronunciations">
+<div class="vsHide" style="clear:right;">
+<hr>
+* [[w:Mandarin Chinese|Mandarin]]
+** <small>(''[[w:Standard Chinese|Standard Chinese]], standard in mainland China (with [[w:erhua|erhua]])'')</small><sup><small><abbr title="Add Mandarin homophones"><span class="plainlinks">[//en.wiktionary.org/w/index.php?title=Module%3Azh%2Fdata%2Fcmn-hom%2F1&action=edit +]</span></abbr></small></sup>
+*** <small>''[[w:Pinyin|Hanyu Pinyin]]''</small>: <span class="form-of pinyin-t-form-of transliteration-断片" lang="cmn" class="zhpron-monospace"><span class="Latn" lang="cmn">[[:duànpiān#Mandarin|duànpiān]]</span></span>
+</div></div></div>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "斷片",
+            """==Chinese==
+===Pronunciation 2===
+{{zh-pron
+|m=duànpiān,duànpiàn,er=y,2er=y,1nb=standard in mainland China (with erhua),2nb=standard in Taiwan
+|c=tyun5 pin3-2
+|cat=v
+}}
+====Verb====
+# to [[break]]""",
+        )
+        self.assertEqual(
+            data[0]["sounds"],
+            [
+                {
+                    "tags": [
+                        "Mandarin",
+                        "Standard-Chinese",
+                        "Mainland-China",
+                        "standard",
+                        "Erhua",
+                        "Pinyin",
+                    ],
+                    "zh_pron": "duànpiān",
+                }
+            ],
+        )

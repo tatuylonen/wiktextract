@@ -971,18 +971,24 @@ def split_zh_pron_raw_tag(raw_tag_text: str) -> list[str]:
             if raw_tag != "":
                 raw_tags.append(raw_tag)
     else:
-        last_offset = 0
+        processed_offsets = []
         for match in re.finditer(r"\([^()]+\)", raw_tag_text):
-            raw_tags.extend(
-                split_zh_pron_raw_tag(raw_tag_text[last_offset : match.start()])
-            )
+            processed_offsets.append((match.start(), match.end()))
             raw_tags.extend(
                 split_zh_pron_raw_tag(
                     raw_tag_text[match.start() + 1 : match.end() - 1]
                 )
             )
-            last_offset = match.end()
-        raw_tags.extend(split_zh_pron_raw_tag(raw_tag_text[last_offset:]))
+        not_processed = ""
+        last_end = 0
+        for start, end in processed_offsets:
+            not_processed += raw_tag_text[last_end:start]
+            last_end = end
+        not_processed += raw_tag_text[last_end:]
+        if not_processed != raw_tag_text:
+            raw_tags = split_zh_pron_raw_tag(not_processed) + raw_tags
+        else:
+            raw_tags.append(not_processed)
 
     return raw_tags
 

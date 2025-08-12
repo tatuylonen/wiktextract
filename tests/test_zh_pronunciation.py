@@ -304,8 +304,8 @@ class TestPronunciation(TestCase):
                         "Quanzhou",
                         "Zhangzhou",
                         "Taiwanese",
-                        "general",
                         "Penang",
+                        "general",
                         "Phak-fa-su",
                     ],
                     "zh_pron": "Tiong-kok",
@@ -601,5 +601,37 @@ class TestPronunciation(TestCase):
                     ],
                     "zh_pron": "yìdīngdiǎnr",
                 },
+            ],
+        )
+
+    def test_zh_pron_unclosed_parentheses(self):
+        # https://zh.wiktionary.org/w/index.php?title=Module:Hak-pron&diff=prev&oldid=9372037
+        self.wxr.wtp.add_page(
+            "Template:zh-pron",
+            10,
+            """<div class="standard-box zhpron"><div class="vsSwitcher" data-toggle-category="發音">
+* [[w:客家語|客家語]]
+*: <small>([[w:海陸客語|海陸]]，[[w:客家語拼音方案|客家語拼音]]</small>：<span class="zhpron-monospace">rhid tin<sup>˖</sup></span></div></div></div>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "一丁點",
+            """==漢語==
+===發音===
+{{zh-pron
+|h=pfs=yit-thin;hrs=h:rhid tin˖
+|cat=a,adv
+}}
+===形容詞===
+# [[規定]]的；[[確定]]不變的""",
+        )
+        self.assertEqual(
+            data[0]["sounds"],
+            [
+                {
+                    "raw_tags": ["(海陸，客家語拼音"],
+                    "tags": ["Hakka"],
+                    "zh_pron": "rhid tin^˖",
+                }
             ],
         )
