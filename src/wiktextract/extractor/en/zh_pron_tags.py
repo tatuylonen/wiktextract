@@ -39,6 +39,7 @@ ZH_PRON_TAGS = {
     "Standard Taiwan": ["Taiwan", "standard"],
     "Standard in Mainland": ["Mainland-China", "standard"],
     "standard in Mainland": ["Mainland-China", "standard"],
+    "standard in mainland China": ["Mainland-China", "standard"],
     "Standard in Taiwan": ["Taiwan", "standard"],
     "standard in Taiwan": ["Taiwan", "standard"],
     "variant in Mainland": ["Mainland-China", "variant"],
@@ -94,6 +95,7 @@ ZH_PRON_TAGS = {
     "literary variant in Taiwan": ["literary", "variant", "Taiwan"],
     "rare variant": ["rare", "variant"],
     "erhua-ed": "Erhua",
+    "with erhua": "Erhua",
     "non-standard variant in Mainland": [
         "nonstandard",
         "variant",
