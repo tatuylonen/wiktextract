@@ -111,6 +111,10 @@ class Hyphenation(BaseModelWrap):
     raw_tags: list[str] = []
 
 
+class Attestation(BaseModelWrap):
+    date: str
+
+
 class WordEntry(BaseModelWrap):
     """
     WordEntry is a dictionary containing lexical information of a single word extracted from Wiktionary with wiktextract.
@@ -155,3 +159,4 @@ class WordEntry(BaseModelWrap):
     cognates: list[Linkage] = []
     morphologies: list[Linkage] = []
     descendants: list[Translation] = []
+    attestations: list[Attestation] = []

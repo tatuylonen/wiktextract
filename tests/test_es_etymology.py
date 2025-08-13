@@ -100,3 +100,30 @@ class TestESEtymology(unittest.TestCase):
             ["DE:Palabras de etimología sin precisar"],
         )
         self.assertTrue("etymology_text" not in page_data[0])
+
+    def test_attestation(self):
+        self.wxr.wtp.add_page(
+            "Plantilla:datación",
+            10,
+            "Atestiguado desde el siglo XIII[[Categoría:EN:Palabras documentadas desde el siglo XIII]]",
+        )
+        data = parse_page(
+            self.wxr,
+            "change",
+            """== {{lengua|en}} ==
+=== Etimología ===
+Del inglés medio changen. {{datación|leng=en|XIII}}.
+
+Desplazó a la palabra inglesa nativa wenden.
+==== {{sustantivo masculino|de}} ====
+;1: Cambio, [[modificación]], [[transformación]].""",
+        )
+        self.assertEqual(data[0]["attestations"], [{"date": "XIII"}])
+        self.assertEqual(
+            data[0]["etymology_text"],
+            "Del inglés medio changen. Atestiguado desde el siglo XIII.\nDesplazó a la palabra inglesa nativa wenden.",
+        )
+        self.assertEqual(
+            data[0]["categories"],
+            ["EN:Palabras documentadas desde el siglo XIII"],
+        )
