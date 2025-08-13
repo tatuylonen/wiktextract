@@ -6,7 +6,8 @@ from wikitextprocessor import NodeKind, TemplateNode, WikiNode
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from ..share import calculate_bold_offsets
-from .models import AltForm, Example, Sense, WordEntry
+from .etymology import ATTESTATION_TEMPLATES, extract_date_template
+from .models import AltForm, AttestationData, Example, Sense, WordEntry
 from .tags import translate_raw_tags
 
 
@@ -33,6 +34,14 @@ def extract_gloss(
         tag_indexes = set()
         for index, gloss_node in enumerate(gloss_nodes):
             if (
+                isinstance(gloss_node, TemplateNode)
+                and gloss_node.template_name in ATTESTATION_TEMPLATES
+            ):
+                gloss_data.attestations = extract_date_template(
+                    wxr, gloss_data, gloss_node
+                )
+                tag_indexes.add(index)
+            elif (
                 isinstance(gloss_node, TemplateNode)
                 and gloss_node.template_name != "équiv-pour"
             ):
@@ -144,7 +153,7 @@ def process_exemple_template(
     wxr: WiktextractContext,
     node: TemplateNode,
     gloss_data: Sense | None,
-    time: str = "",
+    attestations: list[AttestationData] = [],
 ) -> Example:
     # https://fr.wiktionary.org/wiki/Modèle:exemple
     # https://fr.wiktionary.org/wiki/Modèle:ja-exemple
@@ -175,7 +184,7 @@ def process_exemple_template(
         translation=translation,
         roman=transcription,
         ref=source,
-        time=time,
+        attestations=attestations,
     )
     calculate_bold_offsets(
         wxr, text_arg, text, example_data, "bold_text_offsets"

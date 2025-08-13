@@ -10,6 +10,10 @@ class FrenchBaseModel(BaseModel):
     )
 
 
+class AttestationData(FrenchBaseModel):
+    date: str
+
+
 class Example(FrenchBaseModel):
     text: str = Field(default="", description="Example usage sentence")
     bold_text_offsets: list[tuple[int, int]] = []
@@ -25,8 +29,8 @@ class Example(FrenchBaseModel):
         default="",
         description="Source of the sentence, like book title and page number",
     )
-    time: str = Field(
-        default="",
+    attestations: list[AttestationData] = Field(
+        default=[],
         description="For examples in 'Attestations historiques' section",
     )
     note: str = ""
@@ -118,6 +122,7 @@ class Sense(FrenchBaseModel):
     note: str = ""
     alt_of: list[AltForm] = []
     form_of: list[AltForm] = []
+    attestations: list[AttestationData] = []
 
 
 class WordEntry(FrenchBaseModel):
@@ -163,3 +168,4 @@ class WordEntry(FrenchBaseModel):
     notes: list[str] = []
     tags: list[str] = []
     raw_tags: list[str] = []
+    attestations: list[AttestationData] = []

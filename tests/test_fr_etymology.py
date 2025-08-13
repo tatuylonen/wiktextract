@@ -303,7 +303,7 @@ class TestEtymology(TestCase):
             data["etymology_examples"],
             [
                 {
-                    "time": "XVᵉ siècle",
+                    "attestations": [{"date": "XVᵉ siècle"}],
                     "text": "example text",
                     "ref": "source text",
                 }
@@ -408,7 +408,7 @@ class TestEtymology(TestCase):
             data["etymology_examples"],
             [
                 {
-                    "time": "c. 1933",
+                    "attestations": [{"date": "c. 1933"}],
                     "text": "example text",
                     "note": "avec une majuscule et un pilote, un avion léger",
                 }
@@ -433,7 +433,7 @@ class TestEtymology(TestCase):
             data["etymology_examples"],
             [
                 {
-                    "time": "1538",
+                    "attestations": [{"date": "1538"}],
                     "text": "Il faisoit ung billet ouquel il inscripvoit les noms de ceulx qui vouloient estre appellez, lesquelz ilz avoient preadvertyz et sçavoient estre de leur oppinion.",
                     "ref": "Archives de Besançon, dans Revue histor. t. I, page 137",
                 }
@@ -452,3 +452,16 @@ class TestEtymology(TestCase):
 # [[poudre|Poudre]] très [[fin]]e.""",
         )
         self.assertEqual(data[0]["etymology_texts"], ["list 1", "list 2"])
+
+    def test_attestations(self):
+        self.wxr.wtp.add_page("Modèle:date", 10, "({{{1}}})")
+        data = parse_page(
+            self.wxr,
+            "autrice",
+            """== {{langue|fr}} ==
+=== {{S|étymologie}} ===
+: {{date|1477-1478}} Attesté d’abord sous la forme
+=== {{S|nom|fr}} ===
+# [[celle|Celle]]""",
+        )
+        self.assertEqual(data[0]["attestations"], [{"date": "1477-1478"}])

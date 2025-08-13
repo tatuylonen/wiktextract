@@ -17,8 +17,7 @@ class TestFrGloss(TestCase):
         self.wxr = WiktextractContext(
             Wtp(lang_code="fr"),
             WiktionaryConfig(
-                dump_file_lang_code="fr",
-                capture_language_codes=None,
+                dump_file_lang_code="fr", capture_language_codes=None
             ),
         )
 
@@ -725,3 +724,26 @@ class TestFrGloss(TestCase):
             ],
         )
         self.assertEqual(page_data[0].senses[0].glosses, ["gloss."])
+
+    def test_siècle_in_gloss_list(self):
+        self.wxr.wtp.add_page(
+            "Modèle:siècle",
+            10,
+            """<span class="siècle">(<abbr title="16"><small>XVI</small></abbr><sup>e</sup> siècle)</span>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "autrice",
+            """== {{langue|en}} ==
+=== {{S|nom|en}} ===
+# {{siècle|XVI}} [[grand pingouin#fr|Grand pingouin]]""",
+        )
+        self.assertEqual(
+            data[0]["senses"],
+            [
+                {
+                    "glosses": ["Grand pingouin"],
+                    "attestations": [{"date": "XVIᵉ siècle"}],
+                }
+            ],
+        )
