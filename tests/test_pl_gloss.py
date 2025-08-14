@@ -293,3 +293,32 @@ class TestPlGloss(TestCase):
             [{"glosses": ["stosowany"], "sense_index": "1.1"}],
         )
         self.assertEqual(data[1]["lang"], "język polski")
+
+    def test_defdate(self):
+        self.wxr.wtp.add_page(
+            "Szablon:język polski",
+            10,
+            '<span class="lang-code primary-lang-code lang-code-pl" id="pl">[[Słownik języka polskiego|język polski]]</span>',
+        )
+        self.wxr.wtp.add_page(
+            "Szablon:datadef",
+            10,
+            "<small><nowiki>[</nowiki>od 1827<nowiki>]</nowiki></small>",
+        )
+        data = parse_page(
+            self.wxr,
+            "dublet",
+            """== dublet ({{język polski}}) ==
+===znaczenia===
+: (1.1) [[drugi]] {{datadef|od 1827}}""",
+        )
+        self.assertEqual(
+            data[0]["senses"],
+            [
+                {
+                    "glosses": ["drugi"],
+                    "sense_index": "1.1",
+                    "attestations": [{"date": "od 1827"}],
+                }
+            ],
+        )

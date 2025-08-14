@@ -4,7 +4,7 @@ from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
-from .models import AltForm, Sense, WordEntry
+from .models import AltForm, Attestation, Sense, WordEntry
 from .tags import TAGS, translate_raw_tags
 
 # All POS categories
@@ -195,7 +195,12 @@ def process_gloss_list_item(
     gloss_nodes = []
     raw_tags = []
     for gloss_node in list_item_node.children:
-        if isinstance(gloss_node, TemplateNode):
+        if (
+            isinstance(gloss_node, TemplateNode)
+            and gloss_node.template_name == "datadef"
+        ):
+            extract_datedef_template(wxr, sense, gloss_node)
+        elif isinstance(gloss_node, TemplateNode):
             if gloss_node.template_name == "wikipedia":
                 continue
             process_form_of_template(wxr, sense, gloss_node)
@@ -244,3 +249,11 @@ def process_form_of_template(
             wxr, None, template_node.template_parameters.get(1, "")
         )
         sense.form_of.append(AltForm(word=word))
+
+
+def extract_datedef_template(
+    wxr: WiktextractContext, sense: Sense, t_node: TemplateNode
+):
+    date = clean_node(wxr, None, t_node).strip("[] ")
+    if date != "":
+        sense.attestations.append(Attestation(date=date))
