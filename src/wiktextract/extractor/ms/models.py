@@ -28,6 +28,10 @@ class AltForm(MalayBaseModel):
     word: str
 
 
+class Attestation(MalayBaseModel):
+    date: str
+
+
 class Sense(MalayBaseModel):
     glosses: list[str] = []
     tags: list[str] = []
@@ -37,6 +41,7 @@ class Sense(MalayBaseModel):
     examples: list[Example] = []
     form_of: list[AltForm] = []
     alt_of: list[AltForm] = []
+    attestations: list[Attestation] = []
 
 
 class Form(MalayBaseModel):

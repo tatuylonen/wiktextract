@@ -3,7 +3,7 @@ from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .example import extract_example_list_item
-from .models import AltForm, Form, Sense, WordEntry
+from .models import AltForm, Attestation, Form, Sense, WordEntry
 from .section_titles import POS_DATA
 from .tags import translate_raw_tags
 
@@ -87,6 +87,8 @@ def extract_gloss_list_item(
             "context 2",
         ]:
             extract_label_template(wxr, sense, node)
+        elif isinstance(node, TemplateNode) and node.template_name == "defdate":
+            extract_defdate_template(wxr, sense, node)
         elif isinstance(node, TemplateNode) and (
             node.template_name.endswith(" of")
             or node.template_name in FORM_OF_TEMPLATES
@@ -184,3 +186,14 @@ def extract_form_of_template(
                     sense.alt_of.append(AltForm(word=word))
                 else:
                     sense.form_of.append(AltForm(word=word))
+
+
+def extract_defdate_template(
+    wxr: WiktextractContext, sense: Sense, t_node: TemplateNode
+):
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    date = clean_node(wxr, None, expanded_node).strip("[]")
+    if date != "":
+        sense.attestations.append(Attestation(date=date))
