@@ -95,7 +95,9 @@ def process_headword_bold_node(
         if wxr.wtp.title.startswith("不支援的頁面名稱/"):
             # Unsupported titles:
             # https://zh.wiktionary.org/wiki/Appendix:不支援的頁面名稱
+            # https://zh.wiktionary.org/wiki/Special:PrefixIndex/不支援的頁面名稱
             word_entry.word = form
+            word_entry.original_title = wxr.wtp.title
         else:
             word_entry.forms.append(
                 Form(

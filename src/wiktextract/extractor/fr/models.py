@@ -169,3 +169,4 @@ class WordEntry(FrenchBaseModel):
     tags: list[str] = []
     raw_tags: list[str] = []
     attestations: list[AttestationData] = []
+    original_title: str = ""
