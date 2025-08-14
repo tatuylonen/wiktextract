@@ -28,6 +28,10 @@ class AltForm(IndonesianBaseModel):
     word: str
 
 
+class Attestation(IndonesianBaseModel):
+    date: str
+
+
 class Sense(IndonesianBaseModel):
     glosses: list[str] = []
     tags: list[str] = []
@@ -37,6 +41,7 @@ class Sense(IndonesianBaseModel):
     topics: list[str] = []
     alt_of: list[AltForm] = []
     form_of: list[AltForm] = []
+    attestations: list[Attestation] = []
 
 
 class Translation(IndonesianBaseModel):

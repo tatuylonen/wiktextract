@@ -24,6 +24,10 @@ class AltForm(PolishBaseModel):
     word: str
 
 
+class Attestation(PolishBaseModel):
+    date: str
+
+
 class Sense(PolishBaseModel):
     glosses: list[str] = []
     tags: list[str] = []
@@ -35,6 +39,7 @@ class Sense(PolishBaseModel):
     alt_of: list[AltForm] = []
     form_of: list[AltForm] = []
     notes: list[str] = []
+    attestations: list[Attestation] = []
 
 
 class Translation(PolishBaseModel):

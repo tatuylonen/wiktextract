@@ -224,3 +224,27 @@ class TestMsGloss(TestCase):
                 }
             ],
         )
+
+    def test_defdate(self):
+        self.wxr.wtp.add_page(
+            "Templat:defdate",
+            10,
+            '<span class="defdate">[dari abad ke-17]</span>',
+        )
+        data = parse_page(
+            self.wxr,
+            "computer",
+            """==Bahasa Inggeris==
+===Takrifan===
+====Kata nama====
+# [[pengira]]; [[penghitung]]. {{defdate|dari abad ke-17}}""",
+        )
+        self.assertEqual(
+            data[0]["senses"],
+            [
+                {
+                    "glosses": ["pengira; penghitung."],
+                    "attestations": [{"date": "dari abad ke-17"}],
+                }
+            ],
+        )

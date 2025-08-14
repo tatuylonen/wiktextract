@@ -28,6 +28,12 @@ def extract_head_line_nodes(
             "mp",
         ]:
             extract_gramática_template(wxr, word_entry, node)
+        elif isinstance(node, TemplateNode) and node.template_name == "datação":
+            from .etymology import extract_defdate_template
+
+            word_entry.attestations.extend(
+                extract_defdate_template(wxr, word_entry, node)
+            )
         elif (
             isinstance(node, WikiNode)
             and node.kind == NodeKind.BOLD

@@ -197,3 +197,26 @@ class TestIdGloss(TestCase):
             page_data[0]["notes"],
             ["list 1", "list 2", "Lihat pula penggunaan di lema -mu/-nya."],
         )
+
+    def test_defdate(self):
+        self.wxr.wtp.add_page(
+            "Templat:defdate",
+            10,
+            """<span class="defdate"><nowiki>[</nowiki>dari pertengahan abad ke-19.<nowiki>]</nowiki></span>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "kamu",
+            """==bahasa Indonesia==
+===Nomina===
+# [[es teh]] {{defdate|dari pertengahan abad ke-19.}}""",
+        )
+        self.assertEqual(
+            data[0]["senses"],
+            [
+                {
+                    "glosses": ["es teh"],
+                    "attestations": [{"date": "dari pertengahan abad ke-19."}],
+                }
+            ],
+        )
