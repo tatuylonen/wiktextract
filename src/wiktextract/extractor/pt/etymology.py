@@ -2,12 +2,13 @@ from wikitextprocessor.parser import (
     LEVEL_KIND_FLAGS,
     LevelNode,
     NodeKind,
+    TemplateNode,
     WikiNode,
 )
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
-from .models import WordEntry
+from .models import Attestation, WordEntry
 
 
 def extract_etymology_section(
@@ -18,6 +19,7 @@ def extract_etymology_section(
     cats = {}
     e_nodes = []
     e_texts = []
+    attestations = []
     for node in level_node.children:
         if isinstance(node, WikiNode) and node.kind in LEVEL_KIND_FLAGS:
             break
@@ -30,6 +32,8 @@ def extract_etymology_section(
                 e_text = clean_node(wxr, cats, list_item.children)
                 if e_text != "":
                     e_texts.append(e_text)
+        elif isinstance(node, TemplateNode) and node.template_name == "datação":
+            attestations = extract_defdate_template(wxr, cats, node)
         else:
             e_nodes.append(node)
 
@@ -41,3 +45,19 @@ def extract_etymology_section(
         if data.lang_code == page_data[-1].lang_code:
             data.etymology_texts.extend(e_texts)
             data.categories.extend(cats.get("categories", []))
+            data.attestations.extend(attestations)
+
+
+def extract_defdate_template(
+    wxr: WiktextractContext, cats: dict[str, list[str]], t_node: TemplateNode
+) -> list[Attestation]:
+    attestations = []
+    date = (
+        clean_node(wxr, cats, t_node)
+        .removeprefix("(Datação:")
+        .removesuffix(")")
+        .strip()
+    )
+    if date != "":
+        attestations.append(Attestation(date=date))
+    return attestations

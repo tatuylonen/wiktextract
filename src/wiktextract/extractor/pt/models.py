@@ -80,6 +80,10 @@ class Form(PortugueseBaseModel):
     raw_tags: list[str] = []
 
 
+class Attestation(PortugueseBaseModel):
+    date: str
+
+
 class WordEntry(PortugueseBaseModel):
     model_config = ConfigDict(title="Portuguese Wiktionary")
     word: str = Field(description="Word string", min_length=1)
@@ -113,3 +117,4 @@ class WordEntry(PortugueseBaseModel):
     descendants: list[Translation] = []
     abbreviations: list[Linkage] = []
     paronyms: list[Linkage] = []
+    attestations: list[Attestation] = []

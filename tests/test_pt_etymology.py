@@ -50,3 +50,28 @@ class TestPtEtymology(TestCase):
         self.assertEqual(
             data[0]["categories"], ["Entrada de étimo latino (Português)"]
         )
+
+    def test_defdate(self):
+        self.wxr.wtp.add_page("Predefinição:-pt-", 10, "Português")
+        self.wxr.wtp.add_page(
+            "Predefinição:datação",
+            10,
+            """(<span style="color:navy;">''Datação:''</span> 1572)
+[[Categoria:Século XVI (Português)]]""",
+        )
+        data = parse_page(
+            self.wxr,
+            "caos",
+            """={{-pt-}}=
+==Substantivo==
+# espaço
+==Etimologia==
+Do grego antigo χάος “abismo tenebroso”, através do chaos. {{datação|1572|pt}}""",
+        )
+        self.assertEqual(data[0]["categories"], ["Século XVI (Português)"])
+        self.assertEqual(
+            data[0]["etymology_texts"],
+            ["Do grego antigo χάος “abismo tenebroso”, através do chaos."],
+        )
+        self.assertEqual(data[0]["categories"], ["Século XVI (Português)"])
+        self.assertEqual(data[0]["attestations"], [{"date": "1572"}])
