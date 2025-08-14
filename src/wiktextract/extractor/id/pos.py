@@ -10,7 +10,7 @@ from wikitextprocessor.parser import (
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .example import extract_example_list_item
-from .models import AltForm, Example, Form, Sense, WordEntry
+from .models import AltForm, Attestation, Example, Form, Sense, WordEntry
 from .section_titles import POS_DATA
 from .tags import translate_raw_tags
 
@@ -73,6 +73,8 @@ def extract_gloss_list_item(
             "variasi"
         ):
             extract_variasi_template(wxr, sense, node)
+        elif isinstance(node, TemplateNode) and node.template_name == "defdate":
+            extract_defdate_template(wxr, sense, node)
         elif isinstance(node, TemplateNode):
             expanded = clean_node(wxr, sense, node)
             if expanded.startswith("(") and expanded.strip().endswith(
@@ -222,3 +224,14 @@ def extract_usage_section(
     note = clean_node(wxr, word_entry, non_list_nodes)
     if note != "":
         word_entry.notes.append(note)
+
+
+def extract_defdate_template(
+    wxr: WiktextractContext, sense: Sense, t_node: TemplateNode
+):
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    date = clean_node(wxr, None, expanded_node).strip("[]")
+    if date != "":
+        sense.attestations.append(Attestation(date=date))
