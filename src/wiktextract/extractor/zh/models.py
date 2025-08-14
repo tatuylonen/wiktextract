@@ -191,3 +191,4 @@ class WordEntry(ChineseBaseModel):
         description="Soft redirect page, extracted from template zh-see ja-see",
     )
     literal_meaning: str = ""
+    original_title: str = ""

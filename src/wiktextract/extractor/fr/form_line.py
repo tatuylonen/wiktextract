@@ -282,6 +282,8 @@ def process_form_line_bold_node(
     if wxr.wtp.title.startswith("Titres non pris en charge/"):
         # Unsupported titles:
         # https://fr.wiktionary.org/wiki/Annexe:Titres_non_pris_en_charge
+        # https://fr.wiktionary.org/wiki/Spécial:Index/Titres_non_pris_en_charge
         word_entry.word = bold_str
+        word_entry.original_title = wxr.wtp.title
     elif bold_str not in [wxr.wtp.title, ""]:
         word_entry.forms.append(Form(form=bold_str, tags=["canonical"]))
