@@ -109,13 +109,18 @@ def extract_quote_templates(
                 "bold_text_offsets",
             )
         elif "e-translation" in span_class:
-            example_data["english"] = clean_node(wxr, None, span_tag)
+            example_data["translation"] = clean_node(
+                wxr, None, span_tag
+            )  # DEPRECATED for "translation"
+            example_data["english"] = example_data[
+                "translation"
+            ]  # DEPRECATED for "translation"
             calculate_bold_offsets(
                 wxr,
                 span_tag,
-                example_data["english"],
+                example_data["translation"],
                 example_data,
-                "bold_english_offsets",
+                "bold_translation_offsets",
             )
     for i_tag in expanded_node.find_html_recursively(
         "i", attr_name="class", attr_value="e-transliteration"
@@ -172,13 +177,16 @@ def extract_template_ja_usex(
         wxr.wtp.node_to_wikitext(node.template_parameters.get(3, "")),
         expand_all=True,
     )
-    example_data["english"] = clean_node(wxr, None, tr_arg)
+    example_data["translation"] = clean_node(wxr, None, tr_arg)
+    example_data["english"] = example_data[
+        "translation"
+    ]  # DEPRECATED for "translation"
     calculate_bold_offsets(
         wxr,
         tr_arg,
-        example_data["english"],
+        example_data["translation"],
         example_data,
-        "bold_english_offsets",
+        "bold_translation_offsets",
     )
     lit_arg = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(node.template_parameters.get("lit", "")),
@@ -214,13 +222,14 @@ def extract_template_zh_x(
         wxr.wtp.node_to_wikitext(template_node.template_parameters.get(2, "")),
         expand_all=True,
     )
-    example_data["english"] = clean_node(wxr, None, tr_arg)
+    example_data["translation"] = clean_node(wxr, None, tr_arg)
+    example_data["english"] = example_data["translation"]
     calculate_bold_offsets(
         wxr,
         tr_arg,
-        example_data["english"],
+        example_data["translation"],
         example_data,
-        "bold_english_offsets",
+        "bold_translation_offsets",
     )
     lit_arg = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(
@@ -411,13 +420,16 @@ def extract_ux_template(
                 "bold_roman_offsets",
             )
         elif "e-translation" in class_names:
-            example_data["english"] = clean_node(wxr, None, html_node)
+            example_data["translation"] = clean_node(wxr, None, html_node)
+            example_data["english"] = example_data[
+                "translation"
+            ]  # DEPRECATED for "translation"
             calculate_bold_offsets(
                 wxr,
                 html_node,
-                example_data["english"],
+                example_data["translation"],
                 example_data,
-                "bold_english_offsets",
+                "bold_translation_offsets",
             )
         elif "e-literally" in class_names:
             example_data["literal_meaning"] = clean_node(wxr, None, html_node)

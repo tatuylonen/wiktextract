@@ -14,7 +14,8 @@ class AltOf(TypedDict, total=False):
 
 class LinkageData(TypedDict, total=False):
     alt: str
-    english: str
+    english: str  # DEPRECATED in favor of "translation"
+    translation: str
     extra: str
     qualifier: str
     roman: str
@@ -29,8 +30,9 @@ class LinkageData(TypedDict, total=False):
 
 
 class ExampleData(TypedDict, total=False):
-    english: str
-    bold_english_offsets: list[tuple[int, int]]
+    english: str  # DEPRECATED in favor of "translation"
+    translation: str
+    bold_translation_offsets: list[tuple[int, int]]
     note: str
     ref: str
     roman: str
@@ -120,8 +122,10 @@ SoundData = TypedDict(
 
 class TranslationData(TypedDict, total=False):
     alt: str
-    code: str
-    english: str
+    lang_code: str
+    code: str  # DEPRECATED in favor of lang_code
+    english: str  # DEPRECATED in favor of "translation"
+    translation: str
     lang: str
     note: str
     roman: str
@@ -134,7 +138,8 @@ class TranslationData(TypedDict, total=False):
 
 # Xxyzz's East Asian etymology example data
 class EtymologyExample(TypedDict, total=False):
-    english: str
+    english: str  # DEPRECATED in favor of "translation"
+    translation: str
     raw_tags: list[str]
     ref: str
     roman: str
@@ -222,4 +227,4 @@ class WordData(TypedDict, total=False):
     wikidata: list[str]
     wikipedia: list[str]
     word: str
-    anagrams: list[LinkageData] = []
+    anagrams: list[LinkageData]

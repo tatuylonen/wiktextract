@@ -885,7 +885,8 @@ def parse_sense_linkage(
         if topics:
             data_extend(dt, "topics", topics)
         if english:
-            dt["english"] = english
+            dt["english"] = english  # DEPRECATED for "translation"
+            dt["translation"] = english
         if alt:
             dt["alt"] = alt
         data_append(data, field, dt)
@@ -4184,7 +4185,8 @@ def parse_language(
                     if ref:
                         dt["ref"] = ref
                     if tr:
-                        dt["english"] = tr
+                        dt["english"] = tr  # DEPRECATED for "translation"
+                        dt["translation"] = tr
                     if usex_type:
                         dt["type"] = usex_type
                     if note:

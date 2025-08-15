@@ -99,7 +99,12 @@ class EnTrTests(unittest.TestCase):
             data,
             {
                 "translations": [
-                    {"word": "foo", "lang": "Finnish", "code": "fi"},
+                    {
+                        "word": "foo",
+                        "lang": "Finnish",
+                        "code": "fi",  # DEPRECATED for "lang_code"
+                        "lang_code": "fi",
+                    },
                 ]
             },
         )
@@ -113,7 +118,8 @@ class EnTrTests(unittest.TestCase):
                     {
                         "word": "foo",
                         "lang": "Swedish",
-                        "code": "sv",
+                        "code": "sv",  # DEPRECATED for "lang_code"
+                        "lang_code": "sv",
                         "tags": ["feminine"],
                     },
                 ]
@@ -129,7 +135,8 @@ class EnTrTests(unittest.TestCase):
                     {
                         "word": "foo",
                         "lang": "Swedish",
-                        "code": "sv",
+                        "code": "sv",  # DEPRECATED for "lang_code"
+                        "lang_code": "sv",
                         "tags": ["feminine", "masculine"],
                     },
                 ]
@@ -142,7 +149,12 @@ class EnTrTests(unittest.TestCase):
             data,
             {
                 "translations": [
-                    {"word": "foo", "lang": "Swedish", "code": "sv"},
+                    {
+                        "word": "foo",
+                        "lang": "Swedish",
+                        "code": "sv",  # DEPRECATED for "lang_code"
+                        "lang_code": "sv",
+                    },
                 ]
             },
         )
@@ -156,13 +168,15 @@ class EnTrTests(unittest.TestCase):
                     {
                         "word": "foo",
                         "lang": "Swedish",
-                        "code": "sv",
+                        "code": "sv",  # DEPRECATED for "lang_code"
+                        "lang_code": "sv",
                         "tags": ["feminine"],
                     },
                     {
                         "word": "bar",
                         "lang": "Swedish",
-                        "code": "sv",
+                        "code": "sv",  # DEPRECATED for "lang_code"
+                        "lang_code": "sv",
                         "tags": ["masculine"],
                     },
                 ]
@@ -178,7 +192,8 @@ class EnTrTests(unittest.TestCase):
                     {
                         "word": "foo",
                         "lang": "Swedish",
-                        "code": "sv",
+                        "code": "sv",  # DEPRECATED for "lang_code"
+                        "lang_code": "sv",
                         "tags": ["feminine", "plural", "singular"],
                     },
                 ]
@@ -193,7 +208,12 @@ class EnTrTests(unittest.TestCase):
             data,
             {
                 "translations": [
-                    {"word": "foo du", "lang": "Swedish", "code": "sv"},
+                    {
+                        "word": "foo du",
+                        "lang": "Swedish",
+                        "code": "sv",  # DEPRECATED for "lang_code"
+                        "lang_code": "sv",
+                    },
                 ]
             },
         )
@@ -208,7 +228,8 @@ class EnTrTests(unittest.TestCase):
                         "word": "是",
                         "roman": "rrr",
                         "lang": "Chinese Mandarin",
-                        "code": "zh",
+                        "code": "zh",  # DEPRECATED for "lang_code"
+                        "lang_code": "zh",
                     }
                 ]
             },
@@ -225,7 +246,8 @@ class EnTrTests(unittest.TestCase):
                         "word": "寺",
                         "roman": "sì",
                         "lang": "Mandarin",
-                        "code": "zh",
+                        "code": "zh",  # DEPRECATED for "lang_code"
+                        "lang_code": "zh",
                         "topics": [
                             "Buddhist",
                             "Buddhism",
@@ -250,14 +272,16 @@ class EnTrTests(unittest.TestCase):
                         "word": "مَعْبَد‎",
                         "roman": "maʿbad",
                         "lang": "Arabic",
-                        "code": "ar",
+                        "code": "ar",  # DEPRECATED for "lang_code"
+                        "lang_code": "ar",
                         "tags": ["masculine"],
                     },
                     {
                         "word": "هَيْكَل‎",
                         "roman": "haykal",
                         "lang": "Arabic",
-                        "code": "ar",
+                        "code": "ar",  # DEPRECATED for "lang_code"
+                        "lang_code": "ar",
                         "tags": ["masculine"],
                     },
                 ]
@@ -282,13 +306,15 @@ class EnTrTests(unittest.TestCase):
                         "word": "လျှောက်",
                         "roman": "hlyauk",
                         "lang": "Burmese",
-                        "code": "my",
+                        "code": "my",  # DEPRECATED for "lang_code"
+                        "lang_code": "my",
                     },
                     {
                         "word": "လမ်းလျှောက်",
                         "roman": "lam:hlyauk",
                         "lang": "Burmese",
-                        "code": "my",
+                        "code": "my",  # DEPRECATED for "lang_code"
+                        "lang_code": "my",
                     },
                 ]
             },
@@ -303,7 +329,12 @@ class EnTrTests(unittest.TestCase):
             data,
             {
                 "translations": [
-                    {"word": "tämä, testi", "lang": "Finnish", "code": "fi"},
+                    {
+                        "word": "tämä, testi",
+                        "lang": "Finnish",
+                        "code": "fi",  # DEPRECATED for "lang_code"
+                        "lang_code": "fi",
+                    },
                 ]
             },
         )
@@ -317,11 +348,17 @@ class EnTrTests(unittest.TestCase):
             data,
             {
                 "translations": [
-                    {"word": "kävellä", "lang": "Finnish", "code": "fi"},
+                    {
+                        "word": "kävellä",
+                        "lang": "Finnish",
+                        "code": "fi",  # DEPRECATED for "lang_code"
+                        "lang_code": "fi",
+                    },
                     {
                         "word": "käydä",
                         "lang": "Finnish",
-                        "code": "fi",
+                        "code": "fi",  # DEPRECATED for "lang_code"
+                        "lang_code": "fi",
                         "tags": ["archaic", "poetic"],
                     },
                 ]
@@ -341,14 +378,17 @@ class EnTrTests(unittest.TestCase):
                         "word": "шета",
                         "roman": "šeta",
                         "lang": "Macedonian",
-                        "english": "to go for a walk",
-                        "code": "mk",
+                        "english": "to go for a walk",  # DEPRECATED
+                        "translation": "to go for a walk",
+                        "code": "mk",  # DEPRECATED for "lang_code"
+                        "lang_code": "mk",
                     },
                     {
                         "word": "иде",
                         "roman": "ide",
                         "lang": "Macedonian",
-                        "code": "mk",
+                        "code": "mk",  # DEPRECATED for "lang_code"
+                        "lang_code": "mk",
                     },
                 ]
             },
@@ -371,14 +411,16 @@ class EnTrTests(unittest.TestCase):
                         "word": "испари́ться",
                         "roman": "isparítʹsja",
                         "lang": "Russian",
-                        "code": "ru",
+                        "code": "ru",  # DEPRECATED for "lang_code"
+                        "lang_code": "ru",
                         "tags": ["colloquial"],
                     },
                     {
                         "word": "бы́ли вы́несенны",
                         "roman": "býli výnesenny",
                         "lang": "Russian",
-                        "code": "ru",
+                        "code": "ru",  # DEPRECATED for "lang_code"
+                        "lang_code": "ru",
                         "tags": [
                             "?plural",
                             "past",
@@ -401,7 +443,8 @@ class EnTrTests(unittest.TestCase):
                         "word": "ပဏ္ဏ",
                         "roman": "paṇṇa",
                         "lang": "Pali",
-                        "code": "pi",
+                        "code": "pi",  # DEPRECATED for "lang_code"
+                        "lang_code": "pi",
                         "tags": ["Burmese", "neuter"],
                     },
                 ]
@@ -415,7 +458,12 @@ class EnTrTests(unittest.TestCase):
             data,
             {
                 "translations": [
-                    {"word": "foo 11", "lang": "Finnish", "code": "fi"},
+                    {
+                        "word": "foo 11",
+                        "lang": "Finnish",
+                        "code": "fi",  # DEPRECATED for "lang_code"
+                        "lang_code": "fi",
+                    },
                 ]
             },
         )
@@ -430,7 +478,8 @@ class EnTrTests(unittest.TestCase):
                     {
                         "word": "wani",
                         "lang": "Maore Comorian",
-                        "code": "swb",
+                        "code": "swb",  # DEPRECATED for "lang_code"
+                        "lang_code": "swb",
                         "tags": ["class-11", "class-6"],
                     },
                 ]
@@ -447,13 +496,15 @@ class EnTrTests(unittest.TestCase):
                     {
                         "word": "nkásá",
                         "lang": "Lingala",
-                        "code": "ln",
+                        "code": "ln",  # DEPRECATED for "lang_code"
+                        "lang_code": "ln",
                         "tags": ["class-10", "class-9"],
                     },
                     {
                         "word": "lokásá",
                         "lang": "Lingala",
-                        "code": "ln",
+                        "code": "ln",  # DEPRECATED for "lang_code"
+                        "lang_code": "ln",
                         "tags": ["class-10", "class-11"],
                     },
                 ]
@@ -470,13 +521,15 @@ class EnTrTests(unittest.TestCase):
                     {
                         "word": "jani",
                         "lang": "Swahili",
-                        "code": "sw",
+                        "code": "sw",  # DEPRECATED for "lang_code"
+                        "lang_code": "sw",
                         "tags": ["class-5", "class-6"],
                     },
                     {
                         "word": "msahafu",
                         "lang": "Swahili",
-                        "code": "sw",
+                        "code": "sw",  # DEPRECATED for "lang_code"
+                        "lang_code": "sw",
                         "tags": ["class-3", "class-4"],
                     },
                 ]
@@ -493,7 +546,8 @@ class EnTrTests(unittest.TestCase):
                     {
                         "word": "igqabi",
                         "lang": "Xhosa",
-                        "code": "xh",
+                        "code": "xh",  # DEPRECATED for "lang_code"
+                        "lang_code": "xh",
                         "tags": ["class-5", "class-6"],
                     },
                 ]
@@ -510,13 +564,15 @@ class EnTrTests(unittest.TestCase):
                     {
                         "word": "ikhasi",
                         "lang": "Zulu",
-                        "code": "zu",
+                        "code": "zu",  # DEPRECATED for "lang_code"
+                        "lang_code": "zu",
                         "tags": ["class-5", "class-6"],
                     },
                     {
                         "word": "iqabi",
                         "lang": "Zulu",
-                        "code": "zu",
+                        "code": "zu",  # DEPRECATED for "lang_code"
+                        "lang_code": "zu",
                         "tags": ["class-5", "class-6"],
                     },
                 ]
@@ -533,7 +589,8 @@ class EnTrTests(unittest.TestCase):
                     {
                         "word": "ліст",
                         "lang": "Belarusian",
-                        "code": "be",
+                        "code": "be",  # DEPRECATED for "lang_code"
+                        "lang_code": "be",
                         "roman": "list",
                         "tags": ["masculine"],
                     },
@@ -549,7 +606,8 @@ class EnTrTests(unittest.TestCase):
             {
                 "translations": [
                     {
-                        "code": "zh",
+                        "code": "zh",  # DEPRECATED for "lang_code"
+                        "lang_code": "zh",
                         "lang": "Chinese",
                         "tags": ["Puxian-Min"],
                         "word": "foo",
@@ -570,7 +628,8 @@ class EnTrTests(unittest.TestCase):
                     {
                         "word": "foo",
                         "lang": "Danish",
-                        "code": "da",
+                        "code": "da",  # DEPRECATED for "lang_code"
+                        "lang_code": "da",
                         "tags": ["Hallig", "Mooring"],
                     }
                 ]
@@ -587,7 +646,8 @@ class EnTrTests(unittest.TestCase):
                     {
                         "word": "foo",
                         "lang": "Ancient Greek",
-                        "code": "grc",
+                        "code": "grc",  # DEPRECATED for "lang_code"
+                        "lang_code": "grc",
                     }
                 ]
             },
@@ -604,7 +664,12 @@ class EnTrTests(unittest.TestCase):
             data,
             {
                 "translations": [
-                    {"word": "foo", "lang": "Proto-Germanic", "code": "gem-pro"}
+                    {
+                        "word": "foo",
+                        "lang": "Proto-Germanic",
+                        "code": "gem-pro",  # DEPRECATED for "lang_code"
+                        "lang_code": "gem-pro",
+                    }
                 ]
             },
         )
@@ -613,8 +678,8 @@ class EnTrTests(unittest.TestCase):
     # def test_tr7(self):
     #     data = self.runtr("Swedish: foo f or bar m")
     #     self.assertEqual(data, {"translations": [
-    #         {"word": "foo", "lang": "Swedish", "code": "sv",
+    #         {"word": "foo", "lang": "Swedish", "code": "sv", "lang_code": "sv",
     #          "tags": ["feminine"]},
-    #         {"word": "bar", "lang": "Swedish", "code": "sv",
+    #         {"word": "bar", "lang": "Swedish", "code": "sv", "lang_code": "sv",
     #          "tags": ["masculine"]},
     #         ]})

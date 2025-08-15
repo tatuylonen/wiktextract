@@ -2952,9 +2952,11 @@ def parse_translation_desc(
                 # There can be more than one parenthesized english item, see
                 # e.g. Aunt/English/Translations/Tamil
                 if tr.get("english"):
-                    tr["english"] += "; " + par
+                    tr["english"] += "; " + par  # DEPRECATED for "translation"
+                    tr["translation"] += "; " + par
                 else:
-                    tr["english"] = par
+                    tr["english"] = par  # DEPRECATED for "translation"
+                    tr["translation"] = par
         elif cls == "romanization":
             # print("roman text={!r} text cls={}"
             #       .format(text, classify_desc(text)))
@@ -3028,17 +3030,19 @@ def parse_translation_desc(
             data_append(tr, "tags", "masculine")
             tr["roman"] = roman[:-2].strip()
 
-    # If the word now has "english" field but no "roman" field, and
+    # If the word now has "translation" field but no "roman" field, and
     # the word would be classified "other" (generally non-latin
-    # characters), and the value in "english" is only one lowercase
+    # characters), and the value in "translation" is only one lowercase
     # word, move it to "roman".  This happens semi-frequently when the
     # translation is transliterated the same as some English word.
     roman = tr.get("roman")
-    english = tr.get("english")
+    english = tr.get("translation")
     if english and not roman and "word" in tr:
         cls = classify_desc(tr["word"])
         if cls == "other" and " " not in english and english[0].islower():
-            del tr["english"]
+            del tr["translation"]
+            if "english" in tr:  # DEPRECATED for "translation"
+                del tr["english"]
             tr["roman"] = english
 
     # If the entry now has both tr["roman"] and tr["word"] and they have

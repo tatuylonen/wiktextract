@@ -48,13 +48,15 @@ class TestEnExample(TestCase):
                 {
                     "text": "ēasteweard",
                     "bold_text_offsets": [(5, 10)],
-                    "english": "eastward",
+                    "english": "eastward",  # DEPRECATED
+                    "translation": "eastward",
                     "type": "example",
                 },
                 {
                     "text": "tōweard",
                     "bold_text_offsets": [(2, 7)],
-                    "english": "future",
+                    "english": "future",  # DEPRECATED
+                    "translation": "future",
                     "type": "example",
                     "raw_tags": ["adjective and noun"],
                 },
@@ -86,8 +88,9 @@ class TestEnExample(TestCase):
                 {
                     "text": "曹大家",
                     "bold_text_offsets": [(1, 3)],
-                    "english": "Madame Cao",
-                    "bold_english_offsets": [(0, 6)],
+                    "english": "Madame Cao",  # DEPRECATED
+                    "translation": "Madame Cao",
+                    "bold_translation_offsets": [(0, 6)],
                     "roman": "Cáo Dàgū",
                     "bold_roman_offsets": [(4, 8)],
                     "type": "example",

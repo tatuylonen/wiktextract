@@ -542,7 +542,10 @@ def check_json_data(wxr: WiktextractContext, dt: dict) -> None:
             sense,
             ["categories", "topics", "wikidata", "wikipedia"],
         )
-        check_str_fields(wxr, dt, word, lang, pos, sense, ["english"])
+        check_str_fields(
+            wxr, dt, word, lang, pos, sense, ["english"]
+        )  # DEPRECATED in favor of "translation"
+        check_str_fields(wxr, dt, word, lang, pos, sense, ["translation"])
         if not check_dict_list_fields(
             wxr,
             dt,
@@ -601,7 +604,13 @@ def check_json_data(wxr: WiktextractContext, dt: dict) -> None:
                     lang,
                     pos,
                     item,
-                    ["english", "roman", "sense", "taxonomic"],
+                    [
+                        "english",  # DEPRECATED in favor of "translation"
+                        "translation",
+                        "roman",
+                        "sense",
+                        "taxonomic",
+                    ],
                     mandatory=False,
                     empty_ok=True,
                 )
@@ -642,8 +651,10 @@ def check_json_data(wxr: WiktextractContext, dt: dict) -> None:
             item,
             [
                 "alt",
-                "code",
-                "english",
+                "code",  # DEPRECATED for "lang_code"
+                "lang_code"
+                "english",  # DEPRECATED in favor of "translation"
+                "translation",
                 "lang",
                 "note",
                 "roman",
@@ -651,7 +662,7 @@ def check_json_data(wxr: WiktextractContext, dt: dict) -> None:
                 "taxonomic",
             ],
         )
-        if not item.get("code") and not item.get("lang"):
+        if not item.get("lang_code") and not item.get("lang"):
             check_error(
                 wxr,
                 dt,
@@ -659,7 +670,7 @@ def check_json_data(wxr: WiktextractContext, dt: dict) -> None:
                 lang,
                 pos,
                 '"translations" items must contain at least one '
-                'of "code" and "lang" (normally both): {}'.format(
+                'of "lang_code" and "lang" (normally both): {}'.format(
                     json.dumps(item, sort_keys=True, ensure_ascii=False)
                 ),
             )
