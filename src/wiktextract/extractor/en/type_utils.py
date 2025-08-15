@@ -122,7 +122,8 @@ SoundData = TypedDict(
 
 class TranslationData(TypedDict, total=False):
     alt: str
-    code: str
+    lang_code: str
+    code: str  # DEPRECATED in favor of lang_code
     english: str  # DEPRECATED in favor of "translation"
     translation: str
     lang: str

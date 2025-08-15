@@ -651,7 +651,8 @@ def check_json_data(wxr: WiktextractContext, dt: dict) -> None:
             item,
             [
                 "alt",
-                "code",
+                "code",  # DEPRECATED for "lang_code"
+                "lang_code"
                 "english",  # DEPRECATED in favor of "translation"
                 "translation",
                 "lang",
@@ -661,7 +662,7 @@ def check_json_data(wxr: WiktextractContext, dt: dict) -> None:
                 "taxonomic",
             ],
         )
-        if not item.get("code") and not item.get("lang"):
+        if not item.get("lang_code") and not item.get("lang"):
             check_error(
                 wxr,
                 dt,
@@ -669,7 +670,7 @@ def check_json_data(wxr: WiktextractContext, dt: dict) -> None:
                 lang,
                 pos,
                 '"translations" items must contain at least one '
-                'of "code" and "lang" (normally both): {}'.format(
+                'of "lang_code" and "lang" (normally both): {}'.format(
                     json.dumps(item, sort_keys=True, ensure_ascii=False)
                 ),
             )

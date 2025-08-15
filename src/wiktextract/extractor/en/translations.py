@@ -540,7 +540,8 @@ def parse_translation_item_text(
             # Strip language links
             tr: TranslationData = {"lang": lang}
             if langcode:
-                tr["code"] = langcode
+                tr["code"] = langcode # DEPRECATED in favor of "lang_code"
+                tr["lang_code"] = langcode
             if tags:
                 tr["tags"] = list(tags)
                 for ttup in tagsets:
