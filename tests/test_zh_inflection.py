@@ -233,13 +233,18 @@ class TestZhInflection(TestCase):
             self.wxr,
             "大家",
             """==漢語==
+===發音1===
+====名詞====
+# [[眾人]]
+
 ===發音3===
 {{zh-forms|alt=乾家-閩南語,唐家-閩南語,臺家-閩東語}}
 ====名詞====
 # 對[[女子]]的[[尊稱]]""",
         )
+        self.assertTrue("forms" not in data[0])
         self.assertEqual(
-            data[0]["forms"],
+            data[1]["forms"],
             [
                 {
                     "form": "乾家",

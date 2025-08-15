@@ -23,6 +23,7 @@ from wikitextprocessor.core import TemplateArgs, TemplateFnCallable
 from wikitextprocessor.parser import (
     LEVEL_KIND_FLAGS,
     GeneralNode,
+    HTMLNode,
     LevelNode,
     NodeKind,
     TemplateNode,
@@ -84,7 +85,6 @@ from .type_utils import (
     AttestationData,
     DescendantData,
     ExampleData,
-    FormData,
     LinkageData,
     ReferenceData,
     SenseData,
@@ -3668,7 +3668,7 @@ def parse_language(
                 if process_soft_redirect_template(wxr, node, redirect_list):
                     continue
                 elif node.template_name == "zh-forms":
-                    process_zh_forms_templates(wxr, node, base_data)
+                    extract_zh_forms_template(wxr, node, select_data())
 
             if node.kind not in LEVEL_KINDS:
                 # XXX handle e.g. wikipedia links at the top of a language
@@ -4572,44 +4572,136 @@ def process_soft_redirect_template(
     return False
 
 
-def process_zh_forms_templates(
-    wxr: WiktextractContext,
-    template_node: TemplateNode,
-    base_data: WordData,
-) -> None:
+ZH_FORMS_TAGS = {
+    "trad.": "Traditional-Chinese",
+    "simp.": "Simplified-Chinese",
+    "alternative forms": "alternative",
+}
+
+
+def extract_zh_forms_template(
+    wxr: WiktextractContext, t_node: TemplateNode, base_data: WordData
+):
     # https://en.wiktionary.org/wiki/Template:zh-forms
-    if "forms" not in base_data:
-        base_data["forms"] = []
-    for p_name, p_value in template_node.template_parameters.items():
-        if not isinstance(p_name, str):
-            continue
-        if re.fullmatch(r"s\d*", p_name):
-            form_data: FormData = {
-                "form": clean_node(wxr, None, p_value),
-                "tags": ["Simplified-Chinese"],
-            }
-            if len(form_data["form"]) > 0:
-                base_data["forms"].append(form_data)
-        elif re.fullmatch(r"t\d+", p_name):
-            form_data = {
-                "form": clean_node(wxr, None, p_value),
-                "tags": ["Traditional-Chinese"],
-            }
-            if len(form_data["form"]) > 0:
-                base_data["forms"].append(form_data)
-        elif p_name == "alt":
-            for form_text in clean_node(wxr, None, p_value).split(","):
-                texts = form_text.split("-")
-                form_data = {"form": texts[0]}
-                if len(texts) > 1:
-                    # pronunciation data could be added after "-"
-                    # see https://en.wiktionary.org/wiki/新婦
-                    form_data["raw_tags"] = texts[1:]
-                if len(form_data["form"]) > 0:
-                    base_data["forms"].append(form_data)
-        elif p_name == "lit":
-            lit = clean_node(wxr, None, p_value)
-            if lit != "":
-                base_data["literal_meaning"] = lit
-    if len(base_data["forms"]) == 0:
+    lit_meaning = clean_node(
+        wxr, None, t_node.template_parameters.get("lit", "")
+    )
+    if lit_meaning != "":
+        base_data["literal_meaning"] = lit_meaning
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for table in expanded_node.find_child(NodeKind.TABLE):
+        for row in table.find_child(NodeKind.TABLE_ROW):
+            row_header = ""
+            row_header_tags = []
+            header_has_span = False
+            for cell in row.find_child(
+                NodeKind.TABLE_HEADER_CELL | NodeKind.TABLE_CELL
+            ):
+                if cell.kind == NodeKind.TABLE_HEADER_CELL:
+                    row_header, row_header_tags, header_has_span = (
+                        extract_zh_forms_header_cell(wxr, base_data, cell)
+                    )
+                elif not header_has_span:
+                    extract_zh_forms_data_cell(
+                        wxr, base_data, cell, row_header, row_header_tags
+                    )
+
+    if "forms" in base_data and len(base_data["forms"]) == 0:
         del base_data["forms"]
+
+
+def extract_zh_forms_header_cell(
+    wxr: WiktextractContext, base_data: WordData, header_cell: WikiNode
+) -> tuple[str, list[str], bool]:
+    row_header = ""
+    row_header_tags = []
+    header_has_span = False
+    first_span_index = len(header_cell.children)
+    for index, span_tag in header_cell.find_html("span", with_index=True):
+        if index < first_span_index:
+            first_span_index = index
+        header_has_span = True
+    row_header = clean_node(wxr, None, header_cell.children[:first_span_index])
+    for raw_tag in row_header.split(" and "):
+        raw_tag = raw_tag.strip()
+        if raw_tag != "":
+            row_header_tags.append(raw_tag)
+    for span_tag in header_cell.find_html_recursively("span"):
+        span_lang = span_tag.attrs.get("lang", "")
+        form_nodes = []
+        sup_title = ""
+        for node in span_tag.children:
+            if isinstance(node, HTMLNode) and node.tag == "sup":
+                for sup_span in node.find_html("span"):
+                    sup_title = sup_span.attrs.get("title", "")
+            else:
+                form_nodes.append(node)
+        if span_lang in ["zh-Hant", "zh-Hans"]:
+            for word in clean_node(wxr, None, form_nodes).split("/"):
+                if word not in [wxr.wtp.title, ""]:
+                    form = {"form": word}
+                    for raw_tag in row_header_tags:
+                        if raw_tag in ZH_FORMS_TAGS:
+                            data_append(form, "tags", ZH_FORMS_TAGS[raw_tag])
+                        else:
+                            data_append(form, "raw_tags", raw_tag)
+                    if sup_title != "":
+                        data_append(form, "raw_tags", sup_title)
+                    data_append(base_data, "forms", form)
+    return row_header, row_header_tags, header_has_span
+
+
+def extract_zh_forms_data_cell(
+    wxr: WiktextractContext,
+    base_data: WordData,
+    cell: WikiNode,
+    row_header: str,
+    row_header_tags: list[str],
+):
+    from .zh_pron_tags import ZH_PRON_TAGS
+
+    for top_span_tag in cell.find_html("span"):
+        forms = []
+        for span_tag in top_span_tag.find_html("span"):
+            span_lang = span_tag.attrs.get("lang", "")
+            if span_lang in ["zh-Hant", "zh-Hans", "zh"]:
+                word = clean_node(wxr, None, span_tag)
+                if word not in ["", "／", wxr.wtp.title]:
+                    form = {"form": word}
+                    if row_header != "anagram":
+                        for raw_tag in row_header_tags:
+                            if raw_tag in ZH_FORMS_TAGS:
+                                data_append(form, "tags", ZH_FORMS_TAGS[raw_tag])
+                            else:
+                                data_append(form, "raw_tags", raw_tag)
+                    if span_lang == "zh-Hant":
+                        data_append(form, "tags", "Traditional-Chinese")
+                    elif span_lang == "zh-Hans":
+                        data_append(form, "tags", "Simplified-Chinese")
+                    forms.append(form)
+            elif "font-size:80%" in span_tag.attrs.get("style", ""):
+                raw_tag = clean_node(wxr, None, span_tag)
+                if raw_tag != "":
+                    for form in forms:
+                        if raw_tag in ZH_PRON_TAGS:
+                            tr_tag = ZH_PRON_TAGS[raw_tag]
+                            if isinstance(tr_tag, list):
+                                data_extend(form, "tags", tr_tag)
+                            elif isinstance(tr_tag, str):
+                                data_append(form, "tags", tr_tag)
+                        elif raw_tag in valid_tags:
+                            data_append(form, "tags", raw_tag)
+                        else:
+                            data_append(form, "raw_tags", raw_tag)
+
+        if row_header == "anagram":
+            for form in forms:
+                l_data = {"word": form["form"]}
+                for key in ["tags", "raw_tags"]:
+                    if key in form:
+                        l_data[key] = form[key]
+                data_append(base_data, "anagrams", l_data)
+        else:
+            data_extend(base_data, "forms", forms)

@@ -980,3 +980,46 @@ foo
                 }
             ],
         )
+
+    def test_zh_forms_under_pron(self):
+        self.wxr.wtp.add_page(
+            "Template:zh-forms",
+            10,
+            """{| class="floatright"
+|-
+! colspan="2" |[[Simplified Chinese|simp.]] and [[Traditional Chinese|trad.]]<br><span style="font-size:140%">(<span lang="zh-Hani" class="Hani">[[:大家#Chinese|大家]]</span>)</span>
+| [[:大#Chinese|大]]
+| [[:家#Chinese|家]]
+|-
+! colspan="2" |alternative forms
+| colspan="2"|<span style="white-space:nowrap;"><span class="Hant" lang="zh-Hant">[[乾家#Chinese|乾家]]</span><span class="Hani" lang="zh">／</span><span class="Hans" lang="zh-Hans">[[干家#Chinese|干家]]</span> <span style="font-size:80%"><i>Min Nan</i></span></span><br><span style="white-space:nowrap;"><span class="Hani" lang="zh">[[唐家#Chinese|唐家]]</span> <span style="font-size:80%"><i>Min Nan</i></span></span>
+}}""",
+        )
+        data = parse_page(
+            self.wxr,
+            "大家",
+            """==漢語==
+===Pronunciation 1===
+====Pronoun====
+# [[everyone]]
+
+===Pronunciation 3===
+{{zh-forms|alt=乾家-Min Nan,唐家-Min Nan,臺家-Eastern Min}}
+====Noun====
+# alternative form of 大姑""",
+        )
+        self.assertTrue("forms" not in data[0])
+        self.assertEqual(
+            data[1]["forms"],
+            [
+                {
+                    "form": "乾家",
+                    "tags": ["alternative", "Traditional-Chinese", "Min-Nan"],
+                },
+                {
+                    "form": "干家",
+                    "tags": ["alternative", "Simplified-Chinese", "Min-Nan"],
+                },
+                {"form": "唐家", "tags": ["alternative", "Min-Nan"]},
+            ],
+        )
