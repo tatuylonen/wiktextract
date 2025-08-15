@@ -291,10 +291,8 @@ def process_soft_redirect_template(
 
 
 def process_zh_forms(
-    wxr: WiktextractContext,
-    base_data: WordEntry,
-    t_node: TemplateNode,
-) -> None:
+    wxr: WiktextractContext, base_data: WordEntry, t_node: TemplateNode
+):
     # https://zh.wiktionary.org/wiki/Template:zh-forms
     base_data.literal_meaning = clean_node(
         wxr, None, t_node.template_parameters.get("lit", "")

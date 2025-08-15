@@ -222,3 +222,4 @@ class WordData(TypedDict, total=False):
     wikidata: list[str]
     wikipedia: list[str]
     word: str
+    anagrams: list[LinkageData] = []
