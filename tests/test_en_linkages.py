@@ -259,7 +259,16 @@ class EnLinkageTests(unittest.TestCase):
     def test_simple26(self):
         data = self.run_data('foo "a horse"')
         self.assertEqual(
-            data, {"related": [{"word": "foo", "english": "a horse"}]}
+            data,
+            {
+                "related": [
+                    {
+                        "word": "foo",
+                        "english": "a horse",  # DEPRECATED
+                        "translation": "a horse",
+                    }
+                ]
+            },
         )
 
     def test_simple27(self):
@@ -402,7 +411,16 @@ class EnLinkageTests(unittest.TestCase):
     def test_taxonomic1(self):
         data = self.run_data("Hominidae - family")
         self.assertEqual(
-            data, {"related": [{"english": "family", "word": "Hominidae"}]}
+            data,
+            {
+                "related": [
+                    {
+                        "english": "family",  # DEPRECATED
+                        "translation": "family",
+                        "word": "Hominidae",
+                    }
+                ]
+            },
         )
 
     def test_taxonomic2(self):
@@ -411,8 +429,16 @@ class EnLinkageTests(unittest.TestCase):
             data,
             {
                 "related": [
-                    {"english": "family", "word": "Aotidae"},
-                    {"english": "family", "word": "Atelidae"},
+                    {
+                        "english": "family",  # DEPRECATED
+                        "translation": "family",
+                        "word": "Aotidae",
+                    },
+                    {
+                        "english": "family",  # DEPRECATED
+                        "translation": "family",
+                        "word": "Atelidae",
+                    },
                 ]
             },
         )
@@ -433,12 +459,14 @@ class EnLinkageTests(unittest.TestCase):
                 "related": [
                     {
                         "sense": "order",
-                        "english": "superkingdom",
+                        "english": "superkingdom",  # DEPRECATED
+                        "translation": "superkingdom",
                         "word": "Eukaryota",
                     },
                     {
                         "sense": "order",
-                        "english": "kingdom",
+                        "english": "kingdom",  # DEPRECATED
+                        "translation": "kingdom",
                         "word": "Animalia",
                     },
                 ]
@@ -755,19 +783,46 @@ class EnLinkageTests(unittest.TestCase):
     def test_prefix19(self):
         data = self.run_data("NATO phonetic: Bravo")
         self.assertEqual(
-            data, {"related": [{"word": "Bravo", "english": "NATO phonetic"}]}
+            data,
+            {
+                "related": [
+                    {
+                        "word": "Bravo",
+                        "english": "NATO phonetic",  # DEPRECATED
+                        "translation": "NATO phonetic",
+                    }
+                ]
+            },
         )
 
     def test_prefix20(self):
         data = self.run_data("Morse code: –···")
         self.assertEqual(
-            data, {"related": [{"word": "–···", "english": "Morse code"}]}
+            data,
+            {
+                "related": [
+                    {
+                        "word": "–···",
+                        "english": "Morse code",  # DEPRECATED
+                        "translation": "Morse code",
+                    }
+                ]
+            },
         )
 
     def test_prefix21(self):
         data = self.run_data("Braille: ⠃")
         self.assertEqual(
-            data, {"related": [{"word": "⠃", "english": "Braille"}]}
+            data,
+            {
+                "related": [
+                    {
+                        "word": "⠃",
+                        "english": "Braille",  # DEPRECATED
+                        "translation": "Braille",
+                    }
+                ]
+            },
         )
 
     def test_prefix22(self):
@@ -852,7 +907,12 @@ class EnLinkageTests(unittest.TestCase):
             data,
             {
                 "related": [
-                    {"word": "foo", "english": "human", "sense": "Homo sapiens"}
+                    {
+                        "word": "foo",
+                        "english": "human", # DEPRECATED
+                        "translation": "human",
+                        "sense": "Homo sapiens",
+                    }
                 ]
             },
         )
@@ -892,9 +952,9 @@ class EnLinkageTests(unittest.TestCase):
 
     def test_prefix33(self):
         data = self.run_data(
-            '(any member of the suborder (sometimes superfamily) Feliformia '
+            "(any member of the suborder (sometimes superfamily) Feliformia "
             'or Feloidea): feliform ("cat-like" carnivoran), feloid '
-            '(compare Caniformia, Canoidea)'
+            "(compare Caniformia, Canoidea)"
         )
         self.assertEqual(
             data,
@@ -902,15 +962,17 @@ class EnLinkageTests(unittest.TestCase):
                 "related": [
                     {
                         "sense": "any member of the suborder (sometimes "
-                                "superfamily) Feliformia or Feloidea",
+                        "superfamily) Feliformia or Feloidea",
                         "word": "feliform",
-                        "english": "cat-like; carnivoran",
+                        "english": "cat-like; carnivoran",  # DEPRECATED
+                        "translation": "cat-like; carnivoran",
                     },
                     {
                         "sense": "any member of the suborder (sometimes "
-                                "superfamily) Feliformia or Feloidea",
+                        "superfamily) Feliformia or Feloidea",
                         "word": "feloid",
-                        "english": "compare Caniformia, Canoidea",
+                        "english": "compare Caniformia, Canoidea",  # DEPRECATED
+                        "translation": "compare Caniformia, Canoidea",
                     },
                 ]
             },
@@ -922,7 +984,11 @@ class EnLinkageTests(unittest.TestCase):
             data,
             {
                 "related": [
-                    {"english": "animal", "word": "pet"},
+                    {
+                        "english": "animal",  # DEPRECATED
+                        "translation": "animal",
+                        "word": "pet",
+                    },
                     {"word": "companion"},
                 ]
             },
@@ -935,7 +1001,11 @@ class EnLinkageTests(unittest.TestCase):
             {
                 "related": [
                     {"word": "pet"},
-                    {"english": "animal", "word": "companion"},
+                    {
+                        "english": "animal",  # DEPRECATED
+                        "translation": "animal",
+                        "word": "companion",
+                    },
                 ]
             },
         )
@@ -948,7 +1018,8 @@ class EnLinkageTests(unittest.TestCase):
                 "related": [
                     {"word": "pet"},
                     {
-                        "english": "animal",
+                        "english": "animal",  # DEPRECATED
+                        "translation": "animal",
                         "tags": ["feminine"],
                         "word": "companion",
                     },
@@ -964,7 +1035,8 @@ class EnLinkageTests(unittest.TestCase):
                 "related": [
                     {"word": "pet"},
                     {
-                        "english": "animal",
+                        "english": "animal",  # DEPRECATED
+                        "translation": "animal",
                         "tags": ["feminine"],
                         "word": "companion",
                     },
@@ -980,7 +1052,8 @@ class EnLinkageTests(unittest.TestCase):
                 "related": [
                     {"tags": ["verb"], "word": "pet"},
                     {
-                        "english": "animal",
+                        "english": "animal",  # DEPRECATED
+                        "translation": "animal",
                         "tags": ["feminine"],
                         "word": "companion",
                     },
@@ -1026,14 +1099,32 @@ class EnLinkageTests(unittest.TestCase):
     def test_eq1(self):
         data = self.run_data("luoda = to create")
         self.assertEqual(
-            data, {"related": [{"word": "luoda", "english": "to create"}]}
+            data,
+            {
+                "related": [
+                    {
+                        "word": "luoda",
+                        "english": "to create",  # DEPRECATED
+                        "translation": "to create",
+                    }
+                ]
+            },
         )
 
     def test_eq2(self):
         # This should also work in the opposite order (and it is used both ways)
         data = self.run_data("to create = luoda")
         self.assertEqual(
-            data, {"related": [{"word": "luoda", "english": "to create"}]}
+            data,
+            {
+                "related": [
+                    {
+                        "word": "luoda",
+                        "english": "to create",  # DEPRECATED
+                        "translation": "to create",
+                    }
+                ]
+            },
         )
 
     def test_gender1(self):
@@ -1270,7 +1361,8 @@ class EnLinkageTests(unittest.TestCase):
                         "word": "一犬",
                         "roman": "ikken",
                         "ruby": [("一犬", "いっけん")],
-                        "english": "one dog",
+                        "english": "one dog",  # DEPRECATED
+                        "translation": "one dog",
                     }
                 ]
             },
@@ -1286,7 +1378,8 @@ class EnLinkageTests(unittest.TestCase):
                     {
                         "word": "一犬",
                         "roman": "ikken",
-                        "english": "family; one dog",
+                        "english": "family; one dog",  # DEPRECATED
+                        "translation": "family; one dog",
                     }
                 ]
             },
@@ -1304,7 +1397,8 @@ class EnLinkageTests(unittest.TestCase):
                         "word": "一犬",
                         "alt": "滿洲",
                         "roman": "ikken",
-                        "english": "one dog",
+                        "english": "one dog",  # DEPRECATED
+                        "translation": "one dog",
                     }
                 ]
             },
@@ -1320,7 +1414,8 @@ class EnLinkageTests(unittest.TestCase):
                         "word": "만주",
                         "alt": "滿洲",
                         "roman": "Manju",
-                        "english": "Manchuria",
+                        "english": "Manchuria",  # DEPRECATED
+                        "translation": "Manchuria",
                     }
                 ]
             },
@@ -1633,13 +1728,29 @@ class EnLinkageTests(unittest.TestCase):
                     {
                         "word": "Β",
                         "roman": "B",
-                        "english": "Beta",
+                        "english": "Beta",  # DEPRECATED
+                        "translation": "Beta",
                         "sense": "other scripts",
                     },
-                    {"word": "Б", "roman": "B", "english": "Be"},
-                    {"word": "В", "roman": "V", "english": "Ve"},
+                    {
+                        "word": "Б",
+                        "roman": "B",
+                        "english": "Be",  # DEPRECATED
+                        "translation": "Be",
+                    },
+                    {
+                        "word": "В",
+                        "roman": "V",
+                        "english": "Ve",  # DEPRECATED
+                        "translation": "Ve",
+                    },
                     # XXX what should happen with the left-to-right mark here?
-                    {"word": "ב\u200e", "roman": "b", "english": "beth"},
+                    {
+                        "word": "ב\u200e",
+                        "roman": "b",
+                        "english": "beth",  # DEPRECATED
+                        "translation": "beth",
+                    },
                 ]
             },
         )

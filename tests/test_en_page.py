@@ -368,7 +368,8 @@ foo
                             "glosses": ["sense 1"],
                             "examples": [
                                 {
-                                    "english": "to eat a meal",
+                                    "english": "to eat a meal",  # DEPRECATED
+                                    "translation": "to eat a meal",
                                     "roman": "go-han o taberu",
                                     "ruby": [("飯", "はん"), ("食", "た")],
                                     "text": "ご飯を食べる",
