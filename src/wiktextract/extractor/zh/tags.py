@@ -66,6 +66,11 @@ OTHER_TAGS: dict[str, str] = {
     "拉丁字母拼寫": "romanization",
     "定指賓格": ["definite", "accusative"],
     "前元音和諧變體": "front-vowel-harmony",
+    # Template:zh-forms
+    "正體": "Standard-Chinese",
+    "繁體": "Traditional-Chinese",
+    "簡體": "Simplified-Chinese",
+    "異體": "alternative",
 }
 
 VERB_TAGS: dict[str, str] = {

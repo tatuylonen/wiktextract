@@ -192,3 +192,4 @@ class WordEntry(ChineseBaseModel):
     )
     literal_meaning: str = ""
     original_title: str = ""
+    anagrams: list[Linkage] = []

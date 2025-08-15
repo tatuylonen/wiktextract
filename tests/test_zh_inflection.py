@@ -23,22 +23,6 @@ class TestZhInflection(TestCase):
     def tearDown(self) -> None:
         self.wxr.wtp.close_db_conn()
 
-    def test_zh_forms(self):
-        page_data = parse_page(
-            self.wxr,
-            "維基詞典",
-            """==漢語==
-{{zh-forms|s=维基词典|type=22}}
-
-===專有名詞===
-
-# 一個在線的自由多語言[[詞典]]，由維基媒體基金會建立。""",
-        )
-        self.assertEqual(
-            page_data[0]["forms"],
-            [{"form": "维基词典", "tags": ["Simplified-Chinese"]}],
-        )
-
     def test_zh_forms_lit(self):
         page_data = parse_page(
             self.wxr,
@@ -51,26 +35,6 @@ class TestZhInflection(TestCase):
 # 比喻[[好]]的和[[壞]]的一同[[毀滅]]。""",
         )
         self.assertEqual(page_data[0]["literal_meaning"], "玉和石一起燒成灰")
-
-    def test_zh_forms_alt(self):
-        page_data = parse_page(
-            self.wxr,
-            "新婦",
-            """==漢語==
-{{zh-forms|alt=新抱-粵語,心抱-粵語,新府-陽江粵語|1=-}}
-
-===名詞===
-
-# [[新娘]]""",
-        )
-        self.assertEqual(
-            page_data[0]["forms"],
-            [
-                {"form": "新抱", "raw_tags": ["粵語"]},
-                {"form": "心抱", "raw_tags": ["粵語"]},
-                {"form": "新府", "raw_tags": ["陽江粵語"]},
-            ],
-        )
 
     def test_ja_suru(self):
         self.wxr.wtp.add_page(
@@ -206,5 +170,143 @@ class TestZhInflection(TestCase):
                     "raw_tags": ["語幹形態"],
                     "tags": ["hypothetical"],
                 }
+            ],
+        )
+
+    def test_zh_forms_sup_tag(self):
+        self.wxr.wtp.add_page(
+            "Template:zh-forms",
+            10,
+            """{| class="floatright"
+|-
+! colspan=2|
+|-
+! [[正體]]/[[繁體]] -{<span style="font-size:140%">(<span lang="zh-Hant" class="Hant"><!-- -->[[白麵#漢語|-{白麵}-]]/<!-- -->[[白麪#漢語|-{白麪}-]]</span>)</span>
+| <!-- -->[[白#漢語|-{白}-]]
+| <!-- -->[[麵#漢語|-{麵}-]]/<!-- -->[[麪#漢語|-{麪}-]]}-
+|-
+! [[簡體]] -{<span style="font-size:140%">(<span lang="zh-Hans" class="Hans"><!-- -->[[白面#漢語|-{白面}-]]<sup><span class="explain" title="此形式還有其他意義。">*</span></sup></span>)</span>
+| <!-- -->[[白#漢語|-{白}-]]
+| <!-- -->[[面#漢語|-{面}-]]}-
+|}""",
+        )
+        data = parse_page(
+            self.wxr,
+            "白麵",
+            """==漢語==
+{{zh-forms|s=白面}}
+===名詞===
+# [[麵粉]]""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {
+                    "form": "白麪",
+                    "tags": ["Standard-Chinese", "Traditional-Chinese"],
+                },
+                {
+                    "form": "白面",
+                    "raw_tags": ["此形式還有其他意義。"],
+                    "tags": ["Simplified-Chinese"],
+                },
+            ],
+        )
+
+    def test_zh_forms_under_pron_alt_forms(self):
+        self.wxr.wtp.add_page(
+            "Template:zh-forms",
+            10,
+            """{| class="floatright"
+|-
+! colspan=2|
+|-
+! colspan="2" | [[簡體]]與[[正體]]/[[繁體]]<br>-{<span style="font-size:140%">(<span lang="zh-Hani" class="Hani"><!-- -->[[大家#漢語|-{大家}-]]</span>)</span>
+| <!-- -->[[大#漢語|-{大}-]]
+| <!-- -->[[家#漢語|-{家}-]]}-
+|-
+! colspan="2" |異體
+| colspan="2"|-{<span style="white-space:nowrap;"><span class="Hant" lang="zh-Hant">-{<!---->[[乾家#漢語|乾家]]<!---->}-</span><span class="Hani" lang="zh">-{<!---->／<!---->}-</span><span class="Hans" lang="zh-Hans">-{<!---->[[干家#漢語|干家]]<!---->}-</span> <span style="font-size:80%"><i>閩南語</i></span></span><br><span style="white-space:nowrap;"><span class="Hani" lang="zh">-{<!---->[[唐家#漢語|唐家]]<!---->}-</span> <span style="font-size:80%"><i>閩南語</i></span></span><br><span style="white-space:nowrap;"><span class="Hant" lang="zh-Hant">-{<!---->[[臺家#漢語|臺家]]<!---->}-</span><span class="Hani" lang="zh">-{<!---->／<!---->}-</span><span class="Hans" lang="zh-Hans">-{<!---->[[台家#漢語|台家]]<!---->}-</span> <span style="font-size:80%"><i>閩東語</i></span></span>}-
+|}""",
+        )
+        data = parse_page(
+            self.wxr,
+            "大家",
+            """==漢語==
+===發音3===
+{{zh-forms|alt=乾家-閩南語,唐家-閩南語,臺家-閩東語}}
+====名詞====
+# 對[[女子]]的[[尊稱]]""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {
+                    "form": "乾家",
+                    "tags": ["Traditional-Chinese", "alternative", "Min-Nan"],
+                },
+                {
+                    "form": "干家",
+                    "tags": ["Simplified-Chinese", "alternative", "Min-Nan"],
+                },
+                {"form": "唐家", "tags": ["alternative", "Min-Nan"]},
+                {
+                    "form": "臺家",
+                    "tags": ["Traditional-Chinese", "alternative", "Min-Dong"],
+                },
+                {
+                    "form": "台家",
+                    "tags": ["Simplified-Chinese", "alternative", "Min-Dong"],
+                },
+            ],
+        )
+
+    def test_zh_forms_anagrams(self):
+        self.wxr.wtp.add_page(
+            "Template:zh-forms",
+            10,
+            """{| class="floatright"
+|-
+! colspan=2|
+|-
+! colspan="2" |[[正體]]/[[繁體]] -{<span style="font-size:140%">(<span lang="zh-Hant" class="Hant"><!-- -->[[門閥#漢語|-{門閥}-]]</span>)</span>
+| <!-- -->[[門#漢語|-{門}-]]
+| <!-- -->[[閥#漢語|-{閥}-]]}-
+|-
+! colspan="2" |[[簡體]] -{<span style="font-size:140%">(<span lang="zh-Hans" class="Hans"><!-- -->[[门阀#漢語|-{门阀}-]]</span>)</span>
+| <!-- -->[[门#漢語|-{门}-]]
+| <!-- -->[[阀#漢語|-{阀}-]]}-
+|-
+! colspan="2" |異體
+| colspan="2"|-{<span style="white-space:nowrap;"><span class="Hant" lang="zh-Hant">-{<!---->[[門伐#漢語|門伐]]<!---->}-</span><span class="Hani" lang="zh">-{<!---->／<!---->}-</span><span class="Hans" lang="zh-Hans">-{<!---->[[门伐#漢語|门伐]]<!---->}-</span></span>}-
+|-
+! colspan="2" |異序詞
+| colspan="2"|<span style="white-space:nowrap;"><span class="Hant" lang="zh-Hant">-{<!---->[[閥門#漢語|閥門]]<!---->}-</span><span class="Hani" lang="zh">-{<!---->／<!---->}-</span><span class="Hans" lang="zh-Hans">-{<!---->[[阀门#漢語|阀门]]<!---->}-</span></span>
+|}""",
+        )
+        data = parse_page(
+            self.wxr,
+            "門閥",
+            """==漢語==
+{{zh-forms|s=门阀|alt=門伐}}
+===名詞===
+# [[家族]]的[[社會地位]]及[[聲望]]""",
+        )
+        self.assertEqual(
+            data[0]["anagrams"],
+            [
+                {"tags": ["Traditional-Chinese"], "word": "閥門"},
+                {"tags": ["Simplified-Chinese"], "word": "阀门"},
+            ],
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {"form": "门阀", "tags": ["Simplified-Chinese"]},
+                {
+                    "form": "門伐",
+                    "tags": ["Traditional-Chinese", "alternative"],
+                },
+                {"form": "门伐", "tags": ["Simplified-Chinese", "alternative"]},
             ],
         )
