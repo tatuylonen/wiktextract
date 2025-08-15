@@ -18,10 +18,15 @@ from .tags import translate_raw_tags
 def extract_pronunciation_section(
     wxr: WiktextractContext, base_data: WordEntry, level_node: WikiNode
 ) -> None:
-    for template_node in level_node.find_child(NodeKind.TEMPLATE):
-        new_sounds, new_cats = process_pron_template(wxr, template_node)
-        base_data.sounds.extend(new_sounds)
-        base_data.categories.extend(new_cats)
+    for t_node in level_node.find_child(NodeKind.TEMPLATE):
+        if t_node.template_name == "zh-forms":
+            from .page import process_zh_forms
+
+            process_zh_forms(wxr, base_data, t_node)
+        else:
+            new_sounds, new_cats = process_pron_template(wxr, t_node)
+            base_data.sounds.extend(new_sounds)
+            base_data.categories.extend(new_cats)
     for list_item_node in level_node.find_child_recursively(NodeKind.LIST_ITEM):
         new_sounds, new_cats = process_pron_item_list_item(wxr, list_item_node)
         base_data.sounds.extend(new_sounds)
