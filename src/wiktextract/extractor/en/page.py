@@ -974,7 +974,7 @@ def parse_language(
     pos_data: WordData = {}  # For a current part-of-speech
     level_four_data: WordData = {}  # Chinese Pronunciation-sections in-between
     etym_data: WordData = {}  # For one etymology
-    pos_datas: list[SenseData] = []
+    sense_datas: list[SenseData] = []
     level_four_datas: list[WordData] = []
     etym_datas: list[WordData] = []
     page_datas: list[WordData] = []
@@ -1083,21 +1083,21 @@ def parse_language(
         ):
             data_append(sense_data, "tags", "no-gloss")
 
-        pos_datas.append(sense_data)
+        sense_datas.append(sense_data)
         sense_data = {}
         return True
 
     def push_pos() -> None:
         """Starts collecting data for a new part-of-speech."""
         nonlocal pos_data
-        nonlocal pos_datas
+        nonlocal sense_datas
         push_sense()
         if wxr.wtp.subsection:
-            data: WordData = {"senses": pos_datas}
+            data: WordData = {"senses": sense_datas}
             merge_base(data, pos_data)
             level_four_datas.append(data)
         pos_data = {}
-        pos_datas = []
+        sense_datas = []
         wxr.wtp.start_subsection(None)
 
     def push_level_four_section(clear_sound_data: bool) -> None:
@@ -1558,7 +1558,7 @@ def parse_language(
         # If there are no senses extracted, add a dummy sense.  We want to
         # keep tags extracted from the head for the dummy sense.
         push_sense()  # Make sure unfinished data pushed, and start clean sense
-        if len(pos_datas) == 0:
+        if len(sense_datas) == 0:
             data_extend(sense_data, "tags", header_tags)
             data_extend(sense_data, "topics", header_topics)
             data_append(sense_data, "tags", "no-gloss")
@@ -2853,7 +2853,7 @@ def parse_language(
                 item,
                 sense,
                 ruby,
-                pos_datas,
+                sense_datas,
                 is_reconstruction,
                 urls or None,
                 links_that_should_not_be_split or None,
@@ -3770,7 +3770,7 @@ def parse_language(
                     # Parse word senses for the part-of-speech
                     parse_part_of_speech(node, pos)
                     if "tags" in dt:
-                        for pdata in pos_datas:
+                        for pdata in sense_datas:
                             data_extend(pdata, "tags", dt["tags"])
                 elif t_no_number in LINKAGE_TITLES:
                     # print(f"LINKAGE_TITLES NODE {node=}")
