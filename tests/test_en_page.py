@@ -271,13 +271,6 @@ foo
                     ],
                     "senses": [
                         {
-                            "glosses": ["sense 1", "subsense 1"],
-                            "examples": [{"text": "subexample 1"}],
-                        },
-                        {
-                            "glosses": ["sense 1", "subsense 2"],
-                        },
-                        {
                             "glosses": ["sense 1"],
                             "examples": [
                                 {
@@ -285,6 +278,13 @@ foo
                                     "1 to get pushed"
                                 }
                             ],
+                        },
+                        {
+                            "glosses": ["sense 1", "subsense 1"],
+                            "examples": [{"text": "subexample 1"}],
+                        },
+                        {
+                            "glosses": ["sense 1", "subsense 2"],
                         },
                         {
                             "glosses": ["sense 2"],
