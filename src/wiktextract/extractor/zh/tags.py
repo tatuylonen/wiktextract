@@ -10,6 +10,10 @@ GENDER_TAGS: dict[str, str] = {
     "陽性形式": "masculine",
     "中性": "neuter",
     "中性形式": "neuter",
+    "c": "common",
+    "n": "neuter",
+    "m": "masculine",
+    "f": "feminine",
 }
 
 NUMBER_TAGS: dict[str, str | list[str]] = {

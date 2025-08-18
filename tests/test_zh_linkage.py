@@ -230,7 +230,7 @@ class TestZhLinkage(TestCase):
             "Template:CJKV",
             10,
             """<div>[[w:漢字詞|漢字詞]]（-{<!----><span class="Hani" lang="zh">愚民</span><!---->}-）：
-* <span class="desc-arr" title="借詞">→</span> 日語:<templatestyles src="Module:etymology/style.css"></templatestyles> <span class="Jpan" lang="ja">[[愚民#日語|<ruby>愚<rp>(</rp><rt>ぐ</rt><rp>)</rp></ruby><ruby>民<rp>(</rp><rt>みん</rt><rp>)</rp></ruby>]]</span> <span class="mention-gloss-paren annotation-paren">(</span><span class="tr"><span class="mention-tr tr">gumin</span></span><span class="mention-gloss-paren annotation-paren">)</span></div>""",
+* <span class="desc-arr" title="借詞">→</span> 日語: <span class="Jpan" lang="ja">[[愚民#日語|<ruby>愚<rp>(</rp><rt>ぐ</rt><rp>)</rp></ruby><ruby>民<rp>(</rp><rt>みん</rt><rp>)</rp></ruby>]]</span> <span class="mention-gloss-paren annotation-paren">(</span><span class="tr"><span class="mention-tr tr">gumin</span></span><span class="mention-gloss-paren annotation-paren">)</span></div>""",
         )
         page_data = parse_page(
             self.wxr,
