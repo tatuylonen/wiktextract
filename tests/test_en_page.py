@@ -197,17 +197,24 @@ foo
                         },
                     ],
                     "translations": [
-                        {"word": "fuu", "lang": "Finnish", "code": "fi"},
+                        {
+                            "word": "fuu",
+                            "lang": "Finnish",
+                            "code": "fi",  # DEPRECATED
+                            "lang_code": "fi",
+                        },
                         {
                             "word": "bar",
                             "lang": "Swedish",
-                            "code": "sv",
+                            "lang_code": "sv",
+                            "code": "sv",  # DEPRECATED
                             "tags": ["masculine"],
                         },
                         {
                             "word": "hop",
                             "lang": "Swedish",
-                            "code": "sv",
+                            "code": "sv",  # DEPRECATED
+                            "lang_code": "sv",
                             "tags": ["feminine"],
                         },
                     ],
@@ -264,13 +271,6 @@ foo
                     ],
                     "senses": [
                         {
-                            "glosses": ["sense 1", "subsense 1"],
-                            "examples": [{"text": "subexample 1"}],
-                        },
-                        {
-                            "glosses": ["sense 1", "subsense 2"],
-                        },
-                        {
                             "glosses": ["sense 1"],
                             "examples": [
                                 {
@@ -278,6 +278,13 @@ foo
                                     "1 to get pushed"
                                 }
                             ],
+                        },
+                        {
+                            "glosses": ["sense 1", "subsense 1"],
+                            "examples": [{"text": "subexample 1"}],
+                        },
+                        {
+                            "glosses": ["sense 1", "subsense 2"],
                         },
                         {
                             "glosses": ["sense 2"],
@@ -316,17 +323,24 @@ foo
                         },
                     ],
                     "translations": [
-                        {"word": "fuu", "lang": "Finnish", "code": "fi"},
+                        {
+                            "word": "fuu",
+                            "lang": "Finnish",
+                            "code": "fi",  # DEPRECATED
+                            "lang_code": "fi",
+                        },
                         {
                             "word": "bar",
                             "lang": "Swedish",
-                            "code": "sv",
+                            "code": "sv",  # DEPRECATED
+                            "lang_code": "sv",
                             "tags": ["masculine"],
                         },
                         {
                             "word": "hop",
                             "lang": "Swedish",
-                            "code": "sv",
+                            "code": "sv",  # DEPRECATED
+                            "lang_code": "sv",
                             "tags": ["feminine"],
                         },
                     ],
@@ -368,7 +382,8 @@ foo
                             "glosses": ["sense 1"],
                             "examples": [
                                 {
-                                    "english": "to eat a meal",
+                                    "english": "to eat a meal",  # DEPRECATED
+                                    "translation": "to eat a meal",
                                     "roman": "go-han o taberu",
                                     "ruby": [("飯", "はん"), ("食", "た")],
                                     "text": "ご飯を食べる",

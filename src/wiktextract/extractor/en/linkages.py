@@ -934,7 +934,8 @@ def parse_linkage_item_text(
             if ruby:
                 dt["ruby"] = ruby
             if english:
-                dt["english"] = english.strip()
+                dt["english"] = english.strip()  # DEPRECATED for "translation"
+                dt["translation"] = english.strip()
             if taxonomic:
                 if re.match(r"×[A-Z]", taxonomic):
                     data_append(dt, "tags", "extinct")

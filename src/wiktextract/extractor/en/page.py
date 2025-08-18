@@ -885,7 +885,8 @@ def parse_sense_linkage(
         if topics:
             data_extend(dt, "topics", topics)
         if english:
-            dt["english"] = english
+            dt["english"] = english  # DEPRECATED for "translation"
+            dt["translation"] = english
         if alt:
             dt["alt"] = alt
         data_append(data, field, dt)
@@ -973,7 +974,9 @@ def parse_language(
     pos_data: WordData = {}  # For a current part-of-speech
     level_four_data: WordData = {}  # Chinese Pronunciation-sections in-between
     etym_data: WordData = {}  # For one etymology
-    pos_datas: list[SenseData] = []
+    sense_datas: list[SenseData] = []
+    sense_ordinal = 0  # The recursive sense parsing messes up the ordering
+    # Never reset, do not use as data
     level_four_datas: list[WordData] = []
     etym_datas: list[WordData] = []
     page_datas: list[WordData] = []
@@ -1042,10 +1045,12 @@ def parse_language(
                 if "pos" not in s or s["pos"] == data["pos"]  # type: ignore[typeddict-item]
             )
 
-    def push_sense() -> bool:
+    def push_sense(sorting_ordinal: int | None = None) -> bool:
         """Starts collecting data for a new word sense.  This returns True
         if a sense was added."""
         nonlocal sense_data
+        if sorting_ordinal is None:
+            sorting_ordinal = sense_ordinal
         tags = sense_data.get("tags", ())
         if (
             not sense_data.get("glosses")
@@ -1082,21 +1087,22 @@ def parse_language(
         ):
             data_append(sense_data, "tags", "no-gloss")
 
-        pos_datas.append(sense_data)
+        sense_data["__temp_sense_sorting_ordinal"] = sorting_ordinal
+        sense_datas.append(sense_data)
         sense_data = {}
         return True
 
-    def push_pos() -> None:
+    def push_pos(sorting_ordinal: int | None = None) -> None:
         """Starts collecting data for a new part-of-speech."""
         nonlocal pos_data
-        nonlocal pos_datas
-        push_sense()
+        nonlocal sense_datas
+        push_sense(sorting_ordinal)
         if wxr.wtp.subsection:
-            data: WordData = {"senses": pos_datas}
+            data: WordData = {"senses": sense_datas}
             merge_base(data, pos_data)
             level_four_datas.append(data)
         pos_data = {}
-        pos_datas = []
+        sense_datas = []
         wxr.wtp.start_subsection(None)
 
     def push_level_four_section(clear_sound_data: bool) -> None:
@@ -1534,7 +1540,7 @@ def parse_language(
                     for node in ln.children:
                         # Parse nodes in l.children recursively.
                         # The recursion function uses push_sense() to
-                        # add stuff into pos_data, and returns True or
+                        # add stuff into sense_datas, and returns True or
                         # False if something is added, which bubbles upward.
                         # If the bubble is "True", then higher levels of
                         # the recursion will not push_sense(), because
@@ -1557,11 +1563,19 @@ def parse_language(
         # If there are no senses extracted, add a dummy sense.  We want to
         # keep tags extracted from the head for the dummy sense.
         push_sense()  # Make sure unfinished data pushed, and start clean sense
-        if len(pos_datas) == 0:
+        if len(sense_datas) == 0:
             data_extend(sense_data, "tags", header_tags)
             data_extend(sense_data, "topics", header_topics)
             data_append(sense_data, "tags", "no-gloss")
             push_sense()
+
+        sense_datas.sort(
+            key=lambda x: x.get("__temp_sense_sorting_ordinal", 0)
+        )
+
+        for sd in sense_datas:
+            if "__temp_sense_sorting_ordinal" in sd:
+                del sd["__temp_sense_sorting_ordinal"]
 
     def process_gloss_header(
         header_nodes: list[Union[WikiNode, str]],
@@ -1781,6 +1795,11 @@ def parse_language(
         has examples that need to be put somewhere.
         """
         assert isinstance(sense_base, dict)  # Added to every sense deeper in
+
+        nonlocal sense_ordinal
+        my_ordinal = sense_ordinal  # copies, not a reference
+        sense_ordinal += 1  # only use for sorting
+
         if not isinstance(node, WikiNode):
             # This doesn't seem to ever happen in practice.
             wxr.wtp.debug(
@@ -1906,6 +1925,7 @@ def parse_language(
             others,
             gloss_template_args,
             added,
+            my_ordinal,
         )
 
     def process_gloss_contents(
@@ -1916,6 +1936,7 @@ def parse_language(
         others: list[WikiNode] = [],
         gloss_template_args: Set[str] = set(),
         added: bool = False,
+        sorting_ordinal: int | None = None,
     ) -> bool:
         def sense_template_fn(
             name: str, ht: TemplateArgs, is_gloss: bool = False
@@ -2116,7 +2137,7 @@ def parse_language(
         # "translation-hub" tag for them
         if rawgloss == "(This entry is a translation hub.)":
             data_append(sense_data, "tags", "translation-hub")
-            return push_sense()
+            return push_sense(sorting_ordinal)
 
         # Remove certain substrings specific to outer glosses
         strip_ends = [", particularly:"]
@@ -2262,7 +2283,7 @@ def parse_language(
             if not gloss and len(indexed_subglosses) > 1:
                 continue
             # Push a new sense (if the last one is not empty)
-            if push_sense():
+            if push_sense(sorting_ordinal):
                 added = True
             # if gloss not in sense_data.get("raw_glosses", ()):
             #     data_append(sense_data, "raw_glosses", gloss)
@@ -2433,7 +2454,7 @@ def parse_language(
             if len(sense_base.get("tags", [])) == 0:
                 del sense_base["tags"]
             sense_data.update(sense_base)
-        if push_sense():
+        if push_sense(sorting_ordinal):
             # push_sense succeded in adding a sense to pos_data
             added = True
             # print("PARSE_SENSE DONE:", pos_datas[-1])
@@ -2852,7 +2873,7 @@ def parse_language(
                 item,
                 sense,
                 ruby,
-                pos_datas,
+                sense_datas,
                 is_reconstruction,
                 urls or None,
                 links_that_should_not_be_split or None,
@@ -3769,7 +3790,7 @@ def parse_language(
                     # Parse word senses for the part-of-speech
                     parse_part_of_speech(node, pos)
                     if "tags" in dt:
-                        for pdata in pos_datas:
+                        for pdata in sense_datas:
                             data_extend(pdata, "tags", dt["tags"])
                 elif t_no_number in LINKAGE_TITLES:
                     # print(f"LINKAGE_TITLES NODE {node=}")
@@ -4184,7 +4205,8 @@ def parse_language(
                     if ref:
                         dt["ref"] = ref
                     if tr:
-                        dt["english"] = tr
+                        dt["english"] = tr  # DEPRECATED for "translation"
+                        dt["translation"] = tr
                     if usex_type:
                         dt["type"] = usex_type
                     if note:
@@ -4673,7 +4695,9 @@ def extract_zh_forms_data_cell(
                     if row_header != "anagram":
                         for raw_tag in row_header_tags:
                             if raw_tag in ZH_FORMS_TAGS:
-                                data_append(form, "tags", ZH_FORMS_TAGS[raw_tag])
+                                data_append(
+                                    form, "tags", ZH_FORMS_TAGS[raw_tag]
+                                )
                             else:
                                 data_append(form, "raw_tags", raw_tag)
                     if span_lang == "zh-Hant":

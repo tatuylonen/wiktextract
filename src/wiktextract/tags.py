@@ -4050,6 +4050,7 @@ xlat_tags_map: Dict[str, Union[str, List[str]]] = {
     "in general sense": "broadly",
     "by extension": "broadly",
     "by metonymy": "metonymically",
+    "metonymic": "metonymically",
     "by synecdoche": "synecdoche",
     "by semantic narrowing": "narrowly",
     "by semantic widening": "broadly",
