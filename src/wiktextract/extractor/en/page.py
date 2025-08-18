@@ -47,6 +47,7 @@ from ...wxr_context import WiktextractContext
 from ...wxr_logging import logger
 from ..ruby import extract_ruby, parse_ruby
 from ..share import strip_nodes
+from .descendant import extract_descendant_section
 from .example import extract_example_list_item, extract_template_zh_x
 from .form_descriptions import (
     classify_desc,
@@ -1569,9 +1570,7 @@ def parse_language(
             data_append(sense_data, "tags", "no-gloss")
             push_sense()
 
-        sense_datas.sort(
-            key=lambda x: x.get("__temp_sense_sorting_ordinal", 0)
-        )
+        sense_datas.sort(key=lambda x: x.get("__temp_sense_sorting_ordinal", 0))
 
         for sd in sense_datas:
             if "__temp_sense_sorting_ordinal" in sd:
@@ -3746,7 +3745,7 @@ def parse_language(
                     parse_etymology(etym_data, node)
             elif t == DESCENDANTS_TITLE and wxr.config.capture_descendants:
                 data = select_data()
-                parse_descendants(data, node)
+                extract_descendant_section(wxr, data, node)
             elif (
                 t in PROTO_ROOT_DERIVED_TITLES
                 and pos == "root"
@@ -3754,7 +3753,7 @@ def parse_language(
                 and wxr.config.capture_descendants
             ):
                 data = select_data()
-                parse_descendants(data, node, True)
+                extract_descendant_section(wxr, data, node)
             elif t == TRANSLATIONS_TITLE:
                 data = select_data()
                 parse_translations(data, node)
