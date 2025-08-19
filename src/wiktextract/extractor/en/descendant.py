@@ -199,3 +199,7 @@ def extract_desc_span_tag(
             desc_lists.append(deepcopy(desc_data))
     elif span_title != "" and clean_node(wxr, None, span_tag) in ["→", "⇒"]:
         raw_tags.append(span_title)
+    elif "mention-gloss" in class_names and len(desc_lists) > 0:
+        sense = clean_node(wxr, None, span_tag)
+        if sense != "":
+            desc_lists[-1]["sense"] = sense

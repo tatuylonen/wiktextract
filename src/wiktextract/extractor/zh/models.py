@@ -147,6 +147,7 @@ class Descendant(ChineseBaseModel):
     ruby: list[tuple[str, ...]] = Field(
         default=[], description="Japanese Kanji and furigana"
     )
+    sense: str = ""
 
 
 class WordEntry(ChineseBaseModel):

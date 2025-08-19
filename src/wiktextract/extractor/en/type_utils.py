@@ -81,6 +81,7 @@ class DescendantData(TypedDict, total=False):
     raw_tags: list[str]
     descendants: list["DescendantData"]
     ruby: list[tuple[str, ...]]
+    sense: str
 
 
 class FormData(TypedDict, total=False):
