@@ -51,6 +51,7 @@ class TestDescendant(TestCase):
                 "roman": "nīhao",
                 "ruby": [("你好", "ニイハオ")],
                 "word": "你好",
+                "raw_tags": ["借詞"],
             },
         )
 
@@ -71,7 +72,7 @@ class TestDescendant(TestCase):
             {
                 "lang_code": "za",
                 "lang": "壯語",
-                "raw_tags": ["仿譯詞"],
+                "tags": ["calque"],
                 "word": "mwngz ndei",
             },
         )
@@ -82,12 +83,19 @@ class TestDescendant(TestCase):
         self.wxr.wtp.add_page(
             "Template:desc",
             10,
-            '<span class="desc-arr" title="詞形受類比影響或添加了額外詞素">⇒</span> 官話:',
+            """{{#switch:{{{der}}}
+| 1 = <span class="desc-arr" title="以類比或添加詞素等方式重塑">⇒</span> 官話:
+| #default = 官話:
+}}""",
         )
         self.wxr.wtp.add_page(
             "Template:zh-l",
             10,
-            '<span class="Hani" lang="zh">{{{1}}}</span> (<i><span class="tr Latn" lang="la">{{{1}}}_roman</span></i>',
+            """{{#switch:{{{1}}}
+| 御宅族 = <span class="Hani" lang="zh">-{<!---->[[御宅族#漢語|御宅族]]<!---->}-</span> (<i><span class="tr Latn" lang="la">-{<!---->yùzháizú<!---->}-</span></i>)
+| 宅男 = <span class="Hani" lang="zh">-{<!---->[[宅男#漢語|宅男]]<!---->}-</span> (<i><span class="tr Latn" lang="la">-{<!---->zháinán<!---->}-</span></i>)
+| 宅女 = <span class="Hani" lang="zh">-{<!---->[[宅女#漢語|宅女]]<!---->}-</span> (<i><span class="tr Latn" lang="la">-{<!---->zháinǚ<!---->}-</span></i>)
+}}""",
         )
         root = self.wxr.wtp.parse(
             """*: {{desc|cmn|-}} {{zh-l|御宅族}}
@@ -101,24 +109,26 @@ class TestDescendant(TestCase):
         self.assertEqual(
             page_data[0].descendants[0].model_dump(exclude_defaults=True),
             {
+                "lang_code": "cmn",
+                "lang": "官話",
+                "roman": "yùzháizú",
+                "word": "御宅族",
                 "descendants": [
                     {
                         "lang_code": "cmn",
                         "lang": "官話",
-                        "roman": "宅男_roman",
+                        "roman": "zháinán",
                         "word": "宅男",
+                        "raw_tags": ["以類比或添加詞素等方式重塑"],
                     },
                     {
                         "lang_code": "cmn",
                         "lang": "官話",
-                        "roman": "宅女_roman",
+                        "roman": "zháinǚ",
                         "word": "宅女",
+                        "raw_tags": ["以類比或添加詞素等方式重塑"],
                     },
                 ],
-                "lang_code": "cmn",
-                "lang": "官話",
-                "roman": "御宅族_roman",
-                "word": "御宅族",
             },
         )
 
@@ -151,6 +161,7 @@ class TestDescendant(TestCase):
                     "word": "吸貓",
                     "roman": "xīmāo",
                     "tags": ["Traditional-Chinese"],
+                    "raw_tags": ["借詞"],
                 },
                 {
                     "lang_code": "zh",
@@ -158,6 +169,7 @@ class TestDescendant(TestCase):
                     "word": "吸猫",
                     "roman": "xīmāo",
                     "tags": ["Simplified-Chinese"],
+                    "raw_tags": ["借詞"],
                 },
             ],
         )
@@ -185,12 +197,14 @@ class TestDescendant(TestCase):
                     "lang": "波斯語",
                     "word": "فرانسه",
                     "roman": "farânse",
+                    "raw_tags": ["借詞"],
                     "descendants": [
                         {
                             "lang_code": "ps",
                             "lang": "普什圖語",
                             "word": "فرانسه",
                             "roman": "farānsa",
+                            "raw_tags": ["借詞"],
                         }
                     ],
                 }
@@ -224,18 +238,21 @@ class TestDescendant(TestCase):
                     "word": "中文",
                     "ruby": [("中文", "ちゅうぶん")],
                     "roman": "chūbun",
+                    "raw_tags": ["借詞"],
                 },
                 {
                     "lang_code": "ko",
                     "lang": "朝鮮語",
                     "word": "중문(中文)",
                     "roman": "jungmun",
+                    "raw_tags": ["借詞"],
                 },
                 {
                     "lang_code": "vi",
                     "lang": "越南語",
                     "word": "Trung văn",
                     "roman": "中文",
+                    "raw_tags": ["借詞"],
                 },
             ],
         )
@@ -261,8 +278,127 @@ etymology
         )
         self.assertEqual(
             page_data[0]["descendants"],
-            [{"lang": "布依語", "lang_code": "pcc", "word": "Zungyguef"}],
+            [
+                {
+                    "lang": "布依語",
+                    "lang_code": "pcc",
+                    "word": "Zungyguef",
+                    "raw_tags": ["借詞"],
+                }
+            ],
         )
         self.assertEqual(
             page_data[0]["descendants"], page_data[1]["descendants"]
+        )
+
+    def test_two_desc_in_one_list(self):
+        self.wxr.wtp.add_page(
+            "Template:desc",
+            10,
+            """{{#switch:{{{2}}}
+| tresor = 加泰羅尼亞語: <span class="Latn" lang="ca">-{<!-- -->[[tresor#加泰羅尼亞語|-{tresor}-]]}-</span>
+| tesaurus = <span class="desc-arr" title="借詞">→</span> <span class="Latn" lang="ca">-{<!-- -->[[tesaurus#加泰羅尼亞語|-{tesaurus}-]]}-</span>
+}}""",
+        )
+        data = parse_page(
+            self.wxr,
+            "thesaurus",
+            """==拉丁語==
+===名詞===
+# 貯藏處
+====派生語彙====
+* {{desc|ca|tresor}}、{{desc|ca|tesaurus|bor=1|nolb=1}}""",
+        )
+        self.assertEqual(
+            data[0]["descendants"],
+            [
+                {
+                    "lang_code": "ca",
+                    "lang": "加泰羅尼亞語",
+                    "word": "tresor",
+                },
+                {
+                    "lang_code": "ca",
+                    "lang": "加泰羅尼亞語",
+                    "word": "tesaurus",
+                    "raw_tags": ["借詞"],
+                },
+            ],
+        )
+
+    def test_bento(self):
+        self.wxr.wtp.add_page(
+            "Template:desctree",
+            10,
+            """<span class="desc-arr" title="借詞">→</span> 官話: <span class="Hant" lang="cmn">-{<!-- -->[[便當#官話|-{便當}-]]}-</span><span class="Zsym mention" style="font-size:100%;">／</span><span class="Hans" lang="cmn">-{<!-- -->[[便当#官話|-{便当}-]]}-</span> <span class="mention-gloss-paren annotation-paren">(</span><span lang="cmn-Latn" class="tr Latn">-{<!---->biàndāng<!---->}-</span><span class="mention-gloss-paren annotation-paren">)</span>""",
+        )
+        self.wxr.wtp.add_page(
+            "Template:desc",
+            10,
+            """{{#switch:{{{2}}}
+| biandang = <span class="desc-arr" title="借詞">→</span> 英語: <span class="Latn" lang="en">-{<!-- -->[[biandang#英語|-{biandang}-]]}-</span>
+| бэнто́ = <span class="desc-arr" title="借詞">→</span> 俄語: <span class="Cyrl" lang="ru">-{<!-- -->[[бэнто#俄語|-{бэнто́}-]]}-</span> <span class="mention-gloss-paren annotation-paren">(</span><span lang="ru-Latn" class="tr Latn">-{<!---->bɛntó<!---->}-</span><span class="mention-gloss-paren annotation-paren">)</span>，<span class="Cyrl" lang="ru">-{<!-- -->[[бэнто#俄語|-{бэ́нто}-]]}-</span> <span class="mention-gloss-paren annotation-paren">(</span><span lang="ru-Latn" class="tr Latn">-{<!---->bɛ́nto<!---->}-</span><span class="mention-gloss-paren annotation-paren">)</span>
+}}""",
+        )
+        data = parse_page(
+            self.wxr,
+            "弁當",
+            """==日語==
+===名詞===
+# 簡單飯菜，飯盒
+====派生詞====
+* {{desctree|cmn|便當|tr=biàndāng|bor=1}}
+** {{desc|en|biandang|bor=1}}
+* {{desc|ru|бэнто́|бэ́нто|bor=1}}""",
+        )
+        self.assertEqual(
+            data[0]["descendants"],
+            [
+                {
+                    "lang": "官話",
+                    "lang_code": "cmn",
+                    "roman": "biàndāng",
+                    "tags": ["Traditional-Chinese"],
+                    "word": "便當",
+                    "raw_tags": ["借詞"],
+                    "descendants": [
+                        {
+                            "lang": "英語",
+                            "lang_code": "en",
+                            "word": "biandang",
+                            "raw_tags": ["借詞"],
+                        }
+                    ],
+                },
+                {
+                    "lang": "官話",
+                    "lang_code": "cmn",
+                    "roman": "biàndāng",
+                    "tags": ["Simplified-Chinese"],
+                    "word": "便当",
+                    "raw_tags": ["借詞"],
+                    "descendants": [
+                        {
+                            "lang": "英語",
+                            "lang_code": "en",
+                            "word": "biandang",
+                            "raw_tags": ["借詞"],
+                        }
+                    ],
+                },
+                {
+                    "lang": "俄語",
+                    "lang_code": "ru",
+                    "roman": "bɛntó",
+                    "word": "бэнто́",
+                    "raw_tags": ["借詞"],
+                },
+                {
+                    "lang": "俄語",
+                    "lang_code": "ru",
+                    "roman": "bɛ́nto",
+                    "word": "бэ́нто",
+                    "raw_tags": ["借詞"],
+                },
+            ],
         )

@@ -63,7 +63,7 @@ def process_single_page(
     else:
         # Get page content from database
         title = path_or_title
-        text = wxr.wtp.get_page_body(title, 0)  # type: ignore[assignment]
+        text = wxr.wtp.get_page_body(title, None)  # type: ignore[assignment]
         if text is None:
             logger.error(f"Can't find page '{title}' in the database.")
             return

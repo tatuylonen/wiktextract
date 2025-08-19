@@ -73,10 +73,15 @@ class TemplateData(TypedDict, total=False):
 
 
 class DescendantData(TypedDict, total=False):
-    depth: int
+    lang_code: str
+    lang: str
+    word: str
+    roman: str
     tags: list[str]
-    templates: list[TemplateData]
-    text: str
+    raw_tags: list[str]
+    descendants: list["DescendantData"]
+    ruby: list[tuple[str, ...]]
+    sense: str
 
 
 class FormData(TypedDict, total=False):
