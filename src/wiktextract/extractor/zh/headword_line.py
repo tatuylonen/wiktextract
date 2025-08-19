@@ -60,7 +60,7 @@ def extract_headword_line_template(
                         )
                 elif "gender" in class_names:
                     for abbr_tag in span_child.find_html("abbr"):
-                        gender = abbr_tag.children[0]
+                        gender = clean_node(wxr, None, abbr_tag)
                         if gender in TEMPLATE_TAG_ARGS:
                             word_entry.tags.append(TEMPLATE_TAG_ARGS[gender])
                         else:

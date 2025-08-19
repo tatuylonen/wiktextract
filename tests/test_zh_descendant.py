@@ -51,6 +51,7 @@ class TestDescendant(TestCase):
                 "roman": "nīhao",
                 "ruby": [("你好", "ニイハオ")],
                 "word": "你好",
+                "raw_tags": ["借詞"],
             },
         )
 
@@ -71,7 +72,7 @@ class TestDescendant(TestCase):
             {
                 "lang_code": "za",
                 "lang": "壯語",
-                "raw_tags": ["仿譯詞"],
+                "tags": ["calque"],
                 "word": "mwngz ndei",
             },
         )
@@ -114,12 +115,14 @@ class TestDescendant(TestCase):
                         "lang": "官話",
                         "roman": "zháinán",
                         "word": "宅男",
+                        "raw_tags": ["以類比或添加詞素等方式重塑"],
                     },
                     {
                         "lang_code": "cmn",
                         "lang": "官話",
                         "roman": "zháinǚ",
                         "word": "宅女",
+                        "raw_tags": ["以類比或添加詞素等方式重塑"],
                     },
                 ],
                 "lang_code": "cmn",
@@ -158,6 +161,7 @@ class TestDescendant(TestCase):
                     "word": "吸貓",
                     "roman": "xīmāo",
                     "tags": ["Traditional-Chinese"],
+                    "raw_tags": ["借詞"],
                 },
                 {
                     "lang_code": "zh",
@@ -165,6 +169,7 @@ class TestDescendant(TestCase):
                     "word": "吸猫",
                     "roman": "xīmāo",
                     "tags": ["Simplified-Chinese"],
+                    "raw_tags": ["借詞"],
                 },
             ],
         )
@@ -192,12 +197,14 @@ class TestDescendant(TestCase):
                     "lang": "波斯語",
                     "word": "فرانسه",
                     "roman": "farânse",
+                    "raw_tags": ["借詞"],
                     "descendants": [
                         {
                             "lang_code": "ps",
                             "lang": "普什圖語",
                             "word": "فرانسه",
                             "roman": "farānsa",
+                            "raw_tags": ["借詞"],
                         }
                     ],
                 }
@@ -231,18 +238,21 @@ class TestDescendant(TestCase):
                     "word": "中文",
                     "ruby": [("中文", "ちゅうぶん")],
                     "roman": "chūbun",
+                    "raw_tags": ["借詞"],
                 },
                 {
                     "lang_code": "ko",
                     "lang": "朝鮮語",
                     "word": "중문(中文)",
                     "roman": "jungmun",
+                    "raw_tags": ["借詞"],
                 },
                 {
                     "lang_code": "vi",
                     "lang": "越南語",
                     "word": "Trung văn",
                     "roman": "中文",
+                    "raw_tags": ["借詞"],
                 },
             ],
         )
@@ -268,7 +278,14 @@ etymology
         )
         self.assertEqual(
             page_data[0]["descendants"],
-            [{"lang": "布依語", "lang_code": "pcc", "word": "Zungyguef"}],
+            [
+                {
+                    "lang": "布依語",
+                    "lang_code": "pcc",
+                    "word": "Zungyguef",
+                    "raw_tags": ["借詞"],
+                }
+            ],
         )
         self.assertEqual(
             page_data[0]["descendants"], page_data[1]["descendants"]
@@ -304,6 +321,7 @@ etymology
                     "lang_code": "ca",
                     "lang": "加泰羅尼亞語",
                     "word": "tesaurus",
+                    "raw_tags": ["借詞"],
                 },
             ],
         )
@@ -342,6 +360,7 @@ etymology
                             "lang": "英語",
                             "lang_code": "en",
                             "word": "biandang",
+                            "raw_tags": ["借詞"],
                         }
                     ],
                     "lang": "官話",
@@ -349,6 +368,7 @@ etymology
                     "roman": "biàndāng",
                     "tags": ["Traditional-Chinese"],
                     "word": "便當",
+                    "raw_tags": ["借詞"],
                 },
                 {
                     "descendants": [
@@ -356,6 +376,7 @@ etymology
                             "lang": "英語",
                             "lang_code": "en",
                             "word": "biandang",
+                            "raw_tags": ["借詞"],
                         }
                     ],
                     "lang": "官話",
@@ -363,18 +384,21 @@ etymology
                     "roman": "biàndāng",
                     "tags": ["Simplified-Chinese"],
                     "word": "便当",
+                    "raw_tags": ["借詞"],
                 },
                 {
                     "lang": "俄語",
                     "lang_code": "ru",
                     "roman": "bɛntó",
                     "word": "бэнто́",
+                    "raw_tags": ["借詞"],
                 },
                 {
                     "lang": "俄語",
                     "lang_code": "ru",
                     "roman": "bɛ́nto",
                     "word": "бэ́нто",
+                    "raw_tags": ["借詞"],
                 },
             ],
         )

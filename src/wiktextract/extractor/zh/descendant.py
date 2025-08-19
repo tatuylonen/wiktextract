@@ -1,3 +1,5 @@
+import re
+
 from mediawiki_langcodes import name_to_code
 from wikitextprocessor import (
     HTMLNode,
@@ -11,7 +13,7 @@ from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from ..ruby import extract_ruby
 from .models import Descendant, WordEntry
-from .tags import translate_raw_tags
+from .tags import TEMPLATE_TAG_ARGS, translate_raw_tags
 
 
 def extract_descendant_section(
@@ -23,7 +25,7 @@ def extract_descendant_section(
             for list_node in level_node.find_child(NodeKind.LIST):
                 for list_item in list_node.find_child(NodeKind.LIST_ITEM):
                     desc_list.extend(
-                        process_desc_list_item(wxr, list_item, [])[0]
+                        process_desc_list_item(wxr, list_item, [], [])[0]
                     )
         elif (
             isinstance(node, TemplateNode)
@@ -50,7 +52,7 @@ def process_cjkv_template(
     )
     desc_list = []
     for list_item in expanded_node.find_child_recursively(NodeKind.LIST_ITEM):
-        desc_list.extend(process_desc_list_item(wxr, list_item, [])[0])
+        desc_list.extend(process_desc_list_item(wxr, list_item, [], [])[0])
     return desc_list
 
 
@@ -58,6 +60,7 @@ def process_desc_list_item(
     wxr: WiktextractContext,
     list_item: WikiNode,
     parent_data: list[Descendant],
+    raw_tags: list[str],
     lang_code: str = "unknown",
     lang_name: str = "unknown",
 ) -> tuple[list[Descendant], str, str]:
@@ -68,7 +71,9 @@ def process_desc_list_item(
             lang_name = child.strip(": ") or "unknown"
             lang_code = name_to_code(lang_name, "zh") or "unknown"
         elif isinstance(child, HTMLNode) and child.tag == "span":
-            extract_desc_span_tag(wxr, child, data_list, lang_code, lang_name)
+            extract_desc_span_tag(
+                wxr, child, data_list, lang_code, lang_name, raw_tags
+            )
         elif (
             isinstance(child, HTMLNode)
             and child.tag == "i"
@@ -102,6 +107,7 @@ def process_desc_list_item(
                 wxr,
                 expanded_template,
                 [],  # avoid add twice
+                raw_tags,
                 lang_code,
                 lang_name,
             )
@@ -112,10 +118,10 @@ def process_desc_list_item(
 
     for ul_tag in list_item.find_html("ul"):
         for li_tag in ul_tag.find_html("li"):
-            process_desc_list_item(wxr, li_tag, data_list)
+            process_desc_list_item(wxr, li_tag, data_list, [])
     for next_list in list_item.find_child(NodeKind.LIST):
         for next_list_item in next_list.find_child(NodeKind.LIST_ITEM):
-            process_desc_list_item(wxr, next_list_item, data_list)
+            process_desc_list_item(wxr, next_list_item, data_list, [])
 
     for p_data in parent_data:
         p_data.descendants.extend(data_list)
@@ -128,9 +134,11 @@ def extract_desc_span_tag(
     desc_lists: list[Descendant],
     lang_code: str,
     lang_name: str,
+    raw_tags: list[str],
 ):
     class_names = span_tag.attrs.get("class", "").split()
     span_lang = span_tag.attrs.get("lang", "")
+    span_title = span_tag.attrs.get("title", "")
     if ("tr" in class_names or span_lang.endswith("-Latn")) and len(
         desc_lists
     ) > 0:
@@ -139,12 +147,17 @@ def extract_desc_span_tag(
         if len(desc_lists) > 1 and "Traditional-Chinese" in desc_lists[-2].tags:
             desc_lists[-2].roman = roman
     elif (
-        "qualifier-content" in class_names or "gender" in class_names
+        "qualifier-content" in class_names
+        or "gender" in class_names
+        or "label-content" in class_names
     ) and len(desc_lists) > 0:
-        raw_tag = clean_node(wxr, None, span_tag)
-        if raw_tag != "":
-            desc_lists[-1].raw_tags.append(raw_tag)
-            translate_raw_tags(desc_lists[-1])
+        for raw_tag in re.split(r"，|,", clean_node(wxr, None, span_tag)):
+            raw_tag = raw_tag.strip()
+            if raw_tag in TEMPLATE_TAG_ARGS:
+                desc_lists[-1].tags.append(TEMPLATE_TAG_ARGS[raw_tag])
+            elif raw_tag != "":
+                desc_lists[-1].raw_tags.append(raw_tag)
+                translate_raw_tags(desc_lists[-1])
     elif span_lang != "":
         ruby_data, nodes_without_ruby = extract_ruby(wxr, span_tag)
         desc_data = Descendant(
@@ -152,6 +165,7 @@ def extract_desc_span_tag(
             lang_code=lang_code,
             word=clean_node(wxr, None, nodes_without_ruby),
             ruby=ruby_data,
+            raw_tags=raw_tags,
         )
         if desc_data.lang_code == "unknown":
             desc_data.lang_code = span_lang
@@ -160,4 +174,7 @@ def extract_desc_span_tag(
         elif "Hans" in class_names:
             desc_data.tags.append("Simplified-Chinese")
         if desc_data.word not in ["", "／"]:
+            translate_raw_tags(desc_data)
             desc_lists.append(desc_data)
+    elif span_title != "" and clean_node(wxr, None, span_tag) in ["→", "⇒"]:
+        raw_tags.append(span_title)

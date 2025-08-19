@@ -36,7 +36,7 @@ def extract_descendant_section(
         seen_lists.add(list_node)
         for list_item in list_node.find_child(NodeKind.LIST_ITEM):
             desc_list.extend(
-                extract_desc_list_item(wxr, list_item, [], seen_lists)[0]
+                extract_desc_list_item(wxr, list_item, [], seen_lists, [])[0]
             )
 
     if len(desc_list) > 0:
@@ -57,7 +57,7 @@ def extract_cjkv_template(
         seen_lists.add(list_node)
         for list_item in list_node.find_child(NodeKind.LIST_ITEM):
             desc_list.extend(
-                extract_desc_list_item(wxr, list_item, [], seen_lists)[0]
+                extract_desc_list_item(wxr, list_item, [], seen_lists, [])[0]
             )
     return desc_list
 
@@ -67,6 +67,7 @@ def extract_desc_list_item(
     list_item: WikiNode,
     parent_data: list[DescendantData],
     seen_lists: set[WikiNode],
+    raw_tags: list[str],
     lang_code: str = "unknown",
     lang_name: str = "unknown",
 ) -> tuple[list[DescendantData], str, str]:
@@ -77,7 +78,9 @@ def extract_desc_list_item(
             lang_name = child.strip(": ") or "unknown"
             lang_code = name_to_code(lang_name, "en") or "unkown"
         elif isinstance(child, HTMLNode) and child.tag == "span":
-            extract_desc_span_tag(wxr, child, data_list, lang_code, lang_name)
+            extract_desc_span_tag(
+                wxr, child, data_list, lang_code, lang_name, raw_tags
+            )
         elif (
             isinstance(child, HTMLNode)
             and child.tag == "i"
@@ -115,6 +118,7 @@ def extract_desc_list_item(
                 expanded_template,
                 [],  # avoid add twice
                 seen_lists,
+                raw_tags,
                 lang_code,
                 lang_name,
             )
@@ -125,13 +129,15 @@ def extract_desc_list_item(
 
     for ul_tag in list_item.find_html("ul"):
         for li_tag in ul_tag.find_html("li"):
-            extract_desc_list_item(wxr, li_tag, data_list, seen_lists)
+            extract_desc_list_item(wxr, li_tag, data_list, seen_lists, [])
     for next_list in list_item.find_child(NodeKind.LIST):
         if next_list in seen_lists:
             continue
         seen_lists.add(next_list)
         for next_list_item in next_list.find_child(NodeKind.LIST_ITEM):
-            extract_desc_list_item(wxr, next_list_item, data_list, seen_lists)
+            extract_desc_list_item(
+                wxr, next_list_item, data_list, seen_lists, []
+            )
 
     for p_data in parent_data:
         data_extend(p_data, "descendants", data_list)
@@ -144,9 +150,11 @@ def extract_desc_span_tag(
     desc_lists: list[DescendantData],
     lang_code: str,
     lang_name: str,
+    raw_tags: list[str],
 ):
     class_names = span_tag.attrs.get("class", "").split()
     span_lang = span_tag.attrs.get("lang", "")
+    span_title = span_tag.attrs.get("title", "")
     if ("tr" in class_names or span_lang.endswith("-Latn")) and len(
         desc_lists
     ) > 0:
@@ -158,15 +166,18 @@ def extract_desc_span_tag(
             ].get("tags", []):
                 desc_lists[-2]["roman"] = roman
     elif (
-        "qualifier-content" in class_names or "gender" in class_names
+        "qualifier-content" in class_names
+        or "gender" in class_names
+        or "label-content" in class_names
     ) and len(desc_lists) > 0:
-        raw_tag = clean_node(wxr, None, span_tag)
-        if raw_tag != "":
-            data_append(
-                desc_lists[-1],
-                "tags" if raw_tag in valid_tags else "raw_tags",
-                raw_tag,
-            )
+        for raw_tag in clean_node(wxr, None, span_tag).split(","):
+            raw_tag = raw_tag.strip()
+            if raw_tag != "":
+                data_append(
+                    desc_lists[-1],
+                    "tags" if raw_tag in valid_tags else "raw_tags",
+                    raw_tag,
+                )
     elif span_lang != "":
         ruby_data, nodes_without_ruby = extract_ruby(wxr, span_tag)
         desc_data = DescendantData(
@@ -174,6 +185,8 @@ def extract_desc_span_tag(
             lang_code=lang_code,
             word=clean_node(wxr, None, nodes_without_ruby),
         )
+        if len(raw_tags) > 0:
+            desc_data["raw_tags"] = raw_tags
         if len(ruby_data) > 0:
             desc_data["ruby"] = ruby_data
         if desc_data["lang_code"] == "unknown":
@@ -184,3 +197,5 @@ def extract_desc_span_tag(
             data_append(desc_data, "tags", "Simplified-Chinese")
         if desc_data["word"] not in ["", "／"]:
             desc_lists.append(deepcopy(desc_data))
+    elif span_title != "" and clean_node(wxr, None, span_tag) in ["→", "⇒"]:
+        raw_tags.append(span_title)

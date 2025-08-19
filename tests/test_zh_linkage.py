@@ -259,6 +259,7 @@ class TestZhLinkage(TestCase):
                             "roman": "gumin",
                             "ruby": [("愚", "ぐ"), ("民", "みん")],
                             "word": "愚民",
+                            "raw_tags": ["借詞"],
                         }
                     ],
                     "lang": "漢語",
@@ -280,6 +281,7 @@ class TestZhLinkage(TestCase):
                             "roman": "gumin",
                             "ruby": [("愚", "ぐ"), ("民", "みん")],
                             "word": "愚民",
+                            "raw_tags": ["借詞"],
                         }
                     ],
                     "senses": [{"glosses": ["使人民愚昧"]}],
