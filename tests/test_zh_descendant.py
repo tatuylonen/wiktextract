@@ -109,6 +109,10 @@ class TestDescendant(TestCase):
         self.assertEqual(
             page_data[0].descendants[0].model_dump(exclude_defaults=True),
             {
+                "lang_code": "cmn",
+                "lang": "官話",
+                "roman": "yùzháizú",
+                "word": "御宅族",
                 "descendants": [
                     {
                         "lang_code": "cmn",
@@ -125,10 +129,6 @@ class TestDescendant(TestCase):
                         "raw_tags": ["以類比或添加詞素等方式重塑"],
                     },
                 ],
-                "lang_code": "cmn",
-                "lang": "官話",
-                "roman": "yùzháizú",
-                "word": "御宅族",
             },
         )
 
@@ -355,22 +355,12 @@ etymology
             data[0]["descendants"],
             [
                 {
-                    "descendants": [
-                        {
-                            "lang": "英語",
-                            "lang_code": "en",
-                            "word": "biandang",
-                            "raw_tags": ["借詞"],
-                        }
-                    ],
                     "lang": "官話",
                     "lang_code": "cmn",
                     "roman": "biàndāng",
                     "tags": ["Traditional-Chinese"],
                     "word": "便當",
                     "raw_tags": ["借詞"],
-                },
-                {
                     "descendants": [
                         {
                             "lang": "英語",
@@ -379,12 +369,22 @@ etymology
                             "raw_tags": ["借詞"],
                         }
                     ],
+                },
+                {
                     "lang": "官話",
                     "lang_code": "cmn",
                     "roman": "biàndāng",
                     "tags": ["Simplified-Chinese"],
                     "word": "便当",
                     "raw_tags": ["借詞"],
+                    "descendants": [
+                        {
+                            "lang": "英語",
+                            "lang_code": "en",
+                            "word": "biandang",
+                            "raw_tags": ["借詞"],
+                        }
+                    ],
                 },
                 {
                     "lang": "俄語",

@@ -11,7 +11,6 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Iterable,
-    Iterator,
     Optional,
     Set,
     Union,
@@ -84,7 +83,6 @@ from .section_titles import (
 from .translations import parse_translation_item_text
 from .type_utils import (
     AttestationData,
-    DescendantData,
     ExampleData,
     LinkageData,
     ReferenceData,
@@ -3587,7 +3585,7 @@ def parse_language(
                     parse_etymology(etym_data, node)
             elif t == DESCENDANTS_TITLE and wxr.config.capture_descendants:
                 data = select_data()
-                extract_descendant_section(wxr, data, node)
+                extract_descendant_section(wxr, data, node, False)
             elif (
                 t in PROTO_ROOT_DERIVED_TITLES
                 and pos == "root"
@@ -3595,7 +3593,7 @@ def parse_language(
                 and wxr.config.capture_descendants
             ):
                 data = select_data()
-                extract_descendant_section(wxr, data, node)
+                extract_descendant_section(wxr, data, node, True)
             elif t == TRANSLATIONS_TITLE:
                 data = select_data()
                 parse_translations(data, node)

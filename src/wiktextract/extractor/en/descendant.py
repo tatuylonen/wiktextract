@@ -18,7 +18,10 @@ from .type_utils import DescendantData, WordData
 
 
 def extract_descendant_section(
-    wxr: WiktextractContext, word_entry: WordData, level_node: LevelNode
+    wxr: WiktextractContext,
+    word_entry: WordData,
+    level_node: LevelNode,
+    is_derived: bool,
 ):
     desc_list = []
     for t_node in level_node.find_child(NodeKind.TEMPLATE):
@@ -39,6 +42,10 @@ def extract_descendant_section(
                 extract_desc_list_item(wxr, list_item, [], seen_lists, [])[0]
             )
 
+    if is_derived:
+        for data in desc_list:
+            if "derived" not in data.get("tags", []):
+                data_append(data, "tags", "derived")
     if len(desc_list) > 0:
         data_extend(word_entry, "descendants", desc_list)
 
@@ -75,8 +82,8 @@ def extract_desc_list_item(
     data_list = []
     for child in list_item.children:
         if isinstance(child, str) and child.strip().endswith(":"):
-            lang_name = child.strip(": ") or "unknown"
-            lang_code = name_to_code(lang_name, "en") or "unkown"
+            lang_name = child.strip(": \n") or "unknown"
+            lang_code = name_to_code(lang_name, "en") or "unknown"
         elif isinstance(child, HTMLNode) and child.tag == "span":
             extract_desc_span_tag(
                 wxr, child, data_list, lang_code, lang_name, raw_tags
@@ -106,6 +113,7 @@ def extract_desc_list_item(
             "ja-r",
             "zh-l",
             "zh-m",
+            "link",  # used in Reconstruction pages
             "l",
         ]:
             if child.template_name.startswith("desc"):
@@ -126,6 +134,16 @@ def extract_desc_list_item(
             # save lang data from desc template
             lang_code = new_l_code
             lang_name = new_l_name
+
+    if (
+        wxr.wtp.title.startswith("Reconstruction:")
+        and len(data_list) == 0
+        and (lang_code != "unknown" or lang_name != "unknown")
+    ):
+        data = DescendantData(lang_code=lang_code, lang=lang_name)
+        if len(raw_tags) > 0:
+            data["raw_tags"] = raw_tags
+        data_list.append(data)
 
     for ul_tag in list_item.find_html("ul"):
         for li_tag in ul_tag.find_html("li"):
@@ -197,7 +215,12 @@ def extract_desc_span_tag(
             data_append(desc_data, "tags", "Simplified-Chinese")
         if desc_data["word"] not in ["", "／"]:
             desc_lists.append(deepcopy(desc_data))
-    elif span_title != "" and clean_node(wxr, None, span_tag) in ["→", "⇒"]:
+    elif span_title != "" and clean_node(wxr, None, span_tag) in [
+        "→",
+        "⇒",
+        ">",
+        "?",
+    ]:
         raw_tags.append(span_title)
     elif "mention-gloss" in class_names and len(desc_lists) > 0:
         sense = clean_node(wxr, None, span_tag)
