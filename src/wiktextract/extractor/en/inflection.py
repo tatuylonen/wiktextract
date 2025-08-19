@@ -211,6 +211,13 @@ title_contains_wordtags_map = {
     "ultramontane": "Ultramontane",
     "western lombard": "Western-Lombard",
     "eastern lombard": "Eastern-Lombard",
+    "contracted": "contracted",
+    "present": "present",
+    "perfect": "perfect",
+    "imperfect": "imperfect",
+    "pluperfect": "pluperfect",
+    "future": "future",
+    "aorist": "aorist",
 }
 for k, v in title_contains_wordtags_map.items():
     if any(t not in valid_tags for t in v.split()):
