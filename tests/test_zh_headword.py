@@ -7,6 +7,7 @@ from wiktextract.extractor.zh.headword_line import (
     extract_headword_line_template,
     extract_tlb_template,
 )
+from wiktextract.extractor.zh.page import parse_page
 from wiktextract.extractor.zh.models import WordEntry
 from wiktextract.wxr_context import WiktextractContext
 
@@ -178,3 +179,19 @@ class TestHeadword(TestCase):
         extract_tlb_template(self.wxr, page_data[0], root.children[0])
         self.assertEqual(page_data[0].tags, ["intransitive"])
         self.assertEqual(page_data[0].categories, ["漢語不及物動詞"])
+
+    def test_tlb_tags(self):
+        self.wxr.wtp.add_page(
+            "Template:term-label",
+            10,
+            '<span class="usage-label-sense"><span class="ib-brac">(</span><span class="ib-content">[[Appendix:Glossary#俚語|俚語]][[Category:英語俚語|講大話]]<span class="ib-comma">，</span>[[Appendix:Glossary#古舊|古舊]][[Category:有古舊詞義的英語詞|講大話]]</span><span class="ib-brac">)</span></span>',
+        )
+        data = parse_page(
+            self.wxr,
+            "old hat",
+            """==英語==
+===名詞===
+{{term-label|en|俚語|古舊}}
+# gloss""",
+        )
+        self.assertEqual(data[0]["tags"], ["slang", "archaic"])

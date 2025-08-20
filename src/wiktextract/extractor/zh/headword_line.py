@@ -236,8 +236,9 @@ def extract_tlb_template(
     for span_tag in expanded_node.find_html_recursively(
         "span", attr_name="class", attr_value="ib-content"
     ):
-        raw_tag = clean_node(wxr, None, span_tag)
-        if len(raw_tag) > 0:
-            word_entry.raw_tags.append(raw_tag)
+        for raw_tag in clean_node(wxr, None, span_tag).split("，"):
+            raw_tag = raw_tag.strip()
+            if len(raw_tag) > 0:
+                word_entry.raw_tags.append(raw_tag)
     clean_node(wxr, word_entry, expanded_node)
     translate_raw_tags(word_entry)
