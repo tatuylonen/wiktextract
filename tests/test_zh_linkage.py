@@ -576,3 +576,49 @@ class TestZhLinkage(TestCase):
                 }
             ],
         )
+
+    def test_and_tag(self):
+        self.wxr.wtp.add_page(
+            "Template:s",
+            10,
+            '<span class="ib-brac qualifier-brac">(</span><span class="ib-content qualifier-content">說謊</span><span class="ib-brac qualifier-brac">)</span><span class="ib-colon sense-qualifier-colon">：</span>',
+        )
+        self.wxr.wtp.add_page(
+            "Template:zh-dial",
+            10,
+            """	<div class="NavFrame" data-toggle-category="dialectal synonyms">
+	<div class="NavHead"><span class="Hant" lang="zh">-{<!-- -->[[說謊#漢語|-{說謊}-]]}-</span>（「故意說虛假的話」）的各地方言用詞[[Template:zh-dial-map/說謊|<small>&#91;地圖&#93;</small>]]
+</div>
+	<div class="NavContent" style="border-top:0">
+	{| class="wikitable"
+	|-
+	! 語言
+	! 地區
+	! 詞
+|-
+!rowspan=22 | 閩南語
+| [[w:平和縣|平和]]
+| <span class="Hant" lang="zh">-{<!-- -->[[講白賊#漢語|-{講白賊}-]]}-</span>
+|}</div></div>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "講大話",
+            """==漢語==
+===動詞===
+# [[說謊]]
+====近義詞====
+* {{s|說謊}}
+{{zh-dial|說謊}}""",
+        )
+        self.assertEqual(
+            data[0]["synonyms"],
+            [
+                {
+                    "raw_tags": ["平和"],
+                    "tags": ["Min-Nan"],
+                    "word": "講白賊",
+                    "sense": "說謊",
+                }
+            ],
+        )

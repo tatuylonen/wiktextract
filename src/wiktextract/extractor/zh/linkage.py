@@ -185,7 +185,7 @@ def extract_zh_dial_template(
                         span_tag.attrs.get("lang", "") == "zh"
                         and span_text != wxr.wtp.title
                     ):
-                        l_data = Linkage(word=span_text)
+                        l_data = Linkage(word=span_text, sense=sense)
                         if len(lang_tags) > 0:
                             l_data.raw_tags.extend(lang_tags)
                         if len(region_tags) > 0:
