@@ -438,6 +438,10 @@ ZH_PRON_TAGS = {
     "常用": "general",
     "檳城": "Penang",
     "兒化": "Erhua",
+    "文讀": "literary",
+    "中國大陸標準讀法": ["Mainland-China", "standard"],
+    "臺灣異讀法": ["Taiwan", "variant"],
+    "中國大陸與臺灣標準讀法": ["Mainland-China", "Taiwan", "standard"],
 }
 
 ZH_DIAL_TAGS = {
@@ -453,6 +457,7 @@ ZH_DIAL_TAGS = {
     "徽語": "Huizhou",
     "南部平話": "Southern-Pinghua",
     "濟南": "Jinan",
+    "臺灣": "Taiwan",
 }
 
 
