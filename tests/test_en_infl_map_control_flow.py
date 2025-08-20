@@ -10,6 +10,7 @@ from unittest.mock import patch
 from wikitextprocessor import Wtp
 
 from wiktextract.config import WiktionaryConfig
+from wiktextract.extractor.en.page import parse_language
 from wiktextract.extractor.en.inflection import TableContext, expand_header
 from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.wxr_context import WiktextractContext
@@ -28,24 +29,35 @@ class InflTests(unittest.TestCase):
             self.wxr.thesaurus_db_path, self.wxr.thesaurus_db_conn
         )
 
-    def xexpand_header(self, text, i_map, lang="English", pos="verb",
-                       base_tags=[],):
-        with patch('wiktextract.extractor.en.inflection.infl_map', i_map):
-            ret = expand_header(self.wxr, self.tablecontext,
-                                "foobar", lang,
-                                pos, "foo", base_tags)
+    def xexpand_header(
+        self,
+        text,
+        i_map,
+        lang="English",
+        pos="verb",
+        base_tags=[],
+    ):
+        with patch("wiktextract.extractor.en.inflection.infl_map", i_map):
+            ret = expand_header(
+                self.wxr,
+                self.tablecontext,
+                "foobar",
+                lang,
+                pos,
+                "foo",
+                base_tags,
+            )
         return ret
 
     def test_basic(self):
-        ret = self.xexpand_header("foo", { "foo": "counterfactual" })
+        ret = self.xexpand_header("foo", {"foo": "counterfactual"})
         expected = [("counterfactual",)]
         self.assertEqual(expected, ret)
 
     def test_basic_b(self):
-        ret = self.xexpand_header("foo", { "bar": "counterfactual" })
+        ret = self.xexpand_header("foo", {"bar": "counterfactual"})
         expected = [("error-unrecognized-form",)]
         self.assertEqual(expected, ret)
-
 
     def test_if1(self):
         infl_map = {
@@ -56,9 +68,12 @@ class InflTests(unittest.TestCase):
                 "else": "negative",
             },
         }
-        ret = self.xexpand_header("foo", infl_map,
-                                  base_tags=["indicative"],)
-        expected = [("positive",)] # then
+        ret = self.xexpand_header(
+            "foo",
+            infl_map,
+            base_tags=["indicative"],
+        )
+        expected = [("positive",)]  # then
         self.assertEqual(expected, ret)
 
     def test_if2(self):
@@ -70,9 +85,12 @@ class InflTests(unittest.TestCase):
                 "else": "negative",
             },
         }
-        ret = self.xexpand_header("foo", infl_map,
-                                  base_tags=["indicative"],)
-        expected = [("positive",)] # then
+        ret = self.xexpand_header(
+            "foo",
+            infl_map,
+            base_tags=["indicative"],
+        )
+        expected = [("positive",)]  # then
         self.assertEqual(expected, ret)
 
     def test_if3(self):
@@ -84,9 +102,12 @@ class InflTests(unittest.TestCase):
                 "else": "negative",
             },
         }
-        ret = self.xexpand_header("foo", infl_map,
-                                  base_tags=["indicative"],)
-        expected = [("negative",)] # else
+        ret = self.xexpand_header(
+            "foo",
+            infl_map,
+            base_tags=["indicative"],
+        )
+        expected = [("negative",)]  # else
         self.assertEqual(expected, ret)
 
     def test_if4(self):
@@ -98,9 +119,12 @@ class InflTests(unittest.TestCase):
                 "else": "negative",
             },
         }
-        ret = self.xexpand_header("foo", infl_map,
-                                  base_tags=["indicative"],)
-        expected = [("negative",)] # else
+        ret = self.xexpand_header(
+            "foo",
+            infl_map,
+            base_tags=["indicative"],
+        )
+        expected = [("negative",)]  # else
         self.assertEqual(expected, ret)
 
     def test_if5(self):
@@ -112,9 +136,12 @@ class InflTests(unittest.TestCase):
                 "else": "negative",
             },
         }
-        ret = self.xexpand_header("foo", infl_map,
-                                  base_tags=["indicative"],)
-        expected = [("positive",)] # then
+        ret = self.xexpand_header(
+            "foo",
+            infl_map,
+            base_tags=["indicative"],
+        )
+        expected = [("positive",)]  # then
         self.assertEqual(expected, ret)
 
     def test_if6(self):
@@ -125,9 +152,12 @@ class InflTests(unittest.TestCase):
                 "else": "negative",
             },
         }
-        ret = self.xexpand_header("foo", infl_map,
-                                  base_tags=["indicative"],)
-        expected = [("positive",)] # then
+        ret = self.xexpand_header(
+            "foo",
+            infl_map,
+            base_tags=["indicative"],
+        )
+        expected = [("positive",)]  # then
         self.assertEqual(expected, ret)
 
     def test_if7(self):
@@ -137,9 +167,12 @@ class InflTests(unittest.TestCase):
                 "else": "negative",
             },
         }
-        ret = self.xexpand_header("foo", infl_map,
-                                  base_tags=["indicative"],)
-        expected = [()] # "then"
+        ret = self.xexpand_header(
+            "foo",
+            infl_map,
+            base_tags=["indicative"],
+        )
+        expected = [()]  # "then"
         self.assertEqual(expected, ret)
 
     def test_if8(self):
@@ -148,9 +181,12 @@ class InflTests(unittest.TestCase):
                 "else": "negative",
             },
         }
-        ret = self.xexpand_header("foo", infl_map,
-                                  base_tags=["indicative"],)
-        expected = [()] # then
+        ret = self.xexpand_header(
+            "foo",
+            infl_map,
+            base_tags=["indicative"],
+        )
+        expected = [()]  # then
         self.assertEqual(expected, ret)
 
     def test_if9(self):
@@ -160,9 +196,12 @@ class InflTests(unittest.TestCase):
                 "else": "negative",
             },
         }
-        ret = self.xexpand_header("foo", infl_map,
-                                  base_tags=["indicative"],)
-        expected = [("negative",)] # then
+        ret = self.xexpand_header(
+            "foo",
+            infl_map,
+            base_tags=["indicative"],
+        )
+        expected = [("negative",)]  # then
         self.assertEqual(expected, ret)
 
     def test_if10(self):
@@ -176,10 +215,12 @@ class InflTests(unittest.TestCase):
                 "else": "negative",
             },
         }
-        ret = self.xexpand_header("foo", infl_map,
-                                  base_tags=["counterfactual",
-                                             "indicative"],)
-        expected = [("positive",)] # then
+        ret = self.xexpand_header(
+            "foo",
+            infl_map,
+            base_tags=["counterfactual", "indicative"],
+        )
+        expected = [("positive",)]  # then
         self.assertEqual(expected, ret)
 
     def test_if11(self):
@@ -193,9 +234,12 @@ class InflTests(unittest.TestCase):
                 "else": "negative",
             },
         }
-        ret = self.xexpand_header("foo", infl_map,
-                                  base_tags=["counterfactual"],)
-        expected = [("error-unrecognized-form",)] # then
+        ret = self.xexpand_header(
+            "foo",
+            infl_map,
+            base_tags=["counterfactual"],
+        )
+        expected = [("error-unrecognized-form",)]  # then
         self.assertEqual(expected, ret)
 
     def test_default1(self):
@@ -205,9 +249,12 @@ class InflTests(unittest.TestCase):
                 "if": "counterfactual",
             },
         }
-        ret = self.xexpand_header("foo", infl_map,
-                                  base_tags=["indicative"],)
-        expected = [("negative",)] # default
+        ret = self.xexpand_header(
+            "foo",
+            infl_map,
+            base_tags=["indicative"],
+        )
+        expected = [("negative",)]  # default
         self.assertEqual(expected, ret)
 
     def test_default2(self):
@@ -215,16 +262,15 @@ class InflTests(unittest.TestCase):
             "foo": {
                 "default": "negative",
                 "if": "indicative",
-                "then": {
-                    "if": "counterfactual",
-                    "then": "positive"
-                },
-
+                "then": {"if": "counterfactual", "then": "positive"},
             },
         }
-        ret = self.xexpand_header("foo", infl_map,
-                                  base_tags=["indicative"],)
-        expected = [("negative",)] # default
+        ret = self.xexpand_header(
+            "foo",
+            infl_map,
+            base_tags=["indicative"],
+        )
+        expected = [("negative",)]  # default
         self.assertEqual(expected, ret)
 
     def test_default3(self):
@@ -235,14 +281,16 @@ class InflTests(unittest.TestCase):
                 "then": {
                     "default": "negative",
                     "if": "counterfactual",
-                    "then": "positive"
+                    "then": "positive",
                 },
-
             },
         }
-        ret = self.xexpand_header("foo", infl_map,
-                                  base_tags=["indicative"],)
-        expected = [("negative",)] # deeper default
+        ret = self.xexpand_header(
+            "foo",
+            infl_map,
+            base_tags=["indicative"],
+        )
+        expected = [("negative",)]  # deeper default
         self.assertEqual(expected, ret)
 
     def test_lang1(self):
@@ -253,9 +301,12 @@ class InflTests(unittest.TestCase):
                 "else": "negative",
             },
         }
-        ret = self.xexpand_header("foo", infl_map,
-                                  lang="Finnish",
-                                  base_tags=["indicative"],)
+        ret = self.xexpand_header(
+            "foo",
+            infl_map,
+            lang="Finnish",
+            base_tags=["indicative"],
+        )
         expected = [("positive",)]
         self.assertEqual(expected, ret)
 
@@ -267,9 +318,12 @@ class InflTests(unittest.TestCase):
                 "else": "negative",
             },
         }
-        ret = self.xexpand_header("foo", infl_map,
-                                  lang="Finnish",
-                                  base_tags=["indicative"],)
+        ret = self.xexpand_header(
+            "foo",
+            infl_map,
+            lang="Finnish",
+            base_tags=["indicative"],
+        )
         expected = [("negative",)]
         self.assertEqual(expected, ret)
 
@@ -281,9 +335,12 @@ class InflTests(unittest.TestCase):
                 "else": "negative",
             },
         }
-        ret = self.xexpand_header("foo", infl_map,
-                                  pos="noun",
-                                  base_tags=["indicative"],)
+        ret = self.xexpand_header(
+            "foo",
+            infl_map,
+            pos="noun",
+            base_tags=["indicative"],
+        )
         expected = [("positive",)]
         self.assertEqual(expected, ret)
 
@@ -295,9 +352,12 @@ class InflTests(unittest.TestCase):
                 "else": "negative",
             },
         }
-        ret = self.xexpand_header("foo", infl_map,
-                                  pos="noun",
-                                  base_tags=["indicative"],)
+        ret = self.xexpand_header(
+            "foo",
+            infl_map,
+            pos="noun",
+            base_tags=["indicative"],
+        )
         expected = [("negative",)]
         self.assertEqual(expected, ret)
 
@@ -309,8 +369,11 @@ class InflTests(unittest.TestCase):
                 "else": "negative",
             },
         }
-        ret = self.xexpand_header("foo", infl_map,
-                                  pos="noun",)
+        ret = self.xexpand_header(
+            "foo",
+            infl_map,
+            pos="noun",
+        )
         expected = [("positive",)]
         self.assertEqual(expected, ret)
 
@@ -322,8 +385,11 @@ class InflTests(unittest.TestCase):
                 "else": "negative",
             },
         }
-        ret = self.xexpand_header("foo", infl_map,
-                                  pos="noun",)
+        ret = self.xexpand_header(
+            "foo",
+            infl_map,
+            pos="noun",
+        )
         expected = [("negative",)]
         self.assertEqual(expected, ret)
 
@@ -337,10 +403,13 @@ class InflTests(unittest.TestCase):
                 "else": "negative",
             },
         }
-        ret = self.xexpand_header("foo", infl_map,
-                                  lang="Finnish",
-                                  pos="noun",
-                                  base_tags=["indicative"],)
+        ret = self.xexpand_header(
+            "foo",
+            infl_map,
+            lang="Finnish",
+            pos="noun",
+            base_tags=["indicative"],
+        )
         expected = [("positive",)]
         self.assertEqual(expected, ret)
 
@@ -354,10 +423,13 @@ class InflTests(unittest.TestCase):
                 "else": "negative",
             },
         }
-        ret = self.xexpand_header("foo", infl_map,
-                                  lang="Finnish",
-                                  pos="noun",
-                                  base_tags=["indicative"],)
+        ret = self.xexpand_header(
+            "foo",
+            infl_map,
+            lang="Finnish",
+            pos="noun",
+            base_tags=["indicative"],
+        )
         expected = [("negative",)]
         self.assertEqual(expected, ret)
 
@@ -371,10 +443,13 @@ class InflTests(unittest.TestCase):
                 "else": "negative",
             },
         }
-        ret = self.xexpand_header("foo", infl_map,
-                                  lang="Finnish",
-                                  pos="noun",
-                                  base_tags=["indicative"],)
+        ret = self.xexpand_header(
+            "foo",
+            infl_map,
+            lang="Finnish",
+            pos="noun",
+            base_tags=["indicative"],
+        )
         expected = [("negative",)]
         self.assertEqual(expected, ret)
 
@@ -388,10 +463,13 @@ class InflTests(unittest.TestCase):
                 "else": "negative",
             },
         }
-        ret = self.xexpand_header("foo", infl_map,
-                                  lang="Finnish",
-                                  pos="noun",
-                                  base_tags=["indicative"],)
+        ret = self.xexpand_header(
+            "foo",
+            infl_map,
+            lang="Finnish",
+            pos="noun",
+            base_tags=["indicative"],
+        )
         expected = [("negative",)]
         self.assertEqual(expected, ret)
 
@@ -405,10 +483,13 @@ class InflTests(unittest.TestCase):
                 "else": "negative",
             },
         }
-        ret = self.xexpand_header("foo", infl_map,
-                                  lang="Finnish",
-                                  pos="noun",
-                                  base_tags=["indicative"],)
+        ret = self.xexpand_header(
+            "foo",
+            infl_map,
+            lang="Finnish",
+            pos="noun",
+            base_tags=["indicative"],
+        )
         expected = [("negative",)]
         self.assertEqual(expected, ret)
 
@@ -422,10 +503,13 @@ class InflTests(unittest.TestCase):
                 "else": "negative",
             },
         }
-        ret = self.xexpand_header("foo", infl_map,
-                                  lang="Finnish",
-                                  pos="noun",
-                                  base_tags=["indicative"],)
+        ret = self.xexpand_header(
+            "foo",
+            infl_map,
+            lang="Finnish",
+            pos="noun",
+            base_tags=["indicative"],
+        )
         expected = [("negative",)]
         self.assertEqual(expected, ret)
 
@@ -439,10 +523,13 @@ class InflTests(unittest.TestCase):
                 "else": "negative",
             },
         }
-        ret = self.xexpand_header("foo", infl_map,
-                                  lang="Finnish",
-                                  pos="noun",
-                                  base_tags=["indicative"],)
+        ret = self.xexpand_header(
+            "foo",
+            infl_map,
+            lang="Finnish",
+            pos="noun",
+            base_tags=["indicative"],
+        )
         expected = [("negative",)]
         self.assertEqual(expected, ret)
 
@@ -456,10 +543,13 @@ class InflTests(unittest.TestCase):
                 "else": "negative",
             },
         }
-        ret = self.xexpand_header("foo", infl_map,
-                                  lang="Finnish",
-                                  pos="noun",
-                                  base_tags=["indicative"],)
+        ret = self.xexpand_header(
+            "foo",
+            infl_map,
+            lang="Finnish",
+            pos="noun",
+            base_tags=["indicative"],
+        )
         expected = [("negative",)]
         self.assertEqual(expected, ret)
 
@@ -474,10 +564,13 @@ class InflTests(unittest.TestCase):
                 "else": "negative",
             },
         }
-        ret = self.xexpand_header("foo", infl_map,
-                                  lang="English",
-                                  pos="verb",
-                                  base_tags=["indicative"],)
+        ret = self.xexpand_header(
+            "foo",
+            infl_map,
+            lang="English",
+            pos="verb",
+            base_tags=["indicative"],
+        )
         expected = [("positive",)]
         self.assertEqual(expected, ret)
 
@@ -500,10 +593,13 @@ class InflTests(unittest.TestCase):
                 },
             },
         }
-        ret = self.xexpand_header("foo", infl_map,
-                                  lang="Finnish",
-                                  pos="noun",
-                                  base_tags=["indicative"],)
+        ret = self.xexpand_header(
+            "foo",
+            infl_map,
+            lang="Finnish",
+            pos="noun",
+            base_tags=["indicative"],
+        )
         expected = [("positive",)]
         self.assertEqual(expected, ret)
 
@@ -521,15 +617,18 @@ class InflTests(unittest.TestCase):
                     "then": {
                         "lang": "English",
                         "then": "negative",
-                    "else": "negative",
+                        "else": "negative",
                     },
                 },
             },
         }
-        ret = self.xexpand_header("foo", infl_map,
-                                  lang="English",
-                                  pos="noun",
-                                  base_tags=["indicative"],)
+        ret = self.xexpand_header(
+            "foo",
+            infl_map,
+            lang="English",
+            pos="noun",
+            base_tags=["indicative"],
+        )
         expected = [("positive",)]
         self.assertEqual(expected, ret)
 
@@ -552,9 +651,68 @@ class InflTests(unittest.TestCase):
                 },
             },
         }
-        ret = self.xexpand_header("foo", infl_map,
-                                  lang="English",
-                                  pos="verb",
-                                  base_tags=["indicative"],)
+        ret = self.xexpand_header(
+            "foo",
+            infl_map,
+            lang="English",
+            pos="verb",
+            base_tags=["indicative"],
+        )
         expected = [("positive",)]
         self.assertEqual(expected, ret)
+
+    def test_column_index1(self):
+        infl_map = {
+            "bar": {
+                "column-index": 1,
+                "then": "positive",
+                "else": "negative",
+            },
+        }
+        section = """==English==
+
+===Noun===
+# testpage
+
+====Inflection====
+
+{|
+! bar !! bar
+|-
+| testerg || testnorm
+|}
+"""
+        parsed = self.wxr.wtp.parse(section)
+        with patch("wiktextract.extractor.en.inflection.infl_map", infl_map):
+            langret = parse_language(
+                self.wxr, parsed.children[0], "English", "en"
+            )
+        expected = [
+            {
+                "senses": [
+                    {"raw_glosses": ["testpage"], "glosses": ["testpage"]}
+                ],
+                "pos": "noun",
+                "forms": [
+                    {
+                        "form": "no-table-tags",
+                        "source": "inflection",
+                        "tags": ["table-tags"],
+                    },
+                    {
+                        "form": "testerg",
+                        "tags": ["negative"],
+                        "source": "inflection",
+                    },
+                    {
+                        "form": "testnorm",
+                        "tags": ["positive"],
+                        "source": "inflection",
+                    },
+                ],
+                "word": "testpage",
+                "lang": "English",
+                "lang_code": "en",
+            }
+        ]
+        self.assertEqual(expected, langret)
