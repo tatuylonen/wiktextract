@@ -150,8 +150,8 @@ def process_forma_template(
             or "pronom" in template.template_parameters
         ):
             sense.form_of.append(AltForm(word=form_of + "se"))
-            if "form-of" not in sense.tags:
-                sense.tags.append("form-of")
+        if "form-of" not in sense.tags:
+            sense.tags.append("form-of")
 
 
 def process_uso_template(

@@ -101,6 +101,7 @@ class TestESGloss(unittest.TestCase):
                             "glosses": ["Forma del plural de apple."],
                             "form_of": [{"word": "apple"}],
                             "sense_index": "1",
+                            "tags": ["form-of"],
                         }
                     ],
                     "tags": ["form-of", "substantive"],
@@ -212,6 +213,7 @@ class TestESGloss(unittest.TestCase):
                             ],
                             "form_of": [{"word": "caminar"}],
                             "sense_index": "1",
+                            "tags": ["form-of"],
                         }
                     ],
                     "tags": ["form-of"],
