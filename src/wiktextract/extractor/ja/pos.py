@@ -139,6 +139,7 @@ def find_form_of_data(
             form_of = clean_node(wxr, None, link_node)
             if form_of != "":
                 sense.form_of.append(AltForm(word=form_of))
+                sense.tags.append("form-of")
                 break
 
 
