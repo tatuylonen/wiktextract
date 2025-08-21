@@ -112,7 +112,13 @@ class TestPtGloss(TestCase):
         )
         self.assertEqual(
             data[0]["senses"],
-            [{"glosses": ["plural de cão"], "form_of": [{"word": "cão"}]}],
+            [
+                {
+                    "glosses": ["plural de cão"],
+                    "form_of": [{"word": "cão"}],
+                    "tags": ["form-of"],
+                }
+            ],
         )
 
     def test_form_of_link(self):
@@ -130,6 +136,7 @@ class TestPtGloss(TestCase):
                 {
                     "glosses": ["feminino plural de cão (cruel, brutal)"],
                     "form_of": [{"word": "cão"}],
+                    "tags": ["form-of"],
                 }
             ],
         )

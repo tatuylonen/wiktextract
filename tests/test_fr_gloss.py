@@ -289,21 +289,20 @@ class TestFrGloss(TestCase):
         )
 
     def test_gloss_note_template(self):
-        # https://fr.wiktionary.org/wiki/autrice#Nom_commun
-        self.wxr.wtp.start_page("autrice")
+        # https://fr.wiktionary.org/wiki/animal#Nom_commun
+        self.wxr.wtp.start_page("animal")
         self.wxr.wtp.add_page("Modèle:plus rare", 10, "''(Plus rare)''")
         root = self.wxr.wtp.parse(
-            "# {{plus rare}} [[génitrice|Génitrice]] ; [[ascendante]] ({{note}} ce sens n’est plus guère utilisé que sous la forme de la locution « [[autrice de mes jours]] »)."
+            "# {{plus rare}} [[être humain|Être humain]]. — {{note}} note"
         )
-        page_data = [WordEntry(word="autrice", lang_code="fr", lang="Français")]
+        page_data = [WordEntry(word="animal", lang_code="fr", lang="Français")]
         extract_gloss(self.wxr, page_data, root.children[0])
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in page_data[-1].senses],
             [
                 {
-                    "glosses": ["Génitrice ; ascendante"],
-                    "note": "ce sens n’est plus guère utilisé que sous "
-                    "la forme de la locution « autrice de mes jours »",
+                    "glosses": ["Être humain."],
+                    "note": "note",
                     "raw_tags": ["Plus rare"],
                 }
             ],
@@ -419,6 +418,7 @@ class TestFrGloss(TestCase):
                                 "Première personne du singulier de "
                                 "l’indicatif présent du verbe diéser."
                             ],
+                            "tags": ["form-of"],
                         },
                         {
                             "form_of": [{"word": "diéser"}],
@@ -426,6 +426,7 @@ class TestFrGloss(TestCase):
                                 "Troisième personne du singulier de "
                                 "l’indicatif présent du verbe diéser."
                             ],
+                            "tags": ["form-of"],
                         },
                     ],
                     "tags": ["form-of"],
@@ -631,6 +632,7 @@ class TestFrGloss(TestCase):
                     "glosses": [
                         "Forme mutée de wythnos par ajout d’une prothèse h."
                     ],
+                    "tags": ["form-of"],
                 },
             ],
         )
@@ -659,6 +661,7 @@ class TestFrGloss(TestCase):
                 {
                     "form_of": [{"word": "écuyer"}],
                     "glosses": ["Féminin pluriel de écuyer."],
+                    "tags": ["form-of"],
                 },
             ],
         )

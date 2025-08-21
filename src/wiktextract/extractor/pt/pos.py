@@ -141,3 +141,4 @@ def extract_form_of_word(
         form_of = clean_node(wxr, None, link_node)
     if form_of != "":
         sense.form_of.append(AltForm(word=form_of))
+        sense.tags.append("form-of")

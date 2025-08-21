@@ -91,6 +91,7 @@ def extract_gloss(
         )
         if "form-of" in page_data[-1].tags:
             find_form_of_word(wxr, gloss_only_nodes[:note_index], gloss_data)
+        gloss_text = gloss_text.strip("— \n")
         if gloss_text != "":
             gloss_data.glosses.append(gloss_text)
         gloss_data.note = clean_node(
@@ -302,3 +303,5 @@ def find_form_of_word(
                 )
     if len(form_of) > 0:
         gloss_data.form_of.append(AltForm(word=form_of))
+        if "form-of" not in gloss_data.tags:
+            gloss_data.tags.append("form-of")

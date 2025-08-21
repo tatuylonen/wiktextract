@@ -173,7 +173,13 @@ class TestItGloss(TestCase):
         )
         self.assertEqual(
             data[0]["senses"],
-            [{"glosses": ["plurale di cane"], "form_of": [{"word": "cane"}]}],
+            [
+                {
+                    "glosses": ["plurale di cane"],
+                    "form_of": [{"word": "cane"}],
+                    "tags": ["form-of"],
+                }
+            ],
         )
 
     def test_nested_list(self):

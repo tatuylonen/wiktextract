@@ -154,6 +154,7 @@ class TestJaGloss(TestCase):
                 {
                     "form_of": [{"word": "てんぷら"}],
                     "glosses": ["「てんぷら」参照。"],
+                    "tags": ["form-of"],
                 }
             ],
         )
