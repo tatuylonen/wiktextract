@@ -184,8 +184,10 @@ def extract_form_of_template(
             if word != "":
                 if t_node.template_name in ALT_OF_TEMPLATES:
                     sense.alt_of.append(AltForm(word=word))
+                    sense.tags.append("alt-of")
                 else:
                     sense.form_of.append(AltForm(word=word))
+                    sense.tags.append("form-of")
 
 
 def extract_defdate_template(

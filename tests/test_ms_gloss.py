@@ -196,6 +196,7 @@ class TestMsGloss(TestCase):
                     "form_of": [{"word": "abado"}],
                     "categories": ["Jamak berpautan merah untuk mufrad"],
                     "glosses": ["jamak bagi abado; ketua-ketua biara."],
+                    "tags": ["form-of"],
                 }
             ],
         )
@@ -221,6 +222,7 @@ class TestMsGloss(TestCase):
                     "glosses": [
                         "Bentuk alternatif jenis huruf besar bagi orang kena tuduh."
                     ],
+                    "tags": ["alt-of"],
                 }
             ],
         )
