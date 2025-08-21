@@ -153,6 +153,7 @@ def extract_form_of_word(
         word = clean_node(wxr, None, node)
     if word != "":
         sense.form_of.append(AltForm(word=word))
+        sense.tags.append("form-of")
 
 
 def extract_note_section(
