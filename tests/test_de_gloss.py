@@ -490,3 +490,31 @@ Indikativ Präsens Aktiv des Verbs '''[[amar]]'''""",
                 }
             ],
         )
+
+    def test_tag_in_brackets(self):
+        self.wxr.wtp.add_page("Vorlage:reg.", 10, "[[regional|''regional'']]")
+        self.wxr.wtp.add_page(
+            "Vorlage:nordd.", 10, "[[norddeutsch|''norddeutsch'']]"
+        )
+        self.wxr.wtp.add_page(
+            "Vorlage:fachspr.", 10, "[[fachsprachlich|''fachsprachlich'']]"
+        )
+        data = parse_page(
+            self.wxr,
+            "Brack",
+            """== Brack ({{Sprache|Deutsch}}) ==
+=== {{Wortart|Substantiv|Deutsch}} ===
+==== Bedeutungen ====
+:[1] {{reg.}} ''(''{{nordd.}}''),'' {{fachspr.}} ''([[Kaufmannssprache]]):'' [[Produkt]]""",
+        )
+        self.assertEqual(
+            data[0]["senses"],
+            [
+                {
+                    "glosses": ["Produkt"],
+                    "tags": ["regional", "North German", "jargon"],
+                    "sense_index": "1",
+                    "raw_tags": ["Kaufmannssprache"],
+                }
+            ],
+        )

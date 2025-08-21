@@ -99,11 +99,12 @@ def process_gloss_list_item(
                         italic_text.startswith("(")
                         and italic_text.endswith(")")
                     ):
-                        if not italic_text.endswith(":"):
-                            italic_text = italic_text.strip("() ")
-                        for raw_tag in re.split(
-                            r":|,", italic_text.strip(": ")
+                        italic_text = italic_text.strip(": ")
+                        if italic_text.startswith("(") and italic_text.endswith(
+                            ")"
                         ):
+                            italic_text = italic_text.strip("() ")
+                        for raw_tag in re.split(r":|,", italic_text):
                             raw_tag = raw_tag.strip()
                             if len(raw_tag) > 0:
                                 sense_data.raw_tags.append(raw_tag)
@@ -117,6 +118,7 @@ def process_gloss_list_item(
 
             gloss_text = clean_node(wxr, sense_data, gloss_nodes)
             sense_idx, gloss_text = extract_sense_index(gloss_text)
+            gloss_text = gloss_text.replace("()", "").strip(":, \n")
             if sense_idx != "":
                 if (
                     not sense_idx[0].isnumeric()
