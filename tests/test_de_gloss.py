@@ -291,7 +291,12 @@ class TestDEGloss(unittest.TestCase):
                                 "Nominativ Singular Femininum der starken "
                                 "Flexion des Positivs des Adjektivs konjugiert"
                             ],
-                            "tags": ["nominative", "singular", "feminine"],
+                            "tags": [
+                                "nominative",
+                                "singular",
+                                "feminine",
+                                "form-of",
+                            ],
                         },
                         {
                             "form_of": [{"word": "konjugiert"}],
@@ -299,7 +304,12 @@ class TestDEGloss(unittest.TestCase):
                                 "Akkusativ Singular Femininum der starken "
                                 "Flexion des Positivs des Adjektivs konjugiert"
                             ],
-                            "tags": ["accusative", "singular", "feminine"],
+                            "tags": [
+                                "accusative",
+                                "singular",
+                                "feminine",
+                                "form-of",
+                            ],
                         },
                     ],
                     "tags": ["form-of"],
@@ -330,7 +340,7 @@ class TestDEGloss(unittest.TestCase):
                         {
                             "form_of": [{"word": "abakas"}],
                             "glosses": ["Nominativ Plural von abakas"],
-                            "tags": ["nominative", "plural"],
+                            "tags": ["nominative", "plural", "form-of"],
                         }
                     ],
                     "tags": ["form-of"],
@@ -363,7 +373,7 @@ class TestDEGloss(unittest.TestCase):
                             "glosses": [
                                 "Infinitiv Perfekt Aktiv des Verbs abire"
                             ],
-                            "tags": ["perfect", "active"],
+                            "tags": ["perfect", "active", "form-of"],
                         }
                     ],
                     "tags": ["form-of"],
@@ -447,7 +457,7 @@ Indikativ Präsens Aktiv des Verbs '''[[amar]]'''""",
                         {
                             "form_of": [{"word": "auto"}],
                             "glosses": ["Genitiv Plural des Substantivs auto"],
-                            "tags": ["genitive", "plural"],
+                            "tags": ["genitive", "plural", "form-of"],
                         }
                     ],
                     "tags": ["form-of"],

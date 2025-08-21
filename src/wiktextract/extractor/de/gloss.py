@@ -204,4 +204,6 @@ def process_form_of_list_item(
 
         if "form-of" not in word_entry.tags:
             word_entry.tags.append("form-of")
+        if "form-of" not in sense.tags:
+            sense.tags.append("form-of")
         word_entry.senses.append(sense)
