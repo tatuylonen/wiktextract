@@ -72,6 +72,7 @@ InflMapNodeDict = TypedDict(
         "pos": Union[str, set[str], list[str]],
         "inflection-template": Union[str, list[str], tuple[str, ...]],
         "nested-table-depth": Union[int, list[int]],
+        "column-index": int | list[int],
         "default": str,
         "if": str,
         "then": InflMapNode,
@@ -188,7 +189,6 @@ infl_map: dict[str, InflMapNode] = {
         "else": "masculine",
     },
     "error-unrecognized-form": "error-unrecognized-form",  # internal use
-    "active": "active",
     "passive": "passive",
     "Case": "*",  # Interpret the column as headers (e.g., anglais/Irish)
     "participles": "participle",
@@ -7172,6 +7172,12 @@ infl_map: dict[str, InflMapNode] = {
     "-მდე (-mde, “up to”)": "up-to-position adverbial",
     # femeie/Romanian
     "genitive-dative": "genitive dative",
+    "active": {
+        "default": "active",
+        "inflection-template": "grc-conj",
+        "column-index": 2,
+        "then": "dummy-reset-headers active",
+    },
 }
 
 
@@ -7231,6 +7237,13 @@ def check_v(
                     print(
                         "infl_map[{!r}] contains invalid"
                         "inflection-template value "
+                        "{!r}".format(k, v[kk])
+                    )
+            elif kk == "column-index":
+                if not isinstance(v[kk], (int, list, tuple)):
+                    print(
+                        "infl_map[{!r}] contains invalid"
+                        "column-index value "
                         "{!r}".format(k, v[kk])
                     )
             else:

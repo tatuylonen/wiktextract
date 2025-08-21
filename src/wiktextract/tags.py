@@ -5368,7 +5368,7 @@ valid_tags = {
     "contemporary": "misc",
     "contingent": "mood",  # Verb form, উঘাল/Assamese
     "continuative": "aspect",  # Verb aspect (actions still happening; e.g., Japanese)
-    "contracted": "misc",  # XXX Is this the same as contraction?
+    "contracted": "misc",  # Is this the same as contraction? -> not exactly, see ἐρωτάω/Greek 
     "contracted-dem-form": "misc",
     "contraction": "mod",
     "contrastive": "mood",  # Apparently connective verb form in Korean

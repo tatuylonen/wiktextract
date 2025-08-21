@@ -211,6 +211,13 @@ title_contains_wordtags_map = {
     "ultramontane": "Ultramontane",
     "western lombard": "Western-Lombard",
     "eastern lombard": "Eastern-Lombard",
+    "contracted": "contracted",
+    "present": "present",
+    "perfect": "perfect",
+    "imperfect": "imperfect",
+    "pluperfect": "pluperfect",
+    "future": "future",
+    "aorist": "aorist",
 }
 for k, v in title_contains_wordtags_map.items():
     if any(t not in valid_tags for t in v.split()):
@@ -778,6 +785,7 @@ def expand_header(
     silent=False,
     ignore_tags=False,
     depth=0,
+    column_number: int | None = None,
 ) -> list[tuple[str, ...]]:
     """Expands a cell header to tagset, handling conditional expressions
     in infl_map.  This returns list of tuples of tags, each list element
@@ -844,7 +852,7 @@ def expand_header(
 
         # Then loop interpreting the value, until the value is a simple string.
         # This may evaluate nested conditional expressions.
-        default_then = None
+        default_else = None
         while True:
             # If it is a string, we are done.
             if isinstance(v, str):
@@ -903,6 +911,14 @@ def expand_header(
                 else:
                     assert isinstance(d, (list, tuple, set))
                     cond = depth in d
+            # Column index: check if we're in position X of the row
+            if cond and "column-index" in v:
+                index = v["column-index"]
+                if isinstance(index, int):
+                    cond = index == column_number
+                else:
+                    assert isinstance(index, (list, tuple, set))
+                    cond = column_number in index
             # Handle inflection-template condition. Must be a string
             # or list of strings, and if tablecontext.template_name is in
             # those, accept the condition.
@@ -945,11 +961,11 @@ def expand_header(
             # as a default later.
             if "default" in v:
                 assert isinstance(v["default"], str)
-                default_then = v["default"]
+                default_else = v["default"]
 
             # Warning message about missing conditions for debugging.
 
-            if cond == "default-true" and not default_then and not silent:
+            if cond == "default-true" and not default_else and not silent:
                 wxr.wtp.debug(
                     "inflection table: IF MISSING COND: word={} "
                     "lang={} text={} base_tags={} c={} cond={}".format(
@@ -964,8 +980,8 @@ def expand_header(
             else:
                 v1 = v.get("else")
                 if v1 is None:
-                    if default_then:
-                        v = default_then
+                    if default_else:
+                        v = default_else
                     else:
                         if not silent:
                             wxr.wtp.debug(
@@ -1507,6 +1523,7 @@ def parse_simple_table(
                     text,
                     base_tags,
                     depth=depth,
+                    column_number = col_idx,
                 )
                 # base_tags are used in infl_map "if"-conds.
                 for tt in alt_tags:
@@ -2308,6 +2325,7 @@ def parse_simple_table(
                     [],
                     silent=True,
                     depth=depth,
+                    column_number = col_idx,
                 )
                 rowtags = list(
                     set(tuple(sorted(set(x) | refs_tags)) for x in rowtags)
@@ -2341,6 +2359,7 @@ def parse_simple_table(
                     [],
                     silent=True,
                     depth=depth,
+                    column_number = col_idx,
                 )
                 # print("EXPANDED {!r} to {}".format(text, v))
 
