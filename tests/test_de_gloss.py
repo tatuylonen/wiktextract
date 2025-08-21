@@ -124,28 +124,54 @@ class TestDEGloss(unittest.TestCase):
         self.wxr.wtp.add_page(
             "Vorlage:K",
             10,
-            "<i>[[juristisch]],&#32;nur in der Wendung "
-            "„auf etwas erkennen“&#58;</i>",
+            """{{#switch:{{{ft}}}
+| kurz für = <i>kurz für&#58;</i>
+| #default = <i>[[juristisch]],&#32;nur in der Wendung „auf etwas erkennen“&#58;</i>
+}}""",
         )
-        self.wxr.wtp.start_page("erkennen")
-        root = self.wxr.wtp.parse(
-            """===Bedeutungen===
-:[5] {{K|juristisch|ft=nur in der Wendung „auf etwas erkennen“}} im Rahmen eines Urteils ein benanntes Verbrechen bestätigen"""  # noqa: E501
+        data = parse_page(
+            self.wxr,
+            "erkennen",
+            """== erkennen ({{Sprache|Deutsch}}) ==
+=== {{Wortart|Verb|Deutsch}} ===
+====Bedeutungen====
+:[5] {{K|juristisch|ft=nur in der Wendung „auf etwas erkennen“}} im Rahmen eines Urteils ein benanntes Verbrechen bestätigen""",
         )
-        word_entry = WordEntry(
-            lang="Deutsch", lang_code="de", word="erkennen", pos="verb"
-        )
-        extract_glosses(self.wxr, word_entry, root.children[0])
         self.assertEqual(
-            [s.model_dump(exclude_defaults=True) for s in word_entry.senses],
+            data[0]["senses"],
             [
                 {
                     "tags": ["law"],
+                    "raw_tags": ["nur in der Wendung „auf etwas erkennen“"],
                     "glosses": [
-                        "nur in der Wendung „auf etwas erkennen“: im Rahmen "
-                        "eines Urteils ein benanntes Verbrechen bestätigen"
+                        "im Rahmen eines Urteils ein benanntes Verbrechen bestätigen"
                     ],
                     "sense_index": "5",
+                },
+            ],
+        )
+
+        data = parse_page(
+            self.wxr,
+            "Luft",
+            """== Luft ({{Sprache|Deutsch}}) ==
+=== {{Wortart|Substantiv|Deutsch}}, {{f}} ===
+====Bedeutungen====
+:[3] {{K|Plural|t1=_|dichterisch}} leichter [[Wind]]
+:[4] {{K|kPl.|ft=[[kurz]] für}} [[Atemluft]]""",
+        )
+        self.assertEqual(
+            data[0]["senses"],
+            [
+                {
+                    "tags": ["plural", "poetic"],
+                    "glosses": ["leichter Wind"],
+                    "sense_index": "3",
+                },
+                {
+                    "tags": ["no-plural", "short-form"],
+                    "glosses": ["Atemluft"],
+                    "sense_index": "4",
                 },
             ],
         )
