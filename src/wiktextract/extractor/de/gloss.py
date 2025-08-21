@@ -64,20 +64,7 @@ def process_gloss_list_item(
             for gloss_node in list_item_node.children:
                 if isinstance(gloss_node, TemplateNode):
                     if gloss_node.template_name == "K":
-                        for (
-                            k_arg,
-                            k_arg_value,
-                        ) in gloss_node.template_parameters.items():
-                            if k_arg == "ft":
-                                gloss_nodes.append(
-                                    clean_node(wxr, None, k_arg_value)
-                                )
-                                gloss_nodes.append(":")
-                            elif isinstance(k_arg, int):
-                                raw_tag = clean_node(wxr, None, k_arg_value)
-                                if raw_tag != "von":
-                                    sense_data.raw_tags.append(raw_tag)
-                        clean_node(wxr, sense_data, gloss_node)
+                        extract_k_template(wxr, sense_data, gloss_node)
                     elif gloss_node.template_name.endswith("."):
                         raw_tag = clean_node(
                             wxr, sense_data, gloss_node
@@ -99,11 +86,12 @@ def process_gloss_list_item(
                         italic_text.startswith("(")
                         and italic_text.endswith(")")
                     ):
-                        if not italic_text.endswith(":"):
-                            italic_text = italic_text.strip("() ")
-                        for raw_tag in re.split(
-                            r":|,", italic_text.strip(": ")
+                        italic_text = italic_text.strip(": ")
+                        if italic_text.startswith("(") and italic_text.endswith(
+                            ")"
                         ):
+                            italic_text = italic_text.strip("() ")
+                        for raw_tag in re.split(r":|,", italic_text):
                             raw_tag = raw_tag.strip()
                             if len(raw_tag) > 0:
                                 sense_data.raw_tags.append(raw_tag)
@@ -117,6 +105,7 @@ def process_gloss_list_item(
 
             gloss_text = clean_node(wxr, sense_data, gloss_nodes)
             sense_idx, gloss_text = extract_sense_index(gloss_text)
+            gloss_text = gloss_text.replace("()", "").strip(":, \n")
             if sense_idx != "":
                 if (
                     not sense_idx[0].isnumeric()
@@ -204,4 +193,18 @@ def process_form_of_list_item(
 
         if "form-of" not in word_entry.tags:
             word_entry.tags.append("form-of")
+        if "form-of" not in sense.tags:
+            sense.tags.append("form-of")
         word_entry.senses.append(sense)
+
+
+def extract_k_template(
+    wxr: WiktextractContext, sense: Sense, t_node: TemplateNode
+):
+    # https://de.wiktionary.org/wiki/Vorlage:K
+    for arg, arg_value in t_node.template_parameters.items():
+        if isinstance(arg, int) or arg == "ft":
+            raw_tag = clean_node(wxr, None, arg_value)
+            if raw_tag not in ["von", ""]:
+                sense.raw_tags.append(raw_tag)
+    clean_node(wxr, sense, t_node)

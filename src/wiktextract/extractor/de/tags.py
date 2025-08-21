@@ -45,6 +45,7 @@ K_TEMPLATE_TAGS = {
     "Deutschland": "Germany",
     # "der": "",
     "dichter.": "poetic",
+    "dichterisch": "poetic",
     # "die": "",
     "Dim.": "diminutive",
     "Dimin.": "diminutive",
