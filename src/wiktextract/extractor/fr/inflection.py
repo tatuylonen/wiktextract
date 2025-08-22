@@ -1,3 +1,4 @@
+import re
 from dataclasses import dataclass
 
 from wikitextprocessor.parser import NodeKind, TemplateNode, WikiNode
@@ -10,16 +11,16 @@ from .tags import translate_raw_tags
 
 
 def extract_inflection(
-    wxr: WiktextractContext,
-    page_data: list[WordEntry],
-    template_node: TemplateNode,
-) -> None:
+    wxr: WiktextractContext, page_data: list[WordEntry], t_node: TemplateNode
+):
     # inflection templates
     # https://fr.wiktionary.org/wiki/Catégorie:Modèles_d’accord_en_français
-    if template_node.template_name.startswith("en-adj"):
-        process_en_adj_table(wxr, page_data, template_node)
+    if t_node.template_name.startswith("en-adj"):
+        process_en_adj_table(wxr, page_data[-1], t_node)
+    elif t_node.template_name == "fro-adj":
+        extract_fro_adj_template(wxr, page_data[-1], t_node)
     else:
-        process_inflection_table(wxr, page_data, template_node)
+        process_inflection_table(wxr, page_data, t_node)
 
 
 IGNORE_TABLE_HEADERS = frozenset(
@@ -58,7 +59,7 @@ IGNORE_TABLE_CELL_PREFIXES = (
 
 
 @dataclass
-class ColspanHeader:
+class TableHeader:
     text: str
     index: int
     span: int
@@ -83,14 +84,12 @@ def table_data_cell_is_header(
 
 
 def process_inflection_table(
-    wxr: WiktextractContext,
-    page_data: list[WordEntry],
-    table_template: TemplateNode,
+    wxr: WiktextractContext, page_data: list[WordEntry], t_node: TemplateNode
 ) -> None:
     from .form_line import is_conj_link, process_conj_link_node
 
     expanded_node = wxr.wtp.parse(
-        wxr.wtp.node_to_wikitext(table_template), expand_all=True
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
     )
     table_nodes = list(expanded_node.find_child(NodeKind.TABLE))
     if len(table_nodes) == 0:
@@ -173,7 +172,7 @@ def process_inflection_table(
                         # then the header cells are column headers
                         if "colspan" in table_cell.attrs:
                             colspan_headers.append(
-                                ColspanHeader(
+                                TableHeader(
                                     table_header_text,
                                     column_cell_index,
                                     int(table_cell.attrs.get("colspan")),
@@ -245,7 +244,7 @@ def process_inflection_table(
                             new_form_data = form_data.model_copy(deep=True)
                             new_form_data.form = form.removeprefix("ou ")
                             translate_raw_tags(
-                                new_form_data, table_template.template_name
+                                new_form_data, t_node.template_name
                             )
                             if len(new_form_data.form.strip()) > 0:
                                 page_data[-1].forms.append(new_form_data)
@@ -277,15 +276,13 @@ def insert_ipa(form: Form, ipa_text: str) -> None:
 
 
 def process_en_adj_table(
-    wxr: WiktextractContext,
-    page_data: list[WordEntry],
-    template_node: WikiNode,
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: WikiNode
 ) -> None:
     # https://fr.wiktionary.org/wiki/Modèle:en-adj
     # and other en-adj* templates
     # these templates use normal table cell for column table header
     expanded_node = wxr.wtp.parse(
-        wxr.wtp.node_to_wikitext(template_node), expand_all=True
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
     )
     table_nodes = list(expanded_node.find_child(NodeKind.TABLE))
     if len(table_nodes) == 0:
@@ -310,6 +307,60 @@ def process_en_adj_table(
                     insert_ipa(form_data, form_line)
                 else:
                     form_data.form = form_line
-            if form_data.form != page_data[-1].word and len(form_data.form) > 0:
+            if form_data.form != word_entry.word and len(form_data.form) > 0:
                 translate_raw_tags(form_data)
-                page_data[-1].forms.append(form_data)
+                word_entry.forms.append(form_data)
+
+
+def extract_fro_adj_template(
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+):
+    # https://fr.wiktionary.org/wiki/Modèle:fro-adj
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    col_headers = []
+    row_headers = []
+    for table in expanded_node.find_child(NodeKind.TABLE):
+        for row_index, row in enumerate(table.find_child(NodeKind.TABLE_ROW)):
+            row_has_data = row.contain_node(NodeKind.TABLE_CELL)
+            for col_index, cell_node in enumerate(
+                row.find_child(NodeKind.TABLE_HEADER_CELL)
+            ):
+                cell_text = clean_node(wxr, None, cell_node)
+                if cell_text == "" or cell_text.lower() in IGNORE_TABLE_HEADERS:
+                    continue
+                if not row_has_data:
+                    col_headers.append(cell_text)
+                else:
+                    rowspan_str = cell_node.attrs.get("rowspan", "1")
+                    rowspan = 1
+                    if re.fullmatch(r"\d+", rowspan_str) is not None:
+                        rowspan = int(rowspan_str)
+                    row_headers.append(
+                        TableHeader(cell_text, row_index, rowspan)
+                    )
+
+        for row_index, row in enumerate(table.find_child(NodeKind.TABLE_ROW)):
+            for col_index, cell_node in enumerate(
+                row.find_child(NodeKind.TABLE_CELL)
+            ):
+                cell_text = clean_node(wxr, None, cell_node)
+                if cell_text in ["", wxr.wtp.title]:
+                    continue
+                form = Form(form=cell_text)
+                if col_index < len(col_headers):
+                    form.raw_tags.append(col_headers[col_index])
+                rowspan_str = cell_node.attrs.get("rowspan", "1")
+                rowspan = 1
+                if re.fullmatch(r"\d+", rowspan_str) is not None:
+                    rowspan = int(rowspan_str)
+                for header in row_headers:
+                    if (
+                        header.index < row_index + rowspan
+                        and row_index < header.index + header.span
+                        and header.text not in form.raw_tags
+                    ):
+                        form.raw_tags.append(header.text)
+                translate_raw_tags(form)
+                word_entry.forms.append(form)

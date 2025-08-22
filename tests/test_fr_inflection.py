@@ -5,6 +5,7 @@ from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.fr.inflection import extract_inflection
 from wiktextract.extractor.fr.models import WordEntry
+from wiktextract.extractor.fr.page import parse_page
 from wiktextract.wxr_context import WiktextractContext
 
 
@@ -13,7 +14,10 @@ class TestInflection(TestCase):
 
     def setUp(self) -> None:
         self.wxr = WiktextractContext(
-            Wtp(lang_code="fr"), WiktionaryConfig(dump_file_lang_code="fr")
+            Wtp(lang_code="fr"),
+            WiktionaryConfig(
+                dump_file_lang_code="fr", capture_language_codes=None
+            ),
         )
 
     def tearDown(self) -> None:
@@ -663,5 +667,59 @@ class TestInflection(TestCase):
                     "form": "abdiku",
                     "tags": ["volitive", "present"],
                 },
+            ],
+        )
+
+    def test_fro_adj(self):
+        self.wxr.wtp.add_page(
+            "Modèle:fro-adj",
+            10,
+            """{| class="wikitable flextable"
+! Nombre
+! Cas
+! Masculin
+! Féminin
+! Neutre
+|-
+! rowspan="2" | Singulier
+! class="sous-titre" | Sujet
+| <bdi lang="fro" xml:lang="fro" class="lang-fro">[[morz#fro|morz]]</bdi>
+| rowspan="2" | <bdi lang="fro" xml:lang="fro" class="lang-fro">[[morte#fro|morte]]</bdi>
+| rowspan="4" | '''<span lang="fro" xml:lang="fro" class="lang-fro"><bdi>mort</bdi></span>'''
+|-
+! class="sous-titre" | Régime
+| '''<span lang="fro" xml:lang="fro" class="lang-fro"><bdi>mort</bdi></span>'''
+|-
+! rowspan="2" | Pluriel
+! class="sous-titre" | Sujet
+| '''<span lang="fro" xml:lang="fro" class="lang-fro"><bdi>mort</bdi></span>'''
+| rowspan="2" | <bdi lang="fro" xml:lang="fro" class="lang-fro">[[mortes#fro|mortes]]</bdi>
+|-
+! class="sous-titre" | Régime
+| <bdi lang="fro" xml:lang="fro" class="lang-fro">[[morz#fro|morz]]</bdi>
+|}""",
+        )
+        data = parse_page(
+            self.wxr,
+            "mort",
+            """== {{langue|fro}} ==
+=== {{S|adjectif|fro}} ===
+{{fro-adj|mss=morz|msp=mort|mrs=mort|mrp=morz|fs=morte|fp=mortes|n=mort}}
+'''mort'''
+# [[mort#fr|Mort]].""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {"form": "morz", "tags": ["masculine", "singular", "subject"]},
+                {
+                    "form": "morte",
+                    "tags": ["feminine", "singular", "subject", "oblique"],
+                },
+                {
+                    "form": "mortes",
+                    "tags": ["feminine", "plural", "subject", "oblique"],
+                },
+                {"form": "morz", "tags": ["masculine", "plural", "oblique"]},
             ],
         )

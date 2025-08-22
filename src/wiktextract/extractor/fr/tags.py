@@ -136,6 +136,9 @@ CASE_TAGS: dict[str, str | list[str]] = {
     "datif génitif": ["dative", "genitive"],
     # Template:ko-nom
     "nominatif / attributif": ["nominative", "attributive"],
+    # Modèle:fro-adj
+    "sujet": "subject",
+    "régime": "oblique",
 }
 
 # https://en.wikipedia.org/wiki/Grammatical_tense
