@@ -271,6 +271,8 @@ def find_alt_of_form(
                 alt_of = clean_node(wxr, None, link)
         if len(alt_of) > 0:
             gloss_data.alt_of.append(AltForm(word=alt_of))
+            if "alt-of" not in gloss_data.tags:
+                gloss_data.tags.append("alt-of")
 
     gloss_text = clean_node(wxr, gloss_data, filtered_gloss_nodes)
     gloss_text = re.sub(r"\s+\.$", ".", gloss_text)
