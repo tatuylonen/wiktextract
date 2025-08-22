@@ -1475,23 +1475,22 @@ def parse_simple_table(
                 continue
             if d.endswith("."):  # catc ".."??
                 d = d[:-1]
-            tags1_s: set[str] = set()
-            for transformed in map_with(xlat_descs_map, [d]):
-                tags, topics = decode_tags(transformed, no_unknown_starts=True)
-                # print(f"{ref=}, {transformed=}, {tags=}")
+            tags, topics = decode_tags(d, no_unknown_starts=True)
+            # print(f"{ref=}, {transformed=}, {tags=}")
+            if topics or any("error-unknown-tag" in ts for ts in tags):
+                d = d[0].lower() + d[1:]
+                tags, topics = decode_tags(
+                    d, no_unknown_starts=True
+                )
                 if topics or any("error-unknown-tag" in ts for ts in tags):
-                    transformed = transformed[0].lower() + d[1:]
-                    tags, topics = decode_tags(
-                        transformed, no_unknown_starts=True
-                    )
-                    if topics or any("error-unknown-tag" in ts for ts in tags):
-                        # Failed to parse as tags
-                        # print("Failed: topics={} tags={}"
-                        #       .format(topics, tags))
-                        continue
-                for ts in tags:
-                    # Set.update is a union operation: definition tags are flat
-                    tags1_s.update(ts)
+                    # Failed to parse as tags
+                    # print("Failed: topics={} tags={}"
+                    #       .format(topics, tags))
+                    continue
+            tags1_s: set[str] = set()
+            for ts in tags:
+                # Set.update is a union operation: definition tags are flat
+                tags1_s.update(ts)
             tags1 = tuple(sorted(tags1_s))
             # print("DEFINED: {} -> {}".format(ref, tags1))
             def_ht[ref] = tags1
@@ -2558,7 +2557,6 @@ def parse_simple_table(
                 # if refs:
                 #     print("REFS:", refs)
                 extra_tags.extend(hdr_tags)
-                # Extract tags from referenced footnotes
                 # Extract tags from referenced footnotes
                 refs_tags = set()
                 for ref in refs:
@@ -3636,6 +3634,8 @@ def parse_inflection_section(
                 recurse(node.largs[1:], titles, navframe)
             else:
                 recurse(node.largs[0], titles, navframe)
+            return
+        if kind == NodeKind.HTML and node.sarg == "ref":
             return
         if kind == NodeKind.LIST and node.sarg == ";":
             nonlocal preceding_bolded_title
