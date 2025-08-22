@@ -15,12 +15,13 @@ from wikitextprocessor import MAGIC_FIRST, HTMLNode, NodeKind, WikiNode
 
 from ...clean import clean_value
 from ...datautils import data_append, freeze, split_at_comma_semi
-from ...tags import valid_tags
+from ...tags import valid_tags, xlat_descs_map
 from ...wxr_context import WiktextractContext
 from .form_descriptions import (
     classify_desc,
     decode_tags,
     distw,
+    map_with,
     parse_head_final_tags,
 )
 from .inflection_kludges import ka_decl_noun_template_cell
@@ -1474,19 +1475,23 @@ def parse_simple_table(
                 continue
             if d.endswith("."):  # catc ".."??
                 d = d[:-1]
-            tags, topics = decode_tags(d, no_unknown_starts=True)
-            # print(f"{ref=}, {d=}, {tags=}")
-            if topics or any("error-unknown-tag" in ts for ts in tags):
-                d = d[0].lower() + d[1:]
-                tags, topics = decode_tags(d, no_unknown_starts=True)
-                if topics or any("error-unknown-tag" in ts for ts in tags):
-                    # Failed to parse as tags
-                    # print("Failed: topics={} tags={}"
-                    #       .format(topics, tags))
-                    continue
             tags1_s: set[str] = set()
-            for ts in tags:
-                tags1_s.update(ts)
+            for transformed in map_with(xlat_descs_map, [d]):
+                tags, topics = decode_tags(transformed, no_unknown_starts=True)
+                # print(f"{ref=}, {transformed=}, {tags=}")
+                if topics or any("error-unknown-tag" in ts for ts in tags):
+                    transformed = transformed[0].lower() + d[1:]
+                    tags, topics = decode_tags(
+                        transformed, no_unknown_starts=True
+                    )
+                    if topics or any("error-unknown-tag" in ts for ts in tags):
+                        # Failed to parse as tags
+                        # print("Failed: topics={} tags={}"
+                        #       .format(topics, tags))
+                        continue
+                for ts in tags:
+                    # Set.update is a union operation: definition tags are flat
+                    tags1_s.update(ts)
             tags1 = tuple(sorted(tags1_s))
             # print("DEFINED: {} -> {}".format(ref, tags1))
             def_ht[ref] = tags1
@@ -1523,7 +1528,7 @@ def parse_simple_table(
                     text,
                     base_tags,
                     depth=depth,
-                    column_number = col_idx,
+                    column_number=col_idx,
                 )
                 # base_tags are used in infl_map "if"-conds.
                 for tt in alt_tags:
@@ -2325,7 +2330,7 @@ def parse_simple_table(
                     [],
                     silent=True,
                     depth=depth,
-                    column_number = col_idx,
+                    column_number=col_idx,
                 )
                 rowtags = list(
                     set(tuple(sorted(set(x) | refs_tags)) for x in rowtags)
@@ -2359,7 +2364,7 @@ def parse_simple_table(
                     [],
                     silent=True,
                     depth=depth,
-                    column_number = col_idx,
+                    column_number=col_idx,
                 )
                 # print("EXPANDED {!r} to {}".format(text, v))
 
