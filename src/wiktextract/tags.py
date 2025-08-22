@@ -4819,6 +4819,7 @@ xlat_descs_map = {
     "m": "masculine",
     "f": "feminine",
     "classic": "",
+    "Sparsely attested near 1500.“[ can, v.1.]”, in OED Online 8pxPaid subscription required\u2060, Oxford: Oxford University Press, December 2024": "archaic rare",
 }
 
 # Words that are interpreted as tags at the beginning of a linkage
@@ -5368,7 +5369,7 @@ valid_tags = {
     "contemporary": "misc",
     "contingent": "mood",  # Verb form, উঘাল/Assamese
     "continuative": "aspect",  # Verb aspect (actions still happening; e.g., Japanese)
-    "contracted": "misc",  # Is this the same as contraction? -> not exactly, see ἐρωτάω/Greek 
+    "contracted": "misc",  # Is this the same as contraction? -> not exactly, see ἐρωτάω/Greek
     "contracted-dem-form": "misc",
     "contraction": "mod",
     "contrastive": "mood",  # Apparently connective verb form in Korean
@@ -6431,7 +6432,6 @@ valid_tags = {
     "since-position": "misc",
     "together-with-position": "misc",
     "up-to-position": "misc",
-
     # "zh-dial" template
     "Written-vernacular-Chinese": "script",
     "Northeastern-Mandarin": "script",

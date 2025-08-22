@@ -874,7 +874,7 @@ def distw(titleparts: Sequence[str], word: str) -> float:
 
 
 def map_with(
-    ht: Union[dict[str, Union[str, list[str]]], dict[str, str]],
+    ht: dict[str, str | list[str]] | dict[str, str],
     lst: Sequence[str],
 ) -> list[str]:
     """Takes alternatives from ``lst``, maps them using ``ht`` to zero or
