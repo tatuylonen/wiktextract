@@ -4784,6 +4784,7 @@ xlat_tags_map: Dict[str, Union[str, List[str]]] = {
     "sometimes derogatory": "sometimes derogatory",
     # gratis/Swedish
     "not inflected": "indeclinable",
+    "Sparsely attested near 1500": "archaic rare",
 }
 
 # This mapping is applied to full descriptions before splitting by comma.
@@ -4819,7 +4820,6 @@ xlat_descs_map = {
     "m": "masculine",
     "f": "feminine",
     "classic": "",
-    "Sparsely attested near 1500.“[ can, v.1.]”, in OED Online 8pxPaid subscription required\u2060, Oxford: Oxford University Press, December 2024": "archaic rare",
 }
 
 # Words that are interpreted as tags at the beginning of a linkage
