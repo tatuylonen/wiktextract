@@ -15,13 +15,12 @@ from wikitextprocessor import MAGIC_FIRST, HTMLNode, NodeKind, WikiNode
 
 from ...clean import clean_value
 from ...datautils import data_append, freeze, split_at_comma_semi
-from ...tags import valid_tags, xlat_descs_map
+from ...tags import valid_tags
 from ...wxr_context import WiktextractContext
 from .form_descriptions import (
     classify_desc,
     decode_tags,
     distw,
-    map_with,
     parse_head_final_tags,
 )
 from .inflection_kludges import ka_decl_noun_template_cell
