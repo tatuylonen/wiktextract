@@ -458,7 +458,7 @@ def extract_ku_conj_trans_table_node(
     table_node: WikiNode,
     conj_page_title: str,
 ) -> None:
-    from .inflection import ColspanHeader
+    from .inflection import TableHeader
 
     ignore_headers = (
         "Conjugaison du verbe",
@@ -491,7 +491,7 @@ def extract_ku_conj_trans_table_node(
                 if re.fullmatch(r"\d+", colspan_str) is not None:
                     colspan = int(colspan_str)
                 col_headers.append(
-                    ColspanHeader(text=cell_str, index=col_index, span=colspan)
+                    TableHeader(text=cell_str, index=col_index, span=colspan)
                 )
                 last_header = cell_str
                 col_index += colspan
