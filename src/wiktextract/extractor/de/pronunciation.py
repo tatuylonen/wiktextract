@@ -8,9 +8,7 @@ from .tags import translate_raw_tags
 
 
 def extract_pronunciation_section(
-    wxr: WiktextractContext,
-    word_entry: WordEntry,
-    level_node: LevelNode,
+    wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
 ) -> None:
     for list_node in level_node.find_child(NodeKind.LIST):
         for list_item in list_node.find_child(NodeKind.LIST_ITEM):
@@ -30,7 +28,7 @@ def extract_pron_list_item(
         match node.kind:
             case NodeKind.ITALIC:
                 node_text = clean_node(wxr, None, node)
-                if node_text.endswith(":"):
+                if node_text.endswith(":") and node_text != "auth:":
                     raw_tags.append(node_text.removesuffix(":"))
             case NodeKind.LIST:
                 for next_list_item in node.find_child(NodeKind.LIST_ITEM):
@@ -38,14 +36,12 @@ def extract_pron_list_item(
             case NodeKind.TEMPLATE:
                 match node.template_name:
                     case "Lautschrift":
-                        ipa = clean_node(
-                            wxr,
-                            None,
-                            node.template_parameters.get(1, ""),
-                        )
-                        if ipa != "":
-                            sounds.append(Sound(ipa=ipa))
-                            clean_node(wxr, sounds[-1], node)
+                        sound = Sound(ipa="", raw_tags=raw_tags)
+                        sound.ipa = clean_node(wxr, sound, node)
+                        if sound.ipa != "":
+                            translate_raw_tags(sound)
+                            sounds.append(sound)
+                            raw_tags.clear()
                     case "Audio":
                         new_sound = extract_audio_template(wxr, node)
                         if new_sound is not None:
@@ -60,9 +56,6 @@ def extract_pron_list_item(
                             sounds.append(Sound(rhymes=rhyme))
                             clean_node(wxr, sounds[-1], node)
 
-    for sound in sounds:
-        sound.raw_tags.extend(raw_tags)
-        translate_raw_tags(sound)
     return sounds
 
 
@@ -85,4 +78,5 @@ def extract_audio_template(
                 link_str[link_str.index("(") + 1 :].strip(")")
             )
     clean_node(wxr, sound, expanded_node)
+    translate_raw_tags(sound)
     return sound
