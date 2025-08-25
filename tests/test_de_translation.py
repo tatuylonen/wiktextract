@@ -217,3 +217,32 @@ class TestDETranslation(unittest.TestCase):
                 },
             ],
         )
+
+    def test_hiragana(self):
+        self.wxr.wtp.add_page("Vorlage:ja", 10, "[[Japanisch]]")
+        data = parse_page(
+            self.wxr,
+            "Zeichen",
+            """== Zeichen ({{Sprache|Deutsch}}) ==
+=== {{Wortart|Substantiv|Deutsch}}, {{n}} ===
+====Bedeutungen====
+:[1] etwas
+==== Übersetzungen ====
+{{Ü-Tabelle|1|G=etwas|Ü-Liste=
+*{{ja}}: {{Üt|ja|合図|あいず, aizu}}
+}}""",
+        )
+        self.assertEqual(
+            data[0]["translations"],
+            [
+                {
+                    "lang": "Japanisch",
+                    "lang_code": "ja",
+                    "word": "合図",
+                    "other": "あいず",
+                    "roman": "aizu",
+                    "sense": "etwas",
+                    "sense_index": "1",
+                }
+            ],
+        )
