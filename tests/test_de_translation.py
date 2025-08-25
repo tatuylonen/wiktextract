@@ -4,6 +4,7 @@ from wikitextprocessor import Wtp
 
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.de.models import WordEntry
+from wiktextract.extractor.de.page import parse_page
 from wiktextract.extractor.de.translation import extract_translation
 from wiktextract.wxr_context import WiktextractContext
 
@@ -13,7 +14,10 @@ class TestDETranslation(unittest.TestCase):
 
     def setUp(self) -> None:
         self.wxr = WiktextractContext(
-            Wtp(lang_code="de"), WiktionaryConfig(dump_file_lang_code="de")
+            Wtp(lang_code="de"),
+            WiktionaryConfig(
+                dump_file_lang_code="de", capture_language_codes=None
+            ),
         )
 
     def tearDown(self) -> None:
@@ -169,6 +173,75 @@ class TestDETranslation(unittest.TestCase):
                     "lang": "Französisch",
                     "word": "appartenir",
                     "sense": "Mitglied einer Gruppe von Personen sein",
+                    "sense_index": "1",
+                }
+            ],
+        )
+
+    def test_semicolon(self):
+        self.wxr.wtp.add_page("Vorlage:es", 10, "[[Spanisch]]")
+        self.wxr.wtp.add_page(
+            "Vorlage:Üt",
+            10,
+            '<span lang="es" xml:lang="es">{{{2}}}</span>&nbsp;[[:es:Special:Search/machete|<sup class="dewikttm">→&nbsp;es</sup>]][[Kategorie:Übersetzungen (Spanisch)]]',
+        )
+        data = parse_page(
+            self.wxr,
+            "Machete",
+            """== Machete ({{Sprache|Deutsch}}) ==
+=== {{Wortart|Substantiv|Deutsch}}, {{fm}} ===
+====Bedeutungen====
+:[1] {{K|Waffe|Werkzeug}} [[Messer]] zur [[Ernte]]
+==== Übersetzungen ====
+{{Ü-Tabelle|1|G=Waffe, Werkzeug|Ü-Liste=
+*{{es}}: {{Ü|es|machete}}; ''Nicaragua:'' {{Ü|es|paila}}
+}}""",
+        )
+        self.assertEqual(
+            data[0]["translations"],
+            [
+                {
+                    "lang": "Spanisch",
+                    "lang_code": "es",
+                    "sense": "Waffe, Werkzeug",
+                    "sense_index": "1",
+                    "word": "machete",
+                },
+                {
+                    "lang": "Spanisch",
+                    "lang_code": "es",
+                    "raw_tags": ["Nicaragua"],
+                    "sense": "Waffe, Werkzeug",
+                    "sense_index": "1",
+                    "word": "paila",
+                },
+            ],
+        )
+
+    def test_hiragana(self):
+        self.wxr.wtp.add_page("Vorlage:ja", 10, "[[Japanisch]]")
+        data = parse_page(
+            self.wxr,
+            "Zeichen",
+            """== Zeichen ({{Sprache|Deutsch}}) ==
+=== {{Wortart|Substantiv|Deutsch}}, {{n}} ===
+====Bedeutungen====
+:[1] etwas
+==== Übersetzungen ====
+{{Ü-Tabelle|1|G=etwas|Ü-Liste=
+*{{ja}}: {{Üt|ja|合図|あいず, aizu}}
+}}""",
+        )
+        self.assertEqual(
+            data[0]["translations"],
+            [
+                {
+                    "lang": "Japanisch",
+                    "lang_code": "ja",
+                    "word": "合図",
+                    "other": "あいず",
+                    "roman": "aizu",
+                    "sense": "etwas",
                     "sense_index": "1",
                 }
             ],

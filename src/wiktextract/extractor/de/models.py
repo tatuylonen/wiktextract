@@ -38,6 +38,7 @@ class Translation(GermanBaseModel):
     raw_tags: list[str] = []
     tags: list[str] = []
     notes: list[str] = Field(default=[], description="A list of notes")
+    other: str = ""
 
 
 class Example(GermanBaseModel):

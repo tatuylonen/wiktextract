@@ -27,6 +27,9 @@ class TestDEPronunciation(unittest.TestCase):
             10,
             """[[Datei:Loudspeaker.svg|15px|Lautsprecherbild|link=]]<span class="aplay">&nbsp;</span>[[Media:De-at-Hund.ogg|Hund&nbsp;(Österreich)]]<sup>&nbsp;([[:Datei:De-at-Hund.ogg|Info]])</sup>[[Kategorie:Wiktionary:Audio-Datei]]""",
         )
+        self.wxr.wtp.add_page(
+            "Vorlage:Lautschrift", 10, '[<span class="ipa">{{{1}}}</span>]'
+        )
         data = parse_page(
             self.wxr,
             "Hund",
@@ -39,12 +42,15 @@ class TestDEPronunciation(unittest.TestCase):
 ==== Bedeutungen ====
 :[1] [[Haustier]]""",
         )
-        self.assertEqual(data[0]["sounds"][0], {"ipa": "hʊnt"})
+        self.assertEqual(data[0]["sounds"][0], {"ipa": "[hʊnt]"})
         self.assertEqual(data[0]["sounds"][1]["audio"], "De-at-Hund.ogg")
         self.assertEqual(data[0]["sounds"][1]["tags"], ["Austrian German"])
         self.assertEqual(data[0]["sounds"][2], {"rhymes": "ʊnt"})
 
     def test_nested_lists(self):
+        self.wxr.wtp.add_page(
+            "Vorlage:Lautschrift", 10, '[<span class="ipa">{{{1}}}</span>]'
+        )
         data = parse_page(
             self.wxr,
             "Garage",
@@ -57,5 +63,27 @@ class TestDEPronunciation(unittest.TestCase):
 :[1] [[Raum]]""",
         )
         self.assertEqual(
-            data[0]["sounds"][0], {"ipa": "ɡaˈʁaːʒə", "tags": ["Germany"]}
+            data[0]["sounds"][0], {"ipa": "[ɡaˈʁaːʒə]", "tags": ["Germany"]}
+        )
+
+    def test_italic_tag(self):
+        self.wxr.wtp.add_page(
+            "Vorlage:Lautschrift", 10, '[<span class="ipa">{{{1}}}</span>]'
+        )
+        data = parse_page(
+            self.wxr,
+            "pokertest",
+            """== pokertest ({{Sprache|Deutsch}}) ==
+=== {{Wortart|Konjugierte Form|Deutsch}} ===
+==== Aussprache ====
+:{{IPA}} {{Lautschrift|ˈpoːkɐtəst}}, ''selten:'' {{Lautschrift|ˈpɔʊ̯kɐtəst}}
+==== Grammatische Merkmale ====
+*2. Person Singular Indikativ Präteritum Aktiv des Verbs '''[[pokern]]'''""",
+        )
+        self.assertEqual(
+            data[0]["sounds"],
+            [
+                {"ipa": "[ˈpoːkɐtəst]"},
+                {"ipa": "[ˈpɔʊ̯kɐtəst]", "tags": ["rare"]},
+            ],
         )

@@ -60,7 +60,7 @@ def process_u_tabelle_list_item(
                     if len(tr_data.lang_code) == 0:
                         tr_data.lang_code = name_to_code(lang_str, "de")
                 before_colon = False
-            elif node == "," and len(tr_data.word) > 0:
+            elif node in [",", ";"] and len(tr_data.word) > 0:
                 tr_data = append_tr_data(word_entry, tr_data)
 
         if before_colon and len(tr_data.lang) == 0:
@@ -120,9 +120,15 @@ def process_u_template(
     elif template_name == "Üt":
         display_arg = 4
         if 3 in u_template.template_parameters:
-            tr_data.roman = clean_node(
+            arg_value = clean_node(
                 wxr, None, u_template.template_parameters.get(3, "")
             )
+            if tr_data.lang_code in ["ja", "ko"] and "," in arg_value:
+                tr_data.other, tr_data.roman = tuple(
+                    map(str.strip, arg_value.split(",", maxsplit=1))
+                )
+            else:
+                tr_data.roman = arg_value
         else:
             # this template could create roman without the third arg
             expanded_text = clean_node(wxr, None, u_template)
