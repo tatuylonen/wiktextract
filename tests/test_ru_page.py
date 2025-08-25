@@ -210,7 +210,7 @@ class TestRUPage(TestCase):
                     "lang_code": "en",
                     "word": "wait",
                     "pos": "noun",
-                    "sounds": [{"ipa": "weɪt"}],
+                    "sounds": [{"ipa": "[weɪt]"}],
                     "senses": [{"glosses": ["ожидание"]}],
                 },
             ],

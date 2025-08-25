@@ -64,7 +64,7 @@ class TestRUPronunciation(unittest.TestCase):
             {
                 "input": "{{transcription|məɫɐˈko|Ru-молоко.ogg|норма=московская норма}}",
                 "expected": {
-                    "ipa": "məɫɐˈko",
+                    "ipa": "[məɫɐˈko]",
                     "audio": "Ru-молоко.ogg",
                     "raw_tags": ["московская норма"],
                 },
@@ -72,7 +72,7 @@ class TestRUPronunciation(unittest.TestCase):
             {
                 "input": "{{transcription|vot|Ru-вот.ogg|омофоны=вод}}",
                 "expected": {
-                    "ipa": "vot",
+                    "ipa": "[vot]",
                     "audio": "Ru-вот.ogg",
                     "homophones": ["вод"],
                 },
@@ -93,13 +93,13 @@ class TestRUPronunciation(unittest.TestCase):
                 "input": "{{transcriptions|ˈɫoʂɨtʲ|ˈɫoʂɨdʲɪ|Ru-лошадь.ogg|норма=московская норма}}",
                 "expected": [
                     {
-                        "ipa": "ˈɫoʂɨtʲ",
+                        "ipa": "[ˈɫoʂɨtʲ]",
                         "audio": "Ru-лошадь.ogg",
                         "raw_tags": ["московская норма"],
                         "tags": ["singular"],
                     },
                     {
-                        "ipa": "ˈɫoʂɨdʲɪ",
+                        "ipa": "[ˈɫoʂɨdʲɪ]",
                         "raw_tags": ["московская норма"],
                         "tags": ["plural"],
                     },
@@ -109,12 +109,12 @@ class TestRUPronunciation(unittest.TestCase):
                 "input": "{{transcriptions|bɐˈlʲit|bɐˈlʲidɨ|омофоны=болит|источник=Зарва}}",
                 "expected": [
                     {
-                        "ipa": "bɐˈlʲit",
+                        "ipa": "[bɐˈlʲit]",
                         "homophones": ["болит"],
                         "tags": ["singular"],
                     },
                     {
-                        "ipa": "bɐˈlʲidɨ",
+                        "ipa": "[bɐˈlʲidɨ]",
                         "tags": ["plural"],
                     },
                 ],
@@ -123,7 +123,7 @@ class TestRUPronunciation(unittest.TestCase):
                 "input": "{{transcriptions|ˈkʌl.ə(ɹ)|норма=брит.}}",
                 "expected": [
                     {
-                        "ipa": "ˈkʌl.ə(ɹ)",
+                        "ipa": "[ˈkʌl.ə(ɹ)]",
                         "raw_tags": ["брит."],
                         "tags": ["singular"],
                     }
@@ -147,7 +147,7 @@ class TestRUPronunciation(unittest.TestCase):
             process_transcription_ru_template,
             [
                 {
-                    "ipa": "məlɐˈko",
+                    "ipa": "[məlɐˈko]",
                     "audio": "Ru-молоко.ogg",
                     "raw_tags": ["московская норма"],
                 }
@@ -163,7 +163,7 @@ class TestRUPronunciation(unittest.TestCase):
             process_transcription_ru_template,
             [
                 {
-                    "ipa": "vot",
+                    "ipa": "[vot]",
                     "audio": "Ru-вот.ogg",
                     "homophones": ["вод"],
                 }
@@ -175,19 +175,18 @@ class TestRUPronunciation(unittest.TestCase):
         self.wxr.wtp.add_page(
             "Шаблон:transcriptions-ru", 10, "ед. ч. [ˈɫoʂətʲ] мн. ч. [ˈɫoʂədʲɪ]"
         )
-
         self.process_template_and_assert(
             "{{transcriptions-ru|ло́шадь|ло́шади|Ru-лошадь.ogg|норма=московская норма}}",
             process_transcriptions_ru_template,
             [
                 {
-                    "ipa": "ˈɫoʂətʲ",
+                    "ipa": "[ˈɫoʂətʲ]",
                     "audio": "Ru-лошадь.ogg",
                     "raw_tags": ["московская норма"],
                     "tags": ["singular"],
                 },
                 {
-                    "ipa": "ˈɫoʂədʲɪ",
+                    "ipa": "[ˈɫoʂədʲɪ]",
                     "raw_tags": ["московская норма"],
                     "tags": ["plural"],
                 },
@@ -206,12 +205,12 @@ class TestRUPronunciation(unittest.TestCase):
             process_transcriptions_ru_template,
             [
                 {
-                    "ipa": "bɐˈlʲit",
+                    "ipa": "[bɐˈlʲit]",
                     "homophones": ["болит"],
                     "tags": ["singular"],
                 },
                 {
-                    "ipa": "bɐˈlʲidɨ",
+                    "ipa": "[bɐˈlʲidɨ]",
                     "tags": ["plural"],
                 },
             ],
@@ -229,7 +228,7 @@ class TestRUPronunciation(unittest.TestCase):
             process_transcription_la_template,
             [
                 {
-                    "ipa": "proː.kraːs.tiˈnaː.ti.oː",
+                    "ipa": "[proː.kraːs.tiˈnaː.ti.oː]",
                     "raw_tags": ["классическое произношение"],
                 }
             ],
@@ -240,26 +239,19 @@ class TestRUPronunciation(unittest.TestCase):
         self.wxr.wtp.add_page(
             "Шаблон:transcription-grc",
             10,
-            """МФА: [zde͜ʊ́s] → [zeɸs] → [zefs]
-* Аттическое произношение: [zde͜ʊ́s]
-* Египетское произношение: [zeʍs]
-* Койне: [zeɸs]
-* Византийское произношение: [zefs]
-* Константинопольское произношение: [zefs]
-""",
+            """МФА: <span class="IPA" lang="grc">[zde͜ʊ́s]</span> → <span class="IPA" lang="grc">[zeɸs]</span> → <span class="IPA" lang="grc">[zefs]</span>
+* '''Аттическое произношение''': [zde͜ʊ́s]
+* Египетское произношение: [zeʍs]""",
         )
         self.process_template_and_assert(
             "{{transcription-grc|Ζεύς}}",
             process_transcription_grc_template,
             [
-                {"ipa": "zde͜ʊ́s", "raw_tags": ["Аттическое произношение"]},
-                {"ipa": "zeʍs", "raw_tags": ["Египетское произношение"]},
-                {"ipa": "zeɸs", "raw_tags": ["Койне"]},
-                {"ipa": "zefs", "raw_tags": ["Византийское произношение"]},
-                {
-                    "ipa": "zefs",
-                    "raw_tags": ["Константинопольское произношение"],
-                },
+                {"ipa": "[zde͜ʊ́s]"},
+                {"ipa": "[zeɸs]"},
+                {"ipa": "[zefs]"},
+                {"ipa": "[zde͜ʊ́s]", "raw_tags": ["Аттическое произношение"]},
+                {"ipa": "[zeʍs]", "raw_tags": ["Египетское произношение"]},
             ],
         )
 
