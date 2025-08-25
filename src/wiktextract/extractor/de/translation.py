@@ -60,7 +60,7 @@ def process_u_tabelle_list_item(
                     if len(tr_data.lang_code) == 0:
                         tr_data.lang_code = name_to_code(lang_str, "de")
                 before_colon = False
-            elif node == "," and len(tr_data.word) > 0:
+            elif node in [",", ";"] and len(tr_data.word) > 0:
                 tr_data = append_tr_data(word_entry, tr_data)
 
         if before_colon and len(tr_data.lang) == 0:
