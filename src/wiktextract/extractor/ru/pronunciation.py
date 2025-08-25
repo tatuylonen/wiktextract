@@ -1,11 +1,6 @@
 import re
-from typing import Union
 
-from wikitextprocessor.parser import (
-    LevelNode,
-    NodeKind,
-    WikiNode,
-)
+from wikitextprocessor import HTMLNode, LevelNode, NodeKind, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -20,18 +15,13 @@ def process_transcription_template(
     # https://ru.wiktionary.org/wiki/Шаблон:transcription
 
     sound = Sound()
-
     template_params = template_node.template_parameters
-
     extract_ipa(wxr, sound, template_params, 1)
-
     extract_audio_file(wxr, sound, template_params, 2)
-
     extract_tags(wxr, sound, template_params)
-
     extract_homophones(wxr, sound, template_params)
 
-    if sound.model_dump(exclude_defaults=True) != {}:
+    if sound.ipa != "" or sound.audio != "" or len(sound.homophones) > 0:
         word_entry.sounds.append(sound)
 
 
@@ -42,28 +32,19 @@ def process_transcriptions_template(
 
     sound_sg = Sound()
     sound_pl = Sound()
-
     template_params = template_node.template_parameters
-
     extract_ipa(wxr, sound_sg, template_params, 1)
     extract_ipa(wxr, sound_pl, template_params, 2)
-
     extract_audio_file(wxr, sound_sg, template_params, 3)
     extract_audio_file(wxr, sound_pl, template_params, 4)
-
     extract_tags(wxr, [sound_sg, sound_pl], template_params)
-
     extract_homophones(wxr, sound_sg, template_params)
 
-    if sound_sg.model_dump(exclude_defaults=True) != {} and (
-        sound_sg.ipa or sound_sg.audio
-    ):
+    if sound_sg.ipa != "" or sound_sg.audio != "":
         sound_sg.tags.append("singular")
         word_entry.sounds.append(sound_sg)
 
-    if sound_pl.model_dump(exclude_defaults=True) != {} and (
-        sound_pl.ipa or sound_pl.audio
-    ):
+    if sound_pl.ipa != "" or sound_pl.audio != "":
         sound_pl.tags.append("plural")
         word_entry.sounds.append(sound_pl)
 
@@ -73,26 +54,18 @@ def process_transcription_ru_template(
 ):
     # https://ru.wiktionary.org/wiki/Шаблон:transcription-ru
     sound = Sound()
-
     template_params = template_node.template_parameters
-
-    ipa = clean_node(wxr, {}, template_params.get("вручную", ""))
-    if not ipa:
-        cleaned_node = clean_node(wxr, {}, template_node)
-        ipa_match = re.search(r"\[(.*?)\]", cleaned_node)
-        if ipa_match:
-            ipa = ipa_match.group(1)
-
-    if ipa:
-        sound.ipa = ipa
-
+    sound.ipa = clean_node(wxr, None, template_params.get("вручную", ""))
+    if sound.ipa == "":
+        cleaned_node = clean_node(wxr, None, template_node)
+        ipa_match = re.search(r"\[.+?\]", cleaned_node)
+        if ipa_match is not None:
+            sound.ipa = ipa_match.group()
     extract_audio_file(wxr, sound, template_params, 2)
-
     extract_homophones(wxr, sound, template_params)
-
     extract_tags(wxr, sound, template_params)
 
-    if sound.model_dump(exclude_defaults=True) != {}:
+    if sound.ipa != "" or sound.audio != "" or len(sound.homophones) > 0:
         word_entry.sounds.append(sound)
 
 
@@ -101,28 +74,30 @@ def process_transcriptions_ru_template(
 ):
     sound_sg = Sound()
     sound_pl = Sound()
-
     template_params = template_node.template_parameters
-
-    cleaned_node = clean_node(wxr, {}, template_node)
-    ipa_matches = re.findall(r"\[(.*?)\]", cleaned_node)
+    cleaned_node = clean_node(wxr, None, template_node)
+    ipa_matches = re.findall(r"\[.+?\]", cleaned_node)
     if len(ipa_matches) > 0:
         sound_sg.ipa = ipa_matches[0]
     if len(ipa_matches) > 1:
         sound_pl.ipa = ipa_matches[1]
-
     extract_audio_file(wxr, sound_sg, template_params, 3)
     extract_audio_file(wxr, sound_pl, template_params, 4)
-
     extract_tags(wxr, [sound_sg, sound_pl], template_params)
-
     extract_homophones(wxr, sound_sg, template_params)
 
-    if sound_sg.model_dump(exclude_defaults=True) != {}:
+    if (
+        sound_sg.ipa != ""
+        or sound_sg.audio != ""
+        or len(sound_sg.homophones) > 0
+    ):
         sound_sg.tags.append("singular")
         word_entry.sounds.append(sound_sg)
-
-    if sound_pl.model_dump(exclude_defaults=True) != {}:
+    if (
+        sound_pl.ipa != ""
+        or sound_pl.audio != ""
+        or len(sound_pl.homophones) > 0
+    ):
         sound_pl.tags.append("plural")
         word_entry.sounds.append(sound_pl)
 
@@ -132,43 +107,55 @@ def process_transcription_la_template(
 ):
     # https://ru.wiktionary.org/wiki/Шаблон:transcription-la
     sound = Sound()
-    cleaned_node = clean_node(wxr, {}, template_node)
-    ipa_match = re.search(r"\((.*?)\): \[(.*?)\]", cleaned_node)
-
-    if ipa_match:
+    cleaned_node = clean_node(wxr, None, template_node)
+    ipa_match = re.search(r"\((.+?)\): (\[.+?\])", cleaned_node)
+    if ipa_match is not None:
         sound.ipa = ipa_match.group(2)
-        sound.raw_tags = [ipa_match.group(1).strip()]
+        sound.raw_tags.append(ipa_match.group(1).strip())
         word_entry.sounds.append(sound)
 
 
 def process_transcription_grc_template(
-    wxr: WiktextractContext, word_entry: WordEntry, template_node: WikiNode
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: WikiNode
 ):
     # https://ru.wiktionary.org/wiki/Шаблон:transcription-grc
-    sound = Sound()
-    cleaned_node = clean_node(wxr, {}, template_node)
-    ipa_with_labels = re.findall(r"\* (.*?): \[(.*?)\]", cleaned_node)
-    for label, ipa in ipa_with_labels:
-        sound = Sound(ipa=ipa, raw_tags=[label.strip()])
-        word_entry.sounds.append(sound)
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for node in expanded_node.children:
+        if (
+            isinstance(node, HTMLNode)
+            and node.tag == "span"
+            and node.attrs.get("class", "") == "IPA"
+        ):
+            ipa = clean_node(wxr, None, node)
+            if ipa != "":
+                word_entry.sounds.append(Sound(ipa=ipa))
+        elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
+            for list_item in node.find_child(NodeKind.LIST_ITEM):
+                text = clean_node(wxr, None, list_item.children)
+                for raw_tag, ipa in re.findall(r"(.+?): (\[.+?\])", text):
+                    word_entry.sounds.append(
+                        Sound(ipa=ipa, raw_tags=[raw_tag.strip()])
+                    )
 
 
 def extract_ipa(
     wxr: WiktextractContext,
     sound: Sound,
     template_params: dict[str, WikiNode],
-    key: Union[str, int],
+    key: str | int,
 ):
     ipa = clean_node(wxr, {}, template_params.get(key, ""))
-    if ipa:
-        sound.ipa = ipa
+    if ipa != "":
+        sound.ipa = f"[{ipa}]"
 
 
 def extract_audio_file(
     wxr: WiktextractContext,
     sound: Sound,
     template_params: dict[str, WikiNode],
-    key: Union[str, int],
+    key: str | int,
 ):
     audio_file = clean_node(wxr, None, template_params.get(key, ""))
     if audio_file != "":
@@ -177,7 +164,7 @@ def extract_audio_file(
 
 def extract_tags(
     wxr: WiktextractContext,
-    sounds: Union[Sound, list[Sound]],
+    sounds: Sound | list[Sound],
     template_params: dict[str, WikiNode],
 ):
     tags = clean_node(wxr, None, template_params.get("норма", ""))
@@ -191,7 +178,7 @@ def extract_tags(
 
 def extract_homophones(
     wxr: WiktextractContext,
-    sounds: Union[Sound, list[Sound]],
+    sounds: Sound | list[Sound],
     template_params: dict[str, WikiNode],
 ):
     homophones_raw = clean_node(wxr, {}, template_params.get("омофоны", ""))
