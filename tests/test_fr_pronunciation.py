@@ -59,7 +59,7 @@ class TestPronunciation(TestCase):
                             "ipa": "\\bɔ̃.ʒuʁ\\",
                         },
                         {
-                            "ipa": "bõ.ʒuːʁ",
+                            "ipa": "[bõ.ʒuːʁ]",
                             "raw_tags": ["France (Paris)"],
                             "audio": "Fr-bonjour.ogg",
                             "ogg_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Fr-bonjour.ogg",
@@ -76,7 +76,7 @@ class TestPronunciation(TestCase):
                             "ipa": "\\bɔ̃.ʒuʁ\\",
                         },
                         {
-                            "ipa": "bõ.ʒuːʁ",
+                            "ipa": "[bõ.ʒuːʁ]",
                             "raw_tags": ["France (Paris)"],
                             "audio": "Fr-bonjour.ogg",
                             "ogg_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Fr-bonjour.ogg",

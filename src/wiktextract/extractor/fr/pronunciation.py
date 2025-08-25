@@ -243,7 +243,7 @@ def process_ecouter_template(
     if len(location) > 0:
         sound.raw_tags.append(location)
     if len(ipa) > 0:
-        sound.ipa = ipa
+        sound.ipa = f"[{ipa}]"
     if len(audio_file) > 0:
         set_sound_file_url_fields(wxr, audio_file, sound)
     translate_raw_tags(sound)
