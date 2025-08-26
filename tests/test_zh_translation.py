@@ -4,7 +4,8 @@ from wikitextprocessor import Wtp
 
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.zh.models import WordEntry
-from wiktextract.extractor.zh.translation import extract_translation
+from wiktextract.extractor.zh.page import parse_page
+from wiktextract.extractor.zh.translation import extract_translation_section
 from wiktextract.wxr_context import WiktextractContext
 
 
@@ -41,7 +42,7 @@ class TestZhTranslation(TestCase):
 * 塞尔维亚-克罗地亚语：
 *: 西里尔字母：{{qualifier|Ekavian}} {{t+|sh|сунчев ветар|m}}"""
         node = self.wxr.wtp.parse(wikitext)
-        extract_translation(self.wxr, page_data, node)
+        extract_translation_section(self.wxr, page_data[0], node)
         self.assertEqual(
             [
                 d.model_dump(exclude_defaults=True)
@@ -82,7 +83,7 @@ class TestZhTranslation(TestCase):
         wikitext = """{{翻譯-頂}}
 *英语：[[how do you do]]; [[how are you]]"""
         node = self.wxr.wtp.parse(wikitext)
-        extract_translation(self.wxr, page_data, node)
+        extract_translation_section(self.wxr, page_data[0], node)
         self.assertEqual(
             [
                 d.model_dump(exclude_defaults=True)
@@ -120,7 +121,7 @@ class TestZhTranslation(TestCase):
         ]
         wikitext = "{{trans-see|源於英格蘭的語言|英語/翻譯}}"
         node = self.wxr.wtp.parse(wikitext)
-        extract_translation(self.wxr, page_data, node)
+        extract_translation_section(self.wxr, page_data[0], node)
         self.assertEqual(
             [
                 d.model_dump(exclude_defaults=True)
@@ -131,7 +132,7 @@ class TestZhTranslation(TestCase):
                     "lang_code": "ab",
                     "lang": "阿布哈茲語",
                     "word": "англыз бызшәа",
-                    "sense": "一種源於英格蘭的語言",
+                    "sense": "源於英格蘭的語言",
                 }
             ],
         )
@@ -144,7 +145,7 @@ class TestZhTranslation(TestCase):
         node = self.wxr.wtp.parse(
             "*俄语：1) [[лесничество]], [[лесхоз]]; 2) [[лесосека]]"
         )
-        extract_translation(self.wxr, page_data, node)
+        extract_translation_section(self.wxr, page_data[0], node)
         self.assertEqual(
             [
                 d.model_dump(exclude_defaults=True)
@@ -176,7 +177,7 @@ class TestZhTranslation(TestCase):
         ]
         self.wxr.wtp.add_page("Template:en", 10, "英語")
         node = self.wxr.wtp.parse("* {{en}}：{{t+|en|analytic geometry}}")
-        extract_translation(self.wxr, page_data, node)
+        extract_translation_section(self.wxr, page_data[0], node)
         self.assertEqual(
             [
                 d.model_dump(exclude_defaults=True)
@@ -210,7 +211,7 @@ class TestZhTranslation(TestCase):
             """* 南非語: {{l|af|eiervrug}}
 * {{cs}}: {{l|cs|patližán|g=m}} {{口}}"""
         )
-        extract_translation(self.wxr, page_data, node)
+        extract_translation_section(self.wxr, page_data[0], node)
         self.assertEqual(
             [
                 d.model_dump(exclude_defaults=True)
@@ -246,7 +247,7 @@ class TestZhTranslation(TestCase):
         ]
         wikitext = "{{see translation subpage|名詞}}"
         node = self.wxr.wtp.parse(wikitext)
-        extract_translation(self.wxr, page_data, node)
+        extract_translation_section(self.wxr, page_data[0], node)
         self.assertEqual(
             [
                 d.model_dump(exclude_defaults=True)
@@ -258,6 +259,92 @@ class TestZhTranslation(TestCase):
                     "lang": "阿迪格語",
                     "word": "дунае",
                     "sense": "地球上的所有地方或國家",
+                }
+            ],
+        )
+
+    def test_trans_see_single_arg(self):
+        self.wxr.wtp.add_page(
+            "丁香花",
+            0,
+            """==漢語==
+===名詞===
+# 植物
+====翻譯====
+{{trans-top|丁香屬植物的花}}
+* 阿拉伯語：{{t|ar|لَيْلَك|m}}
+{{trans-bottom}}""",
+        )
+        data = parse_page(
+            self.wxr,
+            "丁香",
+            """==漢語==
+===名詞===
+# [[桃金孃]]
+=====翻譯=====
+{{trans-top|香料}}
+* 南非語：{{t+|af|naeltjie}}
+{{trans-bottom}}
+{{trans-top|木樨科植物}}
+* 阿爾巴尼亞語：{{t+|sq|jargavan|f}}
+{{trans-bottom}}
+{{trans-see|丁香花}}""",
+        )
+        self.assertEqual(
+            data[0]["translations"],
+            [
+                {
+                    "lang": "南非語",
+                    "lang_code": "af",
+                    "sense": "香料",
+                    "word": "naeltjie",
+                },
+                {
+                    "lang": "阿爾巴尼亞語",
+                    "lang_code": "sq",
+                    "sense": "木樨科植物",
+                    "tags": ["feminine"],
+                    "word": "jargavan",
+                },
+                {
+                    "lang": "阿拉伯語",
+                    "lang_code": "ar",
+                    "sense": "丁香花",
+                    "tags": ["masculine"],
+                    "word": "لَيْلَك",
+                },
+            ],
+        )
+
+    def test_trans_see_hash(self):
+        self.wxr.wtp.add_page(
+            "第比利斯",
+            0,
+            """==漢語==
+===專有名詞===
+# 首都名，位於格魯吉亞
+====翻譯====
+{{trans-top|格魯吉亞／喬治亞的首都}}
+* 阿布哈茲語：{{t|ab|Қарҭ}}
+{{trans-bottom}}""",
+        )
+        data = parse_page(
+            self.wxr,
+            "丁香",
+            """==漢語==
+===名詞===
+# 首都名，位於歐洲喬治亞
+=====翻譯=====
+{{trans-see|喬治亞／格魯吉亞首都|第比利斯#翻譯{{!}}第比利斯}}""",
+        )
+        self.assertEqual(
+            data[0]["translations"],
+            [
+                {
+                    "lang": "阿布哈茲語",
+                    "lang_code": "ab",
+                    "sense": "喬治亞／格魯吉亞首都",
+                    "word": "Қарҭ",
                 }
             ],
         )
