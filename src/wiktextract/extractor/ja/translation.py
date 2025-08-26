@@ -54,7 +54,16 @@ def process_translation_list_item(
                     lang_code = node.template_parameters.get(1, "")
                 else:
                     lang_code = node.template_name
-            elif node.template_name.lower() in ["t+", "t", "t-", "l", "lang"]:
+            elif node.template_name.lower() in [
+                "t+",
+                "t",
+                "t-",
+                "l",
+                "lang",
+                "tø",
+                "t+check",
+                "t-check",
+            ]:
                 for tr_data in process_t_template(
                     wxr, word_entry, node, sense_text, lang_name, lang_code
                 ):
