@@ -24,7 +24,7 @@ def extract_translation_section(
         if (
             isinstance(node, TemplateNode)
             and node.template_name == "trans-top"
-            and sense == ""
+            and not (sense != "" and is_subpage)
         ):
             sense = clean_node(wxr, None, node.template_parameters.get(1, ""))
         elif (

@@ -35,7 +35,7 @@ from .section_titles import (
     USAGE_NOTE_TITLES,
 )
 from .tags import translate_raw_tags
-from .translation import extract_translation
+from .translation import extract_translation_section
 
 
 def parse_section(
@@ -99,7 +99,7 @@ def parse_section(
     elif wxr.config.capture_translations and subtitle in TRANSLATIONS_TITLES:
         if len(page_data) == 0:
             page_data.append(base_data.model_copy(deep=True))
-        extract_translation(wxr, page_data, level_node)
+        extract_translation_section(wxr, page_data[-1], level_node)
     elif wxr.config.capture_inflections and subtitle in INFLECTION_TITLES:
         extract_inflections(
             wxr, page_data if len(page_data) > 0 else [base_data], level_node
