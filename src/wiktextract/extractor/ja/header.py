@@ -24,6 +24,10 @@ def extract_header_nodes(
             "zhchar",
         ):
             is_first_bold = False
+        elif isinstance(node, TemplateNode):
+            if node.template_name.startswith(word_entry.lang_code + "-"):
+                use_nodes.append(node)
+            # ignore other templates, like "wikipedia" and "commonscat"
         else:
             use_nodes.append(node)
     expanded_nodes = wxr.wtp.parse(
