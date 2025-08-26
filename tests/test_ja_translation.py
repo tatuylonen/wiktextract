@@ -4,6 +4,7 @@ from wikitextprocessor import Wtp
 
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.ja.models import WordEntry
+from wiktextract.extractor.ja.page import parse_page
 from wiktextract.extractor.ja.translation import extract_translation_section
 from wiktextract.wxr_context import WiktextractContext
 
@@ -268,5 +269,38 @@ class TestJaTransaltion(TestCase):
                     "tags": ["Simplified-Chinese"],
                     "roman": "jam¹ ngok⁶",
                 },
+            ],
+        )
+
+    def test_trans_see_id(self):
+        self.wxr.wtp.add_page("テンプレート:T", 10, "英語")
+        self.wxr.wtp.add_page(
+            "バス",
+            0,
+            """==日本語==
+===名詞:音楽===
+# [[男声]]の[[低音域]][[パート]]。
+====翻訳====
+<span id="翻訳:バス(音楽)"></span>
+* {{T|en}}: {{t+|en|bass}}""",
+        )
+        data = parse_page(
+            self.wxr,
+            "低音",
+            """==日本語==
+===名詞===
+#[[ひくい|低い]]または[[よわい|弱い]][[音]]や声。
+====翻訳====
+{{trans-see2|語義2|バス#翻訳:バス(音楽)}}""",
+        )
+        self.assertEqual(
+            data[0]["translations"],
+            [
+                {
+                    "lang": "英語",
+                    "lang_code": "en",
+                    "word": "bass",
+                    "sense": "語義2",
+                }
             ],
         )

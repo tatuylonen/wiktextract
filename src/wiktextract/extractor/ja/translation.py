@@ -1,7 +1,11 @@
-from typing import Optional
-
 from mediawiki_langcodes import name_to_code
-from wikitextprocessor.parser import LevelNode, NodeKind, TemplateNode, WikiNode
+from wikitextprocessor.parser import (
+    LEVEL_KIND_FLAGS,
+    LevelNode,
+    NodeKind,
+    TemplateNode,
+    WikiNode,
+)
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -13,17 +17,26 @@ def extract_translation_section(
     wxr: WiktextractContext,
     word_entry: WordEntry,
     level_node: LevelNode,
+    sense: str = "",
+    is_subpage: bool = False,
 ) -> None:
-    sense_text = ""
     for node in level_node.find_child(NodeKind.TEMPLATE | NodeKind.LIST):
-        if isinstance(node, TemplateNode) and node.template_name == "trans-top":
-            sense_text = clean_node(
-                wxr, None, node.template_parameters.get(1, "")
-            )
+        if (
+            isinstance(node, TemplateNode)
+            and node.template_name == "trans-top"
+            and sense == ""
+        ):
+            sense = clean_node(wxr, None, node.template_parameters.get(1, ""))
+        elif (
+            isinstance(node, TemplateNode)
+            and node.template_name in ["trans-see", "trans-see2"]
+            and not is_subpage
+        ):
+            extract_trans_see_template(wxr, word_entry, node)
         elif node.kind == NodeKind.LIST:
             for list_item in node.find_child(NodeKind.LIST_ITEM):
                 process_translation_list_item(
-                    wxr, word_entry, list_item, sense_text, "", ""
+                    wxr, word_entry, list_item, sense, "", ""
                 )
 
 
@@ -36,7 +49,7 @@ def process_translation_list_item(
     lang_code: str,
 ) -> None:
     after_collon = False
-    last_tr: Optional[Translation] = None
+    last_tr: Translation | None = None
     for node_index, node in enumerate(list_item.children):
         if isinstance(node, str) and ":" in node and not after_collon:
             after_collon = True
@@ -207,7 +220,7 @@ def process_zh_ts_template(
     sense_text: str,
     lang_name: str,
     lang_code: str,
-) -> Optional[Translation]:
+) -> Translation | None:
     # https://ja.wiktionary.org/wiki/テンプレート:zh-ts
     tr_data = None
     for arg in range(1, 3):
@@ -224,3 +237,46 @@ def process_zh_ts_template(
             )
             word_entry.translations.append(tr_data)
     return tr_data
+
+
+def extract_trans_see_template(
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+):
+    # テンプレート:trans-see, テンプレート:trans-see2
+    page_title = clean_node(
+        wxr,
+        None,
+        t_node.template_parameters.get(
+            2, t_node.template_parameters.get(1, wxr.wtp.title)
+        ),
+    )
+    sense = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
+    target_id = ""
+    if "#" in page_title:
+        index = page_title.index("#")
+        target_id = page_title[index + 1 :]
+        page_title = page_title[:index]
+    page = wxr.wtp.get_page(page_title)
+    if page is None:
+        return
+    root = wxr.wtp.parse(page.body)
+    target_node = find_subpage_section(wxr, root, "翻訳", target_id)
+    if target_node is not None:
+        extract_translation_section(
+            wxr, word_entry, target_node, sense=sense, is_subpage=True
+        )
+
+
+def find_subpage_section(
+    wxr: WiktextractContext, root: WikiNode, target_title: str, target_id: str
+) -> WikiNode | None:
+    for level_node in root.find_child_recursively(LEVEL_KIND_FLAGS):
+        section_title = clean_node(wxr, None, level_node.largs)
+        if section_title == target_title:
+            if target_id == "":
+                return level_node
+            else:
+                for span in level_node.find_html("span"):
+                    if span.attrs.get("id", "") == target_id:
+                        return level_node
+    return None
