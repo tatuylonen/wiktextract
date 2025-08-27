@@ -1,6 +1,7 @@
 from mediawiki_langcodes import code_to_name, name_to_code
 from wikitextprocessor.parser import (
     LEVEL_KIND_FLAGS,
+    LevelNode,
     NodeKind,
     TemplateNode,
     WikiNode,
@@ -16,7 +17,7 @@ from .tags import TEMPLATE_TAG_ARGS, translate_raw_tags
 def extract_translation_section(
     wxr: WiktextractContext,
     word_entry: WordEntry,
-    level_node: WikiNode,
+    level_node: LevelNode,
     sense: str = "",
     is_subpage: bool = False,
 ) -> None:

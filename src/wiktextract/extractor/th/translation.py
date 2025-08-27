@@ -1,23 +1,43 @@
 from mediawiki_langcodes import name_to_code
-from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
+from wikitextprocessor.parser import (
+    LEVEL_KIND_FLAGS,
+    LevelNode,
+    NodeKind,
+    TemplateNode,
+    WikiNode,
+)
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .models import Translation, WordEntry
+from .section_titles import TRANSLATION_SECTIONS
 from .tags import translate_raw_tags
 
 
 def extract_translation_section(
-    wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    level_node: LevelNode,
+    sense: str = "",
+    is_subpage: bool = False,
 ) -> None:
-    sense = ""
     for node in level_node.children:
-        if isinstance(node, TemplateNode) and node.template_name == "trans-top":
+        if (
+            isinstance(node, TemplateNode)
+            and node.template_name == "trans-top"
+            and not (sense != "" and is_subpage)
+        ):
             sense = clean_node(wxr, None, node.template_parameters.get(1, ""))
             clean_node(wxr, word_entry, node)
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
             for list_item in node.find_child(NodeKind.LIST_ITEM):
                 extract_translation_list_item(wxr, word_entry, list_item, sense)
+        elif (
+            isinstance(node, TemplateNode)
+            and node.template_name == "trans-see"
+            and not is_subpage
+        ):
+            extract_trans_see_template(wxr, word_entry, node)
 
 
 def extract_translation_list_item(
@@ -131,3 +151,43 @@ def extract_translation_page(
                 continue
             for tr_level_node in level3_node.find_child(NodeKind.LEVEL4):
                 extract_translation_section(wxr, word_entry, tr_level_node)
+
+
+def extract_trans_see_template(
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+):
+    sense = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
+    page_titles = []
+    if 2 in t_node.template_parameters:
+        for index in range(2, 11):
+            if index not in t_node.template_parameters:
+                break
+            page_titles.append(
+                clean_node(wxr, None, t_node.template_parameters[index])
+            )
+    else:
+        page_titles.append(
+            clean_node(wxr, None, t_node.template_parameters.get(1, ""))
+        )
+    for page_title in page_titles:
+        if "#" in page_title:
+            page_title = page_title[: page_title.index("#")]
+        page = wxr.wtp.get_page(page_title)
+        if page is None:
+            return
+        root = wxr.wtp.parse(page.body)
+        target_node = find_subpage_section(wxr, root, TRANSLATION_SECTIONS)
+        if target_node is not None:
+            extract_translation_section(
+                wxr, word_entry, target_node, sense=sense, is_subpage=True
+            )
+
+
+def find_subpage_section(
+    wxr: WiktextractContext, root: WikiNode, target_sections: tuple[str, ...]
+) -> WikiNode | None:
+    for level_node in root.find_child_recursively(LEVEL_KIND_FLAGS):
+        section_title = clean_node(wxr, None, level_node.largs)
+        if section_title in target_sections:
+            return level_node
+    return None
