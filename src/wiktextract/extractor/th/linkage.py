@@ -20,18 +20,23 @@ def extract_linkage_section(
     level_node: LevelNode,
     linkage_type: str,
     source: str = "",
+    sense: str = "",
 ) -> None:
     for node in level_node.children:
         if isinstance(node, TemplateNode) and node.template_name.startswith(
             "col"
         ):
-            extract_col_template(wxr, word_entry, node, linkage_type, source)
+            extract_col_template(
+                wxr, word_entry, node, linkage_type, source, sense
+            )
         elif isinstance(node, TemplateNode) and node.template_name == "ws":
-            extract_ws_template(wxr, word_entry, node, linkage_type, source)
+            extract_ws_template(
+                wxr, word_entry, node, linkage_type, source, sense
+            )
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
             for list_item in node.find_child(NodeKind.LIST_ITEM):
                 extract_linkage_list_item(
-                    wxr, word_entry, list_item, linkage_type, source
+                    wxr, word_entry, list_item, linkage_type, source, sense
                 )
 
 
@@ -41,6 +46,7 @@ def extract_col_template(
     t_node: TemplateNode,
     linkage_type: str,
     source: str,
+    sense: str,
 ) -> None:
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(t_node), expand_all=True
@@ -55,7 +61,9 @@ def extract_col_template(
             elif "lang" in span_tag.attrs:
                 word = clean_node(wxr, None, span_tag)
                 if word != "":
-                    l_data.append(Linkage(word=word, source=source))
+                    l_data.append(
+                        Linkage(word=word, source=source, sense=sense)
+                    )
                     if span_class == "Hant":
                         l_data[-1].tags.append("Traditional-Chinese")
                     elif span_class == "Hans":
@@ -69,6 +77,7 @@ def extract_linkage_list_item(
     list_item: WikiNode,
     linkage_type: str,
     source: str,
+    sense: str,
 ) -> None:
     linkages = []
 
@@ -77,6 +86,7 @@ def extract_linkage_list_item(
             l_data = Linkage(
                 word=clean_node(wxr, None, node.template_parameters.get(2, "")),
                 source=source,
+                sense=sense,
             )
             if l_data.word != "":
                 linkages.append(l_data)
@@ -87,12 +97,12 @@ def extract_linkage_list_item(
                     "อรรถาภิธาน:"
                 ):
                     extract_thesaurus_page(
-                        wxr, word_entry, linkage_type, link_str
+                        wxr, word_entry, linkage_type, link_str, sense
                     )
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
             link_str = clean_node(wxr, None, node)
             if link_str != "":
-                linkages.append(Linkage(word=link_str))
+                linkages.append(Linkage(word=link_str, sense=sense))
         elif isinstance(node, str) and ("-" in node or "–" in node):
             if "-" in node:
                 sense = node[node.index("-") + 1 :]
@@ -115,6 +125,7 @@ def extract_thesaurus_page(
     word_entry: WordEntry,
     linkage_type: str,
     page_title: str,
+    sense: str,
 ) -> None:
     page = wxr.wtp.get_page(page_title, 110)
     if page is None or page.body is None:
@@ -141,7 +152,8 @@ def extract_thesaurus_page(
                     word_entry,
                     linkage_level_node,
                     linkage_type,
-                    page_title,
+                    source=page_title,
+                    sense=sense,
                 )
 
 
@@ -151,10 +163,11 @@ def extract_ws_template(
     t_node: TemplateNode,
     linkage_type: str,
     source: str,
+    sense: str,
 ) -> None:
     word = clean_node(wxr, None, t_node.template_parameters.get(2, ""))
     if word != "":
-        l_data = Linkage(word=word, source=source)
+        l_data = Linkage(word=word, source=source, sense=sense)
         getattr(word_entry, linkage_type).append(l_data)
 
 
@@ -179,11 +192,16 @@ def extract_syn_template(
     t_node: TemplateNode,
     linkage_type: str,
 ) -> None:
+    sense = " ".join(word_entry.senses[-1].glosses)
     for arg_name in count(2):
         if arg_name not in t_node.template_parameters:
             break
         arg_value = clean_node(wxr, None, t_node.template_parameters[arg_name])
         if arg_value.startswith("อรรถาภิธาน:"):
-            extract_thesaurus_page(wxr, word_entry, linkage_type, arg_value)
+            extract_thesaurus_page(
+                wxr, word_entry, linkage_type, arg_value, sense
+            )
         elif arg_value != "":
-            getattr(word_entry, linkage_type).append(Linkage(word=arg_value))
+            getattr(word_entry, linkage_type).append(
+                Linkage(word=arg_value, sense=sense)
+            )
