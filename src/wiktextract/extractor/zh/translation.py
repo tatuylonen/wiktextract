@@ -20,6 +20,7 @@ def extract_translation_section(
     level_node: LevelNode,
     sense: str = "",
     is_subpage: bool = False,
+    source: str = "",
 ) -> None:
     for child in level_node.find_child(NodeKind.TEMPLATE | NodeKind.LIST):
         if isinstance(child, TemplateNode):
@@ -43,10 +44,14 @@ def extract_translation_section(
                     for c in child.template_parameters.get("data", [])
                 )
                 multitrans = wxr.wtp.parse(wikitext)
-                extract_translation_section(wxr, word_entry, multitrans, sense)
+                extract_translation_section(
+                    wxr, word_entry, multitrans, sense=sense, source=source
+                )
         else:
             for list_item in child.find_child_recursively(NodeKind.LIST_ITEM):
-                process_translation_list_item(wxr, word_entry, list_item, sense)
+                process_translation_list_item(
+                    wxr, word_entry, list_item, sense, source
+                )
 
 
 def process_translation_list_item(
@@ -54,9 +59,10 @@ def process_translation_list_item(
     word_entry: WordEntry,
     list_item: WikiNode,
     sense: str,
+    source: str,
 ) -> None:
     tr_data = Translation(
-        word="", sense=sense, lang="unknown", lang_code="unknown"
+        word="", sense=sense, lang="unknown", lang_code="unknown", source=source
     )
 
     for child_index, child in enumerate(list_item.filter_empty_str_child()):
@@ -92,6 +98,7 @@ def process_translation_list_item(
                         lang=tr_data.lang,
                         lang_code=tr_data.lang_code,
                         sense=sense,
+                        source=source,
                     )
                 if tr_data.lang_code == "":
                     tr_data.lang_code = child.template_parameters.get(1, "")
@@ -141,6 +148,7 @@ def process_translation_list_item(
                     lang=tr_data.lang,
                     lang_code=tr_data.lang_code,
                     sense=sense,
+                    source=source,
                 )
             tr_data.word = clean_node(wxr, None, child)
 
@@ -176,7 +184,12 @@ def extract_trans_see_template(
         target_node = find_subpage_section(wxr, root, TRANSLATIONS_TITLES)
         if target_node is not None:
             extract_translation_section(
-                wxr, word_entry, target_node, sense=sense, is_subpage=True
+                wxr,
+                word_entry,
+                target_node,
+                sense=sense,
+                is_subpage=True,
+                source=page_title,
             )
 
 
@@ -207,7 +220,11 @@ def extract_see_trans_subpage_template(
             target_section = new_target_section
     if target_section is not None:
         extract_translation_section(
-            wxr, word_entry, target_section, is_subpage=True
+            wxr,
+            word_entry,
+            target_section,
+            is_subpage=True,
+            source=subpage_title,
         )
 
 

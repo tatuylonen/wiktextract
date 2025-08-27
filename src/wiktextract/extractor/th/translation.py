@@ -19,23 +19,26 @@ def extract_translation_section(
     word_entry: WordEntry,
     level_node: LevelNode,
     sense: str = "",
-    is_subpage: bool = False,
+    from_trans_see: bool = False,
+    source: str = "",
 ) -> None:
     for node in level_node.children:
         if (
             isinstance(node, TemplateNode)
             and node.template_name == "trans-top"
-            and not (sense != "" and is_subpage)
+            and not (sense != "" and from_trans_see)
         ):
             sense = clean_node(wxr, None, node.template_parameters.get(1, ""))
             clean_node(wxr, word_entry, node)
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
             for list_item in node.find_child(NodeKind.LIST_ITEM):
-                extract_translation_list_item(wxr, word_entry, list_item, sense)
+                extract_translation_list_item(
+                    wxr, word_entry, list_item, sense, source
+                )
         elif (
             isinstance(node, TemplateNode)
             and node.template_name == "trans-see"
-            and not is_subpage
+            and not from_trans_see
         ):
             extract_trans_see_template(wxr, word_entry, node)
 
@@ -45,6 +48,7 @@ def extract_translation_list_item(
     word_entry: WordEntry,
     list_item: WikiNode,
     sense: str,
+    source: str,
 ) -> None:
     lang_name = "unknown"
     lang_code = "unknown"
@@ -65,7 +69,7 @@ def extract_translation_list_item(
             "t+",
             "t-simple",
         ]:
-            extract_t_template(wxr, word_entry, node, lang_name, sense)
+            extract_t_template(wxr, word_entry, node, lang_name, sense, source)
         elif (
             isinstance(node, WikiNode)
             and node.kind == NodeKind.LINK
@@ -79,18 +83,19 @@ def extract_translation_list_item(
                         lang=lang_name,
                         lang_code=lang_code,
                         sense=sense,
+                        source=source,
                     )
                 )
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
             for child_list_item in node.find_child(NodeKind.LIST_ITEM):
                 extract_translation_list_item(
-                    wxr, word_entry, child_list_item, sense
+                    wxr, word_entry, child_list_item, sense, source
                 )
         elif isinstance(node, WikiNode) and node.kind == NodeKind.ITALIC:
             for link_node in node.find_child(NodeKind.LINK):
                 link_str = clean_node(wxr, None, link_node)
                 if link_str.endswith("/คำแปลภาษาอื่น"):
-                    extract_translation_page(wxr, word_entry, link_str)
+                    extract_translation_subpage(wxr, word_entry, link_str)
 
 
 def extract_t_template(
@@ -99,12 +104,13 @@ def extract_t_template(
     t_node: TemplateNode,
     lang_name: str,
     sense: str,
+    source: str,
 ) -> None:
     lang_code = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
     if lang_code == "":
         lang_code = "unknown"
     tr_data = Translation(
-        word="", lang=lang_name, lang_code=lang_code, sense=sense
+        word="", lang=lang_name, lang_code=lang_code, sense=sense, source=source
     )
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(t_node), expand_all=True
@@ -130,27 +136,18 @@ def extract_t_template(
             clean_node(wxr, word_entry, link_node)
 
 
-def extract_translation_page(
-    wxr: WiktextractContext,
-    word_entry: WordEntry,
-    page_title: str,
+def extract_translation_subpage(
+    wxr: WiktextractContext, word_entry: WordEntry, page_title: str
 ) -> None:
     page = wxr.wtp.get_page(page_title, 0)
     if page is None or page.body is None:
         return
     root = wxr.wtp.parse(page.body)
-    for level2_node in root.find_child(NodeKind.LEVEL2):
-        lang_name = clean_node(wxr, None, level2_node.largs).removeprefix(
-            "ภาษา"
+    target_node = find_subpage_section(wxr, root, TRANSLATION_SECTIONS)
+    if target_node is not None:
+        extract_translation_section(
+            wxr, word_entry, target_node, source=page_title
         )
-        if lang_name != word_entry.lang:
-            continue
-        for level3_node in level2_node.find_child(NodeKind.LEVEL3):
-            pos_title = clean_node(wxr, None, level3_node.largs)
-            if pos_title != word_entry.pos_title:
-                continue
-            for tr_level_node in level3_node.find_child(NodeKind.LEVEL4):
-                extract_translation_section(wxr, word_entry, tr_level_node)
 
 
 def extract_trans_see_template(
@@ -179,7 +176,12 @@ def extract_trans_see_template(
         target_node = find_subpage_section(wxr, root, TRANSLATION_SECTIONS)
         if target_node is not None:
             extract_translation_section(
-                wxr, word_entry, target_node, sense=sense, is_subpage=True
+                wxr,
+                word_entry,
+                target_node,
+                sense=sense,
+                from_trans_see=True,
+                source=page_title,
             )
 
 

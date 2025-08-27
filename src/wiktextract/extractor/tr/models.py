@@ -68,6 +68,7 @@ class Translation(TurkishBaseModel):
     tags: list[str] = []
     raw_tags: list[str] = []
     roman: str = ""
+    source: str = ""
 
 
 class Linkage(TurkishBaseModel):

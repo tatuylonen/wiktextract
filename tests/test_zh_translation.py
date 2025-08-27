@@ -133,6 +133,7 @@ class TestZhTranslation(TestCase):
                     "lang": "阿布哈茲語",
                     "word": "англыз бызшәа",
                     "sense": "源於英格蘭的語言",
+                    "source": "英語/翻譯",
                 }
             ],
         )
@@ -259,6 +260,7 @@ class TestZhTranslation(TestCase):
                     "lang": "阿迪格語",
                     "word": "дунае",
                     "sense": "地球上的所有地方或國家",
+                    "source": "世界/翻譯",
                 }
             ],
         )
@@ -312,6 +314,7 @@ class TestZhTranslation(TestCase):
                     "sense": "丁香花",
                     "tags": ["masculine"],
                     "word": "لَيْلَك",
+                    "source": "丁香花",
                 },
             ],
         )
@@ -345,6 +348,7 @@ class TestZhTranslation(TestCase):
                     "lang_code": "ab",
                     "sense": "喬治亞／格魯吉亞首都",
                     "word": "Қарҭ",
+                    "source": "第比利斯",
                 }
             ],
         )

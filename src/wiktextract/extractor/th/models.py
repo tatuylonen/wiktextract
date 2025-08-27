@@ -94,6 +94,7 @@ class Translation(ThaiBaseModel):
     raw_tags: list[str] = []
     roman: str = ""
     lit: str = Field(default="", description="Literal translation")
+    source: str = ""
 
 
 class Linkage(ThaiBaseModel):

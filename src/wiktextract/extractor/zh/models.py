@@ -122,6 +122,7 @@ class Translation(ChineseBaseModel):
     roman: str = Field(default="", description="Roman script")
     alt: str = Field(default="", description="Alternative form")
     lit: str = Field(default="", description="Literal translation for the term")
+    source: str = ""
 
 
 class Linkage(ChineseBaseModel):
