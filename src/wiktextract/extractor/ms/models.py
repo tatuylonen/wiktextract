@@ -68,6 +68,7 @@ class Translation(MalayBaseModel):
     raw_tags: list[str] = []
     roman: str = ""
     categories: list[str] = Field(default=[], exclude=True)
+    source: str = ""
 
 
 class Hyphenation(MalayBaseModel):
