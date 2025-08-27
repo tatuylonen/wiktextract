@@ -108,6 +108,10 @@ def parse_section(
     for next_level in level_node.find_child(LEVEL_KIND_FLAGS):
         parse_section(wxr, page_data, base_data, next_level)
 
+    extract_category_templates(
+        wxr, page_data if len(page_data) else [base_data], level_node
+    )
+
 
 def parse_page(
     wxr: WiktextractContext, page_title: str, page_text: str
@@ -143,3 +147,29 @@ def parse_page(
         if len(data.senses) == 0:
             data.senses.append(Sense(tags=["no-gloss"]))
     return [m.model_dump(exclude_defaults=True) for m in page_data]
+
+
+CATEGORY_TEMPLATES = frozenset(
+    [
+        "zh-cat",
+        "cln",
+        "catlangname",
+        "c",
+        "topics",
+        "top",
+        "catlangcode",
+        "topic",
+    ]
+)
+
+
+def extract_category_templates(
+    wxr: WiktextractContext, page_data: list[WordEntry], level_node: LevelNode
+):
+    categories = {}
+    for node in level_node.find_child(NodeKind.TEMPLATE):
+        if node.template_name.lower() in CATEGORY_TEMPLATES:
+            clean_node(wxr, categories, node)
+    for data in page_data:
+        if data.lang_code == page_data[-1].lang_code:
+            data.categories.extend(categories.get("categories", []))

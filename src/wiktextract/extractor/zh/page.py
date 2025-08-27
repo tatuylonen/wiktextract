@@ -122,7 +122,9 @@ def parse_section(
         parse_section(wxr, page_data, base_data, next_level_node)
 
     for template in level_node.find_child(NodeKind.TEMPLATE):
-        add_page_end_categories(wxr, page_data, template)
+        add_page_end_categories(
+            wxr, page_data if len(page_data) else [base_data], template
+        )
 
 
 def process_pos_block(
@@ -399,7 +401,18 @@ def extract_zh_forms_data_cell(
 
 # https://zh.wiktionary.org/wiki/Template:Zh-cat
 # https://zh.wiktionary.org/wiki/Template:Catlangname
-CATEGORY_TEMPLATES = frozenset(["zh-cat", "cln", "catlangname", "c", "topics"])
+CATEGORY_TEMPLATES = frozenset(
+    [
+        "zh-cat",
+        "cln",
+        "catlangname",
+        "c",
+        "topics",
+        "top",
+        "catlangcode",
+        "topic",
+    ]
+)
 
 
 def add_page_end_categories(
