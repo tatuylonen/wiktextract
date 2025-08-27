@@ -95,7 +95,10 @@ class TestThLinkage(TestCase):
         )
         self.assertEqual(
             page_data[0]["synonyms"],
-            [{"word": "ทีวี"}, {"word": "โทรภาพ"}],
+            [
+                {"word": "ทีวี", "sense": "กระบวนการถ่ายทอด"},
+                {"word": "โทรภาพ", "sense": "กระบวนการถ่ายทอด"},
+            ],
         )
 
     def test_col3_zh_pinyin(self):

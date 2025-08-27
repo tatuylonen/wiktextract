@@ -67,3 +67,5 @@ LINKAGE_SECTIONS = {
     "สุภาษิต": "proverbs",
     "คำประสม": "derived",
 }
+
+TRANSLATION_SECTIONS = ("คำแปลภาษาอื่น", "คำแปล")
