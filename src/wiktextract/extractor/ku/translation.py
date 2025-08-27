@@ -24,8 +24,9 @@ def extract_translation_section(
     level_node: LevelNode,
     source: str = "",
     tags: list[str] = [],
+    sense: str = "",
+    from_trans_see: bool = False,
 ) -> None:
-    sense = ""
     sense_index = 0
     for node in level_node.find_child(
         NodeKind.LIST | NodeKind.TEMPLATE | NodeKind.ITALIC | NodeKind.BOLD
@@ -33,6 +34,7 @@ def extract_translation_section(
         if (
             isinstance(node, TemplateNode)
             and node.template_name == "werger-ser"
+            and not (sense != "" and from_trans_see)
         ):
             sense = clean_node(wxr, None, node.template_parameters.get(1, ""))
             sense_i_str = clean_node(
@@ -58,13 +60,10 @@ def extract_translation_section(
                     extract_translation_page(wxr, word_entry, link_str)
         elif (
             isinstance(node, TemplateNode)
-            and node.template_name == "werger-bnr"
+            and node.template_name in ("werger-bnr", "bnr-werger")
+            and not from_trans_see
         ):
-            page_title = clean_node(
-                wxr, None, node.template_parameters.get(1, "")
-            )
-            if is_translation_page(page_title):
-                extract_translation_page(wxr, word_entry, page_title)
+            extract_trans_see_template(wxr, word_entry, node)
 
 
 def extract_translation_list_item(
@@ -159,6 +158,8 @@ def extract_w_template(
         ),
         source=source,
         tags=tags,
+        sense=sense,
+        sense_index=sense_index,
     )
     tag_args = {
         "n": "masculine",
@@ -200,13 +201,54 @@ def extract_translation_page(
     if page is None or page.body is None:
         return
     root = wxr.wtp.parse(page.body)
-    for level2_node in root.find_child(NodeKind.LEVEL2):
-        lang_name = clean_node(wxr, None, level2_node.largs)
-        if lang_name != word_entry.lang:
-            continue
-        for child_level in level2_node.find_child_recursively(LEVEL_KIND_FLAGS):
-            child_level_str = clean_node(wxr, None, child_level.largs)
-            if child_level_str == "Werger":
-                extract_translation_section(
-                    wxr, word_entry, child_level, page_title
-                )
+    target_node = find_subpage_section(wxr, root, "Werger")
+    if target_node is not None:
+        extract_translation_section(
+            wxr, word_entry, target_node, page_title, source=page_title
+        )
+
+
+def extract_trans_see_template(
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+):
+    # https://ku.wiktionary.org/wiki/Şablon:werger-bnr
+    sense = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
+    page_titles = []
+    if 2 in t_node.template_parameters:
+        for index in range(2, 11):
+            if index not in t_node.template_parameters:
+                break
+            page_titles.append(
+                clean_node(wxr, None, t_node.template_parameters[index])
+            )
+    else:
+        page_titles.append(
+            clean_node(wxr, None, t_node.template_parameters.get(1, ""))
+        )
+    for page_title in page_titles:
+        if "#" in page_title:
+            page_title = page_title[: page_title.index("#")]
+        page = wxr.wtp.get_page(page_title)
+        if page is None:
+            return
+        root = wxr.wtp.parse(page.body)
+        target_node = find_subpage_section(wxr, root, "Werger")
+        if target_node is not None:
+            extract_translation_section(
+                wxr,
+                word_entry,
+                target_node,
+                source=page_title,
+                sense=sense,
+                from_trans_see=True,
+            )
+
+
+def find_subpage_section(
+    wxr: WiktextractContext, root: WikiNode, target_section: str
+) -> WikiNode | None:
+    for level_node in root.find_child_recursively(LEVEL_KIND_FLAGS):
+        section_title = clean_node(wxr, None, level_node.largs)
+        if section_title == target_section:
+            return level_node
+    return None
