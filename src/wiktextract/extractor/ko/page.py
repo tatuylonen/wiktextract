@@ -29,6 +29,11 @@ def extract_section_categories(
         clean_node(
             wxr, page_data[-1] if len(page_data) > 0 else base_data, link_node
         )
+    for t_node in level_node.find_child(NodeKind.TEMPLATE):
+        if t_node.template_name in ["C", "topics"]:
+            clean_node(
+                wxr, page_data[-1] if len(page_data) > 0 else base_data, t_node
+            )
 
 
 def parse_section(
