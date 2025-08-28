@@ -26,6 +26,7 @@ class Translation(BaseModelWrap):
     roman: str = Field(default="", description="Romanization of the word")
     tags: list[str] = []
     raw_tags: list[str] = []
+    other: str = ""
 
 
 class Linkage(BaseModelWrap):

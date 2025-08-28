@@ -68,7 +68,10 @@ def process_translate_list_span_tag(
     for node in span_node.children:
         if isinstance(node, WikiNode):
             if node.kind == NodeKind.LINK:
-                translation.word = clean_node(wxr, None, node)
+                if translation.word == "":
+                    translation.word = clean_node(wxr, None, node)
+                else:
+                    translation.other = clean_node(wxr, None, node)
             elif isinstance(node, HTMLNode) and node.tag in ["span", "i"]:
                 # gender tag
                 tag = clean_node(wxr, None, node)
@@ -81,7 +84,7 @@ def process_translate_list_span_tag(
             text = clean_node(wxr, None, node)
             if text.endswith((",", ";")):
                 # this list item has multiple translation words
-                striped_text = text.strip(",: ")
+                striped_text = text.strip(",; ")
                 if striped_text.startswith("(") and striped_text.endswith(")"):
                     translation.roman = striped_text.strip("()")
                 if translation.word != "" and translation.lang != "":
@@ -99,3 +102,9 @@ def process_translate_list_span_tag(
                 translation.raw_tags = []
             elif text.startswith("(") and text.endswith(")"):
                 translation.roman = text.strip("()")
+            elif (
+                text.startswith(",")
+                and text.endswith(")")
+                and translation.lang_code == "ja"
+            ):
+                translation.roman = text.strip(",() ")
