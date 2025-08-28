@@ -44,12 +44,13 @@ def extract_pos_section(
         ):
             page_data[-1].tags.append("auxiliary")
 
+    has_linkage = False
     for node in level_node.find_child(NodeKind.LIST | NodeKind.TEMPLATE):
         if isinstance(node, TemplateNode):
             if node.template_name in SOUND_TEMPLATES:
                 extract_sound_template(wxr, page_data[-1], node)
             elif node.template_name in LINKAGE_TEMPLATES:
-                extract_linkage_template(wxr, page_data[-1], node)
+                has_linkage = extract_linkage_template(wxr, page_data[-1], node)
             elif node.template_name == "외국어":
                 extract_translation_template(
                     wxr,
@@ -73,11 +74,12 @@ def extract_pos_section(
                 else:
                     extract_unorderd_list_item(wxr, page_data[-1], list_item)
 
-    if len(
-        page_data[-1].model_dump(
-            exclude_defaults=True, exclude={"pos_title", "tags"}
-        )
-    ) == len(base_data.model_dump(exclude_defaults=True)):
+    if not (
+        len(page_data[-1].senses) > 0
+        or len(page_data[-1].sounds) > len(base_data.sounds)
+        or len(page_data[-1].translations) > len(base_data.translations)
+        or has_linkage
+    ):
         page_data.pop()
 
 

@@ -15,9 +15,10 @@ def extract_linkage_template(
     wxr: WiktextractContext,
     word_entry: WordEntry,
     node: TemplateNode,
-) -> None:
+) -> bool:
     # https://ko.wiktionary.org/wiki/틀:파생어_상자
     # https://ko.wiktionary.org/wiki/틀:합성어_상자
+    added_data = False
     if node.template_name in ["파생어 상자", "합성어 상자"]:
         for key in range(1, 41):
             if key not in node.template_parameters:
@@ -32,6 +33,8 @@ def extract_linkage_template(
                         else "",
                     )
                 )
+                added_data = True
+    return added_data
 
 
 def extract_linkage_section(
