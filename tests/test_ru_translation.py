@@ -4,6 +4,7 @@ from wikitextprocessor import Wtp
 
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.ru.models import WordEntry
+from wiktextract.extractor.ru.page import parse_page
 from wiktextract.extractor.ru.translation import extract_translations
 from wiktextract.wxr_context import WiktextractContext
 
@@ -14,7 +15,9 @@ class TestRUTranslation(unittest.TestCase):
     def setUp(self) -> None:
         self.wxr = WiktextractContext(
             Wtp(lang_code="ru"),
-            WiktionaryConfig(dump_file_lang_code="ru"),
+            WiktionaryConfig(
+                dump_file_lang_code="ru", capture_language_codes=None
+            ),
         )
 
     def tearDown(self) -> None:
@@ -110,6 +113,61 @@ class TestRUTranslation(unittest.TestCase):
                     "sense": "относящийся к России, россиянам",
                     "tags": ["feminine"],
                     "word": "lingua Russica",
+                },
+            ],
+        )
+
+    def test_ja(self):
+        self.wxr.wtp.add_page(
+            "Шаблон:перев-блок",
+            10,
+            """{|
+| влага, прозрачная бесцветная жидкость
+|-
+|
+* [[ассамский#Русский|Ассамский]]<sub style='color:#33C066'>asm</sub>: <span lang="asm">[[জল#Ассамский|জল]]&nbsp;&#32;(jôl); [[পানী]] (pānī)</span>
+* [[японский#Русский|Японский]]<sub style='color:#33C066'>ja</sub>: <span lang="ja">[[水#Японский|水]]&nbsp;<sup>[[:ja:水|(ja)]]</sup>&#32;([[みず]], mizú)</span>
+</div>
+|}""",
+        )
+        data = parse_page(
+            self.wxr,
+            "вода",
+            """= {{-ru-}} =
+== {{з|ударение=вода́}} ==
+=== Морфологические и синтаксические свойства ===
+==== Значение ====
+# [[влага]]
+=== Перевод ===
+{{перев-блок|влага, прозрачная бесцветная жидкость
+|asm={{t|asm|জল|tr=jôl}}; [[পানী]] (pānī)
+|ja={{t|ja|水|tr=[[みず]], mizú}}
+}}""",
+        )
+        self.assertEqual(
+            data[0]["translations"],
+            [
+                {
+                    "lang": "Ассамский",
+                    "lang_code": "asm",
+                    "roman": "jôl",
+                    "sense": "влага, прозрачная бесцветная жидкость",
+                    "word": "জল",
+                },
+                {
+                    "lang": "Ассамский",
+                    "lang_code": "asm",
+                    "roman": "pānī",
+                    "sense": "влага, прозрачная бесцветная жидкость",
+                    "word": "পানী",
+                },
+                {
+                    "lang": "Японский",
+                    "lang_code": "ja",
+                    "other": "みず",
+                    "roman": "mizú",
+                    "sense": "влага, прозрачная бесцветная жидкость",
+                    "word": "水",
                 },
             ],
         )

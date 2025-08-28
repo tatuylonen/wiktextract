@@ -4,8 +4,8 @@ from typing import Callable
 from wikitextprocessor import Wtp
 
 from wiktextract.config import WiktionaryConfig
-from wiktextract.extractor.ru.page import parse_page
 from wiktextract.extractor.ru.models import WordEntry
+from wiktextract.extractor.ru.page import parse_page
 from wiktextract.extractor.ru.pronunciation import (
     process_transcription_grc_template,
     process_transcription_la_template,
