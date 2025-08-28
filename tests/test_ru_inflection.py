@@ -55,7 +55,7 @@ class TestLinkage(TestCase):
 </tr>
 <tr>
 <td colspan="2" bgcolor="#EEF9FF"> [[творительный|Т.]]</td>
-<td>ру́сской ру́сскою</td>
+<td>ру́сской<br>ру́сскою</td>
 </tr>
 </table>""",
         )
@@ -74,7 +74,13 @@ class TestLinkage(TestCase):
                 },
                 {
                     "form": "ру́сское",
-                    "tags": ["singular", "neuter", "accusative", "animate"],
+                    "tags": [
+                        "singular",
+                        "neuter",
+                        "accusative",
+                        "animate",
+                        "inanimate",
+                    ],
                 },
                 {
                     "form": "ру́сскую",
@@ -83,6 +89,7 @@ class TestLinkage(TestCase):
                         "feminine",
                         "accusative",
                         "animate",
+                        "inanimate",
                     ],
                 },
                 {

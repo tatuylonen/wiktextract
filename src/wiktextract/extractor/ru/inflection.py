@@ -27,10 +27,10 @@ def parse_html_forms_table(
     column_headers = []
     row_headers = []
     td_rowspan = defaultdict(int)
-    for tr_element in table_tag.find_html("tr"):
+    for row_index, tr_element in enumerate(table_tag.find_html("tr")):
         if len(list(tr_element.find_html("td"))) == 0:
-            # all header
-            current_index = 0
+            # all column headers
+            col_index = 0
             for th_element in tr_element.find_html("th"):
                 header_text = ""
                 for header_link in th_element.find_child(NodeKind.LINK):
@@ -39,58 +39,62 @@ def parse_html_forms_table(
                     continue  # ignore top left corner header
                 header_span = int(th_element.attrs.get("colspan", "1"))
                 column_headers.append(
-                    TableHeader(header_text, current_index, header_span)
+                    TableHeader(header_text, col_index, header_span)
                 )
-                current_index += header_span
-        else:
-            col_index = 0
-            has_rowspan = False
-            for th_element in tr_element.find_html("th"):
-                header_text = ""
-                for header_link in th_element.find_child(NodeKind.LINK):
-                    header_text = clean_node(wxr, None, header_link)
-                header_span = int(th_element.attrs.get("rowspan", "1"))
-                row_headers.append(TableHeader(header_text, 0, header_span))
-
-            for td_element in tr_element.find_html("td"):
-                if td_element.attrs.get("bgcolor") == "#EEF9FF":
-                    # this is a td tag but contains header text
+                col_index += header_span
+        else:  # row headers
+            for node in tr_element.children:
+                if isinstance(node, HTMLNode) and (
+                    node.tag == "th"
+                    or (
+                        node.tag == "td"
+                        and node.attrs.get("bgcolor") == "#EEF9FF"
+                    )
+                ):
                     header_text = ""
-                    for header_link in td_element.find_child(NodeKind.LINK):
+                    for header_link in node.find_child(NodeKind.LINK):
                         header_text = clean_node(wxr, None, header_link)
-                    header_span = int(td_element.attrs.get("rowspan", "1"))
-                    row_headers.append(TableHeader(header_text, 0, header_span))
-                    continue
-                if "rowspan" in td_element.attrs:
-                    td_rowspan[col_index] = int(td_element.attrs["rowspan"]) - 1
-                    has_rowspan = True
-                elif not has_rowspan:
-                    for rowspan_index, rowspan_value in td_rowspan.items():
-                        if rowspan_value > 0 and col_index == rowspan_index:
-                            col_index += 1
-                            td_rowspan[rowspan_index] -= 1
-                td_text = clean_node(wxr, None, td_element)
-                for line in td_text.split():
-                    form = Form(form=line)
-                    for col_header in column_headers:
-                        if (
-                            col_index >= col_header.start_index
-                            and col_index
-                            < col_header.start_index + col_header.span
-                        ):
-                            form.raw_tags.append(col_header.text)
-                    form.raw_tags.extend([h.text for h in row_headers])
-                    if len(form.form) > 0:
-                        translate_raw_tags(form)
-                        word_entry.forms.append(form)
-                col_index += 1
+                    header_span = int(node.attrs.get("rowspan", "1"))
+                    row_headers.append(
+                        TableHeader(header_text, row_index, header_span)
+                    )
 
-        updated_row_headers = []
-        for row_header in row_headers:
-            if row_header.span > 1:
-                row_header.span -= 1
-                updated_row_headers.append(row_header)
-        row_headers = updated_row_headers
+    for row_index, tr_element in enumerate(table_tag.find_html("tr")):
+        col_index = 0
+        has_rowspan = False
+        for td_element in tr_element.find_html("td"):
+            rowspan = 1
+            if td_element.attrs.get("bgcolor") == "#EEF9FF":
+                # this is a td tag but contains header text
+                continue
+            if "rowspan" in td_element.attrs:
+                rowspan = int(td_element.attrs["rowspan"])
+                td_rowspan[col_index] = rowspan - 1
+                has_rowspan = True
+            elif not has_rowspan:
+                for rowspan_index, rowspan_value in td_rowspan.items():
+                    if rowspan_value > 0 and col_index == rowspan_index:
+                        col_index += 1
+                        td_rowspan[rowspan_index] -= 1
+            td_text = clean_node(wxr, None, td_element)
+            for line in td_text.splitlines():
+                form = Form(form=line)
+                for col_header in column_headers:
+                    if (
+                        col_index >= col_header.start_index
+                        and col_index < col_header.start_index + col_header.span
+                    ):
+                        form.raw_tags.append(col_header.text)
+                for row_header in row_headers:
+                    if (
+                        row_index < row_header.start_index + row_header.span
+                        and row_index + rowspan > row_header.start_index
+                    ):
+                        form.raw_tags.append(row_header.text)
+                if len(form.form) > 0:
+                    translate_raw_tags(form)
+                    word_entry.forms.append(form)
+            col_index += 1
 
 
 def parse_wikitext_forms_table(

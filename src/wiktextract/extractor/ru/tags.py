@@ -257,7 +257,6 @@ GRAMMATICAL_TAGS = {
     # "разд. п.": "",
     "род. п.": "genitive",
     "собир.": "collective",
-    # "ср. р.": "",
     "статив.": "stative",
     "субстантивир.": "substantive",
     "сущ.": "noun",
