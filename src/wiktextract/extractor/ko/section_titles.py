@@ -95,4 +95,5 @@ LINKAGE_SECTIONS = {
     "숙어": "idioms",
     "하위어": "hyponyms",
     "참고": "related",
+    "후계어": "related",
 }

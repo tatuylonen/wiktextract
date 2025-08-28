@@ -2,13 +2,18 @@ import re
 from typing import Any
 
 from mediawiki_langcodes import name_to_code
-from wikitextprocessor.parser import LEVEL_KIND_FLAGS, LevelNode, NodeKind
+from wikitextprocessor.parser import (
+    LEVEL_KIND_FLAGS,
+    LevelNode,
+    NodeKind,
+    TemplateNode,
+)
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .etymology import extract_etymology_section
 from .linkage import extract_linkage_section
-from .models import Sense, WordEntry
+from .models import Form, Sense, WordEntry
 from .pos import extract_grammar_note_section, extract_pos_section
 from .section_titles import LINKAGE_SECTIONS, POS_DATA
 from .sound import (
@@ -16,6 +21,7 @@ from .sound import (
     extract_sound_section,
     extract_sound_template,
 )
+from .tags import translate_raw_tags
 from .translation import extract_translation_section
 
 
@@ -29,6 +35,11 @@ def extract_section_categories(
         clean_node(
             wxr, page_data[-1] if len(page_data) > 0 else base_data, link_node
         )
+    for t_node in level_node.find_child(NodeKind.TEMPLATE):
+        if t_node.template_name in ["C", "topics"]:
+            clean_node(
+                wxr, page_data[-1] if len(page_data) > 0 else base_data, t_node
+            )
 
 
 def parse_section(
@@ -81,6 +92,8 @@ def parse_section(
             page_data[-1] if len(page_data) > 0 else base_data,
             level_node,
         )
+    elif title_text in ["다른 표기", "표기"]:
+        extract_alt_form_section(wxr, base_data, level_node)
     elif title_text in [
         "참고 문헌",
         "독음",
@@ -155,3 +168,37 @@ def parse_page(
         if len(data.senses) == 0:
             data.senses.append(Sense(tags=["no-gloss"]))
     return [m.model_dump(exclude_defaults=True) for m in page_data]
+
+
+def extract_alt_form_section(
+    wxr: WiktextractContext, base_data: WordEntry, level_node: LevelNode
+):
+    for t_node in level_node.find_child_recursively(NodeKind.TEMPLATE):
+        if t_node.template_name in ["alt", "alter"]:
+            extract_alt_template(wxr, base_data, t_node)
+
+
+def extract_alt_template(
+    wxr: WiktextractContext, base_data: WordEntry, t_node: TemplateNode
+):
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    forms = []
+    lang_code = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
+    for span_tag in expanded_node.find_html("span"):
+        span_lang = span_tag.attrs.get("lang", "")
+        span_class = span_tag.attrs.get("class", "").split()
+        if span_lang == lang_code:
+            word = clean_node(wxr, None, span_tag)
+            if word != "":
+                forms.append(Form(form=word))
+        elif span_lang.endswith("-Latn") and len(forms) > 0:
+            forms[-1].roman = clean_node(wxr, None, span_tag)
+        elif "label-content" in span_class and len(forms) > 0:
+            raw_tag = clean_node(wxr, None, span_tag)
+            if raw_tag != "":
+                for form in forms:
+                    form.raw_tags.append(raw_tag)
+                    translate_raw_tags(form)
+    base_data.forms.extend(forms)

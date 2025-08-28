@@ -85,6 +85,7 @@ class Form(KoreanBaseModel):
     form: str = ""
     tags: list[str] = []
     raw_tags: list[str] = []
+    roman: str = ""
 
 
 class WordEntry(KoreanBaseModel):
