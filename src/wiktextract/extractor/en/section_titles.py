@@ -109,6 +109,7 @@ POS_TITLES: dict[str, POSSubtitleData] = {
     "kanji": {"pos": "character", "tags": ["kanji"]},
     "letter": {"pos": "character", "tags": ["letter"]},
     "ligature": {"pos": "character", "tags": ["ligature"]},
+    "logogram": {"pos": "character", "tags": ["logogram"]},
     "nominal nuclear clause": {
         "pos": "clause",
         "debug": "part-of-speech Nominal nuclear clause is proscribed",
@@ -175,6 +176,7 @@ POS_TITLES: dict[str, POSSubtitleData] = {
     "relative": {"pos": "conj", "tags": ["relative"]},
     "romanization": {"pos": "romanization"},
     "root": {"pos": "root", "tags": ["morpheme"]},
+    "stem": {"pos": "stem"},
     "suffix": {"pos": "suffix", "tags": ["morpheme"]},
     "suffix form": {
         "pos": "suffix",
