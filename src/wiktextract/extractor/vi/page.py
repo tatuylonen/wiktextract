@@ -44,7 +44,7 @@ def parse_page(
     for level2_node in tree.find_child(NodeKind.LEVEL2):
         categories = {}
         lang_name = clean_node(wxr, categories, level2_node.largs)
-        lang_code = name_to_code(lang_name, "vi")
+        lang_code = name_to_code(lang_name, "vi") or "unknown"
         if (
             wxr.config.capture_language_codes is not None
             and lang_code not in wxr.config.capture_language_codes
@@ -58,8 +58,8 @@ def parse_page(
             pos="unknown",
         )
         base_data.categories = categories.get("categories", [])
-        for level3_node in level2_node.find_child(NodeKind.LEVEL3):
-            parse_section(wxr, page_data, base_data, level3_node)
+        for next_level in level2_node.find_child(LEVEL_KIND_FLAGS):
+            parse_section(wxr, page_data, base_data, next_level)
 
     for data in page_data:
         if len(data.senses) == 0:

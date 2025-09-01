@@ -10,12 +10,36 @@ class VietnameseBaseModel(BaseModel):
     )
 
 
+class Example(VietnameseBaseModel):
+    text: str
+    bold_text_offsets: list[tuple[int, int]] = []
+    translation: str = ""
+    bold_translation_offsets: list[tuple[int, int]] = []
+    literal_meaning: str = ""
+    bold_literal_offsets: list[tuple[int, int]] = []
+    roman: str = Field(
+        default="", description="Romanization of the example sentence"
+    )
+    bold_roman_offsets: list[tuple[int, int]] = []
+    ref: str = Field(
+        default="",
+        description="Source of the sentence, like book title and page number",
+    )
+    ruby: list[tuple[str, ...]] = Field(
+        default=[], description="Japanese Kanji and furigana"
+    )
+    tags: list[str] = []
+    raw_tags: list[str] = []
+    categories: list[str] = Field(default=[], exclude=True)
+
+
 class Sense(VietnameseBaseModel):
     glosses: list[str] = []
     tags: list[str] = []
     raw_tags: list[str] = []
     categories: list[str] = []
     topics: list[str] = []
+    examples: list[Example] = []
 
 
 class WordEntry(VietnameseBaseModel):

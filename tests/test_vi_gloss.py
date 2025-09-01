@@ -38,3 +38,28 @@ class TestViGloss(TestCase):
                 {"glosses": ["Nước", "Khoảng"], "topics": ["chemistry"]},
             ],
         )
+
+    def test_italic_example(self):
+        data = parse_page(
+            self.wxr,
+            "war",
+            """==Tiếng Anh==
+===Danh từ===
+# [[chiến tranh|Chiến tranh]].
+#: ''aggressive '''war''''' —  chiến tranh xâm lược""",
+        )
+        self.assertEqual(
+            data[0]["senses"],
+            [
+                {
+                    "glosses": ["Chiến tranh."],
+                    "examples": [
+                        {
+                            "text": "aggressive war",
+                            "bold_text_offsets": [(11, 14)],
+                            "translation": "chiến tranh xâm lược",
+                        }
+                    ],
+                }
+            ],
+        )
