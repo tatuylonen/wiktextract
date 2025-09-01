@@ -53,7 +53,7 @@ def extract_ux_template(
     )
     e_data = Example(text="")
     for i_tag in expanded_node.find_html_recursively("i"):
-        i_class = i_tag.attrs.get("class", "")
+        i_class = i_tag.attrs.get("class", "").split()
         if "e-example" in i_class:
             e_data.text = clean_node(wxr, None, i_tag)
             calculate_bold_offsets(

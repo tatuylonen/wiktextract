@@ -1,0 +1,557 @@
+{
+  "Bản mẫu:-abbr-": {
+    "body": "===Từ viết tắt===\n[[Thể loại:Từ viết tắt|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-adj-": {
+    "body": "===Tính từ===\n[[Thể loại:Tính từ|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-adjective-": {
+    "body": "===Tính từ===\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-adpos-": {
+    "body": "===Yếu tố===\n[[Thể loại:Yếu tố|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-adv-": {
+    "body": "===Phó từ===\n[[Thể loại:Phó từ|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-adverb-": {
+    "body": "===Phó từ===\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-affix-": {
+    "body": "===Phụ tố===\n[[Thể loại:Phụ tố]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-anagram-": {
+    "body": "===Từ đảo chữ===\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-ant-": {
+    "body": "===Trái nghĩa===\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-antonym-": {
+    "body": "===Trái nghĩa===\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-article-": {
+    "body": "===Mạo từ===\n[[Thể loại:Mạo từ|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-aux-verb-": {
+    "body": "===Trợ động từ===\n[[Thể loại:Trợ động từ|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-circumfix-": {
+    "body": "===Phụ tố chu vi===\n[[Thể loại:Phụ tố chu vi|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-circumpos-": {
+    "body": "===Yếu tố quanh===\n[[Thể loại:Yếu tố quanh|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-clitic-": {
+    "body": "===Từ ghép===\n[[Thể loại:Từ ghép|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-cmavo-": {
+    "body": "===cmavo===\n[[Thể loại:cmavo|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-co-conj-": {
+    "body": "===Liên từ kết hợp===\n[[Thể loại:Liên từ kết hợp|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-coll-noun-": {
+    "body": "===Danh từ tập họp===\n[[Thể loại:Danh từ tập họp|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-compound-": {
+    "body": "===Từ ghép===\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-conj-": {
+    "body": "===Liên từ===\n[[Thể loại:Liên từ|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-contr-": {
+    "body": "===Từ rút gọn===\n[[Thể loại:Từ rút gọn|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-copula-": {
+    "body": "===Hệ từ===\n[[Thể loại:Hệ từ|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-coverb-": {
+    "body": "===Đồng động từ===\n[[Thể loại:Đồng động từ|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-decl-": {
+    "body": "===Biến cách===\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-def-article-": {
+    "body": "===Mạo từ hạn định===\n[[Thể loại:Mạo từ hạn định|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-dem-": {
+    "body": "===Từ chỉ định===\n[[Thể loại:Từ chỉ định|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-dem-adj-": {
+    "body": "===Tính từ chỉ định===\n[[Thể loại:Tính từ chỉ định|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-dem-pronoun-": {
+    "body": "===Đại từ chỉ định===\n[[Thể loại:Đại từ chỉ định|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-derived-": {
+    "body": "====Từ dẫn xuất====\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-det-": {
+    "body": "===Từ hạn định===\n[[Thể loại:Từ hạn định|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-determiner-": {
+    "body": "===Từ hạn định===\n[[Thể loại:Từ hạn định|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-dfn-": {
+    "body": "===Định nghĩa===\n[[Thể loại:Mục từ chưa xếp theo loại từ|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-dfn2-": {
+    "body": "===Định nghĩa===\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-dial-": {
+    "body": "====Phương ngữ khác====\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-dictionary-": {
+    "body": "===Tra cứu===\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-drv-": {
+    "body": "====Từ dẫn xuất====\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-enclitic-": {
+    "body": "===Từ ghép sau===\n[[Thể loại:Từ ghép sau|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-encode-": {
+    "body": "====Mã hóa====\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-etymology-": {
+    "body": "===Từ nguyên===\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-expr-": {
+    "body": "====Thành ngữ====\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-forms-": {
+    "body": "====Chia động từ====\n[[Thể loại:Chia động từ]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-furigana-": {
+    "body": "===Furigana===\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-gismu-": {
+    "body": "===gismu===\n[[Thể loại:gismu|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-given-": {
+    "body": "===Tên người===\n[[Thể loại:Tên người|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-glyph origin-": {
+    "body": "===Nguồn gốc ký tự===\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-hanja-": {
+    "body": "===Hanja===\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-hanviet-": {
+    "body": "===Phiên âm Hán–Việt===\n[[Thể loại:Mục từ Hán-Việt]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-hanviet-t-": {
+    "body": "====Phồn thể====\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-homo-": {
+    "body": "===Từ đồng âm===\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-ideogram-": {
+    "body": "===Chữ tượng hình===\n[[Thể loại:Tính từ|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-idiom-": {
+    "body": "===Thành ngữ===\n[[Thể loại:Thành ngữ|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-imp-verb-": {
+    "body": "===Động từ không ngôi===\n[[Thể loại:Động từ không ngôi|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-indef-adj-": {
+    "body": "===Tính từ bất định===\n[[Thể loại:Tính từ bất định|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-indef-article-": {
+    "body": "===Mạo từ bất định===\n[[Thể loại:Mạo từ bất định|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-infix-": {
+    "body": "===Trung tố===\n[[Thể loại:Trung tố|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-interj-": {
+    "body": "===Thán từ===\n[[Thể loại:Thán từ|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-interrog-": {
+    "body": "===Từ nghi vấn===\n[[Thể loại:Từ nghi vấn|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-intr-verb-": {
+    "body": "===Nội động từ===\n[[Thể loại:Nội động từ|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-kanji-": {
+    "body": "===Kanji===\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-lujvo-": {
+    "body": "===lujvo===\n[[Thể loại:lujvo|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-mesoclitic-": {
+    "body": "===Từ ghép trung===\n[[Thể loại:Từ ghép trung|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-name-": {
+    "body": "===Tên===\n[[Thể loại:Tên]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-noun-": {
+    "body": "===Danh từ===\n[[Thể loại:Danh từ|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-noun-2-": {
+    "body": "===Danh từ===\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-num-": {
+    "body": "===Số từ===\n[[Thể loại:Số|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-numeral-": {
+    "body": "===Số từ===\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-nôm-": {
+    "body": "===Chữ Nôm===\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-paro-": {
+    "body": "===Từ tương tự===\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-part-": {
+    "body": "===Trợ từ===\n[[Thể loại:Trợ từ|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-part-adj-": {
+    "body": "===Động tính từ===\n[[Thể loại:Động tính từ|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-part-article-": {
+    "body": "===Mạo từ bộ phận===\n[[Thể loại:Mạo từ bộ phận|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-part-pronoun-": {
+    "body": "===Đại từ nhân xưng===\n[[Thể loại:Đại từ nhân xưng|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-palce-": {
+    "body": "===Địa danh===\n[[Thể loại:Địa danh|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-pos-adj-": {
+    "body": "===Tính từ sở hữu===\n[[Thể loại:Tính từ sở hữu|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-postpos-": {
+    "body": "===Yếu tố sau===\n[[Thể loại:Yếu tố sau|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-pr-adj-": {
+    "body": "===Tính từ riêng===\n[[Thể loại:Tính từ riêng|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-pr-noun-": {
+    "body": "===Danh từ riêng===\n[[Thể loại:Danh từ riêng|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-prefix-": {
+    "body": "===Tiền tố===\n[[Thể loại:Tiền tố|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-prep-": {
+    "body": "===Giới từ===\n[[Thể loại:Giới từ|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-proclitic-": {
+    "body": "===Từ ghép trước===\n[[Thể loại:Từ ghép trước|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-pron-": {
+    "body": "===Cách phát âm===\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-pron2-": {
+    "body": "===Cách phát âm===\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-pronoun-": {
+    "body": "===Đại từ===\n[[Thể loại:Đại từ|{{PAGENAME}}]]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-proverb-": {
+    "body": "===Tục ngữ===\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-punctuation mark-": {
+    "body": "===Dấu câu===\n[[Thể loại:Dấu câu|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-punctuation-": {
+    "body": "===Dấu câu===\n[[Thể loại:Dấu câu|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-quot-": {
+    "body": "====Trích dẫn====\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-rafsi-": {
+    "body": "===rafsi===\n[[Thể loại:rafsi|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-reading-": {
+    "body": "====Âm đọc====\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-redup-": {
+    "body": "====Từ láy====\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-ref-": {
+    "body": "===Tham khảo===\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-ref-pronoun-": {
+    "body": "===Đại từ phản thân===\n[[Thể loại:Đại từ phản thân|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-ref-verb-": {
+    "body": "===Động từ phản thân===\n[[Thể loại:Động từ phản thân|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-reference-": {
+    "body": "===Tham khảo===\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-rel-pronoun-": {
+    "body": "===Đại từ quan hệ===\n[Thể loại:Đại từ quan hệ|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-related-": {
+    "body": "====Từ liên hệ====\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-romanization-": {
+    "body": "===Latinh hóa===\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-see also-": {
+    "body": "===Xem thêm===\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-see-": {
+    "body": "===Xem thêm===\n[[Thể loại:Mục từ chưa xếp theo loại từ|*{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-signs-": {
+    "body": "====Cách ra dấu====\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-stem-": {
+    "body": "===Thân từ===\n[[Thể loại:Thân từ|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-sub-conj-": {
+    "body": "===Liên từ phụ thuộc===\n[[Thể loại:Liên từ phụ thuộc|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-suffix-": {
+    "body": "===Hậu tố===\n[[Thể loại:Hậu tố]]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-syn-": {
+    "body": "====Đồng nghĩa====\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-synonym-": {
+    "body": "====Đồng nghĩa====\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-tr-verb-": {
+    "body": "===Ngoại động từ===\n[[Thể loại:Ngoại động từ|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-trans-": {
+    "body": "====Dịch====\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-translit-": {
+    "body": "===Chuyển tự===\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-usage-": {
+    "body": "====Ghi chú sử dụng====\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-var-": {
+    "body": "===Biến thể===\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  },
+  "Bản mẫu:-verb-": {
+    "body": "===Động từ===\n[[Thể loại:Động từ|{{PAGENAME}}]]\n",
+    "namespace_id": 10,
+    "need_pre_expand": true
+  }
+}

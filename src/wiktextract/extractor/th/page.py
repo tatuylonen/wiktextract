@@ -103,7 +103,7 @@ def parse_section(
         "การกลายรูป",  # conjugation
         "การผันคำนาม",  # inflection
     ]:
-        wxr.wtp.debug(f"Unknown title: {title_text}")
+        wxr.wtp.debug(f"Unknown title: {title_text}", sortid="th/page/106")
 
     for next_level in level_node.find_child(LEVEL_KIND_FLAGS):
         parse_section(wxr, page_data, base_data, next_level)
