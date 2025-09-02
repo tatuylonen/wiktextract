@@ -5,7 +5,7 @@ from wikitextprocessor import (
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
-from .models import Linkage, WordEntry
+from .models import Form, Linkage, WordEntry
 from .tags import translate_raw_tags
 
 GLOSS_LIST_LINKAGE_TEMPLATES = {
@@ -51,24 +51,25 @@ def extract_gloss_list_linkage_template(
         for node in top_span_tag.children:
             if isinstance(node, HTMLNode) and node.tag == "span":
                 span_lang = node.attrs.get("lang", "")
-                span_class = node.attrs.get("class", "")
+                span_class = node.attrs.get("class", "").split()
                 if span_lang == lang_code:
                     l_data = Linkage(
                         word=clean_node(wxr, None, node),
                         sense=sense,
                         raw_tags=raw_tags,
                     )
-                    if span_class == "Hant":
+                    if "Hant" in span_class:
                         l_data.tags.append("Traditional-Chinese")
-                    elif span_class == "Hans":
+                    elif "Hans" in span_class:
                         l_data.tags.append("Simplified-Chinese")
                     if l_data.word != "":
+                        translate_raw_tags(l_data)
                         l_list.append(l_data)
                 elif span_lang == f"{lang_code}-Latn" or "tr" in span_class:
                     roman = clean_node(wxr, None, node)
                     for d in l_list:
                         d.roman = roman
-                elif span_class == "mention-gloss":
+                elif "mention-gloss" in span_class:
                     sense = clean_node(wxr, None, node)
                     for d in l_list:
                         d.sense = sense
@@ -79,9 +80,31 @@ def extract_gloss_list_linkage_template(
                         if raw_tag != "":
                             raw_tags.append(raw_tag)
             elif isinstance(node, str) and node.strip() == ",":
-                getattr(word_entry, linkage_type).extend(l_list)
+                if linkage_type == "alt_forms":
+                    for l_data in l_list:
+                        word_entry.forms.append(
+                            Form(
+                                form=l_data.word,
+                                sense=l_data.sense,
+                                tags=l_data.tags + ["alternative"],
+                                raw_tags=l_data.raw_tags,
+                                roman=l_data.roman,
+                            )
+                        )
+                else:
+                    getattr(word_entry, linkage_type).extend(l_list)
                 l_list.clear()
 
-    getattr(word_entry, linkage_type).extend(l_list)
-    for data in getattr(word_entry, linkage_type):
-        translate_raw_tags(data)
+    if linkage_type == "alt_forms":
+        for l_data in l_list:
+            word_entry.forms.append(
+                Form(
+                    form=l_data.word,
+                    sense=l_data.sense,
+                    tags=l_data.tags + ["alternative"],
+                    raw_tags=l_data.raw_tags,
+                    roman=l_data.roman,
+                )
+            )
+    else:
+        getattr(word_entry, linkage_type).extend(l_list)
