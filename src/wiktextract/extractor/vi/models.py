@@ -33,6 +33,11 @@ class Example(VietnameseBaseModel):
     categories: list[str] = Field(default=[], exclude=True)
 
 
+class AltForm(VietnameseBaseModel):
+    word: str
+    roman: str = ""
+
+
 class Sense(VietnameseBaseModel):
     glosses: list[str] = []
     tags: list[str] = []
@@ -40,6 +45,8 @@ class Sense(VietnameseBaseModel):
     categories: list[str] = []
     topics: list[str] = []
     examples: list[Example] = []
+    form_of: list[AltForm] = []
+    alt_of: list[AltForm] = []
 
 
 class Linkage(VietnameseBaseModel):

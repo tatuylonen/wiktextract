@@ -76,3 +76,15 @@ class TestViLinkage(TestCase):
                 }
             ],
         )
+        self.assertEqual(
+            data[0]["senses"],
+            [
+                {
+                    "glosses": [
+                        "Dạng giống đực số ít quá khứ trần thuật của ки́нутися h.thành (kýnutysja)"
+                    ],
+                    "tags": ["form-of"],
+                    "form_of": [{"word": "ки́нутися", "roman": "kýnutysja"}],
+                }
+            ],
+        )
