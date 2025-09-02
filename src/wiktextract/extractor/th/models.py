@@ -153,4 +153,3 @@ class WordEntry(ThaiBaseModel):
     hyphenations: list[Hyphenation] = []
     abbreviations: list[Linkage] = []
     proverbs: list[Linkage] = []
-    notes: list[str] = []

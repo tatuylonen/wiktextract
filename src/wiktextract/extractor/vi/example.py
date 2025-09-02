@@ -3,6 +3,10 @@ from wikitextprocessor import NodeKind, TemplateNode, WikiNode
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from ..share import calculate_bold_offsets
+from .linkage import (
+    GLOSS_LIST_LINKAGE_TEMPLATES,
+    extract_gloss_list_linkage_template,
+)
 from .models import Example, Sense, WordEntry
 from .tags import translate_raw_tags
 
@@ -37,6 +41,17 @@ def extract_example_list_item(
             "ux2",
         ]:
             extract_ux_template(wxr, sense, node)
+        elif (
+            isinstance(node, TemplateNode)
+            and node.template_name in GLOSS_LIST_LINKAGE_TEMPLATES
+        ):
+            extract_gloss_list_linkage_template(
+                wxr,
+                word_entry,
+                node,
+                GLOSS_LIST_LINKAGE_TEMPLATES[node.template_name],
+                " ".join(word_entry.senses[-1].glosses),
+            )
 
 
 def extract_ux_template(

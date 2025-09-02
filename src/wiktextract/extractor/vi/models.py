@@ -42,6 +42,22 @@ class Sense(VietnameseBaseModel):
     examples: list[Example] = []
 
 
+class Linkage(VietnameseBaseModel):
+    word: str
+    tags: list[str] = []
+    raw_tags: list[str] = []
+    roman: str = ""
+    sense: str = ""
+
+
+class Form(VietnameseBaseModel):
+    form: str
+    tags: list[str] = []
+    raw_tags: list[str] = []
+    roman: str = ""
+    sense: str = ""
+
+
 class WordEntry(VietnameseBaseModel):
     model_config = ConfigDict(title="Vietnamese Wiktionary")
     word: str = Field(description="Word string")
@@ -53,3 +69,13 @@ class WordEntry(VietnameseBaseModel):
     categories: list[str] = []
     tags: list[str] = []
     raw_tags: list[str] = []
+    antonyms: list[Linkage] = []
+    synonyms: list[Linkage] = []
+    coordinate_terms: list[Linkage] = []
+    derived: list[Linkage] = []
+    related: list[Linkage] = []
+    holonyms: list[Linkage] = []
+    hypernyms: list[Linkage] = []
+    hyponyms: list[Linkage] = []
+    meronyms: list[Linkage] = []
+    forms: list[Form] = []

@@ -1,6 +1,9 @@
 from .models import WordEntry
 
-LABEL_TAGS = {}
+# https://vi.wiktionary.org/wiki/Mô_đun:labels/data
+LABEL_TAGS = {
+    "không còn dùng": "obsolete",
+}
 
 TAGS = {**LABEL_TAGS}
 
