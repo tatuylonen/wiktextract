@@ -33,6 +33,11 @@ class Example(VietnameseBaseModel):
     categories: list[str] = Field(default=[], exclude=True)
 
 
+class AltForm(VietnameseBaseModel):
+    word: str
+    roman: str = ""
+
+
 class Sense(VietnameseBaseModel):
     glosses: list[str] = []
     tags: list[str] = []
@@ -40,6 +45,24 @@ class Sense(VietnameseBaseModel):
     categories: list[str] = []
     topics: list[str] = []
     examples: list[Example] = []
+    form_of: list[AltForm] = []
+    alt_of: list[AltForm] = []
+
+
+class Linkage(VietnameseBaseModel):
+    word: str
+    tags: list[str] = []
+    raw_tags: list[str] = []
+    roman: str = ""
+    sense: str = ""
+
+
+class Form(VietnameseBaseModel):
+    form: str
+    tags: list[str] = []
+    raw_tags: list[str] = []
+    roman: str = ""
+    sense: str = ""
 
 
 class WordEntry(VietnameseBaseModel):
@@ -53,3 +76,13 @@ class WordEntry(VietnameseBaseModel):
     categories: list[str] = []
     tags: list[str] = []
     raw_tags: list[str] = []
+    antonyms: list[Linkage] = []
+    synonyms: list[Linkage] = []
+    coordinate_terms: list[Linkage] = []
+    derived: list[Linkage] = []
+    related: list[Linkage] = []
+    holonyms: list[Linkage] = []
+    hypernyms: list[Linkage] = []
+    hyponyms: list[Linkage] = []
+    meronyms: list[Linkage] = []
+    forms: list[Form] = []

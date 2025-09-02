@@ -3,7 +3,7 @@ from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .example import extract_example_list_item
-from .models import Sense, WordEntry
+from .models import AltForm, Sense, WordEntry
 from .section_titles import POS_DATA
 from .tags import translate_raw_tags
 
@@ -31,6 +31,11 @@ def extract_pos_section(
                     gloss_list_index = index
 
 
+# redirect
+ALT_OF_TEMPLATES = frozenset(["altform", "alt form", "vi-alt sp", "vie-alt sp"])
+FORM_OF_TEMPLATES = frozenset(["số nhiều của"])
+
+
 def extract_gloss_list_item(
     wxr: WiktextractContext,
     word_entry: WordEntry,
@@ -50,6 +55,13 @@ def extract_gloss_list_item(
                 extract_label_template(wxr, sense, node)
             elif node.template_name == "term":
                 extract_term_template(wxr, sense, node)
+            elif (
+                node.template_name.endswith((" of", "-of"))
+                or node.template_name in ALT_OF_TEMPLATES
+                or node.template_name in FORM_OF_TEMPLATES
+            ):
+                extract_form_of_template(wxr, sense, node)
+                gloss_nodes.append(node)
             else:
                 gloss_nodes.append(node)
         elif not (isinstance(node, WikiNode) and node.kind == NodeKind.LIST):
@@ -99,3 +111,31 @@ def extract_term_template(
         raw_tag = clean_node(wxr, None, italic_node)
         if raw_tag != "":
             sense.raw_tags.append(raw_tag)
+
+
+def extract_form_of_template(
+    wxr: WiktextractContext, sense: Sense, t_node: TemplateNode
+):
+    # https://vi.wiktionary.org/wiki/Thể_loại:Bản_mẫu_dạng_từ
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    form = AltForm(word="")
+    for i_tag in expanded_node.find_html_recursively("i"):
+        form.word = clean_node(wxr, None, i_tag)
+        break
+    for span_tag in expanded_node.find_html_recursively("span"):
+        if "mention-tr" in span_tag.attrs.get("class", "").split():
+            form.roman = clean_node(wxr, None, span_tag)
+            break
+    is_alt_of = (
+        "alternative" in t_node.template_name
+        or t_node.template_name in ALT_OF_TEMPLATES
+    )
+    if form.word != "":
+        if is_alt_of:
+            sense.alt_of.append(form)
+            sense.tags.append("alt-of")
+        else:
+            sense.form_of.append(form)
+            sense.tags.append("form-of")
