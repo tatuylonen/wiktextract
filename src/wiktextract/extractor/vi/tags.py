@@ -4,8 +4,28 @@ from .models import WordEntry
 LABEL_TAGS = {
     "không còn dùng": "obsolete",
 }
+# https://vi.wiktionary.org/wiki/Mô_đun:gender_and_number/data
+GENDER_NUMBER_TAGS = {
+    "giống đực": "masculine",
+    "giống cái": "feminine",
+    "giống trung": "neuter",
+    "giống chung": "common-gender",
+    "gender-neutral": "neuter",
+    "động vật": "animate",
+    "bất động vật": "inanimate",
+    "chỉ loài vật": "animal-not-person",
+    "từ chỉ cá nhân": "person",
+    "nonpersonal": "impersonal",
+    "virile (= masculine personal)": "virile",
+    "nonvirile (= other than masculine personal)": "nonvirile",
+    "số ít": "singular",
+    "số kép": "dual",
+    "số nhiều": "plural",
+    "thể chưa hoàn thành": "imperfective",
+    "thể hoàn thành": "perfective",
+}
 
-TAGS = {**LABEL_TAGS}
+TAGS = {**LABEL_TAGS, **GENDER_NUMBER_TAGS}
 
 # https://vi.wiktionary.org/wiki/Mô_đun:labels/data/topical
 TOPICS = {

@@ -65,6 +65,20 @@ class Form(VietnameseBaseModel):
     sense: str = ""
 
 
+class Translation(VietnameseBaseModel):
+    lang_code: str = Field(
+        description="Wiktionary language code of the translation term",
+    )
+    lang: str = Field(description="Translation language name")
+    word: str = Field(description="Translation term")
+    sense: str = Field(default="", description="Translation gloss")
+    tags: list[str] = []
+    raw_tags: list[str] = []
+    roman: str = ""
+    lit: str = Field(default="", description="Literal translation")
+    source: str = ""
+
+
 class WordEntry(VietnameseBaseModel):
     model_config = ConfigDict(title="Vietnamese Wiktionary")
     word: str = Field(description="Word string")
@@ -86,3 +100,4 @@ class WordEntry(VietnameseBaseModel):
     hyponyms: list[Linkage] = []
     meronyms: list[Linkage] = []
     forms: list[Form] = []
+    translations: list[Translation] = []
