@@ -7,7 +7,8 @@ from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .models import Sense, WordEntry
 from .pos import extract_pos_section
-from .section_titles import POS_DATA
+from .section_titles import POS_DATA, TRANSLATION_SECTIONS
+from .translation import extract_translation_section
 
 
 def parse_section(
@@ -19,7 +20,11 @@ def parse_section(
     subtitle = clean_node(wxr, None, level_node.largs)
     if subtitle in POS_DATA:
         extract_pos_section(wxr, page_data, base_data, level_node, subtitle)
-    elif subtitle not in ["Tham khảo", "Cách ra dấu"]:
+    elif subtitle in TRANSLATION_SECTIONS:
+        extract_translation_section(
+            wxr, page_data[-1] if len(page_data) else base_data, level_node
+        )
+    elif subtitle not in ["Tham khảo", "Cách ra dấu", "Đọc thêm"]:
         wxr.wtp.debug(f"Unknown title: {subtitle}", sortid="vi/page/22")
 
     for next_level in level_node.find_child(LEVEL_KIND_FLAGS):

@@ -67,3 +67,6 @@ LINKAGE_SECTIONS = {
     "Xem thêm": "related",
     "Đồng nghĩa": "synonyms",
 }
+
+
+TRANSLATION_SECTIONS = frozenset(["Dịch", "Bản dịch"])
