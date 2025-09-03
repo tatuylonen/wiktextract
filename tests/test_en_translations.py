@@ -8,6 +8,7 @@ from wikitextprocessor import Wtp
 
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.en.form_descriptions import parse_translation_desc
+from wiktextract.extractor.en.page import parse_page
 from wiktextract.extractor.en.translations import parse_translation_item_text
 from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.wxr_context import WiktextractContext
@@ -17,7 +18,12 @@ class EnTrTests(unittest.TestCase):
     maxDiff = None
 
     def setUp(self):
-        self.wxr = WiktextractContext(Wtp(), WiktionaryConfig())
+        self.wxr = WiktextractContext(
+            Wtp(lang_code="en"),
+            WiktionaryConfig(
+                dump_file_lang_code="en", capture_language_codes=None
+            ),
+        )
         # Note: some tests use last char
         self.wxr.wtp.start_page("abolitionism")
         self.wxr.wtp.start_section("English")
@@ -341,7 +347,7 @@ class EnTrTests(unittest.TestCase):
 
     def test_tr14(self):
         data = self.runtr(
-            "Finnish: kävellä (fi), käydä (fi) " "(poetic or archaic)"
+            "Finnish: kävellä (fi), käydä (fi) (poetic or archaic)"
         )
         self.assertEqual(self.wxr.wtp.debugs, [])
         self.assertEqual(
@@ -367,7 +373,7 @@ class EnTrTests(unittest.TestCase):
 
     def test_tr15(self):
         data = self.runtr(
-            "Macedonian: шета (šeta) (to go for a walk), " "иде (ide)"
+            "Macedonian: шета (šeta) (to go for a walk), иде (ide)"
         )
         self.assertEqual(self.wxr.wtp.debugs, [])
         self.assertEqual(
@@ -683,3 +689,52 @@ class EnTrTests(unittest.TestCase):
     #         {"word": "bar", "lang": "Swedish", "code": "sv", "lang_code": "sv",
     #          "tags": ["masculine"]},
     #         ]})
+
+    def test_translation_text(self):
+        self.wxr.wtp.add_page(
+            "Template:t+",
+            10,
+            """<span class="Latn" lang="de">[[:Blitzeinbruch#German|Blitzeinbruch]]</span><span class="tpos">&nbsp;[[:de&#58;Blitzeinbruch|(de)]]</span>&nbsp;<span class="gender"><abbr title="masculine gender">m</abbr></span>[[Category:Terms with German translations|RAMRAID]]""",
+        )
+        self.wxr.wtp.add_page(
+            "Template:t",
+            10,
+            """<span class="Latn" lang="de">[[:Rammeinbruch#German|Rammeinbruch]]</span>&nbsp;<span class="gender"><abbr title="masculine gender">m</abbr></span>[[Category:Terms with German translations|RAMRAID]]""",
+        )
+        self.wxr.wtp.add_page(
+            "Template:q",
+            10,
+            """<span class="ib-brac qualifier-brac">(</span><span class="ib-content qualifier-content">{{{1}}}</span><span class="ib-brac qualifier-brac">)</span>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "ramraid",
+            """==English==
+===Noun===
+# An instance of [[ramraiding]].
+====Translations====
+* German: ''no common term:'' {{t+|de|Blitzeinbruch|m}} {{q|occasionally used, but ambiguous, can mean any swift burglary}}; {{t|de|Rammeinbruch|m}} {{q|unambiguous, but rare}}""",
+        )
+        self.assertEqual(
+            data[0]["translations"],
+            [
+                {
+                    "code": "de",
+                    "english": "no common term; occasionally used, but ambiguous, can mean any swift burglary",
+                    "lang": "German",
+                    "lang_code": "de",
+                    "tags": ["masculine"],
+                    "translation": "no common term; occasionally used, but ambiguous, can mean any swift burglary",
+                    "word": "Blitzeinbruch",
+                },
+                {
+                    "code": "de",
+                    "english": "unambiguous, but rare",
+                    "lang": "German",
+                    "lang_code": "de",
+                    "tags": ["masculine"],
+                    "translation": "unambiguous, but rare",
+                    "word": "Rammeinbruch",
+                },
+            ],
+        )
