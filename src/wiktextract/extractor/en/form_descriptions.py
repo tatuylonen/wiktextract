@@ -2951,7 +2951,7 @@ def parse_translation_desc(
             else:
                 # There can be more than one parenthesized english item, see
                 # e.g. Aunt/English/Translations/Tamil
-                if tr.get("english"):
+                if "translation" in tr and "english" in tr:
                     tr["english"] += "; " + par  # DEPRECATED for "translation"
                     tr["translation"] += "; " + par
                 else:

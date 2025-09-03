@@ -540,7 +540,7 @@ def parse_translation_item_text(
             # Strip language links
             tr: TranslationData = {"lang": lang}
             if langcode:
-                tr["code"] = langcode # DEPRECATED in favor of "lang_code"
+                tr["code"] = langcode  # DEPRECATED in favor of "lang_code"
                 tr["lang_code"] = langcode
             if tags:
                 tr["tags"] = list(tags)
@@ -611,10 +611,14 @@ def parse_translation_item_text(
                             else:
                                 tr["note"] = par
                         else:
-                            if "english" in tr:
+                            if "translation" in tr and "english" in tr:
+                                # DEPRECATED for "translation"
                                 tr["english"] += "; " + par
+                                tr["translation"] += "; " + par
                             else:
+                                # DEPRECATED for "translation"
                                 tr["english"] = par
+                                tr["translation"] = par
                         part = rest
 
             # Skip translations that our template_fn says to ignore
@@ -656,7 +660,9 @@ def parse_translation_item_text(
 
             if "english" in tr and tr["english"] in english_to_tags:
                 data_extend(tr, "tags", english_to_tags[tr["english"]].split())
-                del tr["english"]
+                del tr["english"]  # DEPRECATED for "translation"
+                if "translation" in tr:
+                    del tr["translation"]
 
             # Certain values indicate it is not actually a translation.
             # See definition of tr_ignore_re to adjust.
