@@ -1,3 +1,5 @@
+from itertools import count
+
 from mediawiki_langcodes import name_to_code
 from wikitextprocessor.parser import (
     LEVEL_KIND_FLAGS,
@@ -156,16 +158,14 @@ def extract_trans_see_template(
     sense = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
     page_titles = []
     if 2 in t_node.template_parameters:
-        for index in range(2, 11):
+        for index in count(2):
             if index not in t_node.template_parameters:
                 break
             page_titles.append(
                 clean_node(wxr, None, t_node.template_parameters[index])
             )
     else:
-        page_titles.append(
-            clean_node(wxr, None, t_node.template_parameters.get(1, ""))
-        )
+        page_titles.append(sense)
     for page_title in page_titles:
         if "#" in page_title:
             page_title = page_title[: page_title.index("#")]
