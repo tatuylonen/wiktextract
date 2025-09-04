@@ -83,6 +83,13 @@ class Sound(VietnameseBaseModel):
     ipa: str = Field(default="", description="International Phonetic Alphabet")
     tags: list[str] = []
     raw_tags: list[str] = []
+    audio: str = Field(default="", description="Audio file name")
+    wav_url: str = ""
+    oga_url: str = ""
+    ogg_url: str = ""
+    mp3_url: str = ""
+    opus_url: str = ""
+    flac_url: str = ""
 
 
 class WordEntry(VietnameseBaseModel):

@@ -5,10 +5,12 @@ from wikitextprocessor import (
     LevelNode,
     NodeKind,
     TemplateNode,
+    WikiNode,
 )
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from ..share import set_sound_file_url_fields
 from .models import Sound, WordEntry
 from .tags import translate_raw_tags
 
@@ -16,9 +18,31 @@ from .tags import translate_raw_tags
 def extract_sound_section(
     wxr: WiktextractContext, base_data: WordEntry, level_node: LevelNode
 ):
-    for t_node in level_node.find_child(NodeKind.TEMPLATE):
-        if t_node.template_name == "vie-pron":
-            extract_vie_pron_template(wxr, base_data, t_node)
+    for node in level_node.children:
+        if isinstance(node, TemplateNode):
+            if node.template_name == "vie-pron":
+                extract_vie_pron_template(wxr, base_data, node)
+            elif node.template_name in [
+                "âm thanh-IPA",
+                "pron-audio",
+                "audio-for-pron",
+            ]:
+                extract_pron_audio_template(wxr, base_data, node)
+        elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
+            for list_item in node.find_child(NodeKind.LIST_ITEM):
+                extract_sound_list_item(wxr, base_data, list_item)
+
+
+def extract_sound_list_item(
+    wxr: WiktextractContext, base_data: WordEntry, list_item: WikiNode
+):
+    for node in list_item.children:
+        if isinstance(node, TemplateNode) and node.template_name.lower() in [
+            "âm thanh",
+            "audio",
+            "âm thanh",
+        ]:
+            extract_audio_template(wxr, base_data, node)
 
 
 @dataclass
@@ -103,3 +127,36 @@ def extract_vie_pron_span_tag(
                 sound.raw_tags.append(header.text)
         translate_raw_tags(sound)
         base_data.sounds.append(sound)
+
+
+def extract_pron_audio_template(
+    wxr: WiktextractContext, base_data: WordEntry, t_node: TemplateNode
+):
+    file = clean_node(wxr, None, t_node.template_parameters.get("file", ""))
+    if file == "":
+        return
+    sound = Sound()
+    set_sound_file_url_fields(wxr, file, sound)
+    place = clean_node(wxr, None, t_node.template_parameters.get("place", ""))
+    if place != "":
+        sound.raw_tags.append(place)
+    sound.ipa = clean_node(
+        wxr, None, t_node.template_parameters.get("pron", "")
+    )
+    translate_raw_tags(sound)
+    base_data.sounds.append(sound)
+
+
+def extract_audio_template(
+    wxr: WiktextractContext, base_data: WordEntry, t_node: TemplateNode
+):
+    file = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
+    if file == "":
+        return
+    sound = Sound()
+    set_sound_file_url_fields(wxr, file, sound)
+    raw_tag = clean_node(wxr, None, t_node.template_parameters.get(2, ""))
+    if raw_tag != "":
+        sound.raw_tags.append(raw_tag)
+    translate_raw_tags(sound)
+    base_data.sounds.append(sound)
