@@ -8,6 +8,7 @@ from ...wxr_context import WiktextractContext
 from .models import Sense, WordEntry
 from .pos import extract_pos_section
 from .section_titles import POS_DATA, TRANSLATION_SECTIONS
+from .sound import extract_sound_section
 from .translation import extract_translation_section
 
 
@@ -24,6 +25,8 @@ def parse_section(
         extract_translation_section(
             wxr, page_data[-1] if len(page_data) else base_data, level_node
         )
+    elif subtitle == "Cách phát âm":
+        extract_sound_section(wxr, base_data, level_node)
     elif subtitle not in ["Tham khảo", "Cách ra dấu", "Đọc thêm"]:
         wxr.wtp.debug(f"Unknown title: {subtitle}", sortid="vi/page/22")
 
