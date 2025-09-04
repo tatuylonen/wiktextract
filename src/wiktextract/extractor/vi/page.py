@@ -5,6 +5,7 @@ from wikitextprocessor.parser import LEVEL_KIND_FLAGS, LevelNode, NodeKind
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from .etymology import extract_etymology_section
 from .models import Sense, WordEntry
 from .pos import extract_pos_section
 from .section_titles import POS_DATA, TRANSLATION_SECTIONS
@@ -27,6 +28,8 @@ def parse_section(
         )
     elif subtitle == "Cách phát âm":
         extract_sound_section(wxr, base_data, level_node)
+    elif subtitle == "Từ nguyên":
+        extract_etymology_section(wxr, base_data, level_node)
     elif subtitle not in ["Tham khảo", "Cách ra dấu", "Đọc thêm"]:
         wxr.wtp.debug(f"Unknown title: {subtitle}", sortid="vi/page/22")
 

@@ -108,3 +108,4 @@ class WordEntry(VietnameseBaseModel):
     forms: list[Form] = []
     translations: list[Translation] = []
     sounds: list[Sound] = []
+    etymology_text: str = ""
