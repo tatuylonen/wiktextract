@@ -3,6 +3,7 @@ from .models import WordEntry
 # https://vi.wiktionary.org/wiki/Mô_đun:labels/data
 LABEL_TAGS = {
     "không còn dùng": "obsolete",
+    "cũ": "obsolete",
 }
 # https://vi.wiktionary.org/wiki/Mô_đun:gender_and_number/data
 GENDER_NUMBER_TAGS = {
