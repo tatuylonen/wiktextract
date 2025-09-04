@@ -1,3 +1,5 @@
+import re
+
 from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
@@ -51,7 +53,7 @@ def extract_gloss_list_item(
     gloss_nodes = []
     for node in list_item.children:
         if isinstance(node, TemplateNode):
-            if node.template_name in ["nhãn", "label", "def-lb"]:
+            if node.template_name in ["nhãn", "label", "def-lb", "context"]:
                 extract_label_template(wxr, sense, node)
             elif node.template_name == "term":
                 extract_term_template(wxr, sense, node)
@@ -62,6 +64,8 @@ def extract_gloss_list_item(
             ):
                 extract_form_of_template(wxr, sense, node)
                 gloss_nodes.append(node)
+            elif node.template_name == "@":
+                extract_at_template(wxr, sense, node)
             else:
                 gloss_nodes.append(node)
         elif not (isinstance(node, WikiNode) and node.kind == NodeKind.LIST):
@@ -139,3 +143,19 @@ def extract_form_of_template(
         else:
             sense.form_of.append(form)
             sense.tags.append("form-of")
+
+
+def extract_at_template(
+    wxr: WiktextractContext, sense: Sense, t_node: TemplateNode
+):
+    # https://vi.wiktionary.org/wiki/Thể_loại:@
+    # obsolete template
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for i_tag in expanded_node.find_html("i"):
+        text = clean_node(wxr, None, i_tag)
+        for raw_tag in re.split(r",|;", text):
+            raw_tag = raw_tag.strip()
+            if raw_tag != "":
+                sense.raw_tags.append(raw_tag)

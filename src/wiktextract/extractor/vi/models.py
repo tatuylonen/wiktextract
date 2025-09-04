@@ -79,6 +79,19 @@ class Translation(VietnameseBaseModel):
     source: str = ""
 
 
+class Sound(VietnameseBaseModel):
+    ipa: str = Field(default="", description="International Phonetic Alphabet")
+    tags: list[str] = []
+    raw_tags: list[str] = []
+    audio: str = Field(default="", description="Audio file name")
+    wav_url: str = ""
+    oga_url: str = ""
+    ogg_url: str = ""
+    mp3_url: str = ""
+    opus_url: str = ""
+    flac_url: str = ""
+
+
 class WordEntry(VietnameseBaseModel):
     model_config = ConfigDict(title="Vietnamese Wiktionary")
     word: str = Field(description="Word string")
@@ -101,3 +114,5 @@ class WordEntry(VietnameseBaseModel):
     meronyms: list[Linkage] = []
     forms: list[Form] = []
     translations: list[Translation] = []
+    sounds: list[Sound] = []
+    etymology_text: str = ""

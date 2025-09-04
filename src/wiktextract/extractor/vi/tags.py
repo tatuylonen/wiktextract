@@ -3,6 +3,7 @@ from .models import WordEntry
 # https://vi.wiktionary.org/wiki/Mô_đun:labels/data
 LABEL_TAGS = {
     "không còn dùng": "obsolete",
+    "cũ": "obsolete",
 }
 # https://vi.wiktionary.org/wiki/Mô_đun:gender_and_number/data
 GENDER_NUMBER_TAGS = {
@@ -25,7 +26,16 @@ GENDER_NUMBER_TAGS = {
     "thể hoàn thành": "perfective",
 }
 
-TAGS = {**LABEL_TAGS, **GENDER_NUMBER_TAGS}
+LOCATIONS = {
+    "hà nội": "Hà-Nội",
+    "huế": "Huế",
+    "sài gòn": "Saigon",
+    "vinh": "Vinh",
+    "thanh chương": "Thanh-Chương",
+    "hà tĩnh": "Hà-Tĩnh",
+}
+
+TAGS = {**LABEL_TAGS, **GENDER_NUMBER_TAGS, **LOCATIONS}
 
 # https://vi.wiktionary.org/wiki/Mô_đun:labels/data/topical
 TOPICS = {
