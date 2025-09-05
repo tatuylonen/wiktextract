@@ -204,7 +204,7 @@ def extract_translation_page(
     target_node = find_subpage_section(wxr, root, "Werger")
     if target_node is not None:
         extract_translation_section(
-            wxr, word_entry, target_node, page_title, source=page_title
+            wxr, word_entry, target_node, source=page_title
         )
 
 
