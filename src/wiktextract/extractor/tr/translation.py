@@ -156,10 +156,10 @@ def extract_trans_see_template(
     for page_title in page_titles:
         if "#" in page_title:
             page_title = page_title[: page_title.index("#")]
-        page = wxr.wtp.get_page(page_title)
-        if page is None:
+        page_body = wxr.wtp.get_page_body(page_title, 0)
+        if page_body is None:
             return
-        root = wxr.wtp.parse(page.body)
+        root = wxr.wtp.parse(page_body)
         target_node = find_subpage_section(wxr, root, "Çeviriler")
         if target_node is not None:
             extract_translation_section(
