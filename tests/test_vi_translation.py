@@ -69,6 +69,15 @@ class TestViTranslation(TestCase):
             10,
             """<span class="Latn" lang="aas">[[:wa-t#Tiếng&#95;Aasax|wa-t]]</span>[[Category:Mục từ có bản dịch tiếng Aasax|QUAN]]""",
         )
+        self.wxr.wtp.add_page("Bản mẫu:ja", 10, "[[tiếng Nhật|Tiếng Nhật]]")
+        self.wxr.wtp.add_page(
+            "Bản mẫu:tt+", 10, "{{t+|1=ja|2=犬|tr=いぬ, inu}}"
+        )
+        self.wxr.wtp.add_page(
+            "Bản mẫu:t+",
+            10,
+            """<span class="Jpan" lang="ja">[[:犬#Tiếng&#95;Nhật|犬]]</span><span class="tpos">&nbsp;[[:ja&#58;犬|(ja)]]</span> <span class="mention-gloss-paren annotation-paren">(</span><span class="tr">いぬ, inu</span><span class="mention-gloss-paren annotation-paren">)</span>[[Category:Mục từ có bản dịch tiếng Nhật|QUAN]]""",
+        )
         data = parse_page(
             self.wxr,
             "chó",
@@ -79,6 +88,7 @@ class TestViTranslation(TestCase):
 {{multitrans|data=
 {{trans-top|Loài động vật}}
 * {{aas}}: {{t2|aas|wa-t}}
+* {{ja}}: {{tt+|ja|犬|tr=いぬ, inu}}
 {{trans-bottom}}
 }}""",
         )
@@ -90,9 +100,18 @@ class TestViTranslation(TestCase):
                     "lang_code": "aas",
                     "sense": "Loài động vật",
                     "word": "wa-t",
-                }
+                },
+                {
+                    "lang": "Tiếng Nhật",
+                    "lang_code": "ja",
+                    "other": "いぬ",
+                    "roman": "inu",
+                    "sense": "Loài động vật",
+                    "word": "犬",
+                },
             ],
         )
         self.assertEqual(
-            data[0]["categories"], ["Mục từ có bản dịch tiếng Aasax"]
+            data[0]["categories"],
+            ["Mục từ có bản dịch tiếng Aasax", "Mục từ có bản dịch tiếng Nhật"],
         )

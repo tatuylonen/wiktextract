@@ -116,13 +116,21 @@ def extract_t_template(
     lit = clean_node(wxr, None, t_node.template_parameters.get("lit", ""))
     raw_tags = []
     roman = ""
+    other = ""
     for abbr_tag in expanded_node.find_html_recursively("abbr"):
         gender = abbr_tag.attrs.get("title", "")
         if gender != "":
             raw_tags.append(gender)
     for span_tag in expanded_node.find_html_recursively("span"):
-        if span_tag.attrs.get("lang", "").endswith("-Latn"):
+        if (
+            span_tag.attrs.get("lang", "").endswith("-Latn")
+            or span_tag.attrs.get("class", "") == "tr"
+        ):
             roman = clean_node(wxr, None, span_tag)
+            if lang_code == "ja" and "," in roman:
+                other, roman = roman.split(",", maxsplit=1)
+                other = other.strip()
+                roman = roman.strip()
     for span_tag in expanded_node.find_html_recursively("span"):
         span_class = span_tag.attrs.get("class", "").split()
         if span_tag.attrs.get("lang") == lang_code:
@@ -137,6 +145,7 @@ def extract_t_template(
                     roman=roman,
                     lit=lit,
                     raw_tags=raw_tags,
+                    other=other,
                 )
                 if "Hant" in span_class:
                     tr_data.tags.append("Traditional-Chinese")
