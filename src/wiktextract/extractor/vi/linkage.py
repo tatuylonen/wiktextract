@@ -1,7 +1,4 @@
-from wikitextprocessor import (
-    HTMLNode,
-    TemplateNode,
-)
+from wikitextprocessor import HTMLNode, LevelNode, NodeKind, TemplateNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -108,3 +105,56 @@ def extract_gloss_list_linkage_template(
             )
     else:
         getattr(word_entry, linkage_type).extend(l_list)
+
+
+def extract_alt_form_section(
+    wxr: WiktextractContext, base_data: WordEntry, level_node: LevelNode
+):
+    for list_node in level_node.find_child(NodeKind.LIST):
+        for list_item in list_node.find_child(NodeKind.LIST_ITEM):
+            raw_tags = []
+            for node in list_item.children:
+                if isinstance(node, TemplateNode) and node.template_name in [
+                    "alter",
+                    "def-alt",
+                ]:
+                    extract_alter_template(wxr, base_data, node, raw_tags)
+                elif isinstance(node, TemplateNode) and node.template_name in [
+                    "qualifier",
+                    "qual",
+                    "q",
+                    "qf",
+                    "i",
+                ]:
+                    raw_tags.extend(extract_qualifier_template(wxr, node))
+
+
+def extract_alter_template(
+    wxr: WiktextractContext,
+    base_data: WordEntry,
+    t_node: TemplateNode,
+    raw_tags: list[str],
+):
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    lang_code = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
+    for span_tag in expanded_node.find_html(
+        "span", attr_name="lang", attr_value=lang_code
+    ):
+        word = clean_node(wxr, None, span_tag)
+        if word != "":
+            form = Form(form=word, tags=["alternative"], raw_tags=raw_tags)
+            translate_raw_tags(form)
+            base_data.forms.append(form)
+
+
+def extract_qualifier_template(
+    wxr: WiktextractContext, t_node: TemplateNode
+) -> list[str]:
+    raw_tags = []
+    for raw_tag in clean_node(wxr, None, t_node).strip("()").split(","):
+        raw_tag = raw_tag.strip()
+        if raw_tag != "":
+            raw_tags.append(raw_tag)
+    return raw_tags

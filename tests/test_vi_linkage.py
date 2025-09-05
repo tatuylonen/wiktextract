@@ -88,3 +88,34 @@ class TestViLinkage(TestCase):
                 }
             ],
         )
+
+    def test_alter(self):
+        self.wxr.wtp.add_page(
+            "Bản mẫu:q",
+            10,
+            """<span class="ib-brac qualifier-brac">(</span><span class="ib-content qualifier-content">từ lóng Internet</span><span class="ib-brac qualifier-brac">)</span>""",
+        )
+        self.wxr.wtp.add_page(
+            "Bản mẫu:alter",
+            10,
+            """<span class="Latn" lang="vi">[[:cờ hó#Tiếng&#95;Việt|cờ hó]]</span>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "chó",
+            """==Tiếng Việt==
+===Cách viết khác===
+* {{q|từ lóng Internet}} {{alter|vi|cờ hó}}
+===Danh từ===
+# Loài động vật thuộc nhóm ăn thịt""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {
+                    "form": "cờ hó",
+                    "raw_tags": ["từ lóng Internet"],
+                    "tags": ["alternative"],
+                }
+            ],
+        )
