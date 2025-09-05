@@ -60,3 +60,70 @@ class TestViTranslation(TestCase):
                 },
             ],
         )
+
+    def test_multitrans(self):
+        self.wxr.wtp.add_page(
+            "Bản mẫu:ady", 10, "[[tiếng Adygea|Tiếng Adygea]]"
+        )
+        self.wxr.wtp.add_page("Bản mẫu:t2", 10, "{{t|1=ady|2=хьэ}}")
+        self.wxr.wtp.add_page(
+            "Bản mẫu:t",
+            10,
+            """<span class="Cyrl" lang="ady">[[:хьэ#Tiếng&#95;Adygea|хьэ]]</span> <span class="mention-gloss-paren annotation-paren">(</span><span lang="ady-Latn" class="tr Latn">ḥɛ</span><span class="mention-gloss-paren annotation-paren">)</span>[[Category:Mục từ có bản dịch tiếng Adygea|QUAN]]""",
+        )
+        self.wxr.wtp.add_page(
+            "Bản mẫu:q",
+            10,
+            """<span class="ib-brac qualifier-brac">(</span><span class="ib-content qualifier-content">Abzakh</span><span class="ib-brac qualifier-brac">)</span>""",
+        )
+        self.wxr.wtp.add_page("Bản mẫu:ja", 10, "[[tiếng Nhật|Tiếng Nhật]]")
+        self.wxr.wtp.add_page(
+            "Bản mẫu:tt+", 10, "{{t+|1=ja|2=犬|tr=いぬ, inu}}"
+        )
+        self.wxr.wtp.add_page(
+            "Bản mẫu:t+",
+            10,
+            """<span class="Jpan" lang="ja">[[:犬#Tiếng&#95;Nhật|犬]]</span><span class="tpos">&nbsp;[[:ja&#58;犬|(ja)]]</span> <span class="mention-gloss-paren annotation-paren">(</span><span class="tr">いぬ, inu</span><span class="mention-gloss-paren annotation-paren">)</span>[[Category:Mục từ có bản dịch tiếng Nhật|QUAN]]""",
+        )
+        data = parse_page(
+            self.wxr,
+            "chó",
+            """==Tiếng Việt==
+===Danh từ===
+# Loài động vật thuộc nhóm ăn thịt
+====Dịch====
+{{multitrans|data=
+{{trans-top|Loài động vật}}
+* {{ady}}: {{t2|ady|хьэ}} {{q|Abzakh}}
+* {{ja}}: {{tt+|ja|犬|tr=いぬ, inu}}
+{{trans-bottom}}
+}}""",
+        )
+        self.assertEqual(
+            data[0]["translations"],
+            [
+                {
+                    "lang": "Tiếng Adygea",
+                    "lang_code": "ady",
+                    "raw_tags": ["Abzakh"],
+                    "roman": "ḥɛ",
+                    "sense": "Loài động vật",
+                    "word": "хьэ",
+                },
+                {
+                    "lang": "Tiếng Nhật",
+                    "lang_code": "ja",
+                    "other": "いぬ",
+                    "roman": "inu",
+                    "sense": "Loài động vật",
+                    "word": "犬",
+                },
+            ],
+        )
+        self.assertEqual(
+            data[0]["categories"],
+            [
+                "Mục từ có bản dịch tiếng Adygea",
+                "Mục từ có bản dịch tiếng Nhật",
+            ],
+        )

@@ -11,6 +11,7 @@ from wikitextprocessor.parser import (
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from .linkage import QUALIFIER_TEMPALTES, extract_qualifier_template
 from .models import Translation, WordEntry
 from .section_titles import TRANSLATION_SECTIONS
 from .tags import translate_raw_tags
@@ -25,19 +26,18 @@ def extract_translation_section(
     source: str = "",
 ):
     for node in level_node.children:
-        if (
-            isinstance(node, TemplateNode)
-            and node.template_name == "trans-top"
-            and not (sense != "" and from_trans_see)
-        ):
-            sense = clean_node(wxr, None, node.template_parameters.get(1, ""))
-            clean_node(wxr, word_entry, node)
-        elif (
-            isinstance(node, TemplateNode)
-            and node.template_name == "trans-see"
-            and not from_trans_see
-        ):
-            extract_trans_see_template(wxr, word_entry, node)
+        if isinstance(node, TemplateNode):
+            if node.template_name == "trans-top" and not (
+                sense != "" and from_trans_see
+            ):
+                sense = clean_node(
+                    wxr, None, node.template_parameters.get(1, "")
+                )
+                clean_node(wxr, word_entry, node)
+            elif node.template_name == "trans-see" and not from_trans_see:
+                extract_trans_see_template(wxr, word_entry, node)
+            elif node.template_name == "multitrans":
+                extract_multitrans_template(wxr, word_entry, node)
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
             for list_item in node.find_child(NodeKind.LIST_ITEM):
                 extract_translation_list_item(
@@ -66,6 +66,9 @@ def extract_translation_list_item(
             "t",
             "t-",
             "t+",
+            "t2",
+            "t2+",
+            "tt+",
         ]:
             extract_t_template(wxr, word_entry, node, lang_name, sense, source)
         elif (
@@ -89,6 +92,15 @@ def extract_translation_list_item(
                 extract_translation_list_item(
                     wxr, word_entry, child_list_item, sense, source
                 )
+        elif (
+            isinstance(node, TemplateNode)
+            and node.template_name in QUALIFIER_TEMPALTES
+            and len(word_entry.translations) > 0
+        ):
+            word_entry.translations[-1].raw_tags.extend(
+                extract_qualifier_template(wxr, node)
+            )
+            translate_raw_tags(word_entry.translations[-1])
 
 
 def extract_t_template(
@@ -106,16 +118,29 @@ def extract_t_template(
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(t_node), expand_all=True
     )
+    for e_node in expanded_node.find_child(NodeKind.TEMPLATE):
+        if e_node.template_name in ["t", "t+"]:
+            expanded_node = wxr.wtp.parse(
+                wxr.wtp.node_to_wikitext(e_node), expand_all=True
+            )
     lit = clean_node(wxr, None, t_node.template_parameters.get("lit", ""))
     raw_tags = []
     roman = ""
+    other = ""
     for abbr_tag in expanded_node.find_html_recursively("abbr"):
         gender = abbr_tag.attrs.get("title", "")
         if gender != "":
             raw_tags.append(gender)
     for span_tag in expanded_node.find_html_recursively("span"):
-        if span_tag.attrs.get("lang", "").endswith("-Latn"):
+        if (
+            span_tag.attrs.get("lang", "").endswith("-Latn")
+            or span_tag.attrs.get("class", "") == "tr"
+        ):
             roman = clean_node(wxr, None, span_tag)
+            if lang_code == "ja" and "," in roman:
+                other, roman = roman.split(",", maxsplit=1)
+                other = other.strip()
+                roman = roman.strip()
     for span_tag in expanded_node.find_html_recursively("span"):
         span_class = span_tag.attrs.get("class", "").split()
         if span_tag.attrs.get("lang") == lang_code:
@@ -130,6 +155,7 @@ def extract_t_template(
                     roman=roman,
                     lit=lit,
                     raw_tags=raw_tags,
+                    other=other,
                 )
                 if "Hant" in span_class:
                     tr_data.tags.append("Traditional-Chinese")
@@ -183,3 +209,12 @@ def find_subpage_section(
         if section_title in target_sections:
             return level_node
     return None
+
+
+def extract_multitrans_template(
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+):
+    arg = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node.template_parameters.get("data", ""))
+    )
+    extract_translation_section(wxr, word_entry, arg)

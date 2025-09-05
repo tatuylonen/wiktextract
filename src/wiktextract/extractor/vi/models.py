@@ -77,6 +77,7 @@ class Translation(VietnameseBaseModel):
     roman: str = ""
     lit: str = Field(default="", description="Literal translation")
     source: str = ""
+    other: str = ""
 
 
 class Sound(VietnameseBaseModel):
