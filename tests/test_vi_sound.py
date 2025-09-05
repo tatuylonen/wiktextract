@@ -58,3 +58,30 @@ class TestViSound(TestCase):
                 {"ipa": "tʂə̰ːʔ˧˩ tʰajŋ˧˧", "tags": ["Hà-Tĩnh"]},
             ],
         )
+
+    def test_tyz_ipa(self):
+        self.wxr.wtp.add_page(
+            "Bản mẫu:tyz-IPA",
+            10,
+            """* (''[[:vi:w:Thạch An|Thạch An]] – [[:vi:w:Tràng Định|Tràng Định]]'') [[WT:IPA|IPA]]<sup>([[w:Tiếng Tày|ghi chú]])</sup>: <span class="IPA">[kwaːn˧˥]</span>
+* (''[[:vi:w:Trùng Khánh (huyện)|Trùng Khánh]]'') [[WT:IPA|IPA]]<sup>([[w:Tiếng Tày|ghi chú]])</sup>: <span class="IPA">[kwaːn˦]</span>[[Thể loại:Mục từ tiếng Tày có cách phát âm IPA]]""",
+        )
+        data = parse_page(
+            self.wxr,
+            "quan",
+            """==Tiếng Tày==
+===Cách phát âm===
+{{tyz-IPA}}
+===Danh từ===
+# vị quan.""",
+        )
+        self.assertEqual(
+            data[0]["sounds"],
+            [
+                {"ipa": "[kwaːn˧˥]", "raw_tags": ["Thạch An – Tràng Định"]},
+                {"ipa": "[kwaːn˦]", "raw_tags": ["Trùng Khánh"]},
+            ],
+        )
+        self.assertEqual(
+            data[0]["categories"], ["Mục từ tiếng Tày có cách phát âm IPA"]
+        )
