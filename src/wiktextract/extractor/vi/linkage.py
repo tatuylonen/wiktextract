@@ -30,6 +30,8 @@ GLOSS_LIST_LINKAGE_TEMPLATES = {
     "synsee": "synonyms",
 }
 
+QUALIFIER_TEMPALTES = ["qualifier", "qual", "q", "qf", "i"]
+
 
 def extract_gloss_list_linkage_template(
     wxr: WiktextractContext,
@@ -120,13 +122,10 @@ def extract_alt_form_section(
                     "def-alt",
                 ]:
                     extract_alter_template(wxr, base_data, node, raw_tags)
-                elif isinstance(node, TemplateNode) and node.template_name in [
-                    "qualifier",
-                    "qual",
-                    "q",
-                    "qf",
-                    "i",
-                ]:
+                elif (
+                    isinstance(node, TemplateNode)
+                    and node.template_name in QUALIFIER_TEMPALTES
+                ):
                     raw_tags.extend(extract_qualifier_template(wxr, node))
 
 

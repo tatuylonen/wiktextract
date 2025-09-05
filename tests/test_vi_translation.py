@@ -62,12 +62,19 @@ class TestViTranslation(TestCase):
         )
 
     def test_multitrans(self):
-        self.wxr.wtp.add_page("Bản mẫu:aas", 10, "[[tiếng Aasax|Tiếng Aasax]]")
-        self.wxr.wtp.add_page("Bản mẫu:t2", 10, "{{t|1=aas|2=wa-t}}")
+        self.wxr.wtp.add_page(
+            "Bản mẫu:ady", 10, "[[tiếng Adygea|Tiếng Adygea]]"
+        )
+        self.wxr.wtp.add_page("Bản mẫu:t2", 10, "{{t|1=ady|2=хьэ}}")
         self.wxr.wtp.add_page(
             "Bản mẫu:t",
             10,
-            """<span class="Latn" lang="aas">[[:wa-t#Tiếng&#95;Aasax|wa-t]]</span>[[Category:Mục từ có bản dịch tiếng Aasax|QUAN]]""",
+            """<span class="Cyrl" lang="ady">[[:хьэ#Tiếng&#95;Adygea|хьэ]]</span> <span class="mention-gloss-paren annotation-paren">(</span><span lang="ady-Latn" class="tr Latn">ḥɛ</span><span class="mention-gloss-paren annotation-paren">)</span>[[Category:Mục từ có bản dịch tiếng Adygea|QUAN]]""",
+        )
+        self.wxr.wtp.add_page(
+            "Bản mẫu:q",
+            10,
+            """<span class="ib-brac qualifier-brac">(</span><span class="ib-content qualifier-content">Abzakh</span><span class="ib-brac qualifier-brac">)</span>""",
         )
         self.wxr.wtp.add_page("Bản mẫu:ja", 10, "[[tiếng Nhật|Tiếng Nhật]]")
         self.wxr.wtp.add_page(
@@ -87,7 +94,7 @@ class TestViTranslation(TestCase):
 ====Dịch====
 {{multitrans|data=
 {{trans-top|Loài động vật}}
-* {{aas}}: {{t2|aas|wa-t}}
+* {{ady}}: {{t2|ady|хьэ}} {{q|Abzakh}}
 * {{ja}}: {{tt+|ja|犬|tr=いぬ, inu}}
 {{trans-bottom}}
 }}""",
@@ -96,10 +103,12 @@ class TestViTranslation(TestCase):
             data[0]["translations"],
             [
                 {
-                    "lang": "Tiếng Aasax",
-                    "lang_code": "aas",
+                    "lang": "Tiếng Adygea",
+                    "lang_code": "ady",
+                    "raw_tags": ["Abzakh"],
+                    "roman": "ḥɛ",
                     "sense": "Loài động vật",
-                    "word": "wa-t",
+                    "word": "хьэ",
                 },
                 {
                     "lang": "Tiếng Nhật",
@@ -113,5 +122,8 @@ class TestViTranslation(TestCase):
         )
         self.assertEqual(
             data[0]["categories"],
-            ["Mục từ có bản dịch tiếng Aasax", "Mục từ có bản dịch tiếng Nhật"],
+            [
+                "Mục từ có bản dịch tiếng Adygea",
+                "Mục từ có bản dịch tiếng Nhật",
+            ],
         )
