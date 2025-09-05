@@ -60,3 +60,39 @@ class TestViTranslation(TestCase):
                 },
             ],
         )
+
+    def test_multitrans(self):
+        self.wxr.wtp.add_page("Bản mẫu:aas", 10, "[[tiếng Aasax|Tiếng Aasax]]")
+        self.wxr.wtp.add_page("Bản mẫu:t2", 10, "{{t|1=aas|2=wa-t}}")
+        self.wxr.wtp.add_page(
+            "Bản mẫu:t",
+            10,
+            """<span class="Latn" lang="aas">[[:wa-t#Tiếng&#95;Aasax|wa-t]]</span>[[Category:Mục từ có bản dịch tiếng Aasax|QUAN]]""",
+        )
+        data = parse_page(
+            self.wxr,
+            "chó",
+            """==Tiếng Việt==
+===Danh từ===
+# Loài động vật thuộc nhóm ăn thịt
+====Dịch====
+{{multitrans|data=
+{{trans-top|Loài động vật}}
+* {{aas}}: {{t2|aas|wa-t}}
+{{trans-bottom}}
+}}""",
+        )
+        self.assertEqual(
+            data[0]["translations"],
+            [
+                {
+                    "lang": "Tiếng Aasax",
+                    "lang_code": "aas",
+                    "sense": "Loài động vật",
+                    "word": "wa-t",
+                }
+            ],
+        )
+        self.assertEqual(
+            data[0]["categories"], ["Mục từ có bản dịch tiếng Aasax"]
+        )

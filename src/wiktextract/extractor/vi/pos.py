@@ -96,12 +96,13 @@ def extract_label_template(
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(t_node), expand_all=True
     )
-    for span_tag in expanded_node.find_html("span"):
+    for span_tag in expanded_node.find_html_recursively("span"):
         span_classes = span_tag.attrs.get("class", "").split()
         if "label-content" in span_classes:
             raw_tag = clean_node(wxr, None, span_tag)
             if raw_tag != "":
                 sense.raw_tags.append(raw_tag)
+    clean_node(wxr, sense, expanded_node)
 
 
 def extract_term_template(

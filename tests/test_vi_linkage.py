@@ -23,26 +23,31 @@ class TestViLinkage(TestCase):
 
     def test_synonym_in_gloss_list(self):
         self.wxr.wtp.add_page(
-            "Bản mẫu:synonym",
+            "Bản mẫu:synonyms",
             10,
-            """<span class="nyms đồng-nghĩa"><span class="defdate">Đồng nghĩa:</span> <span class="ib-brac qualifier-brac">(</span><span class="ib-content qualifier-content">không còn dùng</span><span class="ib-brac qualifier-brac">)</span> <span class="Latn" lang="vi">[[:kỷ hà học#Tiếng&#95;Việt|kỷ hà học]]</span></span>""",
+            """<span class="nyms đồng-nghĩa"><span class="defdate">Đồng nghĩa:</span> <span class="ib-brac qualifier-brac">(</span><span class="ib-content qualifier-content">từ Hán-Việt</span><span class="ib-brac qualifier-brac">)</span> <span class="Latn" lang="vi">[[:cẩu#Tiếng&#95;Việt|cẩu]]</span>, <span class="ib-brac qualifier-brac">(</span><span class="ib-content qualifier-content">về mặt để ăn thịt</span><span class="ib-brac qualifier-brac">)</span> <span class="Latn" lang="vi">[[:cầy#Tiếng&#95;Việt|cầy]]</span></span>""",
         )
         data = parse_page(
             self.wxr,
-            "hình học",
+            "chó",
             """==Tiếng Việt==
 ===Danh từ===
-# Ngành liên quan đến [[hình dạng]]
-#: {{synonym|vi|kỷ hà học|q=không còn dùng}}""",
+# Loài [[động vật]] thuộc nhóm [[ăn thịt]]
+#: {{synonyms|vi|cẩu|cầy|q1=từ Hán-Việt|q2=về mặt để ăn thịt}}""",
         )
         self.assertEqual(
             data[0]["synonyms"],
             [
                 {
-                    "word": "kỷ hà học",
-                    "tags": ["obsolete"],
-                    "sense": "Ngành liên quan đến hình dạng",
-                }
+                    "word": "cẩu",
+                    "raw_tags": ["từ Hán-Việt"],
+                    "sense": "Loài động vật thuộc nhóm ăn thịt",
+                },
+                {
+                    "word": "cầy",
+                    "raw_tags": ["về mặt để ăn thịt"],
+                    "sense": "Loài động vật thuộc nhóm ăn thịt",
+                },
             ],
         )
 

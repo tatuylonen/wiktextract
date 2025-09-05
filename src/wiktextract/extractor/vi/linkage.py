@@ -91,6 +91,7 @@ def extract_gloss_list_linkage_template(
                 else:
                     getattr(word_entry, linkage_type).extend(l_list)
                 l_list.clear()
+                raw_tags.clear()
 
     if linkage_type == "alt_forms":
         for l_data in l_list:
