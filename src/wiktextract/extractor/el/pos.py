@@ -432,7 +432,7 @@ def process_pos(
     )
 
     for sl in pos_sublevels:
-        subtitle = clean_node(wxr, None, sl.largs[0]).lower().strip()
+        subtitle = clean_node(wxr, None, sl.largs).lower().strip()
 
         type, pos, heading_name, tags, num, ok = parse_lower_heading(
             wxr, subtitle
