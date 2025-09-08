@@ -39,6 +39,7 @@ def extract_example_list_item(
             "ux",
             "usex",
             "ux2",
+            "uxi",
         ]:
             extract_ux_template(wxr, sense, node)
         elif (

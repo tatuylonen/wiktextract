@@ -117,3 +117,33 @@ class TestViSound(TestCase):
                 "Mục từ tiếng Anh có cách phát âm IPA",
             ],
         )
+
+    def test_rhymes_hyphenation(self):
+        self.wxr.wtp.add_page(
+            "Bản mẫu:rhymes",
+            10,
+            """Vần: [[Vần:Tiếng Anh/uːtə(ɹ)|<span class="IPA">-uːtə(ɹ)</span>]][[Category:Vần tiếng Anh/uːtə(ɹ)|COMPUTER]][[Category:Vần tiếng Anh/uːtə(ɹ)/3 âm tiết|COMPUTER]]""",
+        )
+        self.wxr.wtp.add_page(
+            "Bản mẫu:hyphenation",
+            10,
+            """Tách âm: <span class="Latn" lang="en">com‧put‧er</span>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "computer",
+            """==Tiếng Anh==
+===Cách phát âm===
+* {{rhymes|en|uːtə(ɹ)|s=3}}
+* {{hyphenation|en|com|put|er}}
+===Danh từ===
+# [[Máy tính]]""",
+        )
+        self.assertEqual(data[0]["sounds"], [{"rhymes": "-uːtə(ɹ)"}])
+        self.assertEqual(
+            data[0]["hyphenations"], [{"parts": ["com", "put", "er"]}]
+        )
+        self.assertEqual(
+            data[0]["categories"],
+            ["Vần tiếng Anh/uːtə(ɹ)", "Vần tiếng Anh/uːtə(ɹ)/3 âm tiết"],
+        )

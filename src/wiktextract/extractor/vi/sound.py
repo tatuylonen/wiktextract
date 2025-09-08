@@ -11,7 +11,7 @@ from wikitextprocessor import (
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from ..share import set_sound_file_url_fields
-from .models import Sound, WordEntry
+from .models import Hyphenation, Sound, WordEntry
 from .tags import translate_raw_tags
 
 
@@ -46,6 +46,10 @@ def extract_sound_list_item(
                 extract_ipa_template(wxr, base_data, node, "IPA")
             elif node.template_name in ["enPR", "AHD"]:
                 extract_ipa_template(wxr, base_data, node, "enPR")
+            elif node.template_name in ["rhymes", "rhyme"]:
+                extract_rhymes_template(wxr, base_data, node)
+            elif node.template_name in ["hyphenation", "hyph"]:
+                extract_hyphenation_template(wxr, base_data, node)
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
             for child_list_item in node.find_child(NodeKind.LIST_ITEM):
                 extract_sound_list_item(wxr, base_data, child_list_item)
@@ -219,3 +223,42 @@ def extract_ipa_template(
 
     for link in expanded_node.find_child(NodeKind.LINK):
         clean_node(wxr, base_data, link)
+
+
+def extract_rhymes_template(
+    wxr: WiktextractContext, base_data: WordEntry, t_node: TemplateNode
+):
+    # https://vi.wiktionary.org/wiki/Bản_mẫu:rhymes
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for span_tag in expanded_node.find_html_recursively(
+        "span", attr_name="class", attr_value="IPA"
+    ):
+        rhyme = clean_node(wxr, None, span_tag)
+        if rhyme != "":
+            base_data.sounds.append(Sound(rhymes=rhyme))
+
+    for link in expanded_node.find_child(NodeKind.LINK):
+        clean_node(wxr, base_data, link)
+
+
+def extract_hyphenation_template(
+    wxr: WiktextractContext, base_data: WordEntry, t_node: TemplateNode
+):
+    # https://vi.wiktionary.org/wiki/Bản_mẫu:hyphenation
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    lang_code = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
+    for span_tag in expanded_node.find_html(
+        "span", attr_name="lang", attr_value=lang_code
+    ):
+        h_str = clean_node(wxr, None, span_tag)
+        h_data = Hyphenation()
+        for part in h_str.split("‧"):
+            part = part.strip()
+            if part != "":
+                h_data.parts.append(part)
+        if len(h_data.parts) > 0:
+            base_data.hyphenations.append(h_data)

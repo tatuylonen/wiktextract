@@ -91,6 +91,11 @@ class Sound(VietnameseBaseModel):
     mp3_url: str = ""
     opus_url: str = ""
     flac_url: str = ""
+    rhymes: str = ""
+
+
+class Hyphenation(VietnameseBaseModel):
+    parts: list[str] = []
 
 
 class WordEntry(VietnameseBaseModel):
@@ -117,3 +122,4 @@ class WordEntry(VietnameseBaseModel):
     translations: list[Translation] = []
     sounds: list[Sound] = []
     etymology_text: str = ""
+    hyphenations: list[Hyphenation] = []
