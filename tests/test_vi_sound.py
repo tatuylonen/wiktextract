@@ -85,3 +85,78 @@ class TestViSound(TestCase):
         self.assertEqual(
             data[0]["categories"], ["Mục từ tiếng Tày có cách phát âm IPA"]
         )
+
+    def test_enpr_ipa(self):
+        self.wxr.wtp.add_page(
+            "Bản mẫu:enPR",
+            10,
+            """<span class="ib-brac qualifier-brac">(</span><span class="ib-content qualifier-content"><span class="usage-label-accent">[[w:Tiếng Anh Mỹ thông dụng|Anh Mỹ thông dụng]]</span></span><span class="ib-brac qualifier-brac">)</span> [[Appendix:English pronunciation|enPR]]: <span class="AHD enPR">dôg</span>""",
+        )
+        self.wxr.wtp.add_page(
+            "Bản mẫu:IPA4",
+            10,
+            """[[Wiktionary:IPA|IPA]]<sup>([[Phụ lục:Cách phát âm trong tiếng Anh|ghi chú]])</sup>:&#32;<span class="IPA">/dɔɡ/</span>[[Category:Từ tiếng Anh có 1 âm tiết|DOG]][[Category:Mục từ tiếng Anh có cách phát âm IPA|DOG]]""",
+        )
+        data = parse_page(
+            self.wxr,
+            "dog",
+            """==Tiếng Anh==
+===Cách phát âm===
+* {{enPR|dôg|a=GA}}, {{IPA4|en|/dɔɡ/}}
+===Danh từ===
+# [[chó|Chó]].""",
+        )
+        self.assertEqual(
+            data[0]["sounds"],
+            [{"ipa": "dôg", "tags": ["General-American"]}, {"ipa": "/dɔɡ/"}],
+        )
+        self.assertEqual(
+            data[0]["categories"],
+            [
+                "Từ tiếng Anh có 1 âm tiết",
+                "Mục từ tiếng Anh có cách phát âm IPA",
+            ],
+        )
+
+    def test_rhymes_hyphenation(self):
+        self.wxr.wtp.add_page(
+            "Bản mẫu:IPA4",
+            10,
+            """<span class="ib-brac qualifier-brac">(</span><span class="ib-content qualifier-content"><span class="usage-label-accent">[[w:Tiếng Anh Mỹ thông dụng|Anh Mỹ thông dụng]]</span></span><span class="ib-brac qualifier-brac">)</span> [[Wiktionary:IPA|IPA]]<sup>([[Phụ lục:Cách phát âm trong tiếng Anh|ghi chú]])</sup>:&#32;<span class="IPA">/kəmˈpjutɚ/</span>, <span class="IPA">[kəmˈpʰjuɾɚ]</span>""",
+        )
+        self.wxr.wtp.add_page(
+            "Bản mẫu:rhymes",
+            10,
+            """Vần: [[Vần:Tiếng Anh/uːtə(ɹ)|<span class="IPA">-uːtə(ɹ)</span>]][[Category:Vần tiếng Anh/uːtə(ɹ)|COMPUTER]][[Category:Vần tiếng Anh/uːtə(ɹ)/3 âm tiết|COMPUTER]]""",
+        )
+        self.wxr.wtp.add_page(
+            "Bản mẫu:hyphenation",
+            10,
+            """Tách âm: <span class="Latn" lang="en">com‧put‧er</span>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "computer",
+            """==Tiếng Anh==
+===Cách phát âm===
+* {{IPA4|en|/kəmˈpjutɚ/|[kəmˈpʰjuɾɚ]|a=GA}}
+* {{rhymes|en|uːtə(ɹ)|s=3}}
+* {{hyphenation|en|com|put|er}}
+===Danh từ===
+# [[Máy tính]]""",
+        )
+        self.assertEqual(
+            data[0]["sounds"],
+            [
+                {"ipa": "/kəmˈpjutɚ/", "tags": ["General-American"]},
+                {"ipa": "[kəmˈpʰjuɾɚ]", "tags": ["General-American"]},
+                {"rhymes": "-uːtə(ɹ)"},
+            ],
+        )
+        self.assertEqual(
+            data[0]["hyphenations"], [{"parts": ["com", "put", "er"]}]
+        )
+        self.assertEqual(
+            data[0]["categories"],
+            ["Vần tiếng Anh/uːtə(ɹ)", "Vần tiếng Anh/uːtə(ɹ)/3 âm tiết"],
+        )
