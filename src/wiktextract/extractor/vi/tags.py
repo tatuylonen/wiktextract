@@ -35,7 +35,12 @@ LOCATIONS = {
     "hà tĩnh": "Hà-Tĩnh",
 }
 
-TAGS = {**LABEL_TAGS, **GENDER_NUMBER_TAGS, **LOCATIONS}
+SOUND_TAGS = {
+    "phát âm giọng anh chuẩn": "Received-Pronunciation",
+    "anh mỹ thông dụng": "General-American",
+}
+
+TAGS = {**LABEL_TAGS, **GENDER_NUMBER_TAGS, **LOCATIONS, **SOUND_TAGS}
 
 # https://vi.wiktionary.org/wiki/Mô_đun:labels/data/topical
 TOPICS = {
