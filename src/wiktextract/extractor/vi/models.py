@@ -123,3 +123,4 @@ class WordEntry(VietnameseBaseModel):
     sounds: list[Sound] = []
     etymology_text: str = ""
     hyphenations: list[Hyphenation] = []
+    notes: list[str] = []
