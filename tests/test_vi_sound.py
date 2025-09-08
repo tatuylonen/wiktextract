@@ -120,6 +120,11 @@ class TestViSound(TestCase):
 
     def test_rhymes_hyphenation(self):
         self.wxr.wtp.add_page(
+            "Bản mẫu:IPA4",
+            10,
+            """<span class="ib-brac qualifier-brac">(</span><span class="ib-content qualifier-content"><span class="usage-label-accent">[[w:Tiếng Anh Mỹ thông dụng|Anh Mỹ thông dụng]]</span></span><span class="ib-brac qualifier-brac">)</span> [[Wiktionary:IPA|IPA]]<sup>([[Phụ lục:Cách phát âm trong tiếng Anh|ghi chú]])</sup>:&#32;<span class="IPA">/kəmˈpjutɚ/</span>, <span class="IPA">[kəmˈpʰjuɾɚ]</span>""",
+        )
+        self.wxr.wtp.add_page(
             "Bản mẫu:rhymes",
             10,
             """Vần: [[Vần:Tiếng Anh/uːtə(ɹ)|<span class="IPA">-uːtə(ɹ)</span>]][[Category:Vần tiếng Anh/uːtə(ɹ)|COMPUTER]][[Category:Vần tiếng Anh/uːtə(ɹ)/3 âm tiết|COMPUTER]]""",
@@ -134,12 +139,20 @@ class TestViSound(TestCase):
             "computer",
             """==Tiếng Anh==
 ===Cách phát âm===
+* {{IPA4|en|/kəmˈpjutɚ/|[kəmˈpʰjuɾɚ]|a=GA}}
 * {{rhymes|en|uːtə(ɹ)|s=3}}
 * {{hyphenation|en|com|put|er}}
 ===Danh từ===
 # [[Máy tính]]""",
         )
-        self.assertEqual(data[0]["sounds"], [{"rhymes": "-uːtə(ɹ)"}])
+        self.assertEqual(
+            data[0]["sounds"],
+            [
+                {"ipa": "/kəmˈpjutɚ/", "tags": ["General-American"]},
+                {"ipa": "[kəmˈpʰjuɾɚ]", "tags": ["General-American"]},
+                {"rhymes": "-uːtə(ɹ)"},
+            ],
+        )
         self.assertEqual(
             data[0]["hyphenations"], [{"parts": ["com", "put", "er"]}]
         )

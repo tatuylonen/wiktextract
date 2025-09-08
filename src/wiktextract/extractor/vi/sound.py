@@ -42,7 +42,14 @@ def extract_sound_list_item(
         if isinstance(node, TemplateNode):
             if node.template_name.lower() in ["âm thanh", "audio", "âm thanh"]:
                 extract_audio_template(wxr, base_data, node)
-            elif node.template_name in ["IPA", "IPA2", "IPA3", "IPA4"]:
+            elif node.template_name in [
+                "IPA",
+                "IPA2",
+                "IPA3",
+                "IPA4",
+                "fra-IPA",
+                "fr-IPA",
+            ]:
                 extract_ipa_template(wxr, base_data, node, "IPA")
             elif node.template_name in ["enPR", "AHD"]:
                 extract_ipa_template(wxr, base_data, node, "enPR")
@@ -208,18 +215,19 @@ def extract_ipa_template(
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(t_node), expand_all=True
     )
-    sound = Sound()
+    raw_tags = []
     for span_tag in expanded_node.find_html("span"):
         class_names = span_tag.attrs.get("class", "").split()
         if "qualifier-content" in class_names:
             raw_tag = clean_node(wxr, None, span_tag)
             if raw_tag != "":
-                sound.raw_tags.append(raw_tag)
+                raw_tags.append(raw_tag)
         elif ipa_class in class_names:
-            sound.ipa = clean_node(wxr, None, span_tag)
-    if sound.ipa != "":
-        translate_raw_tags(sound)
-        base_data.sounds.append(sound)
+            ipa = clean_node(wxr, None, span_tag)
+            if ipa != "":
+                sound = Sound(ipa=ipa, raw_tags=raw_tags)
+                translate_raw_tags(sound)
+                base_data.sounds.append(sound)
 
     for link in expanded_node.find_child(NodeKind.LINK):
         clean_node(wxr, base_data, link)
