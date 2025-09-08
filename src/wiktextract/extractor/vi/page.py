@@ -36,6 +36,7 @@ def parse_section(
     elif subtitle not in ["Tham khảo", "Cách ra dấu", "Đọc thêm"]:
         wxr.wtp.debug(f"Unknown title: {subtitle}", sortid="vi/page/22")
 
+    extract_section_cats(wxr, base_data, page_data, level_node)
     for next_level in level_node.find_child(LEVEL_KIND_FLAGS):
         parse_section(wxr, page_data, base_data, next_level)
 
@@ -72,6 +73,7 @@ def parse_page(
             pos="unknown",
         )
         base_data.categories = categories.get("categories", [])
+        extract_section_cats(wxr, base_data, page_data, level2_node)
         for next_level in level2_node.find_child(LEVEL_KIND_FLAGS):
             parse_section(wxr, page_data, base_data, next_level)
 
@@ -80,3 +82,30 @@ def parse_page(
             data.senses.append(Sense(tags=["no-gloss"]))
 
     return [d.model_dump(exclude_defaults=True) for d in page_data]
+
+
+def extract_section_cats(
+    wxr: WiktextractContext,
+    base_data: WordEntry,
+    page_data: list[WordEntry],
+    level_node: LevelNode,
+):
+    cats = {}
+    for node in level_node.find_child(NodeKind.TEMPLATE | NodeKind.LINK):
+        if node.kind == NodeKind.LINK:
+            clean_node(wxr, cats, node)
+        elif node.template_name in [
+            "topics",
+            "C",
+            "topic",
+            "catlangname",
+            "cln",
+        ]:
+            clean_node(wxr, cats, node)
+
+    if len(page_data) == 0 or page_data[-1].lang_code != base_data.lang_code:
+        base_data.categories.extend(cats.get("categories", []))
+    else:
+        for data in page_data:
+            if data.lang_code == page_data[-1].lang_code:
+                data.categories.extend(cats.get("categories", []))

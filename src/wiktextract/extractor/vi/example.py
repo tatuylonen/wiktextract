@@ -32,7 +32,7 @@ def extract_example_list_item(
                 )
                 e_data.translation = clean_node(
                     wxr, None, list_item.children[index + 1 :]
-                ).strip("— \n")
+                ).strip("—- \n")
                 sense.examples.append(e_data)
                 break
         elif isinstance(node, TemplateNode) and node.template_name in [
