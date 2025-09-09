@@ -41,7 +41,7 @@ def extract_pos_section(
 
 # redirect
 ALT_OF_TEMPLATES = frozenset(["altform", "alt form", "vi-alt sp", "vie-alt sp"])
-FORM_OF_TEMPLATES = frozenset(["số nhiều của"])
+FORM_OF_TEMPLATES = frozenset(["số nhiều của", "short for"])
 
 
 def extract_gloss_list_item(

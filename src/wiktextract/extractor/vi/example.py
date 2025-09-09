@@ -2,6 +2,7 @@ from wikitextprocessor import NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from ..ruby import extract_ruby
 from ..share import calculate_bold_offsets
 from .linkage import (
     GLOSS_LIST_LINKAGE_TEMPLATES,
@@ -35,24 +36,24 @@ def extract_example_list_item(
                 ).strip("—- \n")
                 sense.examples.append(e_data)
                 break
-        elif isinstance(node, TemplateNode) and node.template_name in [
-            "ux",
-            "usex",
-            "ux2",
-            "uxi",
-        ]:
-            extract_ux_template(wxr, sense, node)
-        elif (
-            isinstance(node, TemplateNode)
-            and node.template_name in GLOSS_LIST_LINKAGE_TEMPLATES
-        ):
-            extract_gloss_list_linkage_template(
-                wxr,
-                word_entry,
-                node,
-                GLOSS_LIST_LINKAGE_TEMPLATES[node.template_name],
-                " ".join(word_entry.senses[-1].glosses),
-            )
+        elif isinstance(node, TemplateNode):
+            if node.template_name in ["ux", "usex", "ux2", "uxi"]:
+                extract_ux_template(wxr, sense, node)
+            elif node.template_name.startswith(("quote-", "RQ:")):
+                ref = extract_quote_template(wxr, sense, node)
+            elif node.template_name in GLOSS_LIST_LINKAGE_TEMPLATES:
+                extract_gloss_list_linkage_template(
+                    wxr,
+                    word_entry,
+                    node,
+                    GLOSS_LIST_LINKAGE_TEMPLATES[node.template_name],
+                    " ".join(word_entry.senses[-1].glosses),
+                )
+        elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
+            for child_list_item in node.find_child(NodeKind.LIST_ITEM):
+                extract_example_list_item(
+                    wxr, word_entry, sense, child_list_item, ref
+                )
 
 
 def extract_ux_template(
@@ -107,3 +108,52 @@ def extract_ux_template(
         sense.examples.append(e_data)
         for link_node in expanded_node.find_child(NodeKind.LINK):
             clean_node(wxr, sense, link_node)
+
+
+def extract_quote_template(
+    wxr: WiktextractContext,
+    sense: Sense,
+    t_node: TemplateNode,
+) -> str:
+    ref = ""
+    if all(
+        arg not in t_node.template_parameters for arg in ["text", "passage", 7]
+    ):
+        ref = clean_node(wxr, sense, t_node)
+    else:
+        expanded_node = wxr.wtp.parse(
+            wxr.wtp.node_to_wikitext(t_node), expand_all=True
+        )
+        example = Example(text="")
+        for span_tag in expanded_node.find_html_recursively("span"):
+            span_class = span_tag.attrs.get("class", "")
+            if "cited-source" == span_class:
+                example.ref = clean_node(wxr, None, span_tag)
+            elif "e-quotation" in span_class:
+                example.ruby, node_without_ruby = extract_ruby(wxr, span_tag)
+                example.text = clean_node(wxr, None, node_without_ruby)
+                calculate_bold_offsets(
+                    wxr, span_tag, example.text, example, "bold_text_offsets"
+                )
+            elif "e-translation" in span_class:
+                example.translation = clean_node(wxr, None, span_tag)
+                calculate_bold_offsets(
+                    wxr,
+                    span_tag,
+                    example.translation,
+                    example,
+                    "bold_translation_text",
+                )
+        for i_tag in expanded_node.find_html_recursively(
+            "i", attr_name="class", attr_value="e-transliteration"
+        ):
+            example.roman = clean_node(wxr, None, i_tag)
+            calculate_bold_offsets(
+                wxr, i_tag, example.roman, example, "bold_roman_offsets"
+            )
+            break
+        if example.text != "":
+            sense.examples.append(example)
+        clean_node(wxr, sense, expanded_node)
+
+    return ref

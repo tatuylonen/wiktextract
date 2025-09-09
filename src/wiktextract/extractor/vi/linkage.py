@@ -3,9 +3,9 @@ import re
 from wikitextprocessor import (
     HTMLNode,
     LevelNode,
-    WikiNode,
     NodeKind,
     TemplateNode,
+    WikiNode,
 )
 
 from ...page import clean_node
