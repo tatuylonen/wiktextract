@@ -100,7 +100,10 @@ def extract_quote_templates(
         if "cited-source" == span_class:
             example_data["ref"] = clean_node(wxr, None, span_tag)
         elif "e-quotation" in span_class:
-            example_data["text"] = clean_node(wxr, None, span_tag)
+            ruby_data, node_without_ruby = extract_ruby(wxr, span_tag)
+            if len(ruby_data) > 0:
+                example_data["ruby"] = ruby_data
+            example_data["text"] = clean_node(wxr, None, node_without_ruby)
             calculate_bold_offsets(
                 wxr,
                 span_tag,

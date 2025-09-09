@@ -66,6 +66,7 @@ LINKAGE_SECTIONS = {
     "Từ liên hệ": "related",
     "Xem thêm": "related",
     "Đồng nghĩa": "synonyms",
+    "Từ phái sinh": "derived",
 }
 
 

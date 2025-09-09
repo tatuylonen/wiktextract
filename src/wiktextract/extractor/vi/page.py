@@ -10,10 +10,10 @@ from wikitextprocessor.parser import (
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .etymology import extract_etymology_section
-from .linkage import extract_alt_form_section
+from .linkage import extract_alt_form_section, extract_linkage_section
 from .models import Sense, WordEntry
 from .pos import extract_note_section, extract_pos_section
-from .section_titles import POS_DATA, TRANSLATION_SECTIONS
+from .section_titles import LINKAGE_SECTIONS, POS_DATA, TRANSLATION_SECTIONS
 from .sound import extract_sound_section
 from .translation import extract_translation_section
 
@@ -41,7 +41,14 @@ def parse_section(
         extract_note_section(
             wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
         )
-    elif subtitle not in ["Tham khảo", "Cách ra dấu", "Đọc thêm"]:
+    elif subtitle in LINKAGE_SECTIONS:
+        extract_linkage_section(
+            wxr,
+            page_data if len(page_data) > 0 else [base_data],
+            level_node,
+            LINKAGE_SECTIONS[subtitle],
+        )
+    elif subtitle not in ["Tham khảo", "Cách ra dấu", "Đọc thêm", "Xem thêm"]:
         wxr.wtp.debug(f"Unknown title: {subtitle}", sortid="vi/page/22")
 
     extract_section_cats(wxr, base_data, page_data, level_node)

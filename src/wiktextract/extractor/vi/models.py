@@ -55,6 +55,8 @@ class Linkage(VietnameseBaseModel):
     raw_tags: list[str] = []
     roman: str = ""
     sense: str = ""
+    other: str = ""
+    translation: str = ""
 
 
 class Form(VietnameseBaseModel):
@@ -124,3 +126,4 @@ class WordEntry(VietnameseBaseModel):
     etymology_text: str = ""
     hyphenations: list[Hyphenation] = []
     notes: list[str] = []
+    anagrams: list[Linkage] = []

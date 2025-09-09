@@ -124,3 +124,80 @@ class TestViLinkage(TestCase):
                 }
             ],
         )
+
+    def test_ko_col3(self):
+        self.wxr.wtp.add_page(
+            "Bản mẫu:col3",
+            10,
+            """<div class="list-switcher-wrapper"><div class="list-switcher" data-toggle-category="từ phái sinh"><div class="term-list columns-bg ul-column-count" data-column-count="3"><ul><li><span lang="ko" class="Kore">[[천도 복숭아]]</span> (<span lang="ko" class="Kore">[[:天桃#Tiếng&#95;Triều&#95;Tiên|天桃]]‒</span>, <span lang="ko-Latn" class="mention-tr tr Latn">cheondo boksung'a</span>, “quả xuân đào”)</li></ul></div></div></div>
+""",
+        )
+        data = parse_page(
+            self.wxr,
+            "복숭아",
+            """==Tiếng Triều Tiên==
+===Danh từ===
+# Quả đào
+====Từ phái sinh====
+{{col3|ko
+|{{ko-l|천도 복숭아|天桃‒|quả xuân đào}}
+}}""",
+        )
+        self.assertEqual(
+            data[0]["derived"],
+            [
+                {
+                    "word": "천도 복숭아",
+                    "roman": "cheondo boksung'a",
+                    "other": "天桃‒",
+                    "translation": "quả xuân đào",
+                }
+            ],
+        )
+
+    def test_zh_col3(self):
+        self.wxr.wtp.add_page(
+            "Bản mẫu:col3",
+            10,
+            """<div class="list-switcher-wrapper"><div class="term-list columns-bg"><ul><li><span class="Hant" lang="zh">[[:鹽溶液#Tiếng&#95;Trung&#95;Quốc|鹽溶液]]</span><span class="Zsym mention" style="font-size:100%;">&nbsp;/ </span><span class="Hans" lang="zh">[[:盐溶液#Tiếng&#95;Trung&#95;Quốc|盐溶液]]</span></li></ul></div></div>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "溶液",
+            """==Tiếng Trung Quốc==
+===Danh từ===
+# Dung dịch.
+====Từ phái sinh====
+{{col3|zh|鹽溶液}}""",
+        )
+        self.assertEqual(
+            data[0]["derived"],
+            [
+                {"word": "鹽溶液", "tags": ["Traditional-Chinese"]},
+                {"word": "盐溶液", "tags": ["Simplified-Chinese"]},
+            ],
+        )
+
+    def test_link_template(self):
+        self.wxr.wtp.add_page(
+            "Bản mẫu:sense",
+            10,
+            """<span class="ib-brac qualifier-brac">(</span><span class="ib-content qualifier-content">khoa học</span><span class="ib-brac qualifier-brac">)</span><span class="ib-colon sense-qualifier-colon">:</span>""",
+        )
+        self.wxr.wtp.add_page(
+            "Bản mẫu:l",
+            10,
+            """<span class="Latn" lang="nl">[[:scheikunde#Tiếng&#95;Hà&#95;Lan|scheikunde]]</span>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "chemie",
+            """==Tiếng Hà Lan==
+===Danh từ===
+# Hóa học
+====Đồng nghĩa====
+* {{sense|khoa học}} {{l|nl|scheikunde}}""",
+        )
+        self.assertEqual(
+            data[0]["synonyms"], [{"word": "scheikunde", "sense": "khoa học"}]
+        )

@@ -63,3 +63,43 @@ class TestViGloss(TestCase):
                 }
             ],
         )
+
+    def test_vi_ruby(self):
+        self.wxr.wtp.add_page(
+            "Bản mẫu:RQ:Truyện Kiều",
+            10,
+            """<div class="citation-whole"><span class="cited-source"><span class="None" lang="und">'''1820'''</span>, [[w:Nguyễn Du|Nguyễn Du]] (<span class="Hani" lang="vi">阮攸</span>), <cite>[[:w&#58;Truyện Kiều|Đoạn trường tân thanh (Truyện Kiều)]]</cite>&lrm;<sup>[https://vi.wikisource.org/wiki/Truyện_Kiều_(bản_Liễu_Văn_Ðường_1866)]</sup>, xuất bản <span class="None" lang="und">1866</span>, dòng <span class="None" lang="und">1269</span>:</span><dl><dd><div class="h-quotation"><span class="Latn e-quotation cited-passage" lang="vi"><span lang='vi' style='font-size: 135%25;'><ruby><rb><span class='Hani'>吝</span></rb><rp>(</rp><rt><span style='padding: 0 0.25em;'>Lần</span></rt><rp>)</rp></ruby><ruby><rb><span class='Hani'>吝</span></rb><rp>(</rp><rt><span style='padding: 0 0.25em;'>lần</span></rt><rp>)</rp></ruby><ruby><rb><span class='Hani'>兎</span></rb><rp>(</rp><rt><span style='padding: 0 0.25em;'>thỏ</span></rt><rp>)</rp></ruby><ruby><rb><span class='Hani'>鉑</span></rb><rp>(</rp><rt><span style='padding: 0 0.25em;'>bạc</span></rt><rp>)</rp></ruby>'''<ruby><rb><span class='Hani'>鵶</span></rb><rp>(</rp><rt><span style='padding: 0 0.25em;'>ác</span></rt><rp>)</rp></ruby><ruby><rb><span class='Hani'>鐄</span></rb><rp>(</rp><rt><span style='padding: 0 0.25em;'>vàng</span></rt><rp>)</rp></ruby>'''</span></span></div>[[Category:Định nghĩa mục từ tiếng Việt có trích dẫn ngữ liệu|BANH&#37;]]</dd></dl></div>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "ác vàng",
+            """==Tiếng Việt==
+===Danh từ===
+# Mặt trời.
+#* {{RQ:Truyện Kiều|year_published=1866|line=1269|passage={{vi-ruby|吝吝兎鉑'''鵶鐄'''|Lần lần thỏ bạc '''ác vàng'''}}}}""",
+        )
+        self.assertEqual(
+            data[0]["senses"],
+            [
+                {
+                    "categories": [
+                        "Định nghĩa mục từ tiếng Việt có trích dẫn ngữ liệu"
+                    ],
+                    "glosses": ["Mặt trời."],
+                    "examples": [
+                        {
+                            "ref": "1820, Nguyễn Du (阮攸), Đoạn trường tân thanh (Truyện Kiều)^(https://vi.wikisource.org/wiki/Truyện_Kiều_(bản_Liễu_Văn_Ðường_1866)), xuất bản 1866, dòng 1269:",
+                            "ruby": [
+                                ("吝", "Lần"),
+                                ("吝", "lần"),
+                                ("兎", "thỏ"),
+                                ("鉑", "bạc"),
+                                ("鵶", "ác"),
+                                ("鐄", "vàng"),
+                            ],
+                            "text": "吝吝兎鉑鵶鐄",
+                        }
+                    ],
+                }
+            ],
+        )
