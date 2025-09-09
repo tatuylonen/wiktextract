@@ -4,6 +4,7 @@ from wikitextprocessor import Wtp
 
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.en.page import parse_page
+from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.wxr_context import WiktextractContext
 
 
@@ -20,6 +21,9 @@ class TestEnDescendant(TestCase):
 
     def tearDown(self):
         self.wxr.wtp.close_db_conn()
+        close_thesaurus_db(
+            self.wxr.thesaurus_db_path, self.wxr.thesaurus_db_conn
+        )
 
     def test_reconstruction(self):
         self.wxr.wtp.add_page(
@@ -121,6 +125,34 @@ class TestEnDescendant(TestCase):
                             ],
                         },
                     ],
+                },
+            ],
+        )
+
+    def test_desc_tags(self):
+        self.wxr.wtp.add_page(
+            "Template:desc",
+            10,
+            """Livonian: <span class="Latn" lang="liv">[[:vež#Livonian|ve’ž]]</span>, <span class="ib-brac qualifier-brac">(</span><span class="ib-content qualifier-content">Salaca</span><span class="ib-brac qualifier-brac">)</span> <span class="Latn" lang="liv">[[:vez#Livonian|vez]]</span> <span class="ib-brac qualifier-brac">(</span><span class="ib-content qualifier-content">dated</span><span class="ib-brac qualifier-brac">)</span>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "Reconstruction:Proto-Finnic/veci",
+            """==Proto-Finnic==
+===Noun===
+# [[water]]
+====Descendants====
+* {{desc|liv|ve’ž|vez<q:Salaca>|qq2=dated}}""",
+        )
+        self.assertEqual(
+            data[0]["descendants"],
+            [
+                {"lang": "Livonian", "lang_code": "liv", "word": "ve’ž"},
+                {
+                    "lang": "Livonian",
+                    "lang_code": "liv",
+                    "word": "vez",
+                    "tags": ["Salaca", "dated"],
                 },
             ],
         )
