@@ -48,7 +48,7 @@ def parse_section(
             level_node,
             LINKAGE_SECTIONS[subtitle],
         )
-    elif subtitle not in ["Tham khảo", "Cách ra dấu", "Đọc thêm"]:
+    elif subtitle not in ["Tham khảo", "Cách ra dấu", "Đọc thêm", "Xem thêm"]:
         wxr.wtp.debug(f"Unknown title: {subtitle}", sortid="vi/page/22")
 
     extract_section_cats(wxr, base_data, page_data, level_node)

@@ -177,3 +177,27 @@ class TestViLinkage(TestCase):
                 {"word": "盐溶液", "tags": ["Simplified-Chinese"]},
             ],
         )
+
+    def test_link_template(self):
+        self.wxr.wtp.add_page(
+            "Bản mẫu:sense",
+            10,
+            """<span class="ib-brac qualifier-brac">(</span><span class="ib-content qualifier-content">khoa học</span><span class="ib-brac qualifier-brac">)</span><span class="ib-colon sense-qualifier-colon">:</span>""",
+        )
+        self.wxr.wtp.add_page(
+            "Bản mẫu:l",
+            10,
+            """<span class="Latn" lang="nl">[[:scheikunde#Tiếng&#95;Hà&#95;Lan|scheikunde]]</span>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "chemie",
+            """==Tiếng Hà Lan==
+===Danh từ===
+# Hóa học
+====Đồng nghĩa====
+* {{sense|khoa học}} {{l|nl|scheikunde}}""",
+        )
+        self.assertEqual(
+            data[0]["synonyms"], [{"word": "scheikunde", "sense": "khoa học"}]
+        )

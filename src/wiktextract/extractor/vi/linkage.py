@@ -1,6 +1,12 @@
 import re
 
-from wikitextprocessor import HTMLNode, LevelNode, NodeKind, TemplateNode
+from wikitextprocessor import (
+    HTMLNode,
+    LevelNode,
+    WikiNode,
+    NodeKind,
+    TemplateNode,
+)
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -175,6 +181,9 @@ def extract_linkage_section(
             or node.template_name in ["columns", "column"]
         ):
             l_data.extend(extract_col_template(wxr, node))
+        elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
+            for list_item in node.find_child(NodeKind.LIST_ITEM):
+                l_data.extend(extract_linkage_list_item(wxr, list_item))
 
     if level_node.kind == NodeKind.LEVEL3:
         for data in page_data:
@@ -223,5 +232,41 @@ def extract_col_template(
                         )
                     )
                     first_word = False
+
+    return l_list
+
+
+def extract_linkage_list_item(
+    wxr: WiktextractContext, list_item: WikiNode
+) -> list[Linkage]:
+    l_list = []
+    sense = ""
+    for node in list_item.children:
+        if isinstance(node, TemplateNode):
+            if node.template_name in ["sense", "s"]:
+                sense = clean_node(wxr, None, node).strip("(): ")
+            elif node.template_name in ["l", "link"]:
+                l_list.extend(extract_link_template(wxr, node, sense))
+        elif isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
+            word = clean_node(wxr, None, node)
+            if word != "":
+                l_list.append(Linkage(word=word, sense=sense))
+    return l_list
+
+
+def extract_link_template(
+    wxr: WiktextractContext, t_node: TemplateNode, sense: str
+) -> list[Linkage]:
+    l_list = []
+    expanded_template = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    lang_code = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
+    for span_tag in expanded_template.find_html("span"):
+        span_lang = span_tag.attrs.get("lang", "")
+        if span_lang == lang_code:
+            l_list.append(
+                Linkage(word=clean_node(wxr, None, span_tag), sense=sense)
+            )
 
     return l_list

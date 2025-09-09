@@ -105,9 +105,10 @@ def extract_label_template(
     for span_tag in expanded_node.find_html_recursively("span"):
         span_classes = span_tag.attrs.get("class", "").split()
         if "label-content" in span_classes:
-            raw_tag = clean_node(wxr, None, span_tag)
-            if raw_tag != "":
-                sense.raw_tags.append(raw_tag)
+            for raw_tag in clean_node(wxr, None, span_tag).split(","):
+                raw_tag = raw_tag.strip()
+                if raw_tag != "":
+                    sense.raw_tags.append(raw_tag)
     clean_node(wxr, sense, expanded_node)
 
 
