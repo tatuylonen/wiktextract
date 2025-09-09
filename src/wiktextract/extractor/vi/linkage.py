@@ -1,3 +1,5 @@
+import re
+
 from wikitextprocessor import HTMLNode, LevelNode, NodeKind, TemplateNode
 
 from ...page import clean_node
@@ -158,3 +160,68 @@ def extract_qualifier_template(
         if raw_tag != "":
             raw_tags.append(raw_tag)
     return raw_tags
+
+
+def extract_linkage_section(
+    wxr: WiktextractContext,
+    page_data: list[WordEntry],
+    level_node: LevelNode,
+    linkage_type: str,
+):
+    l_data = []
+    for node in level_node.children:
+        if isinstance(node, TemplateNode) and (
+            re.fullmatch(r"(?:col|der|rel)(?:\d+)?", node.template_name)
+            or node.template_name in ["columns", "column"]
+        ):
+            l_data.extend(extract_col_template(wxr, node))
+
+    if level_node.kind == NodeKind.LEVEL3:
+        for data in page_data:
+            if data.lang_code == page_data[-1].lang_code:
+                getattr(data, linkage_type).extend(l_data)
+    elif len(page_data) > 0:
+        getattr(page_data[-1], linkage_type).extend(l_data)
+
+
+def extract_col_template(
+    wxr: WiktextractContext, t_node: TemplateNode
+) -> list[Linkage]:
+    l_list = []
+    expanded_template = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    lang_code = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
+    for li_tag in expanded_template.find_html_recursively("li"):
+        first_word = True
+        translation = ""
+        for node in li_tag.children:
+            if isinstance(node, str):
+                m = re.search(r"“(.+)”", node)
+                if m is not None:
+                    translation = m.group(1).strip()
+        for span_tag in li_tag.find_html("span"):
+            span_lang = span_tag.attrs.get("lang", "")
+            span_class = span_tag.attrs.get("class", "")
+            if span_lang.endswith("-Latn") and len(l_list) > 0:
+                l_list[-1].roman = clean_node(wxr, None, span_tag)
+            elif span_lang == lang_code:
+                if lang_code == "zh":
+                    l_data = Linkage(word=clean_node(wxr, None, span_tag))
+                    if "Hant" in span_class:
+                        l_data.tags.append("Traditional-Chinese")
+                    elif "Hans" in span_class:
+                        l_data.tags.append("Simplified-Chinese")
+                    l_list.append(l_data)
+                elif not first_word:
+                    l_list[-1].other = clean_node(wxr, None, span_tag)
+                else:
+                    l_list.append(
+                        Linkage(
+                            word=clean_node(wxr, None, span_tag),
+                            translation=translation,
+                        )
+                    )
+                    first_word = False
+
+    return l_list
