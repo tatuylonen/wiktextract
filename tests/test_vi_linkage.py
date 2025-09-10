@@ -224,3 +224,35 @@ class TestViLinkage(TestCase):
                 {"form": "tank man", "tags": ["alternative"]},
             ],
         )
+
+    def test_idioms(self):
+        data = parse_page(
+            self.wxr,
+            "dog",
+            """==Tiếng Anh==
+===Danh từ===
+# Chó.
+====Thành ngữ====
+* '''to go to the dogs'''
+*# [[thất cơ|Thất cơ]] [[lỡ vận]], [[khánh kiệt]], xuống [[dốc]].
+*# [[sa đọa|Sa đọa]].
+* '''to help a lame dog over stile''': [[giúp đỡ|Giúp đỡ]] ai trong [[lúc]] [[khó khăn]].""",
+        )
+        self.assertEqual(
+            data[0]["related"],
+            [
+                {
+                    "word": "to go to the dogs",
+                    "tags": ["idiomatic"],
+                    "senses": [
+                        "Thất cơ lỡ vận, khánh kiệt, xuống dốc.",
+                        "Sa đọa.",
+                    ],
+                },
+                {
+                    "word": "to help a lame dog over stile",
+                    "tags": ["idiomatic"],
+                    "sense": "Giúp đỡ ai trong lúc khó khăn.",
+                },
+            ],
+        )
