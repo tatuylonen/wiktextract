@@ -2,6 +2,7 @@ import re
 
 from wikitextprocessor.parser import (
     LEVEL_KIND_FLAGS,
+    HTMLNode,
     LevelNode,
     NodeKind,
     TemplateNode,
@@ -11,7 +12,7 @@ from wikitextprocessor.parser import (
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .example import extract_example_list_item
-from .models import AltForm, Sense, WordEntry
+from .models import AltForm, Form, Sense, WordEntry
 from .section_titles import POS_DATA
 from .tags import translate_raw_tags
 
@@ -37,6 +38,10 @@ def extract_pos_section(
                 extract_gloss_list_item(wxr, page_data[-1], list_item)
                 if index < gloss_list_index:
                     gloss_list_index = index
+
+    for node in level_node.children[:gloss_list_index]:
+        if isinstance(node, TemplateNode):
+            extract_headword_template(wxr, page_data[-1], node)
 
 
 # redirect
@@ -185,3 +190,32 @@ def extract_note_section(
         )
         if note != "":
             word_entry.notes.append(note)
+
+
+def extract_headword_template(
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+):
+    raw_tag = ""
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for node in expanded_node.find_child_recursively(
+        NodeKind.ITALIC | NodeKind.HTML
+    ):
+        if node.kind == NodeKind.ITALIC:
+            raw_tag = clean_node(wxr, None, node)
+        elif (
+            isinstance(node, HTMLNode)
+            and node.tag == "span"
+            and "form-of" in node.attrs.get("class", "").split()
+        ):
+            form = Form(form=clean_node(wxr, None, node))
+            if raw_tag != "":
+                form.raw_tags.append(raw_tag)
+                translate_raw_tags(form)
+                raw_tag = ""
+            if form.form != "":
+                word_entry.forms.append(form)
+
+    for link_node in expanded_node.find_child(NodeKind.LINK):
+        clean_node(wxr, word_entry, link_node)
