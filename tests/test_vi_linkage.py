@@ -201,3 +201,26 @@ class TestViLinkage(TestCase):
         self.assertEqual(
             data[0]["synonyms"], [{"word": "scheikunde", "sense": "khoa học"}]
         )
+
+    def test_alt_form_section_under_pos(self):
+        self.wxr.wtp.add_page(
+            "Bản mẫu:alter",
+            10,
+            """<span class="Latn" lang="en">[[:tank-man#Tiếng&#95;Anh|tank-man]]</span>, <span class="Latn" lang="en">[[:tank man#Tiếng&#95;Anh|tank man]]</span>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "tankman",
+            """==Tiếng Anh==
+===Danh từ===
+# Chiến sĩ lái xe tăng; lính xe tăng.
+====Cách viết khác====
+* {{alter|en|tank-man|tank man}}""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {"form": "tank-man", "tags": ["alternative"]},
+                {"form": "tank man", "tags": ["alternative"]},
+            ],
+        )

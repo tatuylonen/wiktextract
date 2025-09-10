@@ -119,8 +119,12 @@ def extract_gloss_list_linkage_template(
 
 
 def extract_alt_form_section(
-    wxr: WiktextractContext, base_data: WordEntry, level_node: LevelNode
+    wxr: WiktextractContext,
+    base_data: WordEntry,
+    page_data: list[WordEntry],
+    level_node: LevelNode,
 ):
+    forms = []
     for list_node in level_node.find_child(NodeKind.LIST):
         for list_item in list_node.find_child(NodeKind.LIST_ITEM):
             raw_tags = []
@@ -129,20 +133,23 @@ def extract_alt_form_section(
                     "alter",
                     "def-alt",
                 ]:
-                    extract_alter_template(wxr, base_data, node, raw_tags)
+                    forms.extend(extract_alter_template(wxr, node, raw_tags))
                 elif (
                     isinstance(node, TemplateNode)
                     and node.template_name in QUALIFIER_TEMPALTES
                 ):
                     raw_tags.extend(extract_qualifier_template(wxr, node))
 
+    if len(page_data) == 0 or page_data[-1].lang != base_data.lang:
+        base_data.forms.extend(forms)
+    else:
+        page_data[-1].forms.extend(forms)
+
 
 def extract_alter_template(
-    wxr: WiktextractContext,
-    base_data: WordEntry,
-    t_node: TemplateNode,
-    raw_tags: list[str],
-):
+    wxr: WiktextractContext, t_node: TemplateNode, raw_tags: list[str]
+) -> list[Form]:
+    forms = []
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(t_node), expand_all=True
     )
@@ -154,7 +161,8 @@ def extract_alter_template(
         if word != "":
             form = Form(form=word, tags=["alternative"], raw_tags=raw_tags)
             translate_raw_tags(form)
-            base_data.forms.append(form)
+            forms.append(form)
+    return forms
 
 
 def extract_qualifier_template(

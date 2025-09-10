@@ -36,7 +36,7 @@ def parse_section(
     elif subtitle == "Từ nguyên":
         extract_etymology_section(wxr, base_data, level_node)
     elif subtitle == "Cách viết khác":
-        extract_alt_form_section(wxr, base_data, level_node)
+        extract_alt_form_section(wxr, base_data, page_data, level_node)
     elif subtitle == "Ghi chú sử dụng":
         extract_note_section(
             wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
