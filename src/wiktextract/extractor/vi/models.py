@@ -57,6 +57,7 @@ class Linkage(VietnameseBaseModel):
     sense: str = ""
     other: str = ""
     translation: str = ""
+    senses: list[str] = []
 
 
 class Form(VietnameseBaseModel):

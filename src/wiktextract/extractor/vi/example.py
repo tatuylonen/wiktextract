@@ -47,7 +47,9 @@ def extract_example_list_item(
                     word_entry,
                     node,
                     GLOSS_LIST_LINKAGE_TEMPLATES[node.template_name],
-                    " ".join(word_entry.senses[-1].glosses),
+                    " ".join(word_entry.senses[-1].glosses)
+                    if len(word_entry.senses) > 0
+                    else "",
                 )
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
             for child_list_item in node.find_child(NodeKind.LIST_ITEM):

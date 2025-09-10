@@ -103,3 +103,22 @@ class TestViGloss(TestCase):
                 }
             ],
         )
+
+    def test_headword_form(self):
+        self.wxr.wtp.add_page(
+            "Bản mẫu:eng-noun",
+            10,
+            """<span class="infl-inline">'''dog''' (''số nhiều''&nbsp;<span class="form-of plural-form-of lang-en">'''[[dogs]]'''</span>)</span>[[Category:Danh từ  tiếng Anh|dog]]""",
+        )
+        data = parse_page(
+            self.wxr,
+            "dog",
+            """==Tiếng Anh==
+===Danh từ===
+{{eng-noun}}
+# [[chó|Chó]].""",
+        )
+        self.assertEqual(
+            data[0]["forms"], [{"form": "dogs", "tags": ["plural"]}]
+        )
+        self.assertEqual(data[0]["categories"], ["Danh từ tiếng Anh"])

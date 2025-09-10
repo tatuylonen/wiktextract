@@ -27,6 +27,14 @@ def parse_section(
     subtitle = clean_node(wxr, None, level_node.largs)
     if subtitle in POS_DATA:
         extract_pos_section(wxr, page_data, base_data, level_node, subtitle)
+        if len(page_data[-1].senses) == 0 and subtitle in LINKAGE_SECTIONS:
+            page_data.pop()
+            extract_linkage_section(
+                wxr,
+                page_data if len(page_data) > 0 else [base_data],
+                level_node,
+                LINKAGE_SECTIONS[subtitle],
+            )
     elif subtitle in TRANSLATION_SECTIONS:
         extract_translation_section(
             wxr, page_data[-1] if len(page_data) else base_data, level_node
@@ -36,7 +44,7 @@ def parse_section(
     elif subtitle == "Từ nguyên":
         extract_etymology_section(wxr, base_data, level_node)
     elif subtitle == "Cách viết khác":
-        extract_alt_form_section(wxr, base_data, level_node)
+        extract_alt_form_section(wxr, base_data, page_data, level_node)
     elif subtitle == "Ghi chú sử dụng":
         extract_note_section(
             wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
@@ -73,7 +81,7 @@ def parse_page(
     page_data = []
     for level2_node in tree.find_child(NodeKind.LEVEL2):
         categories = {}
-        lang_name = clean_node(wxr, categories, level2_node.largs)
+        lang_name = clean_node(wxr, categories, level2_node.largs) or "unknown"
         lang_code = name_to_code(lang_name, "vi") or "unknown"
         for t_node in level2_node.find_content(NodeKind.TEMPLATE):
             if t_node.template_name == "langname":

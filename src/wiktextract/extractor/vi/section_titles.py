@@ -58,11 +58,11 @@ POS_DATA = {
 LINKAGE_SECTIONS = {
     "Từ tương tự": "related",
     "Từ đảo chữ": "anagrams",
-    "Trái nghĩa": "antonymous",
+    "Trái nghĩa": "antonyms",
     "Từ ghép": "derived",  # compound
     "Từ dẫn xuất": "derived",
     "Phương ngữ khác": "related",  # other dialects
-    "Thành ngữ": "related",  # idioms
+    "Thành ngữ": "idioms",
     "Từ liên hệ": "related",
     "Xem thêm": "related",
     "Đồng nghĩa": "synonyms",

@@ -5,5 +5,8 @@
     "Module",
     "MediaWiki",
     "Appendix"
-  ]
+  ],
+  "parser_function_aliases": {
+    "#gọi": "#invoke"
+  }
 }

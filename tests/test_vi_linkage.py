@@ -201,3 +201,58 @@ class TestViLinkage(TestCase):
         self.assertEqual(
             data[0]["synonyms"], [{"word": "scheikunde", "sense": "khoa học"}]
         )
+
+    def test_alt_form_section_under_pos(self):
+        self.wxr.wtp.add_page(
+            "Bản mẫu:alter",
+            10,
+            """<span class="Latn" lang="en">[[:tank-man#Tiếng&#95;Anh|tank-man]]</span>, <span class="Latn" lang="en">[[:tank man#Tiếng&#95;Anh|tank man]]</span>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "tankman",
+            """==Tiếng Anh==
+===Danh từ===
+# Chiến sĩ lái xe tăng; lính xe tăng.
+====Cách viết khác====
+* {{alter|en|tank-man|tank man}}""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {"form": "tank-man", "tags": ["alternative"]},
+                {"form": "tank man", "tags": ["alternative"]},
+            ],
+        )
+
+    def test_idioms(self):
+        data = parse_page(
+            self.wxr,
+            "dog",
+            """==Tiếng Anh==
+===Danh từ===
+# Chó.
+====Thành ngữ====
+* '''to go to the dogs'''
+*# [[thất cơ|Thất cơ]] [[lỡ vận]], [[khánh kiệt]], xuống [[dốc]].
+*# [[sa đọa|Sa đọa]].
+* '''to help a lame dog over stile''': [[giúp đỡ|Giúp đỡ]] ai trong [[lúc]] [[khó khăn]].""",
+        )
+        self.assertEqual(
+            data[0]["related"],
+            [
+                {
+                    "word": "to go to the dogs",
+                    "tags": ["idiomatic"],
+                    "senses": [
+                        "Thất cơ lỡ vận, khánh kiệt, xuống dốc.",
+                        "Sa đọa.",
+                    ],
+                },
+                {
+                    "word": "to help a lame dog over stile",
+                    "tags": ["idiomatic"],
+                    "sense": "Giúp đỡ ai trong lúc khó khăn.",
+                },
+            ],
+        )

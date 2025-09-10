@@ -119,8 +119,12 @@ def extract_gloss_list_linkage_template(
 
 
 def extract_alt_form_section(
-    wxr: WiktextractContext, base_data: WordEntry, level_node: LevelNode
+    wxr: WiktextractContext,
+    base_data: WordEntry,
+    page_data: list[WordEntry],
+    level_node: LevelNode,
 ):
+    forms = []
     for list_node in level_node.find_child(NodeKind.LIST):
         for list_item in list_node.find_child(NodeKind.LIST_ITEM):
             raw_tags = []
@@ -129,20 +133,23 @@ def extract_alt_form_section(
                     "alter",
                     "def-alt",
                 ]:
-                    extract_alter_template(wxr, base_data, node, raw_tags)
+                    forms.extend(extract_alter_template(wxr, node, raw_tags))
                 elif (
                     isinstance(node, TemplateNode)
                     and node.template_name in QUALIFIER_TEMPALTES
                 ):
                     raw_tags.extend(extract_qualifier_template(wxr, node))
 
+    if len(page_data) == 0 or page_data[-1].lang != base_data.lang:
+        base_data.forms.extend(forms)
+    else:
+        page_data[-1].forms.extend(forms)
+
 
 def extract_alter_template(
-    wxr: WiktextractContext,
-    base_data: WordEntry,
-    t_node: TemplateNode,
-    raw_tags: list[str],
-):
+    wxr: WiktextractContext, t_node: TemplateNode, raw_tags: list[str]
+) -> list[Form]:
+    forms = []
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(t_node), expand_all=True
     )
@@ -154,7 +161,8 @@ def extract_alter_template(
         if word != "":
             form = Form(form=word, tags=["alternative"], raw_tags=raw_tags)
             translate_raw_tags(form)
-            base_data.forms.append(form)
+            forms.append(form)
+    return forms
 
 
 def extract_qualifier_template(
@@ -175,15 +183,19 @@ def extract_linkage_section(
     linkage_type: str,
 ):
     l_data = []
-    for node in level_node.children:
-        if isinstance(node, TemplateNode) and (
-            re.fullmatch(r"(?:col|der|rel)(?:\d+)?", node.template_name)
-            or node.template_name in ["columns", "column"]
-        ):
-            l_data.extend(extract_col_template(wxr, node))
-        elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
-            for list_item in node.find_child(NodeKind.LIST_ITEM):
-                l_data.extend(extract_linkage_list_item(wxr, list_item))
+    if linkage_type == "idioms":
+        l_data.extend(extract_idiom_section(wxr, level_node))
+        linkage_type = "related"
+    else:
+        for node in level_node.children:
+            if isinstance(node, TemplateNode) and (
+                re.fullmatch(r"(?:col|der|rel)(?:\d+)?", node.template_name)
+                or node.template_name in ["columns", "column"]
+            ):
+                l_data.extend(extract_col_template(wxr, node))
+            elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
+                for list_item in node.find_child(NodeKind.LIST_ITEM):
+                    l_data.extend(extract_linkage_list_item(wxr, list_item))
 
     if level_node.kind == NodeKind.LEVEL3:
         for data in page_data:
@@ -268,5 +280,43 @@ def extract_link_template(
             l_list.append(
                 Linkage(word=clean_node(wxr, None, span_tag), sense=sense)
             )
+
+    return l_list
+
+
+def extract_idiom_section(
+    wxr: WiktextractContext, level_node: LevelNode
+) -> list[Linkage]:
+    l_list = []
+    for list_node in level_node.find_child(NodeKind.LIST):
+        for list_item in list_node.find_child(NodeKind.LIST_ITEM):
+            l_list.extend(extract_idiom_list_item(wxr, list_item))
+
+    return l_list
+
+
+def extract_idiom_list_item(
+    wxr: WiktextractContext, list_item: WikiNode
+) -> list[Linkage]:
+    l_list = []
+    bold_index = 0
+    sense_nodes = []
+    for index, node in enumerate(list_item.children):
+        if isinstance(node, WikiNode) and node.kind == NodeKind.BOLD:
+            word = clean_node(wxr, None, node)
+            if word != "":
+                bold_index = index
+                l_list.append(Linkage(word=word, tags=["idiomatic"]))
+        elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
+            for child_list_item in node.find_child(NodeKind.LIST_ITEM):
+                sense = clean_node(wxr, None, child_list_item.children)
+                if sense != "" and len(l_list) > 0:
+                    l_list[-1].senses.append(sense)
+        elif index > bold_index:
+            sense_nodes.append(node)
+
+    sense = clean_node(wxr, None, sense_nodes).strip(": ")
+    if sense != "" and len(l_list) > 0:
+        l_list[-1].sense = sense
 
     return l_list
