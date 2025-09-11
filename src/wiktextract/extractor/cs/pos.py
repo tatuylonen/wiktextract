@@ -2,6 +2,7 @@ from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from .example import extract_example_list_item
 from .models import Sense, WordEntry
 from .section_titles import POS_DATA
 from .tags import translate_raw_tags
@@ -84,7 +85,8 @@ def extract_gloss_list_item(
         elif child_list.sarg.startswith("#") and child_list.sarg.endswith(
             (":", "*")
         ):
-            pass
+            for child_list_item in child_list.find_child(NodeKind.LIST_ITEM):
+                extract_example_list_item(wxr, sense, child_list_item)
 
 
 def extract_příznaky_template(

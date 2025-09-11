@@ -10,12 +10,24 @@ class CzechBaseModel(BaseModel):
     )
 
 
+class Example(CzechBaseModel):
+    text: str
+    bold_text_offsets: list[tuple[int, int]] = []
+    translation: str = ""
+    bold_translation_offsets: list[tuple[int, int]] = []
+    ref: str = Field(
+        default="",
+        description="Source of the sentence, like book title and page number",
+    )
+
+
 class Sense(CzechBaseModel):
     glosses: list[str] = []
     tags: list[str] = []
     raw_tags: list[str] = []
     categories: list[str] = []
     topics: list[str] = []
+    examples: list[Example] = []
 
 
 class WordEntry(CzechBaseModel):

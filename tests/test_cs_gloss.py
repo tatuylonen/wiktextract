@@ -82,3 +82,50 @@ class TestCsGloss(TestCase):
                 {"glosses": ["rod Consolida", "ostrožka stračka"]},
             ],
         )
+
+    def test_example_bold_offsets(self):
+        data = parse_page(
+            self.wxr,
+            "pes",
+            """==čeština==
+=== podstatné jméno (1) ===
+==== význam ====
+# [[psovitý|psovitá]]
+#* {{Příklad|cs|'''Pes''' je nejlepší přítel člověka.}}""",
+        )
+        self.assertEqual(
+            data[0]["senses"],
+            [
+                {
+                    "glosses": ["psovitá"],
+                    "examples": [
+                        {
+                            "bold_text_offsets": [(0, 3)],
+                            "text": "Pes je nejlepší přítel člověka.",
+                        }
+                    ],
+                }
+            ],
+        )
+
+    def test_example_translation(self):
+        data = parse_page(
+            self.wxr,
+            "ski",
+            """== angličtina ==
+=== podstatné jméno ===
+==== význam ====
+# [[lyže]]
+#* {{Příklad|en|a pair of skis|pár lyží}}""",
+        )
+        self.assertEqual(
+            data[0]["senses"],
+            [
+                {
+                    "glosses": ["lyže"],
+                    "examples": [
+                        {"text": "a pair of skis", "translation": "pár lyží"}
+                    ],
+                }
+            ],
+        )
