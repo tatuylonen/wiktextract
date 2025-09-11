@@ -1,11 +1,7 @@
 from typing import Any
 
 from mediawiki_langcodes import name_to_code
-from wikitextprocessor.parser import (
-    LEVEL_KIND_FLAGS,
-    LevelNode,
-    NodeKind,
-)
+from wikitextprocessor.parser import LEVEL_KIND_FLAGS, LevelNode, NodeKind
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
