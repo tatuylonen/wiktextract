@@ -45,9 +45,16 @@ def extract_sense_section(
 
 
 def extract_gloss_list_item(
-    wxr: WiktextractContext, word_entry: WordEntry, list_item: WikiNode
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    list_item: WikiNode,
+    parent_sense: Sense | None = None,
 ):
-    sense = Sense()
+    sense = (
+        parent_sense.model_copy(deep=True)
+        if parent_sense is not None
+        else Sense()
+    )
     gloss_nodes = []
     for node in list_item.children:
         if isinstance(node, TemplateNode) and node.template_name == "Příznaky":
@@ -69,6 +76,15 @@ def extract_gloss_list_item(
         sense.glosses.append(gloss)
         translate_raw_tags(sense)
         word_entry.senses.append(sense)
+
+    for child_list in list_item.find_child(NodeKind.LIST):
+        if child_list.sarg.startswith("#") and child_list.sarg.endswith("#"):
+            for child_list_item in child_list.find_child(NodeKind.LIST_ITEM):
+                extract_gloss_list_item(wxr, word_entry, child_list_item, sense)
+        elif child_list.sarg.startswith("#") and child_list.sarg.endswith(
+            (":", "*")
+        ):
+            pass
 
 
 def extract_příznaky_template(

@@ -64,3 +64,21 @@ class TestCsGloss(TestCase):
                 }
             ],
         )
+
+    def test_nested_list(self):
+        data = parse_page(
+            self.wxr,
+            "ostrožka",
+            """==čeština==
+=== podstatné jméno ===
+==== význam ====
+# rod ''[[Consolida]]''
+## [[ostrožka stračka]]""",
+        )
+        self.assertEqual(
+            data[0]["senses"],
+            [
+                {"glosses": ["rod Consolida"]},
+                {"glosses": ["rod Consolida", "ostrožka stračka"]},
+            ],
+        )
