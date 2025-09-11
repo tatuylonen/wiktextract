@@ -250,8 +250,18 @@ lang_specific: dict[str, LangConfDict] = {
             ["noun", r"(?m)^τὸν ", "", ""],
             ["noun", r"^τοὺς ", "", ""],
             ["noun", r"(?m)^toùs ", "", ""],
-            # ["", r"^", "", ""],
-            # ["", r"(?m)^", "", ""],
+            ["noun", r"^τὸ ", "", ""],
+            ["noun", r"(?m)^tò ", "", ""],
+            ["noun", r"^τᾰ̀ ", "", ""],
+            ["noun", r"(?m)^tằ ", "", ""],
+            ["noun", r"^τοῖσῐ / τοῖσῐν ", "", ""],
+            # XXX THIS IS BAD, IF POSSIBLE FIX, ISSUE #1313
+            ["noun", r"(?m)^toîsĭ\(n\) ", "", ""],
+            ["noun", r"(?m)^toîsĭ ", "", ""],
+            ["noun", r"(?m)^toîsĭn ", "", ""],
+            # END BAD
+            # ["noun", r"^", "", ""],
+            # ["noun", r"(?m)^", "", ""],
         ],
     },
     # "Anejom̃": {
