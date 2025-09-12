@@ -35,7 +35,8 @@ class TestCsSound(TestCase):
 * {{IPA|ˈmɔnːdɑːg}}, ''hovorově'' [{{IPA2|ˈmɔnːda}}], {{Audio|Sv-måndag.ogg|måndag}}
 === podstatné jméno ===
 ==== význam ====
-# [[pondělí]]""",
+# [[pondělí]]
+[[Kategorie:Švédská substantiva]]""",
         )
         self.assertEqual(
             data[0]["sounds"][:2],
@@ -45,6 +46,7 @@ class TestCsSound(TestCase):
             ],
         )
         self.assertEqual(data[0]["sounds"][2]["audio"], "Sv-måndag.ogg")
+        self.assertEqual(data[0]["categories"], ["Švédská substantiva"])
 
     def test_hyphenation(self):
         data = parse_page(

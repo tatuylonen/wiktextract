@@ -34,6 +34,11 @@ def parse_section(
     for next_level in level_node.find_child(LEVEL_KIND_FLAGS):
         parse_section(wxr, page_data, base_data, next_level)
 
+    for link_node in level_node.find_child(NodeKind.LINK):
+        clean_node(
+            wxr, page_data[-1] if len(page_data) > 0 else base_data, link_node
+        )
+
 
 def parse_page(
     wxr: WiktextractContext, page_title: str, page_text: str
