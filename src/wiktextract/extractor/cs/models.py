@@ -47,6 +47,12 @@ class Hyphenation(CzechBaseModel):
     parts: list[str] = []
 
 
+class Form(CzechBaseModel):
+    form: str
+    tags: list[str] = []
+    raw_tags: list[str] = []
+
+
 class WordEntry(CzechBaseModel):
     model_config = ConfigDict(title="Czech Wiktionary")
     word: str = Field(description="Word string")
@@ -61,3 +67,4 @@ class WordEntry(CzechBaseModel):
     sounds: list[Sound] = []
     hyphenations: list[Hyphenation] = []
     etymology_text: str = ""
+    forms: list[Form] = []

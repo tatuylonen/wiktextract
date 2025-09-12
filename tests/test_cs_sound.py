@@ -67,3 +67,24 @@ Spojením slov ''[[måne]] ([[měsíc]])'' a ''[[dag]] ([[den]])''.
         self.assertEqual(
             data[0]["hyphenations"], [{"parts": ["dě", "le", "ní"]}]
         )
+
+    def test_ipa_template(self):
+        self.wxr.wtp.add_page(
+            "Šablona:IPA",
+            10,
+            """[[Wikislovník:Výslovnost|IPA]]: <span title="Toto je transkripce výslovnosti pomocí mezinárodní fonetické abecedy IPA." class="IPA" >[ˈpɔnɟɛliː], [ˈpɔɲɟɛliː][[Kategorie:Monitoring:IPA/2|a]]</span>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "pondělí",
+            """== čeština ==
+=== výslovnost ===
+* {{IPA|ˈpɔnɟɛliː|ˈpɔɲɟɛliː}}
+=== podstatné jméno ===
+==== význam ====
+# [[den]]""",
+        )
+        self.assertEqual(
+            data[0]["sounds"], [{"ipa": "[ˈpɔnɟɛliː]"}, {"ipa": "[ˈpɔɲɟɛliː]"}]
+        )
+        self.assertEqual(data[0]["categories"], ["Monitoring:IPA/2"])

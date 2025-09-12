@@ -6,6 +6,7 @@ from wikitextprocessor.parser import LEVEL_KIND_FLAGS, LevelNode, NodeKind
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from .linkage import extract_alt_form_section
 from .models import Sense, WordEntry
 from .pos import extract_pos_section, extract_sense_section
 from .section_titles import POS_DATA
@@ -17,7 +18,7 @@ def parse_section(
     page_data: list[WordEntry],
     base_data: WordEntry,
     level_node: LevelNode,
-) -> None:
+):
     subtitle = clean_node(wxr, None, level_node.largs)
     subtitle = re.sub(r"\(\d+\)", "", subtitle).strip()
     if subtitle in POS_DATA and level_node.contain_node(LEVEL_KIND_FLAGS):
@@ -32,6 +33,8 @@ def parse_section(
         base_data.etymology_text = clean_node(
             wxr, base_data, list(level_node.invert_find_child(LEVEL_KIND_FLAGS))
         )
+    elif subtitle == "varianty":
+        extract_alt_form_section(wxr, base_data, level_node)
     elif subtitle not in ["externí odkazy"]:
         wxr.wtp.debug(f"Unknown title: {subtitle}", sortid="cs/page/27")
 

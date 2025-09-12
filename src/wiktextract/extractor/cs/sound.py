@@ -48,7 +48,7 @@ def extract_ipa_template(
         "span", attr_name="class", attr_value="IPA"
     ):
         text = clean_node(wxr, None, span_tag)
-        for ipa in text.split():
+        for ipa in text.split(","):
             ipa = ipa.strip()
             if ipa != "":
                 sound = Sound(ipa=ipa, raw_tags=raw_tags)
