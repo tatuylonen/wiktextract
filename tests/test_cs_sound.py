@@ -45,3 +45,18 @@ class TestCsSound(TestCase):
             ],
         )
         self.assertEqual(data[0]["sounds"][2]["audio"], "Sv-måndag.ogg")
+
+    def test_hyphenation(self):
+        data = parse_page(
+            self.wxr,
+            "dělení",
+            """== čeština ==
+=== dělení ===
+* dě-le-ní
+=== podstatné jméno ===
+==== význam ====
+# [[proces]]""",
+        )
+        self.assertEqual(
+            data[0]["hyphenations"], [{"parts": ["dě", "le", "ní"]}]
+        )

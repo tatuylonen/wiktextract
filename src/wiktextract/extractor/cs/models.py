@@ -43,6 +43,10 @@ class Sound(CzechBaseModel):
     flac_url: str = ""
 
 
+class Hyphenation(CzechBaseModel):
+    parts: list[str] = []
+
+
 class WordEntry(CzechBaseModel):
     model_config = ConfigDict(title="Czech Wiktionary")
     word: str = Field(description="Word string")
@@ -55,3 +59,4 @@ class WordEntry(CzechBaseModel):
     tags: list[str] = []
     raw_tags: list[str] = []
     sounds: list[Sound] = []
+    hyphenations: list[Hyphenation] = []

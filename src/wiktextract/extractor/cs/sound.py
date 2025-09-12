@@ -3,7 +3,7 @@ from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from ..share import set_sound_file_url_fields
-from .models import Sound, WordEntry
+from .models import Hyphenation, Sound, WordEntry
 from .tags import translate_raw_tags
 
 
@@ -96,3 +96,14 @@ def extract_příznak2_template(
         if raw_tag != "":
             raw_tags.append(raw_tag)
     return raw_tags
+
+
+def extract_hyphenation_section(
+    wxr: WiktextractContext, base_data: WordEntry, level_node: LevelNode
+):
+    for list_node in level_node.find_child(NodeKind.LIST):
+        for list_item in list_node.find_child(NodeKind.LIST_ITEM):
+            h_str = clean_node(wxr, None, list_item.children)
+            h_parts = list(filter(None, map(str.strip, h_str.split("-"))))
+            if len(h_parts) > 0:
+                base_data.hyphenations.append(Hyphenation(parts=h_parts))
