@@ -9,6 +9,7 @@ from ...wxr_context import WiktextractContext
 from .models import Sense, WordEntry
 from .pos import extract_pos_section, extract_sense_section
 from .section_titles import POS_DATA
+from .sound import extract_sound_section
 
 
 def parse_section(
@@ -23,6 +24,10 @@ def parse_section(
         extract_pos_section(wxr, page_data, base_data, level_node, subtitle)
     elif subtitle == "význam" and len(page_data) > 0:
         extract_sense_section(wxr, page_data[-1], level_node)
+    elif subtitle == "výslovnost":
+        extract_sound_section(wxr, base_data, level_node)
+    elif subtitle not in ["externí odkazy"]:
+        wxr.wtp.debug(f"Unknown title: {subtitle}", sortid="cs/page/27")
 
     for next_level in level_node.find_child(LEVEL_KIND_FLAGS):
         parse_section(wxr, page_data, base_data, next_level)
