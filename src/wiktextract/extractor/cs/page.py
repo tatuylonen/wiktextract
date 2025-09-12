@@ -6,9 +6,11 @@ from wikitextprocessor.parser import LEVEL_KIND_FLAGS, LevelNode, NodeKind
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from .linkage import extract_alt_form_section
 from .models import Sense, WordEntry
 from .pos import extract_pos_section, extract_sense_section
 from .section_titles import POS_DATA
+from .sound import extract_hyphenation_section, extract_sound_section
 
 
 def parse_section(
@@ -16,16 +18,33 @@ def parse_section(
     page_data: list[WordEntry],
     base_data: WordEntry,
     level_node: LevelNode,
-) -> None:
+):
     subtitle = clean_node(wxr, None, level_node.largs)
     subtitle = re.sub(r"\(\d+\)", "", subtitle).strip()
     if subtitle in POS_DATA and level_node.contain_node(LEVEL_KIND_FLAGS):
         extract_pos_section(wxr, page_data, base_data, level_node, subtitle)
     elif subtitle == "význam" and len(page_data) > 0:
         extract_sense_section(wxr, page_data[-1], level_node)
+    elif subtitle == "výslovnost":
+        extract_sound_section(wxr, base_data, level_node)
+    elif subtitle == "dělení":
+        extract_hyphenation_section(wxr, base_data, level_node)
+    elif subtitle == "etymologie":
+        base_data.etymology_text = clean_node(
+            wxr, base_data, list(level_node.invert_find_child(LEVEL_KIND_FLAGS))
+        )
+    elif subtitle == "varianty":
+        extract_alt_form_section(wxr, base_data, level_node)
+    elif subtitle not in ["externí odkazy"]:
+        wxr.wtp.debug(f"Unknown title: {subtitle}", sortid="cs/page/27")
 
     for next_level in level_node.find_child(LEVEL_KIND_FLAGS):
         parse_section(wxr, page_data, base_data, next_level)
+
+    for link_node in level_node.find_child(NodeKind.LINK):
+        clean_node(
+            wxr, page_data[-1] if len(page_data) > 0 else base_data, link_node
+        )
 
 
 def parse_page(
