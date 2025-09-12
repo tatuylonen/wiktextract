@@ -60,3 +60,4 @@ class WordEntry(CzechBaseModel):
     raw_tags: list[str] = []
     sounds: list[Sound] = []
     hyphenations: list[Hyphenation] = []
+    etymology_text: str = ""

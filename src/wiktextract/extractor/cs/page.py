@@ -28,6 +28,10 @@ def parse_section(
         extract_sound_section(wxr, base_data, level_node)
     elif subtitle == "dělení":
         extract_hyphenation_section(wxr, base_data, level_node)
+    elif subtitle == "etymologie":
+        base_data.etymology_text = clean_node(
+            wxr, base_data, list(level_node.invert_find_child(LEVEL_KIND_FLAGS))
+        )
     elif subtitle not in ["externí odkazy"]:
         wxr.wtp.debug(f"Unknown title: {subtitle}", sortid="cs/page/27")
 

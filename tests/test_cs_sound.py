@@ -33,6 +33,8 @@ class TestCsSound(TestCase):
             """== švédština ==
 === výslovnost ===
 * {{IPA|ˈmɔnːdɑːg}}, ''hovorově'' [{{IPA2|ˈmɔnːda}}], {{Audio|Sv-måndag.ogg|måndag}}
+=== etymologie ===
+Spojením slov ''[[måne]] ([[měsíc]])'' a ''[[dag]] ([[den]])''.
 === podstatné jméno ===
 ==== význam ====
 # [[pondělí]]
@@ -47,6 +49,9 @@ class TestCsSound(TestCase):
         )
         self.assertEqual(data[0]["sounds"][2]["audio"], "Sv-måndag.ogg")
         self.assertEqual(data[0]["categories"], ["Švédská substantiva"])
+        self.assertEqual(
+            data[0]["etymology_text"], "Spojením slov måne (měsíc) a dag (den)."
+        )
 
     def test_hyphenation(self):
         data = parse_page(
