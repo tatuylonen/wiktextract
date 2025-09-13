@@ -244,8 +244,30 @@ title_elements_map = {
     "plural": "plural",
     "archaic": "archaic",
     "dated": "dated",
-    "Attic": "Attic",  # e.g. καλός/Greek/Adj
-    "Epic": "Epic",  # e.g. καλός/Greek/Adj
+    "iterative": "iterative",
+    "poetic": "poetic",
+    "Attic": "Attic",
+    "Epic": "Epic",
+    "Aeolic": "Aeolic",
+    "Arcadocypriot": "Arcadocypriot",
+    "Old Attic": "Old-Attic",
+    "Boeotian": "Boeotian",
+    "Byzantine": "Byzantine",
+    "Choral Doric": "Choral-Doric",
+    "Doric": "Doric",
+    "Elean": "Elean",
+    "Epirote": "Epirote",
+    "Ionic": "Ionic",
+    "Koine": "Koine",
+    "Cretan": "Cretan",
+    "Corinthian": "Corinthian",
+    "Laconian": "Laconian",
+    "Later poetic": "Later-poetic",
+    "Lesbian": "Lesbian",
+    "Locrian": "Locrian",
+    "Lyric": "Lyric",
+    "Thessalian": "Thessalian",
+    "Tragic": "Tragic",
 }
 for k, v in title_elements_map.items():
     if any(t not in valid_tags for t in v.split()):

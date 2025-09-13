@@ -657,7 +657,7 @@ uppercase_tags = set(
         "Achterhooks",
         "Adana",
         "Adyghe",
-        "Aeolic",
+        "Aeolic",  # Ancient Greek
         "Affectation",
         "Afi-Amanda",
         "Africa",
@@ -718,6 +718,7 @@ uppercase_tags = set(
         "Arango",
         "Arawak",
         "Arbëresh",
+        "Arcadocypriot",  # Ancient Greek
         "Ardennes",
         "Argentina",
         "Arkhangelsk",
@@ -844,7 +845,7 @@ uppercase_tags = set(
         "Burdur",
         "Burgenland",
         "Bygdeå",
-        "Byzantine",
+        "Byzantine",  # Ancient Greek
         "Bzyb",
         "Béarn",
         "cabo Verde",
@@ -900,6 +901,7 @@ uppercase_tags = set(
         "Chinese Character classification",
         "Cholula",
         "Chongqing",
+        "Choral Doric",  # Ancient Greek
         "Christian",
         "Chugoku",
         "Chūgoku",
@@ -936,6 +938,7 @@ uppercase_tags = set(
         "Contentin",
         "Continent",
         "Copenhagen",
+        "Corinthian",  # Ancient Greek
         "Cork",
         "Cornish",
         "Cornwall",
@@ -1026,12 +1029,14 @@ uppercase_tags = set(
         "El Salvador",
         "Elazığ",
         "Elberfelder Bibel",
+        "Elean",  # Ancient Greek
         "England",
         "English Midlands",
         "English",
         "Eonavian",
         "Epic",
         "Epigraphic Gandhari",
+        "Epirote",  # Ancient Greek
         "Erhua",  # Northern Chinese dialectal feature
         "Erzgebirgisch",
         "Esham",
@@ -1374,6 +1379,7 @@ uppercase_tags = set(
         "Late Old Frisian",
         "Late West Saxon",
         "Late",
+        "Later poetic",  # Ancient Greek
         "Latin America",
         "Latinate",
         "Latinism",
@@ -1388,6 +1394,7 @@ uppercase_tags = set(
         "Leizhou Min",  # Chinese dialect/language
         "Lemosin",  # Dialect of Occitan
         "Lengadocian",  # Dialect of Occitan
+        "Lesbian",  # Ancient Greek
         "Lesotho",
         "Levantine Arabic",  # Variant of Arabic language
         "Lewis",
@@ -1409,6 +1416,7 @@ uppercase_tags = set(
         "Litvish",
         "Liverpudlian",
         "Llanos",
+        "Locrian",  # Ancient Greek
         "Logudorese",  # Variant of Sardinian
         "Lojban",
         "Loli",
@@ -1432,6 +1440,7 @@ uppercase_tags = set(
         "Lycopolitan",
         "Lyon",
         "Lyons",
+        "Lyric",  # Ancient Greek
         "Lviv",
         "Lövånger",
         "Ḷḷena",
@@ -1686,6 +1695,7 @@ uppercase_tags = set(
         "Nyungkal",
         "Nürnbergisch",
         "Occitania",
+        "Old Attic",  # Ancient Greek
         "Old Bohairic",
         "Old Chamorro",
         "Old Chinese",  # Historical variant of Chinese
@@ -2081,6 +2091,7 @@ uppercase_tags = set(
         "Thailand",
         "Thanh Chương",
         "The Hague",
+        "Thessalian",  # Ancient Greek
         "Thung Luang village",
         "Thung Luang",
         "Thurgau",
@@ -2100,6 +2111,7 @@ uppercase_tags = set(
         "Tosk",
         "Toulouse",
         "Traditional",
+        "Tragic",  # Ancient Greek
         "Trakai-Vilnius",
         "Translingual",
         "Transoxianan",
@@ -2499,7 +2511,7 @@ uppercase_tags = set(
         "Liping",
         "Ürümqi",
         "Bijie",
-        "Cretan",
+        "Cretan",  # Ancient Greek
         "Crimean Latin",
         "Imperial Aramaic",
         "Jewish Literary Aramaic",
@@ -2519,7 +2531,7 @@ uppercase_tags = set(
         "Bikol Daet",
         "Bikol Partido",
         "Bima" "Sumbawa",
-        "Boeotian",
+        "Boeotian",  # Ancient Greek
         "Bokmal",
         "Book Pahlavi",  # Book Pahlavi, pseudoscience/English/translations/
         "Bádiu",
@@ -2574,7 +2586,7 @@ uppercase_tags = set(
         "Krama",
         "Kyushu",
         "Kölnisch",
-        "Laconian",
+        "Laconian",  # Ancient Greek
         "Late Ottoman Turkish",
         "Levantine, North",
         "Levantine, South",
