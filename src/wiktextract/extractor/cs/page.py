@@ -6,6 +6,7 @@ from wikitextprocessor.parser import LEVEL_KIND_FLAGS, LevelNode, NodeKind
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from .declension import extract_declension_section
 from .linkage import extract_alt_form_section, extract_linkage_section
 from .models import Sense, WordEntry
 from .pos import extract_pos_section, extract_sense_section
@@ -46,6 +47,10 @@ def parse_section(
             page_data[-1] if len(page_data) > 0 else base_data,
             level_node,
             LINKAGE_SECTIONS[subtitle],
+        )
+    elif subtitle == "skloňování":
+        extract_declension_section(
+            wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
         )
     elif subtitle not in ["externí odkazy"]:
         wxr.wtp.debug(f"Unknown title: {subtitle}", sortid="cs/page/27")
