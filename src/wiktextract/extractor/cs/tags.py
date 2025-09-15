@@ -9,10 +9,25 @@ LABEL_TAGS = {
 GENDER_TAGS = {
     "mužský": "masculine",
     "životný": "animate",
+    "femininum (ženský rod)": "feminine",
+    "neutrum (střední rod)": "neuter",
+    "maskulinum (mužský rod)": "masculine",
+}
+
+TABLE_TAGS = {
+    "jednotné": "singular",
+    "množné": "plural",
+    "nominativ": "nominative",
+    "genitiv": "genitive",
+    "dativ": "dative",
+    "akuzativ": "accusative",
+    "vokativ": "vocative",
+    "lokál": "locative",
+    "instrumentál": "instrumental",
 }
 
 
-TAGS = {**LABEL_TAGS, **GENDER_TAGS}
+TAGS = {**LABEL_TAGS, **GENDER_TAGS, **TABLE_TAGS}
 
 TOPICS = {}
 

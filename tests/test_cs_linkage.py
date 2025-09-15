@@ -35,3 +35,30 @@ class TestCsLinkage(TestCase):
         self.assertEqual(
             data[0]["forms"], [{"form": "pondělek", "tags": ["alternative"]}]
         )
+
+    def test_linkage_list(self):
+        self.wxr.wtp.add_page(
+            "Šablona:Příznak2",
+            10,
+            """<span class="priznaky">(zdrobněle)</span>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "pes",
+            """== čeština ==
+=== podstatné jméno (1) ===
+==== význam ====
+# [[psovitý|psovitá]]
+==== synonyma ====
+# {{Příznak2|zdrob.}} [[pejsek]], [[ratlík]]
+==== související ====
+* [[psík]]""",
+        )
+        self.assertEqual(
+            data[0]["synonyms"],
+            [
+                {"raw_tags": ["zdrobněle"], "sense_index": 1, "word": "pejsek"},
+                {"word": "ratlík", "sense_index": 1},
+            ],
+        )
+        self.assertEqual(data[0]["related"], [{"word": "psík"}])

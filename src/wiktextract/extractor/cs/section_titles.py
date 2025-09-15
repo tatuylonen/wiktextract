@@ -30,3 +30,13 @@ POS_DATA = {
     "značka": {"pos": "symbol"},
     "symbol": {"pos": "symbol"},
 }
+
+LINKAGE_SECTIONS = {
+    "synonyma": "synonyms",
+    "antonyma": "antonyms",
+    "související": "related",
+    "slovní spojení": "phrases",
+    "fráze a idiomy": "related",
+    "přísloví, úsloví a pořekadla": "proverbs",
+    "přísloví, rčení a pořekadla": "proverbs",
+}

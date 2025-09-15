@@ -3,7 +3,7 @@ from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .example import extract_example_list_item
-from .models import Sense, WordEntry
+from .models import AltForm, Sense, WordEntry
 from .section_titles import POS_DATA
 from .tags import translate_raw_tags
 
@@ -67,6 +67,21 @@ def extract_gloss_list_item(
                     raw_tag = raw_tag.strip()
                     if raw_tag != "":
                         sense.raw_tags.append(raw_tag)
+            elif node.contain_node(NodeKind.LINK):
+                gloss_nodes.append(node)
+                link_nodes = list(
+                    node.find_child(NodeKind.LINK, with_index=True)
+                )
+                if (
+                    len(link_nodes) == 1
+                    and link_nodes[0][0] != 0
+                    and link_nodes[0][0] == len(node.children) - 1
+                ):
+                    word = clean_node(wxr, None, link_nodes[0][1])
+                    if word != "":
+                        sense.form_of.append(AltForm(word=word))
+                        sense.tags.append("form-of")
+                    break
             else:
                 gloss_nodes.append(node)
         elif not (isinstance(node, WikiNode) and node.kind == NodeKind.LIST):

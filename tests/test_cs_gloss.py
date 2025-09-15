@@ -129,3 +129,23 @@ class TestCsGloss(TestCase):
                 }
             ],
         )
+
+    def test_form_of(self):
+        data = parse_page(
+            self.wxr,
+            "pes",
+            """== čeština ==
+=== podstatné jméno (2) ===
+==== význam ====
+# ''genitiv plurálu substantiva [[peso]]''""",
+        )
+        self.assertEqual(
+            data[0]["senses"],
+            [
+                {
+                    "glosses": ["genitiv plurálu substantiva peso"],
+                    "form_of": [{"word": "peso"}],
+                    "tags": ["form-of"],
+                }
+            ],
+        )
