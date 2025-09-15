@@ -67,6 +67,15 @@ class Translation(CzechBaseModel):
     raw_tags: list[str] = []
 
 
+class Linkage(CzechBaseModel):
+    word: str
+    tags: list[str] = []
+    raw_tags: list[str] = []
+    sense_index: int = Field(
+        default=0, ge=0, description="Number of the definition, start from 1"
+    )
+
+
 class WordEntry(CzechBaseModel):
     model_config = ConfigDict(title="Czech Wiktionary")
     word: str = Field(description="Word string")
@@ -83,3 +92,8 @@ class WordEntry(CzechBaseModel):
     etymology_text: str = ""
     forms: list[Form] = []
     translations: list[Translation] = []
+    synonyms: list[Linkage] = []
+    antonyms: list[Linkage] = []
+    related: list[Linkage] = []
+    phrases: list[Linkage] = []
+    proverbs: list[Linkage] = []
