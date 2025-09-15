@@ -9,6 +9,9 @@ LABEL_TAGS = {
 GENDER_TAGS = {
     "mužský": "masculine",
     "životný": "animate",
+    "femininum (ženský rod)": "feminine",
+    "neutrum (střední rod)": "neuter",
+    "maskulinum (mužský rod)": "masculine",
 }
 
 

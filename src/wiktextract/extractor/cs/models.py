@@ -53,6 +53,20 @@ class Form(CzechBaseModel):
     raw_tags: list[str] = []
 
 
+class Translation(CzechBaseModel):
+    lang_code: str = Field(
+        description="Wiktionary language code of the translation term",
+    )
+    lang: str = Field(description="Translation language name")
+    word: str = Field(description="Translation term")
+    sense: str = Field(default="", description="Translation gloss")
+    sense_index: int = Field(
+        default=0, ge=0, description="Number of the definition, start from 1"
+    )
+    tags: list[str] = []
+    raw_tags: list[str] = []
+
+
 class WordEntry(CzechBaseModel):
     model_config = ConfigDict(title="Czech Wiktionary")
     word: str = Field(description="Word string")
@@ -68,3 +82,4 @@ class WordEntry(CzechBaseModel):
     hyphenations: list[Hyphenation] = []
     etymology_text: str = ""
     forms: list[Form] = []
+    translations: list[Translation] = []
