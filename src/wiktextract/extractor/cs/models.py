@@ -21,6 +21,10 @@ class Example(CzechBaseModel):
     )
 
 
+class AltForm(CzechBaseModel):
+    word: str
+
+
 class Sense(CzechBaseModel):
     glosses: list[str] = []
     tags: list[str] = []
@@ -28,6 +32,7 @@ class Sense(CzechBaseModel):
     categories: list[str] = []
     topics: list[str] = []
     examples: list[Example] = []
+    form_of: list[AltForm] = []
 
 
 class Sound(CzechBaseModel):
