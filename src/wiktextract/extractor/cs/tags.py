@@ -13,9 +13,13 @@ GENDER_TAGS = {
     "neživotný": "inanimate",
     "femininum (ženský rod)": "feminine",
     "ženský": "feminine",
+    "ženský rod": "feminine",
     "neutrum (střední rod)": "neuter",
     "střední": "neuter",
+    "střední rod": "neuter",
     "maskulinum (mužský rod)": "masculine",
+    "mužský rod": "masculine",
+    # "všechny rody": "",
 }
 
 TABLE_TAGS = {
@@ -54,6 +58,25 @@ TABLE_TAGS = {
     "ženský\nstřední": ["feminine", "neuter"],
     "mužský\nženský\nstřední": ["masculine", "feminine", "neuter"],
     "přítomný": "present",
+    # Šablona:Sloveso_(de)
+    "Indikativ": "indicative",
+    "aktivum": "active",
+    "singulár": "singular",
+    "plurál": "plural",
+    "prézens": "present",
+    "préteritum": "preterite",
+    "perfektum": ["present", "perfect"],
+    "plusquamperfektum": ["past", "perfect"],
+    "futurum 1": "future-i",
+    "futurum 2": "future-ii",
+    "konjunktiv I": "conjunctive-i",
+    "konjunktiv II": "conjunctive-ii",
+    "Imperativ": "imperative",
+    "Infinitiv": "infinitive",
+    "Příčestí činné (přítomné)": ["active", "participle", "present"],
+    "silná": "strong",
+    "slabá": "weak",
+    "smíšená": "mixed",
 }
 
 

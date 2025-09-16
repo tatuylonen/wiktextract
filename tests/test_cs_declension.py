@@ -301,3 +301,83 @@ class TestCsDeclension(TestCase):
         self.assertEqual(
             data[0]["categories"], ["Monitoring:Sloveso (cs)/mtra/skrýt"]
         )
+
+    def test_de_verb_table(self):
+        self.wxr.wtp.add_page(
+            "Šablona:Sloveso (de)",
+            10,
+            """{| class="konjugace verbum" style="text-align: center"
+|+ Indikativ
+! rowspan="2" | čas
+! rowspan="2" | osoba
+! colspan="2" | aktivum
+|-
+! singulár !! plurál
+|-
+! rowspan="3" | prézens
+! 1.
+| lang="de" | ich gehe
+| lang="de" | wir gehen
+|-
+! 3.
+| lang="de" | er/sie/es geht
+| lang="de" | sie gehen
+|}""",
+        )
+        data = parse_page(
+            self.wxr,
+            "gehen",
+            """== němčina ==
+=== sloveso ===
+==== časování ====
+{{Sloveso (de)
+  | papr = gehend
+}}
+==== význam ====
+# [[jít]], [[chodit]]""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {
+                    "form": "ich gehe",
+                    "tags": [
+                        "indicative",
+                        "present",
+                        "first-person",
+                        "active",
+                        "singular",
+                    ],
+                },
+                {
+                    "form": "wir gehen",
+                    "tags": [
+                        "indicative",
+                        "present",
+                        "first-person",
+                        "active",
+                        "plural",
+                    ],
+                },
+                {
+                    "form": "er/sie/es geht",
+                    "tags": [
+                        "indicative",
+                        "present",
+                        "third-person",
+                        "active",
+                        "singular",
+                    ],
+                },
+                {
+                    "form": "sie gehen",
+                    "tags": [
+                        "indicative",
+                        "present",
+                        "third-person",
+                        "active",
+                        "plural",
+                    ],
+                },
+            ],
+        )

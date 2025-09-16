@@ -37,20 +37,20 @@ def extract_substantivum_template(
     clean_node(wxr, word_entry, expanded_node)
     for table in expanded_node.find_child(NodeKind.TABLE):
         col_headers = []
+        row_headers = []
         table_caption = ""
         for caption_node in table.find_child(NodeKind.TABLE_CAPTION):
             table_caption = clean_node(wxr, None, caption_node.children)
         for row_index, row in enumerate(table.find_child(NodeKind.TABLE_ROW)):
-            row_header = ""
             is_column_header = not row.contain_node(NodeKind.TABLE_CELL)
             col_index = 0
-            for col_header in col_headers:
+            for header in col_headers if is_column_header else row_headers:
                 if (
-                    col_header.rowspan > 1
-                    and col_header.row_index <= row_index
-                    and col_header.row_index + col_header.rowspan > row_index
+                    header.rowspan > 1
+                    and header.row_index <= row_index
+                    and header.row_index + header.rowspan > row_index
                 ):
-                    col_index += col_header.colspan
+                    col_index += header.colspan
             for cell in row.find_child(
                 NodeKind.TABLE_HEADER_CELL | NodeKind.TABLE_CELL
             ):
@@ -69,16 +69,31 @@ def extract_substantivum_template(
                             )
                         )
                     elif not is_column_header:
-                        row_header = cell_text
+                        row_headers.append(
+                            TableHeader(
+                                cell_text,
+                                colspan,
+                                rowspan,
+                                col_index,
+                                row_index,
+                            )
+                        )
                 else:
-                    for word in cell_text.split("/"):
+                    for word in cell_text.split(" / "):
                         word = word.strip()
-                        if word in ["", wxr.wtp.title]:
+                        if word in ["", "—", wxr.wtp.title]:
                             continue
                         form = Form(form=word)
-                        for raw_tag in (table_caption, row_header):
-                            if raw_tag != "":
-                                form.raw_tags.append(raw_tag)
+                        if table_caption != "":
+                            form.raw_tags.append(table_caption)
+                        for row_header in row_headers:
+                            if (
+                                row_header.text != ""
+                                and row_header.row_index <= row_index
+                                and row_header.row_index + row_header.rowspan
+                                > row_index
+                            ):
+                                form.raw_tags.append(row_header.text)
                         for col_header in col_headers:
                             if (
                                 col_header.text != ""
