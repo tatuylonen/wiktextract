@@ -1379,7 +1379,7 @@ uppercase_tags = set(
         "Late Old Frisian",
         "Late West Saxon",
         "Late",
-        "Later poetic",  # Ancient Greek
+        "Later poetic Ancient Greek",  # Ancient Greek
         "Latin America",
         "Latinate",
         "Latinism",
@@ -1440,7 +1440,7 @@ uppercase_tags = set(
         "Lycopolitan",
         "Lyon",
         "Lyons",
-        "Lyric",  # Ancient Greek
+        "Lyric Ancient Greek",  # Ancient Greek
         "Lviv",
         "Lövånger",
         "Ḷḷena",
@@ -2111,7 +2111,7 @@ uppercase_tags = set(
         "Tosk",
         "Toulouse",
         "Traditional",
-        "Tragic",  # Ancient Greek
+        "Tragic Ancient Greek",  # Ancient Greek
         "Trakai-Vilnius",
         "Translingual",
         "Transoxianan",

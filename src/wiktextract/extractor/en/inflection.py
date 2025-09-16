@@ -262,12 +262,12 @@ title_elements_map = {
     "Cretan": "Cretan",
     "Corinthian": "Corinthian",
     "Laconian": "Laconian",
-    "Later poetic": "Later-poetic",
+    "Later poetic": "Later-poetic-Ancient-Greek",
     "Lesbian": "Lesbian",
     "Locrian": "Locrian",
-    "Lyric": "Lyric",
+    "Lyric": "Lyric-Ancient-Greek",
     "Thessalian": "Thessalian",
-    "Tragic": "Tragic",
+    "Tragic": "Tragic-Ancient-Greek",
 }
 for k, v in title_elements_map.items():
     if any(t not in valid_tags for t in v.split()):
