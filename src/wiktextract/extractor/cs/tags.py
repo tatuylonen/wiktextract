@@ -9,12 +9,16 @@ LABEL_TAGS = {
 GENDER_TAGS = {
     "mužský": "masculine",
     "životný": "animate",
+    "neživotný": "inanimate",
     "femininum (ženský rod)": "feminine",
+    "ženský": "feminine",
     "neutrum (střední rod)": "neuter",
+    "střední": "neuter",
     "maskulinum (mužský rod)": "masculine",
 }
 
 TABLE_TAGS = {
+    # Šablona:Substantivum_(cs)
     "jednotné": "singular",
     "množné": "plural",
     "nominativ": "nominative",
@@ -24,6 +28,13 @@ TABLE_TAGS = {
     "vokativ": "vocative",
     "lokál": "locative",
     "instrumentál": "instrumental",
+    # Šablona:Adjektivum_(cs)
+    "mužský\nživotný": ["masculine", "animate"],
+    "mužský\nneživotný": ["masculine", "inanimate"],
+    # Šablona:Stupňování_(cs)
+    "pozitiv": "positive",
+    "komparativ": "comparative",
+    "superlativ": "superlative",
 }
 
 

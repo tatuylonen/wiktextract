@@ -34,8 +34,7 @@ class TestCsDeclension(TestCase):
 ! <span title="nominativ (1. pád: kdo? co?)">nominativ</span>
 | pes
 | [[psi]] / [[psové]]
-|}
-""",
+|}""",
         )
         data = parse_page(
             self.wxr,
@@ -56,5 +55,109 @@ class TestCsDeclension(TestCase):
             [
                 {"form": "psi", "tags": ["nominative", "plural"]},
                 {"form": "psové", "tags": ["nominative", "plural"]},
+            ],
+        )
+
+    def test_adj_table(self):
+        self.wxr.wtp.add_page(
+            "Šablona:Adjektivum (cs)",
+            10,
+            """{| class="deklinace adjektivum" style="text-align: center"
+|-
+! číslo
+! colspan="4" title="singulár = jednotné číslo" | jednotné
+! colspan="4" title="plurál = množné číslo" | množné
+|-
+! pád \\ rod
+! mužský<br />životný
+! mužský<br />neživotný
+! ženský
+! střední
+! mužský<br />životný
+! mužský<br />neživotný
+! ženský
+! střední
+|-
+! title="nominativ = 1. pád: kdo? co?" | nominativ
+| směšný
+| směšný
+| směšná
+| směšné
+| směšní
+| směšné
+| směšné
+| směšná
+|}""",
+        )
+        self.wxr.wtp.add_page(
+            "Šablona:Stupňování (cs)",
+            10,
+            """{| class="komparace" style="text-align: center"
+|-
+! stupeň
+! tvar
+|-
+! pozitiv
+| směšný
+|-
+! komparativ
+| [[směšnější]]
+|-
+! superlativ
+| [[nejsměšnější]]
+|}""",
+        )
+        data = parse_page(
+            self.wxr,
+            "směšný",
+            """==čeština==
+=== přídavné jméno ===
+====skloňování====
+{{Adjektivum (cs)
+  | snomm = směšný
+}}
+==== stupňování ====
+{{Stupňování (cs)
+  | poz = směšný
+  | komp = směšnější
+  | sup = nejsměšnější
+}}
+==== význam ====
+# [[vyvolávat|vyvolávající]] [[smích]]""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {
+                    "form": "směšná",
+                    "tags": ["nominative", "singular", "feminine"],
+                },
+                {
+                    "form": "směšné",
+                    "tags": ["nominative", "singular", "neuter"],
+                },
+                {
+                    "form": "směšní",
+                    "tags": ["nominative", "plural", "masculine", "animate"],
+                },
+                {
+                    "form": "směšné",
+                    "tags": ["nominative", "plural", "masculine", "inanimate"],
+                },
+                {
+                    "form": "směšné",
+                    "tags": ["nominative", "plural", "feminine"],
+                },
+                {"form": "směšná", "tags": ["nominative", "plural", "neuter"]},
+                {
+                    "form": "směšnější",
+                    "raw_tags": ["tvar"],
+                    "tags": ["comparative"],
+                },
+                {
+                    "form": "nejsměšnější",
+                    "raw_tags": ["tvar"],
+                    "tags": ["superlative"],
+                },
             ],
         )

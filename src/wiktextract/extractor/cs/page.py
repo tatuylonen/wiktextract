@@ -48,7 +48,7 @@ def parse_section(
             level_node,
             LINKAGE_SECTIONS[subtitle],
         )
-    elif subtitle == "skloňování":
+    elif subtitle in ["skloňování", "stupňování"]:
         extract_declension_section(
             wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
         )
