@@ -1842,8 +1842,8 @@ def parse_simple_table(
         # for both the Georgian original and the romanization.
         elif (
             tablecontext.template_name == "ka-decl-noun"
-            and len(alts) == 1
-            and " (" in alts[0]
+            and len(alts) >= 1
+            and any(" (" in alt_ for alt_ in alts)
         ):
             nalts = ka_decl_noun_template_cell(alts)
         else:
