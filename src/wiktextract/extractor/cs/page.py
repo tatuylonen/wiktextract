@@ -36,7 +36,15 @@ def parse_section(
             wxr, base_data, list(level_node.invert_find_child(LEVEL_KIND_FLAGS))
         )
     elif subtitle == "varianty":
-        extract_alt_form_section(wxr, base_data, level_node)
+        extract_alt_form_section(
+            wxr,
+            page_data[-1]
+            if level_node.kind == NodeKind.LEVEL4
+            and len(page_data) > 0
+            and base_data.lang == page_data[-1].lang
+            else base_data,
+            level_node,
+        )
     elif subtitle == "překlady":
         extract_translation_section(
             wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
@@ -48,7 +56,7 @@ def parse_section(
             level_node,
             LINKAGE_SECTIONS[subtitle],
         )
-    elif subtitle == "skloňování":
+    elif subtitle in ["skloňování", "stupňování", "časování"]:
         extract_declension_section(
             wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
         )
