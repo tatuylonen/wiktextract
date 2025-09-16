@@ -4,6 +4,7 @@ from .models import WordEntry
 LABEL_TAGS = {
     "expresivně": "expressively",
     "pejorativně": "pejorative",
+    "zastarale": "obsolete",
 }
 
 GENDER_TAGS = {
@@ -35,6 +36,24 @@ TABLE_TAGS = {
     "pozitiv": "positive",
     "komparativ": "comparative",
     "superlativ": "superlative",
+    # Šablona:Sloveso_(cs)
+    "Oznamovací způsob": "indicative",
+    "číslo jednotné": "singular",
+    "číslo množné": "plural",
+    "1.": "first-person",
+    "2.": "second-person",
+    "3.": "third-person",
+    "přítomný čas": "present",
+    "Rozkazovací způsob": "imperative",
+    "číslo\njednotné": "singular",
+    "Příčestí": "participle",
+    "mužský životný\ni neživotný": ["masculine", "animate", "inanimate"],
+    "mužský neživotný\na ženský": ["masculine", "animate", "feminine"],
+    "činné": "active",
+    "Přechodníky": "transgressive",
+    "ženský\nstřední": ["feminine", "neuter"],
+    "mužský\nženský\nstřední": ["masculine", "feminine", "neuter"],
+    "přítomný": "present",
 }
 
 

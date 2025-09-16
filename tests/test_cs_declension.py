@@ -161,3 +161,143 @@ class TestCsDeclension(TestCase):
                 },
             ],
         )
+
+    def test_verb_tables(self):
+        self.wxr.wtp.add_page(
+            "Šablona:Příznak2",
+            10,
+            """<span class="priznaky">(zastarale)</span>""",
+        )
+        self.wxr.wtp.add_page(
+            "Šablona:Sloveso (cs)",
+            10,
+            """{| class="konjugace verbum" style="text-align: center"
+|+ Oznamovací způsob
+|-
+!rowspan="2"|osoba
+!colspan="3"|číslo jednotné !! colspan="3"|číslo množné
+|-
+!1.!!2.!!3.!!1.!!2.!!3.
+|-
+!přítomný čas
+|[[běžím]]
+|[[běžíš]]
+|[[běží]]
+|[[běžíme]]
+|[[běžíte]]
+|[[běží]]
+|}
+
+{| class="konjugace verbum" style="text-align: center"
+|+ Přechodníky
+|-
+!rowspan="2"|rod
+!colspan="2"|číslo jednotné !! |číslo množné
+|-
+!mužský!!ženský<br/>střední!!mužský<br/>ženský<br/>střední
+|-
+!přítomný
+|[[běže]]
+|[[běžíc]]
+|[[běžíce]]
+|-
+[[Kategorie:Monitoring:Sloveso (cs)/mtra/skrýt]]
+|}""",
+        )
+        data = parse_page(
+            self.wxr,
+            "běžet",
+            """==čeština==
+=== sloveso ===
+==== varianty ====
+* {{Příznak2|zast.}} [[běžeti]]
+==== časování ====
+{{Sloveso (cs)
+  | spre1 = [[běžím]]
+}}
+==== význam ====
+# [[pohybovat se]] [[rychle]] [[po]] [[noha|nohách]]""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {"form": "běžeti", "tags": ["alternative", "obsolete"]},
+                {
+                    "form": "běžím",
+                    "tags": [
+                        "indicative",
+                        "present",
+                        "singular",
+                        "first-person",
+                    ],
+                },
+                {
+                    "form": "běžíš",
+                    "tags": [
+                        "indicative",
+                        "present",
+                        "singular",
+                        "second-person",
+                    ],
+                },
+                {
+                    "form": "běží",
+                    "tags": [
+                        "indicative",
+                        "present",
+                        "singular",
+                        "third-person",
+                    ],
+                },
+                {
+                    "form": "běžíme",
+                    "tags": ["indicative", "present", "plural", "first-person"],
+                },
+                {
+                    "form": "běžíte",
+                    "tags": [
+                        "indicative",
+                        "present",
+                        "plural",
+                        "second-person",
+                    ],
+                },
+                {
+                    "form": "běží",
+                    "tags": ["indicative", "present", "plural", "third-person"],
+                },
+                {
+                    "form": "běže",
+                    "tags": [
+                        "transgressive",
+                        "present",
+                        "singular",
+                        "masculine",
+                    ],
+                },
+                {
+                    "form": "běžíc",
+                    "tags": [
+                        "transgressive",
+                        "present",
+                        "singular",
+                        "feminine",
+                        "neuter",
+                    ],
+                },
+                {
+                    "form": "běžíce",
+                    "tags": [
+                        "transgressive",
+                        "present",
+                        "plural",
+                        "masculine",
+                        "feminine",
+                        "neuter",
+                    ],
+                },
+            ],
+        )
+        self.assertEqual(
+            data[0]["categories"], ["Monitoring:Sloveso (cs)/mtra/skrýt"]
+        )
