@@ -18,8 +18,12 @@ def extract_příklad_template(
     wxr: WiktextractContext, sense: Sense, t_node: TemplateNode
 ):
     # https://cs.wiktionary.org/wiki/Šablona:Příklad
-    second_arg = wxr.wtp.parse(t_node.template_parameters.get(2, ""))
-    third_arg = wxr.wtp.parse(t_node.template_parameters.get(3, ""))
+    second_arg = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node.template_parameters.get(2, ""))
+    )
+    third_arg = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node.template_parameters.get(3, ""))
+    )
     e_data = Example(
         text=clean_node(wxr, None, second_arg),
         translation=clean_node(wxr, None, third_arg),

@@ -149,3 +149,25 @@ class TestCsGloss(TestCase):
                 }
             ],
         )
+
+    def test_wikinode_in_example_template_arg(self):
+        data = parse_page(
+            self.wxr,
+            "älska",
+            """== švédština ==
+=== sloveso ===
+==== význam ====
+# [[milovat]]
+#* {{Příklad|sv|[[jag älskar dig|Jag älskar dig]].|[[miluji tě|Miluji tě]].}}""",
+        )
+        self.assertEqual(
+            data[0]["senses"],
+            [
+                {
+                    "examples": [
+                        {"text": "Jag älskar dig.", "translation": "Miluji tě."}
+                    ],
+                    "glosses": ["milovat"],
+                }
+            ],
+        )
