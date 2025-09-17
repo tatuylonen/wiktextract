@@ -1500,9 +1500,7 @@ def parse_simple_table(
             # print(f"{ref=}, {transformed=}, {tags=}")
             if topics or any("error-unknown-tag" in ts for ts in tags):
                 d = d[0].lower() + d[1:]
-                tags, topics = decode_tags(
-                    d, no_unknown_starts=True
-                )
+                tags, topics = decode_tags(d, no_unknown_starts=True)
                 if topics or any("error-unknown-tag" in ts for ts in tags):
                     # Failed to parse as tags
                     # print("Failed: topics={} tags={}"
@@ -2560,10 +2558,23 @@ def parse_simple_table(
                     tags,
                 ) in form_transformations:
                     # v is a pattern string, like "^ich"
-                    if pos != form_transformations_pos:
+                    if (
+                        isinstance(pos, str) and pos != form_transformations_pos
+                    ) or (
+                        not isinstance(pos, str)
+                        and pos in form_transformations_pos
+                    ):
                         continue
                     m = re.search(v, form)
                     if m is not None:
+                        if base_roman:
+                            for _, rom_v, rom_sub, _ in form_transformations:
+                                rom_m = re.search(rom_v, base_roman)
+                                if rom_m is not None:
+                                    base_roman = re.sub(
+                                        rom_v, rom_sub, base_roman
+                                    )
+                                    break
                         form = re.sub(v, subst, form)
                         for x in tags.split():
                             assert x in valid_tags
