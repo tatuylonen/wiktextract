@@ -94,7 +94,7 @@ class WordEntry(CzechBaseModel):
     raw_tags: list[str] = []
     sounds: list[Sound] = []
     hyphenations: list[Hyphenation] = []
-    etymology_text: str = ""
+    etymology_texts: list[str] = []
     forms: list[Form] = []
     translations: list[Translation] = []
     synonyms: list[Linkage] = []

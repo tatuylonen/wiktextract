@@ -50,7 +50,8 @@ Spojením slov ''[[måne]] ([[měsíc]])'' a ''[[dag]] ([[den]])''.
         self.assertEqual(data[0]["sounds"][2]["audio"], "Sv-måndag.ogg")
         self.assertEqual(data[0]["categories"], ["Švédská substantiva"])
         self.assertEqual(
-            data[0]["etymology_text"], "Spojením slov måne (měsíc) a dag (den)."
+            data[0]["etymology_texts"],
+            ["Spojením slov måne (měsíc) a dag (den)."],
         )
 
     def test_hyphenation(self):
