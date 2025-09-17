@@ -162,7 +162,11 @@ def process_pos_block(
         # low quality pages don't put gloss in list
         expanded_node = wxr.wtp.parse(
             wxr.wtp.node_to_wikitext(
-                list(level_node.invert_find_child(LEVEL_KIND_FLAGS))
+                list(
+                    level_node.invert_find_child(
+                        LEVEL_KIND_FLAGS, include_empty_str=True
+                    )
+                )
             ),
             expand_all=True,
         )

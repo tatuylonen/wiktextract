@@ -197,7 +197,11 @@ def extract_note_section(
             note_str = clean_node(
                 wxr,
                 word_entry,
-                list(list_item.invert_find_child(NodeKind.LIST)),
+                list(
+                    list_item.invert_find_child(
+                        NodeKind.LIST, include_empty_str=True
+                    )
+                ),
             )
             if note_str != "":
                 word_entry.notes.append(note_str)

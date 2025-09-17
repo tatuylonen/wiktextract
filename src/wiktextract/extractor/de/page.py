@@ -337,7 +337,13 @@ def extract_note_section(
 ) -> None:
     for list_item in level_node.find_child_recursively(NodeKind.LIST_ITEM):
         note = clean_node(
-            wxr, None, list(list_item.invert_find_child(NodeKind.LIST))
+            wxr,
+            None,
+            list(
+                list_item.invert_find_child(
+                    NodeKind.LIST, include_empty_str=True
+                )
+            ),
         )
         if note != "":
             word_entry.notes.append(note)

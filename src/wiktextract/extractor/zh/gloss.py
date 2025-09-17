@@ -177,7 +177,13 @@ def process_form_of_template(
 
     if expanded_template.contain_node(NodeKind.LIST):
         shared_gloss = clean_node(
-            wxr, None, list(expanded_template.invert_find_child(NodeKind.LIST))
+            wxr,
+            None,
+            list(
+                expanded_template.invert_find_child(
+                    NodeKind.LIST, include_empty_str=True
+                )
+            ),
         )
         for list_item_node in expanded_template.find_child_recursively(
             NodeKind.LIST_ITEM

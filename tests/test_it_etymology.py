@@ -52,9 +52,9 @@ dal latino canis
         data = parse_page(
             self.wxr,
             "cane",
-            """== {{-it-}} ==
+            """== {{-la-}} ==
 ===Sostantivo, forma flessa===
-# {{Term|mammalogia|it}} [[animale]]
+# ablativo singolare di canis
 ===Etimologia / Derivazione===
 * (sostantivo) vedi [[canis#Latino|canis]]
 * (voce verbale) vedi [[cano#Latino|canō]]""",
@@ -62,4 +62,22 @@ dal latino canis
         self.assertEqual(
             data[0]["etymology_texts"],
             ["(sostantivo) vedi canis", "(voce verbale) vedi canō"],
+        )
+
+    def test_space(self):
+        self.wxr.wtp.add_page("Template:-it-", 10, "Italiano")
+        data = parse_page(
+            self.wxr,
+            "zirconio",
+            """== {{-it-}} ==
+===Sostantivo===
+#  [[elemento chimico]] [[solido]]
+===Etimologia / Derivazione===
+dall'[[arabo]] ''zarkûn'', derivato dal [[persiano]] ''zargûn'', [[colore]] dell'[[oro]]""",
+        )
+        self.assertEqual(
+            data[0]["etymology_texts"],
+            [
+                "dall'arabo zarkûn, derivato dal persiano zargûn, colore dell'oro"
+            ],
         )

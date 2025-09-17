@@ -12,7 +12,9 @@ def extract_etymology(
     level_node: WikiNode,
 ) -> None:
     etymology_nodes = []
-    for node in level_node.invert_find_child(LEVEL_KIND_FLAGS):
+    for node in level_node.invert_find_child(
+        LEVEL_KIND_FLAGS, include_empty_str=True
+    ):
         if isinstance(node, TemplateNode) and node.template_name == "improve":
             # ignore this template
             continue

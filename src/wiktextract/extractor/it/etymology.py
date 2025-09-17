@@ -18,7 +18,13 @@ def extract_etymology_section(
 
     if len(etymology_texts) == 0:
         e_str = clean_node(
-            wxr, None, list(level_node.invert_find_child(LEVEL_KIND_FLAGS))
+            wxr,
+            None,
+            list(
+                level_node.invert_find_child(
+                    LEVEL_KIND_FLAGS, include_empty_str=True
+                )
+            ),
         )
         if e_str != "":
             etymology_texts.append(e_str)

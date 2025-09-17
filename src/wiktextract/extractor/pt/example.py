@@ -63,7 +63,13 @@ def extract_example_list_item(
             bold_str = clean_node(wxr, None, node)
             if re.fullmatch(r"\d+", bold_str) is not None:
                 list_item_str = clean_node(
-                    wxr, None, list(list_item.invert_find_child(NodeKind.LIST))
+                    wxr,
+                    None,
+                    list(
+                        list_item.invert_find_child(
+                            NodeKind.LIST, include_empty_str=True
+                        )
+                    ),
                 )
                 if list_item_str.endswith(":"):
                     ref_nodes.clear()
@@ -103,7 +109,9 @@ def extract_example_text_list(
     sense: Sense,
     list_item: WikiNode,
 ) -> None:
-    e_nodes = list(list_item.invert_find_child(NodeKind.LIST))
+    e_nodes = list(
+        list_item.invert_find_child(NodeKind.LIST, include_empty_str=True)
+    )
     list_item_text = clean_node(wxr, sense, e_nodes)
     example = Example(text=list_item_text)
     if "-" in example.text:

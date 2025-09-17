@@ -56,7 +56,11 @@ def extract_examples(
                 extract_reference(wxr, example_data, ref_tag)
             example_text_node = wxr.wtp.parse(
                 wxr.wtp.node_to_wikitext(
-                    list(list_item_node.invert_find_child(NodeKind.LIST))
+                    list(
+                        list_item_node.invert_find_child(
+                            NodeKind.LIST, include_empty_str=True
+                        )
+                    )
                 )
             )
             example_text = clean_node(wxr, None, example_text_node)

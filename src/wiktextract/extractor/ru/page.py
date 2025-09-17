@@ -136,7 +136,13 @@ def get_pos(
 
     # Search for POS in section text
     text = clean_node(
-        wxr, None, list(level_node.invert_find_child(LEVEL_KIND_FLAGS))
+        wxr,
+        None,
+        list(
+            level_node.invert_find_child(
+                LEVEL_KIND_FLAGS, include_empty_str=True
+            )
+        ),
     )
     for pos_string in POS_TITLES.keys():
         if pos_string in text.lower():

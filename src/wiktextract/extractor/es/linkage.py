@@ -98,7 +98,13 @@ def extract_alt_form_section(
             word_entry.forms.append(Form(form=word, tags=["alt-of"]))
     if not has_link:
         section_text = clean_node(
-            wxr, None, list(level_node.invert_find_child(LEVEL_KIND_FLAGS))
+            wxr,
+            None,
+            list(
+                level_node.invert_find_child(
+                    LEVEL_KIND_FLAGS, include_empty_str=True
+                )
+            ),
         ).removesuffix(".")
         for word in section_text.split(","):
             word = word.strip()
