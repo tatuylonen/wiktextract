@@ -33,7 +33,13 @@ def parse_section(
         extract_hyphenation_section(wxr, base_data, level_node)
     elif subtitle == "etymologie":
         base_data.etymology_text = clean_node(
-            wxr, base_data, list(level_node.invert_find_child(LEVEL_KIND_FLAGS))
+            wxr,
+            base_data,
+            list(
+                level_node.invert_find_child(
+                    LEVEL_KIND_FLAGS, include_empty_str=True
+                )
+            ),
         )
     elif subtitle == "varianty":
         extract_alt_form_section(

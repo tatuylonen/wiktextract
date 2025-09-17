@@ -112,7 +112,13 @@ def extract_etymology_section(
 ) -> None:
     cats = {}
     e_text = clean_node(
-        wxr, cats, list(level_node.invert_find_child(LEVEL_KIND_FLAGS))
+        wxr,
+        cats,
+        list(
+            level_node.invert_find_child(
+                LEVEL_KIND_FLAGS, include_empty_str=True
+            )
+        ),
     )
     if e_text == "":
         return

@@ -58,7 +58,11 @@ def extract_example_list_item(
                     e_data.ref = clean_node(
                         wxr,
                         sense,
-                        list(list_item.invert_find_child(NodeKind.LIST)),
+                        list(
+                            list_item.invert_find_child(
+                                NodeKind.LIST, include_empty_str=True
+                            )
+                        ),
                     )
                     is_ref = True
             is_first_node = False

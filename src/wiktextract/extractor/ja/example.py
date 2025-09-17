@@ -72,7 +72,11 @@ def extract_example_list_item(
 
         expanded_nodes = wxr.wtp.parse(
             wxr.wtp.node_to_wikitext(
-                list(list_item.invert_find_child(NodeKind.LIST))
+                list(
+                    list_item.invert_find_child(
+                        NodeKind.LIST, include_empty_str=True
+                    )
+                )
             ),
             expand_all=True,
         )
@@ -105,7 +109,13 @@ def extract_example_list_item(
         sense.examples.append(example)
     else:
         list_item_text = clean_node(
-            wxr, None, list(list_item.invert_find_child(NodeKind.LIST))
+            wxr,
+            None,
+            list(
+                list_item.invert_find_child(
+                    NodeKind.LIST, include_empty_str=True
+                )
+            ),
         )
         for ref_tag in list_item.find_html("ref"):
             list_item_text += " " + clean_node(wxr, None, ref_tag.children)

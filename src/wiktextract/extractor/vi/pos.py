@@ -186,7 +186,13 @@ def extract_note_section(
                 word_entry.notes.append(note)
     if not has_list:
         note = clean_node(
-            wxr, None, list(level_node.invert_find_child(LEVEL_KIND_FLAGS))
+            wxr,
+            None,
+            list(
+                level_node.invert_find_child(
+                    LEVEL_KIND_FLAGS, include_empty_str=True
+                )
+            ),
         )
         if note != "":
             word_entry.notes.append(note)

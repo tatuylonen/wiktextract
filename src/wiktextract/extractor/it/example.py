@@ -127,7 +127,11 @@ def extract_example_list_item(
         examples.clear()
         text_node = wxr.wtp.parse(
             wxr.wtp.node_to_wikitext(
-                list(list_item.invert_find_child(NodeKind.LIST))
+                list(
+                    list_item.invert_find_child(
+                        NodeKind.LIST, include_empty_str=True
+                    )
+                )
             )
         )
         e_data = Example(text=clean_node(wxr, None, text_node))

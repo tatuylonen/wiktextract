@@ -52,7 +52,11 @@ def extract_gloss(
     if not has_gloss_list:
         node = wxr.wtp.parse(
             wxr.wtp.node_to_wikitext(
-                list(level_node.invert_find_child(LEVEL_KIND_FLAGS))
+                list(
+                    level_node.invert_find_child(
+                        LEVEL_KIND_FLAGS, include_empty_str=True
+                    )
+                )
             )
         )
         process_gloss_list_item(

@@ -24,7 +24,11 @@ def extract_etymology_section(
         text = clean_node(
             wxr,
             word_entry,
-            list(level_node.invert_find_child(LEVEL_KIND_FLAGS)),
+            list(
+                level_node.invert_find_child(
+                    LEVEL_KIND_FLAGS, include_empty_str=True
+                )
+            ),
         )
         if len(text) > 0:
             word_entry.etymology_texts.append(text)

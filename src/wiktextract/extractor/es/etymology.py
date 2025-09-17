@@ -9,7 +9,13 @@ def extract_etymology_section(
     wxr: WiktextractContext, word_entry: WordEntry, level_node: TemplateNode
 ) -> None:
     text = clean_node(
-        wxr, word_entry, list(level_node.invert_find_child(LEVEL_KIND_FLAGS))
+        wxr,
+        word_entry,
+        list(
+            level_node.invert_find_child(
+                LEVEL_KIND_FLAGS, include_empty_str=True
+            )
+        ),
     )
     for t_node in level_node.find_child(NodeKind.TEMPLATE):
         if t_node.template_name == "datación":

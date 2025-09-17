@@ -212,7 +212,11 @@ def extract_usage_section(
                 note = clean_node(
                     wxr,
                     word_entry,
-                    list(list_item.invert_find_child(NodeKind.LIST)),
+                    list(
+                        list_item.invert_find_child(
+                            NodeKind.LIST, include_empty_str=True
+                        )
+                    ),
                 )
                 if note != "":
                     word_entry.notes.append(note)

@@ -17,13 +17,25 @@ def extract_etymology_section(
         # don't use `find_child_recursively` to avoid lists in subsection
         for list_item in list_node.find_child(NodeKind.LIST_ITEM):
             text = clean_node(
-                wxr, cats, list(list_item.invert_find_child(NodeKind.LIST))
+                wxr,
+                cats,
+                list(
+                    list_item.invert_find_child(
+                        NodeKind.LIST, include_empty_str=True
+                    )
+                ),
             )
             if len(text) > 0:
                 etymology_texts.append(text)
     if len(etymology_texts) == 0:
         text = clean_node(
-            wxr, cats, list(level_node.invert_find_child(LEVEL_KIND_FLAGS))
+            wxr,
+            cats,
+            list(
+                level_node.invert_find_child(
+                    LEVEL_KIND_FLAGS, include_empty_str=True
+                )
+            ),
         )
         if len(text) > 0:
             etymology_texts.append(text)

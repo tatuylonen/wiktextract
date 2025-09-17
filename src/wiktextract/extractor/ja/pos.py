@@ -156,7 +156,11 @@ def extract_note_section(
         note = clean_node(
             wxr,
             word_entry,
-            list(level_node.invert_find_child(LEVEL_KIND_FLAGS)),
+            list(
+                level_node.invert_find_child(
+                    LEVEL_KIND_FLAGS, include_empty_str=True
+                )
+            ),
         )
         if note != "":
             word_entry.notes.append(note)

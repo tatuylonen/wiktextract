@@ -74,7 +74,13 @@ def extract_pos_section(
     if not has_list:
         sense = Sense()
         gloss = clean_node(
-            wxr, sense, list(level_node.invert_find_child(LEVEL_KIND_FLAGS))
+            wxr,
+            sense,
+            list(
+                level_node.invert_find_child(
+                    LEVEL_KIND_FLAGS, include_empty_str=True
+                )
+            ),
         )
         if gloss != "":
             sense.glosses.append(gloss)
