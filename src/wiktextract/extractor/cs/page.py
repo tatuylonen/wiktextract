@@ -7,6 +7,7 @@ from wikitextprocessor.parser import LEVEL_KIND_FLAGS, LevelNode, NodeKind
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .declension import extract_declension_section
+from .etymology import extract_etymology_section
 from .linkage import extract_alt_form_section, extract_linkage_section
 from .models import Sense, WordEntry
 from .pos import extract_pos_section, extract_sense_section
@@ -32,15 +33,7 @@ def parse_section(
     elif subtitle == "dělení":
         extract_hyphenation_section(wxr, base_data, level_node)
     elif subtitle == "etymologie":
-        base_data.etymology_text = clean_node(
-            wxr,
-            base_data,
-            list(
-                level_node.invert_find_child(
-                    LEVEL_KIND_FLAGS, include_empty_str=True
-                )
-            ),
-        )
+        extract_etymology_section(wxr, base_data, level_node)
     elif subtitle == "varianty":
         extract_alt_form_section(
             wxr,

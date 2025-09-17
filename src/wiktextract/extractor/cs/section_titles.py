@@ -39,4 +39,5 @@ LINKAGE_SECTIONS = {
     "fráze a idiomy": "related",
     "přísloví, úsloví a pořekadla": "proverbs",
     "přísloví, rčení a pořekadla": "proverbs",
+    "přísloví": "proverbs",
 }
