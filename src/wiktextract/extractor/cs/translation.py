@@ -14,7 +14,13 @@ def extract_translation_section(
         for list_item in list_node.find_child(NodeKind.LIST_ITEM):
             sense_index += 1
             for t_node in list_item.find_child(NodeKind.TEMPLATE):
-                extract_překlady_template(wxr, word_entry, t_node, sense_index)
+                if (
+                    t_node.template_name == "Překlady"
+                    and len(t_node.template_parameters) > 0
+                ):
+                    extract_překlady_template(
+                        wxr, word_entry, t_node, sense_index
+                    )
 
 
 def extract_překlady_template(
@@ -39,7 +45,7 @@ def extract_překlady_template(
                 and lang_name == "unknown"
                 and node.strip().endswith(":")
             ):
-                lang_name = node.strip().removesuffix(":")
+                lang_name = node.strip().removesuffix(":") or "unknown"
             elif (
                 isinstance(node, HTMLNode)
                 and node.tag == "span"
