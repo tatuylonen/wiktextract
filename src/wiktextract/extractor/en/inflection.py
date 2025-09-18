@@ -313,14 +313,7 @@ nondef_re = re.compile(
     r"\s*\d\d?\s*/\s*\d\d?\s*$)"
 )  # taka/Swahili "15 / 17"
 
-# Certain tags are moved from headers in tables into word tags, as they always
-# apply to the whole word.
-TAGS_FORCED_WORDTAGS: set[str] = set(
-    [
-        # This was originally created for a issue with number paradigms in
-        # Arabic, but that is being handled elsewhere now.
-    ]
-)
+
 
 
 class InflCell:
@@ -1553,10 +1546,6 @@ def parse_simple_table(
                     if tt not in all_hdr_tags:
                         all_hdr_tags.append(tt)
                     tt_s = set(tt)
-                    # Certain tags are always moved to word-level tags
-                    if tt_s & TAGS_FORCED_WORDTAGS:
-                        table_tags.extend(tt_s & TAGS_FORCED_WORDTAGS)
-                        tt_s = tt_s - TAGS_FORCED_WORDTAGS
                     # Add tags from referenced footnotes
                     tt_s.update(refs_tags)
                     # Sort, convert to tuple, and add to set of
@@ -2559,10 +2548,11 @@ def parse_simple_table(
                 ) in form_transformations:
                     # v is a pattern string, like "^ich"
                     if (
-                        isinstance(pos, str) and pos != form_transformations_pos
+                        isinstance(form_transformations_pos, str)
+                        and pos != form_transformations_pos
                     ) or (
-                        not isinstance(pos, str)
-                        and pos in form_transformations_pos
+                        (not isinstance(form_transformations_pos, str))
+                        and pos not in form_transformations_pos
                     ):
                         continue
                     m = re.search(v, form)
