@@ -1,4 +1,4 @@
-from wikitextprocessor import TemplateNode, WikiNode
+from wikitextprocessor import HTMLNode, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -12,6 +12,12 @@ def extract_example_list_item(
     for node in list_item.children:
         if isinstance(node, TemplateNode) and node.template_name == "Příklad":
             extract_příklad_template(wxr, sense, node)
+        elif (
+            isinstance(node, HTMLNode)
+            and node.tag == "ref"
+            and len(sense.examples) > 0
+        ):
+            sense.examples[-1].ref = clean_node(wxr, None, node.children)
 
 
 def extract_příklad_template(

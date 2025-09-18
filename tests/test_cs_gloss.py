@@ -171,3 +171,29 @@ class TestCsGloss(TestCase):
                 }
             ],
         )
+
+    def test_example_ref(self):
+        data = parse_page(
+            self.wxr,
+            "stolice",
+            """== čeština ==
+=== podstatné jméno ===
+==== význam ====
+# [[nábytek]] [[k]] [[sezení]]
+#* {{Příklad|cs|A ty, Valentýnku, zahoď tu '''stolici'''.}}<ref>Ladislav Stroupežnický: [[s:Naši furianti|Naši furianti]]</ref>""",
+        )
+        self.assertEqual(
+            data[0]["senses"],
+            [
+                {
+                    "examples": [
+                        {
+                            "bold_text_offsets": [(27, 34)],
+                            "ref": "Ladislav Stroupežnický: Naši furianti",
+                            "text": "A ty, Valentýnku, zahoď tu stolici.",
+                        }
+                    ],
+                    "glosses": ["nábytek k sezení"],
+                }
+            ],
+        )
