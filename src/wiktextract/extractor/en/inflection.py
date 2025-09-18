@@ -2548,10 +2548,11 @@ def parse_simple_table(
                 ) in form_transformations:
                     # v is a pattern string, like "^ich"
                     if (
-                        isinstance(pos, str) and pos != form_transformations_pos
+                        isinstance(form_transformations_pos, str)
+                        and pos != form_transformations_pos
                     ) or (
-                        not isinstance(pos, str)
-                        and pos in form_transformations_pos
+                        (not isinstance(form_transformations_pos, str))
+                        and pos not in form_transformations_pos
                     ):
                         continue
                     m = re.search(v, form)
