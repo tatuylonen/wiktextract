@@ -44,7 +44,7 @@ Spojením slov ''[[måne]] ([[měsíc]])'' a ''[[dag]] ([[den]])''.
             data[0]["sounds"][:2],
             [
                 {"ipa": "[ˈmɔnːdɑːg]"},
-                {"ipa": "[ˈmɔnːda]", "raw_tags": ["hovorově"]},
+                {"ipa": "[ˈmɔnːda]", "tags": ["colloquially"]},
             ],
         )
         self.assertEqual(data[0]["sounds"][2]["audio"], "Sv-måndag.ogg")

@@ -2,9 +2,57 @@ from .models import WordEntry
 
 # https://cs.wiktionary.org/wiki/Modul:Priznaky/seznam
 LABEL_TAGS = {
-    "expresivně": "expressively",
     "pejorativně": "pejorative",
     "zastarale": "obsolete",
+    "v Americe": "US",
+    "argot": "slang",
+    "archaicky": "archaic",
+    "básnicky": "poetic",
+    "bavorský výraz": "Bavarian",
+    "biblický výraz": "Biblical",
+    "cirkusový slang": "slang",
+    "častěji": "often",
+    # "částečně": "partially",
+    "v Čechách": "Bohemia",
+    "dětsky": "childish",
+    "divadelní slang": "slang",
+    "dokonavé": "perfective",
+    # "domácky": "",
+    "dopravní slang": "slang",
+    "doslovně": "literary",
+    "drogový slang": "slang",
+    # "dříve": "formerly",
+    "eufemisticky": "euphemistic",
+    "expresivně": "expressively",
+    "familiárně": "familiar",
+    "formálně": "formally",
+    "hanlivě": "derogatory",
+    # "brněnský hantec": "",
+    "historicky": "historical",
+    "hornický slang": "slang",
+    "horolezecký slang": "slang",
+    "hovorově": "colloquially",
+    "muzikantský slang": "slang",
+    "hyperonymum": "hypernym",
+    "hyponymum": "hyponym",
+    "internetový slang": "slang",
+    "intranzitivní": "intransitive",
+    "ironicky": "ironic",
+    "karetní slang": "slang",
+    "knižně": "literary",
+    "kriminální slang": ["criminal-slang", "slang"],
+    "křesťanský slang": ["Christian", "slang"],
+    "latinsky": "Latin",
+    "slang mládeže": "slang",
+    "v plurálu": "plural",
+    "v moderním kontextu": "modern",
+    "na Moravě": "Moravia",
+    "motoristický slang": "slang",
+    "myslivecký slang": "slang",
+    "slang námořníků": "slang",
+    "nářečně": "dialectal",
+    "nedokonavé": "imperfect",
+    "neformálně": "informal",
 }
 
 GENDER_TAGS = {
@@ -82,24 +130,112 @@ TABLE_TAGS = {
 
 TAGS = {**LABEL_TAGS, **GENDER_TAGS, **TABLE_TAGS}
 
-TOPICS = {}
+TOPICS = {
+    "v alchymii": "alchemy",
+    "v anatomii": "anatomy",
+    "v antropologii": "anthropology",
+    "v archeologii": "archaeology",
+    "v architektuře": "architecture",
+    "v astrologii": "astrology",
+    "v bankovnictví": "banking",
+    "v basketbalu": "basketball",
+    "v biochemii": "biochemistry",
+    "v biologii": "biology",
+    "v botanice": "botany",
+    "v buddhizmu": "Buddhism",
+    "církevní": "ecclesiastical",
+    "cirkusový slang": "circus",
+    "v cukrovarnictví": "sugar-making",
+    "v diplomacii": "diplomacy",
+    "v dopravě": "transport",
+    "dopravní slang": "transport",
+    "drogový slang": "drugs",
+    "v ekologii": "ecology",
+    "v ekonomii": "economics",
+    "v elektrotechnice": "electrical-engineering",
+    "v energetice": "energy",
+    "v entomologii": "entomology",
+    "v epidemiologii": "epidemiology",
+    # "v estetice": "",
+    "v etnografii": "ethnography",
+    "v lékárenství": "pharmacy",
+    "ve filmu": "film",
+    "ve filosofii": "philosophy",
+    "ve finančnictví": "finance",
+    "ve folklóru": "folklore",
+    "ve fotografii": "photography",
+    "ve fyzice": "physics",
+    "ve fyziologii": "physiology",
+    "v gastronomii": "gastronomy",
+    "v genetice": "genetics",
+    "v geodézii": "geodesy",
+    "v geologii": "geology",
+    "v geometrii": "geometry",
+    "v historii": "history",
+    "v ledním hokeji": "ice-hockey",
+    "v hornictví": "mining",
+    "hornický slang": "mining",
+    "horolezecký slang": "mountaineering",
+    "v hudbě": "music",
+    "muzikantský slang": "music",
+    "v hutnictví": "metallurgy",
+    # "chatovací zkratka": "",
+    "v chemii": "chemistry",
+    # "v chodském nářečí": "",
+    "v ichtyologii": "ichthyology",
+    "v informatice": "computer-science",
+    "internetový slang": "Internet",
+    "v islámu": "Islam",
+    "v jazykovědě": "linguistics",
+    "v jaderné fyzice": "nuclear-physics",
+    # "v kartářství": "",
+    "v karetních hrách": "card-games",
+    "karetní slang": "card-games",
+    "keramika": "ceramics",
+    "v knihovnictví": "librarianship",
+    "v komunikaci": "communications",
+    "v konspiračních teoriích": "conspiracy",
+    # "v koželužství": "",
+    "v krejčovství": "tailor",
+    "v křesťanství": "Christianity",
+    # "v kvalitářství": "",
+    # "v kybernetice": "",
+    "v lesnictví": "forestry",
+    "v letectví": "aviation",
+    "v lexikologii": "lexicology",
+    "v literatuře": "literature",
+    "v logice": "logic",
+    "v loďařství": "shipbuilding",
+    "v matematice": "mathematics",
+    "v lékařství": "medicine",
+    "v meteorologii": "meteorology",
+    "v mezinárodním právu": "law",
+    "v mineralogii": "mineralogy",
+    "v mykologii": "mycology",
+    "myslivecký slang": "hunting",
+    "v mytologii": "mythology",
+    "v náboženství": "religion",
+}
 
 
 def translate_raw_tags(data: WordEntry) -> None:
     raw_tags = []
     for raw_tag in data.raw_tags:
+        found_tag = False
         if raw_tag in TAGS and hasattr(data, "tags"):
+            found_tag = True
             tr_tag = TAGS[raw_tag]
             if isinstance(tr_tag, str):
                 data.tags.append(tr_tag)
             elif isinstance(tr_tag, list):
                 data.tags.extend(tr_tag)
-        elif raw_tag in TOPICS and hasattr(data, "topics"):
+        if raw_tag in TOPICS and hasattr(data, "topics"):
+            found_tag = True
             topic = TOPICS[raw_tag]
             if isinstance(topic, str):
                 data.topics.append(topic)
             elif isinstance(topic, list):
                 data.topics.extend(topic)
-        else:
+        if not found_tag:
             raw_tags.append(raw_tag)
     data.raw_tags = raw_tags
