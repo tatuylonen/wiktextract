@@ -116,13 +116,7 @@ class TestViLinkage(TestCase):
         )
         self.assertEqual(
             data[0]["forms"],
-            [
-                {
-                    "form": "cờ hó",
-                    "raw_tags": ["từ lóng Internet"],
-                    "tags": ["alternative"],
-                }
-            ],
+            [{"form": "cờ hó", "tags": ["alternative", "Internet", "slang"]}],
         )
 
     def test_ko_col3(self):
