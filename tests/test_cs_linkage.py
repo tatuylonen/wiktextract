@@ -57,7 +57,7 @@ class TestCsLinkage(TestCase):
         self.assertEqual(
             data[0]["synonyms"],
             [
-                {"raw_tags": ["zdrobněle"], "sense_index": 1, "word": "pejsek"},
+                {"tags": ["diminutive"], "sense_index": 1, "word": "pejsek"},
                 {"word": "ratlík", "sense_index": 1},
             ],
         )
