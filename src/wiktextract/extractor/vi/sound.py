@@ -40,8 +40,10 @@ def extract_sound_list_item(
 ):
     for node in list_item.children:
         if isinstance(node, TemplateNode):
-            if node.template_name.lower() in ["âm thanh", "audio", "âm thanh"]:
-                extract_audio_template(wxr, base_data, node)
+            if node.template_name in ["âm thanh", "Audio", "Âm thanh"]:
+                extract_audio_template(wxr, base_data, node, 1)
+            elif node.template_name in ["âm thanh-2", "audio"]:
+                extract_audio_template(wxr, base_data, node, 2)
             elif node.template_name in [
                 "IPA",
                 "IPA2",
@@ -165,14 +167,21 @@ def extract_pron_audio_template(
 
 
 def extract_audio_template(
-    wxr: WiktextractContext, base_data: WordEntry, t_node: TemplateNode
+    wxr: WiktextractContext,
+    base_data: WordEntry,
+    t_node: TemplateNode,
+    start_arg: int,
 ):
-    file = clean_node(wxr, None, t_node.template_parameters.get(2, ""))
+    # https://vi.wiktionary.org/wiki/Bản_mẫu:âm_thanh
+    # https://vi.wiktionary.org/wiki/Bản_mẫu:âm_thanh-2
+    file = clean_node(wxr, None, t_node.template_parameters.get(start_arg, ""))
     if file == "":
         return
     sound = Sound()
     set_sound_file_url_fields(wxr, file, sound)
-    raw_tag = clean_node(wxr, None, t_node.template_parameters.get(3, ""))
+    raw_tag = clean_node(
+        wxr, None, t_node.template_parameters.get(start_arg + 1, "")
+    )
     if raw_tag != "":
         sound.raw_tags.append(raw_tag)
     translate_raw_tags(sound)
