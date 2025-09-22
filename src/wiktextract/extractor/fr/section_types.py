@@ -71,6 +71,8 @@ POS_SECTIONS: dict[str, POSSubtitleData] = {
     "copule": {"pos": "conj"},
     "dét": {"pos": "det"},
     "déterminant": {"pos": "det"},
+    "déterminant possessif": {"pos": "det", "tags": ["possessive"]},
+    "déterminant démonstratif": {"pos": "det", "tags": ["demonstrative"]},
     "encl": {"pos": "suffix", "tags": ["clitic"]},
     "enclitique": {"pos": "suffix", "tags": ["clitic"]},
     "gismu": {"pos": "verb", "tags": ["gismu"]},
