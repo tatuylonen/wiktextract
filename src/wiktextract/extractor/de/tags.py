@@ -230,10 +230,18 @@ GENDER_TAGS = {
     "n": "neuter",
     "m": "masculine",
     "f": "feminine",
+    "u": "common",
+    "m, f": ["masculine", "feminine"],  # Vorlage:mf
+    "m, f, n": ["masculine", "feminine", "neuter"],  # Vorlage:mfn
+    "f, n": ["feminine", "neuter"],  # Vorlage:fn
     # Vorlage:Deklinationsseite Adjektiv
     "Maskulinum": "masculine",
     "Femininum": "feminine",
     "Neutrum": "neuter",
+    "f Pl.": ["feminine", "plural"],  # Template:fPl.
+    "m Pl.": ["masculine", "plural"],  # Template:mPl.
+    "n Pl.": ["neuter", "plural"],  # Template:nPl.
+    "u Pl.": ["common", "plural"],  # Template:uPl.
 }
 
 NUMBER_TAGS = {
@@ -241,7 +249,12 @@ NUMBER_TAGS = {
     "Singular": "singular",
     "Plural": "plural",
     "Pl.": "plural",
+    "pl": "plural",
     "Dual": "dual",
+    "ohne Plural": "no-plural",
+    "meist im Plural": "plural-normally",
+    "meist Plural": "plural-normally",
+    "nur Plural": "plural-only",
 }
 
 CASE_TAGS = {
@@ -266,6 +279,7 @@ CASE_TAGS = {
     "Abessiv": "abessive",
     "Instruktiv": "instructive",
     "Komitativ": "comitative",
+    "Partitiv": "partitive",
 }
 
 COMPARISON_TAGS = {
@@ -311,6 +325,34 @@ OTHER_TAGS = {
     "Switzerland and Liechtenstein": ["Switzerland", "Liechtenstein"],
     "traditionell": "traditional",
     "vereinfachte Schreibweise": "simplified",
+    "US-amerikanisch": "US",
+    "Adjektive": "adjective",
+    "australisch": "Australian",
+    "scherzhaft": "humorous",
+    "Minuskel": "lowercase",
+    "Majuskel": "uppercase",
+    "bildungssprachlich": "formal",
+    "Imperativ Singular": ["imperative", "singular"],
+    "meist": "usually",
+    "deutsch": "German",
+    "pariserisch": "Parisian",
+    "derb": "impolite",
+    "poetisch": "poetic",
+    "Adverb": "adverb",
+    "süddeutsch": "South-German",
+    "Verb": "verb",
+    "kanadisch": "Canadian",
+    "Supinum": "supine",
+    "Kanada": "Canada",
+    "vulgär": "vulgar",
+    "metonymisch": "metonymically",
+    "veraltet": "dated",
+    "kolumbianisch": "Colombian",
+    "Medial": "medial",
+    "Pinyin": "Pinyin",
+    "Wade-Giles": "Wade-Giles",
+    "umgangssprachlich": "colloquial",
+    "literarisch": "literary",
 }
 
 TENSE_TAGS = {
@@ -325,6 +367,7 @@ TENSE_TAGS = {
     "perfektiv": "perfective",
     "imperfektiv": "imperfective",
     "Imperfekt": "imperfect",
+    "Futur": "future",
 }
 
 MOOD_TAGS = {
@@ -335,6 +378,9 @@ MOOD_TAGS = {
     "Imperativ": "imperative",
     "Imperative": "imperative",
     "Indikativ": "indicative",
+    # Template:Schwedisch Verb Übersicht
+    "Konjunktiv": "subjunctive",
+    "Konditional": "conditional",
 }
 
 VERB_FORM_TAGS = {
@@ -394,9 +440,19 @@ INFLECTION_TABLE_TAGS = {
     # Vorlage:Deklinationsseite Numerale
     "bestimmt": "definite",
     "unbestimmt": "indefinite",
+    "Unbestimmt": "indefinite",
     "mit Possessivpronomen": ["possessive", "pronoun"],
     # Template:Kroatisch Verb Übersicht
     "Partizip Präteritum Aktiv": ["past", "participle", "active"],
+    # Vorlage:Bulgarisch Substantiv Übersicht f1
+    "Singular bestimmt": ["singular", "definite"],
+    "Plural bestimmt": ["plural", "definite"],
+    # Vorlage:Schwedisch Verb Übersicht
+    "Partizip Präsens": ["present", "participle"],
+    # Template:Mazedonisch Substantiv Übersicht
+    "Distalg": "distal",
+    "Proximal": "proximal",
+    "Zählform": "count-form",
 }
 
 GRAMMATICAL_TAGS = {
@@ -459,6 +515,27 @@ K_TEMPLATE_TOPICS = {
     "Theoretische Informatik": "computing",
     "militärisch": "military",
     "Taxonomie": "taxonomy",
+    "Chemie": "chemistry",
+    "Alchimie": "alchemy",
+    "Pharmazie": "medicine",
+    "Wirtschaft": "economics",
+    "wissenschaftlich": "scientific",
+    "Gastronomie": "food",
+    "Architektur": "architecture",
+    "Geologie": "geology",
+    "Philosophie": "philosophy",
+    "Psychologie": "psychology",
+    "Landwirtschaft": "agriculture",
+    "Literatur": "literature",
+    "Weinbau": "viticulture",
+    "Meteorologie": "meteorology",
+    "Kleidung": "clothing",
+    "Bauwesen": "construction",
+    "Geschichte": "history",
+    "Christentum": "Christianity",
+    "Mythologie": "mythology",
+    "Grammatik": "grammar",
+    "Elektrotechnik": "electrical-engineering",
 }
 
 

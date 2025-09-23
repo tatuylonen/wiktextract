@@ -16,6 +16,7 @@ class Linkage(GermanBaseModel):
     note: str = ""
     raw_tags: list[str] = []
     tags: list[str] = []
+    topics: list[str] = []
 
 
 class Translation(GermanBaseModel):
@@ -125,6 +126,7 @@ class Form(GermanBaseModel):
     raw_tags: list[str] = []
     source: str = ""
     sense_index: str = ""
+    topics: list[str] = []
 
 
 class Descendant(GermanBaseModel):

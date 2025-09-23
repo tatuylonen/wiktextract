@@ -75,7 +75,9 @@ def process_u_tabelle_list_item(
                     tr_data = append_tr_data(word_entry, tr_data)
                 process_u_template(wxr, tr_data, node)
             else:
-                tr_data.raw_tags.append(clean_node(wxr, None, node))
+                raw_tag = clean_node(wxr, None, node).strip(": \n")
+                if raw_tag != "":
+                    tr_data.raw_tags.append(raw_tag)
         elif isinstance(node, WikiNode) and node.kind == NodeKind.ITALIC:
             raw_tag_str = clean_node(wxr, None, node).removesuffix(":")
             for raw_tag in filter(None, raw_tag_str.split(", ")):

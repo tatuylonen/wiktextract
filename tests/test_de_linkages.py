@@ -88,7 +88,7 @@ class TestDELinkages(unittest.TestCase):
                 {
                     "word": "Cocos nucifera",
                     "sense_index": "1",
-                    "raw_tags": ["wissenschaftlich"],
+                    "topics": ["scientific"],
                 },
             ],
         )
