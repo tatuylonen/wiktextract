@@ -314,8 +314,6 @@ nondef_re = re.compile(
 )  # taka/Swahili "15 / 17"
 
 
-
-
 class InflCell:
     """Cell in an inflection table."""
 
@@ -3109,7 +3107,16 @@ class TableContext:
 
 
 def handle_wikitext_or_html_table(
-    wxr, word, lang, pos, data, tree, titles, source, after, tablecontext=None
+    wxr: WiktextractContext,
+    word: str,
+    lang: str,
+    pos: str,
+    data,
+    tree,
+    titles,
+    source,
+    after,
+    tablecontext: TableContext | None = None,
 ):
     """Parses a table from parsed Wikitext format into rows and columns of
     InflCell objects and then calls handle_generic_table() to parse it into
@@ -3138,6 +3145,14 @@ def handle_wikitext_or_html_table(
 
     if not tablecontext:
         tablecontext = TableContext()
+
+    # Get language specific text removal patterns
+    remove_text_patterns: dict[tuple[str, ...], tuple[str, ...]] | None = None
+    if rem := get_lang_conf(lang, "remove_text_patterns"):
+        for poses in rem.keys():
+            if pos in poses:
+                remove_text_patterns = rem[poses]
+                break
 
     def handle_table1(
         wxr,
@@ -3294,8 +3309,14 @@ def handle_wikitext_or_html_table(
 
                     # Clean the rest of the cell.
                     celltext = clean_node(wxr, None, rest)
-                    # print("CLEANED:", celltext)
+                    # print(f"CLEANED: {celltext=}")
                     # print(f"SUBTABLES: {tables}")
+
+                    # Remove regexed patterns from text
+                    if remove_text_patterns is not None:
+                        for pat in remove_text_patterns:
+                            celltext = re.sub(pat, "", celltext)
+                    # print(f"AFTER: {celltext=}  <<")
 
                     # Handle nested tables.
                     for tbl in tables:

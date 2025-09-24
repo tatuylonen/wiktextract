@@ -66,6 +66,7 @@ LangConfDict = TypedDict(
         # Cells to ignore in this language, unless the cell has the key
         # as a tag.
         "conditionally_ignored_cells": dict[str, list[str]],
+        "remove_text_patterns": dict[tuple[str, ...], tuple[str, ...]] | None,
     },
     total=False,
 )
@@ -139,6 +140,7 @@ lang_specific: dict[str, LangConfDict] = {
         # Cells to ignore in this language, unless the cell has the key
         # as a tag.
         "conditionally_ignored_cells": {},
+        "remove_text_patterns": None,
     },
     "austronesian-group": {
         "numbers": ["singular", "dual", "plural"],
@@ -183,134 +185,29 @@ lang_specific: dict[str, LangConfDict] = {
     },
     "Ancient Greek": {
         "next": "Proto-Indo-European",  # Has dual
-        "form_transformations": [
-            # Used to remove the gendered article alternatives at the start
-            # of table entries like ἰχθυοκένταυρος / Ancient Greek
-            [("noun", "name"), "^ὁ, ἡ ", "", ""],
-            [("noun", "name"), "^τὼ ", "", ""],
-            [("noun", "name"), "^οἱ, αἱ ", "", ""],
-            [("noun", "name"), "^τοῦ, τῆς ", "", ""],
-            [("noun", "name"), "^τοῖν ", "", ""],
-            [("noun", "name"), "^τῶν ", "", ""],
-            [("noun", "name"), "^τῷ, τῇ ", "", ""],
-            [("noun", "name"), "^τοῖς, ταῖς ", "", ""],
-            [("noun", "name"), "^τὸν, τὴν ", "", ""],
-            [("noun", "name"), "^τὼ ", "", ""],
-            [("noun", "name"), "^τοὺς, τᾱ̀ς ", "", ""],
-            [("noun", "name"), "(?m)^ho, hē ", "", ""],
-            [("noun", "name"), "(?m)^tṑ ", "", ""],
-            [("noun", "name"), "(?m)^hoi, hai ", "", ""],
-            [("noun", "name"), "(?m)^toû, tês ", "", ""],
-            [("noun", "name"), "(?m)^toîn ", "", ""],
-            [("noun", "name"), "(?m)^tôn ", "", ""],
-            [("noun", "name"), "(?m)^tôi, têi ", "", ""],
-            [("noun", "name"), "(?m)^toîs, taîs ", "", ""],
-            [("noun", "name"), "(?m)^tòn, tḕn ", "", ""],
-            [("noun", "name"), "(?m)^tṑ ", "", ""],
-            [("noun", "name"), "(?m)^toùs, tā̀s ", "", ""],
-            # New added ones, leaving the old ones just in case
-            [("noun", "name"), r"^ὁ ", "", ""],
-            [("noun", "name"), r"(?m)^ho ", "", ""],
-            [("noun", "name"), r"^ἡ ", "", ""],
-            [("noun", "name"), r"(?m)^hē ", "", ""],
-            [("noun", "name"), r"^αἱ ", "", ""],
-            [("noun", "name"), r"(?m)^hai ", "", ""],
-            [("noun", "name"), r"^τῆς ", "", ""],
-            [("noun", "name"), r"(?m)^tês ", "", ""],
-            [("noun", "name"), r"^τῇ ", "", ""],
-            [("noun", "name"), r"(?m)^tēî ", "", ""],
-            [("noun", "name"), r"(?m)^têi ", "", ""],
-            [("noun", "name"), r"^ταῖς ", "", ""],
-            [("noun", "name"), r"(?m)^taîs ", "", ""],
-            [("noun", "name"), r"^τὴν ", "", ""],
-            [("noun", "name"), r"(?m)^tḕn ", "", ""],
-            [("noun", "name"), r"^τᾱ̀ς ", "", ""],
-            [("noun", "name"), r"(?m)^tā̀s ", "", ""],
-            [("noun", "name"), r"^ὁ / ἡ ", "", ""],
-            [("noun", "name"), r"(?m)^ho / hē ", "", ""],
-            [("noun", "name"), r"^οἱ / αἱ ", "", ""],
-            [("noun", "name"), r"(?m)^hoi / hai ", "", ""],
-            [("noun", "name"), r"^τοῦ / τῆς ", "", ""],
-            [("noun", "name"), r"(?m)^toû / tês ", "", ""],
-            [("noun", "name"), r"^τῷ / τῇ ", "", ""],
-            [("noun", "name"), r"(?m)^tōî / tēî ", "", ""],
-            [("noun", "name"), r"^τοῖς / ταῖς ", "", ""],
-            [("noun", "name"), r"(?m)^toîs / taîs ", "", ""],
-            [("noun", "name"), r"^τὸν / τὴν ", "", ""],
-            [("noun", "name"), r"(?m)^tòn / tḕn ", "", ""],
-            [("noun", "name"), r"^τοὺς / τᾱ̀ς ", "", ""],
-            [("noun", "name"), r"(?m)^toùs / tā̀s ", "", ""],
-            [("noun", "name"), r"^οἱ ", "", ""],
-            [("noun", "name"), r"(?m)^hoi ", "", ""],
-            [("noun", "name"), r"^τοῦ ", "", ""],
-            [("noun", "name"), r"(?m)^toû ", "", ""],
-            [("noun", "name"), r"^τῷ ", "", ""],
-            [("noun", "name"), r"(?m)^tôi ", "", ""],
-            [("noun", "name"), r"^τοῖς ", "", ""],
-            [("noun", "name"), r"(?m)^toîs ", "", ""],
-            [("noun", "name"), r"^τὸν ", "", ""],
-            [("noun", "name"), r"(?m)^tòn ", "", ""],
-            [("noun", "name"), r"^τοὺς ", "", ""],
-            [("noun", "name"), r"(?m)^toùs ", "", ""],
-            [("noun", "name"), r"^τὸ ", "", ""],
-            [("noun", "name"), r"(?m)^tò ", "", ""],
-            [("noun", "name"), r"^τᾰ̀ ", "", ""],
-            [("noun", "name"), r"(?m)^tằ ", "", ""],
-            [("noun", "name"), r"^τοῖσῐ / τοῖσῐν ", "", ""],
-            # XXX THIS IS BAD, IF POSSIBLE FIX, ISSUE #1313
-            [("noun", "name"), r"(?m)^toîsĭ\(n\) ", "", ""],
-            [("noun", "name"), r"(?m)^toîsĭ ", "", ""],
-            [("noun", "name"), r"(?m)^toîsĭn ", "", ""],
-            # END BAD
-            [("noun", "name"), r"^ᾱ̔ ", "", ""],
-            [("noun", "name"), r"(?m)^hā ", "", ""],
-            [("noun", "name"), r"^ταὶ ", "", ""],
-            [("noun", "name"), r"(?m)^taì ", "", ""],
-            [("noun", "name"), r"^τᾶς ", "", ""],
-            [("noun", "name"), r"(?m)^tâs ", "", ""],
-            [("noun", "name"), r"^τᾶν ", "", ""],
-            [("noun", "name"), r"(?m)^tân ", "", ""],
-            [("noun", "name"), r"^τᾷ ", "", ""],
-            [("noun", "name"), r"(?m)^tâi ", "", ""],
-            [("noun", "name"), r"^τᾱν ", "", ""],
-            [("noun", "name"), r"(?m)^tān ", "", ""],
-            [("noun", "name"), r"^τοὶ ", "", ""],
-            [("noun", "name"), r"(?m)^toì ", "", ""],
-            [("noun", "name"), r"^τῇσῐ ", "", ""],
-            [("noun", "name"), r"(?m)^têisĭ ", "", ""],
-            [("noun", "name"), r"^τῇσῐν ", "", ""],
-            [("noun", "name"), r"(?m)^têisĭ ", "", ""],
-            [("noun", "name"), r"^ὀ ", "", ""],
-            [("noun", "name"), r"(?m)^o ", "", ""],
-            [("noun", "name"), r"^οἰ ", "", ""],
-            [("noun", "name"), r"(?m)^oi ", "", ""],
-            [("noun", "name"), r"^τῶ ", "", ""],
-            [("noun", "name"), r"(?m)^tô ", "", ""],
-            [("noun", "name"), r"^ᾱ ", "", ""],
-            [("noun", "name"), r"(?m)^ā ", "", ""],
-            [("noun", "name"), r"^αἰ ", "", ""],
-            [("noun", "name"), r"(?m)^ai ", "", ""],
-            [("noun", "name"), r"^τᾶ ", "", ""],
-            [("noun", "name"), r"(?m)^tâ ", "", ""],
-            [("noun", "name"), r"^τᾱν ", "", ""],
-            [("noun", "name"), r"(?m)^tān ", "", ""],
-            [
-                ("noun", "name"),
-                r"^τοῖ ",
-                "",
-                "",
-            ],  # alternative suggested by user
-            [("noun", "name"), r"^τοι ", "", ""],
-            [("noun", "name"), r"(?m)^toi ", "", ""],
-            [("noun", "name"), r"^τὼς ", "", ""],
-            [("noun", "name"), r"(?m)^tṑs ", "", ""],
-            [("noun", "name"), r"^τὸς ", "", ""],
-            [("noun", "name"), r"(?m)^tòs ", "", ""],
-            [("noun", "name"), r"^τὼς ", "", ""],
-            [("noun", "name"), r"(?m)^tṑs ", "", ""],
-            # [("noun", "name"), r"^", "", ""],
-            # [("noun", "name"), r"(?m)^", "", ""],
-        ],
+        "remove_text_patterns": {
+            ("noun", "name"): (
+                # Used to remove the gendered article alternatives at the start
+                # of table entries like ἰχθυοκένταυρος / Ancient Greek
+                r"(?m)^(ā |ai |hā |hai |hē |ho |ho / hē |ho, hē |hoi |"
+                r"hoi / hai |hoi, hai |o |oi |tằ |tâ |taì |tâi |"
+                r"taîs |tân |tān |tān |tâs |tā̀s |têi |tēî |têisĭ |"
+                r"têisĭ |tḕn |tês |tò |tô |tṑ |tṑ |toi |toì |tôi |"
+                r"toîn |toîs |toîsĭ |toîsĭ\(n\) |toîsĭn |toîs / taîs |"
+                r"toîs, taîs |tôi, têi |tōî / tēî |tòn |tôn |"
+                r"tòn / tḕn |tòn, tḕn |tòs |tṑs |tṑs |toû |toùs |"
+                r"toùs / tā̀s |toùs, tā̀s |toû / tês |toû, tês )",
+                # Main greek pattern
+                r"^(ᾱ |ᾱ̔ |αἰ |αἱ |ἡ |ὀ |ὁ |ὁ / ἡ |ὁ, ἡ |οἰ |οἱ |οἱ / αἱ |"
+                r"οἱ, αἱ |τᾰ̀ |τᾶ |τᾷ |ταὶ |ταῖς |τᾶν |τᾱν |τᾱν |τᾶς |τᾱ̀ς |"
+                r"τῇ |τὴν |τῆς |τῇσῐ |τῇσῐν |τὸ |τοι |τοὶ |τοῖ |τοῖν |"
+                r"τοῖς |"
+                r"τοῖσῐ / τοῖσῐν |τοῖς / ταῖς |τοῖς, ταῖς |τὸν |τὸν / τὴν |"
+                r"τὸν, τὴν |τὸς |τοῦ |τοὺς |τοὺς / τᾱ̀ς |τοὺς, τᾱ̀ς |"
+                r"τοῦ / τῆς |τοῦ, τῆς |τὼ |τῶ |τῷ |τῶν |τὼς |τὼς |"
+                r"τῷ / τῇ |τῷ, τῇ |τὼ )",
+            ),
+        },
     },
     # "Anejom̃": {
     #     "numbers": ["singular", "dual", "trial", "plural"],
@@ -391,9 +288,10 @@ lang_specific: dict[str, LangConfDict] = {
     },
     "Danish": {
         "genders": ["common-gender", "feminine", "masculine", "neuter"],
-        "form_transformations": [
-            ["noun", r"^\(as a measure\) ", "", ""],
-        ],
+        "remove_text_patterns": {
+            # tuples need the comma to be happy
+            ("noun",): (r"^\(as a measure\) ",),
+        },
     },
     "Eblaite": {
         "next": "semitic-group",
