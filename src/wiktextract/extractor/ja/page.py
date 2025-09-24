@@ -39,15 +39,18 @@ def parse_section(
                 )
             break
         elif (
-            title_text in ["語源", "由来", "字源", "出典"]
+            title_text in ["語源", "由来", "字源", "出典", "語誌"]
             and wxr.config.capture_etymologies
         ):
             extract_etymology_section(wxr, page_data, base_data, level_node)
             break
-        elif title_text.startswith("発音") and wxr.config.capture_pronunciation:
+        elif (
+            title_text.startswith(("発音", "音価"))
+            and wxr.config.capture_pronunciation
+        ):
             extract_sound_section(wxr, page_data, base_data, level_node)
             break
-        elif title_text == "翻訳" and wxr.config.capture_translations:
+        elif title_text in ["翻訳", "訳語"] and wxr.config.capture_translations:
             extract_translation_section(
                 wxr,
                 page_data[-1] if len(page_data) > 0 else base_data,
@@ -65,7 +68,10 @@ def parse_section(
                 LINKAGES[title_text],
             )
             break
-        elif title_text == "活用" and wxr.config.capture_inflections:
+        elif (
+            title_text in ["活用", "サ変動詞"]
+            and wxr.config.capture_inflections
+        ):
             extract_conjugation_section(
                 wxr,
                 page_data[-1] if len(page_data) > 0 else base_data,
@@ -75,6 +81,9 @@ def parse_section(
         elif title_text in [
             "異表記",
             "別表記",
+            "代替表記",
+            "異形",
+            "表記揺れ",
         ]:  # "異表記・別形", Template:alter
             extract_alt_form_section(
                 wxr,
@@ -85,7 +94,16 @@ def parse_section(
                 level_node,
             )
             break
-        elif title_text in ["用法", "注意点", "留意点", "注意"]:
+        elif title_text in [
+            "用法",
+            "注意点",
+            "留意点",
+            "注意",
+            "備考",
+            "表記",
+            "補足",
+            "語法",
+        ]:
             extract_note_section(
                 wxr,
                 page_data[-1] if len(page_data) > 0 else base_data,
@@ -96,7 +114,15 @@ def parse_section(
             extract_homophone_section(wxr, page_data, base_data, level_node)
             break
     else:
-        if title_text not in ["脚注", "参照", "参考文献", "参考"]:
+        if title_text not in [
+            "脚注",
+            "参照",
+            "参考文献",
+            "参考",
+            "同音の漢字",
+            "参考辞書",
+            "外部リンク",
+        ]:
             wxr.wtp.debug(
                 f"Unknown section: {title_text}",
                 sortid="extractor/ja/page/parse_section/93",
@@ -117,7 +143,9 @@ def parse_page(
 ) -> list[dict[str, Any]]:
     # page layout
     # https://ja.wiktionary.org/wiki/Wiktionary:スタイルマニュアル
-    if page_title.startswith(("Appendix:", "シソーラス:")):
+    if page_title.startswith(
+        ("Appendix:", "シソーラス:")
+    ) or page_title.endswith("(活用)"):
         return []
     wxr.wtp.start_page(page_title)
     tree = wxr.wtp.parse(page_text)
