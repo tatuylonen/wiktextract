@@ -561,7 +561,6 @@ infl_map: dict[str, InflMapNode] = {
     "present participle": "present participle",
     "number case / gender": "",
     "Case/Gender": "",
-    "Derived forms": "",
     "Adverb": "adverbial",
     "augmentative": "augmentative",
     "diminutive": "diminutive",
@@ -7177,6 +7176,11 @@ infl_map: dict[str, InflMapNode] = {
         "inflection-template": "grc-conj",
         "column-index": 2,
         "then": "dummy-reset-headers active",
+    },
+    "Derived forms": {
+        "default": "",
+        "lang": "grc",
+        "then": "dummy-reset-headers",
     },
 }
 

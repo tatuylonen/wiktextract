@@ -574,8 +574,11 @@ def extract_cell_content(
 ) -> tuple[str, list[str], list[tuple[str, str]], list[str]]:
     """Cleans a row/column header for later processing.  This returns
     (cleaned, refs, defs, tags)."""
-    # print("EXTRACT_CELL_CONTENT {!r}".format(col))
+    print("EXTRACT_CELL_CONTENT {!r}".format(col))
     hdr_tags = []
+    new_col = re.sub(r"(?m)^τοῖσῐ / τοῖσῐν |^toîsĭ\(n\) ", "", col)
+    if new_col != col:
+        print(f"{col=} -> {new_col=}")
     col = re.sub(r"(?s)\s*,\s*$", "", col)
     col = re.sub(r"(?s)\s*•\s*$", "", col)
     col = re.sub(r"\s+", " ", col)
