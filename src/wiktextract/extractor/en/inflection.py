@@ -3147,7 +3147,9 @@ def handle_wikitext_or_html_table(
         tablecontext = TableContext()
 
     # Get language specific text removal patterns
-    remove_text_patterns: dict[tuple[str, ...], tuple[str, ...]] | None = None
+    remove_text_patterns: (
+        dict[tuple[str, ...], tuple[str | re.Pattern, ...]] | None
+    ) = None
     if rem := get_lang_conf(lang, "remove_text_patterns"):
         for poses in rem.keys():
             if pos in poses:
