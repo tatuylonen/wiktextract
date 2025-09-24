@@ -509,6 +509,7 @@ class TestFrGloss(TestCase):
                     {
                         "examples": [
                             {
+                                "bold_text_offsets": [(0, 6)],
                                 "text": "advena belli",
                                 "ref": "Sil.",
                                 "translation": "étranger à la guerre.",
