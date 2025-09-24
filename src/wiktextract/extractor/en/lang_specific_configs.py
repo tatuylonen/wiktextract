@@ -66,7 +66,10 @@ LangConfDict = TypedDict(
         # Cells to ignore in this language, unless the cell has the key
         # as a tag.
         "conditionally_ignored_cells": dict[str, list[str]],
-        "remove_text_patterns": dict[tuple[str, ...], tuple[str, ...]] | None,
+        "remove_text_patterns": dict[
+            tuple[str, ...], tuple[str | re.Pattern, ...]
+        ]
+        | None,
     },
     total=False,
 )
@@ -189,23 +192,27 @@ lang_specific: dict[str, LangConfDict] = {
             ("noun", "name"): (
                 # Used to remove the gendered article alternatives at the start
                 # of table entries like ἰχθυοκένταυρος / Ancient Greek
-                r"(?m)^(ā |ai |hā |hai |hē |ho |ho / hē |ho, hē |hoi |"
-                r"hoi / hai |hoi, hai |o |oi |tằ |tâ |taì |tâi |"
-                r"taîs |tân |tān |tān |tâs |tā̀s |têi |tēî |têisĭ |"
-                r"têisĭ |tḕn |tês |tò |tô |tṑ |tṑ |toi |toì |tôi |"
-                r"toîn |toîs |toîsĭ |toîsĭ\(n\) |toîsĭn |toîs / taîs |"
-                r"toîs, taîs |tôi, têi |tōî / tēî |tòn |tôn |"
-                r"tòn / tḕn |tòn, tḕn |tòs |tṑs |tṑs |toû |toùs |"
-                r"toùs / tā̀s |toùs, tā̀s |toû / tês |toû, tês )",
+                re.compile(
+                    r"(?m)^(ā |ai |hā |hai |hē |ho |ho / hē |ho, hē |hoi |"
+                    r"hoi / hai |hoi, hai |o |oi |tằ |tâ |taì |tâi |"
+                    r"taîs |tân |tān |tān |tâs |tā̀s |têi |tēî |têisĭ |"
+                    r"têisĭ |tḕn |tês |tò |tô |tṑ |tṑ |toi |toì |tôi |"
+                    r"toîn |toîs |toîsĭ |toîsĭ\(n\) |toîsĭn |toîs / taîs |"
+                    r"toîs, taîs |tôi, têi |tōî / tēî |tòn |tôn |"
+                    r"tòn / tḕn |tòn, tḕn |tòs |tṑs |tṑs |toû |toùs |"
+                    r"toùs / tā̀s |toùs, tā̀s |toû / tês |toû, tês )"
+                ),
                 # Main greek pattern
-                r"^(ᾱ |ᾱ̔ |αἰ |αἱ |ἡ |ὀ |ὁ |ὁ / ἡ |ὁ, ἡ |οἰ |οἱ |οἱ / αἱ |"
-                r"οἱ, αἱ |τᾰ̀ |τᾶ |τᾷ |ταὶ |ταῖς |τᾶν |τᾱν |τᾱν |τᾶς |τᾱ̀ς |"
-                r"τῇ |τὴν |τῆς |τῇσῐ |τῇσῐν |τὸ |τοι |τοὶ |τοῖ |τοῖν |"
-                r"τοῖς |"
-                r"τοῖσῐ / τοῖσῐν |τοῖς / ταῖς |τοῖς, ταῖς |τὸν |τὸν / τὴν |"
-                r"τὸν, τὴν |τὸς |τοῦ |τοὺς |τοὺς / τᾱ̀ς |τοὺς, τᾱ̀ς |"
-                r"τοῦ / τῆς |τοῦ, τῆς |τὼ |τῶ |τῷ |τῶν |τὼς |τὼς |"
-                r"τῷ / τῇ |τῷ, τῇ |τὼ )",
+                re.compile(
+                    r"^(ᾱ |ᾱ̔ |αἰ |αἱ |ἡ |ὀ |ὁ |ὁ / ἡ |ὁ, ἡ |οἰ |οἱ |οἱ / αἱ |"
+                    r"οἱ, αἱ |τᾰ̀ |τᾶ |τᾷ |ταὶ |ταῖς |τᾶν |τᾱν |τᾱν |τᾶς |τᾱ̀ς |"
+                    r"τῇ |τὴν |τῆς |τῇσῐ |τῇσῐν |τὸ |τοι |τοὶ |τοῖ |τοῖν |"
+                    r"τοῖς |"
+                    r"τοῖσῐ / τοῖσῐν |τοῖς / ταῖς |τοῖς, ταῖς |τὸν |τὸν / τὴν |"
+                    r"τὸν, τὴν |τὸς |τοῦ |τοὺς |τοὺς / τᾱ̀ς |τοὺς, τᾱ̀ς |"
+                    r"τοῦ / τῆς |τοῦ, τῆς |τὼ |τῶ |τῷ |τῶν |τὼς |τὼς |"
+                    r"τῷ / τῇ |τῷ, τῇ |τὼ )"
+                ),
             ),
         },
     },
@@ -290,7 +297,7 @@ lang_specific: dict[str, LangConfDict] = {
         "genders": ["common-gender", "feminine", "masculine", "neuter"],
         "remove_text_patterns": {
             # tuples need the comma to be happy
-            ("noun",): (r"^\(as a measure\) ",),
+            ("noun",): (re.compile(r"^\(as a measure\) "),),
         },
     },
     "Eblaite": {
