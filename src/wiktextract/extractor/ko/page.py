@@ -104,6 +104,7 @@ def parse_section(
         "갤러리",
         "참조",
         "이체자",
+        "외부 링크",
     ]:
         pass  # ignore
     else:

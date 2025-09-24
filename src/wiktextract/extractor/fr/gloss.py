@@ -147,6 +147,13 @@ def extract_examples(
                 if node not in ignored_nodes
             ]
             example_data.text = clean_node(wxr, None, example_nodes)
+            calculate_bold_offsets(
+                wxr,
+                wxr.wtp.parse(wxr.wtp.node_to_wikitext(example_nodes)),
+                example_data.text,
+                example_data,
+                "bold_text_offsets",
+            )
             gloss_data.examples.append(example_data)
 
 
