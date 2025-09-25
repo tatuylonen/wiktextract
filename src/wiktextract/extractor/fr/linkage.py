@@ -75,9 +75,11 @@ def extract_linkage_section(
     sense_index = 0
     for node in level_node.children:
         if isinstance(node, TemplateNode) and node.template_name == "(":
-            sense_text = clean_node(
+            new_sense_text = clean_node(
                 wxr, None, node.template_parameters.get(1, "")
             )
+            if new_sense_text != "":
+                sense_text = new_sense_text
             sense_index_text = node.template_parameters.get(2, "0")
             if (
                 isinstance(sense_index_text, str)

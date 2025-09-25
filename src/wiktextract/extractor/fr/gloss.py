@@ -104,57 +104,53 @@ def extract_gloss(
             if nest_gloss_list.sarg.endswith("#"):
                 extract_gloss(wxr, page_data, nest_gloss_list, gloss_data)
             elif nest_gloss_list.sarg.endswith("*"):
-                extract_examples(wxr, gloss_data, nest_gloss_list)
+                for e_list_item in nest_gloss_list.find_child(
+                    NodeKind.LIST_ITEM
+                ):
+                    extract_example_list_item(wxr, gloss_data, e_list_item)
 
         translate_raw_tags(gloss_data)
 
 
-def extract_examples(
-    wxr: WiktextractContext,
-    gloss_data: Sense,
-    example_list_node: WikiNode,
-) -> None:
-    for example_node in example_list_node.find_child(NodeKind.LIST_ITEM):
-        example_node_children = list(example_node.filter_empty_str_child())
-        if len(example_node_children) == 0:
-            continue
-        first_child = example_node_children[0]
-        if isinstance(
-            first_child, TemplateNode
-        ) and first_child.template_name.endswith("exemple"):
-            process_exemple_template(wxr, first_child, gloss_data)
+def extract_example_list_item(
+    wxr: WiktextractContext, sense: Sense, list_item: WikiNode
+):
+    has_exemple_template = False
+    e_data = Example()
+    e_nodes = []
+    raw_tags = []
+    for node in list_item.children:
+        if isinstance(node, TemplateNode):
+            if node.template_name.endswith("exemple"):
+                process_exemple_template(wxr, node, sense, raw_tags=raw_tags)
+                has_exemple_template = True
+            elif node.template_name == "source":
+                e_data.ref = clean_node(wxr, sense, node).strip("— ()")
+            else:
+                t_text = clean_node(wxr, sense, node)
+                if t_text.startswith("(") and t_text.endswith(")"):
+                    raw_tags.append(t_text.strip("() "))
+                else:
+                    e_nodes.append(node)
+        elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
+            for tr_item in node.find_child(NodeKind.LIST_ITEM):
+                e_data.translation = clean_node(wxr, None, tr_item.children)
         else:
-            example_data = Example()
-            ignored_nodes = []
-            for node in example_node.find_child(
-                NodeKind.TEMPLATE | NodeKind.LIST
-            ):
-                if (
-                    node.kind == NodeKind.TEMPLATE
-                    and node.template_name == "source"
-                ):
-                    example_data.ref = clean_node(wxr, None, node).strip("— ()")
-                    ignored_nodes.append(node)
-                elif node.kind == NodeKind.LIST:
-                    for tr_item in node.find_child(NodeKind.LIST_ITEM):
-                        example_data.translation = clean_node(
-                            wxr, None, tr_item.children
-                        )
-                    ignored_nodes.append(node)
-            example_nodes = [
-                node
-                for node in example_node_children
-                if node not in ignored_nodes
-            ]
-            example_data.text = clean_node(wxr, None, example_nodes)
+            e_nodes.append(node)
+
+    if not has_exemple_template:
+        e_data.text = clean_node(wxr, sense, e_nodes)
+        if e_data.text != "":
+            e_data.raw_tags.extend(raw_tags)
+            translate_raw_tags(e_data)
             calculate_bold_offsets(
                 wxr,
-                wxr.wtp.parse(wxr.wtp.node_to_wikitext(example_nodes)),
-                example_data.text,
-                example_data,
+                wxr.wtp.parse(wxr.wtp.node_to_wikitext(e_nodes)),
+                e_data.text,
+                e_data,
                 "bold_text_offsets",
             )
-            gloss_data.examples.append(example_data)
+            sense.examples.append(e_data)
 
 
 def process_exemple_template(
@@ -162,6 +158,7 @@ def process_exemple_template(
     node: TemplateNode,
     gloss_data: Sense | None,
     attestations: list[AttestationData] = [],
+    raw_tags: list[str] = [],
 ) -> Example:
     # https://fr.wiktionary.org/wiki/Modèle:exemple
     # https://fr.wiktionary.org/wiki/Modèle:ja-exemple
@@ -193,6 +190,7 @@ def process_exemple_template(
         roman=transcription,
         ref=source,
         attestations=attestations,
+        raw_tags=raw_tags,
     )
     calculate_bold_offsets(
         wxr, text_arg, text, example_data, "bold_text_offsets"
@@ -207,6 +205,7 @@ def process_exemple_template(
         gloss_data.examples.append(example_data)
     if gloss_data is not None:
         clean_node(wxr, gloss_data, node)
+    translate_raw_tags(example_data)
     return example_data
 
 
