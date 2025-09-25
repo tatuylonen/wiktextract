@@ -1,5 +1,6 @@
 import re
 from collections.abc import Iterator
+from functools import partial
 from typing import TypeAlias
 from unicodedata import name as unicode_name
 
@@ -512,7 +513,11 @@ def bold_node_fn(
 
 
 def extract_form_of_templates(
-    wxr: WiktextractContext, parent_sense: Sense, t_node: TemplateNode
+    wxr: WiktextractContext,
+    parent_sense: Sense,
+    t_node: TemplateNode,
+    siblings: list[str | WikiNode],
+    siblings_index: int,
 ) -> None:
     """Parse form_of for nouns, adjectives and verbs.
 
@@ -530,19 +535,18 @@ def extract_form_of_templates(
     """
     t_name = t_node.template_name
 
+    basic_extract = partial(
+        extract_form_of_templates_basic,
+        wxr,
+        parent_sense,
+        siblings,
+        siblings_index,
+        t_name,
+        t_node,
+    )
     # Generic
     if t_name == "κλ":
-        t_args = t_node.template_parameters
-        if 2 not in t_args:
-            wxr.wtp.warning(
-                "Form-of template does not have lemma data: "
-                f"{t_name}, {t_args=}",
-                sortid="pos/535/20250416",
-            )
-            return
-        lemma = clean_node(wxr, None, t_args[2])
-        form_of = FormOf(word=lemma)
-        parent_sense.form_of.append(form_of)
+        return basic_extract(extract_argument=2)
 
     # Nouns and adjectives
     inflection_t_names = ("πτώσεις", "πτώση")
@@ -551,29 +555,50 @@ def extract_form_of_templates(
 
     # Verbs
     if t_name == "ρημ τύπος":
-        t_args = t_node.template_parameters
-        if 2 not in t_args:
-            wxr.wtp.warning(
-                "Form-of template does not have lemma data: "
-                f"{t_name}, {t_args=}",
-                sortid="pos/535/20250416",
-            )
-            return
-        lemma = clean_node(wxr, None, t_args[2])
-        form_of = FormOf(word=lemma)
-        parent_sense.form_of.append(form_of)
+        return basic_extract(extract_argument=2)
+
     if t_name.startswith("μτχ"):
-        t_args = t_node.template_parameters
-        if 1 not in t_args:
-            wxr.wtp.warning(
-                "Form-of template does not have lemma data: "
-                f"{t_name}, {t_args=}",
-                sortid="pos/570/20250517",
-            )
-            return
-        lemma = clean_node(wxr, None, t_args[1])
+        return basic_extract(extract_argument=1)
+
+def extract_form_of_templates_basic(
+    wxr: WiktextractContext,
+    parent_sense: Sense,
+    siblings: list[str | WikiNode],
+    sibling_index: int,
+    t_name: str,
+    t_node: TemplateNode,
+    extract_argument: int | str,
+):
+    t_args = t_node.template_parameters
+    if extract_argument not in t_args:
+        # mtxpp template has no args, consume the next links for the
+        # form_of field
+        wxr.wtp.warning(
+            "Form-of template does not have lemma data: "
+            f"{t_name}, {t_args=}",
+            sortid="pos/570/20250517",
+        )
+        links: list[str | WikiNode] = []
+        for node in siblings[sibling_index+1:]:
+            if not (
+                (isinstance(node, str) and node.strip() == "")
+                or (isinstance(node, WikiNode) and node.kind == NodeKind.LINK)
+            ):
+                break
+            links.append(node)
+        lemma = clean_node(wxr, None, links).strip()
+    else:
+        lemma = clean_node(wxr, None, t_args[extract_argument]).strip()
+
+    if lemma:
         form_of = FormOf(word=lemma)
         parent_sense.form_of.append(form_of)
+    else:
+        wxr.wtp.warning(
+            "Lemma extract from form-of template was empty or whitespace:"
+            f"{t_name}, {t_args=}, {lemma=}",
+            sortid="pos/609/20250925",
+        )
 
 
 def extract_form_of_templates_ptosi(
@@ -667,9 +692,9 @@ def parse_gloss(
     if len(contents) == 0:
         return False
 
-    for t_node in contents:
+    for i, t_node in enumerate(contents):
         if isinstance(t_node, TemplateNode):
-            extract_form_of_templates(wxr, parent_sense, t_node)
+            extract_form_of_templates(wxr, parent_sense, t_node, contents, i)
 
     template_tags: list[str] = []
 
@@ -857,7 +882,6 @@ def recurse_glosses1(
             ).strip("⮡ \n")
 
             # print(f"{contents=}, {text=}, {related_linkages=}")
-
 
             if example_is_synonym or example_is_antonym:
                 link_linkages = []

@@ -165,6 +165,35 @@ class TestElGlosses(TestCase):
         expected = [{"form_of": [{"word": "διαδέχομαι"}]}]
         self.mktest_sense(raw, expected)
 
+    def test_form_of_empty_args1(self) -> None:
+        # This should return nothing: no argument, no text after
+        # NOTE for this test the name of the template is for debugging
+        raw = """* {{μτχ3a}}"""
+        expected: list[dict] = [{}]
+        self.mktest_sense(raw, expected)
+
+    def test_form_of_empty_args2(self) -> None:
+        # This should return nothing: no argument, no text after
+        # NOTE for this test the name of the template is for debugging
+        raw = """* {{μτχ3b}} [[test]]"""
+        expected = [{"form_of": [{"word": "test"}]}]
+        self.mktest_sense(raw, expected)
+
+    def test_form_of_empty_args3(self) -> None:
+        # This should return nothing: no argument, no text after
+        # NOTE for this test the name of the template is for debugging
+        raw = """* {{μτχ3b}} [[test]] [[foo]]"""
+        expected = [{"form_of": [{"word": "test foo"}]}]
+        self.mktest_sense(raw, expected)
+
+    def test_form_of_empty_args4(self) -> None:
+        # This should return nothing: no argument, no text after
+        # NOTE for this test the name of the template is for debugging
+        raw = """* {{μτχ3b}} [[test]] [[foo]], [[bar]]"""
+        expected = [{"form_of": [{"word": "test foo"}]}]
+        self.mktest_sense(raw, expected)
+
+
     def test_form_of_generic_template_noun(self) -> None:
         # https://el.wiktionary.org/wiki/εδάφη
         raw = "* {{κλ||έδαφος|π=οακ|α=π}}"
