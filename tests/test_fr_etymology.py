@@ -270,12 +270,35 @@ class TestEtymology(TestCase):
         )
 
     def test_no_list_etymology_block(self):
-        self.wxr.wtp.start_page("autrice")
-        root = self.wxr.wtp.parse("Paragraph 1\nParagraph 2")
-        etymology_data = extract_etymology(self.wxr, root, None)
+        self.wxr.wtp.add_page(
+            "Modèle:siècle",
+            10,
+            """<span class="siècle">''(<abbr title="16"><small>XVI</small></abbr><sup style="font-size:83%;line-height:1">e</sup> siècle)''</span>""",
+        )
+        self.wxr.wtp.add_page(
+            "Modèle:date",
+            10,
+            """<span class="date"><i>(<span class="texte">1694</span>)</i></span>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "capucine",
+            """== {{langue|fr}} ==
+=== {{S|étymologie}} ===
+{{siècle|XVI}} Pour la religieuse.
+
+{{date|1694}} Le botaniste français.
+
+=== {{S|nom|fr|num=1}} ===
+
+# Religieuse""",
+        )
         self.assertEqual(
-            etymology_data,
-            {("", ""): EtymologyData(texts=["Paragraph 1\nParagraph 2"])},
+            data[0]["attestations"], [{"date": "XVIᵉ siècle"}, {"date": "1694"}]
+        )
+        self.assertEqual(
+            data[0]["etymology_texts"],
+            ["Pour la religieuse.", "Le botaniste français."],
         )
 
     def test_etymology_examples(self):
