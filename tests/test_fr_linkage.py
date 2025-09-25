@@ -5,13 +5,18 @@ from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.fr.linkage import extract_linkage
 from wiktextract.extractor.fr.models import WordEntry
+from wiktextract.extractor.fr.page import parse_page
 from wiktextract.wxr_context import WiktextractContext
 
 
 class TestLinkage(TestCase):
     def setUp(self) -> None:
         self.wxr = WiktextractContext(
-            Wtp(lang_code="fr"), WiktionaryConfig(dump_file_lang_code="fr")
+            Wtp(lang_code="fr"),
+            WiktionaryConfig(
+                dump_file_lang_code="fr",
+                capture_language_codes=None,
+            ),
         )
 
     def tearDown(self) -> None:
@@ -426,4 +431,25 @@ class TestLinkage(TestCase):
                 for d in page_data[-1].anagrams
             ],
             [{"word": "niche"}, {"word": "niché"}],
+        )
+
+    def test_bold_sense(self):
+        data = parse_page(
+            self.wxr,
+            "autochtone",
+            """== {{langue|fr}} ==
+=== {{S|adjectif|fr}} ===
+# Qui
+==== {{S|synonymes}} ====
+'''se dit d’une espèce végétale ou animale'''
+* [[endémique]]""",
+        )
+        self.assertEqual(
+            data[0]["synonyms"],
+            [
+                {
+                    "word": "endémique",
+                    "sense": "se dit d’une espèce végétale ou animale",
+                }
+            ],
         )
