@@ -514,7 +514,7 @@ def bold_node_fn(
 
 def extract_form_of_templates(
     wxr: WiktextractContext,
-    parent_sense: Sense,
+    parent_sense: Sense | WordEntry,
     t_node: TemplateNode,
     siblings: list[str | WikiNode],
     siblings_index: int,
