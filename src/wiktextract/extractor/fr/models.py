@@ -34,6 +34,8 @@ class Example(FrenchBaseModel):
         description="For examples in 'Attestations historiques' section",
     )
     note: str = ""
+    raw_tags: list[str] = []
+    tags: list[str] = []
 
 
 class Form(FrenchBaseModel):

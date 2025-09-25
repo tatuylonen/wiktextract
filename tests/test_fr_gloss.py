@@ -753,3 +753,41 @@ class TestFrGloss(TestCase):
                 }
             ],
         )
+
+    def test_tag_template_in_example_list(self):
+        self.wxr.wtp.add_page(
+            "Modèle:figuré",
+            10,
+            """<span class="emploi"><span id="figuré"></span>''(<span class="texte">[[Annexe:Glossaire grammatical#F|Sens figuré]]</span>)''</span>[[Catégorie:Métaphores en français]]""",
+        )
+        self.wxr.wtp.add_page(
+            "Modèle:exemple",
+            10,
+            """<span class="example"><q><bdi lang="fr" xml:lang="fr" class="lang-fr">''Celles-ci, nouvelles '''amazones''', placèrent des sentinelles sur le clocher et se barricadèrent dans le chœur de l’église.''</bdi></q> <span class="sources"><span class="tiret">—&#160;</span>([[w:Gustave Fraipont|Gustave Fraipont]], ''Les Vosges'', 1923)</span></span>[[Catégorie:Exemples en français]]""",
+        )
+        self.wxr.wtp.add_page(
+            "Modèle:w", 10, "[[w:Gustave Fraipont|Gustave Fraipont]]"
+        )
+        data = parse_page(
+            self.wxr,
+            "amazone",
+            """== {{langue|fr}} ==
+=== {{S|nom|fr}} ===
+# [[femme|Femme]]
+#* {{figuré|fr}} {{exemple|Celles-ci, nouvelles '''amazones''', placèrent des sentinelles sur le clocher et se barricadèrent dans le chœur de l’église.|lang=fr|source={{w|Gustave Fraipont}}, ''Les Vosges'', 1923}}""",
+        )
+        self.assertEqual(
+            data[0]["senses"][0]["examples"],
+            [
+                {
+                    "bold_text_offsets": [(21, 29)],
+                    "text": "Celles-ci, nouvelles amazones, placèrent des sentinelles sur le clocher et se barricadèrent dans le chœur de l’église.",
+                    "ref": "Gustave Fraipont, Les Vosges, 1923",
+                    "tags": ["figuratively"],
+                }
+            ],
+        )
+        self.assertEqual(
+            data[0]["senses"][0]["categories"],
+            ["Métaphores en français", "Exemples en français"],
+        )

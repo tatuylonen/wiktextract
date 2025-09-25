@@ -75,9 +75,11 @@ def extract_linkage_section(
     sense_index = 0
     for node in level_node.children:
         if isinstance(node, TemplateNode) and node.template_name == "(":
-            sense_text = clean_node(
+            new_sense_text = clean_node(
                 wxr, None, node.template_parameters.get(1, "")
             )
+            if new_sense_text != "":
+                sense_text = new_sense_text
             sense_index_text = node.template_parameters.get(2, "0")
             if (
                 isinstance(sense_index_text, str)
@@ -143,13 +145,17 @@ def extract_linkage_list_item(
             isinstance(child_node, WikiNode)
             and child_node.kind == NodeKind.ITALIC
         ):
-            current_sense = clean_node(wxr, None, child_node).strip("()")
-            if len(list(list_item.filter_empty_str_child())) == 1:
-                linkage_data.word = current_sense
-            elif current_sense.isdecimal():
-                linkage_data.sense_index = int(current_sense)
+            italic_text = clean_node(wxr, None, child_node).strip("()")
+            if italic_text == "":
+                continue
+            elif len(list(list_item.filter_empty_str_child())) == 1:
+                linkage_data.word = italic_text
+            elif italic_text.isdecimal():
+                linkage_data.sense_index = int(italic_text)
+            elif inside_bracket:
+                linkage_data.raw_tags.append(italic_text)
             else:
-                linkage_data.sense = current_sense
+                linkage_data.sense = italic_text
         elif (
             isinstance(child_node, TemplateNode)
             and child_node.template_name == "réf"

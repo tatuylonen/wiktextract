@@ -46,11 +46,22 @@ def extract_etymology(
 
     if len(etymology_dict) == 0:
         categories = {}
-        etymology_text = clean_node(
-            wxr, categories, level_node.children[:level_node_index]
-        )
+        e_nodes = []
+        attestations = []
+        for node in level_node.children[:level_node_index]:
+            if (
+                isinstance(node, TemplateNode)
+                and node.template_name in ATTESTATION_TEMPLATES
+            ):
+                attestations.extend(extract_date_template(wxr, base_data, node))
+            else:
+                e_nodes.append(node)
+        etymology_text = clean_node(wxr, categories, e_nodes)
         if len(etymology_text) > 0:
-            etymology_dict[("", "")].texts.append(etymology_text)
+            etymology_dict[("", "")].texts.extend(
+                list(filter(None, map(str.strip, etymology_text.splitlines())))
+            )
+            etymology_dict[("", "")].attestations = attestations
             etymology_dict[(pos_id, pos_title)].categories.extend(
                 categories.get("categories", [])
             )
