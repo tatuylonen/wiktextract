@@ -1,20 +1,16 @@
-from typing import TypeAlias
-
-from wikitextprocessor import WikiNode
+from wikitextprocessor import NodeKind, TemplateNode, WikiNode
 from wikitextprocessor.core import TemplateArgs
 from wikitextprocessor.parser import LEVEL_KIND_FLAGS
 
 from wiktextract import WiktextractContext
-from wiktextract.clean import clean_value
 from wiktextract.page import clean_node
 
-from .models import TemplateData, WordEntry
+from .models import WordEntry
 from .parse_utils import (
-    ETYMOLOGY_TEMPLATES,
-    PANEL_TEMPLATES,
     POSReturns,
     find_sections,
 )
+from .pos import extract_form_of_templates
 from .pronunciation import process_pron
 from .section_titles import POS_HEADINGS, Heading, Tags
 from .text_utils import ENDING_NUMBER_RE
@@ -37,9 +33,25 @@ def process_etym(
 
     section_num = num
 
+    # Extract form_of data
+    for i, t_node in enumerate(etym_contents):
+        if isinstance(t_node, TemplateNode):
+            extract_form_of_templates(wxr, base_data, t_node, etym_contents, i)
+        if isinstance(t_node, WikiNode) and t_node.kind == NodeKind.LIST:
+            for l_item in t_node.find_child_recursively(NodeKind.LIST_ITEM):
+                for j, l_node in enumerate(l_item.children):
+                    if isinstance(l_node, TemplateNode):
+                        extract_form_of_templates(
+                            wxr, base_data, l_node, l_item.children, j
+                        )
+
     # Greek wiktionary doesn't seem to have etymology templates, or at
     # least they're not used as much.
-    etym_text = clean_node(wxr, base_data, etym_contents)
+    etym_text = (
+        clean_node(wxr, base_data, etym_contents)
+        .lstrip(":#")
+        .strip()
+    )
 
     if etym_text:
         base_data.etymology_text = etym_text

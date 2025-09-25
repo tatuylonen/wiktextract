@@ -241,7 +241,7 @@ class WordEntry(GreekBaseModel):
     hyphenation: str = ""  # Should be a list `hyphenations`.
     head_templates: list[TemplateData] = []
     # alt_of: list[FormOf] = []
-    # form_of: list[FormOf] = []
+    form_of: list[FormOf] = []
     antonyms: list[Linkage] = []
     # coordinate_terms: list[Linkage] = []
     derived: list[Linkage] = []

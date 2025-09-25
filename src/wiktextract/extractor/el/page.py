@@ -1,4 +1,5 @@
 import re
+from typing import Any
 
 from mediawiki_langcodes import code_to_name, name_to_code
 
@@ -40,7 +41,7 @@ from .section_titles import (
 
 def parse_page(
     wxr: WiktextractContext, page_title: str, page_text: str
-) -> list[dict[str, WordEntry]]:
+) -> list[dict[str, Any]]:
     """Parse Greek Wiktionary (el.wiktionary.org) page.
 
     References:
