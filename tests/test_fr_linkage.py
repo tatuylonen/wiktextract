@@ -80,10 +80,7 @@ class TestLinkage(TestCase):
                 d.model_dump(exclude_defaults=True)
                 for d in page_data[-1].derived
             ],
-            [
-                {"word": "être à la masse"},
-                {"word": "mettre à la masse"},
-            ],
+            [{"word": "être à la masse"}, {"word": "mettre à la masse"}],
         )
 
     def test_sub_list(self):
@@ -170,21 +167,9 @@ class TestLinkage(TestCase):
                 for d in page_data[-1].derived
             ],
             [
-                {
-                    "word": "dlo",
-                    "lang_code": "kmv",
-                    "lang": "Karipúna",
-                },
-                {
-                    "word": "djilo",
-                    "lang_code": "kmv",
-                    "lang": "Karipúna",
-                },
-                {
-                    "word": "caliginous",
-                    "lang_code": "en",
-                    "lang": "Anglais",
-                },
+                {"word": "dlo", "lang_code": "kmv", "lang": "Karipúna"},
+                {"word": "djilo", "lang_code": "kmv", "lang": "Karipúna"},
+                {"word": "caliginous", "lang_code": "en", "lang": "Anglais"},
             ],
         )
 
@@ -198,10 +183,7 @@ class TestLinkage(TestCase):
                 d.model_dump(exclude_defaults=True)
                 for d in page_data[-1].derived
             ],
-            [
-                {"word": "benoîte d’eau"},
-                {"word": "benoite d’eau"},
-            ],
+            [{"word": "benoîte d’eau"}, {"word": "benoite d’eau"}],
         )
 
     def test_sense_index_str(self):
@@ -214,9 +196,7 @@ class TestLinkage(TestCase):
                 d.model_dump(exclude_defaults=True)
                 for d in page_data[-1].paronyms
             ],
-            [
-                {"word": "-aar", "sense_index": 1},
-            ],
+            [{"word": "-aar", "sense_index": 1}],
         )
 
     def test_italic_sense_node(self):
@@ -232,9 +212,7 @@ class TestLinkage(TestCase):
                 d.model_dump(exclude_defaults=True)
                 for d in page_data[-1].synonyms
             ],
-            [
-                {"word": "more", "sense": "selon les adjectifs"},
-            ],
+            [{"word": "more", "sense": "selon les adjectifs"}],
         )
 
     def test_no_linkage_empty_tag(self):
@@ -247,9 +225,7 @@ class TestLinkage(TestCase):
                 d.model_dump(exclude_defaults=True)
                 for d in page_data[-1].holonyms
             ],
-            [
-                {"word": "korpo", "sense": "corps"},
-            ],
+            [{"word": "korpo", "raw_tags": ["corps"]}],
         )
 
     def test_italic_number_sense(self):
@@ -259,9 +235,7 @@ class TestLinkage(TestCase):
         extract_linkage(self.wxr, page_data, root, "variantes orthographiques")
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in page_data[-1].forms],
-            [
-                {"form": "Gb", "sense": "10⁹"},
-            ],
+            [{"form": "Gb", "raw_tags": ["10⁹"]}],
         )
 
     def test_linkage_tags(self):
@@ -323,13 +297,7 @@ class TestLinkage(TestCase):
         )
 
     def test_réf_template(self):
-        page_data = [
-            WordEntry(
-                word="chien",
-                lang_code="fr",
-                lang="Français",
-            )
-        ]
+        page_data = [WordEntry(word="chien", lang_code="fr", lang="Français")]
         self.wxr.wtp.start_page("chien")
         root = self.wxr.wtp.parse(
             "* [[battre le chien devant le lion]] : Châtier le faible devant le fort pour une faute que l’un ou l’autre a commise{{réf}}"
@@ -349,13 +317,7 @@ class TestLinkage(TestCase):
         )
 
     def test_zh_lien_link_tr(self):
-        page_data = [
-            WordEntry(
-                word="狗",
-                lang_code="zh",
-                lang="Chinois",
-            )
-        ]
+        page_data = [WordEntry(word="狗", lang_code="zh", lang="Chinois")]
         self.wxr.wtp.start_page("狗")
         root = self.wxr.wtp.parse(
             "* {{zh-lien|饿狗|ègǒu}} — [[chien]] [[affamé]]"
@@ -366,23 +328,11 @@ class TestLinkage(TestCase):
                 d.model_dump(exclude_defaults=True)
                 for d in page_data[-1].derived
             ],
-            [
-                {
-                    "word": "饿狗",
-                    "roman": "ègǒu",
-                    "translation": "chien affamé",
-                }
-            ],
+            [{"word": "饿狗", "roman": "ègǒu", "translation": "chien affamé"}],
         )
 
     def test_dérivés_autres_langues_section_lien_roman(self):
-        page_data = [
-            WordEntry(
-                word="拉麵",
-                lang_code="zh",
-                lang="Chinois",
-            )
-        ]
+        page_data = [WordEntry(word="拉麵", lang_code="zh", lang="Chinois")]
         self.wxr.wtp.add_page("Modèle:L", 10, "Japonais")
         self.wxr.wtp.start_page("拉麵")
         root = self.wxr.wtp.parse(
@@ -452,4 +402,19 @@ class TestLinkage(TestCase):
                     "sense": "se dit d’une espèce végétale ou animale",
                 }
             ],
+        )
+
+    def test_double_italic_tags(self):
+        data = parse_page(
+            self.wxr,
+            "autochtone",
+            """== {{langue|fr}} ==
+=== {{S|nom|fr}} ===
+# Personne
+==== {{S|synonymes}} ====
+* [[Peau-Rouge]] (''Désuet'') (''Injurieux'')""",
+        )
+        self.assertEqual(
+            data[0]["synonyms"],
+            [{"word": "Peau-Rouge", "tags": ["obsolete", "offensive"]}],
         )
