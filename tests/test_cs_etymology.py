@@ -40,3 +40,22 @@ class TestCsEtymology(TestCase):
                 "Složenina, viz česká předpona auto- a francouzské substantivum mobile.",
             ],
         )
+
+    def test_etymology_under_pos(self):
+        data = parse_page(
+            self.wxr,
+            "chleba",
+            """== čeština ==
+=== podstatné jméno (1) ===
+==== význam ====
+* [[chléb]]
+=== podstatné jméno (2) ===
+==== etymologie ====
+Jde vlastně o tzv.
+==== význam ====
+# ''genitiv singuláru substantiva [[chléb]]''"""
+        )
+        self.assertTrue("etymology_texts" not in data[0])
+        self.assertEqual(
+            data[1]["etymology_texts"], ["Jde vlastně o tzv."]
+        )

@@ -33,7 +33,13 @@ def parse_section(
     elif subtitle == "dělení":
         extract_hyphenation_section(wxr, base_data, level_node)
     elif subtitle == "etymologie":
-        extract_etymology_section(wxr, base_data, level_node)
+        extract_etymology_section(
+            wxr,
+            page_data[-1]
+            if level_node.kind != NodeKind.LEVEL3 and len(page_data) > 0
+            else base_data,
+            level_node,
+        )
     elif subtitle == "varianty":
         extract_alt_form_section(
             wxr,
