@@ -53,9 +53,7 @@ class TestCsEtymology(TestCase):
 ==== etymologie ====
 Jde vlastně o tzv.
 ==== význam ====
-# ''genitiv singuláru substantiva [[chléb]]''"""
+# ''genitiv singuláru substantiva [[chléb]]''""",
         )
         self.assertTrue("etymology_texts" not in data[0])
-        self.assertEqual(
-            data[1]["etymology_texts"], ["Jde vlastně o tzv."]
-        )
+        self.assertEqual(data[1]["etymology_texts"], ["Jde vlastně o tzv."])

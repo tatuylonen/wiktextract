@@ -4,6 +4,7 @@ from wikitextprocessor import LevelNode, NodeKind, TemplateNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from ..share import capture_text_in_parentheses
 from .models import Form, WordEntry
 from .tags import translate_raw_tags
 
@@ -80,10 +81,11 @@ def extract_substantivum_template(
                         )
                 else:
                     for word in cell_text.split(" / "):
+                        cell_tags, word = capture_text_in_parentheses(word)
                         word = word.strip()
                         if word in ["", "—", wxr.wtp.title]:
                             continue
-                        form = Form(form=word)
+                        form = Form(form=word, raw_tags=cell_tags)
                         if table_caption != "":
                             form.raw_tags.append(table_caption)
                         for row_header in row_headers:
