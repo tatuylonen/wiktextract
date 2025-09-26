@@ -12,7 +12,11 @@ from .linkage import extract_alt_form_section, extract_linkage_section
 from .models import Sense, WordEntry
 from .pos import extract_pos_section, extract_sense_section
 from .section_titles import LINKAGE_SECTIONS, POS_DATA
-from .sound import extract_hyphenation_section, extract_sound_section
+from .sound import (
+    extract_homophone_section,
+    extract_hyphenation_section,
+    extract_sound_section,
+)
 from .translation import extract_translation_section
 
 
@@ -65,6 +69,8 @@ def parse_section(
         extract_declension_section(
             wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
         )
+    elif subtitle == "homofony":
+        extract_homophone_section(wxr, base_data, level_node)
     elif subtitle not in ["externí odkazy"]:
         wxr.wtp.debug(f"Unknown title: {subtitle}", sortid="cs/page/27")
 
