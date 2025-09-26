@@ -14,7 +14,7 @@ import tempfile
 import time
 from concurrent.futures import ProcessPoolExecutor
 from copy import deepcopy
-from multiprocessing import current_process, get_context
+from multiprocessing import current_process, get_all_start_methods, get_context
 from pathlib import Path
 from traceback import format_exc
 from typing import TextIO
@@ -652,7 +652,7 @@ def check_json_data(wxr: WiktextractContext, dt: dict) -> None:
             [
                 "alt",
                 "code",  # DEPRECATED for "lang_code"
-                "lang_code"
+                "lang_code",
                 "english",  # DEPRECATED in favor of "translation"
                 "translation",
                 "lang",
@@ -789,7 +789,9 @@ def reprocess_wiktionary(
     wxr.remove_unpicklable_objects()
     with ProcessPoolExecutor(
         max_workers=num_processes,
-        mp_context=get_context("spawn"),
+        mp_context=get_context(
+            "forkserver" if "forkserver" in get_all_start_methods() else "spawn"
+        ),
         initializer=init_worker,
         initargs=(deepcopy(wxr),),
     ) as executor:

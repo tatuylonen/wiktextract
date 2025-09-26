@@ -11,7 +11,7 @@ from collections.abc import Iterable
 from concurrent.futures import ProcessPoolExecutor
 from copy import deepcopy
 from dataclasses import dataclass, field
-from multiprocessing import current_process, get_context
+from multiprocessing import current_process, get_all_start_methods, get_context
 from pathlib import Path
 from traceback import format_exc
 from typing import Optional, TextIO
@@ -93,7 +93,9 @@ def extract_thesaurus_data(
     wxr.remove_unpicklable_objects()
     with ProcessPoolExecutor(
         max_workers=num_processes,
-        mp_context=get_context("spawn"),
+        mp_context=get_context(
+            "forkserver" if "forkserver" in get_all_start_methods() else "spawn"
+        ),
         initializer=init_worker,
         initargs=(deepcopy(wxr),),
     ) as executor:
