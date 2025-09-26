@@ -106,6 +106,7 @@ LABEL_TAGS = {
     "železničářský slang": "slang",
     "žertovně": "humorous",
     "židovský slang": ["Jewish", "slang"],
+    "ambitranzitivní": "ambitransitive",
 }
 
 GENDER_TAGS = {

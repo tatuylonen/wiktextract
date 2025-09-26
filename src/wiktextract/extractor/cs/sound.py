@@ -107,3 +107,14 @@ def extract_hyphenation_section(
             h_parts = list(filter(None, map(str.strip, h_str.split("-"))))
             if len(h_parts) > 0:
                 base_data.hyphenations.append(Hyphenation(parts=h_parts))
+
+
+def extract_homophone_section(
+    wxr: WiktextractContext, base_data: WordEntry, level_node: LevelNode
+):
+    for list_node in level_node.find_child(NodeKind.LIST):
+        for list_item in list_node.find_child(NodeKind.LIST_ITEM):
+            for link_node in list_item.find_child(NodeKind.LINK):
+                homophone = clean_node(wxr, None, link_node)
+                if homophone != "":
+                    base_data.sounds.append(Sound(homophone=homophone))

@@ -46,6 +46,7 @@ class Sound(CzechBaseModel):
     mp3_url: str = ""
     opus_url: str = ""
     flac_url: str = ""
+    homophone: str = ""
 
 
 class Hyphenation(CzechBaseModel):

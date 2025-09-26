@@ -381,3 +381,56 @@ class TestCsDeclension(TestCase):
                 },
             ],
         )
+
+    def test_tag_in_table_cell(self):
+        self.wxr.wtp.add_page(
+            "Šablona:Sloveso (cs)",
+            10,
+            """{| class="konjugace verbum" style="text-align: center"
+|+ Oznamovací způsob
+|-
+!rowspan="2"|osoba
+!colspan="3"|číslo jednotné !! colspan="3"|číslo množné
+|-
+!1.!!2.!!3.!!1.!!2.!!3.
+|-
+!přítomný čas
+|[[biji]] / <span class="priznaky">(hovorově)</span> [[biju]]
+|}""",
+        )
+        data = parse_page(
+            self.wxr,
+            "bít",
+            """== čeština ==
+=== sloveso ===
+==== časování ====
+{{Sloveso (cs)
+  | spre1 = [[biji]] / {{Příznak2|hovor.}} [[biju]]
+}}
+==== význam ====
+# [[dávat]] [[rána|rány]], [[úder]]y""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {
+                    "form": "biji",
+                    "tags": [
+                        "indicative",
+                        "present",
+                        "singular",
+                        "first-person",
+                    ],
+                },
+                {
+                    "form": "biju",
+                    "tags": [
+                        "colloquially",
+                        "indicative",
+                        "present",
+                        "singular",
+                        "first-person",
+                    ],
+                },
+            ],
+        )
