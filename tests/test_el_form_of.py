@@ -141,7 +141,10 @@ class TestElGlosses(TestCase):
         raw = """# (''ναα, νααα'') {{ρημ τύπος|α' ενικό [[Παράρτημα:Ρηματικοί τύποι (ελληνικά)#Υποτακτική|υποτακτικής]] αορίστου|συμβουλεύω}}"""
         expected = [
             {
-                "raw_tags": ["ναα", "νααα"],  # does greek have native 'foo bar'?
+                "raw_tags": [
+                    "ναα",
+                    "νααα",
+                ],  # does greek have native 'foo bar'?
                 "form_of": [{"word": "συμβουλεύω"}],
             }
         ]
@@ -192,7 +195,6 @@ class TestElGlosses(TestCase):
         raw = """* {{μτχ3b}} [[test]] [[foo]], [[bar]]"""
         expected = [{"form_of": [{"word": "test foo"}]}]
         self.mktest_sense(raw, expected)
-
 
     def test_form_of_generic_template_noun(self) -> None:
         # https://el.wiktionary.org/wiki/εδάφη
