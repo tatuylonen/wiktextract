@@ -35,7 +35,6 @@ class TestElEtymology(TestCase):
 '''{{PAGENAME}}, -η, -ο'''
 * (εμφατικό) εντελώς κουκουλωμένος""",
         )
-        print(f"{page_datas=}")
         self.assertEqual(len(page_datas), 1)
         page_data = page_datas[0]
         self.assertEqual(page_data["form_of"], [{"word": "φοο"}])
