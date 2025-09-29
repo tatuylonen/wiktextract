@@ -95,6 +95,7 @@ class Sound(VietnameseBaseModel):
     opus_url: str = ""
     flac_url: str = ""
     rhymes: str = ""
+    homophone: str = ""
 
 
 class Hyphenation(VietnameseBaseModel):

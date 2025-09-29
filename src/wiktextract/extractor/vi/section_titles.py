@@ -74,6 +74,7 @@ LINKAGE_SECTIONS = {
     "Từ liên hệ": "related",
     "Xem thêm": "related",
     "Đồng nghĩa": "synonyms",
+    "Từ đồng nghĩa": "synonyms",
     "Từ phái sinh": "derived",
     "Từ có nghĩa rộng hơn": "hypernyms",
     "Từ có nghĩa hẹp hơn": "hyponyms",
