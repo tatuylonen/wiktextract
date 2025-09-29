@@ -95,6 +95,7 @@ class Sound(VietnameseBaseModel):
     opus_url: str = ""
     flac_url: str = ""
     rhymes: str = ""
+    homophone: str = ""
 
 
 class Hyphenation(VietnameseBaseModel):
@@ -128,3 +129,5 @@ class WordEntry(VietnameseBaseModel):
     hyphenations: list[Hyphenation] = []
     notes: list[str] = []
     anagrams: list[Linkage] = []
+    coordinate_terms: list[Linkage] = []
+    reduplicatives: list[Linkage] = []

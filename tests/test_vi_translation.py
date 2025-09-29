@@ -127,3 +127,27 @@ class TestViTranslation(TestCase):
                 "Mục từ có bản dịch tiếng Nhật",
             ],
         )
+
+    def test_bold_sense(self):
+        self.wxr.wtp.add_page("Bản mẫu:en", 10, "[[tiếng Anh|Tiếng Anh]]")
+        data = parse_page(
+            self.wxr,
+            "vuông",
+            """==Tiếng Việt==
+===Tính từ===
+# Có dạng
+====Dịch====
+'''dạng hình vuông'''
+:*{{en}}: [[square]]""",
+        )
+        self.assertEqual(
+            data[0]["translations"],
+            [
+                {
+                    "lang": "Tiếng Anh",
+                    "lang_code": "en",
+                    "sense": "dạng hình vuông",
+                    "word": "square",
+                }
+            ],
+        )

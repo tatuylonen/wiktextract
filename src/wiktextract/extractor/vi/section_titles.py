@@ -53,6 +53,14 @@ POS_DATA = {
     "Thân từ": {"pos": "stem"},
     "Hậu tố": {"pos": "suffix", "tags": ["morpheme"]},
     "Ngoại động từ": {"pos": "verb", "tags": ["transitive"]},
+    "Chữ cái": {"pos": "character", "tags": ["letter"]},
+    "Ký tự": {"pos": "character"},
+    "Giới từ": {"pos": "prep"},
+    "Ký tự chữ Hán": {"pos": "character", "tags": ["han"]},
+    "Ký tự số": {"pos": "character", "tags": ["number"]},
+    "Nghĩa": {"pos": "unknown"},
+    "Từ viết tắt": {"pos": "abbrev", "tags": ["abbreviation"]},
+    "Phân từ": {"pos": "verb", "tags": ["participle"]},
 }
 
 LINKAGE_SECTIONS = {
@@ -66,9 +74,14 @@ LINKAGE_SECTIONS = {
     "Từ liên hệ": "related",
     "Xem thêm": "related",
     "Đồng nghĩa": "synonyms",
+    "Từ đồng nghĩa": "synonyms",
     "Từ phái sinh": "derived",
     "Từ có nghĩa rộng hơn": "hypernyms",
     "Từ có nghĩa hẹp hơn": "hyponyms",
+    "Liên quan": "related",
+    "Thuật ngữ liên quan": "related",
+    "Từ cùng trường nghĩa": "coordinate_terms",
+    "Từ láy": "reduplicatives",
 }
 
 

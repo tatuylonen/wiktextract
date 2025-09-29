@@ -253,7 +253,7 @@ def extract_linkage_list_item(
 ) -> list[Linkage]:
     l_list = []
     sense = ""
-    for node in list_item.children:
+    for index, node in enumerate(list_item.children):
         if isinstance(node, TemplateNode):
             if node.template_name in ["sense", "s"]:
                 sense = clean_node(wxr, None, node).strip("(): ")
@@ -263,6 +263,15 @@ def extract_linkage_list_item(
             word = clean_node(wxr, None, node)
             if word != "":
                 l_list.append(Linkage(word=word, sense=sense))
+        elif (
+            isinstance(node, str)
+            and node.strip().startswith("-")
+            and len(l_list) > 0
+        ):
+            l_list[-1].sense = clean_node(
+                wxr, None, list_item.children[index:]
+            ).strip("- \n")
+            break
     return l_list
 
 

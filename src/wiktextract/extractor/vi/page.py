@@ -1,3 +1,4 @@
+import string
 from typing import Any
 
 from mediawiki_langcodes import name_to_code
@@ -10,7 +11,7 @@ from .linkage import extract_alt_form_section, extract_linkage_section
 from .models import Sense, WordEntry
 from .pos import extract_note_section, extract_pos_section
 from .section_titles import LINKAGE_SECTIONS, POS_DATA, TRANSLATION_SECTIONS
-from .sound import extract_sound_section
+from .sound import extract_homophone_section, extract_sound_section
 from .translation import extract_translation_section
 
 
@@ -21,6 +22,7 @@ def parse_section(
     level_node: LevelNode,
 ) -> None:
     subtitle = clean_node(wxr, None, level_node.largs)
+    subtitle = subtitle.rstrip(string.digits + string.whitespace)
     if subtitle in POS_DATA:
         extract_pos_section(wxr, page_data, base_data, level_node, subtitle)
         if len(page_data[-1].senses) == 0 and subtitle in LINKAGE_SECTIONS:
@@ -37,11 +39,15 @@ def parse_section(
         )
     elif subtitle == "Cách phát âm":
         extract_sound_section(wxr, base_data, level_node)
+    elif subtitle == "Từ đồng âm":
+        extract_homophone_section(wxr, base_data, level_node)
     elif subtitle == "Từ nguyên":
+        if level_node.contain_node(LEVEL_KIND_FLAGS):
+            base_data = base_data.model_copy(deep=True)
         extract_etymology_section(wxr, base_data, level_node)
     elif subtitle == "Cách viết khác":
         extract_alt_form_section(wxr, base_data, page_data, level_node)
-    elif subtitle == "Ghi chú sử dụng":
+    elif subtitle in ["Ghi chú sử dụng", "Chú ý"]:
         extract_note_section(
             wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
         )

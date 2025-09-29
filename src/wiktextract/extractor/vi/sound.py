@@ -279,3 +279,14 @@ def extract_hyphenation_template(
                 h_data.parts.append(part)
         if len(h_data.parts) > 0:
             base_data.hyphenations.append(h_data)
+
+
+def extract_homophone_section(
+    wxr: WiktextractContext, base_data: WordEntry, level_node: LevelNode
+):
+    for list in level_node.find_child(NodeKind.LIST):
+        for list_item in list.find_child(NodeKind.LIST_ITEM):
+            for link_node in list_item.find_child(NodeKind.LINK):
+                homophone = clean_node(wxr, None, link_node)
+                if homophone != "":
+                    base_data.sounds.append(Sound(homophone=homophone))

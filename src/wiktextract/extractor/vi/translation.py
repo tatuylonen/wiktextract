@@ -43,6 +43,8 @@ def extract_translation_section(
                 extract_translation_list_item(
                     wxr, word_entry, list_item, sense, source
                 )
+        elif isinstance(node, WikiNode) and node.kind == NodeKind.BOLD:
+            sense = clean_node(wxr, None, node)
 
 
 def extract_translation_list_item(
