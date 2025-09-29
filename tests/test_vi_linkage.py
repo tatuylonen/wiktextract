@@ -250,3 +250,18 @@ class TestViLinkage(TestCase):
                 },
             ],
         )
+
+    def test_sense_text(self):
+        data = parse_page(
+            self.wxr,
+            "누나",
+            """==Tiếng Triều Tiên==
+===Danh từ===
+# [[chị|Chị]] [[gái]] (em trai gọi)
+====Liên quan====
+* [[언니]] - chị gái của người nữ""",
+        )
+        self.assertEqual(
+            data[0]["related"],
+            [{"word": "언니", "sense": "chị gái của người nữ"}],
+        )

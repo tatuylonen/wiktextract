@@ -53,6 +53,13 @@ POS_DATA = {
     "Thân từ": {"pos": "stem"},
     "Hậu tố": {"pos": "suffix", "tags": ["morpheme"]},
     "Ngoại động từ": {"pos": "verb", "tags": ["transitive"]},
+    "Chữ cái": {"pos": "character", "tags": ["letter"]},
+    "Ký tự": {"pos": "character"},
+    "Giới từ": {"pos": "prep"},
+    "Ký tự chữ Hán": {"pos": "character", "tags": ["han"]},
+    "Ký tự số": {"pos": "character", "tags": ["number"]},
+    "Nghĩa": {"pos": "unknown"},
+    "Từ viết tắt": {"pos": "abbrev", "tags": ["abbreviation"]},
 }
 
 LINKAGE_SECTIONS = {
@@ -69,6 +76,7 @@ LINKAGE_SECTIONS = {
     "Từ phái sinh": "derived",
     "Từ có nghĩa rộng hơn": "hypernyms",
     "Từ có nghĩa hẹp hơn": "hyponyms",
+    "Liên quan": "related",
 }
 
 
