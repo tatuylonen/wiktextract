@@ -60,6 +60,7 @@ POS_DATA = {
     "Ký tự số": {"pos": "character", "tags": ["number"]},
     "Nghĩa": {"pos": "unknown"},
     "Từ viết tắt": {"pos": "abbrev", "tags": ["abbreviation"]},
+    "Phân từ": {"pos": "verb", "tags": ["participle"]},
 }
 
 LINKAGE_SECTIONS = {
@@ -77,6 +78,7 @@ LINKAGE_SECTIONS = {
     "Từ có nghĩa rộng hơn": "hypernyms",
     "Từ có nghĩa hẹp hơn": "hyponyms",
     "Liên quan": "related",
+    "Thuật ngữ liên quan": "related",
 }
 
 

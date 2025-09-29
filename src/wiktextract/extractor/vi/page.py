@@ -1,3 +1,4 @@
+import string
 from typing import Any
 
 from mediawiki_langcodes import name_to_code
@@ -21,6 +22,7 @@ def parse_section(
     level_node: LevelNode,
 ) -> None:
     subtitle = clean_node(wxr, None, level_node.largs)
+    subtitle = subtitle.rstrip(string.digits + string.whitespace)
     if subtitle in POS_DATA:
         extract_pos_section(wxr, page_data, base_data, level_node, subtitle)
         if len(page_data[-1].senses) == 0 and subtitle in LINKAGE_SECTIONS:
@@ -38,6 +40,8 @@ def parse_section(
     elif subtitle == "Cách phát âm":
         extract_sound_section(wxr, base_data, level_node)
     elif subtitle == "Từ nguyên":
+        if level_node.contain_node(LEVEL_KIND_FLAGS):
+            base_data = base_data.model_copy(deep=True)
         extract_etymology_section(wxr, base_data, level_node)
     elif subtitle == "Cách viết khác":
         extract_alt_form_section(wxr, base_data, page_data, level_node)
