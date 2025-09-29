@@ -128,3 +128,5 @@ class WordEntry(VietnameseBaseModel):
     hyphenations: list[Hyphenation] = []
     notes: list[str] = []
     anagrams: list[Linkage] = []
+    coordinate_terms: list[Linkage] = []
+    reduplicatives: list[Linkage] = []

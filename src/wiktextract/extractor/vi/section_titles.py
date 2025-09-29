@@ -79,6 +79,8 @@ LINKAGE_SECTIONS = {
     "Từ có nghĩa hẹp hơn": "hyponyms",
     "Liên quan": "related",
     "Thuật ngữ liên quan": "related",
+    "Từ cùng trường nghĩa": "coordinate_terms",
+    "Từ láy": "reduplicatives",
 }
 
 
