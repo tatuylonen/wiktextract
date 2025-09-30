@@ -13,6 +13,7 @@ from wikitextprocessor.parser import (
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from .descendant import extract_descendant_section
 from .etymology import extract_etymology_section
 from .linkage import extract_alt_form_section, extract_linkage_section
 from .models import Form, Sense, WordEntry
@@ -65,6 +66,10 @@ def parse_section(
             page_data if len(page_data) > 0 else [base_data],
             level_node,
             LINKAGE_SECTIONS[subtitle],
+        )
+    elif subtitle == "Hậu duệ":
+        extract_descendant_section(
+            wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
         )
     elif subtitle not in ["Tham khảo", "Cách ra dấu", "Đọc thêm", "Xem thêm"]:
         wxr.wtp.debug(f"Unknown title: {subtitle}", sortid="vi/page/22")

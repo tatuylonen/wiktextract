@@ -102,6 +102,20 @@ class Hyphenation(VietnameseBaseModel):
     parts: list[str] = []
 
 
+class Descendant(VietnameseBaseModel):
+    lang_code: str = Field(default="", description="Wiktionary language code")
+    lang: str = Field(default="", description="Language name")
+    word: str = ""
+    roman: str = ""
+    tags: list[str] = []
+    raw_tags: list[str] = []
+    descendants: list["Descendant"] = []
+    ruby: list[tuple[str, ...]] = Field(
+        default=[], description="Japanese Kanji and furigana"
+    )
+    sense: str = ""
+
+
 class WordEntry(VietnameseBaseModel):
     model_config = ConfigDict(title="Vietnamese Wiktionary")
     word: str = Field(description="Word string")
@@ -133,3 +147,4 @@ class WordEntry(VietnameseBaseModel):
     reduplicatives: list[Linkage] = []
     literal_meaning: str = ""
     redirects: list[str] = []
+    descendants: list[Descendant] = []
