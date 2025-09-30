@@ -179,6 +179,14 @@ TABLE_TAGS = {
     "silná": "strong",
     "slabá": "weak",
     "smíšená": "mixed",
+    # Template:Adjektivum (nl) skloňování
+    "společný": "common",
+    "střední": "neuter",
+    # Template:Adjektivum (nl) stupňování
+    "neurčitý": "indefinite",
+    "určitý": "definite",
+    "Komparativ": "comparative",
+    "Superlativ": "superlative",
 }
 
 SOUND_TAGS = {

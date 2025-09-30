@@ -10,7 +10,11 @@ from .declension import extract_declension_section
 from .etymology import extract_etymology_section
 from .linkage import extract_alt_form_section, extract_linkage_section
 from .models import Sense, WordEntry
-from .pos import extract_pos_section, extract_sense_section
+from .pos import (
+    extract_note_section,
+    extract_pos_section,
+    extract_sense_section,
+)
 from .section_titles import LINKAGE_SECTIONS, POS_DATA
 from .sound import (
     extract_homophone_section,
@@ -45,7 +49,7 @@ def parse_section(
             else base_data,
             level_node,
         )
-    elif subtitle == "varianty":
+    elif subtitle in ["varianty", "varianta zápisu", "varianty zápisu"]:
         extract_alt_form_section(
             wxr,
             page_data[-1]
@@ -66,9 +70,14 @@ def parse_section(
             level_node,
             LINKAGE_SECTIONS[subtitle],
         )
-    elif subtitle in ["skloňování", "stupňování", "časování"]:
+    elif subtitle in ["stupňování", "časování"] or subtitle.startswith(
+        "skloňování"
+    ):
         extract_declension_section(
-            wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
+            wxr,
+            page_data[-1] if len(page_data) > 0 else base_data,
+            level_node,
+            subtitle,
         )
     elif subtitle == "homofony":
         extract_homophone_section(wxr, base_data, level_node)
@@ -76,7 +85,11 @@ def parse_section(
         extract_transcript_section(
             wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
         )
-    elif subtitle not in ["externí odkazy"]:
+    elif subtitle == "poznámka k užití":
+        extract_note_section(
+            wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
+        )
+    elif subtitle not in ["externí odkazy", "poznámky", "reference"]:
         wxr.wtp.debug(f"Unknown title: {subtitle}", sortid="cs/page/27")
 
     for next_level in level_node.find_child(LEVEL_KIND_FLAGS):

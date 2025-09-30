@@ -1,4 +1,10 @@
-from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
+from wikitextprocessor.parser import (
+    LEVEL_KIND_FLAGS,
+    LevelNode,
+    NodeKind,
+    TemplateNode,
+    WikiNode,
+)
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -113,3 +119,13 @@ def extract_příznaky_template(
         raw_tag = raw_tag.strip()
         if raw_tag != "":
             sense.raw_tags.append(raw_tag)
+
+
+def extract_note_section(
+    wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
+):
+    word_entry.note = clean_node(
+        wxr,
+        word_entry,
+        list(level_node.invert_find_child(LEVEL_KIND_FLAGS, True)),
+    )

@@ -100,6 +100,7 @@ Spojením slov ''[[måne]] ([[měsíc]])'' a ''[[dag]] ([[den]])''.
             self.wxr,
             "彗星",
             """== čínština ==
+=== podstatné jméno ===
 ==== přepis ====
 * ''Pinyin:'' huìxīng (hui4xing1)
 ==== význam ====
@@ -117,5 +118,5 @@ Spojením slov ''[[måne]] ([[měsíc]])'' a ''[[dag]] ([[den]])''.
             [{"zh_pron": "huìxīng (hui4xing1)", "tags": ["Pinyin"]}],
         )
         self.assertEqual(
-            data[0]["forms"], [{"form": "すいせい", "tags": ["hiragana"]}]
+            data[1]["forms"], [{"form": "すいせい", "tags": ["hiragana"]}]
         )

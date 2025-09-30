@@ -107,3 +107,5 @@ class WordEntry(CzechBaseModel):
     phrases: list[Linkage] = []
     proverbs: list[Linkage] = []
     derived: list[Linkage] = []
+    note: str = ""
+    abbreviations: list[Linkage] = []
