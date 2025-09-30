@@ -132,3 +132,4 @@ class WordEntry(VietnameseBaseModel):
     coordinate_terms: list[Linkage] = []
     reduplicatives: list[Linkage] = []
     literal_meaning: str = ""
+    redirects: list[str] = []

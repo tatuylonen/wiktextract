@@ -115,6 +115,18 @@ def parse_page(
         for t_node in level2_node.find_child(NodeKind.TEMPLATE):
             if t_node.template_name in ["zho-forms", "zh-forms"]:
                 extract_zh_forms_template(wxr, base_data, t_node)
+            elif t_node.template_name in ["zh-see", "zho-see"]:
+                base_data.redirects.append(
+                    clean_node(wxr, None, t_node.template_parameters.get(1, ""))
+                )
+                clean_node(wxr, base_data, t_node)
+            elif t_node.template_name in ["ja-see", "jpn-see", "ja-see-kango"]:
+                for key, value in t_node.template_parameters.items():
+                    if isinstance(key, int):
+                        base_data.redirects.append(clean_node(wxr, None, value))
+                clean_node(wxr, base_data, t_node)
+        if len(base_data.redirects) > 0:
+            page_data.append(base_data)
         for next_level in level2_node.find_child(LEVEL_KIND_FLAGS):
             parse_section(wxr, page_data, base_data, next_level)
 
