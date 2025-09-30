@@ -16,6 +16,7 @@ from .sound import (
     extract_homophone_section,
     extract_hyphenation_section,
     extract_sound_section,
+    extract_transcript_section,
 )
 from .translation import extract_translation_section
 
@@ -71,6 +72,10 @@ def parse_section(
         )
     elif subtitle == "homofony":
         extract_homophone_section(wxr, base_data, level_node)
+    elif subtitle == "přepis":
+        extract_transcript_section(
+            wxr, page_data[-1] if len(page_data) > 0 else base_data, level_node
+        )
     elif subtitle not in ["externí odkazy"]:
         wxr.wtp.debug(f"Unknown title: {subtitle}", sortid="cs/page/27")
 

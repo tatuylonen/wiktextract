@@ -47,6 +47,9 @@ class Sound(CzechBaseModel):
     opus_url: str = ""
     flac_url: str = ""
     homophone: str = ""
+    zh_pron: str = ""
+    other: str = ""
+    roman: str = ""
 
 
 class Hyphenation(CzechBaseModel):
@@ -103,3 +106,4 @@ class WordEntry(CzechBaseModel):
     related: list[Linkage] = []
     phrases: list[Linkage] = []
     proverbs: list[Linkage] = []
+    derived: list[Linkage] = []

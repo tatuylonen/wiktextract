@@ -89,3 +89,33 @@ Spojením slov ''[[måne]] ([[měsíc]])'' a ''[[dag]] ([[den]])''.
             data[0]["sounds"], [{"ipa": "[ˈpɔnɟɛliː]"}, {"ipa": "[ˈpɔɲɟɛliː]"}]
         )
         self.assertEqual(data[0]["categories"], ["Monitoring:IPA/2"])
+
+    def test_transcript_section(self):
+        self.wxr.wtp.add_page(
+            "Šablona:Hiragana",
+            10,
+            """<span class="hiragana-title">[[hiragana]]:</span> <span class="hiragana" lang="ja" xml:lang="ja">すいせい</span>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "彗星",
+            """== čínština ==
+==== přepis ====
+* ''Pinyin:'' huìxīng (hui4xing1)
+==== význam ====
+# [[kometa]]
+
+== japonština ==
+=== podstatné jméno ===
+==== přepis ====
+* {{Hiragana|すいせい}}
+==== význam ====
+# [[kometa]]""",
+        )
+        self.assertEqual(
+            data[0]["sounds"],
+            [{"zh_pron": "huìxīng (hui4xing1)", "tags": ["Pinyin"]}],
+        )
+        self.assertEqual(
+            data[0]["forms"], [{"form": "すいせい", "tags": ["hiragana"]}]
+        )

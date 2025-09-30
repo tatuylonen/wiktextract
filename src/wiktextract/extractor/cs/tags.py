@@ -181,8 +181,15 @@ TABLE_TAGS = {
     "smíšená": "mixed",
 }
 
+SOUND_TAGS = {
+    "Pinyin": "Pinyin",
+    "Bopomofo": "Bopomofo",
+    "hiragana": "hiragana",
+    "romaji": "Rōmaji",
+}
 
-TAGS = {**LABEL_TAGS, **GENDER_TAGS, **TABLE_TAGS}
+
+TAGS = {**LABEL_TAGS, **GENDER_TAGS, **TABLE_TAGS, **SOUND_TAGS}
 
 TOPICS = {
     "v alchymii": "alchemy",

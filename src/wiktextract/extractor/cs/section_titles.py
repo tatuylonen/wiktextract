@@ -29,6 +29,7 @@ POS_DATA = {
     "číslo": {"pos": "num", "tags": ["number"]},
     "značka": {"pos": "symbol"},
     "symbol": {"pos": "symbol"},
+    "nevokalizovaný zápis": {"pos": "unknown"},
 }
 
 LINKAGE_SECTIONS = {
@@ -40,4 +41,6 @@ LINKAGE_SECTIONS = {
     "přísloví, úsloví a pořekadla": "proverbs",
     "přísloví, rčení a pořekadla": "proverbs",
     "přísloví": "proverbs",
+    "fráze": "phrases",
+    "odvozené tvary": "derived",
 }
