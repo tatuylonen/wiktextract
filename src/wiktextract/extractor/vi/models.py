@@ -58,6 +58,9 @@ class Linkage(VietnameseBaseModel):
     other: str = ""
     translation: str = ""
     senses: list[str] = []
+    ruby: list[tuple[str, ...]] = Field(
+        default=[], description="Japanese Kanji and furigana"
+    )
 
 
 class Form(VietnameseBaseModel):
