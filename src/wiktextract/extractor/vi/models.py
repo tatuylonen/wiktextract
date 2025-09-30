@@ -131,3 +131,4 @@ class WordEntry(VietnameseBaseModel):
     anagrams: list[Linkage] = []
     coordinate_terms: list[Linkage] = []
     reduplicatives: list[Linkage] = []
+    literal_meaning: str = ""

@@ -95,6 +95,13 @@ LABEL_TAGS = {
     "chính trị úc": "Australian",
     "chính trị philippines": "Philippine",
     "tu từ học": "rhetoric",
+    # Template:zh-forms
+    "phồn.": "Traditional-Chinese",
+    "giản.": "Simplified-Chinese",
+    "alternative forms": "alternative",
+    "dated abbreviation": ["dated", "abbreviation"],
+    "triều châu": "Teochew",
+    "tiếng mân": "Min",
 }
 
 # https://vi.wiktionary.org/wiki/Mô_đun:gender_and_number/data
