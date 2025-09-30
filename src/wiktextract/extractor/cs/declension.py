@@ -8,15 +8,24 @@ from ..share import capture_text_in_parentheses
 from .models import Form, WordEntry
 from .tags import translate_raw_tags
 
+DECLENSION_SECTION_TAGS = {
+    "skloňování mužské": ["masculine"],
+    "skloňování ženské": ["feminine"],
+}
+
 
 def extract_declension_section(
-    wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    level_node: LevelNode,
+    section_title: str,
 ):
+    section_tags = DECLENSION_SECTION_TAGS.get(section_title, [])
     for t_node in level_node.find_child(NodeKind.TEMPLATE):
         if t_node.template_name.startswith(
             ("Substantivum ", "Adjektivum ", "Stupňování ", "Sloveso ")
         ):
-            extract_substantivum_template(wxr, word_entry, t_node)
+            extract_substantivum_template(wxr, word_entry, t_node, section_tags)
 
 
 @dataclass
@@ -29,7 +38,10 @@ class TableHeader:
 
 
 def extract_substantivum_template(
-    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    t_node: TemplateNode,
+    section_tags: list[str],
 ):
     # https://cs.wiktionary.org/wiki/Šablona:Substantivum_(cs)
     expanded_node = wxr.wtp.parse(
@@ -85,7 +97,9 @@ def extract_substantivum_template(
                         word = word.strip()
                         if word in ["", "—", wxr.wtp.title]:
                             continue
-                        form = Form(form=word, raw_tags=cell_tags)
+                        form = Form(
+                            form=word, tags=section_tags, raw_tags=cell_tags
+                        )
                         if table_caption != "":
                             form.raw_tags.append(table_caption)
                         for row_header in row_headers:

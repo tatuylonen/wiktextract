@@ -3,7 +3,7 @@ from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from ..share import set_sound_file_url_fields
-from .models import Hyphenation, Sound, WordEntry
+from .models import Form, Hyphenation, Sound, WordEntry
 from .tags import translate_raw_tags
 
 
@@ -118,3 +118,51 @@ def extract_homophone_section(
                 homophone = clean_node(wxr, None, link_node)
                 if homophone != "":
                     base_data.sounds.append(Sound(homophone=homophone))
+
+
+def extract_transcript_section(
+    wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
+):
+    for list_node in level_node.find_child(NodeKind.LIST):
+        for list_item in list_node.find_child(NodeKind.LIST_ITEM):
+            for index, node in enumerate(list_item.children):
+                if isinstance(node, TemplateNode) and node.template_name in [
+                    "Hiragana",
+                    "Rómadži",
+                    "Kana",
+                ]:
+                    extract_ja_transcript_template(wxr, word_entry, node)
+                elif (
+                    isinstance(node, WikiNode) and node.kind == NodeKind.ITALIC
+                ):
+                    italic_str = clean_node(wxr, None, node).removesuffix(":")
+                    if italic_str != "":
+                        sound = Sound(raw_tags=[italic_str])
+                        if italic_str in ["Pinyin", "Bopomofo"]:
+                            sound.zh_pron = clean_node(
+                                wxr, None, list_item.children[index + 1 :]
+                            )
+                        else:
+                            sound.other = clean_node(
+                                wxr, None, list_item.children[index + 1 :]
+                            )
+                        translate_raw_tags(sound)
+                        word_entry.sounds.append(sound)
+                        break
+
+
+def extract_ja_transcript_template(
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+):
+    expanded_template = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for span_tag in expanded_template.find_html("span"):
+        span_class = span_tag.attrs.get("class", "")
+        if not span_class.endswith("-title") and span_class != "":
+            span_text = clean_node(wxr, None, span_tag)
+            if span_text != "":
+                form = Form(form=span_text, raw_tags=[span_class])
+                translate_raw_tags(form)
+                word_entry.forms.append(form)
+    clean_node(wxr, word_entry, expanded_template)

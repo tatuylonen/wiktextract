@@ -179,10 +179,25 @@ TABLE_TAGS = {
     "silná": "strong",
     "slabá": "weak",
     "smíšená": "mixed",
+    # Template:Adjektivum (nl) skloňování
+    "společný": "common",
+    "střední": "neuter",
+    # Template:Adjektivum (nl) stupňování
+    "neurčitý": "indefinite",
+    "určitý": "definite",
+    "Komparativ": "comparative",
+    "Superlativ": "superlative",
+}
+
+SOUND_TAGS = {
+    "Pinyin": "Pinyin",
+    "Bopomofo": "Bopomofo",
+    "hiragana": "hiragana",
+    "romaji": "Rōmaji",
 }
 
 
-TAGS = {**LABEL_TAGS, **GENDER_TAGS, **TABLE_TAGS}
+TAGS = {**LABEL_TAGS, **GENDER_TAGS, **TABLE_TAGS, **SOUND_TAGS}
 
 TOPICS = {
     "v alchymii": "alchemy",

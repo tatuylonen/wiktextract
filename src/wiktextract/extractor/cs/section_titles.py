@@ -29,6 +29,11 @@ POS_DATA = {
     "číslo": {"pos": "num", "tags": ["number"]},
     "značka": {"pos": "symbol"},
     "symbol": {"pos": "symbol"},
+    "nevokalizovaný zápis": {"pos": "unknown"},
+    "písmeno": {"pos": "character", "tags": ["letter"]},
+    "vlastní jméno": {"pos": "name"},
+    "stažený tvar": {"pos": "contraction", "tags": ["contraction"]},
+    "tvar slovesa": {"pos": "verb", "tags": ["form-of"]},
 }
 
 LINKAGE_SECTIONS = {
@@ -40,4 +45,10 @@ LINKAGE_SECTIONS = {
     "přísloví, úsloví a pořekadla": "proverbs",
     "přísloví, rčení a pořekadla": "proverbs",
     "přísloví": "proverbs",
+    "fráze": "phrases",
+    "odvozené tvary": "derived",
+    "příbuzné výrazy": "related",
+    "související symboly": "related",
+    "významově související": "related",
+    "zkratka": "abbreviations",
 }
