@@ -123,6 +123,7 @@ GENDER_NUMBER_TAGS = {
     "số nhiều": "plural",
     "thể chưa hoàn thành": "imperfective",
     "thể hoàn thành": "perfective",
+    "không đổi": "invariable",
 }
 
 LOCATIONS = {
@@ -139,7 +140,20 @@ SOUND_TAGS = {
     "anh mỹ thông dụng": "General-American",
 }
 
-TAGS = {**LABEL_TAGS, **GENDER_NUMBER_TAGS, **LOCATIONS, **SOUND_TAGS}
+ZH_X_TAGS = {
+    "tiêu chuẩn hiện đại": "Standard-Chinese",
+    "bính âm": "Pinyin",
+    "cantonese": "Cantonese",
+    "việt bính": "Jyutping",
+}
+
+TAGS = {
+    **LABEL_TAGS,
+    **GENDER_NUMBER_TAGS,
+    **LOCATIONS,
+    **SOUND_TAGS,
+    **ZH_X_TAGS,
+}
 
 # https://vi.wiktionary.org/wiki/Mô_đun:labels/data/topical
 TOPICS = {

@@ -265,3 +265,35 @@ class TestViLinkage(TestCase):
             data[0]["related"],
             [{"word": "언니", "sense": "chị gái của người nữ"}],
         )
+
+    def test_der_top_and_vi_l(self):
+        self.wxr.wtp.add_page(
+            "Bản mẫu:vi-l",
+            10,
+            """<span class="Latn" lang="vi">[[:bánh bía#Tiếng&#95;Việt|bánh bía]]</span>""",
+        )
+        self.wxr.wtp.add_page(
+            "Bản mẫu:qualifier",
+            10,
+            """<span class="ib-brac qualifier-brac">(</span><span class="ib-content qualifier-content">Sài Gòn</span><span class="ib-brac qualifier-brac">)</span>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "bánh",
+            """==Tiếng Việt==
+===Danh từ===
+# Thức ăn
+====Từ dẫn xuất====
+{{der-top|Thức ăn làm bằng bột hoặc gạo có chất ngọt, hoặc chất mặn, hoặc chất béo}}
+* {{vi-l|bánh bía}} {{qualifier|Sài Gòn}}""",
+        )
+        self.assertEqual(
+            data[0]["derived"],
+            [
+                {
+                    "sense": "Thức ăn làm bằng bột hoặc gạo có chất ngọt, hoặc chất mặn, hoặc chất béo",
+                    "tags": ["Saigon"],
+                    "word": "bánh bía",
+                }
+            ],
+        )

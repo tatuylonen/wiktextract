@@ -1,4 +1,5 @@
 import re
+from itertools import count
 
 from wikitextprocessor import (
     HTMLNode,
@@ -10,10 +11,9 @@ from wikitextprocessor import (
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from ..ruby import extract_ruby
 from .models import Form, Linkage, WordEntry
 from .tags import translate_raw_tags
-from ..ruby import extract_ruby
-
 
 GLOSS_LIST_LINKAGE_TEMPLATES = {
     "antonyms": "antonyms",
@@ -184,27 +184,38 @@ def extract_linkage_section(
     level_node: LevelNode,
     linkage_type: str,
 ):
-    l_data = []
+    l_list = []
+    sense = ""
+    for node in level_node.children:
+        if isinstance(node, TemplateNode) and (
+            re.fullmatch(r"(?:col|der|rel)(?:\d+)?", node.template_name)
+            or node.template_name in ["columns", "column"]
+        ):
+            l_list.extend(extract_col_template(wxr, node))
+        elif isinstance(node, TemplateNode) and node.template_name.startswith(
+            "der-top"
+        ):
+            sense = clean_node(wxr, None, node.template_parameters.get(1, ""))
+        elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
+            for list_item in node.find_child(NodeKind.LIST_ITEM):
+                l_list.extend(
+                    extract_idiom_list_item(wxr, list_item)
+                    if linkage_type == "idioms"
+                    and list_item.contain_node(NodeKind.BOLD)
+                    else extract_linkage_list_item(wxr, list_item, sense)
+                )
     if linkage_type == "idioms":
-        l_data.extend(extract_idiom_section(wxr, level_node))
         linkage_type = "related"
-    else:
-        for node in level_node.children:
-            if isinstance(node, TemplateNode) and (
-                re.fullmatch(r"(?:col|der|rel)(?:\d+)?", node.template_name)
-                or node.template_name in ["columns", "column"]
-            ):
-                l_data.extend(extract_col_template(wxr, node))
-            elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
-                for list_item in node.find_child(NodeKind.LIST_ITEM):
-                    l_data.extend(extract_linkage_list_item(wxr, list_item))
-
     if level_node.kind == NodeKind.LEVEL3:
         for data in page_data:
             if data.lang_code == page_data[-1].lang_code:
-                getattr(data, linkage_type).extend(l_data)
+                getattr(data, linkage_type).extend(l_list)
+                for l_data in l_list:
+                    data.categories.extend(l_data.categories)
     elif len(page_data) > 0:
-        getattr(page_data[-1], linkage_type).extend(l_data)
+        getattr(page_data[-1], linkage_type).extend(l_list)
+        for l_data in l_list:
+            page_data[-1].categories.extend(l_data.categories)
 
 
 def extract_col_template(
@@ -251,10 +262,9 @@ def extract_col_template(
 
 
 def extract_linkage_list_item(
-    wxr: WiktextractContext, list_item: WikiNode
+    wxr: WiktextractContext, list_item: WikiNode, sense: str
 ) -> list[Linkage]:
     l_list = []
-    sense = ""
     raw_tags = []
     for index, node in enumerate(list_item.children):
         if isinstance(node, TemplateNode):
@@ -265,13 +275,17 @@ def extract_linkage_list_item(
             elif node.template_name in ["qualifier", "qual"]:
                 raw_tags.append(clean_node(wxr, None, node).strip("()"))
             elif node.template_name in ["zh-l", "zho-l"]:
-                l_list.extend(
-                    extract_zh_l_template(wxr, node, sense, raw_tags)
-                )
+                l_list.extend(extract_zh_l_template(wxr, node, sense, raw_tags))
                 raw_tags.clear()
             elif node.template_name in ["ja-r", "jpn-r"]:
-                l_list.append(
-                    extract_ja_r_template(wxr, node, sense, raw_tags)
+                l_list.append(extract_ja_r_template(wxr, node, sense, raw_tags))
+                raw_tags.clear()
+            elif node.template_name in ["vi-l", "vie-l"]:
+                l_list.append(extract_vi_l_template(wxr, node, sense, raw_tags))
+                raw_tags.clear()
+            elif node.template_name in ["anagrams", "Anagrams", "đảo chữ"]:
+                l_list.extend(
+                    extract_anagrams_template(wxr, node, sense, raw_tags)
                 )
                 raw_tags.clear()
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
@@ -289,6 +303,9 @@ def extract_linkage_list_item(
                 wxr, None, list_item.children[index:]
             ).strip("- \n")
             break
+    if len(raw_tags) > 0 and len(l_list) > 0:
+        l_list[-1].raw_tags.extend(raw_tags)
+        translate_raw_tags(l_list[-1])
     return l_list
 
 
@@ -306,17 +323,6 @@ def extract_link_template(
             l_list.append(
                 Linkage(word=clean_node(wxr, None, span_tag), sense=sense)
             )
-
-    return l_list
-
-
-def extract_idiom_section(
-    wxr: WiktextractContext, level_node: LevelNode
-) -> list[Linkage]:
-    l_list = []
-    for list_node in level_node.find_child(NodeKind.LIST):
-        for list_item in list_node.find_child(NodeKind.LIST_ITEM):
-            l_list.extend(extract_idiom_list_item(wxr, list_item))
 
     return l_list
 
@@ -394,15 +400,56 @@ def extract_ja_r_template(
     )
     linkage_data = Linkage(word="", sense=sense, raw_tags=raw_tags)
     for span_node in expanded_node.find_html("span"):
-        span_class = span_node.attrs.get("class", "")
+        span_class = span_node.attrs.get("class", "").split()
         if "lang" in span_node.attrs:
             ruby_data, no_ruby_nodes = extract_ruby(wxr, span_node)
             linkage_data.word = clean_node(wxr, None, no_ruby_nodes)
             linkage_data.ruby = ruby_data
         elif "tr" in span_class:
             linkage_data.roman = clean_node(wxr, None, span_node)
-        elif "mention-gloss" == span_class:
+        elif "mention-gloss" in span_class:
             linkage_data.sense = clean_node(wxr, None, span_node)
 
     translate_raw_tags(linkage_data)
     return linkage_data
+
+
+def extract_vi_l_template(
+    wxr: WiktextractContext,
+    t_node: TemplateNode,
+    sense: str,
+    raw_tags: list[str],
+) -> Linkage:
+    l_data = Linkage(word="", sense=sense, raw_tags=raw_tags)
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for span_tag in expanded_node.find_html("span"):
+        span_lang = span_tag.attrs.get("lang", "")
+        match span_lang:
+            case "vi":
+                l_data.word = clean_node(wxr, None, span_tag)
+            case "vi-Latn":
+                l_data.roman = clean_node(wxr, None, span_tag)
+    for link_node in expanded_node.find_child(NodeKind.LINK):
+        clean_node(wxr, l_data, link_node)
+    return l_data
+
+
+def extract_anagrams_template(
+    wxr: WiktextractContext,
+    t_node: TemplateNode,
+    sense: str,
+    raw_tags: list[str],
+) -> list[Linkage]:
+    l_list = []
+    for arg_index in count(2):
+        if arg_index not in t_node.template_parameters:
+            break
+        word = clean_node(wxr, None, t_node.template_parameters[arg_index])
+        if word != "":
+            l_data = Linkage(word=word, sense=sense, raw_tags=raw_tags)
+            translate_raw_tags(l_data)
+            l_list.append(l_data)
+
+    return l_list

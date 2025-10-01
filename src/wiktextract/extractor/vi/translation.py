@@ -47,6 +47,10 @@ def extract_translation_section(
             sense = clean_node(wxr, None, node)
 
 
+# Thể loại:Bản mẫu ngữ pháp
+ABBR_TAG_TEMPLATES = {"f", "fm", "g", "inv", "m", "mf", "mn", "n", "p"}
+
+
 def extract_translation_list_item(
     wxr: WiktextractContext,
     word_entry: WordEntry,
@@ -101,6 +105,15 @@ def extract_translation_list_item(
         ):
             word_entry.translations[-1].raw_tags.extend(
                 extract_qualifier_template(wxr, node)
+            )
+            translate_raw_tags(word_entry.translations[-1])
+        elif (
+            isinstance(node, TemplateNode)
+            and node.template_name in ABBR_TAG_TEMPLATES
+            and len(word_entry.translations) > 0
+        ):
+            word_entry.translations[-1].raw_tags.extend(
+                extract_abbr_tag_template(wxr, node)
             )
             translate_raw_tags(word_entry.translations[-1])
 
@@ -220,3 +233,17 @@ def extract_multitrans_template(
         wxr.wtp.node_to_wikitext(t_node.template_parameters.get("data", ""))
     )
     extract_translation_section(wxr, word_entry, arg)
+
+
+def extract_abbr_tag_template(
+    wxr: WiktextractContext, t_node: TemplateNode
+) -> list[str]:
+    raw_tags = []
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for abbr_tag in expanded_node.find_html_recursively("abbr"):
+        raw_tag = clean_node(wxr, None, abbr_tag.attrs.get("title", ""))
+        if raw_tag != "":
+            raw_tags.append(raw_tag)
+    return raw_tags
