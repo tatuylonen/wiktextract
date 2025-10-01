@@ -1,4 +1,5 @@
 import re
+from itertools import count
 
 from wikitextprocessor import (
     HTMLNode,
@@ -284,6 +285,11 @@ def extract_linkage_list_item(
             elif node.template_name in ["vi-l", "vie-l"]:
                 l_list.append(extract_vi_l_template(wxr, node, sense, raw_tags))
                 raw_tags.clear()
+            elif node.template_name in ["anagrams", "Anagrams", "đảo chữ"]:
+                l_list.extend(
+                    extract_anagrams_template(wxr, node, sense, raw_tags)
+                )
+                raw_tags.clear()
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
             word = clean_node(wxr, None, node)
             if word != "":
@@ -441,3 +447,22 @@ def extract_vi_l_template(
     for link_node in expanded_node.find_child(NodeKind.LINK):
         clean_node(wxr, l_data, link_node)
     return l_data
+
+
+def extract_anagrams_template(
+    wxr: WiktextractContext,
+    t_node: TemplateNode,
+    sense: str,
+    raw_tags: list[str],
+) -> list[Linkage]:
+    l_list = []
+    for arg_index in count(2):
+        if arg_index not in t_node.template_parameters:
+            break
+        word = clean_node(wxr, None, t_node.template_parameters[arg_index])
+        if word != "":
+            l_data = Linkage(word=word, sense=sense, raw_tags=raw_tags)
+            translate_raw_tags(l_data)
+            l_list.append(l_data)
+
+    return l_list
