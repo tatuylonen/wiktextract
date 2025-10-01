@@ -123,6 +123,7 @@ GENDER_NUMBER_TAGS = {
     "số nhiều": "plural",
     "thể chưa hoàn thành": "imperfective",
     "thể hoàn thành": "perfective",
+    "không đổi": "invariable",
 }
 
 LOCATIONS = {
