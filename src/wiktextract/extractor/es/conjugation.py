@@ -14,7 +14,7 @@ def extract_conjugation_section(
     forms = []
     cats = []
     for t_node in level_node.find_child(NodeKind.TEMPLATE):
-        if t_node.template_name == "es.v":
+        if t_node.template_name in ["es.v", "en.v"]:
             new_forms, new_cats = process_es_v_template(wxr, t_node)
             forms.extend(new_forms)
             cats.extend(new_cats)
@@ -58,6 +58,13 @@ PRONOUN_TAGS = {
     "ustedes, ellos": ["third-person", "plural"],
     "que ustedes, que ellos": ["third-person", "plural"],
     "(ustedes)": ["third-person", "plural"],
+    # Template:en.v
+    "I": ["first-person"],
+    "you": ["second-person"],
+    "(you)": ["second-person"],
+    "he, she, it": ["third-person", "singular"],
+    "we, you, they": ["third-person", "plural"],
+    "(we)": ["third-person", "plural"],
 }
 
 
@@ -122,25 +129,27 @@ def process_es_v_template(
                         and node.kind == NodeKind.LINK
                     ):
                         cell_nodes.append(node)
-                        form = Form(
-                            form=clean_node(wxr, None, cell_nodes).lstrip(", ")
-                        )
-                        for col_head in col_headers:
-                            if (
-                                col_index >= col_head.index
-                                and col_index < col_head.index + col_head.span
-                            ):
-                                form.raw_tags.append(col_head.text)
-                                form.tags.extend(
-                                    PRONOUN_TAGS.get(col_head.text, [])
-                                )
-                        if row_header != "":
-                            form.raw_tags.append(row_header)
-                        if is_archaic_row:
-                            form.tags.append("archaic")
-                        if form.form not in ["", "―"]:
-                            translate_raw_tags(form)
-                            forms.append(form)
+                        for form_str in clean_node(wxr, None, cell_nodes).split(
+                            ","
+                        ):
+                            form = Form(form=form_str.strip())
+                            for col_head in col_headers:
+                                if (
+                                    col_index >= col_head.index
+                                    and col_index
+                                    < col_head.index + col_head.span
+                                ):
+                                    form.raw_tags.append(col_head.text)
+                                    form.tags.extend(
+                                        PRONOUN_TAGS.get(col_head.text, [])
+                                    )
+                            if row_header != "":
+                                form.raw_tags.append(row_header)
+                            if is_archaic_row:
+                                form.tags.append("archaic")
+                            if form.form not in ["", "―", wxr.wtp.title]:
+                                translate_raw_tags(form)
+                                forms.append(form)
                         cell_nodes.clear()
                     elif not (
                         isinstance(node, HTMLNode)

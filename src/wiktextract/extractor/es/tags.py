@@ -711,6 +711,7 @@ TENSE_TAGS = {
     "pretérito anterior": ["past", "anterior"],
     "futuro perfecto": ["future", "perfect"],
     "condicional perfecto": ["conditional", "perfect"],
+    "pretérito compuesto": ["compound", "past"],
 }
 
 VERB_FORM_TAGS = {
@@ -800,6 +801,7 @@ ES_V_SUP_TAGS = {
     "part": "participle",
     "part/adj": ["participle", "adjective"],
     "arg/uru": ["Argentina", "Uruguay"],
+    "†": "archaic",
 }
 
 
