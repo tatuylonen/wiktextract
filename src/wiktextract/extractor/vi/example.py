@@ -37,7 +37,17 @@ def extract_example_list_item(
                 sense.examples.append(e_data)
                 break
         elif isinstance(node, TemplateNode):
-            if node.template_name in ["ux", "usex", "ux2", "uxi"]:
+            if node.template_name in [
+                "ux",
+                "usex",
+                "ux2",
+                "uxi",
+                "collocation",
+                "th-usex",
+                "th-x",
+                "tha-x",
+                "tha-usex",
+            ]:
                 extract_ux_template(wxr, sense, node)
             elif node.template_name.startswith(("quote-", "RQ:")):
                 ref = extract_quote_template(wxr, sense, node)

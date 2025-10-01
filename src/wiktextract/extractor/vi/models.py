@@ -61,6 +61,7 @@ class Linkage(VietnameseBaseModel):
     ruby: list[tuple[str, ...]] = Field(
         default=[], description="Japanese Kanji and furigana"
     )
+    categories: list[str] = Field(default=[], exclude=True)
 
 
 class Form(VietnameseBaseModel):
