@@ -177,3 +177,48 @@ etymology text
                 },
             ],
         )
+
+    def test_en_v(self):
+        self.wxr.wtp.add_page(
+            "Plantilla:en.v",
+            10,
+            """<div class='flex mw-collapsible-content'>
+{| class='flex wikitable' width='100%'
+! colspan=5 | Formas personales
+|-
+! colspan=5 | Modo indicativo
+|-
+!
+! I
+! you
+|-
+! Presente
+| <span class='movil'>I&ensp;</span>dog
+| <span class='movil'>you&ensp;</span>dog, [[doggest|doggest]]<sup>†</sup>
+|}
+</div>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "dog",
+            """== {{lengua|en}} ==
+=== {{verbo transitivo|en}} ===
+;2: Perseguir con [[perro]]s
+=== Conjugación ===
+{{en.v}}""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {
+                    "form": "doggest",
+                    "raw_tags": ["you"],
+                    "tags": [
+                        "second-person",
+                        "indicative",
+                        "present",
+                        "archaic",
+                    ],
+                }
+            ],
+        )
