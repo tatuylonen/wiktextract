@@ -86,7 +86,10 @@ def extract_linkage_section(
                 and sense_index_text.isdecimal()
             ):
                 sense_index = int(sense_index_text)
-        elif isinstance(node, WikiNode) and node.kind == NodeKind.BOLD:
+        elif (
+            isinstance(node, WikiNode)
+            and node.kind in NodeKind.BOLD | NodeKind.ITALIC
+        ):
             sense_text = clean_node(wxr, None, node)
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
             # sense could also be in ";" description list
@@ -135,6 +138,11 @@ def extract_linkage_list_item(
             "zh-lien-t",
         ]:
             process_linkage_template(wxr, child_node, linkage_data)
+        elif (
+            isinstance(child_node, TemplateNode)
+            and child_node.template_name == "cf"
+        ):
+            return
         elif (
             isinstance(child_node, WikiNode)
             and child_node.kind == NodeKind.LINK

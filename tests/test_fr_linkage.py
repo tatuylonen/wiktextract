@@ -418,3 +418,31 @@ class TestLinkage(TestCase):
             data[0]["synonyms"],
             [{"word": "Peau-Rouge", "tags": ["obsolete", "offensive"]}],
         )
+
+    def test_italic_sense(self):
+        data = parse_page(
+            self.wxr,
+            "car",
+            """== {{langue|en}} ==
+=== {{S|nom|en|num=1}} ===
+# [[voiture|Voiture]].
+==== {{S|synonymes}} ====
+''Automobile'' :
+* {{lien|automobile|en}}""",
+        )
+        self.assertEqual(
+            data[0]["synonyms"], [{"word": "automobile", "sense": "Automobile"}]
+        )
+
+    def test_ignore_cf_template(self):
+        data = parse_page(
+            self.wxr,
+            "throne",
+            """== {{langue|en}} ==
+=== {{S|nom|en}} ===
+# [[trône|Trône]]
+==== {{S|synonymes}} ====
+''Siège de toilettes :''
+* {{cf}} [[toilet#Synonymes|''toilet'' (synonymes)]]""",
+        )
+        self.assertTrue("synonyms" not in data[0])
