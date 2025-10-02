@@ -2,6 +2,7 @@ from wikitextprocessor.parser import LEVEL_KIND_FLAGS, LevelNode, NodeKind
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from ..share import calculate_bold_offsets
 from .models import Example, WordEntry
 
 
@@ -41,11 +42,13 @@ def extract_citation_section(
     for t_node in level_node.find_child(NodeKind.TEMPLATE):
         if t_node.template_name.lower() == "quote":
             example = Example()
-            example.text = clean_node(
-                wxr, None, t_node.template_parameters.get(1, "")
-            )
+            first_arg = wxr.wtp.parse(t_node.template_parameters.get(1, ""))
+            example.text = clean_node(wxr, None, first_arg)
             example.ref = clean_node(
                 wxr, None, t_node.template_parameters.get(2, "")
+            )
+            calculate_bold_offsets(
+                wxr, first_arg, example.text, example, "bold_text_offsets"
             )
             if example.text != "":
                 examples.append(example)
