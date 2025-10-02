@@ -195,6 +195,9 @@ etymology text
 ! Presente
 | <span class='movil'>I&ensp;</span>dog
 | <span class='movil'>you&ensp;</span>dog, [[doggest|doggest]]<sup>†</sup>
+|-
+! Futuro
+| <span class='movil'>I&ensp;</span>will dog
 |}
 </div>""",
         )
@@ -219,6 +222,11 @@ etymology text
                         "present",
                         "archaic",
                     ],
-                }
+                },
+                {
+                    "form": "will dog",
+                    "raw_tags": ["I"],
+                    "tags": ["first-person", "indicative", "future"],
+                },
             ],
         )
