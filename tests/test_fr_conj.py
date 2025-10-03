@@ -582,3 +582,97 @@ class TestNotes(TestCase):
                 },
             ],
         )
+
+    def test_de_conj(self):
+        self.wxr.wtp.start_page("trinken")
+        self.wxr.wtp.add_page(
+            "Conjugaison:allemand/trinken",
+            116,
+            "{{de-conj|trink|p2s=trink|prt=trank|part=getrunken|s2=tränk}}",
+        )
+        self.wxr.wtp.add_page(
+            "Modèle:de-conj",
+            10,
+            """<h2>Verbe : [[trinken]] / Auxiliaire : [[haben]]</h2>
+{|
+|-
+! colspan="7" | <strong>INFINITIF</strong>
+|-
+| &nbsp;
+|-
+! Présent
+| rowspan="2" | &nbsp;
+|-
+| [[trinken]]
+|}
+
+{|
+|-
+! colspan="5" | <strong>IMPÉRATIF / PARTICIPE</strong>
+|-
+| &nbsp;
+|-
+! colspan="2" | Impératif
+| rowspan="3" | &nbsp;
+! colspan="2" | Participe
+|-
+| &nbsp;
+| [[trink]](e)!
+| &nbsp;
+| présent : [[trinkend]]
+|}
+
+{|
+|-
+! colspan="8" | <strong>INDICATIF</strong>
+|-
+| &nbsp;
+|-
+! colspan="2" | Présent
+| rowspan="7" | &nbsp;
+! colspan="2" | Prétérit
+| rowspan="7" | &nbsp;
+! colspan="2" | Futur I
+|-
+| align="right" width="5%" | ich&nbsp;&nbsp;
+| align="left" width="28%" | [[trinke ]]
+|-
+| &nbsp;
+|-
+! colspan="2" | Passé composé
+| rowspan="7" | &nbsp;
+|-
+| align="right" width="5%" | ich&nbsp;&nbsp;
+| align="left" width="28%" | habe getrunken
+|}
+[[Catégorie:Conjugaison en allemand|trinken]]""",
+        )
+        data = WordEntry(lang_code="de", lang="Allemand", word="trinken")
+        extract_conjugation(self.wxr, data, "Conjugaison:allemand/trinken")
+        self.assertEqual(
+            [f.model_dump(exclude_defaults=True) for f in data.forms],
+            [
+                {
+                    "form": "trink(e)!",
+                    "tags": ["imperative"],
+                    "raw_tags": ["IMPÉRATIF / PARTICIPE"],
+                    "source": "Conjugaison:allemand/trinken",
+                },
+                {
+                    "form": "trinkend",
+                    "tags": ["present", "participle"],
+                    "raw_tags": ["IMPÉRATIF / PARTICIPE"],
+                    "source": "Conjugaison:allemand/trinken",
+                },
+                {
+                    "form": "ich trinke",
+                    "tags": ["indicative", "present"],
+                    "source": "Conjugaison:allemand/trinken",
+                },
+                {
+                    "form": "ich habe getrunken",
+                    "tags": ["indicative", "past", "multiword-construction"],
+                    "source": "Conjugaison:allemand/trinken",
+                },
+            ],
+        )

@@ -43,6 +43,8 @@ def extract_conjugation(
             )
         elif conj_template.template_name == "ko-conj":
             extract_ko_conj_template(wxr, entry, conj_template, conj_page_title)
+        elif conj_template.template_name == "de-conj":
+            extract_de_conj_template(wxr, entry, conj_template, conj_page_title)
         elif "-conj" in conj_template.template_name:
             process_conj_template(wxr, entry, conj_template, conj_page_title)
         elif conj_template.template_name == "Onglets conjugaison":
@@ -633,3 +635,72 @@ def get_cell_span(cell: WikiNode) -> tuple[int, int]:
     if re.fullmatch(r"\d+", rowspan_str) is not None:
         rowspan = int(rowspan_str)
     return colspan, rowspan
+
+
+def extract_de_conj_template(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    t_node: TemplateNode,
+    conj_page_title: str,
+):
+    word_page_title = wxr.wtp.title
+    wxr.wtp.title = conj_page_title
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    wxr.wtp.title = word_page_title
+    for table_index, table in enumerate(
+        expanded_node.find_child(NodeKind.TABLE)
+    ):
+        table_header = ""
+        col_headers = []
+        for row in table.find_child(NodeKind.TABLE_ROW):
+            word_part = ""
+            col_index = 0
+            if table_index >= 2 and row.contain_node(
+                NodeKind.TABLE_HEADER_CELL
+            ):
+                col_headers.clear()
+            for cell in row.find_child(
+                NodeKind.TABLE_HEADER_CELL | NodeKind.TABLE_CELL
+            ):
+                cell_text = clean_node(wxr, None, cell)
+                if cell_text == "":
+                    continue
+                elif cell.kind == NodeKind.TABLE_HEADER_CELL:
+                    if len(row.children) == 1:
+                        table_header = clean_node(wxr, None, cell)
+                    else:
+                        col_headers.append(clean_node(wxr, None, cell))
+                elif table_index < 2:
+                    form = Form(form=cell_text, source=conj_page_title)
+                    if ":" in cell_text:
+                        colon_index = cell_text.index(":")
+                        raw_tag = cell_text[:colon_index].strip()
+                        if raw_tag != "":
+                            form.raw_tags.append(raw_tag)
+                        form.form = cell_text[colon_index + 1 :].strip()
+                    if table_header != "":
+                        form.raw_tags.append(table_header)
+                    if col_index < len(col_headers):
+                        form.raw_tags.append(col_headers[col_index])
+                    if form.form not in ["", wxr.wtp.title]:
+                        translate_raw_tags(form)
+                        word_entry.forms.append(form)
+                elif col_index % 2 == 0:
+                    word_part = cell_text
+                else:
+                    form = Form(
+                        form=f"{word_part} {cell_text}", source=conj_page_title
+                    )
+                    if table_header != "":
+                        form.raw_tags.append(table_header)
+                    if col_index // 2 < len(col_headers):
+                        form.raw_tags.append(col_headers[col_index // 2])
+                    if form.form not in ["", wxr.wtp.title]:
+                        translate_raw_tags(form)
+                        word_entry.forms.append(form)
+                col_index += 1
+
+    for cat_link in expanded_node.find_child(NodeKind.LINK):
+        clean_node(wxr, word_entry, cat_link)
