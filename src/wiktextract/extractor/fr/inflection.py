@@ -40,6 +40,7 @@ IGNORE_TABLE_HEADERS = frozenset(
         "mode",  # eo-conj
         "avec suffixes possessifs",  # fi-décl-valo
         "en kurmandji",  # flex-ku-nomf
+        "mode ou temps",  # de-tab-conjug
     }
 )
 IGNORE_TABLE_HEADER_PREFIXES = (

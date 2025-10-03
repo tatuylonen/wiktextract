@@ -78,6 +78,9 @@ MOOD_TAGS: dict[str, str] = {
     "conditionnel / subjonctif": ["conditional", "subjunctive"],
     "conjonctif": "subjunctive",
     "provisionnel": "temporal",
+    # Template:de-conj
+    "subjonctif i": "subjunctive-i",
+    "subjonctif ii": "subjunctive-ii",
 }
 
 VERB_FORM_TAGS: dict[str, str | list[str]] = {
@@ -162,6 +165,9 @@ TENSE_TAGS: dict[str, str | list[str]] = {
     "prétérit et imparfait": ["preterite", "imperfect"],
     "non passé": "non-past",
     "présent / futur": ["present", "future"],
+    # Template:de-conj
+    "futur i": "future-i",
+    "futur ii": "future-ii",
 }
 
 # https://en.wikipedia.org/wiki/Grammatical_person
