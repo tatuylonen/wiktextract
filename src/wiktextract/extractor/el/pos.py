@@ -514,7 +514,7 @@ def bold_node_fn(
 
 def extract_form_of_templates(
     wxr: WiktextractContext,
-    parent_sense: Sense | WordEntry,
+    parent_sense: Sense,
     t_node: TemplateNode,
     siblings: list[str | WikiNode],
     siblings_index: int,
@@ -523,12 +523,14 @@ def extract_form_of_templates(
 
     Supports:
     * κλ             | generic                | form_of
+    * γρ             | generic                | form_of
     * πτώση/πτώσεις  | nouns, adjectives etc. | form_of and tags
     * ρημ τύπος      | verbs                  | form_of
     * μτχ            | verbs                  | form_of
 
     * References:
     https://el.wiktionary.org/wiki/Πρότυπο:κλ
+    https://el.wiktionary.org/wiki/Module:άλλημορφή
     https://el.wiktionary.org/wiki/Κατηγορία:Πρότυπα_για_κλιτικούς_τύπους
     https://el.wiktionary.org/wiki/Πρότυπο:ρημ_τύπος
     https://el.wiktionary.org/wiki/Κατηγορία:Πρότυπα_για_μετοχές
@@ -548,6 +550,17 @@ def extract_form_of_templates(
     if t_name == "κλ":
         return basic_extract(extract_argument=2)
 
+    # Notes:
+    # * All occurrences in wiktionary have at least one argument
+    # * Only handle cases where the second argument refers to a form:
+    #   μορφ / μορφή / λόγια μορφή του, etc.
+    #   and ignore those mistakenly used as synonym templates
+    if t_name == "γρ":
+        second_arg = t_node.template_parameters[2]
+        second_arg_str = clean_node(wxr, None, second_arg).strip()
+        if "μορφ" in second_arg_str:
+            return basic_extract(extract_argument=1)
+
     # Nouns and adjectives
     inflection_t_names = ("πτώσεις", "πτώση")
     if any(name in t_name for name in inflection_t_names):
@@ -559,6 +572,7 @@ def extract_form_of_templates(
 
     if t_name.startswith("μτχ"):
         return basic_extract(extract_argument=1)
+
 
 def extract_form_of_templates_basic(
     wxr: WiktextractContext,
@@ -574,12 +588,11 @@ def extract_form_of_templates_basic(
         # mtxpp template has no args, consume the next links for the
         # form_of field
         wxr.wtp.warning(
-            "Form-of template does not have lemma data: "
-            f"{t_name}, {t_args=}",
+            f"Form-of template does not have lemma data: {t_name}, {t_args=}",
             sortid="pos/570/20250517",
         )
         links: list[str | WikiNode] = []
-        for node in siblings[sibling_index+1:]:
+        for node in siblings[sibling_index + 1 :]:
             if not (
                 (isinstance(node, str) and node.strip() == "")
                 or (isinstance(node, WikiNode) and node.kind == NodeKind.LINK)
