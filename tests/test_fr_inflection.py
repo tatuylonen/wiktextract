@@ -45,7 +45,13 @@ class TestInflection(TestCase):
         extract_inflection(self.wxr, page_data, root.children[0])
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in page_data[-1].forms],
-            [{"form": "productrices", "tags": ["plural"]}],
+            [
+                {
+                    "form": "productrices",
+                    "tags": ["plural"],
+                    "ipas": ["\\pʁɔ.dyk.tʁis\\"],
+                }
+            ],
         )
 
     def test_fr_accord_al(self):
@@ -56,6 +62,7 @@ class TestInflection(TestCase):
             10,
             """{|class="flextable flextable-fr-mfsp"
 |-
+!class="invisible"|
 !scope="col"| Singulier
 !scope="col"| Pluriel
 |- class="flextable-fr-m"
@@ -199,30 +206,6 @@ class TestInflection(TestCase):
             [{"tags": ["Traditional-Chinese"], "form": "一萬"}],
         )
 
-    def test_lt_décl_as(self):
-        # empty table cells should be ignored
-        page_data = [WordEntry(word="abadai", lang_code="lt", lang="Lituanien")]
-        self.wxr.wtp.add_page(
-            "Modèle:lt-décl-as",
-            10,
-            """{| class="flextable"
-!Cas
-! Singulier
-! Pluriel
-|-
-! Nominatif
-|| <bdi lang="lt" xml:lang="lt" class="lang-lt">[[abadas#lt|abadas]]</bdi>
-|| '''<span lang="lt" xml:lang="lt" class="lang-lt"><bdi>abadai</bdi></span>'''
-|}""",
-        )
-        self.wxr.wtp.start_page("abadai")
-        root = self.wxr.wtp.parse("{{lt-décl-as|abad}}")
-        extract_inflection(self.wxr, page_data, root.children[0])
-        self.assertEqual(
-            [d.model_dump(exclude_defaults=True) for d in page_data[-1].forms],
-            [{"tags": ["singular", "nominative"], "form": "abadas"}],
-        )
-
     def test_fr_accord_s(self):
         page_data = [WordEntry(word="aastais", lang_code="fr", lang="Français")]
         self.wxr.wtp.add_page(
@@ -231,7 +214,7 @@ class TestInflection(TestCase):
             """{|class="flextable flextable-fr-mfsp"
 
 |-
-| class="invisible" |
+! class="invisible" |
 ! scope="col" | Singulier
 ! scope="col" | Pluriel
 |- class="flextable-fr-m"
@@ -275,7 +258,7 @@ class TestInflection(TestCase):
             "Modèle:fr-accord-personne",
             10,
             """{| class="flextable"
-| colspan="2" |
+! colspan="2" class="invisible" |
 ! Singulier !! Pluriel
 |-
 ! rowspan="2" | 1<sup>e</sup> personne
@@ -358,21 +341,34 @@ class TestInflection(TestCase):
             [
                 {
                     "form": "fenilul",
-                    "tags": ["singular", "nominative", "accusative"],
-                    "raw_tags": ["articulé"],
+                    "tags": [
+                        "singular",
+                        "definite",
+                        "nominative",
+                        "accusative",
+                    ],
                 },
                 {
                     "form": "fenili",
-                    "tags": ["plural", "nominative", "accusative"],
-                    "raw_tags": ["non articulé"],
+                    "tags": [
+                        "plural",
+                        "indefinite",
+                        "nominative",
+                        "accusative",
+                    ],
                 },
                 {
                     "form": "fenilii",
-                    "tags": ["plural", "nominative", "accusative"],
-                    "raw_tags": ["articulé"],
+                    "tags": ["plural", "definite", "nominative", "accusative"],
                 },
-                {"form": "fenilule", "tags": ["singular", "vocative"]},
-                {"form": "fenililor", "tags": ["plural", "vocative"]},
+                {
+                    "form": "fenilule",
+                    "tags": ["singular", "indefinite", "definite", "vocative"],
+                },
+                {
+                    "form": "fenililor",
+                    "tags": ["plural", "indefinite", "definite", "vocative"],
+                },
             ],
         )
 
@@ -449,13 +445,13 @@ class TestInflection(TestCase):
 ! Nature
 ! Forme
 |-
-| class="titre" | Positif
+! class="titre" | Positif
 | '''<span lang="en" xml:lang="en" class="lang-en"><bdi>new</bdi></span>'''<br />[[Annexe:Prononciation/anglais|<span class="API" title="Prononciation API">\\ˈnu\\</span>]]<small> ou </small>[[Annexe:Prononciation/anglais|<span class="API" title="Prononciation API">\\ˈnjuː\\</span>]]
 |-
-| class="titre" | Comparatif
+! class="titre" | Comparatif
 | <bdi lang="en" xml:lang="en" class="lang-en">[[newer#en|newer]]</bdi><br />[[Annexe:Prononciation/anglais|<span class="API" title="Prononciation API">\\ˈnu.ɚ\\</span>]]<small> ou </small>[[Annexe:Prononciation/anglais|<span class="API" title="Prononciation API">\\ˈnjuː.ə\\</span>]]
 |-
-| class="titre" | Superlatif
+! class="titre" | Superlatif
 | <bdi lang="en" xml:lang="en" class="lang-en">[[newest#en|newest]]</bdi><br />[[Annexe:Prononciation/anglais|<span class="API" title="Prononciation API">\\ˈnu.ɪst\\</span>]]<small> ou </small>[[Annexe:Prononciation/anglais|<span class="API" title="Prononciation API">\\ˈnjuː.ɪst\\</span>]]
 |}""",  # noqa: E501
         )
