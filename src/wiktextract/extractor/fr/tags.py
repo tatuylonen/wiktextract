@@ -57,6 +57,11 @@ NUMBER_TAGS: dict[str, str | list[str]] = {
     # "nom d'unité": "",  # Modèle:nu
     "généralement indénombrable": "uncountable",
     "dénombrable": "countable",
+    # Modèle:br-nom
+    "pluriel 1": "plural",
+    "pluriel 2": "plural",
+    "pluriel 3": "plural",
+    "pluriel 4": "plural",
 }
 
 # https://en.wikipedia.org/wiki/Grammatical_mood
@@ -135,8 +140,8 @@ CASE_TAGS: dict[str, str | list[str]] = {
     "essif": "essive",
     "illatif": "illative",
     # Template:ro-nom-tab
-    "nominatif accusatif": ["nominative", "accusative"],
-    "datif génitif": ["dative", "genitive"],
+    "nominatif\naccusatif": ["nominative", "accusative"],
+    "datif\ngénitif": ["dative", "genitive"],
     # Template:ko-nom
     "nominatif / attributif": ["nominative", "attributive"],
     # Modèle:fro-adj
@@ -190,6 +195,9 @@ SEMANTICS_TAGS: dict[str, str] = {
     # https://en.wikipedia.org/wiki/Definiteness
     "défini": "definite",
     "indéfini": "indefinite",
+    # template:ro-nom-tab
+    "articulé": "definite",
+    "non articulé": "indefinite",
 }
 
 COMPARISON_TAGS: dict[str, str] = {
@@ -276,6 +284,8 @@ OTHER_GRAMMATICAL_TAGS: dict[str, str] = {
     "par ellipse": "ellipsis",  # Template:ellipse
     "ironique": "ironic",
     "suffixe": "suffix",
+    # Template:avk-tab-conjug
+    "conjugaison présent indicatif": ["present", "indicative"],
 }
 
 # template text before gloss
@@ -332,8 +342,8 @@ VOICE_TAGS: dict[str, str | list[str]] = {
     "participe passif": ["participle", "passive"],
     "adverbe actif": ["adverb", "active"],
     "adverbe passif": ["adverb", "passive"],
-    "substantif actif": ["subsuntive", "active"],
-    "substantif passif": ["subsuntive", "passive"],
+    "substantif\nactif": ["subsuntive", "active"],
+    "substantif\npassif": ["subsuntive", "passive"],
     "actif": "active",
     "passif": "passive",
     "adverbe": "adverb",

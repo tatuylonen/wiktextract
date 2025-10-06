@@ -1,5 +1,5 @@
-import re
 from dataclasses import dataclass
+from itertools import chain
 
 from wikitextprocessor.parser import NodeKind, TemplateNode, WikiNode
 
@@ -15,38 +15,20 @@ def extract_inflection(
 ):
     # inflection templates
     # https://fr.wiktionary.org/wiki/Catégorie:Modèles_d’accord_en_français
-    if t_node.template_name.startswith("en-adj"):
-        process_en_adj_table(wxr, page_data[-1], t_node)
-    elif t_node.template_name == "fro-adj":
-        extract_fro_adj_template(wxr, page_data[-1], t_node)
+    if t_node.template_name == "fr-verbe-flexion":
+        extract_fr_verbe_flexion(wxr, page_data, t_node)
     else:
-        process_inflection_table(wxr, page_data, t_node)
+        extract_inf_table_template(wxr, page_data[-1], t_node)
 
 
 IGNORE_TABLE_HEADERS = frozenset(
     {
         "terme",  # https://fr.wiktionary.org/wiki/Modèle:de-adj
         "forme",  # br-flex-adj
-        "temps",  # en-conj-rég,
-        "cas",  # lt_décl_as, ro-nom-tab(lower case)
-        "commun",  # sv-nom-c-ar
-        "personne",  # hu-pos-otok
-        "pronom personnel",  # it-enclise
-        "mutation",  # br-nom
-        "nombre",  # ca-accord-mixte2
-        "nature",  # de-adj
-        "genre",  # es-accord-oa
-        "conjugaison présent indicatif",  # avk-tab-conjug
-        "mode",  # eo-conj
-        "avec suffixes possessifs",  # fi-décl-valo
-        "en kurmandji",  # flex-ku-nomf
-        "mode ou temps",  # de-tab-conjug
     }
 )
 IGNORE_TABLE_HEADER_PREFIXES = (
     "voir la conjugaison du verbe ",  # Modèle:fr-verbe-flexion
-    "conjugaison de ",  # sv-conj-ar
-    "déclinaison de ",  # da-adj
 )
 IGNORE_TABLE_CELL = frozenset(
     {
@@ -84,7 +66,7 @@ def table_data_cell_is_header(
     return False
 
 
-def process_inflection_table(
+def extract_fr_verbe_flexion(
     wxr: WiktextractContext, page_data: list[WordEntry], t_node: TemplateNode
 ) -> None:
     from .form_line import is_conj_link, process_conj_link_node
@@ -143,15 +125,6 @@ def process_inflection_table(
                         wxr, table_cell, page_data[-1].word
                     )
                 ):
-                    if any(
-                        table_cell.find_html(
-                            "span",
-                            attr_name="class",
-                            attr_value="ligne-de-forme",
-                        )
-                    ):
-                        # ignore gender header in template "ro-nom-tab"
-                        continue
                     table_header_text = clean_node(
                         wxr, None, table_cell
                     ).replace("\n", " ")
@@ -206,7 +179,7 @@ def process_inflection_table(
                     table_cell_lines = clean_node(wxr, None, table_cell)
                     for table_cell_line in table_cell_lines.splitlines():
                         if is_ipa_text(table_cell_line):
-                            insert_ipa(form_data, table_cell_line)
+                            form_data.ipas.extend(split_ipa(table_cell_line))
                         elif (
                             table_cell_line != page_data[-1].word
                             and table_cell_line not in IGNORE_TABLE_CELL
@@ -262,106 +235,123 @@ def split_ipa(text: str) -> list[str]:
         return text.split(" ou ")
     if text.startswith("ou "):
         return [text.removeprefix("ou ")]
-    if text.endswith("Prononciation ?\\"):
+    if text.endswith("\\Prononciation ?\\"):
         # inflection table templates use a edit link when the ipa data is
-        # missing, and the link usually ends with "Prononciation ?"
+        # missing, and the link usually ends with "\Prononciation ?\"
         return []
     return [text]
 
 
-def insert_ipa(form: Form, ipa_text: str) -> None:
-    ipa_data = split_ipa(ipa_text)
-    if len(ipa_data) == 0:
-        return
-    form.ipas.extend(ipa_data)
+@dataclass
+class TableSpanHeader:
+    text: str
+    col_index: int = 0
+    colspan: int = 1
+    row_index: int = 0
+    rowspan: int = 1
 
 
-def process_en_adj_table(
-    wxr: WiktextractContext, word_entry: WordEntry, t_node: WikiNode
-) -> None:
-    # https://fr.wiktionary.org/wiki/Modèle:en-adj
-    # and other en-adj* templates
-    # these templates use normal table cell for column table header
-    expanded_node = wxr.wtp.parse(
-        wxr.wtp.node_to_wikitext(t_node), expand_all=True
-    )
-    table_nodes = list(expanded_node.find_child(NodeKind.TABLE))
-    if len(table_nodes) == 0:
-        return
-    table_node = table_nodes[0]
-    for row_num, table_row in enumerate(
-        table_node.find_child(NodeKind.TABLE_ROW)
-    ):
-        if row_num == 0:
-            # skip header
-            continue
-        if len(table_row.children) > 1:
-            form_data = Form()
-            form_data.raw_tags.append(
-                clean_node(wxr, None, table_row.children[0])
-            )
-            form_text = clean_node(wxr, None, table_row.children[1])
-            for form_line in form_text.splitlines():
-                if form_line in IGNORE_TABLE_CELL:
-                    continue
-                elif is_ipa_text(form_line):
-                    insert_ipa(form_data, form_line)
-                else:
-                    form_data.form = form_line
-            if form_data.form != word_entry.word and len(form_data.form) > 0:
-                translate_raw_tags(form_data)
-                word_entry.forms.append(form_data)
-
-
-def extract_fro_adj_template(
+def extract_inf_table_template(
     wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
 ):
     # https://fr.wiktionary.org/wiki/Modèle:fro-adj
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(t_node), expand_all=True
     )
-    col_headers = []
-    row_headers = []
     for table in expanded_node.find_child(NodeKind.TABLE):
+        col_headers = []
+        row_headers = []
         for row_index, row in enumerate(table.find_child(NodeKind.TABLE_ROW)):
             row_has_data = row.contain_node(NodeKind.TABLE_CELL)
-            for col_index, cell_node in enumerate(
-                row.find_child(NodeKind.TABLE_HEADER_CELL)
-            ):
+            col_index = 0
+            for header in chain(col_headers, row_headers):
+                if (
+                    row_index >= header.row_index
+                    and row_index < header.row_index + header.rowspan
+                ):
+                    col_index += header.colspan
+            for cell_node in row.find_child(NodeKind.TABLE_HEADER_CELL):
                 cell_text = clean_node(wxr, None, cell_node)
-                if cell_text == "" or cell_text.lower() in IGNORE_TABLE_HEADERS:
-                    continue
+                colspan = int(cell_node.attrs.get("colspan", "1"))
+                rowspan = int(cell_node.attrs.get("rowspan", "1"))
                 if not row_has_data:
-                    col_headers.append(cell_text)
-                else:
-                    rowspan_str = cell_node.attrs.get("rowspan", "1")
-                    rowspan = 1
-                    if re.fullmatch(r"\d+", rowspan_str) is not None:
-                        rowspan = int(rowspan_str)
-                    row_headers.append(
-                        TableHeader(cell_text, row_index, rowspan)
+                    col_headers.append(
+                        TableSpanHeader(
+                            cell_text, col_index, colspan, row_index, rowspan
+                        )
                     )
+                else:
+                    row_headers.append(
+                        TableSpanHeader(
+                            cell_text, col_index, colspan, row_index, rowspan
+                        )
+                    )
+                col_index += colspan
 
         for row_index, row in enumerate(table.find_child(NodeKind.TABLE_ROW)):
-            for col_index, cell_node in enumerate(
-                row.find_child(NodeKind.TABLE_CELL)
-            ):
+            col_index = 0
+            last_col_header_row = 0
+            for col_header in col_headers[::-1]:
+                if col_header.row_index < row_index:
+                    last_col_header_row = col_header.row_index
+                    break
+            for row_header in row_headers:
+                if (
+                    row_index >= row_header.row_index
+                    and row_index < row_header.row_index + row_header.rowspan
+                ):
+                    col_index += row_header.colspan
+            for cell_node in row.find_child(NodeKind.TABLE_CELL):
+                colspan = int(cell_node.attrs.get("colspan", "1"))
+                rowspan = int(cell_node.attrs.get("rowspan", "1"))
                 cell_text = clean_node(wxr, None, cell_node)
-                if cell_text in ["", wxr.wtp.title]:
-                    continue
-                form = Form(form=cell_text)
-                if col_index < len(col_headers):
-                    form.raw_tags.append(col_headers[col_index])
-                rowspan_str = cell_node.attrs.get("rowspan", "1")
-                rowspan = 1
-                if re.fullmatch(r"\d+", rowspan_str) is not None:
-                    rowspan = int(rowspan_str)
-                for header in row_headers:
-                    if (
-                        header.index < row_index + rowspan
-                        and row_index < header.index + header.span
-                        and header.text not in form.raw_tags
-                    ):
-                        form.raw_tags.append(header.text)
-                translate_raw_tags(form)
-                word_entry.forms.append(form)
+                for line in cell_text.splitlines():
+                    line = line.removeprefix("ou ").strip()
+                    if is_ipa_text(line):
+                        if len(word_entry.forms) > 0:
+                            word_entry.forms[-1].ipas.extend(split_ipa(line))
+                        continue
+                    form = Form(form=line)
+                    use_col_tags = []
+                    for col_header in col_headers[::-1]:
+                        if (
+                            col_header.col_index < col_index + colspan
+                            and col_index
+                            < col_header.col_index + col_header.colspan
+                            and col_header.text not in form.raw_tags
+                            and col_header.text not in use_col_tags
+                            and col_header.text.lower()
+                            not in IGNORE_TABLE_HEADERS
+                            and not col_header.text.lower().startswith(
+                                IGNORE_TABLE_HEADER_PREFIXES
+                            )
+                            # column header above cell and above last header
+                            # don't use headers for other top sections
+                            # Modèle:eo-conj
+                            and col_header.row_index + col_header.rowspan
+                            in [last_col_header_row, last_col_header_row + 1]
+                        ):
+                            use_col_tags.append(col_header.text)
+                    form.raw_tags.extend(use_col_tags[::-1])
+                    for row_header in row_headers:
+                        if (
+                            row_header.row_index < row_index + rowspan
+                            and row_index
+                            < row_header.row_index + row_header.rowspan
+                            and row_header.text not in form.raw_tags
+                            and row_header.text.lower()
+                            not in IGNORE_TABLE_HEADERS
+                            and not row_header.text.lower().startswith(
+                                IGNORE_TABLE_HEADER_PREFIXES
+                            )
+                        ):
+                            form.raw_tags.append(row_header.text)
+                    if form.form not in [
+                        "",
+                        "—",
+                        wxr.wtp.title,
+                        "Déclinaisons",
+                    ] and not form.form.startswith(IGNORE_TABLE_CELL_PREFIXES):
+                        translate_raw_tags(form)
+                        word_entry.forms.append(form)
+                col_index += colspan
