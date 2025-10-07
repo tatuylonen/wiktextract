@@ -460,7 +460,11 @@ def extract_ku_conj_trans_table_node(
     table_node: WikiNode,
     conj_page_title: str,
 ) -> None:
-    from .inflection import TableHeader
+    @dataclass
+    class TableHeader:
+        text: str
+        index: int
+        span: int
 
     ignore_headers = (
         "Conjugaison du verbe",

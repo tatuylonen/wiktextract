@@ -480,13 +480,13 @@ class TestInflection(TestCase):
             "Modèle:fr-verbe-flexion",
             10,
             """{|
-!colspan="3"|Voir la conjugaison du verbe ''diéser''
+!colspan="3"| <small>[[Conjugaison:français/diéser|Voir la conjugaison du verbe ''diéser'']]</small>
 |-
-|rowspan="2" | '''Indicatif'''
-|rowspan="2" | '''Présent'''
-| je <nowiki />dièse
+!rowspan="2" | '''Indicatif'''
+!rowspan="2" | '''Présent'''
+|| je <nowiki />dièse
 |-
-| il/elle/on dièse
+|| il/elle/on dièse
 |}""",
         )
         root = self.wxr.wtp.parse("{{fr-verbe-flexion|diéser}}")
