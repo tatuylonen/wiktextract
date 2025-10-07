@@ -5,6 +5,7 @@ from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.fr.conjugation import extract_conjugation
 from wiktextract.extractor.fr.models import WordEntry
+from wiktextract.extractor.fr.page import parse_page
 from wiktextract.wxr_context import WiktextractContext
 
 
@@ -13,7 +14,10 @@ class TestNotes(TestCase):
 
     def setUp(self) -> None:
         self.wxr = WiktextractContext(
-            Wtp(lang_code="fr"), WiktionaryConfig(dump_file_lang_code="fr")
+            Wtp(lang_code="fr"),
+            WiktionaryConfig(
+                dump_file_lang_code="fr", capture_language_codes=None
+            ),
         )
 
     def tearDown(self) -> None:
@@ -675,4 +679,98 @@ class TestNotes(TestCase):
                     "source": "Conjugaison:allemand/trinken",
                 },
             ],
+        )
+
+    def test_de_adj_declension(self):
+        self.wxr.wtp.start_page("herrlich")
+        self.wxr.wtp.add_page(
+            "Annexe:Déclinaison en allemand/herrlich",
+            100,
+            """{{de-adjectif-déclinaisons
+|positif-racine=herrlich
+|comparatif-racine=herrlicher
+|superlatif-racine=herrlichst
+}}""",
+        )
+        self.wxr.wtp.add_page(
+            "Modèle:de-adj",
+            10,
+            """{| class="wikitable flextable"
+!scope=col | Nature
+!scope=col | Terme
+|-
+!scope=row | Positif
+| [[herrlich]]
+|-
+!scope=row | Comparatif
+| [[herrlicher]]
+|-
+!scope=row | Superlatif
+| am [[herrlichsten]]
+|-
+| colspan=3 | [[Annexe:Déclinaison en allemand/herrlich|Déclinaisons]]
+|}""",
+        )
+        self.wxr.wtp.add_page(
+            "Modèle:de-adjectif-déclinaisons",
+            10,
+            """== Positif ==
+{|class="wikitable" width="100%"
+|+ Déclinaison faible
+|-
+!scope=row | [[Annexe:Glossaire_grammatical#N|Nombre]]
+! colspan="6" | [[Annexe:Glossaire_grammatical#S|Singulier]]
+! colspan="2" | [[Annexe:Glossaire_grammatical#P|Pluriel]]
+|-
+!scope=row | [[Annexe:Glossaire_grammatical#G|Genre]]
+! colspan="2" | [[Annexe:Glossaire_grammatical#M|Masculin]]
+! colspan="2" | [[Annexe:Glossaire_grammatical#F|Féminin]]
+! colspan="2" | [[Annexe:Glossaire_grammatical#N|Neutre]]
+! colspan="2" | Tout genre
+|-
+!scope=row | [[Annexe:Glossaire_grammatical#C|Cas]]
+! Article
+! Forme
+! Article
+! Forme
+! Article
+! Forme
+! Article
+! Forme
+|-
+!scope=row | [[Annexe:Glossaire_grammatical#N|Nominatif]]
+| der
+| <bdi lang="de" xml:lang="de" class="lang-de">[[herrliche#de|herrliche]]</bdi>
+|}
+[[Catégorie:Déclinaisons d’adjectif en allemand|herrlich]]""",
+        )
+        data = parse_page(
+            self.wxr,
+            "herrlich",
+            """== {{langue|de}} ==
+=== {{S|adjectif|de}} ===
+{{de-adj}}
+# [[magnifique#fr|Magnifique]]""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {"form": "herrlicher", "tags": ["comparative"]},
+                {"form": "am herrlichsten", "tags": ["superlative"]},
+                {
+                    "article": "der",
+                    "form": "herrliche",
+                    "source": "Annexe:Déclinaison en allemand/herrlich",
+                    "tags": [
+                        "singular",
+                        "masculine",
+                        "positive",
+                        "weak",
+                        "nominative",
+                    ],
+                },
+            ],
+        )
+        self.assertEqual(
+            data[0]["categories"], ["Déclinaisons d’adjectif en allemand"]
         )

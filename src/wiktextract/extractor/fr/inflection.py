@@ -180,7 +180,12 @@ def extract_inf_table_template(
                             not in IGNORE_TABLE_HEADERS
                         ):
                             form.raw_tags.append(row_header.text)
-                    if form.form not in ["", "—", wxr.wtp.title]:
+                    if form.form not in [
+                        "",
+                        "—",
+                        "non comparable",  # Template:de-adj
+                        wxr.wtp.title,
+                    ]:
                         translate_raw_tags(form)
                         word_entry.forms.append(form)
                 col_index += colspan
