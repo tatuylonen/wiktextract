@@ -207,3 +207,34 @@ class TestElGlosses(TestCase):
         raw = "* {{κλ||πλανεύω|π=1ε|ε=ορ|χ=αορ|φ=π|φ+=πλανεύομαι}}"
         expected = [{"form_of": [{"word": "πλανεύω"}]}]
         self.mktest_sense(raw, expected)
+
+    def test_form_of_gr_base(self) -> None:
+        # https://el.wiktionary.org/wiki/εσένανε
+        raw = "* {{γρ|εσένα|μορφή}}"
+        expected = [{"form_of": [{"word": "εσένα"}]}]
+        self.mktest_sense(raw, expected)
+
+    def test_form_of_gr_second_arg_wrong(self) -> None:
+        # https://el.wiktionary.org/wiki/πιάνο_τοίχου
+        # Should ignore expansion depending on the second argument
+        raw = "* {{γρ|όρθιο πιάνο|συνων}}"
+        expected = [{}]
+        self.mktest_sense(raw, expected)
+
+    def test_gr_linkage_second_arg_variant(self) -> None:
+        # https://el.wiktionary.org/wiki/μαλακή_υπερώα
+        raw = "* {{γρ|μαλθακή υπερώα|μορφ}}· ο μαλακός [[ιστός]]..."
+        expected = [{"form_of": [{"word": "μαλθακή υπερώα"}]}]
+        self.mktest_sense(raw, expected)
+
+    def test_gr_linkage_second_arg_empty(self) -> None:
+        # Seen via ripgrep
+        raw = "* {{γρ|well-rounded||en}}"
+        expected = [{}]
+        self.mktest_sense(raw, expected)
+
+    def test_gr_linkage_one_arg(self) -> None:
+        # Seen via ripgrep
+        raw = "* {{γρ|τάδε}}"
+        expected = [{}]
+        self.mktest_sense(raw, expected)
