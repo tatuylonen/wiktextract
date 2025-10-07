@@ -514,7 +514,7 @@ def bold_node_fn(
 
 def extract_form_of_templates(
     wxr: WiktextractContext,
-    parent_sense: Sense,
+    parent_sense: Sense | WordEntry,
     t_node: TemplateNode,
     siblings: list[str | WikiNode],
     siblings_index: int,
@@ -576,7 +576,7 @@ def extract_form_of_templates(
 
 def extract_form_of_templates_basic(
     wxr: WiktextractContext,
-    parent_sense: Sense,
+    parent_sense: Sense | WordEntry,
     siblings: list[str | WikiNode],
     sibling_index: int,
     t_name: str,
@@ -615,7 +615,9 @@ def extract_form_of_templates_basic(
 
 
 def extract_form_of_templates_ptosi(
-    wxr: WiktextractContext, parent_sense: Sense, t_node: TemplateNode
+    wxr: WiktextractContext,
+    parent_sense: Sense | WordEntry,
+    t_node: TemplateNode,
 ) -> None:
     """Parse form_of for nouns and adjectives.
 
