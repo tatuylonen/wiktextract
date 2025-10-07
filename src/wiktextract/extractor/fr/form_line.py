@@ -2,7 +2,7 @@ from wikitextprocessor.parser import HTMLNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
-from .conjugation import extract_conjugation
+from .conjugation import extract_conjugation, extract_declension_page
 from .models import Form, Sound, WordEntry
 from .pronunciation import (
     ASPIRATED_H_TEMPLATES,
@@ -229,7 +229,7 @@ def is_conj_link(wxr: WiktextractContext, link: WikiNode) -> bool:
     if len(link.largs) == 0 or len(link.largs[0]) == 0:
         return False
     conj_title = clean_node(wxr, None, link.largs[0][0])
-    return conj_title.startswith("Conjugaison:")
+    return conj_title.startswith(("Conjugaison:", "Annexe:Déclinaison en"))
 
 
 def process_conj_link_node(
@@ -240,6 +240,8 @@ def process_conj_link_node(
     if not is_conj_link(wxr, link):
         return
     conj_title = link.largs[0][0]
+    if "/" not in conj_title:
+        return
     conj_word = conj_title.split("/", 1)[-1]
     if conj_word in (
         "Premier groupe",
@@ -255,8 +257,10 @@ def process_conj_link_node(
         and page_data[-2].forms[-1].source == conj_title
     ):
         page_data[-1].forms = page_data[-2].forms
-    else:
+    elif conj_title.startswith("Conjugaison:"):
         extract_conjugation(wxr, page_data[-1], conj_title)
+    elif conj_title.startswith("Annexe:Déclinaison en"):
+        extract_declension_page(wxr, page_data[-1], conj_title)
 
 
 def process_lien_pronominal(

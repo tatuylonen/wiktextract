@@ -460,7 +460,11 @@ def extract_ku_conj_trans_table_node(
     table_node: WikiNode,
     conj_page_title: str,
 ) -> None:
-    from .inflection import TableHeader
+    @dataclass
+    class TableHeader:
+        text: str
+        index: int
+        span: int
 
     ignore_headers = (
         "Conjugaison du verbe",
@@ -704,3 +708,95 @@ def extract_de_conj_template(
 
     for cat_link in expanded_node.find_child(NodeKind.LINK):
         clean_node(wxr, word_entry, cat_link)
+
+
+def extract_declension_page(
+    wxr: WiktextractContext, word_entry: WordEntry, page_title: str
+):
+    page_body = wxr.wtp.get_page_body(
+        page_title, wxr.wtp.NAMESPACE_DATA["Appendix"]["id"]
+    )
+    if page_body is None:
+        return
+    root = wxr.wtp.parse(page_body)
+    for t_node in root.find_child(NodeKind.TEMPLATE):
+        if t_node.template_name in [
+            "de-adjectif-déclinaisons",
+            "de-adj-déclinaisons",
+        ]:
+            extract_de_adj_declension_template(
+                wxr, word_entry, page_title, t_node
+            )
+
+
+def extract_de_adj_declension_template(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    page_title: str,
+    t_node: TemplateNode,
+):
+    # https://fr.wiktionary.org/wiki/Modèle:de-adjectif-déclinaisons
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for level_node in expanded_node.find_child(LEVEL_KIND_FLAGS):
+        section_title = clean_node(wxr, None, level_node.largs)
+        for table in level_node.find_child(NodeKind.TABLE):
+            table_caption = ""
+            for cap_node in table.find_child(NodeKind.TABLE_CAPTION):
+                table_caption = clean_node(wxr, None, cap_node.children)
+            col_headers = []
+            for row in table.find_child(NodeKind.TABLE_ROW):
+                col_index = 0
+                row_header = ""
+                row_has_data = row.contain_node(NodeKind.TABLE_CELL)
+                article = ""
+                for cell in row.find_child(
+                    NodeKind.TABLE_HEADER_CELL | NodeKind.TABLE_CELL
+                ):
+                    colspan = int(cell.attrs.get("colspan", "1"))
+                    cell_text = clean_node(wxr, None, cell)
+                    if cell.kind == NodeKind.TABLE_HEADER_CELL:
+                        if row_has_data:
+                            row_header = clean_node(wxr, None, cell)
+                        elif cell_text != "Forme":
+                            col_headers.append(
+                                TableHeader(
+                                    clean_node(wxr, None, cell),
+                                    col_index=col_index,
+                                    colspan=colspan,
+                                )
+                            )
+                    else:
+                        use_col_headers = []
+                        for col_header in col_headers:
+                            if (
+                                col_index >= col_header.col_index
+                                and col_index
+                                < col_header.col_index + col_header.colspan
+                            ):
+                                use_col_headers.append(col_header.text)
+                        if "Article" in use_col_headers:
+                            if cell_text != "—":
+                                article = cell_text
+                        else:
+                            form = Form(
+                                form=cell_text,
+                                article=article,
+                                raw_tags=use_col_headers,
+                                source=page_title,
+                            )
+                            for raw_tag in [
+                                section_title,
+                                table_caption,
+                                row_header,
+                            ]:
+                                if raw_tag != "":
+                                    form.raw_tags.append(raw_tag)
+                            if form.form not in ["", wxr.wtp.title]:
+                                translate_raw_tags(form)
+                                word_entry.forms.append(form)
+                    col_index += colspan
+
+        for link in level_node.find_child(NodeKind.LINK):
+            clean_node(wxr, word_entry, link)

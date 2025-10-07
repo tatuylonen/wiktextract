@@ -286,6 +286,11 @@ OTHER_GRAMMATICAL_TAGS: dict[str, str] = {
     "suffixe": "suffix",
     # Template:avk-tab-conjug
     "conjugaison présent indicatif": ["present", "indicative"],
+    # Modèle:de-adjectif-déclinaisons
+    "déclinaison forte": "strong",
+    "déclinaison faible": "weak",
+    "déclinaison mixte": "mixed",
+    "singulier / pluriel": ["singular", "plural"],
 }
 
 # template text before gloss
