@@ -555,9 +555,9 @@ def extract_form_of_templates(
     # * Only handle cases where the second argument refers to a form:
     #   μορφ / μορφή / λόγια μορφή του, etc.
     #   and ignore those mistakenly used as synonym templates
-    if t_name == "γρ":
+    if t_name == "γρ" and 2 in t_node.template_parameters:
         second_arg = t_node.template_parameters[2]
-        second_arg_str = clean_node(wxr, None, second_arg).strip()
+        second_arg_str = clean_node(wxr, None, second_arg)
         if "μορφ" in second_arg_str:
             return basic_extract(extract_argument=1)
 

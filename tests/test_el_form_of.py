@@ -232,3 +232,9 @@ class TestElGlosses(TestCase):
         raw = "* {{γρ|well-rounded||en}}"
         expected = [{}]
         self.mktest_sense(raw, expected)
+
+    def test_gr_linkage_one_arg(self) -> None:
+        # Seen via ripgrep
+        raw = "* {{γρ|τάδε}}"
+        expected = [{}]
+        self.mktest_sense(raw, expected)
