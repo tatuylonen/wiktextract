@@ -720,13 +720,40 @@ def extract_declension_page(
         return
     root = wxr.wtp.parse(page_body)
     for t_node in root.find_child(NodeKind.TEMPLATE):
-        if t_node.template_name in [
-            "de-adjectif-déclinaisons",
-            "de-adj-déclinaisons",
-        ]:
-            extract_de_adj_declension_template(
-                wxr, word_entry, page_title, t_node
+        extract_declension_template(wxr, word_entry, page_title, t_node, "")
+
+
+def extract_declension_template(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    page_title: str,
+    t_node: TemplateNode,
+    tab_name: str,
+):
+    if t_node.template_name in [
+        "de-adjectif-déclinaisons",
+        "de-adj-déclinaisons",
+    ]:
+        extract_de_adj_declension_template(
+            wxr, word_entry, page_title, t_node, tab_name
+        )
+    elif t_node.template_name == "Onglets conjugaison":
+        for index in range(1, 7):
+            tab_name_arg = f"onglet{index}"
+            if tab_name_arg not in t_node.template_parameters:
+                break
+            tab_name = clean_node(
+                wxr, None, t_node.template_parameters[tab_name_arg]
             )
+            tab_content = wxr.wtp.parse(
+                wxr.wtp.node_to_wikitext(
+                    t_node.template_parameters[f"contenu{index}"]
+                )
+            )
+            for node in tab_content.find_child(NodeKind.TEMPLATE):
+                extract_declension_template(
+                    wxr, word_entry, page_title, node, tab_name
+                )
 
 
 def extract_de_adj_declension_template(
@@ -734,6 +761,7 @@ def extract_de_adj_declension_template(
     word_entry: WordEntry,
     page_title: str,
     t_node: TemplateNode,
+    tab_name: str,
 ):
     # https://fr.wiktionary.org/wiki/Modèle:de-adjectif-déclinaisons
     expanded_node = wxr.wtp.parse(
@@ -787,6 +815,7 @@ def extract_de_adj_declension_template(
                                 source=page_title,
                             )
                             for raw_tag in [
+                                tab_name,
                                 section_title,
                                 table_caption,
                                 row_header,
