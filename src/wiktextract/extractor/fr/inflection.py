@@ -15,7 +15,10 @@ def extract_inflection(
 ):
     # inflection templates
     # https://fr.wiktionary.org/wiki/Catégorie:Modèles_d’accord_en_français
-    extract_inf_table_template(wxr, page_data[-1], t_node)
+    if t_node.template_name == "avk-tab-conjug":
+        extract_avk_tab_conjug(wxr, page_data[-1], t_node)
+    else:
+        extract_inf_table_template(wxr, page_data[-1], t_node)
 
 
 IGNORE_TABLE_HEADERS = frozenset(
@@ -189,3 +192,36 @@ def extract_inf_table_template(
                         translate_raw_tags(form)
                         word_entry.forms.append(form)
                 col_index += colspan
+
+
+def extract_avk_tab_conjug(
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+):
+    # https://fr.wiktionary.org/wiki/Modèle:avk-tab-conjug
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for table in expanded_node.find_child(NodeKind.TABLE):
+        col_headers = []
+        for row in table.find_child(NodeKind.TABLE_ROW):
+            row_header = ""
+            is_row_header = row.contain_node(NodeKind.TABLE_CELL)
+            for col_index, cell in enumerate(
+                row.find_child(NodeKind.TABLE_HEADER_CELL | NodeKind.TABLE_CELL)
+            ):
+                cell_text = clean_node(wxr, None, cell)
+                if cell_text == "":
+                    continue
+                elif cell.kind == NodeKind.TABLE_HEADER_CELL:
+                    if is_row_header:
+                        row_header = cell_text
+                    elif cell_text != "Conjugaison Présent Indicatif":
+                        col_headers.append(cell_text)
+                else:
+                    form = Form(form=cell_text, tags=["present", "indicative"])
+                    if col_index < len(col_headers):
+                        form.raw_tags.append(col_headers[col_index])
+                    if row_header != "":
+                        form.raw_tags.append(row_header)
+                    translate_raw_tags(form)
+                    word_entry.forms.append(form)
