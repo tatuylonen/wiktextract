@@ -62,6 +62,20 @@ NUMBER_TAGS: dict[str, str | list[str]] = {
     "pluriel 2": "plural",
     "pluriel 3": "plural",
     "pluriel 4": "plural",
+    # https://fr.wiktionary.org/wiki/Modèle:avk-tab-conjug
+    "1": "first-person",
+    "2": "second-person",
+    "3": "third-person",
+    "4": "fourth-person",
+    # Template:nl-conj-cons
+    # https://en.wikipedia.org/wiki/Dutch_grammar#Personal_pronouns
+    "ik": ["first-person", "singular"],
+    "jij": ["second-person", "singular", "informal"],
+    "hij, zij, het": "third-person",
+    "wij": ["first-person", "plural"],
+    "jullie": ["second-person", "plural", "informal"],
+    "zij": ["third-person", "plural"],
+    "u": "second-person",
 }
 
 # https://en.wikipedia.org/wiki/Grammatical_mood
@@ -433,22 +447,20 @@ GRAMMATICAL_TAGS: dict[str, str | list[str]] = {
 }
 
 
-def translate_raw_tags(
-    data: WordEntry,
-    table_template_name: str = "",
-    tag_dict: dict[str, str] = GRAMMATICAL_TAGS,
-) -> WordEntry:
+def translate_raw_tags(data: WordEntry) -> WordEntry:
     from .topics import SLANG_TOPICS, TOPIC_TAGS
 
     raw_tags = []
     for raw_tag in data.raw_tags:
         raw_tag_lower = raw_tag.lower()
-        if raw_tag_lower in tag_dict:
-            tr_tag = tag_dict[raw_tag_lower]
+        if raw_tag_lower in GRAMMATICAL_TAGS:
+            tr_tag = GRAMMATICAL_TAGS[raw_tag_lower]
             if isinstance(tr_tag, str):
                 data.tags.append(tr_tag)
             elif isinstance(tr_tag, list):
-                data.tags.extend(tr_tag)
+                for t in tr_tag:
+                    if t not in data.tags:
+                        data.tags.append(t)
         elif hasattr(data, "topics") and raw_tag_lower in TOPIC_TAGS:
             data.topics.append(TOPIC_TAGS[raw_tag_lower])
         elif hasattr(data, "topics") and raw_tag_lower in SLANG_TOPICS:
@@ -458,19 +470,4 @@ def translate_raw_tags(
         else:
             raw_tags.append(raw_tag)
     data.raw_tags = raw_tags
-    if table_template_name != "":
-        return convert_table_headers(data, table_template_name)
-    return data
-
-
-def convert_table_headers(data: WordEntry, template_name: str) -> WordEntry:
-    if template_name == "avk-tab-conjug":
-        # https://fr.wiktionary.org/wiki/Modèle:avk-tab-conjug
-        tags = {
-            "1": "first-person",
-            "2": "second-person",
-            "3": "third-person",
-            "4": "fourth-person",
-        }
-        return translate_raw_tags(data, tag_dict=tags)
     return data

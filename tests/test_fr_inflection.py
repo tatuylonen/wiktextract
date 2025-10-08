@@ -578,7 +578,7 @@ class TestInflection(TestCase):
             ],
         )
 
-    def tes_avk_tab_conjug(self):
+    def test_avk_tab_conjug(self):
         page_data = [WordEntry(word="aalar", lang_code="avk", lang="Kotava")]
         self.wxr.wtp.start_page("aalar")
         root = self.wxr.wtp.parse("{{avk-tab-conjug|aalá|aala}}")
@@ -587,7 +587,7 @@ class TestInflection(TestCase):
             10,
             """{| class="flextable"
 |-
-| class="titre" colspan="4" align="center" | '''Conjugaison Présent Indicatif'''
+! class="titre" colspan="4" align="center" | '''Conjugaison Présent Indicatif'''
 |-
 ! Personne
 ! Singulier
@@ -606,11 +606,16 @@ class TestInflection(TestCase):
             [
                 {
                     "form": "aalá",
-                    "tags": ["singular", "first-person"],
+                    "tags": [
+                        "present",
+                        "indicative",
+                        "singular",
+                        "first-person",
+                    ],
                 },
                 {
                     "form": "aalat",
-                    "tags": ["plural", "first-person"],
+                    "tags": ["present", "indicative", "plural", "first-person"],
                 },
             ],
         )
