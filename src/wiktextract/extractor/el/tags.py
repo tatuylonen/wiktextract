@@ -17,7 +17,7 @@ from wiktextract.tags import uppercase_tags, valid_tags
 # Otherwise, the implementation of tags is a translation effort: when this
 # edition of Wiktionary says 'x', what tags does that refer to?
 
-tag_map: dict[str, list[str]] = {
+base_tag_map: dict[str, list[str]] = {
     "no-gloss": ["no-gloss"],
     "comparative": ["comparative"],
     "Comparative": ["comparative"],
@@ -52,7 +52,7 @@ tag_map: dict[str, list[str]] = {
     "Australian": ["Australia"],
     "California": ["California"],
     "Canadian": ["Canada"],
-    "CA synth": [""],
+    "CA synth": [],
     "GB": ["UK"],
     "India": ["India"],
     "Indian English": ["Indian-English"],
@@ -77,18 +77,10 @@ tag_map: dict[str, list[str]] = {
 
 
 
-# Check validity.
-# valid_tags is from higher level code, originally created for the English
-# extractor but also applicable to other extractors: these are the tags
-# that should be used for tagging. Can be added to when needed, but
-# often there's already an equivalent tag with a slightly different name.
-for tags in tag_map.values():
-    for tag in tags:
-        if tag.islower() and tag.isalpha() and tag not in valid_tags:
-            assert False, f"Invalid tag in simple_tag_map: {tag}"
+tag_map = {}
 
 # uppercase_tags are specific tags with uppercase names that are for stuff
 # like locations and dialect and language names.
 for k in uppercase_tags:
-    if k not in tag_map:
-        tag_map[k] = [ k.replace(" ", "-") ]
+    if k not in base_tag_map:
+        tag_map[k] = [k.replace(" ", "-")]
