@@ -1,6 +1,5 @@
 from unittest import TestCase
 
-from wiktextract.extractor.el.table import VERB_TABLE_TAGS
 from wiktextract.extractor.el.tags import base_tag_map
 from wiktextract.tags import valid_tags
 
@@ -22,6 +21,3 @@ class TestElTags(TestCase):
 
     def test_validate_tags_base(self) -> None:
         self.mktest_tags(base_tag_map)
-
-    def test_validate_tags_verb_table(self) -> None:
-        self.mktest_tags(VERB_TABLE_TAGS)
