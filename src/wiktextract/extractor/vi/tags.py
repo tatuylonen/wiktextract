@@ -211,6 +211,54 @@ ZH_PRON_TAGS = {
     "shanghai": "Shanghai",
 }
 
+ZH_DIAL_TAGS = {
+    "chính thức": "formal",
+    "bạch thoại": "Written-vernacular-Chinese",
+    "quan thoại giao-liêu": "Jiaoliao-Mandarin",
+    "yên đài": "Yantai",
+    "mưu bình": "Muping",
+    "quan thoại trung nguyên": "Central-Plains-Mandarin",
+    "lạc dươn": "Luoyang",
+    "vạn vinh": "Wanrong",
+    "tây ninh": "Xining",
+    "quan thoại lan-ngân": "Lanyin-Mandarin",
+    "ngân xuyên": "Yinchuan",
+    "quan thoại tây nam": "Southwestern-Mandarin",
+    "liễu châu": "Liuzhou",
+    "quan thoại giang hoài": "Jianghuai-Mandarin",
+    "nam kinh": "Nanjing",
+    "dương châu": "Yangzhou",
+    "quảng châu": "Guangzhou",
+    "đông hoản": "Dongguan",
+    "huy châu": "Huizhou",
+    "tích khê": "Jixi",
+    "tấn": "Jin",
+    "thái nguyên": "Taiyuan",
+    "đài nam": "Tainan",
+    "lôi châu": "Leizhou",
+    "mân phủ tiên": "Puxian-Min",
+    "bình nam": "Southern-Pinghua",
+    "nam ninh": "Nanning",
+    "đình tử": "Tingzi",
+    "thượng hải": "Shanghai",
+    "tô châu": "Suzhou",
+    "đan dương": "Danyang",
+    "hàng châu": "Hangzhou",
+    "ninh ba": "Ningbo",
+    "ôn châu": "Wenzhou",
+    "kim hoa": "Jinhua",
+    "tương": "Xiang",
+    "trường sa": "Changsha",
+    "quan thoại đông bắc": "Northeastern-Mandarin",
+    "quan thoại ký-lỗ": "Jilu-Mandarin",
+    "cám": "Cantonese",
+    "mân trung sơn": "Zhongshan-Min",
+    "trung sơn": "Zhongshan",
+    "long đô": "Longdu",
+    "sa khê": "Shaxi",
+}
+
+
 TAGS = {
     **LABEL_TAGS,
     **GENDER_NUMBER_TAGS,
@@ -218,6 +266,7 @@ TAGS = {
     **SOUND_TAGS,
     **ZH_X_TAGS,
     **ZH_PRON_TAGS,
+    **ZH_DIAL_TAGS,
 }
 
 # https://vi.wiktionary.org/wiki/Mô_đun:labels/data/topical
