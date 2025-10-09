@@ -1121,6 +1121,7 @@ ZH_DIAL_TAGS = {
     "Southern Min": ["Min-Nan"],
     "Zhongshan Min": ["Zhongshan-Min"],
     "Southern Pinghua": ["Southern-Pinghua"],
+    "Puxian Min": ["Puxian-Min"],
 }
 
 

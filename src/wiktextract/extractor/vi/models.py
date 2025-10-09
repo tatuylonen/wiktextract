@@ -100,6 +100,8 @@ class Sound(VietnameseBaseModel):
     flac_url: str = ""
     rhymes: str = ""
     homophone: str = ""
+    zh_pron: str = ""
+    roman: str = ""
 
 
 class Hyphenation(VietnameseBaseModel):

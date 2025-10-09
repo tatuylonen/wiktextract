@@ -196,6 +196,8 @@ def extract_linkage_section(
             "der-top"
         ):
             sense = clean_node(wxr, None, node.template_parameters.get(1, ""))
+        elif isinstance(node, TemplateNode) and node.template_name in ["zh-dial", "zho-dial"]:
+            l_list.extend(extract_zh_dial_template(wxr, node, sense))
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
             for list_item in node.find_child(NodeKind.LIST_ITEM):
                 l_list.extend(
@@ -453,3 +455,76 @@ def extract_anagrams_template(
             l_list.append(l_data)
 
     return l_list
+
+
+def extract_zh_dial_template(
+    wxr: WiktextractContext, template_node: TemplateNode, sense: str
+) -> list[Linkage]:
+    from .sound import split_zh_pron_raw_tag
+
+    linkage_list = []
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(template_node), expand_all=True
+    )
+    for table_node in expanded_node.find_child_recursively(NodeKind.TABLE):
+        is_note_row = False
+        note_tags = {}
+        for row_node in table_node.find_child(NodeKind.TABLE_ROW):
+            for cell_node in row_node.find_child(
+                NodeKind.TABLE_HEADER_CELL | NodeKind.TABLE_CELL
+            ):
+                if cell_node.kind == NodeKind.TABLE_HEADER_CELL:
+                    is_note_row = clean_node(wxr, None, cell_node) == "Ghi chú"
+                elif is_note_row:
+                    for note_str in clean_node(wxr, None, cell_node).split(";"):
+                        if "-" in note_str:
+                            note_symbol, note = note_str.split("-", maxsplit=1)
+                            note_symbol = note_symbol.strip()
+                            note = note.strip()
+                            if note_symbol != "" and note != "":
+                                note_tags[note_symbol] = note
+        lang_tags = []
+        region_tags = []
+        for row_node in table_node.find_child(NodeKind.TABLE_ROW):
+            if not row_node.contain_node(NodeKind.TABLE_CELL):
+                continue  # skip header row
+            for header_node in row_node.find_child(NodeKind.TABLE_HEADER_CELL):
+                lang_tags = split_zh_pron_raw_tag(
+                    clean_node(wxr, None, header_node)
+                )
+            if lang_tags == ["Ghi chú"]:  # skip last note row
+                continue
+            for cell_node in row_node.find_child(NodeKind.TABLE_CELL):
+                for link_node in cell_node.find_child(NodeKind.LINK):
+                    region_tags = split_zh_pron_raw_tag(
+                        clean_node(wxr, None, link_node)
+                    )
+                for span_tag in cell_node.find_html("span"):
+                    span_text = clean_node(wxr, None, span_tag)
+                    if span_text == "":
+                        continue
+                    if (
+                        span_tag.attrs.get("lang", "") == "zh"
+                        and span_text != wxr.wtp.title
+                    ):
+                        l_data = Linkage(word=span_text, sense=sense)
+                        if len(lang_tags) > 0:
+                            l_data.raw_tags.extend(lang_tags)
+                        if len(region_tags) > 0:
+                            l_data.raw_tags.extend(region_tags)
+                        translate_raw_tags(l_data)
+                        linkage_list.append(l_data)
+                    elif (
+                        span_tag.attrs.get("style", "") == "font-size:60%"
+                        and len(linkage_list) > 0
+                    ):
+                        for note_symbol in span_text.split(","):
+                            note_symbol = note_symbol.strip()
+                            raw_tag = note_symbol
+                            if note_symbol in note_tags:
+                                raw_tag = note_tags[note_symbol]
+                            if raw_tag != "":
+                                linkage_list[-1].raw_tags.append(raw_tag)
+                                translate_raw_tags(linkage_list[-1])
+
+    return linkage_list
