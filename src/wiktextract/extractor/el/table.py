@@ -5,6 +5,7 @@ from unicodedata import name as unicode_name
 from wikitextprocessor import HTMLNode, NodeKind, TemplateNode, WikiNode
 
 from wiktextract.clean import clean_value
+from wiktextract.tags import valid_tags
 from wiktextract.wxr_context import WiktextractContext
 from wiktextract.wxr_logging import logger
 
@@ -67,6 +68,148 @@ ARTICLES: set[str] = {
     "τα",
 }
 
+# Tags used for modern Greek verb tables.
+#
+# Tags are assumed to be lowercase (otherwise validity check will ignore them)
+# > this is relevant because the Standard table uses capitalized tags
+#
+# * Reference:
+#   https://el.wiktionary.org/wiki/Κατηγορία:Πρότυπα_κλίσης_ρημάτων_(νέα_ελληνικά)
+#
+# * Standard table:
+#   https://el.wiktionary.org/wiki/ψάχνω
+# * Non-standard table (relatively frequent):
+#   https://el.wiktionary.org/wiki/αναφωνώ which follows
+#   https://el.wiktionary.org/wiki/Πρότυπο:el-κλίσ-'λαλώ'
+# * Others:
+#   https://el.wiktionary.org/wiki/τρώω
+#
+# Both are merged into this dictionary:
+VERB_TABLE_TAGS_BASE: dict[str, list[str]] = {
+    # Persons & numbers
+    "α' ενικ.": ["first-person", "singular"],
+    "β' ενικ.": ["second-person", "singular"],
+    "γ' ενικ.": ["third-person", "singular"],
+    "α' πληθ.": ["first-person", "plural"],
+    "β' πληθ.": ["second-person", "plural"],
+    "γ' πληθ.": ["third-person", "plural"],
+    "ενικός": ["singular"],
+    "πληθυντικός": ["plural"],
+    "εγώ": ["first-person", "singular"],
+    "εσύ": ["second-person", "singular"],
+    "αυτός": ["third-person", "singular"],
+    "εμείς": ["first-person", "plural"],
+    "εσείς": ["second-person", "plural"],
+    "αυτοί": ["third-person", "plural"],
+    "(εσύ)": ["second-person", "singular"],
+    "(εσείς)": ["second-person", "plural"],
+    # Aspect groups
+    # Every tag here should be read as X-tense: "imperfect-tense",
+    # "simple-tense" etc.
+    "εξακολουθητικοί χρόνοι": ["imperfect"],  # N/A
+    "συνοπτικοί χρόνοι": [],  # ["simple"],  # N/A -> maybe nothing?
+    "συντελεσμένοι χρόνοι": ["perfect"],  # N/A
+    "συντελεσμένοι χρόνοι (β΄ τύποι)": ["perfect", "type-b"],
+    "συντελεσμένοι χρόνοι β΄ (μεταβατικοί)": [
+        "perfect",
+        "type-b",
+        "transitive",
+    ],
+    "συντελεσμένοι χρόνοι β΄ (αμετάβατοι)": [
+        "perfect",
+        "type-b",
+        "intransitive",
+    ],
+    # Basic tenses / aspects
+    "ενεστώτας": ["present"],
+    "παρατατικός": ["imperfect"],
+    "αόριστος": ["aorist"],
+    # Forms / moods
+    "υποτακτική": ["subjunctive"],
+    "προστακτική": ["imperative"],
+    "μετοχή": ["participle"],
+    "απαρέμφατο": ["infinitive"],
+    # Future & perfect subtypes
+    "εξακολουθητικός μέλλοντας": ["future", "imperfect"],
+    "εξ. μέλλ.": ["future", "imperfect"],
+    "συνοπτ. μέλλ.": ["future"],
+    "στιγμιαίος μέλλοντας": ["future"],  # στιγμιαίος = συνοπτικός
+    "συντελ. μέλλ.": ["future", "perfect"],
+    "συντελεσμένος μέλλοντας α'": ["future", "perfect", "type-a"],
+    "παρακείμενος": ["present", "perfect"],
+    "παρακείμενος α'": ["present", "perfect", "type-a"],
+    "υπερσυντέλικος": ["past", "perfect"],
+    "υπερσυντέλικος α'": ["past", "perfect", "type-a"],
+    # Others
+    "προσωπικές εγκλίσεις": ["personal"],  # ["personal-moods"],
+    "απρόσωπες εγκλίσεις": ["impersonal"],  # ["impersonal-moods"],
+    "μονολεκτικοί χρόνοι": [],  # ["simple-tenses"], # no   να/θα/έχει
+    "περιφραστικοί χρόνοι": [],  # ["periphrastic"], # with να/θα/έχει
+    "απαρέμφατο (αόριστος)": ["infinitive", "aorist"],
+    "μετοχή (ενεστώτας)": ["participle", "present"],
+}
+
+# Because some users unexplicably put noun inflections in a Κλήση section
+# instead of at the top...
+# https://el.wiktionary.org/wiki/δισεκατομμυριούχος
+# https://el.wiktionary.org/wiki/συμπαθητικός
+NOUN_TABLE_TAGS: dict[str, list[str]] = {
+    # Cases
+    "ονομαστική": ["nominative"],
+    "γενική": ["genitive"],
+    "αιτιατική": ["accusative"],
+    "κλητική": ["vocative"],
+    # Genders
+    "αρσενικό": ["masculine"],
+    "θηλυκό": ["feminine"],
+    "ουδέτερο": ["neuter"],
+}
+
+VERB_TABLE_TAGS = {
+    **VERB_TABLE_TAGS_BASE,
+    **NOUN_TABLE_TAGS,
+}
+
+# from wiktextract.extractor.el.logger import log2
+
+# Check validity.
+# valid_tags is from higher level code, originally created for the English
+# extractor but also applicable to other extractors: these are the tags
+# that should be used for tagging. Can be added to when needed, but
+# often there's already an equivalent tag with a slightly different name.
+for tags in VERB_TABLE_TAGS.values():
+    for tag in tags:
+        # print(tag, tag.islower(), tag.isalpha())
+        if tag.islower() and tag not in valid_tags:
+            # log2.warning(f"Invalid tag: {tag}")
+            assert False, f"Invalid tag: {tag}"
+        if not tag.islower():
+            # log2.warning(f"Invalid tag. Not lowercase: {tag}")
+            assert False, f"Invalid tag. Not lowercase: {tag}"
+
+
+def localize_verb_inflection_raw_tags(form: Form, url: str) -> None:
+    new_raw_tags = []
+    verb_tags = []
+
+    for raw_tag in form.raw_tags:
+        clean_raw_tag = raw_tag.replace("\n", " ").lower()
+        localized = VERB_TABLE_TAGS.get(clean_raw_tag)
+        if localized is not None:
+            verb_tags.extend(localized)
+            new_raw_tags.append(raw_tag)
+        else:
+            # log2.warning(raw_tag)
+            with open("missing_tags.txt", "a", encoding="utf-8") as f:
+                f.write(f"{raw_tag} @ {url}\n")
+            # Return dirty - comment this to remove raw_tags
+            new_raw_tags.append(raw_tag)
+
+    unique_tags = list(set(verb_tags))
+    unique_tags.sort()
+    form.tags.extend(unique_tags)
+    form.raw_tags = new_raw_tags
+
 
 def process_inflection_section(
     wxr: WiktextractContext, data: WordEntry, snode: WikiNode
@@ -125,6 +268,13 @@ def process_inflection_section(
     if len(table_nodes) > 0:
         for template_name, table_node in table_nodes:
             # XXX template_name
+
+            # Because parse_table extends data.forms, we reset it to make
+            # our life easier when testing our localization.
+            #
+            # TODO: Remove later
+            data.forms = []
+
             parse_table(
                 wxr,
                 table_node,
@@ -132,6 +282,14 @@ def process_inflection_section(
                 data.lang_code in GREEK_LANGCODES,
                 template_name=template_name or "",
             )
+            if template_name and template_name.startswith("el"):
+                url = f"https://el.wiktionary.org/wiki/{data.word}"  # debug
+                for form in data.forms:
+                    localize_verb_inflection_raw_tags(form, url)
+            else:
+                # Ignore non Greek templates.
+                # Cf. https://el.wiktionary.org/wiki/Helios
+                pass
 
     data.forms = remove_duplicate_forms(wxr, data.forms)
 

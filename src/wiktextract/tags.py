@@ -2530,7 +2530,7 @@ uppercase_tags = set(
         "Bau-Jagoi",
         "Bikol Daet",
         "Bikol Partido",
-        "Bima" "Sumbawa",
+        "BimaSumbawa",
         "Boeotian",  # Ancient Greek
         "Bokmal",
         "Book Pahlavi",  # Book Pahlavi, pseudoscience/English/translations/
@@ -6055,6 +6055,7 @@ valid_tags = {
     "truncative": "misc",  # Greenlandic: suffix attaches to last vowel, removing stuff
     "two-termination": "misc",
     "type-a": "class",
+    "type-b": "class",
     "type-p": "class",
     "type-u": "class",
     "type-ua": "class",
@@ -6417,18 +6418,14 @@ valid_tags = {
     "masculine-plural": "gender",
     "collocation": "misc",
     "comeronym": "misc",
-
     # https://en.wiktionary.org/wiki/Template:vi-readings
     "han-viet-reading": "misc",
     "nom-reading": "misc",
-
     "Traditional-Chinese": "script",
     "Simplified-Chinese": "script",
     "Second-Round-Simplified-Chinese": "script",
-
     # "zh-pron" template
     "phonetic": "misc",
-
     # https://en.wiktionary.org/wiki/Template:ka-decl-noun
     # some useful general "position" tags
     # Because these postpositions don't seem to have any good
