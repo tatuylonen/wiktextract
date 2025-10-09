@@ -37,12 +37,14 @@ def extract_etymology_section(
 
 def extract_citation_section(
     wxr: WiktextractContext, page_data: list[WordEntry], level_node: LevelNode
-) -> None:
+):
     examples = []
     for t_node in level_node.find_child(NodeKind.TEMPLATE):
         if t_node.template_name.lower() == "quote":
             example = Example()
-            first_arg = wxr.wtp.parse(t_node.template_parameters.get(1, ""))
+            first_arg = wxr.wtp.parse(
+                wxr.wtp.node_to_wikitext(t_node.template_parameters.get(1, ""))
+            )
             example.text = clean_node(wxr, None, first_arg)
             example.ref = clean_node(
                 wxr, None, t_node.template_parameters.get(2, "")

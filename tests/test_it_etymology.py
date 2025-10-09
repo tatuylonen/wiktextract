@@ -25,24 +25,27 @@ class TestItEtymology(TestCase):
         self.wxr.wtp.add_page("Template:-it-", 10, "Italiano")
         data = parse_page(
             self.wxr,
-            "cane",
+            "Abramo",
             """== {{-it-}} ==
-===Sostantivo===
-# {{Term|mammalogia|it}} [[animale]]
+===Nome proprio===
+# secondo
 ===Etimologia / Derivazione===
-dal latino canis
+dall'ebraico "grande antenato".
 ====Citazione====
 {{Quote
-|Cane affamato non teme bastone
-|[[q:Giovanni Verga|Giovanni Verga]]}}""",
+|L'angelo, che mi libera da ogni male, benedica i fanciulli, siano chiamati con il mio nome e con il nome dei miei padri '''Avraham''' ed [[Isacco]]... e diventino numerosi sulla Terra
+|''[[w:Genesi|Genesi 48:16]]''}}""",
         )
-        self.assertEqual(data[0]["etymology_texts"], ["dal latino canis"])
+        self.assertEqual(
+            data[0]["etymology_texts"], ['dall\'ebraico "grande antenato".']
+        )
         self.assertEqual(
             data[0]["etymology_examples"],
             [
                 {
-                    "text": "Cane affamato non teme bastone",
-                    "ref": "Giovanni Verga",
+                    "bold_text_offsets": [(120, 127)],
+                    "ref": "Genesi 48:16",
+                    "text": "L'angelo, che mi libera da ogni male, benedica i fanciulli, siano chiamati con il mio nome e con il nome dei miei padri Avraham ed Isacco... e diventino numerosi sulla Terra",
                 }
             ],
         )
