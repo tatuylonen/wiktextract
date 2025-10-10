@@ -368,39 +368,40 @@ def extract_zh_forms_data_cell(
     row_header: str,
     row_header_tags: list[str],
 ):
+    forms = []
     for top_span_tag in cell.find_html("span"):
-        forms = []
-        for span_tag in top_span_tag.find_html("span"):
-            span_lang = span_tag.attrs.get("lang", "")
-            if span_lang in ["zh-Hant", "zh-Hans", "zh"]:
-                word = clean_node(wxr, None, span_tag)
-                if word not in ["", "／", base_data.word]:
-                    form = Form(form=word)
-                    if row_header != "異序詞":
-                        form.raw_tags = row_header_tags
-                    if span_lang == "zh-Hant":
-                        form.tags.append("Traditional-Chinese")
-                    elif span_lang == "zh-Hans":
-                        form.tags.append("Simplified-Chinese")
+        span_style = top_span_tag.attrs.get("style", "")
+        span_lang = top_span_tag.attrs.get("lang", "")
+        if span_style == "white-space:nowrap;":
+            extract_zh_forms_data_cell(
+                wxr, base_data, top_span_tag, row_header, row_header_tags
+            )
+        elif "font-size:80%" in span_style:
+            raw_tag = clean_node(wxr, None, top_span_tag)
+            if raw_tag != "":
+                for form in forms:
+                    form.raw_tags.append(raw_tag)
                     translate_raw_tags(form)
-                    forms.append(form)
-            elif "font-size:80%" in span_tag.attrs.get("style", ""):
-                raw_tag = clean_node(wxr, None, span_tag)
-                if raw_tag != "":
-                    for form in forms:
-                        form.raw_tags.append(raw_tag)
-                        translate_raw_tags(form)
-        if row_header == "異序詞":
-            for form in forms:
-                base_data.anagrams.append(
-                    Linkage(
-                        word=form.form,
-                        raw_tags=form.raw_tags,
-                        tags=form.tags,
-                    )
-                )
-        else:
-            base_data.forms.extend(forms)
+        elif span_lang in ["zh-Hant", "zh-Hans", "zh"]:
+            word = clean_node(wxr, None, top_span_tag)
+            if word not in ["", "／", base_data.word]:
+                form = Form(form=word)
+                if row_header != "異序詞":
+                    form.raw_tags = row_header_tags
+                if span_lang == "zh-Hant":
+                    form.tags.append("Traditional-Chinese")
+                elif span_lang == "zh-Hans":
+                    form.tags.append("Simplified-Chinese")
+                translate_raw_tags(form)
+                forms.append(form)
+
+    if row_header == "異序詞":
+        for form in forms:
+            base_data.anagrams.append(
+                Linkage(word=form.form, raw_tags=form.raw_tags, tags=form.tags)
+            )
+    else:
+        base_data.forms.extend(forms)
 
 
 # https://zh.wiktionary.org/wiki/Template:Zh-cat

@@ -1013,7 +1013,7 @@ foo
         data = parse_page(
             self.wxr,
             "大家",
-            """==漢語==
+            """==Chinese==
 ===Pronunciation 1===
 ====Pronoun====
 # [[everyone]]
@@ -1036,5 +1036,51 @@ foo
                     "tags": ["alternative", "Simplified-Chinese", "Min-Nan"],
                 },
                 {"form": "唐家", "tags": ["alternative", "Min-Nan"]},
+            ],
+        )
+
+    def test_zh_forms_2nd_round_simp(self):
+        self.wxr.wtp.add_page(
+            "Template:zh-forms",
+            10,
+            """{| class="floatright"
+|-
+! colspan=2|
+! colspan=1|electric; electricity; electrical
+! colspan=1|brain
+|-
+! colspan="2" |[[Traditional Chinese|trad.]] <span style="font-size:140%">(<span lang="zh-Hant" class="Hant">[[:電腦#Chinese|電腦]]</span>)</span>
+| lang="zh-Hant" class="Hant" | [[:電#Chinese|電]]
+| lang="zh-Hant" class="Hant" | [[:腦#Chinese|腦]]
+|-
+! colspan="2" |[[Simplified Chinese|simp.]] <span style="font-size:140%">(<span lang="zh-Hans" class="Hans">[[:电脑#Chinese|电脑]]</span>)</span>
+| lang="zh-Hans" class="Hans" | [[:电#Chinese|电]]
+| lang="zh-Hans" class="Hans" | [[:脑#Chinese|脑]]
+|-
+! colspan="2" |[[w:Second round of simplified Chinese characters|2nd round simp.]]
+| colspan="2"|<span class="Hans" lang="zh-Hans">[[电㐫#Chinese|电㐫]]</span>
+|-
+! colspan=4|<i>Literally:</i> “electric brain”.
+|}""",
+        )
+        data = parse_page(
+            self.wxr,
+            "電腦",
+            """==Chinese==
+{{zh-forms|s=电脑|lit=electric brain|ss=电㐫}}
+===Noun===
+# computer""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {"form": "电脑", "tags": ["Simplified-Chinese"]},
+                {
+                    "form": "电㐫",
+                    "tags": [
+                        "Second-Round-Simplified-Chinese",
+                        "Simplified-Chinese",
+                    ],
+                },
             ],
         )
