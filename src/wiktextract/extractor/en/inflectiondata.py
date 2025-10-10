@@ -7179,7 +7179,7 @@ infl_map: dict[str, InflMapNode] = {
     },
     "Derived forms": {
         "default": "",
-        "lang": "grc",
+        "lang": "Ancient Greek",
         "then": "dummy-reset-headers",
     },
 }

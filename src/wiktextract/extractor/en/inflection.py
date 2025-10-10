@@ -6,11 +6,11 @@ import collections
 import copy
 import functools
 import html
-import itertools
 import re
 import unicodedata
 from typing import Generator, Optional, Union
 
+from mediawiki_langcodes import code_to_name, name_to_code
 from wikitextprocessor import MAGIC_FIRST, HTMLNode, NodeKind, WikiNode
 
 from ...clean import clean_value
