@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from wikitextprocessor import Wtp
+from wikitextprocessor import WikiNode, Wtp
 
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.el.models import WordEntry
@@ -133,3 +133,49 @@ class TestElHeader(TestCase):
         ]
         dumped = data.model_dump(exclude_defaults=True)
         self.assertEqual(dumped["forms"], expected)
+
+    def test_form_parsing_verbs(self) -> None:
+        # Test that particles (θα) are properly merged to verb forms.
+        # Note: seems that only θα can appear (no να etc.).
+        # https://el.wiktionary.org/wiki/Πρότυπο:el-ρήμα
+        word = "ψάχνω"
+        self.wxr.wtp.start_page(word)
+        data = WordEntry(lang="Greek", lang_code="el", word=word)
+        # '''{{PAGENAME}}'''{{el-ρήμα|έψαχνα|ψάξω|έψαξα|ψάχνομαι|ψαγμένος|π-αορ=ψάχτηκα}}
+        # Expanded via 'wxr.wtp.node_to_text(node)' at the start of 'process_pos'
+        root = self.wxr.wtp.parse(
+            """===Ρήμα===
+'''ψάχνω''', ''πρτ.'': '''έψαχνα''', ''στ.μέλλ.'': θα '''ψάξω''', ''αόρ.'': '''έψαξα''', ''παθ.φωνή:'' '''[[ψάχνομαι]]''', ''π.αόρ.:'' '''ψάχτηκα''', ''μτχ.π.π.:'' '''[[ψαγμένος]]'''
+* foo
+"""
+        )
+        pos_node = root.children[0]
+        assert isinstance(pos_node, WikiNode)
+        process_pos(
+            self.wxr, pos_node, data, None, "noun", "ουσιαστικό", pos_tags=[]
+        )
+        dumped = data.model_dump(exclude_defaults=True)
+
+        expected = [
+            {"form": "ψάχνω"},
+            {"form": "έψαχνα", "raw_tags": ["πρτ."]},
+            # Should not have "tha"
+            {"form": "ψάξω", "raw_tags": ["στ.μέλλ."]},
+            {
+                "form": "έψαξα",
+                "raw_tags": ["αόρ.", "μτχ.π.π.:", "π.αόρ.:", "παθ.φωνή:"],
+            },
+            {
+                "form": "ψάχνομαι",
+                "raw_tags": ["αόρ.", "μτχ.π.π.:", "π.αόρ.:", "παθ.φωνή:"],
+            },
+            {
+                "form": "ψάχτηκα",
+                "raw_tags": ["αόρ.", "μτχ.π.π.:", "π.αόρ.:", "παθ.φωνή:"],
+            },
+            {
+                "form": "ψαγμένος",
+                "raw_tags": ["αόρ.", "μτχ.π.π.:", "π.αόρ.:", "παθ.φωνή:"],
+            },
+        ]
+        self.assertEqual(dumped.get("forms"), expected)

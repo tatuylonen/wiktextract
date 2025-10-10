@@ -1,8 +1,7 @@
 import re
+from unicodedata import name as unicode_name
 
 from mediawiki_langcodes import code_to_name
-
-from unicodedata import name as unicode_name
 
 from wiktextract.extractor.en.form_descriptions import distw
 from wiktextract.wxr_context import WiktextractContext
@@ -24,7 +23,7 @@ def parse_head(wxr: WiktextractContext, pos_data: WordEntry, text: str) -> bool:
             if len(split_text) > 3:
                 # Just throw the prefix into the (probably) bolded text
                 split_text[2] = split_text[0] + split_text[2]
-                split_text[0] = ''
+                split_text[0] = ""
             else:
                 return False
         else:
@@ -86,7 +85,8 @@ def partition_head_forms(
         current_forms = []
         current_tags = []
 
-    seen_italics = False
+    seen_italics = "__I__" in split_text
+    seen_bold = "__B__" in split_text
     inside_parens = False
     inside_bold = False
     inside_link = False
@@ -157,8 +157,8 @@ def partition_head_forms(
                     current_forms.append(f)
                 continue
 
-            if inside_link or not (
-                inside_link or inside_italics or inside_bold
+            if inside_link or (
+                not inside_italics and not inside_bold and not seen_bold
             ):
                 # Usually a form, sometimes a tag...
                 # XXX handle titles with whitespace by doing the splitting
@@ -253,7 +253,6 @@ def partition_head_forms(
             case "__/L__":
                 inside_link = False
             case "__I__":
-                seen_italics = True
                 inside_italics = True
             case "__/I__":
                 inside_italics = False
@@ -269,7 +268,8 @@ def partition_head_forms(
 
     for forms, tags in blocks:
         # print(f"{forms=}, {tags=}")
-        tags = list(set(tags))
+        tags = sorted(set(tags))
+
         for form in forms:
             ret.append(Form(form=form, raw_tags=tags))
 
