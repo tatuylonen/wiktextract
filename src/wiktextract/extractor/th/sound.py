@@ -20,38 +20,75 @@ def extract_sound_section(
     wxr: WiktextractContext, base_data: WordEntry, level_node: LevelNode
 ):
     for t_node in level_node.find_child(NodeKind.TEMPLATE):
-        if t_node.template_name == "th-pron":
-            extract_th_pron_template(wxr, base_data, t_node)
-        elif t_node.template_name == "lo-pron":
-            extract_lo_pron_template(wxr, base_data, t_node)
+        extract_sound_template(wxr, base_data, t_node)
     for list_node in level_node.find_child(NodeKind.LIST):
         for list_item in list_node.find_child(NodeKind.LIST_ITEM):
-            extract_sound_list_item(wxr, base_data, list_item)
+            for t_node in list_item.find_child(NodeKind.TEMPLATE):
+                extract_sound_template(wxr, base_data, t_node)
 
 
-def extract_sound_list_item(
-    wxr: WiktextractContext, base_data: WordEntry, list_item: WikiNode
+def extract_sound_template(
+    wxr: WiktextractContext, base_data: WordEntry, t_node: TemplateNode
 ):
-    for t_node in list_item.find_child(NodeKind.TEMPLATE):
-        if t_node.template_name == "IPA":
-            extract_ipa_template(wxr, base_data, t_node)
-        elif t_node.template_name == "X-SAMPA":
-            extract_x_sampa_template(wxr, base_data, t_node)
-        elif t_node.template_name == "enPR":
-            extract_enpr_template(wxr, base_data, t_node)
-        elif t_node.template_name == "audio":
-            extract_audio_template(wxr, base_data, t_node)
+    if t_node.template_name == "IPA":
+        extract_ipa_template(wxr, base_data, t_node)
+    elif t_node.template_name == "X-SAMPA":
+        extract_x_sampa_template(wxr, base_data, t_node)
+    elif t_node.template_name == "enPR":
+        extract_enpr_template(wxr, base_data, t_node)
+    elif t_node.template_name == "audio":
+        extract_audio_template(wxr, base_data, t_node)
+    elif t_node.template_name == "th-pron":
+        extract_th_pron_template(wxr, base_data, t_node)
+    elif t_node.template_name == "lo-pron":
+        extract_lo_pron_template(wxr, base_data, t_node)
+    elif t_node.template_name in ["ja-pron", "ja-IPA"]:
+        extract_ja_pron_template(wxr, base_data, t_node)
 
 
 def extract_ipa_template(
     wxr: WiktextractContext, base_data: WordEntry, t_node: TemplateNode
 ):
-    sound = Sound(
-        ipa=clean_node(wxr, None, t_node.template_parameters.get(2, ""))
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
     )
-    if sound.ipa != "":
-        base_data.sounds.append(sound)
-        clean_node(wxr, base_data, t_node)
+    extract_ipa_li_tag(wxr, base_data, expanded_node)
+    clean_node(wxr, base_data, expanded_node)
+
+
+def extract_ipa_li_tag(
+    wxr: WiktextractContext, base_data: WordEntry, li_tag: HTMLNode
+):
+    raw_tag = ""
+    for span_tag in li_tag.find_html_recursively("span"):
+        span_class = span_tag.attrs.get("class", "").split()
+        if "qualifier-content" in span_class:
+            raw_tag = clean_node(wxr, None, span_tag)
+        elif "IPA" in span_class:
+            sound = Sound(ipa=clean_node(wxr, None, span_tag))
+            if raw_tag != "":
+                sound.raw_tags.append(raw_tag)
+                translate_raw_tags(sound)
+            if sound.ipa != "":
+                base_data.sounds.append(sound)
+        elif "Latn" in span_class:
+            sound = Sound(roman=clean_node(wxr, None, span_tag))
+            if raw_tag != "":
+                sound.raw_tags.append(raw_tag)
+                translate_raw_tags(sound)
+            if sound.roman != "":
+                base_data.sounds.append(sound)
+
+
+def extract_ja_pron_template(
+    wxr: WiktextractContext, base_data: WordEntry, t_node: TemplateNode
+):
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for li_tag in expanded_node.find_html_recursively("li"):
+        extract_ipa_li_tag(wxr, base_data, li_tag)
+    clean_node(wxr, base_data, expanded_node)
 
 
 def extract_x_sampa_template(
