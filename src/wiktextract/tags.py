@@ -2530,7 +2530,8 @@ uppercase_tags = set(
         "Bau-Jagoi",
         "Bikol Daet",
         "Bikol Partido",
-        "BimaSumbawa",
+        "Bima",
+        "Sumbawa",
         "Boeotian",  # Ancient Greek
         "Bokmal",
         "Book Pahlavi",  # Book Pahlavi, pseudoscience/English/translations/
