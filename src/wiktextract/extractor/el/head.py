@@ -1,8 +1,7 @@
 import re
+from unicodedata import name as unicode_name
 
 from mediawiki_langcodes import code_to_name
-
-from unicodedata import name as unicode_name
 
 from wiktextract.extractor.en.form_descriptions import distw
 from wiktextract.wxr_context import WiktextractContext
@@ -24,7 +23,7 @@ def parse_head(wxr: WiktextractContext, pos_data: WordEntry, text: str) -> bool:
             if len(split_text) > 3:
                 # Just throw the prefix into the (probably) bolded text
                 split_text[2] = split_text[0] + split_text[2]
-                split_text[0] = ''
+                split_text[0] = ""
             else:
                 return False
         else:
@@ -270,6 +269,11 @@ def partition_head_forms(
     for forms, tags in blocks:
         # print(f"{forms=}, {tags=}")
         tags = list(set(tags))
+
+        # Merge particle (θα = will) with their respective verb
+        if len(forms) == 2 and forms[0] == "θα":
+            forms = [f"θα {forms[1]}"]
+
         for form in forms:
             ret.append(Form(form=form, raw_tags=tags))
 

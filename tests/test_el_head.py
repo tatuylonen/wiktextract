@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from wikitextprocessor import Wtp
+from wikitextprocessor import WikiNode, Wtp
 
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.el.models import WordEntry
@@ -133,3 +133,35 @@ class TestElHeader(TestCase):
         ]
         dumped = data.model_dump(exclude_defaults=True)
         self.assertEqual(dumped["forms"], expected)
+
+    def test_form_parsing_verbs(self) -> None:
+        # Test that particles (θα) are properly merged to verb forms.
+        # Note: seems that only θα can appear (no να etc.).
+        # https://el.wiktionary.org/wiki/Πρότυπο:el-ρήμα
+        word = "ψάχνω"
+        self.wxr.wtp.start_page(word)
+        data = WordEntry(lang="Greek", lang_code="el", word=word)
+        # '''{{PAGENAME}}'''{{el-ρήμα|έψαχνα|ψάξω|έψαξα|ψάχνομαι|ψαγμένος|π-αορ=ψάχτηκα}}
+        # Expanded via 'wxr.wtp.node_to_text(node)' at the start of 'process_pos'
+        root = self.wxr.wtp.parse(
+            """===Ρήμα===
+'''ψάχνω''', ''πρτ.'': '''έψαχνα''', ''στ.μέλλ.'': θα '''ψάξω''', ''αόρ.'': '''έψαξα''', ''παθ.φωνή:'' '''[[ψάχνομαι]]''', ''π.αόρ.:'' '''ψάχτηκα''', ''μτχ.π.π.:'' '''[[ψαγμένος]]'''
+* foo
+"""
+        )
+        pos_node = root.children[0]
+        assert isinstance(pos_node, WikiNode)
+        process_pos(
+            self.wxr, pos_node, data, None, "noun", "ουσιαστικό", pos_tags=[]
+        )
+        dumped = data.model_dump(exclude_defaults=True)
+
+        found_expected = False
+        for form in dumped["forms"]:
+            form = form["form"].strip()
+            self.assertNotEqual(form, "θα", "A form can not be θα")
+            if form == "θα ψάξω":
+                found_expected = True
+        self.assertTrue(
+            found_expected, f"Could not find {found_expected} in forms"
+        )
