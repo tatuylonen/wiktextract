@@ -144,6 +144,7 @@ ZH_X_TAGS = {
     "tiêu chuẩn hiện đại": "Standard-Chinese",
     "bính âm": "Pinyin",
     "cantonese": "Cantonese",
+    "mandarin": "Mandarin",
 }
 
 ZH_PRON_TAGS = {

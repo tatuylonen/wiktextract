@@ -12,7 +12,7 @@ from wikitextprocessor.parser import (
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .example import extract_example_list_item
-from .models import AltForm, Form, Sense, WordEntry
+from .models import AltForm, Classifier, Form, Sense, WordEntry
 from .section_titles import POS_DATA
 from .tags import translate_raw_tags
 
@@ -77,6 +77,8 @@ def extract_gloss_list_item(
                 gloss_nodes.append(node)
             elif node.template_name == "@":
                 extract_at_template(wxr, sense, node)
+            elif node.template_name in ["zho-mw", "zh-mw"]:
+                extract_zh_mw_template(wxr, node, sense)
             else:
                 gloss_nodes.append(node)
         elif not (isinstance(node, WikiNode) and node.kind == NodeKind.LIST):
@@ -225,3 +227,41 @@ def extract_headword_template(
 
     for link_node in expanded_node.find_child(NodeKind.LINK):
         clean_node(wxr, word_entry, link_node)
+
+
+def extract_zh_mw_template(
+    wxr: WiktextractContext, t_node: TemplateNode, sense: Sense
+):
+    # Chinese inline classifier template
+    # https://zh.wiktionary.org/wiki/Bản_mẫu:zho-mw
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    classifiers = []
+    last_word = ""
+    for span_tag in expanded_node.find_html_recursively("span"):
+        span_class = span_tag.attrs.get("class", "")
+        if span_class in ["Hani", "Hant", "Hans"]:
+            word = clean_node(wxr, None, span_tag)
+            if word != "／":
+                classifier = Classifier(classifier=word)
+                if span_class == "Hant":
+                    classifier.tags.append("Traditional-Chinese")
+                elif span_class == "Hans":
+                    classifier.tags.append("Simplified-Chinese")
+
+                if len(classifiers) > 0 and last_word != "／":
+                    sense.classifiers.extend(classifiers)
+                    classifiers.clear()
+                classifiers.append(classifier)
+            last_word = word
+        elif "title" in span_tag.attrs:
+            raw_tag = clean_node(wxr, None, span_tag.attrs["title"])
+            if len(raw_tag) > 0:
+                for classifier in classifiers:
+                    classifier.raw_tags.append(raw_tag)
+    sense.classifiers.extend(classifiers)
+    for classifier in sense.classifiers:
+        translate_raw_tags(classifier)
+    for link in expanded_node.find_child(NodeKind.LINK):
+        clean_node(wxr, sense, link)
