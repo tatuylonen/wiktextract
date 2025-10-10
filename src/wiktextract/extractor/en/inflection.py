@@ -904,11 +904,18 @@ def expand_header(
             # those languages.
             if "lang" in v:
                 c = v["lang"]
+                # check if it's a code and transform if necessary
                 if isinstance(c, str):
-                    cond = c == lang
+                    if c != lang:
+                        cond = lang == code_to_name(c, "en")
+                    else:
+                        cond = True
                 else:
                     assert isinstance(c, (list, tuple, set))
-                    cond = lang in c
+                    if lang not in c:
+                        cond = name_to_code(lang, "en") in c
+                    else:
+                        cond = True
             # Handle "nested-table-depth" condition. The value must
             # be an int or list of ints, and the condition evaluates
             # True if the depth is one of those values.
