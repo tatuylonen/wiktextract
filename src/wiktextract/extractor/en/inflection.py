@@ -1526,8 +1526,10 @@ def parse_simple_table(
                     set(rt0)
                     | set(ct0)
                     | set(global_tags)
-                    | set(itertools.chain.from_iterable(table_tags))
+                    | set(table_tags)
                 )  # Union.
+                # print(f"{rt0=}, {ct0=}, {global_tags=},"
+                #       f" {table_tags=}, {base_tags=}")
                 alt_tags = expand_header(
                     wxr,
                     tablecontext,
