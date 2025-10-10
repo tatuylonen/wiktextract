@@ -38,6 +38,12 @@ class AltForm(VietnameseBaseModel):
     roman: str = ""
 
 
+class Classifier(VietnameseBaseModel):
+    classifier: str = ""
+    tags: list[str] = []
+    raw_tags: list[str] = []
+
+
 class Sense(VietnameseBaseModel):
     glosses: list[str] = []
     tags: list[str] = []
@@ -47,6 +53,7 @@ class Sense(VietnameseBaseModel):
     examples: list[Example] = []
     form_of: list[AltForm] = []
     alt_of: list[AltForm] = []
+    classifiers: list[Classifier] = []
 
 
 class Linkage(VietnameseBaseModel):
@@ -102,6 +109,7 @@ class Sound(VietnameseBaseModel):
     homophone: str = ""
     zh_pron: str = ""
     roman: str = ""
+    other: str = ""
 
 
 class Hyphenation(VietnameseBaseModel):

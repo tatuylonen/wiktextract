@@ -269,6 +269,8 @@ def process_zh_mw_template(
     sense.classifiers.extend(classifiers)
     for classifier in sense.classifiers:
         translate_raw_tags(classifier)
+    for link in expanded_node.find_child(NodeKind.LINK):
+        clean_node(wxr, sense, link)
 
 
 def extract_zh_abbr_template(

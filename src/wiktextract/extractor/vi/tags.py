@@ -144,6 +144,7 @@ ZH_X_TAGS = {
     "tiêu chuẩn hiện đại": "Standard-Chinese",
     "bính âm": "Pinyin",
     "cantonese": "Cantonese",
+    "mandarin": "Mandarin",
 }
 
 ZH_PRON_TAGS = {
@@ -258,6 +259,15 @@ ZH_DIAL_TAGS = {
     "sa khê": "Shaxi",
 }
 
+TH_PRON_TAGS = {
+    "chính tả": "orthographic",
+    "âm vị": "phonemic",
+    "chính tả/âm vị": ["orthographic", "phonemic"],
+    "chuyển tự": "romanization",
+    "paiboon": "Paiboon",
+    "viện hoàng gia": "Royal-Institute",
+}
+
 
 TAGS = {
     **LABEL_TAGS,
@@ -267,6 +277,7 @@ TAGS = {
     **ZH_X_TAGS,
     **ZH_PRON_TAGS,
     **ZH_DIAL_TAGS,
+    **TH_PRON_TAGS,
 }
 
 # https://vi.wiktionary.org/wiki/Mô_đun:labels/data/topical
