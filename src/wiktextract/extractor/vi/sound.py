@@ -33,6 +33,8 @@ def extract_sound_section(
                 extract_tyz_ipa_template(wxr, base_data, node)
             elif node.template_name in ["zh-pron", "zho-pron"]:
                 extract_zh_pron_template(wxr, base_data, node)
+            elif node.template_name in ["th-pron", "tha-pron"]:
+                extract_th_pron_template(wxr, base_data, node)
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
             for list_item in node.find_child(NodeKind.LIST_ITEM):
                 extract_sound_list_item(wxr, base_data, list_item)
@@ -510,3 +512,89 @@ def extract_zh_pron_homophones_table(
                     sound.tags.append("Simplified-Chinese")
                 sounds.append(sound)
     return sounds
+
+
+def extract_th_pron_template(
+    wxr: WiktextractContext, base_data: WordEntry, t_node: TemplateNode
+):
+    # https://vi.wiktionary.org/wiki/Bản mẫu:th-pron
+    @dataclass
+    class TableHeader:
+        text: str
+        rowspan: int
+
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    sounds = []
+    for table_tag in expanded_node.find_html("table"):
+        row_headers = []
+        for tr_tag in table_tag.find_html("tr"):
+            field = "other"
+            new_headers = []
+            for header in row_headers:
+                if header.rowspan > 1:
+                    header.rowspan -= 1
+                    new_headers.append(header)
+            row_headers = new_headers
+            for th_tag in tr_tag.find_html("th"):
+                header_str = clean_node(wxr, None, th_tag)
+                if header_str.startswith("(Tiêu chuẩn) IPA"):
+                    field = "ipa"
+                elif header_str.startswith("Từ đồng âm"):
+                    field = "homophone"
+                elif header_str == "Âm thanh":
+                    field = "audio"
+                elif header_str != "":
+                    rowspan = 1
+                    rowspan_str = th_tag.attrs.get("rowspan", "1")
+                    if re.fullmatch(r"\d+", rowspan_str):
+                        rowspan = int(rowspan_str)
+                    row_headers.append(TableHeader(header_str, rowspan))
+
+            for td_tag in tr_tag.find_html("td"):
+                if field == "audio":
+                    for link_node in td_tag.find_child(NodeKind.LINK):
+                        filename = clean_node(wxr, None, link_node.largs[0])
+                        if filename != "":
+                            sound = Sound()
+                            set_sound_file_url_fields(wxr, filename, sound)
+                            sounds.append(sound)
+                elif field == "homophone":
+                    for span_tag in td_tag.find_html_recursively(
+                        "span", attr_name="lang", attr_value="th"
+                    ):
+                        word = clean_node(wxr, None, span_tag)
+                        if word != "":
+                            sounds.append(Sound(homophone=word))
+                else:
+                    raw_tag = ""
+                    for html_node in td_tag.find_child_recursively(
+                        NodeKind.HTML
+                    ):
+                        if html_node.tag == "small":
+                            node_str = clean_node(wxr, None, html_node)
+                            if node_str.startswith("[") and node_str.endswith(
+                                "]"
+                            ):
+                                raw_tag = node_str.strip("[]")
+                            elif len(sounds) > 0:
+                                sounds[-1].roman = node_str
+                        elif html_node.tag == "span":
+                            node_str = clean_node(wxr, None, html_node)
+                            span_lang = html_node.attrs.get("lang", "")
+                            span_class = html_node.attrs.get("class", "")
+                            if node_str != "" and (
+                                span_lang == "th" or span_class in ["IPA", "tr"]
+                            ):
+                                sound = Sound()
+                                setattr(sound, field, node_str)
+                                if raw_tag != "":
+                                    sound.raw_tags.append(raw_tag)
+                                for header in row_headers:
+                                    sound.raw_tags.append(header.text)
+                                translate_raw_tags(sound)
+                                sounds.append(sound)
+
+    base_data.sounds.extend(sounds)
+    clean_node(wxr, base_data, expanded_node)

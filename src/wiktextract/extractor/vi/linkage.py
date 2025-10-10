@@ -196,7 +196,10 @@ def extract_linkage_section(
             "der-top"
         ):
             sense = clean_node(wxr, None, node.template_parameters.get(1, ""))
-        elif isinstance(node, TemplateNode) and node.template_name in ["zh-dial", "zho-dial"]:
+        elif isinstance(node, TemplateNode) and node.template_name in [
+            "zh-dial",
+            "zho-dial",
+        ]:
             l_list.extend(extract_zh_dial_template(wxr, node, sense))
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
             for list_item in node.find_child(NodeKind.LIST_ITEM):
