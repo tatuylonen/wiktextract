@@ -6,11 +6,11 @@ import collections
 import copy
 import functools
 import html
-import itertools
 import re
 import unicodedata
 from typing import Generator, Optional, Union
 
+from mediawiki_langcodes import code_to_name, name_to_code
 from wikitextprocessor import MAGIC_FIRST, HTMLNode, NodeKind, WikiNode
 
 from ...clean import clean_value
@@ -572,11 +572,8 @@ def extract_cell_content(
 ) -> tuple[str, list[str], list[tuple[str, str]], list[str]]:
     """Cleans a row/column header for later processing.  This returns
     (cleaned, refs, defs, tags)."""
-    print("EXTRACT_CELL_CONTENT {!r}".format(col))
+    # print("EXTRACT_CELL_CONTENT {!r}".format(col))
     hdr_tags = []
-    new_col = re.sub(r"(?m)^τοῖσῐ / τοῖσῐν |^toîsĭ\(n\) ", "", col)
-    if new_col != col:
-        print(f"{col=} -> {new_col=}")
     col = re.sub(r"(?s)\s*,\s*$", "", col)
     col = re.sub(r"(?s)\s*•\s*$", "", col)
     col = re.sub(r"\s+", " ", col)
@@ -718,8 +715,8 @@ def parse_title(
     title = re.sub(r"(?i)<[^>]*>", "", title).strip()
     title = re.sub(r"\s+", " ", title)
     # print("PARSE_TITLE:", title)
-    global_tags = []
-    table_tags = []
+    global_tags: list[str] = []
+    table_tags: list[str] = []
     extra_forms = []
     # Add certain global tags based on contained words
     for m in re.finditer(title_contains_global_re, title):
@@ -907,11 +904,18 @@ def expand_header(
             # those languages.
             if "lang" in v:
                 c = v["lang"]
+                # check if it's a code and transform if necessary
                 if isinstance(c, str):
-                    cond = c == lang
+                    if c != lang:
+                        cond = lang == code_to_name(c, "en")
+                    else:
+                        cond = True
                 else:
                     assert isinstance(c, (list, tuple, set))
-                    cond = lang in c
+                    if lang not in c:
+                        cond = name_to_code(lang, "en") in c
+                    else:
+                        cond = True
             # Handle "nested-table-depth" condition. The value must
             # be an int or list of ints, and the condition evaluates
             # True if the depth is one of those values.
@@ -996,7 +1000,7 @@ def expand_header(
             else:
                 v1 = v.get("else")
                 if v1 is None:
-                    if default_else:
+                    if default_else is not None:
                         v = default_else
                     else:
                         if not silent:
@@ -1529,8 +1533,10 @@ def parse_simple_table(
                     set(rt0)
                     | set(ct0)
                     | set(global_tags)
-                    | set(itertools.chain.from_iterable(table_tags))
+                    | set(table_tags)
                 )  # Union.
+                # print(f"{rt0=}, {ct0=}, {global_tags=},"
+                #       f" {table_tags=}, {base_tags=}")
                 alt_tags = expand_header(
                     wxr,
                     tablecontext,
