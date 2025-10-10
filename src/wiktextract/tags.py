@@ -6424,6 +6424,7 @@ valid_tags = {
 
     "Traditional-Chinese": "script",
     "Simplified-Chinese": "script",
+    "Second-Round-Simplified-Chinese": "script",
 
     # "zh-pron" template
     "phonetic": "misc",

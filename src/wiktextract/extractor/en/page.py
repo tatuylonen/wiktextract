@@ -4437,6 +4437,7 @@ ZH_FORMS_TAGS = {
     "trad.": "Traditional-Chinese",
     "simp.": "Simplified-Chinese",
     "alternative forms": "alternative",
+    "2nd round simp.": "Second-Round-Simplified-Chinese",
 }
 
 
@@ -4523,48 +4524,50 @@ def extract_zh_forms_data_cell(
 ):
     from .zh_pron_tags import ZH_PRON_TAGS
 
+    forms = []
     for top_span_tag in cell.find_html("span"):
-        forms = []
-        for span_tag in top_span_tag.find_html("span"):
-            span_lang = span_tag.attrs.get("lang", "")
-            if span_lang in ["zh-Hant", "zh-Hans", "zh"]:
-                word = clean_node(wxr, None, span_tag)
-                if word not in ["", "／", wxr.wtp.title]:
-                    form = {"form": word}
-                    if row_header != "anagram":
-                        for raw_tag in row_header_tags:
-                            if raw_tag in ZH_FORMS_TAGS:
-                                data_append(
-                                    form, "tags", ZH_FORMS_TAGS[raw_tag]
-                                )
-                            else:
-                                data_append(form, "raw_tags", raw_tag)
-                    if span_lang == "zh-Hant":
-                        data_append(form, "tags", "Traditional-Chinese")
-                    elif span_lang == "zh-Hans":
-                        data_append(form, "tags", "Simplified-Chinese")
-                    forms.append(form)
-            elif "font-size:80%" in span_tag.attrs.get("style", ""):
-                raw_tag = clean_node(wxr, None, span_tag)
-                if raw_tag != "":
-                    for form in forms:
-                        if raw_tag in ZH_PRON_TAGS:
-                            tr_tag = ZH_PRON_TAGS[raw_tag]
-                            if isinstance(tr_tag, list):
-                                data_extend(form, "tags", tr_tag)
-                            elif isinstance(tr_tag, str):
-                                data_append(form, "tags", tr_tag)
-                        elif raw_tag in valid_tags:
-                            data_append(form, "tags", raw_tag)
+        span_style = top_span_tag.attrs.get("style", "")
+        span_lang = top_span_tag.attrs.get("lang", "")
+        if span_style == "white-space:nowrap;":
+            extract_zh_forms_data_cell(
+                wxr, base_data, top_span_tag, row_header, row_header_tags
+            )
+        elif "font-size:80%" in span_style:
+            raw_tag = clean_node(wxr, None, top_span_tag)
+            if raw_tag != "":
+                for form in forms:
+                    if raw_tag in ZH_PRON_TAGS:
+                        tr_tag = ZH_PRON_TAGS[raw_tag]
+                        if isinstance(tr_tag, list):
+                            data_extend(form, "tags", tr_tag)
+                        elif isinstance(tr_tag, str):
+                            data_append(form, "tags", tr_tag)
+                    elif raw_tag in valid_tags:
+                        data_append(form, "tags", raw_tag)
+                    else:
+                        data_append(form, "raw_tags", raw_tag)
+        elif span_lang in ["zh-Hant", "zh-Hans", "zh"]:
+            word = clean_node(wxr, None, top_span_tag)
+            if word not in ["", "／", wxr.wtp.title]:
+                form = {"form": word}
+                if row_header != "anagram":
+                    for raw_tag in row_header_tags:
+                        if raw_tag in ZH_FORMS_TAGS:
+                            data_append(form, "tags", ZH_FORMS_TAGS[raw_tag])
                         else:
                             data_append(form, "raw_tags", raw_tag)
+                if span_lang == "zh-Hant":
+                    data_append(form, "tags", "Traditional-Chinese")
+                elif span_lang == "zh-Hans":
+                    data_append(form, "tags", "Simplified-Chinese")
+                forms.append(form)
 
-        if row_header == "anagram":
-            for form in forms:
-                l_data = {"word": form["form"]}
-                for key in ["tags", "raw_tags"]:
-                    if key in form:
-                        l_data[key] = form[key]
-                data_append(base_data, "anagrams", l_data)
-        else:
-            data_extend(base_data, "forms", forms)
+    if row_header == "anagram":
+        for form in forms:
+            l_data = {"word": form["form"]}
+            for key in ["tags", "raw_tags"]:
+                if key in form:
+                    l_data[key] = form[key]
+            data_append(base_data, "anagrams", l_data)
+    else:
+        data_extend(base_data, "forms", forms)

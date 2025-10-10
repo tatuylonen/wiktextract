@@ -102,3 +102,30 @@ class TestThSound(unittest.TestCase):
                 "สัมผัส:ภาษาลาว/aj",
             ],
         )
+
+    def test_ja_pron(self):
+        self.wxr.wtp.add_page(
+            "แม่แบบ:ja-pron",
+            10,
+            """<ul><li><span class="usage-label-accent"><span class="ib-brac">(</span><span class="ib-content">[[w:ภาษาถิ่นโตเกียว|โตเกียว]]</span><span class="ib-brac">)</span></span> <span lang="ja" class="Jpan"><span style="border-top:1px solid black;position:relative;padding:1px;">あ<span style="position:absolute;top:0;bottom:67%;right:0%;border-right:1px solid black;">&#8203;</span></span>い<span style="border:1px dotted gray; border-radius:50%;">し</span>ている</span> <span class="Latn"><samp>[áꜜìsh<del>ì</del>tè ìrù]</samp></span> ([[頭高型|อาตามาดากะ]] – [1])</li><li>[[วิกิพจนานุกรม:สัทอักษรสากล|สัทอักษรสากล]]<sup>([[ภาคผนวก:การออกเสียงภาษาญี่ปุ่น|คำอธิบาย]])</sup>:&#32;<span class="IPA">[a̠iɕi̥te̞ iɾɯ̟ᵝ]</span>[[Category:ศัพท์ภาษาญี่ปุ่นที่มีการออกเสียงไอพีเอ|あいしている]][[Category:ญี่ปุ่น terms with non-redundant non-automated sortkeys|愛している]]</li></ul>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "愛している",
+            """==ภาษาญี่ปุ่น==
+=== การออกเสียง ===
+* {{ja-pron|あいして いる|acc=1|dev=3}}
+=== วลี ===
+# [[ฉันรักคุณ]]""",
+        )
+        self.assertEqual(
+            data[0]["sounds"],
+            [{"roman": "[áꜜìshìtè ìrù]"}, {"ipa": "[a̠iɕi̥te̞ iɾɯ̟ᵝ]"}],
+        )
+        self.assertEqual(
+            data[0]["categories"],
+            [
+                "ศัพท์ภาษาญี่ปุ่นที่มีการออกเสียงไอพีเอ",
+                "ญี่ปุ่น terms with non-redundant non-automated sortkeys",
+            ],
+        )

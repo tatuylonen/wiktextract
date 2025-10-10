@@ -133,6 +133,12 @@ LABEL_TAGS = {
     "สัมพันธการก": "genitive",
     "กรรตุการกพหูพจน์": ["nominative", "plural"],
     "สัมพันธการกพหูพจน์": ["genitive", "plural"],
+    # Template:zh-forms
+    "ตัวเต็ม": "Traditional-Chinese",
+    "ตัวย่อ": "Simplified-Chinese",
+    "ตัวย่อรอบสอง": "Second-Round-Simplified-Chinese",
+    "รูปแบบอื่น": "alternative",
+    "obsolete": "obsolete",
 }
 
 
