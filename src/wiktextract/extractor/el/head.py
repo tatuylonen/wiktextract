@@ -85,8 +85,8 @@ def partition_head_forms(
         current_forms = []
         current_tags = []
 
-    seen_italics = False
-    seen_bold = False
+    seen_italics = "__I__" in split_text
+    seen_bold = "__B__" in split_text
     inside_parens = False
     inside_bold = False
     inside_link = False
@@ -241,7 +241,6 @@ def partition_head_forms(
                     push_new_block()
             case "__B__":
                 # print(f"{current_forms=}, {current_tags=}")
-                seen_bold = True
                 if current_forms and current_tags:
                     push_new_block()
                 else:
@@ -254,7 +253,6 @@ def partition_head_forms(
             case "__/L__":
                 inside_link = False
             case "__I__":
-                seen_italics = True
                 inside_italics = True
             case "__/I__":
                 inside_italics = False
