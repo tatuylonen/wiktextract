@@ -86,6 +86,7 @@ def partition_head_forms(
         current_tags = []
 
     seen_italics = False
+    seen_bold = False
     inside_parens = False
     inside_bold = False
     inside_link = False
@@ -156,8 +157,8 @@ def partition_head_forms(
                     current_forms.append(f)
                 continue
 
-            if inside_link or not (
-                inside_link or inside_italics or inside_bold
+            if inside_link or (
+                not inside_italics and not inside_bold and not seen_bold
             ):
                 # Usually a form, sometimes a tag...
                 # XXX handle titles with whitespace by doing the splitting
@@ -240,6 +241,7 @@ def partition_head_forms(
                     push_new_block()
             case "__B__":
                 # print(f"{current_forms=}, {current_tags=}")
+                seen_bold = True
                 if current_forms and current_tags:
                     push_new_block()
                 else:
@@ -268,11 +270,7 @@ def partition_head_forms(
 
     for forms, tags in blocks:
         # print(f"{forms=}, {tags=}")
-        tags = list(set(tags))
-
-        # Merge particle (θα = will) with their respective verb
-        if len(forms) == 2 and forms[0] == "θα":
-            forms = [f"θα {forms[1]}"]
+        tags = sorted(set(tags))
 
         for form in forms:
             ret.append(Form(form=form, raw_tags=tags))

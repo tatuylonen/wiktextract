@@ -156,12 +156,26 @@ class TestElHeader(TestCase):
         )
         dumped = data.model_dump(exclude_defaults=True)
 
-        found_expected = False
-        for form in dumped["forms"]:
-            form = form["form"].strip()
-            self.assertNotEqual(form, "θα", "A form can not be θα")
-            if form == "θα ψάξω":
-                found_expected = True
-        self.assertTrue(
-            found_expected, f"Could not find {found_expected} in forms"
-        )
+        expected = [
+            {"form": "ψάχνω"},
+            {"form": "έψαχνα", "raw_tags": ["πρτ."]},
+            # Should not have "tha"
+            {"form": "ψάξω", "raw_tags": ["στ.μέλλ."]},
+            {
+                "form": "έψαξα",
+                "raw_tags": ["αόρ.", "μτχ.π.π.:", "π.αόρ.:", "παθ.φωνή:"],
+            },
+            {
+                "form": "ψάχνομαι",
+                "raw_tags": ["αόρ.", "μτχ.π.π.:", "π.αόρ.:", "παθ.φωνή:"],
+            },
+            {
+                "form": "ψάχτηκα",
+                "raw_tags": ["αόρ.", "μτχ.π.π.:", "π.αόρ.:", "παθ.φωνή:"],
+            },
+            {
+                "form": "ψαγμένος",
+                "raw_tags": ["αόρ.", "μτχ.π.π.:", "π.αόρ.:", "παθ.φωνή:"],
+            },
+        ]
+        self.assertEqual(dumped.get("forms"), expected)
