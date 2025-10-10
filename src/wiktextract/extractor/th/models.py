@@ -154,3 +154,4 @@ class WordEntry(ThaiBaseModel):
     abbreviations: list[Linkage] = []
     proverbs: list[Linkage] = []
     literal_meaning: str = ""
+    redirects: list[str] = []

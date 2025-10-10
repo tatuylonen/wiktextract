@@ -61,6 +61,12 @@ def parse_section(
     elif title_text == "รากศัพท์":
         if level_node.contain_node(LEVEL_KIND_FLAGS):
             base_data = base_data.model_copy(deep=True)
+        for t_node in level_node.find_child(NodeKind.TEMPLATE):
+            if t_node.template_name in ["ja-see", "ja-see-kango"]:
+                base_data = base_data.model_copy(deep=True)
+                extract_ja_see_template(wxr, base_data, t_node)
+                if len(base_data.redirects) > 0:
+                    page_data.append(base_data)
         extract_etymology_section(wxr, base_data, level_node)
     elif title_text in TRANSLATION_SECTIONS:
         extract_translation_section(
@@ -152,6 +158,15 @@ def parse_page(
         for t_node in level2_node.find_child(NodeKind.TEMPLATE):
             if t_node.template_name == "zh-forms":
                 extract_zh_forms(wxr, base_data, t_node)
+            elif t_node.template_name == "zh-see":
+                base_data.redirects.append(
+                    clean_node(wxr, None, t_node.template_parameters.get(1, ""))
+                )
+                clean_node(wxr, base_data, t_node)
+            elif t_node.template_name in ["ja-see", "ja-see-kango"]:
+                extract_ja_see_template(wxr, base_data, t_node)
+        if len(base_data.redirects) > 0:
+            page_data.append(base_data)
         for next_level_node in level2_node.find_child(LEVEL_KIND_FLAGS):
             parse_section(wxr, page_data, base_data, next_level_node)
 
@@ -292,3 +307,12 @@ def extract_zh_forms_data_cell(
             )
     else:
         base_data.forms.extend(forms)
+
+
+def extract_ja_see_template(
+    wxr: WiktextractContext, base_data: WordEntry, t_node: TemplateNode
+):
+    for key, value in t_node.template_parameters.items():
+        if isinstance(key, int):
+            base_data.redirects.append(clean_node(wxr, None, value))
+    clean_node(wxr, base_data, t_node)
