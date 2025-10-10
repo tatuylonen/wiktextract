@@ -50,10 +50,11 @@ verb_table_tags_base: dict[str, list[str]] = {
     "(εσύ)": ["second-person", "singular"],
     "(εσείς)": ["second-person", "plural"],
     # Aspect groups
-    # Every tag here should be read as X-tense: "imperfect-tense" etc.
-    "εξακολουθητικοί χρόνοι": ["imperfect"],  # N/A
-    "συνοπτικοί χρόνοι": [],  # ["simple"],  # N/A -> maybe nothing?
-    "συντελεσμένοι χρόνοι": ["perfect"],  # N/A
+    # These following three are from:
+    # Greek: An Essential Grammar (Routledge Essential Grammars)
+    "εξακολουθητικοί χρόνοι": ["imperfective"],
+    "συνοπτικοί χρόνοι": ["perfective"],
+    "συντελεσμένοι χρόνοι": ["perfect"],
     "συντελεσμένοι χρόνοι (β΄ τύποι)": ["perfect", "type-b"],
     "συντελεσμένοι χρόνοι β΄ (μεταβατικοί)": [
         "perfect",
@@ -103,7 +104,7 @@ base_tag_map: dict[str, list[str]] = {
     "αρσενικό": ["masculine"],
     "θηλυκό": ["feminine"],
     "ουδέτερο": ["neuter"],
-    # ---- English
+    # ------ English --------------------------------
     "no-gloss": ["no-gloss"],
     "comparative": ["comparative"],
     "Comparative": ["comparative"],
