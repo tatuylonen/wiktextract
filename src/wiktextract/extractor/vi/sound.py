@@ -354,7 +354,7 @@ def extract_zh_pron_list_item(
                                     isinstance(n, HTMLNode) and n.tag == "sup"
                                 )
                             ],
-                        ).rstrip("：")
+                        ).rstrip(":")
                         current_tags.extend(split_zh_pron_raw_tag(raw_tag_text))
                     elif len(sounds) > 0:
                         sounds[-1].raw_tags.extend(
