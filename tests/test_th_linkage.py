@@ -146,3 +146,43 @@ class TestThLinkage(TestCase):
             page_data[0]["derived"],
             [{"word": "take aback", "sense": "ทำให้สะดุ้ง, ทำให้ตกใจ"}],
         )
+
+    def test_zh_l(self):
+        self.wxr.wtp.add_page(
+            "แม่แบบ:qualifier",
+            10,
+            """<span class="ib-brac qualifier-brac">(</span><span class="ib-content qualifier-content">มนุษย์, เฉพาะกับเพศหญิง</span><span class="ib-brac qualifier-brac">)</span>""",
+        )
+        self.wxr.wtp.add_page(
+            "แม่แบบ:zh-l",
+            10,
+            """<span class="Hant" lang="zh-Hant">[[她們#ภาษาจีน|她們]]</span><span class="Hani" lang="zh">／</span><span class="Hans" lang="zh-Hans">[[她们#ภาษาจีน|她们]]</span> (<i><span class="tr Latn">tāmen</span></i>, “พวกหล่อน”)""",
+        )
+        data = parse_page(
+            self.wxr,
+            "他們",
+            """== ภาษาจีน ==
+=== คำสรรพนาม ===
+# [[พวกเขา]]
+==== คำเกี่ยวข้อง ====
+* {{qualifier|มนุษย์, เฉพาะกับเพศหญิง}} {{zh-l|她們|พวกหล่อน}}""",
+        )
+        self.assertEqual(
+            data[0]["related"],
+            [
+                {
+                    "raw_tags": ["มนุษย์", "เฉพาะกับเพศหญิง"],
+                    "roman": "tāmen",
+                    "sense": "พวกหล่อน",
+                    "tags": ["Traditional-Chinese"],
+                    "word": "她們",
+                },
+                {
+                    "raw_tags": ["มนุษย์", "เฉพาะกับเพศหญิง"],
+                    "roman": "tāmen",
+                    "sense": "พวกหล่อน",
+                    "tags": ["Simplified-Chinese"],
+                    "word": "她们",
+                },
+            ],
+        )

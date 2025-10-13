@@ -142,7 +142,7 @@ class TestThExample(TestCase):
                         "translation": "ทุกคนต่างเคารพเขามาก",
                         "bold_translation_offsets": [(0, 5)],
                         "tags": [
-                            "Modern Standard Chinese",
+                            "Modern-Standard-Chinese",
                             "Traditional-Chinese",
                             "Simplified-Chinese",
                             "Pinyin",
@@ -182,7 +182,7 @@ class TestThExample(TestCase):
                         "translation": "ทุกคนกรุณาเงียบ",
                         "bold_translation_offsets": [(0, 5)],
                         "tags": [
-                            "Modern Standard Chinese",
+                            "Modern-Standard-Chinese",
                             "Traditional-Chinese",
                             "Pinyin",
                         ],
@@ -195,7 +195,7 @@ class TestThExample(TestCase):
                         "translation": "ทุกคนกรุณาเงียบ",
                         "bold_translation_offsets": [(0, 5)],
                         "tags": [
-                            "Modern Standard Chinese",
+                            "Modern-Standard-Chinese",
                             "Simplified-Chinese",
                             "Pinyin",
                         ],

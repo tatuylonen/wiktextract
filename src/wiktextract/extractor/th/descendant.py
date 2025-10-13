@@ -1,16 +1,19 @@
 from mediawiki_langcodes import code_to_name
-from wikitextprocessor import NodeKind, TemplateNode, WikiNode
+from wikitextprocessor import HTMLNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from ..ruby import extract_ruby
 from .models import Descendant, WordEntry
 
 
 def extract_descendant_section(
-    wxr: WiktextractContext,
-    word_entry: WordEntry,
-    level_node: WikiNode,
-) -> None:
+    wxr: WiktextractContext, word_entry: WordEntry, level_node: WikiNode
+):
+    for t_node in level_node.find_child(NodeKind.TEMPLATE):
+        if t_node.template_name in ["CJKV", "Sinoxenic-word"]:
+            extract_cjkv_template(wxr, word_entry, t_node)
+
     for list_node in level_node.find_child(NodeKind.LIST):
         for list_item in list_node.find_child(NodeKind.LIST_ITEM):
             extract_desc_list_item(wxr, word_entry, [], list_item)
@@ -21,7 +24,7 @@ def extract_desc_list_item(
     word_entry: WordEntry,
     parent_data: list[Descendant],
     list_item: WikiNode,
-) -> None:
+):
     desc_list = []
     for node in list_item.children:
         if isinstance(node, TemplateNode) and node.template_name in [
@@ -75,3 +78,35 @@ def extract_desc_template(
         word_entry.descendants.extend(desc_data)
     clean_node(wxr, word_entry, expanded_node)
     return desc_data
+
+
+def extract_cjkv_template(
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+):
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for list_item in expanded_node.find_child_recursively(NodeKind.LIST_ITEM):
+        desc_data = Descendant(word="", lang="unknown", lang_code="unknown")
+        for node in list_item.children:
+            if (
+                isinstance(node, str)
+                and node.strip().endswith(":")
+                and desc_data.lang == "unknown"
+            ):
+                desc_data.lang = node.strip(": ")
+            elif isinstance(node, HTMLNode) and node.tag == "span":
+                span_class = node.attrs.get("class", "")
+                if span_class == "desc-arr":
+                    raw_tag = node.attrs.get("title", "")
+                    if raw_tag != "":
+                        desc_data.raw_tags.append(raw_tag)
+                elif span_class == "tr":
+                    desc_data.roman = clean_node(wxr, None, node)
+                elif "lang" in node.attrs:
+                    desc_data.lang_code = node.attrs["lang"]
+                    ruby_data, nodes_without_ruby = extract_ruby(wxr, node)
+                    desc_data.ruby = ruby_data
+                    desc_data.word = clean_node(wxr, None, nodes_without_ruby)
+        if desc_data.word != "":
+            word_entry.descendants.append(desc_data)
