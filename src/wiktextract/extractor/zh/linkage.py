@@ -210,16 +210,19 @@ def extract_zh_dial_template(
 
 def process_zh_l_template(
     wxr: WiktextractContext,
-    template_node: TemplateNode,
+    t_node: TemplateNode,
     sense: str,
     raw_tags: list[str] = [],
 ) -> list[Linkage]:
     # https://zh.wiktionary.org/wiki/Template:Zh-l
     expanded_node = wxr.wtp.parse(
-        wxr.wtp.node_to_wikitext(template_node), expand_all=True
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
     )
     roman = ""
     linkage_list = []
+    new_sense = clean_node(wxr, None, t_node.template_parameters.get(2, ""))
+    if new_sense != "":
+        sense = new_sense
     for i_tag in expanded_node.find_html_recursively(
         "span", attr_name="class", attr_value="Latn"
     ):
@@ -238,7 +241,7 @@ def process_zh_l_template(
             linkage_data.tags.append("Traditional-Chinese")
         elif lang_attr == "zh-Hans":
             linkage_data.tags.append("Simplified-Chinese")
-        if len(linkage_data.word) > 0 and linkage_data.word != "／":
+        if linkage_data.word not in ["／", ""]:
             translate_raw_tags(linkage_data)
             linkage_list.append(linkage_data)
     return linkage_list

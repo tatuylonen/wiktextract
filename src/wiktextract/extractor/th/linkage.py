@@ -83,6 +83,7 @@ def extract_linkage_list_item(
     sense: str,
 ) -> None:
     linkages = []
+    raw_tags = []
 
     for index, node in enumerate(list_item.children):
         if isinstance(node, TemplateNode) and node.template_name == "l":
@@ -90,8 +91,10 @@ def extract_linkage_list_item(
                 word=clean_node(wxr, None, node.template_parameters.get(2, "")),
                 source=source,
                 sense=sense,
+                raw_tags=raw_tags,
             )
             if l_data.word != "":
+                translate_raw_tags(l_data)
                 linkages.append(l_data)
         elif isinstance(node, WikiNode) and node.kind == NodeKind.ITALIC:
             for link_node in node.find_child(NodeKind.LINK):
@@ -105,7 +108,9 @@ def extract_linkage_list_item(
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
             link_str = clean_node(wxr, None, node)
             if link_str != "":
-                linkages.append(Linkage(word=link_str, sense=sense))
+                l_data = Linkage(word=link_str, sense=sense, raw_tags=raw_tags)
+                translate_raw_tags(l_data)
+                linkages.append(l_data)
         elif isinstance(node, str) and ("-" in node or "–" in node):
             if "-" in node:
                 sense = node[node.index("-") + 1 :]
@@ -119,6 +124,19 @@ def extract_linkage_list_item(
             for l_data in linkages:
                 l_data.sense = sense
             break
+        elif isinstance(node, TemplateNode) and node.template_name in [
+            "qualifier",
+            "q",
+            "qual",
+            "qf",
+        ]:
+            text = clean_node(wxr, None, node).strip("() ")
+            for raw_tag in text.split(","):
+                raw_tag = raw_tag.strip()
+                if raw_tag != "":
+                    raw_tags.append(raw_tag)
+        elif isinstance(node, TemplateNode) and node.template_name == "zh-l":
+            linkages.extend(extract_zh_l_template(wxr, node, sense, raw_tags))
 
     getattr(word_entry, linkage_type).extend(linkages)
 
@@ -285,3 +303,42 @@ def extract_zh_dial_template(
                                 translate_raw_tags(linkage_list[-1])
 
     getattr(word_entry, linkage_type).extend(linkage_list)
+
+
+def extract_zh_l_template(
+    wxr: WiktextractContext,
+    t_node: TemplateNode,
+    sense: str,
+    raw_tags: list[str],
+) -> list[Linkage]:
+    l_list = []
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    roman = ""
+    new_sense = clean_node(wxr, None, t_node.template_parameters.get(2, ""))
+    if new_sense != "":
+        sense = new_sense
+    for i_tag in expanded_node.find_html_recursively(
+        "span", attr_name="class", attr_value="Latn"
+    ):
+        roman = clean_node(wxr, None, i_tag)
+    for span_tag in expanded_node.find_html(
+        "span", attr_name="lang", attr_value="zh"
+    ):
+        linkage_data = Linkage(
+            sense=sense,
+            raw_tags=raw_tags,
+            roman=roman,
+            word=clean_node(wxr, None, span_tag),
+        )
+        lang_attr = span_tag.attrs.get("lang", "")
+        if lang_attr == "zh-Hant":
+            linkage_data.tags.append("Traditional-Chinese")
+        elif lang_attr == "zh-Hans":
+            linkage_data.tags.append("Simplified-Chinese")
+        if linkage_data.word not in ["／", ""]:
+            translate_raw_tags(linkage_data)
+            l_list.append(linkage_data)
+
+    return l_list
