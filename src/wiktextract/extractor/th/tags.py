@@ -2,7 +2,7 @@ from .models import WordEntry
 
 EXAMPLE_TAGS = {
     # แม่แบบ:zh-x, มอดูล:zh-usex/data
-    "MSC": "Modern Standard Chinese",
+    "MSC": "Modern-Standard-Chinese",
     "Pinyin": "Pinyin",
     "trad.": "Traditional-Chinese",
     "simp.": "Simplified-Chinese",
@@ -178,6 +178,23 @@ LABEL_TAGS = {
     "ตัวย่อรอบสอง": "Second-Round-Simplified-Chinese",
     "รูปแบบอื่น": "alternative",
     "obsolete": "obsolete",
+    # Template:zh-dial
+    "คลาสสิก": "Classical-Chinese",
+    "Written Vernacular Chinese": "Written-vernacular-Chinese",
+    "Written Standard Chinese": "Written-Standard-Chinese",
+    "จีนกลางตะวันออกเฉียงเหนือ": "Northeastern-Mandarin",
+    "จีนกลางแบบจี้หลู่": "Jilu-Mandarin",
+    "จีนกลางแบบเจียวเหลียว": "Jiaoliao-Mandarin",
+    "จีนกลาง": "Central-Plains-Mandarin",
+    "จีนกลางแบบหลันอิ๋น": "Lanyin-Mandarin",
+    "จีนกลางตะวันตกเฉียงใต้": "Southwestern-Mandarin",
+    "จีนกลางแบบเจียงหวย": "Jianghuai-Mandarin",
+    "ฮุ่ยโจว": "Huizhou",
+    "หมิ่นแบบผูเซียน": "Puxian-Min",
+    "หมิ่นตอนกลาง": "Central-Min",
+    "หมิ่นแบบจงซัน": "Zhongshan-Min",
+    "ผิงใต้": "Southern-Pinghua",
+    "ผิงเหนือ": "Northern-Pinghua",
 }
 
 
