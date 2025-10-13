@@ -17,7 +17,94 @@ from wiktextract.tags import uppercase_tags, valid_tags
 # Otherwise, the implementation of tags is a translation effort: when this
 # edition of Wiktionary says 'x', what tags does that refer to?
 
+
+# Tags used for modern Greek verb tables.
+# * Reference:
+#   https://el.wiktionary.org/wiki/Κατηγορία:Πρότυπα_κλίσης_ρημάτων_(νέα_ελληνικά)
+#
+# * Standard table:
+#   https://el.wiktionary.org/wiki/ψάχνω
+# * Non-standard table (relatively frequent):
+#   https://el.wiktionary.org/wiki/αναφωνώ which follows
+#   https://el.wiktionary.org/wiki/Πρότυπο:el-κλίσ-'λαλώ'
+# * Others:
+#   https://el.wiktionary.org/wiki/τρώω
+# * Users wrongly putting noun inflections in a Κλήση section
+#   https://el.wiktionary.org/wiki/δισεκατομμυριούχος
+verb_table_tags_base: dict[str, list[str]] = {
+    # Persons & numbers
+    "α' ενικ.": ["first-person", "singular"],
+    "β' ενικ.": ["second-person", "singular"],
+    "γ' ενικ.": ["third-person", "singular"],
+    "α' πληθ.": ["first-person", "plural"],
+    "β' πληθ.": ["second-person", "plural"],
+    "γ' πληθ.": ["third-person", "plural"],
+    "ενικός": ["singular"],
+    "πληθυντικός": ["plural"],
+    "εγώ": ["first-person", "singular"],
+    "εσύ": ["second-person", "singular"],
+    "αυτός": ["third-person", "singular"],
+    "εμείς": ["first-person", "plural"],
+    "εσείς": ["second-person", "plural"],
+    "αυτοί": ["third-person", "plural"],
+    "(εσύ)": ["second-person", "singular"],
+    "(εσείς)": ["second-person", "plural"],
+    # Aspect groups
+    # These following three are from:
+    # Greek: An Essential Grammar (Routledge Essential Grammars)
+    "εξακολουθητικοί χρόνοι": ["imperfective"],
+    "συνοπτικοί χρόνοι": ["perfective"],
+    "συντελεσμένοι χρόνοι": ["perfect"],
+    "συντελεσμένοι χρόνοι (β΄ τύποι)": ["perfect", "type-b"],
+    "συντελεσμένοι χρόνοι β΄ (μεταβατικοί)": [
+        "perfect",
+        "type-b",
+        "transitive",
+    ],
+    "συντελεσμένοι χρόνοι β΄ (αμετάβατοι)": [
+        "perfect",
+        "type-b",
+        "intransitive",
+    ],
+    # Basic tenses / aspects
+    "ενεστώτας": ["present"],
+    "παρατατικός": ["imperfect"],
+    "αόριστος": ["aorist"],
+    # Forms / moods
+    "υποτακτική": ["subjunctive"],
+    "προστακτική": ["imperative"],
+    "μετοχή": ["participle"],
+    "απαρέμφατο": ["infinitive"],
+    # Future & perfect subtypes
+    "εξακολουθητικός μέλλοντας": ["future", "imperfect"],
+    "εξ. μέλλ.": ["future", "imperfect"],
+    "συνοπτ. μέλλ.": ["future"],
+    "στιγμιαίος μέλλοντας": ["future"],  # στιγμιαίος = συνοπτικός
+    "συντελ. μέλλ.": ["future", "perfect"],
+    "συντελεσμένος μέλλοντας α'": ["future", "perfect", "type-a"],
+    "παρακείμενος": ["present", "perfect"],
+    "παρακείμενος α'": ["present", "perfect", "type-a"],
+    "υπερσυντέλικος": ["past", "perfect"],
+    "υπερσυντέλικος α'": ["past", "perfect", "type-a"],
+    # Others
+    "προσωπικές εγκλίσεις": ["personal"],  # ["personal-moods"],
+    "απρόσωπες εγκλίσεις": ["impersonal"],  # ["impersonal-moods"],
+    "μονολεκτικοί χρόνοι": [],  # ["simple-tenses"], # no   να/θα/έχει
+    "περιφραστικοί χρόνοι": [],  # ["periphrastic"], # with να/θα/έχει
+    "απαρέμφατο (αόριστος)": ["infinitive", "aorist"],
+    "μετοχή (ενεστώτας)": ["participle", "present"],
+}
+
 base_tag_map: dict[str, list[str]] = {
+    **verb_table_tags_base,
+    "ονομαστική": ["nominative"],
+    "γενική": ["genitive"],
+    "αιτιατική": ["accusative"],
+    "κλητική": ["vocative"],
+    "αρσενικό": ["masculine"],
+    "θηλυκό": ["feminine"],
+    "ουδέτερο": ["neuter"],
+    # ------ English --------------------------------
     "no-gloss": ["no-gloss"],
     "comparative": ["comparative"],
     "Comparative": ["comparative"],
@@ -74,7 +161,6 @@ base_tag_map: dict[str, list[str]] = {
     "American": ["US"],
     "Audio US": ["US"],
 }
-
 
 
 tag_map = {}

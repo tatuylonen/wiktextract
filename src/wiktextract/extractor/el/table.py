@@ -5,6 +5,7 @@ from unicodedata import name as unicode_name
 from wikitextprocessor import HTMLNode, NodeKind, TemplateNode, WikiNode
 
 from wiktextract.clean import clean_value
+from wiktextract.extractor.el.tags import base_tag_map
 from wiktextract.wxr_context import WiktextractContext
 from wiktextract.wxr_logging import logger
 
@@ -66,6 +67,21 @@ ARTICLES: set[str] = {
     "τις",
     "τα",
 }
+
+
+def localize_verb_inflection_raw_tags(form: Form) -> None:
+    # Leaves raw_tags untouched
+    verb_tags = []
+
+    for raw_tag in form.raw_tags:
+        clean_raw_tag = raw_tag.replace("\n", " ").lower()
+        localized = base_tag_map.get(clean_raw_tag)
+        if localized is not None:
+            verb_tags.extend(localized)
+
+    unique_tags = list(set(verb_tags))
+    unique_tags.sort()
+    form.tags.extend(unique_tags)
 
 
 def process_inflection_section(
@@ -132,6 +148,8 @@ def process_inflection_section(
                 data.lang_code in GREEK_LANGCODES,
                 template_name=template_name or "",
             )
+            for form in data.forms:
+                localize_verb_inflection_raw_tags(form)
 
     data.forms = remove_duplicate_forms(wxr, data.forms)
 

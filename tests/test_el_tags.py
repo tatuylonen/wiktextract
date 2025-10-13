@@ -17,7 +17,4 @@ class TestElTags(TestCase):
                     if not part.isalpha() or (
                         part.islower() and tag not in valid_tags
                     ):
-                        self.assertFalse(
-                            f"Invalid tag in tag_map: {tag=}"
-                        )
-                        break
+                        self.assertFalse(f"Invalid tag in tag_map: {tag=}")
