@@ -5,7 +5,6 @@ from mediawiki_langcodes import code_to_name
 
 from wiktextract.extractor.en.form_descriptions import distw
 from wiktextract.wxr_context import WiktextractContext
-from wiktextract.wxr_logging import logger
 
 from .models import Form, WordEntry
 
@@ -165,7 +164,9 @@ def partition_head_forms(
                 # in N steps: there's one space, split A B C D with
                 # A B, C D and (A), B C, (D)
 
-                if seen_italics:  # there has been text in italics before
+                if (
+                    seen_italics and not seen_bold
+                ):  # there has been text in italics before
                     current_forms.append(t)
                     continue
                 words = t.split()

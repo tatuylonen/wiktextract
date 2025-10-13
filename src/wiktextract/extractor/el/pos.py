@@ -166,17 +166,32 @@ def process_pos(
         nonlocal top_template_name
         if kind == NodeKind.BOLD or (
             isinstance(node, HTMLNode)
-            and node.tag == "span"
-            and "style" in node.attrs
             and (
-                "bold" in node.attrs["style"]
-                # Special handling for output for stuff in arabic script
-                or node.attrs["style"] == "color:black; font-size:200%;"
+                node.tag == "span"
+                and "style" in node.attrs
+                and (
+                    "bold" in node.attrs["style"]
+                    # Special handling for output for stuff in arabic script
+                    or node.attrs["style"] == "color:black; font-size:200%;"
+                )
+                or node.tag == "b"
+                or node.tag == "strong"
             )
         ):
             # These are word forms almost always
             return ["__B__", *node.children, "__/B__"]
-        elif kind == NodeKind.ITALIC:
+        elif kind == NodeKind.ITALIC or (
+            isinstance(node, HTMLNode)
+            and (
+                node.tag == "span"
+                and "style" in node.attrs
+                and (
+                    "italic" in node.attrs["style"]
+                )
+                or node.tag == "i"
+                or node.tag == "em"
+            )
+        ):
             # These are almost always tag words; often 'kai' isn't italicized,
             # for example.
             return ["__I__", *node.children, "__/I__"]
@@ -215,21 +230,31 @@ def process_pos(
             if node.largs[0][0].startswith("Κατηγορία:"):
                 category_data.append(node.largs[0][0][len("Κατηγορία:") :])
                 return [""]
+            # Special case for meta-links like Πρότυπο:ετ that generate
+            # both a category link and :category link that is actually
+            # displayed as a link, but for our purposes we want to ignore
+            # that it is a link; it's a tag.
+            if node.largs[0][0].startswith(":Κατηγορία:"):
+                # unpacking a list-comprehension, unpacking into a list
+                # seems to be more performant than adding lists together.
+                return [
+                    wxr.wtp.node_to_text(
+                        node.largs[1:2] or node.largs[0],
+                        node_handler_fn=bold_node_handler_fn,
+                    )
+                    # output the "visible" half of the link.
+                ]
             if node.largs[0][0].startswith("Αρχείο:"):
                 return [""]
             # Often forms are 'formatted' with links, so let's mark these
             # too.
             return [
                 "__L__",
-                # unpacking a list-comprehension, unpacking into a list
-                # seems to be more performant than adding lists together.
-                *(
-                    wxr.wtp.node_to_text(
-                        node.largs[1:2] or node.largs[0],
-                        node_handler_fn=bold_node_handler_fn,
-                    )
-                    # output the "visible" half of the link.
+                wxr.wtp.node_to_text(
+                    node.largs[1:2] or node.largs[0],
+                    node_handler_fn=bold_node_handler_fn,
                 ),
+                # output the "visible" half of the link.
                 # XXX collect link data if it turns out to be important.
                 "__/L__",
             ]

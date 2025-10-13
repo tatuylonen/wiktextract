@@ -4,6 +4,7 @@ from wikitextprocessor import WikiNode, Wtp
 
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.el.models import WordEntry
+from wiktextract.extractor.el.page import parse_page
 from wiktextract.extractor.el.pos import process_pos
 from wiktextract.wxr_context import WiktextractContext
 
@@ -179,3 +180,36 @@ class TestElHeader(TestCase):
             },
         ]
         self.assertEqual(dumped.get("forms"), expected)
+
+    def test_parsing_logio(self) -> None:
+        # https://el.wiktionary.org/wiki/αιδώς
+        # Test that logio (literary) is correctly parsed
+        self.wxr.wtp.add_page("Πρότυπο:-el-", 10, "Greek")
+        self.wxr.wtp.add_page("Πρότυπο:ουσιαστικό", 10, "Ουσιαστικό")
+        self.wxr.wtp.add_page(
+            "Πρότυπο:ετ",
+            10,
+            """([[:Κατηγορία:Λόγιοι όροι (νέα ελληνικά)|<i>λόγιο</i>]])[[Κατηγορία:Λόγιοι όροι  (νέα ελληνικά)]]""",
+        )
+        self.wxr.wtp.add_page(
+            "Πρότυπο:θεν",
+            10,
+            """<span style="background:#ffffff; color:#002000;">''θηλυκό, μόνο στον ενικό''</span>""",
+        )
+
+        raw = """=={{-el-}}==
+==={{ουσιαστικό|el}}===
+'''{{PAGENAME}}''' {{θεν}} {{ετ|λόγιο}}
+"""
+        word = "αιδώς"
+        page_datas = parse_page(self.wxr, word, raw)
+        received = page_datas[0]["forms"]
+
+        expected = [
+            {
+                "form": "αιδώς",
+                "raw_tags": ["θηλυκό", "λόγιο", "μόνο στον ενικό"],
+            },
+        ]
+
+        self.assertEqual(received, expected)
