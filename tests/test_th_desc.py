@@ -57,3 +57,33 @@ class TestThDesc(unittest.TestCase):
                 },
             ],
         )
+
+    def test_cjkv(self):
+        self.wxr.wtp.add_page(
+            "แม่แบบ:CJKV",
+            10,
+            """<div>''[[ซีโน-เซนิก]]'' (<span class="Hant" lang="zh">醫生</span>):
+* <span class="desc-arr" title="borrowed">→</span> ญี่ปุ่น: <span class="Jpan" lang="ja">[[:医生#ภาษาญี่ปุ่น|<ruby>医生<rp>(</rp><rt>いせい</rt><rp>)</rp></ruby>]]</span> <span class="mention-gloss-paren annotation-paren">(</span><span class="tr"><span class="mention-tr tr">isei</span></span><span class="mention-gloss-paren annotation-paren">)</span></div>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "醫生",
+            """== ภาษาจีน ==
+=== คำนาม ===
+# [[หมอ]]; [[แพทย์]]
+=== คำสืบทอด ===
+{{CJKV||s=医生|いせい|의생|y sinh}}""",
+        )
+        self.assertEqual(
+            data[0]["descendants"],
+            [
+                {
+                    "lang": "ญี่ปุ่น",
+                    "lang_code": "ja",
+                    "raw_tags": ["borrowed"],
+                    "roman": "isei",
+                    "ruby": [("医生", "いせい")],
+                    "word": "医生",
+                }
+            ],
+        )

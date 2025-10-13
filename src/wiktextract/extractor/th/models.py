@@ -115,6 +115,7 @@ class Descendant(ThaiBaseModel):
     raw_tags: list[str] = []
     descendants: list["Descendant"] = []
     sense: str = ""
+    ruby: list[tuple[str, str]] = []
 
 
 class Hyphenation(ThaiBaseModel):
