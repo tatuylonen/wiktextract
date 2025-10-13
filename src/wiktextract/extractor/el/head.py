@@ -3,6 +3,7 @@ from unicodedata import name as unicode_name
 
 from mediawiki_langcodes import code_to_name
 
+from wiktextract.clean import clean_value
 from wiktextract.extractor.en.form_descriptions import distw
 from wiktextract.wxr_context import WiktextractContext
 
@@ -12,6 +13,7 @@ BOLD_RE = re.compile(r"(__/?[BIL]__|\(|\)|, |\. |: )")
 
 
 def parse_head(wxr: WiktextractContext, pos_data: WordEntry, text: str) -> bool:
+    text = clean_value(wxr, text)
     split_text = BOLD_RE.split(text)
     # print(split_text)
 
