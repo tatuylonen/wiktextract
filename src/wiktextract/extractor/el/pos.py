@@ -183,9 +183,11 @@ def process_pos(
         elif kind == NodeKind.ITALIC or (
             isinstance(node, HTMLNode)
             and (
-                node.tag == "span"
-                and "style" in node.attrs
-                and ("italic" in node.attrs["style"])
+                (
+                    node.tag == "span"
+                    and "style" in node.attrs
+                    and "italic" in node.attrs["style"]
+                )
                 or node.tag == "i"
                 or node.tag == "em"
             )
