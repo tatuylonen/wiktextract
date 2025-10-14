@@ -218,3 +218,35 @@ class TestElHeader(TestCase):
         ]
 
         self.assertEqual(received, expected)
+
+    def test_parsing_forms_and_tags(self) -> None:
+        # https://el.wiktionary.org/wiki/γάιδαρος
+        self.wxr.wtp.add_page("Πρότυπο:-el-", 10, "Greek")
+        self.wxr.wtp.add_page("Πρότυπο:ουσιαστικό", 10, "Ουσιαστικό")
+        self.wxr.wtp.add_page(
+            "Πρότυπο:α",
+            10,
+            """<span style="background:#ffffff; color:#002000;">''αρσενικό''</span>""",
+        )
+        self.wxr.wtp.add_page(
+            "Πρότυπο:θ",
+            10,
+            """(<span style="background:#ffffff; color:#002000;">''θηλυκό''</span> '''[[γαϊδάρα]]'''&nbsp;''ή''  '''[[γαϊδούρα]]''')""",
+        )
+
+        raw = """=={{-el-}}==
+==={{ουσιαστικό|el}}===
+'''{{PAGENAME}}''' {{α}} {{θ|γαϊδάρα|ή=γαϊδούρα}}
+"""
+        word = "γάιδαρος"
+        page_datas = parse_page(self.wxr, word, raw)
+        received = page_datas[0]["forms"]
+
+        expected = [
+            {"form": "γάιδαρος", "raw_tags": ["αρσενικό"]},
+            {"form": "γαϊδάρα", "raw_tags": ["θηλυκό"]},
+            {"form": "γαϊδούρα", "raw_tags": ["θηλυκό"]},
+        ]
+
+        # print(f"{received=}")
+        self.assertEqual(received, expected)
