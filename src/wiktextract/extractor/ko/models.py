@@ -115,3 +115,5 @@ class WordEntry(KoreanBaseModel):
     idioms: list[Translation] = []
     hyponyms: list[Translation] = []
     redirects: list[str] = []
+    literal_meaning: str = ""
+    anagrams: list[Linkage] = []

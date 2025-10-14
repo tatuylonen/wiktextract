@@ -107,7 +107,15 @@ TRANSLATION_TAGS = {
     "드문 단어": "rare",
 }
 
-TAGS = {**GLOSS_TAGS, **SOUND_TAGS, **HEADER_TAGS, **TRANSLATION_TAGS}
+TAGS = {
+    **GLOSS_TAGS,
+    **SOUND_TAGS,
+    **HEADER_TAGS,
+    **TRANSLATION_TAGS,
+    # Template:zh-forms
+    "정체": "Traditional-Chinese",
+    "간체": "Simplified-Chinese",
+}
 
 TOPICS = {
     "금융": "finance",
