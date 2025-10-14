@@ -50,7 +50,9 @@ def extract_pos_section(
             if node.template_name in SOUND_TEMPLATES:
                 extract_sound_template(wxr, page_data[-1], node)
             elif node.template_name in LINKAGE_TEMPLATES:
-                has_linkage = extract_linkage_template(wxr, page_data[-1], node)
+                has_linkage = extract_linkage_template(
+                    wxr, page_data[-1], node, "derived"
+                )
             elif node.template_name == "외국어":
                 extract_translation_template(
                     wxr,
