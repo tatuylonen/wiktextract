@@ -6425,6 +6425,7 @@ valid_tags = {
     "Traditional-Chinese": "script",
     "Simplified-Chinese": "script",
     "Second-Round-Simplified-Chinese": "script",
+    "Guangzhou-Cantonese": "script",
     # "zh-pron" template
     "phonetic": "misc",
     # https://en.wiktionary.org/wiki/Template:ka-decl-noun

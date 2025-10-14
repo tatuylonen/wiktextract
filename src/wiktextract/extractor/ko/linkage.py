@@ -15,6 +15,7 @@ def extract_linkage_template(
     wxr: WiktextractContext,
     word_entry: WordEntry,
     node: TemplateNode,
+    l_type: str,
 ) -> bool:
     # https://ko.wiktionary.org/wiki/틀:파생어_상자
     # https://ko.wiktionary.org/wiki/틀:합성어_상자
@@ -25,7 +26,7 @@ def extract_linkage_template(
                 break
             word = clean_node(wxr, None, node.template_parameters[key])
             if word != "":
-                word_entry.derived.append(
+                getattr(word_entry, l_type).append(
                     Linkage(
                         word=word,
                         sense=word_entry.senses[-1].glosses[-1]
@@ -34,6 +35,9 @@ def extract_linkage_template(
                     )
                 )
                 added_data = True
+    elif re.fullmatch(r"col\d", node.template_name):
+        extract_col_template(wxr, word_entry, node, l_type)
+
     return added_data
 
 
@@ -54,7 +58,7 @@ def extract_linkage_section(
             )
 
         for t_node in level_node.find_child(NodeKind.TEMPLATE):
-            extract_linkage_template(wxr, word_entry, t_node)
+            extract_linkage_template(wxr, word_entry, t_node, linkage_type)
             if t_node.template_name == "외국어":
                 extract_translation_template(wxr, word_entry, t_node)
 
@@ -158,3 +162,46 @@ def extract_l_template(
                     break
             getattr(word_entry, linkage_type).append(linkage)
             break
+
+
+def extract_col_template(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    t_node: TemplateNode,
+    l_type: str,
+):
+    linkage_list = []
+    expanded_template = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for ui_tag in expanded_template.find_html_recursively("li"):
+        current_data = []
+        roman = ""
+        raw_tags = []
+        for span_tag in ui_tag.find_html("span"):
+            span_lang = span_tag.attrs.get("lang", "")
+            if span_lang.endswith("-Latn"):
+                roman = clean_node(wxr, None, span_tag)
+            elif "qualifier-content" in span_tag.attrs.get("class", ""):
+                span_text = clean_node(wxr, None, span_tag)
+                for raw_tag in span_text.split(","):
+                    raw_tag = raw_tag.strip()
+                    if raw_tag != "":
+                        raw_tags.append(raw_tag)
+            elif span_lang != "":
+                l_data = Linkage(word=clean_node(wxr, None, span_tag))
+                class_names = span_tag.attrs.get("class", "")
+                if class_names == "Hant":
+                    l_data.tags.append("Traditional-Chinese")
+                elif class_names == "Hans":
+                    l_data.tags.append("Simplified-Chinese")
+                if l_data.word != "":
+                    current_data.append(l_data)
+
+        for data in current_data:
+            data.raw_tags.extend(raw_tags)
+            data.roman = roman
+            translate_raw_tags(data)
+        linkage_list.extend(current_data)
+
+    getattr(word_entry, l_type).extend(linkage_list)

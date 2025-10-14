@@ -42,10 +42,18 @@ class Example(KoreanBaseModel):
     bold_literal_offsets: list[tuple[int, int]] = []
     note: str = ""
     sounds: list[Sound] = []
+    tags: list[str] = []
+    raw_tags: list[str] = []
 
 
 class AltForm(KoreanBaseModel):
     word: str
+
+
+class Classifier(KoreanBaseModel):
+    classifier: str = ""
+    tags: list[str] = []
+    raw_tags: list[str] = []
 
 
 class Sense(KoreanBaseModel):
@@ -58,6 +66,7 @@ class Sense(KoreanBaseModel):
     note: str = ""
     form_of: list[AltForm] = []
     pattern: str = Field(default="", description="Sentence structure, 문형")
+    classifiers: list[Classifier] = []
 
 
 class Linkage(KoreanBaseModel):
@@ -114,3 +123,6 @@ class WordEntry(KoreanBaseModel):
     )
     idioms: list[Translation] = []
     hyponyms: list[Translation] = []
+    redirects: list[str] = []
+    literal_meaning: str = ""
+    anagrams: list[Linkage] = []

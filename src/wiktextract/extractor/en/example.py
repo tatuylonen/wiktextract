@@ -368,6 +368,11 @@ def extract_zh_x_dl_span_tag(
 ZH_X_TAGS = {
     "trad.": "Traditional-Chinese",
     "simp.": "Simplified-Chinese",
+    "Taiwanese Mandarin": "Taiwanese-Mandarin",
+    "MSC": "Standard-Chinese",
+    "Literary Chinese": "Literary-Chinese",
+    "Classical Chinese": "Classical-Chinese",
+    "Guangzhou Cantonese": "Guangzhou-Cantonese",
 }
 
 
