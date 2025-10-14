@@ -142,7 +142,15 @@ def parse_language_section(
     for t_node in level2_node.find_child(NodeKind.TEMPLATE):
         if t_node.template_name in SOUND_TEMPLATES:
             extract_sound_template(wxr, base_data, t_node)
-
+        elif t_node.template_name == "zh-see":
+            base_data.redirects.append(
+                clean_node(wxr, None, t_node.template_parameters.get(1, ""))
+            )
+            clean_node(wxr, base_data, t_node)
+        elif t_node.template_name in ["ja-see", "ja-see-kango"]:
+            extract_ja_see_template(wxr, base_data, t_node)
+    if len(base_data.redirects) > 0:
+        page_data.append(base_data)
     for next_level in level2_node.find_child(LEVEL_KIND_FLAGS):
         parse_section(wxr, page_data, base_data, next_level)
 
@@ -203,3 +211,12 @@ def extract_alt_template(
                     form.raw_tags.append(raw_tag)
                     translate_raw_tags(form)
     base_data.forms.extend(forms)
+
+
+def extract_ja_see_template(
+    wxr: WiktextractContext, base_data: WordEntry, t_node: TemplateNode
+):
+    for key, value in t_node.template_parameters.items():
+        if isinstance(key, int):
+            base_data.redirects.append(clean_node(wxr, None, value))
+    clean_node(wxr, base_data, t_node)

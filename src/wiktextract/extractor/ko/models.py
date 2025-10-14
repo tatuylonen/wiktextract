@@ -114,3 +114,4 @@ class WordEntry(KoreanBaseModel):
     )
     idioms: list[Translation] = []
     hyponyms: list[Translation] = []
+    redirects: list[str] = []
