@@ -6,9 +6,11 @@ from mediawiki_langcodes import code_to_name, name_to_code
 # NodeKind is an internal enum for WikiNode and subclasses that specifies
 # what kind of WikiNode it is. Subclasses also have the field, but it's
 # always NodeKind.TEMPLATE for TemplateNodes etc.
+from wikitextprocessor import TemplateNode
 from wikitextprocessor.parser import LEVEL_KIND_FLAGS, NodeKind, WikiNode
 
 # Clean node takes a WikiNode+strings node or tree and gives you a cleanish text
+from wiktextract.extractor.el.table import process_inflection_section
 from wiktextract.page import clean_node, clean_value
 
 # The main context object to more easily share state of parsing between
@@ -139,8 +141,25 @@ def parse_page(
         previous_empty_language_name = None
         previous_empty_language_code = None
 
-        # XXX Some tables are put directly into the language level's content
-        # Separate content and sublevels, parse content and put in base_data
+        # Parse tables directly into the language level's content.
+        # Ex. from https://el.wiktionary.org/wiki/αμάξι
+        # =={{-el-}}==
+        # {{el-κλίση-'τραγούδι'}} <= THIS
+        # ...
+        #
+        # Notes:
+        # * Only support Modern Greek pages at the moment.
+        # * There can be more than one inflection: ρολόι, πλάγιος
+        if (
+            level.kind == NodeKind.LEVEL2
+            and level.largs
+            and clean_node(wxr, None, level.largs[0]) == "Νέα ελληνικά (el)"
+        ):
+            for child in level.children:
+                if isinstance(
+                    child, TemplateNode
+                ) and child.template_name.startswith("el-κλίση"):
+                    process_inflection_section(wxr, base_data, child)
 
         for sublevel in sublevels:
             if len(sublevel.largs) == 0:

@@ -7,12 +7,12 @@ from wiktextract.clean import clean_value
 from wiktextract.extractor.en.form_descriptions import distw
 from wiktextract.wxr_context import WiktextractContext
 
-from .models import Form, WordEntry
+from .models import Form
 
 BOLD_RE = re.compile(r"(__/?[BIL]__|\(|\)|, |\. |: )")
 
 
-def parse_head(wxr: WiktextractContext, pos_data: WordEntry, text: str) -> bool:
+def parse_head(wxr: WiktextractContext, text: str) -> list[Form]:
     text = clean_value(wxr, text)
     split_text = BOLD_RE.split(text)
     # print(split_text)
@@ -26,9 +26,9 @@ def parse_head(wxr: WiktextractContext, pos_data: WordEntry, text: str) -> bool:
                 split_text[2] = split_text[0] + split_text[2]
                 split_text[0] = ""
             else:
-                return False
+                return []
         else:
-            return False
+            return []
 
     forms: list[Form] = []
     # print_blocks = []
@@ -42,12 +42,7 @@ def parse_head(wxr: WiktextractContext, pos_data: WordEntry, text: str) -> bool:
     #     f"\n  §§ {wxr.wtp.title} ->  {''.join(split_text)}\n  § "
     #     + "\n  § ".join(f"{''.join(pb)}" for pb in print_blocks)
     # )
-    if len(forms) == 0:
-        return False
-
-    pos_data.forms = forms
-
-    return True
+    return forms
 
 
 # Sometimes bolded sections of the head are just smooshed together; what
@@ -60,7 +55,7 @@ def partition_head_forms(
 ) -> list[Form]:
     if len(split_text) < 2:
         wxr.wtp.error(
-            f"Failed to partition head forms; " f"too few items {split_text=}",
+            f"Failed to partition head forms; too few items {split_text=}",
             sortid="head/50/20250303",
         )
         return []

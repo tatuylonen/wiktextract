@@ -68,25 +68,51 @@ ARTICLES: set[str] = {
     "τα",
 }
 
+UNEXPECTED_ARTICLES = {
+    "αι",
+    "ένα",
+    "ένας",
+    "στα",
+    "στη",
+    "στην",
+    "στης",
+    "στις",
+    "στο",
+    "στον",
+    "στου",
+    "στους",
+    "στων",
+    "τ'",
+    "ταις",
+    "τας",
+    "τες",
+    "τη",
+    "τοις",
+    "τω",
+}
+"""Includes contractions, Ancient Greek articles etc."""
 
-def localize_verb_inflection_raw_tags(form: Form) -> None:
+
+def translate_raw_tags(data: WordEntry) -> None:
     # Leaves raw_tags untouched
-    verb_tags = []
 
-    for raw_tag in form.raw_tags:
-        clean_raw_tag = raw_tag.replace("\n", " ").lower()
-        localized = base_tag_map.get(clean_raw_tag)
-        if localized is not None:
-            verb_tags.extend(localized)
+    for form in data.forms:
+        form_tags: list[str] = []
 
-    unique_tags = list(set(verb_tags))
-    unique_tags.sort()
-    form.tags.extend(unique_tags)
+        for raw_tag in form.raw_tags:
+            clean_raw_tag = raw_tag.replace("\n", " ").lower()
+            tags = base_tag_map.get(clean_raw_tag)
+            if tags is not None:
+                form_tags.extend(tags)
+
+        unique_tags = list(set(form_tags))
+        unique_tags.sort()
+        form.tags.extend(unique_tags)
 
 
 def process_inflection_section(
     wxr: WiktextractContext, data: WordEntry, snode: WikiNode
-):
+) -> None:
     table_nodes: list[tuple[str | None, WikiNode]] = []
     # template_depth is used as a nonlocal variable in bold_node_handler
     # to gauge how deep inside a top-level template we are; we want to
@@ -148,8 +174,25 @@ def process_inflection_section(
                 data.lang_code in GREEK_LANGCODES,
                 template_name=template_name or "",
             )
+
+            translate_raw_tags(data)
+
+            # Postprocess forms.
+            # XXX This should probably go into a "postprocess_forms"
+            # function, together with "remove_duplicate_forms" just below.
             for form in data.forms:
-                localize_verb_inflection_raw_tags(form)
+                parts = form.form.split()
+                # * Remove articles
+                if len(parts) > 1 and parts[0] in ARTICLES:
+                    form.form = " ".join(parts[1:])
+
+                if not form.form:
+                    continue
+
+                # Parens > rare inflection (cf. μπόι)
+                if form.form[0] == "(" and form.form[-1] == ")":
+                    form.form = form.form[1:-1]
+                    form.tags.append("rare")
 
     data.forms = remove_duplicate_forms(wxr, data.forms)
 
@@ -368,28 +411,7 @@ def parse_table(
                 prefix = text
             else:
                 # cell is data
-                if text in (
-                    "αι",
-                    "ένα",
-                    "ένας",
-                    "στα",
-                    "στη",
-                    "στην",
-                    "στης",
-                    "στις",
-                    "στο",
-                    "στον",
-                    "στου",
-                    "στους",
-                    "στων",
-                    "τ'",
-                    "ταις",
-                    "τας",
-                    "τες",
-                    "τη",
-                    "τοις",
-                    "τω",
-                ):
+                if text in UNEXPECTED_ARTICLES:
                     wxr.wtp.debug(
                         f"Found '{text}' in table '{wxr.wtp.title}'",
                         sortid="table/335",
