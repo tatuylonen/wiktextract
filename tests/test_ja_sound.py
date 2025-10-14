@@ -53,10 +53,10 @@ class TestJaSound(TestCase):
         self.assertEqual(
             data.sounds[:4],
             [
-                Sound(ipa="ˈpə.pi"),
-                Sound(ipa="ˈpʌp.i"),
-                Sound(ipa='"p@.pi', tags=["X-SAMPA"]),
-                Sound(ipa='"pVp.i', tags=["X-SAMPA"]),
+                Sound(ipa="/ˈpə.pi/"),
+                Sound(ipa="/ˈpʌp.i/"),
+                Sound(ipa='/"p@.pi/', tags=["X-SAMPA"]),
+                Sound(ipa='/"pVp.i/', tags=["X-SAMPA"]),
             ],
         )
         self.assertEqual(data.sounds[4].audio, "en-us-puppy.ogg")
@@ -174,19 +174,79 @@ class TestJaSound(TestCase):
         self.assertEqual(base_data.sounds[0].audio, "De-Aluminium.ogg")
 
     def test_zh_sounds(self):
-        self.wxr.wtp.start_page("議論")
-        self.wxr.wtp.add_page("テンプレート:nan", 10, "閩南語")
-        root = self.wxr.wtp.parse("""===発音===
-*注音符号: ㄧˋ　ㄌㄨㄣˋ
-*{{nan}}: gī-lūn""")
-        base_data = WordEntry(word="議論", lang_code="zh", lang="中国語")
-        page_data = [base_data.model_copy(deep=True)]
-        extract_sound_section(self.wxr, page_data, base_data, root.children[0])
+        self.wxr.wtp.add_page(
+            "テンプレート:zh-cat",
+            10,
+            "[[カテゴリ:中国語|ri4ben3]][[カテゴリ:中国語_固有名詞|ri4ben3]][[カテゴリ:中国語_アジアの国名|ri4ben3]]",
+        )
+        self.wxr.wtp.add_page(
+            "テンプレート:cmn-pron",
+            10,
+            """*標準中国語:
+*:[[w:国際音声記号|IPA]]<small>([[付録:中国語の発音表記|?]])</small>: <span class="IPA">/ʐ̩⁵¹ pən²¹⁴⁻²¹⁽⁴⁾/</span>[[カテゴリ:中国語]][[カテゴリ:中国語 国際音声記号あり]]""",
+        )
+        self.wxr.wtp.add_page(
+            "テンプレート:音声",
+            10,
+            """<table class="audiotable"><tr><td class="unicode audiolink">音声</td></td><td class="audiofile">[[File:LL-Q9192 (cmn)-Luilui6666-日本.wav|noicon|175px]]</td><td class="audiometa">([[:File:LL-Q9192 (cmn)-Luilui6666-日本.wav|ファイル]])</td></tr></table>[[カテゴリ:中国語 音声リンクがある語句|日00本]]""",
+        )
+        self.wxr.wtp.add_page(
+            "テンプレート:nan-pron",
+            10,
+            """*閩南語: [[w:廈門語|廈門]], [[w:泉州語|泉州]], [[w:台北市|台北]], [[w:フィリピン|フィリピン]]:
+** [[w:国際音声記号|IPA]] ([[w:廈門語|廈門]], [[w:台北市|台北]]): <span class="IPA">/lit̚⁴⁻³² pun⁵³/</span>[[カテゴリ:閩南語_国際音声記号あり]]""",
+        )
+        self.wxr.wtp.add_page("テンプレート:cpx", 10, "莆仙語")
+        data = parse_page(
+            self.wxr,
+            "日本",
+            """==中国語==
+{{zh-cat|ri4ben3|name|アジアの国名}}
+===発音===
+{{cmn-pron|Rìběn}}
+::{{音声|zh|LL-Q9192 (cmn)-Luilui6666-日本.wav}}
+{{nan-pron|zz,zp,kh,pn,sg:Ji̍t-pún/xm,qz,tp,jj,ph:Li̍t-pún}}
+*{{cpx}}: zih7 bong3, zih7 buong3
+===固有名詞===
+# 日本。""",
+        )
         self.assertEqual(
-            [s.model_dump(exclude_defaults=True) for s in base_data.sounds],
+            data[0]["sounds"],
             [
-                {"zh_pron": "ㄧˋ　ㄌㄨㄣˋ", "tags": ["Bopomofo"]},
-                {"zh_pron": "gī-lūn", "tags": ["Min-Nan"]},
+                {
+                    "tags": ["Standard-Chinese", "IPA"],
+                    "zh_pron": "/ʐ̩⁵¹ pən²¹⁴⁻²¹⁽⁴⁾/",
+                },
+                {
+                    "audio": "LL-Q9192 (cmn)-Luilui6666-日本.wav",
+                    "mp3_url": "https://upload.wikimedia.org/wikipedia/commons/transcoded/b/be/LL-Q9192_(cmn)-Luilui6666-日本.wav/LL-Q9192_(cmn)-Luilui6666-日本.wav.mp3",
+                    "ogg_url": "https://upload.wikimedia.org/wikipedia/commons/transcoded/b/be/LL-Q9192_(cmn)-Luilui6666-日本.wav/LL-Q9192_(cmn)-Luilui6666-日本.wav.ogg",
+                    "wav_url": "https://commons.wikimedia.org/wiki/Special:FilePath/LL-Q9192 (cmn)-Luilui6666-日本.wav",
+                },
+                {
+                    "tags": [
+                        "Min-Nan",
+                        "Xiamen",
+                        "Quanzhou",
+                        "Taipei",
+                        "Philippines",
+                        "IPA",
+                    ],
+                    "zh_pron": "/lit̚⁴⁻³² pun⁵³/",
+                },
+                {"tags": ["Puxian-Min"], "zh_pron": "zih7 bong3"},
+                {"tags": ["Puxian-Min"], "zh_pron": "zih7 buong3"},
+            ],
+        )
+        self.assertEqual(
+            data[0]["categories"],
+            [
+                "中国語",
+                "中国語_固有名詞",
+                "中国語_アジアの国名",
+                "中国語",
+                "中国語 国際音声記号あり",
+                "閩南語_国際音声記号あり",
             ],
         )
 

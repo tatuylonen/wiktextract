@@ -174,6 +174,9 @@ def parse_page(
         )
         for link_node in level2_node.find_child(NodeKind.LINK):
             clean_node(wxr, base_data, link_node)
+        for t_node in level2_node.find_child(NodeKind.TEMPLATE):
+            if t_node.template_name.endswith("-cat"):
+                clean_node(wxr, base_data, t_node)
         for level3_node in level2_node.find_child(NodeKind.LEVEL3):
             parse_section(wxr, page_data, base_data, level3_node)
 
