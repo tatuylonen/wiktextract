@@ -16,7 +16,7 @@ from .linkage import (
     extract_linkage_list_item,
     extract_linkage_template,
 )
-from .models import AltForm, Form, Sense, WordEntry
+from .models import AltForm, Classifier, Form, Sense, WordEntry
 from .section_titles import LINKAGE_SECTIONS, POS_DATA
 from .sound import SOUND_TEMPLATES, extract_sound_template
 from .tags import translate_raw_tags
@@ -123,6 +123,8 @@ def extract_gloss_list_item(
                     .split(",")
                 ]
             )
+        elif isinstance(node, TemplateNode) and node.template_name == "zh-mw":
+            extract_zh_mw_template(wxr, node, sense)
         else:
             gloss_nodes.append(node)
 
@@ -275,3 +277,39 @@ def extract_grammar_note_section(
 ) -> None:
     for list_item in level_node.find_child_recursively(NodeKind.LIST_ITEM):
         word_entry.note = clean_node(wxr, None, list_item.children)
+
+
+def extract_zh_mw_template(
+    wxr: WiktextractContext, t_node: TemplateNode, sense: Sense
+) -> None:
+    # Chinese inline classifier template
+    # copied from zh edition code
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    classifiers = []
+    last_word = ""
+    for span_tag in expanded_node.find_html_recursively("span"):
+        span_class = span_tag.attrs.get("class", "")
+        if span_class in ["Hani", "Hant", "Hans"]:
+            word = clean_node(wxr, None, span_tag)
+            if word != "／":
+                classifier = Classifier(classifier=word)
+                if span_class == "Hant":
+                    classifier.tags.append("Traditional-Chinese")
+                elif span_class == "Hans":
+                    classifier.tags.append("Simplified-Chinese")
+
+                if len(classifiers) > 0 and last_word != "／":
+                    sense.classifiers.extend(classifiers)
+                    classifiers.clear()
+                classifiers.append(classifier)
+            last_word = word
+        elif "title" in span_tag.attrs:
+            raw_tag = clean_node(wxr, None, span_tag.attrs["title"])
+            if len(raw_tag) > 0:
+                for classifier in classifiers:
+                    classifier.raw_tags.append(raw_tag)
+    sense.classifiers.extend(classifiers)
+    for classifier in sense.classifiers:
+        translate_raw_tags(classifier)

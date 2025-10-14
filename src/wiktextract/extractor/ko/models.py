@@ -48,6 +48,12 @@ class AltForm(KoreanBaseModel):
     word: str
 
 
+class Classifier(KoreanBaseModel):
+    classifier: str = ""
+    tags: list[str] = []
+    raw_tags: list[str] = []
+
+
 class Sense(KoreanBaseModel):
     glosses: list[str] = []
     tags: list[str] = []
@@ -58,6 +64,7 @@ class Sense(KoreanBaseModel):
     note: str = ""
     form_of: list[AltForm] = []
     pattern: str = Field(default="", description="Sentence structure, 문형")
+    classifiers: list[Classifier] = []
 
 
 class Linkage(KoreanBaseModel):
