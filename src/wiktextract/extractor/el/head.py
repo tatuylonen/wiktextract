@@ -3,6 +3,7 @@ from unicodedata import name as unicode_name
 
 from mediawiki_langcodes import code_to_name
 
+from wiktextract.clean import clean_value
 from wiktextract.extractor.en.form_descriptions import distw
 from wiktextract.wxr_context import WiktextractContext
 
@@ -12,6 +13,7 @@ BOLD_RE = re.compile(r"(__/?[BIL]__|\(|\)|, |\. |: )")
 
 
 def parse_head(wxr: WiktextractContext, pos_data: WordEntry, text: str) -> bool:
+    text = clean_value(wxr, text)
     split_text = BOLD_RE.split(text)
     # print(split_text)
 
@@ -94,6 +96,7 @@ def partition_head_forms(
     previous_token_was_period = False
     for i, t in enumerate(split_text):
         # print(f"{i}: {t=}")
+        # print(f"{current_forms=}, {current_tags=}. Now: {t=}")
         t2 = t.strip()
         if not t2 and t and previous_token_was_period:
             # Whitespace
@@ -154,6 +157,7 @@ def partition_head_forms(
                     if not f:
                         continue
                     current_forms.append(f)
+                # print(f"inside_bold {t=} {current_forms=}")
                 continue
 
             if inside_link or (
@@ -242,9 +246,9 @@ def partition_head_forms(
                     push_new_block()
             case "__B__":
                 # print(f"{current_forms=}, {current_tags=}")
-                if current_forms and current_tags:
+                if not inside_parens and current_forms and current_tags:
                     push_new_block()
-                else:
+                elif not inside_parens:
                     extend_old_block()
                 inside_bold = True
             case "__/B__":
