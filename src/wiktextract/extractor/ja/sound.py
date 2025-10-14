@@ -1,10 +1,17 @@
 import itertools
+import re
 
-from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
+from wikitextprocessor import (
+    HTMLNode,
+    LevelNode,
+    NodeKind,
+    TemplateNode,
+    WikiNode,
+)
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
-from ..share import set_sound_file_url_fields
+from ..share import capture_text_in_parentheses, set_sound_file_url_fields
 from .models import Sound, WordEntry
 from .tags import translate_raw_tags
 
@@ -17,13 +24,16 @@ def extract_sound_section(
 ) -> None:
     sounds = []
     cats = {}
-    if base_data.lang_code == "zh":
-        extract_zh_sounds(wxr, level_node, sounds)
-    else:
-        for template_node in level_node.find_child_recursively(
-            NodeKind.TEMPLATE
-        ):
-            process_sound_template(wxr, template_node, sounds, cats)
+    for node in level_node.children:
+        if isinstance(node, TemplateNode):
+            process_sound_template(wxr, node, sounds, cats)
+        elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
+            for list_item in node.find_child(NodeKind.LIST_ITEM):
+                if base_data.lang_code == "zh":
+                    extract_zh_sound_list_item(wxr, list_item, sounds, [])
+                else:
+                    for t_node in list_item.find_child(NodeKind.TEMPLATE):
+                        process_sound_template(wxr, t_node, sounds, cats)
 
     if level_node.kind == NodeKind.LEVEL3:
         base_data.sounds.extend(sounds)
@@ -42,53 +52,72 @@ def extract_sound_section(
 
 def process_sound_template(
     wxr: WiktextractContext,
-    template_node: TemplateNode,
+    t_node: TemplateNode,
     sounds: list[Sound],
     cats: dict[str, list[str]],
 ) -> None:
-    if template_node.template_name == "音声":
-        audio_file = clean_node(
-            wxr, None, template_node.template_parameters.get(2, "")
-        )
-        if audio_file not in ["", "-"]:
-            sound = Sound()
-            raw_tag = clean_node(
-                wxr, None, template_node.template_parameters.get(3, "")
-            )
-            if len(raw_tag) > 0:
-                sound.raw_tags.append(raw_tag)
-            set_sound_file_url_fields(wxr, audio_file, sound)
-            sounds.append(sound)
-    elif template_node.template_name in ["IPA", "X-SAMPA"]:
-        for index in itertools.count(1):
-            if index not in template_node.template_parameters:
-                break
-            ipa = clean_node(
-                wxr, None, template_node.template_parameters[index]
-            )
-            if len(ipa) > 0:
-                sound = Sound(ipa=ipa)
-                if template_node.template_name == "X-SAMPA":
-                    sound.tags.append("X-SAMPA")
-                sounds.append(sound)
-    elif template_node.template_name == "homophones":
-        homophones = []
-        for index in itertools.count(1):
-            if index not in template_node.template_parameters:
-                break
-            homophone = clean_node(
-                wxr, None, template_node.template_parameters[index]
-            )
-            if len(homophone) > 0:
-                homophones.append(homophone)
-        if len(homophones) > 0:
-            sounds.append(Sound(homophones=homophones))
-    elif template_node.template_name == "ja-pron":
-        process_ja_pron_template(wxr, template_node, sounds)
-    elif template_node.template_name == "ja-accent-common":
-        process_ja_accent_common_template(wxr, template_node, sounds)
+    if t_node.template_name in ["音声", "audio"]:
+        extract_audio_template(wxr, t_node, sounds)
+    elif t_node.template_name in ["IPA", "X-SAMPA"]:
+        extract_ipa_template(wxr, t_node, sounds)
+    elif t_node.template_name == "homophones":
+        extract_homophones_template(wxr, t_node, sounds)
+    elif t_node.template_name == "ja-pron":
+        process_ja_pron_template(wxr, t_node, sounds)
+    elif t_node.template_name == "ja-accent-common":
+        process_ja_accent_common_template(wxr, t_node, sounds)
+    elif t_node.template_name in [
+        "cmn-pron",
+        "yue-pron",
+        "nan-pron",
+        "cdo-pron",
+        "hak-pron",
+        "wuu-pron",
+    ]:
+        extract_zh_sound_template(wxr, t_node, sounds)
 
-    clean_node(wxr, cats, template_node)
+    clean_node(wxr, cats, t_node)
+
+
+def extract_audio_template(
+    wxr: WiktextractContext, t_node: TemplateNode, sounds: list[Sound]
+):
+    audio_file = clean_node(wxr, None, t_node.template_parameters.get(2, ""))
+    if audio_file not in ["", "-"]:
+        sound = Sound()
+        raw_tag = clean_node(wxr, None, t_node.template_parameters.get(3, ""))
+        if len(raw_tag) > 0:
+            sound.raw_tags.append(raw_tag)
+        set_sound_file_url_fields(wxr, audio_file, sound)
+        sounds.append(sound)
+
+
+def extract_ipa_template(
+    wxr: WiktextractContext, t_node: TemplateNode, sounds: list[Sound]
+):
+    for index in itertools.count(1):
+        if index not in t_node.template_parameters:
+            break
+        ipa = clean_node(wxr, None, t_node.template_parameters[index])
+        if len(ipa) > 0:
+            sound = Sound(ipa=f"/{ipa}/")
+            if t_node.template_name == "X-SAMPA":
+                sound.tags.append("X-SAMPA")
+            sounds.append(sound)
+
+
+def extract_homophones_template(
+    wxr: WiktextractContext, t_node: TemplateNode, sounds: list[Sound]
+):
+    homophones = []
+    for index in itertools.count(1):
+        if index not in t_node.template_parameters:
+            break
+        homophone = clean_node(wxr, None, t_node.template_parameters[index])
+        if len(homophone) > 0:
+            homophones.append(homophone)
+    if len(homophones) > 0:
+        sounds.append(Sound(homophones=homophones))
 
 
 JA_PRON_ACCENTS = {
@@ -179,30 +208,6 @@ def process_ja_accent_common_template(
         sounds.append(sound)
 
 
-def extract_zh_sounds(
-    wxr: WiktextractContext, level_node: LevelNode, sounds: list[Sound]
-) -> None:
-    for list_item in level_node.find_child_recursively(NodeKind.LIST_ITEM):
-        after_colon = False
-        tag_nodes = []
-        value_nodes = []
-        for child in list_item.children:
-            if isinstance(child, str) and ":" in child and not after_colon:
-                tag_nodes.append(child[: child.index(":")])
-                value_nodes.append(child[child.index(":") + 1 :])
-                after_colon = True
-            elif not after_colon:
-                tag_nodes.append(child)
-            else:
-                value_nodes.append(child)
-        sound = Sound(
-            zh_pron=clean_node(wxr, None, value_nodes),
-            raw_tags=[clean_node(wxr, None, tag_nodes)],
-        )
-        translate_raw_tags(sound)
-        sounds.append(sound)
-
-
 def extract_homophone_section(
     wxr: WiktextractContext,
     page_data: list[WordEntry],
@@ -242,3 +247,75 @@ def extract_homophone_section(
         page_data[-1].sounds.extend(sounds)
     else:
         base_data.sounds.extend(sounds)
+
+
+def extract_zh_sound_template(
+    wxr: WiktextractContext, t_node: TemplateNode, sounds: list[Sound]
+):
+    # https://ja.wiktionary.org/wiki/カテゴリ:中国語_発音テンプレート
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for list_node in expanded_node.find_child(NodeKind.LIST):
+        for list_item in list_node.find_child(NodeKind.LIST_ITEM):
+            raw_tags = []
+            raw_tag_nodes = []
+            for node in list_item.children:
+                if isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
+                    if len(raw_tags) == 0:
+                        for raw_tag in re.split(
+                            r":|,", clean_node(wxr, None, raw_tag_nodes)
+                        ):
+                            raw_tag = raw_tag.strip()
+                            if raw_tag != "":
+                                raw_tags.append(raw_tag)
+                    for child_list_item in node.find_child(NodeKind.LIST_ITEM):
+                        extract_zh_sound_list_item(
+                            wxr, child_list_item, sounds, raw_tags
+                        )
+                else:
+                    raw_tag_nodes.append(node)
+
+
+def extract_zh_sound_list_item(
+    wxr: WiktextractContext,
+    list_item: WikiNode,
+    sounds: list[Sound],
+    raw_tags: list[str],
+):
+    after_colon = False
+    tag_nodes = []
+    value_nodes = []
+    for node in list_item.children:
+        if isinstance(node, str) and ":" in node and not after_colon:
+            tag_nodes.append(node[: node.index(":")])
+            value_nodes.append(node[node.index(":") + 1 :])
+            after_colon = True
+        elif not after_colon:
+            if isinstance(node, TemplateNode) and node.template_name in [
+                "音声",
+                "audio",
+            ]:
+                extract_audio_template(wxr, node, sounds)
+            elif not (isinstance(node, HTMLNode) and node.tag == "small"):
+                tag_nodes.append(node)
+        else:
+            value_nodes.append(node)
+    for value in clean_node(wxr, None, value_nodes).split(","):
+        value = value.strip()
+        if value == "":
+            continue
+        sound = Sound(zh_pron=value, raw_tags=raw_tags)
+        texts_in_p, text_out_p = capture_text_in_parentheses(
+            clean_node(wxr, None, tag_nodes)
+        )
+        text_out_p = text_out_p.strip()
+        if text_out_p != "":
+            sound.raw_tags.append(text_out_p)
+        for raw_tag_str in texts_in_p:
+            for raw_tag in raw_tag_str.split(","):
+                raw_tag = raw_tag.strip()
+                if raw_tag != "":
+                    sound.raw_tags.append(raw_tag)
+        translate_raw_tags(sound)
+        sounds.append(sound)
