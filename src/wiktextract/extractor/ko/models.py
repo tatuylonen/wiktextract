@@ -42,6 +42,8 @@ class Example(KoreanBaseModel):
     bold_literal_offsets: list[tuple[int, int]] = []
     note: str = ""
     sounds: list[Sound] = []
+    tags: list[str] = []
+    raw_tags: list[str] = []
 
 
 class AltForm(KoreanBaseModel):

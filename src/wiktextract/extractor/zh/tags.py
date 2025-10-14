@@ -352,6 +352,7 @@ ZH_X_TAGS = {
     "粵語": "Cantonese",
     "吳語": "Wu",
     "廣州話": "Cantonese",
+    "臺灣華語": "Taiwanese-Mandarin",
 }
 
 # classifier tags

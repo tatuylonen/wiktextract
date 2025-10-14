@@ -19,6 +19,8 @@ GLOSS_TAGS = {
     "문학적": "literary",
     "해학적": "humorous",
     "완곡적": "euphemistic",
+    "가산": "countable",
+    "불가산": "uncountable",
 }
 
 SOUND_TAGS = {
@@ -115,6 +117,12 @@ TAGS = {
     # Template:zh-forms
     "정체": "Traditional-Chinese",
     "간체": "Simplified-Chinese",
+    # Template:zh-x
+    "대만 관화": "Taiwanese-Mandarin",
+    "표준 중국어": "Standard-Chinese",
+    "한어병음": "Pinyin",
+    "광저우 광둥어": "Guangzhou-Cantonese",
+    "월병": "Jyutping",
 }
 
 TOPICS = {
