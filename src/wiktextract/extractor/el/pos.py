@@ -183,10 +183,10 @@ def process_pos(
         elif kind == NodeKind.ITALIC or (
             isinstance(node, HTMLNode)
             and (
-                node.tag == "span"
-                and "style" in node.attrs
-                and (
-                    "italic" in node.attrs["style"]
+                (
+                    node.tag == "span"
+                    and "style" in node.attrs
+                    and "italic" in node.attrs["style"]
                 )
                 or node.tag == "i"
                 or node.tag == "em"
@@ -285,9 +285,11 @@ def process_pos(
         )
         if not stripped:
             continue
-        if not found_head and parse_head(wxr, data, stripped):
+        if not found_head and (parsed_forms := parse_head(wxr, stripped)):
             # print(data)
+            data.forms.extend(parsed_forms)
             found_head = True
+
     if not found_head:
         # There are a bunch of Greek Wiktionary articles with POS sections
         # without heads, but they seem to always follow ones with heads;

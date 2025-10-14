@@ -19,6 +19,9 @@ from wiktextract.tags import uppercase_tags, valid_tags
 
 
 # Tags used for modern Greek verb tables.
+#
+# Includes other verb related tags that may appear in headers etc.
+#
 # * Reference:
 #   https://el.wiktionary.org/wiki/Κατηγορία:Πρότυπα_κλίσης_ρημάτων_(νέα_ελληνικά)
 #
@@ -39,6 +42,12 @@ verb_table_tags_base: dict[str, list[str]] = {
     "α' πληθ.": ["first-person", "plural"],
     "β' πληθ.": ["second-person", "plural"],
     "γ' πληθ.": ["third-person", "plural"],
+    "Α' πρόσωπο": ["first-person"],
+    "Β' πρόσωπο": ["second-person"],
+    "Γ' πρόσωπο": ["third-person"],
+    "α' πρόσωπο": ["first-person"],
+    "β' πρόσωπο": ["second-person"],
+    "γ' πρόσωπο": ["third-person"],
     "ενικός": ["singular"],
     "πληθυντικός": ["plural"],
     "εγώ": ["first-person", "singular"],
@@ -69,23 +78,29 @@ verb_table_tags_base: dict[str, list[str]] = {
     # Basic tenses / aspects
     "ενεστώτας": ["present"],
     "παρατατικός": ["imperfect"],
+    "αόρ": ["aorist"],
     "αόριστος": ["aorist"],
     # Forms / moods
     "υποτακτική": ["subjunctive"],
     "προστακτική": ["imperative"],
     "μετοχή": ["participle"],
+    "μτχ.": ["participle"],
     "απαρέμφατο": ["infinitive"],
     # Future & perfect subtypes
     "εξακολουθητικός μέλλοντας": ["future", "imperfect"],
     "εξ. μέλλ.": ["future", "imperfect"],
     "συνοπτ. μέλλ.": ["future"],
     "στιγμιαίος μέλλοντας": ["future"],  # στιγμιαίος = συνοπτικός
+    "στ.μέλλ": ["future"],
     "συντελ. μέλλ.": ["future", "perfect"],
     "συντελεσμένος μέλλοντας α'": ["future", "perfect", "type-a"],
     "παρακείμενος": ["present", "perfect"],
     "παρακείμενος α'": ["present", "perfect", "type-a"],
     "υπερσυντέλικος": ["past", "perfect"],
     "υπερσυντέλικος α'": ["past", "perfect", "type-a"],
+    # Voices
+    "παθητική φωνή": ["passive"],
+    "παθ.φωνή": ["passive"],
     # Others
     "προσωπικές εγκλίσεις": ["personal"],  # ["personal-moods"],
     "απρόσωπες εγκλίσεις": ["impersonal"],  # ["impersonal-moods"],
@@ -104,6 +119,10 @@ base_tag_map: dict[str, list[str]] = {
     "αρσενικό": ["masculine"],
     "θηλυκό": ["feminine"],
     "ουδέτερο": ["neuter"],
+    # ------ Ancient Greek --------------------------
+    "δοτική": ["dative"],
+    "αφαιρετική": ["ablative"],
+    "τοπική": ["locative"],
     # ------ English --------------------------------
     "no-gloss": ["no-gloss"],
     "comparative": ["comparative"],
