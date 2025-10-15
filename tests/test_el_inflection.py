@@ -52,21 +52,8 @@ class TestElInflection(TestCase):
         forms = dumped["forms"]
         return forms
 
-    def _remove_dontcares(self, received):
-        dontcares = (
-            {"tags": ["inflection-template"]},
-            {"tags": ["inflection-template"], "source": "inflection"},
-            {"source": "inflection", "tags": ["inflection-template"]},
-        )
-        for dontcare in dontcares:
-            if dontcare in received:
-                idx = received.index(dontcare)
-                received.pop(idx)
-
     def mktest_form(self, raw, expected):
         received = self.xinfl("filler", "verb", raw.strip())
-
-        self._remove_dontcares(received)
 
         def normalize_forms(lst):
             for form in lst:
@@ -82,8 +69,6 @@ class TestElInflection(TestCase):
 
     def mktest_form_no_raw_tags(self, raw, expected):
         received = self.xinfl("filler", "verb", raw.strip())
-
-        self._remove_dontcares(received)
 
         def normalize_forms(lst):
             for form in lst:
@@ -189,6 +174,7 @@ class TestElInflection(TestCase):
 |}
 """
         expected = [
+            {"tags": ["inflection-template"]},
             {
                 "form": "πλάγιος",
                 "tags": ["masculine", "nominative", "singular"],
@@ -256,6 +242,7 @@ class TestElInflection(TestCase):
 |}
 """
         expected = [
+            {"tags": ["inflection-template"]},
             {"form": "αιδώς", "tags": ["nominative", "singular"]},
             {"form": "αιδούς", "tags": ["genitive", "singular"]},
             {"form": "αιδώ", "tags": ["accusative", "singular"]},
@@ -302,6 +289,7 @@ class TestElInflection(TestCase):
 |}
 """
         expected = [
+            {"tags": ["inflection-template"]},
             {"form": "αβγούλι", "tags": ["nominative", "singular"]},
             {"form": "αβγούλια", "tags": ["nominative", "plural"]},
             # There should be no genitive
@@ -485,6 +473,7 @@ class TestElInflection(TestCase):
 |}
 """
         expected = [
+            {"tags": ["inflection-template"]},
             {"form": "μπόι", "tags": ["nominative", "singular"]},
             {"form": "μπόγια", "tags": ["nominative", "plural"]},
             {"form": "μπογιού", "tags": ["genitive", "singular"]},
@@ -535,6 +524,7 @@ class TestElInflection(TestCase):
         """.strip()
 
         expected = [
+            {"tags": ["inflection-template"]},
             {
                 "form": "πίνω",
                 "tags": ["first-person", "imperfective", "present", "singular"],
