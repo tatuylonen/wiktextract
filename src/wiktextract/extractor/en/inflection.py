@@ -2822,7 +2822,7 @@ def parse_simple_table(
     # table.  This way we can reliably detect where a new table starts.
     # Table-tags applies until the next table-tags entry.
     if ret or table_tags:
-        table_tags = list(sorted(set(table_tags)))
+        table_tags = sorted(set(table_tags))
         dt = {
             "form": " ".join(table_tags),
             "source": source,

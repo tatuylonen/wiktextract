@@ -721,7 +721,7 @@ def parse_translation_item_text(
                     )
 
             if "tags" in tr:
-                tr["tags"] = list(sorted(set(tr["tags"])))
+                tr["tags"] = sorted(set(tr["tags"]))
 
             # If we have only notes, add as-is
             if "word" not in tr:

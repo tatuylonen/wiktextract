@@ -394,7 +394,7 @@ def process_pos(
     # do stuff with head_text, like parsing it for different forms.
     # Unfortunately, you often have to parse stuff by hand.
 
-    template_tags = list(set(template_tags))
+    template_tags = sorted(set(template_tags))
     data.forms.extend(template_forms)
     data.forms = remove_duplicate_forms(wxr, data.forms)
     data.tags.extend(template_tags)

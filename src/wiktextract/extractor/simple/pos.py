@@ -384,7 +384,7 @@ def process_pos(
         else:
             break
 
-    template_tags = list(set(template_tags))
+    template_tags = sorted(set(template_tags))
     data.forms.extend(template_forms)
     data.forms = remove_duplicate_forms(wxr, data.forms)
     data.tags.extend(template_tags)

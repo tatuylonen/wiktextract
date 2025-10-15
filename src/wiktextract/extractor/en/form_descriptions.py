@@ -1736,7 +1736,7 @@ def add_related(
                             or topics2
                             or ruby
                         ):
-                            data_extend(form, "tags", list(sorted(set(tags))))
+                            data_extend(form, "tags", sorted(set(tags)))
                         else:
                             # We won't add canonical form here
                             filtered_tags = list(
@@ -1745,7 +1745,7 @@ def add_related(
                             data_extend(data, "tags", filtered_tags)
                             continue
                     else:
-                        data_extend(form, "tags", list(sorted(set(tags))))
+                        data_extend(form, "tags", sorted(set(tags)))
                     # Only insert if the form is not already there
                     for old in data.get("forms", ()):
                         if form == old:
@@ -2623,7 +2623,7 @@ def parse_word_head(
                         # tags here; cf. burn/English/Verb
                         for tags_l in tagsets:
                             for ts in prev_tags:
-                                tags_l1 = list(sorted(set(tags_l) | set(ts)))
+                                tags_l1 = sorted(set(tags_l) | set(ts))
                                 add_related(
                                     wxr,
                                     data,
@@ -2723,7 +2723,7 @@ def parse_word_head(
         #     f"Tags appear in word root data: {data['tags']=}",  # type:ignore
         #     sortid="form_descriptions/2620/20240606",
         # )  # Messes up tests.
-        data["tags"] = list(sorted(set(tags)))  # type:ignore
+        data["tags"] = sorted(set(tags))  # type:ignore
 
 
 def parse_sense_qualifier(
@@ -2776,7 +2776,7 @@ def parse_sense_qualifier(
                     "unrecognized sense qualifier: {}".format(text),
                     sortid="form_descriptions/1831",
                 )
-    sense_tags = list(sorted(set(sense_tags)))
+    sense_tags = sorted(set(sense_tags))
     data_extend(data, "tags", sense_tags)
 
 
@@ -3210,7 +3210,7 @@ def parse_alt_or_inflection_of1(
                 lst = lst[:-1]
 
     # Eliminate empty and duplicate tags
-    tags = list(sorted(set(t for t in tags if t)))
+    tags = sorted(set(t for t in tags if t))
 
     # Clean up some extra stuff from the linked word, separating the text
     # into ``base`` (the linked word) and ``extra`` (additional information,

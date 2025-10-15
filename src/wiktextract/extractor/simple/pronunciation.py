@@ -347,11 +347,11 @@ def process_pron(
     for st in sound_templates:
         legit_tags, raw_tags, poses = convert_tags(st.raw_tags)
         if len(legit_tags) > 0:
-            st.tags = list(set(legit_tags))
-            st.raw_tags = list(set(raw_tags))
+            st.tags = sorted(set(legit_tags))
+            st.raw_tags = sorted(set(raw_tags))
         if len(poses) > 0:
             st.poses.extend(poses)
-        st.poses = list(set(st.poses))
+        st.poses = sorted(set(st.poses))
 
     if len(sound_templates) > 0:
         # completely replace sound data with new

@@ -105,8 +105,7 @@ def translate_raw_tags(data: WordEntry) -> None:
             if tags is not None:
                 form_tags.extend(tags)
 
-        unique_tags = list(set(form_tags))
-        unique_tags.sort()
+        unique_tags = sorted(set(form_tags))
         form.tags.extend(unique_tags)
 
 
