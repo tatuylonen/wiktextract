@@ -4,8 +4,9 @@ from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from ..ruby import extract_ruby
 from ..share import capture_text_in_parentheses
-from .models import Form, Linkage, WordEntry
+from .models import Descendant, Form, Linkage, WordEntry
 from .section_types import LINKAGE_SECTIONS, LINKAGE_TAGS
 from .tags import translate_raw_tags
 
@@ -16,9 +17,7 @@ def extract_linkage(
     level_node: LevelNode,
     section_type: str,
 ) -> None:
-    if section_type == "dérivés autres langues":
-        process_derives_autres_list(wxr, page_data, level_node)
-    elif section_type == "anagrammes":
+    if section_type == "anagrammes":
         for node in level_node.find_child(NodeKind.TEMPLATE):
             if node.template_name == "voir anagrammes":
                 anagram_list = process_voir_anagrammes_template(wxr, node)
@@ -35,21 +34,21 @@ def extract_linkage(
         )
 
 
-def process_derives_autres_list(
-    wxr: WiktextractContext, page_data: list[WordEntry], level_node: LevelNode
+def extract_desc_section(
+    wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
 ):
     # drrive to other languages list
     for list_item in level_node.find_child_recursively(NodeKind.LIST_ITEM):
-        lang_code = ""
-        lang_name = ""
+        lang_code = "unknown"
+        lang_name = "unknown"
         for node in list_item.find_child(NodeKind.TEMPLATE | NodeKind.LINK):
             if isinstance(node, TemplateNode) and node.template_name == "L":
                 lang_code = node.template_parameters.get(1)
                 lang_name = clean_node(wxr, None, node)
             elif node.kind == NodeKind.LINK:
                 word = clean_node(wxr, None, node)
-                page_data[-1].derived.append(
-                    Linkage(lang_code=lang_code, lang=lang_name, word=word)
+                word_entry.descendants.append(
+                    Descendant(lang_code=lang_code, lang=lang_name, word=word)
                 )
             elif isinstance(node, TemplateNode) and node.template_name in [
                 "l",
@@ -57,11 +56,34 @@ def process_derives_autres_list(
                 "zh-lien",
                 "zh-lien-t",
             ]:
-                linkage_data = Linkage(
-                    lang_code=lang_code, lang=lang_name, word=""
+                l_data = Linkage(word="")
+                process_linkage_template(wxr, node, l_data)
+                word_entry.descendants.append(
+                    Descendant(
+                        lang=lang_name,
+                        lang_code=lang_code,
+                        word=l_data.word,
+                        roman=l_data.roman,
+                        ruby=l_data.ruby,
+                        tags=l_data.tags,
+                        raw_tags=l_data.raw_tags,
+                    )
                 )
-                process_linkage_template(wxr, node, linkage_data)
-                page_data[-1].derived.append(linkage_data)
+            elif (
+                isinstance(node, TemplateNode) and node.template_name == "zh-l"
+            ):
+                l_list = extract_zh_l_template(wxr, node)
+                for l_data in l_list:
+                    word_entry.descendants.append(
+                        Descendant(
+                            lang=lang_name,
+                            lang_code=lang_code,
+                            word=l_data.word,
+                            roman=l_data.roman,
+                            tags=l_data.tags,
+                            raw_tags=l_data.raw_tags,
+                        )
+                    )
 
 
 def extract_linkage_section(
@@ -138,6 +160,15 @@ def extract_linkage_list_item(
             "zh-lien-t",
         ]:
             process_linkage_template(wxr, child_node, linkage_data)
+        elif (
+            isinstance(child_node, TemplateNode)
+            and child_node.template_name == "zh-l"
+        ):
+            getattr(word_entry, linkage_type).extend(
+                extract_zh_l_template(
+                    wxr, child_node, section_tags, sense, sense_index
+                )
+            )
         elif (
             isinstance(child_node, TemplateNode)
             and child_node.template_name == "cf"
@@ -264,9 +295,7 @@ def add_linkage_data(
 
 
 def process_linkage_template(
-    wxr: WiktextractContext,
-    node: TemplateNode,
-    linkage_data: Linkage,
+    wxr: WiktextractContext, node: TemplateNode, linkage_data: Linkage
 ) -> None:
     if node.template_name in ["lien", "l"]:
         process_lien_template(wxr, node, linkage_data)
@@ -275,31 +304,32 @@ def process_linkage_template(
 
 
 def process_lien_template(
-    wxr: WiktextractContext,
-    node: TemplateNode,
-    linkage_data: Linkage,
+    wxr: WiktextractContext, node: TemplateNode, linkage_data: Linkage
 ) -> None:
     # link word template: https://fr.wiktionary.org/wiki/Modèle:lien
-    word = clean_node(
+    ruby, without_ruby = extract_ruby(
         wxr,
-        None,
-        node.template_parameters.get("dif", node.template_parameters.get(1)),
+        wxr.wtp.parse(
+            wxr.wtp.node_to_wikitext(
+                node.template_parameters.get(
+                    "dif", node.template_parameters.get(1)
+                )
+            ),
+            expand_all=True,
+        ),
     )
-    linkage_data.word = word
-    if "tr" in node.template_parameters:
-        linkage_data.roman = clean_node(
-            wxr, None, node.template_parameters.get("tr")
-        )
-    if "sens" in node.template_parameters:
-        linkage_data.translation = clean_node(
-            wxr, None, node.template_parameters.get("sens")
-        )
+    linkage_data.word = clean_node(wxr, None, without_ruby)
+    linkage_data.ruby = ruby
+    linkage_data.roman = clean_node(
+        wxr, None, node.template_parameters.get("tr", "")
+    )
+    linkage_data.translation = clean_node(
+        wxr, None, node.template_parameters.get("sens", "")
+    )
 
 
 def process_zh_lien_template(
-    wxr: WiktextractContext,
-    node: TemplateNode,
-    linkage_data: Linkage,
+    wxr: WiktextractContext, node: TemplateNode, linkage_data: Linkage
 ) -> None:
     # https://fr.wiktionary.org/wiki/Modèle:zh-lien
     linkage_data.word = clean_node(wxr, None, node.template_parameters.get(1))
@@ -327,3 +357,42 @@ def process_voir_anagrammes_template(
             if len(word) > 0:
                 results.append(Linkage(word=word))
     return results
+
+
+def extract_zh_l_template(
+    wxr: WiktextractContext,
+    t_node: TemplateNode,
+    raw_tags: list[str] = [],
+    sense: str = "",
+    sense_index: int = 0,
+) -> list[Linkage]:
+    # https://fr.wiktionary.org/wiki/Modèle:zh-l
+    roman = clean_node(wxr, None, t_node.template_parameters.get(2, ""))
+    new_sense = clean_node(wxr, None, t_node.template_parameters.get(3, ""))
+    if new_sense != "":
+        sense = new_sense
+    l_list = []
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for span_tag in expanded_node.find_html(
+        "span", attr_name="lang", attr_value="zh"
+    ):
+        word = clean_node(wxr, None, span_tag)
+        if word != "":
+            l_data = Linkage(
+                word=word,
+                sense=sense,
+                sense_index=sense_index,
+                raw_tags=raw_tags,
+                roman=roman,
+            )
+            translate_raw_tags(l_data)
+            l_list.append(l_data)
+    if len(l_list) == 2:
+        for index, l_data in enumerate(l_list):
+            if index == 0:
+                l_data.tags.append("Traditional-Chinese")
+            else:
+                l_data.tags.append("Simplified-Chinese")
+    return l_list

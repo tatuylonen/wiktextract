@@ -135,6 +135,13 @@ def extract_example_list_item(
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
             for tr_item in node.find_child(NodeKind.LIST_ITEM):
                 e_data.translation = clean_node(wxr, None, tr_item.children)
+                calculate_bold_offsets(
+                    wxr,
+                    wxr.wtp.parse(wxr.wtp.node_to_wikitext(tr_item.children)),
+                    e_data.translation,
+                    e_data,
+                    "bold_translation_offsets",
+                )
         else:
             e_nodes.append(node)
 

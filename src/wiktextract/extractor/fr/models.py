@@ -107,8 +107,9 @@ class Linkage(FrenchBaseModel):
     sense_index: int = Field(
         default=0, ge=0, description="Number of the definition, start from 1"
     )
-    lang: str = Field(default="", description="Localized language name")
-    lang_code: str = Field(default="", description="Wiktionary language code")
+    ruby: list[tuple[str, ...]] = Field(
+        default=[], description="Japanese Kanji and furigana"
+    )
 
 
 class AltForm(FrenchBaseModel):
@@ -126,6 +127,19 @@ class Sense(FrenchBaseModel):
     alt_of: list[AltForm] = []
     form_of: list[AltForm] = []
     attestations: list[AttestationData] = []
+
+
+class Descendant(FrenchBaseModel):
+    lang_code: str = Field(default="", description="Wiktionary language code")
+    lang: str = Field(default="", description="Language name")
+    word: str = ""
+    roman: str = ""
+    tags: list[str] = []
+    raw_tags: list[str] = []
+    ruby: list[tuple[str, ...]] = Field(
+        default=[], description="Japanese Kanji and furigana"
+    )
+    sense: str = ""
 
 
 class WordEntry(FrenchBaseModel):
@@ -173,3 +187,4 @@ class WordEntry(FrenchBaseModel):
     raw_tags: list[str] = []
     attestations: list[AttestationData] = []
     original_title: str = ""
+    descendants: list[Descendant] = []
