@@ -184,7 +184,7 @@ class TestElHeader(TestCase):
     def test_parsing_logio(self) -> None:
         # https://el.wiktionary.org/wiki/αιδώς
         # Test that logio (literary) is correctly parsed
-        self.wxr.wtp.add_page("Πρότυπο:-el-", 10, "Greek")
+        self.wxr.wtp.add_page("Πρότυπο:-el-", 10, "Νέα ελληνικά (el)")
         self.wxr.wtp.add_page("Πρότυπο:ουσιαστικό", 10, "Ουσιαστικό")
         self.wxr.wtp.add_page(
             "Πρότυπο:ετ",
@@ -200,6 +200,7 @@ class TestElHeader(TestCase):
         raw = """=={{-el-}}==
 ==={{ουσιαστικό|el}}===
 '''{{PAGENAME}}''' {{θεν}} {{ετ|λόγιο}}
+* foo
 """
         word = "αιδώς"
         page_datas = parse_page(self.wxr, word, raw)
@@ -216,7 +217,7 @@ class TestElHeader(TestCase):
 
     def test_parsing_forms_and_tags(self) -> None:
         # https://el.wiktionary.org/wiki/γάιδαρος
-        self.wxr.wtp.add_page("Πρότυπο:-el-", 10, "Greek")
+        self.wxr.wtp.add_page("Πρότυπο:-el-", 10, "Νέα ελληνικά (el)")
         self.wxr.wtp.add_page("Πρότυπο:ουσιαστικό", 10, "Ουσιαστικό")
         self.wxr.wtp.add_page(
             "Πρότυπο:α",
@@ -232,6 +233,7 @@ class TestElHeader(TestCase):
         raw = """=={{-el-}}==
 ==={{ουσιαστικό|el}}===
 '''{{PAGENAME}}''' {{α}} {{θ|γαϊδάρα|ή=γαϊδούρα}}
+* foo
 """
         word = "γάιδαρος"
         page_datas = parse_page(self.wxr, word, raw)
