@@ -242,8 +242,10 @@ TABLE_TAGS = {
 SOUND_TAGS = {
     "Pinyin": "Pinyin",
     "Bopomofo": "Bopomofo",
+    "bopomofo": "Bopomofo",
     "hiragana": "hiragana",
     "romaji": "Rōmaji",
+    "Jyutping": "Jyutping",
 }
 
 
