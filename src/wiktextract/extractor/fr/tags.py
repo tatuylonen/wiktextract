@@ -401,10 +401,10 @@ ZH_PRON_TAGS = {
     "pha̍k-fa-sṳ": "Phak-fa-su",
     "meixian, guangdong": ["Meixian", "Guangdong"],
     "jin": "Jin",
-    "mindong": "Eastern-Min",
+    "mindong": "Min-Dong",
     # https://en.wikipedia.org/wiki/Bàng-uâ-cê
     "bàng-uâ-cê (fuzhou)": ["Bang-ua-ce", "Fuzhou"],
-    "minnan": "Min",
+    "minnan": "Min-Nan",
     "pe̍h-ōe-jī (hokkien : fujian, taïwan)": [
         "Peh-oe-ji",
         "Hokkien",
@@ -455,7 +455,7 @@ def translate_raw_tags(data: WordEntry) -> WordEntry:
         raw_tag_lower = raw_tag.lower()
         if raw_tag_lower in GRAMMATICAL_TAGS:
             tr_tag = GRAMMATICAL_TAGS[raw_tag_lower]
-            if isinstance(tr_tag, str):
+            if isinstance(tr_tag, str) and tr_tag not in data.tags:
                 data.tags.append(tr_tag)
             elif isinstance(tr_tag, list):
                 for t in tr_tag:

@@ -95,6 +95,7 @@ def extract_ruby(
         NodeKind.TABLE_CELL,
         NodeKind.PRE,
         NodeKind.PREFORMATTED,
+        NodeKind.ROOT,
     }:
         # Process only children
         e1, c1 = extract_ruby(wxr, contents.children)

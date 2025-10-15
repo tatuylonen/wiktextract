@@ -5,9 +5,8 @@ from unicodedata import name as unicode_name
 from wikitextprocessor import HTMLNode, NodeKind, TemplateNode, WikiNode
 
 from wiktextract.clean import clean_value
-from wiktextract.extractor.el.tags import base_tag_map
+from wiktextract.extractor.el.tags import translate_raw_tags
 from wiktextract.wxr_context import WiktextractContext
-from wiktextract.wxr_logging import logger
 
 from .models import Form, WordEntry
 from .parse_utils import GREEK_LANGCODES, remove_duplicate_forms
@@ -93,22 +92,6 @@ UNEXPECTED_ARTICLES = {
 """Includes contractions, Ancient Greek articles etc."""
 
 
-def translate_raw_tags(data: WordEntry) -> None:
-    # Leaves raw_tags untouched
-
-    for form in data.forms:
-        form_tags: list[str] = []
-
-        for raw_tag in form.raw_tags:
-            clean_raw_tag = raw_tag.replace("\n", " ").lower()
-            tags = base_tag_map.get(clean_raw_tag)
-            if tags is not None:
-                form_tags.extend(tags)
-
-        unique_tags = sorted(set(form_tags))
-        form.tags.extend(unique_tags)
-
-
 def process_inflection_section(
     wxr: WiktextractContext, data: WordEntry, snode: WikiNode
 ) -> None:
@@ -174,7 +157,8 @@ def process_inflection_section(
                 template_name=template_name or "",
             )
 
-            translate_raw_tags(data)
+            for form in data.forms:
+                translate_raw_tags(form)
 
             # Postprocess forms.
             # XXX This should probably go into a "postprocess_forms"

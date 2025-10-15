@@ -192,7 +192,6 @@ LINKAGE_SECTIONS: dict[str, str] = {
     "app": "related",
     "apparentés": "related",
     "apr": "related",
-    "dérivés autres langues": "derived",
     "dérivés int": "derived",
     "dérivés": "derived",
     "dial": "forms",

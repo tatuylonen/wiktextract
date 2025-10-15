@@ -11,6 +11,7 @@ from wikitextprocessor.parser import (
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from ...wxr_logging import logger
+from .descendant import extract_desc_section
 from .etymology import (
     EtymologyData,
     extract_etymology,
@@ -128,6 +129,12 @@ def parse_section(
                     base_data,
                     level_node,
                     title_categories.get("categories", []),
+                )
+            elif section_type == "dérivés autres langues":
+                extract_desc_section(
+                    wxr,
+                    page_data[-1] if len(page_data) > 0 else base_data,
+                    level_node,
                 )
             else:
                 wxr.wtp.debug(
