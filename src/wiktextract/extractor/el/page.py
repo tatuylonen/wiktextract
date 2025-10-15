@@ -159,7 +159,12 @@ def parse_page(
                 if isinstance(
                     child, TemplateNode
                 ) and child.template_name.startswith("el-κλίση"):
-                    process_inflection_section(wxr, base_data, child)
+                    process_inflection_section(
+                        wxr,
+                        base_data,
+                        child,
+                        source="declension",
+                    )
 
         for sublevel in sublevels:
             if len(sublevel.largs) == 0:

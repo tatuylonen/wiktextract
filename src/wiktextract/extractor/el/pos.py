@@ -471,7 +471,7 @@ def process_pos(
         if type == Heading.Translations:
             process_translations(wxr, data, sl)
         elif type == Heading.Infl:
-            process_inflection_section(wxr, data, sl)
+            process_inflection_section(wxr, data, sl, source="conjugation")
         elif type in (
             Heading.Related,
             Heading.Synonyms,

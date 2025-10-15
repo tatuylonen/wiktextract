@@ -46,28 +46,53 @@ class TestElInflection(TestCase):
         self.wxr.wtp.start_subsection(pos)
         tree = self.wxr.wtp.parse(text)
         data = WordEntry(lang=lang, lang_code="el", word=word)
-        process_inflection_section(self.wxr, data, tree)
+        process_inflection_section(self.wxr, data, tree)  # note that source=""
         dumped = data.model_dump(exclude_defaults=True)
         forms = dumped["forms"]
         return forms
 
-    def mktest_conjugation(self, raw, expected):
+    def _remove_dontcares(self, received):
+        dontcares = (
+            {"tags": ["inflection-template"]},
+            {"tags": ["inflection-template"], "source": "inflection"},
+            {"source": "inflection", "tags": ["inflection-template"]},
+        )
+        for dontcare in dontcares:
+            if dontcare in received:
+                idx = received.index(dontcare)
+                received.pop(idx)
+
+    def mktest_form(self, raw, expected):
         received = self.xinfl("filler", "verb", raw.strip())
 
-        def sort_tags(lst):
+        self._remove_dontcares(received)
+
+        def normalize_forms(lst):
             for form in lst:
-                # Remove raw_tags for comparison
+                if "raw_tags" in form:
+                    form["raw_tags"].sort()
+                if "tags" in form:
+                    form["tags"].sort()
+
+        normalize_forms(received)
+        normalize_forms(expected)
+
+        self.assertEqual(received, expected)
+
+    def mktest_form_no_raw_tags(self, raw, expected):
+        received = self.xinfl("filler", "verb", raw.strip())
+
+        self._remove_dontcares(received)
+
+        def normalize_forms(lst):
+            for form in lst:
                 if "raw_tags" in form:
                     del form["raw_tags"]
                 if "tags" in form:
                     form["tags"].sort()
 
-        # Remove boilerplate for the moment
-        if {"tags": ["inflection-template"]} in received:
-            idx = received.index({"tags": ["inflection-template"]})
-            received.pop(idx)
-        sort_tags(received)
-        sort_tags(expected)
+        normalize_forms(received)
+        normalize_forms(expected)
 
         self.assertEqual(received, expected)
 
@@ -200,7 +225,7 @@ class TestElInflection(TestCase):
             {"form": "πλάγιες", "tags": ["feminine", "plural", "vocative"]},
             {"form": "πλάγια", "tags": ["neuter", "plural", "vocative"]},
         ]
-        self.mktest_conjugation(raw, expected)
+        self.mktest_form_no_raw_tags(raw, expected)
 
     def test_noun_inflection_only_singular(self):
         # https://el.wiktionary.org/wiki/αιδώς
@@ -235,7 +260,7 @@ class TestElInflection(TestCase):
             {"form": "αιδώ", "tags": ["accusative", "singular"]},
             {"form": "αιδώ", "tags": ["vocative", "singular"]},
         ]
-        self.mktest_conjugation(raw, expected)
+        self.mktest_form_no_raw_tags(raw, expected)
 
     def test_noun_inflection_no_genitive(self) -> None:
         # https://el.wiktionary.org/wiki/αβγούλι
@@ -284,7 +309,7 @@ class TestElInflection(TestCase):
             {"form": "αβγούλι", "tags": ["vocative", "singular"]},
             {"form": "αβγούλια", "tags": ["vocative", "plural"]},
         ]
-        self.mktest_conjugation(raw, expected)
+        self.mktest_form_no_raw_tags(raw, expected)
 
     def test_noun_inflection_standard(self):
         raw = """
@@ -335,4 +360,4 @@ class TestElInflection(TestCase):
             {"form": "μπόι", "tags": ["vocative", "singular"]},
             {"form": "μπόγια", "tags": ["vocative", "plural"]},
         ]
-        self.mktest_conjugation(raw, expected)
+        self.mktest_form_no_raw_tags(raw, expected)

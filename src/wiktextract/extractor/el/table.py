@@ -8,7 +8,7 @@ from wiktextract.clean import clean_value
 from wiktextract.extractor.el.tags import translate_raw_tags
 from wiktextract.wxr_context import WiktextractContext
 
-from .models import Form, WordEntry
+from .models import Form, FormSource, WordEntry
 from .parse_utils import GREEK_LANGCODES, remove_duplicate_forms
 
 # from .simple_tags import simple_tag_map
@@ -93,7 +93,11 @@ UNEXPECTED_ARTICLES = {
 
 
 def process_inflection_section(
-    wxr: WiktextractContext, data: WordEntry, snode: WikiNode
+    wxr: WiktextractContext,
+    data: WordEntry,
+    snode: WikiNode,
+    *,
+    source: FormSource = "",
 ) -> None:
     table_nodes: list[tuple[str | None, WikiNode]] = []
     # template_depth is used as a nonlocal variable in bold_node_handler
@@ -155,6 +159,7 @@ def process_inflection_section(
                 data,
                 data.lang_code in GREEK_LANGCODES,
                 template_name=template_name or "",
+                source=source,
             )
 
             for form in data.forms:
@@ -186,6 +191,8 @@ def parse_table(
     data: WordEntry,
     is_greek_entry: bool = False,  # Whether the entry is for a Greek word
     template_name: str = "",
+    *,
+    source: FormSource = "",
 ) -> None:
     """Parse inflection table. Generates 'form' data; 'foos' is a form of 'foo'
     with the tags ['plural']."""
@@ -423,7 +430,12 @@ def parse_table(
                     # If a cell has no tags in a table, it's probably a note
                     # or something.
                     forms.extend(
-                        Form(form=text, raw_tags=list(tags)) for text in texts
+                        Form(
+                            form=text,
+                            raw_tags=list(tags),
+                            source=source,
+                        )
+                        for text in texts
                     )
                 else:
                     wxr.wtp.warning(
@@ -450,7 +462,11 @@ def parse_table(
 
     if len(forms) > 0:
         data.forms.append(
-            Form(form=template_name, tags=["inflection-template"])
+            Form(
+                form=template_name,
+                tags=["inflection-template"],
+                source=source,
+            )
         )
 
         data.forms.extend(forms)

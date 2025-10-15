@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pydantic import BaseModel, ConfigDict, Field
 
 # Pydantic models are basically classes that take the place of the dicts
@@ -154,6 +156,9 @@ class Sense(GreekBaseModel):
         self.related.extend(other.related)
 
 
+FormSource = Literal["declension", "conjugation", "header", ""]
+
+
 # An inflected form of the word, like `{ form: "bats", tags: ["plural"] }`
 class Form(GreekBaseModel):
     form: str = ""
@@ -164,7 +169,7 @@ class Form(GreekBaseModel):
     ipa: str = ""
     # roman: str = ""
     # ruby: list[tuple[str, str]] = []
-    source: str = ""
+    source: FormSource = ""
     # sense_index: str = ""
 
 
