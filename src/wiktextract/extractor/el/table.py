@@ -157,7 +157,8 @@ def process_inflection_section(
                 template_name=template_name or "",
             )
 
-            translate_raw_tags(data)
+            for form in data.forms:
+                translate_raw_tags(form)
 
             # Postprocess forms.
             # XXX This should probably go into a "postprocess_forms"

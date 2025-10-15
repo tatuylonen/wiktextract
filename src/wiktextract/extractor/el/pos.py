@@ -14,6 +14,7 @@ from wikitextprocessor import (
 from wikitextprocessor.parser import LEVEL_KIND_FLAGS
 
 from wiktextract import WiktextractContext
+from wiktextract.extractor.el.tags import translate_raw_tags
 from wiktextract.page import clean_node
 from wiktextract.wxr_logging import logger
 
@@ -286,7 +287,8 @@ def process_pos(
         if not stripped:
             continue
         if not found_head and (parsed_forms := parse_head(wxr, stripped)):
-            # print(data)
+            for form in parsed_forms:
+                translate_raw_tags(form)
             data.forms.extend(parsed_forms)
             found_head = True
 
