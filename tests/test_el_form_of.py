@@ -218,8 +218,7 @@ class TestElGlosses(TestCase):
         # https://el.wiktionary.org/wiki/πιάνο_τοίχου
         # Should ignore expansion depending on the second argument
         raw = "* {{γρ|όρθιο πιάνο|συνων}}"
-        expected = [{}]
-        self.mktest_sense(raw, expected)
+        self.mktest_sense(raw, [{}])
 
     def test_gr_linkage_second_arg_variant(self) -> None:
         # https://el.wiktionary.org/wiki/μαλακή_υπερώα
@@ -230,11 +229,9 @@ class TestElGlosses(TestCase):
     def test_gr_linkage_second_arg_empty(self) -> None:
         # Seen via ripgrep
         raw = "* {{γρ|well-rounded||en}}"
-        expected = [{}]
-        self.mktest_sense(raw, expected)
+        self.mktest_sense(raw, [{}])
 
     def test_gr_linkage_one_arg(self) -> None:
         # Seen via ripgrep
         raw = "* {{γρ|τάδε}}"
-        expected = [{}]
-        self.mktest_sense(raw, expected)
+        self.mktest_sense(raw, [{}])

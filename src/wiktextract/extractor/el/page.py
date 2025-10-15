@@ -33,10 +33,7 @@ from .parse_utils import (
 )
 from .pos import process_pos
 from .pronunciation import process_pron
-from .section_titles import (
-    Heading,
-    Tags,
-)
+from .section_titles import Heading
 
 # from .text_utils import ENDING_NUMBER_RE
 

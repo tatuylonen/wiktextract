@@ -109,15 +109,15 @@ def process_inflection_section(
 
     def table_node_handler_fn(
         node: WikiNode,
-    ) -> list[str | WikiNode] | None:
+    ) -> list[str] | str | None:
         """Insert special markers `__*__` and `__/*__` around bold nodes so
         that the strings can later be split into "head-word" and "tag-words"
         parts. Collect incidental stuff, like side-tables, that are often
         put around the head."""
         assert isinstance(node, WikiNode)
-        kind = node.kind
         nonlocal template_depth
         nonlocal top_template_name
+
         if isinstance(node, TemplateNode):
             # Recursively expand templates so that even nodes inside the
             # the templates are handled with bold_node_handler.
@@ -138,7 +138,7 @@ def process_inflection_section(
                 top_template_name = None
             return ret
 
-        if kind in {
+        if node.kind in {
             NodeKind.TABLE,
         }:
             # XXX Handle tables here
