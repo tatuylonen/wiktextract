@@ -142,35 +142,21 @@ class TestLinkage(TestCase):
             ],
         )
 
-    def test_derives_autres_langues_section(self):
-        # https://fr.wiktionary.org/wiki/eau#Dérivés_dans_d’autres_langues
+    def test_derives_autres_langues_section_link(self):
         # https://fr.wiktionary.org/wiki/caligineux#Dérivés_dans_d’autres_langues
-        self.wxr.wtp.add_page("Modèle:lien", 10, body="{{{1}}}")
-        self.wxr.wtp.add_page(
-            "Modèle:L",
-            10,
-            body="""{{#switch: {{{1}}}
-| kmv = Karipúna
-| en = Anglais
-}}""",
+        self.wxr.wtp.add_page("Modèle:L", 10, "Anglais")
+        data = parse_page(
+            self.wxr,
+            "eau",
+            """== {{langue|frm}} ==
+=== {{S|adjectif|frm}} ===
+# Qui décrit une
+==== {{S|dérivés autres langues}} ====
+* {{L|en}} : [[caliginous#en|caliginous]]""",
         )
-        page_data = [WordEntry(word="test", lang_code="fr", lang="Français")]
-        self.wxr.wtp.start_page("eau")
-        root = self.wxr.wtp.parse(
-            """* {{L|kmv}} : {{lien|dlo|kmv}}, {{lien|djilo|kmv}}
-* {{L|en}} : [[caliginous#en|caliginous]]"""
-        )
-        extract_linkage(self.wxr, page_data, root, "dérivés autres langues")
         self.assertEqual(
-            [
-                d.model_dump(exclude_defaults=True)
-                for d in page_data[-1].derived
-            ],
-            [
-                {"word": "dlo", "lang_code": "kmv", "lang": "Karipúna"},
-                {"word": "djilo", "lang_code": "kmv", "lang": "Karipúna"},
-                {"word": "caliginous", "lang_code": "en", "lang": "Anglais"},
-            ],
+            data[0]["descendants"],
+            [{"word": "caliginous", "lang_code": "en", "lang": "Anglais"}],
         )
 
     def test_words_divided_by_slash(self):
@@ -332,18 +318,18 @@ class TestLinkage(TestCase):
         )
 
     def test_dérivés_autres_langues_section_lien_roman(self):
-        page_data = [WordEntry(word="拉麵", lang_code="zh", lang="Chinois")]
         self.wxr.wtp.add_page("Modèle:L", 10, "Japonais")
-        self.wxr.wtp.start_page("拉麵")
-        root = self.wxr.wtp.parse(
-            "* {{L|ja}} : {{lien|ラーメン|ja|tr=ɾaː.meɴ}}"
+        data = parse_page(
+            self.wxr,
+            "拉麵",
+            """== {{langue|zh}} ==
+=== {{S|nom|zh}} ===
+# [[nouille|Nouille]]s tirées, en général à la main, spécialité de [[Lanzhou]].
+==== {{S|dérivés autres langues}} ====
+* {{L|ja}} : {{lien|ラーメン|ja|tr=ɾaː.meɴ}}"""
         )
-        extract_linkage(self.wxr, page_data, root, "dérivés autres langues")
         self.assertEqual(
-            [
-                d.model_dump(exclude_defaults=True)
-                for d in page_data[-1].derived
-            ],
+            data[0]["descendants"],
             [
                 {
                     "lang": "Japonais",
@@ -446,3 +432,66 @@ class TestLinkage(TestCase):
 * {{cf}} [[toilet#Synonymes|''toilet'' (synonymes)]]""",
         )
         self.assertTrue("synonyms" not in data[0])
+
+    def test_desc_ruby(self):
+        self.wxr.wtp.add_page("Modèle:L", 10, "Japonais")
+        self.wxr.wtp.add_page(
+            "Modèle:ruby",
+            10,
+            """<ruby>櫛<rp> (</rp><rt>くし</rt><rp>) </rp></ruby>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "髪梳",
+            """== {{langue|ojp}} ==
+=== {{S|nom|ojp}} ===
+# [[peigne|Peigne]].
+==== {{S|dérivés autres langues}} ====
+* {{L|ja}} : {{lien|{{ruby|櫛|くし}}|ja|tr=kushi}}""",
+        )
+        self.assertEqual(
+            data[0]["descendants"],
+            [
+                {
+                    "lang": "Japonais",
+                    "lang_code": "ja",
+                    "roman": "kushi",
+                    "ruby": [("櫛", "くし")],
+                    "word": "櫛",
+                }
+            ],
+        )
+
+    def test_zh_l(self):
+        self.wxr.wtp.add_page("Modèle:L", 10, "Chinois")
+        self.wxr.wtp.add_page(
+            "Modèle:zh-l",
+            10,
+            """<span class="Hani" lang="zh">[[圖書#zh|圖書]]</span>／<span class="Hani" lang="zh">[[图书#zh|图书]]</span> (<i><span class="tr Latn">túshū</span></i>, « [[livre]]s, [[documents]] »)""",
+        )
+        data = parse_page(
+            self.wxr,
+            "書籍",
+            """== {{langue|zh}} ==
+=== {{S|nom|zh}} ===
+# [[livre|Livre]], [[ouvrage]], [[documentation]].
+==== {{S|synonymes}} ====
+* {{zh-l|圖書|túshū|[[livre]]s, [[documents]]}}""",
+        )
+        self.assertEqual(
+            data[0]["synonyms"],
+            [
+                {
+                    "roman": "túshū",
+                    "sense": "livres, documents",
+                    "tags": ["Traditional-Chinese"],
+                    "word": "圖書",
+                },
+                {
+                    "roman": "túshū",
+                    "sense": "livres, documents",
+                    "tags": ["Simplified-Chinese"],
+                    "word": "图书",
+                },
+            ],
+        )

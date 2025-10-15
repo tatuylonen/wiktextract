@@ -20,7 +20,7 @@ from .etymology import (
 from .form_line import extract_form_line
 from .gloss import extract_gloss, process_exemple_template
 from .inflection import extract_inflection
-from .linkage import extract_linkage
+from .linkage import extract_desc_section, extract_linkage
 from .models import Sense, WordEntry
 from .note import extract_note, extract_recognition_rate_section
 from .pronunciation import extract_homophone_section, extract_pronunciation
@@ -128,6 +128,12 @@ def parse_section(
                     base_data,
                     level_node,
                     title_categories.get("categories", []),
+                )
+            elif section_type == "dérivés autres langues":
+                extract_desc_section(
+                    wxr,
+                    page_data[-1] if len(page_data) > 0 else base_data,
+                    level_node,
                 )
             else:
                 wxr.wtp.debug(
