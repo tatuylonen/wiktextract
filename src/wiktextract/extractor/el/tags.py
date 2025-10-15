@@ -1,3 +1,4 @@
+from wiktextract.extractor.el.models import Form, WordEntry
 from wiktextract.tags import uppercase_tags, valid_tags
 
 # ======
@@ -189,3 +190,35 @@ tag_map = {}
 for k in uppercase_tags:
     if k not in base_tag_map:
         tag_map[k] = [k.replace(" ", "-")]
+
+Taggable = WordEntry | Form
+"""An object with raw_tags and tags attributes."""
+
+
+def translate_raw_tags(taggable: Taggable) -> None:
+    """Translate raw_tags to tags, preserving raw_tags.
+
+    This is a bit different from other extractors in order to type check.
+
+    INVARIANT: taggable's tags should **remain** unique.
+    If they were not unique before, there are no guarantees.
+
+    Use:
+    # Apply to an entire WordEntry
+    >>> translate_raw_tags(word_entry)
+
+    # Apply to each Form in a WordEntry
+    >>> for form in word_entry.forms:
+    ...     translate_raw_tags(form)
+
+    # Apply to a list of Form objects
+    >>> for form in form_list:
+    ...     translate_raw_tags(form)
+    """
+    for raw_tag in taggable.raw_tags:
+        clean_raw_tag = raw_tag.replace("\n", " ").lower()
+        tags = base_tag_map.get(clean_raw_tag)
+        if tags is not None:
+            for tag in tags:
+                if tag not in taggable.tags:
+                    taggable.tags.append(tag)
