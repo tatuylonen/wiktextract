@@ -145,9 +145,9 @@ class Sense(GreekBaseModel):
 
     def merge(self, other: "Sense") -> None:
         """Combine the fields of this Sense with another Sense"""
-        self.tags = list(set(self.tags + other.tags))
-        self.raw_tags = list(set(self.raw_tags + other.raw_tags))
-        self.categories = list(set(self.categories + other.categories))
+        self.tags = sorted(set(self.tags + other.tags))
+        self.raw_tags = sorted(set(self.raw_tags + other.raw_tags))
+        self.categories = sorted(set(self.categories + other.categories))
         self.examples.extend(other.examples)
         self.synonyms.extend(other.synonyms)
         self.antonyms.extend(other.antonyms)

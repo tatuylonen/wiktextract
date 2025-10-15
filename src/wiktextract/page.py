@@ -294,10 +294,10 @@ def remove_duplicate_data(page_data: dict) -> None:
     for data in page_data:
         for field in ("categories", "topics", "tags", "wikidata", "wikipedia"):
             if field in data:
-                data[field] = list(sorted(set(data[field])))
+                data[field] = sorted(set(data[field]))
             for sense in data.get("senses", ()):
                 if field in sense:
-                    sense[field] = list(sorted(set(sense[field])))
+                    sense[field] = sorted(set(sense[field]))
 
     # If raw_glosses is identical to glosses, remove it
     # If "empty-gloss" in tags and there are glosses, remove the tag

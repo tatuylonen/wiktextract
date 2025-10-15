@@ -331,7 +331,7 @@ def parse_pronunciation(
             tagsets, _ = decode_tags(caption)
             # flatten the tagsets into one; it would be really weird to have
             # several tagsets for a hyphenation caption
-            tags = list(set(tag for tagset in tagsets for tag in tagset))
+            tags = sorted(set(tag for tagset in tagsets for tag in tagset))
             # We'll just ignore any errors from tags, it's not very important
             # for hyphenation
             tags = [tag for tag in tags if not tag.startswith("error")]
