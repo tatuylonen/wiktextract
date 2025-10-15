@@ -497,3 +497,156 @@ class TestElInflection(TestCase):
             {"form": "μπόγια", "tags": ["vocative", "plural"]},
         ]
         self.mktest_form_no_raw_tags(raw, expected)
+
+    def test_el_conjugation_table(self):
+        # Section of https://el.wiktionary.org/wiki/πίνω:
+        # {{el-κλίσ-'μπαίνω'|θαορ=ήπι|θμελλ=πι}}
+        # Expanded via 'wxr.wtp.node_to_text(node)' at the start of
+        # 'process_inflection_section'
+        raw = """
+        {|
+        |-
+        ! colspan="7" style="background:#e2e4c0; text-align:center" | Εξακολουθητικοί χρόνοι
+        |-
+        ! πρόσωπα
+        ! Ενεστώτας
+        ! Παρατατικός
+        ! Εξ. Μέλλ.
+        ! Υποτακτική
+        ! Προστακτική
+        ! align=center | Μετοχή
+        |-
+        | style='background:#c0c0c0' | α' ενικ.
+        | πίνω
+        | έπινα
+        | θα πίνω
+        | να πίνω
+        |
+        | rowspan="6" align="center" |πίνοντας
+        |-
+        | style='background:#c0c0c0' | β' ενικ.
+        | πίνεις
+        | έπινες
+        | θα πίνεις
+        | να πίνεις
+        | πίνε
+
+        |}
+        """.strip()
+
+        expected = [
+            {
+                "form": "πίνω",
+                "tags": ["first-person", "imperfective", "present", "singular"],
+                "raw_tags": ["Εξακολουθητικοί χρόνοι", "Ενεστώτας", "α' ενικ."],
+            },
+            {
+                "form": "έπινα",
+                "tags": [
+                    "first-person",
+                    "imperfect",
+                    "imperfective",
+                    "singular",
+                ],
+                "raw_tags": [
+                    "Εξακολουθητικοί χρόνοι",
+                    "α' ενικ.",
+                    "Παρατατικός",
+                ],
+            },
+            {
+                "form": "θα πίνω",
+                "tags": [
+                    "first-person",
+                    "future",
+                    "imperfect",
+                    "imperfective",
+                    "singular",
+                ],
+                "raw_tags": ["Εξ. Μέλλ.", "Εξακολουθητικοί χρόνοι", "α' ενικ."],
+            },
+            {
+                "form": "να πίνω",
+                "tags": [
+                    "first-person",
+                    "imperfective",
+                    "singular",
+                    "subjunctive",
+                ],
+                "raw_tags": [
+                    "Εξακολουθητικοί χρόνοι",
+                    "α' ενικ.",
+                    "Υποτακτική",
+                ],
+            },
+            {
+                "form": "πίνοντας",
+                "tags": ["imperfective", "participle"],
+                "raw_tags": ["Μετοχή", "Εξακολουθητικοί χρόνοι"],
+            },
+            {
+                "form": "πίνεις",
+                "tags": [
+                    "imperfective",
+                    "present",
+                    "second-person",
+                    "singular",
+                ],
+                "raw_tags": ["Ενεστώτας", "Εξακολουθητικοί χρόνοι", "β' ενικ."],
+            },
+            {
+                "form": "έπινες",
+                "tags": [
+                    "imperfect",
+                    "imperfective",
+                    "second-person",
+                    "singular",
+                ],
+                "raw_tags": [
+                    "Εξακολουθητικοί χρόνοι",
+                    "Παρατατικός",
+                    "β' ενικ.",
+                ],
+            },
+            {
+                "form": "θα πίνεις",
+                "tags": [
+                    "future",
+                    "imperfect",
+                    "imperfective",
+                    "second-person",
+                    "singular",
+                ],
+                "raw_tags": ["Εξ. Μέλλ.", "Εξακολουθητικοί χρόνοι", "β' ενικ."],
+            },
+            {
+                "form": "να πίνεις",
+                "tags": [
+                    "imperfective",
+                    "second-person",
+                    "singular",
+                    "subjunctive",
+                ],
+                "raw_tags": [
+                    "Εξακολουθητικοί χρόνοι",
+                    "Υποτακτική",
+                    "β' ενικ.",
+                ],
+            },
+            {
+                "form": "πίνε",
+                "tags": [
+                    "imperative",
+                    "imperfective",
+                    "second-person",
+                    "singular",
+                ],
+                "raw_tags": [
+                    "Εξακολουθητικοί χρόνοι",
+                    "Προστακτική",
+                    "β' ενικ.",
+                ],
+            },
+        ]
+
+        self.mktest_form(raw, expected)
