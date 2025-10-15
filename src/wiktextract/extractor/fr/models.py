@@ -140,6 +140,7 @@ class Descendant(FrenchBaseModel):
         default=[], description="Japanese Kanji and furigana"
     )
     sense: str = ""
+    descendants: list["Descendant"] = []
 
 
 class WordEntry(FrenchBaseModel):

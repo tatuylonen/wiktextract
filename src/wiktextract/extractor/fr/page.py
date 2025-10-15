@@ -11,6 +11,7 @@ from wikitextprocessor.parser import (
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from ...wxr_logging import logger
+from .descendant import extract_desc_section
 from .etymology import (
     EtymologyData,
     extract_etymology,
@@ -20,7 +21,7 @@ from .etymology import (
 from .form_line import extract_form_line
 from .gloss import extract_gloss, process_exemple_template
 from .inflection import extract_inflection
-from .linkage import extract_desc_section, extract_linkage
+from .linkage import extract_linkage
 from .models import Sense, WordEntry
 from .note import extract_note, extract_recognition_rate_section
 from .pronunciation import extract_homophone_section, extract_pronunciation

@@ -9,7 +9,9 @@ from wiktextract.extractor.fr.page import parse_page
 from wiktextract.wxr_context import WiktextractContext
 
 
-class TestLinkage(TestCase):
+class TestFrLinkage(TestCase):
+    maxDiff = None
+
     def setUp(self) -> None:
         self.wxr = WiktextractContext(
             Wtp(lang_code="fr"),
@@ -140,23 +142,6 @@ class TestLinkage(TestCase):
                     "sense_index": 1,
                 },
             ],
-        )
-
-    def test_derives_autres_langues_section_link(self):
-        # https://fr.wiktionary.org/wiki/caligineux#Dérivés_dans_d’autres_langues
-        self.wxr.wtp.add_page("Modèle:L", 10, "Anglais")
-        data = parse_page(
-            self.wxr,
-            "eau",
-            """== {{langue|frm}} ==
-=== {{S|adjectif|frm}} ===
-# Qui décrit une
-==== {{S|dérivés autres langues}} ====
-* {{L|en}} : [[caliginous#en|caliginous]]""",
-        )
-        self.assertEqual(
-            data[0]["descendants"],
-            [{"word": "caliginous", "lang_code": "en", "lang": "Anglais"}],
         )
 
     def test_words_divided_by_slash(self):
@@ -317,29 +302,6 @@ class TestLinkage(TestCase):
             [{"word": "饿狗", "roman": "ègǒu", "translation": "chien affamé"}],
         )
 
-    def test_dérivés_autres_langues_section_lien_roman(self):
-        self.wxr.wtp.add_page("Modèle:L", 10, "Japonais")
-        data = parse_page(
-            self.wxr,
-            "拉麵",
-            """== {{langue|zh}} ==
-=== {{S|nom|zh}} ===
-# [[nouille|Nouille]]s tirées, en général à la main, spécialité de [[Lanzhou]].
-==== {{S|dérivés autres langues}} ====
-* {{L|ja}} : {{lien|ラーメン|ja|tr=ɾaː.meɴ}}"""
-        )
-        self.assertEqual(
-            data[0]["descendants"],
-            [
-                {
-                    "lang": "Japonais",
-                    "lang_code": "ja",
-                    "word": "ラーメン",
-                    "roman": "ɾaː.meɴ",
-                }
-            ],
-        )
-
     def test_voir_anagrammes(self):
         page_data = [
             WordEntry(
@@ -432,35 +394,6 @@ class TestLinkage(TestCase):
 * {{cf}} [[toilet#Synonymes|''toilet'' (synonymes)]]""",
         )
         self.assertTrue("synonyms" not in data[0])
-
-    def test_desc_ruby(self):
-        self.wxr.wtp.add_page("Modèle:L", 10, "Japonais")
-        self.wxr.wtp.add_page(
-            "Modèle:ruby",
-            10,
-            """<ruby>櫛<rp> (</rp><rt>くし</rt><rp>) </rp></ruby>""",
-        )
-        data = parse_page(
-            self.wxr,
-            "髪梳",
-            """== {{langue|ojp}} ==
-=== {{S|nom|ojp}} ===
-# [[peigne|Peigne]].
-==== {{S|dérivés autres langues}} ====
-* {{L|ja}} : {{lien|{{ruby|櫛|くし}}|ja|tr=kushi}}""",
-        )
-        self.assertEqual(
-            data[0]["descendants"],
-            [
-                {
-                    "lang": "Japonais",
-                    "lang_code": "ja",
-                    "roman": "kushi",
-                    "ruby": [("櫛", "くし")],
-                    "word": "櫛",
-                }
-            ],
-        )
 
     def test_zh_l(self):
         self.wxr.wtp.add_page("Modèle:L", 10, "Chinois")
