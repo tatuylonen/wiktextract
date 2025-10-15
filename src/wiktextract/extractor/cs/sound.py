@@ -132,6 +132,12 @@ def extract_transcript_section(
                     "Kana",
                 ]:
                     extract_ja_transcript_template(wxr, word_entry, node)
+                elif isinstance(node, TemplateNode) and node.template_name in [
+                    "Pinyin",
+                    "Švarný",
+                    "bopomofo",
+                ]:
+                    extract_zh_transcript_template(wxr, word_entry, node)
                 elif (
                     isinstance(node, WikiNode) and node.kind == NodeKind.ITALIC
                 ):
@@ -166,3 +172,25 @@ def extract_ja_transcript_template(
                 translate_raw_tags(form)
                 word_entry.forms.append(form)
     clean_node(wxr, word_entry, expanded_template)
+
+
+def extract_zh_transcript_template(
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+):
+    expanded_template = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    raw_tag = ""
+    for span_tag in expanded_template.find_html("span"):
+        span_class = span_tag.attrs.get("class", "")
+        span_lang = span_tag.attrs.get("lang", "")
+        if span_class.endswith("-title"):
+            raw_tag = clean_node(wxr, None, span_tag).removesuffix(":")
+        elif span_lang == "zh":
+            pron = clean_node(wxr, None, span_tag)
+            if pron != "":
+                sound = Sound(zh_pron=pron)
+                if raw_tag != "":
+                    sound.raw_tags.append(raw_tag)
+                    translate_raw_tags(sound)
+                word_entry.sounds.append(sound)

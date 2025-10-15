@@ -187,13 +187,65 @@ TABLE_TAGS = {
     "určitý": "definite",
     "Komparativ": "comparative",
     "Superlativ": "superlative",
+    # Template:Sloveso (en)
+    "infinitiv": "infinitive",
+    "3. osoba": "third-person",
+    "vid průběhový": ["present", "progressive"],
+    # Template:Sloveso (fr)
+    "Číslo jednotné": "singular",
+    "Číslo množné": "plural",
+    "1. je (j')": "first-person",
+    "2. tu": "second-person",
+    "3. il / elle": "third-person",
+    "1. nous": "first-person",
+    "2. vous": "second-person",
+    "3. ils / elles": "third-person",
+    "Jednoduché\nčasy": "simple",
+    "Prézens": "present",
+    "Imperfektum": "imperfect",
+    "Passé simple": "past",
+    "Futurum I": "future-i",
+    "Složené\nčasy": "compound",
+    "Passé composé": ["past", "compound"],
+    "Plusquamperfektum": ["past", "perfect"],
+    "Passé antérieur": ["past", "anterior"],
+    "Futurum II": "future-ii",
+    "Spojovací způsob": "subjunctive",
+    "1. que je (j')": "first-person",
+    "2. que tu": "second-person",
+    "3. qu'il / elle": "third-person",
+    "1. que nous": "first-person",
+    "2. que vous": "second-person",
+    "3. qu'ils / elles": "third-person",
+    "Passé": "past",
+    "Podmiňovací způsob": "conditional",
+    "Číslo\n jednotné": "singular",
+    "Přechodník": "transgressive",
+    # Template:Sloveso (es)
+    "způsob oznamovací": "indicative",
+    "souminulý čas": "past",
+    "minulý čas dokonavý": ["past", "perfective"],
+    "budoucí čas": "future",
+    "podmiňovací": "conditional",
+    "způsob spojovací": "connective",
+    "souminulý čas (ra)": "past",
+    "souminulý čas (se)": "past",
+    "způsob rozkazovací": "imperative",
+    "kladný": "affirmative",
+    "záporný": "negative",
+    "neosobní tvary": "impersonal",
+    "gerundium": "gerund",
+    "příčestí": "participle",
+    "příčestí minulé": ["past", "participle"],
 }
 
 SOUND_TAGS = {
     "Pinyin": "Pinyin",
     "Bopomofo": "Bopomofo",
+    "bopomofo": "Bopomofo",
     "hiragana": "hiragana",
     "romaji": "Rōmaji",
+    "Jyutping": "Jyutping",
 }
 
 
@@ -350,17 +402,21 @@ def translate_raw_tags(data: WordEntry) -> None:
         if raw_tag in TAGS and hasattr(data, "tags"):
             found_tag = True
             tr_tag = TAGS[raw_tag]
-            if isinstance(tr_tag, str):
+            if isinstance(tr_tag, str) and tr_tag not in data.tags:
                 data.tags.append(tr_tag)
             elif isinstance(tr_tag, list):
-                data.tags.extend(tr_tag)
+                for tag in tr_tag:
+                    if tag not in data.tags:
+                        data.tags.append(tag)
         if raw_tag in TOPICS and hasattr(data, "topics"):
             found_tag = True
             topic = TOPICS[raw_tag]
-            if isinstance(topic, str):
+            if isinstance(topic, str) and topic not in data.topics:
                 data.topics.append(topic)
             elif isinstance(topic, list):
-                data.topics.extend(topic)
+                for t in topic:
+                    if t not in data.topics:
+                        data.topics.append(t)
         if not found_tag:
             raw_tags.append(raw_tag)
     data.raw_tags = raw_tags
