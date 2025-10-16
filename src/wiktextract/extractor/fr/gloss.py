@@ -126,6 +126,11 @@ def extract_example_list_item(
                 has_exemple_template = True
             elif node.template_name == "source":
                 e_data.ref = clean_node(wxr, sense, node).strip("— ()")
+            elif node.template_name.lower() == "lang":
+                e_data = extract_lang_example_template(wxr, node)
+                if e_data.text != "":
+                    sense.examples.append(e_data)
+                has_exemple_template = True
             else:
                 t_text = clean_node(wxr, sense, node)
                 if t_text.startswith("(") and t_text.endswith(")"):
@@ -320,3 +325,15 @@ def find_form_of_word(
         gloss_data.form_of.append(AltForm(word=form_of))
         if "form-of" not in gloss_data.tags:
             gloss_data.tags.append("form-of")
+
+
+def extract_lang_example_template(
+    wxr: WiktextractContext, t_node: TemplateNode
+) -> Example:
+    text_arg = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node.template_parameters.get(2, ""))
+    )
+    text = clean_node(wxr, None, text_arg)
+    e_data = Example(text=text)
+    calculate_bold_offsets(wxr, text_arg, text, e_data, "bold_text_offsets")
+    return e_data
