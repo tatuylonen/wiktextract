@@ -111,21 +111,21 @@ class TestElLinkage(TestCase):
             [
                 {
                     "form": "arabfoo",
+                    "tags": ["transliteration", "Arabic"],
                     "raw_tags": ["αραβικό αλφάβητο"],
-                    "tags": ["transliteration"],
+                    "source": "linkage",
                 },
                 {
                     "form": "yanalatinfoo",
-                    "raw_tags": [
-                        "λατινικό αλφάβητο",
-                        "Yañalif",
-                    ],
-                    "tags": ["transliteration"],
+                    "tags": ["transliteration", "Latin"],
+                    "raw_tags": ["λατινικό αλφάβητο", "Yañalif"],
+                    "source": "linkage",
                 },
                 {
                     "form": "latinfoo",
+                    "tags": ["transliteration", "Latin"],
                     "raw_tags": ["λατινικό αλφάβητο"],
-                    "tags": ["transliteration"],
+                    "source": "linkage",
                 },
             ],
         )
@@ -145,17 +145,15 @@ class TestElLinkage(TestCase):
             [
                 {
                     "form": "acidajho",
+                    "tags": ["transliteration"],
                     "raw_tags": ["H-sistemo"],
-                    "tags": [
-                        "transliteration",
-                    ],
+                    "source": "linkage",
                 },
                 {
                     "form": "acidajxo",
+                    "tags": ["transliteration"],
                     "raw_tags": ["X-sistemo"],
-                    "tags": [
-                        "transliteration",
-                    ],
+                    "source": "linkage",
                 },
             ],
         )

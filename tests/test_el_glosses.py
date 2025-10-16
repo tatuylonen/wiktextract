@@ -81,7 +81,7 @@ class TestElGlosses(TestCase):
                 {
                     "related": [{"word": "καραγκιόζης"}],
                     "raw_tags": ["μεταφορικά"],
-                    "tags": ["no-gloss"],
+                    "tags": ["no-gloss", "figuratively"],
                 },
             ],
         }
@@ -271,6 +271,7 @@ class TestElGlosses(TestCase):
                         "τα μυαλά, το μυαλό ζώων που χρησιμοποιείται από τους ανθρώπους ως τροφή"
                     ],
                     "raw_tags": ["πληθυντικός"],
+                    "tags": ["plural"],
                     "examples": [{"text": "lamb brains - αρνίσια μυαλά"}],
                 },
                 {
