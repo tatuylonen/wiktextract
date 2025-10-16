@@ -724,3 +724,44 @@ class TestInflection(TestCase):
                 {"form": "morz", "tags": ["masculine", "plural", "oblique"]},
             ],
         )
+
+    def test_ignore_hidden_table_cell(self):
+        self.wxr.wtp.add_page(
+            "Modèle:es-verbe-flexion",
+            10,
+            """{| class="wikitable flextable"<nowiki />
+!colspan="3"|<small>[[Conjugaison:espagnol/amar|Voir la conjugaison du verbe ''<span lang="es" xml:lang="es" class="lang-es"><bdi>amar</bdi></span>'']]</small><nowiki />
+|- style="vertical-align:top"
+! rowspan="32" style="font-variant:small-caps;text-align:right"| '''Subjonctif'''
+! rowspan="8" style="background-color:#FFDDBB" style="display:none"| '''Présent'''
+|style="display:none"|que (yo) amare
+|- style="vertical-align:top"
+! rowspan="8" style="background-color:#FFDDBB" | '''Futur'''
+||que (yo) amare
+|- style="vertical-align:top"
+|style="display:none"|que (tú) amare
+|- style="vertical-align:top"
+|style="display:none"|que (vos) amare
+|- style="vertical-align:top"
+||que (él/ella/ello/usted) amare
+|}""",
+        )
+        data = parse_page(
+            self.wxr,
+            "amare",
+            """== {{langue|es}} ==
+=== {{S|verbe|es|flexion}} ===
+{{es-verbe-flexion|amar|sub.f.1s=oui|sub.f.3s=oui}}
+'''amare'''
+# ''Première personne du singulier du futur du subjonctif de ''[[amar#es|amar]]''.''""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {"form": "que (yo) amare", "tags": ["subjunctive", "future"]},
+                {
+                    "form": "que (él/ella/ello/usted) amare",
+                    "tags": ["subjunctive", "future"],
+                },
+            ],
+        )

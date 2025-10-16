@@ -74,6 +74,8 @@ def extract_inf_table_template(
                 ):
                     col_index += header.colspan
             for cell_node in row.find_child(NodeKind.TABLE_HEADER_CELL):
+                if cell_node.attrs.get("style") == "display:none":
+                    continue
                 has_conj_link = False
                 for link_node in cell_node.find_child_recursively(
                     NodeKind.LINK
@@ -117,6 +119,8 @@ def extract_inf_table_template(
                 ):
                     col_index += row_header.colspan
             for cell_node in row.find_child(NodeKind.TABLE_CELL):
+                if cell_node.attrs.get("style") == "display:none":
+                    continue
                 has_conj_link = False
                 for link_node in cell_node.find_child_recursively(
                     NodeKind.LINK

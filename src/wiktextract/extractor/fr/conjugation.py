@@ -45,7 +45,12 @@ def extract_conjugation(
             extract_ko_conj_template(wxr, entry, conj_template, conj_page_title)
         elif conj_template.template_name == "de-conj":
             extract_de_conj_template(wxr, entry, conj_template, conj_page_title)
-        elif "-conj" in conj_template.template_name:
+        elif (
+            "-conj" in conj_template.template_name
+            # https://fr.wiktionary.org/wiki/Catégorie:Modèles_de_conjugaison_en_italien
+            # Italian table templates
+            or conj_template.template_name.startswith("it-")
+        ):
             process_conj_template(wxr, entry, conj_template, conj_page_title)
         elif conj_template.template_name == "Onglets conjugaison":
             process_onglets_conjugaison_template(
@@ -111,7 +116,7 @@ def process_onglets_conjugaison_template(
             for arg_node in arg_value:
                 if isinstance(arg_node, TemplateNode) and (
                     "-conj" in arg_node.template_name
-                    or arg_node.template_name.startswith("it-irrégulier-")
+                    or arg_node.template_name.startswith("it-")
                 ):
                     process_conj_template(wxr, entry, arg_node, conj_page_title)
 
