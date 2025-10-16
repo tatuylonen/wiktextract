@@ -6,7 +6,7 @@ from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from ..ruby import extract_ruby
 from ..share import capture_text_in_parentheses
-from .models import Descendant, Form, Linkage, WordEntry
+from .models import Form, Linkage, WordEntry
 from .section_types import LINKAGE_SECTIONS, LINKAGE_TAGS
 from .tags import translate_raw_tags
 
@@ -32,58 +32,6 @@ def extract_linkage(
             LINKAGE_SECTIONS[section_type],
             LINKAGE_TAGS.get(section_type, []),
         )
-
-
-def extract_desc_section(
-    wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
-):
-    # drrive to other languages list
-    for list_item in level_node.find_child_recursively(NodeKind.LIST_ITEM):
-        lang_code = "unknown"
-        lang_name = "unknown"
-        for node in list_item.find_child(NodeKind.TEMPLATE | NodeKind.LINK):
-            if isinstance(node, TemplateNode) and node.template_name == "L":
-                lang_code = node.template_parameters.get(1)
-                lang_name = clean_node(wxr, None, node)
-            elif node.kind == NodeKind.LINK:
-                word = clean_node(wxr, None, node)
-                word_entry.descendants.append(
-                    Descendant(lang_code=lang_code, lang=lang_name, word=word)
-                )
-            elif isinstance(node, TemplateNode) and node.template_name in [
-                "l",
-                "lien",
-                "zh-lien",
-                "zh-lien-t",
-            ]:
-                l_data = Linkage(word="")
-                process_linkage_template(wxr, node, l_data)
-                word_entry.descendants.append(
-                    Descendant(
-                        lang=lang_name,
-                        lang_code=lang_code,
-                        word=l_data.word,
-                        roman=l_data.roman,
-                        ruby=l_data.ruby,
-                        tags=l_data.tags,
-                        raw_tags=l_data.raw_tags,
-                    )
-                )
-            elif (
-                isinstance(node, TemplateNode) and node.template_name == "zh-l"
-            ):
-                l_list = extract_zh_l_template(wxr, node)
-                for l_data in l_list:
-                    word_entry.descendants.append(
-                        Descendant(
-                            lang=lang_name,
-                            lang_code=lang_code,
-                            word=l_data.word,
-                            roman=l_data.roman,
-                            tags=l_data.tags,
-                            raw_tags=l_data.raw_tags,
-                        )
-                    )
 
 
 def extract_linkage_section(

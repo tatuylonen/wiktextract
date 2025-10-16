@@ -242,6 +242,8 @@ def process_conj_link_node(
     conj_title = link.largs[0][0]
     if "/" not in conj_title:
         return
+    if "#" in conj_title:
+        conj_title = conj_title[: conj_title.index("#")]
     conj_word = conj_title.split("/", 1)[-1]
     if conj_word in (
         "Premier groupe",

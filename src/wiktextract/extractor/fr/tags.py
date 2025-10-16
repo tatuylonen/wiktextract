@@ -100,6 +100,7 @@ MOOD_TAGS: dict[str, str] = {
     # Template:de-conj
     "subjonctif i": "subjunctive-i",
     "subjonctif ii": "subjunctive-ii",
+    "conjectural/volitif": ["conjectural", "volitive"],
 }
 
 VERB_FORM_TAGS: dict[str, str | list[str]] = {
@@ -137,6 +138,8 @@ VERB_FORM_TAGS: dict[str, str | list[str]] = {
     "bitransitif": "ditransitive",
     "déterminé": "determinate",
     "indéterminé": "indeterminate",
+    # Template:irrégulier
+    "irrégulier": "irregular",
 }
 
 # https://en.wikipedia.org/wiki/Grammatical_case
@@ -187,6 +190,9 @@ TENSE_TAGS: dict[str, str | list[str]] = {
     # Template:de-conj
     "futur i": "future-i",
     "futur ii": "future-ii",
+    # Template:it-irrégulier-avere-1
+    "présent affirmatif": ["present", "affirmative"],
+    "présent négatif": ["present", "negative"],
 }
 
 # https://en.wikipedia.org/wiki/Grammatical_person
@@ -305,6 +311,23 @@ OTHER_GRAMMATICAL_TAGS: dict[str, str] = {
     "déclinaison faible": "weak",
     "déclinaison mixte": "mixed",
     "singulier / pluriel": ["singular", "plural"],
+    # Template:ja-する
+    "inaccompli": "uncompleted",
+    "imperfectif (未然形, mizen-kei)": "imperfective",
+    "continuatif (連用形, ren'yō-kei)": "continuative",
+    "conclusif (終止形, shūshi-kei)": "terminal",
+    "attributif (連体形, rentai-kei)": "attributive",
+    "hypothétique (仮定形, katei-kei)": "hypothetical",
+    "impératif (命令形, meirei-kei)": "imperative",
+    "forme en -te": "gerund",
+    "désidératif adjectif variable (flexions)": ["desiderative", "adjective"],
+    # Template:ja-flx-adj-な
+    "imperfectif (未然形)": "imperfective",
+    "continuatif (連用形)": "continuative",
+    "conclusif (終止形)": "terminal",
+    "attributif (連体形)": "attributive",
+    "hypothétique (仮定形)": "hypothetical",
+    "impératif (命令形)": "imperative",
 }
 
 # template text before gloss

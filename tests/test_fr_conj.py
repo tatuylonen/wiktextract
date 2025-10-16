@@ -228,8 +228,7 @@ class TestNotes(TestCase):
                     "hiragana": "かっこうだろ",
                     "roman": "kakkou daro",
                     "source": "Conjugaison:japonais/格好だ",
-                    "tags": ["base-form"],
-                    "raw_tags": ["Imperfectif (未然形)"],
+                    "tags": ["base-form", "imperfective"],
                 },
                 {
                     "form": "格好ではない",
@@ -310,8 +309,7 @@ class TestNotes(TestCase):
                     "hiragana": "ない",
                     "roman": "nai",
                     "source": "Conjugaison:japonais/在る",
-                    "tags": ["base-form"],
-                    "raw_tags": ["Imperfectif (未然形, mizen-kei)"],
+                    "tags": ["base-form", "imperfective"],
                 },
                 {
                     "form": "在ります",
@@ -773,4 +771,66 @@ class TestNotes(TestCase):
         )
         self.assertEqual(
             data[0]["categories"], ["Déclinaisons d’adjectif en allemand"]
+        )
+
+    def test_ja_conj_multi_lines(self):
+        self.wxr.wtp.add_page(
+            "Conjugaison:japonais/愛する", 116, "{{ja-する|愛|あい|ai}}"
+        )
+        self.wxr.wtp.add_page(
+            "Modèle:ja-する",
+            10,
+            """{| class="wikitable flextable"
+! class="titre" style="background: #faf9b2;" colspan="7" | '''[[w:Verbe_en_japonais#Conjugaison_de_base|Formes de base]]'''
+|-
+! colspan="4" |
+! [[kanji|Kanji]]
+! [[hiragana|Hiragana]]
+! [[romaji|Rōmaji]]
+|-
+! colspan="4" | '''[[w:Verbe_en_japonais#Conjugaison_de_base|Imperfectif]]''' (<bdi lang="ja" xml:lang="ja" class="lang-ja">[[未然形#ja-nom|未然形]]</bdi>, <bdi lang="ja-Latn" xml:lang="ja-Latn" class="lang-ja-Latn">''mizen-kei''</bdi>)
+| <bdi lang="ja" xml:lang="ja" class="lang-ja">[[愛さ#ja|愛さ]]</bdi><br/><bdi lang="ja" xml:lang="ja" class="lang-ja">[[愛し#ja|愛し]]</bdi><br/><bdi lang="ja" xml:lang="ja" class="lang-ja">[[愛せ#ja|愛せ]]</bdi>
+| <bdi lang="ja" xml:lang="ja" class="lang-ja">[[あいさ#ja|あいさ]]</bdi><br/><bdi lang="ja" xml:lang="ja" class="lang-ja">[[あいし#ja|あいし]]</bdi><br/><bdi lang="ja" xml:lang="ja" class="lang-ja">[[あいせ#ja|あいせ]]</bdi>
+| ''ai sa<br/>ai shi<br/>ai se
+''
+|}""",
+        )
+        self.wxr.wtp.add_page(
+            "Modèle:ja-verbe",
+            10,
+            "([[Conjugaison:japonais/愛する|conjugaison]])",
+        )
+        data = parse_page(
+            self.wxr,
+            "愛する",
+            """== {{langue|ja}} ==
+=== {{S|verbe|ja}} ===
+{{ja-verbe}}
+# [[aimer|Aimer]] (d’amour).""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {
+                    "form": "愛さ",
+                    "hiragana": "あいさ",
+                    "roman": "ai sa",
+                    "source": "Conjugaison:japonais/愛する",
+                    "tags": ["base-form", "imperfective"],
+                },
+                {
+                    "form": "愛し",
+                    "hiragana": "あいし",
+                    "roman": "ai shi",
+                    "source": "Conjugaison:japonais/愛する",
+                    "tags": ["base-form", "imperfective"],
+                },
+                {
+                    "form": "愛せ",
+                    "hiragana": "あいせ",
+                    "roman": "ai se",
+                    "source": "Conjugaison:japonais/愛する",
+                    "tags": ["base-form", "imperfective"],
+                },
+            ],
         )

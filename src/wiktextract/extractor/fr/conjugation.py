@@ -45,7 +45,12 @@ def extract_conjugation(
             extract_ko_conj_template(wxr, entry, conj_template, conj_page_title)
         elif conj_template.template_name == "de-conj":
             extract_de_conj_template(wxr, entry, conj_template, conj_page_title)
-        elif "-conj" in conj_template.template_name:
+        elif (
+            "-conj" in conj_template.template_name
+            # https://fr.wiktionary.org/wiki/Catégorie:Modèles_de_conjugaison_en_italien
+            # Italian table templates
+            or conj_template.template_name.startswith("it-")
+        ):
             process_conj_template(wxr, entry, conj_template, conj_page_title)
         elif conj_template.template_name == "Onglets conjugaison":
             process_onglets_conjugaison_template(
@@ -109,9 +114,9 @@ def process_onglets_conjugaison_template(
             process_conj_template(wxr, entry, arg_value, conj_page_title)
         elif isinstance(arg_value, list):
             for arg_node in arg_value:
-                if (
-                    isinstance(arg_node, TemplateNode)
-                    and "-conj" in arg_node.template_name
+                if isinstance(arg_node, TemplateNode) and (
+                    "-conj" in arg_node.template_name
+                    or arg_node.template_name.startswith("it-")
                 ):
                     process_conj_template(wxr, entry, arg_node, conj_page_title)
 
@@ -423,20 +428,28 @@ def process_ja_conj_template(
                     del row_headers[tag]
                 else:
                     row_headers[tag] = rowspan - 1
-            form = Form(raw_tags=tags, source=conj_page_title)
+            forms = []
             for cell_index, cell in enumerate(
                 row.find_child(NodeKind.TABLE_CELL)
             ):
                 cell_text = clean_node(wxr, None, cell)
-                if cell_index == 0:
-                    form.form = cell_text
-                elif cell_index == 1:
-                    form.hiragana = cell_text
-                elif cell_index == 2:
-                    form.roman = cell_text
-            if len(form.form) > 0:
-                translate_raw_tags(form)
-                entry.forms.append(form)
+                for line_index, line in enumerate(cell_text.splitlines()):
+                    if cell_index == 0:
+                        forms.append(
+                            Form(
+                                form=line.strip(),
+                                raw_tags=tags,
+                                source=conj_page_title,
+                            )
+                        )
+                    elif cell_index == 1 and line_index < len(forms):
+                        forms[line_index].hiragana = line.strip()
+                    elif cell_index == 2 and line_index < len(forms):
+                        forms[line_index].roman = line.strip()
+            for form in forms:
+                if len(form.form) > 0:
+                    translate_raw_tags(form)
+                    entry.forms.append(form)
 
 
 def extract_ku_conj_trans_template(

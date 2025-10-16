@@ -199,7 +199,8 @@ def process_pos_block(
                 elif template_name.startswith((f"{lang_code}-", "flex-ku-")):
                     extract_inflection(wxr, page_data, child)
             elif child.kind == NodeKind.BOLD and is_first_bold:
-                form_line_start = index
+                if index < form_line_start:
+                    form_line_start = index
             elif child.kind == NodeKind.LIST and child.sarg.startswith("#"):
                 if index < gloss_start:
                     gloss_start = index

@@ -791,3 +791,26 @@ class TestFrGloss(TestCase):
             data[0]["senses"][0]["categories"],
             ["Métaphores en français", "Exemples en français"],
         )
+
+    def test_lang_example(self):
+        # obsolete layout
+        data = parse_page(
+            self.wxr,
+            "fare",
+            """== {{langue|it}} ==
+=== {{S|verbe|it}} ===
+# [[faire|Faire]], [[fabriquer]], [[construire]], [[opérer]]
+#* {{Lang|it|''la mia ragazza mi '''ha fatto''' un discorso sull'amore.''}}
+#*: ma copine m’'''a fait''' un discours sur l’amour.""",
+        )
+        self.assertEqual(
+            data[0]["senses"][0]["examples"],
+            [
+                {
+                    "bold_text_offsets": [(18, 26)],
+                    "bold_translation_offsets": [(12, 18)],
+                    "text": "la mia ragazza mi ha fatto un discorso sull'amore.",
+                    "translation": "ma copine m’a fait un discours sur l’amour.",
+                }
+            ],
+        )
