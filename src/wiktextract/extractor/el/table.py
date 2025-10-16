@@ -432,7 +432,7 @@ def parse_table(
                     forms.extend(
                         Form(
                             form=text,
-                            raw_tags=list(tags),
+                            raw_tags=sorted(tags),
                             source=source,
                         )
                         for text in texts

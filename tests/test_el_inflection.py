@@ -54,17 +54,6 @@ class TestElInflection(TestCase):
 
     def mktest_form(self, raw, expected):
         received = self.xinfl("filler", "verb", raw.strip())
-
-        def normalize_forms(lst):
-            for form in lst:
-                if "raw_tags" in form:
-                    form["raw_tags"].sort()
-                if "tags" in form:
-                    form["tags"].sort()
-
-        normalize_forms(received)
-        normalize_forms(expected)
-
         self.assertEqual(received, expected)
 
     def mktest_form_no_raw_tags(self, raw, expected):
@@ -74,8 +63,6 @@ class TestElInflection(TestCase):
             for form in lst:
                 if "raw_tags" in form:
                     del form["raw_tags"]
-                if "tags" in form:
-                    form["tags"].sort()
 
         normalize_forms(received)
         normalize_forms(expected)
@@ -177,42 +164,171 @@ class TestElInflection(TestCase):
             {"tags": ["inflection-template"]},
             {
                 "form": "πλάγιος",
-                "tags": ["masculine", "nominative", "singular"],
+                "tags": ["masculine", "singular", "nominative"],
+                "raw_tags": ["αρσενικό", "ενικός", "ονομαστική"],
             },
-            {"form": "πλάγια", "tags": ["feminine", "nominative", "singular"]},
-            {"form": "πλαγία", "tags": ["feminine", "nominative", "singular"]},
-            {"form": "πλάγιο", "tags": ["neuter", "nominative", "singular"]},
-            {"form": "πλάγιου", "tags": ["genitive", "masculine", "singular"]},
-            {"form": "πλαγίου", "tags": ["genitive", "masculine", "singular"]},
-            {"form": "πλάγιας", "tags": ["feminine", "genitive", "singular"]},
-            {"form": "πλαγίας", "tags": ["feminine", "genitive", "singular"]},
-            {"form": "πλάγιου", "tags": ["genitive", "neuter", "singular"]},
-            {"form": "πλαγίου", "tags": ["genitive", "neuter", "singular"]},
-            {"form": "πλάγιο", "tags": ["accusative", "masculine", "singular"]},
-            {"form": "πλάγια", "tags": ["accusative", "feminine", "singular"]},
-            {"form": "πλαγία", "tags": ["accusative", "feminine", "singular"]},
-            {"form": "πλάγιο", "tags": ["accusative", "neuter", "singular"]},
-            {"form": "πλάγιε", "tags": ["masculine", "singular", "vocative"]},
-            {"form": "πλάγια", "tags": ["feminine", "singular", "vocative"]},
-            {"form": "πλάγιο", "tags": ["neuter", "singular", "vocative"]},
-            {"form": "πλάγιοι", "tags": ["masculine", "nominative", "plural"]},
-            {"form": "πλάγιες", "tags": ["feminine", "nominative", "plural"]},
-            {"form": "πλάγια", "tags": ["neuter", "nominative", "plural"]},
-            {"form": "πλάγιων", "tags": ["genitive", "masculine", "plural"]},
-            {"form": "πλαγίων", "tags": ["genitive", "masculine", "plural"]},
-            {"form": "πλάγιων", "tags": ["feminine", "genitive", "plural"]},
-            {"form": "πλαγίων", "tags": ["feminine", "genitive", "plural"]},
-            {"form": "πλάγιων", "tags": ["genitive", "neuter", "plural"]},
-            {"form": "πλαγίων", "tags": ["genitive", "neuter", "plural"]},
-            {"form": "πλάγιους", "tags": ["accusative", "masculine", "plural"]},
-            {"form": "πλαγίους", "tags": ["accusative", "masculine", "plural"]},
-            {"form": "πλάγιες", "tags": ["accusative", "feminine", "plural"]},
-            {"form": "πλάγια", "tags": ["accusative", "neuter", "plural"]},
-            {"form": "πλάγιοι", "tags": ["masculine", "plural", "vocative"]},
-            {"form": "πλάγιες", "tags": ["feminine", "plural", "vocative"]},
-            {"form": "πλάγια", "tags": ["neuter", "plural", "vocative"]},
+            {
+                "form": "πλάγια",
+                "tags": ["singular", "feminine", "nominative"],
+                "raw_tags": ["ενικός", "θηλυκό", "ονομαστική"],
+            },
+            {
+                "form": "πλαγία",
+                "tags": ["singular", "feminine", "nominative"],
+                "raw_tags": ["ενικός", "θηλυκό", "ονομαστική"],
+            },
+            {
+                "form": "πλάγιο",
+                "tags": ["singular", "nominative", "neuter"],
+                "raw_tags": ["ενικός", "ονομαστική", "ουδέτερο"],
+            },
+            {
+                "form": "πλάγιου",
+                "tags": ["masculine", "genitive", "singular"],
+                "raw_tags": ["αρσενικό", "γενική", "ενικός"],
+            },
+            {
+                "form": "πλαγίου",
+                "tags": ["masculine", "genitive", "singular"],
+                "raw_tags": ["αρσενικό", "γενική", "ενικός"],
+            },
+            {
+                "form": "πλάγιας",
+                "tags": ["genitive", "singular", "feminine"],
+                "raw_tags": ["γενική", "ενικός", "θηλυκό"],
+            },
+            {
+                "form": "πλαγίας",
+                "tags": ["genitive", "singular", "feminine"],
+                "raw_tags": ["γενική", "ενικός", "θηλυκό"],
+            },
+            {
+                "form": "πλάγιου",
+                "tags": ["genitive", "singular", "neuter"],
+                "raw_tags": ["γενική", "ενικός", "ουδέτερο"],
+            },
+            {
+                "form": "πλαγίου",
+                "tags": ["genitive", "singular", "neuter"],
+                "raw_tags": ["γενική", "ενικός", "ουδέτερο"],
+            },
+            {
+                "form": "πλάγιο",
+                "tags": ["accusative", "masculine", "singular"],
+                "raw_tags": ["αιτιατική", "αρσενικό", "ενικός"],
+            },
+            {
+                "form": "πλάγια",
+                "tags": ["accusative", "singular", "feminine"],
+                "raw_tags": ["αιτιατική", "ενικός", "θηλυκό"],
+            },
+            {
+                "form": "πλαγία",
+                "tags": ["accusative", "singular", "feminine"],
+                "raw_tags": ["αιτιατική", "ενικός", "θηλυκό"],
+            },
+            {
+                "form": "πλάγιο",
+                "tags": ["accusative", "singular", "neuter"],
+                "raw_tags": ["αιτιατική", "ενικός", "ουδέτερο"],
+            },
+            {
+                "form": "πλάγιε",
+                "tags": ["masculine", "singular", "vocative"],
+                "raw_tags": ["αρσενικό", "ενικός", "κλητική"],
+            },
+            {
+                "form": "πλάγια",
+                "tags": ["singular", "feminine", "vocative"],
+                "raw_tags": ["ενικός", "θηλυκό", "κλητική"],
+            },
+            {
+                "form": "πλάγιο",
+                "tags": ["singular", "vocative", "neuter"],
+                "raw_tags": ["ενικός", "κλητική", "ουδέτερο"],
+            },
+            {
+                "form": "πλάγιοι",
+                "tags": ["masculine", "nominative", "plural"],
+                "raw_tags": ["αρσενικό", "ονομαστική", "πληθυντικός"],
+            },
+            {
+                "form": "πλάγιες",
+                "tags": ["feminine", "nominative", "plural"],
+                "raw_tags": ["θηλυκό", "ονομαστική", "πληθυντικός"],
+            },
+            {
+                "form": "πλάγια",
+                "tags": ["nominative", "neuter", "plural"],
+                "raw_tags": ["ονομαστική", "ουδέτερο", "πληθυντικός"],
+            },
+            {
+                "form": "πλάγιων",
+                "tags": ["masculine", "genitive", "plural"],
+                "raw_tags": ["αρσενικό", "γενική", "πληθυντικός"],
+            },
+            {
+                "form": "πλαγίων",
+                "tags": ["masculine", "genitive", "plural"],
+                "raw_tags": ["αρσενικό", "γενική", "πληθυντικός"],
+            },
+            {
+                "form": "πλάγιων",
+                "tags": ["genitive", "feminine", "plural"],
+                "raw_tags": ["γενική", "θηλυκό", "πληθυντικός"],
+            },
+            {
+                "form": "πλαγίων",
+                "tags": ["genitive", "feminine", "plural"],
+                "raw_tags": ["γενική", "θηλυκό", "πληθυντικός"],
+            },
+            {
+                "form": "πλάγιων",
+                "tags": ["genitive", "neuter", "plural"],
+                "raw_tags": ["γενική", "ουδέτερο", "πληθυντικός"],
+            },
+            {
+                "form": "πλαγίων",
+                "tags": ["genitive", "neuter", "plural"],
+                "raw_tags": ["γενική", "ουδέτερο", "πληθυντικός"],
+            },
+            {
+                "form": "πλάγιους",
+                "tags": ["accusative", "masculine", "plural"],
+                "raw_tags": ["αιτιατική", "αρσενικό", "πληθυντικός"],
+            },
+            {
+                "form": "πλαγίους",
+                "tags": ["accusative", "masculine", "plural"],
+                "raw_tags": ["αιτιατική", "αρσενικό", "πληθυντικός"],
+            },
+            {
+                "form": "πλάγιες",
+                "tags": ["accusative", "feminine", "plural"],
+                "raw_tags": ["αιτιατική", "θηλυκό", "πληθυντικός"],
+            },
+            {
+                "form": "πλάγια",
+                "tags": ["accusative", "neuter", "plural"],
+                "raw_tags": ["αιτιατική", "ουδέτερο", "πληθυντικός"],
+            },
+            {
+                "form": "πλάγιοι",
+                "tags": ["masculine", "vocative", "plural"],
+                "raw_tags": ["αρσενικό", "κλητική", "πληθυντικός"],
+            },
+            {
+                "form": "πλάγιες",
+                "tags": ["feminine", "vocative", "plural"],
+                "raw_tags": ["θηλυκό", "κλητική", "πληθυντικός"],
+            },
+            {
+                "form": "πλάγια",
+                "tags": ["vocative", "neuter", "plural"],
+                "raw_tags": ["κλητική", "ουδέτερο", "πληθυντικός"],
+            },
         ]
-        self.mktest_form_no_raw_tags(raw, expected)
+        self.mktest_form(raw, expected)
 
     def test_noun_inflection_only_singular(self):
         # https://el.wiktionary.org/wiki/αιδώς
@@ -243,10 +359,10 @@ class TestElInflection(TestCase):
 """
         expected = [
             {"tags": ["inflection-template"]},
-            {"form": "αιδώς", "tags": ["nominative", "singular"]},
+            {"form": "αιδώς", "tags": ["singular", "nominative"]},
             {"form": "αιδούς", "tags": ["genitive", "singular"]},
             {"form": "αιδώ", "tags": ["accusative", "singular"]},
-            {"form": "αιδώ", "tags": ["vocative", "singular"]},
+            {"form": "αιδώ", "tags": ["singular", "vocative"]},
         ]
         self.mktest_form_no_raw_tags(raw, expected)
 
@@ -290,12 +406,12 @@ class TestElInflection(TestCase):
 """
         expected = [
             {"tags": ["inflection-template"]},
-            {"form": "αβγούλι", "tags": ["nominative", "singular"]},
+            {"form": "αβγούλι", "tags": ["singular", "nominative"]},
             {"form": "αβγούλια", "tags": ["nominative", "plural"]},
             # There should be no genitive
             {"form": "αβγούλι", "tags": ["accusative", "singular"]},
             {"form": "αβγούλια", "tags": ["accusative", "plural"]},
-            {"form": "αβγούλι", "tags": ["vocative", "singular"]},
+            {"form": "αβγούλι", "tags": ["singular", "vocative"]},
             {"form": "αβγούλια", "tags": ["vocative", "plural"]},
         ]
         self.mktest_form_no_raw_tags(raw, expected)
@@ -474,7 +590,7 @@ class TestElInflection(TestCase):
 """
         expected = [
             {"tags": ["inflection-template"]},
-            {"form": "μπόι", "tags": ["nominative", "singular"]},
+            {"form": "μπόι", "tags": ["singular", "nominative"]},
             {"form": "μπόγια", "tags": ["nominative", "plural"]},
             {"form": "μπογιού", "tags": ["genitive", "singular"]},
             # {"form": "(μπογιών)", "tags": ["genitive", "plural"]},
@@ -482,7 +598,7 @@ class TestElInflection(TestCase):
             {"form": "μπογιών", "tags": ["genitive", "plural", "rare"]},
             {"form": "μπόι", "tags": ["accusative", "singular"]},
             {"form": "μπόγια", "tags": ["accusative", "plural"]},
-            {"form": "μπόι", "tags": ["vocative", "singular"]},
+            {"form": "μπόι", "tags": ["singular", "vocative"]},
             {"form": "μπόγια", "tags": ["vocative", "plural"]},
         ]
         self.mktest_form_no_raw_tags(raw, expected)
@@ -527,30 +643,30 @@ class TestElInflection(TestCase):
             {"tags": ["inflection-template"]},
             {
                 "form": "πίνω",
-                "tags": ["first-person", "imperfective", "present", "singular"],
-                "raw_tags": ["Εξακολουθητικοί χρόνοι", "Ενεστώτας", "α' ενικ."],
+                "tags": ["present", "imperfective", "first-person", "singular"],
+                "raw_tags": ["Ενεστώτας", "Εξακολουθητικοί χρόνοι", "α' ενικ."],
             },
             {
                 "form": "έπινα",
                 "tags": [
-                    "first-person",
-                    "imperfect",
                     "imperfective",
+                    "imperfect",
+                    "first-person",
                     "singular",
                 ],
                 "raw_tags": [
                     "Εξακολουθητικοί χρόνοι",
-                    "α' ενικ.",
                     "Παρατατικός",
+                    "α' ενικ.",
                 ],
             },
             {
                 "form": "θα πίνω",
                 "tags": [
-                    "first-person",
                     "future",
                     "imperfect",
                     "imperfective",
+                    "first-person",
                     "singular",
                 ],
                 "raw_tags": ["Εξ. Μέλλ.", "Εξακολουθητικοί χρόνοι", "α' ενικ."],
@@ -558,27 +674,27 @@ class TestElInflection(TestCase):
             {
                 "form": "να πίνω",
                 "tags": [
-                    "first-person",
                     "imperfective",
-                    "singular",
                     "subjunctive",
+                    "first-person",
+                    "singular",
                 ],
                 "raw_tags": [
                     "Εξακολουθητικοί χρόνοι",
-                    "α' ενικ.",
                     "Υποτακτική",
+                    "α' ενικ.",
                 ],
             },
             {
                 "form": "πίνοντας",
                 "tags": ["imperfective", "participle"],
-                "raw_tags": ["Μετοχή", "Εξακολουθητικοί χρόνοι"],
+                "raw_tags": ["Εξακολουθητικοί χρόνοι", "Μετοχή"],
             },
             {
                 "form": "πίνεις",
                 "tags": [
-                    "imperfective",
                     "present",
+                    "imperfective",
                     "second-person",
                     "singular",
                 ],
@@ -587,8 +703,8 @@ class TestElInflection(TestCase):
             {
                 "form": "έπινες",
                 "tags": [
-                    "imperfect",
                     "imperfective",
+                    "imperfect",
                     "second-person",
                     "singular",
                 ],
@@ -613,9 +729,9 @@ class TestElInflection(TestCase):
                 "form": "να πίνεις",
                 "tags": [
                     "imperfective",
+                    "subjunctive",
                     "second-person",
                     "singular",
-                    "subjunctive",
                 ],
                 "raw_tags": [
                     "Εξακολουθητικοί χρόνοι",
@@ -626,8 +742,8 @@ class TestElInflection(TestCase):
             {
                 "form": "πίνε",
                 "tags": [
-                    "imperative",
                     "imperfective",
+                    "imperative",
                     "second-person",
                     "singular",
                 ],
