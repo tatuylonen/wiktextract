@@ -193,7 +193,7 @@ def process_linkage_section(
                 for link_parts, ltags, _ in combined_line_data
             ]
             for form in transliteration_forms:
-                translate_raw_tags(form, wxr)
+                translate_raw_tags(form)
             data.forms.extend(transliteration_forms)
             if transliteration_template_data:
                 data.forms.extend(transliteration_template_data)
