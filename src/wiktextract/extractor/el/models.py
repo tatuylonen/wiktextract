@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pydantic import BaseModel, ConfigDict, Field
 
 # Pydantic models are basically classes that take the place of the dicts
@@ -120,6 +122,7 @@ class Sense(GreekBaseModel):
     glosses: list[str] = []  # ["Gloss supercategory", "Specific gloss."]
     tags: list[str] = []
     raw_tags: list[str] = []
+    topics: list[str] = []
     form_of: list[FormOf] = []
     # alt_of : list[FormOf] = []
     # compound_of: list[FormOf] = []
@@ -154,6 +157,16 @@ class Sense(GreekBaseModel):
         self.related.extend(other.related)
 
 
+FormSource = Literal[
+    "conjugation",
+    "declension",
+    "header",
+    "inflection",  # Can be further narrowed to conjugation/declension
+    "linkage",
+    "",
+]
+
+
 # An inflected form of the word, like `{ form: "bats", tags: ["plural"] }`
 class Form(GreekBaseModel):
     form: str = ""
@@ -164,7 +177,7 @@ class Form(GreekBaseModel):
     ipa: str = ""
     # roman: str = ""
     # ruby: list[tuple[str, str]] = []
-    source: str = ""
+    source: FormSource = ""
     # sense_index: str = ""
 
 
@@ -237,6 +250,7 @@ class WordEntry(GreekBaseModel):
     categories: list[str] = []
     sounds: list[Sound] = []
     tags: list[str] = []
+    topics: list[str] = []
     raw_tags: list[str] = []
     hyphenation: str = ""  # Should be a list `hyphenations`.
     head_templates: list[TemplateData] = []

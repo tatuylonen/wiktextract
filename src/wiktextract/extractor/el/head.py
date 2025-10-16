@@ -266,11 +266,16 @@ def partition_head_forms(
 
     ret: list[Form] = []
 
-    for forms, tags in blocks:
-        # print(f"{forms=}, {tags=}")
-        tags = sorted(set(tags))
-
+    for forms, raw_tags in blocks:
+        # print(f"{forms=}, {raw_tags=}")
+        raw_tags = sorted(set(raw_tags))
         for form in forms:
-            ret.append(Form(form=form, raw_tags=tags))
+            ret.append(
+                Form(
+                    form=form,
+                    raw_tags=raw_tags,
+                    source="header",
+                )
+            )
 
     return ret

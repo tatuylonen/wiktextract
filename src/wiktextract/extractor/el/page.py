@@ -33,10 +33,7 @@ from .parse_utils import (
 )
 from .pos import process_pos
 from .pronunciation import process_pron
-from .section_titles import (
-    Heading,
-    Tags,
-)
+from .section_titles import Heading
 
 # from .text_utils import ENDING_NUMBER_RE
 
@@ -159,7 +156,12 @@ def parse_page(
                 if isinstance(
                     child, TemplateNode
                 ) and child.template_name.startswith("el-κλίση"):
-                    process_inflection_section(wxr, base_data, child)
+                    process_inflection_section(
+                        wxr,
+                        base_data,
+                        child,
+                        source="declension",
+                    )
 
         for sublevel in sublevels:
             if len(sublevel.largs) == 0:

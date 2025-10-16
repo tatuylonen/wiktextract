@@ -81,7 +81,7 @@ class TestElGlosses(TestCase):
                 {
                     "related": [{"word": "καραγκιόζης"}],
                     "raw_tags": ["μεταφορικά"],
-                    "tags": ["no-gloss"],
+                    "tags": ["no-gloss", "figuratively"],
                 },
             ],
         }
@@ -252,7 +252,7 @@ class TestElGlosses(TestCase):
         # print(f"{data.model_dump(exclude_defaults=True)}")
         test = {
             "word": "brain",
-            "forms": [{"form": "φώσφορος"}],
+            "forms": [{"form": "φώσφορος", "source": "header"}],
             "lang_code": "en",
             "lang": "English",
             "pos": "noun",
@@ -271,6 +271,7 @@ class TestElGlosses(TestCase):
                         "τα μυαλά, το μυαλό ζώων που χρησιμοποιείται από τους ανθρώπους ως τροφή"
                     ],
                     "raw_tags": ["πληθυντικός"],
+                    "tags": ["plural"],
                     "examples": [{"text": "lamb brains - αρνίσια μυαλά"}],
                 },
                 {
@@ -318,8 +319,8 @@ class TestElGlosses(TestCase):
         self.assertEqual(dumped, test)
 
     def test_synonyms_antonyms(self) -> None:
-            # https://el.wiktionary.org/wiki/ευχαριστώ
-            raw = """
+        # https://el.wiktionary.org/wiki/ευχαριστώ
+        raw = """
                 # [[δείχνω]] σε κάποιον ότι τον [[ευγνωμονώ]] για κάτι που μου έκανε ή που μου έδωσε
                 #: {{πχ}}  ''Μπορείς να τον '''ευχαριστήσεις''' για όλο τον κόπο που έκανε!''
                 #: {{αντων}} [[δυσαρεστώ]], [[πικραίνω]], [[στενοχωρώ]]
@@ -327,33 +328,33 @@ class TestElGlosses(TestCase):
                 #: {{συνων}} [[ικανοποιώ]], [[χαροποιώ]]
                 #: {{αντων}} [[δυσαρεστώ]], [[στενοχωρώ]]
             """
-            expected = {
-                "senses": [
-                    {
-                        "glosses": [
-                            "δείχνω σε κάποιον ότι τον ευγνωμονώ για κάτι που μου έκανε ή που μου έδωσε"
-                        ],
-                        "examples": [
-                            {
-                                "text": ":Πρότυπο:πχ Μπορείς να τον ευχαριστήσεις για όλο τον κόπο που έκανε!"
-                            }
-                        ],
-                        "antonyms": [
-                            {"word": "δυσαρεστώ"},
-                            {"word": "πικραίνω"},
-                            {"word": "στενοχωρώ"},
-                        ],
-                    },
-                    {
-                        "glosses": [
-                            "κάνω κάποιον να νιώσει όμορφα, ικανοποιώ κάποιον"
-                        ],
-                        "synonyms": [{"word": "ικανοποιώ"}, {"word": "χαροποιώ"}],
-                        "antonyms": [{"word": "δυσαρεστώ"}, {"word": "στενοχωρώ"}],
-                    },
-                ],
-            }
-            self.mktest_bl_linkage(raw, expected)
+        expected = {
+            "senses": [
+                {
+                    "glosses": [
+                        "δείχνω σε κάποιον ότι τον ευγνωμονώ για κάτι που μου έκανε ή που μου έδωσε"
+                    ],
+                    "examples": [
+                        {
+                            "text": ":Πρότυπο:πχ Μπορείς να τον ευχαριστήσεις για όλο τον κόπο που έκανε!"
+                        }
+                    ],
+                    "antonyms": [
+                        {"word": "δυσαρεστώ"},
+                        {"word": "πικραίνω"},
+                        {"word": "στενοχωρώ"},
+                    ],
+                },
+                {
+                    "glosses": [
+                        "κάνω κάποιον να νιώσει όμορφα, ικανοποιώ κάποιον"
+                    ],
+                    "synonyms": [{"word": "ικανοποιώ"}, {"word": "χαροποιώ"}],
+                    "antonyms": [{"word": "δυσαρεστώ"}, {"word": "στενοχωρώ"}],
+                },
+            ],
+        }
+        self.mktest_bl_linkage(raw, expected)
 
     def test_el_subglosses1(self) -> None:
         self.wxr.wtp.start_page("brain")
@@ -378,7 +379,7 @@ class TestElGlosses(TestCase):
         # print(f"{data.model_dump(exclude_defaults=True)}")
         test = {
             "word": "brain",
-            "forms": [{"form": "brain"}],
+            "forms": [{"form": "brain", "source": "header"}],
             "lang_code": "en",
             "lang": "English",
             "pos": "noun",

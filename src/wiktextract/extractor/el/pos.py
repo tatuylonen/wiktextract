@@ -156,7 +156,7 @@ def process_pos(
 
     def bold_node_handler_fn(
         node: WikiNode,
-    ) -> list[str | WikiNode] | None:
+    ) -> list[str | WikiNode] | str | None:
         """Insert special markers `__*S__` and `__*E__` around bold nodes so
         that the strings can later be split into "head-word" and "tag-words"
         parts. Collect incidental stuff, like side-tables, that are often
@@ -325,7 +325,10 @@ def process_pos(
                 data,
                 data.lang_code in GREEK_LANGCODES,
                 template_name=template_name or "",
+                source="inflection",
             )
+            for form in data.forms:
+                translate_raw_tags(form)
 
     data.forms = remove_duplicate_forms(wxr, data.forms)
 
@@ -431,6 +434,8 @@ def process_pos(
         senses = recurse_glosses(wxr, lst, data)
         if len(senses) > 0:
             got_senses = True
+            for sense in senses:
+                translate_raw_tags(sense)
             data.senses.extend(senses)
 
     if not got_senses and len(glosses_lists) > 0:
@@ -471,7 +476,10 @@ def process_pos(
         if type == Heading.Translations:
             process_translations(wxr, data, sl)
         elif type == Heading.Infl:
-            process_inflection_section(wxr, data, sl)
+            source = "inflection"
+            if data.lang_code in ("el", "grc"):
+                source = "conjugation"
+            process_inflection_section(wxr, data, sl, source=source)
         elif type in (
             Heading.Related,
             Heading.Synonyms,
