@@ -137,6 +137,8 @@ VERB_FORM_TAGS: dict[str, str | list[str]] = {
     "bitransitif": "ditransitive",
     "déterminé": "determinate",
     "indéterminé": "indeterminate",
+    # Template:irrégulier
+    "irrégulier": "irregular",
 }
 
 # https://en.wikipedia.org/wiki/Grammatical_case
@@ -187,6 +189,9 @@ TENSE_TAGS: dict[str, str | list[str]] = {
     # Template:de-conj
     "futur i": "future-i",
     "futur ii": "future-ii",
+    # Template:it-irrégulier-avere-1
+    "présent affirmatif": ["present", "affirmative"],
+    "présent négatif": ["present", "negative"],
 }
 
 # https://en.wikipedia.org/wiki/Grammatical_person

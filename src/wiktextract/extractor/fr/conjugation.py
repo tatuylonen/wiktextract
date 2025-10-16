@@ -109,9 +109,9 @@ def process_onglets_conjugaison_template(
             process_conj_template(wxr, entry, arg_value, conj_page_title)
         elif isinstance(arg_value, list):
             for arg_node in arg_value:
-                if (
-                    isinstance(arg_node, TemplateNode)
-                    and "-conj" in arg_node.template_name
+                if isinstance(arg_node, TemplateNode) and (
+                    "-conj" in arg_node.template_name
+                    or arg_node.template_name.startswith("it-irrégulier-")
                 ):
                     process_conj_template(wxr, entry, arg_node, conj_page_title)
 
