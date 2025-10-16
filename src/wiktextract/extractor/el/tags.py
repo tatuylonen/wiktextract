@@ -1,5 +1,7 @@
-from wiktextract.extractor.el.models import Form, WordEntry
+from wiktextract.extractor.el.models import Form, Sense, WordEntry
 from wiktextract.tags import uppercase_tags, valid_tags
+from wiktextract.topics import valid_topics
+from wiktextract.wxr_context import WiktextractContext
 
 # ======
 #  TAGS
@@ -78,6 +80,7 @@ verb_table_tags_base: dict[str, list[str]] = {
     ],
     # Basic tenses / aspects
     "ενεστώτας": ["present"],
+    "πρτ": ["imperfect"],
     "παρατατικός": ["imperfect"],
     "αόρ": ["aorist"],
     "αόριστος": ["aorist"],
@@ -102,6 +105,9 @@ verb_table_tags_base: dict[str, list[str]] = {
     # Voices
     "παθητική φωνή": ["passive"],
     "παθ.φωνή": ["passive"],
+    "π.αόρ": ["passive", "aorist"],
+    # παθητική μετοχή παρακειμένου
+    "μτχ.π.π": ["passive", "participle"],
     # Others
     "προσωπικές εγκλίσεις": ["personal"],  # ["personal-moods"],
     "απρόσωπες εγκλίσεις": ["impersonal"],  # ["impersonal-moods"],
@@ -111,19 +117,113 @@ verb_table_tags_base: dict[str, list[str]] = {
     "μετοχή (ενεστώτας)": ["participle", "present"],
 }
 
-base_tag_map: dict[str, list[str]] = {
+# https://el.wiktionary.org/wiki/free
+english_tables_tags = {
+    # Comparative
+    # lit. "degree of comparison" but degree is a category already
+    "παραθετικά": [],
+    "θετικός": ["positive"],
+    "συγκριτικός": ["comparative"],
+    "υπερθετικός": ["superlative"],
+    # Others
+    "γ΄ ενικό ενεστώτα": ["third-person", "singular", "present"],
+    "παθητική μετοχή": ["passive", "participle"],
+    "ενεργητική μετοχή": ["active", "participle"],  # ...gerund really but
+    "μεταβατικό": ["transitive"],
+    "αμετάβατο": ["intransitive"],  # unsure if it happens
+}
+
+# https://el.wiktionary.org/wiki/balai
+esperanto_tables_tags = {
+    "μέλλοντας": ["future"],
+    "μορφή": [],  # it means form, but it's not a valid tag...
+}
+
+# 1. https://el.wiktionary.org/wiki/un
+# 2. https://el.wiktionary.org/wiki/içmek
+turkish_tables_tags = {
+    # 1
+    "... μου": ["first-person", "singular"],
+    "... σου": ["second-person", "singular"],
+    "... του": ["third-person", "singular"],
+    "... μας": ["first-person", "plural"],
+    "... σας": ["second-person", "plural"],
+    "... τους": ["third-person", "plural"],
+    "είμαι": ["first-person", "singular", "present"],
+    "είσαι": ["second-person", "singular", "present"],
+    "είναι": ["third-person", "singular", "plural", "present"],  # yeah... Greek
+    "είμαστε": ["first-person", "plural", "present"],
+    "είστε": ["second-person", "plural", "present"],
+    "ήμουν": ["first-person", "singular", "past"],
+    "ήσουν": ["second-person", "singular", "past"],
+    "ήταν": ["third-person", "singular", "plural", "past"],
+    "ήμασταν": ["first-person", "plural", "past"],
+    "ήσασταν": ["second-person", "plural", "past"],
+    # 2.
+    "άρνηση": ["negative"],
+    "θετικός - ερώτηση": ["positive", "interrogative"],
+}
+
+# Tags need capitalization
+transliteration_tags = {
+    "λατινικοί χαρακτήρες": ["Latin", "transliteration"],
+    "λατινικό αλφάβητο": ["Latin", "transliteration"],
+    "αραβικό αλφάβητο": ["Arabic", "transliteration"],
+    "κυριλλικοί χαρακτήρες": ["Cyrillic", "transliteration"],
+}
+
+# TODO:
+# This booms somewhere in the parsing
+# (να, ας, αν, ίσως κλπ) γ' ενικό υποτακτικής αορίστου του ρήματος εντάσσω
+
+# TODO: Ideally empty. Move things around.
+other_tags = {
+    "λόγιο": ["literary"],
+    "σπάνιο": ["rare"],
+    "άκλιτο": ["uninflected"],
+    "μεταφορικά": ["figuratively"],  # or metaphorically
+    "παρωχημένο": ["dated"],  # or antiquated
+    "λαϊκότροπο": ["vulgar"],
+    "τοπωνύμιο": ["toponymic"],  # toponym/placename are not valid
+    # Greeks
+    "καθαρεύουσα": ["Katharevousa"],
+    "ελληνιστική κοινή": ["Koine"],
+}
+
+topic_map: dict[str, list[str]] = {
+    "επάγγελμα": ["business"],  # really profession
+    "ιατρική": ["medicine"],
+}
+
+tag_map: dict[str, list[str]] = {
     **verb_table_tags_base,
+    **english_tables_tags,
+    **esperanto_tables_tags,
+    **turkish_tables_tags,
+    **transliteration_tags,
+    **other_tags,
+    # Gender
+    "αρσενικό": ["masculine"],
+    "θηλυκό": ["feminine"],
+    "ουδέτερο": ["neuter"],
+    "αρσενικό & θηλυκό": ["masculine", "feminine"],
+    "αρσενικό ή θηλυκό": ["masculine", "feminine"],
+    # Number
+    "μόνο στον ενικό": ["singular-only"],
+    "μόνο στον πληθυντικό": ["plural-only"],
+    # Case
     "ονομαστική": ["nominative"],
     "γενική": ["genitive"],
     "αιτιατική": ["accusative"],
     "κλητική": ["vocative"],
-    "αρσενικό": ["masculine"],
-    "θηλυκό": ["feminine"],
-    "ουδέτερο": ["neuter"],
     # ------ Ancient Greek --------------------------
     "δοτική": ["dative"],
     "αφαιρετική": ["ablative"],
     "τοπική": ["locative"],
+    "δυϊκός": ["dual"],
+}
+
+example_tag_map = {
     # ------ English --------------------------------
     "no-gloss": ["no-gloss"],
     "comparative": ["comparative"],
@@ -183,24 +283,24 @@ base_tag_map: dict[str, list[str]] = {
 }
 
 
-tag_map = {}
+# tag_map = {}
+#
+# # uppercase_tags are specific tags with uppercase names that are for stuff
+# # like locations and dialect and language names.
+# for k in uppercase_tags:
+#     if k not in base_tag_map:
+#         tag_map[k] = [k.replace(" ", "-")]
 
-# uppercase_tags are specific tags with uppercase names that are for stuff
-# like locations and dialect and language names.
-for k in uppercase_tags:
-    if k not in base_tag_map:
-        tag_map[k] = [k.replace(" ", "-")]
-
-Taggable = WordEntry | Form
-"""An object with raw_tags and tags attributes."""
+Taggable = WordEntry | Form | Sense
+"""An object with raw_tags, tags and topics attributes."""
 
 
 def translate_raw_tags(taggable: Taggable) -> None:
-    """Translate raw_tags to tags, preserving raw_tags.
+    """Translate raw_tags to tags/topics, preserving raw_tags.
 
     This is a bit different from other extractors in order to type check.
 
-    INVARIANT: taggable's tags should **remain** unique.
+    INVARIANT: taggable's tags/topics should **remain** unique.
     If they were not unique before, there are no guarantees.
 
     Use:
@@ -217,8 +317,14 @@ def translate_raw_tags(taggable: Taggable) -> None:
     """
     for raw_tag in taggable.raw_tags:
         clean_raw_tag = raw_tag.replace("\n", " ").lower()
-        tags = base_tag_map.get(clean_raw_tag)
+        tags = tag_map.get(clean_raw_tag)
         if tags is not None:
             for tag in tags:
                 if tag not in taggable.tags:
                     taggable.tags.append(tag)
+        else:
+            topics = topic_map.get(clean_raw_tag)
+            if topics is not None:
+                for topic in topics:
+                    if topic not in taggable.topics:
+                        taggable.topics.append(topic)

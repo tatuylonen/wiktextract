@@ -3,6 +3,7 @@ import re
 from wikitextprocessor import TemplateNode, WikiNode
 from wikitextprocessor.parser import NodeKind
 
+from wiktextract.extractor.el.tags import translate_raw_tags
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
@@ -57,6 +58,7 @@ def process_linkage_section(
                         else "X-sistemo"
                     ],
                     tags=["transliteration"],
+                    source="linkage",
                 )
             )
             return []
@@ -181,14 +183,18 @@ def process_linkage_section(
             target_field = data.derived
         case Heading.Transliterations:
             # For transliteration sections we add these to forms instead.
-            data.forms.extend(
+            transliteration_forms = [
                 Form(
                     form=" ".join(link_parts),
                     raw_tags=ltags,
                     tags=["transliteration"],
+                    source="linkage",
                 )
                 for link_parts, ltags, _ in combined_line_data
-            )
+            ]
+            for form in transliteration_forms:
+                translate_raw_tags(form, wxr)
+            data.forms.extend(transliteration_forms)
             if transliteration_template_data:
                 data.forms.extend(transliteration_template_data)
             return

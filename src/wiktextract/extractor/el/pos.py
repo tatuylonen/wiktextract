@@ -325,7 +325,10 @@ def process_pos(
                 data,
                 data.lang_code in GREEK_LANGCODES,
                 template_name=template_name or "",
+                source="inflection",
             )
+            for form in data.forms:
+                translate_raw_tags(form)
 
     data.forms = remove_duplicate_forms(wxr, data.forms)
 
@@ -431,6 +434,8 @@ def process_pos(
         senses = recurse_glosses(wxr, lst, data)
         if len(senses) > 0:
             got_senses = True
+            for sense in senses:
+                translate_raw_tags(sense)
             data.senses.extend(senses)
 
     if not got_senses and len(glosses_lists) > 0:
@@ -471,7 +476,10 @@ def process_pos(
         if type == Heading.Translations:
             process_translations(wxr, data, sl)
         elif type == Heading.Infl:
-            process_inflection_section(wxr, data, sl, source="conjugation")
+            source = "inflection"
+            if data.lang_code in ("el", "grc"):
+                source = "conjugation"
+            process_inflection_section(wxr, data, sl, source=source)
         elif type in (
             Heading.Related,
             Heading.Synonyms,

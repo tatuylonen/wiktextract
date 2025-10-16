@@ -122,6 +122,7 @@ class Sense(GreekBaseModel):
     glosses: list[str] = []  # ["Gloss supercategory", "Specific gloss."]
     tags: list[str] = []
     raw_tags: list[str] = []
+    topics: list[str] = []
     form_of: list[FormOf] = []
     # alt_of : list[FormOf] = []
     # compound_of: list[FormOf] = []
@@ -156,7 +157,14 @@ class Sense(GreekBaseModel):
         self.related.extend(other.related)
 
 
-FormSource = Literal["declension", "conjugation", "header", ""]
+FormSource = Literal[
+    "conjugation",
+    "declension",
+    "header",
+    "inflection",  # Can be further narrowed to conjugation/declension
+    "linkage",
+    "",
+]
 
 
 # An inflected form of the word, like `{ form: "bats", tags: ["plural"] }`
@@ -242,6 +250,7 @@ class WordEntry(GreekBaseModel):
     categories: list[str] = []
     sounds: list[Sound] = []
     tags: list[str] = []
+    topics: list[str] = []
     raw_tags: list[str] = []
     hyphenation: str = ""  # Should be a list `hyphenations`.
     head_templates: list[TemplateData] = []
