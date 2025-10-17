@@ -160,7 +160,7 @@ def process_pron(
                     tags,
                     num,
                     subnode,
-                    target_data.copy(deep=True),
+                    target_data.model_copy(deep=True),
                 )
             )
 

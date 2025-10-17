@@ -1,5 +1,4 @@
 from wikitextprocessor import NodeKind, TemplateNode, WikiNode
-from wikitextprocessor.core import TemplateArgs
 from wikitextprocessor.parser import LEVEL_KIND_FLAGS
 
 from wiktextract import WiktextractContext
@@ -12,8 +11,7 @@ from .parse_utils import (
 )
 from .pos import extract_form_of_templates
 from .pronunciation import process_pron
-from .section_titles import POS_HEADINGS, Heading, Tags
-from .text_utils import ENDING_NUMBER_RE
+from .section_titles import Heading
 
 
 def process_etym(
@@ -47,11 +45,7 @@ def process_etym(
 
     # Greek wiktionary doesn't seem to have etymology templates, or at
     # least they're not used as much.
-    etym_text = (
-        clean_node(wxr, base_data, etym_contents)
-        .lstrip(":#")
-        .strip()
-    )
+    etym_text = clean_node(wxr, base_data, etym_contents).lstrip(":#").strip()
 
     if etym_text:
         base_data.etymology_text = etym_text
@@ -62,7 +56,14 @@ def process_etym(
         if heading_type == Heading.POS:
             section_num = num if num > section_num else section_num
             ret_etym_sublevels.append(
-                (pos, title, tags, num, subnode, base_data.copy(deep=True))
+                (
+                    pos,
+                    title,
+                    tags,
+                    num,
+                    subnode,
+                    base_data.model_copy(deep=True),
+                )
             )
         elif heading_type == Heading.Pron:
             section_num = num if num > section_num else section_num

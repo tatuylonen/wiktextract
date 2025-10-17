@@ -20,7 +20,15 @@ from wiktextract.wxr_logging import logger
 
 from .head import parse_head
 from .linkages import process_linkage_section
-from .models import Example, FormOf, Linkage, Sense, TemplateData, WordEntry
+from .models import (
+    Example,
+    FormOf,
+    FormSource,
+    Linkage,
+    Sense,
+    TemplateData,
+    WordEntry,
+)
 from .parse_utils import (
     GREEK_LANGCODES,
     Heading,
@@ -476,7 +484,7 @@ def process_pos(
         if type == Heading.Translations:
             process_translations(wxr, data, sl)
         elif type == Heading.Infl:
-            source = "inflection"
+            source: FormSource = "inflection"
             if data.lang_code in ("el", "grc"):
                 source = "conjugation"
             process_inflection_section(wxr, data, sl, source=source)
