@@ -41,21 +41,16 @@ class TestLinkage(TestCase):
 <th> [[женский род|жен.&nbsp;р.]] </th>
 </tr>
 <tr>
-<td rowspan="2" bgcolor="#EEF9FF">[[винительный|В.]]&nbsp;&nbsp;&nbsp;</td>
-<td bgcolor="#EEF9FF">[[одушевлённый|одуш.]]</td>
-<td bgcolor="#ffffff">ру́сского</td>
-<td rowspan="2" bgcolor="#ffffff">ру́сское</td>
-<td rowspan="2" bgcolor="#ffffff">ру́сскую</td>
-<td bgcolor="#ffffff">ру́сских</td>
+<th rowspan="2">[[винительный|В.]]&nbsp;&nbsp;&nbsp;</th>
+<th>[[одушевлённый|одуш.]]</th><td>ру́сского</td><td rowspan="2">ру́сское</td><td rowspan="2">ру́сскую</td><td>ру́сских</td>
 </tr>
 <tr>
-<td bgcolor="#EEF9FF">[[неодушевлённый|неод.]]</td>
-<td bgcolor="#ffffff">ру́сский</td>
-<td bgcolor="#ffffff">ру́сские</td>
+<th>[[неодушевлённый|неод.]]</th>
+<td>ру́сский</td>
+<td>ру́сские</td>
 </tr>
 <tr>
-<td colspan="2" bgcolor="#EEF9FF"> [[творительный|Т.]]</td>
-<td>ру́сской<br>ру́сскою</td>
+<th colspan="2"> [[творительный|Тв.]]</th><td>ру́сской<br>ру́сскою</td>
 </tr>
 </table>""",
         )
@@ -286,5 +281,74 @@ class TestLinkage(TestCase):
             [
                 {"form": "опа́снее", "tags": ["comparative"]},
                 {"form": "опа́сней", "tags": ["comparative"]},
+            ],
+        )
+
+    def test_спряжения(self):
+        self.wxr.wtp.add_page("Шаблон:-ru-", 10, "Русский")
+        self.wxr.wtp.add_page(
+            "Шаблон:гл ru 1a",
+            10,
+            """<table class="morfotable ru" cellpadding="2" rules="all">
+<tr>
+<th colspan="3">[[настоящее время|Настоящее время]]</th>
+</tr><tr>
+<th></th>
+<th align="center">[[единственное число|ед. число]]</th>
+<th align="center">[[множественное число|мн. число]]</th>
+</tr>
+<tr>
+<th>[[первое лицо|1-е лицо]]</th>
+<td>пры́гаю</td>
+<td>пры́гаем</td>
+</tr>
+<tr>
+<th colspan="3">[[деепричастие|Деепричастия]]</th>
+</tr>
+<tr><th align="right">[[настоящее время|наст. вр.]]</th>
+<td colspan="2">[[прыгая#пры́гая|пры́гая]]</td>
+</tr>
+<tr>
+<th align="right">[[прошедшее время|прош. вр.]]</th>
+<td colspan="2">[[прыгав#пры́гав|пры́гав]], [[прыгавши#пры́гавши|пры́гавши]]</td>
+</tr>
+</table>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "прыгать",
+            """= {{-ru-}} =
+=== Морфологические и синтаксические свойства ===
+{{гл ru 1a
+|основа=пры́га
+|слоги={{по-слогам|пры́|гать}}
+|НП=1
+|соотв={{без ссылок|приставочные типа}} запры́гать, пропры́гать
+|дореф=
+}}
+=== Семантические свойства ===
+==== Значение ====
+# совершать прыжок""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {
+                    "form": "пры́гаю",
+                    "tags": ["present", "singular", "first-person"],
+                },
+                {
+                    "form": "пры́гаем",
+                    "tags": ["present", "plural", "first-person"],
+                },
+                {
+                    "form": "пры́гая",
+                    "tags": ["adverbial", "participle", "present"],
+                },
+                {"form": "пры́гав", "tags": ["adverbial", "participle", "past"]},
+                {
+                    "form": "пры́гавши",
+                    "tags": ["adverbial", "participle", "past"],
+                },
             ],
         )

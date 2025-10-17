@@ -387,6 +387,24 @@ TENSE_TAGS = {
     "прич. прош. вр.": ["past", "participle"],
     # Template:гл ru 2a-ся
     "наст./будущ.": ["present", "future"],
+    # Template:гл ru 7b/b-дX
+    "настоящее время": "present",
+    "ед. число": "singular",
+    "мн. число": "plural",
+    "1-е лицо": "first-person",
+    "2-е лицо": "second-person",
+    "3-е лицо": "third-person",
+    "прошедшее время": "past",
+    "с. р.": "neuter",
+    "повелительное наклонение": "imperative",
+    "причастия": "participle",
+    "действ. наст.": ["active", "present"],
+    "действ. прош.": ["active", "past"],
+    "страд. наст.": ["passive", "present"],
+    "страд. прош.": ["passive", "past"],
+    "деепричастия": ["adverbial", "participle"],
+    "наст. вр.": "present",
+    "будущее время": "future",
 }
 
 MOOD_TAGS = {
