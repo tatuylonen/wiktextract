@@ -71,6 +71,7 @@ def extract_inf_table_template(
                 if (
                     row_index >= header.row_index
                     and row_index < header.row_index + header.rowspan
+                    and header.col_index <= col_index
                 ):
                     col_index += header.colspan
             for cell_node in row.find_child(NodeKind.TABLE_HEADER_CELL):
@@ -116,6 +117,7 @@ def extract_inf_table_template(
                 if (
                     row_index >= row_header.row_index
                     and row_index < row_header.row_index + row_header.rowspan
+                    and row_header.col_index <= col_index
                 ):
                     col_index += row_header.colspan
             for cell_node in row.find_child(NodeKind.TABLE_CELL):
