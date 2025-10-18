@@ -2,7 +2,6 @@ import re
 
 from .models import Sense
 from .section_titles import POS_HEADINGS
-from .simple_tags import simple_tag_map
 from .text_utils import ENDING_NUMBER_RE, STRIP_PUNCTUATION, normalized_int
 
 # If you want to use groups in a regex meant for re.split(), you need to use the
@@ -15,6 +14,8 @@ SPLITTER_RE = re.compile(r"\s*(?:,|;|\(|\)|\.|&)\s*")
 def convert_tags(raw_tags: list[str]) -> tuple[list[str], list[str], list[str]]:
     """Check if raw tags contain tag strings in `simple_tag_map` and return
     lists of strings: tags, raw_tags and parts of speech.
+
+    Note that the translation raw_tags > tags is done elsewhere for Senses.
     """
 
     if not any(s.strip(STRIP_PUNCTUATION) for s in raw_tags):
@@ -39,15 +40,15 @@ def convert_tags(raw_tags: list[str]) -> tuple[list[str], list[str], list[str]]:
             if m := ENDING_NUMBER_RE.search(s):
                 s = s[: m.start()].strip()
                 pos_num = normalized_int(m.group(1))
-            if s.lower() in POS_HEADINGS:
+            heading_posmap = POS_HEADINGS.get(s.lower())
+            if heading_posmap is not None:
                 # XXX might be better to separate out the POS-number here
+                pos = heading_posmap["pos"]
                 if pos_num and pos_num != -1:
-                    pos = f"{s.lower()} {pos_num}"
-                else:
-                    pos = s.lower()
+                    pos = f"{pos} {pos_num}"
                 pposes.append(pos)
-            elif s in simple_tag_map:
-                ttags.extend(simple_tag_map[s])
+                if heading_tags := heading_posmap.get("tags"):
+                    ttags.extend(heading_tags)
             else:
                 rtags.append(s)
         if len(ttags) > 0 or len(pposes) > 0:
@@ -67,4 +68,12 @@ def convert_tags_in_sense(sense: Sense) -> None:
     tags, raw_tags, poses = convert_tags(sense.raw_tags)
     sense.tags.extend(tags)
     sense.raw_tags = raw_tags
+    # While this is generally useful, it can also miss because these poses may
+    # not refer to the sense:
+    #   https://el.wiktionary.org/wiki/Ινδός
+    #   where (θηλυκό Ινδή) does not claim that the Sense is feminine
+    #   but that the feminine version of Ινδός is Ινδή
+    #
+    # ... but then there should not have been in raw.tags? and parsed into a
+    # Form before reaching this?
     sense.tags.extend(poses)

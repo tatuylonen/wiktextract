@@ -27,6 +27,7 @@ POSName = str
 POSMap = TypedDict(
     "POSMap",
     {
+        # TODO: Use Typing.Required (3.11>=) when python 3.10 supports drop
         "pos": POSName,
         # "debug" is legacy from [en], might be implemented
         "debug": str,

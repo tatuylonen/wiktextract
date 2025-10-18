@@ -822,7 +822,7 @@ def parse_gloss(
         return True
 
     if no_gloss_but_keep_anyway:
-        parent_sense.raw_tags.append("no-gloss")
+        parent_sense.tags.append("no-gloss")
         return True
 
     return False
@@ -1025,7 +1025,7 @@ def recurse_glosses1(
         # XXX if this becomes relevant, add the example data to a returned
         # subsense instead?
         # if any(
-        #     isinstance(r, Sense) and r.raw_tags == ["no-gloss"] for r in ret
+        #     isinstance(r, Sense) and r.tags == ["no-gloss"] for r in ret
         # ):
         #     print(f"{ret=}")
         return (
@@ -1037,7 +1037,7 @@ def recurse_glosses1(
         )
 
     # If nothing came from below, then this.
-    if found_gloss is True or "no-gloss" in parent_sense.raw_tags:
+    if found_gloss is True or "no-gloss" in parent_sense.tags:
         parent_sense.examples.extend(ret_examples)
         parent_sense.related.extend(ret_related)
         parent_sense.synonyms.extend(ret_synonyms)
