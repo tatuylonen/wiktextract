@@ -20,7 +20,7 @@ class TestElLinkage(TestCase):
             ),
         )
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         self.wxr.wtp.close_db_conn()
 
     def parse_related(self, word: str, text: str, type=Heading.Related) -> dict:
@@ -33,7 +33,7 @@ class TestElLinkage(TestCase):
 
         return data.model_dump(exclude_defaults=True)
 
-    def test_related1(self):
+    def test_related1(self) -> None:
         data = self.parse_related(
             "κόκκινο",
             """==== <span style="cursor:help;" title="Λέξεις της ίδιας γλώσσας με ετυμολογική συγγένεια">Συγγενικά</span> ====
@@ -48,7 +48,7 @@ class TestElLinkage(TestCase):
             ],
         )
 
-    def test_related1b(self):
+    def test_related1b(self) -> None:
         data = self.parse_related(
             "κόκκινο",
             """==== <span style="cursor:help;" title="Λέξεις της ίδιας γλώσσας με ετυμολογική συγγένεια">Συγγενικά</span> ====
@@ -63,7 +63,7 @@ class TestElLinkage(TestCase):
             ],
         )
 
-    def test_related1c(self):
+    def test_related1c(self) -> None:
         data = self.parse_related(
             "κόκκινο",
             """==== <span style="cursor:help;" title="Λέξεις της ίδιας γλώσσας με ετυμολογική συγγένεια">Συγγενικά</span> ====
@@ -80,7 +80,7 @@ class TestElLinkage(TestCase):
             ],
         )
 
-    def test_related2(self):
+    def test_related2(self) -> None:
         data = self.parse_related(
             "papillon",
             """==== <span style="cursor:help;" title="Εκφράσεις που περιέχουν τη λέξη «κόκκινο»">Εκφράσεις</span> ====
@@ -95,7 +95,7 @@ class TestElLinkage(TestCase):
             ],
         )
 
-    def test_transliterations(self):
+    def test_transliterations(self) -> None:
         data = self.parse_related(
             "foo",
             """===={{μεταγραφές}}====
@@ -130,7 +130,7 @@ class TestElLinkage(TestCase):
             ],
         )
 
-    def test_transliterations_esperanto(self):
+    def test_transliterations_esperanto(self) -> None:
         data = self.parse_related(
             "foo",
             """===={{άλλη γραφή}}====
@@ -158,7 +158,7 @@ class TestElLinkage(TestCase):
             ],
         )
 
-    def test_related_examples1(self):
+    def test_related_examples1(self) -> None:
         data = self.parse_related(
             "papillon",
             """==== <span style="cursor:help;" title="Εκφράσεις που περιέχουν τη λέξη «κόκκινο»">Εκφράσεις</span> ====

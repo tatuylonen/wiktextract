@@ -126,7 +126,7 @@ def parse_lower_heading(
 
 
 def parse_pos_heading(
-    wxr: WiktextractContext, heading: str, m: re.Match
+    wxr: WiktextractContext, heading: str, m: re.Match[str]
 ) -> tuple[POSName, Tags, int, bool]:
     pos_str = m.group(1)
     rest = m.group(2)
@@ -141,7 +141,7 @@ def parse_pos_heading(
 
 
 def parse_section_heading(
-    wxr: WiktextractContext, heading: str, m: re.Match
+    wxr: WiktextractContext, heading: str, m: re.Match[str]
 ) -> tuple[Heading, str, Tags, int, bool]:
     subsection_str = m.group(1)
     rest = m.group(2)

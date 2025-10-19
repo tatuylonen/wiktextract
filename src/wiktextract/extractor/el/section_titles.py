@@ -27,7 +27,7 @@ POSName = str
 POSMap = TypedDict(
     "POSMap",
     {
-        # TODO: Use Typing.Required (3.11>=) when python 3.10 supports drop
+        # TODO: Use Typing.Required (3.11>=) when python 3.10 support drops
         "pos": POSName,
         # "debug" is legacy from [en], might be implemented
         "debug": str,
@@ -617,6 +617,7 @@ POS_HEADINGS_RE = re.compile(
 SubSectionMap = TypedDict(
     "SubSectionMap",
     {
+        # TODO: Use Typing.Required (3.11>=) when python 3.10 support drops
         "type": Heading,
         # "debug" is legacy from [en], might be implemented
         "debug": str,

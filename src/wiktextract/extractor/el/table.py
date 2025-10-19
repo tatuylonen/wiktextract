@@ -522,7 +522,7 @@ def is_header(
     spans: list[tuple[bool, bool, bool, str]],
     is_greek_entry: bool,
     unformatted_text_found: bool,
-    first_cells_are_bold,
+    first_cells_are_bold: bool,
 ) -> tuple[bool, UnformattedFound]:
     # Container for more complex logic stuff because trying to figure out
     # if something is a header can get messy.

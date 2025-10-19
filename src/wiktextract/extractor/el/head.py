@@ -66,14 +66,14 @@ def partition_head_forms(
     current_forms: Forms = []
     current_tags: Tags = []
 
-    def push_new_block():
+    def push_new_block() -> None:
         nonlocal current_forms
         nonlocal current_tags
         blocks.append((current_forms, current_tags))
         current_forms = []
         current_tags = []
 
-    def extend_old_block():
+    def extend_old_block() -> None:
         nonlocal current_forms
         nonlocal current_tags
         blocks[-1][0].extend(current_forms)

@@ -1,7 +1,7 @@
 import re
 from collections.abc import Iterator
 from functools import partial
-from typing import TypeAlias
+from typing import Any, TypeAlias
 from unicodedata import name as unicode_name
 
 from wikitextprocessor import (
@@ -31,11 +31,10 @@ from .models import (
 )
 from .parse_utils import (
     GREEK_LANGCODES,
-    Heading,
     parse_lower_heading,
     remove_duplicate_forms,
 )
-from .section_titles import POS_HEADINGS
+from .section_titles import POS_HEADINGS, Heading
 from .table import parse_table, process_inflection_section
 from .tags_utils import convert_tags_in_sense
 from .text_utils import (
@@ -627,7 +626,7 @@ def extract_form_of_templates_basic(
     t_name: str,
     t_node: TemplateNode,
     extract_argument: int | str,
-):
+) -> None:
     t_args = t_node.template_parameters
     if extract_argument not in t_args:
         # mtxpp template has no args, consume the next links for the
@@ -857,7 +856,7 @@ def recurse_glosses1(
     # Pydantic stuff doesn't play nice with Tatu's manual dict manipulation
     # functions, so we'll use a dummy dict here that we then check for
     # content and apply to `parent_sense`.
-    dummy_parent: dict = {}
+    dummy_parent: dict[str, Any] = {}
 
     related_linkages: list[Linkage] = []
     example_is_synonym = False

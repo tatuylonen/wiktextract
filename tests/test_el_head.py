@@ -24,9 +24,9 @@ class TestElHeader(TestCase):
     def tearDown(self) -> None:
         self.wxr.wtp.close_db_conn()
 
-    def mktest_form(self, received, expected):
+    def mktest_form(self, received, expected) -> None:
         # Similar to test_el_inflection::mktest_form
-        def normalize_forms(lst):
+        def normalize_forms(lst) -> None:
             for form in lst:
                 if "raw_tags" in form:
                     form["raw_tags"].sort()
@@ -58,7 +58,7 @@ class TestElHeader(TestCase):
             self.wxr, pos_node, data, None, "noun", "ουσιαστικό", pos_tags=[]
         )
         dumped = data.model_dump(exclude_defaults=True)
-        forms = dumped["forms"]
+        forms: list[Form] = dumped["forms"]
         return forms
 
     def test_el_head1(self) -> None:
