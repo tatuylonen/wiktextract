@@ -166,7 +166,7 @@ class TestElHeader(TestCase):
 
     def test_parsing_logio(self) -> None:
         # https://el.wiktionary.org/wiki/αιδώς
-        # Test that logio (literary) is correctly parsed
+        # Test that logio is correctly parsed
         self.wxr.wtp.add_page("Πρότυπο:-el-", 10, "Νέα ελληνικά (el)")
         self.wxr.wtp.add_page("Πρότυπο:ουσιαστικό", 10, "Ουσιαστικό")
         self.wxr.wtp.add_page(

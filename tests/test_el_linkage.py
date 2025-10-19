@@ -117,7 +117,7 @@ class TestElLinkage(TestCase):
                 },
                 {
                     "form": "yanalatinfoo",
-                    "tags": ["transliteration", "Latin"],
+                    "tags": ["transliteration", "Latin", "Yañalif"],
                     "raw_tags": ["λατινικό αλφάβητο", "Yañalif"],
                     "source": "linkage",
                 },
