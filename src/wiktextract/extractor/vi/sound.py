@@ -520,7 +520,7 @@ def extract_th_pron_template(
     # https://vi.wiktionary.org/wiki/Bản mẫu:th-pron
     @dataclass
     class TableHeader:
-        text: str
+        raw_tags: list[str]
         rowspan: int
 
     expanded_node = wxr.wtp.parse(
@@ -550,7 +550,13 @@ def extract_th_pron_template(
                     rowspan_str = th_tag.attrs.get("rowspan", "1")
                     if re.fullmatch(r"\d+", rowspan_str):
                         rowspan = int(rowspan_str)
-                    row_headers.append(TableHeader(header_str, rowspan))
+                    header = TableHeader([], rowspan)
+                    for line in header_str.splitlines():
+                        for raw_tag in line.strip("{}\n ").split(";"):
+                            raw_tag = raw_tag.strip()
+                            if raw_tag != "":
+                                header.raw_tags.append(raw_tag)
+                    row_headers.append(header)
 
             for td_tag in tr_tag.find_html("td"):
                 if field == "audio":
@@ -568,7 +574,7 @@ def extract_th_pron_template(
                         if word != "":
                             sounds.append(Sound(homophone=word))
                 else:
-                    raw_tag = ""
+                    raw_tags = []
                     for html_node in td_tag.find_child_recursively(
                         NodeKind.HTML
                     ):
@@ -577,7 +583,10 @@ def extract_th_pron_template(
                             if node_str.startswith("[") and node_str.endswith(
                                 "]"
                             ):
-                                raw_tag = node_str.strip("[]")
+                                for raw_tag in node_str.strip("[]").split(","):
+                                    raw_tag = raw_tag.strip()
+                                    if raw_tag != "":
+                                        raw_tags.append(raw_tag)
                             elif len(sounds) > 0:
                                 sounds[-1].roman = node_str
                         elif html_node.tag == "span":
@@ -587,13 +596,13 @@ def extract_th_pron_template(
                             if node_str != "" and (
                                 span_lang == "th" or span_class in ["IPA", "tr"]
                             ):
-                                sound = Sound()
-                                setattr(sound, field, node_str)
-                                if raw_tag != "":
-                                    sound.raw_tags.append(raw_tag)
+                                sound = Sound(raw_tags=raw_tags)
                                 for header in row_headers:
-                                    sound.raw_tags.append(header.text)
+                                    sound.raw_tags.extend(header.raw_tags)
                                 translate_raw_tags(sound)
+                                if "romanization" in sound.tags:
+                                    field = "roman"
+                                setattr(sound, field, node_str)
                                 sounds.append(sound)
 
     base_data.sounds.extend(sounds)

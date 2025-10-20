@@ -261,7 +261,7 @@ ZH_DIAL_TAGS = {
 
 TH_PRON_TAGS = {
     "chính tả": "orthographic",
-    "âm vị": "phonemic",
+    "âm vị": "phoneme",
     "chính tả/âm vị": ["orthographic", "phonemic"],
     "chuyển tự": "romanization",
     "paiboon": "Paiboon",

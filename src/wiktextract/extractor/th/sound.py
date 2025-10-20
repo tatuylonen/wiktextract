@@ -132,16 +132,15 @@ def extract_audio_template(
         clean_node(wxr, base_data, t_node)
 
 
-@dataclass
-class TableHeader:
-    text: str
-    rowspan: int
-
-
 def extract_th_pron_template(
     wxr: WiktextractContext, base_data: WordEntry, t_node: TemplateNode
 ):
     # https://th.wiktionary.org/wiki/แม่แบบ:th-pron
+    @dataclass
+    class TableHeader:
+        raw_tags: list[str]
+        rowspan: int
+
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(t_node), expand_all=True
     )
@@ -168,7 +167,13 @@ def extract_th_pron_template(
                     rowspan_str = th_tag.attrs.get("rowspan", "1")
                     if re.fullmatch(r"\d+", rowspan_str):
                         rowspan = int(rowspan_str)
-                    row_headers.append(TableHeader(header_str, rowspan))
+                    header = TableHeader([], rowspan)
+                    for line in header_str.splitlines():
+                        for raw_tag in line.strip("{}\n ").split(";"):
+                            raw_tag = raw_tag.strip()
+                            if raw_tag != "":
+                                header.raw_tags.append(raw_tag)
+                    row_headers.append(header)
 
             for td_tag in tr_tag.find_html("td"):
                 if field == "audio":
@@ -186,14 +191,34 @@ def extract_th_pron_template(
                         if word != "":
                             base_data.sounds.append(Sound(homophone=word))
                 else:
-                    data = clean_node(wxr, None, td_tag)
-                    if data != "":
-                        sound = Sound()
-                        setattr(sound, field, data)
-                        for header in row_headers:
-                            sound.raw_tags.append(header.text)
-                        translate_raw_tags(sound)
-                        base_data.sounds.append(sound)
+                    raw_tags = []
+                    for html_node in td_tag.find_child_recursively(
+                        NodeKind.HTML
+                    ):
+                        if html_node.tag == "small":
+                            node_str = clean_node(wxr, None, html_node)
+                            if node_str.startswith("[") and node_str.endswith(
+                                "]"
+                            ):
+                                for raw_tag in node_str.strip("[]").split(","):
+                                    raw_tag = raw_tag.strip()
+                                    if raw_tag != "":
+                                        raw_tags.append(raw_tag)
+                        elif html_node.tag == "span":
+                            node_str = clean_node(wxr, None, html_node)
+                            span_lang = html_node.attrs.get("lang", "")
+                            span_class = html_node.attrs.get("class", "")
+                            if node_str != "" and (
+                                span_lang == "th" or span_class in ["IPA", "tr"]
+                            ):
+                                sound = Sound(raw_tags=raw_tags)
+                                for header in row_headers:
+                                    sound.raw_tags.extend(header.raw_tags)
+                                translate_raw_tags(sound)
+                                if "romanization" in sound.tags:
+                                    field = "roman"
+                                setattr(sound, field, node_str)
+                                base_data.sounds.append(sound)
 
     clean_node(wxr, base_data, expanded_node)
 

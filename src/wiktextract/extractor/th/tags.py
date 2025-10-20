@@ -28,12 +28,17 @@ TRANSLATION_TAGS = {
 }
 
 SOUND_TAGS = {
-    "การแผลงเป็น\nอักษรโรมัน": "romanization",  # Template:th-pron
+    # Template:th-pron
+    "การแผลงเป็น": "romanization",
+    "อักษรโรมัน": "romanization",
     "ไพบูลย์พับบลิชชิง": "Paiboon",
     "ราชบัณฑิตยสภา": "Royal-Institute",
     "การแบ่งพยางค์": "phoneme",
     "US": "US",
     "UK": "UK",
+    "เสียงสมาส": "compound",
+    "ไม่ตามอักขรวิธี": "unorthographical",
+    "เสียงสระสั้น": "short",
     # Template:zh-pron
     "จีนกลาง": "Mandarin",
     "มาตรฐาน": "Standard",
@@ -343,10 +348,12 @@ def translate_raw_tags(data: WordEntry) -> None:
     for raw_tag in data.raw_tags:
         if raw_tag in TAGS and hasattr(data, "tags"):
             tr_tag = TAGS[raw_tag]
-            if isinstance(tr_tag, str):
+            if isinstance(tr_tag, str) and tr_tag not in data.tags:
                 data.tags.append(tr_tag)
             elif isinstance(tr_tag, list):
-                data.tags.extend(tr_tag)
+                for tag in tr_tag:
+                    if tag not in data.tags:
+                        data.tags.append(tag)
         elif raw_tag in TOPICS and hasattr(data, "topics"):
             topic = TOPICS[raw_tag]
             if isinstance(topic, str):
