@@ -1,5 +1,6 @@
 import itertools
 import re
+from dataclasses import dataclass
 
 from wikitextprocessor import (
     HTMLNode,
@@ -73,6 +74,10 @@ def process_pron_template(
         sounds.extend(process_enpr_template(wxr, template_node, raw_tags))
     elif template_name == "ja-pron":
         new_sounds, new_cats = extract_ja_pron_template(wxr, template_node)
+        sounds.extend(new_sounds)
+        categories.extend(new_cats)
+    elif template_name == "th-pron":
+        new_sounds, new_cats = extract_th_pron_template(wxr, template_node)
         sounds.extend(new_sounds)
         categories.extend(new_cats)
     return sounds, categories
@@ -395,6 +400,101 @@ def extract_ja_pron_template(
         if sound.ipa != "" or sound.other != "":
             translate_raw_tags(sound)
             sounds.append(sound)
+
+    clean_node(wxr, cats, expanded_node)
+    return sounds, cats.get("categories", [])
+
+
+def extract_th_pron_template(
+    wxr: WiktextractContext, t_node: TemplateNode
+) -> tuple[list[Sound], list[str]]:
+    @dataclass
+    class TableHeader:
+        raw_tags: list[str]
+        rowspan: int
+
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    cats = {}
+    sounds = []
+    for table_tag in expanded_node.find_html("table"):
+        row_headers = []
+        for tr_tag in table_tag.find_html("tr"):
+            field = "other"
+            new_headers = []
+            for header in row_headers:
+                if header.rowspan > 1:
+                    header.rowspan -= 1
+                    new_headers.append(header)
+            row_headers = new_headers
+            for th_tag in tr_tag.find_html("th"):
+                header_str = clean_node(wxr, None, th_tag)
+                if header_str.startswith("(標準泰語) IPA"):
+                    field = "ipa"
+                elif header_str.startswith("同音詞"):
+                    field = "homophone"
+                elif header_str == "音頻":
+                    field = "audio"
+                elif header_str != "":
+                    rowspan = 1
+                    rowspan_str = th_tag.attrs.get("rowspan", "1")
+                    if re.fullmatch(r"\d+", rowspan_str):
+                        rowspan = int(rowspan_str)
+                    header = TableHeader([], rowspan)
+                    for line in header_str.splitlines():
+                        for raw_tag in line.strip("{}\n ").split(";"):
+                            raw_tag = raw_tag.strip()
+                            if raw_tag != "":
+                                header.raw_tags.append(raw_tag)
+                    row_headers.append(header)
+
+            for td_tag in tr_tag.find_html("td"):
+                if field == "audio":
+                    for link_node in td_tag.find_child(NodeKind.LINK):
+                        filename = clean_node(wxr, None, link_node.largs[0])
+                        if filename != "":
+                            sound = Sound()
+                            set_sound_file_url_fields(wxr, filename, sound)
+                            sounds.append(sound)
+                elif field == "homophone":
+                    for span_tag in td_tag.find_html_recursively(
+                        "span", attr_name="lang", attr_value="th"
+                    ):
+                        word = clean_node(wxr, None, span_tag)
+                        if word != "":
+                            sounds.append(Sound(homophone=word))
+                else:
+                    raw_tags = []
+                    for html_node in td_tag.find_child_recursively(
+                        NodeKind.HTML
+                    ):
+                        if html_node.tag == "small":
+                            node_str = clean_node(wxr, None, html_node)
+                            if node_str.startswith("[") and node_str.endswith(
+                                "]"
+                            ):
+                                for raw_tag in node_str.strip("[]").split(","):
+                                    raw_tag = raw_tag.strip()
+                                    if raw_tag != "":
+                                        raw_tags.append(raw_tag)
+                            elif len(sounds) > 0:
+                                sounds[-1].roman = node_str
+                        elif html_node.tag == "span":
+                            node_str = clean_node(wxr, None, html_node)
+                            span_lang = html_node.attrs.get("lang", "")
+                            span_class = html_node.attrs.get("class", "")
+                            if node_str != "" and (
+                                span_lang == "th" or span_class in ["IPA", "tr"]
+                            ):
+                                sound = Sound(raw_tags=raw_tags)
+                                for header in row_headers:
+                                    sound.raw_tags.extend(header.raw_tags)
+                                translate_raw_tags(sound)
+                                if "romanization" in sound.tags:
+                                    field = "roman"
+                                setattr(sound, field, node_str)
+                                sounds.append(sound)
 
     clean_node(wxr, cats, expanded_node)
     return sounds, cats.get("categories", [])
