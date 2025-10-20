@@ -11,7 +11,7 @@ from wikitextprocessor.parser import LEVEL_KIND_FLAGS, NodeKind, WikiNode
 
 # Clean node takes a WikiNode+strings node or tree and gives you a cleanish text
 from wiktextract.extractor.el.table import process_inflection_section
-from wiktextract.page import clean_node, clean_value
+from wiktextract.page import clean_node
 
 # The main context object to more easily share state of parsing between
 # functions. Contains WiktextractContext.wtp, which is the context for

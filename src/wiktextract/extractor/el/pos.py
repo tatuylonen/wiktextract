@@ -1,7 +1,7 @@
 import re
 from collections.abc import Iterator
 from functools import partial
-from typing import TypeAlias
+from typing import Any, TypeAlias
 from unicodedata import name as unicode_name
 
 from wikitextprocessor import (
@@ -20,14 +20,21 @@ from wiktextract.wxr_logging import logger
 
 from .head import parse_head
 from .linkages import process_linkage_section
-from .models import Example, FormOf, Linkage, Sense, TemplateData, WordEntry
+from .models import (
+    Example,
+    FormOf,
+    FormSource,
+    Linkage,
+    Sense,
+    TemplateData,
+    WordEntry,
+)
 from .parse_utils import (
     GREEK_LANGCODES,
-    Heading,
     parse_lower_heading,
     remove_duplicate_forms,
 )
-from .section_titles import POS_HEADINGS
+from .section_titles import POS_HEADINGS, Heading
 from .table import parse_table, process_inflection_section
 from .tags_utils import convert_tags_in_sense
 from .text_utils import (
@@ -476,7 +483,7 @@ def process_pos(
         if type == Heading.Translations:
             process_translations(wxr, data, sl)
         elif type == Heading.Infl:
-            source = "inflection"
+            source: FormSource = "inflection"
             if data.lang_code in ("el", "grc"):
                 source = "conjugation"
             process_inflection_section(wxr, data, sl, source=source)
@@ -619,7 +626,7 @@ def extract_form_of_templates_basic(
     t_name: str,
     t_node: TemplateNode,
     extract_argument: int | str,
-):
+) -> None:
     t_args = t_node.template_parameters
     if extract_argument not in t_args:
         # mtxpp template has no args, consume the next links for the
@@ -814,7 +821,7 @@ def parse_gloss(
         return True
 
     if no_gloss_but_keep_anyway:
-        parent_sense.raw_tags.append("no-gloss")
+        parent_sense.tags.append("no-gloss")
         return True
 
     return False
@@ -849,7 +856,7 @@ def recurse_glosses1(
     # Pydantic stuff doesn't play nice with Tatu's manual dict manipulation
     # functions, so we'll use a dummy dict here that we then check for
     # content and apply to `parent_sense`.
-    dummy_parent: dict = {}
+    dummy_parent: dict[str, Any] = {}
 
     related_linkages: list[Linkage] = []
     example_is_synonym = False
@@ -1017,7 +1024,7 @@ def recurse_glosses1(
         # XXX if this becomes relevant, add the example data to a returned
         # subsense instead?
         # if any(
-        #     isinstance(r, Sense) and r.raw_tags == ["no-gloss"] for r in ret
+        #     isinstance(r, Sense) and r.tags == ["no-gloss"] for r in ret
         # ):
         #     print(f"{ret=}")
         return (
@@ -1029,7 +1036,7 @@ def recurse_glosses1(
         )
 
     # If nothing came from below, then this.
-    if found_gloss is True or "no-gloss" in parent_sense.raw_tags:
+    if found_gloss is True or "no-gloss" in parent_sense.tags:
         parent_sense.examples.extend(ret_examples)
         parent_sense.related.extend(ret_related)
         parent_sense.synonyms.extend(ret_synonyms)

@@ -4,11 +4,13 @@ from wikitextprocessor import NodeKind, TemplateNode, WikiNode
 from wikitextprocessor.parser import LEVEL_KIND_FLAGS  # , print_tree
 
 from wiktextract import WiktextractContext
-from wiktextract.page import clean_node, clean_value
+from wiktextract.clean import clean_value
+from wiktextract.page import clean_node
 
 # from wiktextract.wxr_logging import logger
 from .models import Sound, WordEntry
-from .parse_utils import Heading, POSReturns, find_sections
+from .parse_utils import POSReturns, find_sections
+from .section_titles import Heading
 from .tags_utils import convert_tags
 
 TEMPLATES_TO_IGNORE: set[str] = set(
@@ -94,10 +96,9 @@ def process_pron(
             continue
         content.append(child)
 
-
     def pronunciation_node_handler_fn(
         node: WikiNode,
-    ) -> list[str | WikiNode] | None:
+    ) -> list[str | WikiNode] | str | None:
         assert isinstance(node, WikiNode)
         kind = node.kind
         if isinstance(node, TemplateNode):
@@ -160,7 +161,7 @@ def process_pron(
                     tags,
                     num,
                     subnode,
-                    target_data.copy(deep=True),
+                    target_data.model_copy(deep=True),
                 )
             )
 

@@ -21,10 +21,12 @@ class TestElTags(TestCase):
                         self.assertFalse(f"Invalid tag in tag_map: {tag=}")
 
     def test_validate_topics(self) -> None:
-        for tags in topic_map.values():
-            for tag in tags:
-                for part in tag.split("-"):
+        for topics in topic_map.values():
+            for topic in topics:
+                for part in topic.split("-"):
                     if not part.isalpha() or (
-                        part.islower() and tag not in valid_topics
+                        part.islower() and topic not in valid_topics
                     ):
-                        self.assertFalse(f"Invalid topic in topic_map: {tag=}")
+                        self.assertFalse(
+                            f"Invalid topic in topic_map: {topic=}"
+                        )

@@ -8,7 +8,7 @@ from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
 from .models import Form, Linkage, WordEntry
-from .parse_utils import Heading
+from .section_titles import Heading
 
 Node = str | WikiNode
 

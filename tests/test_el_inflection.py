@@ -52,14 +52,14 @@ class TestElInflection(TestCase):
         forms = dumped["forms"]
         return forms
 
-    def mktest_form(self, raw, expected):
+    def mktest_form(self, raw, expected) -> None:
         received = self.xinfl("filler", "verb", raw.strip())
         self.assertEqual(received, expected)
 
-    def mktest_form_no_raw_tags(self, raw, expected):
+    def mktest_form_no_raw_tags(self, raw, expected) -> None:
         received = self.xinfl("filler", "verb", raw.strip())
 
-        def normalize_forms(lst):
+        def normalize_forms(lst) -> None:
             for form in lst:
                 if "raw_tags" in form:
                     del form["raw_tags"]
@@ -69,7 +69,7 @@ class TestElInflection(TestCase):
 
         self.assertEqual(received, expected)
 
-    def test_noun_inflection_two_tables(self):
+    def test_noun_inflection_two_tables(self) -> None:
         # https://el.wiktionary.org/wiki/πλάγιος
         # The second table are the literary (usu. from Ancient Greek) versions
         raw = """
@@ -330,7 +330,7 @@ class TestElInflection(TestCase):
         ]
         self.mktest_form(raw, expected)
 
-    def test_noun_inflection_only_singular(self):
+    def test_noun_inflection_only_singular(self) -> None:
         # https://el.wiktionary.org/wiki/αιδώς
         raw = """
 {| style="clear%3Aright%3B+float%3Aright%3B+margin-left%3A0.5em%3B+margin-bottom%3A0.5em%3Bbackground%3A%23ffffff%3B+color%3A%23000000%3B+border%3A1px+solid%23a1bdea%3B+text-align%3Aright%3B" rules="none" border="1" cellpadding="3" cellspacing="0"
@@ -416,7 +416,7 @@ class TestElInflection(TestCase):
         ]
         self.mktest_form_no_raw_tags(raw, expected)
 
-    def test_two_inflection_sources(self):
+    def test_two_inflection_sources(self) -> None:
         # https://el.wiktionary.org/wiki/αμάξι
         # Contains forms from both declension and header
         self.wxr.wtp.add_page("Πρότυπο:-el-", 10, "Νέα ελληνικά (el)")
@@ -539,7 +539,7 @@ class TestElInflection(TestCase):
             },
         ]
 
-        def normalize_forms(lst):
+        def normalize_forms(lst) -> None:
             for form in lst:
                 if "raw_tags" in form:
                     form["raw_tags"].sort()
@@ -551,7 +551,7 @@ class TestElInflection(TestCase):
 
         self.assertEqual(received, expected)
 
-    def test_noun_inflection_standard(self):
+    def test_noun_inflection_standard(self) -> None:
         raw = """
 {| style="clear%3Aright%3B+float%3Aright%3B+margin-left%3A0.5em%3B+margin-bottom%3A0.5em%3Bbackground%3A%23ffffff%3B+color%3A%23000000%3B+border%3A1px+solid%23a1bdea%3B+text-align%3Aright%3B" rules="none" border="1" cellpadding="3" cellspacing="0"
 |-
@@ -603,7 +603,7 @@ class TestElInflection(TestCase):
         ]
         self.mktest_form_no_raw_tags(raw, expected)
 
-    def test_el_conjugation_table(self):
+    def test_el_conjugation_table(self) -> None:
         # Section of https://el.wiktionary.org/wiki/πίνω:
         # {{el-κλίσ-'μπαίνω'|θαορ=ήπι|θμελλ=πι}}
         # Expanded via 'wxr.wtp.node_to_text(node)' at the start of
