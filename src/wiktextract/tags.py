@@ -4,6 +4,7 @@
 #
 # Copyright (c) 2020-2022 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
+import re
 from typing import Dict, List, Union
 
 # Mappings for tags in template head line ends outside parentheses.  These are
@@ -6465,6 +6466,17 @@ for k, v in valid_tags.items():
 for tag in form_of_tags - set(valid_tags.keys()):
     print("tags.py:form_of_tags contains invalid tag {}".format(tag))
 
+for tag in uppercase_tags:
+    hyphenated = re.sub(r"\s+", "-", tag)
+    if hyphenated in valid_tags:
+        print(
+            "DUPLICATE TAG: {} (from uppercase tag {!r})".format(
+                hyphenated, tag
+            )
+        )
+    assert hyphenated not in valid_tags
+    # Might as well, while we're here: Add hyphenated location tag.
+    valid_tags[hyphenated] = "dialect"
 
 # Don't move this, notify me so that I can change some an import in
 # the kaikki.org regen code

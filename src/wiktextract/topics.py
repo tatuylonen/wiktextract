@@ -3,6 +3,8 @@
 #
 # Copyright (c) 2020-2022 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 
+import re
+
 # Set of valid topic tags.  (Other tags may be canonicalized to these)
 valid_topics = set([
     "Buddhism",
@@ -1068,3 +1070,7 @@ topic_generalize_map = {
     "Abrahamic religions": "religion",
 
 }
+
+for topic in topic_generalize_map.keys():
+    hyphenated = re.sub(r"\s+", "-", topic)
+    valid_topics.add(hyphenated)
