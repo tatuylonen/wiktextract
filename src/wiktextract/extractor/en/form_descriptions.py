@@ -803,22 +803,10 @@ for tag in valid_tags:
     add_to_valid_tree(valid_sequences, tag, tag)
 for tag in uppercase_tags:
     hyphenated = re.sub(r"\s+", "-", tag)
-    if hyphenated in valid_tags:
-        print(
-            "DUPLICATE TAG: {} (from uppercase tag {!r})".format(
-                hyphenated, tag
-            )
-        )
-    assert hyphenated not in valid_tags
-    # Might as well, while we're here: Add hyphenated location tag.
-    valid_tags[hyphenated] = "dialect"
-    add_to_valid_tree(valid_sequences, hyphenated, hyphenated)
-for tag in uppercase_tags:
-    hyphenated = re.sub(r"\s+", "-", tag)
-    # XXX Move to above loop? Or is this here for readability?
     if "/" in tag:
         sequences_with_slashes.add(tag)
     add_to_valid_tree(valid_sequences, tag, hyphenated)
+
 # xlat_tags_map!
 add_to_valid_tree_mapping(valid_sequences, xlat_tags_map, valid_tags, False)
 for k in xlat_tags_map:
@@ -833,10 +821,9 @@ for topic in valid_topics:
 # Let each original topic value stand alone.  These are not generally on
 # valid_topics.  We add the original topics with spaces replaced by hyphens.
 for topic in topic_generalize_map.keys():
-    hyphenated = topic.replace(" ", "-")
-    valid_topics.add(hyphenated)
+    hyphenated = re.sub(r"\s+", "-", topic)
     if "/" in topic:
-        sequences_with_slashes.add(tag)
+        sequences_with_slashes.add(topic)
     add_to_valid_tree(valid_sequences, topic, hyphenated)
 # Add canonicalized/generalized topic values
 add_to_valid_tree_mapping(
