@@ -6,7 +6,8 @@
 import re
 
 # Set of valid topic tags.  (Other tags may be canonicalized to these)
-valid_topics = set([
+# Note that this is extended below.
+valid_topics = {
     "Buddhism",
     "Catholicism",
     "Chinese-cuisine",
@@ -234,7 +235,7 @@ valid_topics = set([
     "wrestling",
     "writing",
     "zoology",
-])
+}
 
 # Translation map for topics.
 # XXX revisit this mapping.  Create more fine-tuned hierarchy
@@ -1068,7 +1069,6 @@ topic_generalize_map = {
     "Western Christianity": "Christianity",
     "Eastern Christianity": "Christianity",
     "Abrahamic religions": "religion",
-
 }
 
 for topic in topic_generalize_map.keys():
