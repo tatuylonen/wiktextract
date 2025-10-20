@@ -112,11 +112,10 @@ def extract_linkage_list_item(
             isinstance(child_node, TemplateNode)
             and child_node.template_name == "zh-l"
         ):
-            getattr(word_entry, linkage_type).extend(
-                extract_zh_l_template(
-                    wxr, child_node, section_tags, sense, sense_index
-                )
-            )
+            for l_data in extract_zh_l_template(
+                wxr, child_node, section_tags, sense, sense_index
+            ):
+                add_linkage_data(word_entry, linkage_type, l_data)
         elif (
             isinstance(child_node, TemplateNode)
             and child_node.template_name == "cf"

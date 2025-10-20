@@ -428,3 +428,23 @@ class TestFrLinkage(TestCase):
                 },
             ],
         )
+
+    def test_zh_l_forms(self):
+        self.wxr.wtp.add_page("Modèle:L", 10, "Chinois")
+        self.wxr.wtp.add_page(
+            "Modèle:zh-l",
+            10,
+            """<span class="Hani" lang="zh">[[霍加狓#zh|霍加狓]]</span> (<i><span class="tr Latn">huòjiāpí</span></i>)""",
+        )
+        data = parse_page(
+            self.wxr,
+            "㺢㹢狓",
+            """== {{langue|zh}} ==
+=== {{S|nom|zh}} ===
+#  [[okapi#Français|Okapi]]
+==={{S|variantes}}===
+* {{zh-l|霍加狓|huòjiāpí}}""",
+        )
+        self.assertEqual(
+            data[0]["forms"], [{"form": "霍加狓", "roman": "huòjiāpí"}]
+        )
