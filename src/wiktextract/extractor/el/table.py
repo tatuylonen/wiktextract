@@ -560,7 +560,7 @@ def is_header(
     if first_cells_are_bold:
         return True, False
 
-    wxr.wtp.warning(
+    wxr.wtp.wiki_notice(
         f"Can't be sure if bolded text entry '{text}' is a header or not",
         sortid="table/20250210a",
     )

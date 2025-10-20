@@ -364,7 +364,7 @@ def process_pos(
             if forms := parse_pos_table(wxr, child, data):
                 template_forms.extend(forms)
             else:
-                wxr.wtp.warning(
+                wxr.wtp.wiki_notice(
                     f"POS template '{child.template_name}' did "
                     "not have any forms.",
                     sortid="simple/pos/129",

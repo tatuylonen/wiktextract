@@ -47,7 +47,7 @@ def process_translations(
                 lang_name = "LANG_NAME_ERROR"
             text = ht.get(2, "")
             if not text:
-                wxr.wtp.warning(
+                wxr.wtp.wiki_notice(
                     f"Translation template has no translation," f"{ht=}",
                     sortid="translations/64",
                 )

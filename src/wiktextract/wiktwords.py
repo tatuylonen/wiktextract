@@ -531,6 +531,8 @@ def main():
                     "errors": wxr.config.errors,
                     "warnings": wxr.config.warnings,
                     "debugs": wxr.config.debugs,
+                    "notes": wxr.config.notes,
+                    "wiki_notices": wxr.config.wiki_notices,
                 },
                 f,
                 sort_keys=True,

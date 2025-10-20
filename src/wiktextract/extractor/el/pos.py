@@ -148,7 +148,7 @@ def process_pos(
     if glosses_index is None:
         # Could not find any glosses.
         # logger.info(f"  ////  {wxr.wtp.title}\n  MISSING GLOSSES")
-        wxr.wtp.warning("Missing glosses", sortid="pos/20250121")
+        wxr.wtp.wiki_notice("Missing glosses", sortid="pos/20250121")
         data.tags.append("no-gloss")
 
     template_data: list[TemplateData] = []
@@ -306,7 +306,7 @@ def process_pos(
         # for these (or copying the previous one).
 
         if prev_data is None:
-            wxr.wtp.warning(
+            wxr.wtp.wiki_notice(
                 f"Part of speech missing head: {wxr.wtp.title}",
                 sortid="pos/460/20250104",
             )
@@ -631,7 +631,7 @@ def extract_form_of_templates_basic(
     if extract_argument not in t_args:
         # mtxpp template has no args, consume the next links for the
         # form_of field
-        wxr.wtp.warning(
+        wxr.wtp.wiki_notice(
             f"Form-of template does not have lemma data: {t_name}, {t_args=}",
             sortid="pos/570/20250517",
         )
@@ -651,7 +651,7 @@ def extract_form_of_templates_basic(
         form_of = FormOf(word=lemma)
         parent_sense.form_of.append(form_of)
     else:
-        wxr.wtp.warning(
+        wxr.wtp.wiki_notice(
             "Lemma extract from form-of template was empty or whitespace:"
             f"{t_name}, {t_args=}, {lemma=}",
             sortid="pos/609/20250925",
@@ -728,7 +728,7 @@ def extract_form_of_templates_ptosi(
     t_args = t_node.template_parameters
 
     if 1 not in t_args:
-        wxr.wtp.warning(
+        wxr.wtp.wiki_notice(
             f"Form-of template does not have lemma data: {t_name}, {t_args=}",
             sortid="pos/620/20250416",
         )

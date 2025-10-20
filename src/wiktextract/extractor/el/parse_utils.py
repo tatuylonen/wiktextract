@@ -97,7 +97,7 @@ def find_sections(
         )
 
         if num > 0:
-            wxr.wtp.warning(
+            wxr.wtp.wiki_notice(
                 f"Sub-sub-section is numbered: {heading_name}, {num=}",
                 sortid="page/find_pos_sections_1",
             )

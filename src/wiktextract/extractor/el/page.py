@@ -107,7 +107,7 @@ def parse_page(
                 previous_empty_language_name is None
                 or previous_empty_language_code is None
             ):
-                wxr.wtp.warning(
+                wxr.wtp.wiki_notice(
                     f"Can't parse language header: '{lang_name}'; "
                     "skipping section",
                     sortid="page/111",
@@ -181,7 +181,7 @@ def parse_page(
             section_num = num if num > section_num else section_num
 
             if not ok:
-                wxr.wtp.warning(
+                wxr.wtp.wiki_notice(
                     f"Sub-language heading '{heading_title}' couldn't be "
                     f"be parsed as a heading; "
                     f"{type=}, {heading_name=}, {tags=}.",
