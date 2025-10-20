@@ -499,22 +499,22 @@ class TestPronunciation(TestCase):
                     "roman": "v a – h ̥ r ạ ˋ ŋ",
                 },
                 {
-                    "other": "fà-ràng",
+                    "roman": "fà-ràng",
                     "raw_tags": ["Paiboon"],
                     "tags": ["romanization"],
                 },
                 {
-                    "other": "fá-ràng",
+                    "roman": "fá-ràng",
                     "raw_tags": ["Paiboon"],
                     "tags": ["romanization"],
                 },
                 {
-                    "other": "fa-rang",
+                    "roman": "fa-rang",
                     "raw_tags": ["Royal Institute"],
                     "tags": ["romanization"],
                 },
                 {
-                    "other": "fa-rang",
+                    "roman": "fa-rang",
                     "raw_tags": ["Royal Institute"],
                     "tags": ["romanization"],
                 },
@@ -748,6 +748,34 @@ Etymology 2
                         "Pinyin",
                     ],
                     "zh_pron": "duànpiān",
+                }
+            ],
+        )
+
+    def test_th_pron_th_tags(self):
+        self.wxr.wtp.add_page(
+            "Template:th-pron",
+            10,
+            """<table cellpadding=10>
+<tr><th colspan="2">''[[w:Thai alphabet|Phonemic]]''<br><small>{<span title="This phonetic respelling violates Thai alphabet rules to indicate an irregular pronunciation.">Unorthographical</span>; <span title="The vowel in this word is pronounced irregularly short.">Short</span>}</small></th><td><div class="th-reading"><span lang="th" class="Thai ">เล็่น-เพื่อน</span><br><small><span title="Vowel sign appearing in front of the initial consonant.">e</span>&thinsp;l&thinsp;˘&thinsp;ˋ&thinsp;n&thinsp;&ndash;&thinsp;<span title="Vowel sign appearing in front of the initial consonant.">e</span>&thinsp;b&thinsp;ụ̄&thinsp;ˋ&thinsp;ɒ&thinsp;n</small></div></td></tr>
+</table>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "เล่นเพื่อน",
+            """==Thai==
+===Pronunciation===
+{{th-pron|เล็่น-เพื่อน}}
+===Verb===
+# gloss""",
+        )
+        self.assertEqual(
+            data[0]["sounds"],
+            [
+                {
+                    "other": "เล็่น-เพื่อน",
+                    "raw_tags": ["Phonemic", "Unorthographical", "Short"],
+                    "roman": "e l ˘ ˋ n – e b ụ̄ ˋ ɒ n",
                 }
             ],
         )

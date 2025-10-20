@@ -462,6 +462,16 @@ ZH_DIAL_TAGS = {
     "臺灣": "Taiwan",
 }
 
+TH_PRON_TAGS = {
+    "寫法": "orthographic",
+    "音素": "phoneme",
+    "泰語羅馬化": "romanization",
+    "派汶拼音": "Paiboon",
+    "皇家轉寫": "Royal-Institute",
+    "非正字法": "unorthographical",
+    "短音": "short",
+}
+
 
 ALL_TAGS = {
     **GRAMMATICAL_TAGS,
@@ -470,6 +480,7 @@ ALL_TAGS = {
     **ZH_TAGS,
     **ZH_PRON_TAGS,
     **ZH_DIAL_TAGS,
+    **TH_PRON_TAGS,
 }
 
 

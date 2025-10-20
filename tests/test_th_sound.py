@@ -26,6 +26,7 @@ class TestThSound(unittest.TestCase):
             "แม่แบบ:th-pron",
             10,
             """<table>
+<tr><th colspan="2">''[[w:อักษรไทย|การแบ่งพยางค์]]''</th><td><span lang="th" class="Thai th-reading">รด</span></td><td><span><small>[เสียงสมาส]</small></span><br><span lang="th" class="Thai th-reading">ระ-ถะ-</span></td></tr>
 <tr><th rowspan="2">''[[วิกิพจนานุกรม:การแผลงเป็นอักษรโรมันของภาษาไทย|การแผลงเป็น<br>อักษรโรมัน]]''</th><th colspan="1">''[[วิกิพจนานุกรม:การแผลงเป็นอักษรโรมันของภาษาไทย|ไพบูลย์พับบลิชชิง]]''</th><td><span class="tr">rót</span></td></tr><tr><th colspan="1">''[[วิกิพจนานุกรม:การแผลงเป็นอักษรโรมันของภาษาไทย|ราชบัณฑิตยสภา]]''</th><td><span class="tr">rot</span></td></tr>
 <tr><th colspan="2">(''[[w:ภาษาไทย|มาตรฐาน]]'') [[วิกิพจนานุกรม:สัทอักษรสากล|สัทอักษรสากล]]<sup>([[ภาคผนวก:การออกเสียงภาษาไทย|คำอธิบาย]])</sup></th><td><span class="IPA">/rot̚˦˥/</span><sup>([[:หมวดหมู่:สัมผัส:ภาษาไทย/ot̚|สัมผัส]])</sup>[[หมวดหมู่:สัมผัส:ภาษาไทย/ot̚]]</td></tr>
 <tr><th colspan="2">''คำพ้องเสียง''<div><span class="plainlinks"></span></div></th><td><div><span>&nbsp;</span><div></div><div><span class="Thai" lang="th">[[รด#ภาษาไทย|รด]]</span><br><span class="Thai" lang="th">[[รท#ภาษาไทย|รท]]</span><br><span class="Thai" lang="th">[[รส#ภาษาไทย|รส]]</span>[[Category:ศัพท์ภาษาไทยที่มีคำพ้องเสียง|รถ]]</div></div></td><td></td></tr>
@@ -43,15 +44,17 @@ class TestThSound(unittest.TestCase):
         self.assertEqual(
             data[0]["sounds"],
             [
+                {"other": "รด", "tags": ["phoneme"]},
+                {"other": "ระ-ถะ-", "tags": ["compound", "phoneme"]},
                 {
-                    "other": "rót",
+                    "roman": "rót",
                     "tags": ["romanization", "Paiboon"],
                 },
                 {
-                    "other": "rot",
+                    "roman": "rot",
                     "tags": ["romanization", "Royal-Institute"],
                 },
-                {"ipa": "/rot̚˦˥/^((สัมผัส))"},
+                {"ipa": "/rot̚˦˥/"},
                 {"homophone": "รด"},
                 {"homophone": "รท"},
                 {"homophone": "รส"},
