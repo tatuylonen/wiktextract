@@ -72,6 +72,7 @@ OTHER_TAGS: dict[str, str] = {
     "簡體": "Simplified-Chinese",
     "異體": "alternative",
     "仿譯詞": "calque",
+    "貶稱詞": "pejorative",
 }
 
 VERB_TAGS: dict[str, str] = {

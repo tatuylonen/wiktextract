@@ -364,6 +364,9 @@ CASE_TAGS = {
     "вин.": "accusative",
     "мест.": "locative",
     "род.": "genitive",
+    # Template:сущ ru m ina 1c
+    "местный падеж": "locative",
+    "разделительный падеж": "partitive",
 }
 
 TENSE_TAGS = {

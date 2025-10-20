@@ -119,29 +119,28 @@ class TestLinkage(TestCase):
         self.wxr.wtp.add_page(
             "Шаблон:сущ bg 7",
             10,
-            """{| class="morfotable ru" cellpadding="3" rules="all"
-! bgcolor="#eef9ff" | [[форма]]
-! bgcolor="#eef9ff" | [[единственное число|ед.&nbsp;ч.]]
-! bgcolor="#eef9ff" | [[множественное число|мн.&nbsp;ч.]]
+            """{| class="morfotable bg" cellpadding="2" rules="all"
+! [[форма]]
+! [[единственное число|ед.&nbsp;ч.]]
+! [[множественное число|мн.&nbsp;ч.]]
 |-
+! [[неопределённый|общая]]
+| публицист
+| публицисти
 |-
-! bgcolor="#eef9ff" | [[неопределённый|общая]]
-| bgcolor="#ffffff" | публицист
-| bgcolor="#ffffff" | публицисти
+! [[определённый|опред.]]
+| публициста <br>публицистът
+| публицистите
 |-
-! bgcolor="#eef9ff" | [[определённый|опред.]]
-| bgcolor="#ffffff" | публициста <br>публицистът
-| bgcolor="#ffffff" | публицистите
+! [[счётная форма|счётн.]]
+| colspan="2"  | публициста
 |-
-! bgcolor="#eef9ff" | [[счётная форма|счётн.]]</td>
-| colspan="2" bgcolor="#ffffff"  | публициста
-|-
-| bgcolor="#eef9ff" | [[звательный|зват.]]
-| colspan="2" bgcolor="#ffffff" align="center" | —
+! [[звательный|зват.]]
+| colspan="2" align="center" | —
 |}[[Категория:Болгарские существительные]]
 <b>публицист</b>
 
-Существительное, мужской род, склонение 7.[[Категория:Болгарские существительные, склонение 7]][[Категория:Мужской род/bg]]]""",  # noqa: E501
+Существительное, мужской род, склонение 7.[[Категория:Болгарские существительные, склонение 7]][[Категория:Мужской род/bg]]""",  # noqa: E501
         )
         self.wxr.wtp.start_page("публицист")
         root = self.wxr.wtp.parse("{{сущ bg 7|публицист}}")
@@ -152,7 +151,6 @@ class TestLinkage(TestCase):
         self.assertEqual(
             [f.model_dump(exclude_defaults=True) for f in word_entry.forms],
             [
-                {"form": "публицист", "tags": ["indefinite", "singular"]},
                 {"form": "публицисти", "tags": ["indefinite", "plural"]},
                 {"form": "публициста", "tags": ["definite", "singular"]},
                 {"form": "публицистът", "tags": ["definite", "singular"]},
@@ -161,79 +159,25 @@ class TestLinkage(TestCase):
             ],
         )
 
-    def test_verb_table(self):
-        self.wxr.wtp.add_page(
-            "Шаблон:гл ru 5a-т",
-            10,
-            """{| rules="all" class="morfotable ru"
-! bgcolor="#EEF9FF" | &#160;
-! bgcolor="#EEF9FF" | [[настоящее время|наст.]]
-! bgcolor="#EEF9FF" | [[прошедшее время|прош.]]
-! bgcolor="#EEF9FF" | [[повелительное наклонение|повелит.]]
-|-
-| bgcolor="#EEF9FF" align="right" | [[он|Он]]<br />[[она|Она]]<br />[[оно|Оно]]
-| ви́дит
-| ви́дел<br />ви́дела<br />ви́дело
-| align="center" | —
-|-
-<tr>
-<td bgcolor="#EEF9FF" align="right">[[деепричастие|Деепр.]] [[прошедшее время|прош.]]</td>
-<td colspan="3" align="center">[[видев#ви́дев|ви́дев]], [[видевши#ви́девши|ви́девши]]</td>
-</tr>
-<tr>
-<td bgcolor="#EEF9FF" align="right">[[будущее время|Будущее]]</td>
-<td colspan="3" align="center">буду/будешь… ви́деть</td>
-</tr>
-|}""",  # noqa: E501
-        )
-        self.wxr.wtp.start_page("видеть")
-        root = self.wxr.wtp.parse("{{гл ru 5a-т}}")
-        word_entry = WordEntry(
-            word="видеть", pos="verb", lang_code="ru", lang="Русский"
-        )
-        extract_morphological_section(self.wxr, [word_entry], root)
-        self.assertEqual(
-            [f.model_dump(exclude_defaults=True) for f in word_entry.forms],
-            [
-                {
-                    "form": "ви́дит",
-                    "tags": ["third-person", "singular", "present"],
-                },
-                {"form": "ви́дел", "tags": ["third-person", "singular", "past"]},
-                {
-                    "form": "ви́дела",
-                    "tags": ["third-person", "singular", "past"],
-                },
-                {
-                    "form": "ви́дело",
-                    "tags": ["third-person", "singular", "past"],
-                },
-                {"form": "ви́дев", "tags": ["adverbial", "past"]},
-                {"form": "ви́девши", "tags": ["adverbial", "past"]},
-                {"form": "буду/будешь… ви́деть", "tags": ["future"]},
-            ],
-        )
-
     def test_падежи_cu(self):
         self.wxr.wtp.add_page(
             "Шаблон:сущ cu (-а)",
             10,
             """{|
-! bgcolor="#EEF9FF" | [[падеж]]
-! bgcolor="#EEF9FF" | [[единственное число|ед. ч.]]
-! bgcolor="#EEF9FF" | [[двойственное число|дв. ч.]]
-! bgcolor="#EEF9FF" | [[множественное число|мн. ч.]]
+! [[падеж]]
+! [[единственное число|ед. ч.]]
+! [[двойственное число|дв. ч.]]
+! [[множественное число|мн. ч.]]
 |-
-! bgcolor="#EEF9FF" | [[местный|М.]]
+! [[местный|М.]]
 | lang="cu" | водѣ
 | lang="cu" | водѹ
 | lang="cu" | водахъ
-<tr>
-<th bgcolor="#EEF9FF"> [[звательный|Зв.]]</th>
-<td lang="cu"> водо
-<td align="center"> — </td>
-<td align="center"> — </td>
-</tr>
+|-
+! [[звательный|Зв.]]
+| lang="cu" | водо
+| align="center" | —
+| align="center" | —
 |}""",
         )
         self.wxr.wtp.start_page("вода")

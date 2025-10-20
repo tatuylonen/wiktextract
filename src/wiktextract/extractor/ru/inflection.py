@@ -120,7 +120,7 @@ def parse_wikitext_forms_table(
 ) -> None:
     # https://ru.wiktionary.org/wiki/Шаблон:сущ-ru
     # Шаблон:inflection сущ ru
-    column_headers = []
+    col_headers = []
     for table_row in table_node.find_child(NodeKind.TABLE_ROW):
         row_headers = []
         has_data_cell = table_row.contain_node(NodeKind.TABLE_CELL)
@@ -129,10 +129,10 @@ def parse_wikitext_forms_table(
                 NodeKind.TABLE_HEADER_CELL | NodeKind.TABLE_CELL
             )
         ):
+            cell_text = clean_node(wxr, None, table_cell)
             if table_cell.kind == NodeKind.TABLE_HEADER_CELL:
-                cell_text = clean_node(wxr, None, table_cell)
                 if not has_data_cell:
-                    column_headers.append(cell_text)
+                    col_headers.append(cell_text)
                 else:
                     if cell_text == "М." and table_cell.contain_node(
                         NodeKind.LINK
@@ -143,81 +143,18 @@ def parse_wikitext_forms_table(
                     else:
                         row_headers.append(cell_text)
             elif table_cell.kind == NodeKind.TABLE_CELL:
-                cell_text = clean_node(  # remove cursed <tr> tag
-                    wxr,
-                    None,
-                    [
-                        n
-                        for n in table_cell.children
-                        if not (isinstance(n, HTMLNode) and n.tag == "tr")
-                    ],
-                )
-                if table_cell.attrs.get("bgcolor", "").lower() == "#eef9ff":
-                    if cell_text == "М." and table_cell.contain_node(
-                        NodeKind.LINK
-                    ):
-                        for link_node in table_cell.find_child(NodeKind.LINK):
-                            row_headers.append(link_node.largs[0][0])
-                            break
-                    else:
-                        row_headers.append(cell_text)
-                else:
-                    for form_text in cell_text.splitlines():
-                        add_form_data(
-                            word_entry,
-                            form_text,
-                            row_headers,
-                            column_headers,
-                            col_index,
-                        )
-
-        # cursed layout from Шаблон:Гл-блок
-        # tr tag could be after or inside table cell node: Шаблон:сущ cu (-а)
-        for tr_tag in table_row.find_html_recursively("tr"):
-            row_headers = []
-            has_th_tag = False
-            for th_tag in tr_tag.find_html("th"):
-                row_headers.append(clean_node(wxr, None, th_tag))
-                has_th_tag = True
-            for td_index, td_tag in enumerate(tr_tag.find_html("td")):
-                if td_tag.contain_node(NodeKind.LINK):
-                    for link_node in td_tag.find_child(NodeKind.LINK):
-                        if td_tag.attrs.get("bgcolor", "").lower() == "#eef9ff":
-                            row_headers.append(clean_node(wxr, None, link_node))
-                        else:
-                            add_form_data(
-                                word_entry,
-                                clean_node(wxr, None, link_node),
-                                row_headers,
-                                []
-                                if "colspan" in td_tag.attrs
-                                else column_headers,
-                                td_index,
-                            )
-                else:
-                    add_form_data(
-                        word_entry,
-                        clean_node(wxr, None, td_tag),
-                        row_headers,
-                        [] if "colspan" in td_tag.attrs else column_headers,
-                        td_index + 1 if has_th_tag else td_index,
+                for form_text in cell_text.splitlines():
+                    form = Form(
+                        form=form_text.strip(" /"), raw_tags=row_headers
                     )
-
-
-def add_form_data(
-    word_entry: WordEntry,
-    form_text: str,
-    row_headers: list[str],
-    col_headers: list[str],
-    col_index: int,
-) -> None:
-    form = Form(form=form_text.strip(" /"))
-    form.raw_tags.extend(row_headers)
-    if col_index < len(col_headers) and col_headers[col_index] != "":
-        form.raw_tags.append(col_headers[col_index])
-    if form.form not in ["", "—", "-"]:
-        translate_raw_tags(form)
-        word_entry.forms.append(form)
+                    if (
+                        col_index < len(col_headers)
+                        and col_headers[col_index] != ""
+                    ):
+                        form.raw_tags.append(col_headers[col_index])
+                    if form.form not in ["", "—", "-", wxr.wtp.title]:
+                        translate_raw_tags(form)
+                        word_entry.forms.append(form)
 
 
 def extract_прил_ru_comparative_forms(
