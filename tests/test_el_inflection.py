@@ -604,10 +604,10 @@ class TestElInflection(TestCase):
         self.mktest_form_no_raw_tags(raw, expected)
 
     def test_el_conjugation_table(self) -> None:
-        # Section of https://el.wiktionary.org/wiki/πίνω:
+        # Section of https://el.wiktionary.org/wiki/πίνω
         # {{el-κλίσ-'μπαίνω'|θαορ=ήπι|θμελλ=πι}}
         # Expanded via 'wxr.wtp.node_to_text(node)' at the start of
-        # 'process_inflection_section'
+        # 'table.process_inflection_section'
         raw = """
         {|
         |-
@@ -751,6 +751,124 @@ class TestElInflection(TestCase):
                     "Εξακολουθητικοί χρόνοι",
                     "Προστακτική",
                     "β' ενικ.",
+                ],
+            },
+        ]
+
+        self.mktest_form(raw, expected)
+
+    def test_el_conjugation_table_variants(self) -> None:
+        # Section of https://el.wiktionary.org/wiki/πίνω
+        raw = """
+        {|
+        |-
+        ! colspan="7" style="background:#e2e4c0; text-align:center" | Εξακολουθητικοί χρόνοι
+        |-
+        ! πρόσωπα
+        ! Ενεστώτας
+        ! Παρατατικός
+        ! Εξ. Μέλλ.
+        ! Υποτακτική
+        ! Προστακτική
+        ! align=center | Μετοχή
+        |-
+        | style="background%3A%23c0c0c0" | γ' πληθ.
+        | πίνουν(ε)
+        | έπιναν<br>πίναν(ε)
+        | θα πίνουν(ε)
+        | να πίνουν(ε)
+        |
+
+        |}
+        """.strip()
+
+        expected = [
+            {"tags": ["inflection-template"]},
+            {
+                "form": "πίνουν",
+                "tags": ["present", "imperfective", "third-person", "plural"],
+                "raw_tags": ["Ενεστώτας", "Εξακολουθητικοί χρόνοι", "γ' πληθ."],
+            },
+            {
+                "form": "πίνουνε",
+                "tags": ["present", "imperfective", "third-person", "plural"],
+                "raw_tags": ["Ενεστώτας", "Εξακολουθητικοί χρόνοι", "γ' πληθ."],
+            },
+            {
+                "form": "έπιναν",
+                "tags": ["imperfective", "imperfect", "third-person", "plural"],
+                "raw_tags": [
+                    "Εξακολουθητικοί χρόνοι",
+                    "Παρατατικός",
+                    "γ' πληθ.",
+                ],
+            },
+            {
+                "form": "πίναν",
+                "tags": ["imperfective", "imperfect", "third-person", "plural"],
+                "raw_tags": [
+                    "Εξακολουθητικοί χρόνοι",
+                    "Παρατατικός",
+                    "γ' πληθ.",
+                ],
+            },
+            {
+                "form": "πίνανε",
+                "tags": ["imperfective", "imperfect", "third-person", "plural"],
+                "raw_tags": [
+                    "Εξακολουθητικοί χρόνοι",
+                    "Παρατατικός",
+                    "γ' πληθ.",
+                ],
+            },
+            {
+                "form": "θα πίνουν",
+                "tags": [
+                    "future",
+                    "imperfect",
+                    "imperfective",
+                    "third-person",
+                    "plural",
+                ],
+                "raw_tags": ["Εξ. Μέλλ.", "Εξακολουθητικοί χρόνοι", "γ' πληθ."],
+            },
+            {
+                "form": "θα πίνουνε",
+                "tags": [
+                    "future",
+                    "imperfect",
+                    "imperfective",
+                    "third-person",
+                    "plural",
+                ],
+                "raw_tags": ["Εξ. Μέλλ.", "Εξακολουθητικοί χρόνοι", "γ' πληθ."],
+            },
+            {
+                "form": "να πίνουν",
+                "tags": [
+                    "imperfective",
+                    "subjunctive",
+                    "third-person",
+                    "plural",
+                ],
+                "raw_tags": [
+                    "Εξακολουθητικοί χρόνοι",
+                    "Υποτακτική",
+                    "γ' πληθ.",
+                ],
+            },
+            {
+                "form": "να πίνουνε",
+                "tags": [
+                    "imperfective",
+                    "subjunctive",
+                    "third-person",
+                    "plural",
+                ],
+                "raw_tags": [
+                    "Εξακολουθητικοί χρόνοι",
+                    "Υποτακτική",
+                    "γ' πληθ.",
                 ],
             },
         ]

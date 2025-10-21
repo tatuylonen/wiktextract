@@ -322,19 +322,16 @@ def process_pos(
         #     + "\n   >>>".join(repr(td) for td in template_data)
         # )
 
-    if len(table_nodes) > 0:
-        for template_name, table_node in table_nodes:
-            # XXX template_name
-            parse_table(
-                wxr,
-                table_node,
-                data,
-                data.lang_code in GREEK_LANGCODES,
-                template_name=template_name or "",
-                source="inflection",
-            )
-            for form in data.forms:
-                translate_raw_tags(form)
+    for template_name, table_node in table_nodes:
+        # XXX template_name
+        parse_table(
+            wxr,
+            table_node,
+            data,
+            data.lang_code in GREEK_LANGCODES,
+            template_name=template_name or "",
+            source="inflection",
+        )
 
     data.forms = remove_duplicate_forms(wxr, data.forms)
 
