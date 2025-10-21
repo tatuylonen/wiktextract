@@ -252,7 +252,7 @@ def process_ecouter_template(
 
 def is_ipa_text(text: str) -> bool:
     # check if the text is IPA, used for inflection table cell text
-    if text.startswith("\\") and text.endswith("\\"):
+    if text.startswith(("\\", "*\\")) and text.endswith("\\"):
         return True
     if text.startswith("/") and text.endswith("/"):
         return True

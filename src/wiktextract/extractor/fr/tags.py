@@ -328,6 +328,11 @@ OTHER_GRAMMATICAL_TAGS: dict[str, str] = {
     "attributif (連体形)": "attributive",
     "hypothétique (仮定形)": "hypothetical",
     "impératif (命令形)": "imperative",
+    # Template:ko-nom
+    "avec\nclitique": "clitic",
+    "thème": "stem",
+    "nominatif\n/ attributif": ["nominative", "attributive"],
+    "seulement": "exclusive",
 }
 
 # template text before gloss
