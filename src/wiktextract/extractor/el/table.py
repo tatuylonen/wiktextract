@@ -150,17 +150,16 @@ def process_inflection_section(
 
     _ = wxr.wtp.node_to_html(snode, node_handler_fn=table_node_handler_fn)
 
-    if len(table_nodes) > 0:  # < useless
-        for template_name, table_node in table_nodes:
-            # XXX template_name
-            parse_table(
-                wxr,
-                table_node,
-                data,
-                data.lang_code in GREEK_LANGCODES,
-                template_name=template_name or "",
-                source=source,
-            )
+    for template_name, table_node in table_nodes:
+        # XXX template_name
+        parse_table(
+            wxr,
+            table_node,
+            data,
+            data.lang_code in GREEK_LANGCODES,
+            template_name=template_name or "",
+            source=source,
+        )
 
     data.forms = remove_duplicate_forms(wxr, data.forms)
 
