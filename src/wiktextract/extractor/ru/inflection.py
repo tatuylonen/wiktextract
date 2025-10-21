@@ -34,7 +34,7 @@ def parse_html_forms_table(
         col_index = 0
         for header in chain(col_headers, row_headers):
             if (
-                row_index >= header.row_index
+                row_index > header.row_index
                 and row_index < header.row_index + header.rowspan
                 and header.col_index <= col_index
             ):

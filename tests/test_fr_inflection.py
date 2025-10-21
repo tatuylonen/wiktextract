@@ -765,3 +765,27 @@ class TestInflection(TestCase):
                 },
             ],
         )
+
+    def test_ignore_empty_theoretical_ipa(self):
+        self.wxr.wtp.add_page(
+            "Modèle:osp-nom",
+            10,
+            """{| class="wikitable flextable"
+! Singulier !! Pluriel
+|-
+| '''<span lang="osp" xml:lang="osp" class="lang-osp"><bdi>coraçon</bdi></span>'''<br /><abbr title="Prononciation théorique">*</abbr><span title="Prononciation à préciser">\\<small><span class="plainlinks stubedit">[//fr.wiktionary.org/w/index.php?title=cora%C3%A7on&action=edit Prononciation ?]</span></small>\\</span>[[Catégorie:Wiktionnaire:Prononciations  manquantes en vieil espagnol]]
+|  <bdi lang="osp" xml:lang="osp" class="lang-osp">[[coraçones#osp-flex-nom|coraçones]]</bdi><br /><abbr title="Prononciation théorique">*</abbr><span title="Prononciation à préciser">\\<small><span class="plainlinks stubedit">[//fr.wiktionary.org/w/index.php?title=cora%C3%A7on&action=edit Prononciation ?]</span></small>\\</span>[[Catégorie:Wiktionnaire:Prononciations  manquantes en vieil espagnol]]
+|}""",
+        )
+        data = parse_page(
+            self.wxr,
+            "coraçon",
+            """== {{langue|osp}} ==
+=== {{S|nom|osp}} ===
+{{osp-nom|p=coraçones}}
+'''coraçon'''
+# [[cœur|Cœur]].""",
+        )
+        self.assertEqual(
+            data[0]["forms"], [{"form": "coraçones", "tags": ["plural"]}]
+        )
