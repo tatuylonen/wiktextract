@@ -448,20 +448,24 @@ def parse_table(
             )
         )
 
-        postprocess_table_forms(forms)
-        data.forms.extend(forms)
+        new_forms = postprocess_table_forms(forms)
+        data.forms.extend(new_forms)
 
 
-def postprocess_table_forms(forms: list[Form]) -> None:
+def postprocess_table_forms(forms: list[Form]) -> list[Form]:
+    """Postprocess table forms.
+
+    * Translates tags
+    * Removes articles
+    * Convert some parens to rare tag
+    * Convert some parens to multiple forms
+    """
     for form in forms:
         translate_raw_tags(form)
 
-    # Postprocess forms.
-    # XXX This should probably go into a "postprocess_forms"
-    # function, together with "remove_duplicate_forms" just below.
     for form in forms:
         parts = form.form.split()
-        # * Remove articles
+        # Remove articles
         if len(parts) > 1 and parts[0] in ARTICLES:
             form.form = " ".join(parts[1:])
 
@@ -472,6 +476,31 @@ def postprocess_table_forms(forms: list[Form]) -> None:
         if form.form[0] == "(" and form.form[-1] == ")":
             form.form = form.form[1:-1]
             form.tags.append("rare")
+
+    # Expansion
+    # { "form": "πίνουν(ε)", ...rest }
+    # >
+    # { "form": "πίνουν", ...rest }
+    # { "form": "πίνουνε", ...rest }
+    new_forms: list[Form] = []
+    for form in forms:
+        text = form.form
+        if not text:
+            continue
+
+        m = re.match(r"^(.*?)\((.*?)\)(.*)$", text)
+        if not m:
+            new_forms.append(form)
+            continue
+
+        before, inside, after = m.groups()
+        expanded = [before + after, before + inside + after]
+        for variant in expanded:
+            new_form = form.model_copy(deep=True)
+            new_form.form = variant
+            new_forms.append(new_form)
+
+    return new_forms
 
 
 def process_cell_text(
