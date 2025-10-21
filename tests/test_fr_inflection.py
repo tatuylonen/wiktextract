@@ -789,3 +789,46 @@ class TestInflection(TestCase):
         self.assertEqual(
             data[0]["forms"], [{"form": "coraçones", "tags": ["plural"]}]
         )
+
+    def test_ancient_greek_article(self):
+        self.wxr.wtp.add_page(
+            "Modèle:grc-décl-nomf-1-α-ης",
+            10,
+            """{| class="wikitable flextable"
+! Cas
+! colspan="2" | Singulier
+! colspan="2" | Pluriel
+! colspan="2" | Duel
+|-
+! Nominatif
+| class="droite article" | ἡ
+| class="gauche" | [[Μοῦσα|Μοῦσ<span class="blue ">α</span>]]
+| class="droite article" | αἱ
+| class="gauche" | [[Μοῦσαι|Μοῦσ<span class="blue ">αι</span>]]
+| class="droite article" | τὼ
+| class="gauche" | [[Μούσ|Μούσ<span class="blue ">α</span>]]
+|}""",
+        )
+        data = parse_page(
+            self.wxr,
+            "Μοῦσα",
+            """== {{langue|grc}} ==
+=== {{S|nom propre|grc}} ===
+{{grc-décl-nomf-1-α-ης|Μοῦσ|Μούσ|Μουσ}}
+# [[Muse#fr-nom|Muse]].""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {
+                    "article": "αἱ",
+                    "form": "Μοῦσαι",
+                    "tags": ["plural", "nominative"],
+                },
+                {
+                    "article": "τὼ",
+                    "form": "Μούσα",
+                    "tags": ["dual", "nominative"],
+                },
+            ],
+        )

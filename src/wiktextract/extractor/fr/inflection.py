@@ -120,6 +120,7 @@ def extract_inf_table_template(
                     and row_header.col_index <= col_index
                 ):
                     col_index += row_header.colspan
+            article = ""
             for cell_node in row.find_child(NodeKind.TABLE_CELL):
                 if cell_node.attrs.get("style") == "display:none":
                     continue
@@ -136,6 +137,7 @@ def extract_inf_table_template(
                     continue
                 colspan = int(cell_node.attrs.get("colspan", "1"))
                 rowspan = int(cell_node.attrs.get("rowspan", "1"))
+                cell_classes = cell_node.attrs.get("class", "").split()
                 filtered_cell = []
                 cell_tags = []
                 for cell_child in cell_node.children:
@@ -152,13 +154,18 @@ def extract_inf_table_template(
                     else:
                         filtered_cell.append(cell_child)
                 cell_text = clean_node(wxr, None, filtered_cell)
+                # Template:grc-décl-nomf-1-α-ης
+                if "article" in cell_classes:
+                    article = cell_text
+                    col_index += colspan
+                    continue
                 for line in cell_text.splitlines():
                     line = line.removeprefix("ou ").strip()
                     if is_ipa_text(line):
                         if len(word_entry.forms) > 0:
                             word_entry.forms[-1].ipas.extend(split_ipa(line))
                         continue
-                    form = Form(form=line, raw_tags=cell_tags)
+                    form = Form(form=line, raw_tags=cell_tags, article=article)
                     use_col_tags = []
                     for col_header in col_headers[::-1]:
                         if (
@@ -196,6 +203,7 @@ def extract_inf_table_template(
                         translate_raw_tags(form)
                         word_entry.forms.append(form)
                 col_index += colspan
+                article = ""
 
 
 def extract_avk_tab_conjug(

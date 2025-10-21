@@ -37,6 +37,8 @@ GENDER_TAGS: dict[str, str | list[str]] = {
     # Template:n
     "neutre animé": ["neuter", "animate"],
     "neutre inanimé": ["neuter", "inanimate"],
+    # Template:fr-rég
+    "masculin\net féminin": ["masculine", "feminine"],
 }
 
 # https://en.wikipedia.org/wiki/Grammatical_number
