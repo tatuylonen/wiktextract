@@ -235,3 +235,9 @@ class TestElGlosses(TestCase):
         # Seen via ripgrep
         raw = "* {{γρ|τάδε}}"
         self.mktest_sense(raw, [{}])
+
+    def test_gr_linkage_alternative_template_name(self) -> None:
+        # https://el.wiktionary.org/wiki/προμηνώ
+        raw = "* {{γραφή του|προμηνύω|μορφ}}"
+        expected = [{"form_of": [{"word": "προμηνύω"}]}]
+        self.mktest_sense(raw, expected)
