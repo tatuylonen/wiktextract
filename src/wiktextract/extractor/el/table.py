@@ -150,7 +150,7 @@ def process_inflection_section(
 
     _ = wxr.wtp.node_to_html(snode, node_handler_fn=table_node_handler_fn)
 
-    if len(table_nodes) > 0:
+    if len(table_nodes) > 0:  # < useless
         for template_name, table_node in table_nodes:
             # XXX template_name
             parse_table(
@@ -161,26 +161,6 @@ def process_inflection_section(
                 template_name=template_name or "",
                 source=source,
             )
-
-            for form in data.forms:
-                translate_raw_tags(form)
-
-            # Postprocess forms.
-            # XXX This should probably go into a "postprocess_forms"
-            # function, together with "remove_duplicate_forms" just below.
-            for form in data.forms:
-                parts = form.form.split()
-                # * Remove articles
-                if len(parts) > 1 and parts[0] in ARTICLES:
-                    form.form = " ".join(parts[1:])
-
-                if not form.form:
-                    continue
-
-                # Parens > rare inflection (cf. μπόι)
-                if form.form[0] == "(" and form.form[-1] == ")":
-                    form.form = form.form[1:-1]
-                    form.tags.append("rare")
 
     data.forms = remove_duplicate_forms(wxr, data.forms)
 
@@ -469,7 +449,30 @@ def parse_table(
             )
         )
 
+        postprocess_table_forms(forms)
         data.forms.extend(forms)
+
+
+def postprocess_table_forms(forms: list[Form]) -> None:
+    for form in forms:
+        translate_raw_tags(form)
+
+    # Postprocess forms.
+    # XXX This should probably go into a "postprocess_forms"
+    # function, together with "remove_duplicate_forms" just below.
+    for form in forms:
+        parts = form.form.split()
+        # * Remove articles
+        if len(parts) > 1 and parts[0] in ARTICLES:
+            form.form = " ".join(parts[1:])
+
+        if not form.form:
+            continue
+
+        # Parens > rare inflection (cf. μπόι)
+        if form.form[0] == "(" and form.form[-1] == ")":
+            form.form = form.form[1:-1]
+            form.tags.append("rare")
 
 
 def process_cell_text(
