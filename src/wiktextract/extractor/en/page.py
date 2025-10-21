@@ -2019,7 +2019,7 @@ def parse_language(
                 # currently we're separating out example entries (..#:)
                 # well enough that there seems to very little contamination.
                 if is_gloss:
-                    wxr.wtp.warning(
+                    wxr.wtp.wiki_notice(
                         "Example template is used for gloss text",
                         sortid="extractor.en.page.sense_template_fn/1415",
                     )
@@ -3617,7 +3617,7 @@ def parse_language(
                             sortid="page/2755",
                         )
                     if "warning" in dt:
-                        wxr.wtp.warning(
+                        wxr.wtp.wiki_notice(
                             "{} in section {}".format(dt["warning"], t),
                             sortid="page/2759",
                         )
@@ -3625,6 +3625,16 @@ def parse_language(
                         wxr.wtp.error(
                             "{} in section {}".format(dt["error"], t),
                             sortid="page/2763",
+                        )
+                    if "note" in dt:
+                        wxr.wtp.note(
+                            "{} in section {}".format(dt["note"], t),
+                            sortid="page/20251017a",
+                        )
+                    if "wiki_notice" in dt:
+                        wxr.wtp.wiki_notice(
+                            "{} in section {}".format(dt["wiki_notice"], t),
+                            sortid="page/20251017b",
                         )
                     # Parse word senses for the part-of-speech
                     parse_part_of_speech(node, pos)

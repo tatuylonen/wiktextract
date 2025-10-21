@@ -28,6 +28,8 @@ POSSubtitleData = TypedDict(
         "tags": list[str],
         "error": str,  # not used
         "warning": str,  # not used
+        "note": str,  # not used
+        "wiki_notices": str,  # not used
     },
     total=False,
 )
@@ -65,6 +67,8 @@ class WiktionaryConfig:
         "extract_ns_names",
         "allowed_html_tags",
         "parser_function_aliases",
+        "notes",
+        "wiki_notices",
     )
 
     def __init__(
@@ -120,6 +124,8 @@ class WiktionaryConfig:
         self.errors: list[ErrorMessageData] = []
         self.warnings: list[ErrorMessageData] = []
         self.debugs: list[ErrorMessageData] = []
+        self.notes: list[ErrorMessageData] = []
+        self.wiki_notices: list[ErrorMessageData] = []
         self.redirects: SoundFileRedirects = {}
         self.data_folder = files("wiktextract") / "data" / dump_file_lang_code
         self.extract_thesaurus_pages = False
@@ -149,6 +155,10 @@ class WiktionaryConfig:
             self.errors.extend(ret.get("errors", []))
         if "warnings" in ret and len(self.warnings) < 100_000:
             self.warnings.extend(ret.get("warnings", []))
+        if "notes" in ret and len(self.notes) < 100_000:
+            self.notes.extend(ret.get("warnings", []))
+        if "wiki_notices" in ret and len(self.wiki_notices) < 100_000:
+            self.wiki_notices.extend(ret.get("warnings", []))
         if "debugs" in ret and len(self.debugs) < 3_000_000:
             self.debugs.extend(ret.get("debugs", []))
 
