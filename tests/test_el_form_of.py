@@ -236,8 +236,14 @@ class TestElGlosses(TestCase):
         raw = "* {{γρ|τάδε}}"
         self.mktest_sense(raw, [{}])
 
-    def test_gr_linkage_alternative_template_name(self) -> None:
+    def test_gr_linkage_alternative_template_name1(self) -> None:
         # https://el.wiktionary.org/wiki/προμηνώ
         raw = "* {{γραφή του|προμηνύω|μορφ}}"
         expected = [{"form_of": [{"word": "προμηνύω"}]}]
+        self.mktest_sense(raw, expected)
+
+    def test_gr_linkage_alternative_template_name2(self) -> None:
+        # https://el.wiktionary.org/wiki/queen-sized
+        raw = "* {{alter|queen-size|μορφή|en}}"
+        expected = [{"form_of": [{"word": "queen-size"}]}]
         self.mktest_sense(raw, expected)
