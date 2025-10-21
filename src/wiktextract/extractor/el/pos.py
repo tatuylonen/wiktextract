@@ -16,7 +16,6 @@ from wikitextprocessor.parser import LEVEL_KIND_FLAGS
 from wiktextract import WiktextractContext
 from wiktextract.extractor.el.tags import translate_raw_tags
 from wiktextract.page import clean_node
-from wiktextract.wxr_logging import logger
 
 from .head import parse_head
 from .linkages import process_linkage_section
@@ -599,7 +598,7 @@ def extract_form_of_templates(
     # * Only handle cases where the second argument refers to a form:
     #   μορφ / μορφή / λόγια μορφή του, etc.
     #   and ignore those mistakenly used as synonym templates
-    if t_name == "γρ" and 2 in t_node.template_parameters:
+    if t_name in ("γρ", "γραφή του") and 2 in t_node.template_parameters:
         second_arg = t_node.template_parameters[2]
         second_arg_str = clean_node(wxr, None, second_arg)
         if "μορφ" in second_arg_str:
