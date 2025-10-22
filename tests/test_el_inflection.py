@@ -15,9 +15,12 @@ from unittest import TestCase
 from wikitextprocessor import Wtp
 
 from wiktextract.config import WiktionaryConfig
-from wiktextract.extractor.el.models import WordEntry
+from wiktextract.extractor.el.models import Form, WordEntry
 from wiktextract.extractor.el.page import parse_page
-from wiktextract.extractor.el.table import process_inflection_section
+from wiktextract.extractor.el.table import (
+    postprocess_table_forms,
+    process_inflection_section,
+)
 from wiktextract.wxr_context import WiktextractContext
 
 
@@ -874,3 +877,27 @@ class TestElInflection(TestCase):
         ]
 
         self.mktest_form(raw, expected)
+
+    def mktest_postprocess_forms(self, raw: str, expected: list[str]) -> None:
+        forms = [Form(form=raw)]
+        new_forms = postprocess_table_forms(forms)
+        new_forms_lemmas = [form.form for form in new_forms]
+        self.assertEqual(new_forms_lemmas, expected)
+
+    def test_postprocess_forms_separators1(self) -> None:
+        # https://el.wiktionary.org/wiki/τρώω
+        raw = "έτρωγαν / τρώγανε"
+        expected = ["έτρωγαν", "τρώγανε"]
+        self.mktest_postprocess_forms(raw, expected)
+
+    def test_postprocess_forms_separators2(self) -> None:
+        # https://el.wiktionary.org/wiki/ζητάω
+        raw = "να ζητάν(ε) - ζητούν(ε)"
+        expected = ["να ζητάν", "να ζητάνε", "να ζητούν", "να ζητούνε"]
+        self.mktest_postprocess_forms(raw, expected)
+
+    def test_postprocess_forms_separators3(self) -> None:
+        # https://el.wiktionary.org/wiki/ζητάω
+        raw = "ζητούσαν(ε) - ζήταγαν - ζητάγανε"
+        expected = ["ζητούσαν", "ζητούσανε", "ζήταγαν", "ζητάγανε"]
+        self.mktest_postprocess_forms(raw, expected)

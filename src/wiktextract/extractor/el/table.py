@@ -455,17 +455,30 @@ def parse_table(
 def postprocess_table_forms(forms: list[Form]) -> list[Form]:
     """Postprocess table forms.
 
-    * Translates tags
-    * Removes articles
+    * Translate tags
+    * Remove articles
     * Convert some parens to rare tag
-    * Convert some parens to multiple forms
+    * Form expansion
+
+    About form expansion, there are two types:
+    * Separators: "/", "-"
+    * Strings inside parens
+
+    The purpose being to go:
+      FROM "θα ζητάν(ε) - ζητούν(ε)"
+      TO   ["θα ζητάν", "θα ζητάνε", "θα ζητούν", "θα ζητούνε"]
+
+    References:
+    * https://el.wiktionary.org/wiki/τρώω
+    * https://el.wiktionary.org/wiki/ζητάω  < this page is cursed anyway
+      https://el.wiktionary.org/wiki/αγαπάω < use this instead
     """
     for form in forms:
         translate_raw_tags(form)
 
     for form in forms:
-        parts = form.form.split()
         # Remove articles
+        parts = form.form.split()
         if len(parts) > 1 and parts[0] in ARTICLES:
             form.form = " ".join(parts[1:])
 
@@ -477,16 +490,37 @@ def postprocess_table_forms(forms: list[Form]) -> list[Form]:
             form.form = form.form[1:-1]
             form.tags.append("rare")
 
-    # Expansion
-    # { "form": "πίνουν(ε)", ...rest }
-    # >
-    # { "form": "πίνουν", ...rest }
-    # { "form": "πίνουνε", ...rest }
-    new_forms: list[Form] = []
+    # Separators
+    separators = ("/", "-")
+    verb_particles = ("θα", "να")
+    separated_forms: list[Form] = []
     for form in forms:
-        text = form.form
-        if not text:
+        # Assumes only one type of separator present atm
+        sep = next((sep for sep in separators if sep in form.form), None)
+        if sep is None:
+            separated_forms.append(form)
             continue
+
+        # Extract particle if any
+        suffix_particle = ""
+        parts = form.form.split()
+        if len(parts) > 1 and parts[0] in verb_particles:
+            suffix_particle = parts[0]
+            form.form = " ".join(parts[1:])
+
+        for separated in form.form.split(sep):
+            separated_form = form.model_copy(deep=True)
+            separated = separated.strip()
+            if suffix_particle:
+                separated_form.form = f"{suffix_particle} {separated}"
+            else:
+                separated_form.form = separated
+            separated_forms.append(separated_form)
+
+    # Strings inside parens
+    new_forms: list[Form] = []
+    for form in separated_forms:
+        text = form.form
 
         m = re.match(r"^(.*?)\((.*?)\)(.*)$", text)
         if not m:
