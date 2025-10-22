@@ -70,7 +70,7 @@ def process_verb_table(
     for table_row in table_node.find_child(NodeKind.TABLE_ROW):
         col_index = 0
         header_col_index = 0
-        person = ""
+        pronouns = []
         for table_cell in table_row.find_child(
             NodeKind.TABLE_HEADER_CELL | NodeKind.TABLE_CELL
         ):
@@ -93,36 +93,31 @@ def process_verb_table(
                 else:  # new table
                     col_headers.append(cell_text)
                     has_person = False
-                    person = ""
+                    pronouns.clear()
                 header_col_index += 1
             elif table_cell.kind == NodeKind.TABLE_CELL:
                 if has_person and col_index == 0:
                     if cell_text in ("Singular", "Plural"):
                         row_headers.append(RowspanHeader(cell_text, 0, 1))
                     else:
-                        person = cell_text
+                        pronouns = list(
+                            filter(None, map(str.strip, cell_text.split(",")))
+                        )
                 else:
                     for cell_line in cell_text.splitlines():
                         cell_line = cell_line.strip()
-                        if cell_line in ["", "—"]:
+                        if cell_line in ["", "—", wxr.wtp.title]:
                             continue
                         elif cell_line.startswith("Flexion:"):
                             parse_flexion_page(wxr, word_entry, cell_line)
                             continue
-                        for p in person.split(","):
-                            p = p.strip()
-                            form_text = cell_line
-                            if p != "":
-                                form_text = p + " " + cell_line
-                            if form_text == wxr.wtp.title:
-                                continue
-                            form = Form(form=form_text)
-                            if col_index < len(col_headers):
-                                form.raw_tags.append(col_headers[col_index])
-                            for row_header in row_headers:
-                                form.raw_tags.append(row_header.text)
-                            translate_raw_tags(form)
-                            word_entry.forms.append(form)
+                        form = Form(form=cell_line, pronouns=pronouns)
+                        if col_index < len(col_headers):
+                            form.raw_tags.append(col_headers[col_index])
+                        for row_header in row_headers:
+                            form.raw_tags.append(row_header.text)
+                        translate_raw_tags(form)
+                        word_entry.forms.append(form)
                 col_index += 1
 
         new_row_headers = []

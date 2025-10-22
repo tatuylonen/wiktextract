@@ -127,6 +127,7 @@ class Form(GermanBaseModel):
     source: str = ""
     sense_index: str = ""
     topics: list[str] = []
+    pronouns: list[str] = []
 
 
 class Descendant(GermanBaseModel):

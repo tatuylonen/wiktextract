@@ -295,13 +295,19 @@ class TestDeForms(TestCase):
         self.assertEqual(
             word_entry.model_dump(exclude_defaults=True)["forms"],
             [
-                {"form": "ich sehe", "tags": ["present"]},
-                {"form": "du siehst", "tags": ["present"]},
-                {"form": "er sieht", "tags": ["present"]},
-                {"form": "sie sieht", "tags": ["present"]},
-                {"form": "es sieht", "tags": ["present"]},
-                {"form": "ich sah", "tags": ["past"]},
-                {"form": "ich sähe", "tags": ["subjunctive-ii"]},
+                {"form": "sehe", "pronouns": ["ich"], "tags": ["present"]},
+                {"form": "siehst", "pronouns": ["du"], "tags": ["present"]},
+                {
+                    "form": "sieht",
+                    "pronouns": ["er", "sie", "es"],
+                    "tags": ["present"],
+                },
+                {"form": "sah", "pronouns": ["ich"], "tags": ["past"]},
+                {
+                    "form": "sähe",
+                    "pronouns": ["ich"],
+                    "tags": ["subjunctive-ii"],
+                },
                 {"form": "siehe!", "tags": ["imperative", "singular"]},
                 {"form": "sieh!", "tags": ["imperative", "singular"]},
                 {"form": "seht!", "tags": ["imperative", "plural"]},
