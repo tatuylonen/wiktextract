@@ -27,6 +27,8 @@ from wikitextprocessor.parser import (
     NodeKind,
     TemplateNode,
     WikiNode,
+    is_list,
+    is_list_item,
 )
 
 from ...clean import clean_template_args, clean_value
@@ -307,6 +309,7 @@ ADDITIONAL_EXPAND_TEMPLATES: set[str] = {
     "trans-bottom",
     "checktrans-top",
     "checktrans-bottom",
+    "col",
     "col1",
     "col2",
     "col3",
@@ -692,24 +695,6 @@ taxonomy_templates = {
     "taxlinknew",
     "taxlook",
 }
-
-# Template name component to linkage section listing.  Integer section means
-# default section, starting at that argument.
-# XXX not used anymore, except for the first elements: moved to
-# template_linkages
-# template_linkage_mappings: list[list[Union[str, int]]] = [
-#     ["syn", "synonyms"],
-#     ["synonyms", "synonyms"],
-#     ["ant", "antonyms"],
-#     ["antonyms", "antonyms"],
-#     ["hyp", "hyponyms"],
-#     ["hyponyms", "hyponyms"],
-#     ["der", "derived"],
-#     ["derived terms", "derived"],
-#     ["coordinate terms", "coordinate_terms"],
-#     ["rel", "related"],
-#     ["col", 2],
-# ]
 
 # Template names, this was exctracted from template_linkage_mappings,
 # because the code using template_linkage_mappings was actually not used
@@ -2760,7 +2745,7 @@ def parse_language(
                     kind = node.kind
                     # print("ITEM_RECURSE KIND:", kind,
                     #        node.sarg if node.sarg else node.largs)
-                    if kind == NodeKind.LIST:
+                    if is_list_item(node):
                         if parts:
                             sense1: Optional[str]
                             sense1 = clean_node(wxr, None, parts)
@@ -2896,9 +2881,9 @@ def parse_language(
                 assert isinstance(node, WikiNode)
                 kind = node.kind
                 # print("PARSE_LINKAGE_RECURSE CHILD", kind)
-                if kind == NodeKind.LIST:
+                if is_list(node):
                     parse_linkage_recurse(node.children, field, sense)
-                elif kind == NodeKind.LIST_ITEM:
+                elif is_list_item(node):
                     v = parse_linkage_item(node.children, field, sense)
                     if v:
                         # parse_linkage_item() can return a value that should
