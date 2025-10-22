@@ -181,7 +181,7 @@ TENSE_TAGS: dict[str, str | list[str]] = {
     "passé antérieur": ["past", "anterior"],
     "futur antérieur": ["future", "perfect"],
     "prétérit": "preterite",
-    "présent simple, 3ᵉ pers. sing.": ["present", "third-person", "singular"],
+    "présent simple,\n3ᵉ pers. sing.": ["present", "third-person", "singular"],
     "participe passé": ["participle", "past"],
     "participe présent": ["participle", "present"],
     # Template:ku-conj-trans
