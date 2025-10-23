@@ -562,18 +562,22 @@ def extract_form_of_templates(
     """Parse form_of for nouns, adjectives and verbs.
 
     Supports:
-    * κλ             | generic                | form_of
-    * γρ             | generic                | form_of
-    * πτώση/πτώσεις  | nouns, adjectives etc. | form_of and tags
-    * ρημ τύπος      | verbs                  | form_of
-    * μτχ            | verbs                  | form_of
+    1. κλ             | generic                | form_of
+    2. γρ             | generic                | form_of
+    3. πτώση/πτώσεις  | nouns, adjectives etc. | form_of and tags
+    4. υπο/υποκ       | nouns                  | form_of
+    5. μεγ/μεγεθ      | nouns                  | form_of
+    6. ρημ τύπος      | verbs                  | form_of
+    7. μτχ            | verbs                  | form_of
 
     * References:
-    https://el.wiktionary.org/wiki/Πρότυπο:κλ
-    https://el.wiktionary.org/wiki/Module:άλλημορφή
-    https://el.wiktionary.org/wiki/Κατηγορία:Πρότυπα_για_κλιτικούς_τύπους
-    https://el.wiktionary.org/wiki/Πρότυπο:ρημ_τύπος
-    https://el.wiktionary.org/wiki/Κατηγορία:Πρότυπα_για_μετοχές
+    1. https://el.wiktionary.org/wiki/Πρότυπο:κλ
+    2. https://el.wiktionary.org/wiki/Module:άλλημορφή
+    3. https://el.wiktionary.org/wiki/Κατηγορία:Πρότυπα_για_κλιτικούς_τύπους
+    4. https://el.wiktionary.org/wiki/Πρότυπο:υπο
+    5. https://el.wiktionary.org/wiki/Πρότυπο:μεγ
+    6. https://el.wiktionary.org/wiki/Πρότυπο:ρημ_τύπος
+    7. https://el.wiktionary.org/wiki/Κατηγορία:Πρότυπα_για_μετοχές
     """
     t_name = t_node.template_name
 
@@ -608,6 +612,13 @@ def extract_form_of_templates(
     inflection_t_names = ("πτώσεις", "πτώση")
     if any(name in t_name for name in inflection_t_names):
         return extract_form_of_templates_ptosi(wxr, parent_sense, t_node)
+
+    # Nouns
+    # Note that the "diminutive/augmentative" tags will be added later on
+    # via translation of the "υποκοριστικό/μεγεθυντικό" raw_tags
+    for template_name in ("υπο", "υποκ", "μεγ", "μεγεθ"):
+        if t_name == template_name:
+            return basic_extract(extract_argument=1)
 
     # Verbs
     if t_name == "ρημ τύπος":
