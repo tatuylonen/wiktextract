@@ -130,7 +130,10 @@ class TestItForms(TestCase):
             "Template:It-conj",
             10,
             """{|
-|-
+! colspan="2" | participio presente
+| colspan="1" | [[dicente#Italiano|dicente]]
+! colspan="2" | participio passato
+| colspan="2" | [[detto#Italiano|detto]]
 |-
 ! colspan="1" rowspan="2" | persona
 ! colspan="3" | singolare
@@ -168,15 +171,25 @@ class TestItForms(TestCase):
             data[0]["forms"],
             [
                 {
+                    "form": "dicente",
+                    "source": "Appendice:Coniugazioni/Italiano/dire",
+                    "tags": ["present", "participle"],
+                },
+                {
+                    "form": "detto",
+                    "source": "Appendice:Coniugazioni/Italiano/dire",
+                    "tags": ["past", "participle"],
+                },
+                {
                     "form": "ho detto",
                     "raw_tags": ["io"],
-                    "tags": ["past", "perfect", "singular", "first-person"],
+                    "tags": ["singular", "first-person", "past", "perfect"],
                     "source": "Appendice:Coniugazioni/Italiano/dire",
                 },
                 {
                     "form": "sono detto",
                     "raw_tags": ["io"],
-                    "tags": ["past", "perfect", "singular", "first-person"],
+                    "tags": ["singular", "first-person", "past", "perfect"],
                     "source": "Appendice:Coniugazioni/Italiano/dire",
                 },
                 {
