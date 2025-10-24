@@ -174,6 +174,8 @@ class TestElGlosses(TestCase):
         raw = """* {{μτχ3a}}"""
         expected: list[dict] = [{}]
         self.mktest_sense(raw, expected)
+        # Should contain a wiki_notice
+        self.assertTrue(self.wxr.wtp.wiki_notices)
 
     def test_form_of_empty_args2(self) -> None:
         # This should return nothing: no argument, no text after
@@ -246,4 +248,35 @@ class TestElGlosses(TestCase):
         # https://el.wiktionary.org/wiki/queen-sized
         raw = "* {{alter|queen-size|μορφή|en}}"
         expected = [{"form_of": [{"word": "queen-size"}]}]
+        self.mktest_sense(raw, expected)
+
+    def test_ypo_linkage(self) -> None:
+        # https://el.wiktionary.org/wiki/Πρότυπο:υπο
+        raw = "* {{υπο|λέξη}}"
+        expected = [{"form_of": [{"word": "λέξη"}]}]
+        self.mktest_sense(raw, expected)
+
+    def test_ypok_linkage(self) -> None:
+        # https://el.wiktionary.org/wiki/Πρότυπο:υποκ
+        raw = "* {{υποκ|παιδί}}"
+        expected = [{"form_of": [{"word": "παιδί"}]}]
+        self.mktest_sense(raw, expected)
+
+    def test_ypok_linkage_edge_first_arg_empty(self) -> None:
+        # https://el.wiktionary.org/wiki/πιτάκι
+        raw = "* {{υποκ}} μικρή [[πίτα]]"
+        self.mktest_sense(raw, [{}])
+        # Should not contain a wiki_notice
+        self.assertFalse(self.wxr.wtp.wiki_notices)
+
+    def test_meg_linkage(self) -> None:
+        # https://el.wiktionary.org/wiki/γυναικάρα
+        raw = "* {{μεγ|γυναίκα}}"
+        expected = [{"form_of": [{"word": "γυναίκα"}]}]
+        self.mktest_sense(raw, expected)
+
+    def test_megeth_linkage(self) -> None:
+        # https://el.wiktionary.org/wiki/φλιτζάνα
+        raw = "* {{μεγεθ|φλιτζάνι}}"
+        expected = [{"form_of": [{"word": "φλιτζάνι"}]}]
         self.mktest_sense(raw, expected)
