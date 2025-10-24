@@ -617,7 +617,7 @@ def extract_form_of_templates(
     # Note that the "diminutive/augmentative" tags will be added later on
     # via translation of the "υποκοριστικό/μεγεθυντικό" raw_tags
     for template_name in ("υπο", "υποκ", "μεγ", "μεγεθ"):
-        if t_name == template_name:
+        if t_name == template_name and 1 in t_node.template_parameters:
             return basic_extract(extract_argument=1)
 
     # Verbs
@@ -638,9 +638,12 @@ def extract_form_of_templates_basic(
     extract_argument: int | str,
 ) -> None:
     t_args = t_node.template_parameters
-    if extract_argument not in t_args:
+    if extract_argument in t_args:
+        lemma = clean_node(wxr, None, t_args[extract_argument]).strip()
+    else:
         # mtxpp template has no args, consume the next links for the
         # form_of field
+        # cf. https://github.com/tatuylonen/wiktextract/issues/1372
         wxr.wtp.wiki_notice(
             f"Form-of template does not have lemma data: {t_name}, {t_args=}",
             sortid="pos/570/20250517",
@@ -654,8 +657,6 @@ def extract_form_of_templates_basic(
                 break
             links.append(node)
         lemma = clean_node(wxr, None, links).strip()
-    else:
-        lemma = clean_node(wxr, None, t_args[extract_argument]).strip()
 
     if lemma:
         form_of = FormOf(word=lemma)

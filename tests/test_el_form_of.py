@@ -174,6 +174,8 @@ class TestElGlosses(TestCase):
         raw = """* {{μτχ3a}}"""
         expected: list[dict] = [{}]
         self.mktest_sense(raw, expected)
+        # Should contain a wiki_notice
+        self.assertTrue(self.wxr.wtp.wiki_notices)
 
     def test_form_of_empty_args2(self) -> None:
         # This should return nothing: no argument, no text after
@@ -264,6 +266,8 @@ class TestElGlosses(TestCase):
         # https://el.wiktionary.org/wiki/πιτάκι
         raw = "* {{υποκ}} μικρή [[πίτα]]"
         self.mktest_sense(raw, [{}])
+        # Should not contain a wiki_notice
+        self.assertFalse(self.wxr.wtp.wiki_notices)
 
     def test_meg_linkage(self) -> None:
         # https://el.wiktionary.org/wiki/γυναικάρα
