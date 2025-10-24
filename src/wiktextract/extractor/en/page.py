@@ -2697,16 +2697,15 @@ def parse_language(
         assert isinstance(data, dict)
         assert isinstance(field, str)
         assert isinstance(linkagenode, WikiNode)
-        # if field == "synonyms":
-        #     print("field", field)
-        #     print("data", data)
-        #     print("children:")
-        #     print(linkagenode.children)
+        # print("field", field)
+        # print("data", data)
+        # print("children:")
+        # print(linkagenode.children)
         if not wxr.config.capture_linkages:
             return
         have_panel_template = False
         toplevel_text = []
-        next_navframe_sense = None  # Used for "(sense):" before NavFrame
+        block_header_sense = None
 
         def parse_linkage_item(
             contents: list[Union[str, WikiNode]],
@@ -2870,7 +2869,7 @@ def parse_language(
         ) -> None:
             assert isinstance(contents, (list, tuple))
             assert sense is None or isinstance(sense, str)
-            nonlocal next_navframe_sense
+            nonlocal block_header_sense
             # print("PARSE_LINKAGE_RECURSE: {}: {}".format(sense, contents))
             for node in contents:
                 if isinstance(node, str):
@@ -2891,7 +2890,7 @@ def parse_language(
                         # parse_linkage_item() can return a value that should
                         # be used as the sense for the follow-on linkages,
                         # which are typically provided in a table (see 滿)
-                        next_navframe_sense = v
+                        block_header_sense = v
                 elif kind in (NodeKind.TABLE, NodeKind.TABLE_ROW):
                     parse_linkage_recurse(node.children, field, sense)
                 elif kind == NodeKind.TABLE_CELL:
@@ -2903,17 +2902,16 @@ def parse_language(
                     NodeKind.BOLD,
                 ):
                     continue
-                elif kind == NodeKind.HTML:
+                elif isinstance(node, HTMLNode):
                     # Recurse to process inside the HTML for most tags
                     if node.sarg in ("gallery", "ref", "cite", "caption"):
                         continue
-                    classes = (node.attrs.get("class") or "").split()
-                    if node.sarg == "li":
-                        # duplicates code from if kind == NodeKind.LIST_ITEM ⇑
-                        v = parse_linkage_item(node.children, field, sense)
-                        if v:
-                            next_navframe_sense = v
-                    elif "qualifier-content" in classes:
+                    classes = (
+                        (node.attrs.get("class") or "")
+                        .replace("+", " ")
+                        .split()
+                    )
+                    if "qualifier-content" in classes:
                         sense1 = clean_node(wxr, None, node.children)
                         if sense1.endswith(":"):
                             sense1 = sense1[:-1].strip()
@@ -2924,13 +2922,20 @@ def parse_language(
                                 sortid="page/2170",
                             )
                         parse_linkage_recurse(node.children, field, sense1)
-                    elif "NavFrame" in classes:
-                        # NavFrame uses previously assigned next_navframe_sense
-                        # (from a "(sense):" item) and clears it afterwards
-                        parse_linkage_recurse(
-                            node.children, field, sense or next_navframe_sense
+                    elif "list-switcher-header" in classes:
+                        block_header_sense = clean_node(
+                            wxr, None, node.children
                         )
-                        next_navframe_sense = None
+                        if block_header_sense.endswith(":"):
+                            block_header_sense = block_header_sense[:-1].strip()
+                    elif any(x in classes for x in ("NavFrame", "term-list")):
+                        # NavFrame uses previously assigned block_header_sense
+                        # (from a "(sense):" item) and clears it afterwards
+                        # print(f"{sense=}, {block_header_sense=}")
+                        parse_linkage_recurse(
+                            node.children, field, sense or block_header_sense
+                        )
+                        block_header_sense = None
                     else:
                         parse_linkage_recurse(node.children, field, sense)
                 elif kind in LEVEL_KINDS:
