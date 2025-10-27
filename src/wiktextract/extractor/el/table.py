@@ -47,6 +47,7 @@ def cell_node_fn(
 
 
 BOLD_RE = re.compile(r"(__/?[BI]__)")
+TRAILING_NUMBER_RE = re.compile(r"\d+$")
 
 ARTICLES: set[str] = {
     "ο",
@@ -458,6 +459,7 @@ def postprocess_table_forms(forms: list[Form]) -> list[Form]:
     * Translate tags
     * Remove articles
     * Convert some parens to rare tag
+    * Remove trailing numbers (usu. notes)
     * Form expansion
 
     About form expansion, there are two types:
@@ -476,13 +478,16 @@ def postprocess_table_forms(forms: list[Form]) -> list[Form]:
     for form in forms:
         translate_raw_tags(form)
 
+    clean_forms: list[Form] = []
     for form in forms:
         # Remove articles
         parts = form.form.split()
         if len(parts) > 1 and parts[0] in ARTICLES:
             form.form = " ".join(parts[1:])
-
         if not form.form:
+            continue
+        # https://el.wiktionary.org/wiki/λίθος
+        if form.form in {"ο/η", "του/της", "τον/τη", "τους/τις"}:
             continue
 
         # Parens > rare inflection (cf. μπόι)
@@ -490,14 +495,25 @@ def postprocess_table_forms(forms: list[Form]) -> list[Form]:
             form.form = form.form[1:-1]
             form.tags.append("rare")
 
+        # Remove trailing numbers (usu. notes)
+        # https://el.wiktionary.org/wiki/Καπιτόπουλος
+        form.form = TRAILING_NUMBER_RE.sub("", form.form)
+
+        clean_forms.append(form)
+
     # Separators
     separators = ("/", "-")
     verb_particles = ("θα", "να")
     separated_forms: list[Form] = []
-    for form in forms:
-        # Assumes only one type of separator present atm
+    for form in clean_forms:
+        # Assume only one type of separator present atm
         sep = next((sep for sep in separators if sep in form.form), None)
         if sep is None:
+            separated_forms.append(form)
+            continue
+
+        # Ignore suffix/prefixes (-ισμός)
+        if form.form.startswith(sep) or form.form.endswith(sep):
             separated_forms.append(form)
             continue
 

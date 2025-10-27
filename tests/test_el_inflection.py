@@ -879,7 +879,7 @@ class TestElInflection(TestCase):
         self.mktest_form(raw, expected)
 
     def mktest_postprocess_forms(self, raw: str, expected: list[str]) -> None:
-        forms = [Form(form=raw)]
+        forms = [Form(form=entry.strip()) for entry in raw.splitlines()]
         new_forms = postprocess_table_forms(forms)
         new_forms_lemmas = [form.form for form in new_forms]
         self.assertEqual(new_forms_lemmas, expected)
@@ -900,4 +900,28 @@ class TestElInflection(TestCase):
         # https://el.wiktionary.org/wiki/ζητάω
         raw = "ζητούσαν(ε) - ζήταγαν - ζητάγανε"
         expected = ["ζητούσαν", "ζητούσανε", "ζήταγαν", "ζητάγανε"]
+        self.mktest_postprocess_forms(raw, expected)
+
+    def test_postprocess_forms_declension(self) -> None:
+        # https://el.wiktionary.org/wiki/λίθος
+        # raw = "του/της λίθου" < This is never parsed by us
+        # expected = ["λίθου"]  <
+        raw = """
+        ο/η
+        του/της
+        τον/τη
+        τους/τις
+        """.strip()
+        self.mktest_postprocess_forms(raw, [])
+
+    def test_postprocess_forms_suffix(self) -> None:
+        # https://el.wiktionary.org/wiki/-ισμός
+        raw = "ο -ισμός"
+        expected = ["-ισμός"]
+        self.mktest_postprocess_forms(raw, expected)
+
+    def test_postprocess_forms_trailing_numbers(self) -> None:
+        # https://el.wiktionary.org/wiki/Καπιτόπουλος
+        raw = "Καπιτοπουλαίοι1"
+        expected = ["Καπιτοπουλαίοι"]
         self.mktest_postprocess_forms(raw, expected)
