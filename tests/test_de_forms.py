@@ -569,3 +569,38 @@ class TestDeForms(TestCase):
                 {"form": "lid", "tags": ["transcription", "imperative"]},
             ],
         )
+
+    def test_verb_table_auxiliary_forms(self):
+        self.wxr.wtp.add_page(
+            "Vorlage:Deutsch Verb Übersicht",
+            10,
+            """{| class="wikitable inflection-table float-right flexbox"
+! style="width: 80px;" |
+! style="width: 62px;" | [[Hilfe:Person|Person]]
+! colspan="3" | Wortform
+|-
+! rowspan="2" | [[Hilfe:Perfekt|Perfekt]] !! colspan="3" | [[Hilfe:Partizip|Partizip&nbsp;II]] || [[Hilfe:Hilfsverb|Hilfsverb]]
+|-
+| colspan="3" | [[gelegen|gelegen]]
+| [[haben|haben]], [[sein]]
+|}""",
+        )
+        data = parse_page(
+            self.wxr,
+            "liegen",
+            """== liegen ({{Sprache|Deutsch}}) ==
+=== {{Wortart|Verb|Deutsch}}, ''unregelmäßig'' ===
+{{Deutsch Verb Übersicht
+|Präsens_ich=liege
+}}
+==== Bedeutungen ====
+:[1] eine""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {"form": "gelegen", "tags": ["participle-2", "perfect"]},
+                {"form": "haben", "tags": ["auxiliary", "perfect"]},
+                {"form": "sein", "tags": ["auxiliary", "perfect"]},
+            ],
+        )
