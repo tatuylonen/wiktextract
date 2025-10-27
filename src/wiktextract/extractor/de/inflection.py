@@ -105,19 +105,19 @@ def process_verb_table(
                         )
                 else:
                     for cell_line in cell_text.splitlines():
-                        cell_line = cell_line.strip()
-                        if cell_line in ["", "—", wxr.wtp.title]:
-                            continue
-                        elif cell_line.startswith("Flexion:"):
-                            parse_flexion_page(wxr, word_entry, cell_line)
-                            continue
-                        form = Form(form=cell_line, pronouns=pronouns)
-                        if col_index < len(col_headers):
-                            form.raw_tags.append(col_headers[col_index])
-                        for row_header in row_headers:
-                            form.raw_tags.append(row_header.text)
-                        translate_raw_tags(form)
-                        word_entry.forms.append(form)
+                        for form_str in map(str.strip, cell_line.split(",")):
+                            if form_str in ["", "—", wxr.wtp.title]:
+                                continue
+                            elif form_str.startswith("Flexion:"):
+                                parse_flexion_page(wxr, word_entry, form_str)
+                                continue
+                            form = Form(form=form_str, pronouns=pronouns)
+                            if col_index < len(col_headers):
+                                form.raw_tags.append(col_headers[col_index])
+                            for row_header in row_headers:
+                                form.raw_tags.append(row_header.text)
+                            translate_raw_tags(form)
+                            word_entry.forms.append(form)
                 col_index += 1
 
         new_row_headers = []
