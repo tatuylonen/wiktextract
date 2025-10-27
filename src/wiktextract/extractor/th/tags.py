@@ -200,6 +200,31 @@ LABEL_TAGS = {
     "หมิ่นแบบจงซัน": "Zhongshan-Min",
     "ผิงใต้": "Southern-Pinghua",
     "ผิงเหนือ": "Northern-Pinghua",
+    # Template:en-noun
+    "พหูพจน์": "plural",
+    # Template:en-verb
+    "บุรุษที่สามเอกพจน์ปัจจุบันกาล": ["present", "singular", "third-person"],
+    "รูปกริยาขยายปัจจุบันกาล": ["participle", "present"],
+    "อดีตกาล": "past",
+    "รูปกริยาขยายอดีตกาล": ["participle", "past"],
+    # Template:en-adj
+    "ขั้นกว่า": "comparative",
+    "ขั้นสุด": "superlative",
+    # Template:en-pron
+    "ตัวกำหนดเจ้าของ": ["determiner", "possessive"],
+    "สรรพนามเจ้าของ": ["possessive", "pronoun"],
+    "สะท้อนเอกพจน์": ["reflexive", "singular"],
+    "สะท้อนพหูพจน์": ["reflexive", "plural"],
+    # Template:eo-head
+    "กรรมการกเอกพจน์": ["accusative", "singular"],
+    "กรรมการกพหูพจน์": ["accusative", "plural"],
+    # Template:nl-noun
+    "ตัวบอกความเล็ก": "diminutive",
+    # Template:fr-noun
+    "เพศชายพหูพจน์": ["masculine", "plural"],
+    "เพศหญิงพหูพจน์": ["feminine", "plural"],
+    # Template:es-adj
+    "เพศชายและเพศหญิงพหูพจน์": ["masculine", "feminine", "plural"],
 }
 
 
