@@ -87,3 +87,30 @@ class TestThDesc(unittest.TestCase):
                 }
             ],
         )
+
+    def test_tr_class(self):
+        self.wxr.wtp.add_page(
+            "แม่แบบ:desc",
+            10,
+            """<span class="desc-arr" title="borrowed">→</span> เบลารุส: <span class="Cyrl" lang="be">[[:інтэр'ер#ภาษาเบลารุส|інтэр'е́р]]</span> <span class="mention-gloss-paren annotation-paren">(</span><span lang="be" class="tr">อินแตรʺแยร</span><span class="mention-gloss-paren annotation-paren">)</span>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "intérieur",
+            """== ภาษาฝรั่งเศส ==
+=== คำนาม ===
+# [[ภาย]][[ใน]], [[ข้าง]]ใน
+==== คำสืบทอด ====
+* {{desc|be|інтэр'е́р|bor=1}}""",
+        )
+        self.assertEqual(
+            data[0]["descendants"],
+            [
+                {
+                    "lang": "เบลารุส",
+                    "lang_code": "be",
+                    "roman": "อินแตรʺแยร",
+                    "word": "інтэр'е́р",
+                }
+            ],
+        )

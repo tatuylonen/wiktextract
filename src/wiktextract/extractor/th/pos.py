@@ -359,6 +359,9 @@ def extract_headword_line_template(
                         form.raw_tags.append(form_raw_tag)
                         translate_raw_tags(form)
                     word_entry.forms.append(form)
+                form_raw_tag = ""
+        if form_raw_tag != "":
+            word_entry.raw_tags.append(form_raw_tag)
 
     clean_node(wxr, word_entry, expanded_node)
     translate_raw_tags(word_entry)

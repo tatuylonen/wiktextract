@@ -447,3 +447,20 @@ class TestThGloss(TestCase):
                 "หน้าที่มี 1 รายการ",
             ],
         )
+
+    def test_en_adv_i_tag(self):
+        self.wxr.wtp.add_page(
+            "แม่แบบ:en-adv",
+            10,
+            """<span class="headword-line"><strong class="Latn headword" lang="en">again</strong> (<i>[[ภาคผนวก:อภิธานศัพท์#เปรียบเทียบไม่ได้|เปรียบเทียบไม่ได้]]</i>)</span>[[Category:คำหลักภาษาอังกฤษ|AGAIN]]""",
+        )
+        data = parse_page(
+            self.wxr,
+            "again",
+            """== ภาษาอังกฤษ ==
+=== คำกริยาวิเศษณ์ ===
+{{en-adv|-}}
+# [[อีก]]""",
+        )
+        self.assertEqual(data[0]["tags"], ["not-comparable"])
+        self.assertEqual(data[0]["categories"], ["คำหลักภาษาอังกฤษ"])

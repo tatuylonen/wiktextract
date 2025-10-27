@@ -57,8 +57,14 @@ def extract_desc_template(
     lang_name = code_to_name(lang_code, "th") or "unknown"
     for span_tag in expanded_node.find_html("span"):
         span_lang = span_tag.attrs.get("lang", "")
-        span_class = span_tag.attrs.get("class", "")
-        if span_lang == lang_code:
+        span_class = span_tag.attrs.get("class", "").split()
+        if (span_lang.endswith("-Latn") or "tr" in span_class) and len(
+            desc_data
+        ) > 0:
+            desc_data[-1].roman = clean_node(wxr, None, span_tag)
+        elif "mention-gloss" in span_class and len(desc_data) > 0:
+            desc_data[-1].sense = clean_node(wxr, None, span_tag)
+        elif span_lang == lang_code:
             desc_data.append(
                 Descendant(
                     lang_code=lang_code,
@@ -66,10 +72,6 @@ def extract_desc_template(
                     word=clean_node(wxr, None, span_tag),
                 )
             )
-        elif span_lang.endswith("-Latn") and len(desc_data) > 0:
-            desc_data[-1].roman = clean_node(wxr, None, span_tag)
-        elif span_class == "mention-gloss" and len(desc_data) > 0:
-            desc_data[-1].sense = clean_node(wxr, None, span_tag)
 
     if len(parent_data) > 0:
         for p_data in parent_data:
