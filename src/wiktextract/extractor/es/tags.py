@@ -812,6 +812,10 @@ POS_TITLE_TAGS = {
     "ordinal": "ordinal",
     "partitiva": "partitive",
     "adjetiva": "adjectival",
+    "irregular": "irregular",
+    "contable e incontable": ["countable", "uncountable"],
+    "generalmente incontable": "uncountable",
+    "generalmente contable": "countable",
 }
 
 

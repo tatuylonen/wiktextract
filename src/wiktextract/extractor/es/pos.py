@@ -60,7 +60,7 @@ def extract_pos_section(
         elif isinstance(node, TemplateNode):
             if node.template_name.startswith("inflect."):
                 process_inflect_template(wxr, word_entry, node)
-            elif node.template_name in ["es.sust", "es.adj", "es.v"]:
+            elif node.template_name.endswith((".sust", ".adj")):
                 extract_pos_header_template(wxr, word_entry, node)
             elif node.template_name.removesuffix("s") in LINKAGE_TITLES:
                 process_linkage_template(wxr, word_entry, node)
@@ -225,3 +225,4 @@ def extract_pos_header_template(
             r_tag = clean_node(wxr, None, node)
             if r_tag != "":
                 word_entry.raw_tags.append(r_tag)
+                translate_raw_tags(word_entry)
