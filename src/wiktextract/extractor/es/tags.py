@@ -760,6 +760,18 @@ TABLE_TAGS = {
     "adverbial": "adverbial",
     "partitivo": "partitive",
     "prolativo": "prolative",
+    # Template:de.v
+    "participio presente": ["present", "participle"],
+    "participio pretérito": ["past", "participle"],
+    "zu-infinitivo": "infinitive-zu",
+    "presente (1)": ["present", "subjunctive-i"],
+    "pretérito (2)": ["present", "subjunctive-ii"],
+    # Template:pl.t
+    "participio adjetival pasivo": ["passive", "adjectival", "participle"],
+    "participio adjetival activo": ["active", "adjectival", "participle"],
+    "participio adverbial presente": ["present", "adverbial", "participle"],
+    "sustantivo verbal": "noun-from-verb",
+    "pretérito impersonal": ["past", "impersonal"],
 }
 
 SOUND_TAGS = {
