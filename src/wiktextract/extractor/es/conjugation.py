@@ -14,7 +14,7 @@ def extract_conjugation_section(
     forms = []
     cats = []
     for t_node in level_node.find_child(NodeKind.TEMPLATE):
-        if t_node.template_name in ["es.v", "en.v"]:
+        if t_node.template_name in ["es.v", "en.v", "de.v", "pl.v"]:
             new_forms, new_cats = process_es_v_template(wxr, t_node)
             forms.extend(new_forms)
             cats.extend(new_cats)
@@ -65,6 +65,27 @@ PRONOUN_TAGS = {
     "he, she, it": ["third-person", "singular"],
     "we, you, they": ["third-person", "plural"],
     "(we)": ["third-person", "plural"],
+    # Template:de.v
+    "ich": ["first-person", "singular"],
+    "du": ["second-person", "singular"],
+    "er, sie, es": ["third-person", "singular"],
+    "wir": ["first-person", "plural"],
+    "ihr": ["second-person", "plural"],
+    "sie": ["third-person", "plural"],
+    "(du)": ["second-person", "singular"],
+    "(wir)": ["first-person", "plural"],
+    "(ihr)": ["second-person", "plural"],
+    "(Sie)": ["third-person", "plural"],
+    # Template:pl.v
+    "ja": ["first-person", "singular"],
+    "ty": ["second-person", "singular"],
+    "on, ona, ono": ["third-person", "singular"],
+    "my": ["first-person", "plural"],
+    "wy": ["second-person", "plural"],
+    "oni, one": ["third-person", "plural"],
+    "(ty)": ["second-person", "singular"],
+    "(my)": ["first-person", "plural"],
+    "(wy)": ["second-person", "plural"],
 }
 
 

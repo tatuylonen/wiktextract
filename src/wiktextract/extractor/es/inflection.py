@@ -10,6 +10,7 @@ def process_inflect_template(
     wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
 ) -> None:
     # https://es.wiktionary.org/wiki/Plantilla:inflect.es.sust.reg
+    # POS headword table template
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(t_node), expand_all=True
     )
