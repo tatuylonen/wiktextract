@@ -847,6 +847,8 @@ ALL_TAGS = {
     "simples": "simple",
     "compuestas": "compound",
     "invariante": "invariable",
+    "copulativa": "copulative",
+    "sin género": ["masculine", "feminine"],
 }
 
 

@@ -10,6 +10,8 @@ from wiktextract.wxr_context import WiktextractContext
 
 
 class TestESInflection(TestCase):
+    maxDiff = None
+
     def setUp(self) -> None:
         self.wxr = WiktextractContext(
             Wtp(lang_code="es"),
@@ -127,7 +129,7 @@ koutu, koute.
         )
         page_data = parse_page(
             self.wxr,
-            "goto",
+            "gato",
             """== {{lengua|es}} ==
 === Etimología 1 ===
 ==== Sustantivo femenino y masculino ====
@@ -158,8 +160,52 @@ koutu, koute.
 {{es.adj|ng}}
 ;1: gloss""",
         )
-        self.assertEqual(page_data[0]["raw_tags"], ["sin género"])
+        self.assertEqual(page_data[0]["tags"], ["masculine", "feminine"])
         self.assertEqual(
             page_data[0]["forms"],
             [{"form": "-ables", "tags": ["plural"]}],
+        )
+
+    def test_space_in_title(self):
+        self.wxr.wtp.add_page(
+            "Plantilla:es.sust",
+            10,
+            """'''arc<span style='background: white; color:Green; font-weight: bold;'>o</span> iri<span style='background: white; color:Green; font-weight: bold;'>s</span>''' (''copulativa'')&ensp;¦&ensp;plural: [[arcos|arc<span style='color:Green; background: white; font-weight: bold;'>os</span>]] [[iris|iri<span style='color:Green; background: white; font-weight: bold;'>s</span>]][[Categoría:ES:Locuciones sustantivas copulativas]]""",
+        )
+        data = parse_page(
+            self.wxr,
+            "arco iris",
+            """== {{lengua|es}} ==
+=== {{locución|es|sustantiva|masculina}} ===
+{{es.sust|cop=s}}
+;1: {{grafía|arcoíris}}.""",
+        )
+        self.assertEqual(
+            data[0]["forms"], [{"form": "arcos iris", "tags": ["plural"]}]
+        )
+        self.assertEqual(data[0]["tags"], ["copulative"])
+        self.assertEqual(
+            data[0]["categories"], ["ES:Locuciones sustantivas copulativas"]
+        )
+
+    def test_comma_in_es_sust(self):
+        self.wxr.wtp.add_page(
+            "Plantilla:es.sust",
+            10,
+            """'''gur<span style='background: white; color:Green; font-weight: bold;'>ú</span>''' (''sin género'')&ensp;¦&ensp;plural: [[gurús|gur<span style='color:Green; background: white; font-weight: bold;'>ús</span>]], [[gurúes|gur<span style='color:Green; background: white; font-weight: bold;'>úes</span>]][[Categoría:ES:Sustantivos sin género definido]]""",
+        )
+        data = parse_page(
+            self.wxr,
+            "gurú",
+            """== {{lengua|es}} ==
+=== {{sustantivo femenino y masculino|es}} ===
+{{es.sust|mf}}
+;1 {{csem|religión}} en [[w: Hinduismo|hinduismo]].""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {"form": "gurús", "tags": ["plural"]},
+                {"form": "gurúes", "tags": ["plural"]},
+            ],
         )
