@@ -116,45 +116,111 @@ def parse_html_forms_table(
 
 
 def parse_wikitext_forms_table(
-    wxr: WiktextractContext, word_entry: WordEntry, table_node: WikiNode
+    wxr: WiktextractContext, word_entry: WordEntry, table: WikiNode
 ) -> None:
     # https://ru.wiktionary.org/wiki/Шаблон:сущ-ru
     # Шаблон:inflection сущ ru
     col_headers = []
-    for table_row in table_node.find_child(NodeKind.TABLE_ROW):
-        row_headers = []
-        has_data_cell = table_row.contain_node(NodeKind.TABLE_CELL)
-        for col_index, table_cell in enumerate(
-            table_row.find_child(
-                NodeKind.TABLE_HEADER_CELL | NodeKind.TABLE_CELL
-            )
+    row_headers = []
+    for row_index, row in enumerate(table.find_child(NodeKind.TABLE_ROW)):
+        row_has_data = row.contain_node(NodeKind.TABLE_CELL)
+        col_index = 0
+        for header in chain(col_headers, row_headers):
+            if (
+                row_index > header.row_index
+                and row_index < header.row_index + header.rowspan
+                and header.col_index <= col_index
+            ):
+                col_index += header.colspan
+        for cell_node in row.find_child(
+            NodeKind.TABLE_HEADER_CELL | NodeKind.TABLE_CELL
         ):
-            cell_text = clean_node(wxr, None, table_cell)
-            if table_cell.kind == NodeKind.TABLE_HEADER_CELL:
-                if not has_data_cell:
-                    col_headers.append(cell_text)
-                else:
-                    if cell_text == "М." and table_cell.contain_node(
-                        NodeKind.LINK
-                    ):
-                        for link_node in table_cell.find_child(NodeKind.LINK):
-                            row_headers.append(link_node.largs[0][0])
-                            break
-                    else:
-                        row_headers.append(cell_text)
-            elif table_cell.kind == NodeKind.TABLE_CELL:
-                for form_text in cell_text.splitlines():
-                    form = Form(
-                        form=form_text.strip(" /"), raw_tags=row_headers
+            cell_text = clean_node(wxr, None, cell_node)
+            colspan = int(cell_node.attrs.get("colspan", "1"))
+            rowspan = int(cell_node.attrs.get("rowspan", "1"))
+            if cell_node.kind == NodeKind.TABLE_CELL:
+                pass
+            elif not row_has_data:
+                col_headers.append(
+                    TableHeader(
+                        cell_text, col_index, colspan, row_index, rowspan
                     )
-                    if (
-                        col_index < len(col_headers)
-                        and col_headers[col_index] != ""
-                    ):
-                        form.raw_tags.append(col_headers[col_index])
-                    if form.form not in ["", "—", "-", wxr.wtp.title]:
-                        translate_raw_tags(form)
-                        word_entry.forms.append(form)
+                )
+            else:
+                if cell_text == "М." and cell_node.contain_node(NodeKind.LINK):
+                    for link_node in cell_node.find_child(NodeKind.LINK):
+                        cell_text = clean_node(wxr, None, link_node.largs[0][0])
+                        break
+                row_headers.append(
+                    TableHeader(
+                        cell_text, col_index, colspan, row_index, rowspan
+                    )
+                )
+            col_index += colspan
+
+    for row_index, row in enumerate(table.find_child(NodeKind.TABLE_ROW)):
+        col_index = 0
+        for header in chain(col_headers, row_headers):
+            if (
+                row_index >= header.row_index
+                and row_index < header.row_index + header.rowspan
+                and header.col_index <= col_index
+            ):
+                col_index += header.colspan
+        for cell_node in row.find_child(NodeKind.TABLE_CELL):
+            colspan = int(cell_node.attrs.get("colspan", "1"))
+            rowspan = int(cell_node.attrs.get("rowspan", "1"))
+            cell_text = clean_node(wxr, None, cell_node)
+            last_col_header_row = -1
+            use_tags = []
+            for line in cell_text.splitlines():
+                line = line.strip("\n /")
+                if line not in ["", "—", "-", wxr.wtp.title]:
+                    form = Form(form=line)
+                    for col_header in col_headers[::-1]:
+                        if (
+                            col_header.text != ""
+                            and col_header.col_index < col_index + colspan
+                            and col_index
+                            < col_header.col_index + col_header.colspan
+                            and col_header.text not in form.raw_tags
+                            and col_header.text not in use_tags
+                            and (
+                                (
+                                    last_col_header_row != -1
+                                    and col_header.row_index
+                                    + col_header.rowspan
+                                    in [
+                                        last_col_header_row,
+                                        last_col_header_row + 1,
+                                    ]
+                                )
+                                or (
+                                    last_col_header_row == -1
+                                    and col_header.row_index
+                                    + col_header.rowspan
+                                    <= row_index
+                                )
+                            )
+                        ):
+                            use_tags.append(col_header.text)
+                            last_col_header_row = col_header.row_index
+                    form.raw_tags.extend(use_tags[::-1])
+                    use_tags.clear()
+                    for row_header in row_headers[::-1]:
+                        if (
+                            row_header.text != ""
+                            and row_header.row_index < row_index + rowspan
+                            and row_index
+                            < row_header.row_index + row_header.rowspan
+                            and row_header.text not in form.raw_tags
+                            and row_header.text not in use_tags
+                        ):
+                            use_tags.append(row_header.text)
+                    form.raw_tags.extend(use_tags[::-1])
+                    translate_raw_tags(form)
+                    word_entry.forms.append(form)
+            col_index += colspan
 
 
 def extract_прил_ru_comparative_forms(
