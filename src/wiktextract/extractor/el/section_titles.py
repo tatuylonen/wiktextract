@@ -650,6 +650,7 @@ SUBSECTION_HEADINGS: dict[str, SubSectionMap] = {
     "μερική συνωνυμία": {"type": Heading.Synonyms},
     # Exact synonym
     "ταυτόσημο": {"type": Heading.Synonyms},
+    "ταυτόσημα": {"type": Heading.Synonyms},
     "εκφράσεις": {"type": Heading.Related, "tags": ["idiomatic"]},
     "σύνθετα": {"type": Heading.Related, "tags": ["compound"]},
     "μεταγραφές": {"type": Heading.Transliterations},
@@ -657,7 +658,7 @@ SUBSECTION_HEADINGS: dict[str, SubSectionMap] = {
     "παράγωγα": {"type": Heading.Derived},
     # Derived words
     "απόγονοι": {"type": Heading.Derived},
-    "υποκοριστικά": {"type": Heading.Derived, "tags": ["diminuitive"]},
+    "υποκοριστικά": {"type": Heading.Derived, "tags": ["diminutive"]},
     # Anagrams
     "αλλόγλωσσα παράγωγα": {"type": Heading.Translations},
     "μεταφράσεις": {"type": Heading.Translations},

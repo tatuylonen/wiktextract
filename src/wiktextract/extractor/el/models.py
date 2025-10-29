@@ -105,7 +105,7 @@ class Linkage(GreekBaseModel):
     # note: str = ""
     raw_tags: list[str] = []
     tags: list[str] = []
-    # topics: list[str] = []
+    topics: list[str] = []
     # urls: list[str]
     examples: list[str] = []
 
