@@ -208,21 +208,44 @@ def extract_pos_header_template(
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(t_node), expand_all=True
     )
-    raw_tag = ""
+    raw_tags = []
+    form_nodes = []
+    after_tag_str = False
     for node in expanded_node.children:
         if isinstance(node, str) and node.strip().endswith(":"):
+            if len(form_nodes) > 0:
+                form_str = clean_node(wxr, None, form_nodes)
+                if form_str != "":
+                    form = Form(form=form_str, raw_tags=raw_tags)
+                    translate_raw_tags(form)
+                    word_entry.forms.append(form)
+                    form_nodes.clear()
             raw_tag = clean_node(wxr, None, node).strip(": ¦()")
-        elif isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
-            form = Form(form=clean_node(wxr, None, node))
-            if form.form == "":
-                continue
-            if raw_tag != "":
-                for r_tag in raw_tag.split():
-                    form.raw_tags.append(r_tag)
+            raw_tags = list(filter(None, map(str.strip, raw_tag.split())))
+            after_tag_str = True
+        elif (
+            isinstance(node, str)
+            and node.strip() == ","
+            and len(form_nodes) > 0
+        ):
+            form_str = clean_node(wxr, None, form_nodes)
+            if form_str != "":
+                form = Form(form=form_str, raw_tags=raw_tags)
                 translate_raw_tags(form)
-            word_entry.forms.append(form)
+                word_entry.forms.append(form)
+                form_nodes.clear()
         elif isinstance(node, WikiNode) and node.kind == NodeKind.ITALIC:
             r_tag = clean_node(wxr, None, node)
             if r_tag != "":
                 word_entry.raw_tags.append(r_tag)
                 translate_raw_tags(word_entry)
+        elif after_tag_str:
+            form_nodes.append(node)
+
+    if len(form_nodes) > 0:
+        form_str = clean_node(wxr, None, form_nodes)
+        if form_str != "":
+            form = Form(form=form_str, raw_tags=raw_tags)
+            translate_raw_tags(form)
+            word_entry.forms.append(form)
+    clean_node(wxr, word_entry, expanded_node)
