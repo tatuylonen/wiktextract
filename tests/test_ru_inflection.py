@@ -151,11 +151,14 @@ class TestLinkage(TestCase):
         self.assertEqual(
             [f.model_dump(exclude_defaults=True) for f in word_entry.forms],
             [
-                {"form": "публицисти", "tags": ["indefinite", "plural"]},
-                {"form": "публициста", "tags": ["definite", "singular"]},
-                {"form": "публицистът", "tags": ["definite", "singular"]},
-                {"form": "публицистите", "tags": ["definite", "plural"]},
-                {"form": "публициста", "tags": ["count-form", "singular"]},
+                {"form": "публицисти", "tags": ["plural", "indefinite"]},
+                {"form": "публициста", "tags": ["singular", "definite"]},
+                {"form": "публицистът", "tags": ["singular", "definite"]},
+                {"form": "публицистите", "tags": ["plural", "definite"]},
+                {
+                    "form": "публициста",
+                    "tags": ["singular", "plural", "count-form"],
+                },
             ],
         )
 
@@ -189,10 +192,10 @@ class TestLinkage(TestCase):
         self.assertEqual(
             [f.model_dump(exclude_defaults=True) for f in word_entry.forms],
             [
-                {"form": "водѣ", "tags": ["locative", "singular"]},
-                {"form": "водѹ", "tags": ["locative", "dual"]},
-                {"form": "водахъ", "tags": ["locative", "plural"]},
-                {"form": "водо", "tags": ["vocative", "singular"]},
+                {"form": "водѣ", "tags": ["singular", "locative"]},
+                {"form": "водѹ", "tags": ["dual", "locative"]},
+                {"form": "водахъ", "tags": ["plural", "locative"]},
+                {"form": "водо", "tags": ["singular", "vocative"]},
             ],
         )
 
@@ -294,5 +297,85 @@ class TestLinkage(TestCase):
                     "form": "пры́гавши",
                     "tags": ["adverbial", "participle", "past"],
                 },
+            ],
+        )
+
+    def test_гл_es_блок(self):
+        self.wxr.wtp.add_page(
+            "Шаблон:гл es 1 reg",
+            10,
+            """{| class="morfotable es" cellpadding="2" rules="all"
+! &#160;
+! colspan="3"|[[modo indicativo|Modo indicativo]]
+! style="width:5em" rowspan="2"| [[presente de subjuntivo|Presente de subjuntivo]]
+|-
+! &#160;
+! style="width:5em" | [[presente|Presente]]
+! style="width:5em" | [[futuro|Futuro]]
+! style="width:5em" | [[pretérito indefinido|Pretérito indefinido]]
+|-
+! [[yo|Yo]]
+| nado
+| nadaré
+| nadé
+| nade
+|-
+! colspan="5"| [[participio|Participio]]
+|-
+| align="center" colspan="5"| nadado
+|}""",
+        )
+        data = parse_page(
+            self.wxr,
+            "nadar",
+            """= {{-es-}} =
+=== Морфологические и синтаксические свойства ===
+{{гл es 1 reg|основа=nad
+|слоги={{по-слогам|na|dar}}}}
+=== Семантические свойства ===
+==== Значение ====
+# [[плавать]]""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {
+                    "form": "nado",
+                    "tags": [
+                        "indicative",
+                        "present",
+                        "first-person",
+                        "singular",
+                    ],
+                },
+                {
+                    "form": "nadaré",
+                    "tags": [
+                        "indicative",
+                        "future",
+                        "first-person",
+                        "singular",
+                    ],
+                },
+                {
+                    "form": "nadé",
+                    "tags": [
+                        "indicative",
+                        "past",
+                        "indefinite",
+                        "first-person",
+                        "singular",
+                    ],
+                },
+                {
+                    "form": "nade",
+                    "tags": [
+                        "present",
+                        "subjunctive",
+                        "first-person",
+                        "singular",
+                    ],
+                },
+                {"form": "nadado", "tags": ["participle"]},
             ],
         )
