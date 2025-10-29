@@ -206,10 +206,13 @@ def process_linkage_section(
             )
             return
 
-    target_field.extend(
+    linkages = [
         Linkage(word=" ".join(link_parts), raw_tags=ltags, examples=lexamples)
         for link_parts, ltags, lexamples in combined_line_data
-    )
+    ]
+    for linkage in linkages:
+        translate_raw_tags(linkage)
+    target_field.extend(linkages)
 
     # iterate over list item lines and get links
 

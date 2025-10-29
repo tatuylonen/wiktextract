@@ -10,7 +10,7 @@ Otherwise, the implementation of tags is a translation effort: when this
 edition of Wiktionary says 'x', what tags does that refer to?
 """
 
-from wiktextract.extractor.el.models import Form, Sense, WordEntry
+from wiktextract.extractor.el.models import Form, Linkage, Sense, WordEntry
 from wiktextract.tags import uppercase_tags, valid_tags
 from wiktextract.topics import valid_topics
 
@@ -391,6 +391,7 @@ other_tags = {
     "δεικτική αντωνυμία": ["pronoun"],
     "οριστική αντωνυμία": ["pronoun", "definite"],
     "αόριστη αντωνυμία": ["pronoun", "indefinite"],
+    "επιμεριστική αντωνυμία": ["pronoun", "distributive"],
     "ακρωνύμιο": ["acronym"],
     "αρκτικόλεξο": ["initialism"],
     "υποκοριστικό": ["diminutive"],
@@ -731,7 +732,7 @@ tag_map: dict[str, list[str]] = {
 }
 
 
-Taggable = WordEntry | Form | Sense
+Taggable = WordEntry | Form | Sense | Linkage
 """An object with raw_tags, tags and topics attributes."""
 
 
