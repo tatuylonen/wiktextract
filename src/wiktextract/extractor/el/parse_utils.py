@@ -212,3 +212,57 @@ def remove_duplicate_forms(
         # wxr.wtp.debug("Found duplicate forms", sortid="simple/pos/32")
         return new_forms
     return forms
+
+
+def get_stem(word: str) -> str:
+    """Get the stem from a Greek adjective or participle."""
+    vowels = "αειουηω"
+    vowel_digraphs = ["αι", "ει", "οι", "ου", "υι"]
+    idx = len(word)
+    nword = strip_accents(word)  # normalized
+    # 1. Consume every consonant until we find a vowel
+    while idx > 0 and nword[idx - 1] not in vowels:
+        idx -= 1
+    # 2. Consume the vowel/digraph
+    if idx > 2 and nword[idx - 2 : idx] in vowel_digraphs:
+        idx -= 2
+    elif idx > 1 and nword[idx - 1] in vowels:
+        idx -= 1
+    return word[:idx]
+
+
+def expand_suffix_forms(forms: list[Form]) -> list[Form]:
+    """Expand headword suffix endings for Greek adjectives or participles.
+
+    Assume that forms are given in parsed order. That is: masc/fem/neut
+
+    Reference:
+    * https://el.wiktionary.org/wiki/Παράρτημα:Επίθετα_και_μετοχές_(νέα_ελληνικά)
+    * https://el.wiktionary.org/wiki/άμεσος (adjective)
+    * https://el.wiktionary.org/wiki/αρσενικός (adjective)
+    * https://el.wiktionary.org/wiki/αναμμένος (participle)
+    """
+    assert len(forms) == 3
+    base, *others = forms
+    word = base.form
+    stem = get_stem(word)
+
+    associated_tags = [
+        ["masculine", "singular", "nominative"],
+        ["feminine", "singular", "nominative"],
+        ["neuter", "singular", "nominative"],
+    ]
+
+    expanded_forms: list[Form] = []
+    new_form = base.model_copy(deep=True)
+    new_form.tags.extend(associated_tags[0])
+    expanded_forms.append(new_form)
+
+    for idx, form in enumerate(others, 1):
+        for ending in form.form.replace("-", "").split("/"):
+            new_form = form.model_copy(deep=True)
+            new_form.form = f"{stem}{ending}"
+            new_form.tags.extend(associated_tags[idx])
+            expanded_forms.append(new_form)
+
+    return expanded_forms

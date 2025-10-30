@@ -30,6 +30,7 @@ from .models import (
 )
 from .parse_utils import (
     GREEK_LANGCODES,
+    expand_suffix_forms,
     parse_lower_heading,
     remove_duplicate_forms,
 )
@@ -64,6 +65,9 @@ def process_pos(
     # print(f"{pos_title=}, {pos_tags=}, {pos_num=}")
     data.pos = pos  # the internal/translated name for the POS
     data.pos_num = pos_num  # SEW uses "Noun 1", "Noun 2" style headings.
+    for pos_tag in pos_tags:
+        if pos_tag not in data.tags:
+            data.tags.append(pos_tag)
 
     wxr.wtp.start_subsection(title)
 
@@ -295,6 +299,23 @@ def process_pos(
         if not found_head and (parsed_forms := parse_head(wxr, stripped)):
             for form in parsed_forms:
                 translate_raw_tags(form)
+
+            if (
+                data.lang_code == "el"
+                and not data.word.startswith("-")
+                # If there are spaces around the "/", we don't parse the
+                # header correctly, so just skip the expansion.
+                # Ex. "πρωτοπόρος, -α / -ος, -ο"
+                # Remove this check if that ever gets fixed.
+                and len(parsed_forms) == 3
+                # Only adjectives or participles
+                and (
+                    data.pos == "adj"
+                    or (data.pos == "verb" and "participle" in data.tags)
+                )
+            ):
+                parsed_forms = expand_suffix_forms(parsed_forms)
+
             data.forms.extend(parsed_forms)
             found_head = True
 
