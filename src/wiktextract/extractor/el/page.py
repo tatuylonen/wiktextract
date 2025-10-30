@@ -7,7 +7,7 @@ from mediawiki_langcodes import code_to_name, name_to_code
 # what kind of WikiNode it is. Subclasses also have the field, but it's
 # always NodeKind.TEMPLATE for TemplateNodes etc.
 from wikitextprocessor import TemplateNode
-from wikitextprocessor.parser import LEVEL_KIND_FLAGS, NodeKind, WikiNode
+from wikitextprocessor.parser import LEVEL_KIND_FLAGS, NodeKind
 
 # Clean node takes a WikiNode+strings node or tree and gives you a cleanish text
 from wiktextract.extractor.el.table import process_inflection_section
@@ -27,7 +27,6 @@ from .etymology import process_etym
 from .models import WordEntry
 from .parse_utils import (
     POSReturns,
-    find_sections,
     parse_lower_heading,
     strip_accents,
 )
@@ -174,7 +173,7 @@ def parse_page(
                 clean_node(wxr, None, sublevel.largs[0]).lower().strip("= \n")
             )
 
-            type, pos, heading_name, tags, num, ok = parse_lower_heading(
+            heading_type, pos, tags, num, ok = parse_lower_heading(
                 wxr, heading_title
             )
 
@@ -184,23 +183,23 @@ def parse_page(
                 wxr.wtp.wiki_notice(
                     f"Sub-language heading '{heading_title}' couldn't be "
                     f"be parsed as a heading; "
-                    f"{type=}, {heading_name=}, {tags=}.",
+                    f"{heading_type=}, {heading_title=}, {tags=}.",
                     sortid="page/103/20241112",
                 )
                 continue
 
-            if type in (Heading.Err, Heading.Ignored):
+            if heading_type in (Heading.Err, Heading.Ignored):
                 continue
             ## TEMP
 
             found_pos_sections: POSReturns = []
 
-            if type is Heading.Etym:
+            if heading_type is Heading.Etym:
                 # Update base_data with etymology and maybe sound data.
                 # Return any sublevels in the etymology section
                 # so that we can check for POS sections.
                 num, etym_sublevels = process_etym(
-                    wxr, base_data, sublevel, heading_name, section_num
+                    wxr, base_data, sublevel, heading_title, section_num
                 )
 
                 section_num = num if num > section_num else section_num
@@ -222,23 +221,23 @@ def parse_page(
 
             # Typical pronunciation section that applies to the whole
             # entry
-            if type == Heading.Pron:
+            if heading_type == Heading.Pron:
                 # Update base_data with sound and hyphenation data.
                 # Return any sublevels in the pronunciation section
                 # so that we can check for POS sections.
                 num, pron_sublevels = process_pron(
-                    wxr, sublevel, base_data, heading_name, section_num
+                    wxr, sublevel, base_data, heading_title, section_num
                 )
 
                 section_num = num if num > section_num else section_num
 
                 found_pos_sections.extend(pron_sublevels)
 
-            if type is Heading.POS:
+            if heading_type is Heading.POS:
                 found_pos_sections.append(
                     (
                         pos,
-                        heading_name,
+                        heading_title,
                         tags,
                         section_num,
                         sublevel,
@@ -262,7 +261,7 @@ def parse_page(
                         pos_section,
                         pos_base_data.model_copy(deep=True),
                         prev_data,
-                        pos,  # heading_name is the English pos
+                        pos,
                         title,
                         tags,
                         num,

@@ -2,6 +2,8 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from wiktextract.extractor.el.section_titles import POSName
+
 # Pydantic models are basically classes that take the place of the dicts
 # used in the main English extractor. They use more resources, but also do
 # a lot of validation work and are easier for the type-checker.
@@ -126,7 +128,6 @@ class Sense(GreekBaseModel):
     form_of: list[FormOf] = []
     # alt_of : list[FormOf] = []
     # compound_of: list[FormOf] = []
-    # topics: list[str] = []
     categories: list[str] = []  # Wikipedia category link data; not printed.
     examples: list[Example] = []
     synonyms: list[Linkage] = []
@@ -231,7 +232,7 @@ class WordEntry(GreekBaseModel):
     forms: list[Form] = Field(default=[], description="Inflection forms list")
     lang_code: str = Field(default="", description="Wiktionary language code")
     lang: str = Field(default="", description="Localized language name")
-    pos: str = Field(default="", description="Part of speech type")
+    pos: POSName = Field(default="", description="Part of speech type")
     pos_title: str = ""  # `==Noun==`
     pos_num: int = -1  # `==Noun 2==` Default -1 gets removed.
     etymology_text: str = Field(

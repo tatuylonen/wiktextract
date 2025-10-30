@@ -147,7 +147,7 @@ def process_pron(
             )
             sounds.append(Sound(homophones=homophones))
 
-    for heading_type, pos, heading_name, tags, num, subnode in find_sections(
+    for heading_type, pos, heading_title, tags, num, subnode in find_sections(
         wxr, sublevels
     ):
         section_num = num if num > section_num else section_num
@@ -157,7 +157,7 @@ def process_pron(
             pos_returns.append(
                 (
                     pos,
-                    heading_name,
+                    heading_title,
                     tags,
                     num,
                     subnode,
