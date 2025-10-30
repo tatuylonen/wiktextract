@@ -1,3 +1,5 @@
+from typing import cast
+
 from wikitextprocessor import NodeKind, TemplateNode, WikiNode
 from wikitextprocessor.parser import LEVEL_KIND_FLAGS
 
@@ -11,7 +13,7 @@ from .parse_utils import (
 )
 from .pos import extract_form_of_templates
 from .pronunciation import process_pron
-from .section_titles import Heading
+from .section_titles import Heading, POSName
 
 
 def process_etym(
@@ -55,6 +57,9 @@ def process_etym(
     ):
         if heading_type == Heading.POS:
             section_num = num if num > section_num else section_num
+            # SAFETY: Since the heading_type is POS, find_sections
+            # "pos_or_section" is guaranteed to be a pos: POSName
+            pos = cast(POSName, pos)
             ret_etym_sublevels.append(
                 (
                     pos,

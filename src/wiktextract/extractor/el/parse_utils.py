@@ -93,6 +93,13 @@ def find_sections(
     None,
     None,
 ]:
+    """In practice, only called when we expect heading_type to be either
+    Heading.POS or Heading.Pron.
+
+    Heading.POS guarantees that pos_or_section is a POSName.
+    Heading.Pron guarantees that pos_or_section is a SectionName, and, looking
+    at SUBSECTION_HEADINGS, either: "pronunciation" or "προφορά"
+    """
     for node in nodes:
         heading_title = clean_node(wxr, None, node.largs[0]).lower().strip()
 

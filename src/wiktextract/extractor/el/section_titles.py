@@ -1,7 +1,7 @@
 # https://simple.wiktionary.org/wiki/Category:Part_of_speech_templates
 import re
 from enum import Enum, auto
-from typing import TypedDict
+from typing import Literal, TypedDict
 
 
 class Heading(Enum):
@@ -9,7 +9,7 @@ class Heading(Enum):
     Ignored = auto()
     POS = auto()
     Etym = auto()
-    Pron = auto()
+    Pron = auto()  # Pronunciation
     Infl = auto()
     Related = auto()
     Transliterations = auto()
@@ -23,7 +23,35 @@ class Heading(Enum):
 
 
 Tags = list[str]
-POSName = str
+POSName = Literal[
+    "",  # Used as default
+    "ERROR_UNKNOWN_POS",
+    "abbrev",
+    "adj",
+    "adv",
+    "adv_phrase",
+    "affix",
+    "article",
+    "character",
+    "conj",
+    "contraction",
+    "det",
+    "infix",
+    "intj",
+    "name",
+    "noun",
+    "num",
+    "particle",
+    "phrase",
+    "prefix",
+    "prep",
+    "pron",  # pronoun
+    "romanization",
+    "root",
+    "suffix",
+    "symbol",
+    "verb",
+]
 POSMap = TypedDict(
     "POSMap",
     {
