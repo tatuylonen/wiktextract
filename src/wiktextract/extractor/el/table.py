@@ -491,7 +491,7 @@ def postprocess_table_forms(forms: list[Form], word: str) -> list[Form]:
     * Translate tags
     * Remove articles (requires original word)
     * Convert some parens to rare tag
-    * Remove trailing numbers (usu. notes)
+    * Remove trailing numbers and stars (usu. notes)
     * Form expansion
 
     About form expansion, there are two types:
@@ -521,8 +521,8 @@ def postprocess_table_forms(forms: list[Form], word: str) -> list[Form]:
         # Remove trailing numbers (usu. notes)
         # https://el.wiktionary.org/wiki/Καπιτόπουλος
         form.form = TRAILING_NUMBER_RE.sub("", form.form)
-
-        clean_forms.append(form)
+        # https://el.wiktionary.org/wiki/επιζών
+        form.form = form.form.rstrip("*")
 
     # Separators
     separators = ("/", "-")
