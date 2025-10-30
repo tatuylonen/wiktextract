@@ -67,7 +67,8 @@ ARTICLES: set[str] = {
     "τις",
     "τα",
 }
-
+EXTENDED_ARTICLES = ARTICLES | {"ο/η", "του/της", "τον/τη", "τους/τις"}
+"""Articles to trim from inflection tables / headwords."""
 UNEXPECTED_ARTICLES = {
     "αι",
     "ένα",
@@ -449,15 +450,46 @@ def parse_table(
             )
         )
 
-        new_forms = postprocess_table_forms(forms)
+        new_forms = postprocess_table_forms(forms, data.word)
         data.forms.extend(new_forms)
 
 
-def postprocess_table_forms(forms: list[Form]) -> list[Form]:
+def remove_article_forms(forms: list[Form], word: str) -> list[Form]:
+    """Return a new form list without article forms.
+
+    Articles can appear in two ways:
+    * As a separate form:
+      Ex. https://el.wiktionary.org/wiki/λίθος
+    * As part of a form, inside form.form
+      Ex. most tables
+
+    Used in both headword and table forms. Note that for headword forms, where
+    there is usually no grammatic information, we could also use these articles
+    to populate tags - but since most of the time we remove articles in tables,
+    it was deemed not worth.
+    """
+    # Do not remove article forms for the article pages themselves...
+    if word in ARTICLES:
+        return forms
+
+    new_forms: list[Form] = []
+    for form in forms:
+        if form.form in EXTENDED_ARTICLES:
+            continue
+        parts = form.form.split()
+        if len(parts) > 1 and parts[0] in EXTENDED_ARTICLES:
+            form.form = " ".join(parts[1:])
+        if not form.form:
+            continue
+        new_forms.append(form)
+    return new_forms
+
+
+def postprocess_table_forms(forms: list[Form], word: str) -> list[Form]:
     """Postprocess table forms.
 
     * Translate tags
-    * Remove articles
+    * Remove articles (requires original word)
     * Convert some parens to rare tag
     * Remove trailing numbers (usu. notes)
     * Form expansion
@@ -478,18 +510,9 @@ def postprocess_table_forms(forms: list[Form]) -> list[Form]:
     for form in forms:
         translate_raw_tags(form)
 
-    clean_forms: list[Form] = []
-    for form in forms:
-        # Remove articles
-        parts = form.form.split()
-        if len(parts) > 1 and parts[0] in ARTICLES:
-            form.form = " ".join(parts[1:])
-        if not form.form:
-            continue
-        # https://el.wiktionary.org/wiki/λίθος
-        if form.form in {"ο/η", "του/της", "τον/τη", "τους/τις"}:
-            continue
+    clean_forms = remove_article_forms(forms, word)
 
+    for form in clean_forms:
         # Parens > rare inflection (cf. μπόι)
         if form.form[0] == "(" and form.form[-1] == ")":
             form.form = form.form[1:-1]

@@ -28,7 +28,7 @@ class TestElInflection(TestCase):
         self, raw: str, expected: list[str]
     ) -> None:
         forms = [Form(form=entry.strip()) for entry in raw.splitlines()]
-        new_forms = postprocess_table_forms(forms)
+        new_forms = postprocess_table_forms(forms, word="filler")
         new_forms_lemmas = [form.form for form in new_forms]
         self.assertEqual(new_forms_lemmas, expected)
 
@@ -89,27 +89,23 @@ class TestElInflection(TestCase):
     def test_expand_suffix_forms_adj2(self) -> None:
         # https://el.wiktionary.org/wiki/αρσενικός
         raw = "αρσενικός, -ή/-ιά, -ό"
-        word = raw.split(",")[0]
         expected = ["αρσενικός", "αρσενική", "αρσενικιά", "αρσενικό"]
         self.mktest_expand_suffix_forms(raw, expected)
 
     def test_expand_suffix_forms_adj3(self) -> None:
         # https://el.wiktionary.org/wiki/σιδηρούς
         raw = "σιδηρούς, -ά, -ούν "
-        word = raw.split(",")[0]
         expected = ["σιδηρούς", "σιδηρά", "σιδηρούν"]
         self.mktest_expand_suffix_forms(raw, expected)
 
     def test_expand_suffix_forms_adj4(self) -> None:
         # https://el.wiktionary.org/wiki/εξαμηνιαίος
         raw = "εξαμηνιαίος, -α, -ο"
-        word = raw.split(",")[0]
         expected = ["εξαμηνιαίος", "εξαμηνιαία", "εξαμηνιαίο"]
         self.mktest_expand_suffix_forms(raw, expected)
 
     def test_expand_suffix_forms_participle(self) -> None:
         # https://el.wiktionary.org/wiki/αναμμένος
         raw = "αναμμένος, -η, -ο"
-        word = raw.split(",")[0]
         expected = ["αναμμένος", "αναμμένη", "αναμμένο"]
         self.mktest_expand_suffix_forms(raw, expected)

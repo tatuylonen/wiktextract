@@ -35,7 +35,7 @@ from .parse_utils import (
     remove_duplicate_forms,
 )
 from .section_titles import POS_HEADINGS, Heading, POSName
-from .table import parse_table, process_inflection_section
+from .table import parse_table, process_inflection_section, remove_article_forms
 from .tags_utils import convert_tags_in_sense
 from .text_utils import (
     ENDING_NUMBER_RE,
@@ -316,6 +316,7 @@ def process_pos(
             ):
                 parsed_forms = expand_suffix_forms(parsed_forms)
 
+            parsed_forms = remove_article_forms(parsed_forms, data.word)
             data.forms.extend(parsed_forms)
             found_head = True
 

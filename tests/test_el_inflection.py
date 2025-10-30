@@ -15,12 +15,9 @@ from unittest import TestCase
 from wikitextprocessor import Wtp
 
 from wiktextract.config import WiktionaryConfig
-from wiktextract.extractor.el.models import Form, WordEntry
+from wiktextract.extractor.el.models import WordEntry
 from wiktextract.extractor.el.page import parse_page
-from wiktextract.extractor.el.table import (
-    postprocess_table_forms,
-    process_inflection_section,
-)
+from wiktextract.extractor.el.table import process_inflection_section
 from wiktextract.wxr_context import WiktextractContext
 
 
