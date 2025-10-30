@@ -1,5 +1,5 @@
 import re
-from typing import Any
+from typing import Any, cast
 
 from mediawiki_langcodes import code_to_name, name_to_code
 
@@ -32,7 +32,7 @@ from .parse_utils import (
 )
 from .pos import process_pos
 from .pronunciation import process_pron
-from .section_titles import Heading
+from .section_titles import Heading, POSName
 
 # from .text_utils import ENDING_NUMBER_RE
 
@@ -233,7 +233,10 @@ def parse_page(
 
                 found_pos_sections.extend(pron_sublevels)
 
-            if heading_type is Heading.POS:
+            if heading_type == Heading.POS:
+                # SAFETY: Since the heading_type is POS, parse_lower_heading
+                # "pos_or_section" is guaranteed to be a pos: POSName
+                pos = cast(POSName, pos)
                 found_pos_sections.append(
                     (
                         pos,

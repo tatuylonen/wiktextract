@@ -1,4 +1,5 @@
 import re
+from typing import cast
 
 from wikitextprocessor import NodeKind, TemplateNode, WikiNode
 from wikitextprocessor.parser import LEVEL_KIND_FLAGS  # , print_tree
@@ -10,7 +11,7 @@ from wiktextract.page import clean_node
 # from wiktextract.wxr_logging import logger
 from .models import Sound, WordEntry
 from .parse_utils import POSReturns, find_sections
-from .section_titles import Heading
+from .section_titles import Heading, POSName
 from .tags_utils import convert_tags
 
 TEMPLATES_TO_IGNORE: set[str] = set(
@@ -153,7 +154,9 @@ def process_pron(
         section_num = num if num > section_num else section_num
 
         if heading_type == Heading.POS:
-            section_num = num if num > section_num else section_num
+            # SAFETY: Since the heading_type is POS, find_sections
+            # "pos_or_section" is guaranteed to be a pos: POSName
+            pos = cast(POSName, pos)
             pos_returns.append(
                 (
                     pos,
