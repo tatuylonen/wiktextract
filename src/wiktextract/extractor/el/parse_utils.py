@@ -2,7 +2,7 @@ import re
 import unicodedata
 from typing import Generator, TypeAlias
 
-from wikitextprocessor import WikiNode
+from wikitextprocessor import LevelNode, WikiNode
 
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
@@ -79,7 +79,7 @@ GREEK_LANGCODES = set(
 
 
 Title: TypeAlias = str
-
+SectionName: TypeAlias = str  # The keys of SUBSECTION_HEADINGS
 POSReturns: TypeAlias = list[
     tuple[POSName, Title, Tags, int, WikiNode, WordEntry]
 ]
@@ -87,47 +87,52 @@ POSReturns: TypeAlias = list[
 
 def find_sections(
     wxr: WiktextractContext,
-    nodes: list[WikiNode],
-) -> Generator[tuple[Heading, POSName, Title, Tags, int, WikiNode], None, None]:
+    nodes: list[WikiNode] | list[LevelNode],
+) -> Generator[
+    tuple[Heading, POSName | SectionName, Title, Tags, int, WikiNode],
+    None,
+    None,
+]:
     for node in nodes:
         heading_title = clean_node(wxr, None, node.largs[0]).lower().strip()
 
-        type, pos, heading_name, tags, num, ok = parse_lower_heading(
+        heading_type, pos_or_section, tags, num, ok = parse_lower_heading(
             wxr, heading_title
         )
 
         if num > 0:
             wxr.wtp.wiki_notice(
-                f"Sub-sub-section is numbered: {heading_name}, {num=}",
+                f"Sub-sub-section is numbered: {heading_title}, {num=}",
                 sortid="page/find_pos_sections_1",
             )
-        yield type, pos, heading_name, tags, num, node
+        yield heading_type, pos_or_section, heading_title, tags, num, node
 
 
 def parse_lower_heading(
     wxr: WiktextractContext, heading: str
-) -> tuple[Heading, str, str, Tags, int, bool]:
+) -> tuple[Heading, POSName | SectionName, Tags, int, bool]:
     """Determine if a heading is for a part of speech or other subsection.
     Returns heading type enum, POS name or string data, list of tags and a
-    success bool."""
+    success bool.
+    """
     if m := POS_HEADINGS_RE.match(heading):
-        pos, tags, num, ok = parse_pos_heading(wxr, heading, m)
+        heading_type, pos, tags, num, ok = parse_pos_heading(wxr, heading, m)
         if ok:
-            return Heading.POS, pos, heading, tags, num, True
+            return heading_type, pos, tags, num, True
 
     if m := SUBSECTIONS_RE.match(heading):
-        section, section_name, tags, num, ok = parse_section_heading(
+        heading_type, section, tags, num, ok = parse_section_heading(
             wxr, heading, m
         )
         if ok:
-            return section, section_name, heading, tags, num, True
+            return heading_type, section, tags, num, True
 
-    return Heading.Err, "", heading, [], -1, False
+    return Heading.Err, "", [], -1, False
 
 
 def parse_pos_heading(
     wxr: WiktextractContext, heading: str, m: re.Match[str]
-) -> tuple[POSName, Tags, int, bool]:
+) -> tuple[Heading, POSName, Tags, int, bool]:
     pos_str = m.group(1)
     rest = m.group(2)
     post_number = -1
@@ -137,12 +142,18 @@ def parse_pos_heading(
             post_number = normalized_int(rest.strip())
             # logger.info(f"POST_NUMBER {post_number}")
     pos_data = POS_HEADINGS[pos_str]
-    return pos_data["pos"], pos_data.get("tags", []), post_number, True
+    return (
+        Heading.POS,
+        pos_data["pos"],
+        pos_data.get("tags", []),
+        post_number,
+        True,
+    )
 
 
 def parse_section_heading(
     wxr: WiktextractContext, heading: str, m: re.Match[str]
-) -> tuple[Heading, str, Tags, int, bool]:
+) -> tuple[Heading, SectionName, Tags, int, bool]:
     subsection_str = m.group(1)
     rest = m.group(2)
     post_number = -1

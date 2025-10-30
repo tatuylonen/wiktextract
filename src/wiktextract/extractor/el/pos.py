@@ -33,7 +33,7 @@ from .parse_utils import (
     parse_lower_heading,
     remove_duplicate_forms,
 )
-from .section_titles import POS_HEADINGS, Heading
+from .section_titles import POS_HEADINGS, Heading, POSName
 from .table import parse_table, process_inflection_section
 from .tags_utils import convert_tags_in_sense
 from .text_utils import (
@@ -51,7 +51,7 @@ def process_pos(
     data: WordEntry,
     prev_data: WordEntry | None,  # data from the last entry in this language
     # the "noun" in "Noun 2"
-    pos: str,
+    pos: POSName,
     title: str,
     # the "2" in "Noun 2"
     pos_tags: list[str],
@@ -472,25 +472,23 @@ def process_pos(
     for sl in pos_sublevels:
         subtitle = clean_node(wxr, None, sl.largs).lower().strip()
 
-        type, pos, heading_name, tags, num, ok = parse_lower_heading(
-            wxr, subtitle
-        )
+        heading_type, *_ = parse_lower_heading(wxr, subtitle)
 
-        if type == Heading.Translations:
+        if heading_type == Heading.Translations:
             process_translations(wxr, data, sl)
-        elif type == Heading.Infl:
+        elif heading_type == Heading.Infl:
             source: FormSource = "inflection"
             if data.lang_code in ("el", "grc"):
                 source = "conjugation"
             process_inflection_section(wxr, data, sl, source=source)
-        elif type in (
+        elif heading_type in (
             Heading.Related,
             Heading.Synonyms,
             Heading.Antonyms,
             Heading.Transliterations,
         ):
-            process_linkage_section(wxr, data, sl, type)
-    #     if type not in (
+            process_linkage_section(wxr, data, sl, heading_type)
+    #     if heading_type not in (
     #         Heading.Translations,
     #         Heading.Ignored,
     #         Heading.Infl,
@@ -507,7 +505,7 @@ def process_pos(
     #         # text = clean_node(wxr, None, sl)
     #         logger.warning(
     #             f"""
-    # {wxr.wtp.title}: {type}, '{heading_name}', {ok=}
+    # {wxr.wtp.title}: {heading_type}, {ok=}
     # {expanded}
 
     # ###########################
