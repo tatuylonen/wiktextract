@@ -1,6 +1,6 @@
 import re
 import unicodedata
-from typing import Generator
+from typing import Generator, TypeAlias
 
 from wikitextprocessor import LevelNode, WikiNode
 
@@ -78,9 +78,11 @@ GREEK_LANGCODES = set(
 )
 
 
-Title = str
-SectionName = str  # The keys of SUBSECTION_HEADINGS
-POSReturns = list[tuple[POSName, Title, Tags, int, WikiNode, WordEntry]]
+Title: TypeAlias = str
+SectionName: TypeAlias = str  # The keys of SUBSECTION_HEADINGS
+POSReturns: TypeAlias = list[
+    tuple[POSName, Title, Tags, int, WikiNode, WordEntry]
+]
 
 
 def find_sections(
