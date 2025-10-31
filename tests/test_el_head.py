@@ -229,3 +229,59 @@ class TestElHeader(TestCase):
         ]
 
         self.mktest_form(received, expected)
+
+    def test_parsing_forms_no_articles(self) -> None:
+        # https://el.wiktionary.org/wiki/ρώθων
+        self.wxr.wtp.add_page("Πρότυπο:-el-", 10, "Νέα ελληνικά (el)")
+        self.wxr.wtp.add_page("Πρότυπο:ουσιαστικό", 10, "Ουσιαστικό")
+        self.wxr.wtp.add_page(
+            "Πρότυπο:α",
+            10,
+            """<span style="background:#ffffff; color:#002000;">''αρσενικό''</span>""",
+        )
+
+        raw = """=={{-el-}}==
+==={{ουσιαστικό|el}}===
+'''{{PAGENAME}}''' {{α}}'', συνήθως στον πληθυντικό:'' '''οι [[ρώθωνες]]'''
+* foo
+"""
+        word = "ρώθων"
+        page_datas = parse_page(self.wxr, word, raw)
+        received = page_datas[0]["forms"]
+
+        # Should not contain the article οι as a form
+        expected = [
+            {
+                "form": "ρώθων",
+                "raw_tags": ["αρσενικό", "συνήθως στον πληθυντικό:"],
+            },
+            {
+                "form": "ρώθωνες",
+                "raw_tags": ["αρσενικό", "συνήθως στον πληθυντικό:"],
+            },
+        ]
+
+        self.mktest_form(received, expected)
+
+    def test_parsing_forms_no_articles_when_word_is_article(self) -> None:
+        # https://el.wiktionary.org/wiki/τις
+        self.wxr.wtp.add_page("Πρότυπο:-el-", 10, "Νέα ελληνικά (el)")
+        self.wxr.wtp.add_page("Πρότυπο:αντωνυμία", 10, "Αντωνυμία")
+
+        raw = """=={{-el-}}==
+==={{αντωνυμία|el}}===
+'''{{PAGENAME}}''' (''αόριστη ή ερωτηματική αρχαία αντωνυμία'')
+* foo
+"""
+        word = "τις"
+        page_datas = parse_page(self.wxr, word, raw)
+        received = page_datas[0]["forms"]
+
+        expected = [
+            {
+                "form": "τις",
+                "raw_tags": ["αόριστη ή ερωτηματική αρχαία αντωνυμία"],
+            }
+        ]
+
+        self.mktest_form(received, expected)
