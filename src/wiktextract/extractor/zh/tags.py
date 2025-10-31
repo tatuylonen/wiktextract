@@ -84,6 +84,24 @@ VERB_TAGS: dict[str, str] = {
     "強變化": "strong",
     "動名詞": "supine",
     "命令式": "imperative",
+    # Template:ar-verb
+    "第I類": "form-i",
+    "第II類": "form-ii",
+    "第III類": "form-iii",
+    "第IV類": "form-iv",
+    "第V類": "form-v",
+    "第VI類": "form-vi",
+    "第VII類": "form-vii",
+    "第IX類": "form-ix",
+    "第X類": "form-x",
+    "第XII類": "form-xii",
+    "第XIII類": "form-xiii",
+    "第XIV類": "form-xiv",
+    "第XV類": "form-xv",
+    "第Iq類": "form-iq",
+    "第IIq類": "form-iiq",
+    "第IIIq類": "form-iiiq",
+    "第IVq類": "form-ivq",
 }
 
 # https://en.wikipedia.org/wiki/Japanese_grammar#Stem_forms
@@ -141,6 +159,11 @@ TENSE_TAGS = {
     "现在时不定式": ["present", "infinitive"],
     "完成时主动式": ["perfect", "active"],
     "目的动名词": "supine",
+    # Template:ar-verb
+    "非過去時": "non-past",
+    "動詞性名詞": "noun-from-verb",
+    "主動分詞": ["active", "participle"],
+    "被動分詞": ["passive", "participle"],
 }
 
 GRAMMATICAL_TAGS: dict[str, str] = {

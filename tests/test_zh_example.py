@@ -5,6 +5,7 @@ from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.zh.example import extract_example_list_item
 from wiktextract.extractor.zh.models import Sense
+from wiktextract.extractor.zh.page import parse_page
 from wiktextract.wxr_context import WiktextractContext
 
 
@@ -421,5 +422,45 @@ class TestExample(TestCase):
                     ],
                     "ref": "2012年，馬嘉蘭、臺灣文學中的性越界，編輯廖炳惠、孫康宜、王德威，《臺灣及其脈絡》第329頁",
                 },
+            ],
+        )
+
+    def test_quote_under_plain_text_ref_list(self):
+        self.wxr.wtp.add_page(
+            "Template:ante", 10, "''[[Appendix:Glossary#a.|a.]]'' '''1937''',"
+        )
+        self.wxr.wtp.add_page(
+            "Template:w", 10, "[[w:欧内斯特·卢瑟福|歐尼斯特·拉塞福]]"
+        )
+        self.wxr.wtp.add_page(
+            "Template:quote",
+            10,
+            """<div class="h-quotation"><span class="Latn e-quotation" lang="en">-{All science is either physics or '''stamp collecting'''.}-</span><dl><dd><span class="e-translation">所有的科學不是物理學，就是'''集郵'''。</span></dd></dl></div>[[Category:有引文的英語詞|STAMPCOLLECTING]]""",
+        )
+        data = parse_page(
+            self.wxr,
+            "stamp collecting",
+            """==英語==
+===名詞===
+# [[集郵]]
+#* {{ante|1937}}，引自物理學家{{w|欧内斯特·卢瑟福|歐尼斯特·拉塞福}}：
+#*: {{quote|en|All science is either physics or '''stamp collecting'''.|所有的科學不是物理學，就是'''集郵'''。}}""",
+        )
+        self.assertEqual(
+            data[0]["senses"],
+            [
+                {
+                    "categories": ["有引文的英語詞"],
+                    "examples": [
+                        {
+                            "text": "All science is either physics or stamp collecting.",
+                            "bold_text_offsets": [(33, 49)],
+                            "ref": "a. 1937,，引自物理學家歐尼斯特·拉塞福：",
+                            "translation": "所有的科學不是物理學，就是集郵。",
+                            "bold_translation_offsets": [(13, 15)],
+                        }
+                    ],
+                    "glosses": ["集郵"],
+                }
             ],
         )

@@ -228,25 +228,61 @@ def extract_l_template(
 def extract_alt_form_section(
     wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
 ) -> None:
-    for node in level_node.find_child_recursively(
-        NodeKind.LINK | NodeKind.TEMPLATE
-    ):
-        if node.kind == NodeKind.LINK:
-            word = clean_node(wxr, None, node)
-            if word != "":
-                word_entry.forms.append(Form(form=word, tags=["alternative"]))
-        elif isinstance(node, TemplateNode) and node.template_name == "l":
-            l_data = extract_l_template(wxr, node)
-            if l_data.word != "":
-                word_entry.forms.append(
-                    Form(
-                        form=l_data.word,
-                        tags=l_data.tags,
-                        raw_tags=l_data.raw_tags,
-                        roman=l_data.roman,
-                        literal_meaning=l_data.literal_meaning,
-                    )
-                )
+    forms = []
+    parentheses = 0
+    tag_nodes = []
+
+    def add_tag():
+        if len(forms) > 0 and len(tag_nodes) > 0:
+            raw_tag = clean_node(wxr, None, tag_nodes).strip("()（） ")
+            if raw_tag != "":
+                forms[-1].raw_tags.append(raw_tag)
+                translate_raw_tags(forms[-1])
+            tag_nodes.clear()
+
+    for list_node in level_node.find_child(NodeKind.LIST):
+        for list_item in list_node.find_child(NodeKind.LIST_ITEM):
+            for node in list_item.children:
+                if (
+                    isinstance(node, WikiNode)
+                    and node.kind == NodeKind.LINK
+                    and parentheses == 0
+                ):
+                    word = clean_node(wxr, None, node)
+                    if word != "":
+                        forms.append(Form(form=word, tags=["alternative"]))
+                        add_tag()
+                elif (
+                    isinstance(node, TemplateNode) and node.template_name == "l"
+                ):
+                    l_data = extract_l_template(wxr, node)
+                    if l_data.word != "":
+                        forms.append(
+                            Form(
+                                form=l_data.word,
+                                tags=l_data.tags + ["alternative"],
+                                raw_tags=l_data.raw_tags,
+                                roman=l_data.roman,
+                                literal_meaning=l_data.literal_meaning,
+                            )
+                        )
+                        add_tag()
+                elif (
+                    isinstance(node, str)
+                    and node.strip().startswith(("(", "（"))
+                    and node.strip().endswith((")", "）"))
+                ):
+                    tag_nodes.append(node)
+                elif isinstance(node, str) and ("(" in node or "（" in node):
+                    parentheses += 1
+                    tag_nodes.append(node)
+                elif isinstance(node, str) and (")" in node or "）" in node):
+                    parentheses -= 1
+                    tag_nodes.append(node)
+                elif parentheses > 0:
+                    tag_nodes.append(node)
+    add_tag()
+    word_entry.forms.extend(forms)
 
 
 def extract_desc_template(

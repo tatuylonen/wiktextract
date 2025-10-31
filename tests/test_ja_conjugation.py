@@ -5,6 +5,7 @@ from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.ja.conjugation import extract_conjugation_section
 from wiktextract.extractor.ja.models import WordEntry
+from wiktextract.extractor.ja.page import parse_page
 from wiktextract.wxr_context import WiktextractContext
 
 
@@ -88,4 +89,44 @@ class TestJaConjugation(TestCase):
         self.assertEqual(
             word_entry.categories,
             ["日本語", "日本語 動詞", "日本語 動詞 ザ下一"],
+        )
+
+    def test_alter_section_tag(self):
+        data = parse_page(
+            self.wxr,
+            "豆腐",
+            """==日本語==
+===異表記・別形===
+*[[豆富]] （[[好字]]による書き換え、非標準的）
+===名詞===
+#[[大豆]]""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {
+                    "form": "豆富",
+                    "tags": ["alternative"],
+                    "raw_tags": ["好字による書き換え、非標準的"],
+                }
+            ],
+        )
+        data = parse_page(
+            self.wxr,
+            "color",
+            """==英語==
+===異表記・別形===
+*[[colour]] (アメリカ合衆国以外)
+===名詞===
+# [[いろ|色]]""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {
+                    "form": "colour",
+                    "tags": ["alternative"],
+                    "raw_tags": ["アメリカ合衆国以外"],
+                }
+            ],
         )
