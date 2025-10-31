@@ -907,10 +907,10 @@ def recurse_glosses1(
                         Linkage(word=clean_node(wxr, None, v))
                     )
             return ""
-        if name == "συνων":
+        if name in ("συνων", "συνών"):
             example_is_synonym = True
             return ""
-        if name == "αντων":
+        if name in ("αντων", "αντών"):
             example_is_antonym = True
             return ""
         return None
