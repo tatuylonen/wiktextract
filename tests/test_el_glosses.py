@@ -28,7 +28,7 @@ class TestElGlosses(TestCase):
     def tearDown(self) -> None:
         self.wxr.wtp.close_db_conn()
 
-    def mktest_bl_linkage(self, raw: str, expected: dict[str, Any]) -> None:
+    def mktest_bl_linkage(self, raw: str, expected: list[Any]) -> None:
         """Test βλ-linkage parsing in glosses.
 
         Reference:
@@ -63,7 +63,7 @@ class TestElGlosses(TestCase):
         # dbg(data)
         dumped = data.model_dump(exclude_defaults=True)
         # print(f"{dumped=}")
-        senses = {"senses": dumped["senses"]}
+        senses = dumped["senses"]
         # print("-----------------------------------")
         # print(f"{senses=}")
         self.assertEqual(senses, expected)
@@ -75,41 +75,35 @@ class TestElGlosses(TestCase):
             # [[ήρωας]] του [[θέατρο σκιών|θεάτρου σκιών]]
             # (μεταφορικά) {{βλ|καραγκιόζης}}
         """
-        expected = {
-            "senses": [
-                {"glosses": ["ήρωας του θεάτρου σκιών"]},
-                {
-                    "related": [{"word": "καραγκιόζης"}],
-                    "raw_tags": ["μεταφορικά"],
-                    "tags": ["no-gloss", "figuratively"],
-                },
-            ],
-        }
+        expected = [
+            {"glosses": ["ήρωας του θεάτρου σκιών"]},
+            {
+                "related": [{"word": "καραγκιόζης"}],
+                "raw_tags": ["μεταφορικά"],
+                "tags": ["no-gloss", "figuratively"],
+            },
+        ]
         self.mktest_bl_linkage(raw, expected)
 
     def test_bl_linkage_list_with_single_colon_item(self) -> None:
         # https://el.wiktionary.org/wiki/αναμαλλιασμένος
         raw = """: {{βλ|αναμαλλιάζω}}"""
-        expected = {
-            "senses": [
-                {"related": [{"word": "αναμαλλιάζω"}], "tags": ["no-gloss"]}
-            ]
-        }
+        expected = [
+            {"related": [{"word": "αναμαλλιάζω"}], "tags": ["no-gloss"]}
+        ]
         self.mktest_bl_linkage(raw, expected)
 
     def test_bl_linkage_with_another_template(self) -> None:
         # https://el.wiktionary.org/wiki/επωτίδες
         raw = """* {{πτώσειςΟΑΚπλ|επωτίδα}} {{βλ|όρος=το αρχαίο|ἐπωτίδες}}"""
-        expected = {
-            "senses": [
-                {
-                    "glosses": [":Πρότυπο:πτώσειςΟΑΚπλ"],
-                    "tags": ["accusative", "nominative", "plural", "vocative"],
-                    "form_of": [{"word": "επωτίδα"}],
-                    "related": [{"word": "ἐπωτίδες"}],
-                }
-            ],
-        }
+        expected = [
+            {
+                "glosses": [":Πρότυπο:πτώσειςΟΑΚπλ"],
+                "tags": ["accusative", "nominative", "plural", "vocative"],
+                "form_of": [{"word": "επωτίδα"}],
+                "related": [{"word": "ἐπωτίδες"}],
+            }
+        ]
         self.mktest_bl_linkage(raw, expected)
 
     def test_bl_linkage_inside_synonym(self) -> None:
@@ -118,38 +112,29 @@ class TestElGlosses(TestCase):
             * [[ό,τι]] [[αφοδεύω|αφοδεύει]] κάποιος
             *: {{συνων}} {{βλ|περίττωμα}}
         """
-        expected = {
-            "senses": [
-                {
-                    "glosses": ["ό,τι αφοδεύει κάποιος"],
-                    "synonyms": [{"word": "περίττωμα"}],
-                }
-            ],
-        }
+        expected = [
+            {
+                "glosses": ["ό,τι αφοδεύει κάποιος"],
+                "synonyms": [{"word": "περίττωμα"}],
+            }
+        ]
         self.mktest_bl_linkage(raw, expected)
 
     def test_bl_linkage_no_gloss(self) -> None:
         # https://el.wiktionary.org/wiki/αγριόσκυλος
         raw = """* {{βλ|αγριόσκυλο}}"""
-        expected = {
-            "senses": [
-                {"tags": ["no-gloss"], "related": [{"word": "αγριόσκυλο"}]}
-            ]
-        }
+        expected = [{"tags": ["no-gloss"], "related": [{"word": "αγριόσκυλο"}]}]
         self.mktest_bl_linkage(raw, expected)
 
     def test_bl_linkage_no_gloss_with_bl_starting_linkage(self) -> None:
         # Handmade: to test prefix selection.
         raw = """* {{βλ|βλέπε}}"""
-        expected = {
-            "senses": [
-                {
-                    "related": [{"word": "βλέπε"}],
-                    "tags": ["no-gloss"],
-                }
-            ]
-        }
-
+        expected = [
+            {
+                "related": [{"word": "βλέπε"}],
+                "tags": ["no-gloss"],
+            }
+        ]
         self.mktest_bl_linkage(raw, expected)
 
     def test_bl_linkage_no_gloss_one_quote(self) -> None:
@@ -158,15 +143,13 @@ class TestElGlosses(TestCase):
             * {{βλ|αιματόχρους}}
             *: {{παράθεμα}} ''Στα πρώτα...''
         """
-        expected = {
-            "senses": [
-                {
-                    "examples": [{"text": ":Πρότυπο:παράθεμα Στα πρώτα..."}],
-                    "related": [{"word": "αιματόχρους"}],
-                    "tags": ["no-gloss"],
-                }
-            ],
-        }
+        expected = [
+            {
+                "examples": [{"text": ":Πρότυπο:παράθεμα Στα πρώτα..."}],
+                "related": [{"word": "αιματόχρους"}],
+                "tags": ["no-gloss"],
+            }
+        ]
         self.mktest_bl_linkage(raw, expected)
 
     def test_bl_linkage(self) -> None:
@@ -175,14 +158,12 @@ class TestElGlosses(TestCase):
             * οποιοδήποτε είδος ταινίας...
             *: {{βλ|και=2|μεζούρα}}
         """
-        expected = {
-            "senses": [
-                {
-                    "glosses": ["οποιοδήποτε είδος ταινίας..."],
-                    "related": [{"word": "μεζούρα"}],
-                }
-            ]
-        }
+        expected = [
+            {
+                "glosses": ["οποιοδήποτε είδος ταινίας..."],
+                "related": [{"word": "μεζούρα"}],
+            }
+        ]
         self.mktest_bl_linkage(raw, expected)
 
     def test_bl_linkage_multiple(self) -> None:
@@ -192,25 +173,23 @@ class TestElGlosses(TestCase):
             #: {{βλ|όρος=1|ισοβαρής γραμμή|ισοβαρής καμπύλη}}
             #: {{βλ|και=2|ισαλλοβαρής}}
         """
-        expected = {
-            "senses": [
-                {
-                    "glosses": ["που ενώνει σημεία με ίδια βαρομετρική πίεση"],
-                    "related": [
-                        {"word": "ισοβαρής γραμμή"},
-                        {"word": "ισοβαρής καμπύλη"},
-                        {"word": "ισαλλοβαρής"},
-                    ],
-                },
-            ],
-        }
+        expected = [
+            {
+                "glosses": ["που ενώνει σημεία με ίδια βαρομετρική πίεση"],
+                "related": [
+                    {"word": "ισοβαρής γραμμή"},
+                    {"word": "ισοβαρής καμπύλη"},
+                    {"word": "ισαλλοβαρής"},
+                ],
+            },
+        ]
         self.mktest_bl_linkage(raw, expected)
 
     def test_bl_linkage_inline_useless(self) -> None:
         # https://el.wiktionary.org/wiki/επί
         # Should delete the βλ template
         raw = """# δηλώνει [[αιτία]] {{βλ|όρος=τις εκφράσεις}}"""
-        expected = {"senses": [{"glosses": ["δηλώνει αιτία"]}]}
+        expected = [{"glosses": ["δηλώνει αιτία"]}]
         self.mktest_bl_linkage(raw, expected)
 
     def test_el_glosses1(self) -> None:
@@ -328,32 +307,28 @@ class TestElGlosses(TestCase):
             #: {{συνων}} [[ικανοποιώ]], [[χαροποιώ]]
             #: {{αντων}} [[δυσαρεστώ]], [[στενοχωρώ]]
         """
-        expected = {
-            "senses": [
-                {
-                    "glosses": [
-                        "δείχνω σε κάποιον ότι τον ευγνωμονώ για κάτι που μου έκανε ή που μου έδωσε"
-                    ],
-                    "examples": [
-                        {
-                            "text": ":Πρότυπο:πχ Μπορείς να τον ευχαριστήσεις για όλο τον κόπο που έκανε!"
-                        }
-                    ],
-                    "antonyms": [
-                        {"word": "δυσαρεστώ"},
-                        {"word": "πικραίνω"},
-                        {"word": "στενοχωρώ"},
-                    ],
-                },
-                {
-                    "glosses": [
-                        "κάνω κάποιον να νιώσει όμορφα, ικανοποιώ κάποιον"
-                    ],
-                    "synonyms": [{"word": "ικανοποιώ"}, {"word": "χαροποιώ"}],
-                    "antonyms": [{"word": "δυσαρεστώ"}, {"word": "στενοχωρώ"}],
-                },
-            ],
-        }
+        expected = [
+            {
+                "glosses": [
+                    "δείχνω σε κάποιον ότι τον ευγνωμονώ για κάτι που μου έκανε ή που μου έδωσε"
+                ],
+                "examples": [
+                    {
+                        "text": ":Πρότυπο:πχ Μπορείς να τον ευχαριστήσεις για όλο τον κόπο που έκανε!"
+                    }
+                ],
+                "antonyms": [
+                    {"word": "δυσαρεστώ"},
+                    {"word": "πικραίνω"},
+                    {"word": "στενοχωρώ"},
+                ],
+            },
+            {
+                "glosses": ["κάνω κάποιον να νιώσει όμορφα, ικανοποιώ κάποιον"],
+                "synonyms": [{"word": "ικανοποιώ"}, {"word": "χαροποιώ"}],
+                "antonyms": [{"word": "δυσαρεστώ"}, {"word": "στενοχωρώ"}],
+            },
+        ]
         self.mktest_bl_linkage(raw, expected)
 
     def test_synonyms_antonyms_alt_templates(self) -> None:
@@ -363,19 +338,17 @@ class TestElGlosses(TestCase):
             #: {{συνών}} [[αναβίβαση]], [[ανέβασμα]]
             #: {{αντών}} [[καταβιβασμός]], [[καταβίβαση]], [[κατέβασμα]]
         """
-        expected = {
-            "senses": [
-                {
-                    "glosses": ["ανέβασμα"],
-                    "synonyms": [{"word": "αναβίβαση"}, {"word": "ανέβασμα"}],
-                    "antonyms": [
-                        {"word": "καταβιβασμός"},
-                        {"word": "καταβίβαση"},
-                        {"word": "κατέβασμα"},
-                    ],
-                }
-            ]
-        }
+        expected = [
+            {
+                "glosses": ["ανέβασμα"],
+                "synonyms": [{"word": "αναβίβαση"}, {"word": "ανέβασμα"}],
+                "antonyms": [
+                    {"word": "καταβιβασμός"},
+                    {"word": "καταβίβαση"},
+                    {"word": "κατέβασμα"},
+                ],
+            }
+        ]
         self.mktest_bl_linkage(raw, expected)
 
     def test_el_subglosses1(self) -> None:
