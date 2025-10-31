@@ -39,8 +39,10 @@ def extract_example_list_item(
     ):
         # plain text in the nested list, not using any template
         # https://zh.wiktionary.org/wiki/%, the second example
-        extract_plain_text_example_list(wxr, list_item, example_data)
-    else:
+        extract_plain_text_example_list(
+            wxr, sense_data, list_item, word_entry, example_data
+        )
+    elif list_item.contain_node(NodeKind.TEMPLATE):
         # parse example templates
         for child in list_item.find_child(NodeKind.TEMPLATE):
             template_name = child.template_name
@@ -95,21 +97,28 @@ def extract_example_list_item(
             extract_example_list_item(
                 wxr, sense_data, next_list_item, word_entry, example_data
             )
+    elif not list_item.contain_node(NodeKind.LIST):
+        example_data.text = clean_node(wxr, None, list_item.children)
 
     if len(example_data.text) > 0 and parent_example is None:
         sense_data.examples.append(example_data)
 
 
 def extract_plain_text_example_list(
-    wxr: WiktextractContext, list_item: WikiNode, example_data: Example
+    wxr: WiktextractContext,
+    sense: Sense,
+    list_item: WikiNode,
+    word_entry: WordEntry,
+    example_data: Example,
 ) -> None:
     for index, nested_list in list_item.find_child(
         NodeKind.LIST, with_index=True
     ):
         example_data.ref = clean_node(wxr, None, list_item.children[:index])
-        example_data.text = clean_node(
-            wxr, None, nested_list.children[0].children
-        )
+        for child_list_item in nested_list.find_child(NodeKind.LIST_ITEM):
+            extract_example_list_item(
+                wxr, sense, child_list_item, word_entry, example_data
+            )
 
 
 def extract_quote_templates(

@@ -7,8 +7,8 @@ from wiktextract.extractor.zh.headword_line import (
     extract_headword_line_template,
     extract_tlb_template,
 )
-from wiktextract.extractor.zh.page import parse_page
 from wiktextract.extractor.zh.models import WordEntry
+from wiktextract.extractor.zh.page import parse_page
 from wiktextract.wxr_context import WiktextractContext
 
 
