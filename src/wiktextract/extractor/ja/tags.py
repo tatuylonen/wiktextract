@@ -305,6 +305,7 @@ TAGS = {
     "複数形": "plural",
     "指小辞無し": "no-diminutive",
     "指小辞": "diminutive",
+    "廃用": "obsolete",
 }
 
 TOPICS = {
