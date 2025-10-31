@@ -51,7 +51,7 @@ def extract_headword_line_template(
         for index, span_child in span_node.find_child(NodeKind.HTML, True):
             if span_child.tag == "span":
                 forms_start_index = index + 1
-                class_names = span_child.attrs.get("class", "")
+                class_names = span_child.attrs.get("class", "").split()
                 if "headword-tr" in class_names:
                     form = clean_node(wxr, word_entry, span_child)
                     if form != "":
@@ -66,6 +66,11 @@ def extract_headword_line_template(
                         else:
                             word_entry.raw_tags.append(gender)
                             translate_raw_tags(word_entry)
+                elif "ib-content" in class_names:
+                    raw_tag = clean_node(wxr, None, span_child)
+                    if raw_tag != "":
+                        word_entry.raw_tags.append(raw_tag)
+                        translate_raw_tags(word_entry)
                 else:
                     for strong_node in span_child.find_html(
                         "strong", attr_name="class", attr_value="headword"

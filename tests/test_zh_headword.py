@@ -195,3 +195,33 @@ class TestHeadword(TestCase):
 # gloss""",
         )
         self.assertEqual(data[0]["tags"], ["slang", "archaic"])
+
+    def test_ar_verb(self):
+        self.wxr.wtp.add_page(
+            "Template:ar-verb",
+            10,
+            """<span class="headword-line"><strong class="Arab headword" lang="ar">-{شَلَحَ}-</strong> (<span lang="ar-Latn" class="headword-tr tr Latn" dir="ltr">-{<!---->šalaḥa<!---->}-</span>) <span class="ib-content qualifier-content">[[Appendix:阿拉伯語動詞#第I類|第I類]]</span> (非過去時-{ <b class="Arab" lang="ar"><!-- -->[[يشلح#阿拉伯語|-{يَشْلَحُ}-]]</b> <span class="mention-gloss-paren annotation-paren">(</span><span lang="ar-Latn" class="tr Latn">-{<!---->yašlaḥu<!---->}-</span><span class="mention-gloss-paren annotation-paren">)</span>}-，動詞性名詞-{ <b class="Arab" lang="ar"><!-- -->[[شلح#阿拉伯語|-{شَلْح}-]]</b> <span class="mention-gloss-paren annotation-paren">(</span><span lang="ar-Latn" class="tr Latn">-{<!---->šalḥ<!---->}-</span><span class="mention-gloss-paren annotation-paren">)</span>}-)</span>[[Category:阿拉伯語詞元|شلح]]""",
+        )
+        data = parse_page(
+            self.wxr,
+            "شلح",
+            """==阿拉伯語==
+===動詞===
+{{ar-verb|I/a~a.vn:شَلْح}}
+# [[脫掉]]""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {"form": "شَلَحَ", "tags": ["canonical"]},
+                {"form": "šalaḥa", "tags": ["romanization"]},
+                {
+                    "form": "يَشْلَحُ",
+                    "tags": ["non-past"],
+                    "roman": "yašlaḥu",
+                },
+                {"form": "شَلْح", "roman": "šalḥ", "tags": ["noun-from-verb"]},
+            ],
+        )
+        self.assertEqual(data[0]["tags"], ["form-i"])
+        self.assertEqual(data[0]["categories"], ["阿拉伯語詞元"])
