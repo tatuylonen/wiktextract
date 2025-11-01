@@ -18,6 +18,9 @@ from wiktextract.topics import valid_topics
 #
 # Includes other verb related tags that may appear in headers etc.
 #
+# Some of the translations are from:
+# * Greek: An Essential Grammar (Routledge Essential Grammars)
+#
 # * Reference:
 #   https://el.wiktionary.org/wiki/Κατηγορία:Πρότυπα_κλίσης_ρημάτων_(νέα_ελληνικά)
 #
@@ -51,19 +54,25 @@ verb_table_tags_base: dict[str, list[str]] = {
     "(εσύ)": ["second-person", "singular"],
     "(εσείς)": ["second-person", "plural"],
     # Aspect groups
-    # These following three are from:
-    # Greek: An Essential Grammar (Routledge Essential Grammars)
-    "εξακολουθητικοί χρόνοι": ["imperfective"],
-    "συνοπτικοί χρόνοι": ["perfective"],
-    "συντελεσμένοι χρόνοι": ["perfect"],
-    "συντελεσμένοι χρόνοι (β΄ τύποι)": ["perfect", "type-b"],
+    # NOTE: redundant within most subcategories but needed to distinguish:
+    # υποτακτική/προστακτική.
+    # NOTE: The above distinction was deemed less important than being precise
+    # over the main, most used forms, and so, these groups are ignored.
+    # It also has the advantage of syncing standard and non-standard tables.
+    "εξακολουθητικοί χρόνοι": [],  # ["imperfective"],
+    "συνοπτικοί χρόνοι": [],  # ["perfective"],
+    "συντελεσμένοι χρόνοι": [],  # ["perfect"],
+    "συντελεσμένοι χρόνοι (β΄ τύποι)": [
+        # "perfect",
+        "type-b",
+    ],
     "συντελεσμένοι χρόνοι β΄ (μεταβατικοί)": [
-        "perfect",
+        # "perfect",
         "type-b",
         "transitive",
     ],
     "συντελεσμένοι χρόνοι β΄ (αμετάβατοι)": [
-        "perfect",
+        # "perfect",
         "type-b",
         "intransitive",
     ],
@@ -74,6 +83,19 @@ verb_table_tags_base: dict[str, list[str]] = {
     "παρατατικός": ["imperfect"],
     "αόρ": ["aorist"],
     "αόριστος": ["aorist"],
+    # Future
+    "εξακολουθητικός μέλλοντας": ["future", "imperfect"],
+    "εξ. μέλλ.": ["future", "imperfect"],
+    "συνοπτ. μέλλ.": ["future"],
+    "στιγμιαίος μέλλοντας": ["future"],  # στιγμιαίος = συνοπτικός
+    "στ.μέλλ": ["future"],
+    "συντελ. μέλλ.": ["future", "perfect"],
+    "συντελεσμένος μέλλοντας α'": ["future", "perfect", "type-a"],
+    # Perfect subtypes
+    "παρακείμενος": ["perfect"],
+    "παρακείμενος α'": ["perfect", "type-a"],
+    "υπερσυντέλικος": ["pluperfect"],
+    "υπερσυντέλικος α'": ["pluperfect", "type-a"],
     # Forms / moods
     "υποτακτική": ["subjunctive"],
     "προστακτική": ["imperative"],
@@ -84,18 +106,6 @@ verb_table_tags_base: dict[str, list[str]] = {
     "μτχ.π.ε": ["active", "participle"],
     "μετοχή (ενεστώτας)": ["participle", "present"],
     "απαρέμφατο": ["infinitive"],
-    # Future & perfect subtypes
-    "εξακολουθητικός μέλλοντας": ["future", "imperfect"],
-    "εξ. μέλλ.": ["future", "imperfect"],
-    "συνοπτ. μέλλ.": ["future"],
-    "στιγμιαίος μέλλοντας": ["future"],  # στιγμιαίος = συνοπτικός
-    "στ.μέλλ": ["future"],
-    "συντελ. μέλλ.": ["future", "perfect"],
-    "συντελεσμένος μέλλοντας α'": ["future", "perfect", "type-a"],
-    "παρακείμενος": ["present", "perfect"],
-    "παρακείμενος α'": ["present", "perfect", "type-a"],
-    "υπερσυντέλικος": ["past", "perfect"],
-    "υπερσυντέλικος α'": ["past", "perfect", "type-a"],
     # Voices
     "ενεργ.:": ["active"],
     "παθητική φωνή": ["passive"],
@@ -106,9 +116,9 @@ verb_table_tags_base: dict[str, list[str]] = {
     "συνήθως στην παθητική φωνή": [],
     "π.αόρ": ["passive", "aorist"],
     "χωρίς παθητική φωνή": [],  # passive-only is not valid (ADD IT?)
-    # Others
-    "προσωπικές εγκλίσεις": ["personal"],  # ["personal-moods"],
-    "απρόσωπες εγκλίσεις": ["impersonal"],  # ["impersonal-moods"],
+    # Others (τρώω table)
+    "προσωπικές εγκλίσεις": [],  # (noise) personal-moods
+    "απρόσωπες εγκλίσεις": ["impersonal"],  # impersonal-moods
     "μονολεκτικοί χρόνοι": [],  # ["simple-tenses"], # no   να/θα/έχει
     "περιφραστικοί χρόνοι": [],  # ["periphrastic"], # with να/θα/έχει
     "απαρέμφατο (αόριστος)": ["infinitive", "aorist"],
@@ -282,7 +292,7 @@ ancient_greek_tables_tags = {
     "ενεργητικός αόριστος α'": ["active", "aorist", "type-a"],
     "ενεργητικός αόριστος β'": ["active", "aorist", "type-b"],
     "ενεργητικός παρατατικός": ["active", "imperfect"],
-    "ενεργητικός υπερσυντέλικος": ["active", "past", "perfect"],
+    "ενεργητικός υπερσυντέλικος": ["active", "pluperfect"],
     "ενεργητικός μέλλοντας": ["active", "future"],
     "ονοματικοί τύποι": [],  # ?
     "2o δυϊκός": ["second-person", "dual"],
@@ -295,11 +305,7 @@ ancient_greek_tables_tags = {
     "μέσος / παθητικός ενεστώτας": ["mediopassive", "present"],
     "μέσος / παθητικός παρακείμενος": ["mediopassive", "perfect"],
     "μέσος / παθητικός παρατατικός": ["mediopassive", "imperfect"],
-    "μέσος / παθητικός υπερσυντέλικος": [
-        "mediopassive",
-        "past",
-        "perfect",
-    ],
+    "μέσος / παθητικός υπερσυντέλικος": ["mediopassive", "pluperfect"],
     "1η συζυγία - μεσοπαθητικός ενεστώτας": ["mediopassive", "present"],
     "2η συζυγία - ενεργητικός ενεστώτας": ["active", "present"],
     "παθητικός αόριστος α'": ["passive", "aorist", "type-a"],

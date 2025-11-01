@@ -643,17 +643,12 @@ class TestElInflection(TestCase):
             {"tags": ["inflection-template"]},
             {
                 "form": "πίνω",
-                "tags": ["present", "imperfective", "first-person", "singular"],
+                "tags": ["present", "first-person", "singular"],
                 "raw_tags": ["Ενεστώτας", "Εξακολουθητικοί χρόνοι", "α' ενικ."],
             },
             {
                 "form": "έπινα",
-                "tags": [
-                    "imperfective",
-                    "imperfect",
-                    "first-person",
-                    "singular",
-                ],
+                "tags": ["imperfect", "first-person", "singular"],
                 "raw_tags": [
                     "Εξακολουθητικοί χρόνοι",
                     "Παρατατικός",
@@ -662,23 +657,12 @@ class TestElInflection(TestCase):
             },
             {
                 "form": "θα πίνω",
-                "tags": [
-                    "future",
-                    "imperfect",
-                    "imperfective",
-                    "first-person",
-                    "singular",
-                ],
+                "tags": ["future", "imperfect", "first-person", "singular"],
                 "raw_tags": ["Εξ. Μέλλ.", "Εξακολουθητικοί χρόνοι", "α' ενικ."],
             },
             {
                 "form": "να πίνω",
-                "tags": [
-                    "imperfective",
-                    "subjunctive",
-                    "first-person",
-                    "singular",
-                ],
+                "tags": ["subjunctive", "first-person", "singular"],
                 "raw_tags": [
                     "Εξακολουθητικοί χρόνοι",
                     "Υποτακτική",
@@ -687,27 +671,17 @@ class TestElInflection(TestCase):
             },
             {
                 "form": "πίνοντας",
-                "tags": ["imperfective", "participle"],
+                "tags": ["participle"],
                 "raw_tags": ["Εξακολουθητικοί χρόνοι", "Μετοχή"],
             },
             {
                 "form": "πίνεις",
-                "tags": [
-                    "present",
-                    "imperfective",
-                    "second-person",
-                    "singular",
-                ],
+                "tags": ["present", "second-person", "singular"],
                 "raw_tags": ["Ενεστώτας", "Εξακολουθητικοί χρόνοι", "β' ενικ."],
             },
             {
                 "form": "έπινες",
-                "tags": [
-                    "imperfective",
-                    "imperfect",
-                    "second-person",
-                    "singular",
-                ],
+                "tags": ["imperfect", "second-person", "singular"],
                 "raw_tags": [
                     "Εξακολουθητικοί χρόνοι",
                     "Παρατατικός",
@@ -716,23 +690,12 @@ class TestElInflection(TestCase):
             },
             {
                 "form": "θα πίνεις",
-                "tags": [
-                    "future",
-                    "imperfect",
-                    "imperfective",
-                    "second-person",
-                    "singular",
-                ],
+                "tags": ["future", "imperfect", "second-person", "singular"],
                 "raw_tags": ["Εξ. Μέλλ.", "Εξακολουθητικοί χρόνοι", "β' ενικ."],
             },
             {
                 "form": "να πίνεις",
-                "tags": [
-                    "imperfective",
-                    "subjunctive",
-                    "second-person",
-                    "singular",
-                ],
+                "tags": ["subjunctive", "second-person", "singular"],
                 "raw_tags": [
                     "Εξακολουθητικοί χρόνοι",
                     "Υποτακτική",
@@ -741,16 +704,205 @@ class TestElInflection(TestCase):
             },
             {
                 "form": "πίνε",
-                "tags": [
-                    "imperfective",
-                    "imperative",
-                    "second-person",
-                    "singular",
-                ],
+                "tags": ["imperative", "second-person", "singular"],
                 "raw_tags": [
                     "Εξακολουθητικοί χρόνοι",
                     "Προστακτική",
                     "β' ενικ.",
+                ],
+            },
+        ]
+
+        self.mktest_form(raw, expected)
+
+    def test_el_conjugation_table_non_standard(self) -> None:
+        # https://el.wiktionary.org/wiki/τρώω
+        raw = """
+        {| style="background%3A%23F0F0F0"
+        |-
+        ! colspan="8" style="background%3A%23C0C0C0" | <center> προσωπικές εγκλίσεις </center>
+        |-
+        ! colspan="2" rowspan="2" style="background%3A%23C0C0C0" | πρόσωπο
+        ! colspan="3" style="background%3A%23C0C0C0" | ενικός
+        ! colspan="3" style="background%3A%23C0C0C0" | πληθυντικός
+        |-
+        ! style="background%3A%23C0C0C0%3Bwidth%3A12.5%25" | πρώτο
+        ! style="background%3A%23C0C0C0%3Bwidth%3A12.5%25" | δεύτερο
+        ! style="background%3A%23C0C0C0%3Bwidth%3A12.5%25" | τρίτο
+        ! style="background%3A%23C0C0C0%3Bwidth%3A12.5%25" | πρώτο
+        ! style="background%3A%23C0C0C0%3Bwidth%3A12.5%25" | δεύτερο
+        ! style="background%3A%23C0C0C0%3Bwidth%3A12.5%25" | τρίτο
+        |-
+        ! style="background%3A%23c0cfe4" colspan="2" | οριστική
+        ! style="background%3A%23c0cfe4" | εγώ
+        ! style="background%3A%23c0cfe4" | εσύ
+        ! style="background%3A%23c0cfe4" | αυτός
+        ! style="background%3A%23c0cfe4" | εμείς
+        ! style="background%3A%23c0cfe4" | εσείς
+        ! style="background%3A%23c0cfe4" | αυτοί
+        |-
+        ! rowspan="3" style="background%3A%23c0cfe4" | μονολεκτικοί<br>χρόνοι
+        ! style="height%3A3em%3Bbackground%3A%23c0cfe4" | ενεστώτας
+        | τρώω
+        | τρως
+        | τρώει
+        | τρώμε
+        | τρώτε
+        | τρώνε
+        |-
+        ! style="height%3A3em%3Bbackground%3A%23c0cfe4" | παρατατικός
+        | έτρωγα
+        | έτρωγες
+        | έτρωγε
+        | τρώγαμε
+        | τρώγατε
+        | έτρωγαν / τρώγανε
+        |}
+        """
+
+        expected = [
+            {"tags": ["inflection-template"]},
+            {
+                "form": "τρώω",
+                "tags": ["first-person", "singular", "present"],
+                "raw_tags": [
+                    "εγώ",
+                    "ενεστώτας",
+                    "ενικός",
+                    "μονολεκτικοί\nχρόνοι",
+                    "προσωπικές εγκλίσεις",
+                ],
+            },
+            {
+                "form": "τρως",
+                "tags": ["present", "singular", "second-person"],
+                "raw_tags": [
+                    "ενεστώτας",
+                    "ενικός",
+                    "εσύ",
+                    "μονολεκτικοί\nχρόνοι",
+                    "προσωπικές εγκλίσεις",
+                ],
+            },
+            {
+                "form": "τρώει",
+                "tags": ["third-person", "singular", "present"],
+                "raw_tags": [
+                    "αυτός",
+                    "ενεστώτας",
+                    "ενικός",
+                    "μονολεκτικοί\nχρόνοι",
+                    "προσωπικές εγκλίσεις",
+                ],
+            },
+            {
+                "form": "τρώμε",
+                "tags": ["first-person", "plural", "present"],
+                "raw_tags": [
+                    "εμείς",
+                    "ενεστώτας",
+                    "μονολεκτικοί\nχρόνοι",
+                    "πληθυντικός",
+                    "προσωπικές εγκλίσεις",
+                ],
+            },
+            {
+                "form": "τρώτε",
+                "tags": ["present", "second-person", "plural"],
+                "raw_tags": [
+                    "ενεστώτας",
+                    "εσείς",
+                    "μονολεκτικοί\nχρόνοι",
+                    "πληθυντικός",
+                    "προσωπικές εγκλίσεις",
+                ],
+            },
+            {
+                "form": "τρώνε",
+                "tags": ["third-person", "plural", "present"],
+                "raw_tags": [
+                    "αυτοί",
+                    "ενεστώτας",
+                    "μονολεκτικοί\nχρόνοι",
+                    "πληθυντικός",
+                    "προσωπικές εγκλίσεις",
+                ],
+            },
+            {
+                "form": "έτρωγα",
+                "tags": ["first-person", "singular", "imperfect"],
+                "raw_tags": [
+                    "εγώ",
+                    "ενικός",
+                    "μονολεκτικοί\nχρόνοι",
+                    "παρατατικός",
+                    "προσωπικές εγκλίσεις",
+                ],
+            },
+            {
+                "form": "έτρωγες",
+                "tags": ["singular", "second-person", "imperfect"],
+                "raw_tags": [
+                    "ενικός",
+                    "εσύ",
+                    "μονολεκτικοί\nχρόνοι",
+                    "παρατατικός",
+                    "προσωπικές εγκλίσεις",
+                ],
+            },
+            {
+                "form": "έτρωγε",
+                "tags": ["third-person", "singular", "imperfect"],
+                "raw_tags": [
+                    "αυτός",
+                    "ενικός",
+                    "μονολεκτικοί\nχρόνοι",
+                    "παρατατικός",
+                    "προσωπικές εγκλίσεις",
+                ],
+            },
+            {
+                "form": "τρώγαμε",
+                "tags": ["first-person", "plural", "imperfect"],
+                "raw_tags": [
+                    "εμείς",
+                    "μονολεκτικοί\nχρόνοι",
+                    "παρατατικός",
+                    "πληθυντικός",
+                    "προσωπικές εγκλίσεις",
+                ],
+            },
+            {
+                "form": "τρώγατε",
+                "tags": ["second-person", "plural", "imperfect"],
+                "raw_tags": [
+                    "εσείς",
+                    "μονολεκτικοί\nχρόνοι",
+                    "παρατατικός",
+                    "πληθυντικός",
+                    "προσωπικές εγκλίσεις",
+                ],
+            },
+            {
+                "form": "έτρωγαν",
+                "tags": ["third-person", "plural", "imperfect"],
+                "raw_tags": [
+                    "αυτοί",
+                    "μονολεκτικοί\nχρόνοι",
+                    "παρατατικός",
+                    "πληθυντικός",
+                    "προσωπικές εγκλίσεις",
+                ],
+            },
+            {
+                "form": "τρώγανε",
+                "tags": ["third-person", "plural", "imperfect"],
+                "raw_tags": [
+                    "αυτοί",
+                    "μονολεκτικοί\nχρόνοι",
+                    "παρατατικός",
+                    "πληθυντικός",
+                    "προσωπικές εγκλίσεις",
                 ],
             },
         ]
@@ -786,17 +938,17 @@ class TestElInflection(TestCase):
             {"tags": ["inflection-template"]},
             {
                 "form": "πίνουν",
-                "tags": ["present", "imperfective", "third-person", "plural"],
+                "tags": ["present", "third-person", "plural"],
                 "raw_tags": ["Ενεστώτας", "Εξακολουθητικοί χρόνοι", "γ' πληθ."],
             },
             {
                 "form": "πίνουνε",
-                "tags": ["present", "imperfective", "third-person", "plural"],
+                "tags": ["present", "third-person", "plural"],
                 "raw_tags": ["Ενεστώτας", "Εξακολουθητικοί χρόνοι", "γ' πληθ."],
             },
             {
                 "form": "έπιναν",
-                "tags": ["imperfective", "imperfect", "third-person", "plural"],
+                "tags": ["imperfect", "third-person", "plural"],
                 "raw_tags": [
                     "Εξακολουθητικοί χρόνοι",
                     "Παρατατικός",
@@ -805,7 +957,7 @@ class TestElInflection(TestCase):
             },
             {
                 "form": "πίναν",
-                "tags": ["imperfective", "imperfect", "third-person", "plural"],
+                "tags": ["imperfect", "third-person", "plural"],
                 "raw_tags": [
                     "Εξακολουθητικοί χρόνοι",
                     "Παρατατικός",
@@ -814,7 +966,7 @@ class TestElInflection(TestCase):
             },
             {
                 "form": "πίνανε",
-                "tags": ["imperfective", "imperfect", "third-person", "plural"],
+                "tags": ["imperfect", "third-person", "plural"],
                 "raw_tags": [
                     "Εξακολουθητικοί χρόνοι",
                     "Παρατατικός",
@@ -823,34 +975,17 @@ class TestElInflection(TestCase):
             },
             {
                 "form": "θα πίνουν",
-                "tags": [
-                    "future",
-                    "imperfect",
-                    "imperfective",
-                    "third-person",
-                    "plural",
-                ],
+                "tags": ["future", "imperfect", "third-person", "plural"],
                 "raw_tags": ["Εξ. Μέλλ.", "Εξακολουθητικοί χρόνοι", "γ' πληθ."],
             },
             {
                 "form": "θα πίνουνε",
-                "tags": [
-                    "future",
-                    "imperfect",
-                    "imperfective",
-                    "third-person",
-                    "plural",
-                ],
+                "tags": ["future", "imperfect", "third-person", "plural"],
                 "raw_tags": ["Εξ. Μέλλ.", "Εξακολουθητικοί χρόνοι", "γ' πληθ."],
             },
             {
                 "form": "να πίνουν",
-                "tags": [
-                    "imperfective",
-                    "subjunctive",
-                    "third-person",
-                    "plural",
-                ],
+                "tags": ["subjunctive", "third-person", "plural"],
                 "raw_tags": [
                     "Εξακολουθητικοί χρόνοι",
                     "Υποτακτική",
@@ -859,12 +994,7 @@ class TestElInflection(TestCase):
             },
             {
                 "form": "να πίνουνε",
-                "tags": [
-                    "imperfective",
-                    "subjunctive",
-                    "third-person",
-                    "plural",
-                ],
+                "tags": ["subjunctive", "third-person", "plural"],
                 "raw_tags": [
                     "Εξακολουθητικοί χρόνοι",
                     "Υποτακτική",
