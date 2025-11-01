@@ -67,7 +67,13 @@ ARTICLES: set[str] = {
     "τις",
     "τα",
 }
-EXTENDED_ARTICLES = ARTICLES | {"ο/η", "του/της", "τον/τη", "τους/τις"}
+EXTENDED_ARTICLES = ARTICLES | {
+    "ο/η",
+    "του/της",
+    "τον/τη",
+    "τον/την",
+    "τους/τις",
+}
 """Articles to trim from inflection tables / headwords."""
 UNEXPECTED_ARTICLES = {
     "αι",

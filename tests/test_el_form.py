@@ -50,7 +50,7 @@ class TestElInflection(TestCase):
         expected = ["ζητούσαν", "ζητούσανε", "ζήταγαν", "ζητάγανε"]
         self.mktest_postprocess_table_forms(raw, expected)
 
-    def test_postprocess_forms_declension(self) -> None:
+    def test_postprocess_forms_remove_articles1(self) -> None:
         # https://el.wiktionary.org/wiki/λίθος
         # raw = "του/της λίθου" < This is never parsed by us
         # expected = ["λίθου"]  <
@@ -60,6 +60,11 @@ class TestElInflection(TestCase):
         τον/τη
         τους/τις
         """.strip()
+        self.mktest_postprocess_table_forms(raw, [])
+
+    def test_postprocess_forms_remove_articles2(self) -> None:
+        # https://el.wiktionary.org/wiki/ανθυποπλοίαρχος
+        raw = "τον/την"
         self.mktest_postprocess_table_forms(raw, [])
 
     def test_postprocess_forms_suffix(self) -> None:
