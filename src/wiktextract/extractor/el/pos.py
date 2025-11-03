@@ -630,7 +630,10 @@ def extract_form_of_templates(
 
     # Nouns and adjectives
     inflection_t_names = ("πτώσεις", "πτώση")
-    if any(name in t_name for name in inflection_t_names):
+    if (
+        any(name in t_name for name in inflection_t_names)
+        and 1 in t_node.template_parameters
+    ):
         return extract_form_of_templates_ptosi(wxr, parent_sense, t_node)
 
     # Nouns
@@ -689,6 +692,23 @@ def extract_form_of_templates_basic(
         )
 
 
+PTOSI_GENDER_INFLECTION_MAP = {
+    "θηλ": "feminine",
+    "αρσ": "masculine",
+    "ουδ": "neuter",
+}
+PTOSI_NUMBER_INFLECTION_MAP = {
+    "εν": "singular",
+    "πλ": "plural",
+}
+PTOSI_CASE_INFLECTION_MAP = {
+    "Ο": "nominative",
+    "Α": "accusative",
+    "Γ": "genitive",
+    "Κ": "vocative",
+}
+
+
 def extract_form_of_templates_ptosi(
     wxr: WiktextractContext,
     parent_sense: Sense | WordEntry,
@@ -700,7 +720,12 @@ def extract_form_of_templates_ptosi(
     * [gender του] πτώση-πτώσεις templates
 
     Notes:
-    * πτώση has exactly one case, πτώσεις as at least two cases
+    * The πτώση-πτώσεις templates contains:
+      * Case(s): 1 for πτώση, >1 for πτώσεις - in uppercase characters.
+      * Number:  "εν" (singular) or "πλ" (plural)
+      Examples:
+      * {{πτώσηΑεν|κόρφος}}    > accusative           | singular
+      * {{πτώσειςΟΚπλ|κόρφος}} > nominative, vocative | plural
     """
     t_name = t_node.template_name
     inflection_t_names = ("πτώσεις", "πτώση")
@@ -711,13 +736,8 @@ def extract_form_of_templates_ptosi(
         # Cf. {{ουδ του-πτώσειςΟΑΚεν|καλός|grc}}
         gender, inflection = t_name.split("-")
         code = gender[:3]
-        GENDER_INFLECTION_MAP = {
-            "θηλ": "feminine",
-            "αρσ": "masculine",
-            "ουδ": "neuter",
-        }
         try:
-            gender_tag = GENDER_INFLECTION_MAP[code]
+            gender_tag = PTOSI_GENDER_INFLECTION_MAP[code]
         except KeyError:
             # Bad template name.
             return
@@ -731,44 +751,21 @@ def extract_form_of_templates_ptosi(
             inflection = inflection[len(prefix) :]
             break
 
-    PTOSI_INFLECTION_MAP = {
-        "Ο": "nominative",
-        "Α": "accusative",
-        "Γ": "genitive",
-        "Κ": "vocative",
-    }
-
-    # The πτώση-πτώσεις templates contains:
-    # * Case(s) (1 for πτώση, >1 for πτώσεις) in uppercase characters.
-    # * Number in either "εν" (singular) or "πλ" (plural)
-    #
-    # Examples:
-    # * {{πτώσηΑεν|κόρφος}}    > accusative           | singular
-    # * {{πτώσειςΟΚπλ|κόρφος}} > nominative, vocative | plural
     try:
         lowercase = "".join(ch for ch in inflection if ch.islower())
-        number = {"εν": "singular", "πλ": "plural"}[lowercase]
+        number = PTOSI_NUMBER_INFLECTION_MAP[lowercase]
         uppercase = [ch for ch in inflection if not ch.islower()]
-        cases = [PTOSI_INFLECTION_MAP[ch] for ch in uppercase]
+        cases = [PTOSI_CASE_INFLECTION_MAP[ch] for ch in uppercase]
     except KeyError:
         # Bad template name.
         return
 
-    tags.extend([elt for elt in cases + [number]])
+    tags.extend([*cases, number])
+    tags.sort()  # For the tests, but also good practice
 
-    t_args = t_node.template_parameters
-
-    if 1 not in t_args:
-        wxr.wtp.wiki_notice(
-            f"Form-of template does not have lemma data: {t_name}, {t_args=}",
-            sortid="pos/620/20250416",
-        )
-        return
-
-    lemma = clean_node(wxr, None, t_args[1])
+    lemma = clean_node(wxr, None, t_node.template_parameters[1])
     form_of = FormOf(word=lemma)
     parent_sense.form_of.append(form_of)
-    tags.sort()  # For the tests, but also good practice
     parent_sense.tags.extend(tags)
 
 
