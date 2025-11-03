@@ -496,20 +496,21 @@ def process_pos(
 
         heading_type, *_ = parse_lower_heading(wxr, subtitle)
 
-        if heading_type == Heading.Translations:
-            process_translations(wxr, data, sl)
-        elif heading_type == Heading.Infl:
-            source: FormSource = "inflection"
-            if data.lang_code in ("el", "grc"):
-                source = "conjugation"
-            process_inflection_section(wxr, data, sl, source=source)
-        elif heading_type in (
-            Heading.Related,
-            Heading.Synonyms,
-            Heading.Antonyms,
-            Heading.Transliterations,
-        ):
-            process_linkage_section(wxr, data, sl, heading_type)
+        match heading_type:
+            case Heading.Translations:
+                process_translations(wxr, data, sl)
+            case Heading.Infl:
+                source: FormSource = "inflection"
+                if data.lang_code in ("el", "grc"):
+                    source = "conjugation"
+                process_inflection_section(wxr, data, sl, source=source)
+            case (
+                Heading.Related
+                | Heading.Synonyms
+                | Heading.Antonyms
+                | Heading.Transliterations
+            ):
+                process_linkage_section(wxr, data, sl, heading_type)
     #     if heading_type not in (
     #         Heading.Translations,
     #         Heading.Ignored,

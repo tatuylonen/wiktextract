@@ -1,4 +1,5 @@
 import re
+from typing import Literal
 
 from wikitextprocessor import TemplateNode, WikiNode
 from wikitextprocessor.parser import NodeKind
@@ -16,12 +17,20 @@ LINK_RE = re.compile(r"(__/?[IL]__)")
 
 EXAMPLES_RE = re.compile(r"(?sm)__E__(.*?)__/E__")
 
+LinkageType = Literal[
+    Heading.Related,
+    Heading.Synonyms,
+    Heading.Antonyms,
+    Heading.Transliterations,
+]
+"""Headings variants supported by process_linkage_section."""
+
 
 def process_linkage_section(
     wxr: WiktextractContext,
     data: WordEntry,
     rnode: WikiNode,
-    linkage_type: Heading,
+    linkage_type: LinkageType,
 ) -> None:
     transliteration_template_data: list[Form] = []
 
@@ -180,6 +189,7 @@ def process_linkage_section(
         case Heading.Antonyms:
             target_field = data.antonyms
         case Heading.Derived:
+            # unreachable
             target_field = data.derived
         case Heading.Transliterations:
             # For transliteration sections we add these to forms instead.
@@ -199,6 +209,7 @@ def process_linkage_section(
                 data.forms.extend(transliteration_template_data)
             return
         case _:
+            # unreachable
             wxr.wtp.error(
                 "process_linkage_section() given unhandled Heading: "
                 f"{linkage_type=}",

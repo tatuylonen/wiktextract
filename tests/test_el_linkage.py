@@ -3,7 +3,10 @@ from unittest import TestCase
 from wikitextprocessor import WikiNode, Wtp
 
 from wiktextract.config import WiktionaryConfig
-from wiktextract.extractor.el.linkages import process_linkage_section
+from wiktextract.extractor.el.linkages import (
+    LinkageType,
+    process_linkage_section,
+)
 from wiktextract.extractor.el.models import WordEntry
 from wiktextract.extractor.el.parse_utils import Heading
 from wiktextract.wxr_context import WiktextractContext
@@ -23,13 +26,18 @@ class TestElLinkage(TestCase):
     def tearDown(self) -> None:
         self.wxr.wtp.close_db_conn()
 
-    def parse_related(self, word: str, text: str, type=Heading.Related) -> dict:
+    def parse_related(
+        self,
+        word: str,
+        text: str,
+        linkage_type: LinkageType = Heading.Related,
+    ) -> dict:
         data = WordEntry(word=word)
         self.wxr.wtp.start_page(word)
         parsed = self.wxr.wtp.parse(text)
         related_section = parsed.children[0]
         assert isinstance(related_section, WikiNode)
-        process_linkage_section(self.wxr, data, related_section, type)
+        process_linkage_section(self.wxr, data, related_section, linkage_type)
 
         return data.model_dump(exclude_defaults=True)
 
@@ -103,7 +111,7 @@ class TestElLinkage(TestCase):
 * ''λατινικό αλφάβητο [[Yañalif]]'': [[yanalatinfoo]]
 * ''λατινικό αλφάβητο'': [[latinfoo]]
 """,
-            type=Heading.Transliterations,
+            linkage_type=Heading.Transliterations,
         )
         # print(f"{data=}")
         self.assertEqual(
@@ -131,13 +139,14 @@ class TestElLinkage(TestCase):
         )
 
     def test_transliterations_esperanto(self) -> None:
+        # https://el.wiktionary.org/wiki/acidaĵo
         data = self.parse_related(
             "foo",
             """===={{άλλη γραφή}}====
 * {{eo-h|acidajho}}
 * {{eo-x|acidajxo}}
 """,
-            type=Heading.Transliterations,
+            linkage_type=Heading.Transliterations,
         )
         # print(f"{data=}")
         self.assertEqual(
