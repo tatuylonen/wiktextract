@@ -188,9 +188,6 @@ def process_linkage_section(
             target_field = data.synonyms
         case Heading.Antonyms:
             target_field = data.antonyms
-        case Heading.Derived:
-            # unreachable
-            target_field = data.derived
         case Heading.Transliterations:
             # For transliteration sections we add these to forms instead.
             transliteration_forms = [
