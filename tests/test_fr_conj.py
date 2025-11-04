@@ -834,3 +834,146 @@ class TestNotes(TestCase):
                 },
             ],
         )
+
+    def test_pt_conj(self):
+        self.wxr.wtp.add_page(
+            "Conjugaison:portugais/tombar", 116, "{{pt-conj/1|tomb}}"
+        )
+        self.wxr.wtp.add_page(
+            "Modèle:pt-conj/1",
+            10,
+            """<div class="NavHead" align=left>&nbsp; &nbsp; Conjugaison des [[:Catégorie:Verbes_en_portugais|verbes en portugais]] ''portugais/tombar''</div>
+
+{|
+|-
+! style="height:3em" colspan=8 | '''<bdi lang="pt" xml:lang="pt" class="lang-pt">[[tombar#pt|tombar]]</bdi>''', [[Conjugaison:portugais/Premier groupe|1<sup style="font-size:83.33%;line-height:1">er</sup> groupe]]
+|-
+! style="height:3em" colspan=8 bgcolor=#ffeeaa | '''Formas impessoais'''<br/><small>(formes impersonnelles)</small>
+|-
+! colspan=2 bgcolor=#ffeebb | '''Infinitivo''' <small>(infinitif)</small>
+| colspan=6 | <bdi lang="pt" xml:lang="pt" class="lang-pt">[[tombar#pt|tombar]]</bdi>
+|-
+! colspan=2 bgcolor=#ffeebb | '''Gerúndio''' <small>(gérondif)</small>
+| colspan=6 | <bdi lang="pt" xml:lang="pt" class="lang-pt">[[tombando#pt|tombando]]</bdi>
+|-
+! colspan=8 bgcolor=#ccccff style="height:3em" | '''Formas pessoais'''<br/><small>(formes personnelles)</small>
+|- bgcolor=#d5d5ff
+! colspan=2 | '''número''' <small>(nombre)</small>
+! colspan=3 | '''singular''' <small>(singulier)</small>
+! colspan=3 | '''plural''' <small>(pluriel)</small>
+|- bgcolor=#d5d5ff
+! colspan=2 | '''pessoa''' <small>(personne)</small>
+! width=12.5% | '''primeira''' <small>(première)</small>
+! width=12.5% | '''segunda''' <small>(deuxième)</small>
+! width=12.5% | '''terceira''' <small>(troisième)</small>
+! width=12.5% | '''primeira''' <small>(première)</small>
+! width=12.5% | '''segunda''' <small>(deuxième)</small>
+! width=12.5% | '''terceira''' <small>(troisième)</small>
+|- bgcolor=#d5d5ff
+! colspan=2 |
+! '''eu'''
+! '''tu'''
+! '''ele''' / '''ela''' /  '''você¹²'''
+! '''nós'''
+! '''vós'''
+! '''eles'''/ '''elas'''/ '''vocês²'''
+|- bgcolor=#ccddff
+! rowspan=7 | '''Modo Indicativo''' <small>(indicatif)</small>
+|-
+! style="height:3em" bgcolor=#ccddff | '''Pretérito perfeito'''<br/><small>(Prétérit parfait)</small>
+| <bdi lang="pt" xml:lang="pt" class="lang-pt">[[tombei#pt|tombei]]</bdi>
+| <bdi lang="pt" xml:lang="pt" class="lang-pt">[[tombaste#pt|tombaste]]</bdi>
+| <bdi lang="pt" xml:lang="pt" class="lang-pt">[[tombou#pt|tombou]]</bdi>
+| <bdi lang="pt" xml:lang="pt" class="lang-pt">[[tombámos#pt|tombámos]]</bdi> / <br> <small>brésilien:</small> <bdi lang="pt" xml:lang="pt" class="lang-pt">[[tombamos#pt|tombamos]]</bdi>
+|}""",
+        )
+        self.wxr.wtp.add_page(
+            "Modèle:conj",
+            10,
+            """[[Conjugaison:portugais/Premier groupe|1<sup style="font-size:83.33%;line-height:1">er</sup> groupe]] ([[Conjugaison:portugais/tombar|<span style="font-size: 100%; font-weight: bold; font-variant: small-caps">voir la conjugaison</span>]])[[Catégorie:Verbes du premier groupe en portugais]]""",
+        )
+        data = parse_page(
+            self.wxr,
+            "tombar",
+            """== {{langue|pt}} ==
+=== {{S|verbe|pt}} ===
+'''tombar''' {{conj|grp=1|pt}}
+# [[tomber|Tomber]], [[s'abattre]].""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {
+                    "form": "tombando",
+                    "raw_tags": ["tombar, 1ᵉʳ groupe"],
+                    "source": "Conjugaison:portugais/tombar",
+                    "tags": ["impersonal", "gerund"],
+                },
+                {
+                    "form": "tombei",
+                    "raw_tags": ["eu"],
+                    "source": "Conjugaison:portugais/tombar",
+                    "tags": [
+                        "personal",
+                        "singular",
+                        "first-person",
+                        "indicative",
+                        "perfect",
+                        "preterite",
+                    ],
+                },
+                {
+                    "form": "tombaste",
+                    "raw_tags": ["tu"],
+                    "source": "Conjugaison:portugais/tombar",
+                    "tags": [
+                        "personal",
+                        "singular",
+                        "second-person",
+                        "indicative",
+                        "perfect",
+                        "preterite",
+                    ],
+                },
+                {
+                    "form": "tombou",
+                    "raw_tags": ["ele / ela / você¹²"],
+                    "source": "Conjugaison:portugais/tombar",
+                    "tags": [
+                        "personal",
+                        "singular",
+                        "third-person",
+                        "indicative",
+                        "perfect",
+                        "preterite",
+                    ],
+                },
+                {
+                    "form": "tombámos",
+                    "raw_tags": ["nós"],
+                    "source": "Conjugaison:portugais/tombar",
+                    "tags": [
+                        "personal",
+                        "plural",
+                        "first-person",
+                        "indicative",
+                        "perfect",
+                        "preterite",
+                    ],
+                },
+                {
+                    "form": "tombamos",
+                    "raw_tags": ["nós"],
+                    "source": "Conjugaison:portugais/tombar",
+                    "tags": [
+                        "personal",
+                        "plural",
+                        "first-person",
+                        "indicative",
+                        "perfect",
+                        "preterite",
+                        "Brazilian",
+                    ],
+                },
+            ],
+        )

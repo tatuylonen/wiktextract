@@ -1,5 +1,6 @@
 import re
 from dataclasses import dataclass
+from itertools import chain
 
 from wikitextprocessor.parser import (
     LEVEL_KIND_FLAGS,
@@ -45,6 +46,8 @@ def extract_conjugation(
             extract_ko_conj_template(wxr, entry, conj_template, conj_page_title)
         elif conj_template.template_name == "de-conj":
             extract_de_conj_template(wxr, entry, conj_template, conj_page_title)
+        elif conj_template.template_name.startswith("pt-conj/"):
+            extract_pt_conj_template(wxr, entry, conj_template, conj_page_title)
         elif (
             "-conj" in conj_template.template_name
             # https://fr.wiktionary.org/wiki/Catégorie:Modèles_de_conjugaison_en_italien
@@ -842,3 +845,110 @@ def extract_de_adj_declension_template(
 
         for link in level_node.find_child(NodeKind.LINK):
             clean_node(wxr, word_entry, link)
+
+
+def extract_pt_conj_template(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    t_node: TemplateNode,
+    page_title: str,
+):
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for table in expanded_node.find_child(NodeKind.TABLE):
+        col_headers = []
+        row_headers = []
+        for row_index, row in enumerate(table.find_child(NodeKind.TABLE_ROW)):
+            row_has_data = row.contain_node(NodeKind.TABLE_CELL)
+            col_index = 0
+            for header in chain(col_headers, row_headers):
+                if (
+                    row_index > header.row_index
+                    and row_index < header.row_index + header.rowspan
+                    and header.col_index <= col_index
+                ):
+                    col_index += header.colspan
+            for cell_node in row.find_child(
+                NodeKind.TABLE_HEADER_CELL | NodeKind.TABLE_CELL
+            ):
+                cell_text = clean_node(wxr, None, cell_node)
+                colspan = int(cell_node.attrs.get("colspan", "1"))
+                rowspan = int(cell_node.attrs.get("rowspan", "1"))
+                if cell_node.kind == NodeKind.TABLE_HEADER_CELL:
+                    if row_has_data:
+                        row_headers.append(
+                            TableHeader(
+                                cell_text,
+                                col_index,
+                                colspan,
+                                row_index,
+                                rowspan,
+                            )
+                        )
+                    else:
+                        if (
+                            cell_text
+                            == "Formas pessoais\n(formes personnelles)"
+                        ):
+                            col_headers.clear()
+                            row_headers.clear()
+                        col_headers.append(
+                            TableHeader(
+                                cell_text,
+                                col_index,
+                                colspan,
+                                row_index,
+                                rowspan,
+                            )
+                        )
+                elif cell_node.contain_node(NodeKind.LIST):
+                    continue  # skip end notes
+                else:
+                    for line in cell_text.splitlines():
+                        form_str = line.strip("/ \n")
+                        raw_tag = ""
+                        if ":" in form_str:
+                            colon_index = form_str.index(":")
+                            raw_tag = form_str[:colon_index].strip()
+                            form_str = form_str[colon_index + 1 :].strip()
+                        if form_str not in ["", "-", wxr.wtp.title]:
+                            form = Form(form=form_str, source=page_title)
+                            for col_header in col_headers:
+                                if (
+                                    (
+                                        (
+                                            col_header.col_index
+                                            < col_index + colspan
+                                            and col_index
+                                            < col_header.col_index
+                                            + col_header.colspan
+                                        )
+                                        or (
+                                            # "Modo Subjuntivo" header
+                                            col_header.col_index == 0
+                                            and col_header.row_index
+                                            < row_index + rowspan
+                                            and col_header.row_index
+                                            + col_header.rowspan
+                                            > row_index
+                                        )
+                                    )
+                                    and col_header.text != ""
+                                    and col_header.text not in form.raw_tags
+                                ):
+                                    form.raw_tags.append(col_header.text)
+                            for row_header in row_headers:
+                                if (
+                                    row_header.row_index < row_index + rowspan
+                                    and row_index
+                                    < row_header.row_index + row_header.rowspan
+                                    and row_header.text != ""
+                                    and row_header.text not in form.raw_tags
+                                ):
+                                    form.raw_tags.append(row_header.text)
+                            if raw_tag != "":
+                                form.raw_tags.append(raw_tag)
+                            translate_raw_tags(form)
+                            word_entry.forms.append(form)
+                col_index += colspan
