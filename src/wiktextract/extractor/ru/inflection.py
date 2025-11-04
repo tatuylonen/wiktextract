@@ -82,7 +82,6 @@ def parse_html_forms_table(
                 has_rowspan_td.append(
                     TableHeader("", col_index, colspan, row_index, rowspan)
                 )
-            td_text = clean_node(wxr, None, td_tag)
             raw_tags = []
             use_col_tags = []
             for col_header in col_headers[::-1]:
@@ -105,6 +104,19 @@ def parse_html_forms_table(
                     and row_header.text not in raw_tags
                 ):
                     raw_tags.append(row_header.text)
+            form_nodes = []
+            for td_child in td_tag.children:
+                if (
+                    isinstance(td_child, HTMLNode)
+                    and td_child.tag == "span"
+                    and "cursor:help" in td_child.attrs.get("style", "")
+                ):
+                    sup_tag = td_child.attrs.get("title", "")
+                    if sup_tag != "":
+                        raw_tags.append(sup_tag)
+                else:
+                    form_nodes.append(td_child)
+            td_text = clean_node(wxr, None, form_nodes)
             for line in td_text.splitlines():
                 for word in line.split(","):
                     word = word.strip()

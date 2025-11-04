@@ -405,6 +405,8 @@ OTHER_TAGS = {
     "wao (люди)": ["third-person", "plural"],
     "wao (вещи)": ["third-person", "plural", "non-human"],
     "хабитуалис": "habitual",
+    # шаблона:спряжения
+    "эта форма слова или ударение является нестандартной для данной схемы словоизменения": "nonstandard",
 }
 
 CASE_TAGS = {
