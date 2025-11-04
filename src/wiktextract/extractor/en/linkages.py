@@ -6,12 +6,29 @@ import re
 import unicodedata
 from typing import Optional, Sequence
 
-from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
+from wikitextprocessor import (
+    LevelNode,
+    NodeKind,
+    TemplateNode,
+    WikiNode,
+)
+from wikitextprocessor.core import TemplateArgs
+from wikitextprocessor.parser import (
+    HTMLNode,
+    is_list,
+    is_list_item,
+)
 
-from ...datautils import data_append, data_extend, split_at_comma_semi
-from ...page import clean_node
+from ...datautils import (
+    data_append,
+    data_extend,
+    ns_title_prefix_tuple,
+    split_at_comma_semi,
+)
+from ...page import clean_node, is_panel_template
 from ...tags import linkage_beginning_tags, valid_tags
 from ...wxr_context import WiktextractContext
+from ..ruby import extract_ruby, parse_ruby  # noqa: F401
 from .form_descriptions import (
     classify_desc,
     decode_tags,
@@ -24,7 +41,8 @@ from .form_descriptions import (
     parse_head_final_tags,
     parse_sense_qualifier,
 )
-from .type_utils import FormData, LinkageData, WordData
+from .section_titles import TRANSLATIONS_TITLE
+from .type_utils import FormData, LinkageData, SenseData, WordData
 
 # Linkage will be ignored if it matches this regexp before splitting
 linkage_pre_split_ignore_re = re.compile(
@@ -1126,12 +1144,15 @@ ZH_DIAL_TAGS = {
 
 
 def extract_zh_dial_template(
-    wxr: WiktextractContext, word_entry: WordData, t_node: TemplateNode, sense: str
+    wxr: WiktextractContext,
+    word_entry: WordData,
+    t_node: TemplateNode,
+    sense: str,
 ):
     # https://en.wiktionary.org/wiki/Template:zh-dial
     from .pronunciation import split_zh_pron_raw_tag
 
-    linkage_list = []
+    linkage_list: list[LinkageData] = []
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(t_node), expand_all=True
     )
@@ -1176,7 +1197,7 @@ def extract_zh_dial_template(
                         span_tag.attrs.get("lang", "") == "zh"
                         and span_text != wxr.wtp.title
                     ):
-                        l_data = {"word": span_text}
+                        l_data: LinkageData = {"word": span_text}
                         if sense != "":
                             l_data["sense"] = sense
                         if len(lang_tags) > 0:
@@ -1212,3 +1233,302 @@ def extract_zh_dial_template(
             elif "raw_tags" in l_data:
                 del l_data["raw_tags"]
         data_extend(word_entry, "synonyms", linkage_list)
+
+
+def parse_linkage(
+    wxr: WiktextractContext,
+    data: WordData,
+    field: str,
+    linkagenode: LevelNode,
+    word: str,
+    sense_datas: list[SenseData],
+    is_reconstruction: bool,
+) -> None:
+    assert isinstance(data, dict)
+    assert isinstance(field, str)
+    assert isinstance(linkagenode, LevelNode)
+    # print("field", field)
+    # print("data", data)
+    # print("children:")
+    # print(linkagenode.children)
+    if not wxr.config.capture_linkages:
+        return
+    have_panel_template = False
+    toplevel_text = []
+    block_header_sense = None
+
+    def parse_linkage_item(
+        contents: list[str | WikiNode],
+        field: str,
+        sense: Optional[str] = None,
+    ) -> str | None:
+        assert isinstance(contents, (list, tuple))
+        assert isinstance(field, str)
+        assert sense is None or isinstance(sense, str)
+
+        # print("PARSE_LINKAGE_ITEM: {} ({}): {}"
+        #    .format(field, sense, contents))
+
+        parts: list[str] = []
+        ruby: list[tuple[str, str]] = []
+        urls: list[str] = []
+        # data about link text; this is used to skip splitting on
+        # linkage text items that contain stuff like commas; for
+        # example "Hunde, die bellen, beißen nicht" in article
+        # beißen is split into "Hunde", "die bellen" etc.
+        # We take that link text and use it, eventually,
+        # in split_at_comma_semi to skip splitting on those
+        # commas.
+        links_that_should_not_be_split: list[str] = []
+
+        def item_recurse(contents: list[str | WikiNode], italic=False) -> None:
+            assert isinstance(contents, (list, tuple))
+            nonlocal sense
+            nonlocal ruby
+            nonlocal parts
+            # print("ITEM_RECURSE:", contents)
+            for node in contents:
+                if isinstance(node, str):
+                    parts.append(node)
+                    continue
+                kind = node.kind
+                # print("ITEM_RECURSE KIND:", kind,
+                #        node.sarg if node.sarg else node.largs)
+                if is_list_item(node):
+                    if parts:
+                        # print(f"{parts=}")
+                        sense1: Optional[str]
+                        sense1 = clean_node(wxr, None, parts)
+                        if sense1.endswith(":"):
+                            sense1 = sense1[:-1].strip()
+                        if sense1.startswith("(") and sense1.endswith(")"):
+                            sense1 = sense1[1:-1].strip()
+                        if sense1.lower() == TRANSLATIONS_TITLE:
+                            sense1 = None
+                        # print("linkage item_recurse LIST sense1:", sense1)
+                        parse_linkage_recurse(
+                            node.children, field, sense=sense1 or sense
+                        )
+                        parts = []
+                    else:
+                        parse_linkage_recurse(node.children, field, sense)
+                elif kind in (
+                    NodeKind.TABLE,
+                    NodeKind.TABLE_ROW,
+                    NodeKind.TABLE_CELL,
+                ):
+                    parse_linkage_recurse(node.children, field, sense)
+                elif kind in (
+                    NodeKind.TABLE_HEADER_CELL,
+                    NodeKind.TABLE_CAPTION,
+                ):
+                    continue
+                elif kind == NodeKind.HTML:
+                    classes = (node.attrs.get("class") or "").split()
+                    if node.sarg in ("gallery", "ref", "cite", "caption"):
+                        continue
+                    elif node.sarg == "ruby":
+                        rb = parse_ruby(wxr, node)
+                        if rb:
+                            ruby.append(rb)
+                            parts.append(rb[0])
+                        continue
+                    elif node.sarg == "math":
+                        parts.append(clean_node(wxr, None, node))
+                        continue
+                    elif "interProject" in classes:
+                        continue  # These do not seem to be displayed
+                    if "NavFrame" in classes:
+                        parse_linkage_recurse(node.children, field, sense)
+                    else:
+                        item_recurse(node.children, italic=italic)
+                elif kind == NodeKind.ITALIC:
+                    item_recurse(node.children, italic=True)
+                elif kind == NodeKind.LINK:
+                    ignore = False
+                    if isinstance(node.largs[0][0], str):
+                        v1 = node.largs[0][0].strip().lower()
+                        if v1.startswith(
+                            ns_title_prefix_tuple(wxr, "Category", True)
+                            + ns_title_prefix_tuple(wxr, "File", True)
+                        ):
+                            ignore = True
+                        if not ignore:
+                            v = node.largs[-1]
+                            if (
+                                len(node.largs) == 1
+                                and len(v) > 0
+                                and isinstance(v[0], str)
+                                and v[0][0] == ":"
+                            ):
+                                v = [v[0][1:]] + list(v[1:])  # type:ignore
+                            if isinstance(v[0], str) and not v[0].isalnum():
+                                links_that_should_not_be_split.append(
+                                    "".join(v[0])
+                                )  # type: ignore
+                            item_recurse(v, italic=italic)
+                elif kind == NodeKind.URL:
+                    if len(node.largs) < 2 and node.largs:
+                        # Naked url captured
+                        urls.extend(node.largs[-1])  # type:ignore[arg-type]
+                        continue
+                    if len(node.largs) == 2:
+                        # Url from link with text
+                        urls.append(node.largs[0][-1])  # type:ignore[arg-type]
+                    # print(f"{node.largs=!r}")
+                    # print("linkage recurse URL {}".format(node))
+                    item_recurse(node.largs[-1], italic=italic)
+                elif kind in (NodeKind.PREFORMATTED, NodeKind.BOLD):
+                    item_recurse(node.children, italic=italic)
+                else:
+                    wxr.wtp.debug(
+                        "linkage item_recurse unhandled {}: {}".format(
+                            node.kind, node
+                        ),
+                        sortid="page/2073",
+                    )
+
+        # print("LINKAGE CONTENTS BEFORE ITEM_RECURSE: {!r}"
+        #       .format(contents))
+
+        item_recurse(contents)
+        item = clean_node(wxr, None, parts)
+        # print("LINKAGE ITEM CONTENTS:", parts)
+        # print("CLEANED ITEM: {!r}".format(item))
+        # print(f"URLS {urls=!r}")
+
+        return parse_linkage_item_text(
+            wxr,
+            word,
+            data,
+            field,
+            item,
+            sense,
+            ruby,
+            sense_datas,
+            is_reconstruction,
+            urls or None,
+            links_that_should_not_be_split or None,
+        )
+
+    def parse_linkage_recurse(
+        contents: list[WikiNode | str],
+        field: str,
+        sense: str | None,
+    ) -> None:
+        assert isinstance(contents, (list, tuple))
+        assert sense is None or isinstance(sense, str)
+        nonlocal block_header_sense
+        # print("PARSE_LINKAGE_RECURSE: {}: {}".format(sense, contents))
+        for node in contents:
+            if isinstance(node, str):
+                # Ignore top-level text, generally comments before the
+                # linkages list.  However, if no linkages are found, then
+                # use this for linkages (not all words use bullet points
+                # for linkages).
+                toplevel_text.append(node)
+                continue
+            assert isinstance(node, WikiNode)
+            kind = node.kind
+            # print("PARSE_LINKAGE_RECURSE CHILD", kind)
+            if is_list(node):
+                parse_linkage_recurse(node.children, field, sense)
+            elif is_list_item(node):
+                v = parse_linkage_item(node.children, field, sense)
+                if v:
+                    # parse_linkage_item() can return a value that should
+                    # be used as the sense for the follow-on linkages,
+                    # which are typically provided in a table (see 滿)
+                    block_header_sense = v
+            elif kind in (NodeKind.TABLE, NodeKind.TABLE_ROW):
+                parse_linkage_recurse(node.children, field, sense)
+            elif kind == NodeKind.TABLE_CELL:
+                parse_linkage_item(node.children, field, sense)
+            elif kind in (
+                NodeKind.TABLE_CAPTION,
+                NodeKind.TABLE_HEADER_CELL,
+                NodeKind.PREFORMATTED,
+                NodeKind.BOLD,
+            ):
+                continue
+            elif isinstance(node, HTMLNode):
+                # Recurse to process inside the HTML for most tags
+                if node.sarg in ("gallery", "ref", "cite", "caption"):
+                    continue
+                classes = (
+                    (node.attrs.get("class") or "").replace("+", " ").split()
+                )
+                if "qualifier-content" in classes:
+                    sense1 = clean_node(wxr, None, node.children)
+                    if sense1.endswith(":"):
+                        sense1 = sense1[:-1].strip()
+                    if sense and sense1:
+                        wxr.wtp.debug(
+                            "linkage qualifier-content on multiple "
+                            "levels: {!r} and {!r}".format(sense, sense1),
+                            sortid="page/2170",
+                        )
+                    parse_linkage_recurse(node.children, field, sense1)
+                elif "list-switcher-header" in classes:
+                    block_header_sense = clean_node(wxr, None, node.children)
+                    if block_header_sense.endswith(":"):
+                        block_header_sense = block_header_sense[:-1].strip()
+                elif any(x in classes for x in ("NavFrame", "term-list")):
+                    # NavFrame uses previously assigned block_header_sense
+                    # (from a "(sense):" item) and clears it afterwards
+                    # print(f"{sense=}, {block_header_sense=}")
+                    parse_linkage_recurse(
+                        node.children, field, sense or block_header_sense
+                    )
+                    block_header_sense = None
+                else:
+                    parse_linkage_recurse(node.children, field, sense)
+            elif isinstance(node, LevelNode):
+                # Just recurse to any possible subsections
+                parse_linkage_recurse(node.children, field, sense)
+            elif kind in (NodeKind.BOLD, NodeKind.ITALIC):
+                # Skip these on top level; at least sometimes bold is
+                # used for indicating a subtitle
+                continue
+            elif kind == NodeKind.LINK:
+                # Recurse into the last argument
+                # Apparently ":/" is used as a link to "/", so strip
+                # initial value
+                parse_linkage_recurse(node.largs[-1], field, sense)
+            else:
+                wxr.wtp.debug(
+                    "parse_linkage_recurse unhandled {}: {}".format(kind, node),
+                    sortid="page/2196",
+                )
+
+    def linkage_template_fn1(name: str, ht: TemplateArgs) -> Optional[str]:
+        nonlocal have_panel_template
+        if is_panel_template(wxr, name):
+            have_panel_template = True
+            return ""
+        return None
+
+    # Main body of parse_linkage()
+    l_nodes: list[str | WikiNode] = []
+    l_sense = ""
+    for node in linkagenode.children:
+        if isinstance(node, TemplateNode) and node.template_name == "zh-dial":
+            extract_zh_dial_template(wxr, data, node, l_sense)
+        elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
+            for list_item in node.find_child(NodeKind.LIST_ITEM):
+                for t_node in list_item.find_child(NodeKind.TEMPLATE):
+                    if t_node.template_name in ["s", "sense"]:
+                        l_sense = clean_node(wxr, None, t_node).strip("(): ")
+            l_nodes.append(node)
+        else:
+            l_nodes.append(node)
+    text = wxr.wtp.node_to_wikitext(l_nodes)
+    parsed = wxr.wtp.parse(
+        text, expand_all=True, template_fn=linkage_template_fn1
+    )
+    parse_linkage_recurse(parsed.children, field, None)
+    if not data.get(field) and not have_panel_template:
+        text = "".join(toplevel_text).strip()
+        if "\n" not in text and "," in text and text.count(",") > 3:
+            if not text.startswith("See "):
+                parse_linkage_item([text], field, None)
