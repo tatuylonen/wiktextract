@@ -1,4 +1,5 @@
 import re
+from typing import Literal
 
 from wikitextprocessor import TemplateNode, WikiNode
 from wikitextprocessor.parser import NodeKind
@@ -16,12 +17,20 @@ LINK_RE = re.compile(r"(__/?[IL]__)")
 
 EXAMPLES_RE = re.compile(r"(?sm)__E__(.*?)__/E__")
 
+LinkageType = Literal[
+    Heading.Related,
+    Heading.Synonyms,
+    Heading.Antonyms,
+    Heading.Transliterations,
+]
+"""Headings variants supported by process_linkage_section."""
+
 
 def process_linkage_section(
     wxr: WiktextractContext,
     data: WordEntry,
     rnode: WikiNode,
-    linkage_type: Heading,
+    linkage_type: LinkageType,
 ) -> None:
     transliteration_template_data: list[Form] = []
 
@@ -36,14 +45,16 @@ def process_linkage_section(
             # print("REACHED")
             # print(f"{node.largs=}")
             ret: list[Node] = []
-            # print(f"{ret=}")
             comma = False
-            for arg in node.largs[1:]:
+            for k, v in node.template_parameters.items():
+                if not isinstance(k, int):
+                    continue
                 if comma:
                     ret.append(", ")
-                ret.append("__L__")
-                ret.append(wxr.wtp.node_to_text(arg))
-                ret.append("__/L__")
+                if isinstance(v, list):
+                    ret.extend(["__L__", *v, "__/L__"])
+                else:
+                    ret.extend(["__L__", v, "__/L__"])
                 comma = True
             return ret
         if node.template_name in ("eo-h", "eo-x"):
@@ -179,8 +190,6 @@ def process_linkage_section(
             target_field = data.synonyms
         case Heading.Antonyms:
             target_field = data.antonyms
-        case Heading.Derived:
-            target_field = data.derived
         case Heading.Transliterations:
             # For transliteration sections we add these to forms instead.
             transliteration_forms = [
@@ -199,6 +208,7 @@ def process_linkage_section(
                 data.forms.extend(transliteration_template_data)
             return
         case _:
+            # unreachable
             wxr.wtp.error(
                 "process_linkage_section() given unhandled Heading: "
                 f"{linkage_type=}",
