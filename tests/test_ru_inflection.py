@@ -379,3 +379,47 @@ class TestLinkage(TestCase):
                 {"form": "nadado", "tags": ["participle"]},
             ],
         )
+
+    def test_sup_title_tag(self):
+        self.wxr.wtp.add_page(
+            "Шаблон:гл ru 5c'^-т-ся",
+            10,
+            """<table class="morfotable ru" cellpadding="2" rules="all">
+<tr>
+<th colspan="3">[[настоящее время|Настоящее время]]</th>
+</tr><tr>
+<th></th>
+<th align="center">[[единственное число|ед. число]]</th>
+<th align="center">[[множественное число|мн. число]]</th>
+</tr>
+<tr>
+<th> [[третье лицо|3-е лицо]]</th>
+<td>хо́чется<span style="color:#c0a300; cursor:help; font-size:x-small;" title="эта форма слова или ударение является нестандартной для данной схемы словоизменения"><sup>△</sup></span></td>
+<td align="center">—</td>
+</tr>
+</table>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "хотеться",
+            """= {{-ru-}} =
+=== Морфологические и синтаксические свойства ===
+{{гл ru 5c'^-т-ся}}
+=== Семантические свойства ===
+==== Значение ====
+# [[иметь]]""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {
+                    "form": "хо́чется",
+                    "tags": [
+                        "present",
+                        "singular",
+                        "third-person",
+                        "nonstandard",
+                    ],
+                }
+            ],
+        )

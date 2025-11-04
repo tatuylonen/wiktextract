@@ -190,7 +190,7 @@ def extract_morphological_section(
                     Hyphenation(parts=h_str.split("-"))
                 )
 
-        if child_node.template_name.startswith("прил ru"):
+        if child_node.template_name.startswith(("прил ru", "прил-ru")):
             extract_прил_ru_comparative_forms(
                 wxr, page_data[-1], expanded_template
             )
