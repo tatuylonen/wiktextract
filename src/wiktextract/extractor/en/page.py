@@ -11,6 +11,7 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Iterable,
+    Literal,
     Optional,
     Set,
     Union,
@@ -86,6 +87,7 @@ from .translations import parse_translation_item_text
 from .type_utils import (
     AttestationData,
     ExampleData,
+    FormData,
     LinkageData,
     ReferenceData,
     SenseData,
@@ -813,9 +815,9 @@ def parse_sense_linkage(
 
                     lang_code = clean_node(wxr, None, ht.get(1, ""))
                     for t_data in search_thesaurus(
-                        wxr.thesaurus_db_conn, w, lang_code, pos, field
+                        wxr.thesaurus_db_conn, w, lang_code, pos, field  # type: ignore
                     ):
-                        l_data = {
+                        l_data: LinkageData = {
                             "word": t_data.term,
                             "source": "Thesaurus:" + w,
                         }
@@ -1071,7 +1073,7 @@ def parse_language(
         ):
             data_append(sense_data, "tags", "no-gloss")
 
-        sense_data["__temp_sense_sorting_ordinal"] = sorting_ordinal
+        sense_data["__temp_sense_sorting_ordinal"] = sorting_ordinal  # type: ignore
         sense_datas.append(sense_data)
         sense_data = {}
         return True
@@ -1555,11 +1557,11 @@ def parse_language(
             data_append(sense_data, "tags", "no-gloss")
             push_sense()
 
-        sense_datas.sort(key=lambda x: x.get("__temp_sense_sorting_ordinal", 0))
+        sense_datas.sort(key=lambda x: x.get("__temp_sense_sorting_ordinal", 0))  # type: ignore
 
         for sd in sense_datas:
             if "__temp_sense_sorting_ordinal" in sd:
-                del sd["__temp_sense_sorting_ordinal"]
+                del sd["__temp_sense_sorting_ordinal"]  # type: ignore
 
     def process_gloss_header(
         header_nodes: list[Union[WikiNode, str]],
@@ -2015,7 +2017,7 @@ def parse_language(
             if name == "w":
                 if ht.get(2) == "Wp":
                     return ""
-            for k, v in ht.items():
+            for v in ht.values():
                 v = v.strip()
                 if v and "<" not in v:
                     gloss_template_args.add(v)
@@ -2696,7 +2698,7 @@ def parse_language(
     ) -> None:
         assert isinstance(data, dict)
         assert isinstance(field, str)
-        assert isinstance(linkagenode, WikiNode)
+        assert isinstance(linkagenode, LevelNode)
         # print("field", field)
         # print("data", data)
         # print("children:")
@@ -2711,7 +2713,7 @@ def parse_language(
             contents: list[Union[str, WikiNode]],
             field: str,
             sense: Optional[str] = None,
-        ):
+        ) -> str | None:
             assert isinstance(contents, (list, tuple))
             assert isinstance(field, str)
             assert sense is None or isinstance(sense, str)
@@ -2966,7 +2968,7 @@ def parse_language(
             return None
 
         # Main body of parse_linkage()
-        l_nodes = []
+        l_nodes: list[str | WikiNode] = []
         l_sense = ""
         for node in linkagenode.children:
             if (
@@ -3522,7 +3524,7 @@ def parse_language(
                 elif node.template_name == "zh-forms":
                     extract_zh_forms_template(wxr, node, select_data())
 
-            if node.kind not in LEVEL_KINDS:
+            if not isinstance(node, LevelNode):
                 # XXX handle e.g. wikipedia links at the top of a language
                 # XXX should at least capture "also" at top of page
                 if node.kind in (
@@ -3625,7 +3627,7 @@ def parse_language(
                         )
                     if "wiki_notice" in dt:
                         wxr.wtp.wiki_notice(
-                            "{} in section {}".format(dt["wiki_notice"], t),
+                            "{} in section {}".format(dt["wiki_notices"], t),
                             sortid="page/20251017b",
                         )
                     # Parse word senses for the part-of-speech
@@ -4458,7 +4460,7 @@ def extract_zh_forms_template(
     for table in expanded_node.find_child(NodeKind.TABLE):
         for row in table.find_child(NodeKind.TABLE_ROW):
             row_header = ""
-            row_header_tags = []
+            row_header_tags: list[str] = []
             header_has_span = False
             for cell in row.find_child(
                 NodeKind.TABLE_HEADER_CELL | NodeKind.TABLE_CELL
@@ -4517,16 +4519,19 @@ def extract_zh_forms_header_cell(
     return row_header, row_header_tags, header_has_span
 
 
+TagLiteral = Literal["tags", "raw_tags"]
+TAG_LITERALS_TUPLE: tuple[TagLiteral, ...] = ("tags", "raw_tags")
+
 def extract_zh_forms_data_cell(
     wxr: WiktextractContext,
     base_data: WordData,
     cell: WikiNode,
     row_header: str,
     row_header_tags: list[str],
-):
+) -> None:
     from .zh_pron_tags import ZH_PRON_TAGS
 
-    forms = []
+    forms: list[FormData] = []
     for top_span_tag in cell.find_html("span"):
         span_style = top_span_tag.attrs.get("style", "")
         span_lang = top_span_tag.attrs.get("lang", "")
@@ -4566,8 +4571,8 @@ def extract_zh_forms_data_cell(
 
     if row_header == "anagram":
         for form in forms:
-            l_data = {"word": form["form"]}
-            for key in ["tags", "raw_tags"]:
+            l_data: LinkageData = {"word": form["form"]}
+            for key in TAG_LITERALS_TUPLE:
                 if key in form:
                     l_data[key] = form[key]
             data_append(base_data, "anagrams", l_data)
