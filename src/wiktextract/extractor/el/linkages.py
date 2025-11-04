@@ -45,14 +45,16 @@ def process_linkage_section(
             # print("REACHED")
             # print(f"{node.largs=}")
             ret: list[Node] = []
-            # print(f"{ret=}")
             comma = False
-            for arg in node.largs[1:]:
+            for k, v in node.template_parameters.items():
+                if not isinstance(k, int):
+                    continue
                 if comma:
                     ret.append(", ")
-                ret.append("__L__")
-                ret.append(wxr.wtp.node_to_text(arg))
-                ret.append("__/L__")
+                if isinstance(v, list):
+                    ret.extend(["__L__", *v, "__/L__"])
+                else:
+                    ret.extend(["__L__", v, "__/L__"])
                 comma = True
             return ret
         if node.template_name in ("eo-h", "eo-x"):

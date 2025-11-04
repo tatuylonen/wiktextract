@@ -6,6 +6,7 @@ from wikitextprocessor import Wtp
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.el.models import WordEntry
 from wiktextract.extractor.el.pos import process_pos
+from wiktextract.page import parse_page
 from wiktextract.wxr_context import WiktextractContext
 
 
@@ -45,6 +46,7 @@ class TestElGlosses(TestCase):
         * linkage basic
         * linkage multiple
         * linkage useless (delete)
+        * linkage under linkage section: ===={{συνώνυμα}}====
 
         Notes:
         * Is this another template or equivalent?
@@ -191,6 +193,41 @@ class TestElGlosses(TestCase):
         raw = """# δηλώνει [[αιτία]] {{βλ|όρος=τις εκφράσεις}}"""
         expected = [{"glosses": ["δηλώνει αιτία"]}]
         self.mktest_bl_linkage(raw, expected)
+
+    def test_bl_linkage_under_linkage_heading(self) -> None:
+        # https://el.wiktionary.org/wiki/κώλος
+        word = "κώλος"
+        self.wxr.wtp.start_page(word)
+        self.wxr.wtp.add_page("Πρότυπο:-el-", 10, "Νέα ελληνικά (el)")
+        self.wxr.wtp.add_page("Πρότυπο:ουσιαστικό", 10, "Ουσιαστικό")
+        self.wxr.wtp.add_page("Πρότυπο:συνώνυμα", 10, "Συνώνυμα")
+        raw = """=={{-el-}}==
+==={{ουσιαστικό|el}}===
+'''{{PAGENAME}}'''
+* foo
+* {{βλ|0=-}} [[bar]]
+
+===={{συνώνυμα}}====
+* {{βλ|0=-}} [[πισινός#Ουσιαστικό|πισινός]]
+* {{βλ|και=2|φοο}}
+* {{βλ|0=-|βαρ}}
+"""
+        page_datas = parse_page(self.wxr, word, raw)
+        expected = {
+            "word": "κώλος",
+            "forms": [{"form": "κώλος", "source": "header"}],
+            "lang_code": "el",
+            "lang": "Greek",
+            "pos": "noun",
+            "senses": [{"glosses": ["foo"]}, {"glosses": ["bar"]}],
+            "synonyms": [
+                {"word": "πισινός"},
+                {"word": "φοο"},
+                {"word": "βαρ"},
+            ],
+        }
+        data = page_datas[0]
+        self.assertEqual(data, expected)
 
     def test_el_glosses1(self) -> None:
         self.wxr.wtp.start_page("brain")
