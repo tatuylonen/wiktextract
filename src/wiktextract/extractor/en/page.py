@@ -1255,14 +1255,16 @@ def parse_language(
                 isinstance(x, WikiNode)
                 and (
                     (
-                        x.kind == NodeKind.TEMPLATE
-                        and x.largs[0][0] in FLOATING_TABLE_TEMPLATES
+                        isinstance(x, TemplateNode)
+                        and x.template_name in FLOATING_TABLE_TEMPLATES
                     )
                     or (
                         x.kind == NodeKind.LINK
                         # Need to check for stringiness because some links are
                         # broken; for example, if a template is missing an
                         # argument, a link might look like `[[{{{1}}}...]]`
+                        and len(x.largs) > 0
+                        and len(x.largs[0]) > 0
                         and isinstance(x.largs[0][0], str)
                         and x.largs[0][0].lower().startswith("file:")  # type:ignore[union-attr]
                     )
