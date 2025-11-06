@@ -108,7 +108,7 @@ POS_HEADINGS: dict[str, POSMap] = {
     # arithmetical, numerical] // Accusative masculine singular form of
     # αριθμητικός (arithmitikós). // Nominative, accusative and vocative
     # neuter singular form of αριθμητικός (arithmitikós).
-    "αριθμητικό": {"pos": "num", "tags": ["number"]},
+    "αριθμητικό": {"pos": "num"},
     # βαθμός επιθέτου:   βαθμός: grade (of job, exams, position in
     # employment) // rank // degree (unit of temperature) // (plural) marks,
     # grades // degree (severity of burns) // degree (of an adjective)
@@ -306,7 +306,7 @@ POS_HEADINGS: dict[str, POSMap] = {
     # (arithmitikós). // Nominative, accusative and vocative neuter singular
     # form of αριθμητικός (arithmitikós).] // Genitive singular form of
     # αριθμητικό (arithmitikó).
-    "κλιτικός τύπος αριθμητικού": {"pos": "num", "tags": ["number", "form-of"]},
+    "κλιτικός τύπος αριθμητικού": {"pos": "num", "tags": ["form-of"]},
     # κλιτικός τύπος γερουνδιακού:   'κλιτικός' ???,  τύπος: sort, type,
     # mould, stamp (of a person character) // model, type (of car, etc) //
     # shape, form // the press, the newspapers collectively // formality,
