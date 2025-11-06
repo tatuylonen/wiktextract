@@ -53,7 +53,10 @@ class TableSpanHeader:
 
 
 def extract_inf_table_template(
-    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    t_node: TemplateNode,
+    source: str = "",
 ):
     # https://fr.wiktionary.org/wiki/Modèle:fro-adj
     from .form_line import is_conj_link, process_conj_link_node
@@ -165,7 +168,12 @@ def extract_inf_table_template(
                         if len(word_entry.forms) > 0:
                             word_entry.forms[-1].ipas.extend(split_ipa(line))
                         continue
-                    form = Form(form=line, raw_tags=cell_tags, article=article)
+                    form = Form(
+                        form=line,
+                        raw_tags=cell_tags,
+                        article=article,
+                        source=source,
+                    )
                     use_col_tags = []
                     for col_header in col_headers[::-1]:
                         if (
