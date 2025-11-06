@@ -78,6 +78,26 @@ NUMBER_TAGS: dict[str, str | list[str]] = {
     "jullie": ["second-person", "plural", "informal"],
     "zij": ["third-person", "plural"],
     "u": "second-person",
+    # Template:cs-conj-e
+    "já": ["first-person", "singular"],
+    "ty": ["second-person", "singular"],
+    "on\nona\nono": ["third-person", "singular"],
+    "my": ["first-person", "plural"],
+    "vy": ["second-person", "plural"],
+    "oni\nony\nony": ["third-person", "plural"],
+    # Template:ro-verb-1-tab
+    "1ʳᵉ personne du singulier\nprésent de l’indicatif": [
+        "first-person",
+        "singular",
+        "present",
+        "indicative",
+    ],
+    "3ᵉ personne du singulier\nprésent du subjonctif": [
+        "third-person",
+        "singular",
+        "present",
+        "subjunctive",
+    ],
 }
 
 # https://en.wikipedia.org/wiki/Grammatical_mood
@@ -103,6 +123,8 @@ MOOD_TAGS: dict[str, str] = {
     "subjonctif i": "subjunctive-i",
     "subjonctif ii": "subjunctive-ii",
     "conjectural/volitif": ["conjectural", "volitive"],
+    # Modèle:ro-verb-décl
+    "présomptif": "presumptive",
 }
 
 VERB_FORM_TAGS: dict[str, str | list[str]] = {
@@ -195,6 +217,11 @@ TENSE_TAGS: dict[str, str | list[str]] = {
     # Template:it-irrégulier-avere-1
     "présent affirmatif": ["present", "affirmative"],
     "présent négatif": ["present", "negative"],
+    # Modèle:ro-verb-décl
+    "infinitif passé": ["infinitive", "past"],
+    "futur populaire": ["future", "colloquial"],
+    "futur littéraire": ["future", "literary"],
+    "présent progrésif": ["present", "progressive"],
 }
 
 # https://en.wikipedia.org/wiki/Grammatical_person
@@ -211,6 +238,13 @@ PERSON_TAGS: dict[str, str | list[str]] = {
     "2ᵉ du plur.": ["second-person", "plural"],
     "3ᵉ du plur.": ["third-person", "plural"],
     "4ᵉ du plur.": ["fourth-person", "plural"],
+    # Modèle:ro-verb-décl
+    "1ʳᵉ personne\n(eu)": "first-person",
+    "2ᵉ personne\n(tu)": "second-person",
+    "3ᵉ personne\n(el/ea/el)": "third-person",
+    "1ʳᵉ personne\n(noi)": "first-person",
+    "2ᵉ personne\n(voi)": "second-person",
+    "3ᵉ personne\n(ei/ele/ele)": "third-person",
 }
 
 SEMANTICS_TAGS: dict[str, str] = {
