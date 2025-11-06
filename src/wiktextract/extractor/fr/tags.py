@@ -78,6 +78,13 @@ NUMBER_TAGS: dict[str, str | list[str]] = {
     "jullie": ["second-person", "plural", "informal"],
     "zij": ["third-person", "plural"],
     "u": "second-person",
+    # Template:cs-conj-e
+    "já": ["first-person", "singular"],
+    "ty": ["second-person", "singular"],
+    "on\nona\nono": ["third-person", "singular"],
+    "my": ["first-person", "plural"],
+    "vy": ["second-person", "plural"],
+    "oni\nony\nony": ["third-person", "plural"],
 }
 
 # https://en.wikipedia.org/wiki/Grammatical_mood

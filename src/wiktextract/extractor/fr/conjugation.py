@@ -48,6 +48,8 @@ def extract_conjugation(
             extract_de_conj_template(wxr, entry, conj_template, conj_page_title)
         elif conj_template.template_name.startswith("pt-conj/"):
             extract_pt_conj_template(wxr, entry, conj_template, conj_page_title)
+        elif conj_template.template_name.startswith("cs-conj-"):
+            extract_cs_conj_template(wxr, entry, conj_template, conj_page_title)
         elif (
             "-conj" in conj_template.template_name
             # https://fr.wiktionary.org/wiki/Catégorie:Modèles_de_conjugaison_en_italien
@@ -952,3 +954,71 @@ def extract_pt_conj_template(
                             translate_raw_tags(form)
                             word_entry.forms.append(form)
                 col_index += colspan
+
+
+def extract_cs_conj_template(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    t_node: TemplateNode,
+    page_title: str,
+):
+    def add_form(form_nodes, col_headers, col_index, row_header, raw_tags):
+        form_str = clean_node(wxr, None, form_nodes)
+        if form_str not in ["", "—", wxr.wtp.title]:
+            form = Form(form=form_str, source=page_title)
+            if col_index < len(col_headers):
+                form.raw_tags.append(col_headers[col_index])
+            if row_header != "":
+                form.raw_tags.append(row_header)
+            form.raw_tags.extend(raw_tags)
+            translate_raw_tags(form)
+            word_entry.forms.append(form)
+            form_nodes.clear()
+            raw_tags.clear()
+
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for table in expanded_node.find_child(NodeKind.TABLE):
+        col_headers = []
+        for row in table.find_child(NodeKind.TABLE_ROW):
+            row_header = ""
+            for col_index, cell in enumerate(
+                row.find_child(NodeKind.TABLE_HEADER_CELL | NodeKind.TABLE_CELL)
+            ):
+                if cell.kind == NodeKind.TABLE_HEADER_CELL:
+                    cell_scope = cell.attrs.get("scope", "")
+                    if cell_scope == "col":
+                        col_headers.append(clean_node(wxr, None, cell))
+                    elif cell_scope == "row":
+                        row_header = clean_node(wxr, None, cell)
+                else:
+                    raw_tags = []
+                    form_nodes = []
+                    for node in cell.children:
+                        if isinstance(node, HTMLNode) and node.tag == "span":
+                            span_class = node.attrs.get("class", "").split()
+                            if (
+                                "ligne-de-forme" in span_class
+                                or "registre" in span_class
+                            ):
+                                raw_tag = clean_node(wxr, None, node).strip(
+                                    "() "
+                                )
+                                if raw_tag != "":
+                                    raw_tags.append(raw_tag)
+                            else:
+                                form_nodes.append(node)
+                        elif isinstance(node, HTMLNode) and node.tag == "br":
+                            add_form(
+                                form_nodes,
+                                col_headers,
+                                col_index,
+                                row_header,
+                                raw_tags,
+                            )
+                        else:
+                            form_nodes.append(node)
+                    add_form(
+                        form_nodes, col_headers, col_index, row_header, raw_tags
+                    )

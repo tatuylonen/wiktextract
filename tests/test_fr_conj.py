@@ -977,3 +977,70 @@ class TestNotes(TestCase):
                 },
             ],
         )
+
+    def test_cs_conj(self):
+        self.wxr.wtp.add_page(
+            "Modèle:conjugaison",
+            10,
+            """([[Conjugaison:tchèque/plavat|<span style="font-size: 100%; font-weight: bold; font-variant: small-caps">voir la conjugaison</span>]])""",
+        )
+        self.wxr.wtp.add_page(
+            "Modèle:cs-conj-e",
+            10,
+            """{| class="wikitable" style="text-align:center"
+! scope="col" | Personne
+! scope="col" | Présent
+! scope="col" | Passé
+! scope="col" | Futur
+! scope="col" | Conditionnel
+! scope="col" | Impératif
+|-
+! scope="row" | ''ty''
+| <bdi lang="cs" xml:lang="cs" class="lang-cs">[[plaveš#cs|plaveš]]</bdi> || <bdi lang="cs" xml:lang="cs" class="lang-cs">[[plaval#cs|plaval]]</bdi> <bdi lang="cs" xml:lang="cs" class="lang-cs">[[jsi#cs|jsi]]</bdi> <span class="ligne-de-forme"  ><i>masculin</i></span><br><bdi lang="cs" xml:lang="cs" class="lang-cs">[[plavals#cs|plavals]]</bdi> <span class="registre"><span id="familier"></span>''(<span class="texte">[[Annexe:Glossaire grammatical#F|Familier]]</span>)''</span> <span class="ligne-de-forme"  ><i>masculin</i></span><br><bdi lang="cs" xml:lang="cs" class="lang-cs">[[plavala#cs|plavala]]</bdi> <bdi lang="cs" xml:lang="cs" class="lang-cs">[[jsi#cs|jsi]]</bdi> <span class="ligne-de-forme"  ><i>féminin</i></span>
+|}""",
+        )
+        self.wxr.wtp.add_page(
+            "Conjugaison:tchèque/plavat",
+            116,
+            """L'impératif fait aussi ''[[plavej]], [[plavejme]], [[plavejte]]''.
+{{cs-conj-e|rad=plav||a|a|plav}}""",
+        )
+        data = parse_page(
+            self.wxr,
+            "plavat",
+            """== {{langue|cs}} ==
+=== {{S|verbe|cs}} ===
+'''plavat''' {{conjugaison|cs}}
+# [[nager#fr|Nager]].""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {
+                    "form": "plaveš",
+                    "source": "Conjugaison:tchèque/plavat",
+                    "tags": ["present", "second-person", "singular"],
+                },
+                {
+                    "form": "plaval jsi",
+                    "source": "Conjugaison:tchèque/plavat",
+                    "tags": ["past", "second-person", "singular", "masculine"],
+                },
+                {
+                    "form": "plavals",
+                    "source": "Conjugaison:tchèque/plavat",
+                    "tags": [
+                        "past",
+                        "second-person",
+                        "singular",
+                        "familiar",
+                        "masculine",
+                    ],
+                },
+                {
+                    "form": "plavala jsi",
+                    "source": "Conjugaison:tchèque/plavat",
+                    "tags": ["past", "second-person", "singular", "feminine"],
+                },
+            ],
+        )
