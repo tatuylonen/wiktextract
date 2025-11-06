@@ -68,6 +68,7 @@ ARTICLES: set[str] = {
     "τα",
 }
 EXTENDED_ARTICLES = ARTICLES | {
+    "τη(ν)",
     "ο/η",
     "του/της",
     "τον/τη",

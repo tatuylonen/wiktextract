@@ -551,6 +551,57 @@ class TestElInflection(TestCase):
 
         self.assertEqual(received, expected)
 
+    def test_suffix_inflection(self) -> None:
+        # https://el.wiktionary.org/wiki/-ωνιά
+        raw = """
+{| style="clear%3Aright%3B+float%3Aright%3B+margin-left%3A0.5em%3B+margin-bottom%3A0.5em%3Bbackground%3A%23ffffff%3B+color%3A%23000000%3B+border%3A1px+solid%23a1bdea%3B+text-align%3Aright%3B" rules="none" border="1" cellpadding="3" cellspacing="0"
+|-
+! style="background%3A%23a1bdea%3B+border-right%3A1px+solid+%23c1d3f1%3B+text-align%3Acenter%3B+font-size%3A90%25%3B" align="center" | &darr;&nbsp;''πτώσεις''
+! style="background%3A%23a1bdea%3B+border-right%3A1px+solid+%23c1d3f1%3B" colspan="2" align="center" | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[[ενικός|<span title="%CE%B5%CE%BD%CE%B9%CE%BA%CF%8C%CF%82+%CE%B1%CF%81%CE%B9%CE%B8%CE%BC%CF%8C%CF%82" style="color%3Ablack%3B">'''''ενικός'''''</span>]]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+! style="background%3A%23a1bdea%3B" colspan="2" align="center" | &nbsp;&nbsp;[[πληθυντικός|<span title="%CF%80%CE%BB%CE%B7%CE%B8%CF%85%CE%BD%CF%84%CE%B9%CE%BA%CF%8C%CF%82+%CE%B1%CF%81%CE%B9%CE%B8%CE%BC%CF%8C%CF%82" style="color%3Ablack%3B">'''''πληθυντικός'''''</span>]]&nbsp;&nbsp;
+|-
+| style="background%3A%23d5e2f6%3B+border-bottom%3A1px+solid+%23eaf0fa%3B+text-align%3Aright%3B+font-size%3A90%25%3B" | [[ονομαστική|<span title="%CE%BF%CE%BD%CE%BF%CE%BC%CE%B1%CF%83%CF%84%CE%B9%CE%BA%CE%AE+%CF%80%CF%84%CF%8E%CF%83%CE%B7" style="color%3Ablack%3B">'''''ονομαστική'''''</span>]]
+| style="border-bottom%3A1px+solid+%23eaf0fa%3B" align="center" | [[η|<span style="color%3A%23002000%3B+font-weight%3Anormal%3B">η</span>]]
+| style="border-bottom%3A1px+solid+%23eaf0fa%3B+border-right%3A1px+solid+%23eaf0fa%3B" align="left" | [[-ωνιά|<span style="color%3A%23002000%3B+font-weight%3Anormal%3B">-ωνι</span><span style="color%3A%23EB0000%3B+font-weight%3Anormal%3B">ά</span>]]
+| style="border-bottom%3A1px+solid+%23eaf0fa%3B" align="center" | [[οι|<span style="color%3A%23002000%3B+font-weight%3Anormal%3B">οι</span>]]
+| style="border-bottom%3A1px+solid+%23eaf0fa%3B" align="left" | [[-ωνιές|<span style="color%3A%23002000%3B+font-weight%3Anormal%3B">-ωνι</span><span style="color%3A%23EB0000%3B+font-weight%3Anormal%3B">ές</span>]]
+|-
+| style="background%3A%23d5e2f6%3B+border-bottom%3A1px+solid+%23eaf0fa%3B+text-align%3Aright%3B+font-size%3A90%25%3B" | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[[γενική|<span title="%CE%B3%CE%B5%CE%BD%CE%B9%CE%BA%CE%AE+%CF%80%CF%84%CF%8E%CF%83%CE%B7" style="color%3Ablack%3B">'''''γενική'''''</span>]]
+| style="border-bottom%3A1px+solid+%23eaf0fa%3B" align="center" | [[της|<span style="color%3A%23002000%3B+font-weight%3Anormal%3B">της</span>]]
+| style="border-bottom%3A1px+solid+%23eaf0fa%3B+border-right%3A1px+solid+%23eaf0fa%3B" align="left" | [[-ωνιάς|<span style="color%3A%23002000%3B+font-weight%3Anormal%3B">-ωνι</span><span style="color%3A%23EB0000%3B+font-weight%3Anormal%3B">άς</span>]]
+| style="border-bottom%3A1px+solid+%23eaf0fa%3B" align="center" | [[των|<span style="color%3A%23002000%3B+font-weight%3Anormal%3B">των</span>]]
+| style="border-bottom%3A1px+solid+%23eaf0fa%3B" align="left" | [[-ωνιών|<span style="color%3A%23002000%3B+font-weight%3Anormal%3B">-ωνι</span><span style="color%3A%23EB0000%3B+font-weight%3Anormal%3B">ών</span>]]
+|-
+| style="background%3A%23d5e2f6%3B+border-bottom%3A1px+solid+%23eaf0fa%3B+text-align%3Aright%3B+font-size%3A90%25%3B" | &nbsp;&nbsp;&nbsp;&nbsp;[[αιτιατική|<span title="%CE%B1%CE%B9%CF%84%CE%B9%CE%B1%CF%84%CE%B9%CE%BA%CE%AE+%CF%80%CF%84%CF%8E%CF%83%CE%B7" style="color%3Ablack%3B">'''''αιτιατική'''''</span>]]
+| style="border-bottom%3A1px+solid+%23eaf0fa%3B" align="center" | [[την|<span style="color%3A%23002000%3B+font-weight%3Anormal%3B">τη(ν)</span>]]
+| style="border-bottom%3A1px+solid+%23eaf0fa%3B+border-right%3A1px+solid+%23eaf0fa%3B" align="left" | [[-ωνιά|<span style="color%3A%23002000%3B+font-weight%3Anormal%3B">-ωνι</span><span style="color%3A%23EB0000%3B+font-weight%3Anormal%3B">ά</span>]]
+| style="border-bottom%3A1px+solid+%23eaf0fa%3B" align="center" | [[τις|<span style="color%3A%23002000%3B+font-weight%3Anormal%3B">τις</span>]]
+| style="border-bottom%3A1px+solid+%23eaf0fa%3B" align="left" | [[-ωνιές|<span style="color%3A%23002000%3B+font-weight%3Anormal%3B">-ωνι</span><span style="color%3A%23EB0000%3B+font-weight%3Anormal%3B">ές</span>]]
+|-
+| style="background%3A%23d5e2f6%3B+text-align%3Aright%3B" | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[[κλητική|<span title="%CE%BA%CE%BB%CE%B7%CF%84%CE%B9%CE%BA%CE%AE+%CF%80%CF%84%CF%8E%CF%83%CE%B7" style="color%3Ablack%3B+font-size%3A90%25%3B">'''''κλητική'''''</span>]]
+| align="center" |
+| style="border-right%3A1px+solid+%23eaf0fa%3B" align="left" | [[-ωνιά|<span style="color%3A%23002000%3B+font-weight%3Anormal%3B">-ωνι</span><span style="color%3A%23EB0000%3B+font-weight%3Anormal%3B">ά</span>]]
+| align="center" |
+| align="left" | [[-ωνιές|<span style="color%3A%23002000%3B+font-weight%3Anormal%3B">-ωνι</span><span style="color%3A%23EB0000%3B+font-weight%3Anormal%3B">ές</span>]]
+|-
+| colspan="5" align="left" style="background%3A%23eaf0fa%3B+font-size%3A80%25%3B+line-height%3A100%25%3B" | Οι καταλήξεις προφέρονται με [[συνίζηση]].
+|-
+| colspan="5" align="right" style="text-align%3Aright%3B+background%3A%23eaf0fa%3B+font-size%3A70%25%3B+line-height%3A100%25%3B" | [[:Κατηγορία:Ουσιαστικά που κλίνονται όπως το 'καρδιά' (νέα ελληνικά)|Κατηγορία]]  όπως «[[Παράρτημα:Ουσιαστικά (νέα ελληνικά)/θηλυκά#καρδιά|καρδιά]]» - [[Παράρτημα:Ουσιαστικά (νέα ελληνικά)|<span title="%CE%A0%CE%B1%CF%81%CE%AC%CF%81%CF%84%CE%B7%CE%BC%CE%B1%3A%CE%9F%CF%85%CF%83%CE%B9%CE%B1%CF%83%CF%84%CE%B9%CE%BA%CE%AC">Παράρτημα:Ουσιαστικά</span>]]
+|}
+"""
+        expected = [
+            {"tags": ["inflection-template"]},
+            {"form": "-ωνιά", "tags": ["singular", "nominative"]},
+            {"form": "-ωνιές", "tags": ["nominative", "plural"]},
+            {"form": "-ωνιάς", "tags": ["genitive", "singular"]},
+            {"form": "-ωνιών", "tags": ["genitive", "plural"]},
+            {"form": "-ωνιά", "tags": ["accusative", "singular"]},
+            {"form": "-ωνιές", "tags": ["accusative", "plural"]},
+            {"form": "-ωνιά", "tags": ["singular", "vocative"]},
+            {"form": "-ωνιές", "tags": ["vocative", "plural"]},
+        ]
+        self.mktest_form_no_raw_tags(raw, expected)
+
     def test_noun_inflection_standard(self) -> None:
         raw = """
 {| style="clear%3Aright%3B+float%3Aright%3B+margin-left%3A0.5em%3B+margin-bottom%3A0.5em%3Bbackground%3A%23ffffff%3B+color%3A%23000000%3B+border%3A1px+solid%23a1bdea%3B+text-align%3Aright%3B" rules="none" border="1" cellpadding="3" cellspacing="0"
