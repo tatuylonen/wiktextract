@@ -244,6 +244,14 @@ def expand_suffix_forms(forms: list[Form]) -> list[Form]:
     """
     assert len(forms) == 3
     base, *others = forms
+
+    # The first form should NOT start with an hyphen, and the other two should.
+    # cf. άμεσος, -η, -ο
+    if base.form.startswith("-") or not all(
+        f.form.startswith("-") for f in others
+    ):
+        return forms
+
     word = base.form
     stem = get_stem(word)
 
