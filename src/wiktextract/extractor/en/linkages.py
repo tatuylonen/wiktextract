@@ -685,27 +685,37 @@ def parse_linkage_item(
             if is_list_item(node):
                 if parts:
                     # print(f"{parts=}")
-                    sense1: Optional[str]
-                    sense1 = clean_node(wxr, None, parts)
-                    if sense1.endswith(":"):
-                        sense1 = sense1[:-1].strip()
-                    if sense1.startswith("(") and sense1.endswith(")"):
-                        sense1 = sense1[1:-1].strip()
-                    if sense1.lower() == TRANSLATIONS_TITLE:
-                        sense1 = None
+                    possible_sense: Optional[str]
+                    possible_sense = clean_node(wxr, None, parts)
+                    is_sense = False
+
+                    if possible_sense.endswith(":"):
+                        is_sense = True
+                        possible_sense = possible_sense[:-1].strip()
+                    if possible_sense.startswith(
+                        "("
+                    ) and possible_sense.endswith(")"):
+                        is_sense = True
+                        possible_sense = possible_sense[1:-1].strip()
+                    if (
+                        possible_sense.lower() == TRANSLATIONS_TITLE
+                        or not is_sense
+                    ):
+                        possible_sense = None
                     # print("linkage item_recurse LIST sense1:", sense1)
                     parse_linkage_recurse(
                         wxr,
                         node.children,
                         field,
-                        sense1 or sense,
+                        possible_sense or sense,
                         None,
                         word,
                         data,
                         sense_datas,
                         is_reconstruction,
                     )
-                    parts = []
+                    if is_sense:
+                        parts = []
                 else:
                     parse_linkage_recurse(
                         wxr,
