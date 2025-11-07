@@ -8,10 +8,5 @@
     "body": "===Note / Riferimenti===\n",
     "namespace_id": 10,
     "need_pre_expand": true
-  },
-  "Template:-verb-": {
-    "body": "{{Sezione voce|Immagine=Open_book_01.svg|Dimensione=30px|Sezione=verbo|Sezione al plurale=verbi|Genere=m|Lingua={{{1|}}}}}{{#invoke:Categorizzazione verbi italiani|main|{{{1|}}}}}",
-    "namespace_id": 10,
-    "need_pre_expand": true
   }
 }

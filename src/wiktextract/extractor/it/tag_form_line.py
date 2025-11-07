@@ -29,6 +29,8 @@ def extract_tag_form_line_nodes(
                 extract_a_cmp_template(wxr, word_entry, node)
             elif node.template_name.lower() == "pn":
                 extract_pn_template(wxr, word_entry, node)
+            elif node.template_name == "en-verb":
+                extract_en_verb_template(wxr, word_entry, node)
 
 
 ITALIC_TAGS = {
@@ -134,3 +136,28 @@ def extract_pn_template(
                 link_str = clean_node(wxr, None, link_node.largs[0])
                 if link_str.startswith("Appendice:Coniugazioni/"):
                     extract_appendix_conjugation_page(wxr, word_entry, link_str)
+
+
+def extract_en_verb_template(
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+):
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    raw_tag = ""
+    for node in expanded_node.find_child(
+        NodeKind.ITALIC | NodeKind.BOLD | NodeKind.LINK
+    ):
+        match node.kind:
+            case NodeKind.ITALIC:
+                raw_tag = clean_node(wxr, None, node)
+            case NodeKind.BOLD:
+                form_str = clean_node(wxr, None, node)
+                if form_str not in ["", wxr.wtp.title]:
+                    form = Form(form=form_str)
+                    if raw_tag != "":
+                        form.raw_tags.append(raw_tag)
+                        translate_raw_tags(form)
+                    word_entry.forms.append(form)
+            case NodeKind.LINK:
+                clean_node(wxr, word_entry, node)
