@@ -369,18 +369,6 @@ def process_pos(
     # see: free -> {{en-verb-'free'}} creates a floating inflection table
     # followed by the usual head template
 
-    # see: τηλεομοιοτυπία
-    # '''{{PAGENAME}}''' {{θ}}
-    # theta is basically {{f|...}}
-
-    # see: θηλυκός
-    # '''{{PAGENAME}}, -ή''' ''και'' '''-ιά, -ό'''
-    # pagename, -e and -ia, -o, no indication of what these mean
-
-    # Ιόνια νησιά
-    # >>>'''{{PAGENAME}}''' ''πληθυντικός του'' [[ιόνιος|Ιόνιο]] [[νησί]]
-    # plural of 'Ionian island'
-
     # >>>>>>>>> free
     # >>>{{en-adj-r}}  # floating table
     # >>>{{τ|en|{{PAGENAME}}}}, ''συγκριτικός'' '''freer''', ''υπερθετικός'' '''freest'''
@@ -388,13 +376,6 @@ def process_pos(
 
     # genus
     # {{τ|la|{{PAGENAME}}}} {{ο}} ([[γενική]]: generis) (3ης [[κλίση]]ς)
-
-    # ουδέτερος
-    # >>>'''{{PAGENAME}} -η -ο'''
-
-    #  καφέ
-    # >>>'''{{PAGENAME}}''' {{ακλ|επίθ}}
-    # aklitos, uninflected
 
     # καφέ
     # >>>[[Αρχείο:Cafe Museum - Vienna (5402363918).jpg|μικρογραφία|τραπέζι σε βιενέζικο '''καφέ''']]
