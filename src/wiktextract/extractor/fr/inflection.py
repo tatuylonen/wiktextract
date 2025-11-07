@@ -64,7 +64,7 @@ def extract_inf_table_template(
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(t_node), expand_all=True
     )
-    for table in expanded_node.find_child(NodeKind.TABLE):
+    for table in expanded_node.find_child_recursively(NodeKind.TABLE):
         col_headers = []
         row_headers = []
         for row_index, row in enumerate(table.find_child(NodeKind.TABLE_ROW)):
@@ -127,6 +127,7 @@ def extract_inf_table_template(
             for cell_node in row.find_child(NodeKind.TABLE_CELL):
                 if cell_node.attrs.get("style") == "display:none":
                     continue
+                has_collapsible_div = False
                 has_conj_link = False
                 for link_node in cell_node.find_child_recursively(
                     NodeKind.LINK
@@ -136,7 +137,13 @@ def extract_inf_table_template(
                             process_conj_link_node(wxr, link_node, [word_entry])
                         has_conj_link = True
                         break
-                if has_conj_link:
+                # ignore note in Template:fi-décl-ihminen
+                for div_tag in cell_node.find_html("div"):
+                    div_class = div_tag.attrs.get("class", "").split()
+                    if "mw-collapsible" in div_class:
+                        has_collapsible_div = True
+                        break
+                if has_conj_link or has_collapsible_div:
                     continue
                 colspan = int(cell_node.attrs.get("colspan", "1"))
                 rowspan = int(cell_node.attrs.get("rowspan", "1"))
@@ -153,6 +160,14 @@ def extract_inf_table_template(
                         if raw_tag.startswith("(") and raw_tag.endswith(")"):
                             cell_tags.append(raw_tag.strip("() "))
                         else:
+                            filtered_cell.append(cell_child)
+                    elif (
+                        isinstance(cell_child, HTMLNode)
+                        and cell_child.tag == "span"
+                    ):
+                        # note ref number in Template:fi-décl-ihminen
+                        span_id = cell_child.attrs.get("id", "")
+                        if not span_id.startswith("ref-"):
                             filtered_cell.append(cell_child)
                     else:
                         filtered_cell.append(cell_child)

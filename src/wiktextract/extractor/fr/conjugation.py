@@ -50,6 +50,12 @@ def extract_conjugation(
             extract_pt_conj_template(wxr, entry, conj_template, conj_page_title)
         elif conj_template.template_name.startswith("cs-conj-"):
             extract_cs_conj_template(wxr, entry, conj_template, conj_page_title)
+        elif conj_template.template_name.startswith(("ro-verb-", "se-conj-")):
+            from .inflection import extract_inf_table_template
+
+            extract_inf_table_template(
+                wxr, entry, conj_template, conj_page_title
+            )
         elif (
             "-conj" in conj_template.template_name
             # https://fr.wiktionary.org/wiki/Catégorie:Modèles_de_conjugaison_en_italien
@@ -78,12 +84,6 @@ def extract_conjugation(
             )
         elif conj_template.template_name.startswith("ja-"):
             process_ja_conj_template(wxr, entry, conj_template, conj_page_title)
-        elif conj_template.template_name.startswith("ro-verb-"):
-            from .inflection import extract_inf_table_template
-
-            extract_inf_table_template(
-                wxr, entry, conj_template, conj_page_title
-            )
 
     if conj_page_title.startswith("Conjugaison:kurde/"):
         for table in conj_root.find_child(NodeKind.TABLE):

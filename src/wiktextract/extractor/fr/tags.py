@@ -125,6 +125,7 @@ MOOD_TAGS: dict[str, str] = {
     "conjectural/volitif": ["conjectural", "volitive"],
     # Modèle:ro-verb-décl
     "présomptif": "presumptive",
+    "potentiel": "potential",
 }
 
 VERB_FORM_TAGS: dict[str, str | list[str]] = {
@@ -164,6 +165,9 @@ VERB_FORM_TAGS: dict[str, str | list[str]] = {
     "indéterminé": "indeterminate",
     # Template:irrégulier
     "irrégulier": "irregular",
+    # Template:se-conj
+    "nom d’action": "noun-from-verb",
+    "thème négatif": "negative",
 }
 
 # https://en.wikipedia.org/wiki/Grammatical_case
@@ -188,6 +192,17 @@ CASE_TAGS: dict[str, str | list[str]] = {
     # Modèle:fro-adj
     "sujet": "subject",
     "régime": "oblique",
+    # Template:se-décl-pari
+    "accusatif\ngénitif": ["accusative", "genitive"],
+    # Template:fi-décl-ihminen
+    "partitif": "partitive",
+    "inessif": "inessive",
+    "élatif": "elative",
+    "adessif": "adessive",
+    "allatif": "allative",
+    "translatif": "translative",
+    "abessif": "abessive",
+    "instructif": "instructive",
 }
 
 # https://en.wikipedia.org/wiki/Grammatical_tense
@@ -245,6 +260,16 @@ PERSON_TAGS: dict[str, str | list[str]] = {
     "1ʳᵉ personne\n(noi)": "first-person",
     "2ᵉ personne\n(voi)": "second-person",
     "3ᵉ personne\n(ei/ele/ele)": "third-person",
+    # Template:se-conj
+    "je": ["first-person", "singular"],
+    "tu": ["second-person", "singular"],
+    "il/elle": ["third-person", "singular"],
+    "nous deux": ["first-person", "dual"],
+    "vous deux": ["second-person", "dual"],
+    "ils/elles deux": ["third-person", "dual"],
+    "nous": ["first-person", "plural"],
+    "vous": ["second-person", "plural"],
+    "ils/elles": ["third-person", "plural"],
 }
 
 SEMANTICS_TAGS: dict[str, str] = {

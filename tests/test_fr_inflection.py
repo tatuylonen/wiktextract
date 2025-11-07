@@ -832,3 +832,54 @@ class TestInflection(TestCase):
                 },
             ],
         )
+
+    def test_fi_décl_ihminen(self):
+        self.wxr.wtp.add_page(
+            "Modèle:fi-décl-ihminen",
+            10,
+            """<div class="inflection-table mw-collapsible">
+<div>Déclinaison</div>
+<div class="mw-collapsible-content">
+{| class="wikitable flextable"
+|-
+! Cas
+! Singulier
+! Pluriel
+|-
+! [[accusatif|Accusatif]]
+| '''<span lang="fi" xml:lang="fi" class="lang-fi"><bdi>ikäinen</bdi></span>'''<span id="ref-1">&#x202F;<sup>[[#reference-1|&#91;1&#93;]]</sup></span><br
+/><bdi lang="fi" xml:lang="fi" class="lang-fi">[[ikäisen#fi|ikäisen]]</bdi><span id="ref-2">&#x202F;<sup>[[#reference-2|&#91;2&#93;]]</sup></span>
+|-
+| colspan="3" bgcolor="#EEEEF7" |
+<div class="mw-collapsible mw-collapsed">''Notes''
+<div class="mw-collapsible-content">
+</div>
+</div>
+|}
+</div>
+</div>
+{| class="wikitable flextable"
+! scope="col" | Avec suffixes<br>possessifs
+! scope="col" | Singulier
+! scope="col" | Pluriel
+|-
+! scope="row" | 1<sup style="font-size:83.33%;line-height:1">re</sup> personne
+|<bdi lang="fi" xml:lang="fi" class="lang-fi">[[ikäiseni#fi|ikäiseni]]</bdi>
+|}""",
+        )
+        data = parse_page(
+            self.wxr,
+            "ikäinen",
+            """== {{langue|fi}} ==
+=== {{S|adjectif|fi|clé=ikz€€inen}} ===
+{{fi-décl-ihminen|ikäi|ä}}
+'''ikäinen'''
+# Qui est de tel âge""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {"form": "ikäisen", "tags": ["singular", "accusative"]},
+                {"form": "ikäiseni", "tags": ["singular", "first-person"]},
+            ],
+        )

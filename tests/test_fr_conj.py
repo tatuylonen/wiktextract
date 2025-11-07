@@ -924,7 +924,6 @@ class TestNotes(TestCase):
                 },
                 {
                     "form": "tombaste",
-                    "raw_tags": ["tu"],
                     "source": "Conjugaison:portugais/tombar",
                     "tags": [
                         "personal",
