@@ -231,9 +231,6 @@ unicode_dc_re = re.compile(
 )
 
 
-
-
-
 def extract_alt_form_section(
     wxr: WiktextractContext, word_entry: WordData, level_node: LevelNode
 ) -> None:
@@ -483,7 +480,7 @@ def parse_linkage_recurse(
     data,
     sense_datas,
     is_reconstruction,
-) ->list[str]:
+) -> list[str]:
     assert isinstance(contents, (list, tuple))
     assert sense is None or isinstance(sense, str)
     # print("PARSE_LINKAGE_RECURSE: {}: {}".format(sense, contents))
@@ -672,7 +669,7 @@ def parse_linkage_item(
     # commas.
     links_that_should_not_be_split: list[str] = []
 
-    def item_recurse(contents: list[str | WikiNode], italic=False) -> None:
+    def item_recurse(contents: list[str | WikiNode]) -> None:
         assert isinstance(contents, (list, tuple))
         nonlocal sense
         nonlocal ruby
@@ -770,9 +767,7 @@ def parse_linkage_item(
                         is_reconstruction,
                     )
                 else:
-                    item_recurse(node.children, italic=italic)
-            elif kind == NodeKind.ITALIC:
-                item_recurse(node.children, italic=True)
+                    item_recurse(node.children)
             elif kind == NodeKind.LINK:
                 ignore = False
                 if isinstance(node.largs[0][0], str):
@@ -793,7 +788,7 @@ def parse_linkage_item(
                             v = [v[0][1:]] + list(v[1:])  # type:ignore
                         if isinstance(v[0], str) and not v[0].isalnum():
                             links_that_should_not_be_split.append("".join(v[0]))  # type: ignore
-                        item_recurse(v, italic=italic)
+                        item_recurse(v)
             elif kind == NodeKind.URL:
                 if len(node.largs) < 2 and node.largs:
                     # Naked url captured
@@ -804,9 +799,13 @@ def parse_linkage_item(
                     urls.append(node.largs[0][-1])  # type:ignore[arg-type]
                 # print(f"{node.largs=!r}")
                 # print("linkage recurse URL {}".format(node))
-                item_recurse(node.largs[-1], italic=italic)
-            elif kind in (NodeKind.PREFORMATTED, NodeKind.BOLD):
-                item_recurse(node.children, italic=italic)
+                item_recurse(node.largs[-1])
+            elif kind in (
+                NodeKind.PREFORMATTED,
+                NodeKind.BOLD,
+                NodeKind.ITALIC,
+            ):
+                item_recurse(node.children)
             else:
                 wxr.wtp.debug(
                     "linkage item_recurse unhandled {}: {}".format(
