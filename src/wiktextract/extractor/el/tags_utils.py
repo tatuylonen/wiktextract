@@ -12,8 +12,7 @@ SPLITTER_RE = re.compile(r"\s*(?:,|;|\(|\)|\.|&)\s*")
 
 
 def convert_tags(raw_tags: list[str]) -> tuple[list[str], list[str], list[str]]:
-    """Check if raw tags contain tag strings in `simple_tag_map` and return
-    lists of strings: tags, raw_tags and parts of speech.
+    """Return lists of strings: tags, raw_tags and parts of speech.
 
     Note that the translation raw_tags > tags is done elsewhere for Senses.
     """

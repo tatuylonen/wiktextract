@@ -34,8 +34,6 @@ from .pos import process_pos
 from .pronunciation import process_pron
 from .section_titles import Heading, POSName
 
-# from .text_utils import ENDING_NUMBER_RE
-
 
 def parse_page(
     wxr: WiktextractContext, page_title: str, page_text: str
@@ -52,18 +50,13 @@ def parse_page(
     wxr.config.word = page_title
     wxr.wtp.start_page(page_title)
 
-    parts = []
-    parts.append(page_title)
-
     # from .debug_bypass import debug_bypass
     # return debug_bypass(wxr, page_title, page_text)
 
     if page_title.startswith("Πύλη:"):
         return []
 
-    page_root = wxr.wtp.parse(
-        page_text,
-    )
+    page_root = wxr.wtp.parse(page_text)
 
     # print_tree(page_root)  # WikiNode tree pretty printer
     word_datas: list[WordEntry] = []
@@ -194,7 +187,7 @@ def parse_page(
 
             found_pos_sections: POSReturns = []
 
-            if heading_type is Heading.Etym:
+            if heading_type == Heading.Etym:
                 # Update base_data with etymology and maybe sound data.
                 # Return any sublevels in the etymology section
                 # so that we can check for POS sections.
@@ -214,8 +207,6 @@ def parse_page(
                 #     logger.warning(f"£ {wxr.wtp.title}\n" + text)
 
                 # PRINTS HERE
-
-            # continue
 
             ## /TEMP
 
@@ -278,7 +269,6 @@ def parse_page(
                         sortid="page.py/20250110",
                     )
 
-    # logger.info("%%" + "\n%%".join(parts))
     # Transform pydantic objects to normal dicts so that the old code can
     # handle them.
     return [wd.model_dump(exclude_defaults=True) for wd in word_datas]

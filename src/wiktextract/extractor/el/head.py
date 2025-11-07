@@ -30,19 +30,7 @@ def parse_head(wxr: WiktextractContext, text: str) -> list[Form]:
         else:
             return []
 
-    forms: list[Form] = []
-    # print_blocks = []
-
-    for form_ret in partition_head_forms(wxr, split_text):
-        # print_blocks.append(form_block)
-        # logger.info(f"\n  §§ {form_ret}")
-        forms.append(form_ret)
-
-    # logger.info(
-    #     f"\n  §§ {wxr.wtp.title} ->  {''.join(split_text)}\n  § "
-    #     + "\n  § ".join(f"{''.join(pb)}" for pb in print_blocks)
-    # )
-    return forms
+    return partition_head_forms(wxr, split_text)
 
 
 # Sometimes bolded sections of the head are just smooshed together; what

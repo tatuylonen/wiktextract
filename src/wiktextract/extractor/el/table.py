@@ -11,9 +11,6 @@ from wiktextract.wxr_context import WiktextractContext
 from .models import Form, FormSource, WordEntry
 from .parse_utils import GREEK_LANGCODES, remove_duplicate_forms
 
-# from .simple_tags import simple_tag_map
-# from .tags_utils import convert_tags
-
 # Shorthand for this file. Could be an import, but it's so simple...
 Node = str | WikiNode
 
