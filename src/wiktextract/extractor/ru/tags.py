@@ -295,6 +295,9 @@ GRAMMATICAL_TAGS = {
     "пр. действ. наст.": ["active", "participle", "present"],
     "деепр. наст.": ["adverbial", "participle", "present"],
     "пр. страд. наст.": ["passive", "participle", "present"],
+    # Template:гл pt 1 reg
+    "particípio": "participle",
+    "gerúndio": "gerund",
 }
 
 # Прочие сокращения

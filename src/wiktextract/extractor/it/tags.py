@@ -79,6 +79,9 @@ FORM_LINE_TEMPLATE_TAGS = {
     "Riflessivo": "reflexive",
     "Attivo": "active",
     "Riflessivo pronominale": ["reflexive", "pronominal"],
+    # Template:en-verb
+    "3ª persona sing. presente": ["third-person", "singular", "present"],
+    "passato semplice": "past",
 }
 
 # https://it.wiktionary.org/wiki/Template:Term/d

@@ -206,3 +206,31 @@ class TestItForms(TestCase):
                 },
             ],
         )
+
+    def test_en_verb(self):
+        self.wxr.wtp.add_page(
+            "Template:en-verb",
+            10,
+            "(''<small>3ª persona sing. presente</small>'' '''[[swims#Inglese|swims]]''', ''<small>participio presente</small>'' '''[[swimming#Inglese|swimming]]''', ''<small>passato semplice</small>'' '''[[swam#Inglese|swam]]''', ''<small>participio passato</small>'' '''[[swum#Inglese|swum]]''') [[Categoria:Verbi irregolari inglesi]]",
+        )
+        data = parse_page(
+            self.wxr,
+            "swim",
+            """== {{-en-}} ==
+===''[[verbo|Verbo]]''===
+{{pn}} {{en-verb|swims|swimming|swam|swum}}
+# [[nuotare]]""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {
+                    "form": "swims",
+                    "tags": ["third-person", "singular", "present"],
+                },
+                {"form": "swimming", "tags": ["present", "participle"]},
+                {"form": "swam", "tags": ["past"]},
+                {"form": "swum", "tags": ["past", "participle"]},
+            ],
+        )
+        self.assertEqual(data[0]["categories"], ["Verbi irregolari inglesi"])
