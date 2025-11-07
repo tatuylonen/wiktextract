@@ -302,7 +302,6 @@ def process_pos(
 
             if (
                 data.lang_code == "el"
-                and not data.word.startswith("-")
                 # If there are spaces around the "/", we don't parse the
                 # header correctly, so just skip the expansion.
                 # Ex. "πρωτοπόρος, -α / -ος, -ο"

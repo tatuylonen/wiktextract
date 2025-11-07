@@ -114,3 +114,9 @@ class TestElInflection(TestCase):
         raw = "αναμμένος, -η, -ο"
         expected = ["αναμμένος", "αναμμένη", "αναμμένο"]
         self.mktest_expand_suffix_forms(raw, expected)
+
+    def test_expand_already_expanded(self) -> None:
+        # https://el.wiktionary.org/wiki/πολύς
+        raw = "πολύς, πολλή, πολύ"
+        expected = ["πολύς", "πολλή", "πολύ"]
+        self.mktest_expand_suffix_forms(raw, expected)
