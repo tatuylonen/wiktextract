@@ -199,3 +199,27 @@ class TestItGloss(TestCase):
                 {"glosses": ["uccello rapace", "gufo comune"]},
             ],
         )
+
+    def test_double_tags(self):
+        self.wxr.wtp.add_page(
+            "Template:Term",
+            10,
+            "<small>(<i>[[{{{1}}}]]</i>)</small>[[Categoria:Parole disusate-IT]]",
+        )
+        data = parse_page(
+            self.wxr,
+            "ammortare",
+            """== {{-it-}} ==
+===Verbo===
+# {{Term|obsoleto|it}}, {{Term|letterario|it}} [[portare]] alla [[morte]], [[causare]] la [[morte]] di""",
+        )
+        self.assertEqual(
+            data[0]["senses"],
+            [
+                {
+                    "categories": ["Parole disusate-IT"],
+                    "glosses": ["portare alla morte, causare la morte di"],
+                    "tags": ["obsolete", "literary"],
+                }
+            ],
+        )

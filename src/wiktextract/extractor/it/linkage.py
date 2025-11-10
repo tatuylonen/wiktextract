@@ -53,7 +53,7 @@ def extract_linkage_list_item(
                 word_str = word_str.strip()
                 if word_str.startswith("(") and word_str.endswith(")"):
                     raw_tags.append(word_str.strip("()"))
-                elif word_str != "":
+                elif word_str not in ["", "(", ")"]:
                     linkages.append(Linkage(word=word_str, raw_tags=raw_tags))
                     raw_tags.clear()
     return linkages
