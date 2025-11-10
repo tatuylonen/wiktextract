@@ -131,10 +131,12 @@ You can also easily pretty-print the data into a more human-readable form using:
 print(json.dumps(data, indent=2, sort_keys=True, ensure_ascii=False))
 ```
 
+Non-en editions has JSON schema files at https://tatuylonen.github.io/wiktextract/, the English edition doesn't have JSON schema but the fields are listed at https://kaikki.org/dictionary/errors/mapping/index.html and has TypedDict models in [type_utils.py](https://github.com/tatuylonen/wiktextract/blob/master/src/wiktextract/extractor/en/type_utils.py) file.
+
 Here is a pretty-printed example of an extracted word entry for the
 word `thrill` as an English verb (only one part-of-speech is shown here):
 
-```python
+```json
 {
   "categories": [
     "Emotions"
