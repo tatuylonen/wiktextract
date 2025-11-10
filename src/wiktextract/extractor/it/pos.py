@@ -129,7 +129,7 @@ def extract_gloss_list_item(
                     )
         else:
             gloss_nodes.append(node)
-    gloss_str = clean_node(wxr, sense, gloss_nodes)
+    gloss_str = clean_node(wxr, sense, gloss_nodes).strip(", ")
     if gloss_str != "":
         sense.glosses.append(gloss_str)
         translate_raw_tags(sense)
