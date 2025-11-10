@@ -604,3 +604,44 @@ class TestDeForms(TestCase):
                 {"form": "sein", "tags": ["auxiliary", "perfect"]},
             ],
         )
+
+    def test_en_verb(self):
+        self.wxr.wtp.add_page(
+            "Vorlage:Englisch Verb Übersicht",
+            10,
+            """{| class="wikitable inflection-table float-right"
+! style="width: 120px;" | [[Hilfe:tense|Zeitform]]
+! Person
+! Wortform
+|-
+| rowspan="2" style="background-color: #f4f4f4;" | '''[[Hilfe:simple present|simple present]]'''
+| <small>I, you, they</small> || swim
+|-
+| <small>he, she, it</small> || [[swims#swims (Englisch)|swims]]
+|}""",
+        )
+        data = parse_page(
+            self.wxr,
+            "swim",
+            """== swim ({{Sprache|Englisch}}) ==
+=== {{Wortart|Verb|Englisch}} ===
+{{Englisch Verb Übersicht
+|present_I=swim
+|present_he, she, it=swims
+|past_simple_I=swam
+|present participle=swimming
+|past participle=swum
+}}
+====Bedeutungen====
+:[1] sich auf oder in einer Flüssigkeit (aus eigener Kraft) fortbewegen""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {
+                    "form": "swims",
+                    "tags": ["present"],
+                    "pronouns": ["he", "she", "it"],
+                }
+            ],
+        )

@@ -381,6 +381,11 @@ MOOD_TAGS = {
     # Template:Schwedisch Verb Übersicht
     "Konjunktiv": "subjunctive",
     "Konditional": "conditional",
+    # Template:Englisch Verb Übersicht
+    "simple present": "present",
+    "simple past": "past",
+    "present participle": ["present", "participle"],
+    "past participle": ["past", "participle"],
 }
 
 VERB_FORM_TAGS = {

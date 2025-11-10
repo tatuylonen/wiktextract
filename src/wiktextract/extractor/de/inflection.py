@@ -96,7 +96,14 @@ def process_verb_table(
                     pronouns.clear()
                 header_col_index += 1
             elif table_cell.kind == NodeKind.TABLE_CELL:
-                if has_person and col_index == 0:
+                if "background-color: #f4f4f4" in table_cell.attrs.get(
+                    "style", ""
+                ):
+                    # Template:Englisch Verb Übersicht
+                    rowspan = int(table_cell.attrs.get("rowspan", "1"))
+                    row_headers.append(RowspanHeader(cell_text, 0, rowspan))
+                    continue
+                elif has_person and col_index == 0:
                     if cell_text in ("Singular", "Plural"):
                         row_headers.append(RowspanHeader(cell_text, 0, 1))
                     else:
