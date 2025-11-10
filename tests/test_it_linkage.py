@@ -65,6 +65,16 @@ class TestItLinkage(TestCase):
             data[0]["hypernyms"],
             [{"word": "eucariote", "raw_tags": ["dominio"]}],
         )
+        data = parse_page(
+            self.wxr,
+            "areopago",
+            """== {{-it-}} ==
+===Sostantivo===
+# nell'[[antichità]] il [[tribunale]] [[supremo]] di [[Atene]]
+===Sinonimi===
+* (''consesso'') [[consiglio]]""",
+        )
+        self.assertEqual(data[0]["synonyms"], [{"word": "consiglio"}])
 
     def test_proverbs(self):
         self.wxr.wtp.add_page("Template:-it-", 10, "Italiano")
