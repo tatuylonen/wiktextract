@@ -63,6 +63,11 @@ class TestPronunciation(TestCase):
 
     def test_homophone_template(self):
         self.wxr.wtp.start_page("大家")
+        self.wxr.wtp.add_page(
+            "Template:homophones",
+            10,
+            """<span class="homophones">[[Appendix:術語表#同音詞|同音詞]]：<span class="Jpan" lang="ja">-{<!-- -->[[大矢#日語|-{大矢}-]]}-</span>、<span class="Jpan" lang="ja">-{<!-- -->[[大宅#日語|-{大宅}-]]}-</span>、<span class="Jpan" lang="ja">-{<!-- -->[[大谷#日語|-{大谷}-]]}-</span></span>[[Category:有同音詞的日語詞|大00宀07]]""",
+        )
         root = self.wxr.wtp.parse("* {{homophones|ja|大矢|大宅|大谷}}")
         base_data = WordEntry(
             word="大家", lang_code="ja", lang="日語", pos="noun"
@@ -76,6 +81,7 @@ class TestPronunciation(TestCase):
                 {"homophone": "大谷"},
             ],
         )
+        self.assertEqual(base_data.categories, ["有同音詞的日語詞"])
 
     def test_en_pron_list(self):
         self.wxr.wtp.start_page("hello")
