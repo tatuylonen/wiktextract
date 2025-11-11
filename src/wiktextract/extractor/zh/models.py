@@ -107,6 +107,7 @@ class Sound(ChineseBaseModel):
     enpr: str = Field(default="", description="English pronunciation")
     other: str = ""
     roman: str = ""
+    rhymes: str = ""
 
 
 class Translation(ChineseBaseModel):

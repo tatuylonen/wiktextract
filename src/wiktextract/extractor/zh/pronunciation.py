@@ -61,8 +61,14 @@ def process_pron_template(
         new_sounds, new_cats = process_zh_pron_template(wxr, template_node)
         sounds.extend(new_sounds)
         categories.extend(new_cats)
+    elif template_name in ["rhymes", "rhyme"]:
+        new_sounds, new_cats = extract_rhymes_template(wxr, template_node)
+        sounds.extend(new_sounds)
+        categories.extend(new_cats)
     elif template_name in ["homophones", "homophone", "hmp"]:
-        sounds.extend(process_homophones_template(wxr, template_node))
+        new_sounds, new_cats = extract_homophones_template(wxr, template_node)
+        sounds.extend(new_sounds)
+        categories.extend(new_cats)
     elif template_name in ["a", "accent"]:
         # https://zh.wiktionary.org/wiki/Template:Accent
         raw_tags.append(clean_node(wxr, None, template_node).strip("()"))
@@ -301,20 +307,36 @@ def extract_zh_pron_homophones_table(
     return sounds
 
 
-def process_homophones_template(
-    wxr: WiktextractContext, template_node: TemplateNode
-) -> list[Sound]:
+def extract_homophones_template(
+    wxr: WiktextractContext, t_node: TemplateNode
+) -> tuple[list[Sound], list[str]]:
     # https://zh.wiktionary.org/wiki/Template:homophones
-    sounds = []
-    for word_index in itertools.count(2):
-        if word_index not in template_node.template_parameters:
-            break
-        homophone = clean_node(
-            wxr, None, template_node.template_parameters.get(word_index, "")
-        )
-        if len(homophone) > 0:
-            sounds.append(Sound(homophone=homophone))
-    return sounds
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    homophones = []
+    cats = {}
+    lang_code = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
+    for top_span in expanded_node.find_html(
+        "span", attr_name="class", attr_value="homophones"
+    ):
+        for span_tag in top_span.find_html("span"):
+            span_lang = span_tag.attrs.get("lang", "")
+            span_class = span_tag.attrs.get("class", "").split()
+            if "Latn" in span_class and len(homophones) > 0:
+                homophones[-1].roman = clean_node(wxr, None, span_tag)
+            elif span_lang == lang_code:
+                homophone = clean_node(wxr, None, span_tag)
+                if homophone != "":
+                    homophones.append(Sound(homophone=homophone))
+            elif "qualifier-content" in span_class and len(homophones) > 0:
+                raw_tag = clean_node(wxr, None, span_tag)
+                if raw_tag != "":
+                    homophones[-1].raw_tags.append(raw_tag)
+                    translate_raw_tags(homophones[-1])
+    for link_node in expanded_node.find_child(NodeKind.LINK):
+        clean_node(wxr, cats, link_node)
+    return homophones, cats.get("categories", [])
 
 
 def process_audio_template(
@@ -497,4 +519,19 @@ def extract_th_pron_template(
                                 sounds.append(sound)
 
     clean_node(wxr, cats, expanded_node)
+    return sounds, cats.get("categories", [])
+
+
+def extract_rhymes_template(
+    wxr: WiktextractContext, t_node: TemplateNode
+) -> tuple[list[Sound], list[str]]:
+    sounds = []
+    cats = {}
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for link_node in expanded_node.find_child(NodeKind.LINK):
+        rhyme = clean_node(wxr, cats, link_node)
+        if rhyme != "":
+            sounds.append(Sound(rhymes=rhyme))
     return sounds, cats.get("categories", [])

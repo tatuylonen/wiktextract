@@ -54,9 +54,7 @@ def extract_sound_list_item(
                 "IPA2",
                 "IPA3",
                 "IPA4",
-                "fra-IPA",
-                "fr-IPA",
-            ]:
+            ] or node.template_name.endswith("-IPA"):
                 extract_ipa_template(wxr, base_data, node, "IPA")
             elif node.template_name in ["enPR", "AHD"]:
                 extract_ipa_template(wxr, base_data, node, "enPR")
@@ -64,6 +62,8 @@ def extract_sound_list_item(
                 extract_rhymes_template(wxr, base_data, node)
             elif node.template_name in ["hyphenation", "hyph"]:
                 extract_hyphenation_template(wxr, base_data, node)
+            elif node.template_name in ["homophones", "homophone", "hmp"]:
+                extract_homophones_template(wxr, base_data, t_node)
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
             for child_list_item in node.find_child(NodeKind.LIST_ITEM):
                 extract_sound_list_item(wxr, base_data, child_list_item)
@@ -607,3 +607,34 @@ def extract_th_pron_template(
 
     base_data.sounds.extend(sounds)
     clean_node(wxr, base_data, expanded_node)
+
+
+def extract_homophones_template(
+    wxr: WiktextractContext, base_data: WordEntry, t_node: TemplateNode
+):
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    homophones = []
+    lang_code = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
+    for top_span in expanded_node.find_html(
+        "span", attr_name="class", attr_value="homophones"
+    ):
+        for span_tag in top_span.find_html("span"):
+            span_lang = span_tag.attrs.get("lang", "")
+            span_class = span_tag.attrs.get("class", "").split()
+            if "tr" in span_class and len(homophones) > 0:
+                homophones[-1].roman = clean_node(wxr, None, span_tag)
+            elif span_lang == lang_code:
+                homophone = clean_node(wxr, None, span_tag)
+                if homophone != "":
+                    homophones.append(Sound(homophone=homophone))
+            elif "qualifier-content" in span_class and len(homophones) > 0:
+                raw_tag = clean_node(wxr, None, span_tag)
+                if raw_tag != "":
+                    homophones[-1].raw_tags.append(raw_tag)
+                    translate_raw_tags(homophones[-1])
+
+    base_data.sounds.extend(homophones)
+    for link_node in expanded_node.find_child(NodeKind.LINK):
+        clean_node(wxr, base_data, link_node)
