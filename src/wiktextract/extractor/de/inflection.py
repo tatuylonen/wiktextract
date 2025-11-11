@@ -96,8 +96,9 @@ def process_verb_table(
                     pronouns.clear()
                 header_col_index += 1
             elif table_cell.kind == NodeKind.TABLE_CELL:
-                if "background-color: #f4f4f4" in table_cell.attrs.get(
-                    "style", ""
+                if (
+                    "background-color: #f4f4f4"
+                    in table_cell.attrs.get("style", "").lower()
                 ):
                     # Template:Englisch Verb Übersicht
                     rowspan = int(table_cell.attrs.get("rowspan", "1"))
