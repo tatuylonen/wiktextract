@@ -420,6 +420,9 @@ def parse_linkage(
         if is_panel_template(wxr, name):
             have_panel_template = True
             return ""
+        # Ignore auto-filled templates like Template:table:Solar System/en
+        if name.startswith("table:"):
+            return ""
         return None
 
     # Main body of parse_linkage()
