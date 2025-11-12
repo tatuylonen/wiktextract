@@ -197,3 +197,22 @@ class TestCsGloss(TestCase):
                 }
             ],
         )
+
+    def test_form_of_list(self):
+        data = parse_page(
+            self.wxr,
+            "dianetik",
+            """== čeština ==
+=== podstatné jméno (2) ===
+* ''genitiv množného čísla od slova'' [[dianetika]]""",
+        )
+        self.assertEqual(
+            data[0]["senses"],
+            [
+                {
+                    "glosses": ["genitiv množného čísla od slova dianetika"],
+                    "tags": ["form-of"],
+                    "form_of": [{"word": "dianetika"}],
+                }
+            ],
+        )

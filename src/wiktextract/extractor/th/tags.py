@@ -207,6 +207,7 @@ LABEL_TAGS = {
     "รูปกริยาขยายปัจจุบันกาล": ["participle", "present"],
     "อดีตกาล": "past",
     "รูปกริยาขยายอดีตกาล": ["participle", "past"],
+    "อดีตกาลและรูปกริยาขยายอดีตกาล": ["participle", "past"],
     # Template:en-adj
     "ขั้นกว่า": "comparative",
     "ขั้นสุด": "superlative",
