@@ -411,7 +411,6 @@ def parse_linkage(
     # print("field", field)
     # print("data", data)
     # print("children:")
-    # print(linkagenode.children)
     if not wxr.config.capture_linkages:
         return
     have_panel_template = False
@@ -669,66 +668,76 @@ def parse_linkage_item(
     # commas.
     links_that_should_not_be_split: list[str] = []
 
-    def item_recurse(contents: list[str | WikiNode]) -> None:
+    def item_recurse(
+        contents: list[str | WikiNode], possible_sense: str | None = None
+    ) -> bool:
         assert isinstance(contents, (list, tuple))
         nonlocal sense
         nonlocal ruby
         nonlocal parts
+        is_sense = False
         # print("ITEM_RECURSE:", contents)
         for node in contents:
             if isinstance(node, str):
                 parts.append(node)
                 continue
             kind = node.kind
-            # print("ITEM_RECURSE KIND:", kind,
-            #        node.sarg if node.sarg else node.largs)
-            if is_list_item(node):
-                if parts:
-                    # print(f"{parts=}")
-                    possible_sense: Optional[str]
-                    possible_sense = clean_node(wxr, None, parts)
-                    is_sense = False
+            # print(
+            #     "ITEM_RECURSE KIND:",
+            #     kind,
+            #     node.sarg if node.sarg else node.largs,
+            # )
 
-                    if possible_sense.endswith(":"):
-                        is_sense = True
-                        possible_sense = possible_sense[:-1].strip()
-                    if possible_sense.startswith(
-                        "("
-                    ) and possible_sense.endswith(")"):
-                        is_sense = True
-                        possible_sense = possible_sense[1:-1].strip()
-                    if (
-                        possible_sense.lower() == TRANSLATIONS_TITLE
-                        or not is_sense
-                    ):
-                        possible_sense = None
-                    # print("linkage item_recurse LIST sense1:", sense1)
-                    parse_linkage_recurse(
-                        wxr,
-                        node.children,
-                        field,
-                        possible_sense or sense,
-                        None,
-                        word,
-                        data,
-                        sense_datas,
-                        is_reconstruction,
-                    )
-                    if is_sense:
-                        parts = []
+            #### parts into possible_sense
+            if (
+                is_list_item(node)
+                or is_list(node)
+                or kind
+                in (
+                    NodeKind.TABLE,
+                    NodeKind.TABLE_ROW,
+                    NodeKind.TABLE_CELL,
+                )
+                and parts
+            ):
+                # print(f"{parts=}")
+                candidate_sense: str | None
+                candidate_sense = clean_node(wxr, None, parts)
+                is_sense = False
+
+                if candidate_sense.endswith(":"):
+                    is_sense = True
+                    candidate_sense = candidate_sense[:-1].strip()
+                if candidate_sense.startswith("(") and candidate_sense.endswith(
+                    ")"
+                ):
+                    is_sense = True
+                    candidate_sense = candidate_sense[1:-1].strip()
+                if (
+                    candidate_sense.lower() == TRANSLATIONS_TITLE
+                    or not is_sense
+                ):
+                    candidate_sense = None
+                # print(f"{possible_sense=}, {is_sense=}")
+                if is_sense:
+                    possible_sense = candidate_sense
+                    parts = []
                 else:
-                    parse_linkage_recurse(
-                        wxr,
-                        node.children,
-                        field,
-                        sense,
-                        None,
-                        word,
-                        data,
-                        sense_datas,
-                        is_reconstruction,
-                    )
-            elif kind in (
+                    candidate_sense = None
+
+            # Handle nodes
+            if is_list_item(node):
+                parse_linkage_item(
+                    wxr,
+                    node.children,
+                    field,
+                    word,
+                    data,
+                    sense_datas,
+                    is_reconstruction,
+                    possible_sense or sense,
+                )
+            elif is_list(node) or kind in (
                 NodeKind.TABLE,
                 NodeKind.TABLE_ROW,
                 NodeKind.TABLE_CELL,
@@ -737,7 +746,7 @@ def parse_linkage_item(
                     wxr,
                     node.children,
                     field,
-                    sense,
+                    possible_sense or sense,
                     None,
                     word,
                     data,
@@ -769,7 +778,7 @@ def parse_linkage_item(
                         wxr,
                         node.children,
                         field,
-                        sense,
+                        possible_sense or sense,
                         None,
                         word,
                         data,
@@ -777,7 +786,7 @@ def parse_linkage_item(
                         is_reconstruction,
                     )
                 else:
-                    item_recurse(node.children)
+                    item_recurse(node.children, possible_sense)
             elif kind == NodeKind.LINK:
                 ignore = False
                 if isinstance(node.largs[0][0], str):
@@ -798,7 +807,7 @@ def parse_linkage_item(
                             v = [v[0][1:]] + list(v[1:])  # type:ignore
                         if isinstance(v[0], str) and not v[0].isalnum():
                             links_that_should_not_be_split.append("".join(v[0]))  # type: ignore
-                        item_recurse(v)
+                        item_recurse(v, possible_sense)
             elif kind == NodeKind.URL:
                 if len(node.largs) < 2 and node.largs:
                     # Naked url captured
@@ -809,7 +818,7 @@ def parse_linkage_item(
                     urls.append(node.largs[0][-1])  # type:ignore[arg-type]
                 # print(f"{node.largs=!r}")
                 # print("linkage recurse URL {}".format(node))
-                item_recurse(node.largs[-1])
+                item_recurse(node.largs[-1], possible_sense)
             elif kind in (
                 NodeKind.PREFORMATTED,
                 NodeKind.BOLD,
@@ -824,31 +833,35 @@ def parse_linkage_item(
                     sortid="page/2073",
                 )
 
+        return is_sense
+
     # print("LINKAGE CONTENTS BEFORE ITEM_RECURSE: {!r}"
     #       .format(contents))
 
-    item_recurse(contents)
-    item = clean_node(wxr, None, parts)
-    # print("LINKAGE ITEM CONTENTS:", parts)
-    # print("CLEANED ITEM: {!r}".format(item))
-    # print(f"URLS {urls=!r}")
+    is_sense = item_recurse(contents)
 
-    if v := parse_linkage_item_text(
-        wxr,
-        word,
-        data,
-        field,
-        item,
-        sense,
-        ruby,
-        sense_datas,
-        is_reconstruction,
-        urls or None,
-        links_that_should_not_be_split or None,
-    ):
-        return [v]
-    else:
-        return []
+    if not is_sense:
+        item = clean_node(wxr, None, parts)
+        # print("LINKAGE ITEM CONTENTS:", parts)
+        # print("CLEANED ITEM: {!r}".format(item))
+        # print(f"URLS {urls=!r}")
+
+        if v := parse_linkage_item_text(
+            wxr,
+            word,
+            data,
+            field,
+            item,
+            sense,
+            ruby,
+            sense_datas,
+            is_reconstruction,
+            urls or None,
+            links_that_should_not_be_split or None,
+        ):
+            return [v]
+
+    return []
 
 
 def parse_linkage_item_text(

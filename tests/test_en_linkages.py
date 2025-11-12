@@ -9,6 +9,7 @@ from wikitextprocessor import Wtp
 
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.en.linkages import parse_linkage_item_text
+from wiktextract.extractor.en.page import parse_page
 from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.wxr_context import WiktextractContext
 
@@ -451,7 +452,7 @@ class EnLinkageTests(unittest.TestCase):
 
     def test_taxonomic4(self):
         data = self.run_data(
-            "(order): Eukaryota - superkingdom; " "Animalia - kingdom"
+            "(order): Eukaryota - superkingdom; Animalia - kingdom"
         )
         self.assertEqual(
             data,
@@ -838,7 +839,7 @@ class EnLinkageTests(unittest.TestCase):
 
     def test_prefix23(self):
         data = self.run_data(
-            "(intransitive, transitive, verb, frequentative): " "foo"
+            "(intransitive, transitive, verb, frequentative): foo"
         )
         self.assertEqual(
             data,
@@ -863,7 +864,7 @@ class EnLinkageTests(unittest.TestCase):
 
     def test_prefix25(self):
         data = self.run_data(
-            "(intransitive, to run, transitive, " "ditransitive): foo"
+            "(intransitive, to run, transitive, ditransitive): foo"
         )
         self.assertEqual(
             data,
@@ -909,7 +910,7 @@ class EnLinkageTests(unittest.TestCase):
                 "related": [
                     {
                         "word": "foo",
-                        "english": "human", # DEPRECATED
+                        "english": "human",  # DEPRECATED
                         "translation": "human",
                         "sense": "Homo sapiens",
                     }
@@ -1867,3 +1868,54 @@ class EnLinkageTests(unittest.TestCase):
                 ]
             },
         )
+
+    #############
+    # Testing stuff related to nested lists in general
+    #############
+
+    def test_nested_lists_1(self):
+        data = parse_page(
+            self.wxr,
+            "foo",
+            """
+==English==
+
+===Prefix===
+
+# [[pebble]], small [[stone]]
+
+====Derived terms====
+*Foo:
+**foo-one
+**foo-two (rare)
+**foo-three
+** Bar:
+*** bar-one
+*** bar-two
+**** bar-three
+**** bar-four
+*** bar-five
+*** bar-six
+**foo-four
+*** foo-five
+""",
+        )
+        # print()
+        # print(data)
+        # for x in data[0]["derived"]:
+        #     print(f"{x}")
+
+        expected = [
+            {"sense": "Foo", "word": "foo-one"},
+            {"tags": ["rare"], "sense": "Foo", "word": "foo-two"},
+            {"sense": "Foo", "word": "foo-three"},
+            {"sense": "Bar", "word": "bar-one"},
+            {"sense": "Bar", "word": "bar-three"},
+            {"sense": "Bar", "word": "bar-four"},
+            {"sense": "Bar", "word": "bar-two"},
+            {"sense": "Bar", "word": "bar-five"},
+            {"sense": "Bar", "word": "bar-six"},
+            {"sense": "Foo", "word": "foo-five"},
+            {"sense": "Foo", "word": "foo-four"},
+        ]
+        self.assertEqual(data[0]["derived"], expected)
