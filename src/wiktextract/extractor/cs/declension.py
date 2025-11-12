@@ -92,7 +92,12 @@ def extract_substantivum_template(
                             )
                         )
                 else:
-                    for word in cell_text.split(" / "):
+                    words = (
+                        filter(None, map(str.strip, cell_text.split("/")))
+                        if cell_text.count("/") == 1
+                        else [cell_text]
+                    )
+                    for word in words:
                         cell_tags, word = capture_text_in_parentheses(word)
                         word = word.strip()
                         if word in ["", "—", wxr.wtp.title]:
