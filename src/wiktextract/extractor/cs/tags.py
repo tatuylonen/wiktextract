@@ -237,6 +237,14 @@ TABLE_TAGS = {
     "gerundium": "gerund",
     "příčestí": "participle",
     "příčestí minulé": ["past", "participle"],
+    # Template:Sloveso (sv)
+    "pasivum": "passive",
+    "přítomnost": "present",
+    "supinum": "supine",
+    "rozkazovací zp.": "imperative",
+    "přítomné": "present",
+    "trpné": "passive",
+    "plurál/\nurč. tvar": "plural",
 }
 
 SOUND_TAGS = {

@@ -34,6 +34,8 @@ POS_DATA = {
     "vlastní jméno": {"pos": "name"},
     "stažený tvar": {"pos": "contraction", "tags": ["contraction"]},
     "tvar slovesa": {"pos": "verb", "tags": ["form-of"]},
+    "kořen": {"pos": "root", "tags": ["morpheme"]},
+    "pořekadlo": {"pos": "phrase", "tags": ["idiomatic"]},
 }
 
 LINKAGE_SECTIONS = {
@@ -51,4 +53,5 @@ LINKAGE_SECTIONS = {
     "související symboly": "related",
     "významově související": "related",
     "zkratka": "abbreviations",
+    "idiomy a fráze": "phrases",
 }

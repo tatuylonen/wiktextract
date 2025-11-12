@@ -33,6 +33,8 @@ def parse_section(
 ):
     subtitle = clean_node(wxr, None, level_node.largs)
     subtitle = re.sub(r"\(\d+\)", "", subtitle).strip()
+    if "/" in subtitle:
+        subtitle = subtitle.split("/")[0].strip()
     if subtitle in POS_DATA:
         extract_pos_section(wxr, page_data, base_data, level_node, subtitle)
     elif subtitle == "význam" and len(page_data) > 0:

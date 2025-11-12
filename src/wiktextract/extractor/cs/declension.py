@@ -62,6 +62,7 @@ def extract_substantivum_template(
                     header.rowspan > 1
                     and header.row_index <= row_index
                     and header.row_index + header.rowspan > row_index
+                    and header.col_index <= col_index
                 ):
                     col_index += header.colspan
             for cell in row.find_child(
@@ -110,7 +111,7 @@ def extract_substantivum_template(
                         for row_header in row_headers:
                             if (
                                 row_header.text != ""
-                                and row_header.row_index <= row_index
+                                and row_header.row_index < row_index + rowspan
                                 and row_header.row_index + row_header.rowspan
                                 > row_index
                             ):
@@ -118,7 +119,7 @@ def extract_substantivum_template(
                         for col_header in col_headers:
                             if (
                                 col_header.text != ""
-                                and col_header.col_index <= col_index
+                                and col_header.col_index < col_index + colspan
                                 and col_header.col_index + col_header.colspan
                                 > col_index
                             ):
