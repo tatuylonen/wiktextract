@@ -22,7 +22,9 @@ def extract_declension_section(
 ):
     section_tags = DECLENSION_SECTION_TAGS.get(section_title, [])
     for t_node in level_node.find_child(NodeKind.TEMPLATE):
-        if t_node.template_name.startswith(
+        if t_node.template_name == "Sloveso (ja)":
+            extract_sloveso_ja_template(wxr, word_entry, t_node, section_tags)
+        elif t_node.template_name.startswith(
             ("Substantivum ", "Adjektivum ", "Stupňování ", "Sloveso ")
         ):
             extract_substantivum_template(wxr, word_entry, t_node, section_tags)
@@ -127,3 +129,38 @@ def extract_substantivum_template(
                         translate_raw_tags(form)
                         word_entry.forms.append(form)
                 col_index += colspan
+
+
+def extract_sloveso_ja_template(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    t_node: TemplateNode,
+    section_tags: list[str],
+):
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    forms = []
+    for table in expanded_node.find_child(NodeKind.TABLE):
+        for row in table.find_child(NodeKind.TABLE_ROW):
+            row_header = ""
+            for col_index, cell in enumerate(
+                row.find_child(NodeKind.TABLE_CELL | NodeKind.TABLE_HEADER_CELL)
+            ):
+                if col_index >= 3:
+                    break
+                if cell.kind == NodeKind.TABLE_HEADER_CELL:
+                    row_header = clean_node(wxr, None, cell)
+                elif cell.kind == NodeKind.TABLE_CELL:
+                    if col_index == 1:
+                        word = clean_node(wxr, None, cell)
+                        if word not in ["", wxr.wtp.title]:
+                            form = Form(form=word, raw_tags=section_tags)
+                            if row_header != "":
+                                form.raw_tags.append(row_header)
+                            translate_raw_tags(form)
+                            forms.append(form)
+                    elif col_index == 2 and len(forms) > 0:
+                        forms[-1].roman = clean_node(wxr, None, cell)
+
+    word_entry.forms.extend(forms)

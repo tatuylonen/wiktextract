@@ -472,3 +472,39 @@ class TestCsDeclension(TestCase):
                 {"form": "dianetikové", "tags": ["nominative", "plural"]},
             ],
         )
+
+    def test_ja_verb(self):
+        self.wxr.wtp.add_page(
+            "Šablona:Sloveso (ja)",
+            10,
+            """{| class="konjugace verbum"
+|-
+! Sloveso
+! tvar
+! rómadži
+! odvozené tvary
+|-
+! 1. základ
+| lang="ja" xml:lang="ja" | 飲ま
+| lang="cs" xml:lang="cs" | noma
+| lang="ja" xml:lang="ja" | [[飲まない]], [[飲まなくて]]
+|}""",
+        )
+        data = parse_page(
+            self.wxr,
+            "飲む",
+            """== japonština ==
+=== sloveso ===
+==== časování ====
+{{Sloveso (ja)
+  | 1z = 飲ま
+  | 1r = noma
+  | 1o = [[飲まない]], [[飲まなくて]]
+}}
+==== význam ====
+# [[pít]]""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [{"form": "飲ま", "roman": "noma", "raw_tags": ["1. základ"]}],
+        )
