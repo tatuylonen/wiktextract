@@ -421,7 +421,7 @@ def parse_linkage(
             have_panel_template = True
             return ""
         # Ignore auto-filled templates like Template:table:Solar System/en
-        if name.startswith("table:"):
+        if name.startswith(("table:", "list:")):
             return ""
         return None
 
