@@ -60,6 +60,7 @@ class Form(CzechBaseModel):
     form: str
     tags: list[str] = []
     raw_tags: list[str] = []
+    roman: str = ""
 
 
 class Translation(CzechBaseModel):

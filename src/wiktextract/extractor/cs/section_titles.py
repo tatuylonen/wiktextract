@@ -21,6 +21,8 @@ POS_DATA = {
     "substitut": {"pos": "unknown"},
     "slovní spojení": {"pos": "phrase"},
     "fráze": {"pos": "phrase"},
+    "rčení": {"pos": "phrase"},
+    "úsloví": {"pos": "phrase"},
     "idiom": {"pos": "phrase", "tags": ["idiomatic"]},
     "přísloví": {"pos": "proverb"},
     "zkratka": {"pos": "abbrev", "tags": ["abbreviation"]},
@@ -36,6 +38,9 @@ POS_DATA = {
     "tvar slovesa": {"pos": "verb", "tags": ["form-of"]},
     "kořen": {"pos": "root", "tags": ["morpheme"]},
     "pořekadlo": {"pos": "phrase", "tags": ["idiomatic"]},
+    "partikule": {"pos": "particle"},
+    "pseudosloveso": {"pos": "verb"},
+    "výraz": {"pos": "phrase", "tags": ["idiomatic"]},
 }
 
 LINKAGE_SECTIONS = {
