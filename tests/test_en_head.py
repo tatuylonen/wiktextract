@@ -181,8 +181,7 @@ class HeadTests(unittest.TestCase):
         parse_word_head(
             self.wxr,
             "noun",
-            "testpage f (plurale tantum, stem testpag, inanimate) "
-            "(+ dative)",
+            "testpage f (plurale tantum, stem testpag, inanimate) (+ dative)",
             data,
             False,
             None,
@@ -672,7 +671,7 @@ class HeadTests(unittest.TestCase):
         parse_word_head(
             self.wxr,
             "noun",
-            "rear admiral (lower half) (plural rear admirals " "(lower half))",
+            "rear admiral (lower half) (plural rear admirals (lower half))",
             data,
             False,
             None,
@@ -952,6 +951,72 @@ class HeadTests(unittest.TestCase):
                     ],
                     "senses": [{"raw_tags": ["han"], "tags": ["no-gloss"]}],
                     "word": "敎",
+                }
+            ],
+        )
+
+    def test_suffixes_at_end_of_form1(self):
+        # Issue #1484
+        data = {}
+        self.wxr.wtp.start_page("foo")
+        self.wxr.wtp.start_section("Japanese")
+        self.wxr.wtp.start_subsection("Adjective")
+        self.wxr.wtp.add_page(
+            "Template:ja-adj",
+            10,
+            """
+<p><span class="headword-line"><strong class="Jpan headword" lang="ja"><ruby>楽<rp>(</rp><rt><a href="/wiki/%E3%81%9F%E3%81%AE%E3%81%97%E3%81%84#Japanese" title="たのしい">たの</a></rt><rp>)</rp></ruby>しい</strong> <a href="/wiki/Wiktionary:Japanese_transliteration" title="Wiktionary:Japanese transliteration">•</a> (<span lang="ja-Latn" class="headword-tr tr Latn" dir="ltr"><a href="/wiki/tanoshii#Japanese" title="tanoshii">tanoshii</a></span></span>)&nbsp;<i><abbr title="-i (type I) inflection">-i</abbr></i> (<i>adverbial</i> <b class="Jpan" lang="ja"><a href="/wiki/%E6%A5%BD%E3%81%97%E3%81%8F#Japanese" title="楽しく"><ruby>楽<rp>(</rp><rt>たの</rt><rp>)</rp></ruby>しく</a></b> <span class="mention-gloss-paren annotation-paren">(</span><span class="tr">tanoshiku</span><span class="mention-gloss-paren annotation-paren">)</span>)
+</p>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "楽しい",
+            """
+==Japanese==
+
+===Adjective===
+{{ja-adj}}
+
+# pleasant
+""",
+        )
+        self.assertEqual(
+            data,
+            [
+                {
+                    "forms": [
+                        {
+                            "form": "楽しい",
+                            "ruby": [("楽", "たの")],
+                            "tags": ["canonical"],
+                        },
+                        {"form": "tanoshii", "tags": ["romanization"]},
+                        {
+                            "form": "楽しく",
+                            "roman": "tanoshiku",
+                            "ruby": [("楽", "たの")],
+                            "tags": ["adverbial"],
+                        },
+                    ],
+                    "head_templates": [
+                        {
+                            "args": {},
+                            "expansion": "楽(たの)しい • (tanoshii) -i (adverbial 楽(たの)しく (tanoshiku))",
+                            "name": "ja-adj",
+                        }
+                    ],
+                    "lang": "Japanese",
+                    "lang_code": "ja",
+                    "pos": "adj",
+                    "senses": [
+                        {
+                            "glosses": ["pleasant"],
+                            "raw_glosses": [
+                                "pleasant"
+                            ],
+                        }
+                    ],
+                    "word": "楽しい",
                 }
             ],
         )

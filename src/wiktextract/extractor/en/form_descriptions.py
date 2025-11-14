@@ -1820,10 +1820,6 @@ def parse_word_head(
     if "Lua execution error" in text or "Lua timeout error" in text:
         return
 
-    # In Aug 2021, some words had spurious Template:en at the end of head forms
-    # due to a Wiktionary error.
-    text = re.sub(r"\s+Template:[-a-zA-Z]+\s*$", "", text)
-
     # Fix words with "superlative:" or "comparative:" at end of head
     # e.g. grande/Spanish/Adj
     text = re.sub(r" (superlative|comparative): (.*)", r" (\1 \2)", text)
@@ -1878,6 +1874,7 @@ def parse_word_head(
     # Many languages use • as a punctuation mark separating the base
     # from the rest of the head. στάδιος/Ancient Greek, issue #176
     base = base.strip()
+    # print(f"{base=}")
 
     # Check for certain endings in head (mostly for compatibility with weird
     # heads, e.g. rata/Romanian "1st conj." at end)
@@ -1996,6 +1993,13 @@ def parse_word_head(
         if alt.startswith("compound form:"):
             mode = "compound-form"
             alt = alt[14:].strip()
+        if (dash_i := alt.find(" -")) > 0:
+            # test_en_head / test_suffixes_at_end_of_form1
+            # Some heads have suffixes that end up attached to the form
+            # like in https://en.wiktionary.org/wiki/%E6%A5%BD%E3%81%97%E3%81%84
+            # We'll assume that there is no lemma anywhere that has " -" in it
+            # in any language, and thus it is safe to just chop it off.
+            alt = alt[:dash_i]
         if mode == "compound-form":
             add_related(
                 wxr,
