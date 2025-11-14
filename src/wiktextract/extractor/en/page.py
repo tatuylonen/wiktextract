@@ -812,7 +812,7 @@ def parse_sense_linkage(
 
                     lang_code = clean_node(wxr, None, ht.get(1, ""))
                     for t_data in search_thesaurus(
-                        wxr.thesaurus_db_conn,
+                        wxr.thesaurus_db_conn,  # type: ignore
                         w,
                         lang_code,
                         pos,
