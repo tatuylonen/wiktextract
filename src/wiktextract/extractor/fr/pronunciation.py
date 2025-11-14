@@ -59,6 +59,8 @@ PRON_TEMPLATES = frozenset(
         "prononciation reconstruite",  # redirect to "pron-recons"
         "pron recons",  # redirect to "pron-recons"
         "phono",
+        "pron-API",
+        "API",
     ]
 )
 
