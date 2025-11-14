@@ -20,7 +20,12 @@ def extract_sound_section(
     wxr: WiktextractContext, base_data: WordEntry, level_node: LevelNode
 ):
     for t_node in level_node.find_child(NodeKind.TEMPLATE):
-        extract_sound_template(wxr, base_data, t_node)
+        if t_node.template_name == "zh-forms":
+            from .page import extract_zh_forms
+
+            extract_zh_forms(wxr, base_data, t_node)
+        else:
+            extract_sound_template(wxr, base_data, t_node)
     for list_node in level_node.find_child(NodeKind.LIST):
         for list_item in list_node.find_child(NodeKind.LIST_ITEM):
             for t_node in list_item.find_child(NodeKind.TEMPLATE):
