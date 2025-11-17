@@ -1993,12 +1993,12 @@ def parse_word_head(
         if alt.startswith("compound form:"):
             mode = "compound-form"
             alt = alt[14:].strip()
-        if (dash_i := alt.find(" -")) > 0:
+        if ((dash_i := alt.find(" -")) > 0) and (
+            dash_i > (wxr.wtp.title or "").find(" -")
+        ):
             # test_en_head / test_suffixes_at_end_of_form1
             # Some heads have suffixes that end up attached to the form
             # like in https://en.wiktionary.org/wiki/%E6%A5%BD%E3%81%97%E3%81%84
-            # We'll assume that there is no lemma anywhere that has " -" in it
-            # in any language, and thus it is safe to just chop it off.
             alt = alt[:dash_i]
         if mode == "compound-form":
             add_related(
@@ -2877,8 +2877,9 @@ def parse_translation_desc(
                     tr["alt"] = a
                     if tr.get("roman") and tr.get("roman") != r:
                         wxr.wtp.debug(
-                            'more than one value in "roman": '
-                            "{} vs. {}".format(tr["roman"], r),
+                            'more than one value in "roman": {} vs. {}'.format(
+                                tr["roman"], r
+                            ),
                             sortid="form_descriptions/1936",
                         )
                     tr["roman"] = r
