@@ -1780,6 +1780,7 @@ def parse_word_head(
     pos: str,
     text: str,
     data: WordData,
+    word: str,
     is_reconstruction: bool,
     head_group: Optional[int],
     ruby=None,
@@ -1988,17 +1989,16 @@ def parse_word_head(
     # Process the head alternatives
     canonicals: list[tuple[list[str], list[str]]] = []
     mode: Optional[str] = None
+    space_dashes_in_word = word.find(" -")
     for alt_i, alt in enumerate(alts):
         alt = alt.strip()
         if alt.startswith("compound form:"):
             mode = "compound-form"
             alt = alt[14:].strip()
-        if (dash_i := alt.find(" -")) > 0:
+        if (dash_i := alt.find(" -")) > space_dashes_in_word:
             # test_en_head / test_suffixes_at_end_of_form1
             # Some heads have suffixes that end up attached to the form
             # like in https://en.wiktionary.org/wiki/%E6%A5%BD%E3%81%97%E3%81%84
-            # We'll assume that there is no lemma anywhere that has " -" in it
-            # in any language, and thus it is safe to just chop it off.
             alt = alt[:dash_i]
         if mode == "compound-form":
             add_related(

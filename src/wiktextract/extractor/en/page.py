@@ -1708,6 +1708,7 @@ def parse_language(
             pos_type,
             header_text,
             pos_data,
+            word,
             is_reconstruction,
             header_group,
             ruby=ruby,

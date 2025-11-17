@@ -1011,12 +1011,112 @@ class HeadTests(unittest.TestCase):
                     "senses": [
                         {
                             "glosses": ["pleasant"],
-                            "raw_glosses": [
-                                "pleasant"
-                            ],
+                            "raw_glosses": ["pleasant"],
                         }
                     ],
                     "word": "楽しい",
+                }
+            ],
+        )
+
+    def test_suffixes_at_end_of_form2(self):
+        # Don't chop off " -x" stuff if it's part of the word
+        data = {}
+        self.wxr.wtp.start_page("stand up -koomikko")
+        self.wxr.wtp.start_section("Finnish")
+        self.wxr.wtp.start_subsection("Noun")
+        self.wxr.wtp.add_page(
+            "Template:fi-noun",
+            10,
+            """
+[[stand up]] -[[koomikko]]
+""",
+        )
+        data = parse_page(
+            self.wxr,
+            "stand up -koomikko",
+            """
+==Finnish==
+
+===Noun===
+{{fi-noun}}
+
+# stand-up comedian
+""",
+        )
+        print(data)
+        self.assertEqual(
+            data,
+            [
+                {
+                    "senses": [
+                        {
+                            "raw_glosses": ["stand-up comedian"],
+                            "glosses": ["stand-up comedian"],
+                        }
+                    ],
+                    "pos": "noun",
+                    "head_templates": [
+                        {
+                            "name": "fi-noun",
+                            "args": {},
+                            "expansion": "stand up -koomikko",
+                        }
+                    ],
+                    "word": "stand up -koomikko",
+                    "lang": "Finnish",
+                    "lang_code": "fi",
+                }
+            ],
+        )
+
+    def test_suffixes_at_end_of_form3(self):
+        # Don't chop off " -x" stuff if it's part of the word
+        data = {}
+        self.wxr.wtp.start_page("stand up -koomikko -foo")
+        self.wxr.wtp.start_section("Finnish")
+        self.wxr.wtp.start_subsection("Noun")
+        self.wxr.wtp.add_page(
+            "Template:fi-noun",
+            10,
+            """
+[[stand up]] -[[koomikko]] -[[foo]]
+""",
+        )
+        data = parse_page(
+            self.wxr,
+            "stand up -koomikko -foo",
+            """
+==Finnish==
+
+===Noun===
+{{fi-noun}}
+
+# stand-up comedian
+""",
+        )
+        print(data)
+        self.assertEqual(
+            data,
+            [
+                {
+                    "senses": [
+                        {
+                            "raw_glosses": ["stand-up comedian"],
+                            "glosses": ["stand-up comedian"],
+                        }
+                    ],
+                    "pos": "noun",
+                    "head_templates": [
+                        {
+                            "name": "fi-noun",
+                            "args": {},
+                            "expansion": "stand up -koomikko -foo",
+                        }
+                    ],
+                    "word": "stand up -koomikko -foo",
+                    "lang": "Finnish",
+                    "lang_code": "fi",
                 }
             ],
         )
