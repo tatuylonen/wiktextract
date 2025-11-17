@@ -63,7 +63,7 @@ def extract_sound_list_item(
             elif node.template_name in ["hyphenation", "hyph"]:
                 extract_hyphenation_template(wxr, base_data, node)
             elif node.template_name in ["homophones", "homophone", "hmp"]:
-                extract_homophones_template(wxr, base_data, t_node)
+                extract_homophones_template(wxr, base_data, node)
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
             for child_list_item in node.find_child(NodeKind.LIST_ITEM):
                 extract_sound_list_item(wxr, base_data, child_list_item)
