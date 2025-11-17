@@ -11,6 +11,7 @@ from wikitextprocessor.parser import (
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from ..ruby import extract_ruby
 from .example import extract_example_list_item
 from .models import AltForm, Classifier, Form, Sense, WordEntry
 from .section_titles import POS_DATA
@@ -203,30 +204,74 @@ def extract_note_section(
 def extract_headword_template(
     wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
 ):
-    raw_tag = ""
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(t_node), expand_all=True
     )
-    for node in expanded_node.find_child_recursively(
-        NodeKind.ITALIC | NodeKind.HTML
+    has_headword_span = False
+    for main_span_tag in expanded_node.find_html(
+        "span", attr_name="class", attr_value="headword-line"
     ):
-        if node.kind == NodeKind.ITALIC:
-            raw_tag = clean_node(wxr, None, node)
-        elif (
-            isinstance(node, HTMLNode)
-            and node.tag == "span"
-            and "form-of" in node.attrs.get("class", "").split()
+        has_headword_span = True
+        for strong_tag in main_span_tag.find_html(
+            "strong", attr_name="class", attr_value="headword"
         ):
-            form = Form(form=clean_node(wxr, None, node))
-            if raw_tag != "":
-                form.raw_tags.append(raw_tag)
-                translate_raw_tags(form)
-                raw_tag = ""
-            if form.form != "":
-                word_entry.forms.append(form)
+            ruby, no_ruby = extract_ruby(wxr, strong_tag)
+            strong_str = clean_node(wxr, None, no_ruby)
+            if strong_str not in ["", wxr.wtp.title] or len(ruby) > 0:
+                word_entry.forms.append(
+                    Form(form=strong_str, tags=["canonical"], ruby=ruby)
+                )
+        for roman_span in main_span_tag.find_html(
+            "span", attr_name="class", attr_value="headword-tr"
+        ):
+            roman = clean_node(wxr, None, roman_span)
+            if roman != "":
+                word_entry.forms.append(
+                    Form(form=roman, tags=["transliteration"])
+                )
+        for gender_span in main_span_tag.find_html(
+            "span", attr_name="class", attr_value="gender"
+        ):
+            for abbr_tag in gender_span.find_html("abbr"):
+                word_entry.raw_tags.append(clean_node(wxr, None, abbr_tag))
+        form_raw_tag = ""
+        for html_tag in main_span_tag.find_child(NodeKind.HTML):
+            if html_tag.tag == "i":
+                form_raw_tag = clean_node(wxr, None, html_tag)
+            elif html_tag.tag == "b":
+                form_str = clean_node(wxr, None, html_tag)
+                if form_str != "":
+                    form = Form(form=form_str)
+                    if form_raw_tag != "":
+                        form.raw_tags.append(form_raw_tag)
+                        translate_raw_tags(form)
+                    word_entry.forms.append(form)
+                form_raw_tag = ""
+        if form_raw_tag != "":
+            word_entry.raw_tags.append(form_raw_tag)
+    if not has_headword_span:
+        # Template:eng-noun
+        raw_tag = ""
+        for node in expanded_node.find_child_recursively(
+            NodeKind.ITALIC | NodeKind.HTML
+        ):
+            if node.kind == NodeKind.ITALIC:
+                raw_tag = clean_node(wxr, None, node)
+            elif (
+                isinstance(node, HTMLNode)
+                and node.tag == "span"
+                and "form-of" in node.attrs.get("class", "").split()
+            ):
+                form = Form(form=clean_node(wxr, None, node))
+                if raw_tag != "":
+                    form.raw_tags.append(raw_tag)
+                    translate_raw_tags(form)
+                    raw_tag = ""
+                if form.form != "":
+                    word_entry.forms.append(form)
 
-    for link_node in expanded_node.find_child(NodeKind.LINK):
-        clean_node(wxr, word_entry, link_node)
+    clean_node(wxr, word_entry, expanded_node)
+    translate_raw_tags(word_entry)
 
 
 def extract_zh_mw_template(

@@ -35,6 +35,13 @@ def extract_sound_section(
                 extract_zh_pron_template(wxr, base_data, node)
             elif node.template_name in ["th-pron", "tha-pron"]:
                 extract_th_pron_template(wxr, base_data, node)
+            elif node.template_name in [
+                "ja-pron",
+                "ja-IPA",
+                "jpn-IPA",
+                "jpn-pron",
+            ]:
+                extract_ja_pron_template(wxr, base_data, node)
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
             for list_item in node.find_child(NodeKind.LIST_ITEM):
                 extract_sound_list_item(wxr, base_data, list_item)
@@ -63,7 +70,7 @@ def extract_sound_list_item(
             elif node.template_name in ["hyphenation", "hyph"]:
                 extract_hyphenation_template(wxr, base_data, node)
             elif node.template_name in ["homophones", "homophone", "hmp"]:
-                extract_homophones_template(wxr, base_data, t_node)
+                extract_homophones_template(wxr, base_data, node)
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
             for child_list_item in node.find_child(NodeKind.LIST_ITEM):
                 extract_sound_list_item(wxr, base_data, child_list_item)
@@ -638,3 +645,42 @@ def extract_homophones_template(
     base_data.sounds.extend(homophones)
     for link_node in expanded_node.find_child(NodeKind.LINK):
         clean_node(wxr, base_data, link_node)
+
+
+def extract_ja_pron_template(
+    wxr: WiktextractContext, base_data: WordEntry, t_node: TemplateNode
+):
+    JA_PRON_ACCENTS = {"Nakadaka", "Heiban", "Atamadaka", "Odaka"}
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for li_tag in expanded_node.find_html_recursively("li"):
+        sound = Sound()
+        for span_tag in li_tag.find_html("span"):
+            span_class = span_tag.attrs.get("class", "").split()
+            if "usage-label-accent" in span_class:
+                raw_tag = clean_node(wxr, None, span_tag).strip("() ")
+                if raw_tag != "":
+                    sound.raw_tags.append(raw_tag)
+            elif "IPA" in span_class:
+                sound.ipa = clean_node(wxr, None, span_tag)
+            elif "Latn" in span_class:
+                sound.roman = clean_node(wxr, None, span_tag)
+            elif span_tag.attrs.get("lang", "") == "ja":
+                sound.other = clean_node(wxr, None, span_tag)
+        for link_node in li_tag.find_child(NodeKind.LINK):
+            link_text = clean_node(wxr, None, link_node)
+            if link_text in JA_PRON_ACCENTS:
+                sound.tags.append(link_text)
+        if sound.ipa != "" or sound.other != "":
+            translate_raw_tags(sound)
+            base_data.sounds.append(sound)
+    audio_file = t_node.template_parameters.get(
+        "a", t_node.template_parameters.get("audio", "")
+    ).strip()
+    if audio_file != "":
+        sound = Sound()
+        set_sound_file_url_fields(wxr, audio_file, sound)
+        base_data.sounds.append(sound)
+
+    clean_node(wxr, base_data, expanded_node)

@@ -58,7 +58,7 @@ class Sound(JapaneseBaseModel):
     tags: list[str] = []
     raw_tags: list[str] = []
     homophones: list[str] = []
-    form: str = ""
+    other: str = ""
     roman: str = ""
     sense: str = ""
 

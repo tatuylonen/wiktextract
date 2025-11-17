@@ -1,15 +1,11 @@
 import itertools
 import re
 
-from wikitextprocessor import (
-    LevelNode,
-    NodeKind,
-    TemplateNode,
-    WikiNode,
-)
+from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from ..ruby import extract_ruby
 from .example import extract_example_list_item
 from .models import AltForm, Classifier, Form, Sense, WordEntry
 from .section_titles import POS_DATA
@@ -329,10 +325,11 @@ def extract_headword_line_template(
         for strong_tag in main_span_tag.find_html(
             "strong", attr_name="class", attr_value="headword"
         ):
-            strong_str = clean_node(wxr, None, strong_tag)
-            if strong_str not in ["", wxr.wtp.title]:
+            ruby, no_ruby = extract_ruby(wxr, strong_tag)
+            strong_str = clean_node(wxr, None, no_ruby)
+            if strong_str not in ["", wxr.wtp.title] or len(ruby) > 0:
                 word_entry.forms.append(
-                    Form(form=strong_str, tags=["canonical"])
+                    Form(form=strong_str, tags=["canonical"], ruby=ruby)
                 )
         for roman_span in main_span_tag.find_html(
             "span", attr_name="class", attr_value="headword-tr"

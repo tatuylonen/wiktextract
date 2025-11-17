@@ -80,7 +80,7 @@ class TestKoSound(TestCase):
         self.wxr.wtp.add_page(
             "틀:ja-pron",
             10,
-            """<ul><li><span class="usage-label-accent"><span class="ib-brac">(</span><span class="ib-content">[[w:도쿄 방언|도쿄]]</span><span class="ib-brac">)</span></span> <span lang="ja" class="Jpan"><span>と<span></span></span>ーざい</span></span> <span class="Latn"><samp>[tóꜜòzàì]</samp></span> ([[頭高型|두고형]] – [1])</li><li>[[w:국제 음성 기호|IPA]]<sup>([[부록:일본어 발음|표기]])</sup>:&#32;<span class="IPA">[to̞ːza̠i]</span>[[Category:일본어 IPA 발음이 포함된 낱말|とうざい]][[Category:일본어 중복되지 않는 수동 정렬 키를 포함하는 낱말|東西]]</li></ul>""",
+            """<ul><li><span class="usage-label-accent"><span class="ib-brac label-brac">(</span><span class="ib-content label-content">[[w:ko:도쿄 방언|도쿄]]</span><span class="ib-brac label-brac">)</span></span> <span lang="ja" class="Jpan"><span style="border-top:1px solid;position:relative;padding:1px;">と<span style="position:absolute;top:0;bottom:67%;right:0%;border-right:1px solid;"></span></span>ーざい</span> <span class="Latn"><samp>[tóꜜòzàì]</samp></span> ([[頭高型|두고형]] – [1])<ref name="DJR">{{R:ja:다이지린}}</ref><ref name="NHK">{{R:ja:NHK 일본어 발음 악센트 사전}}</ref></li><li>[[w:국제 음성 기호|IPA]]<sup>([[부록:일본어 발음|표기]])</sup>:&#32;<span class="IPA">[to̞ːza̠i]</span>[[분류:일본어 IPA 발음이 포함된 낱말|とうさい']]</li></ul>[[분류:일본어 두고형 악센트 단어 (도쿄)|とうさい']]""",
         )
         data = parse_page(
             self.wxr,
@@ -94,7 +94,11 @@ class TestKoSound(TestCase):
         self.assertEqual(
             data[0]["sounds"],
             [
-                {"roman": "[tóꜜòzàì]", "other": "とーざい", "tags": ["Tokyo"]},
+                {
+                    "roman": "[tóꜜòzàì]",
+                    "other": "とーざい",
+                    "tags": ["Atamadaka", "Tokyo"],
+                },
                 {"ipa": "[to̞ːza̠i]"},
             ],
         )
@@ -102,7 +106,7 @@ class TestKoSound(TestCase):
             data[0]["categories"],
             [
                 "일본어 IPA 발음이 포함된 낱말",
-                "일본어 중복되지 않는 수동 정렬 키를 포함하는 낱말",
+                "일본어 두고형 악센트 단어 (도쿄)",
             ],
         )
 

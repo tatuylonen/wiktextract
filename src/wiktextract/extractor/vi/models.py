@@ -77,6 +77,7 @@ class Form(VietnameseBaseModel):
     raw_tags: list[str] = []
     roman: str = ""
     sense: str = ""
+    ruby: list[tuple[str, ...]] = []
 
 
 class Translation(VietnameseBaseModel):

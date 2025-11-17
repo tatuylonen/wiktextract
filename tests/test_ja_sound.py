@@ -80,7 +80,7 @@ class TestJaSound(TestCase):
             [
                 Sound(
                     roman="[nìhóńgó]",
-                    form="にほんご",
+                    other="にほんご",
                     raw_tags=["東京式"],
                     tags=["Heiban"],
                 ),
@@ -139,7 +139,7 @@ class TestJaSound(TestCase):
             data["sounds"],
             [
                 {
-                    "form": "とーにゅー",
+                    "other": "とーにゅー",
                     "tags": ["Heiban"],
                     "raw_tags": ["京阪式"],
                 }
@@ -161,7 +161,7 @@ class TestJaSound(TestCase):
         data = base_data.model_dump(exclude_defaults=True)
         self.assertEqual(
             data["sounds"],
-            [{"form": "まぜる", "tags": ["Heiban"], "raw_tags": ["京阪式"]}],
+            [{"other": "まぜる", "tags": ["Heiban"], "raw_tags": ["京阪式"]}],
         )
 
     def test_magic_word_in_template_param(self):

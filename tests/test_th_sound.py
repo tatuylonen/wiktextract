@@ -123,7 +123,15 @@ class TestThSound(unittest.TestCase):
         )
         self.assertEqual(
             data[0]["sounds"],
-            [{"roman": "[áꜜìshìtè ìrù]"}, {"ipa": "[a̠iɕi̥te̞ iɾɯ̟ᵝ]"}],
+            [
+                {
+                    "other": "あいしている",
+                    "raw_tags": ["โตเกียว"],
+                    "tags": ["Atamadaka"],
+                    "roman": "[áꜜìshìtè ìrù]",
+                },
+                {"ipa": "[a̠iɕi̥te̞ iɾɯ̟ᵝ]"},
+            ],
         )
         self.assertEqual(
             data[0]["categories"],

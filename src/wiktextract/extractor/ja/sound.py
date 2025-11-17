@@ -143,7 +143,7 @@ def process_ja_pron_template(
         else:
             sound = Sound()
             for span_tag in list_item.find_html_recursively("span"):
-                span_classes = span_tag.attrs.get("class", "")
+                span_classes = span_tag.attrs.get("class", "").split()
                 if "qualifier-content" in span_classes:
                     raw_tag = clean_node(wxr, None, span_tag)
                     if len(raw_tag) > 0:
@@ -153,12 +153,12 @@ def process_ja_pron_template(
                 elif "Latn" in span_classes:
                     sound.roman = clean_node(wxr, None, span_tag)
                 elif "Jpan" in span_classes:
-                    sound.form = clean_node(wxr, None, span_tag)
+                    sound.other = clean_node(wxr, None, span_tag)
             for link_node in list_item.find_child(NodeKind.LINK):
                 link_text = clean_node(wxr, None, link_node)
                 if link_text in JA_PRON_ACCENTS:
                     sound.tags.append(JA_PRON_ACCENTS[link_text])
-            if len(sound.model_dump(exclude_defaults=True)) > 0:
+            if sound.ipa != "" or sound.other != "":
                 sounds.append(sound)
 
     for arg in ["a", "audio"]:
@@ -197,14 +197,14 @@ def process_ja_accent_common_template(
     for span_tag in expanded_node.find_html_recursively("span"):
         span_text = clean_node(wxr, None, span_tag)
         if len(span_text) > 0:
-            sound.form = span_text
+            sound.other = span_text
             break
     accent_type = clean_node(
         wxr, None, template_node.template_parameters.get(1, "")
     )
     if accent_type in JA_ACCENT_COMMON_TYPES:
         sound.tags.append(JA_ACCENT_COMMON_TYPES[accent_type])
-    if sound.form != "":
+    if sound.other != "":
         sounds.append(sound)
 
 
