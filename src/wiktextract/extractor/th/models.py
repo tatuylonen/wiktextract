@@ -81,6 +81,7 @@ class Form(ThaiBaseModel):
     tags: list[str] = []
     raw_tags: list[str] = []
     roman: str = ""
+    ruby: list[tuple[str, ...]] = []
 
 
 class Translation(ThaiBaseModel):
