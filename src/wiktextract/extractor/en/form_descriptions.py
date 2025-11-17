@@ -1989,13 +1989,12 @@ def parse_word_head(
     # Process the head alternatives
     canonicals: list[tuple[list[str], list[str]]] = []
     mode: Optional[str] = None
-    space_dashes_in_word = word.find(" -")
     for alt_i, alt in enumerate(alts):
         alt = alt.strip()
         if alt.startswith("compound form:"):
             mode = "compound-form"
             alt = alt[14:].strip()
-        if (dash_i := alt.find(" -")) > space_dashes_in_word:
+        if (dash_i := alt.find(" -")) > 0 and dash_i > word.find(" -"):
             # test_en_head / test_suffixes_at_end_of_form1
             # Some heads have suffixes that end up attached to the form
             # like in https://en.wiktionary.org/wiki/%E6%A5%BD%E3%81%97%E3%81%84
