@@ -116,6 +116,12 @@ def extract_ja_pron_template(
     wxr: WiktextractContext, word_entry: WordEntry, node: TemplateNode
 ) -> None:
     # https://ko.wiktionary.org/wiki/틀:ja-pron
+    JA_PRON_ACCENTS = {
+        "중고형": "Nakadaka",
+        "평판형": "Heiban",
+        "두고형": "Atamadaka",
+        "미고형": "Odaka",
+    }
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(node), expand_all=True
     )
@@ -123,18 +129,29 @@ def extract_ja_pron_template(
         for li_tag in ul_tag.find_html("li"):
             sound = Sound()
             for span_tag in li_tag.find_html("span"):
-                span_class = span_tag.attrs.get("class", "")
-                if span_class == "usage-label-accent":
+                span_class = span_tag.attrs.get("class", "").split()
+                if "usage-label-accent" in span_class:
                     sound.raw_tags.append(
                         clean_node(wxr, None, span_tag).strip("()")
                     )
-                elif span_class == "Jpan":
+                elif "Jpan" in span_class:
                     sound.other = clean_node(wxr, None, span_tag)
-                elif span_class == "Latn":
+                elif "Latn" in span_class:
                     sound.roman = clean_node(wxr, None, span_tag)
-                elif span_class == "IPA":
+                elif "IPA" in span_class:
                     sound.ipa = clean_node(wxr, None, span_tag)
+            for link_node in li_tag.find_child(NodeKind.LINK):
+                link_text = clean_node(wxr, None, link_node)
+                if link_text in JA_PRON_ACCENTS:
+                    sound.tags.append(JA_PRON_ACCENTS[link_text])
             if sound.ipa != "" or sound.roman != "":
                 translate_raw_tags(sound)
                 word_entry.sounds.append(sound)
+    audio_file = node.template_parameters.get(
+        "a", node.template_parameters.get("audio", "")
+    ).strip()
+    if audio_file != "":
+        sound = Sound()
+        set_sound_file_url_fields(wxr, audio_file, sound)
+        word_entry.sounds.append(sound)
     clean_node(wxr, word_entry, expanded_node)
