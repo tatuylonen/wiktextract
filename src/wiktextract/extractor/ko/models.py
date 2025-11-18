@@ -95,6 +95,9 @@ class Form(KoreanBaseModel):
     tags: list[str] = []
     raw_tags: list[str] = []
     roman: str = ""
+    ruby: list[tuple[str, ...]] = Field(
+        default=[], description="Japanese Kanji and furigana"
+    )
 
 
 class WordEntry(KoreanBaseModel):

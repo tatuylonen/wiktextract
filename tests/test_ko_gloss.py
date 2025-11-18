@@ -153,7 +153,7 @@ class TestKoGloss(TestCase):
         self.wxr.wtp.add_page(
             "틀:ko-verb",
             10,
-            """<span class="headword-line"><strong class="Kore headword" lang="ko">없다</strong> (<span lang="ko-Latn" class="headword-tr tr Latn" dir="ltr">eopda</span>) (부정사형 <b class="None" lang="ko">[[없어#한국어|없어]]</b>[[Category:한국어 비표준 문자가 포함된 낱말 (링크)|없다]], 연결어미형 <b class="None" lang="ko">[[없으니#한국어|없으니]]</b>, 명사형 <b class="None" lang="ko">[[없음#한국어|없음]]</b>, 사동사 <b class="None" lang="ko">[[없애다#한국어|없애다]]</b>)</span>[[Category:한국어 동사|없다]]""",
+            """<span class="headword-line"><strong class="Kore headword" lang="ko">없다</strong> (<span lang="ko-Latn" class="headword-tr manual-tr tr Latn" dir="ltr">eopda</span>) (<i>연결형</i> <b class="Kore" lang="ko">[[:없으니#한국어|없으니]]</b>, <i>명사형</i> <b class="Kore" lang="ko">[[:없음#한국어|없음]]</b>, <i>사동사</i> <b class="Kore" lang="ko">[[:없애다#한국어|없애다]]</b>)</span>[[분류:한국어 기본형|없다]]""",
         )
         data = parse_page(
             self.wxr,
@@ -166,16 +166,13 @@ class TestKoGloss(TestCase):
         self.assertEqual(
             data[0]["forms"],
             [
-                {"form": "없어", "tags": ["infinitive"]},
+                {"form": "eopda", "tags": ["romanization"]},
                 {"form": "없으니", "tags": ["sequential"]},
                 {"form": "없음", "tags": ["noun"]},
                 {"form": "없애다", "tags": ["causative"]},
             ],
         )
-        self.assertEqual(
-            data[0]["categories"],
-            ["한국어 비표준 문자가 포함된 낱말 (링크)", "한국어 동사"],
-        )
+        self.assertEqual(data[0]["categories"], ["한국어 기본형"])
 
     def test_nested_gloss_lists(self):
         data = parse_page(
@@ -229,3 +226,43 @@ class TestKoGloss(TestCase):
                 },
             ],
         )
+
+    def test_ja_verb(self):
+        self.wxr.wtp.add_page(
+            "틀:ja-verb",
+            10,
+            """<span class="headword-line"><strong class="Jpan headword" lang="ja"><ruby>電<rp>(</rp><rt>[[:でんわ#일본어|でん]]</rt><rp>)</rp></ruby><ruby>話<rp>(</rp><rt>[[:でんわ#일본어|わ]]</rt><rp>)</rp></ruby>[[:する#일본어|する]]</strong> (<span class="headword-tr tr" dir="ltr"><span class="Latn" lang="ja">[[:den'wa#일본어|den'wa]] [[:suru#일본어|suru]]</span></span>)&nbsp;<i><abbr title="サ행 변격 (3류) 동사">サ행 변격</abbr></i> (<i>연용형</i> <b class="Jpan" lang="ja"><span style="font-size: 120%;"><ruby>電<rp>(</rp><rt>でん</rt><rp>)</rp></ruby><ruby>話<rp>(</rp><rt>わ</rt><rp>)</rp></ruby>[[:し#일본어|し]]</span></b> <span class="mention-gloss-paren annotation-paren">(</span><span class="tr">den'wa [[shi#일본어|shi]]</span><span class="mention-gloss-paren annotation-paren">)</span>, <i>과거형</i> <b class="Jpan" lang="ja"><span style="font-size: 120%;"><ruby>電<rp>(</rp><rt>でん</rt><rp>)</rp></ruby><ruby>話<rp>(</rp><rt>わ</rt><rp>)</rp></ruby>[[:した#일본어|した]]</span></b> <span class="mention-gloss-paren annotation-paren">(</span><span class="tr">den'wa [[shita#일본어|shita]]</span><span class="mention-gloss-paren annotation-paren">)</span>)</span>[[분류:일본어 기본형|てんわ']]""",
+        )
+        data = parse_page(
+            self.wxr,
+            "電話",
+            """== 일본어 ==
+=== 동사 ===
+{{ja-verb|type=suru|でんわ}}
+# [[전화하다]]""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {
+                    "form": "電話する",
+                    "roman": "den'wa suru",
+                    "ruby": [("電", "でん"), ("話", "わ")],
+                    "tags": ["canonical"],
+                },
+                {
+                    "form": "電話し",
+                    "roman": "den'wa shi",
+                    "ruby": [("電", "でん"), ("話", "わ")],
+                    "tags": ["stem"],
+                },
+                {
+                    "form": "電話した",
+                    "roman": "den'wa shita",
+                    "ruby": [("電", "でん"), ("話", "わ")],
+                    "tags": ["past"],
+                },
+            ],
+        )
+        self.assertEqual(data[0]["tags"], ["suru"])
+        self.assertEqual(data[0]["categories"], ["일본어 기본형"])

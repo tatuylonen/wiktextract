@@ -67,10 +67,19 @@ SOUND_TAGS = {
 
 HEADER_TAGS = {
     # 틀:한국어_동사
-    "부정사형": "infinitive",
-    "연결어미형": "sequential",
+    "활용": "infinitive",
+    "연결형": "sequential",
     "명사형": "noun",
     "사동사": "causative",
+    "한글": "hangeul",
+    "한자": "hanja",
+    # 모듈:Jpan-headword
+    "연용형": "stem",
+    "과거형": "past",
+    "5단 활용": "godan",
+    "1단 활용": "ichidan",
+    "サ행 변격": "suru",
+    "kuru": "kuru",
 }
 
 # also in linkage lists
