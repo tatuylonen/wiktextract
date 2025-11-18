@@ -155,6 +155,16 @@ def parse_page(
                         source="declension",
                     )
 
+        # If we only looked at the headword (μετοχή), all the participles would
+        # be labeled as "verb"s, which is just wrong.
+        # Instead, we quickly inspect the page for a participle template, and
+        # then, if we are indeed a participle, we update the pos.
+        better_participle_pos: POSName | None = None
+        for child in page_root.find_child_recursively(NodeKind.TEMPLATE):
+            t_name = child.template_name
+            if t_name.startswith("μτχ") and t_name != "μτχεε":
+                better_participle_pos = "adj"
+
         for sublevel in sublevels:
             if len(sublevel.largs) == 0:
                 wxr.wtp.debug(
@@ -169,6 +179,14 @@ def parse_page(
             heading_type, pos, tags, num, ok = parse_lower_heading(
                 wxr, heading_title
             )
+
+            # It would have been great if we had a "participle" pos, but alas!
+            if (
+                pos == "verb"
+                and tags == ["participle"]
+                and better_participle_pos
+            ):
+                pos = better_participle_pos
 
             section_num = num if num > section_num else section_num
 
