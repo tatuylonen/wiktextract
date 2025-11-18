@@ -427,8 +427,7 @@ class TestThGloss(TestCase):
         self.assertEqual(
             page_data[0]["forms"],
             [
-                {"form": "абза́ц", "tags": ["canonical"]},
-                {"form": "อับซฺัต͜ซ", "tags": ["transliteration"]},
+                {"form": "абза́ц", "roman": "อับซฺัต͜ซ", "tags": ["canonical"]},
                 {"form": "абза́ца", "tags": ["genitive"]},
                 {"form": "абза́цы", "tags": ["nominative", "plural"]},
                 {"form": "абза́цев", "tags": ["genitive", "plural"]},

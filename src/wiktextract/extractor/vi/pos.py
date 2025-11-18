@@ -204,51 +204,65 @@ def extract_note_section(
 def extract_headword_template(
     wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
 ):
+    forms = []
+    has_headword_span = False
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(t_node), expand_all=True
     )
-    has_headword_span = False
     for main_span_tag in expanded_node.find_html(
         "span", attr_name="class", attr_value="headword-line"
     ):
         has_headword_span = True
-        for strong_tag in main_span_tag.find_html(
-            "strong", attr_name="class", attr_value="headword"
-        ):
-            ruby, no_ruby = extract_ruby(wxr, strong_tag)
-            strong_str = clean_node(wxr, None, no_ruby)
-            if strong_str not in ["", wxr.wtp.title] or len(ruby) > 0:
-                word_entry.forms.append(
-                    Form(form=strong_str, tags=["canonical"], ruby=ruby)
-                )
-        for roman_span in main_span_tag.find_html(
-            "span", attr_name="class", attr_value="headword-tr"
-        ):
-            roman = clean_node(wxr, None, roman_span)
-            if roman != "":
-                word_entry.forms.append(
-                    Form(form=roman, tags=["transliteration"])
-                )
-        for gender_span in main_span_tag.find_html(
-            "span", attr_name="class", attr_value="gender"
-        ):
-            for abbr_tag in gender_span.find_html("abbr"):
-                word_entry.raw_tags.append(clean_node(wxr, None, abbr_tag))
-        form_raw_tag = ""
-        for html_tag in main_span_tag.find_child(NodeKind.HTML):
-            if html_tag.tag == "i":
-                form_raw_tag = clean_node(wxr, None, html_tag)
-            elif html_tag.tag == "b":
-                form_str = clean_node(wxr, None, html_tag)
+        i_tag = ""
+        for html_node in main_span_tag.find_child(NodeKind.HTML):
+            class_names = html_node.attrs.get("class", "").split()
+            if html_node.tag == "strong" and "headword" in class_names:
+                ruby, no_ruby = extract_ruby(wxr, html_node)
+                strong_str = clean_node(wxr, None, no_ruby)
+                if strong_str not in ["", wxr.wtp.title] or len(ruby) > 0:
+                    forms.append(
+                        Form(form=strong_str, tags=["canonical"], ruby=ruby)
+                    )
+            elif html_node.tag == "span":
+                if "headword-tr" in class_names or "tr" in class_names:
+                    roman = clean_node(wxr, None, html_node)
+                    if roman != "":
+                        if len(forms) == 0:
+                            forms.append(
+                                Form(form=roman, tags=["romanization"])
+                            )
+                        else:
+                            forms[-1].roman = roman
+                elif "gender" in class_names:
+                    for abbr_tag in html_node.find_html("abbr"):
+                        gender_tag = clean_node(wxr, None, abbr_tag)
+                        if len(forms) > 0 and "canonical" not in forms[-1].tags:
+                            forms[-1].raw_tags.append(gender_tag)
+                            translate_raw_tags(forms[-1])
+                        else:
+                            word_entry.raw_tags.append(gender_tag)
+            elif html_node.tag == "i":
+                if i_tag != "":
+                    word_entry.raw_tags.append(i_tag)
+                i_tag = clean_node(wxr, None, html_node)
+            elif html_node.tag == "b":
+                ruby, no_ruby = extract_ruby(wxr, html_node)
+                form_str = clean_node(wxr, None, no_ruby)
                 if form_str != "":
-                    form = Form(form=form_str)
-                    if form_raw_tag != "":
-                        form.raw_tags.append(form_raw_tag)
+                    form = Form(form=form_str, ruby=ruby)
+                    if i_tag != "":
+                        form.raw_tags.append(i_tag)
                         translate_raw_tags(form)
-                    word_entry.forms.append(form)
-                form_raw_tag = ""
-        if form_raw_tag != "":
-            word_entry.raw_tags.append(form_raw_tag)
+                    forms.append(form)
+                i_tag = ""
+
+        if i_tag != "":
+            word_entry.raw_tags.append(i_tag)
+
+    word_entry.forms.extend(forms)
+    clean_node(wxr, word_entry, expanded_node)
+    translate_raw_tags(word_entry)
+
     if not has_headword_span:
         # Template:eng-noun
         raw_tag = ""
@@ -269,9 +283,6 @@ def extract_headword_template(
                     raw_tag = ""
                 if form.form != "":
                     word_entry.forms.append(form)
-
-    clean_node(wxr, word_entry, expanded_node)
-    translate_raw_tags(word_entry)
 
 
 def extract_zh_mw_template(
