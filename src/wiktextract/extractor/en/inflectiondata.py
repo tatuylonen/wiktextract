@@ -3955,6 +3955,7 @@ infl_map: dict[str, InflMapNode] = {
     "f·p": "feminine plural",
     "n·p": "neuter plural",
     "Masc./Fem./Neut.": "masculine feminine neuter",  # mille/Latin
+    "masc./fem./neut.": "masculine feminine neuter",  # sūi/Latin
     "Reflexive third": "third-person reflexive",  # se/Latin
     "masculine dual": "masculine dual",  # a סוס/Hebrew
     "his": "third-person singular masculine possessive",  # moj/Serbo-Croatian
