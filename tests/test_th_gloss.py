@@ -427,7 +427,8 @@ class TestThGloss(TestCase):
         self.assertEqual(
             page_data[0]["forms"],
             [
-                {"form": "абза́ц", "roman": "อับซฺัต͜ซ", "tags": ["canonical"]},
+                {"form": "абза́ц", "tags": ["canonical"]},
+                {"form": "อับซฺัต͜ซ", "tags": ["romanization"]},
                 {"form": "абза́ца", "tags": ["genitive"]},
                 {"form": "абза́цы", "tags": ["nominative", "plural"]},
                 {"form": "абза́цев", "tags": ["genitive", "plural"]},
@@ -463,3 +464,35 @@ class TestThGloss(TestCase):
         )
         self.assertEqual(data[0]["tags"], ["not-comparable"])
         self.assertEqual(data[0]["categories"], ["คำหลักภาษาอังกฤษ"])
+
+    def test_ja_noun_two_headword_forms(self):
+        self.wxr.wtp.add_page(
+            "แม่แบบ:ja-noun",
+            10,
+            """<span class="headword-line"><strong class="Jpan headword" lang="ja"><ruby>日<rp>(</rp><rt>[[:にほんじん#ภาษาญี่ปุ่น|に]]</rt><rp>)</rp></ruby><ruby>本<rp>(</rp><rt>[[:にほんじん#ภาษาญี่ปุ่น|ほん]]</rt><rp>)</rp></ruby><ruby>人<rp>(</rp><rt>[[:にほんじん#ภาษาญี่ปุ่น|じん]]</rt><rp>)</rp></ruby></strong> <i>หรือ</i> <strong class="Jpan headword" lang="ja"><ruby>日本人<rp>(</rp><rt>[[:にっぽんじん#ภาษาญี่ปุ่น|にっぽんじん]]</rt><rp>)</rp></ruby></strong> (<span class="headword-tr manual-tr tr" dir="ltr"><span class="Latn" lang="ja">[[:nihonjin#ภาษาญี่ปุ่น|nihonjin]]</span>[[Category:ญี่ปุ่น links with redundant wikilinks|日本人]][[Category:ญี่ปุ่น links with redundant alt parameters|日本人]]</span> <i>หรือ</i> <span class="headword-tr manual-tr tr" dir="ltr"><span class="Latn" lang="ja">[[:nipponjin#ภาษาญี่ปุ่น|nipponjin]]</span>[[Category:ญี่ปุ่น links with redundant wikilinks|日本人]][[Category:ญี่ปุ่น links with redundant alt parameters|日本人]]</span>)&nbsp;<i></i></span>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "日本人",
+            """== ภาษาญี่ปุ่น ==
+=== คำนาม ===
+{{ja-noun|にほんじん|にっぽんじん}}
+# คนญี่ปุ่น""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {
+                    "form": "日本人",
+                    "ruby": [("日", "に"), ("本", "ほん"), ("人", "じん")],
+                    "tags": ["canonical"],
+                },
+                {
+                    "form": "日本人",
+                    "ruby": [("日本人", "にっぽんじん")],
+                    "tags": ["canonical"],
+                },
+                {"form": "nihonjin", "tags": ["romanization"]},
+                {"form": "nipponjin", "tags": ["romanization"]},
+            ],
+        )

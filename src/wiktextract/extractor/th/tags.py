@@ -226,6 +226,29 @@ LABEL_TAGS = {
     "เพศหญิงพหูพจน์": ["feminine", "plural"],
     # Template:es-adj
     "เพศชายและเพศหญิงพหูพจน์": ["masculine", "feminine", "plural"],
+    # มอดูล:Jpan-headword
+    "สกรรมหรืออกรรม": ["transitive", "intransitive"],
+    "ต้นเค้าศัพท์": "stem",
+    "โกดัง": "godan",
+    "อิจิดัง": "ichidan",
+    "ซูรุ": "suru",
+    "คูรุ": "kuru",
+    "-อิ": "-i",
+    "-นะ": "-na",
+    "โยดัง": "yodan",
+    "นิดัง": "nidan",
+    "-ริ": "-ri",
+    "-เซะ": "-se",
+    "-โกะ": "-ko",
+    "-ง": "-n",
+    "-นาริ": "-nari",
+    "-ตาริ": "-tari",
+    "-กุ": "-ku",
+    "-ชิกุ": "-shiku",
+    "-กะ": "-ka",
+    # Template:ko-noun
+    "ฮันกึล": "hangeul",
+    "ฮันจา": "hanja",
 }
 
 

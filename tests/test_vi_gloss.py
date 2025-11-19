@@ -122,3 +122,62 @@ class TestViGloss(TestCase):
             data[0]["forms"], [{"form": "dogs", "tags": ["plural"]}]
         )
         self.assertEqual(data[0]["categories"], ["Danh từ tiếng Anh"])
+
+    def test_ja_headword(self):
+        self.wxr.wtp.add_page(
+            "Bản mẫu:ja-verb-suru",
+            10,
+            """<span class="headword-line"><strong class="Jpan headword" lang="ja"><ruby>完<rp>(</rp><rt>[[:かんりょう#Tiếng&#95;Nhật|かん]]</rt><rp>)</rp></ruby><ruby>了<rp>(</rp><rt>[[:かんりょう#Tiếng&#95;Nhật|りょう]]</rt><rp>)</rp></ruby>[[:する#Tiếng&#95;Nhật|する]]</strong> (<span class="headword-tr tr" dir="ltr"><span class="Latn" lang="ja">[[:kanryō#Tiếng&#95;Nhật|kanryō]] [[:suru#Tiếng&#95;Nhật|suru]]</span></span>)&nbsp;<i>ngoại hoặc nội động từ&nbsp;<abbr title="chia động từ nhóm サ (nhóm 3)">suru</abbr></i> (<i>stem</i> <b class="Jpan" lang="ja"><ruby>完<rp>(</rp><rt>かん</rt><rp>)</rp></ruby><ruby>了<rp>(</rp><rt>りょう</rt><rp>)</rp></ruby>[[:し#Tiếng&#95;Nhật|し]]</b> <span class="mention-gloss-paren annotation-paren">(</span><span class="tr">kanryō [[shi]]</span><span class="mention-gloss-paren annotation-paren">)</span>)</span>[[Category:Mục từ tiếng Nhật|かんりょう]]""",
+        )
+        data = parse_page(
+            self.wxr,
+            "完了",
+            """=={{langname|ja}}==
+===Danh từ===
+{{ja-verb-suru|tr=both|かんりょう}}
+# [[hoàn tất]]; [[hoàn thành]]""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {
+                    "form": "完了する",
+                    "ruby": [("完", "かん"), ("了", "りょう")],
+                    "tags": ["canonical"],
+                },
+                {"form": "kanryō suru", "tags": ["romanization"]},
+                {
+                    "form": "完了し",
+                    "roman": "kanryō shi",
+                    "ruby": [("完", "かん"), ("了", "りょう")],
+                    "tags": ["stem"],
+                },
+            ],
+        )
+        self.assertEqual(
+            data[0]["tags"], ["transitive", "intransitive", "suru"]
+        )
+        self.assertEqual(data[0]["categories"], ["Mục từ tiếng Nhật"])
+
+    def test_split_headword_forms(self):
+        self.wxr.wtp.add_page(
+            "Bản mẫu:ko-noun",
+            10,
+            """<span class="headword-line"><strong class="Kore headword" lang="ko">사과</strong> (<span lang="ko-Latn" class="headword-tr manual-tr tr Latn" dir="ltr">sagwa</span>) (<i>hanja</i> <b class="Kore" lang="ko">[[:沙果#Tiếng&#95;Triều&#95;Tiên|沙果]], [[:砂果#Tiếng&#95;Triều&#95;Tiên|砂果]]</b>)</span>[[Category:Mục từ tiếng Triều Tiên|사과]]""",
+        )
+        data = parse_page(
+            self.wxr,
+            "사과",
+            """=={{langname|ko}}==
+===Danh từ===
+{{ko-noun|hanja=[[沙果]], [[砂果]]}}
+# Quả [[táo]].""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {"form": "sagwa", "tags": ["romanization"]},
+                {"form": "沙果", "tags": ["hanja"]},
+                {"form": "砂果", "tags": ["hanja"]},
+            ],
+        )

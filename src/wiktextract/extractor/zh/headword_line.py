@@ -144,11 +144,8 @@ def process_forms_text(
             if node.tag == "b":
                 has_forms = True
                 ruby_data = []
-                if lang_code == "ja":
-                    ruby_data, node_without_ruby = extract_ruby(wxr, node)
-                    form = clean_node(wxr, None, node_without_ruby)
-                else:
-                    form = clean_node(wxr, None, node)
+                ruby_data, node_without_ruby = extract_ruby(wxr, node)
+                form = clean_node(wxr, None, node_without_ruby)
                 raw_form_tags = extract_headword_tags(
                     clean_node(wxr, None, tag_nodes).strip("() ")
                 )
@@ -168,10 +165,9 @@ def process_forms_text(
                         else:
                             raw_form_tags.append(gender)
 
-                for f_str in form.split("／"):
-                    f_str = f_str.strip()
-                    if f_str == "":
-                        continue
+                for f_str in filter(
+                    None, map(str.strip, re.split(r"／|,", form))
+                ):
                     form_data = Form(
                         form=f_str,
                         raw_tags=raw_form_tags,

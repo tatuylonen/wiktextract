@@ -102,6 +102,15 @@ LABEL_TAGS = {
     "dated abbreviation": ["dated", "abbreviation"],
     "triều châu": "Teochew",
     "tiếng mân": "Min",
+    # Template:ja-verb-suru
+    # Module:Jpan-headword
+    "ngoại hoặc nội động từ": ["transitive", "intransitive"],
+    "suru": "suru",
+    "stem": "stem",
+    "past": "past",
+    # Template:ko-noun
+    "hanja": "hanja",
+    "hangeul": "hangeul",
 }
 
 # https://vi.wiktionary.org/wiki/Mô_đun:gender_and_number/data

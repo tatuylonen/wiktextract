@@ -246,10 +246,10 @@ class TestKoGloss(TestCase):
             [
                 {
                     "form": "電話する",
-                    "roman": "den'wa suru",
                     "ruby": [("電", "でん"), ("話", "わ")],
                     "tags": ["canonical"],
                 },
+                {"form": "den'wa suru", "tags": ["romanization"]},
                 {
                     "form": "電話し",
                     "roman": "den'wa shi",
