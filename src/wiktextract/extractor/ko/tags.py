@@ -74,6 +74,7 @@ HEADER_TAGS = {
     "한글": "hangeul",
     "한자": "hanja",
     # 모듈:Jpan-headword
+    "자동사 및 타동사": ["transitive", "intransitive"],
     "연용형": "stem",
     "과거형": "past",
     "5단 활용": "godan",

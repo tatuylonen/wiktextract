@@ -1,7 +1,13 @@
 import itertools
 import re
 
-from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
+from wikitextprocessor import (
+    HTMLNode,
+    LevelNode,
+    NodeKind,
+    TemplateNode,
+    WikiNode,
+)
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -323,7 +329,7 @@ def extract_headword_line_template(
     for main_span_tag in expanded_node.find_html(
         "span", attr_name="class", attr_value="headword-line"
     ):
-        i_tag = ""
+        i_tags = []
         for html_node in main_span_tag.find_child(NodeKind.HTML):
             class_names = html_node.attrs.get("class", "").split()
             if html_node.tag == "strong" and "headword" in class_names:
@@ -352,22 +358,24 @@ def extract_headword_line_template(
                         else:
                             word_entry.raw_tags.append(gender_tag)
             elif html_node.tag == "i":
-                if i_tag != "":
-                    word_entry.raw_tags.append(i_tag)
-                i_tag = clean_node(wxr, None, html_node)
+                if len(i_tags) > 0:
+                    word_entry.raw_tags.extend(i_tags)
+                i_tags.clear()
+                for i_child in html_node.children:
+                    raw_tag = clean_node(wxr, None, i_child)
+                    if raw_tag != "":
+                        i_tags.append(raw_tag)
             elif html_node.tag == "b":
                 ruby, no_ruby = extract_ruby(wxr, html_node)
                 form_str = clean_node(wxr, None, no_ruby)
                 if form_str != "":
-                    form = Form(form=form_str, ruby=ruby)
-                    if i_tag != "":
-                        form.raw_tags.append(i_tag)
-                        translate_raw_tags(form)
+                    form = Form(form=form_str, ruby=ruby, raw_tags=i_tags)
+                    translate_raw_tags(form)
                     forms.append(form)
-                i_tag = ""
+                i_tags.clear()
 
-        if i_tag != "":
-            word_entry.raw_tags.append(i_tag)
+        if len(i_tags) > 0:
+            word_entry.raw_tags.extend(i_tags)
     word_entry.forms.extend(forms)
     clean_node(wxr, word_entry, expanded_node)
     translate_raw_tags(word_entry)

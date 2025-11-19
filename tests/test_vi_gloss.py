@@ -122,3 +122,39 @@ class TestViGloss(TestCase):
             data[0]["forms"], [{"form": "dogs", "tags": ["plural"]}]
         )
         self.assertEqual(data[0]["categories"], ["Danh từ tiếng Anh"])
+
+    def test_ja_headword(self):
+        self.wxr.wtp.add_page(
+            "Bản mẫu:ja-verb-suru",
+            10,
+            """<span class="headword-line"><strong class="Jpan headword" lang="ja"><ruby>完<rp>(</rp><rt>[[:かんりょう#Tiếng&#95;Nhật|かん]]</rt><rp>)</rp></ruby><ruby>了<rp>(</rp><rt>[[:かんりょう#Tiếng&#95;Nhật|りょう]]</rt><rp>)</rp></ruby>[[:する#Tiếng&#95;Nhật|する]]</strong> (<span class="headword-tr tr" dir="ltr"><span class="Latn" lang="ja">[[:kanryō#Tiếng&#95;Nhật|kanryō]] [[:suru#Tiếng&#95;Nhật|suru]]</span></span>)&nbsp;<i>ngoại hoặc nội động từ&nbsp;<abbr title="chia động từ nhóm サ (nhóm 3)">suru</abbr></i> (<i>stem</i> <b class="Jpan" lang="ja"><ruby>完<rp>(</rp><rt>かん</rt><rp>)</rp></ruby><ruby>了<rp>(</rp><rt>りょう</rt><rp>)</rp></ruby>[[:し#Tiếng&#95;Nhật|し]]</b> <span class="mention-gloss-paren annotation-paren">(</span><span class="tr">kanryō [[shi]]</span><span class="mention-gloss-paren annotation-paren">)</span>)</span>[[Category:Mục từ tiếng Nhật|かんりょう]]""",
+        )
+        data = parse_page(
+            self.wxr,
+            "完了",
+            """=={{langname|ja}}==
+===Danh từ===
+{{ja-verb-suru|tr=both|かんりょう}}
+# [[hoàn tất]]; [[hoàn thành]]""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {
+                    "form": "完了する",
+                    "roman": "kanryō suru",
+                    "ruby": [("完", "かん"), ("了", "りょう")],
+                    "tags": ["canonical"],
+                },
+                {
+                    "form": "完了し",
+                    "roman": "kanryō shi",
+                    "ruby": [("完", "かん"), ("了", "りょう")],
+                    "tags": ["stem"],
+                },
+            ],
+        )
+        self.assertEqual(
+            data[0]["tags"], ["transitive", "intransitive", "suru"]
+        )
+        self.assertEqual(data[0]["categories"], ["Mục từ tiếng Nhật"])

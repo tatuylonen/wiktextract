@@ -226,6 +226,8 @@ LABEL_TAGS = {
     "เพศหญิงพหูพจน์": ["feminine", "plural"],
     # Template:es-adj
     "เพศชายและเพศหญิงพหูพจน์": ["masculine", "feminine", "plural"],
+    # มอดูล:Jpan-headword
+    "สกรรมหรืออกรรม": ["transitive", "intransitive"],
 }
 
 
