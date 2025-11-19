@@ -226,21 +226,31 @@ def extract_headword_template(
             elif html_node.tag == "span":
                 if "headword-tr" in class_names or "tr" in class_names:
                     roman = clean_node(wxr, None, html_node)
-                    if roman != "":
-                        if len(forms) == 0:
-                            forms.append(
-                                Form(form=roman, tags=["romanization"])
-                            )
-                        else:
-                            forms[-1].roman = roman
+                    if (
+                        len(forms) > 0
+                        and "canonical" not in forms[-1].tags
+                        and "romanization" not in forms[-1].tags
+                    ):
+                        forms[-1].roman = roman
+                    elif roman != "":
+                        forms.append(Form(form=roman, tags=["romanization"]))
                 elif "gender" in class_names:
                     for abbr_tag in html_node.find_html("abbr"):
                         gender_tag = clean_node(wxr, None, abbr_tag)
-                        if len(forms) > 0 and "canonical" not in forms[-1].tags:
+                        if (
+                            len(forms) > 0
+                            and "canonical" not in forms[-1].tags
+                            and "romanization" not in forms[-1].tags
+                        ):
                             forms[-1].raw_tags.append(gender_tag)
                             translate_raw_tags(forms[-1])
                         else:
                             word_entry.raw_tags.append(gender_tag)
+                elif "ib-content" in class_names:
+                    raw_tag = clean_node(wxr, None, html_node)
+                    if raw_tag != "":
+                        word_entry.raw_tags.append(raw_tag)
+                        translate_raw_tags(word_entry)
             elif html_node.tag == "i":
                 if len(i_tags) > 0:
                     word_entry.raw_tags.extend(i_tags)

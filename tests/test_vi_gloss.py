@@ -142,10 +142,10 @@ class TestViGloss(TestCase):
             [
                 {
                     "form": "完了する",
-                    "roman": "kanryō suru",
                     "ruby": [("完", "かん"), ("了", "りょう")],
                     "tags": ["canonical"],
                 },
+                {"form": "kanryō suru", "tags": ["romanization"]},
                 {
                     "form": "完了し",
                     "roman": "kanryō shi",
