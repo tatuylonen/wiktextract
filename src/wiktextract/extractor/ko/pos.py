@@ -305,8 +305,10 @@ def extract_headword_line_template(
                         i_tags.append(raw_tag)
             elif html_node.tag == "b":
                 ruby, no_ruby = extract_ruby(wxr, html_node)
-                form_str = clean_node(wxr, None, no_ruby)
-                if form_str != "":
+                for form_str in filter(
+                    None,
+                    map(str.strip, clean_node(wxr, None, no_ruby).split(",")),
+                ):
                     form = Form(form=form_str, ruby=ruby, raw_tags=i_tags)
                     translate_raw_tags(form)
                     forms.append(form)

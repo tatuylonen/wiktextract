@@ -108,6 +108,9 @@ LABEL_TAGS = {
     "suru": "suru",
     "stem": "stem",
     "past": "past",
+    # Template:ko-noun
+    "hanja": "hanja",
+    "hangeul": "hangeul",
 }
 
 # https://vi.wiktionary.org/wiki/Mô_đun:gender_and_number/data

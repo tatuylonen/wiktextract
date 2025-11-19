@@ -225,3 +225,51 @@ class TestHeadword(TestCase):
         )
         self.assertEqual(data[0]["tags"], ["form-i"])
         self.assertEqual(data[0]["categories"], ["阿拉伯語詞元"])
+
+    def test_split_form_words1(self):
+        self.wxr.wtp.add_page(
+            "Template:ko-noun",
+            10,
+            """<span class="headword-line"><strong class="Kore headword" lang="ko">-{0차원}-</strong> (<span lang="ko-Latn" class="headword-tr manual-tr tr Latn" dir="ltr">-{<!---->yeongchawon<!---->}-</span>) (諺文-{ <b class="Kore" lang="ko"><!-- -->[[영차원#朝鮮語|-{영차원}-]]</b>}-，漢字-{ <b class="Kore" lang="ko"><!-- -->[[零次元#朝鮮語|-{零次元}-]]／<!-- -->[[0次元#朝鮮語|-{0次元}-]]</b>}-)</span>[[Category:朝鮮語詞元|영차원]]""",
+        )
+        data = parse_page(
+            self.wxr,
+            "0차원",
+            """==朝鮮語==
+===名詞===
+{{ko-noun|hangeul=영차원|hanja=[[零次元]]／[[0次元]]}}
+# {{alt sp|ko|영차원}}""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {"form": "yeongchawon", "tags": ["romanization"]},
+                {"form": "영차원", "tags": ["hangeul"]},
+                {"form": "零次元", "tags": ["hanja"]},
+                {"form": "0次元", "tags": ["hanja"]},
+            ],
+        )
+        self.assertEqual(data[0]["categories"], ["朝鮮語詞元"])
+
+    def test_split_form_words2(self):
+        self.wxr.wtp.add_page(
+            "Template:ko-noun",
+            10,
+            """<span class="headword-line"><strong class="Kore headword" lang="ko">-{사과}-</strong> (<span lang="ko-Latn" class="headword-tr manual-tr tr Latn" dir="ltr">-{<!---->sagwa<!---->}-</span>) (漢字-{ <b class="Kore" lang="ko"><!-- -->[[沙果#朝鮮語|-{沙果}-]], <!-- -->[[砂果#朝鮮語|-{砂果}-]]</b>}-)</span>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "사과",
+            """==朝鮮語==
+===名詞===
+{{ko-noun|hanja=[[沙果]], [[砂果]]}}
+# [[蘋果]]""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {"form": "sagwa", "tags": ["romanization"]},
+                {"form": "沙果", "tags": ["hanja"]},
+                {"form": "砂果", "tags": ["hanja"]},
+            ],
+        )

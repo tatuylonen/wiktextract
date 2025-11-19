@@ -158,3 +158,26 @@ class TestViGloss(TestCase):
             data[0]["tags"], ["transitive", "intransitive", "suru"]
         )
         self.assertEqual(data[0]["categories"], ["Mục từ tiếng Nhật"])
+
+    def test_split_headword_forms(self):
+        self.wxr.wtp.add_page(
+            "Bản mẫu:ko-noun",
+            10,
+            """<span class="headword-line"><strong class="Kore headword" lang="ko">사과</strong> (<span lang="ko-Latn" class="headword-tr manual-tr tr Latn" dir="ltr">sagwa</span>) (<i>hanja</i> <b class="Kore" lang="ko">[[:沙果#Tiếng&#95;Triều&#95;Tiên|沙果]], [[:砂果#Tiếng&#95;Triều&#95;Tiên|砂果]]</b>)</span>[[Category:Mục từ tiếng Triều Tiên|사과]]""",
+        )
+        data = parse_page(
+            self.wxr,
+            "사과",
+            """=={{langname|ko}}==
+===Danh từ===
+{{ko-noun|hanja=[[沙果]], [[砂果]]}}
+# Quả [[táo]].""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {"form": "sagwa", "tags": ["romanization"]},
+                {"form": "沙果", "tags": ["hanja"]},
+                {"form": "砂果", "tags": ["hanja"]},
+            ],
+        )
