@@ -27,6 +27,7 @@ def extract_pos_head_line_nodes(
         ):
             process_headword_bold_node(wxr, word_entry, node)
             is_first_bold = False
+    translate_raw_tags(word_entry)
 
 
 def extract_headword_line_template(
@@ -65,12 +66,10 @@ def extract_headword_line_template(
                             word_entry.tags.append(TEMPLATE_TAG_ARGS[gender])
                         else:
                             word_entry.raw_tags.append(gender)
-                            translate_raw_tags(word_entry)
                 elif "ib-content" in class_names:
                     raw_tag = clean_node(wxr, None, span_child)
                     if raw_tag != "":
                         word_entry.raw_tags.append(raw_tag)
-                        translate_raw_tags(word_entry)
                 else:
                     for strong_node in span_child.find_html(
                         "strong", attr_name="class", attr_value="headword"
@@ -82,6 +81,20 @@ def extract_headword_line_template(
             ):
                 forms_start_index = index + 1
                 process_headword_bold_node(wxr, word_entry, span_child)
+            elif span_child.tag == "sup" and word_entry.lang_code == "ja":
+                extract_historical_kana(wxr, word_entry, span_child)
+                forms_start_index = index + 1
+            elif span_child.tag == "i":
+                for i_child in span_child.children:
+                    raw_tag = (
+                        clean_node(wxr, None, i_child)
+                        .removeprefix("^†")
+                        .strip()
+                    )
+                    if raw_tag != "":
+                        word_entry.raw_tags.append(raw_tag)
+                if len(span_child.children) > 0:
+                    forms_start_index = index + 1
             elif span_child.tag == "b":
                 # this is a form <b> tag, already inside form parentheses
                 break
@@ -138,7 +151,6 @@ def process_forms_text(
     tag_nodes = []
     has_forms = False
     striped_nodes = list(strip_nodes(form_nodes))
-    lang_code = word_entry.lang_code
     for index, node in enumerate(striped_nodes):
         if isinstance(node, WikiNode) and node.kind == NodeKind.HTML:
             if node.tag == "b":
@@ -178,14 +190,15 @@ def process_forms_text(
                     word_entry.forms.append(form_data)
             elif (
                 node.tag == "span"
-                and "tr" in node.attrs.get("class", "")
+                and "tr" in node.attrs.get("class", "").split()
                 and len(word_entry.forms) > 0
             ):
                 # romanization of the previous form <b> tag
                 word_entry.forms[-1].roman = clean_node(wxr, None, node)
-            elif node.tag == "sup" and lang_code == "ja":
-                extract_historical_kana(wxr, word_entry, node)
-            else:
+            elif not (
+                node.tag == "span"
+                and "mention-gloss-paren" in node.attrs.get("class", "").split()
+            ):
                 tag_nodes.append(node)
         else:
             tag_nodes.append(node)
@@ -222,8 +235,7 @@ def extract_historical_kana(
     ):
         roman = clean_node(wxr, None, span_node).strip("()")
     if len(form) > 0:
-        form_data = Form(form=form, roman=roman)
-        word_entry.forms.append(form_data)
+        word_entry.forms.append(Form(form=form, roman=roman, tags=["archaic"]))
 
 
 def extract_tlb_template(

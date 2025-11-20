@@ -246,6 +246,8 @@ LABEL_TAGS = {
     "-กุ": "-ku",
     "-ชิกุ": "-shiku",
     "-กะ": "-ka",
+    "adnominal": "adnominal",
+    "adverbial": "adverbial",
     # Template:ko-noun
     "ฮันกึล": "hangeul",
     "ฮันจา": "hanja",

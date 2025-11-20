@@ -102,6 +102,21 @@ VERB_TAGS: dict[str, str] = {
     "第IIq類": "form-iiq",
     "第IIIq類": "form-iiiq",
     "第IVq類": "form-ivq",
+    # Module:Jpan-headword
+    "他動詞": "transitive",
+    "自動詞": "intransitive",
+    "自、他動詞": ["transitive", "intransitive"],
+    "五段": "godan",
+    "一段": "ichidan",
+    "サ行": "suru",
+    "カ行": "kuru",
+    "イ形": "-i",
+    "ナ形": "-na",
+    "四段": "yodan",
+    "二段": "nidan",
+    "ラ行": "-ri",
+    "ナリ": "-nari",
+    "タリ": "-tari",
 }
 
 # https://en.wikipedia.org/wiki/Japanese_grammar#Stem_forms

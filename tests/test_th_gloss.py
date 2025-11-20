@@ -496,3 +496,43 @@ class TestThGloss(TestCase):
                 {"form": "nipponjin", "tags": ["romanization"]},
             ],
         )
+
+    def test_ja_adj(self):
+        self.wxr.wtp.add_page(
+            "แม่แบบ:ja-adj",
+            10,
+            """<span class="headword-line"><strong class="Jpan headword" lang="ja"><ruby>悄<rp>(</rp><rt>[[:しょうぜん#ภาษาญี่ปุ่น|しょう]]</rt><rp>)</rp></ruby><ruby>然<rp>(</rp><rt>[[:しょうぜん#ภาษาญี่ปุ่น|ぜん]]</rt><rp>)</rp></ruby></strong> (<span class="headword-tr manual-tr tr" dir="ltr"><span class="Latn" lang="ja">[[:shōzen#ภาษาญี่ปุ่น|shōzen]]</span>[[Category:ญี่ปุ่น links with redundant wikilinks|悄然]][[Category:ญี่ปุ่น links with redundant alt parameters|悄然]]</span>)&nbsp;<sup>←<strong class="Jpan headword" lang="ja">[[:せうぜん#ภาษาญี่ปุ่น|せうぜん]]</strong> <span class="mention-gloss-paren annotation-paren">(</span><span class="tr"><span class="mention-tr tr">seuzen</span></span><span class="mention-gloss-paren annotation-paren">)</span>[[Category:ญี่ปุ่น links with redundant alt parameters|悄然]]<sup>[[w:Historical kana orthography|?]]</sup></sup><i><abbr title="-tari inflection (classical)"><sup><small>†</small></sup>-ตาริ</abbr></i> (<i>adnominal</i> <b class="Jpan" lang="ja"><ruby>悄<rp>(</rp><rt>しょう</rt><rp>)</rp></ruby><ruby>然<rp>(</rp><rt>ぜん</rt><rp>)</rp></ruby>[[:とした#ภาษาญี่ปุ่น|とした]]</b> <span class="mention-gloss-paren annotation-paren">(</span><span class="tr">shōzen [[to shita]]</span><span class="mention-gloss-paren annotation-paren">)</span> <i>หรือ</i> <b class="Jpan" lang="ja"><ruby>悄<rp>(</rp><rt>しょう</rt><rp>)</rp></ruby><ruby>然<rp>(</rp><rt>ぜん</rt><rp>)</rp></ruby>[[:たる#ภาษาญี่ปุ่น|たる]]</b> <span class="mention-gloss-paren annotation-paren">(</span><span class="tr">shōzen [[taru]]</span><span class="mention-gloss-paren annotation-paren">)</span></span>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "悄然",
+            """== ภาษาญี่ปุ่น ==
+=== คำคุณศัพท์ ===
+{{ja-adj|しょうぜん|infl=tari|hhira=せうぜん}}
+# สลดใจ""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {
+                    "form": "悄然",
+                    "ruby": [("悄", "しょう"), ("然", "ぜん")],
+                    "tags": ["canonical"],
+                },
+                {"form": "shōzen", "tags": ["romanization"]},
+                {"form": "せうぜん", "roman": "seuzen", "tags": ["archaic"]},
+                {
+                    "form": "悄然とした",
+                    "tags": ["adnominal"],
+                    "roman": "shōzen to shita",
+                    "ruby": [("悄", "しょう"), ("然", "ぜん")],
+                },
+                {
+                    "form": "悄然たる",
+                    "tags": ["adnominal"],
+                    "roman": "shōzen taru",
+                    "ruby": [("悄", "しょう"), ("然", "ぜん")],
+                },
+            ],
+        )
+        self.assertEqual(data[0]["tags"], ["-tari"])
