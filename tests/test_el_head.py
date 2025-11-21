@@ -62,6 +62,7 @@ class TestElHeader(TestCase):
         return forms
 
     def test_el_head1(self) -> None:
+        # https://el.wiktionary.org/wiki/φώσφορος
         self.wxr.wtp.start_page("φώσφορος")
         raw = """==={{ουσιαστικό|el}}===
 '''{{PAGENAME}}''' ''ή'' '''[[φωσφόρος]]''' (''αρσενικό'') ''και'' '''[[φώσφορο]]''' (''ουδέτερο'')
