@@ -1,3 +1,4 @@
+import re
 from itertools import zip_longest
 
 from wikitextprocessor import NodeKind, WikiNode
@@ -53,9 +54,12 @@ def extract_ja_inf_table(
             # table end tags
             for small_tag in row_node.find_html_recursively("small"):
                 has_small_tag = True
-                tag_text = clean_node(wxr, None, small_tag)
-                if tag_text.startswith(("¹", "²")):
-                    small_tags_dict[tag_text[0]] = tag_text[1:].strip()
+                for line in clean_node(wxr, None, small_tag).splitlines():
+                    m = re.match(r"(¹|²|\^\(\[\d+\]\))", line)
+                    if m is not None:
+                        small_tags_dict[line[: m.end()]] = line[
+                            m.end() :
+                        ].strip()
             if not has_small_tag:
                 table_header = clean_node(wxr, None, row_node.children)
         else:
@@ -86,10 +90,11 @@ def extract_ja_inf_table(
                         for line in span_text.splitlines():
                             if line == "-":
                                 continue
-                            if line.endswith(("¹", "²")):
+                            m = re.search(r"(¹|²|\^\(\[\d+\]\))$", line)
+                            if m is not None:
                                 if cell_node_index == 0:
-                                    small_tags.append(line[-1])
-                                line = line[:-1]
+                                    small_tags.append(m.group(1))
+                                line = line[: m.start(1)]
                             if span_class == "Latn":
                                 roman_list.append(line)
                             elif span_class == "Jpan":
