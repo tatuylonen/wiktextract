@@ -117,6 +117,20 @@ VERB_TAGS: dict[str, str] = {
     "ラ行": "-ri",
     "ナリ": "-nari",
     "タリ": "-tari",
+    # Template:ja-conj-bungo
+    "語幹形態": "stem",
+    "對比連接詞": ["contrastive", "conjunction"],
+    "因果連接詞": ["causative", "conjunction"],
+    "條件連接詞": ["conditional", "conjunction"],
+    "過去式 (第一手消息)": "past",
+    "過去式 (第二手消息)": "past",
+    "完成式 (自覺動作)": "perfect",
+    "完成式 (自然事件)": ["perfect", "natural"],
+    "完成進行式": ["perfect", "continuative"],
+    "意志形": "volitional",
+    "副詞": "adverbial",
+    "無助動詞": "no-auxiliary",
+    "有助動詞": "auxiliary",
 }
 
 # https://en.wikipedia.org/wiki/Japanese_grammar#Stem_forms
@@ -129,6 +143,7 @@ JA_STEM_FORMS: dict[str, str] = {
     "假定形": "hypothetical",
     "仮定形": "hypothetical",
     "命令形": "imperative",
+    "已然形": "realis",
 }
 
 # https://en.wikipedia.org/wiki/Voice_(grammar)
@@ -179,6 +194,40 @@ TENSE_TAGS = {
     "動詞性名詞": "noun-from-verb",
     "主動分詞": ["active", "participle"],
     "被動分詞": ["passive", "participle"],
+    # Template:it-verb
+    # https://zh.wiktionary.org/wiki/Module:It-headword
+    "第一人稱單數現在時": ["first-person", "singular", "present"],
+    "第一人稱單數先過去時": ["first-person", "singular", "past", "historic"],
+    "第三人稱單數先過去時": ["third-person", "singular", "past", "historic"],
+    "第一人稱單數過去分詞": ["first-person", "singular", "past", "participle"],
+    "第三人稱單數過去分詞": ["third-person", "singular", "past", "participle"],
+    "第一人稱單數未完成時": ["first-person", "singular", "imperfect"],
+    "第三人稱單數未完成時": ["third-person", "singular", "imperfect"],
+    "第一人稱單數未來時": ["first-person", "singular", "future"],
+    "第三人稱單數未來時": ["third-person", "singular", "future"],
+    "第一人稱單數現在時虛擬式": ["first-person", "singular", "subjunctive"],
+    "第三人稱單數現在時虛擬式": ["third-person", "singular", "subjunctive"],
+    "第一人稱單數未完成時虛擬式": [
+        "first-person",
+        "singular",
+        "imperfect",
+        "subjunctive",
+    ],
+    "第三人稱單數未完成時虛擬式": [
+        "third-person",
+        "singular",
+        "imperfect",
+        "subjunctive",
+    ],
+    # Template:es-verb
+    "第一人稱單數過去時": ["first-person", "singular", "past"],
+    # Template:ast-verb-ar
+    "第一人稱單數直陳現在時": [
+        "first-person",
+        "singular",
+        "indicative",
+        "present",
+    ],
 }
 
 GRAMMATICAL_TAGS: dict[str, str] = {
