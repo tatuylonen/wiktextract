@@ -105,6 +105,7 @@ def process_inflection_section(
     snode: WikiNode,
     *,
     source: FormSource = "",
+    top_template_name: str | None = None
 ) -> None:
     table_nodes: list[tuple[str | None, WikiNode]] = []
     # template_depth is used as a nonlocal variable in bold_node_handler
@@ -112,7 +113,6 @@ def process_inflection_section(
     # collect template data only for the top-level templates that are
     # visible in the wikitext, not templates inside templates.
     template_depth = 0
-    top_template_name: str | None = None
 
     def table_node_handler_fn(
         node: WikiNode,
@@ -446,7 +446,13 @@ def parse_table(
     #         form.raw_tags = new_raw_tags
     # print(f"Inside parse_table: {forms=}")
 
-    if len(forms) > 0:
+    # If there is no template name (https://el.wiktionary.org/wiki/κρόκος)
+    # we are adding junk anyway. This prevents a Form with empty form, which
+    # is treated as an (non critical) error by src/wiktextract/wiktionary.py
+    #
+    # (I think the κρόκος issue is due to not stopping parsing at headings,
+    # since the two intermingled templates are in different headings...)
+    if forms and template_name:
         data.forms.append(
             Form(
                 form=template_name,
