@@ -111,6 +111,8 @@ LABEL_TAGS = {
     # Template:ko-noun
     "hanja": "hanja",
     "hangeul": "hangeul",
+    # Template:ja-kanjitab
+    "kyūjitai": "kyūjitai",
 }
 
 # https://vi.wiktionary.org/wiki/Mô_đun:gender_and_number/data
