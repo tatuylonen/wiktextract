@@ -133,6 +133,8 @@ TAGS = {
     "한어병음": "Pinyin",
     "광저우 광둥어": "Guangzhou-Cantonese",
     "월병": "Jyutping",
+    # template:ja-kanjitab
+    "구자체": "kyūjitai",
 }
 
 TOPICS = {

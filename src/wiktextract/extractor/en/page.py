@@ -3221,7 +3221,10 @@ def parse_language(
                     continue
                 elif node.template_name == "zh-forms":
                     extract_zh_forms_template(wxr, node, select_data())
-                elif node.template_name in ["ja-kanjitab", "ja-kt"]:
+                elif (
+                    node.template_name.endswith("-kanjitab")
+                    or node.template_name == "ja-kt"
+                ):
                     extract_ja_kanjitab_template(wxr, node, select_data())
 
             if not isinstance(node, LevelNode):
@@ -4318,10 +4321,7 @@ def extract_ja_kanjitab_template(
             for cell_node in row.find_child(NodeKind.TABLE_CELL):
                 for child_node in cell_node.children:
                     if isinstance(child_node, HTMLNode):
-                        if (
-                            child_node.tag == "span"
-                            and child_node.attrs.get("lang", "") == "ja"
-                        ):
+                        if child_node.tag == "span":
                             word = clean_node(wxr, None, child_node)
                             if word != "":
                                 forms.append(

@@ -251,6 +251,8 @@ LABEL_TAGS = {
     # Template:ko-noun
     "ฮันกึล": "hangeul",
     "ฮันจา": "hanja",
+    # Template:ja-kanjitab
+    "คีวจิไต": "kyūjitai",
 }
 
 

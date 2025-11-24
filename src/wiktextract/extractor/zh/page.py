@@ -15,7 +15,7 @@ from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from ...wxr_logging import logger
 from .descendant import extract_descendant_section
-from .etymology import extract_etymology_section
+from .etymology import extract_etymology_section, extract_ja_kanjitab_template
 from .gloss import extract_gloss
 from .headword_line import extract_pos_head_line_nodes
 from .inflection import extract_inflections
@@ -229,9 +229,14 @@ def parse_page(
             pos="unknown",
         )
         base_data.categories = categories.get("categories", [])
-        for template_node in level2_node.find_child(NodeKind.TEMPLATE):
-            if template_node.template_name == "zh-forms":
-                process_zh_forms(wxr, base_data, template_node)
+        for t_node in level2_node.find_child(NodeKind.TEMPLATE):
+            if t_node.template_name == "zh-forms":
+                process_zh_forms(wxr, base_data, t_node)
+            elif (
+                t_node.template_name.endswith("-kanjitab")
+                or t_node.template_name == "ja-kt"
+            ):
+                extract_ja_kanjitab_template(wxr, t_node, base_data)
 
         for level3_node in level2_node.find_child(NodeKind.LEVEL3):
             parse_section(wxr, page_data, base_data, level3_node)
