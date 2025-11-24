@@ -387,6 +387,7 @@ PANEL_TEMPLATES: set[str] = {
     "hu-suff-pron",
     "interwiktionary",
     "ja-kanjitab",
+    "ja-kt",
     "ko-hanja-search",
     "look",
     "maintenance box",
@@ -3112,7 +3113,7 @@ def parse_language(
         # to define at this level and recurse in parse_translation_recurse().
         parse_translation_recurse(xlatnode)
 
-    def parse_etymology(data: WordData, node: WikiNode) -> None:
+    def parse_etymology(data: WordData, node: LevelNode) -> None:
         """Parses an etymology section."""
         assert isinstance(data, dict)
         assert isinstance(node, WikiNode)
@@ -3220,6 +3221,8 @@ def parse_language(
                     continue
                 elif node.template_name == "zh-forms":
                     extract_zh_forms_template(wxr, node, select_data())
+                elif node.template_name in ["ja-kanjitab", "ja-kt"]:
+                    extract_ja_kanjitab_template(wxr, node, select_data())
 
             if not isinstance(node, LevelNode):
                 # XXX handle e.g. wikipedia links at the top of a language
@@ -4292,3 +4295,53 @@ def extract_zh_forms_data_cell(
             data_append(base_data, "anagrams", l_data)
     else:
         data_extend(base_data, "forms", forms)
+
+
+def extract_ja_kanjitab_template(
+    wxr: WiktextractContext, t_node: TemplateNode, base_data: WordData
+):
+    # https://en.wiktionary.org/wiki/Template:ja-kanjitab
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for table in expanded_node.find_child(NodeKind.TABLE):
+        is_alt_form_table = False
+        for row in table.find_child(NodeKind.TABLE_ROW):
+            for header_node in row.find_child(NodeKind.TABLE_HEADER_CELL):
+                header_text = clean_node(wxr, None, header_node)
+                if header_text.startswith("Alternative spelling"):
+                    is_alt_form_table = True
+        if not is_alt_form_table:
+            continue
+        forms = []
+        for row in table.find_child(NodeKind.TABLE_ROW):
+            for cell_node in row.find_child(NodeKind.TABLE_CELL):
+                for child_node in cell_node.children:
+                    if isinstance(child_node, HTMLNode):
+                        if (
+                            child_node.tag == "span"
+                            and child_node.attrs.get("lang", "") == "ja"
+                        ):
+                            word = clean_node(wxr, None, child_node)
+                            if word != "":
+                                forms.append(
+                                    {
+                                        "form": word,
+                                        "tags": ["alternative", "kanji"],
+                                    }
+                                )
+                        elif child_node.tag == "small":
+                            raw_tag = clean_node(wxr, None, child_node).strip(
+                                "()"
+                            )
+                            if raw_tag != "" and len(forms) > 0:
+                                data_append(
+                                    forms[-1],
+                                    "tags"
+                                    if raw_tag in valid_tags
+                                    else "raw_tags",
+                                    raw_tag,
+                                )
+        data_extend(base_data, "forms", forms)
+    for link_node in expanded_node.find_child(NodeKind.LINK):
+        clean_node(wxr, base_data, link_node)
