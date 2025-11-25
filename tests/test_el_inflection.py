@@ -47,7 +47,9 @@ class TestElInflection(TestCase):
         self.wxr.wtp.start_subsection(pos)
         tree = self.wxr.wtp.parse(text)
         data = WordEntry(lang=lang, lang_code="el", word=word)
-        process_inflection_section(self.wxr, data, tree)  # note that source=""
+        process_inflection_section(
+            self.wxr, data, tree, top_template_name="tname-filler"
+        )
         dumped = data.model_dump(exclude_defaults=True)
         forms = dumped["forms"]
         return forms
@@ -161,7 +163,7 @@ class TestElInflection(TestCase):
 |}
 """
         expected = [
-            {"tags": ["inflection-template"]},
+            {"form": "tname-filler", "tags": ["inflection-template"]},
             {
                 "form": "πλάγιος",
                 "tags": ["masculine", "singular", "nominative"],
@@ -358,7 +360,7 @@ class TestElInflection(TestCase):
 |}
 """
         expected = [
-            {"tags": ["inflection-template"]},
+            {"form": "tname-filler", "tags": ["inflection-template"]},
             {"form": "αιδώς", "tags": ["singular", "nominative"]},
             {"form": "αιδούς", "tags": ["genitive", "singular"]},
             {"form": "αιδώ", "tags": ["accusative", "singular"]},
@@ -405,7 +407,7 @@ class TestElInflection(TestCase):
 |}
 """
         expected = [
-            {"tags": ["inflection-template"]},
+            {"form": "tname-filler", "tags": ["inflection-template"]},
             {"form": "αβγούλι", "tags": ["singular", "nominative"]},
             {"form": "αβγούλια", "tags": ["nominative", "plural"]},
             # There should be no genitive
@@ -590,7 +592,7 @@ class TestElInflection(TestCase):
 |}
 """
         expected = [
-            {"tags": ["inflection-template"]},
+            {"form": "tname-filler", "tags": ["inflection-template"]},
             {"form": "-ωνιά", "tags": ["singular", "nominative"]},
             {"form": "-ωνιές", "tags": ["nominative", "plural"]},
             {"form": "-ωνιάς", "tags": ["genitive", "singular"]},
@@ -640,7 +642,7 @@ class TestElInflection(TestCase):
 |}
 """
         expected = [
-            {"tags": ["inflection-template"]},
+            {"form": "tname-filler", "tags": ["inflection-template"]},
             {"form": "μπόι", "tags": ["singular", "nominative"]},
             {"form": "μπόγια", "tags": ["nominative", "plural"]},
             {"form": "μπογιού", "tags": ["genitive", "singular"]},
@@ -689,7 +691,7 @@ class TestElInflection(TestCase):
 | colspan="5" align="right" style="text-align:right; background:#eaf0fa; font-size:70%; line-height:100%;" | [[:Κατηγορία:Ουσιαστικά που κλίνονται όπως το 'ζωγράφος' (νέα ελληνικά)|Κατηγορία]]  όπως «[[Παράρτημα:Ουσιαστικά (νέα ελληνικά)/κοινά#ζωγράφος|ζωγράφος]]» - [[Παράρτημα:Ουσιαστικά (νέα ελληνικά)|<span title="Παράρτημα:Ουσιαστικά">Παράρτημα:Ουσιαστικά</span>]]
 |}"""
         expected = [
-            {"tags": ["inflection-template"]},
+            {"form": "tname-filler", "tags": ["inflection-template"]},
             {
                 "form": "-γράφος",
                 "tags": ["singular", "nominative"],
@@ -770,7 +772,7 @@ class TestElInflection(TestCase):
         """.strip()
 
         expected = [
-            {"tags": ["inflection-template"]},
+            {"form": "tname-filler", "tags": ["inflection-template"]},
             {
                 "form": "πίνω",
                 "tags": ["present", "first-person", "singular"],
@@ -891,7 +893,7 @@ class TestElInflection(TestCase):
         """
 
         expected = [
-            {"tags": ["inflection-template"]},
+            {"form": "tname-filler", "tags": ["inflection-template"]},
             {
                 "form": "τρώω",
                 "tags": ["first-person", "singular", "present"],
@@ -1065,7 +1067,7 @@ class TestElInflection(TestCase):
         """.strip()
 
         expected = [
-            {"tags": ["inflection-template"]},
+            {"form": "tname-filler", "tags": ["inflection-template"]},
             {
                 "form": "πίνουν",
                 "tags": ["present", "third-person", "plural"],
