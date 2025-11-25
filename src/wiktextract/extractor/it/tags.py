@@ -82,6 +82,7 @@ FORM_LINE_TEMPLATE_TAGS = {
     # Template:en-verb
     "3ª persona sing. presente": ["third-person", "singular", "present"],
     "passato semplice": "past",
+    "passato semplice e participio passato": ["past", "participle"],
 }
 
 # https://it.wiktionary.org/wiki/Template:Term/d

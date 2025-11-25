@@ -19,17 +19,18 @@ def extract_tag_form_line_nodes(
         if isinstance(node, WikiNode) and node.kind == NodeKind.ITALIC:
             extract_italic_tag_node(wxr, word_entry, node)
         elif isinstance(node, TemplateNode):
-            if node.template_name.lower() == "tabs":
+            t_name = node.template_name.lower()
+            if t_name == "tabs":
                 extract_tabs_template(wxr, word_entry, node)
-            elif node.template_name.lower() in FORM_LINK_TEMPLATES:
+            elif t_name in FORM_LINK_TEMPLATES:
                 extract_form_link_template(wxr, word_entry, node)
-            elif node.template_name.lower().startswith("it-decl-agg"):
+            elif t_name.startswith("it-decl-agg"):
                 extract_it_decl_agg_template(wxr, word_entry, node)
-            elif node.template_name.lower() == "a cmp":
+            elif t_name == "a cmp":
                 extract_a_cmp_template(wxr, word_entry, node)
-            elif node.template_name.lower() == "pn":
+            elif t_name == "pn":
                 extract_pn_template(wxr, word_entry, node)
-            elif node.template_name == "en-verb":
+            elif t_name == "en-verb":
                 extract_en_verb_template(wxr, word_entry, node)
 
 
