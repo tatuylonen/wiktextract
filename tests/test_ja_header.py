@@ -83,7 +83,7 @@ class TestJaHeader(TestCase):
             data.forms,
             [
                 Form(form="料理する", tags=["canonical"]),
-                Form(form="りょうりする"),
+                Form(form="りょうりする", tags=["transliteration"]),
             ],
         )
 
@@ -137,9 +137,9 @@ class TestJaHeader(TestCase):
         self.assertEqual(
             [f.model_dump(exclude_defaults=True) for f in data.forms],
             [
-                {"form": "きんぎょく"},
-                {"form": "きんたま"},
-                {"form": "かねだま"},
+                {"form": "きんぎょく", "tags": ["transliteration"]},
+                {"form": "きんたま", "tags": ["transliteration"]},
+                {"form": "かねだま", "tags": ["transliteration"]},
             ],
         )
 
