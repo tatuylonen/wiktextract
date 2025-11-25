@@ -131,6 +131,19 @@ VERB_TAGS: dict[str, str] = {
     "副詞": "adverbial",
     "無助動詞": "no-auxiliary",
     "有助動詞": "auxiliary",
+    # Template:ja-na
+    "簡體否定": ["informal", "negative"],
+    "簡體過去": ["informal", "past"],
+    "簡體過去否定": ["informal", "past", "negative"],
+    "敬體": "formal",
+    "敬體否定": ["formal", "negative"],
+    "敬體過去": ["formal", "past"],
+    "敬體過去否定": ["formal", "past", "negative"],
+    "連接形": "conjunctive",
+    "暫定形": "provisional",
+    "推量形": "volitional",
+    "連用形": "adverbial",
+    "程度形": "degree",
 }
 
 # https://en.wikipedia.org/wiki/Japanese_grammar#Stem_forms
@@ -422,6 +435,7 @@ LABEL_TAGS = {
     "古典": "Classical",
     "中國大陸": "Mainland-China",
     "書面語": "literary",
+    "文言": "literary",
 }
 
 # example sentence template
@@ -531,6 +545,10 @@ ZH_PRON_TAGS = {
     "中國大陸標準讀法": ["Mainland-China", "standard"],
     "臺灣異讀法": ["Taiwan", "variant"],
     "中國大陸與臺灣標準讀法": ["Mainland-China", "Taiwan", "standard"],
+    "異讀": "variant",
+    "上古": "Old-Chinese",
+    "白–沙": "Baxter–Sagart",
+    "鄭張": "Zhengzhang",
 }
 
 ZH_DIAL_TAGS = {
