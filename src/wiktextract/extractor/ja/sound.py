@@ -159,6 +159,7 @@ def process_ja_pron_template(
                 if link_text in JA_PRON_ACCENTS:
                     sound.tags.append(JA_PRON_ACCENTS[link_text])
             if sound.ipa != "" or sound.other != "":
+                translate_raw_tags(sound)
                 sounds.append(sound)
 
     for arg in ["a", "audio"]:
@@ -205,6 +206,7 @@ def process_ja_accent_common_template(
     if accent_type in JA_ACCENT_COMMON_TYPES:
         sound.tags.append(JA_ACCENT_COMMON_TYPES[accent_type])
     if sound.other != "":
+        translate_raw_tags(sound)
         sounds.append(sound)
 
 
