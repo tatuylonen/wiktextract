@@ -81,8 +81,7 @@ class TestJaSound(TestCase):
                 Sound(
                     roman="[nìhóńgó]",
                     other="にほんご",
-                    raw_tags=["東京式"],
-                    tags=["Heiban"],
+                    tags=["Heiban", "Tokyo"],
                 ),
                 Sound(ipa="[ɲ̟ihõ̞ŋɡo̞]"),
             ],
@@ -137,13 +136,7 @@ class TestJaSound(TestCase):
         data = base_data.model_dump(exclude_defaults=True)
         self.assertEqual(
             data["sounds"],
-            [
-                {
-                    "other": "とーにゅー",
-                    "tags": ["Heiban"],
-                    "raw_tags": ["京阪式"],
-                }
-            ],
+            [{"other": "とーにゅー", "tags": ["Heiban", "Kyoto", "Osaka"]}],
         )
 
     def test_ja_accent_common_template_two_span_tags(self):
@@ -161,7 +154,7 @@ class TestJaSound(TestCase):
         data = base_data.model_dump(exclude_defaults=True)
         self.assertEqual(
             data["sounds"],
-            [{"other": "まぜる", "tags": ["Heiban"], "raw_tags": ["京阪式"]}],
+            [{"other": "まぜる", "tags": ["Heiban", "Kyoto", "Osaka"]}],
         )
 
     def test_magic_word_in_template_param(self):

@@ -306,6 +306,8 @@ TAGS = {
     "指小辞無し": "no-diminutive",
     "指小辞": "diminutive",
     "廃用": "obsolete",
+    # Template:ja-noun
+    "旧字体": "kyūjitai",
 }
 
 TOPICS = {
