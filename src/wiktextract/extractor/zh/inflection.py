@@ -13,13 +13,14 @@ JAPANESE_INFLECTION_TEMPLATE_PREFIXES = (
     "ja-i",
     "ja-adj-infl",
     "ja-conj-bungo",
-    "ja-go",
+    "ja-go-",
     "ja-honorific",
     "ja-ichi",
     "ja-kuru",
     "ja-suru",
     "ja-verbconj",
     "ja-zuru",
+    "ja-na",
 )
 
 
