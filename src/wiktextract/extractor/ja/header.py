@@ -60,7 +60,7 @@ def extract_header_nodes(
         elif (
             isinstance(node, HTMLNode)
             and node.tag == "span"
-            and "form-of" in node.attrs.get("class", "")
+            and "form-of" in node.attrs.get("class", "").split()
         ):
             for span_child in node.children:
                 if isinstance(span_child, str) and span_child.strip() != "":
@@ -132,7 +132,8 @@ def add_form_data(
             for class_name in FORM_OF_CLASS_TAGS:
                 if class_name in class_names:
                     form.tags.append(class_name)
-        if "tr Latn" in node.attrs.get("class", ""):
+        class_name = node.attrs.get("class", "")
+        if "tr Latn" in class_name or "headword-tr" in class_name:
             form.tags.append("transliteration")
         translate_raw_tags(form)
         if raw_tags == ["又は"] and len(word_entry.forms) > 0:
