@@ -185,3 +185,25 @@ class TestThSound(unittest.TestCase):
             ],
         )
         self.assertEqual(data[0]["categories"], ["ศัพท์ภาษาลาวที่มีคำพ้องเสียง"])
+
+    def test_vi_ipa(self):
+        self.wxr.wtp.add_page(
+            "แม่แบบ:vi-pron",
+            10,
+            """* (''[[นครโฮจิมินห์|นครโฮจิมินห์]]'') [[วิกิพจนานุกรม:สัทอักษรสากล|สัทอักษรสากล]] <sup>([[ภาคผนวก:การออกเสียงภาษาเวียดนาม|คำอธิบาย]])</sup>: <span class="IPA">[ʔɓuəŋ˨˩ ŋʊw˨˩˦]</span>[[หมวดหมู่:ศัพท์ภาษาเวียดนามที่มีการออกเสียงไอพีเอ]]""",
+        )
+        data = parse_page(
+            self.wxr,
+            "buồng ngủ",
+            """== ภาษาเวียดนาม ==
+=== การออกเสียง ===
+{{vi-pron}}
+=== คำนาม ===
+# [[ห้องนอน]]""",
+        )
+        self.assertEqual(
+            data[0]["sounds"], [{"ipa": "[ʔɓuəŋ˨˩ ŋʊw˨˩˦]", "tags": ["Saigon"]}]
+        )
+        self.assertEqual(
+            data[0]["categories"], ["ศัพท์ภาษาเวียดนามที่มีการออกเสียงไอพีเอ"]
+        )

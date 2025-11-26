@@ -1,4 +1,3 @@
-import itertools
 import re
 from dataclasses import dataclass
 
@@ -75,7 +74,15 @@ def process_pron_template(
     elif template_name in ["audio", "音"]:
         sounds.extend(process_audio_template(wxr, template_node, raw_tags))
     elif template_name == "ipa":
-        sounds.extend(process_ipa_template(wxr, template_node, raw_tags))
+        new_sounds, new_cats = extract_ipa_template(
+            wxr, template_node, raw_tags
+        )
+        sounds.extend(new_sounds)
+        categories.extend(new_cats)
+    elif template_name in ["vi-ipa", "vi-pron"]:
+        new_sounds, new_cats = extract_vi_ipa_template(wxr, template_node)
+        sounds.extend(new_sounds)
+        categories.extend(new_cats)
     elif template_name == "enpr":
         sounds.extend(process_enpr_template(wxr, template_node, raw_tags))
     elif template_name == "ja-pron":
@@ -357,24 +364,63 @@ def process_audio_template(
     return [sound_data]
 
 
-def process_ipa_template(
+def extract_ipa_template(
     wxr: WiktextractContext,
-    template_node: TemplateNode,
+    t_node: TemplateNode,
     raw_tags: list[str],
-) -> list[Sound]:
+) -> tuple[list[Sound], list[str]]:
     # https://zh.wiktionary.org/wiki/Template:IPA
+    cats = {}
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    clean_node(wxr, cats, expanded_node)
+    sounds = extract_ipa_list_item(wxr, expanded_node, raw_tags)
+    return sounds, cats.get("categories", [])
+
+
+def extract_ipa_list_item(
+    wxr: WiktextractContext, list_item: WikiNode, raw_tags: list[str]
+) -> list[Sound]:
     sounds = []
-    for index in itertools.count(2):
-        if index not in template_node.template_parameters:
-            break
-        sound = Sound(
-            ipa=clean_node(
-                wxr, None, template_node.template_parameters.get(index)
-            ),
-            raw_tags=raw_tags,
-        )
-        sounds.append(sound)
+    raw_tag = ""
+    for span_tag in list_item.find_html("span"):
+        span_class = span_tag.attrs.get("class", "").split()
+        if "qualifier-content" in span_class:
+            raw_tag = clean_node(wxr, None, span_tag)
+        elif "IPA" in span_class:
+            sound = Sound(
+                ipa=clean_node(wxr, None, span_tag), raw_tags=raw_tags
+            )
+            if raw_tag != "":
+                sound.raw_tags.append(raw_tag)
+                translate_raw_tags(sound)
+            if sound.ipa != "":
+                sounds.append(sound)
+        elif "Latn" in span_class:
+            sound = Sound(
+                roman=clean_node(wxr, None, span_tag), raw_tags=raw_tags
+            )
+            if raw_tag != "":
+                sound.raw_tags.append(raw_tag)
+                translate_raw_tags(sound)
+            if sound.roman != "":
+                sounds.append(sound)
     return sounds
+
+
+def extract_vi_ipa_template(
+    wxr: WiktextractContext, t_node: TemplateNode
+) -> tuple[list[Sound], list[str]]:
+    sounds = []
+    cats = {}
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    clean_node(wxr, cats, expanded_node)
+    for list_item in expanded_node.find_child_recursively(NodeKind.LIST_ITEM):
+        sounds.extend(extract_ipa_list_item(wxr, list_item, []))
+    return sounds, cats.get("categories", [])
 
 
 def process_enpr_template(
