@@ -74,6 +74,7 @@ def extract_example_list_item(
                 "th-usex",
                 "th-x",
                 "th-xi",
+                "uxa",
             ]:
                 extract_template_ux(wxr, child, example_data)
                 clean_node(wxr, sense_data, child)  # add cat link
