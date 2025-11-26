@@ -86,6 +86,10 @@ SOUND_TAGS = {
     "อู๋": "Wu",
     "เซียง": "Xiang",
     "Wiktionary Romanisation": ["Wiktionary-specific", "romanization"],
+    # Template:vi-ipa
+    "ฮานอย": "Hà-Nội",
+    "เว้": "Huế",
+    "นครโฮจิมินห์": "Saigon",
 }
 
 LABEL_TAGS = {

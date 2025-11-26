@@ -86,6 +86,11 @@ class TestPronunciation(TestCase):
     def test_en_pron_list(self):
         self.wxr.wtp.start_page("hello")
         self.wxr.wtp.add_page("Template:a", 10, "(美國)")
+        self.wxr.wtp.add_page(
+            "Template:IPA",
+            10,
+            """[[Wiktionary:國際音標|國際音標]]<sup>([[Appendix:英語發音|幫助]])</sup>:&#32;<span class="IPA">/hɛˈloʊ/</span>、<span class="IPA">/həˈloʊ/</span>、<span class="IPA">/ˈhɛloʊ/</span>""",
+        )
         root = self.wxr.wtp.parse(
             "* {{a|US}} {{enPR|hĕ-lō'|hə-lō'}}、{{IPA|en|/hɛˈloʊ/|/həˈloʊ/|/ˈhɛloʊ/}}"
         )
@@ -640,4 +645,24 @@ class TestPronunciation(TestCase):
                     "zh_pron": "rhid tin^˖",
                 }
             ],
+        )
+
+    def test_vi_ipa(self):
+        self.wxr.wtp.add_page(
+            "Template:vi-IPA",
+            10,
+            """* <span class="ib-brac qualifier-brac">(</span><span class="ib-content qualifier-content"><span class="usage-label-accent">[[w:胡志明市|胡志明市]]</span></span><span class="ib-brac qualifier-brac">)</span> [[Wiktionary:國際音標|國際音標]]<sup>([[Appendix:越南語發音|幫助]])</sup>:&#32;<span class="IPA">[kaːk̚˦˥ tak̚˨˩˨]</span>[[Category:有國際音標的越南語詞|CAT&#37; TAC&amp;]][[分類:有國際音標的越南語詞]]""",
+        )
+        data = parse_page(
+            self.wxr,
+            "cát tặc",
+            """==越南語==
+===發音===
+{{vi-IPA}}
+===名詞===
+# [[盜]][[採]][[砂石]]者，[[非法]]採砂者""",
+        )
+        self.assertEqual(
+            data[0]["sounds"],
+            [{"ipa": "[kaːk̚˦˥ tak̚˨˩˨]", "tags": ["Saigon"]}],
         )

@@ -586,6 +586,10 @@ ALL_TAGS = {
     **ZH_PRON_TAGS,
     **ZH_DIAL_TAGS,
     **TH_PRON_TAGS,
+    # Template:vi-ipa
+    "河內": "Hà-Nội",
+    "順化": "Huế",
+    "胡志明市": "Saigon",
 }
 
 
