@@ -47,6 +47,7 @@ def extract_example_list_item(
                 "th-x",
                 "tha-x",
                 "tha-usex",
+                "uxa",
             ]:
                 extract_ux_template(wxr, sense, node)
             elif node.template_name.startswith(("quote-", "RQ:")):

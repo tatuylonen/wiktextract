@@ -69,6 +69,7 @@ def extract_example_list_item(
             "collocation",
             "co",
             "coi",
+            "uxa",
         ]:
             copy_of_parent_data = deepcopy(parent_data)
             if template_node.template_name in ("collocation", "co", "coi"):
