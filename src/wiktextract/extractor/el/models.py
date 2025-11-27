@@ -112,7 +112,7 @@ class Linkage(GreekBaseModel):
     examples: list[str] = []
 
 
-class FormOf(GreekBaseModel):
+class AltForm(GreekBaseModel):
     word: str
     # extra: str
     # roman: str
@@ -125,9 +125,9 @@ class Sense(GreekBaseModel):
     tags: list[str] = []
     raw_tags: list[str] = []
     topics: list[str] = []
-    form_of: list[FormOf] = []
-    # alt_of : list[FormOf] = []
-    # compound_of: list[FormOf] = []
+    form_of: list[AltForm] = []
+    alt_of : list[AltForm] = []
+    # compound_of: list[AltForm] = []
     categories: list[str] = []  # Wikipedia category link data; not printed.
     examples: list[Example] = []
     synonyms: list[Linkage] = []
@@ -255,8 +255,8 @@ class WordEntry(GreekBaseModel):
     raw_tags: list[str] = []
     hyphenation: str = ""  # Should be a list `hyphenations`.
     head_templates: list[TemplateData] = []
-    # alt_of: list[FormOf] = []
-    form_of: list[FormOf] = []
+    alt_of: list[AltForm] = []
+    form_of: list[AltForm] = []
     antonyms: list[Linkage] = []
     # coordinate_terms: list[Linkage] = []
     derived: list[Linkage] = []

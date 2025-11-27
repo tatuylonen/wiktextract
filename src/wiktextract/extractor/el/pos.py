@@ -20,8 +20,8 @@ from wiktextract.page import clean_node
 from .head import parse_head
 from .linkages import process_linkage_section
 from .models import (
+    AltForm,
     Example,
-    FormOf,
     FormSource,
     Linkage,
     Sense,
@@ -486,6 +486,8 @@ def process_pos(
                 | Heading.Synonyms
                 | Heading.Antonyms
                 | Heading.Transliterations
+                | Heading.AltOf
+                | Heading.FormOf
             ):
                 process_linkage_section(wxr, data, sl, heading_type)
     #     if heading_type not in (
@@ -550,18 +552,18 @@ def bold_node_fn(
     return None
 
 
-def extract_form_of_templates(
+def extract_alt_form_templates(
     wxr: WiktextractContext,
     parent_sense: Sense | WordEntry,
     t_node: TemplateNode,
     siblings: list[str | WikiNode],
     siblings_index: int,
 ) -> None:
-    """Parse form_of for nouns, adjectives and verbs.
+    """Parse form_of or alt_of templates.
 
     Supports:
     1. κλ             | generic                | form_of
-    2. γρ             | generic                | form_of
+    2. γρ             | generic                | form_of or alt_of
     3. πτώση/πτώσεις  | nouns, adjectives etc. | form_of and tags
     4. υπο/υποκ       | nouns                  | form_of
     5. μεγ/μεγεθ      | nouns                  | form_of
@@ -578,8 +580,9 @@ def extract_form_of_templates(
     7. https://el.wiktionary.org/wiki/Κατηγορία:Πρότυπα_για_μετοχές
     """
     t_name = t_node.template_name
+    t_args = t_node.template_parameters
 
-    basic_extract = partial(
+    basic_extract_form_of = partial(
         extract_form_of_templates_basic,
         wxr,
         parent_sense,
@@ -590,43 +593,41 @@ def extract_form_of_templates(
     )
     # Generic
     if t_name == "κλ":
-        return basic_extract(extract_argument=2)
+        return basic_extract_form_of(extract_argument=2)
 
+    # Generic
+    # * Try parsing a "form_of" if the second template arguments refers to a
+    # form (μορφ / μορφή / λόγια μορφή του, etc.).
+    # * Otherwise, parse an "alt_of"
+    #
     # Notes:
     # * All occurrences in wiktionary have at least one argument
-    # * Only handle cases where the second argument refers to a form:
-    #   μορφ / μορφή / λόγια μορφή του, etc.
-    #   and ignore those mistakenly used as synonym templates
-    if (
-        t_name in ("γρ", "γραφή του", "alter")
-        and 2 in t_node.template_parameters
-    ):
-        second_arg = t_node.template_parameters[2]
-        second_arg_str = clean_node(wxr, None, second_arg)
-        if "μορφ" in second_arg_str:
-            return basic_extract(extract_argument=1)
+    if t_name in ("γρ", "γραφή του", "alter") and 1 in t_args:
+        if 2 in t_node.template_parameters:
+            second_arg = t_node.template_parameters[2]
+            if "μορφ" in clean_node(wxr, None, second_arg):
+                return basic_extract_form_of(extract_argument=1)
+        # We could add some tags here, but AltForm takes none
+        word = clean_node(wxr, None, t_args[1]).strip()
+        parent_sense.alt_of.append(AltForm(word=word))
+        return
 
     # Nouns and adjectives
-    inflection_t_names = ("πτώσεις", "πτώση")
-    if (
-        any(name in t_name for name in inflection_t_names)
-        and 1 in t_node.template_parameters
-    ):
+    if any(name in t_name for name in ("πτώσεις", "πτώση")) and 1 in t_args:
         return extract_form_of_templates_ptosi(wxr, parent_sense, t_node)
 
     # Nouns
     # Note that the "diminutive/augmentative" tags will be added later on
     # via translation of the "υποκοριστικό/μεγεθυντικό" raw_tags
-    for template_name in ("υπο", "υποκ", "μεγ", "μεγεθ"):
-        if t_name == template_name and 1 in t_node.template_parameters:
-            return basic_extract(extract_argument=1)
+    if t_name in ("υπο", "υποκ", "μεγ", "μεγεθ") and 1 in t_args:
+        return basic_extract_form_of(extract_argument=1)
 
     # Verbs
     if t_name == "ρημ τύπος":
-        return basic_extract(extract_argument=2)
+        return basic_extract_form_of(extract_argument=2)
 
     if t_name.startswith("μτχ"):
-        return basic_extract(extract_argument=1)
+        return basic_extract_form_of(extract_argument=1)
 
 
 def extract_form_of_templates_basic(
@@ -660,7 +661,7 @@ def extract_form_of_templates_basic(
         lemma = clean_node(wxr, None, links).strip()
 
     if lemma:
-        form_of = FormOf(word=lemma)
+        form_of = AltForm(word=lemma)
         parent_sense.form_of.append(form_of)
     else:
         wxr.wtp.wiki_notice(
@@ -742,7 +743,7 @@ def extract_form_of_templates_ptosi(
     tags.sort()  # For the tests, but also good practice
 
     lemma = clean_node(wxr, None, t_node.template_parameters[1])
-    form_of = FormOf(word=lemma)
+    form_of = AltForm(word=lemma)
     parent_sense.form_of.append(form_of)
     parent_sense.tags.extend(tags)
 
@@ -759,7 +760,7 @@ def parse_gloss(
 
     for i, t_node in enumerate(contents):
         if isinstance(t_node, TemplateNode):
-            extract_form_of_templates(wxr, parent_sense, t_node, contents, i)
+            extract_alt_form_templates(wxr, parent_sense, t_node, contents, i)
 
     template_tags: list[str] = []
 

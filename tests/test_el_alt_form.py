@@ -5,6 +5,7 @@ from wikitextprocessor import Wtp
 
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.el.models import WordEntry
+from wiktextract.extractor.el.page import parse_page
 from wiktextract.extractor.el.pos import process_pos
 from wiktextract.wxr_context import WiktextractContext
 
@@ -29,7 +30,7 @@ class TestElGlosses(TestCase):
         self.wxr.wtp.close_db_conn()
 
     def mktest_sense(self, raw: str, expected: list[dict[str, Any]]) -> None:
-        """Compare only senses["tags"] and senses["form_of"].
+        """Compare only senses["tags"], senses["form_of"] and senses["alt_of"].
 
         Do not compare senses["glosses"] but check that it exists. This
         way we don't need to expand templates, and we still (roughly) check
@@ -210,17 +211,16 @@ class TestElGlosses(TestCase):
         expected = [{"form_of": [{"word": "πλανεύω"}]}]
         self.mktest_sense(raw, expected)
 
-    def test_form_of_gr_base(self) -> None:
+    def test_gr_linkage_base(self) -> None:
         # https://el.wiktionary.org/wiki/εσένανε
         raw = "* {{γρ|εσένα|μορφή}}"
         expected = [{"form_of": [{"word": "εσένα"}]}]
         self.mktest_sense(raw, expected)
 
-    def test_form_of_gr_second_arg_wrong(self) -> None:
+    def test_gr_linkage_second_arg_syn(self) -> None:
         # https://el.wiktionary.org/wiki/πιάνο_τοίχου
-        # Should ignore expansion depending on the second argument
         raw = "* {{γρ|όρθιο πιάνο|συνων}}"
-        self.mktest_sense(raw, [{}])
+        self.mktest_sense(raw, [{"alt_of": [{"word": "όρθιο πιάνο"}]}])
 
     def test_gr_linkage_second_arg_variant(self) -> None:
         # https://el.wiktionary.org/wiki/μαλακή_υπερώα
@@ -231,12 +231,14 @@ class TestElGlosses(TestCase):
     def test_gr_linkage_second_arg_empty(self) -> None:
         # Seen via ripgrep
         raw = "* {{γρ|well-rounded||en}}"
-        self.mktest_sense(raw, [{}])
+        expected = [{"alt_of": [{"word": "well-rounded"}]}]
+        self.mktest_sense(raw, expected)
 
     def test_gr_linkage_one_arg(self) -> None:
         # Seen via ripgrep
         raw = "* {{γρ|τάδε}}"
-        self.mktest_sense(raw, [{}])
+        expected = [{"alt_of": [{"word": "τάδε"}]}]
+        self.mktest_sense(raw, expected)
 
     def test_gr_linkage_alternative_template_name1(self) -> None:
         # https://el.wiktionary.org/wiki/προμηνώ
@@ -280,3 +282,87 @@ class TestElGlosses(TestCase):
         raw = "* {{μεγεθ|φλιτζάνι}}"
         expected = [{"form_of": [{"word": "φλιτζάνι"}]}]
         self.mktest_sense(raw, expected)
+
+    def test_gr_linkage_when_alt_of(self) -> None:
+        # Tests both γρ-sections and template
+        # https://el.wiktionary.org/wiki/γορίλλας
+        word = "γορίλλας"
+        self.wxr.wtp.start_page(word)
+        self.wxr.wtp.add_page("Πρότυπο:-el-", 10, "Νέα ελληνικά (el)")
+        self.wxr.wtp.add_page("Πρότυπο:ουσιαστικό", 10, "Ουσιαστικό")
+        self.wxr.wtp.add_page("Πρότυπο:άλλη γραφή", 10, "Άλλες γραφές")
+        self.wxr.wtp.add_page(
+            "Πρότυπο:γρ",
+            10,
+            "''[[Βικιλεξικό:Μορφές λέξεων|άλλη γραφή του]] '''''[[γορίλας1]]'''",
+        )
+        raw = """=={{-el-}}==
+==={{ουσιαστικό|el}}===
+'''{{PAGENAME}}'''
+* foo
+* {{γρ|γορίλας1}}
+
+===={{άλλη γραφή}}====
+* [[γορίλας2]]
+"""
+        page_datas = parse_page(self.wxr, word, raw)
+        expected = {
+            "word": "γορίλλας",
+            "forms": [{"form": "γορίλλας", "source": "header"}],
+            "lang_code": "el",
+            "lang": "Greek",
+            "pos": "noun",
+            "senses": [
+                {"glosses": ["foo"]},
+                {
+                    "glosses": ["άλλη γραφή του γορίλας1"],
+                    "alt_of": [{"word": "γορίλας1"}],
+                },
+            ],
+            "alt_of": [{"word": "γορίλας2"}],
+        }
+
+        data = page_datas[0]
+        self.assertEqual(data, expected)
+
+    def test_gr_linkage_when_form_of(self) -> None:
+        # Tests both γρ-sections and template
+        # https://el.wiktionary.org/wiki/ελαιόδενδρο
+        word = "ελαιόδενδρο"
+        self.wxr.wtp.start_page(word)
+        self.wxr.wtp.add_page("Πρότυπο:-el-", 10, "Νέα ελληνικά (el)")
+        self.wxr.wtp.add_page("Πρότυπο:ουσιαστικό", 10, "Ουσιαστικό")
+        self.wxr.wtp.add_page("Πρότυπο:μορφές", 10, "Άλλες μορφές")
+        self.wxr.wtp.add_page(
+            "Πρότυπο:γρ",
+            10,
+            "''[[Βικιλεξικό:Μορφές λέξεων|άλλη μορφή του]] '''''[[ελαιόδεντρο]]'''",
+        )
+        raw = """=={{-el-}}==
+==={{ουσιαστικό|el}}===
+'''{{PAGENAME}}'''
+* foo
+* {{γρ|ελαιόδεντρο|μορφή}}
+
+===={{μορφές}}====
+* [[ελιά]]
+"""
+        page_datas = parse_page(self.wxr, word, raw)
+        expected = {
+            "word": "ελαιόδενδρο",
+            "forms": [{"form": "ελαιόδενδρο", "source": "header"}],
+            "lang_code": "el",
+            "lang": "Greek",
+            "pos": "noun",
+            "senses": [
+                {"glosses": ["foo"]},
+                {
+                    "glosses": ["άλλη μορφή του ελαιόδεντρο"],
+                    "form_of": [{"word": "ελαιόδεντρο"}],
+                },
+            ],
+            "form_of": [{"word": "ελιά"}],
+        }
+
+        data = page_datas[0]
+        self.assertEqual(data, expected)
