@@ -218,7 +218,7 @@ def extract_syn_template(
         if arg_name not in t_node.template_parameters:
             break
         arg_value = clean_node(wxr, None, t_node.template_parameters[arg_name])
-        if arg_value.startswith("อรรถาภิธาน:"):
+        if arg_value.startswith(("อรรถาภิธาน:", "Thesaurus:")):
             extract_thesaurus_page(
                 wxr, word_entry, linkage_type, arg_value, sense
             )

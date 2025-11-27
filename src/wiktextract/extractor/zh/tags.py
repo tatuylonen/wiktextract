@@ -436,6 +436,13 @@ LABEL_TAGS = {
     "中國大陸": "Mainland-China",
     "書面語": "literary",
     "文言": "literary",
+    "詞幹": "stem",
+    "烏爾都語寫法": "Urdu",
+    "波斯-阿拉伯字母": "Perso-Arabic",
+    # Template:kok-pos
+    "拉丁字母": ["Latin", "character"],
+    "卡納達文": ["Kannada", "character"],
+    "尼瓦爾文拼寫": "Newa",
 }
 
 # example sentence template
@@ -590,6 +597,13 @@ ALL_TAGS = {
     "河內": "Hà-Nội",
     "順化": "Huế",
     "胡志明市": "Saigon",
+    # Template:hi-ipa
+    "德里": "Delhi",
+    # Template:hi-noun
+    "烏爾都文拼寫": "Urdu",
+    # Template:sa-ipa
+    "吠陀": "Vedic",
+    "古典梵語": "Classical-Sanskrit",
 }
 
 

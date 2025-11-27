@@ -21,30 +21,50 @@ def extract_sound_section(
 ):
     for node in level_node.children:
         if isinstance(node, TemplateNode):
-            if node.template_name == "vie-pron":
-                extract_vie_pron_template(wxr, base_data, node)
-            elif node.template_name in [
-                "âm thanh-IPA",
-                "pron-audio",
-                "audio-for-pron",
-            ]:
-                extract_pron_audio_template(wxr, base_data, node)
-            elif node.template_name == "tyz-IPA":
-                extract_tyz_ipa_template(wxr, base_data, node)
-            elif node.template_name in ["zh-pron", "zho-pron"]:
-                extract_zh_pron_template(wxr, base_data, node)
-            elif node.template_name in ["th-pron", "tha-pron"]:
-                extract_th_pron_template(wxr, base_data, node)
-            elif node.template_name in [
-                "ja-pron",
-                "ja-IPA",
-                "jpn-IPA",
-                "jpn-pron",
-            ]:
-                extract_ja_pron_template(wxr, base_data, node)
+            extract_sound_template(wxr, base_data, node)
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
             for list_item in node.find_child(NodeKind.LIST_ITEM):
                 extract_sound_list_item(wxr, base_data, list_item)
+
+
+def extract_sound_template(
+    wxr: WiktextractContext, base_data: WordEntry, t_node: TemplateNode
+):
+    if t_node.template_name == "vie-pron":
+        extract_vie_pron_template(wxr, base_data, t_node)
+    elif t_node.template_name in [
+        "âm thanh-IPA",
+        "pron-audio",
+        "audio-for-pron",
+    ]:
+        extract_pron_audio_template(wxr, base_data, t_node)
+    elif t_node.template_name in ["tyz-IPA", "hi-IPA", "sa-IPA", "san-IPA"]:
+        extract_tyz_ipa_template(wxr, base_data, t_node)
+    elif t_node.template_name in ["zh-pron", "zho-pron"]:
+        extract_zh_pron_template(wxr, base_data, t_node)
+    elif t_node.template_name in ["th-pron", "tha-pron"]:
+        extract_th_pron_template(wxr, base_data, t_node)
+    elif t_node.template_name in ["ja-pron", "ja-IPA", "jpn-IPA", "jpn-pron"]:
+        extract_ja_pron_template(wxr, base_data, t_node)
+    elif t_node.template_name in ["âm thanh", "Audio", "Âm thanh"]:
+        extract_audio_template(wxr, base_data, t_node, 1)
+    elif t_node.template_name in ["âm thanh-2", "audio"]:
+        extract_audio_template(wxr, base_data, t_node, 2)
+    elif t_node.template_name in [
+        "IPA",
+        "IPA2",
+        "IPA3",
+        "IPA4",
+    ] or t_node.template_name.endswith("-IPA"):
+        extract_ipa_template(wxr, base_data, t_node, "IPA")
+    elif t_node.template_name in ["enPR", "AHD"]:
+        extract_ipa_template(wxr, base_data, t_node, "enPR")
+    elif t_node.template_name in ["rhymes", "rhyme"]:
+        extract_rhymes_template(wxr, base_data, t_node)
+    elif t_node.template_name in ["hyphenation", "hyph"]:
+        extract_hyphenation_template(wxr, base_data, t_node)
+    elif t_node.template_name in ["homophones", "homophone", "hmp"]:
+        extract_homophones_template(wxr, base_data, t_node)
 
 
 def extract_sound_list_item(
@@ -52,25 +72,7 @@ def extract_sound_list_item(
 ):
     for node in list_item.children:
         if isinstance(node, TemplateNode):
-            if node.template_name in ["âm thanh", "Audio", "Âm thanh"]:
-                extract_audio_template(wxr, base_data, node, 1)
-            elif node.template_name in ["âm thanh-2", "audio"]:
-                extract_audio_template(wxr, base_data, node, 2)
-            elif node.template_name in [
-                "IPA",
-                "IPA2",
-                "IPA3",
-                "IPA4",
-            ] or node.template_name.endswith("-IPA"):
-                extract_ipa_template(wxr, base_data, node, "IPA")
-            elif node.template_name in ["enPR", "AHD"]:
-                extract_ipa_template(wxr, base_data, node, "enPR")
-            elif node.template_name in ["rhymes", "rhyme"]:
-                extract_rhymes_template(wxr, base_data, node)
-            elif node.template_name in ["hyphenation", "hyph"]:
-                extract_hyphenation_template(wxr, base_data, node)
-            elif node.template_name in ["homophones", "homophone", "hmp"]:
-                extract_homophones_template(wxr, base_data, node)
+            extract_sound_template(wxr, base_data, node)
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
             for child_list_item in node.find_child(NodeKind.LIST_ITEM):
                 extract_sound_list_item(wxr, base_data, child_list_item)
@@ -208,22 +210,25 @@ def extract_tyz_ipa_template(
     )
     for list in expanded_node.find_child(NodeKind.LIST):
         for list_item in list.find_child(NodeKind.LIST_ITEM):
-            sound = Sound()
-            for node in list_item.children:
-                if isinstance(node, WikiNode) and node.kind == NodeKind.ITALIC:
+            raw_tag = ""
+            for node in list_item.find_child(NodeKind.ITALIC | NodeKind.LINK):
+                if node.kind == NodeKind.ITALIC:
                     raw_tag = clean_node(wxr, None, node)
+                elif node.kind == NodeKind.LINK:
+                    clean_node(wxr, base_data, node)
+            for span_tag in list_item.find_html_recursively("span"):
+                class_names = span_tag.attrs.get("class", "").split()
+                if "IPA" in class_names:
+                    sound = Sound(ipa=clean_node(wxr, None, span_tag))
                     if raw_tag != "":
                         sound.raw_tags.append(raw_tag)
-                elif (
-                    isinstance(node, HTMLNode)
-                    and node.tag == "span"
-                    and "IPA" in node.attrs.get("class", "").split()
-                ):
-                    sound.ipa = clean_node(wxr, None, node)
-                elif isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
-                    clean_node(wxr, base_data, node)
-            if sound.ipa != "":
-                base_data.sounds.append(sound)
+                    if sound.ipa != "":
+                        translate_raw_tags(sound)
+                        base_data.sounds.append(sound)
+                elif "label-content" in class_names:
+                    raw_tag = clean_node(wxr, None, span_tag)
+    for link_node in expanded_node.find_child(NodeKind.LINK):
+        clean_node(wxr, base_data, link_node)
 
 
 def extract_ipa_template(
@@ -239,7 +244,7 @@ def extract_ipa_template(
     raw_tags = []
     for span_tag in expanded_node.find_html("span"):
         class_names = span_tag.attrs.get("class", "").split()
-        if "qualifier-content" in class_names:
+        if "qualifier-content" in class_names or "label-content" in class_names:
             raw_tag = clean_node(wxr, None, span_tag)
             if raw_tag != "":
                 raw_tags.append(raw_tag)

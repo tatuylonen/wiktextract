@@ -113,6 +113,10 @@ LABEL_TAGS = {
     "hangeul": "hangeul",
     # Template:ja-kanjitab
     "kyūjitai": "kyūjitai",
+    # Template:sa-noun
+    "thân từ": "stem",
+    # Template:hi-noun
+    "chính tả urdu": "Urdu",
 }
 
 # https://vi.wiktionary.org/wiki/Mô_đun:gender_and_number/data
@@ -149,6 +153,9 @@ LOCATIONS = {
 SOUND_TAGS = {
     "phát âm giọng anh chuẩn": "Received-Pronunciation",
     "anh mỹ thông dụng": "General-American",
+    # Template:sa-ipa
+    "vệ đà": "Vedic",
+    "tiếng phạn cổ điển": "Classical-Sanskrit",
 }
 
 ZH_X_TAGS = {
