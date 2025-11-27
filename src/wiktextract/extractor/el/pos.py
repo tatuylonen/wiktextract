@@ -424,12 +424,9 @@ def process_pos(
     # differently than the last line before the glosses list, which is the
     # head.
 
-    # return None
-
     # ======================
 
     ### Glosses after head ###
-    # parts = []
     got_senses = False
     for lst in glosses_lists:
         # Wiktionaries handle glosses the usual way: with numbered lists.

@@ -71,282 +71,7 @@ class TestElInflection(TestCase):
 
         self.assertEqual(received, expected)
 
-    def test_adj_inflection(self) -> None:
-        # https://el.wiktionary.org/wiki/αζωικός
-        self.wxr.wtp.add_page("Πρότυπο:-el-", 10, "Νέα ελληνικά (el)")
-        self.wxr.wtp.add_page("Πρότυπο:επίθετο", 10, "Επίθετο")
-        self.wxr.wtp.add_page(
-            "Πρότυπο:el-κλίση-'καλός'",
-            10,
-            """{| style="clear:right; float:right; margin-left:0.5em; margin-bottom:0.5em;background:#ffffff; color:#000000; border:1px solid#a1bdea; text-align:right;"rules="none" border="1" cellpadding="3" cellspacing="0"|-
-! style="background:#a1bdea; border-right:1px solid #c1d3f1; text-align:center; font-size:90%;" align="center"| &darr;&nbsp;''πτώσεις''
-! style="background:#a1bdea; border-right:1px solid #a1bdea; font-size:90%;" align="center" colspan="6" | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[[ενικός|<span title="ενικός αριθμός" style="color:black;">'''''ενικός'''''</span>]]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-|-
-| style="background:#c1d3f1; border-right:1px solid #a1bdea; text-align:center; font-size:70%; line-height:100%;" align="center"| ''γένη''&nbsp;&rarr;
-| style="background:#c1d3f1; border-right:1px solid #a1bdea; font-size:70%; font-style:italic; line-height:100%;" colspan="2" align="center"| [[αρσενικό|<span style="color:#000000; font-weight:normal;">αρσενικό</span>]]
-| style="background:#c1d3f1; border-right:1px solid #a1bdea; font-size:70%; font-style:italic; line-height:100%;" colspan="2" align="center"| [[θηλυκό|<span style="color:#000000; font-weight:normal;">θηλυκό</span>]]
-| style="background:#c1d3f1; border-right:1px solid #a1bdea; font-size:70%; font-style:italic; line-height:100%;" colspan="2" align="center"| [[ουδέτερο|<span style="color:#000000; font-weight:normal;">ουδέτερο</span>]]
-|-
-| style="background:#d5e2f6; border-bottom:1px solid #eaf0fa; text-align:right; font-size:90%;"| [[ονομαστική|<span title="ονομαστική πτώση" style="color:black;">'''''ονομαστική'''''</span>]]
-| style="border-bottom:1px solid #eaf0fa;" align="center" | [[ο#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">ο</span>]]
-| style="border-bottom:1px solid #eaf0fa; border-right:1px solid #a1bdea;" align="left" | [[αζωικός#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">αζωικ</span><span style="color:#eb0000; font-weight:normal;">ός</span>]]
-| style="border-bottom:1px solid #eaf0fa;" align="center" | [[η#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">η</span>]]
-| style="border-bottom:1px solid #eaf0fa; border-right:1px solid #a1bdea;" align="left" | [[αζωική#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">αζωικ</span><span style="color:#eb0000; font-weight:normal;">ή</span>]]
-| style="border-bottom:1px solid #eaf0fa;" align="center" | [[το#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">το</span>]]
-| style="border-bottom:1px solid #eaf0fa; border-right:1px solid #a1bdea;" align="left" | [[αζωικό#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">αζωικ</span><span style="color:#eb0000; font-weight:normal;">ό</span>]]
-|-
-| style="background:#d5e2f6; border-bottom:1px solid #eaf0fa; text-align:right; font-size:90%;"| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[[γενική|<span title="γενική πτώση" style="color:black;">'''''γενική'''''</span>]]
-| style="border-bottom:1px solid #eaf0fa;" align="center" | [[του#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">του</span>]]
-| style="border-bottom:1px solid #eaf0fa; border-right:1px solid #a1bdea;" align="left" | [[αζωικού#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">αζωικ</span><span style="color:#eb0000; font-weight:normal;">ού</span>]]
-| style="border-bottom:1px solid #eaf0fa;" align="center" | [[της#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">της</span>]]
-| style="border-bottom:1px solid #eaf0fa; border-right:1px solid #a1bdea;" align="left" | [[αζωικής#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">αζωικ</span><span style="color:#eb0000; font-weight:normal;">ής</span>]]
-| style="border-bottom:1px solid #eaf0fa;" align="center" | [[του#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">του</span>]]
-| style="border-bottom:1px solid #eaf0fa; border-right:1px solid #a1bdea;" align="left" | [[αζωικού#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">αζωικ</span><span style="color:#eb0000; font-weight:normal;">ού</span>]]
-|-
-| style="background:#d5e2f6; border-bottom:1px solid #eaf0fa; text-align:right; font-size:90%;"| &nbsp;&nbsp;&nbsp;&nbsp;[[αιτιατική|<span title="αιτιατική πτώση" style="color:black;">'''''αιτιατική'''''</span>]]
-| style="border-bottom:1px solid #eaf0fa;" align="center" | [[τον#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">τον</span>]]
-| style="border-bottom:1px solid #eaf0fa; border-right:1px solid #a1bdea;" align="left" | [[αζωικό#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">αζωικ</span><span style="color:#eb0000; font-weight:normal;">ό</span>]]
-| style="border-bottom:1px solid #eaf0fa;" align="center" | [[την#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">την</span>]]
-| style="border-bottom:1px solid #eaf0fa; border-right:1px solid #a1bdea;" align="left" | [[αζωική#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">αζωικ</span><span style="color:#eb0000; font-weight:normal;">ή</span>]]
-| style="border-bottom:1px solid #eaf0fa;" align="center" | [[το#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">το</span>]]
-| style="border-bottom:1px solid #eaf0fa; border-right:1px solid #a1bdea;" align="left" | [[αζωικό#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">αζωικ</span><span style="color:#eb0000; font-weight:normal;">ό</span>]]
-|-
-| style="background:#d5e2f6; text-align:right;"| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[[κλητική|<span title="κλητική πτώση" style="color:black; font-size:90%;">'''''κλητική'''''</span>]]
-| align="center" |
-| style="border-right:1px solid #a1bdea;" align="left" | [[αζωικέ#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">αζωικ</span><span style="color:#eb0000; font-weight:normal;">έ</span>]]
-| align="center" |
-| style="border-right:1px solid #a1bdea;" align="left" | [[αζωική#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">αζωικ</span><span style="color:#eb0000; font-weight:normal;">ή</span>]]
-| align="center" |
-| style="border-right:1px solid #a1bdea;" align="left" | [[αζωικό#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">αζωικ</span><span style="color:#eb0000; font-weight:normal;">ό</span>]]
-|-
-
-
-
-! style="background:#a1bdea; border-right:1px solid #c1d3f1; text-align:center; font-size:90%;" align="center"| &darr;&nbsp;''πτώσεις''
-! style="background:#a1bdea; font-size:90%;" align="center" colspan="6"| &nbsp;&nbsp;[[πληθυντικός|<span title="πληθυντικός αριθμός" style="color:black;">'''''πληθυντικός'''''</span>]]&nbsp;&nbsp;
-|-
-| style="background:#c1d3f1; border-right:1px solid #a1bdea; text-align:center; font-size:70%; line-height:100%;" align="center"| ''γένη''&nbsp;&rarr;
-| style="background:#c1d3f1; border-right:1px solid #a1bdea; font-size:70%; font-style:italic; line-height:100%;" colspan="2" align="center"| [[αρσενικό|<span style="color:#000000; font-weight:normal;">αρσενικό</span>]]
-| style="background:#c1d3f1; border-right:1px solid #a1bdea; font-size:70%; font-style:italic; line-height:100%;" colspan="2" align="center"| [[θηλυκό|<span style="color:#000000; font-weight:normal;">θηλυκό</span>]]
-| style="background:#c1d3f1; border-right:1px solid #a1bdea; font-size:70%; font-style:italic; line-height:100%;" colspan="2" align="center"| [[ουδέτερο|<span style="color:#000000; font-weight:normal;">ουδέτερο</span>]]
-|-
-| style="background:#d5e2f6; border-bottom:1px solid #eaf0fa; text-align:right; font-size:90%;"| [[ονομαστική|<span title="ονομαστική πτώση" style="color:black;">'''''ονομαστική'''''</span>]]
-| style="border-bottom:1px solid #eaf0fa;" align="center" | [[οι#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">οι</span>]]
-| style="border-bottom:1px solid #eaf0fa; border-right:1px solid #a1bdea;" align="left" | [[αζωικοί#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">αζωικ</span><span style="color:#eb0000; font-weight:normal;">οί</span>]]
-| style="border-bottom:1px solid #eaf0fa;" align="center" | [[οι#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">οι</span>]]
-| style="border-bottom:1px solid #eaf0fa; border-right:1px solid #a1bdea;" align="left" | [[αζωικές#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">αζωικ</span><span style="color:#eb0000; font-weight:normal;">ές</span>]]
-| style="border-bottom:1px solid #eaf0fa;" align="center" | [[τα#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">τα</span>]]
-| style="border-bottom:1px solid #eaf0fa; border-right:1px solid #a1bdea;" align="left" | [[αζωικά#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">αζωικ</span><span style="color:#eb0000; font-weight:normal;">ά</span>]]
-|-
-| style="background:#d5e2f6; border-bottom:1px solid #eaf0fa; text-align:right; font-size:90%;"| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[[γενική|<span title="γενική πτώση" style="color:black;">'''''γενική'''''</span>]]
-| style="border-bottom:1px solid #eaf0fa;" align="center" | [[των#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">των</span>]]
-| style="border-bottom:1px solid #eaf0fa; border-right:1px solid #a1bdea;" align="left" | [[αζωικών#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">αζωικ</span><span style="color:#eb0000; font-weight:normal;">ών</span>]]
-| style="border-bottom:1px solid #eaf0fa;" align="center" | [[των#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">των</span>]]
-| style="border-bottom:1px solid #eaf0fa; border-right:1px solid #a1bdea;" align="left" | [[αζωικών#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">αζωικ</span><span style="color:#eb0000; font-weight:normal;">ών</span>]]
-| style="border-bottom:1px solid #eaf0fa;" align="center" | [[των#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">των</span>]]
-| style="border-bottom:1px solid #eaf0fa; border-right:1px solid #a1bdea;" align="left" | [[αζωικών#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">αζωικ</span><span style="color:#eb0000; font-weight:normal;">ών</span>]]
-|-
-| style="background:#d5e2f6; border-bottom:1px solid #eaf0fa; text-align:right; font-size:90%;"| &nbsp;&nbsp;&nbsp;&nbsp;[[αιτιατική|<span title="αιτιατική πτώση" style="color:black;">'''''αιτιατική'''''</span>]]
-| style="border-bottom:1px solid #eaf0fa;" align="center" | [[τους#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">τους</span>]]
-| style="border-bottom:1px solid #eaf0fa; border-right:1px solid #a1bdea;" align="left" | [[αζωικούς#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">αζωικ</span><span style="color:#eb0000; font-weight:normal;">ούς</span>]]
-| style="border-bottom:1px solid #eaf0fa;" align="center" | [[τις#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">τις</span>]]
-| style="border-bottom:1px solid #eaf0fa; border-right:1px solid #a1bdea;" align="left" | [[αζωικές#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">αζωικ</span><span style="color:#eb0000; font-weight:normal;">ές</span>]]
-| style="border-bottom:1px solid #eaf0fa;" align="center" | [[τα#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">τα</span>]]
-| style="border-bottom:1px solid #eaf0fa; border-right:1px solid #a1bdea;" align="left" | [[αζωικά#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">αζωικ</span><span style="color:#eb0000; font-weight:normal;">ά</span>]]
-|-
-| style="background:#d5e2f6; text-align:right;"| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[[κλητική|<span title="κλητική πτώση" style="color:black; font-size:90%;">'''''κλητική'''''</span>]]
-| align="center" |
-| style="border-right:1px solid #a1bdea;" align="left" | [[αζωικοί#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">αζωικ</span><span style="color:#eb0000; font-weight:normal;">οί</span>]]
-| align="center" |
-| style="border-right:1px solid #a1bdea;" align="left" | [[αζωικές#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">αζωικ</span><span style="color:#eb0000; font-weight:normal;">ές</span>]]
-| align="center" |
-| style="border-right:1px solid #a1bdea;" align="left" | [[αζωικά#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">αζωικ</span><span style="color:#eb0000; font-weight:normal;">ά</span>]]
-|-
-| colspan="7" align="right" style="text-align:right; background:#eaf0fa; font-size:70%; line-height:100%;" | [[:Κατηγορία:Επίθετα που κλίνονται όπως το 'καλός' (νέα ελληνικά)|Κατηγορία]] όπως «[[Παράρτημα:Επίθετα και μετοχές (νέα ελληνικά)#καλός|καλός]]» - [[Παράρτημα:Επίθετα και μετοχές (νέα ελληνικά)|<span title="Παράρτημα:Επίθετα & Μετοχές">Παράρτημα:Επίθετα & Μετοχές</span>]]
-|}[[Κατηγορία:Επίθετα που κλίνονται όπως το 'καλός' (νέα ελληνικά)]]""",
-        )
-
-        raw = """
-=={{-el-}}==
-{{el-κλίση-'καλός'}}
-
-==={{επίθετο|el}}===
-'''{{PAGENAME}}, -ή, -ό'''
-* που δεν εμφανίζει ίχνη [[ζωή]]ς
-        """.strip()
-
-        word = "αζωικός"
-        page_datas = parse_page(self.wxr, word, raw)
-        received = page_datas[0]["forms"]
-        print(received)
-
-        expected = [
-            {
-                "form": "el-κλίση-'καλός'",
-                "tags": ["inflection-template"],
-                "source": "declension",
-            },
-            {
-                "form": "αζωικός",
-                "tags": ["masculine", "singular", "nominative"],
-                "raw_tags": ["αρσενικό", "ενικός", "ονομαστική"],
-                "source": "declension",
-            },
-            {
-                "form": "αζωική",
-                "tags": ["singular", "feminine", "nominative"],
-                "raw_tags": ["ενικός", "θηλυκό", "ονομαστική"],
-                "source": "declension",
-            },
-            {
-                "form": "αζωικό",
-                "tags": ["singular", "nominative", "neuter"],
-                "raw_tags": ["ενικός", "ονομαστική", "ουδέτερο"],
-                "source": "declension",
-            },
-            {
-                "form": "αζωικού",
-                "tags": ["masculine", "genitive", "singular"],
-                "raw_tags": ["αρσενικό", "γενική", "ενικός"],
-                "source": "declension",
-            },
-            {
-                "form": "αζωικής",
-                "tags": ["genitive", "singular", "feminine"],
-                "raw_tags": ["γενική", "ενικός", "θηλυκό"],
-                "source": "declension",
-            },
-            {
-                "form": "αζωικού",
-                "tags": ["genitive", "singular", "neuter"],
-                "raw_tags": ["γενική", "ενικός", "ουδέτερο"],
-                "source": "declension",
-            },
-            {
-                "form": "αζωικό",
-                "tags": ["accusative", "masculine", "singular"],
-                "raw_tags": ["αιτιατική", "αρσενικό", "ενικός"],
-                "source": "declension",
-            },
-            {
-                "form": "αζωική",
-                "tags": ["accusative", "singular", "feminine"],
-                "raw_tags": ["αιτιατική", "ενικός", "θηλυκό"],
-                "source": "declension",
-            },
-            {
-                "form": "αζωικό",
-                "tags": ["accusative", "singular", "neuter"],
-                "raw_tags": ["αιτιατική", "ενικός", "ουδέτερο"],
-                "source": "declension",
-            },
-            {
-                "form": "αζωικέ",
-                "tags": ["masculine", "singular", "vocative"],
-                "raw_tags": ["αρσενικό", "ενικός", "κλητική"],
-                "source": "declension",
-            },
-            {
-                "form": "αζωική",
-                "tags": ["singular", "feminine", "vocative"],
-                "raw_tags": ["ενικός", "θηλυκό", "κλητική"],
-                "source": "declension",
-            },
-            {
-                "form": "αζωικό",
-                "tags": ["singular", "vocative", "neuter"],
-                "raw_tags": ["ενικός", "κλητική", "ουδέτερο"],
-                "source": "declension",
-            },
-            {
-                "form": "αζωικοί",
-                "tags": ["masculine", "nominative", "plural"],
-                "raw_tags": ["αρσενικό", "ονομαστική", "πληθυντικός"],
-                "source": "declension",
-            },
-            {
-                "form": "αζωικές",
-                "tags": ["feminine", "nominative", "plural"],
-                "raw_tags": ["θηλυκό", "ονομαστική", "πληθυντικός"],
-                "source": "declension",
-            },
-            {
-                "form": "αζωικά",
-                "tags": ["nominative", "neuter", "plural"],
-                "raw_tags": ["ονομαστική", "ουδέτερο", "πληθυντικός"],
-                "source": "declension",
-            },
-            {
-                "form": "αζωικών",
-                "tags": ["masculine", "genitive", "plural"],
-                "raw_tags": ["αρσενικό", "γενική", "πληθυντικός"],
-                "source": "declension",
-            },
-            {
-                "form": "αζωικών",
-                "tags": ["genitive", "feminine", "plural"],
-                "raw_tags": ["γενική", "θηλυκό", "πληθυντικός"],
-                "source": "declension",
-            },
-            {
-                "form": "αζωικών",
-                "tags": ["genitive", "neuter", "plural"],
-                "raw_tags": ["γενική", "ουδέτερο", "πληθυντικός"],
-                "source": "declension",
-            },
-            {
-                "form": "αζωικούς",
-                "tags": ["accusative", "masculine", "plural"],
-                "raw_tags": ["αιτιατική", "αρσενικό", "πληθυντικός"],
-                "source": "declension",
-            },
-            {
-                "form": "αζωικές",
-                "tags": ["accusative", "feminine", "plural"],
-                "raw_tags": ["αιτιατική", "θηλυκό", "πληθυντικός"],
-                "source": "declension",
-            },
-            {
-                "form": "αζωικά",
-                "tags": ["accusative", "neuter", "plural"],
-                "raw_tags": ["αιτιατική", "ουδέτερο", "πληθυντικός"],
-                "source": "declension",
-            },
-            {
-                "form": "αζωικοί",
-                "tags": ["masculine", "vocative", "plural"],
-                "raw_tags": ["αρσενικό", "κλητική", "πληθυντικός"],
-                "source": "declension",
-            },
-            {
-                "form": "αζωικές",
-                "tags": ["feminine", "vocative", "plural"],
-                "raw_tags": ["θηλυκό", "κλητική", "πληθυντικός"],
-                "source": "declension",
-            },
-            {
-                "form": "αζωικά",
-                "tags": ["vocative", "neuter", "plural"],
-                "raw_tags": ["κλητική", "ουδέτερο", "πληθυντικός"],
-                "source": "declension",
-            },
-            {
-                "form": "αζωικός",
-                "tags": ["masculine", "singular", "nominative"],
-                "source": "header",
-            },
-            {
-                "form": "αζωική",
-                "tags": ["feminine", "singular", "nominative"],
-                "source": "header",
-            },
-            {
-                "form": "αζωικό",
-                "tags": ["neuter", "singular", "nominative"],
-                "source": "header",
-            },
-        ]
-
+    def mktest_form_all(self, received, expected) -> None:
         def normalize_forms(lst) -> None:
             for form in lst:
                 if "raw_tags" in form:
@@ -706,7 +431,7 @@ class TestElInflection(TestCase):
         ]
         self.mktest_form_no_raw_tags(raw, expected)
 
-    def test_two_inflection_sources(self) -> None:
+    def test_noun_two_inflection_sources(self) -> None:
         # https://el.wiktionary.org/wiki/αμάξι
         # Contains forms from both declension and header
         self.wxr.wtp.add_page("Πρότυπο:-el-", 10, "Νέα ελληνικά (el)")
@@ -829,19 +554,9 @@ class TestElInflection(TestCase):
             },
         ]
 
-        def normalize_forms(lst) -> None:
-            for form in lst:
-                if "raw_tags" in form:
-                    form["raw_tags"].sort()
-                if "tags" in form:
-                    form["tags"].sort()
+        self.mktest_form_all(received, expected)
 
-        normalize_forms(received)
-        normalize_forms(expected)
-
-        self.assertEqual(received, expected)
-
-    def test_suffix_inflection1(self) -> None:
+    def test_el_suffix_inflection1(self) -> None:
         # https://el.wiktionary.org/wiki/-ωνιά
         raw = """
 {| style="clear%3Aright%3B+float%3Aright%3B+margin-left%3A0.5em%3B+margin-bottom%3A0.5em%3Bbackground%3A%23ffffff%3B+color%3A%23000000%3B+border%3A1px+solid%23a1bdea%3B+text-align%3Aright%3B" rules="none" border="1" cellpadding="3" cellspacing="0"
@@ -892,59 +607,7 @@ class TestElInflection(TestCase):
         ]
         self.mktest_form_no_raw_tags(raw, expected)
 
-    def test_noun_inflection_standard(self) -> None:
-        raw = """
-{| style="clear%3Aright%3B+float%3Aright%3B+margin-left%3A0.5em%3B+margin-bottom%3A0.5em%3Bbackground%3A%23ffffff%3B+color%3A%23000000%3B+border%3A1px+solid%23a1bdea%3B+text-align%3Aright%3B" rules="none" border="1" cellpadding="3" cellspacing="0"
-|-
-! style="background%3A%23a1bdea%3B+border-right%3A1px+solid+%23c1d3f1%3B+text-align%3Acenter%3B+font-size%3A90%25%3B" align="center" | &darr;&nbsp;''πτώσεις''
-! style="background%3A%23a1bdea%3B+border-right%3A1px+solid+%23c1d3f1%3B" colspan="2" align="center" | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[[ενικός|<span title="%CE%B5%CE%BD%CE%B9%CE%BA%CF%8C%CF%82+%CE%B1%CF%81%CE%B9%CE%B8%CE%BC%CF%8C%CF%82" style="color%3Ablack%3B">'''''ενικός'''''</span>]]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-! style="background%3A%23a1bdea%3B" colspan="2" align="center" | &nbsp;&nbsp;[[πληθυντικός|<span title="%CF%80%CE%BB%CE%B7%CE%B8%CF%85%CE%BD%CF%84%CE%B9%CE%BA%CF%8C%CF%82+%CE%B1%CF%81%CE%B9%CE%B8%CE%BC%CF%8C%CF%82" style="color%3Ablack%3B">'''''πληθυντικός'''''</span>]]&nbsp;&nbsp;
-|-
-| style="background%3A%23d5e2f6%3B+border-bottom%3A1px+solid+%23eaf0fa%3B+text-align%3Aright%3B+font-size%3A90%25%3B" | [[ονομαστική|<span title="%CE%BF%CE%BD%CE%BF%CE%BC%CE%B1%CF%83%CF%84%CE%B9%CE%BA%CE%AE+%CF%80%CF%84%CF%8E%CF%83%CE%B7" style="color%3Ablack%3B">'''''ονομαστική'''''</span>]]
-| style="border-bottom%3A1px+solid+%23eaf0fa%3B" align="center" | [[το|<span style="color%3A%23002000%3B+font-weight%3Anormal%3B">το</span>]]
-| style="border-bottom%3A1px+solid+%23eaf0fa%3B+border-right%3A1px+solid+%23eaf0fa%3B" align="left" | [[μπόι|<span style="color%3A%23002000%3B+font-weight%3Anormal%3B">μπό</span><span style="color%3A%23EB0000%3B+font-weight%3Anormal%3B">ι</span>]]
-| style="border-bottom%3A1px+solid+%23eaf0fa%3B" align="center" | [[τα|<span style="color%3A%23002000%3B+font-weight%3Anormal%3B">τα</span>]]
-| style="border-bottom%3A1px+solid+%23eaf0fa%3B" align="left" | [[μπόγια|<span style="color%3A%23002000%3B+font-weight%3Anormal%3B">μπό</span><span style="color%3A%23002000%3B+font-weight%3Anormal%3B">γ</span><span style="color%3A%23EB0000%3B+font-weight%3Anormal%3B">ια</span>]]
-|-
-| style="background%3A%23d5e2f6%3B+border-bottom%3A1px+solid+%23eaf0fa%3B+text-align%3Aright%3B+font-size%3A90%25%3B" | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[[γενική|<span title="%CE%B3%CE%B5%CE%BD%CE%B9%CE%BA%CE%AE+%CF%80%CF%84%CF%8E%CF%83%CE%B7" style="color%3Ablack%3B">'''''γενική'''''</span>]]
-| style="border-bottom%3A1px+solid+%23eaf0fa%3B" align="center" | [[του|<span style="color%3A%23002000%3B+font-weight%3Anormal%3B">του</span>]]
-| style="border-bottom%3A1px+solid+%23eaf0fa%3B+border-right%3A1px+solid+%23eaf0fa%3B" align="left" | [[μπογιού|<span style="color%3A%23002000%3B+font-weight%3Anormal%3B">μπο</span><span style="color%3A%23002000%3B+font-weight%3Anormal%3B">γ</span><span style="color%3A%23EB0000%3B+font-weight%3Anormal%3B">ιού</span>]]
-| style="border-bottom%3A1px+solid+%23eaf0fa%3B" align="center" | [[των|<span style="color%3A%23002000%3B+font-weight%3Anormal%3B">των</span>]]
-| style="border-bottom%3A1px+solid+%23eaf0fa%3B" align="left" | ([[μπογιών|<span style="color%3A%23002000%3B+font-weight%3Anormal%3B">μπο</span><span style="color%3A%23002000%3B+font-weight%3Anormal%3B">γ</span><span style="color%3A%23EB0000%3B+font-weight%3Anormal%3B">ιών</span>]])
-|-
-| style="background%3A%23d5e2f6%3B+border-bottom%3A1px+solid+%23eaf0fa%3B+text-align%3Aright%3B+font-size%3A90%25%3B" | &nbsp;&nbsp;&nbsp;&nbsp;[[αιτιατική|<span title="%CE%B1%CE%B9%CF%84%CE%B9%CE%B1%CF%84%CE%B9%CE%BA%CE%AE+%CF%80%CF%84%CF%8E%CF%83%CE%B7" style="color%3Ablack%3B">'''''αιτιατική'''''</span>]]
-| style="border-bottom%3A1px+solid+%23eaf0fa%3B" align="center" | [[το|<span style="color%3A%23002000%3B+font-weight%3Anormal%3B">το</span>]]
-| style="border-bottom%3A1px+solid+%23eaf0fa%3B+border-right%3A1px+solid+%23eaf0fa%3B" align="left" | [[μπόι|<span style="color%3A%23002000%3B+font-weight%3Anormal%3B">μπό</span><span style="color%3A%23EB0000%3B+font-weight%3Anormal%3B">ι</span>]]
-| style="border-bottom%3A1px+solid+%23eaf0fa%3B" align="center" | [[τα|<span style="color%3A%23002000%3B+font-weight%3Anormal%3B">τα</span>]]
-| style="border-bottom%3A1px+solid+%23eaf0fa%3B" align="left" | [[μπόγια|<span style="color%3A%23002000%3B+font-weight%3Anormal%3B">μπό</span><span style="color%3A%23002000%3B+font-weight%3Anormal%3B">γ</span><span style="color%3A%23EB0000%3B+font-weight%3Anormal%3B">ια</span>]]
-|-
-| style="background%3A%23d5e2f6%3B+text-align%3Aright%3B" | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[[κλητική|<span title="%CE%BA%CE%BB%CE%B7%CF%84%CE%B9%CE%BA%CE%AE+%CF%80%CF%84%CF%8E%CF%83%CE%B7" style="color%3Ablack%3B+font-size%3A90%25%3B">'''''κλητική'''''</span>]]
-| align="center" |
-| style="border-right%3A1px+solid+%23eaf0fa%3B" align="left" | [[μπόι|<span style="color%3A%23002000%3B+font-weight%3Anormal%3B">μπό</span><span style="color%3A%23EB0000%3B+font-weight%3Anormal%3B">ι</span>]]
-| align="center" |
-| align="left" | [[μπόγια|<span style="color%3A%23002000%3B+font-weight%3Anormal%3B">μπό</span><span style="color%3A%23002000%3B+font-weight%3Anormal%3B">γ</span><span style="color%3A%23EB0000%3B+font-weight%3Anormal%3B">ια</span>]]
-|-
-| colspan="5" align="left" style="background%3A%23eaf0fa%3B+font-size%3A80%25%3B+line-height%3A100%25%3B" | Οι καταλήξεις -ιού, -ια, -ιών προφέρονται με [[συνίζηση]].<br>Ο πληθυντικός δε συνηθίζεται.
-|-
-| colspan="5" align="right" style="text-align%3Aright%3B+background%3A%23eaf0fa%3B+font-size%3A70%25%3B+line-height%3A100%25%3B" | [[:Κατηγορία:Ουσιαστικά που κλίνονται όπως το 'τσάι' (νέα ελληνικά)|Κατηγορία]]  όπως «[[Παράρτημα:Ουσιαστικά (νέα ελληνικά)/ουδέτερα#τσάι|τσάι]]» - [[Παράρτημα:Ουσιαστικά (νέα ελληνικά)|<span title="%CE%A0%CE%B1%CF%81%CE%AC%CF%81%CF%84%CE%B7%CE%BC%CE%B1%3A%CE%9F%CF%85%CF%83%CE%B9%CE%B1%CF%83%CF%84%CE%B9%CE%BA%CE%AC">Παράρτημα:Ουσιαστικά</span>]]
-|}
-"""
-        expected = [
-            {"form": "tname-filler", "tags": ["inflection-template"]},
-            {"form": "μπόι", "tags": ["singular", "nominative"]},
-            {"form": "μπόγια", "tags": ["nominative", "plural"]},
-            {"form": "μπογιού", "tags": ["genitive", "singular"]},
-            # {"form": "(μπογιών)", "tags": ["genitive", "plural"]},
-            # v Should treat parenthesized forms as rare
-            {"form": "μπογιών", "tags": ["genitive", "plural", "rare"]},
-            {"form": "μπόι", "tags": ["accusative", "singular"]},
-            {"form": "μπόγια", "tags": ["accusative", "plural"]},
-            {"form": "μπόι", "tags": ["singular", "vocative"]},
-            {"form": "μπόγια", "tags": ["vocative", "plural"]},
-        ]
-        self.mktest_form_no_raw_tags(raw, expected)
-
-    def test_suffix_inflection2(self) -> None:
+    def test_el_suffix_inflection2(self) -> None:
         # https://el.wiktionary.org/wiki/-γράφος
         raw = """{|
 |-
@@ -1022,6 +685,335 @@ class TestElInflection(TestCase):
             },
         ]
         self.mktest_form_no_raw_tags(raw, expected)
+
+    def test_noun_inflection_standard(self) -> None:
+        raw = """
+{| style="clear%3Aright%3B+float%3Aright%3B+margin-left%3A0.5em%3B+margin-bottom%3A0.5em%3Bbackground%3A%23ffffff%3B+color%3A%23000000%3B+border%3A1px+solid%23a1bdea%3B+text-align%3Aright%3B" rules="none" border="1" cellpadding="3" cellspacing="0"
+|-
+! style="background%3A%23a1bdea%3B+border-right%3A1px+solid+%23c1d3f1%3B+text-align%3Acenter%3B+font-size%3A90%25%3B" align="center" | &darr;&nbsp;''πτώσεις''
+! style="background%3A%23a1bdea%3B+border-right%3A1px+solid+%23c1d3f1%3B" colspan="2" align="center" | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[[ενικός|<span title="%CE%B5%CE%BD%CE%B9%CE%BA%CF%8C%CF%82+%CE%B1%CF%81%CE%B9%CE%B8%CE%BC%CF%8C%CF%82" style="color%3Ablack%3B">'''''ενικός'''''</span>]]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+! style="background%3A%23a1bdea%3B" colspan="2" align="center" | &nbsp;&nbsp;[[πληθυντικός|<span title="%CF%80%CE%BB%CE%B7%CE%B8%CF%85%CE%BD%CF%84%CE%B9%CE%BA%CF%8C%CF%82+%CE%B1%CF%81%CE%B9%CE%B8%CE%BC%CF%8C%CF%82" style="color%3Ablack%3B">'''''πληθυντικός'''''</span>]]&nbsp;&nbsp;
+|-
+| style="background%3A%23d5e2f6%3B+border-bottom%3A1px+solid+%23eaf0fa%3B+text-align%3Aright%3B+font-size%3A90%25%3B" | [[ονομαστική|<span title="%CE%BF%CE%BD%CE%BF%CE%BC%CE%B1%CF%83%CF%84%CE%B9%CE%BA%CE%AE+%CF%80%CF%84%CF%8E%CF%83%CE%B7" style="color%3Ablack%3B">'''''ονομαστική'''''</span>]]
+| style="border-bottom%3A1px+solid+%23eaf0fa%3B" align="center" | [[το|<span style="color%3A%23002000%3B+font-weight%3Anormal%3B">το</span>]]
+| style="border-bottom%3A1px+solid+%23eaf0fa%3B+border-right%3A1px+solid+%23eaf0fa%3B" align="left" | [[μπόι|<span style="color%3A%23002000%3B+font-weight%3Anormal%3B">μπό</span><span style="color%3A%23EB0000%3B+font-weight%3Anormal%3B">ι</span>]]
+| style="border-bottom%3A1px+solid+%23eaf0fa%3B" align="center" | [[τα|<span style="color%3A%23002000%3B+font-weight%3Anormal%3B">τα</span>]]
+| style="border-bottom%3A1px+solid+%23eaf0fa%3B" align="left" | [[μπόγια|<span style="color%3A%23002000%3B+font-weight%3Anormal%3B">μπό</span><span style="color%3A%23002000%3B+font-weight%3Anormal%3B">γ</span><span style="color%3A%23EB0000%3B+font-weight%3Anormal%3B">ια</span>]]
+|-
+| style="background%3A%23d5e2f6%3B+border-bottom%3A1px+solid+%23eaf0fa%3B+text-align%3Aright%3B+font-size%3A90%25%3B" | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[[γενική|<span title="%CE%B3%CE%B5%CE%BD%CE%B9%CE%BA%CE%AE+%CF%80%CF%84%CF%8E%CF%83%CE%B7" style="color%3Ablack%3B">'''''γενική'''''</span>]]
+| style="border-bottom%3A1px+solid+%23eaf0fa%3B" align="center" | [[του|<span style="color%3A%23002000%3B+font-weight%3Anormal%3B">του</span>]]
+| style="border-bottom%3A1px+solid+%23eaf0fa%3B+border-right%3A1px+solid+%23eaf0fa%3B" align="left" | [[μπογιού|<span style="color%3A%23002000%3B+font-weight%3Anormal%3B">μπο</span><span style="color%3A%23002000%3B+font-weight%3Anormal%3B">γ</span><span style="color%3A%23EB0000%3B+font-weight%3Anormal%3B">ιού</span>]]
+| style="border-bottom%3A1px+solid+%23eaf0fa%3B" align="center" | [[των|<span style="color%3A%23002000%3B+font-weight%3Anormal%3B">των</span>]]
+| style="border-bottom%3A1px+solid+%23eaf0fa%3B" align="left" | ([[μπογιών|<span style="color%3A%23002000%3B+font-weight%3Anormal%3B">μπο</span><span style="color%3A%23002000%3B+font-weight%3Anormal%3B">γ</span><span style="color%3A%23EB0000%3B+font-weight%3Anormal%3B">ιών</span>]])
+|-
+| style="background%3A%23d5e2f6%3B+border-bottom%3A1px+solid+%23eaf0fa%3B+text-align%3Aright%3B+font-size%3A90%25%3B" | &nbsp;&nbsp;&nbsp;&nbsp;[[αιτιατική|<span title="%CE%B1%CE%B9%CF%84%CE%B9%CE%B1%CF%84%CE%B9%CE%BA%CE%AE+%CF%80%CF%84%CF%8E%CF%83%CE%B7" style="color%3Ablack%3B">'''''αιτιατική'''''</span>]]
+| style="border-bottom%3A1px+solid+%23eaf0fa%3B" align="center" | [[το|<span style="color%3A%23002000%3B+font-weight%3Anormal%3B">το</span>]]
+| style="border-bottom%3A1px+solid+%23eaf0fa%3B+border-right%3A1px+solid+%23eaf0fa%3B" align="left" | [[μπόι|<span style="color%3A%23002000%3B+font-weight%3Anormal%3B">μπό</span><span style="color%3A%23EB0000%3B+font-weight%3Anormal%3B">ι</span>]]
+| style="border-bottom%3A1px+solid+%23eaf0fa%3B" align="center" | [[τα|<span style="color%3A%23002000%3B+font-weight%3Anormal%3B">τα</span>]]
+| style="border-bottom%3A1px+solid+%23eaf0fa%3B" align="left" | [[μπόγια|<span style="color%3A%23002000%3B+font-weight%3Anormal%3B">μπό</span><span style="color%3A%23002000%3B+font-weight%3Anormal%3B">γ</span><span style="color%3A%23EB0000%3B+font-weight%3Anormal%3B">ια</span>]]
+|-
+| style="background%3A%23d5e2f6%3B+text-align%3Aright%3B" | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[[κλητική|<span title="%CE%BA%CE%BB%CE%B7%CF%84%CE%B9%CE%BA%CE%AE+%CF%80%CF%84%CF%8E%CF%83%CE%B7" style="color%3Ablack%3B+font-size%3A90%25%3B">'''''κλητική'''''</span>]]
+| align="center" |
+| style="border-right%3A1px+solid+%23eaf0fa%3B" align="left" | [[μπόι|<span style="color%3A%23002000%3B+font-weight%3Anormal%3B">μπό</span><span style="color%3A%23EB0000%3B+font-weight%3Anormal%3B">ι</span>]]
+| align="center" |
+| align="left" | [[μπόγια|<span style="color%3A%23002000%3B+font-weight%3Anormal%3B">μπό</span><span style="color%3A%23002000%3B+font-weight%3Anormal%3B">γ</span><span style="color%3A%23EB0000%3B+font-weight%3Anormal%3B">ια</span>]]
+|-
+| colspan="5" align="left" style="background%3A%23eaf0fa%3B+font-size%3A80%25%3B+line-height%3A100%25%3B" | Οι καταλήξεις -ιού, -ια, -ιών προφέρονται με [[συνίζηση]].<br>Ο πληθυντικός δε συνηθίζεται.
+|-
+| colspan="5" align="right" style="text-align%3Aright%3B+background%3A%23eaf0fa%3B+font-size%3A70%25%3B+line-height%3A100%25%3B" | [[:Κατηγορία:Ουσιαστικά που κλίνονται όπως το 'τσάι' (νέα ελληνικά)|Κατηγορία]]  όπως «[[Παράρτημα:Ουσιαστικά (νέα ελληνικά)/ουδέτερα#τσάι|τσάι]]» - [[Παράρτημα:Ουσιαστικά (νέα ελληνικά)|<span title="%CE%A0%CE%B1%CF%81%CE%AC%CF%81%CF%84%CE%B7%CE%BC%CE%B1%3A%CE%9F%CF%85%CF%83%CE%B9%CE%B1%CF%83%CF%84%CE%B9%CE%BA%CE%AC">Παράρτημα:Ουσιαστικά</span>]]
+|}
+"""
+        expected = [
+            {"form": "tname-filler", "tags": ["inflection-template"]},
+            {"form": "μπόι", "tags": ["singular", "nominative"]},
+            {"form": "μπόγια", "tags": ["nominative", "plural"]},
+            {"form": "μπογιού", "tags": ["genitive", "singular"]},
+            # {"form": "(μπογιών)", "tags": ["genitive", "plural"]},
+            # v Should treat parenthesized forms as rare
+            {"form": "μπογιών", "tags": ["genitive", "plural", "rare"]},
+            {"form": "μπόι", "tags": ["accusative", "singular"]},
+            {"form": "μπόγια", "tags": ["accusative", "plural"]},
+            {"form": "μπόι", "tags": ["singular", "vocative"]},
+            {"form": "μπόγια", "tags": ["vocative", "plural"]},
+        ]
+        self.mktest_form_no_raw_tags(raw, expected)
+
+    def test_el_adj_inflection(self) -> None:
+        # https://el.wiktionary.org/wiki/αζωικός
+        self.wxr.wtp.add_page("Πρότυπο:-el-", 10, "Νέα ελληνικά (el)")
+        self.wxr.wtp.add_page("Πρότυπο:επίθετο", 10, "Επίθετο")
+        self.wxr.wtp.add_page(
+            "Πρότυπο:el-κλίση-'καλός'",
+            10,
+            """{| style="clear:right; float:right; margin-left:0.5em; margin-bottom:0.5em;background:#ffffff; color:#000000; border:1px solid#a1bdea; text-align:right;"rules="none" border="1" cellpadding="3" cellspacing="0"|-
+! style="background:#a1bdea; border-right:1px solid #c1d3f1; text-align:center; font-size:90%;" align="center"| &darr;&nbsp;''πτώσεις''
+! style="background:#a1bdea; border-right:1px solid #a1bdea; font-size:90%;" align="center" colspan="6" | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[[ενικός|<span title="ενικός αριθμός" style="color:black;">'''''ενικός'''''</span>]]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+|-
+| style="background:#c1d3f1; border-right:1px solid #a1bdea; text-align:center; font-size:70%; line-height:100%;" align="center"| ''γένη''&nbsp;&rarr;
+| style="background:#c1d3f1; border-right:1px solid #a1bdea; font-size:70%; font-style:italic; line-height:100%;" colspan="2" align="center"| [[αρσενικό|<span style="color:#000000; font-weight:normal;">αρσενικό</span>]]
+| style="background:#c1d3f1; border-right:1px solid #a1bdea; font-size:70%; font-style:italic; line-height:100%;" colspan="2" align="center"| [[θηλυκό|<span style="color:#000000; font-weight:normal;">θηλυκό</span>]]
+| style="background:#c1d3f1; border-right:1px solid #a1bdea; font-size:70%; font-style:italic; line-height:100%;" colspan="2" align="center"| [[ουδέτερο|<span style="color:#000000; font-weight:normal;">ουδέτερο</span>]]
+|-
+| style="background:#d5e2f6; border-bottom:1px solid #eaf0fa; text-align:right; font-size:90%;"| [[ονομαστική|<span title="ονομαστική πτώση" style="color:black;">'''''ονομαστική'''''</span>]]
+| style="border-bottom:1px solid #eaf0fa;" align="center" | [[ο#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">ο</span>]]
+| style="border-bottom:1px solid #eaf0fa; border-right:1px solid #a1bdea;" align="left" | [[αζωικός#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">αζωικ</span><span style="color:#eb0000; font-weight:normal;">ός</span>]]
+| style="border-bottom:1px solid #eaf0fa;" align="center" | [[η#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">η</span>]]
+| style="border-bottom:1px solid #eaf0fa; border-right:1px solid #a1bdea;" align="left" | [[αζωική#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">αζωικ</span><span style="color:#eb0000; font-weight:normal;">ή</span>]]
+| style="border-bottom:1px solid #eaf0fa;" align="center" | [[το#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">το</span>]]
+| style="border-bottom:1px solid #eaf0fa; border-right:1px solid #a1bdea;" align="left" | [[αζωικό#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">αζωικ</span><span style="color:#eb0000; font-weight:normal;">ό</span>]]
+|-
+| style="background:#d5e2f6; border-bottom:1px solid #eaf0fa; text-align:right; font-size:90%;"| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[[γενική|<span title="γενική πτώση" style="color:black;">'''''γενική'''''</span>]]
+| style="border-bottom:1px solid #eaf0fa;" align="center" | [[του#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">του</span>]]
+| style="border-bottom:1px solid #eaf0fa; border-right:1px solid #a1bdea;" align="left" | [[αζωικού#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">αζωικ</span><span style="color:#eb0000; font-weight:normal;">ού</span>]]
+| style="border-bottom:1px solid #eaf0fa;" align="center" | [[της#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">της</span>]]
+| style="border-bottom:1px solid #eaf0fa; border-right:1px solid #a1bdea;" align="left" | [[αζωικής#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">αζωικ</span><span style="color:#eb0000; font-weight:normal;">ής</span>]]
+| style="border-bottom:1px solid #eaf0fa;" align="center" | [[του#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">του</span>]]
+| style="border-bottom:1px solid #eaf0fa; border-right:1px solid #a1bdea;" align="left" | [[αζωικού#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">αζωικ</span><span style="color:#eb0000; font-weight:normal;">ού</span>]]
+|-
+| style="background:#d5e2f6; border-bottom:1px solid #eaf0fa; text-align:right; font-size:90%;"| &nbsp;&nbsp;&nbsp;&nbsp;[[αιτιατική|<span title="αιτιατική πτώση" style="color:black;">'''''αιτιατική'''''</span>]]
+| style="border-bottom:1px solid #eaf0fa;" align="center" | [[τον#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">τον</span>]]
+| style="border-bottom:1px solid #eaf0fa; border-right:1px solid #a1bdea;" align="left" | [[αζωικό#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">αζωικ</span><span style="color:#eb0000; font-weight:normal;">ό</span>]]
+| style="border-bottom:1px solid #eaf0fa;" align="center" | [[την#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">την</span>]]
+| style="border-bottom:1px solid #eaf0fa; border-right:1px solid #a1bdea;" align="left" | [[αζωική#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">αζωικ</span><span style="color:#eb0000; font-weight:normal;">ή</span>]]
+| style="border-bottom:1px solid #eaf0fa;" align="center" | [[το#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">το</span>]]
+| style="border-bottom:1px solid #eaf0fa; border-right:1px solid #a1bdea;" align="left" | [[αζωικό#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">αζωικ</span><span style="color:#eb0000; font-weight:normal;">ό</span>]]
+|-
+| style="background:#d5e2f6; text-align:right;"| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[[κλητική|<span title="κλητική πτώση" style="color:black; font-size:90%;">'''''κλητική'''''</span>]]
+| align="center" |
+| style="border-right:1px solid #a1bdea;" align="left" | [[αζωικέ#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">αζωικ</span><span style="color:#eb0000; font-weight:normal;">έ</span>]]
+| align="center" |
+| style="border-right:1px solid #a1bdea;" align="left" | [[αζωική#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">αζωικ</span><span style="color:#eb0000; font-weight:normal;">ή</span>]]
+| align="center" |
+| style="border-right:1px solid #a1bdea;" align="left" | [[αζωικό#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">αζωικ</span><span style="color:#eb0000; font-weight:normal;">ό</span>]]
+|-
+
+
+
+! style="background:#a1bdea; border-right:1px solid #c1d3f1; text-align:center; font-size:90%;" align="center"| &darr;&nbsp;''πτώσεις''
+! style="background:#a1bdea; font-size:90%;" align="center" colspan="6"| &nbsp;&nbsp;[[πληθυντικός|<span title="πληθυντικός αριθμός" style="color:black;">'''''πληθυντικός'''''</span>]]&nbsp;&nbsp;
+|-
+| style="background:#c1d3f1; border-right:1px solid #a1bdea; text-align:center; font-size:70%; line-height:100%;" align="center"| ''γένη''&nbsp;&rarr;
+| style="background:#c1d3f1; border-right:1px solid #a1bdea; font-size:70%; font-style:italic; line-height:100%;" colspan="2" align="center"| [[αρσενικό|<span style="color:#000000; font-weight:normal;">αρσενικό</span>]]
+| style="background:#c1d3f1; border-right:1px solid #a1bdea; font-size:70%; font-style:italic; line-height:100%;" colspan="2" align="center"| [[θηλυκό|<span style="color:#000000; font-weight:normal;">θηλυκό</span>]]
+| style="background:#c1d3f1; border-right:1px solid #a1bdea; font-size:70%; font-style:italic; line-height:100%;" colspan="2" align="center"| [[ουδέτερο|<span style="color:#000000; font-weight:normal;">ουδέτερο</span>]]
+|-
+| style="background:#d5e2f6; border-bottom:1px solid #eaf0fa; text-align:right; font-size:90%;"| [[ονομαστική|<span title="ονομαστική πτώση" style="color:black;">'''''ονομαστική'''''</span>]]
+| style="border-bottom:1px solid #eaf0fa;" align="center" | [[οι#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">οι</span>]]
+| style="border-bottom:1px solid #eaf0fa; border-right:1px solid #a1bdea;" align="left" | [[αζωικοί#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">αζωικ</span><span style="color:#eb0000; font-weight:normal;">οί</span>]]
+| style="border-bottom:1px solid #eaf0fa;" align="center" | [[οι#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">οι</span>]]
+| style="border-bottom:1px solid #eaf0fa; border-right:1px solid #a1bdea;" align="left" | [[αζωικές#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">αζωικ</span><span style="color:#eb0000; font-weight:normal;">ές</span>]]
+| style="border-bottom:1px solid #eaf0fa;" align="center" | [[τα#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">τα</span>]]
+| style="border-bottom:1px solid #eaf0fa; border-right:1px solid #a1bdea;" align="left" | [[αζωικά#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">αζωικ</span><span style="color:#eb0000; font-weight:normal;">ά</span>]]
+|-
+| style="background:#d5e2f6; border-bottom:1px solid #eaf0fa; text-align:right; font-size:90%;"| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[[γενική|<span title="γενική πτώση" style="color:black;">'''''γενική'''''</span>]]
+| style="border-bottom:1px solid #eaf0fa;" align="center" | [[των#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">των</span>]]
+| style="border-bottom:1px solid #eaf0fa; border-right:1px solid #a1bdea;" align="left" | [[αζωικών#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">αζωικ</span><span style="color:#eb0000; font-weight:normal;">ών</span>]]
+| style="border-bottom:1px solid #eaf0fa;" align="center" | [[των#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">των</span>]]
+| style="border-bottom:1px solid #eaf0fa; border-right:1px solid #a1bdea;" align="left" | [[αζωικών#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">αζωικ</span><span style="color:#eb0000; font-weight:normal;">ών</span>]]
+| style="border-bottom:1px solid #eaf0fa;" align="center" | [[των#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">των</span>]]
+| style="border-bottom:1px solid #eaf0fa; border-right:1px solid #a1bdea;" align="left" | [[αζωικών#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">αζωικ</span><span style="color:#eb0000; font-weight:normal;">ών</span>]]
+|-
+| style="background:#d5e2f6; border-bottom:1px solid #eaf0fa; text-align:right; font-size:90%;"| &nbsp;&nbsp;&nbsp;&nbsp;[[αιτιατική|<span title="αιτιατική πτώση" style="color:black;">'''''αιτιατική'''''</span>]]
+| style="border-bottom:1px solid #eaf0fa;" align="center" | [[τους#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">τους</span>]]
+| style="border-bottom:1px solid #eaf0fa; border-right:1px solid #a1bdea;" align="left" | [[αζωικούς#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">αζωικ</span><span style="color:#eb0000; font-weight:normal;">ούς</span>]]
+| style="border-bottom:1px solid #eaf0fa;" align="center" | [[τις#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">τις</span>]]
+| style="border-bottom:1px solid #eaf0fa; border-right:1px solid #a1bdea;" align="left" | [[αζωικές#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">αζωικ</span><span style="color:#eb0000; font-weight:normal;">ές</span>]]
+| style="border-bottom:1px solid #eaf0fa;" align="center" | [[τα#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">τα</span>]]
+| style="border-bottom:1px solid #eaf0fa; border-right:1px solid #a1bdea;" align="left" | [[αζωικά#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">αζωικ</span><span style="color:#eb0000; font-weight:normal;">ά</span>]]
+|-
+| style="background:#d5e2f6; text-align:right;"| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[[κλητική|<span title="κλητική πτώση" style="color:black; font-size:90%;">'''''κλητική'''''</span>]]
+| align="center" |
+| style="border-right:1px solid #a1bdea;" align="left" | [[αζωικοί#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">αζωικ</span><span style="color:#eb0000; font-weight:normal;">οί</span>]]
+| align="center" |
+| style="border-right:1px solid #a1bdea;" align="left" | [[αζωικές#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">αζωικ</span><span style="color:#eb0000; font-weight:normal;">ές</span>]]
+| align="center" |
+| style="border-right:1px solid #a1bdea;" align="left" | [[αζωικά#Νέα ελληνικά (el)|<span style="color:#002000; font-weight:normal;">αζωικ</span><span style="color:#eb0000; font-weight:normal;">ά</span>]]
+|-
+| colspan="7" align="right" style="text-align:right; background:#eaf0fa; font-size:70%; line-height:100%;" | [[:Κατηγορία:Επίθετα που κλίνονται όπως το 'καλός' (νέα ελληνικά)|Κατηγορία]] όπως «[[Παράρτημα:Επίθετα και μετοχές (νέα ελληνικά)#καλός|καλός]]» - [[Παράρτημα:Επίθετα και μετοχές (νέα ελληνικά)|<span title="Παράρτημα:Επίθετα & Μετοχές">Παράρτημα:Επίθετα & Μετοχές</span>]]
+|}[[Κατηγορία:Επίθετα που κλίνονται όπως το 'καλός' (νέα ελληνικά)]]""",
+        )
+
+        raw = """
+=={{-el-}}==
+{{el-κλίση-'καλός'}}
+
+==={{επίθετο|el}}===
+'''{{PAGENAME}}, -ή, -ό'''
+* που δεν εμφανίζει ίχνη [[ζωή]]ς
+        """.strip()
+
+        word = "αζωικός"
+        page_datas = parse_page(self.wxr, word, raw)
+        received = page_datas[0]["forms"]
+
+        expected = [
+            {
+                "form": "el-κλίση-'καλός'",
+                "tags": ["inflection-template"],
+                "source": "declension",
+            },
+            {
+                "form": "αζωικός",
+                "tags": ["masculine", "singular", "nominative"],
+                "raw_tags": ["αρσενικό", "ενικός", "ονομαστική"],
+                "source": "declension",
+            },
+            {
+                "form": "αζωική",
+                "tags": ["singular", "feminine", "nominative"],
+                "raw_tags": ["ενικός", "θηλυκό", "ονομαστική"],
+                "source": "declension",
+            },
+            {
+                "form": "αζωικό",
+                "tags": ["singular", "nominative", "neuter"],
+                "raw_tags": ["ενικός", "ονομαστική", "ουδέτερο"],
+                "source": "declension",
+            },
+            {
+                "form": "αζωικού",
+                "tags": ["masculine", "genitive", "singular"],
+                "raw_tags": ["αρσενικό", "γενική", "ενικός"],
+                "source": "declension",
+            },
+            {
+                "form": "αζωικής",
+                "tags": ["genitive", "singular", "feminine"],
+                "raw_tags": ["γενική", "ενικός", "θηλυκό"],
+                "source": "declension",
+            },
+            {
+                "form": "αζωικού",
+                "tags": ["genitive", "singular", "neuter"],
+                "raw_tags": ["γενική", "ενικός", "ουδέτερο"],
+                "source": "declension",
+            },
+            {
+                "form": "αζωικό",
+                "tags": ["accusative", "masculine", "singular"],
+                "raw_tags": ["αιτιατική", "αρσενικό", "ενικός"],
+                "source": "declension",
+            },
+            {
+                "form": "αζωική",
+                "tags": ["accusative", "singular", "feminine"],
+                "raw_tags": ["αιτιατική", "ενικός", "θηλυκό"],
+                "source": "declension",
+            },
+            {
+                "form": "αζωικό",
+                "tags": ["accusative", "singular", "neuter"],
+                "raw_tags": ["αιτιατική", "ενικός", "ουδέτερο"],
+                "source": "declension",
+            },
+            {
+                "form": "αζωικέ",
+                "tags": ["masculine", "singular", "vocative"],
+                "raw_tags": ["αρσενικό", "ενικός", "κλητική"],
+                "source": "declension",
+            },
+            {
+                "form": "αζωική",
+                "tags": ["singular", "feminine", "vocative"],
+                "raw_tags": ["ενικός", "θηλυκό", "κλητική"],
+                "source": "declension",
+            },
+            {
+                "form": "αζωικό",
+                "tags": ["singular", "vocative", "neuter"],
+                "raw_tags": ["ενικός", "κλητική", "ουδέτερο"],
+                "source": "declension",
+            },
+            {
+                "form": "αζωικοί",
+                "tags": ["masculine", "nominative", "plural"],
+                "raw_tags": ["αρσενικό", "ονομαστική", "πληθυντικός"],
+                "source": "declension",
+            },
+            {
+                "form": "αζωικές",
+                "tags": ["feminine", "nominative", "plural"],
+                "raw_tags": ["θηλυκό", "ονομαστική", "πληθυντικός"],
+                "source": "declension",
+            },
+            {
+                "form": "αζωικά",
+                "tags": ["nominative", "neuter", "plural"],
+                "raw_tags": ["ονομαστική", "ουδέτερο", "πληθυντικός"],
+                "source": "declension",
+            },
+            {
+                "form": "αζωικών",
+                "tags": ["masculine", "genitive", "plural"],
+                "raw_tags": ["αρσενικό", "γενική", "πληθυντικός"],
+                "source": "declension",
+            },
+            {
+                "form": "αζωικών",
+                "tags": ["genitive", "feminine", "plural"],
+                "raw_tags": ["γενική", "θηλυκό", "πληθυντικός"],
+                "source": "declension",
+            },
+            {
+                "form": "αζωικών",
+                "tags": ["genitive", "neuter", "plural"],
+                "raw_tags": ["γενική", "ουδέτερο", "πληθυντικός"],
+                "source": "declension",
+            },
+            {
+                "form": "αζωικούς",
+                "tags": ["accusative", "masculine", "plural"],
+                "raw_tags": ["αιτιατική", "αρσενικό", "πληθυντικός"],
+                "source": "declension",
+            },
+            {
+                "form": "αζωικές",
+                "tags": ["accusative", "feminine", "plural"],
+                "raw_tags": ["αιτιατική", "θηλυκό", "πληθυντικός"],
+                "source": "declension",
+            },
+            {
+                "form": "αζωικά",
+                "tags": ["accusative", "neuter", "plural"],
+                "raw_tags": ["αιτιατική", "ουδέτερο", "πληθυντικός"],
+                "source": "declension",
+            },
+            {
+                "form": "αζωικοί",
+                "tags": ["masculine", "vocative", "plural"],
+                "raw_tags": ["αρσενικό", "κλητική", "πληθυντικός"],
+                "source": "declension",
+            },
+            {
+                "form": "αζωικές",
+                "tags": ["feminine", "vocative", "plural"],
+                "raw_tags": ["θηλυκό", "κλητική", "πληθυντικός"],
+                "source": "declension",
+            },
+            {
+                "form": "αζωικά",
+                "tags": ["vocative", "neuter", "plural"],
+                "raw_tags": ["κλητική", "ουδέτερο", "πληθυντικός"],
+                "source": "declension",
+            },
+            {
+                "form": "αζωικός",
+                "tags": ["masculine", "singular", "nominative"],
+                "source": "header",
+            },
+            {
+                "form": "αζωική",
+                "tags": ["feminine", "singular", "nominative"],
+                "source": "header",
+            },
+            {
+                "form": "αζωικό",
+                "tags": ["neuter", "singular", "nominative"],
+                "source": "header",
+            },
+        ]
+
+        self.mktest_form_all(received, expected)
 
     def test_el_conjugation_table(self) -> None:
         # Section of https://el.wiktionary.org/wiki/πίνω
