@@ -90,6 +90,11 @@ SOUND_TAGS = {
     "ฮานอย": "Hà-Nội",
     "เว้": "Huế",
     "นครโฮจิมินห์": "Saigon",
+    # Template:hi-ipa
+    "เดลี": "Delhi",
+    # Template:sa-ipa
+    "พระเวท": "Vedic",
+    "สันสกฤตคลาสสิก": "Classical-Sanskrit",
 }
 
 LABEL_TAGS = {
@@ -257,6 +262,9 @@ LABEL_TAGS = {
     "ฮันจา": "hanja",
     # Template:ja-kanjitab
     "คีวจิไต": "kyūjitai",
+    # Template:hi-noun
+    "การสะกดภาษาอูรดู": "Urdu",
+    "เป็นทางการ": "formal",
 }
 
 

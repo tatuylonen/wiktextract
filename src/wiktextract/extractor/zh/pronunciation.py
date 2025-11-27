@@ -73,13 +73,13 @@ def process_pron_template(
         raw_tags.append(clean_node(wxr, None, template_node).strip("()"))
     elif template_name in ["audio", "音"]:
         sounds.extend(process_audio_template(wxr, template_node, raw_tags))
-    elif template_name == "ipa":
+    elif template_name in ["ipa", "hi-ipa"]:
         new_sounds, new_cats = extract_ipa_template(
             wxr, template_node, raw_tags
         )
         sounds.extend(new_sounds)
         categories.extend(new_cats)
-    elif template_name in ["vi-ipa", "vi-pron"]:
+    elif template_name in ["vi-ipa", "vi-pron", "sa-ipa"]:
         new_sounds, new_cats = extract_vi_ipa_template(wxr, template_node)
         sounds.extend(new_sounds)
         categories.extend(new_cats)
@@ -384,9 +384,9 @@ def extract_ipa_list_item(
 ) -> list[Sound]:
     sounds = []
     raw_tag = ""
-    for span_tag in list_item.find_html("span"):
+    for span_tag in list_item.find_html_recursively("span"):
         span_class = span_tag.attrs.get("class", "").split()
-        if "qualifier-content" in span_class:
+        if "qualifier-content" in span_class or "ib-content" in span_class:
             raw_tag = clean_node(wxr, None, span_tag)
         elif "IPA" in span_class:
             sound = Sound(

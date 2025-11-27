@@ -37,7 +37,7 @@ class TestJaSound(TestCase):
             '[[w:X-SAMPA|X-SAMPA]]:&nbsp;<span title="X-SAMPA pronunciation">/<span class="SAMPA">"p@.pi</span>/, /<span class="SAMPA">"pVp.i</span>/</span>',
         )
         self.wxr.wtp.add_page(
-            "テンプレート:X-SAMPA",
+            "テンプレート:音声",
             10,
             '<table class="audiotable"><tr><td class="unicode audiolink" style="padding-right:5px; padding-left: 0;">音声 (米)<td class="audiofile">[[File:en-us-puppy.ogg|noicon|175px]]</td><td class="audiometa" style="font-size: 80%;">([[:File:en-us-puppy.ogg|ファイル]])</td></tr></table>[[カテゴリ:英語 音声リンクがある語句|PUPPY]]',
         )

@@ -58,8 +58,10 @@ def process_sound_template(
 ) -> None:
     if t_node.template_name in ["音声", "audio"]:
         extract_audio_template(wxr, t_node, sounds)
-    elif t_node.template_name in ["IPA", "X-SAMPA"]:
+    elif t_node.template_name in ["IPA", "X-SAMPA", "hi-IPA"]:
         extract_ipa_template(wxr, t_node, sounds)
+    elif t_node.template_name == "sa-IPA":
+        extract_ipa_list_template(wxr, t_node, sounds)
     elif t_node.template_name == "homophones":
         extract_homophones_template(wxr, t_node, sounds)
     elif t_node.template_name == "ja-pron":
@@ -95,15 +97,42 @@ def extract_audio_template(
 def extract_ipa_template(
     wxr: WiktextractContext, t_node: TemplateNode, sounds: list[Sound]
 ):
-    for index in itertools.count(1):
-        if index not in t_node.template_parameters:
-            break
-        ipa = clean_node(wxr, None, t_node.template_parameters[index])
-        if len(ipa) > 0:
-            sound = Sound(ipa=f"/{ipa}/")
-            if t_node.template_name == "X-SAMPA":
-                sound.tags.append("X-SAMPA")
-            sounds.append(sound)
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    sounds.extend(extract_ipa_list_item(wxr, expanded_node))
+
+
+def extract_ipa_list_template(
+    wxr: WiktextractContext, t_node: TemplateNode, sounds: list[Sound]
+):
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for list_item in expanded_node.find_child_recursively(NodeKind.LIST_ITEM):
+        sounds.extend(extract_ipa_list_item(wxr, list_item))
+
+
+def extract_ipa_list_item(
+    wxr: WiktextractContext, list_item: WikiNode
+) -> list[Sound]:
+    raw_tag = ""
+    sounds = []
+    for span_tag in list_item.find_html_recursively("span"):
+        span_class = span_tag.attrs.get("class", "").split()
+        if "qualifier-content" in span_class or "ib-content" in span_class:
+            raw_tag = clean_node(wxr, None, span_tag)
+        elif "IPA" in span_class or "SAMPA" in span_class:
+            sound = Sound(ipa=clean_node(wxr, None, span_tag))
+            if raw_tag != "":
+                sound.raw_tags.append(raw_tag)
+            if sound.ipa != "":
+                if "SAMPA" in span_class:
+                    sound.ipa = f"/{sound.ipa}/"
+                    sound.tags.append("X-SAMPA")
+                translate_raw_tags(sound)
+                sounds.append(sound)
+    return sounds
 
 
 def extract_homophones_template(

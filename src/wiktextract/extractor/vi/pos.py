@@ -236,7 +236,9 @@ def extract_headword_template(
                         forms.append(Form(form=roman, tags=["romanization"]))
                 elif "gender" in class_names:
                     for abbr_tag in html_node.find_html("abbr"):
-                        gender_tag = clean_node(wxr, None, abbr_tag)
+                        gender_tag = abbr_tag.attrs.get(
+                            "title", clean_node(wxr, None, abbr_tag)
+                        )
                         if (
                             len(forms) > 0
                             and "canonical" not in forms[-1].tags

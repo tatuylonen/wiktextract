@@ -75,6 +75,10 @@ def extract_gloss_list_item(
             "label",
             "lb",
             "lbl",
+            "qualifier",
+            "q",
+            "qf",
+            "qual",
         ]:
             extract_label_template(wxr, sense, node)
         elif isinstance(node, TemplateNode) and node.template_name == "cls":

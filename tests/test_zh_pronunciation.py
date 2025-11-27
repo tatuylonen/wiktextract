@@ -666,3 +666,48 @@ class TestPronunciation(TestCase):
             data[0]["sounds"],
             [{"ipa": "[kaːk̚˦˥ tak̚˨˩˨]", "tags": ["Saigon"]}],
         )
+
+    def test_hi_ipa(self):
+        self.wxr.wtp.add_page(
+            "Template:hi-IPA",
+            10,
+            """<span class="usage-label-accent"><span class="ib-brac">(</span><span class="ib-content">[[w:en:Delhi Hindi|德里]]</span><span class="ib-brac">)</span></span> [[Wiktionary:國際音標|國際音標]]<sup>([[Appendix:印地語發音|幫助]])</sup>:&#32;<span class="IPA">/bʱɑː.ɾət̪/</span>, <span class="IPA">[bʱäː.ɾɐt̪]</span>[[Category:有國際音標的印地語詞|भारत]]""",
+        )
+        data = parse_page(
+            self.wxr,
+            "भारत",
+            """==印地語==
+===發音===
+* {{hi-IPA}}
+===專有名詞===
+# {{place|hi|國家|r/南亞|t1=印度}}""",
+        )
+        self.assertEqual(
+            data[0]["sounds"],
+            [
+                {"ipa": "/bʱɑː.ɾət̪/", "tags": ["Delhi"]},
+                {"ipa": "[bʱäː.ɾɐt̪]", "tags": ["Delhi"]},
+            ],
+        )
+        self.assertEqual(data[0]["categories"], ["有國際音標的印地語詞"])
+
+    def test_sa_ipa(self):
+        self.wxr.wtp.add_page(
+            "Template:sa-IPA",
+            10,
+            """* <span class="usage-label-accent"><span class="ib-brac">(</span><span class="ib-content">[[w:吠陀梵語|吠陀]]</span><span class="ib-brac">)</span></span> [[Wiktionary:國際音標|國際音標]]<sup>([[wikipedia:梵語音系|幫助]])</sup>:&#32;<span class="IPA">/bʱɑ́ː.ɾɐ.tɐ/</span>[[Category:有國際音標的梵語詞|भारत]]""",
+        )
+        data = parse_page(
+            self.wxr,
+            "भारत",
+            """==梵語==
+===發音===
+{{sa-IPA|a=1}}
+===形容詞===
+# 源自{{l|sa|भरत}}/[[Bhāratas]]""",
+        )
+        self.assertEqual(
+            data[0]["sounds"],
+            [{"ipa": "/bʱɑ́ː.ɾɐ.tɐ/", "tags": ["Vedic"]}],
+        )
+        self.assertEqual(data[0]["categories"], ["有國際音標的梵語詞"])
