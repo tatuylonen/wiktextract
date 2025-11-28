@@ -12,7 +12,7 @@ from wikitextprocessor import (
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from ..share import capture_text_in_parentheses, set_sound_file_url_fields
-from .models import Sound, WordEntry
+from .models import Hyphenation, Sound, WordEntry
 from .tags import translate_raw_tags
 
 
@@ -26,14 +26,16 @@ def extract_sound_section(
     cats = {}
     for node in level_node.children:
         if isinstance(node, TemplateNode):
-            process_sound_template(wxr, node, sounds, cats)
+            process_sound_template(wxr, base_data, node, sounds, cats)
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
             for list_item in node.find_child(NodeKind.LIST_ITEM):
                 if base_data.lang_code == "zh":
                     extract_zh_sound_list_item(wxr, list_item, sounds, [])
                 else:
                     for t_node in list_item.find_child(NodeKind.TEMPLATE):
-                        process_sound_template(wxr, t_node, sounds, cats)
+                        process_sound_template(
+                            wxr, base_data, t_node, sounds, cats
+                        )
 
     if level_node.kind == NodeKind.LEVEL3:
         base_data.sounds.extend(sounds)
@@ -52,6 +54,7 @@ def extract_sound_section(
 
 def process_sound_template(
     wxr: WiktextractContext,
+    base_data: WordEntry,
     t_node: TemplateNode,
     sounds: list[Sound],
     cats: dict[str, list[str]],
@@ -80,6 +83,8 @@ def process_sound_template(
         extract_zh_sound_template(wxr, t_node, sounds)
     elif t_node.template_name in ["rhymes", "rhyme"]:
         extract_rhymes_template(wxr, t_node, sounds)
+    elif t_node.template_name in ["hyphenation", "hyph"]:
+        extract_hyphenation_template(wxr, base_data, t_node)
 
     clean_node(wxr, cats, t_node)
 
@@ -370,3 +375,28 @@ def extract_rhymes_template(
         rhyme = clean_node(wxr, None, span_node)
         if rhyme != "":
             sounds.append(Sound(rhymes=rhyme))
+
+
+def extract_hyphenation_template(
+    wxr: WiktextractContext, base_data: WordEntry, t_node: TemplateNode
+):
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    h_strs = []
+    if t_node.template_name == "hyph":
+        lang_code = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
+        for span_tag in expanded_node.find_html(
+            "span", attr_name="lang", attr_value=lang_code
+        ):
+            h_strs.append(clean_node(wxr, None, span_tag))
+    else:
+        h_strs.append(
+            clean_node(wxr, base_data, t_node).removeprefix("分綴:").strip()
+        )
+    for h_str in h_strs:
+        h_data = Hyphenation(
+            parts=list(filter(None, map(str.strip, h_str.split("‧"))))
+        )
+        if len(h_data.parts) > 0:
+            base_data.hyphenations.append(h_data)

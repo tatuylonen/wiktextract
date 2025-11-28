@@ -58,6 +58,8 @@ def extract_sound_template(
         extract_rhymes_template(wxr, base_data, t_node)
     elif t_node.template_name in ["homophones", "homophone", "hmp"]:
         extract_homophones_template(wxr, base_data, t_node)
+    elif t_node.template_name in ["hyphenation", "hyph"]:
+        extract_hyphenation_template(wxr, base_data, t_node)
 
 
 def extract_ipa_template(
@@ -591,3 +593,21 @@ def extract_homophones_template(
     base_data.sounds.extend(homophones)
     for link_node in expanded_node.find_child(NodeKind.LINK):
         clean_node(wxr, base_data, link_node)
+
+
+def extract_hyphenation_template(
+    wxr: WiktextractContext, base_data: WordEntry, t_node: TemplateNode
+):
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    lang_code = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
+    for span_tag in expanded_node.find_html(
+        "span", attr_name="lang", attr_value=lang_code
+    ):
+        h_str = clean_node(wxr, None, span_tag)
+        h_data = Hyphenation(
+            parts=list(filter(None, map(str.strip, h_str.split("‧"))))
+        )
+        if len(h_data.parts) > 0:
+            base_data.hyphenations.append(h_data)

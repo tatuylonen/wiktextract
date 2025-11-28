@@ -98,6 +98,10 @@ class Descendant(JapaneseBaseModel):
     raw_tags: list[str] = []
 
 
+class Hyphenation(JapaneseBaseModel):
+    parts: list[str] = []
+
+
 class WordEntry(JapaneseBaseModel):
     model_config = ConfigDict(title="Japanese Wiktionary")
 
@@ -135,3 +139,4 @@ class WordEntry(JapaneseBaseModel):
     anagrams: list[Linkage] = []
     notes: list[str] = []
     proverbs: list[Descendant] = []
+    hyphenations: list[Hyphenation] = []

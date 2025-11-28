@@ -152,6 +152,10 @@ class Descendant(ChineseBaseModel):
     sense: str = ""
 
 
+class Hyphenation(ChineseBaseModel):
+    parts: list[str] = []
+
+
 class WordEntry(ChineseBaseModel):
     model_config = ConfigDict(title="Chinese Wiktionary")
 
@@ -196,3 +200,4 @@ class WordEntry(ChineseBaseModel):
     literal_meaning: str = ""
     original_title: str = ""
     anagrams: list[Linkage] = []
+    hyphenations: list[Hyphenation] = []
