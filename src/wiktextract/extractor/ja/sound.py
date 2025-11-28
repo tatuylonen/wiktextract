@@ -58,10 +58,11 @@ def process_sound_template(
 ) -> None:
     if t_node.template_name in ["音声", "audio"]:
         extract_audio_template(wxr, t_node, sounds)
-    elif t_node.template_name in ["IPA", "X-SAMPA", "hi-IPA"]:
+    elif t_node.template_name in [
+        "IPA",
+        "X-SAMPA",
+    ] or t_node.template_name.endswith("-IPA"):
         extract_ipa_template(wxr, t_node, sounds)
-    elif t_node.template_name == "sa-IPA":
-        extract_ipa_list_template(wxr, t_node, sounds)
     elif t_node.template_name == "homophones":
         extract_homophones_template(wxr, t_node, sounds)
     elif t_node.template_name == "ja-pron":
@@ -102,32 +103,35 @@ def extract_ipa_template(
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(t_node), expand_all=True
     )
-    sounds.extend(extract_ipa_list_item(wxr, expanded_node))
-
-
-def extract_ipa_list_template(
-    wxr: WiktextractContext, t_node: TemplateNode, sounds: list[Sound]
-):
-    expanded_node = wxr.wtp.parse(
-        wxr.wtp.node_to_wikitext(t_node), expand_all=True
-    )
-    for list_item in expanded_node.find_child_recursively(NodeKind.LIST_ITEM):
-        sounds.extend(extract_ipa_list_item(wxr, list_item))
+    no_list_nodes = []
+    for node in expanded_node.children:
+        if isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
+            for list_item in node.find_child(NodeKind.LIST_ITEM):
+                sounds.extend(extract_ipa_list_item(wxr, list_item))
+        else:
+            no_list_nodes.append(node)
+    if len(no_list_nodes) > 0:
+        tmp_node = WikiNode(NodeKind.ROOT, 0)
+        tmp_node.children = no_list_nodes
+        sounds.extend(extract_ipa_list_item(wxr, tmp_node))
 
 
 def extract_ipa_list_item(
     wxr: WiktextractContext, list_item: WikiNode
 ) -> list[Sound]:
-    raw_tag = ""
+    raw_tags = []
     sounds = []
     for span_tag in list_item.find_html_recursively("span"):
         span_class = span_tag.attrs.get("class", "").split()
         if "qualifier-content" in span_class or "ib-content" in span_class:
-            raw_tag = clean_node(wxr, None, span_tag)
+            for raw_tag in clean_node(wxr, None, span_tag).split(","):
+                raw_tag = raw_tag.strip()
+                if raw_tag != "":
+                    raw_tags.append(raw_tag)
         elif "IPA" in span_class or "SAMPA" in span_class:
-            sound = Sound(ipa=clean_node(wxr, None, span_tag))
-            if raw_tag != "":
-                sound.raw_tags.append(raw_tag)
+            sound = Sound(
+                ipa=clean_node(wxr, None, span_tag), raw_tags=raw_tags
+            )
             if sound.ipa != "":
                 if "SAMPA" in span_class:
                     sound.ipa = f"/{sound.ipa}/"

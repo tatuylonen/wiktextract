@@ -308,6 +308,8 @@ TAGS = {
     "廃用": "obsolete",
     # Template:ja-noun
     "旧字体": "kyūjitai",
+    # Template:ca-verb
+    "現在第一人称単数形": ["first-person", "singular", "present"],
 }
 
 TOPICS = {

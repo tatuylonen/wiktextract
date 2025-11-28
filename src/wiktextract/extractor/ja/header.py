@@ -52,7 +52,9 @@ def extract_header_nodes(
             or "form-of" in node.attrs.get("class", "")
         ):
             continue
-        if isinstance(node, HTMLNode) and node.tag in ["small", "i"]:
+        if (isinstance(node, HTMLNode) and node.tag in ["small", "i"]) or (
+            isinstance(node, WikiNode) and node.kind == NodeKind.ITALIC
+        ):
             raw_tag = clean_node(wxr, None, node).strip("(): ")
             if raw_tag != "又は" and raw_tag not in raw_tags:
                 # ignore "又は"(or) in "ja-noun" template
