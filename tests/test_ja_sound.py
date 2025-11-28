@@ -272,3 +272,18 @@ class TestJaSound(TestCase):
 # 変える。""",
         )
         self.assertEqual(page_data[0]["sounds"], [{"homophones": ["altar"]}])
+
+    def test_rhymes(self):
+        self.wxr.wtp.add_page(
+            "テンプレート:rhymes", 10, '押韻: <span class="IPA">-ɪʃ</span>'
+        )
+        data = parse_page(
+            self.wxr,
+            "fish",
+            """==英語==
+===発音===
+* {{rhymes|ɪʃ}}
+===名詞===
+# 魚""",
+        )
+        self.assertEqual(data[0]["sounds"], [{"rhymes": "-ɪʃ"}])
