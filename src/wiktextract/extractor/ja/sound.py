@@ -77,6 +77,8 @@ def process_sound_template(
         "wuu-pron",
     ]:
         extract_zh_sound_template(wxr, t_node, sounds)
+    elif t_node.template_name in ["rhymes", "rhyme"]:
+        extract_rhymes_template(wxr, t_node, sounds)
 
     clean_node(wxr, cats, t_node)
 
@@ -350,3 +352,17 @@ def extract_zh_sound_list_item(
                     sound.raw_tags.append(raw_tag)
         translate_raw_tags(sound)
         sounds.append(sound)
+
+
+def extract_rhymes_template(
+    wxr: WiktextractContext, t_node: TemplateNode, sounds: list[Sound]
+):
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for span_node in expanded_node.find_html(
+        "span", attr_name="class", attr_value="IPA"
+    ):
+        rhyme = clean_node(wxr, None, span_node)
+        if rhyme != "":
+            sounds.append(Sound(rhymes=rhyme))

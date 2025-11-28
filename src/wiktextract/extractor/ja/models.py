@@ -61,6 +61,7 @@ class Sound(JapaneseBaseModel):
     other: str = ""
     roman: str = ""
     sense: str = ""
+    rhymes: str = ""
 
 
 class Translation(JapaneseBaseModel):
