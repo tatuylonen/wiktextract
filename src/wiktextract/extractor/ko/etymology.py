@@ -26,7 +26,7 @@ def extract_etymology_section(
         for node in level_node.children:
             if isinstance(node, TemplateNode) and (
                 node.template_name.endswith("-kanjitab")
-                or node.template_anme == "ja-kt"
+                or node.template_name == "ja-kt"
             ):
                 extract_ja_kanjitab_template(wxr, node, word_entry)
             elif isinstance(node, LevelNode):
