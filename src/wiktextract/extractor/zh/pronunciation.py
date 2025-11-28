@@ -11,7 +11,7 @@ from wikitextprocessor import (
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from ..share import set_sound_file_url_fields
-from .models import Sound, WordEntry
+from .models import Hyphenation, Sound, WordEntry
 from .tags import translate_raw_tags
 
 
@@ -28,23 +28,26 @@ def extract_pronunciation_section(
             base_data.sounds.extend(new_sounds)
             base_data.categories.extend(new_cats)
     for list_item_node in level_node.find_child_recursively(NodeKind.LIST_ITEM):
-        new_sounds, new_cats = process_pron_item_list_item(wxr, list_item_node)
+        new_sounds, new_cats = process_pron_item_list_item(
+            wxr, base_data, list_item_node
+        )
         base_data.sounds.extend(new_sounds)
         base_data.categories.extend(new_cats)
 
 
 def process_pron_item_list_item(
-    wxr: WiktextractContext, list_item_node: WikiNode
+    wxr: WiktextractContext, base_data: WordEntry, list_item_node: WikiNode
 ) -> tuple[list[Sound], list[str]]:
     raw_tags = []
     sounds = []
     categories = []
-    for template_node in list_item_node.find_child(NodeKind.TEMPLATE):
-        new_sounds, new_cats = process_pron_template(
-            wxr, template_node, raw_tags
-        )
-        sounds.extend(new_sounds)
-        categories.extend(new_cats)
+    for t_node in list_item_node.find_child(NodeKind.TEMPLATE):
+        if t_node.template_name.lower() in ["hyph", "hyphenation"]:
+            extract_hyphenation_template(wxr, base_data, t_node)
+        else:
+            new_sounds, new_cats = process_pron_template(wxr, t_node, raw_tags)
+            sounds.extend(new_sounds)
+            categories.extend(new_cats)
     return sounds, categories
 
 
@@ -590,3 +593,21 @@ def extract_rhymes_template(
         if rhyme != "":
             sounds.append(Sound(rhymes=rhyme))
     return sounds, cats.get("categories", [])
+
+
+def extract_hyphenation_template(
+    wxr: WiktextractContext, base_data: WordEntry, t_node: TemplateNode
+):
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    lang_code = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
+    for span_tag in expanded_node.find_html(
+        "span", attr_name="lang", attr_value=lang_code
+    ):
+        h_str = clean_node(wxr, None, span_tag)
+        h_data = Hyphenation(
+            parts=list(filter(None, map(str.strip, h_str.split("‧"))))
+        )
+        if len(h_data.parts) > 0:
+            base_data.hyphenations.append(h_data)

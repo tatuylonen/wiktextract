@@ -281,11 +281,9 @@ def extract_hyphenation_template(
         "span", attr_name="lang", attr_value=lang_code
     ):
         h_str = clean_node(wxr, None, span_tag)
-        h_data = Hyphenation()
-        for part in h_str.split("‧"):
-            part = part.strip()
-            if part != "":
-                h_data.parts.append(part)
+        h_data = Hyphenation(
+            parts=list(filter(None, map(str.strip, h_str.split("‧"))))
+        )
         if len(h_data.parts) > 0:
             base_data.hyphenations.append(h_data)
 
