@@ -110,7 +110,7 @@ class TestJaHeader(TestCase):
             "テンプレート:en-verb",
             10,
             """<strong class="Latn headword" lang="en">debate</strong>
-(<small>三単現: </small>''[[debates]]'')""",
+(<small>三単現: </small><b>[[debates]]</b>)""",
         )
         data = WordEntry(lang="英語", lang_code="en", word="debate")
         root = self.wxr.wtp.parse("{{en-verb|debat|ing}}")
@@ -239,3 +239,29 @@ class TestJaHeader(TestCase):
             ],
         )
         self.assertEqual(page_data[0]["tags"], ["masculine"])
+
+    def test_ca_verb(self):
+        self.wxr.wtp.add_page(
+            "テンプレート:ca-verb",
+            10,
+            """<span class="mention-Latn">'''jugar'''</span> (''現在第一人称単数形'' '''<span class="Latn" lang="ca">[[jugo#カタルーニャ語|jugo]]</span>''', ''過去分詞'' '''<span class="Latn" lang="ca">[[jugat#カタルーニャ語|jugat]]</span>''')[[Category:カタルーニャ語]]""",
+        )
+        data = parse_page(
+            self.wxr,
+            "jugar",
+            """=={{L|ca}}==
+===動詞===
+{{ca-verb|ar|jug}}
+# 遊ぶ""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {
+                    "form": "jugo",
+                    "tags": ["first-person", "singular", "present"],
+                },
+                {"form": "jugat", "tags": ["past", "participle"]},
+            ],
+        )
+        self.assertEqual(data[0]["categories"], ["カタルーニャ語"])

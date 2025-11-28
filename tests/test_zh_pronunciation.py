@@ -711,3 +711,28 @@ class TestPronunciation(TestCase):
             [{"ipa": "/bʱɑ́ː.ɾɐ.tɐ/", "tags": ["Vedic"]}],
         )
         self.assertEqual(data[0]["categories"], ["有國際音標的梵語詞"])
+
+    def test_ca_ipa(self):
+        self.wxr.wtp.add_page(
+            "Template:ca-IPA",
+            10,
+            """[[Wiktionary:國際音標|國際音標]]<sup>([[Appendix:加泰羅尼亞語發音|幫助]])</sup>:&#32;<span class="ib-brac qualifier-brac">(</span><span class="ib-content qualifier-content"><span class="usage-label-accent">[[w:en:Central Catalan|中加泰羅尼亞]]</span></span><span class="ib-brac qualifier-brac">)</span> <span class="IPA">[kuˈβal]</span>[[Category:有國際音標的加泰羅尼亞語詞|COBALT]]
+* [[Wiktionary:國際音標|國際音標]]<sup>([[Appendix:加泰羅尼亞語發音|幫助]])</sup>:&#32;<span class="ib-brac qualifier-brac">(</span><span class="ib-content qualifier-content"><span class="usage-label-accent">[[w:en:Balearic Catalan|巴利阿里]]<span class="ib-comma">，</span>[[w:巴倫西亞語|瓦倫西亞]]</span></span><span class="ib-brac qualifier-brac">)</span> <span class="IPA">[koˈbalt]</span>[[Category:有國際音標的加泰羅尼亞語詞|COBALT]]""",
+        )
+        data = parse_page(
+            self.wxr,
+            "cobalt",
+            """==加泰羅尼亞語==
+===發音===
+* {{ca-IPA}}
+===名詞===
+# [[鈷]]]""",
+        )
+        self.assertEqual(
+            data[0]["sounds"],
+            [
+                {"ipa": "[koˈbalt]", "raw_tags": ["巴利阿里", "瓦倫西亞"]},
+                {"ipa": "[kuˈβal]", "raw_tags": ["中加泰羅尼亞"]},
+            ],
+        )
+        self.assertEqual(data[0]["categories"], ["有國際音標的加泰羅尼亞語詞"])
