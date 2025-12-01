@@ -86,3 +86,33 @@ class TestKuSound(TestCase):
         self.assertEqual(
             page_data[0]["hyphenations"], [{"parts": ["lê", "ker"]}]
         )
+
+    def test_kîte(self):
+        self.wxr.wtp.add_page("Şablon:ziman", 10, "Latînî")
+        self.wxr.wtp.add_page(
+            "Şablon:pj.", 10, '<span style="font-size:95%;">Pirjimar:</span>'
+        )
+        self.wxr.wtp.add_page(
+            "Şablon:kîte",
+            10,
+            """{{#switch:{{{nivîsna}}}
+| 1 = <span class="Latn" lang="la">-{fā‧bu‧lae}-</span>
+| #default = [[kîte|Kîtekirin]]: <span class="Latn" lang="la">-{fā‧bu‧la}-</span>
+}}""",
+        )
+        data = parse_page(
+            self.wxr,
+            "fabula",
+            """== {{ziman|la}} ==
+=== Bilêvkirin ===
+* {{kîte|la|fā|bu|la}} {{pj.}} {{kîte|la|fā|bu|lae|nivîsna=1}}
+=== Navdêr ===
+# [[efsane]]""",
+        )
+        self.assertEqual(
+            data[0]["hyphenations"],
+            [
+                {"parts": ["fā", "bu", "la"]},
+                {"parts": ["fā", "bu", "lae"], "tags": ["plural"]},
+            ],
+        )
