@@ -51,3 +51,28 @@ class TestPlEtymology(TestCase):
             page_data[0]["etymology_texts"],
             ["Od średnioang. dogge", "por. szkoc. dug → pies"],
         )
+
+    def test_sense_index(self):
+        self.wxr.wtp.add_page(
+            "Szablon:forma rzeczownika",
+            10,
+            "<i>rzeczownik, forma fleksyjna</i>[[Kategoria:Formy rzeczowników polskich]]",
+        )
+        data = parse_page(
+            self.wxr,
+            "jam",
+            """== jam ({{język polski}}) ==
+===znaczenia===
+''zaimek''
+: (1.1) ''…''[[ja]]'' z końcówką czasownikową''
+''rzeczownik, rodzaj męskorzeczowy''
+: (2.1) {{przest}} {{zob|dżem}}
+''{{forma rzeczownika|pl}}''
+: (3.1) {{D}} {{lm}} ''od'' [[jama]]
+===etymologia===
+: (1.1) pol. ja + -m
+: (2.1) ang. jam → dżem""",
+        )
+        self.assertEqual(data[0]["etymology_texts"], ["pol. ja + -m"])
+        self.assertEqual(data[1]["etymology_texts"], ["ang. jam → dżem"])
+        self.assertTrue("etymology_texts" not in data[2])
