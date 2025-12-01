@@ -3255,7 +3255,8 @@ def parse_language(
                 # be level 4 instead of 3 so that they're part of a larger
                 # etymology hierarchy; usually the data here is empty and
                 # acts as an inbetween between POS and Etymology data
-                inside_level_four = True
+                if lang_code in ("zh",):
+                    inside_level_four = True
                 if t.startswith(PRONUNCIATION_TITLE + " "):
                     # Pronunciation 1, etc, are used in Chinese Glyphs,
                     # and each of them may have senses under Definition
