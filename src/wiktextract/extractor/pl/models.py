@@ -66,6 +66,7 @@ class Sound(PolishBaseModel):
     tags: list[str] = []
     raw_tags: list[str] = []
     homophone: str = ""
+    sense_index: str = ""
 
 
 class Linkage(PolishBaseModel):

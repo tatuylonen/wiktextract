@@ -84,6 +84,7 @@ class TestPlSound(TestCase):
 ===wymowa===
 : {{dzielenie|ar|bi|​ter el|​e|​gan|​ti|​a|​rum}}
 ===znaczenia===
+''fraza rzeczownikowa''
 : (1.1) [[znawca]] [[dobry|dobrego]] [[smak]]u, [[esteta]]""",
         )
         self.assertEqual(
@@ -114,8 +115,38 @@ class TestPlSound(TestCase):
 ===wymowa===
 :: {{homofony|red|redd}}
 ===znaczenia===
+''czasownik''
 : (1.1) [[czytać]]""",
         )
         self.assertEqual(
             data[0]["sounds"], [{"homophone": "red"}, {"homophone": "redd"}]
+        )
+
+    def test_sound_sense_index(self):
+        self.wxr.wtp.add_page(
+            "Szablon:forma czasownika", 10, "<i>czasownik, forma fleksyjna</i>"
+        )
+        data = parse_page(
+            self.wxr,
+            "read",
+            """== read ({{język angielski}}) ==
+===wymowa===
+: (1.1-6, 2.1)
+:: {{IPA|riːd}}
+: (3.1-2)
+:: {{IPA|red}}
+===znaczenia===
+''czasownik''
+: (1.1) [[czytać]]
+''rzeczownik''
+: (2.1) [[lektura]]
+''{{forma czasownika|en}}''
+: (3.1) {{past simple|read}}""",
+        )
+        self.assertEqual(
+            data[0]["sounds"], [{"ipa": "riːd", "sense_index": "1.1-6, 2.1"}]
+        )
+        self.assertEqual(data[0]["sounds"], data[1]["sounds"])
+        self.assertEqual(
+            data[2]["sounds"], [{"ipa": "red", "sense_index": "3.1-2"}]
         )
