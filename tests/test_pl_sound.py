@@ -105,3 +105,17 @@ class TestPlSound(TestCase):
             ],
         )
         self.assertEqual(data[0]["categories"], ["Błąd w szablonie dzielenie"])
+
+    def test_homofony(self):
+        data = parse_page(
+            self.wxr,
+            "read",
+            """== read ({{język angielski}}) ==
+===wymowa===
+:: {{homofony|red|redd}}
+===znaczenia===
+: (1.1) [[czytać]]""",
+        )
+        self.assertEqual(
+            data[0]["sounds"], [{"homophone": "red"}, {"homophone": "redd"}]
+        )

@@ -65,6 +65,7 @@ class Sound(PolishBaseModel):
     flac_url: str = ""
     tags: list[str] = []
     raw_tags: list[str] = []
+    homophone: str = ""
 
 
 class Linkage(PolishBaseModel):

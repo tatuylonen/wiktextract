@@ -1,5 +1,5 @@
 from functools import partial
-from itertools import chain
+from itertools import chain, count
 
 from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 
@@ -71,6 +71,8 @@ def process_sound_template(
             base_data.sounds.append(sound)
     elif template_node.template_name == "dzielenie":
         extract_dzielenie_template(wxr, base_data, template_node)
+    elif template_node.template_name == "homofony":
+        extract_homofony_template(wxr, base_data, template_node)
 
 
 def extract_morphology_section(
@@ -106,3 +108,14 @@ def extract_dzielenie_template(
             )
         )
     )
+
+
+def extract_homofony_template(
+    wxr: WiktextractContext, base_data: WordEntry, t_node: TemplateNode
+):
+    for arg in count(1):
+        if arg not in t_node.template_parameters:
+            break
+        word = clean_node(wxr, None, t_node.template_parameters[arg])
+        if word != "":
+            base_data.sounds.append(Sound(homophone=word))
