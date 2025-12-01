@@ -1,3 +1,6 @@
+from functools import partial
+from itertools import chain
+
 from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
@@ -66,6 +69,8 @@ def process_sound_template(
                 sound.tags.append("Bopomofo")
             translate_raw_tags(sound)
             base_data.sounds.append(sound)
+    elif template_node.template_name == "dzielenie":
+        extract_dzielenie_template(wxr, base_data, template_node)
 
 
 def extract_morphology_section(
@@ -77,5 +82,27 @@ def extract_morphology_section(
             h_str = clean_node(wxr, base_data, t_node)
             if h_str != "":
                 base_data.hyphenations.append(
-                    Hyphenation(parts=h_str.split("•"))
+                    Hyphenation(
+                        parts=list(
+                            chain.from_iterable(
+                                map(partial(str.split, sep="•"), h_str.split())
+                            )
+                        )
+                    )
                 )
+
+
+def extract_dzielenie_template(
+    wxr: WiktextractContext, base_data: WordEntry, t_node: TemplateNode
+):
+    expanded_str = clean_node(wxr, base_data, t_node)
+    h_str = expanded_str[expanded_str.find(":") + 1 :].strip()
+    base_data.hyphenations.append(
+        Hyphenation(
+            parts=list(
+                chain.from_iterable(
+                    map(partial(str.split, sep="•"), h_str.split())
+                )
+            )
+        )
+    )

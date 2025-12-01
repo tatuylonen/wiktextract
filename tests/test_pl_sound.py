@@ -4,6 +4,7 @@ from wikitextprocessor import Wtp
 
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.pl.models import WordEntry
+from wiktextract.extractor.pl.page import parse_page
 from wiktextract.extractor.pl.sound import extract_sound_section
 from wiktextract.wxr_context import WiktextractContext
 
@@ -69,3 +70,38 @@ class TestPlSound(TestCase):
         extract_sound_section(self.wxr, base_data, root.children[0])
         data = base_data.model_dump(exclude_defaults=True)
         self.assertEqual(data["sounds"], [{"ipa": "ˈpwakaʨ̑"}])
+
+    def test_dzielenie(self):
+        self.wxr.wtp.add_page(
+            "Szablon:dzielenie",
+            10,
+            "<i>podział przy przenoszeniu wyrazu:</i> ar&#8226;bi&#8226;​ter el&#8226;​e&#8226;​gan&#8226;​ti&#8226;​a&#8226;​rum[[Kategoria:Błąd w szablonie dzielenie]]",
+        )
+        data = parse_page(
+            self.wxr,
+            "arbiter elegantiarum",
+            """== arbiter elegantiarum ({{język angielski}}) ==
+===wymowa===
+: {{dzielenie|ar|bi|​ter el|​e|​gan|​ti|​a|​rum}}
+===znaczenia===
+: (1.1) [[znawca]] [[dobry|dobrego]] [[smak]]u, [[esteta]]""",
+        )
+        self.assertEqual(
+            data[0]["hyphenations"],
+            [
+                {
+                    "parts": [
+                        "ar",
+                        "bi",
+                        "ter",
+                        "el",
+                        "e",
+                        "gan",
+                        "ti",
+                        "a",
+                        "rum",
+                    ]
+                }
+            ],
+        )
+        self.assertEqual(data[0]["categories"], ["Błąd w szablonie dzielenie"])
