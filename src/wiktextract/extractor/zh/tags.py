@@ -41,6 +41,7 @@ NUMBER_TAGS: dict[str, str | list[str]] = {
     # Template:nb-noun-m1
     "定指單數": ["definite", "singular"],
     "定指複數": ["definite", "plural"],
+    "複": "plural",
 }
 
 # https://en.wikipedia.org/wiki/Count_noun
@@ -76,6 +77,13 @@ OTHER_TAGS: dict[str, str] = {
     "異體": "alternative",
     "仿譯詞": "calque",
     "貶稱詞": "pejorative",
+    # Template:ms-noun
+    "爪夷文": "Jawi",
+    "非正式第一人稱屬格": ["informal", "first-person", "genitive"],
+    "不禮貌第二人稱屬格": ["impolite", "second-person", "genitive"],
+    "第三人稱屬格": ["third-person", "genitive"],
+    "印尼語": "Indonesian",
+    "姓氏": "surname",
 }
 
 VERB_TAGS: dict[str, str] = {

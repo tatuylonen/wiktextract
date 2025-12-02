@@ -132,6 +132,9 @@ def process_linkage_list_item(
                 )
                 linkage_list.extend(new_list)
 
+    if len(raw_tags) > 0 and len(linkage_list) > 0:
+        linkage_list[-1].raw_tags.extend(raw_tags)
+        translate_raw_tags(linkage_list[-1])
     return sense, linkage_list
 
 
@@ -296,7 +299,7 @@ def process_l_template(
     lang_code = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
     for span_tag in expanded_node.find_html("span"):
         span_lang = span_tag.attrs.get("lang", "")
-        span_class = span_tag.attrs.get("class", "")
+        span_class = span_tag.attrs.get("class", "").split()
         if span_lang == lang_code:
             linkage_data = Linkage(
                 sense=sense,
@@ -308,8 +311,13 @@ def process_l_template(
                 linkage_list.append(linkage_data)
         elif span_lang.endswith("-Latn") and len(linkage_list) > 0:
             linkage_list[-1].roman = clean_node(wxr, None, span_tag)
-        elif "mention-gloss" == span_class and len(linkage_list) > 0:
+        elif "mention-gloss" in span_class and len(linkage_list) > 0:
             linkage_list[-1].sense = clean_node(wxr, None, span_tag)
+        elif "ib-content" in span_class and len(linkage_list) > 0:
+            raw_tag = clean_node(wxr, None, span_tag)
+            if raw_tag != "":
+                linkage_list[-1].raw_tags.append(raw_tag)
+                translate_raw_tags(linkage_list[-1])
 
     return linkage_list
 
