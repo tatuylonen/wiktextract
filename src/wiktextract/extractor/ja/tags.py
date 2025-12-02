@@ -310,6 +310,11 @@ TAGS = {
     "旧字体": "kyūjitai",
     # Template:ca-verb
     "現在第一人称単数形": ["first-person", "singular", "present"],
+    # Template:en-adj
+    "比較形なし": "not-comparable",
+    "比較級": "comparative",
+    "最上級": "superlative",
+    "旧綴り": "archaic",
 }
 
 TOPICS = {
