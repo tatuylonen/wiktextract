@@ -38,6 +38,9 @@ NUMBER_TAGS: dict[str, str | list[str]] = {
     "賓格單數": ["accusative", "singular"],
     "賓格複數": ["accusative", "plural"],
     "無複數": "no-plural",
+    # Template:nb-noun-m1
+    "定指單數": ["definite", "singular"],
+    "定指複數": ["definite", "plural"],
 }
 
 # https://en.wikipedia.org/wiki/Count_noun
