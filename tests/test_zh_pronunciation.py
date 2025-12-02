@@ -736,3 +736,43 @@ class TestPronunciation(TestCase):
             ],
         )
         self.assertEqual(data[0]["categories"], ["有國際音標的加泰羅尼亞語詞"])
+
+    def test_pl_pr(self):
+        self.wxr.wtp.add_page(
+            "Template:pl-pr",
+            10,
+            """<div class="vsSwitcher" data-toggle-category="pronunciations"><span class="vsToggleElement">&nbsp;</span>
+*[[Wiktionary:國際音標|國際音標]]<sup>([[Appendix:波蘭語發音|幫助]])</sup>:&#32;<span class="IPA">/ˈtfɔ.ʐɘt͡ɕ/</span>
+<div class="vsHide">
+
+*<span class="usage-label-accent"><span class="ib-brac">(</span><span class="ib-content">[[w:中古波蘭語|中古波蘭語]]</span><span class="ib-brac">)</span></span> [[Wiktionary:國際音標|國際音標]]<sup>([[Appendix:波蘭語發音|幫助]])</sup>:&#32;<span class="ib-brac qualifier-brac">(</span><span class="ib-content qualifier-content"><span class="usage-label-accent">16世紀</span></span><span class="ib-brac qualifier-brac">)</span> <span class="IPA">/ˈtfɔ.r̝ɨt͡ɕ/</span>, <span class="ib-brac qualifier-brac">(</span><span class="ib-content qualifier-content"><span class="usage-label-accent">17至18世紀</span></span><span class="ib-brac qualifier-brac">)</span> <span class="IPA">/ˈtfɔ.ʐɨt͡ɕ/</span>
+</div></div>
+
+* <table class="audiotable"><tr><td>音頻1<span class="ib-semicolon qualifier-semicolon">；</span><i class="Latn mention" lang="pl">-{<span class="ib-quote qualifier-quote">“</span>tworzyć<span class="ib-quote qualifier-quote">”</span>}-</i><span class="ib-colon qualifier-colon">：</span></td><td class="audiofile">[[File:Pl-tworzyć.ogg|noicon|175px]]</td><td class="audiometa" style="font-size: 80%;">([[:File:Pl-tworzyć.ogg|檔案]])</td></tr></table>
+* 韻部：[[Rhymes:波蘭語/ɔʐɘt͡ɕ|<span class="IPA">-ɔʐɘt͡ɕ</span>]]
+* 音節化：<span class="Latn" lang="pl">-{two‧rzyć}-</span>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "tworzyć",
+            """==波兰语==
+===发音===
+* {{pl-pr|a=Pl-tworzyć.ogg<text:#>|mp=#}}
+===动词===
+#创建，创造，创制""",
+        )
+        self.assertEqual(
+            data[0]["sounds"][:3],
+            [
+                {"ipa": "/ˈtfɔ.ʐɘt͡ɕ/"},
+                {"ipa": "/ˈtfɔ.r̝ɨt͡ɕ/", "raw_tags": ["中古波蘭語", "16世紀"]},
+                {
+                    "ipa": "/ˈtfɔ.ʐɨt͡ɕ/",
+                    "raw_tags": ["中古波蘭語", "17至18世紀"],
+                },
+            ],
+        )
+        self.assertEqual(data[0]["sounds"][3]["audio"], "Pl-tworzyć.ogg")
+        self.assertEqual(data[0]["sounds"][3]["raw_tags"], ["“tworzyć”"])
+        self.assertEqual(data[0]["sounds"][4], {"rhymes": "-ɔʐɘt͡ɕ"})
+        self.assertEqual(data[0]["hyphenations"], [{"parts": ["two", "rzyć"]}])
