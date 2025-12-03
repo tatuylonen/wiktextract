@@ -96,6 +96,7 @@ class Sound(BaseModelWrap):
     )
     rhymes: str = ""
     homophone: str = ""
+    other: str = ""
 
 
 class Form(BaseModelWrap):
@@ -153,7 +154,6 @@ class WordEntry(BaseModelWrap):
     proverbs: list[Linkage] = []
     tags: list[str] = []
     raw_tags: list[str] = []
-    extra_sounds: dict[str, str] = {}
     forms: list[Form] = []
     hyphenations: list[Hyphenation] = []
     cognates: list[Linkage] = []
