@@ -320,6 +320,7 @@ LINKAGE_TITLES: dict[str, str] = {
     "關聯詞": "related",
     "關聯詞彙": "related",
     "短語": "derived",
+    "縮寫": "abbreviations",
 }
 
 ETYMOLOGY_TITLES: frozenset[str] = frozenset(

@@ -177,7 +177,7 @@ class WordEntry(FrenchBaseModel):
     troponyms: list[Linkage] = []
     paronyms: list[Linkage] = []
     related: list[Linkage] = []
-    abbreviation: list[Linkage] = []
+    abbreviations: list[Linkage] = []
     proverbs: list[Linkage] = []
     anagrams: list[Linkage] = []
     title: str = Field(default="", description="Redirect page source title")

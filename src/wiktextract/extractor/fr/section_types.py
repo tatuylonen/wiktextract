@@ -183,8 +183,8 @@ POS_SECTIONS: dict[str, POSSubtitleData] = {
 
 # map section arguments to pydantic fields
 LINKAGE_SECTIONS: dict[str, str] = {
-    "abrév": "abbreviation",
-    "abréviations": "abbreviation",
+    "abrév": "abbreviations",
+    "abréviations": "abbreviations",
     "anagrammes": "anagrams",
     "anagr": "anagrams",
     "anagramme": "anagrams",

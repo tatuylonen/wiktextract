@@ -180,7 +180,7 @@ class WordEntry(ChineseBaseModel):
     troponyms: list[Linkage] = []
     paronyms: list[Linkage] = []
     related: list[Linkage] = []
-    abbreviation: list[Linkage] = []
+    abbreviations: list[Linkage] = []
     proverbs: list[Linkage] = []
     antonyms: list[Linkage] = []
     coordinate_terms: list[Linkage] = []
