@@ -91,9 +91,8 @@ class TestDEPage(unittest.TestCase):
                 {
                     "lang": "Deutsch",
                     "lang_code": "de",
-                    "pos": "noun",
-                    "pos_title": "Substantiv",
-                    "other_pos": ["name"],
+                    "pos": "name",
+                    "pos_title": "Toponym",
                     "senses": [
                         {
                             "glosses": [
@@ -104,7 +103,7 @@ class TestDEPage(unittest.TestCase):
                         }
                     ],
                     "word": "Griechenland",
-                    "tags": ["neuter"],
+                    "tags": ["noun", "neuter"],
                 }
             ],
         )

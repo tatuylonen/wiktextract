@@ -566,7 +566,7 @@ class TestZhGloss(TestCase):
                                 },
                             ],
                             "glosses": ["一會／一会 (yīhuì) 的兒化形式。"],
-                            "tags": ["form-of", "Mandarin", "Erhua"],
+                            "tags": ["form-of", "Erhua", "Mandarin"],
                         }
                     ],
                     "word": "一會兒",
@@ -781,6 +781,33 @@ class TestZhGloss(TestCase):
                 {
                     "glosses": ["大學教師；學者"],
                     "attestations": [{"date": "自17世紀"}],
+                }
+            ],
+        )
+
+    def test_cmn_pinyin_of(self):
+        self.wxr.wtp.add_page(
+            "Template:cmn-pinyin of",
+            10,
+            '<span class="use-with-mention"><span class="Hant" lang="zh">-{<!-- -->[[門鼻兒#漢語|-{門鼻兒}-]]}-</span><span class="Zsym mention" style="font-size:100%;">／</span><span class="Hans" lang="zh">-{<!-- -->[[门鼻儿#漢語|-{门鼻儿}-]]}-</span></span>的[[漢語拼音]]讀法',
+        )
+        data = parse_page(
+            self.wxr,
+            "ménbír",
+            """==官話==
+===羅馬化===
+# {{cmn-pinyin of|門鼻兒}}""",
+        )
+        self.assertEqual(
+            data[0]["senses"],
+            [
+                {
+                    "form_of": [
+                        {"tags": ["Traditional-Chinese"], "word": "門鼻兒"},
+                        {"tags": ["Simplified-Chinese"], "word": "门鼻儿"},
+                    ],
+                    "glosses": ["門鼻兒／门鼻儿的漢語拼音讀法"],
+                    "tags": ["form-of"],
                 }
             ],
         )

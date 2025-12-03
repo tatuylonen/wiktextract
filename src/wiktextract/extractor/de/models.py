@@ -154,7 +154,6 @@ class WordEntry(GermanBaseModel):
 
     word: str = Field(description="word string")
     pos: str = Field(default="", description="Part of speech type")
-    other_pos: list[str] = []
     pos_title: str = Field(default="", description="Original POS title")
     lang_code: str = Field(
         description="Wiktionary language code", examples=["es"]

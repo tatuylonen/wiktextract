@@ -158,12 +158,11 @@ def process_pos_section(
     level_node: LevelNode,
 ) -> None:
     pos_data_list = []
-    pos_title = ""
+    pos_titles = []
     for template_node in level_node.find_content(NodeKind.TEMPLATE):
         if template_node.template_name == "Wortart":
             pos_argument = template_node.template_parameters.get(1, "").strip()
-            if pos_title == "":
-                pos_title = pos_argument
+            pos_titles.append(pos_argument)
             if pos_argument in IGNORE_POS:
                 continue
             elif pos_argument in FORM_POS:
@@ -193,16 +192,22 @@ def process_pos_section(
     if len(pos_data_list) == 0:
         return
     page_data.append(base_data.model_copy(deep=True))
-    for pos_index, pos_data in enumerate(pos_data_list):
-        pos = pos_data["pos"]
+    for pos_data in pos_data_list:
         for tag in pos_data.get("tags", []):
             if tag not in page_data[-1].tags:
                 page_data[-1].tags.append(tag)
-        if pos_index == 0:
-            page_data[-1].pos = pos
-            page_data[-1].pos_title = pos_title
-        elif pos != page_data[-1].pos and pos not in page_data[-1].other_pos:
-            page_data[-1].other_pos.append(pos)
+    if len(pos_data_list) > 1 and pos_data_list[-1]["pos"] != "unknown":
+        page_data[-1].pos = pos_data_list[-1]["pos"]
+        page_data[-1].pos_title = pos_titles[-1]
+    else:
+        page_data[-1].pos = pos_data_list[0]["pos"]
+        page_data[-1].pos_title = pos_titles[0]
+    for pos_data in pos_data_list:
+        if (
+            pos_data["pos"] not in [page_data[-1].pos, "unknown"]
+            and pos_data["pos"] not in page_data[-1].tags
+        ):
+            page_data[-1].tags.append(pos_data["pos"])
 
     for node in level_node.find_content(NodeKind.TEMPLATE | NodeKind.ITALIC):
         if (
