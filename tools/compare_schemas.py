@@ -11,7 +11,9 @@ from typing import Any, TypedDict
 
 from generate_schema import iter_schemas
 
-Attrs = list[str]
+Attr = tuple[str, str]
+"""A path attribute and a type. Ex. (sense.tags, array)"""
+Attrs = list[Attr]
 
 
 class Summary(TypedDict):
@@ -21,9 +23,29 @@ class Summary(TypedDict):
 
 def summarize_schema(schema: Any) -> Summary:
     lang = schema.get("title") or schema.get("$id") or "unknown"
-    lang = lang.split()[0]  # remove Wiktionary part
-    attributes = set()
+    lang = lang.split()[0]
+
+    attrs: dict[str, str] = {}  # path > type
     seen = set()
+
+    def detect_type(node: Any) -> str:
+        t = node.get("type")
+
+        if isinstance(t, list):
+            return "|".join(t)
+        if isinstance(t, str):
+            return t
+
+        if "properties" in node:
+            return "object"
+        if "items" in node:
+            return "array"
+
+        return "unknown"
+
+    def record(path: str, node: dict):
+        if path not in attrs:
+            attrs[path] = detect_type(node)
 
     def walk(node, prefix=""):
         if not isinstance(node, dict):
@@ -38,29 +60,32 @@ def summarize_schema(schema: Any) -> Summary:
         if "properties" in node:
             for prop, sub in node["properties"].items():
                 path = f"{prefix}.{prop}" if prefix else prop
-                attributes.add(path)
+                record(path, sub)
                 walk(sub, path)
 
         # Array items
         if node.get("type") == "array":
             items = node.get("items")
             if isinstance(items, dict):
+                # array node itself may also be a property
+                if prefix and prefix not in attrs:
+                    record(prefix, node)
                 walk(items, prefix)
 
         # Definitions
         if "$defs" in node:
             for defname, defschema in node["$defs"].items():
                 path = f"$defs.{defname}"
-                attributes.add(path)
+                record(path, defschema)
                 walk(defschema, path)
 
-        # Combinator keywords: oneOf, anyOf, allOf
+        # Combinators
         for key in ("oneOf", "anyOf", "allOf"):
             if key in node:
                 for sub in node[key]:
                     walk(sub, prefix)
 
-        # Handle internal $ref
+        # $ref
         if "$ref" in node:
             ref = node["$ref"]
             if ref.startswith("#/"):
@@ -70,7 +95,14 @@ def summarize_schema(schema: Any) -> Summary:
                 walk(target, prefix)
 
     walk(schema)
-    return {"language": lang, "attributes": sorted(attributes)}
+
+    # Convert to list of (path, type)
+    attributes: Attrs = sorted(attrs.items())
+
+    return {
+        "language": lang,
+        "attributes": attributes,
+    }
 
 
 def read_all_summaries() -> dict[str, Attrs]:
@@ -98,11 +130,12 @@ def add_summary_to_tree(global_tree: dict, lang: str, attrs: Attrs) -> None:
 
     Each node gets a _langs set that accumulates languages reaching it.
     """
-    for path in attrs:
+    for path, ty in attrs:
         node = global_tree
         for p in path.split("."):
             node = node.setdefault(p, {})
             node.setdefault("_langs", set()).add(lang)
+            node.setdefault("_type", set()).add(ty)
 
 
 def basic_css() -> str:
@@ -171,7 +204,7 @@ def html_tree(tree: dict, all_langs: list[str]) -> str:
         parts = ['<ul class="tree">']
 
         for key, child in sorted(node.items()):
-            if key == "_langs":
+            if not isinstance(child, dict):
                 continue
 
             langs = child.get("_langs", set())
@@ -184,16 +217,25 @@ def html_tree(tree: dict, all_langs: list[str]) -> str:
 
             count = len(langs)
             if count == n_langs:
-                count_class = "all"
+                count_cls = "all"
             elif count == 1:
-                count_class = "one"
+                count_cls = "one"
                 first_lang = list(langs)[0]
                 count = f"1, {first_lang}"
             else:
-                count_class = "some"
+                count_cls = "some"
+
+            is_leaf = not any(isinstance(v, dict) for v in child.values())
+            types = child.get("_type", set())
+            types_info = ""
+            if is_leaf and len(types) > 1:
+                type_list = ", ".join(sorted(types))
+                types_info = f' <span title="{escape(type_list)}">⚠️</span>'
 
             key = escape(key)
-            label = f'<span class="{count_class}">{key} ({count})</span>'
+            label = (
+                f'<span class="{count_cls}">{key} ({count}){types_info}</span>'
+            )
 
             parts.append(f'<li title="{tooltip}">{label}')
             parts.append(go(child))
