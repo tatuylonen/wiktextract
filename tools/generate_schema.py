@@ -1,19 +1,11 @@
 import importlib
 import json
-from pathlib import Path
 from importlib.resources import files
+from pathlib import Path
 
 
-def main() -> None:
-    """
-    Run this script at the project root folder to generate JSON schema files of
-    each extractor that has pydantic model `WordEntry` defined in the
-    `models.py` file.
-    """
-
+def iter_schemas():
     extractor_folder = files("wiktextract") / "extractor"
-    output_path = Path("_site")
-    output_path.mkdir(exist_ok=True)
     for extractor_folder in filter(
         lambda p: p.is_dir()
         and p.stem != "template"
@@ -31,6 +23,18 @@ def main() -> None:
             model_schema["description"] = model_schema["description"].replace(
                 "\n", " "
             )
+        yield lang_code, model_schema
+
+
+def main() -> None:
+    """
+    Run this script at the project root folder to generate JSON schema files of
+    each extractor that has pydantic model `WordEntry` defined in the
+    `models.py` file.
+    """
+    output_path = Path("_site")
+    output_path.mkdir(exist_ok=True)
+    for lang_code, model_schema in iter_schemas():
         with (output_path / f"{lang_code}.json").open(
             "w", encoding="utf-8"
         ) as f:
