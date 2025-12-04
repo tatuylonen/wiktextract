@@ -104,7 +104,7 @@ class WordEntry(PolishBaseModel):
     lang_code: str = Field(description="Wiktionary language code", min_length=1)
     lang: str = Field(description="Localized language name", min_length=1)
     pos: str = Field(description="Part of speech type", min_length=1)
-    pos_text: str = ""
+    pos_title: str = ""
     senses: list[Sense] = []
     title: str = Field(default="", description="Redirect page source title")
     redirect: str = Field(default="", description="Redirect page target title")

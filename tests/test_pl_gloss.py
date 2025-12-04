@@ -58,7 +58,7 @@ class TestPlGloss(TestCase):
                         }
                     ],
                     "pos": "noun",
-                    "pos_text": "rzeczownik",
+                    "pos_title": "rzeczownik",
                     "tags": ["masculine", "animate"],
                     "word": "dog",
                 }
@@ -95,7 +95,7 @@ class TestPlGloss(TestCase):
                         }
                     ],
                     "pos": "abbrev",
-                    "pos_text": "skrótowiec",
+                    "pos_title": "skrótowiec",
                     "tags": ["abbreviation"],
                     "word": "AYPI",
                 }
@@ -144,7 +144,7 @@ class TestPlGloss(TestCase):
                     ],
                     "tags": ["form-of"],
                     "pos": "verb",
-                    "pos_text": "czasownik",
+                    "pos_title": "czasownik",
                     "word": "dog",
                 }
             ],
@@ -218,7 +218,7 @@ class TestPlGloss(TestCase):
                         }
                     ],
                     "pos": "verb",
-                    "pos_text": "czasownik",
+                    "pos_title": "czasownik",
                     "tags": ["intransitive", "imperfective"],
                     "word": "płakać",
                 }
