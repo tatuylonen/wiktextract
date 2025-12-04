@@ -370,3 +370,26 @@ class TestZhHeadword(TestCase):
             ],
         )
         self.assertEqual(data[0]["tags"], ["-tari"])
+
+    def test_sv_adv(self):
+        self.wxr.wtp.add_page(
+            "Template:sv-adv",
+            10,
+            """<span class="headword-line"><strong class="Latn headword" lang="sv">-{rakt}-</strong></span>[[Category:瑞典語詞元|RAKT]][[Category:瑞典語副詞|RAKT]] (比較級 '''<span class="Latn form-of lang-sv comparative-form-of" lang="sv">-{<!-- -->[[raktare#瑞典語|-{raktare}-]]}-</span>'''，最高級 '''<span class="Latn form-of lang-sv superlative-form-of" lang="sv">-{<!-- -->[[raktast#瑞典語|-{raktast}-]]}-</span>''')""",
+        )
+        data = parse_page(
+            self.wxr,
+            "rakt",
+            """==瑞典語==
+===副詞===
+{{sv-adv}}
+# [[直接]]""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {"form": "raktare", "tags": ["comparative"]},
+                {"form": "raktast", "tags": ["superlative"]},
+            ],
+        )
+        self.assertEqual(data[0]["categories"], ["瑞典語詞元", "瑞典語副詞"])
