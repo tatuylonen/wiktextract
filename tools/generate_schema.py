@@ -16,7 +16,9 @@ def iter_schemas():
         model_module = importlib.import_module(
             f"wiktextract.extractor.{lang_code}.models"
         )
-        model_schema = model_module.WordEntry.model_json_schema()
+        model_schema = model_module.WordEntry.model_json_schema(
+            mode="serialization"
+        )
         model_schema["$id"] = f"https://kaikki.org/{lang_code}.json"
         model_schema["$schema"] = "https://json-schema.org/draft/2020-12/schema"
         if "description" in model_schema:
@@ -26,7 +28,7 @@ def iter_schemas():
         yield lang_code, model_schema
 
 
-def main() -> None:
+def create_json_schema_files():
     """
     Run this script at the project root folder to generate JSON schema files of
     each extractor that has pydantic model `WordEntry` defined in the
@@ -45,7 +47,3 @@ def main() -> None:
                 ensure_ascii=False,
                 sort_keys=True,
             )
-
-
-if __name__ == "__main__":
-    main()
