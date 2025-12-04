@@ -9,8 +9,6 @@ import json
 from pathlib import Path
 from typing import Any, TypedDict
 
-from generate_schema import iter_schemas
-
 Attr = tuple[str, str]
 """A path attribute and a type. Ex. (sense.tags, array)"""
 Attrs = list[Attr]
@@ -105,22 +103,14 @@ def summarize_schema(schema: Any) -> Summary:
     }
 
 
-def read_all_summaries() -> dict[str, Attrs]:
+def read_all_summaries(schema_paths: list[Path]) -> dict[str, Attrs]:
     summaries = {}
 
-    for _, model_schema in iter_schemas():
-        # Seems dumb, but we need this to replicate reading the schemas from
-        # the _site folder, due to key sorting...
-        schema = json.loads(
-            json.dumps(
-                model_schema,
-                ensure_ascii=False,
-                sort_keys=True,
-            )
-        )
-        summary = summarize_schema(schema)
-        lang = summary["language"]
-        summaries[lang] = summary["attributes"]
+    for path in schema_paths:
+        with path.open() as f:
+            summary = summarize_schema(json.load(f))
+            lang = summary["language"]
+            summaries[lang] = summary["attributes"]
 
     return summaries
 
@@ -145,9 +135,7 @@ def basic_css() -> str:
 .one  { color: red; }
 .some { color: black; }
 
-/* Yoinked @
-https://gist.githubusercontent.com/dylancwood/7368914/raw/48a6e93ab59a1017ee6a8512a2bf5be343aa307c/tree.css
-*/
+/* Yoinked @ https://gist.github.com/dylancwood/7368914 */
 
 ul.tree,
 ul.tree ul {
@@ -247,8 +235,8 @@ def html_tree(tree: dict, all_langs: list[str]) -> str:
     return go(tree)
 
 
-def main() -> None:
-    summaries = read_all_summaries()
+def create_compare_schemas_html(schema_paths: list[Path]):
+    summaries = read_all_summaries(schema_paths)
 
     langs = sorted(summaries.keys())
 
@@ -256,15 +244,19 @@ def main() -> None:
     for lang, attrs in summaries.items():
         add_summary_to_tree(global_tree, lang, attrs)
 
-    output_path = Path("_summary")
+    output_path = Path("_site")
     output_path.mkdir(exist_ok=True)
-    summary_path = output_path / "summary.html"
+    summary_path = output_path / "compare_schemas.html"
     with summary_path.open("w") as f:
-        page = basic_css() + html_tree(global_tree, langs)
-        f.write(page)
-
-    print(f"Wrote summary @ {summary_path}")
-
-
-if __name__ == "__main__":
-    main()
+        f.write(f"""<!DOCTYPE HTML>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width" />
+        <title>Compare wiktextract schemas</title>
+    </head>
+    <body>
+        {html_tree(global_tree, langs)}
+    </body>
+    {basic_css()}
+</html>""")

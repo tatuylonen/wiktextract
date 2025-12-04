@@ -12,7 +12,6 @@ coverage_report:
 	python -m coverage combine
 	python -m coverage html
 github_pages:
-	python tools/generate_schema.py
 	python tools/github_pages.py $(REPO) $(SHA)
 clean:
 	python -m coverage erase
