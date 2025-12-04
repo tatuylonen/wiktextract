@@ -42,6 +42,7 @@ NUMBER_TAGS: dict[str, str | list[str]] = {
     "定指單數": ["definite", "singular"],
     "定指複數": ["definite", "plural"],
     "複": "plural",
+    "單": "singular",
 }
 
 # https://en.wikipedia.org/wiki/Count_noun

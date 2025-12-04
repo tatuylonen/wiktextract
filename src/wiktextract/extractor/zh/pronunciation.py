@@ -85,7 +85,7 @@ def process_pron_template(
         new_sounds, new_cats = extract_ja_pron_template(wxr, template_node)
     elif template_name == "th-pron":
         new_sounds, new_cats = extract_th_pron_template(wxr, template_node)
-    elif template_name == "pl-pr":
+    elif template_name.endswith("-pr"):
         new_sounds, new_cats = extract_pl_pr_template(
             wxr, base_data, template_node
         )

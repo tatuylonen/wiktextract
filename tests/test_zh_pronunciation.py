@@ -121,12 +121,12 @@ class TestPronunciation(TestCase):
         self.wxr.wtp.add_page(
             "Template:zh-verb",
             10,
-            "充耳[[Category:漢語詞元|儿04耳00]][[Category:漢語動詞|儿04耳00]]",
+            '<span class="headword-line"><strong class="Hani headword" lang="zh">-{充耳}-</strong></span>[[Category:漢語詞元|儿04耳00]][[Category:漢語動詞|儿04耳00]]',
         )
         self.wxr.wtp.add_page(
             "Template:head",
             10,
-            "充耳[[Category:漢語詞元|儿04耳00]][[Category:漢語名詞|儿04耳00]]",
+            '<span class="headword-line"><strong class="Hani headword" lang="zh">-{充耳}-</strong></span>[[Category:漢語詞元|儿04耳00]][[Category:漢語名詞|儿04耳00]]',
         )
         self.assertEqual(
             parse_page(
