@@ -43,46 +43,19 @@ class Translation(GermanBaseModel):
 
 
 class Example(GermanBaseModel):
-    text: str = Field(default="", description="Example usage sentence")
-    italic_text_offsets: list[tuple[int, int]] = []
+    text: str = Field(description="Example usage sentence")
+    bold_text_offsets: list[tuple[int, int]] = Field(
+        default=[], description="Italic words"
+    )
     translation: str = Field(
         default="", description="German translation of the example sentence"
     )
-    italic_translation_offsets: list[tuple[int, int]] = []
+    bold_translation_offsets: list[tuple[int, int]] = Field(
+        default=[], description="Italic words"
+    )
     raw_tags: list[str] = []
     tags: list[str] = []
     ref: str = Field(default="", description="Raw reference string")
-    url: str = Field(
-        default="", description="A web link. Not necessarily well-formated."
-    )
-    author: str = Field(default="", description="Author's name")
-    title: str = Field(default="", description="Title of the reference")
-    title_complement: str = Field(
-        default="", description="Complement to the title"
-    )
-    pages: str = Field(default="", description="Page numbers")
-    year: str = Field(default="", description="Year of publication")
-    publisher: str = Field(default="", description="Published by")
-    editor: str = Field(default="", description="Editor")
-    translator: str = Field(default="", description="Translator")
-    collection: str = Field(
-        default="",
-        description="Name of collection that reference was published in",
-    )
-    volume: str = Field(default="", description="Volume number")
-    comment: str = Field(default="", description="Comment on the reference")
-    day: str = Field(default="", description="Day of publication")
-    month: str = Field(default="", description="Month of publication")
-    accessdate: str = Field(
-        default="", description="Date of access of online reference"
-    )
-    date: str = Field(default="", description="Date of publication")
-    number: str = Field(default="", description="Issue number")
-    # chapter: Optional[str] = Field(default=None, description="Chapter name")
-    place: str = Field(default="", description="Place of publication")
-    # editor: Optional[str] = Field(default=None, description="Editor")
-    edition: str = Field(default="", description="Edition number")
-    isbn: str = Field(default="", description="ISBN number")
 
 
 class AltForm(GermanBaseModel):

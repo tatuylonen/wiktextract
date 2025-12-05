@@ -3,8 +3,8 @@ import unittest
 from wikitextprocessor import Wtp
 
 from wiktextract.config import WiktionaryConfig
-from wiktextract.extractor.de.example import extract_examples, extract_reference
-from wiktextract.extractor.de.models import Example, Sense, WordEntry
+from wiktextract.extractor.de.example import extract_examples
+from wiktextract.extractor.de.models import Sense, WordEntry
 from wiktextract.wxr_context import WiktextractContext
 
 
@@ -85,52 +85,6 @@ class TestDEExample(unittest.TestCase):
             ],
         )
 
-    def test_de_extract_reference_from_literatur_template(self):
-        # https://de.wiktionary.org/wiki/Beispiel
-        self.wxr.wtp.start_page("Beispiel")
-        self.wxr.wtp.add_page("Vorlage:Literatur", 10, "Expanded template")
-        root = self.wxr.wtp.parse(
-            "<ref>{{Literatur|Autor=Steffen Möller|Titel=Viva Warszawa|TitelErg=Polen für Fortgeschrittene|Verlag=Piper|Ort=München/Berlin|Jahr=2015|}}, Seite 273. ISBN 978-3-89029-459-9.</ref>"
-        )
-
-        example_data = Example()
-
-        extract_reference(self.wxr, example_data, root.children[0])
-
-        self.assertEqual(
-            example_data.model_dump(exclude_defaults=True),
-            {
-                "ref": "Expanded template, Seite 273. ISBN 978-3-89029-459-9.",
-                "title": "Viva Warszawa",
-                "author": "Steffen Möller",
-                "title_complement": "Polen für Fortgeschrittene",
-                "publisher": "Piper",
-                "place": "München/Berlin",
-                "year": "2015",
-            },
-        )
-
-    def test_de_extract_reference_from_templates_without_named_args(self):
-        # https://de.wiktionary.org/wiki/Beispiel
-        # Reference templates not following the Literatur template pattern are
-        # currently not extracted field by field (e.g. Vorlage:Ref-OWID)
-        self.wxr.wtp.start_page("Beispiel")
-        self.wxr.wtp.add_page("Vorlage:Ref-OWID", 10, "Expanded template")
-        root = self.wxr.wtp.parse(
-            "<ref>{{Ref-OWID|Sprichwörter|401781|Schlechte Beispiele verderben gute Sitten.}}</ref>"
-        )
-
-        example_data = Example()
-
-        extract_reference(self.wxr, example_data, root.children[0])
-
-        self.assertEqual(
-            example_data.model_dump(exclude_defaults=True),
-            {
-                "ref": "Expanded template",
-            },
-        )
-
     def test_nested_example_list(self):
         self.wxr.wtp.start_page("auf")
         root = self.wxr.wtp.parse(""":[1]
@@ -156,7 +110,7 @@ class TestDEExample(unittest.TestCase):
                     "examples": [
                         {
                             "text": "Er stand auf dem Dach.",
-                            "italic_text_offsets": [(9, 12)],
+                            "bold_text_offsets": [(9, 12)],
                         }
                     ],
                     "glosses": ["gloss 1a"],
@@ -166,7 +120,7 @@ class TestDEExample(unittest.TestCase):
                     "examples": [
                         {
                             "text": "Er stieg aufs Dach.",
-                            "italic_text_offsets": [(9, 13)],
+                            "bold_text_offsets": [(9, 13)],
                         }
                     ],
                     "glosses": ["gloss 1b"],
@@ -198,7 +152,7 @@ class TestDEExample(unittest.TestCase):
                     "examples": [
                         {
                             "text": "Un bot son quinze litres:",
-                            "italic_text_offsets": [(3, 6)],
+                            "bold_text_offsets": [(3, 6)],
                             "translation": "Ein Bot (Weinschlauch) hat ca. fünfzehn Liter.",
                         }
                     ],
@@ -272,7 +226,7 @@ class TestDEExample(unittest.TestCase):
                         {
                             "tags": ["Germany"],
                             "text": "„Den ganzen ‚Feber‘ hörte man lapidar",
-                            "italic_text_offsets": [(12, 19)],
+                            "bold_text_offsets": [(12, 19)],
                         }
                     ],
                     "glosses": ["gloss 1"],
