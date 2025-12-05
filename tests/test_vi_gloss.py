@@ -181,3 +181,23 @@ class TestViGloss(TestCase):
                 {"form": "砂果", "tags": ["hanja"]},
             ],
         )
+
+    def test_etymology_lists(self):
+        data = parse_page(
+            self.wxr,
+            "etymology",
+            """==Tiếng Anh==
+===Từ nguyên===
+*Đánh vần lại của [[tiếng Anh]] [[Trung cổ]] ''[[ethimologie]]''
+*''[[-ology]]'', từ ''[[-logy]]'', từ tiếng Latinh ''[[-logia]]''
+===Danh từ===
+# [[từ nguyên|Từ nguyên]].
+# [[từ nguyên học|Từ nguyên học]].""",
+        )
+        self.assertEqual(
+            data[0]["etymology_texts"],
+            [
+                "Đánh vần lại của tiếng Anh Trung cổ ethimologie",
+                "-ology, từ -logy, từ tiếng Latinh -logia",
+            ],
+        )

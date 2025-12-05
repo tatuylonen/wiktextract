@@ -154,7 +154,7 @@ class WordEntry(VietnameseBaseModel):
     forms: list[Form] = []
     translations: list[Translation] = []
     sounds: list[Sound] = []
-    etymology_text: str = ""
+    etymology_texts: list[str] = []
     hyphenations: list[Hyphenation] = []
     notes: list[str] = []
     anagrams: list[Linkage] = []
