@@ -24,7 +24,6 @@ def summarize_schema(schema: Any) -> Summary:
     lang = lang.split()[0]
 
     attrs: dict[str, str] = {}  # path > type
-    seen = set()
 
     def detect_type(node: Any) -> str:
         t = node.get("type")
@@ -49,17 +48,13 @@ def summarize_schema(schema: Any) -> Summary:
         if not isinstance(node, dict):
             return
 
-        node_id = id(node)
-        if node_id in seen:
-            return
-        seen.add(node_id)
-
         # Normal properties
         if "properties" in node:
             for prop, sub in node["properties"].items():
                 path = f"{prefix}.{prop}" if prefix else prop
                 record(path, sub)
-                walk(sub, path)
+                if prop not in prefix.split("."):
+                    walk(sub, path)
 
         # Array items
         if node.get("type") == "array":
@@ -69,13 +64,6 @@ def summarize_schema(schema: Any) -> Summary:
                 if prefix and prefix not in attrs:
                     record(prefix, node)
                 walk(items, prefix)
-
-        # Definitions
-        if "$defs" in node:
-            for defname, defschema in node["$defs"].items():
-                path = f"$defs.{defname}"
-                record(path, defschema)
-                walk(defschema, path)
 
         # Combinators
         for key in ("oneOf", "anyOf", "allOf"):
@@ -201,7 +189,13 @@ def html_tree(tree: dict, all_langs: list[str]) -> str:
             present = langs
             missing_in = ", ".join(sorted(missing))
             present_in = ", ".join(sorted(present))
-            tooltip = f"Present in: {present_in}\nMissing in: {missing_in}"
+            tooltip = ""
+            if len(present_in) > 0:
+                tooltip += f"Present in: {present_in}"
+            if len(missing_in) > 0:
+                if len(present_in) > 0:
+                    tooltip += "\n"
+                tooltip += f"Missing in: {missing_in}"
 
             count = len(langs)
             if count == n_langs:

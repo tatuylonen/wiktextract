@@ -8,7 +8,7 @@ def iter_schemas():
     extractor_folder = files("wiktextract") / "extractor"
     for extractor_folder in filter(
         lambda p: p.is_dir()
-        and p.stem != "template"
+        and p.stem not in ["template", "sv"]
         and (p / "models.py").is_file(),
         (files("wiktextract") / "extractor").iterdir(),
     ):
