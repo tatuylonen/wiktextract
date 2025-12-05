@@ -39,7 +39,7 @@ class TestESEtymology(unittest.TestCase):
 ;1: Que recuerda""",
         )
         self.assertEqual(
-            page_data[0]["etymology_text"], "Del griego antiguo ἀνθρωποειδής"
+            page_data[0]["etymology_texts"], ["Del griego antiguo ἀνθρωποειδής"]
         )
         self.assertEqual(
             page_data[0]["senses"],
@@ -74,11 +74,13 @@ class TestESEtymology(unittest.TestCase):
             ],
         )
         self.assertEqual(
-            page_data[0]["etymology_text"],
-            "Del setsuana pula, del sotho norteño pula y del sesoto pula ('lluvia').",
+            page_data[0]["etymology_texts"],
+            [
+                "Del setsuana pula, del sotho norteño pula y del sesoto pula ('lluvia')."
+            ],
         )
         self.assertTrue("categories" not in page_data[1])
-        self.assertTrue("etymology_text" not in page_data[1])
+        self.assertTrue("etymology_texts" not in page_data[1])
 
     def test_missing_etymology_data(self):
         self.wxr.wtp.add_page(
@@ -99,7 +101,7 @@ class TestESEtymology(unittest.TestCase):
             page_data[0]["categories"],
             ["DE:Palabras de etimología sin precisar"],
         )
-        self.assertTrue("etymology_text" not in page_data[0])
+        self.assertTrue("etymology_texts" not in page_data[0])
 
     def test_attestation(self):
         self.wxr.wtp.add_page(
@@ -120,10 +122,43 @@ Desplazó a la palabra inglesa nativa wenden.
         )
         self.assertEqual(data[0]["attestations"], [{"date": "XIII"}])
         self.assertEqual(
-            data[0]["etymology_text"],
-            "Del inglés medio changen. Atestiguado desde el siglo XIII.\nDesplazó a la palabra inglesa nativa wenden.",
+            data[0]["etymology_texts"],
+            [
+                "Del inglés medio changen. Atestiguado desde el siglo XIII.\nDesplazó a la palabra inglesa nativa wenden."
+            ],
         )
         self.assertEqual(
             data[0]["categories"],
             ["EN:Palabras documentadas desde el siglo XIII"],
+        )
+
+    def test_etymology_lists(self):
+        self.wxr.wtp.add_page(
+            "Plantilla:etimología",
+            10,
+            "Del latín [[{{{2}}}#Latín|''{{{2}}}'']] ('{{{3}}}')[[Categoría:ES:Palabras provenientes del latín|DEOSCOPIDESEMPERIDES]]",
+        )
+        data = parse_page(
+            self.wxr,
+            "Deoscopidesempérides",
+            """== {{lengua|es}} ==
+=== Etimología ===
+* {{etimología|la|deus|dios}}
+
+* {{etimología|la|scopus|escopo}}
+
+Conjunto: Dios, objeto de observación, abundar, siempre, de un día.
+=== {{sustantivo propio|es}} ===
+;1: {{antropónimo masculino}}.""",
+        )
+        self.assertEqual(
+            data[0]["etymology_texts"],
+            [
+                "Del latín deus ('dios')",
+                "Del latín scopus ('escopo')",
+                "Conjunto: Dios, objeto de observación, abundar, siempre, de un día.",
+            ],
+        )
+        self.assertEqual(
+            data[0]["categories"], ["ES:Palabras provenientes del latín"]
         )

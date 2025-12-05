@@ -139,8 +139,8 @@ class WordEntry(BaseModelWrap):
     )
     sounds: list[Sound] = []
     translations: list[Translation] = []
-    etymology_text: str = Field(
-        default="", description="Etymology section as cleaned text."
+    etymology_texts: list[str] = Field(
+        default=[], description="Etymology section as cleaned text."
     )
     antonyms: list[Linkage] = []
     compounds: list[Linkage] = []
