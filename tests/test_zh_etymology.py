@@ -39,7 +39,9 @@ class TestNote(TestCase):
         extract_etymology_section(
             self.wxr, [base_data], base_data, root.children[0]
         )
-        self.assertEqual(base_data.etymology_text, "源自宋．蘇軾《春夜》詩：")
+        self.assertEqual(
+            base_data.etymology_texts, ["源自宋．蘇軾《春夜》詩："]
+        )
         self.assertEqual(
             [
                 e.model_dump(exclude_defaults=True)
@@ -91,7 +93,7 @@ class TestNote(TestCase):
         extract_etymology_section(
             self.wxr, [base_data], base_data, root.children[0]
         )
-        self.assertEqual(base_data.etymology_text, "出自唐·韓愈《進學解》：")
+        self.assertEqual(base_data.etymology_texts, ["出自唐·韓愈《進學解》："])
         self.assertEqual(
             [
                 e.model_dump(exclude_defaults=True)
@@ -159,11 +161,11 @@ class TestNote(TestCase):
 # {{zh-div|地方|地區}} 日本中國地區，本州西部地區""",
         )
         self.assertEqual(
-            page_data[0]["etymology_text"],
-            "最早出現於西周青銅器何尊的銘文。參見中國的稱號。",
+            page_data[0]["etymology_texts"],
+            ["最早出現於西周青銅器何尊的銘文。參見中國的稱號。"],
         )
         self.assertEqual(
-            page_data[0]["etymology_text"], page_data[1]["etymology_text"]
+            page_data[0]["etymology_texts"], page_data[1]["etymology_texts"]
         )
         self.assertEqual(page_data[0]["categories"], ["有引文的文言文詞"])
         self.assertEqual(page_data[0]["categories"], page_data[1]["categories"])
@@ -172,6 +174,28 @@ class TestNote(TestCase):
             page_data[0]["etymology_examples"],
             page_data[1]["etymology_examples"],
         )
-        self.assertEqual(page_data[2]["etymology_text"], "形譯詞自日語")
+        self.assertEqual(page_data[2]["etymology_texts"], ["形譯詞自日語"])
         self.assertEqual(page_data[2]["categories"], ["源自日語的漢語借詞"])
         self.assertTrue("etymology_examples" not in page_data[2])
+
+    def test_etymology_lists(self):
+        data = parse_page(
+            self.wxr,
+            "Bosch",
+            """==荷蘭語==
+===詞源===
+* (村莊名)： 最早見於1307年，作 silua。派生自bos (「樹林，森林」)。
+* (舊島嶼名)： 源自bosch，bos (「樹林，森林」)的棄用拼法。
+
+姓氏派生自bos的其中一個義項，或其他地名。
+===專有名詞===
+# {{surname|nl}}""",
+        )
+        self.assertEqual(
+            data[0]["etymology_texts"],
+            [
+                "(村莊名)： 最早見於1307年，作 silua。派生自bos (「樹林，森林」)。",
+                "(舊島嶼名)： 源自bosch，bos (「樹林，森林」)的棄用拼法。",
+                "姓氏派生自bos的其中一個義項，或其他地名。",
+            ],
+        )
