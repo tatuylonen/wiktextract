@@ -9,32 +9,6 @@ from .models import Example, Sense, WordEntry
 from .tags import translate_raw_tags
 from .utils import extract_sense_index
 
-LITERATUR_TEMPLATE_ARGS = {
-    "autor": "author",
-    "a": "author",
-    "titel": "title",
-    "titelerg": "title_complement",
-    "auflage": "edition",
-    "verlag": "publisher",
-    "ort": "place",
-    "jahr": "year",
-    "seiten": "pages",
-    "isbn": "isbn",
-    "übersetzer": "translator",
-    "herausgeber": "editor",
-    "sammelwerk": "collection",
-    "werk": "collection",
-    "band": "volume",
-    "kommentar": "comment",
-    "online": "url",
-    "tag": "day",
-    "monat": "month",
-    "zugriff": "accessdate",
-    "nummer": "number",
-    "datum": "date",
-    "hrsg": "editor",
-}
-
 
 def extract_examples(
     wxr: WiktextractContext,
@@ -51,9 +25,9 @@ def extract_examples(
             if raw_tag != "":
                 raw_tags.append(raw_tag)
         else:
-            example_data = Example(raw_tags=raw_tags)
+            example_data = Example(text="", raw_tags=raw_tags)
             for ref_tag in list_item_node.find_html("ref"):
-                extract_reference(wxr, example_data, ref_tag)
+                example_data.ref = clean_node(wxr, None, ref_tag.children)
             example_text_node = wxr.wtp.parse(
                 wxr.wtp.node_to_wikitext(
                     list(
@@ -73,7 +47,7 @@ def extract_examples(
                     example_text_node,
                     example_text,
                     example_data,
-                    "italic_text_offsets",
+                    "bold_text_offsets",
                     extra_node_kind=NodeKind.ITALIC,
                 )
                 if len(sense_idx) > 0:
@@ -96,7 +70,7 @@ def extract_examples(
                         example_text_node,
                         example_text,
                         example_data,
-                        "italic_translation_offsets",
+                        "bold_translation_offsets",
                         extra_node_kind=NodeKind.ITALIC,
                     )
                 else:
@@ -117,26 +91,6 @@ def extract_reference(
     wxr: WiktextractContext, example_data: Example, ref_node: WikiNode
 ):
     example_data.ref = clean_node(wxr, None, ref_node.children)
-    for template_node in ref_node.find_child(NodeKind.TEMPLATE):
-        if template_node.template_name == "Literatur":
-            # https://de.wiktionary.org/wiki/Vorlage:Literatur
-            for key, value in template_node.template_parameters.items():
-                if not isinstance(key, str):
-                    continue
-                if key.lower() in LITERATUR_TEMPLATE_ARGS:
-                    field = LITERATUR_TEMPLATE_ARGS[key.lower()]
-                    if hasattr(example_data, field):
-                        setattr(
-                            example_data, field, clean_node(wxr, None, value)
-                        )
-                elif isinstance(key, str):
-                    wxr.wtp.debug(
-                        f"Unexpected key in Literatur template: {key}",
-                        sortid="extractor/de/examples/extract_examples/77",
-                    )
-
-        # XXX: Treat other templates as well.
-        # E.g. https://de.wiktionary.org/wiki/Vorlage:Ref-OWID
 
 
 def match_sense_index(sense_idx: str, sense: Sense) -> bool:
