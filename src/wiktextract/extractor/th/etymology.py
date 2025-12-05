@@ -1,4 +1,10 @@
-from wikitextprocessor import HTMLNode, LevelNode, NodeKind, TemplateNode
+from wikitextprocessor import (
+    HTMLNode,
+    LevelNode,
+    NodeKind,
+    TemplateNode,
+    WikiNode,
+)
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -8,7 +14,7 @@ from .tags import translate_raw_tags
 
 def extract_etymology_section(
     wxr: WiktextractContext, base_data: WordEntry, level_node: LevelNode
-) -> None:
+):
     e_nodes = []
     for node in level_node.children:
         if isinstance(node, TemplateNode) and (
@@ -16,6 +22,11 @@ def extract_etymology_section(
             or node.template_name == "ja-kt"
         ):
             extract_ja_kanjitab_template(wxr, node, base_data)
+        elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
+            for list_item in node.find_child(NodeKind.LIST_ITEM):
+                e_text = clean_node(wxr, base_data, list_item.children)
+                if e_text != "":
+                    base_data.etymology_texts.append(e_text)
         elif not (
             isinstance(node, LevelNode)
             or (
@@ -25,9 +36,10 @@ def extract_etymology_section(
         ):
             e_nodes.append(node)
 
-    e_str = clean_node(wxr, base_data, e_nodes)
-    if e_str != "":
-        base_data.etymology_text = e_str
+    if len(e_nodes) > 0:
+        e_str = clean_node(wxr, base_data, e_nodes)
+        if e_str != "":
+            base_data.etymology_texts.append(e_str)
 
 
 def extract_ja_kanjitab_template(

@@ -136,7 +136,7 @@ class WordEntry(ThaiBaseModel):
     categories: list[str] = []
     tags: list[str] = []
     raw_tags: list[str] = []
-    etymology_text: str = ""
+    etymology_texts: list[str] = []
     classifiers: list[Classifier] = []
     forms: list[Form] = []
     translations: list[Translation] = []
