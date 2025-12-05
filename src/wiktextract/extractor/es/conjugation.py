@@ -22,7 +22,7 @@ def extract_conjugation_section(
     for data in page_data:
         if (
             data.lang_code == page_data[-1].lang_code
-            and data.etymology_text == page_data[-1].etymology_text
+            and data.etymology_texts == page_data[-1].etymology_texts
             and data.pos == "verb"  # should be fixed on Wiktionary
         ):
             data.forms.extend(forms)
