@@ -59,7 +59,7 @@ class Sound(BaseModelWrap):
 
 
 class Example(BaseModelWrap):
-    text: str = Field(default="", description="Example usage sentence")
+    text: str = Field(description="Example usage sentence")
     bold_text_offsets: list[tuple[int, int]] = []
     translation: str = Field(
         default="", description="Russian translation of the example sentence"
@@ -68,21 +68,6 @@ class Example(BaseModelWrap):
     ref: str = Field(
         default="",
         description="Example reference, combine data like author and title",
-    )
-    author: str = Field(default="", description="Author's name")
-    title: str = Field(default="", description="Title of the reference")
-    date: str = Field(default="", description="Original date")
-    date_published: str = Field(default="", description="Date of publication")
-    collection: str = Field(
-        default="",
-        description="Name of the collection the example was taken from",
-    )
-    editor: str = Field(default="", description="Editor")
-    translator: str = Field(default="", description="Translator")
-    source: str = Field(
-        default="",
-        description="Source of reference, corresponds to template "
-        "parameter 'источник'",
     )
 
 
