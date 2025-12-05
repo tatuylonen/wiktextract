@@ -58,8 +58,8 @@ class TestElInflection(TestCase):
         received = self.xinfl("filler", "verb", raw.strip())
         self.assertEqual(received, expected)
 
-    def mktest_form_no_raw_tags(self, raw, expected) -> None:
-        received = self.xinfl("filler", "verb", raw.strip())
+    def mktest_form_no_raw_tags(self, raw, expected, word="filler") -> None:
+        received = self.xinfl(word, "verb", raw.strip())
 
         def normalize_forms(lst) -> None:
             for form in lst:
@@ -558,6 +558,7 @@ class TestElInflection(TestCase):
 
     def test_el_suffix_inflection1(self) -> None:
         # https://el.wiktionary.org/wiki/-ωνιά
+        word = "-ωνιά"
         raw = """
 {| style="clear%3Aright%3B+float%3Aright%3B+margin-left%3A0.5em%3B+margin-bottom%3A0.5em%3Bbackground%3A%23ffffff%3B+color%3A%23000000%3B+border%3A1px+solid%23a1bdea%3B+text-align%3Aright%3B" rules="none" border="1" cellpadding="3" cellspacing="0"
 |-
@@ -605,10 +606,11 @@ class TestElInflection(TestCase):
             {"form": "-ωνιά", "tags": ["singular", "vocative"]},
             {"form": "-ωνιές", "tags": ["vocative", "plural"]},
         ]
-        self.mktest_form_no_raw_tags(raw, expected)
+        self.mktest_form_no_raw_tags(raw, expected, word)
 
     def test_el_suffix_inflection2(self) -> None:
         # https://el.wiktionary.org/wiki/-γράφος
+        word = "-γράφος"
         raw = """{|
 |-
 ! style="background:#a1bdea; border-right:1px solid #c1d3f1; text-align:center; font-size:90%;" align="center"| &darr;&nbsp;''πτώσεις''
@@ -684,7 +686,7 @@ class TestElInflection(TestCase):
                 "raw_tags": ["κλητική", "πληθυντικός"],
             },
         ]
-        self.mktest_form_no_raw_tags(raw, expected)
+        self.mktest_form_no_raw_tags(raw, expected, word)
 
     def test_noun_inflection_standard(self) -> None:
         raw = """

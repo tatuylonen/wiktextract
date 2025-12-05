@@ -105,7 +105,7 @@ def process_inflection_section(
     snode: WikiNode,
     *,
     source: FormSource = "",
-    top_template_name: str | None = None
+    top_template_name: str | None = None,
 ) -> None:
     table_nodes: list[tuple[str | None, WikiNode]] = []
     # template_depth is used as a nonlocal variable in bold_node_handler
@@ -546,8 +546,9 @@ def postprocess_table_forms(forms: list[Form], word: str) -> list[Form]:
             separated_forms.append(form)
             continue
 
-        # Ignore suffix/prefixes (-ισμός)
-        if form.form.startswith(sep) or form.form.endswith(sep):
+        # Ignore separator if the original word contained it
+        # Ex. "-ισμός", "η-τάξη" etc.
+        if sep in word:
             separated_forms.append(form)
             continue
 
