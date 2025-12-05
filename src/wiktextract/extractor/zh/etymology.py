@@ -1,6 +1,6 @@
-from wikitextprocessor.parser import (
-    LEVEL_KIND_FLAGS,
+from wikitextprocessor import (
     HTMLNode,
+    LevelNode,
     NodeKind,
     TemplateNode,
     WikiNode,
@@ -17,55 +17,44 @@ def extract_etymology_section(
     page_data: list[WordEntry],
     base_data: WordEntry,
     level_node: WikiNode,
-) -> None:
+):
     from .example import extract_template_zh_x
 
-    etymology_nodes = []
-    level_node_index = len(level_node.children)
-    for next_level_index, next_level_node in level_node.find_child(
-        LEVEL_KIND_FLAGS, True
-    ):
-        level_node_index = next_level_index
-        break
-    for etymology_node in level_node.children[:level_node_index]:
-        if isinstance(
-            etymology_node, TemplateNode
-        ) and etymology_node.template_name in ["zh-x", "zh-q"]:
+    e_nodes = []
+    for node in level_node.children:
+        if isinstance(node, TemplateNode) and node.template_name in [
+            "zh-x",
+            "zh-q",
+        ]:
             for example_data in extract_template_zh_x(
-                wxr, etymology_node, Example()
+                wxr, node, Example(text="")
             ):
                 base_data.etymology_examples.append(example_data)
-            clean_node(wxr, base_data, etymology_node)
-        elif isinstance(
-            etymology_node, TemplateNode
-        ) and etymology_node.template_name.lower() in [
+            clean_node(wxr, base_data, node)
+        elif isinstance(node, TemplateNode) and node.template_name.lower() in [
             "rfe",  # missing etymology
             "zh-forms",
             "zh-wp",
             "wp",
             "wikipedia",
         ]:
-            pass
-        elif (
-            isinstance(etymology_node, WikiNode)
-            and etymology_node.kind == NodeKind.LIST
-        ):
+            continue
+        elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
             has_zh_x = False
-            for template_node in etymology_node.find_child_recursively(
-                NodeKind.TEMPLATE
-            ):
+            for template_node in node.find_child_recursively(NodeKind.TEMPLATE):
                 if template_node.template_name in ["zh-x", "zh-q"]:
                     has_zh_x = True
                     for example_data in extract_template_zh_x(
-                        wxr, template_node, Example()
+                        wxr, template_node, Example(text="")
                     ):
                         base_data.etymology_examples.append(example_data)
                     clean_node(wxr, base_data, template_node)
             if not has_zh_x:
-                etymology_nodes.append(etymology_node)
-        elif isinstance(
-            etymology_node, TemplateNode
-        ) and etymology_node.template_name in [
+                for list_item in node.find_child(NodeKind.LIST_ITEM):
+                    e_text = clean_node(wxr, None, list_item.children)
+                    if len(e_text) > 0:
+                        base_data.etymology_texts.append(e_text)
+        elif isinstance(node, TemplateNode) and node.template_name in [
             "ja-see",
             "ja-see-kango",
             "zh-see",
@@ -73,18 +62,21 @@ def extract_etymology_section(
             from .page import process_soft_redirect_template
 
             page_data.append(base_data.model_copy(deep=True))
-            process_soft_redirect_template(wxr, etymology_node, page_data[-1])
-        elif isinstance(etymology_node, TemplateNode) and (
-            etymology_node.template_name.endswith("-kanjitab")
-            or etymology_node.template_name == "ja-kt"
+            process_soft_redirect_template(wxr, node, page_data[-1])
+        elif isinstance(node, TemplateNode) and (
+            node.template_name.endswith("-kanjitab")
+            or node.template_name == "ja-kt"
         ):
-            extract_ja_kanjitab_template(wxr, etymology_node, base_data)
+            extract_ja_kanjitab_template(wxr, node, base_data)
+        elif isinstance(node, LevelNode):
+            break
         else:
-            etymology_nodes.append(etymology_node)
+            e_nodes.append(node)
 
-    etymology_text = clean_node(wxr, base_data, etymology_nodes)
-    if len(etymology_text) > 0:
-        base_data.etymology_text = etymology_text
+    if len(e_nodes) > 0:
+        etymology_text = clean_node(wxr, base_data, e_nodes)
+        if len(etymology_text) > 0:
+            base_data.etymology_texts.append(etymology_text)
 
 
 def extract_ja_kanjitab_template(

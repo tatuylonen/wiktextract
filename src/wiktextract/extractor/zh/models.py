@@ -13,7 +13,6 @@ class ChineseBaseModel(BaseModel):
 
 class Example(ChineseBaseModel):
     text: str = Field(
-        default="",
         description="Example usage sentences, some might have have both "
         "Simplified and Traditional Chinese forms",
     )
@@ -165,7 +164,7 @@ class WordEntry(ChineseBaseModel):
     pos: str = Field(description="Part of speech type")
     pos_title: str = ""
     pos_level: NodeKind = Field(default=NodeKind.ROOT, exclude=True)
-    etymology_text: str = ""
+    etymology_texts: list[str] = []
     etymology_examples: list[Example] = []
     senses: list[Sense] = Field(default=[], description="Sense list")
     forms: list[Form] = Field(default=[], description="Inflection forms list")

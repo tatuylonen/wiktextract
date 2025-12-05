@@ -32,7 +32,7 @@ def extract_example_list_item(
     word_entry: WordEntry,
     parent_example: Example | None = None,
 ) -> None:
-    example_data = parent_example or Example()
+    example_data = parent_example or Example(text="")
     if list_item.contain_node(NodeKind.LIST) and not all(
         isinstance(n, TemplateNode)
         for n in list_item.invert_find_child(NodeKind.LIST)
