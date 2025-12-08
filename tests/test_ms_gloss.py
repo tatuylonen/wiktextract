@@ -250,3 +250,22 @@ class TestMsGloss(TestCase):
                 }
             ],
         )
+
+    def test_etymology_lists(self):
+        data = parse_page(
+            self.wxr,
+            "injin",
+            """== Bahasa Melayu ==
+=== Takrifan ===
+# [[ibu]].
+=== Etimologi ===
+* Daripada bahasa Melayu [Istilah?].
+* Makna kedua dipinjam daripada bahasa Inggeris engine.""",
+        )
+        self.assertEqual(
+            data[0]["etymology_texts"],
+            [
+                "Daripada bahasa Melayu [Istilah?].",
+                "Makna kedua dipinjam daripada bahasa Inggeris engine.",
+            ],
+        )
