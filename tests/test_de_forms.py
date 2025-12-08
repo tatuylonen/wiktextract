@@ -82,6 +82,7 @@ class TestDeForms(TestCase):
 ! colspan="5" | ''All other forms:'' [[Flexion:arm|Flexion:arm]]
 |}""",
         )
+        # https://de.wiktionary.org/wiki/Flexion:arm
         self.wxr.wtp.add_page(
             "Flexion:arm",
             108,
@@ -156,7 +157,7 @@ class TestDeForms(TestCase):
                 {"form": "ärmer", "tags": ["comparative"]},
                 {"form": "am ärmsten", "tags": ["superlative"]},
                 {
-                    "form": "der arme",
+                    "form": "arme",
                     "tags": [
                         "positive",
                         "nominative",
@@ -165,9 +166,10 @@ class TestDeForms(TestCase):
                         "masculine",
                     ],
                     "source": "Flexion:arm",
+                    "article": "der",
                 },
                 {
-                    "form": "die arme",
+                    "form": "arme",
                     "tags": [
                         "positive",
                         "nominative",
@@ -176,9 +178,10 @@ class TestDeForms(TestCase):
                         "feminine",
                     ],
                     "source": "Flexion:arm",
+                    "article": "die",
                 },
                 {
-                    "form": "das arme",
+                    "form": "arme",
                     "tags": [
                         "positive",
                         "nominative",
@@ -187,11 +190,13 @@ class TestDeForms(TestCase):
                         "neuter",
                     ],
                     "source": "Flexion:arm",
+                    "article": "das",
                 },
                 {
-                    "form": "die armen",
+                    "form": "armen",
                     "tags": ["positive", "nominative", "weak", "plural"],
                     "source": "Flexion:arm",
+                    "article": "die",
                 },
                 {
                     "form": "er ist arm",
@@ -657,3 +662,55 @@ class TestDeForms(TestCase):
                 }
             ],
         )
+
+    def test_name_table(self):
+        self.wxr.wtp.add_page(
+            "Vorlage:Deutsch Vorname Übersicht m",
+            10,
+            """{| class="wikitable float-right inflection-table flexbox"
+! width="65" |
+! [[Hilfe:Singular|Singular]]
+! [[Hilfe:Plural|Plural 1]]
+! [[Hilfe:Plural|Plural 2]]
+<nowiki />
+|-
+! style="text-align:left;" |  [[Hilfe:Nominativ|Nominativ]]
+| <small>(der)</small> Peter
+| die Peter
+| die [[Peters|Peters]]
+<nowiki />
+|-
+! style="text-align:left;" |  [[Hilfe:Genitiv|Genitiv]]
+| <small>(des Peter)<br />(des [[Peters|Peters]])</small><br />[[Peters|Peters]]
+|}[[Kategorie:Vorname m (Deutsch)]]""",
+        )
+        data = parse_page(
+            self.wxr,
+            "Peter",
+            """== Peter ({{Sprache|Deutsch}}) ==
+=== {{Wortart|Substantiv|Deutsch}}, {{m}}, {{Wortart|Vorname|Deutsch}} ===
+{{Deutsch Vorname Übersicht m
+|Nominativ Plural 1=Peter
+|Nominativ Plural 2=Peters
+|Genitiv Singular=Peters
+}}
+====Bedeutungen====
+:[1] männlicher [[Vorname]]""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {
+                    "article": "die",
+                    "form": "Peters",
+                    "tags": ["nominative", "plural"],
+                },
+                {
+                    "article": "des",
+                    "form": "Peters",
+                    "tags": ["genitive", "singular"],
+                },
+                {"form": "Peters", "tags": ["genitive", "singular"]},
+            ],
+        )
+        self.assertEqual(data[0]["categories"], ["Vorname m (Deutsch)"])
