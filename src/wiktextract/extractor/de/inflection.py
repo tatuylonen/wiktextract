@@ -54,11 +54,11 @@ class RowspanHeader:
 
 
 def process_verb_table(
-    wxr: WiktextractContext, word_entry: WordEntry, template_node: TemplateNode
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
 ) -> None:
     # Vorlage:Deutsch Verb Übersicht
     expanded_template = wxr.wtp.parse(
-        wxr.wtp.node_to_wikitext(template_node), expand_all=True
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
     )
     table_nodes = list(expanded_template.find_child(NodeKind.TABLE))
     if len(table_nodes) == 0:
@@ -137,13 +137,13 @@ def process_verb_table(
 
 
 def process_noun_table(
-    wxr: WiktextractContext, word_entry: WordEntry, template_node: TemplateNode
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
 ) -> None:
     # Vorlage:Deutsch Substantiv Übersicht
     from .page import extract_note_section
 
     expanded_template = wxr.wtp.parse(
-        wxr.wtp.node_to_wikitext(template_node), expand_all=True
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
     )
     table_nodes = list(expanded_template.find_child(NodeKind.TABLE))
     if len(table_nodes) == 0:
@@ -151,6 +151,8 @@ def process_noun_table(
     table_node = table_nodes[0]
     column_headers = []
     table_header = ""
+    forms = []
+    flexion_pages = []
     for table_row in table_node.find_child(NodeKind.TABLE_ROW):
         row_header = ""
         is_header_row = not table_row.contain_node(NodeKind.TABLE_CELL)
@@ -188,7 +190,7 @@ def process_noun_table(
                 for link_node in table_cell.find_child(NodeKind.LINK):
                     link_text = clean_node(wxr, None, link_node)
                     if link_text.startswith("Flexion:"):
-                        parse_flexion_page(wxr, word_entry, link_text)
+                        flexion_pages.append(link_text)
             else:
                 for form_text in cell_text.splitlines():
                     form_text = form_text.strip()
@@ -209,10 +211,15 @@ def process_noun_table(
                         ):
                             form.raw_tags.append(col_header.text)
                     translate_raw_tags(form)
-                    word_entry.forms.append(form)
+                    forms.append(form)
                 col_index += 1
 
+    if t_node.template_name == "Deutsch Substantiv Übersicht":
+        forms = seprarte_de_article(wxr, forms)
+    word_entry.forms.extend(forms)
     clean_node(wxr, word_entry, expanded_template)  # category links
+    for flexion_page in flexion_pages:
+        parse_flexion_page(wxr, word_entry, flexion_page)
     # Vorlage:Deutsch Nachname Übersicht
     for level_node in expanded_template.find_child(NodeKind.LEVEL4):
         section_text = clean_node(wxr, None, level_node.largs)
@@ -326,3 +333,19 @@ def extract_pronoun_table(
                         word_entry.forms.append(form)
                     article = ""
                 col_index += 1
+
+
+def seprarte_de_article(
+    wxr: WiktextractContext, forms: list[Form]
+) -> list[Form]:
+    # https://de.wiktionary.org/wiki/Vorlage:Deutsch_Substantiv_Übersicht
+    # https://en.wikipedia.org/wiki/German_articles
+    new_forms = []
+    for form in forms:
+        m = re.match(r"(der|die|das|den|dem|des)\s+", form.form)
+        if m is not None:
+            form.form = form.form[m.end() :]
+            form.article = m.group(1)
+            if form.form != wxr.wtp.title:
+                new_forms.append(form)
+    return new_forms
