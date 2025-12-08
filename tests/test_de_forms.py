@@ -47,9 +47,21 @@ class TestDeForms(TestCase):
         self.assertEqual(
             word_entry.model_dump(exclude_defaults=True)["forms"],
             [
-                {"form": "des Wörterbuches", "tags": ["genitive", "singular"]},
-                {"form": "des Wörterbuchs", "tags": ["genitive", "singular"]},
-                {"form": "der Wörterbücher", "tags": ["genitive", "plural"]},
+                {
+                    "article": "des",
+                    "form": "Wörterbuches",
+                    "tags": ["genitive", "singular"],
+                },
+                {
+                    "article": "des",
+                    "form": "Wörterbuchs",
+                    "tags": ["genitive", "singular"],
+                },
+                {
+                    "article": "der",
+                    "form": "Wörterbücher",
+                    "tags": ["genitive", "plural"],
+                },
             ],
         )
 
