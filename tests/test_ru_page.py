@@ -365,3 +365,16 @@ class TestRUPage(TestCase):
         self.assertEqual(
             data[0]["forms"], [{"form": "коса́", "tags": ["stressed"]}]
         )
+
+    def test_etymology_list(self):
+        data = parse_page(
+            self.wxr,
+            "albast",
+            """= {{-nl-}} =
+=== Семантические свойства ===
+==== Значение ====
+# [[алебастр]]
+=== Этимология ===
+*От [1285] г.""",
+        )
+        self.assertEqual(data[0]["etymology_texts"], ["От [1285] г."])
