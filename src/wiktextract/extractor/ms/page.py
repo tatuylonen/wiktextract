@@ -2,7 +2,12 @@ import string
 from typing import Any
 
 from mediawiki_langcodes import name_to_code
-from wikitextprocessor.parser import LEVEL_KIND_FLAGS, LevelNode, NodeKind
+from wikitextprocessor.parser import (
+    LEVEL_KIND_FLAGS,
+    LevelNode,
+    NodeKind,
+    WikiNode,
+)
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -109,29 +114,36 @@ def extract_etymology_section(
     page_data: list[WordEntry],
     base_data: WordEntry,
     level_node: LevelNode,
-) -> None:
+):
     cats = {}
-    e_text = clean_node(
-        wxr,
-        cats,
-        list(
-            level_node.invert_find_child(
-                LEVEL_KIND_FLAGS, include_empty_str=True
-            )
-        ),
-    )
-    if e_text == "":
+    e_nodes = []
+    e_texts = []
+    for node in level_node.children:
+        if isinstance(node, LevelNode):
+            break
+        elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
+            for list_item in node.find_child(NodeKind.LIST_ITEM):
+                e_text = clean_node(wxr, cats, list_item.children)
+                if e_text != "":
+                    e_texts.append(e_text)
+        else:
+            e_nodes.append(node)
+    if len(e_nodes) > 0:
+        e_text = clean_node(wxr, cats, e_nodes)
+        if e_text != "":
+            e_texts.append(e_text)
+    if len(e_texts) == 0:
         return
     if len(page_data) == 0 or page_data[-1].lang_code != base_data.lang_code:
-        base_data.etymology_text = e_text
+        base_data.etymology_texts = e_texts
         base_data.categories.extend(cats.get("categories", []))
     elif level_node.kind == NodeKind.LEVEL3:
         for data in page_data:
             if data.lang_code == page_data[-1].lang_code:
-                data.etymology_text = e_text
+                data.etymology_texts = e_texts
                 data.categories.extend(cats.get("categories", []))
     else:
-        page_data[-1].etymology_text = e_text
+        page_data[-1].etymology_texts = e_texts
         page_data[-1].categories.extend(cats.get("categories", []))
 
 
