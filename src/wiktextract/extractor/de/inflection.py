@@ -214,8 +214,11 @@ def process_noun_table(
                     forms.append(form)
                 col_index += 1
 
-    if t_node.template_name == "Deutsch Substantiv Übersicht":
-        forms = seprarte_de_article(wxr, forms)
+    if t_node.template_name in (
+        "Deutsch Substantiv Übersicht",
+        "Deutsch Vorname Übersicht m",
+    ):
+        forms = separate_de_article(wxr, forms)
     word_entry.forms.extend(forms)
     clean_node(wxr, word_entry, expanded_template)  # category links
     for flexion_page in flexion_pages:
@@ -228,11 +231,11 @@ def process_noun_table(
 
 
 def process_adj_table(
-    wxr: WiktextractContext, word_entry: WordEntry, template_node: TemplateNode
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
 ) -> None:
     # Vorlage:Deutsch Adjektiv Übersicht
     expanded_template = wxr.wtp.parse(
-        wxr.wtp.node_to_wikitext(template_node), expand_all=True
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
     )
     table_nodes = list(expanded_template.find_child(NodeKind.TABLE))
     if len(table_nodes) == 0:
@@ -335,17 +338,19 @@ def extract_pronoun_table(
                 col_index += 1
 
 
-def seprarte_de_article(
+def separate_de_article(
     wxr: WiktextractContext, forms: list[Form]
 ) -> list[Form]:
-    # https://de.wiktionary.org/wiki/Vorlage:Deutsch_Substantiv_Übersicht
     # https://en.wikipedia.org/wiki/German_articles
+    # https://de.wiktionary.org/wiki/Vorlage:Deutsch_Substantiv_Übersicht
+    # https://de.wiktionary.org/wiki/Vorlage:Deutsch_Vorname_Übersicht_m
+    # * May contain parens around the article
     new_forms = []
     for form in forms:
-        m = re.match(r"(der|die|das|den|dem|des)\s+", form.form)
+        m = re.match(r"\(?(der|die|das|den|dem|des)\)?\s+", form.form)
         if m is not None:
             form.form = form.form[m.end() :]
             form.article = m.group(1)
-            if form.form != wxr.wtp.title:
-                new_forms.append(form)
+        if form.form != wxr.wtp.title:
+            new_forms.append(form)
     return new_forms

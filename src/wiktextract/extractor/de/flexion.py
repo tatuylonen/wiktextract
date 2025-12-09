@@ -110,11 +110,9 @@ def process_deklinationsseite_template(
                             row_header = cell_text
                     elif cell_node.kind == NodeKind.TABLE_CELL:
                         if has_article and col_index % 2 == 0:
-                            article = cell_text
+                            if cell_text != "—":
+                                article = cell_text
                         else:
-                            form_text = ""
-                            if article not in ("", "—"):
-                                form_text = article + " "
                             raw_tags = []
                             if h4_text != "":
                                 raw_tags.append(h4_text)
@@ -130,9 +128,10 @@ def process_deklinationsseite_template(
                                     raw_tags.append(col_header.text)
                             for line in cell_text.splitlines():
                                 form = Form(
-                                    form=form_text + line,
+                                    form=line,
                                     source=page_tite,
                                     raw_tags=raw_tags,
+                                    article=article,
                                 )
                                 if form.form not in ("", "—"):
                                     translate_raw_tags(form)
