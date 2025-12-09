@@ -448,3 +448,29 @@ class TestFrLinkage(TestCase):
         self.assertEqual(
             data[0]["forms"], [{"form": "霍加狓", "roman": "huòjiāpí"}]
         )
+
+    def test_link_node_after_linkage_word(self):
+        self.wxr.wtp.add_page("Modèle:oc gascon", 10, "''(Gascon)''")
+        self.wxr.wtp.add_page(
+            "Modèle:w", 10, "[[w:Michel Serres|Michel Serres]]"
+        )
+        self.wxr.wtp.add_page("Modèle:ISBN", 10, "ISBN 978-2746522138")
+        data = parse_page(
+            self.wxr,
+            "adishatz",
+            """== {{langue|oc}} ==
+=== {{S|interjection|oc}} ===
+# Terme de salutation
+==== {{S|variantes}} ====
+* [[adichatz]] {{oc gascon|nocat=1}} : le philosophe, écrivain, épistémologue et académicien français d'origine [[gascon|gasconne]] {{w|Michel Serres}} a écrit un livre [[testamentaire]] intitulé ''Adichats ! (Adieu !)'' (publication posthume en 2020, {{ISBN|978-2746522138}}).""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {
+                    "form": "adichatz",
+                    "raw_tags": ["Gascon"],
+                    "sense": "le philosophe, écrivain, épistémologue et académicien français d'origine gasconne Michel Serres a écrit un livre testamentaire intitulé Adichats ! (Adieu !) (publication posthume en 2020, ISBN 978-2746522138).",
+                }
+            ],
+        )

@@ -194,9 +194,27 @@ def extract_linkage_list_item(
                     ],
                 ).strip("— \n")
                 break
-            elif tag_text.strip().startswith(":"):
-                sense_text = tag_text.strip().removeprefix(":").strip()
-                linkage_data.sense = sense_text
+            elif tag_text.lstrip().startswith(":"):
+                linkage_data.sense = clean_node(
+                    wxr,
+                    None,
+                    [tag_text.lstrip().removeprefix(":").lstrip()]
+                    + [
+                        n
+                        for n in list_item.children[index + 1 :]
+                        if not (
+                            (
+                                isinstance(n, TemplateNode)
+                                and n.template_name == "réf"
+                            )
+                            or (
+                                isinstance(n, WikiNode)
+                                and n.kind == NodeKind.LIST
+                            )
+                        )
+                    ],
+                )
+                break
             else:
                 tags, _ = capture_text_in_parentheses(tag_text)
                 for tag in tags:
