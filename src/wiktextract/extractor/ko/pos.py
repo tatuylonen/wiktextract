@@ -77,7 +77,7 @@ def extract_pos_section(
                         Sense(pattern=page_data[-1].pattern),
                     )
                 else:
-                    extract_unorderd_list_item(wxr, page_data[-1], list_item)
+                    extract_unordered_list_item(wxr, page_data[-1], list_item)
 
     if not (
         len(page_data[-1].senses) > 0
@@ -110,7 +110,7 @@ def extract_gloss_list_item(
                         wxr, word_entry, nested_list_item, sense
                     )
                 else:
-                    extract_unorderd_list_item(
+                    extract_unordered_list_item(
                         wxr, word_entry, nested_list_item
                     )
             continue
@@ -140,7 +140,7 @@ def extract_gloss_list_item(
         word_entry.senses.append(sense)
 
 
-def extract_unorderd_list_item(
+def extract_unordered_list_item(
     wxr: WiktextractContext, word_entry: WordEntry, list_item: WikiNode
 ) -> None:
     is_first_bold = True

@@ -88,7 +88,7 @@ class Translation(FrenchBaseModel):
     roman: str = ""
     traditional_writing: str = Field(
         default="",
-        description="Alternative writting for Chinese, Korean and Mongolian",
+        description="Alternative writing for Chinese, Korean and Mongolian",
     )
     ruby: list[tuple[str, ...]] = Field(
         default=[], description="Japanese Kanji and furigana"

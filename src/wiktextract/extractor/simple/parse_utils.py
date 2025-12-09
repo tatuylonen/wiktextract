@@ -59,4 +59,3 @@ ETYMOLOGY_TEMPLATES = set(
         "multiword term",
     ]
 )
-

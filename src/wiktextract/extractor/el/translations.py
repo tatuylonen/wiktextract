@@ -48,7 +48,7 @@ def process_translations(
             text = ht.get(2, "")
             if not text:
                 wxr.wtp.wiki_notice(
-                    f"Translation template has no translation," f"{ht=}",
+                    f"Translation template has no translation,{ht=}",
                     sortid="translations/64",
                 )
                 return None
@@ -60,7 +60,7 @@ def process_translations(
                     lang_code=lang_code,
                     lang=lang_name,
                     word=text,
-                    roman=latin_translitteration
+                    roman=latin_translitteration,
                 )
             )
 

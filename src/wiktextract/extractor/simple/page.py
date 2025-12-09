@@ -1,4 +1,4 @@
-from wikitextprocessor.parser import LEVEL_KIND_FLAGS  #, print_tree
+from wikitextprocessor.parser import LEVEL_KIND_FLAGS  # , print_tree
 
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
@@ -40,6 +40,7 @@ from .text_utils import POS_ENDING_NUMBER_RE
 # and there is rarely any need to add new fields (because often they already
 # exist in the English extractor), but it is possible to add them if needed;
 # please check first with an issue to keep everyone in synch.
+
 
 def parse_page(
     wxr: WiktextractContext, page_title: str, page_text: str
@@ -126,7 +127,7 @@ def parse_page(
     )
 
     # This is our return list.
-    word_datas: list[WordEntry] = []
+    word_data: list[WordEntry] = []
 
     for level in page_root.find_child_recursively(LEVEL_KIND_FLAGS):
         # Ignore everything outside of a section with a heading; there shouldn't
@@ -161,7 +162,7 @@ def parse_page(
                 # new_data would be one WordEntry object, for one Part of
                 # Speech section ("Noun", "Verb"); this is generally how we
                 # want it.
-                word_datas.append(new_data)
+                word_data.append(new_data)
         else:
             # Process pronunciation and etym sections.
             # Ignore other sections, like 'Description'
@@ -178,5 +179,5 @@ def parse_page(
 
     # Transform pydantic objects to normal dicts so that the old code can
     # handle them.
-    return [wd.model_dump(exclude_defaults=True) for wd in word_datas]
+    return [wd.model_dump(exclude_defaults=True) for wd in word_data]
     # return [base_data.model_dump(exclude_defaults=True)]

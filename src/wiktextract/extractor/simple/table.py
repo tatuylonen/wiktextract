@@ -15,7 +15,6 @@ from .tags_utils import convert_tags
 Node = str | WikiNode
 
 
-
 # node_fns are different from template_fns. template_fns are functions that
 # are used to handle how to expand (and otherwise process) templates, while
 # node functions are used when turning parsed nodes into strings.
@@ -67,8 +66,8 @@ def parse_pos_table(
     # Check if there are actually any headers, because Simple English Wiktionary
     # doesn't use them in these POS template tables.
     # Headers and non-headers in other editions can be a real headache.
-    # Having headers is better than not, but when they're inconsistenly applied,
-    # it's a headache.
+    # Having headers is better than not, but when they're inconsistently
+    # applied, it's a headache.
     for header in tree.find_child_recursively(NodeKind.TABLE_HEADER_CELL):
         wxr.wtp.debug(
             f"POS template table has headers! {repr(header)[:255]}",
