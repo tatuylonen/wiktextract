@@ -200,3 +200,4 @@ class WordEntry(ChineseBaseModel):
     original_title: str = ""
     anagrams: list[Linkage] = []
     hyphenations: list[Hyphenation] = []
+    classifiers: list[Classifier] = []
