@@ -1,5 +1,3 @@
-from .models import WordEntry
-
 TAGS = {
     "男性": "masculine",
     "女性": "feminine",
@@ -292,6 +290,11 @@ TAGS = {
     "丁寧": "polite",
     "東京式": "Tokyo",
     "京阪式": ["Kyoto", "Osaka"],
+    "推量・意志": "volitional",
+    "様態": "appearance",
+    # Template:日本語下一段活用
+    "意志・勧誘": "volitional",
+    "仮定条件": "conditional",
     # Template:hu-noun
     "複数・主格": "plural",
     "・主格": "nominative",
@@ -568,7 +571,7 @@ TOPICS = {
 }
 
 
-def translate_raw_tags(data: WordEntry) -> None:
+def translate_raw_tags(data):
     raw_tags = []
     for raw_tag in data.raw_tags:
         if raw_tag in TAGS:
@@ -585,7 +588,7 @@ def translate_raw_tags(data: WordEntry) -> None:
     data.raw_tags = raw_tags
 
 
-def add_tag(raw_tag: str, data: WordEntry) -> None:
+def add_tag(raw_tag, data):
     tr_tag = TAGS[raw_tag]
     if isinstance(tr_tag, str) and tr_tag not in data.tags:
         data.tags.append(TAGS[raw_tag])
