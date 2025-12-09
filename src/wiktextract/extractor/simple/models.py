@@ -4,6 +4,7 @@ from pydantic import BaseModel, ConfigDict, Field
 # used in the main English extractor. They use more resources, but also do
 # a lot of validation work and are easier for the type-checker.
 
+
 # Pydantic config stuff.
 class SimpleEnglishBaseModel(BaseModel):
     model_config = ConfigDict(
@@ -16,13 +17,14 @@ class SimpleEnglishBaseModel(BaseModel):
         validate_default=True,
     )
 
+
 # Not an example, this is for example entries next to glosses.
 class Example(SimpleEnglishBaseModel):
     text: str = Field(default="", description="Example usage sentence")
     author: str = Field(default="", description="Author's name")
     title: str = Field(default="", description="Title of the reference")
     # SEW example templates are simple and don't seem to have these
-    # latter datas.
+    # latter data.
     # date: str = Field(default="", description="Original date")
     # date_published: str = Field(default="", description="Date of publication")
     # collection: str = Field(
@@ -36,6 +38,7 @@ class Example(SimpleEnglishBaseModel):
     #     description="Source of reference",
     # )
 
+
 # General glass for "link to another related word", like synonym, antonym, etc.
 # Instead of having classes for each, we have differnet fields of list[Linkage],
 # like `synonyms: list[Linkage] = []`.
@@ -45,6 +48,7 @@ class Linkage(SimpleEnglishBaseModel):
     # note: str = ""
     # raw_tags: list[str] = []
     # tags: list[str] = []
+
 
 # Basically a line or lines of gloss, a meaning of a word. These are collected
 # under the POS as a list.
@@ -58,6 +62,7 @@ class Sense(SimpleEnglishBaseModel):
     synonyms: list[Linkage] = []
     antonyms: list[Linkage] = []
     # ruby: list[tuple[str, ...]] = []
+
 
 # An inflected form of the word, like `{ form: "bats", tags: ["plural"] }`
 class Form(SimpleEnglishBaseModel):
@@ -92,6 +97,7 @@ class Sound(SimpleEnglishBaseModel):
     # they are originally found in one combined pronunciation section
     poses: list[str] = []
 
+
 # Sometimes we collect raw template arguments separately, like in the main
 # line English extractor where we keep data from etymology templates.
 class TemplateData(SimpleEnglishBaseModel):
@@ -103,6 +109,7 @@ class TemplateData(SimpleEnglishBaseModel):
         default="",
         description="The result of expanding the template.",
     )
+
 
 # The highest level entry: This is returned from the program as a JSON object
 # in the JSONL output.

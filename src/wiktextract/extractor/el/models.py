@@ -35,7 +35,7 @@ class Example(GreekBaseModel):
     # title: str = Field(default="", description="Title of the reference")
     # ref: str = Field(default="", description="Raw reference string")
     # url: str = Field(
-    #     default="", description="A web link. Not necessarily well-formated."
+    #     default="", description="A web link. Not necessarily well-formatted."
     # )
     # date: str = Field(default="", description="Original date")
     # date_published: str = Field(default="", description="Date of publication")
@@ -95,7 +95,7 @@ class Translation(GreekBaseModel):
 
 
 # General glass for "link to another related word", like synonym, antonym, etc.
-# Instead of having classes for each, we have differnet fields of list[Linkage],
+# Instead of having classes for each, we have different fields of list[Linkage],
 # like `synonyms: list[Linkage] = []`.
 class Linkage(GreekBaseModel):
     word: str
@@ -126,7 +126,7 @@ class Sense(GreekBaseModel):
     raw_tags: list[str] = []
     topics: list[str] = []
     form_of: list[AltForm] = []
-    alt_of : list[AltForm] = []
+    alt_of: list[AltForm] = []
     # compound_of: list[AltForm] = []
     categories: list[str] = []  # Wikipedia category link data; not printed.
     examples: list[Example] = []

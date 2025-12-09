@@ -10,9 +10,7 @@ Otherwise, the implementation of tags is a translation effort: when this
 edition of Wiktionary says 'x', what tags does that refer to?
 """
 
-from wiktextract.extractor.el.models import Form, Linkage, Sense, WordEntry
-from wiktextract.tags import uppercase_tags, valid_tags
-from wiktextract.topics import valid_topics
+from .models import Form, Linkage, Sense, WordEntry
 
 # Tags used for modern Greek verb tables.
 #

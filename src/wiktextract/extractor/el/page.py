@@ -59,7 +59,7 @@ def parse_page(
     page_root = wxr.wtp.parse(page_text)
 
     # print_tree(page_root)  # WikiNode tree pretty printer
-    word_datas: list[WordEntry] = []
+    word_data: list[WordEntry] = []
 
     # stuff_outside_main_headings = page_root.invert_find_child(
     #                                                         LEVEL_KIND_FLAGS)
@@ -261,7 +261,7 @@ def parse_page(
                         num,
                     )
                 ) is not None:
-                    word_datas.append(pos_ret)
+                    word_data.append(pos_ret)
                     prev_data = pos_ret
                 else:
                     wxr.wtp.error(
@@ -271,7 +271,7 @@ def parse_page(
 
     # Transform pydantic objects to normal dicts so that the old code can
     # handle them.
-    return [wd.model_dump(exclude_defaults=True) for wd in word_datas]
+    return [wd.model_dump(exclude_defaults=True) for wd in word_data]
     # return [base_data.model_dump(exclude_defaults=True)]
 
 

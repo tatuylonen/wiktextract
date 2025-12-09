@@ -40,7 +40,7 @@ GLOSS_LIST_LINKAGE_TEMPLATES = {
     "synsee": "synonyms",
 }
 
-QUALIFIER_TEMPALTES = ["qualifier", "qual", "q", "qf", "i"]
+QUALIFIER_TEMPLATES = ["qualifier", "qual", "q", "qf", "i"]
 
 
 def extract_gloss_list_linkage_template(
@@ -138,7 +138,7 @@ def extract_alt_form_section(
                     forms.extend(extract_alter_template(wxr, node, raw_tags))
                 elif (
                     isinstance(node, TemplateNode)
-                    and node.template_name in QUALIFIER_TEMPALTES
+                    and node.template_name in QUALIFIER_TEMPLATES
                 ):
                     raw_tags.extend(extract_qualifier_template(wxr, node))
 

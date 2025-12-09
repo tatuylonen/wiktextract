@@ -29,7 +29,7 @@ FORM_OF_TEMPLATES = frozenset(
         "sup sp",
     ]
 )
-ABBR_TEMPALTES = frozenset(
+ABBR_TEMPLATES = frozenset(
     [
         "之縮寫",
         "abbreviation of",
@@ -70,7 +70,7 @@ def extract_gloss(
                     raw_tags.append(raw_tag.strip("〈〉"))
                 elif (
                     node.template_name
-                    in FORM_OF_TEMPLATES | ABBR_TEMPALTES | ZH_ALT_OF_TEMPLATES
+                    in FORM_OF_TEMPLATES | ABBR_TEMPLATES | ZH_ALT_OF_TEMPLATES
                     or node.template_name.endswith((" of", " form", "-form"))
                 ) and process_form_of_template(
                     wxr, node, gloss_data, page_data
@@ -137,7 +137,7 @@ def process_form_of_template(
         re.search(r"^alt|alt[\s-]|alternative", t_node.template_name.lower())
         or t_node.template_name.lower() in ZH_ALT_OF_TEMPLATES
     )
-    is_abbr = t_node.template_name.lower() in ABBR_TEMPALTES
+    is_abbr = t_node.template_name.lower() in ABBR_TEMPLATES
     if is_alt_of:
         sense.tags.append("alt-of")
     elif is_abbr:

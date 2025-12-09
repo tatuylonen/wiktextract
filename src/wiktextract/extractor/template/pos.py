@@ -278,6 +278,7 @@ def recurse_glosses(
 # ## An example used in extractor starting template code.
 # ##: 'Foo bar baz gloss example text.'
 
+
 def process_pos(
     wxr: WiktextractContext,
     node: WikiNode,
@@ -379,6 +380,7 @@ def process_pos(
             break
 
     head_text = "".join(parts)
+
     # Or we can also just call clean_node on pos_contents and use a template_fn
     # to hand template stuff.
     def head_template_fn(name: str, ht: TemplateArgs) -> str | None:
@@ -399,7 +401,6 @@ def process_pos(
     data.forms = remove_duplicate_forms(wxr, data.forms)
     data.tags.extend(template_tags)
     data.head_templates.extend(head_templates)
-
 
     ### Glosses after head ###
     # parts = []

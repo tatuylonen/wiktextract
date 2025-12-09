@@ -14,6 +14,7 @@ from .tags_utils import convert_tags
 
 REMOVE_HYPHENATION_RE = re.compile(r"(?i)\s*hyphenation\s*,?:?\s*(.+)")
 
+
 def recurse_list(
     wxr: WiktextractContext,
     node: WikiNode,
@@ -114,7 +115,7 @@ def recurse_list_item(
         i = int(sound_m[-1])  # (\d+)
         sound = sound_templates[i]  # the Sound object
 
-        # These sound datas are attached to POS data later; for this, we
+        # These sound data are attached to POS data later; for this, we
         # use the sound.pos field.
         if len(line_poses) > 0 or len(poses) > 0:
             sound.poses = line_poses or poses
