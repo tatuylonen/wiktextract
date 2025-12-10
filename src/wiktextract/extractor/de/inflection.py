@@ -43,7 +43,7 @@ def extract_inf_table_template(
     ):
         process_verb_table(wxr, word_entry, t_node)
     elif t_node.template_name == "Deutsch Possessivpronomen":
-        extract_pronoun_table(wxr, word_entry, t_node)
+        extract_de_pronoun_table(wxr, word_entry, t_node)
 
 
 @dataclass
@@ -269,7 +269,7 @@ def process_adj_table(
                     word_entry.forms.append(form)
 
 
-def extract_pronoun_table(
+def extract_de_pronoun_table(
     wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
 ) -> None:
     # Vorlage:Deutsch Possessivpronomen
@@ -312,14 +312,10 @@ def extract_pronoun_table(
                     col_index += colspan
             elif cell.kind == NodeKind.TABLE_CELL:
                 if col_index % 2 == 0:
-                    article = cell_text
+                    if cell_text != "—":
+                        article = cell_text
                 else:
-                    form_str = (
-                        article + " " + cell_text
-                        if article not in ["", "—"]
-                        else cell_text
-                    )
-                    form = Form(form=form_str)
+                    form = Form(form=cell_text, article=article)
                     if table_header != "":
                         form.raw_tags.append(table_header)
                     if row_header != "":
