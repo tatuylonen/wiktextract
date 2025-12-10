@@ -541,24 +541,28 @@ class TestDeForms(TestCase):
                     "raw_tags": ["attributiv (vor Substantiv)"],
                 },
                 {
-                    "form": "der meine",
+                    "form": "meine",
                     "tags": ["nominative", "singular", "masculine"],
                     "raw_tags": ["nicht attributiv, mit Artikel"],
+                    "article": "der",
                 },
                 {
-                    "form": "die meine",
+                    "form": "meine",
                     "tags": ["nominative", "singular", "feminine"],
                     "raw_tags": ["nicht attributiv, mit Artikel"],
+                    "article": "die",
                 },
                 {
-                    "form": "das meine",
+                    "form": "meine",
                     "tags": ["nominative", "singular", "neuter"],
                     "raw_tags": ["nicht attributiv, mit Artikel"],
+                    "article": "das",
                 },
                 {
-                    "form": "die meinen",
+                    "form": "meinen",
                     "tags": ["nominative", "plural"],
                     "raw_tags": ["nicht attributiv, mit Artikel"],
+                    "article": "die",
                 },
             ],
         )
