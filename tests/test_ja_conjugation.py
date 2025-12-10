@@ -3,8 +3,6 @@ from unittest import TestCase
 from wikitextprocessor import Wtp
 
 from wiktextract.config import WiktionaryConfig
-from wiktextract.extractor.ja.conjugation import extract_conjugation_section
-from wiktextract.extractor.ja.models import WordEntry
 from wiktextract.extractor.ja.page import parse_page
 from wiktextract.wxr_context import WiktextractContext
 
@@ -24,7 +22,7 @@ class TestJaConjugation(TestCase):
     def tearDown(self) -> None:
         self.wxr.wtp.close_db_conn()
 
-    def test_ja_conjugation_table(self):
+    def test_ja_conjugation_table_ichidan(self):
         self.wxr.wtp.add_page(
             "テンプレート:日本語下一段活用",
             10,
@@ -35,9 +33,9 @@ class TestJaConjugation(TestCase):
 |+ ま-ぜる 動詞活用表<small>（[[付録:日本語の活用|日本語の活用]]）</small>
 ! colspan="7" | [[下一段活用|ザ行下一段活用]]
 |-
-! [[仮定形]] !! [[命令形]]
+! [[語幹]] !! [[命令形]]
 |-
-| ぜれ || ぜろ<br />ぜよ
+| ま || ぜろ<br />ぜよ
 |}
 {| class="wikitable" style="text-align:center"
 |+ 各活用形の基礎的な結合例
@@ -45,51 +43,44 @@ class TestJaConjugation(TestCase):
 |-
 | 命令 || まぜろ<br />まぜよ || 命令形のみ
 |}
-</div></div>[[カテゴリ:日本語|ませる まぜる]][[カテゴリ:日本語 動詞|ませる まぜる]][[カテゴリ:日本語 動詞 ザ下一|ませる まぜる]]""",
+</div></div>[[カテゴリ:日本語|ませる まぜる]]""",
         )
-        self.wxr.wtp.start_page("まぜる")
-        word_entry = WordEntry(lang="日本語", lang_code="ja", word="まぜる")
-        root = self.wxr.wtp.parse("{{日本語下一段活用}}")
-        extract_conjugation_section(self.wxr, word_entry, root)
+        data = parse_page(
+            self.wxr,
+            "まぜる",
+            """=={{L|ja}}==
+===動詞===
+#ある物に他の物を[[くわえる|加え]]て一つにする。[[混合]]する。
+====活用====
+{{日本語下一段活用}}""",
+        )
         self.assertEqual(
-            [f.model_dump(exclude_defaults=True) for f in word_entry.forms],
+            data[0]["forms"],
             [
                 {
-                    "form": "ぜれ",
-                    "raw_tags": ["ザ行下一段活用"],
-                    "tags": ["hypothetical"],
+                    "form": "まぜろ",
+                    "raw_tags": ["ま-ぜる 動詞活用表（日本語の活用）"],
+                    "tags": ["za-row", "shimoichidan", "ichidan", "imperative"],
                 },
                 {
-                    "form": "ぜろ",
-                    "raw_tags": ["ザ行下一段活用"],
-                    "tags": ["imperative"],
-                },
-                {
-                    "form": "ぜよ",
-                    "raw_tags": ["ザ行下一段活用"],
-                    "tags": ["imperative"],
+                    "form": "まぜよ",
+                    "raw_tags": ["ま-ぜる 動詞活用表（日本語の活用）"],
+                    "tags": ["za-row", "shimoichidan", "ichidan", "imperative"],
                 },
                 {
                     "form": "まぜろ",
-                    "raw_tags": ["各活用形の基礎的な結合例", "語形"],
+                    "raw_tags": ["各活用形の基礎的な結合例", "命令形のみ"],
                     "tags": ["imperative"],
                 },
                 {
                     "form": "まぜよ",
-                    "raw_tags": ["各活用形の基礎的な結合例", "語形"],
-                    "tags": ["imperative"],
-                },
-                {
-                    "form": "命令形のみ",
-                    "raw_tags": ["各活用形の基礎的な結合例", "結合"],
+                    "raw_tags": ["各活用形の基礎的な結合例", "命令形のみ"],
                     "tags": ["imperative"],
                 },
             ],
         )
-        self.assertEqual(
-            word_entry.categories,
-            ["日本語", "日本語 動詞", "日本語 動詞 ザ下一"],
-        )
+        self.assertEqual(data[0]["tags"], ["za-row", "shimoichidan", "ichidan"])
+        self.assertEqual(data[0]["categories"], ["日本語"])
 
     def test_alter_section_tag(self):
         data = parse_page(
@@ -127,6 +118,95 @@ class TestJaConjugation(TestCase):
                     "form": "colour",
                     "tags": ["alternative"],
                     "raw_tags": ["アメリカ合衆国以外"],
+                }
+            ],
+        )
+
+    def test_ja_conj_table_missing_form(self):
+        self.wxr.wtp.add_page(
+            "テンプレート:日本語タルト活用",
+            10,
+            """<div class="NavFrame" style="clear:both">
+<div class="NavHead" align="left">活用と結合例</div>
+<div class="NavContent">
+{| class="wikitable" style="text-align:center"
+|+ 全然 形容動詞活用表<small>（[[付録:日本語の活用|日本語の活用]]）</small>
+! colspan="7" | [[タルト活用|タルト活用]]
+|-
+! [[語幹]] !! [[未然形]] !! [[連用形]] !! [[終止形]]
+|-
+| 全然 || (無し) || と || (たり)
+|}
+</div></div>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "全然",
+            """=={{L|ja}}==
+===形容動詞===
+#まったくの、完全な、全面的な。
+{{日本語タルト活用}}""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {
+                    "form": "全然と",
+                    "raw_tags": [
+                        "全然 形容動詞活用表（日本語の活用）",
+                        "タルト活用",
+                    ],
+                    "tags": ["continuative"],
+                },
+                {
+                    "form": "全然たり",
+                    "raw_tags": [
+                        "全然 形容動詞活用表（日本語の活用）",
+                        "タルト活用",
+                    ],
+                    "tags": ["terminal"],
+                },
+            ],
+        )
+
+    def test_ja_conj_no_stem(self):
+        self.wxr.wtp.add_page(
+            "テンプレート:日本語上一段活用",
+            10,
+            """<div class="NavFrame" style="clear:both">
+<div class="NavHead" align="left">活用と結合例</div>
+<div class="NavContent">
+{| class="wikitable" style="text-align:center"
+|+ にる 動詞活用表<small>（[[付録:日本語の活用|日本語の活用]]）</small>
+! colspan="7" | [[上一段活用|ナ行上一段活用]]
+|-
+! [[語幹]] !! [[未然形]]
+|-
+| (語幹無し) || に
+|}
+</div></div>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "にる",
+            """=={{L|ja}}==
+===動詞：似る===
+#（他の比較よりも）[[共通]]の[[性質]]が[[おおい|多く]]ある。
+====活用====
+{{日本語上一段活用}}""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {
+                    "form": "に",
+                    "raw_tags": ["にる 動詞活用表（日本語の活用）"],
+                    "tags": [
+                        "na-row",
+                        "kamiichidan",
+                        "ichidan",
+                        "imperfective",
+                    ],
                 }
             ],
         )

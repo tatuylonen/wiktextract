@@ -1,4 +1,6 @@
-from wikitextprocessor import LevelNode, NodeKind, TemplateNode
+import re
+
+from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -23,13 +25,14 @@ def extract_conjugation_section(
             "日本語一段活用",
             "日本語カ変活用",
             "日本語ザ変活用",
+            "日本語変格活用",  # has delete request
         }:
             extract_ja_conjugation_table_template(wxr, word_entry, t_node)
 
 
 def extract_ja_conjugation_table_template(
     wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
-) -> None:
+):
     # extract templates use this Lua module
     # https://ja.wiktionary.org/wiki/モジュール:日本語活用表
     expanded_node = wxr.wtp.parse(
@@ -40,44 +43,127 @@ def extract_ja_conjugation_table_template(
     for table_index, table_node in enumerate(
         expanded_node.find_child_recursively(NodeKind.TABLE)
     ):
-        table_name = ""
-        column_headers = []
-        row_header = ""
-        for row_or_caption in table_node.find_child(
-            NodeKind.TABLE_CAPTION | NodeKind.TABLE_ROW
-        ):
-            if row_or_caption.kind == NodeKind.TABLE_CAPTION:
-                table_name = clean_node(wxr, None, row_or_caption.children)
-            elif row_or_caption.kind == NodeKind.TABLE_ROW:
-                for cell_index, cell_node in enumerate(
-                    row_or_caption.find_child(
-                        NodeKind.TABLE_HEADER_CELL | NodeKind.TABLE_CELL
-                    )
-                ):
-                    if cell_node.kind == NodeKind.TABLE_HEADER_CELL:
-                        if (
-                            len(list(row_or_caption.filter_empty_str_child()))
-                            == 1
-                        ):
-                            table_name = clean_node(wxr, None, cell_node)
-                        else:
-                            column_headers.append(
-                                clean_node(wxr, None, cell_node)
-                            )
-                    elif cell_node.kind == NodeKind.TABLE_CELL:
-                        if table_index == 1 and cell_index == 0:
-                            row_header = clean_node(wxr, None, cell_node)
-                        else:
-                            for line in clean_node(
-                                wxr, None, cell_node
-                            ).splitlines():
-                                form = Form(form=line)
-                                form.raw_tags.append(table_name)
-                                if cell_index < len(column_headers):
-                                    form.raw_tags.append(
-                                        column_headers[cell_index]
-                                    )
-                                if len(row_header) > 0:
-                                    form.raw_tags.append(row_header)
+        if table_index == 0:
+            extract_ja_first_conj_table(wxr, word_entry, table_node)
+        elif table_index == 1:
+            extract_ja_second_conj_table(wxr, word_entry, table_node)
+
+
+def extract_ja_first_conj_table(
+    wxr: WiktextractContext, word_entry: WordEntry, table: WikiNode
+):
+    table_caption = ""
+    top_header_tags = []
+    top_header = ""
+    col_headers = []
+    stem = ""
+    for row_or_caption in table.find_child(
+        NodeKind.TABLE_CAPTION | NodeKind.TABLE_ROW
+    ):
+        if row_or_caption.kind == NodeKind.TABLE_CAPTION:
+            table_caption = clean_node(wxr, None, row_or_caption.children)
+        elif row_or_caption.kind == NodeKind.TABLE_ROW:
+            for col_index, cell_node in enumerate(
+                row_or_caption.find_child(
+                    NodeKind.TABLE_HEADER_CELL | NodeKind.TABLE_CELL
+                )
+            ):
+                cell_text = clean_node(wxr, None, cell_node)
+                if cell_node.kind == NodeKind.TABLE_HEADER_CELL:
+                    if "colspan" in cell_node.attrs:
+                        top_header = cell_text
+                        top_header_tags = convert_ja_first_conj_table_header(
+                            top_header
+                        )
+                    else:
+                        col_headers.append(cell_text)
+                elif col_index == 0:
+                    cell_text = cell_text.strip("()")
+                    if cell_text != "語幹無し":
+                        stem = cell_text
+                else:
+                    for line in cell_text.splitlines():
+                        line = line.strip("()")
+                        if line != "無し":
+                            form = Form(form=stem + line)
+                            if table_caption != "":
+                                form.raw_tags.append(table_caption)
+                            if len(top_header_tags) > 0:
+                                form.tags.extend(top_header_tags)
+                            else:
+                                form.raw_tags.append(top_header)
+                            if col_index < len(col_headers):
+                                form.raw_tags.append(col_headers[col_index])
+                            if form.form != "":
                                 translate_raw_tags(form)
                                 word_entry.forms.append(form)
+    word_entry.tags.extend(top_header_tags)
+
+
+def extract_ja_second_conj_table(
+    wxr: WiktextractContext, word_entry: WordEntry, table: WikiNode
+):
+    table_caption = ""
+    for row_or_caption in table.find_child(
+        NodeKind.TABLE_CAPTION | NodeKind.TABLE_ROW
+    ):
+        if row_or_caption.kind == NodeKind.TABLE_CAPTION:
+            table_caption = clean_node(wxr, None, row_or_caption.children)
+        elif row_or_caption.kind == NodeKind.TABLE_ROW:
+            row_header = ""
+            forms = []
+            for col_index, cell_node in enumerate(
+                row_or_caption.find_child(NodeKind.TABLE_CELL)
+            ):
+                cell_text = clean_node(wxr, None, cell_node)
+                if col_index == 0:
+                    row_header = cell_text
+                elif col_index == 1:
+                    for line in cell_text.splitlines():
+                        form = Form(form=line)
+                        if table_caption != "":
+                            form.raw_tags.append(table_caption)
+                        if row_header != "":
+                            form.raw_tags.append(row_header)
+                        if form.form != "":
+                            forms.append(form)
+                elif col_index == 2 and len(cell_text) > 3:
+                    for form in forms:
+                        form.raw_tags.append(cell_text[:3])
+                        form.raw_tags.append(cell_text)
+                        translate_raw_tags(form)
+            word_entry.forms.extend(forms)
+
+
+def convert_ja_first_conj_table_header(header: str) -> list[str]:
+    # https://en.wikipedia.org/wiki/Japanese_conjugation
+    m = re.fullmatch(r"(.+?)行(.+?)活用", header)
+    if m is None:
+        return []
+    tags = []
+    katakana_map = {
+        "ア": "a",
+        "カ": "ka",
+        "ガ": "ga",
+        "サ": "sa",
+        "ザ": "za",
+        "タ": "ta",
+        "ダ": "da",
+        "ナ": "na",
+        "ハ": "ha",
+        "バ": "ba",
+        "マ": "ma",
+        "ラ": "ra",
+        "ワ": "wa",
+    }
+    verb_tags = {
+        "上一段": ["kamiichidan", "ichidan"],
+        "下一段": ["shimoichidan", "ichidan"],
+        "五段": ["godan"],
+        "変格": ["irregular"],
+    }
+    katakana, verb_type = m.groups()
+    if katakana in katakana_map:
+        tags.append(f"{katakana_map[katakana]}-row")
+    tags.extend(verb_tags.get(verb_type, []))
+    return tags
