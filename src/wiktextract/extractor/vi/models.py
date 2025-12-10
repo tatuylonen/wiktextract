@@ -163,3 +163,4 @@ class WordEntry(VietnameseBaseModel):
     literal_meaning: str = ""
     redirects: list[str] = []
     descendants: list[Descendant] = []
+    classifiers: list[Classifier] = []

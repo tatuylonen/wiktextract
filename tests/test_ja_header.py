@@ -193,7 +193,7 @@ class TestJaHeader(TestCase):
                 {"form": "ко́мнат", "tags": ["genitive", "plural"]},
                 {"form": "ко́мнатный", "tags": ["relational", "adjective"]},
                 {"form": "ко́мнатка", "tags": ["diminutive"]},
-                {"form": "комнату́шка"},
+                {"form": "комнату́шка", "tags": ["diminutive"]},
             ],
         )
 

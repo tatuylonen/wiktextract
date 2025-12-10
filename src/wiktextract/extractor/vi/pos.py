@@ -282,9 +282,19 @@ def extract_headword_template(
 
         if len(i_tags) > 0:
             word_entry.raw_tags.extend(i_tags)
+    new_forms = []
     for form in forms:
-        translate_raw_tags(form)
-    word_entry.forms.extend(forms)
+        if "loại từ" in form.raw_tags:
+            translate_raw_tags(form)
+            word_entry.classifiers.append(
+                Classifier(
+                    classifier=form.form, tags=form.tags, raw_tags=form.raw_tags
+                )
+            )
+        else:
+            translate_raw_tags(form)
+            new_forms.append(form)
+    word_entry.forms.extend(new_forms)
     clean_node(wxr, word_entry, expanded_node)
     translate_raw_tags(word_entry)
 

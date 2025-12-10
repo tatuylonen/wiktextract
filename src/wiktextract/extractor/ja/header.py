@@ -4,7 +4,7 @@ from wikitextprocessor.parser import HTMLNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
-from .models import Form, WordEntry
+from .models import Classifier, Form, WordEntry
 from .tags import translate_raw_tags
 
 FORM_OF_CLASS_TAGS = frozenset(["kanji", "plural"])
@@ -56,8 +56,7 @@ def extract_header_nodes(
             isinstance(node, WikiNode) and node.kind == NodeKind.ITALIC
         ):
             raw_tag = clean_node(wxr, None, node).strip("(): ")
-            if raw_tag != "又は" and raw_tag not in raw_tags:
-                # ignore "又は"(or) in "ja-noun" template
+            if raw_tag not in raw_tags:
                 raw_tags.append(raw_tag)
         elif (
             isinstance(node, HTMLNode)
@@ -90,6 +89,17 @@ def extract_header_nodes(
             if node.kind == NodeKind.BOLD:
                 is_first_bold = False
             raw_tags.clear()
+    new_forms = []
+    for form in word_entry.forms:
+        if "類別詞" in form.raw_tags:
+            word_entry.classifiers.append(
+                Classifier(
+                    classifier=form.form, tags=form.tags, raw_tags=form.raw_tags
+                )
+            )
+        else:
+            new_forms.append(form)
+    word_entry.forms = new_forms
     clean_node(wxr, word_entry, expanded_nodes)
     if len(raw_tags) > 0:
         word_entry.raw_tags.extend(raw_tags)
