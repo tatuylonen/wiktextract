@@ -97,6 +97,12 @@ class Sound(MalayBaseModel):
     hyphenations: list[Hyphenation] = Field(default=[], exclude=True)
 
 
+class Classifier(MalayBaseModel):
+    classifier: str = ""
+    tags: list[str] = []
+    raw_tags: list[str] = []
+
+
 class WordEntry(MalayBaseModel):
     model_config = ConfigDict(title="Malay Wiktionary")
     word: str = Field(description="Word string")
@@ -123,3 +129,4 @@ class WordEntry(MalayBaseModel):
     proverbs: list[Linkage] = []
     related: list[Linkage] = []
     notes: list[str] = []
+    classifiers: list[Classifier] = []
