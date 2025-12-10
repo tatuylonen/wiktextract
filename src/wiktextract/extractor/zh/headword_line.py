@@ -6,7 +6,7 @@ from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from ..ruby import extract_ruby
 from ..share import strip_nodes
-from .models import Form, WordEntry
+from .models import Classifier, Form, WordEntry
 from .tags import TEMPLATE_TAG_ARGS, translate_raw_tags
 
 
@@ -106,10 +106,10 @@ def extract_headword_line_template(
                 break
 
         extract_headword_forms(
-            wxr, word_entry, node.children[forms_start_index:]
+            wxr, word_entry, node.children[forms_start_index:], template_name
         )
     if len(nodes_after_span) > 0:
-        extract_headword_forms(wxr, word_entry, nodes_after_span)
+        extract_headword_forms(wxr, word_entry, nodes_after_span, template_name)
 
 
 def process_headword_bold_node(
@@ -138,23 +138,25 @@ def extract_headword_forms(
     wxr: WiktextractContext,
     word_entry: WordEntry,
     form_nodes: list[WikiNode | str],
+    template_name: str,
 ) -> None:
     current_nodes = []
     for node in form_nodes:
         if isinstance(node, str) and node.startswith(("，", ",")):
-            process_forms_text(wxr, word_entry, current_nodes)
+            process_forms_text(wxr, word_entry, current_nodes, template_name)
             current_nodes = [node[1:]]
         else:
             current_nodes.append(node)
 
     if len(current_nodes) > 0:
-        process_forms_text(wxr, word_entry, current_nodes)
+        process_forms_text(wxr, word_entry, current_nodes, template_name)
 
 
 def process_forms_text(
     wxr: WiktextractContext,
     word_entry: WordEntry,
     form_nodes: list[WikiNode | str],
+    template_name: str,
 ) -> None:
     tag_nodes = []
     has_forms = False
@@ -187,14 +189,21 @@ def process_forms_text(
                         raw_form_tags.append(gender)
 
             for f_str in filter(None, map(str.strip, re.split(r"／|,", form))):
-                form_data = Form(
-                    form=f_str,
-                    raw_tags=raw_form_tags,
-                    tags=form_tags,
-                    ruby=ruby_data,
-                )
-                translate_raw_tags(form_data)
-                word_entry.forms.append(form_data)
+                if (
+                    isinstance(node, HTMLNode)
+                    and node.tag == "b"
+                    and template_name == "th-noun"
+                ):
+                    word_entry.classifiers.append(Classifier(classifier=f_str))
+                else:
+                    form_data = Form(
+                        form=f_str,
+                        raw_tags=raw_form_tags,
+                        tags=form_tags,
+                        ruby=ruby_data,
+                    )
+                    translate_raw_tags(form_data)
+                    word_entry.forms.append(form_data)
         elif (
             isinstance(node, HTMLNode)
             and node.tag == "span"
