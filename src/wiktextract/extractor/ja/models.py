@@ -43,6 +43,7 @@ class Form(JapaneseBaseModel):
     raw_tags: list[str] = []
     roman: str = ""
     literal_meaning: str = ""
+    ruby: list[tuple[str, ...]] = []
 
 
 class Sound(JapaneseBaseModel):
