@@ -306,3 +306,57 @@ class TestJaConjugation(TestCase):
                 },
             ],
         )
+
+    def test_classical_ja_conj(self):
+        self.wxr.wtp.add_page(
+            "テンプレート:古典日本語ク活用",
+            10,
+            """
+{| class="wikitable" style="text-align:center"
+|-
+!基本形!!語幹!!未然形!!連用形!!終止形!!連体形!!已然形!!命令形!!活用の種類
+|-
+|rowspan=2|とし
+|rowspan=2|と
+| (-く)
+|○
+|○
+|○
+|○
+|○
+|rowspan=2|ク活用
+|-
+| -から
+|○
+|○
+|○
+|○
+|○
+|}[[カテゴリ:古典日本語]]
+""",
+        )
+        data = parse_page(
+            self.wxr,
+            "とし",
+            """== 古典日本語 ==
+=== 形容詞 ===
+# [[迅速]]な。
+====活用====
+{{古典日本語ク活用|と}}""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {
+                    "form": "とく",
+                    "raw_tags": ["ク活用"],
+                    "tags": ["imperfective"],
+                },
+                {
+                    "form": "とから",
+                    "raw_tags": ["ク活用"],
+                    "tags": ["imperfective"],
+                },
+            ],
+        )
+        self.assertEqual(data[0]["categories"], ["古典日本語"])
