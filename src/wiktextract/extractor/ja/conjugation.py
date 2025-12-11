@@ -4,6 +4,7 @@ from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from ..ruby import extract_ruby
 from .models import Form, WordEntry
 from .tags import translate_raw_tags
 
@@ -17,13 +18,17 @@ def extract_conjugation_section(
             "日本語五段活用",
             "日本語五段活用/表示",
             "日本語上一段活用",
+            "日本語上一段活用2",
             "日本語下一段活用",
+            "日本語形容詞活用",
             "日本語形容詞活用/表示",
+            "日本語形容詞活用2",
             "日本語タルト活用",
             "日本語ダ活用",
             "日本語サ変活用",
             "日本語一段活用",
             "日本語カ変活用",
+            "日本語サ変活用",
             "日本語ザ変活用",
             "日本語変格活用",  # has delete request
         }:
@@ -57,6 +62,7 @@ def extract_ja_first_conj_table(
     top_header = ""
     col_headers = []
     stem = ""
+    ruby = []
     for row_or_caption in table.find_child(
         NodeKind.TABLE_CAPTION | NodeKind.TABLE_ROW
     ):
@@ -78,19 +84,22 @@ def extract_ja_first_conj_table(
                     else:
                         col_headers.append(cell_text)
                 elif col_index == 0:
-                    cell_text = cell_text.strip("()")
-                    if cell_text != "語幹無し":
-                        stem = cell_text
+                    ruby, no_ruby_nodes = extract_ruby(wxr, cell_node)
+                    no_ruby_text = clean_node(wxr, None, no_ruby_nodes).strip(
+                        "()"
+                    )
+                    if no_ruby_text != "語幹無し":
+                        stem = no_ruby_text
                 else:
                     for line in cell_text.splitlines():
                         line = line.strip("()")
                         if line != "無し":
-                            form = Form(form=stem + line)
+                            form = Form(form=stem + line, ruby=ruby)
                             if table_caption != "":
                                 form.raw_tags.append(table_caption)
                             if len(top_header_tags) > 0:
                                 form.tags.extend(top_header_tags)
-                            else:
+                            elif top_header != "":
                                 form.raw_tags.append(top_header)
                             if col_index < len(col_headers):
                                 form.raw_tags.append(col_headers[col_index])
@@ -115,12 +124,13 @@ def extract_ja_second_conj_table(
             for col_index, cell_node in enumerate(
                 row_or_caption.find_child(NodeKind.TABLE_CELL)
             ):
-                cell_text = clean_node(wxr, None, cell_node)
+                ruby, no_ruby_nodes = extract_ruby(wxr, cell_node)
+                cell_text = clean_node(wxr, None, no_ruby_nodes)
                 if col_index == 0:
                     row_header = cell_text
                 elif col_index == 1:
                     for line in cell_text.splitlines():
-                        form = Form(form=line)
+                        form = Form(form=line, ruby=ruby)
                         if table_caption != "":
                             form.raw_tags.append(table_caption)
                         if row_header != "":
@@ -129,8 +139,16 @@ def extract_ja_second_conj_table(
                             forms.append(form)
                 elif col_index == 2 and len(cell_text) > 3:
                     for form in forms:
-                        form.raw_tags.append(cell_text[:3])
                         form.raw_tags.append(cell_text)
+                        raw_tag = cell_text.removesuffix("のみ")
+                        if "+" in raw_tag:
+                            raw_tag = (
+                                raw_tag[: raw_tag.index("+")]
+                                .strip()
+                                .removesuffix("音便")
+                            )
+                        if raw_tag != "":
+                            form.raw_tags.append(raw_tag)
                         translate_raw_tags(form)
             word_entry.forms.extend(forms)
 

@@ -292,6 +292,7 @@ TAGS = {
     "京阪式": ["Kyoto", "Osaka"],
     "推量・意志": "volitional",
     "様態": "appearance",
+    "語幹": "stem",
     # Template:日本語下一段活用
     "意志・勧誘": "volitional",
     "仮定条件": "conditional",

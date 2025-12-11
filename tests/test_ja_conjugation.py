@@ -210,3 +210,64 @@ class TestJaConjugation(TestCase):
                 }
             ],
         )
+
+    def test_ja_conj_ruby(self):
+        self.wxr.wtp.add_page(
+            "テンプレート:日本語形容動詞活用",
+            10,
+            """<div class="NavFrame" style="clear:both">
+<div class="NavHead" align="left">活用と結合例</div>
+<div class="NavContent">
+{| class="wikitable" style="text-align:center"
+|+ <ruby>準静的<rp>（</rp><rt>じゅんせいてき</rt><rp>）</rp></ruby>-だ 形容動詞活用表<small>（[[付録:日本語の活用|日本語の活用]]）</small>
+! colspan="7" | [[ダ活用|ダ活用]]
+|-
+! [[語幹]] !! [[未然形]]
+|-
+| <ruby>準静的<rp>（</rp><rt>じゅんせいてき</rt><rp>）</rp></ruby> || だろ
+|}
+{| class="wikitable" style="text-align:center"
+|+ 各活用形の基礎的な結合例
+! 意味 !! 語形 !! 結合
+|-
+| 言い切り || <ruby>準静的<rp>（</rp><rt>じゅんせいてき</rt><rp>）</rp></ruby>だ || 終止形のみ
+|-
+| 様態 || <ruby>準静的<rp>（</rp><rt>じゅんせいてき</rt><rp>）</rp></ruby>そうだ || 語幹 + [[そうだ]]
+|}
+</div></div>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "準静的",
+            """=={{ja}}==
+===形容動詞===
+# [[状態]]の[[変化]]の形態の一種で
+====活用====
+{{日本語形容動詞活用|{{ruby|準静的|じゅんせいてき}}|だ}}""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {
+                    "form": "準静的だろ",
+                    "raw_tags": [
+                        "準静的（じゅんせいてき）-だ 形容動詞活用表（日本語の活用）",
+                        "ダ活用",
+                    ],
+                    "ruby": [("準静的", "じゅんせいてき")],
+                    "tags": ["imperfective"],
+                },
+                {
+                    "form": "準静的だ",
+                    "raw_tags": ["各活用形の基礎的な結合例", "終止形のみ"],
+                    "ruby": [("準静的", "じゅんせいてき")],
+                    "tags": ["definitive", "terminal"],
+                },
+                {
+                    "form": "準静的そうだ",
+                    "raw_tags": ["各活用形の基礎的な結合例", "語幹 + そうだ"],
+                    "ruby": [("準静的", "じゅんせいてき")],
+                    "tags": ["appearance", "stem"],
+                },
+            ],
+        )
