@@ -319,6 +319,8 @@ TAGS = {
     "比較級": "comparative",
     "最上級": "superlative",
     "旧綴り": "archaic",
+    # Template:古典日本語四段活用
+    "已然形": "realis",
 }
 
 TOPICS = {

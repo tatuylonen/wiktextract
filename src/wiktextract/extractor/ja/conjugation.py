@@ -12,6 +12,7 @@ from .tags import translate_raw_tags
 def extract_conjugation_section(
     wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
 ):
+    # https://ja.wiktionary.org/wiki/テンプレートの一覧/ja
     for t_node in level_node.find_child(NodeKind.TEMPLATE):
         if t_node.template_name in (
             "日本語形容動詞活用",
@@ -31,10 +32,26 @@ def extract_conjugation_section(
             "日本語サ変活用",
             "日本語ザ変活用",
             "日本語変格活用",  # has delete request
+            "古典日本語四段活用",
+            "古典日本語上一段活用",
+            "古典日本語上二段活用",
+            "古典日本語下一段活用",
+            "古典日本語下二段活用",
+            "古典日本語変格活用",
         ):
             extract_ja_conj_template(wxr, word_entry, t_node)
-        elif t_node.template_name == "日本語助動詞活用":
+        elif t_node.template_name in (
+            "日本語助動詞活用",
+            "古典日本語助動詞活用",
+        ):
             extract_ja_auxiliary_verb_conj_template(wxr, word_entry, t_node)
+        elif t_node.template_name in (
+            "古典日本語ク活用",
+            "古典日本語シク活用",
+            "古典日本語ナリ活用",
+            "古典日本語タリ活用",
+        ):
+            extract_classical_ja_conj_template(wxr, word_entry, t_node)
 
 
 def extract_ja_conj_template(
@@ -179,6 +196,9 @@ def convert_ja_first_conj_table_header(header: str) -> list[str]:
     verb_tags = {
         "上一段": ["kamiichidan", "ichidan"],
         "下一段": ["shimoichidan", "ichidan"],
+        "上二段": ["kaminidan", "nidan"],
+        "下二段": ["shimonidan", "nidan"],
+        "四段": ["yodan"],
         "五段": ["godan"],
         "変格": ["irregular"],
     }
@@ -220,4 +240,46 @@ def extract_ja_auxiliary_verb_conj_template(
         if raw_tag != "":
             form.raw_tags.append(raw_tag)
         translate_raw_tags(form)
+    word_entry.forms.extend(forms)
+
+
+def extract_classical_ja_conj_template(
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+):
+    forms = []
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    col_headers = []
+    stem = ""
+    raw_tag = ""
+    for table in expanded_node.find_child(NodeKind.TABLE):
+        for row_index, row in enumerate(table.find_child(NodeKind.TABLE_ROW)):
+            for col_index, cell in enumerate(
+                row.find_child(NodeKind.TABLE_HEADER_CELL | NodeKind.TABLE_CELL)
+            ):
+                cell_text = clean_node(wxr, None, cell)
+                if cell.kind == NodeKind.TABLE_HEADER_CELL:
+                    col_headers.append(cell_text)
+                elif row_index == 1 and col_index == 1:
+                    stem = cell_text
+                elif row_index == 1 and col_index == 8:
+                    raw_tag = cell_text
+                elif not (row_index == 1 and col_index == 0):
+                    for line in cell_text.splitlines():
+                        line = line.strip("()○-")
+                        if line != "":
+                            form = Form(form=stem + line)
+                            if row_index == 2:
+                                col_index += 2
+                            if col_index < len(col_headers):
+                                form.raw_tags.append(col_headers[col_index])
+                            if form.form != "":
+                                forms.append(form)
+    for form in forms:
+        if raw_tag != "":
+            form.raw_tags.append(raw_tag)
+        translate_raw_tags(form)
+    for link in expanded_node.find_child(NodeKind.LINK):
+        clean_node(wxr, word_entry, link)
     word_entry.forms.extend(forms)
