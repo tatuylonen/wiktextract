@@ -11,9 +11,9 @@ from .tags import translate_raw_tags
 
 def extract_conjugation_section(
     wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
-) -> None:
+):
     for t_node in level_node.find_child(NodeKind.TEMPLATE):
-        if t_node.template_name in {
+        if t_node.template_name in (
             "日本語形容動詞活用",
             "日本語五段活用",
             "日本語五段活用/表示",
@@ -31,11 +31,13 @@ def extract_conjugation_section(
             "日本語サ変活用",
             "日本語ザ変活用",
             "日本語変格活用",  # has delete request
-        }:
-            extract_ja_conjugation_table_template(wxr, word_entry, t_node)
+        ):
+            extract_ja_conj_template(wxr, word_entry, t_node)
+        elif t_node.template_name == "日本語助動詞活用":
+            extract_ja_auxiliary_verb_conj_template(wxr, word_entry, t_node)
 
 
-def extract_ja_conjugation_table_template(
+def extract_ja_conj_template(
     wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
 ):
     # extract templates use this Lua module
@@ -185,3 +187,37 @@ def convert_ja_first_conj_table_header(header: str) -> list[str]:
         tags.append(f"{katakana_map[katakana]}-row")
     tags.extend(verb_tags.get(verb_type, []))
     return tags
+
+
+def extract_ja_auxiliary_verb_conj_template(
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+):
+    forms = []
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    col_headers = []
+    raw_tag = ""
+    for table in expanded_node.find_child(NodeKind.TABLE):
+        for row in table.find_child(NodeKind.TABLE_ROW):
+            for col_index, cell in enumerate(
+                row.find_child(NodeKind.TABLE_HEADER_CELL | NodeKind.TABLE_CELL)
+            ):
+                cell_text = clean_node(wxr, None, cell)
+                if cell.kind == NodeKind.TABLE_HEADER_CELL:
+                    col_headers.append(cell_text)
+                elif col_index == 6:
+                    raw_tag = cell_text
+                else:
+                    for line in cell_text.splitlines():
+                        word = line.strip("()○")
+                        if word != "":
+                            form = Form(form=word)
+                            if col_index < len(col_headers):
+                                form.raw_tags.append(col_headers[col_index])
+                            forms.append(form)
+    for form in forms:
+        if raw_tag != "":
+            form.raw_tags.append(raw_tag)
+        translate_raw_tags(form)
+    word_entry.forms.extend(forms)
