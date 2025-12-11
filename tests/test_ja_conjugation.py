@@ -271,3 +271,38 @@ class TestJaConjugation(TestCase):
                 },
             ],
         )
+
+    def test_ja_auxiliary_verb_conj(self):
+        self.wxr.wtp.add_page(
+            "テンプレート:日本語助動詞活用",
+            10,
+            """{| class="wikitable" style="text-align:center"
+! 未然形 !! 連用形 !! 終止形 !! 連体形 !! 仮定形 !! 命令形 !! 活用型
+|- align=center
+| させ || させ || させる || させる || させれ || させろ<br>させよ || 動詞下一段型
+|}""",
+        )
+        data = parse_page(
+            self.wxr,
+            "させる",
+            """=={{L|ja}}==
+===助動詞===
+#（[[使役]]）勧めたり命じたりして行う・従うようにする。
+====活用====
+{{日本語助動詞活用|させ|させ|させる|させる|させれ|させろ<br>させよ|動詞下一段型}}""",
+        )
+        self.assertEqual(
+            data[0]["forms"][-2:],
+            [
+                {
+                    "form": "させろ",
+                    "raw_tags": ["動詞下一段型"],
+                    "tags": ["imperative"],
+                },
+                {
+                    "form": "させよ",
+                    "raw_tags": ["動詞下一段型"],
+                    "tags": ["imperative"],
+                },
+            ],
+        )
