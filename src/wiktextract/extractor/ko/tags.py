@@ -25,15 +25,16 @@ GLOSS_TAGS = {
 
 SOUND_TAGS = {
     # 틀:ko-IPA
-    "Revised Romanization": ["revised", "romanization"],
-    "Revised Romanization (translit.)": [
+    "국어의 로마자 표기\nRevised Romanization": ["revised", "romanization"],
+    "국어의 로마자 표기 (음역)\nRevised Romanization (translit.)": [
         "revised",
         "romanization",
         "transliteration",
     ],
-    "McCune-Reischauer": "McCune-Reischauer",
-    "Yale Romanization": ["Yale", "romanization"],
-    "표준어/서울": ["SK-Standard", "Seoul"],
+    "매큔-라이샤워 표기\nMcCune-Reischauer": "McCune-Reischauer",
+    "예일 표기\nYale Romanization": ["Yale", "romanization"],
+    "표준어": "SK-Standard",
+    "서울": "Seoul",
     # 틀:ja-pron
     "도쿄": "Tokyo",
     # 틀:발음 듣기, 틀:IPA
@@ -93,7 +94,6 @@ TRANSLATION_TAGS = {
     "번체": "Traditional-Chinese",
     "번체자": "Traditional-Chinese",
     "오스트리아": "Austria",
-    "표준어": "standard",
     "히브리 문자": ["Hebrew", "letter"],
     "아랍 문자": ["Arabic", "letter"],
     "복수형": "plural",

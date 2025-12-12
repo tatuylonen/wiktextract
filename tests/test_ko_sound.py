@@ -52,7 +52,7 @@ class TestKoSound(TestCase):
         self.wxr.wtp.add_page(
             "틀:ko-IPA",
             10,
-            """<ul><li>(<i>[[w:대한민국 표준어|표준어]]/[[w:경기 방언|서울]]</i>) [[w:국제 음성 기호|IPA]]<sup>([[위키낱말사전:국제 음성 기호|표기]])</sup>: <span class="IPA">[ka̠]</span></li><li class="ko-pron__ph">발음: <span class="Kore" lang="ko">[<span>가</span>]</span></li></ul><table><tr><th colspan="2">로마자 표기 목록</th></tr><tr><th>[[부록:로마자 표기법/국어|국어의 로마자 표기]]<br/><span>Revised Romanization</span></th><td class="IPA">ga</td></tr></table>[[분류:한국어 IPA 발음이 포함된 낱말]]""",
+            """<ul><li>([[w:대한민국 표준어|표준어]]/[[w:경기 방언|서울]]) [[w:국제 음성 기호|IPA]]<sup>([[위키낱말사전:국제 음성 기호|표기]])</sup>: <span class="IPA">[ka̠]</span></li><li class="ko-pron__ph">발음: <span class="Kore" lang="ko">[<span>가</span>]</span></li></ul><table><tr><th colspan="2">로마자 표기 목록</th></tr><tr><th>[[부록:로마자 표기법/국어|국어의 로마자 표기]]<br/><span>Revised Romanization</span></th><td class="IPA">ga</td></tr></table>[[분류:한국어 IPA 발음이 포함된 낱말]]""",
         )
         data = parse_page(
             self.wxr,
@@ -68,7 +68,7 @@ class TestKoSound(TestCase):
             data[0]["sounds"],
             [
                 {"ipa": "[ka̠]", "tags": ["SK-Standard", "Seoul"]},
-                {"hangul": "[가]"},
+                {"hangeul": "가", "tags": ["phonetic"]},
                 {"roman": "ga", "tags": ["revised", "romanization"]},
             ],
         )
