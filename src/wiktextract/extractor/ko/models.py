@@ -21,7 +21,7 @@ class Sound(KoreanBaseModel):
     flac_url: str = ""
     tags: list[str] = []
     raw_tags: list[str] = []
-    hangul: str = ""
+    hangeul: str = ""
     roman: str = ""
     other: str = ""
 

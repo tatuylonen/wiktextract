@@ -107,6 +107,7 @@ class Sound(ChineseBaseModel):
     other: str = ""
     roman: str = ""
     rhymes: str = ""
+    hangeul: str = ""
 
 
 class Translation(ChineseBaseModel):

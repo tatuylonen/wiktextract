@@ -776,3 +776,34 @@ class TestPronunciation(TestCase):
         self.assertEqual(data[0]["sounds"][3]["raw_tags"], ["“tworzyć”"])
         self.assertEqual(data[0]["sounds"][4], {"rhymes": "-ɔʐɘt͡ɕ"})
         self.assertEqual(data[0]["hyphenations"], [{"parts": ["two", "rzyć"]}])
+
+    def test_ko_ipa(self):
+        self.wxr.wtp.add_page(
+            "Template:ko-IPA",
+            10,
+            """<ul><li>([[w:韓國標準語|韓國標準語]]/[[w:首尔方言|首尔]]) [[Wiktionary:國際音標|IPA]]<sup>([[w:韓語音系|說明]])</sup>: <span class="IPA">[jʌ̹nɡjʌ̹ɭdwe̞da̠] ~ [jʌ̹nɡjʌ̹ɭdø̞da̠]</span><ul><li><table class="audiotable"><tr><td>音頻<span class="ib-colon qualifier-colon">：</span></td><td class="audiofile">[[File:Ko-연결되다.oga|noicon|175px]]</td><td class="audiometa" style="font-size: 80%;">([[:File:Ko-연결되다.oga|檔案]])</td></tr></table>[[Category:有音頻鏈接的朝鮮語詞|연결되다]]</li></ul></li><li class="ko-pron__ph">諺文注音：<span class="Kore" lang="ko">[<span>연</span><span>결</span><b>뒈</b><span>다</span>/<span>연</span><span>결</span><span>되</span><span>다</span>]</span></li></ul><table class="ko-pron mw-collapsible mw-collapsed"><tr><th colspan="2">羅馬化</th></tr><tr><th>[[w:文化觀光部2000年式|國語羅馬字]]<sup><small>[[Wiktionary:關於朝鮮語/羅馬化|?]]</small></sup></th><td class="IPA">yeon'gyeoldoeda</td></tr></table>[[Category:有國際音標的朝鮮語詞]]""",
+        )
+        data = parse_page(
+            self.wxr,
+            "연결되다",
+            """==朝鮮語==
+===發音===
+{{ko-IPA|a=Ko-연결되다.oga}}
+===動詞===
+# [[連接]]，[[連通]]""",
+        )
+        self.assertEqual(
+            data[0]["sounds"][:-1],
+            [
+                {"ipa": "[jʌ̹nɡjʌ̹ɭdwe̞da̠]", "tags": ["SK-Standard", "Seoul"]},
+                {"ipa": "[jʌ̹nɡjʌ̹ɭdø̞da̠]", "tags": ["SK-Standard", "Seoul"]},
+                {"hangeul": "연결뒈다", "tags": ["phonetic"]},
+                {"hangeul": "연결되다", "tags": ["phonetic"]},
+                {"roman": "yeon'gyeoldoeda", "tags": ["Gwoyeu-Romatsyh"]},
+            ],
+        )
+        self.assertEqual(data[0]["sounds"][-1]["audio"], "Ko-연결되다.oga")
+        self.assertEqual(
+            data[0]["categories"],
+            ["有音頻鏈接的朝鮮語詞", "有國際音標的朝鮮語詞"],
+        )

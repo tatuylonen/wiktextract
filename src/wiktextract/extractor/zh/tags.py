@@ -156,6 +156,9 @@ VERB_TAGS: dict[str, str] = {
     "推量形": "volitional",
     "連用形": "adverbial",
     "程度形": "degree",
+    # Template:ko-verb
+    "不定式": "infinitive",
+    "連續式": "sequential",
 }
 
 # https://en.wikipedia.org/wiki/Japanese_grammar#Stem_forms
@@ -616,6 +619,13 @@ ALL_TAGS = {
     # Template:sa-ipa
     "吠陀": "Vedic",
     "古典梵語": "Classical-Sanskrit",
+    # Template:ko-ipa
+    "韓國標準語": "SK-Standard",
+    "首爾": "Seoul",
+    "首尔": "Seoul",
+    "國語羅馬字（轉寫）": ["revised-romanization", "transliteration"],
+    "馬科恩-賴肖爾式": "McCune–Reischauer",
+    "耶魯拼音": ["Yale", "romanization"],
 }
 
 
