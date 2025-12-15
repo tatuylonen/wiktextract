@@ -62,6 +62,8 @@ def extract_sound_template(
         extract_homophones_template(wxr, base_data, t_node)
     elif t_node.template_name in ["hyphenation", "hyph"]:
         extract_hyphenation_template(wxr, base_data, t_node)
+    elif t_node.template_name in ["คำอ่านไทย", "คอท"]:
+        extract_approximate_th_pron(wxr, base_data, t_node)
 
 
 def extract_ipa_template(
@@ -187,12 +189,18 @@ def extract_audio_template(
     filename = clean_node(wxr, None, t_node.template_parameters.get(2, ""))
     if filename != "":
         set_sound_file_url_fields(wxr, filename, sound)
-        for raw_tag in clean_node(
-            wxr, None, t_node.template_parameters.get("a", "")
-        ).split(","):
-            raw_tag = raw_tag.strip()
-            if raw_tag != "":
-                sound.raw_tags.append(raw_tag)
+        caption = clean_node(wxr, None, t_node.template_parameters.get(3, ""))
+        if caption != "":
+            sound.raw_tags.append(caption)
+        expanded_node = wxr.wtp.parse(
+            wxr.wtp.node_to_wikitext(t_node), expand_all=True
+        )
+        for span_node in expanded_node.find_html_recursively(
+            "span", attr_name="class", attr_value="ib-content"
+        ):
+            for raw_tag in clean_node(wxr, None, span_node).split(","):
+                if raw_tag != "":
+                    sound.raw_tags.append(raw_tag)
         translate_raw_tags(sound)
         base_data.sounds.append(sound)
         clean_node(wxr, base_data, t_node)
@@ -678,3 +686,17 @@ def extract_ko_ipa_template(
         set_sound_file_url_fields(wxr, audio_file, sound)
         sounds.append(sound)
     word_entry.sounds.extend(sounds)
+
+
+def extract_approximate_th_pron(
+    wxr: WiktextractContext, base_data: WordEntry, t_node: TemplateNode
+):
+    # https://th.wiktionary.org/wiki/แม่แบบ:คำอ่านไทย
+    for arg_index in range(1, 7):
+        if arg_index not in t_node.template_parameters:
+            break
+        value = clean_node(wxr, None, t_node.template_parameters[arg_index])
+        if value != "":
+            base_data.sounds.append(
+                Sound(other=value, raw_tags=["เทียบเสียงภาษาไทยโดยประมาณ"])
+            )
