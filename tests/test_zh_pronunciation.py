@@ -101,11 +101,11 @@ class TestPronunciation(TestCase):
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in base_data.sounds],
             [
-                {"enpr": "hĕ-lō'", "raw_tags": ["美國"]},
-                {"enpr": "hə-lō'", "raw_tags": ["美國"]},
-                {"ipa": "/hɛˈloʊ/", "raw_tags": ["美國"]},
-                {"ipa": "/həˈloʊ/", "raw_tags": ["美國"]},
-                {"ipa": "/ˈhɛloʊ/", "raw_tags": ["美國"]},
+                {"enpr": "hĕ-lō'", "tags": ["US"]},
+                {"enpr": "hə-lō'", "tags": ["US"]},
+                {"ipa": "/hɛˈloʊ/", "tags": ["US"]},
+                {"ipa": "/həˈloʊ/", "tags": ["US"]},
+                {"ipa": "/ˈhɛloʊ/", "tags": ["US"]},
             ],
         )
 
@@ -807,3 +807,22 @@ class TestPronunciation(TestCase):
             data[0]["categories"],
             ["有音頻鏈接的朝鮮語詞", "有國際音標的朝鮮語詞"],
         )
+
+    def test_audio_location(self):
+        self.wxr.wtp.add_page(
+            "Template:audio",
+            10,
+            """<table class="audiotable"><tr><td>音頻 <span class="ib-brac qualifier-brac">(</span><span class="usage-label-accent"><span class="ib-content">[[w:柏林|柏林]]</span></span><span class="ib-brac qualifier-brac">)</span><span class="ib-colon qualifier-colon">：</span></td><td class="audiofile">[[File:De-verrückt.ogg|noicon|175px]]</td><td class="audiometa" style="font-size: 80%;">([[:File:De-verrückt.ogg|檔案]])</td></tr></table>[[Category:有音頻鏈接的德語詞|VERRUCKT]]""",
+        )
+        data = parse_page(
+            self.wxr,
+            "verrückt",
+            """==德语==
+===发音===
+* {{audio|de|De-verrückt.ogg|a=Berlin}}
+===分词===
+# {{past participle of|de|verrücken}}""",
+        )
+        self.assertEqual(data[0]["sounds"][0]["audio"], "De-verrückt.ogg")
+        self.assertEqual(data[0]["sounds"][0]["tags"], ["Berlin"])
+        self.assertEqual(data[0]["categories"], ["有音頻鏈接的德語詞"])

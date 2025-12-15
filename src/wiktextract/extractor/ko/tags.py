@@ -64,6 +64,7 @@ SOUND_TAGS = {
     "베를린": "Berlin",
     "비격식체": "informal",
     "민난어 장저우": ["Min-Nan", "Zhangzhou"],
+    "대한민국": "South-Korea",
 }
 
 HEADER_TAGS = {

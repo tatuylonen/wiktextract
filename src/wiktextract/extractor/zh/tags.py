@@ -626,6 +626,17 @@ ALL_TAGS = {
     "國語羅馬字（轉寫）": ["revised-romanization", "transliteration"],
     "馬科恩-賴肖爾式": "McCune–Reischauer",
     "耶魯拼音": ["Yale", "romanization"],
+    # Template:audio
+    "標準英音": "Received-Pronunciation",
+    "通用美式": "General-American",
+    "（通用美式）音频": "General-American",
+    "柏林": "Berlin",
+    "美國": "US",
+    "澳大利亞": "Australia",
+    "南英格蘭": "Southern-England",
+    "加利福尼亞": "California",
+    "加拿大": "Canada",
+    "新西蘭": "New-Zealand",
 }
 
 

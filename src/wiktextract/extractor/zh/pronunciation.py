@@ -74,7 +74,9 @@ def process_pron_template(
         # https://zh.wiktionary.org/wiki/Template:Accent
         raw_tags.append(clean_node(wxr, None, template_node).strip("()"))
     elif template_name in ["audio", "音"]:
-        sounds.extend(process_audio_template(wxr, template_node, raw_tags))
+        new_sounds, new_cats = process_audio_template(
+            wxr, template_node, raw_tags
+        )
     elif template_name == "ko-ipa":
         new_sounds, new_cats = extract_ko_ipa_template(
             wxr, template_node, raw_tags
@@ -349,21 +351,29 @@ def extract_homophones_template(
 
 
 def process_audio_template(
-    wxr: WiktextractContext, template_node: TemplateNode, raw_tags: list[str]
-) -> list[Sound]:
+    wxr: WiktextractContext, t_node: TemplateNode, raw_tags: list[str]
+) -> tuple[list[Sound], list[str]]:
     # https://zh.wiktionary.org/wiki/Template:Audio
-    sound_file = clean_node(
-        wxr, None, template_node.template_parameters.get(2, "")
-    )
-    sound_data = Sound()
+    cats = {}
+    sound_file = clean_node(wxr, None, t_node.template_parameters.get(2, ""))
+    sound_data = Sound(raw_tags=raw_tags)
     set_sound_file_url_fields(wxr, sound_file, sound_data)
-    raw_tag = clean_node(
-        wxr, None, template_node.template_parameters.get(3, "")
-    )
+    raw_tag = clean_node(wxr, None, t_node.template_parameters.get(3, ""))
     if len(raw_tag) > 0:
         sound_data.raw_tags.append(raw_tag)
-    sound_data.raw_tags.extend(raw_tags)
-    return [sound_data]
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for span_node in expanded_node.find_html_recursively(
+        "span", attr_name="class", attr_value="ib-content"
+    ):
+        for raw_tag in re.split(r",|，", clean_node(wxr, None, span_node)):
+            raw_tag = raw_tag.strip()
+            if raw_tag != "":
+                sound_data.raw_tags.append(raw_tag)
+    translate_raw_tags(sound_data)
+    clean_node(wxr, cats, expanded_node)
+    return [sound_data], cats.get("categories", [])
 
 
 def extract_ipa_template(
@@ -455,6 +465,7 @@ def process_enpr_template(
             ),
             raw_tags=raw_tags,
         )
+        translate_raw_tags(sound)
         sounds.append(sound)
     return sounds
 

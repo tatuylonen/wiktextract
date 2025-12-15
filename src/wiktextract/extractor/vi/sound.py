@@ -198,7 +198,17 @@ def extract_audio_template(
     )
     if raw_tag != "":
         sound.raw_tags.append(raw_tag)
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for span_node in expanded_node.find_html_recursively(
+        "span", attr_name="class", attr_value="ib-content"
+    ):
+        for raw_tag in clean_node(wxr, None, span_node).split(","):
+            if raw_tag != "":
+                sound.raw_tags.append(raw_tag)
     translate_raw_tags(sound)
+    clean_node(wxr, base_data, expanded_node)
     base_data.sounds.append(sound)
 
 
