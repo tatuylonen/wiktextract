@@ -232,7 +232,7 @@ def process_pos_section(
 
     for table_node in level_node.find_child(NodeKind.TABLE):
         # page "beide"
-        process_noun_table(wxr, page_data[-1], table_node)
+        process_noun_table(wxr, page_data[-1], table_node, "")
 
     if not level_node.contain_node(NodeKind.LEVEL4):
         extract_glosses(wxr, page_data[-1], level_node)
