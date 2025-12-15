@@ -114,7 +114,7 @@ def process_verb_table(
                 else:
                     for cell_line in cell_text.splitlines():
                         for form_str in map(str.strip, cell_line.split(",")):
-                            if form_str in ["", "—", wxr.wtp.title]:
+                            if form_str in ["", "—"]:
                                 continue
                             elif form_str.startswith("Flexion:"):
                                 parse_flexion_page(wxr, word_entry, form_str)
@@ -209,7 +209,7 @@ def process_noun_table(
                     form_text = form_text.strip()
                     if form_text.startswith("(") and form_text.endswith(")"):
                         form_text = form_text.strip("() ")
-                    if form_text in ["—", "–", "-", "", "?", wxr.wtp.title]:
+                    if form_text in ["—", "–", "-", "", "?"]:
                         continue
                     form = Form(form=form_text)
                     if table_header != "":
@@ -335,7 +335,7 @@ def extract_de_pronoun_table(
                         ):
                             form.raw_tags.append(header.text)
                     translate_raw_tags(form)
-                    if form.form != wxr.wtp.title:
+                    if form.form not in ["", "—"]:
                         word_entry.forms.append(form)
                     article = ""
                 col_index += 1
@@ -354,6 +354,6 @@ def separate_de_article(
         if m is not None:
             form.form = form.form[m.end() :]
             form.article = m.group(1)
-        if form.form != wxr.wtp.title:
+        if form.form not in ["", "—"]:
             new_forms.append(form)
     return new_forms
