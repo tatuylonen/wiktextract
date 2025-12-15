@@ -329,6 +329,7 @@ class TestDeForms(TestCase):
                 {"form": "sieh!", "tags": ["imperative", "singular"]},
                 {"form": "seht!", "tags": ["imperative", "plural"]},
                 {"form": "gesehen", "tags": ["participle-2", "perfect"]},
+                {"form": "sehen", "tags": ["participle-2", "perfect"]},
                 {"form": "haben", "tags": ["auxiliary", "perfect"]},
                 {
                     "form": "sehen",
@@ -531,8 +532,18 @@ class TestDeForms(TestCase):
             page_data[0]["forms"],
             [
                 {
+                    "form": "mein",
+                    "tags": ["nominative", "singular", "masculine"],
+                    "raw_tags": ["attributiv (vor Substantiv)"],
+                },
+                {
                     "form": "meine",
                     "tags": ["nominative", "singular", "feminine"],
+                    "raw_tags": ["attributiv (vor Substantiv)"],
+                },
+                {
+                    "form": "mein",
+                    "tags": ["nominative", "singular", "neuter"],
                     "raw_tags": ["attributiv (vor Substantiv)"],
                 },
                 {
@@ -660,10 +671,15 @@ class TestDeForms(TestCase):
             data[0]["forms"],
             [
                 {
+                    "form": "swim",
+                    "pronouns": ["I", "you", "they"],
+                    "tags": ["present"],
+                },
+                {
                     "form": "swims",
                     "tags": ["present"],
                     "pronouns": ["he", "she", "it"],
-                }
+                },
             ],
         )
 
@@ -705,9 +721,24 @@ class TestDeForms(TestCase):
             data[0]["forms"],
             [
                 {
+                    "article": "der",
+                    "form": "Peter",
+                    "tags": ["nominative", "singular"],
+                },
+                {
+                    "article": "die",
+                    "form": "Peter",
+                    "tags": ["nominative", "plural"],
+                },
+                {
                     "article": "die",
                     "form": "Peters",
                     "tags": ["nominative", "plural"],
+                },
+                {
+                    "article": "des",
+                    "form": "Peter",
+                    "tags": ["genitive", "singular"],
                 },
                 {
                     "article": "des",
