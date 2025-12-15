@@ -1,7 +1,7 @@
 import re
 from dataclasses import dataclass
 
-from wikitextprocessor import NodeKind, TemplateNode
+from wikitextprocessor import NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -32,7 +32,7 @@ def extract_inf_table_template(
         )
         or re.search(r" Personalpronomen \d$", t_node.template_name)
     ):
-        process_noun_table(wxr, word_entry, t_node)
+        extract_noun_table_template(wxr, word_entry, t_node)
     elif t_node.template_name.endswith(
         ("Adjektiv Übersicht", "Adverb Übersicht")
     ):
@@ -136,24 +136,37 @@ def process_verb_table(
         row_headers = new_row_headers
 
 
-def process_noun_table(
+def extract_noun_table_template(
     wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
-) -> None:
+):
     # Vorlage:Deutsch Substantiv Übersicht
     from .page import extract_note_section
 
     expanded_template = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(t_node), expand_all=True
     )
-    table_nodes = list(expanded_template.find_child(NodeKind.TABLE))
-    if len(table_nodes) == 0:
-        return
-    table_node = table_nodes[0]
+    clean_node(wxr, word_entry, expanded_template)
+    for table in expanded_template.find_child(NodeKind.TABLE):
+        process_noun_table(wxr, word_entry, table, t_node.template_name)
+
+    # Vorlage:Deutsch Nachname Übersicht
+    for level_node in expanded_template.find_child(NodeKind.LEVEL4):
+        section_text = clean_node(wxr, None, level_node.largs)
+        if section_text.startswith("Anmerkung"):
+            extract_note_section(wxr, word_entry, level_node)
+
+
+def process_noun_table(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    table: WikiNode,
+    template_name: str,
+):
     column_headers = []
     table_header = ""
     forms = []
     flexion_pages = []
-    for table_row in table_node.find_child(NodeKind.TABLE_ROW):
+    for table_row in table.find_child(NodeKind.TABLE_ROW):
         row_header = ""
         is_header_row = not table_row.contain_node(NodeKind.TABLE_CELL)
         row_has_header = table_row.contain_node(NodeKind.TABLE_HEADER_CELL)
@@ -214,20 +227,14 @@ def process_noun_table(
                     forms.append(form)
                 col_index += 1
 
-    if t_node.template_name in (
+    if template_name in (
         "Deutsch Substantiv Übersicht",
         "Deutsch Vorname Übersicht m",
     ):
         forms = separate_de_article(wxr, forms)
     word_entry.forms.extend(forms)
-    clean_node(wxr, word_entry, expanded_template)  # category links
     for flexion_page in flexion_pages:
         parse_flexion_page(wxr, word_entry, flexion_page)
-    # Vorlage:Deutsch Nachname Übersicht
-    for level_node in expanded_template.find_child(NodeKind.LEVEL4):
-        section_text = clean_node(wxr, None, level_node.largs)
-        if section_text.startswith("Anmerkung"):
-            extract_note_section(wxr, word_entry, level_node)
 
 
 def process_adj_table(
