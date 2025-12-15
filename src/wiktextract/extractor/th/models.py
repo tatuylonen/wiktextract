@@ -27,6 +27,7 @@ class Sound(ThaiBaseModel):
     roman: str = ""
     rhymes: str = ""
     enpr: str = ""
+    hangeul: str = ""
 
 
 class Example(ThaiBaseModel):

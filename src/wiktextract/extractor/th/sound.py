@@ -43,6 +43,8 @@ def extract_sound_template(
         extract_lo_pron_template(wxr, base_data, t_node)
     elif t_node.template_name == "zh-pron":
         extract_zh_pron_template(wxr, base_data, t_node)
+    elif t_node.template_name.lower() == "ko-ipa":
+        extract_ko_ipa_template(wxr, base_data, t_node)
     elif (
         t_node.template_name.lower() == "ipa"
         or t_node.template_name.lower().endswith(("-ipa", "-pron"))
@@ -611,3 +613,68 @@ def extract_hyphenation_template(
         )
         if len(h_data.parts) > 0:
             base_data.hyphenations.append(h_data)
+
+
+def extract_ko_ipa_template(
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+):
+    sounds = []
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    clean_node(wxr, word_entry, expanded_node)
+    for ul_node in expanded_node.find_html("ul"):
+        for li_node in ul_node.find_html("li"):
+            if "ko-pron__ph" in li_node.attrs.get("class", ""):
+                for span_node in li_node.find_html(
+                    "span", attr_name="lang", attr_value="ko"
+                ):
+                    hangeul_str = clean_node(wxr, None, span_node).strip("[]")
+                    for hangeul in hangeul_str.split("/"):
+                        if hangeul != "":
+                            sounds.append(
+                                Sound(hangeul=hangeul, tags=["phonetic"])
+                            )
+            else:
+                raw_tags = []
+                for i_node in li_node.find_html("i"):
+                    for raw_tag in clean_node(wxr, None, i_node).split("/"):
+                        if raw_tag not in ["", "สัทอักษรสากล"]:
+                            raw_tags.append(raw_tag)
+                for span_node in li_node.find_html(
+                    "span", attr_name="class", attr_value="IPA"
+                ):
+                    ipas = clean_node(wxr, None, span_node)
+                    for ipa in ipas.split("~"):
+                        ipa = ipa.strip()
+                        if ipa != "":
+                            sound = Sound(ipa=ipa, raw_tags=raw_tags)
+                            translate_raw_tags(sound)
+                            sounds.append(sound)
+
+    for table in expanded_node.find_html("table"):
+        for tr in table.find_html("tr"):
+            raw_tag = ""
+            for th in tr.find_html("th"):
+                raw_tag = clean_node(wxr, None, th)
+            for td in tr.find_html("td"):
+                roman = clean_node(wxr, None, td)
+                if roman != "":
+                    sound = Sound(roman=roman)
+                    if raw_tag != "":
+                        sound.raw_tags.append(raw_tag)
+                        translate_raw_tags(sound)
+                    sounds.append(sound)
+
+    audio_file = clean_node(
+        wxr,
+        None,
+        t_node.template_parameters.get(
+            "a", t_node.template_parameters.get("audio", "")
+        ),
+    )
+    if audio_file != "":
+        sound = Sound()
+        set_sound_file_url_fields(wxr, audio_file, sound)
+        sounds.append(sound)
+    word_entry.sounds.extend(sounds)

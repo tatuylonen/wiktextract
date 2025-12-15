@@ -156,6 +156,17 @@ SOUND_TAGS = {
     # Template:sa-ipa
     "vệ đà": "Vedic",
     "tiếng phạn cổ điển": "Classical-Sanskrit",
+    # Template:ko-ipa
+    "romaja quốc ngữ": ["revised", "romanization"],
+    "romaja quốc ngữ (chuyển tự)": [
+        "revised",
+        "romanization",
+        "transliteration",
+    ],
+    "mccune–reischauer": "McCune-Reischauer",
+    "latinh hóa yale": ["Yale", "romanization"],
+    "hq tiêu chuẩn": "SK-Standard",
+    "seoul": "Seoul",
 }
 
 ZH_X_TAGS = {

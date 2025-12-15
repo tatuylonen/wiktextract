@@ -95,6 +95,7 @@ class Sound(MalayBaseModel):
     rhymes: str = ""
     categories: list[str] = Field(default=[], exclude=True)
     hyphenations: list[Hyphenation] = Field(default=[], exclude=True)
+    hangeul: str = ""
 
 
 class Classifier(MalayBaseModel):

@@ -111,6 +111,7 @@ class Sound(VietnameseBaseModel):
     zh_pron: str = ""
     roman: str = ""
     other: str = ""
+    hangeul: str = ""
 
 
 class Hyphenation(VietnameseBaseModel):
