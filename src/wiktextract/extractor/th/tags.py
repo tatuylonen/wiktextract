@@ -95,6 +95,17 @@ SOUND_TAGS = {
     # Template:sa-ipa
     "พระเวท": "Vedic",
     "สันสกฤตคลาสสิก": "Classical-Sanskrit",
+    # Template:ko-ipa
+    "มาตรฐานเกาหลีใต้": "SK-Standard",
+    "โซล": "Seoul",
+    "การแผลงเป็นอักษรโรมันฉบับปรับปรุง": ["revised", "romanization"],
+    "การแผลงเป็นอักษรโรมันฉบับปรับปรุง (การถอดอักษร)": [
+        "revised",
+        "romanization",
+        "transliteration",
+    ],
+    "ระบบแมกคูน-ไรซ์ชาวเออร์": "McCune-Reischauer",
+    "ระบบเยล": ["Yale", "romanization"],
 }
 
 LABEL_TAGS = {
