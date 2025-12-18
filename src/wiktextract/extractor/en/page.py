@@ -761,6 +761,11 @@ sense_linkage_templates: dict[str, str] = {
     "pf": "related",
     "imperfectives": "related",
     "impf": "related",
+    "parasynonyms": "synonyms",
+    "par": "synonyms",
+    "parasyn": "synonyms",
+    "nearsyn": "synonyms",
+    "near-syn": "synonyms",
 }
 
 sense_linkage_templates_tags: dict[str, list[str]] = {
@@ -801,8 +806,13 @@ def parse_sense_linkage(
     field = sense_linkage_templates[name]
     field_tags = sense_linkage_templates_tags.get(name, [])
     for i in range(2, 20):
-        w = ht.get(i) or ""
-        w = clean_node(wxr, data, w)
+        if i not in ht:
+            break
+        w = clean_node(wxr, data, ht[i])
+        if "#" in w:
+            w = w[: w.index("#")]
+        if w in ["", "<"]:  # used in "hypernyms" template
+            continue
         is_thesaurus = False
         for alias in ns_title_prefix_tuple(wxr, "Thesaurus"):
             if w.startswith(alias):
@@ -817,7 +827,7 @@ def parse_sense_linkage(
                         w,
                         lang_code,
                         pos,
-                        field,  # type: ignore
+                        "synonyms",  # GH issue #1570
                     ):
                         l_data: LinkageData = {
                             "word": t_data.term,
@@ -829,8 +839,6 @@ def parse_sense_linkage(
                             l_data["raw_tags"] = t_data.raw_tags
                         data_append(data, field, l_data)
                 break
-        if not w:
-            break
         if is_thesaurus:
             continue
         tags: list[str] = []
