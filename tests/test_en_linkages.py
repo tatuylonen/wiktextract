@@ -1919,3 +1919,33 @@ class EnLinkageTests(unittest.TestCase):
             {"sense": "Foo", "word": "foo-four"},
         ]
         self.assertEqual(data[0]["derived"], expected)
+
+    def test_hypernyms_template(self):
+        from wiktextract.thesaurus import ThesaurusTerm, insert_thesaurus_term
+
+        insert_thesaurus_term(
+            self.wxr.thesaurus_db_conn,
+            ThesaurusTerm(
+                entry="jerk",
+                language_code="en",
+                pos="noun",
+                linkage="synonyms",
+                term="assbucket",
+            ),
+        )
+        data = parse_page(
+            self.wxr,
+            "snake",
+            """==English==
+===Noun===
+# A person who acts deceitfully for personal or social gain
+#: {{hyper|en|jerk<id:Q193607>|<|person#Noun|Thesaurus:jerk}}""",
+        )
+        self.assertEqual(
+            data[0]["senses"][0]["hypernyms"],
+            [
+                {"word": "jerk"},
+                {"word": "person"},
+                {"source": "Thesaurus:jerk", "word": "assbucket"},
+            ],
+        )
