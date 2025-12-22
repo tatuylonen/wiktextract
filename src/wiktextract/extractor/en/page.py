@@ -685,6 +685,7 @@ quotation_templates: set[str] = {
     "quote-wikipedia",
     "wikiquote",
     "Wikiquote",
+    "Q",
 }
 
 taxonomy_templates = {
