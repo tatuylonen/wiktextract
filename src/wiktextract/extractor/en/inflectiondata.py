@@ -7267,9 +7267,10 @@ infl_start_map = {
     "with infinitive": "infinitive",
     "with gerund": "gerund",
     "with informal second-person singular imperative": "informal second-person singular imperative",
-    "with informal second-person singular tú imperative":  # cedular/Spanish
+    # Template:es-conj Module:es-verb
+    "with informal second-person singular tuteo imperative":  # cedular/Spanish
     "informal second-person singular imperative with-tú",
-    "with informal second-person singular vos imperative": "informal second-person singular imperative with-vos",
+    "with informal second-person singular voseo imperative": "informal second-person singular imperative with-vos",
     "with formal second-person singular imperative": "formal second-person singular imperative",
     "with first-person plural imperative": "first-person plural imperative",
     "with informal second-person plural imperative": "informal second-person plural imperative",
