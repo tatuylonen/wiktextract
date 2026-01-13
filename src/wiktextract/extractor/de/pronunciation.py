@@ -55,6 +55,8 @@ def extract_pron_list_item(
                         if rhyme != "":
                             sounds.append(Sound(rhymes=rhyme))
                             clean_node(wxr, sounds[-1], node)
+                    case _ if node.template_name.startswith("Pl."):
+                        raw_tags.append("Plural")
 
     return sounds
 

@@ -22,6 +22,7 @@ def extract_inf_table_template(
                 "Nachname Übersicht",
                 "Eigenname Übersicht",
                 "Vorname Übersicht m",
+                "Vorname Übersicht f",
                 "Name Übersicht",
                 "Pronomina-Tabelle",
                 "Pronomen Übersicht",
@@ -230,6 +231,7 @@ def process_noun_table(
     if template_name in (
         "Deutsch Substantiv Übersicht",
         "Deutsch Vorname Übersicht m",
+        "Deutsch Vorname Übersicht f",
     ):
         forms = separate_de_article(wxr, forms)
     word_entry.forms.extend(forms)

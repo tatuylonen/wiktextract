@@ -353,6 +353,8 @@ OTHER_TAGS = {
     "Wade-Giles": "Wade-Giles",
     "umgangssprachlich": "colloquial",
     "literarisch": "literary",
+    "franz.": "French",
+    "engl.": "English",
 }
 
 TENSE_TAGS = {
