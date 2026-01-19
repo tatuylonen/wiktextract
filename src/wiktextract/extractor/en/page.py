@@ -2627,7 +2627,7 @@ def parse_language(
                 tablecontext = None
                 m = re.search(r"{{([^}{|]+)\|?", text)
                 if m:
-                    template_name = m.group(1)
+                    template_name = m.group(1).strip()
                     tablecontext = TableContext(template_name)
 
                 parse_inflection_section(
