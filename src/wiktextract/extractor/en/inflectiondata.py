@@ -2611,7 +2611,11 @@ infl_map: dict[str, InflMapNode] = {
     },
     "Subjunctive mood ➤": {
         "lang": "Greek",
-        "then": "subjunctive dummy-tense",
+        "then": {
+            "inflection-template": "el-conjug-1st",
+            "then": "dummy-skip-this",
+            "else": "subjunctive dummy-tense",
+        },
         "else": "subjunctive",
     },
     "Imperative mood ➤": {
