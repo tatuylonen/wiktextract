@@ -633,6 +633,8 @@ alt_of_form_of_clean_re = re.compile(
             r", called ",
             r", especially ",
             r", slang for ",
+            r", used to",  # c/o /English
+            r", commonly",  # b/w /English
             r" corresponding to ",
             r" equivalent to ",
             r" popularized by ",
