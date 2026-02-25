@@ -2358,7 +2358,9 @@ infl_map: dict[str, InflMapNode] = {
     "f-w1": "",  # Icelandic ['-ína']
     "Supine": "supine",
     "Imper. plural": "imperative plural",
+    "imper. plural": "imperative plural",
     "Ind. plural": "indicative plural",
+    "ind. plural": "indicative plural",
     "-skur a24": "",  # Faroese ['-skur']
     "Singular (eintal)": "singular",
     "Nominative (hvørfall)": "nominative",
