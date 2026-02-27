@@ -194,7 +194,7 @@ head_final_re_text = r"( -)?( ({}))+".format(
         sorted(xlat_head_map.keys(), key=len, reverse=True)
     )
 )
-head_final_re = re.compile(head_final_re_text + "$")
+head_final_re = re.compile(head_final_re_text + r"$")
 
 # Regexp used to match head tag specifiers at end of a form for certain
 # Bantu languages (particularly Swahili and similar languages).
@@ -227,7 +227,7 @@ head_split_re_text = (
     + head_final_semitic_re_text
     + "|"
     + head_final_other_re_text
-    + ")?( or |[,;]+)"
+    + ")?( or |[,;]+| *$)"
 )
 head_split_re = re.compile(head_split_re_text)
 head_split_re_parens = 0
@@ -1949,6 +1949,7 @@ def parse_word_head(
     else:
         # Do the normal split; previous only-behavior.
         splits = re.split(head_split_re, base)
+    # print("BASE: ", repr(base))
     # print("SPLITS:", splits)
     alts: list[str] = []
     # print("parse_word_head: splits:", splits,
