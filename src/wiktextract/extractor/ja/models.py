@@ -43,6 +43,7 @@ class Form(JapaneseBaseModel):
     raw_tags: list[str] = []
     roman: str = ""
     literal_meaning: str = ""
+    ruby: list[tuple[str, ...]] = []
 
 
 class Sound(JapaneseBaseModel):
@@ -58,9 +59,10 @@ class Sound(JapaneseBaseModel):
     tags: list[str] = []
     raw_tags: list[str] = []
     homophones: list[str] = []
-    form: str = ""
+    other: str = ""
     roman: str = ""
     sense: str = ""
+    rhymes: str = ""
 
 
 class Translation(JapaneseBaseModel):
@@ -93,6 +95,16 @@ class Descendant(JapaneseBaseModel):
     roman: str = ""
     descendants: list["Descendant"] = []
     sense: str = ""
+    tags: list[str] = []
+    raw_tags: list[str] = []
+
+
+class Hyphenation(JapaneseBaseModel):
+    parts: list[str] = []
+
+
+class Classifier(JapaneseBaseModel):
+    classifier: str = ""
     tags: list[str] = []
     raw_tags: list[str] = []
 
@@ -134,3 +146,5 @@ class WordEntry(JapaneseBaseModel):
     anagrams: list[Linkage] = []
     notes: list[str] = []
     proverbs: list[Descendant] = []
+    hyphenations: list[Hyphenation] = []
+    classifiers: list[Classifier] = []

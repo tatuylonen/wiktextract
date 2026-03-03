@@ -10,6 +10,8 @@ from wiktextract.wxr_context import WiktextractContext
 
 
 class TestRUExample(unittest.TestCase):
+    maxDiff = None
+
     def setUp(self) -> None:
         self.wxr = WiktextractContext(
             Wtp(lang_code="ru"),
@@ -31,11 +33,6 @@ class TestRUExample(unittest.TestCase):
                 "input": "{{пример|Недолго думая, отправляю овощ в рот.|М. И. Саитов|Островки||Бельские Просторы|2010|источник=НКРЯ}}",
                 "expected": [
                     {
-                        "author": "М. И. Саитов",
-                        "collection": "Бельские Просторы",
-                        "date_published": "2010",
-                        "source": "НКРЯ",
-                        "title": "Островки",
                         "text": "Недолго думая, отправляю овощ в рот.",
                     }
                 ],

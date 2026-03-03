@@ -17,6 +17,9 @@ class TestDEPronunciation(unittest.TestCase):
                 dump_file_lang_code="de", capture_language_codes=None
             ),
         )
+        self.wxr.wtp.add_page(
+            "Vorlage:Lautschrift", 10, '[<span class="ipa">{{{1}}}</span>]'
+        )
 
     def tearDown(self) -> None:
         self.wxr.wtp.close_db_conn()
@@ -26,9 +29,6 @@ class TestDEPronunciation(unittest.TestCase):
             "Vorlage:Audio",
             10,
             """[[Datei:Loudspeaker.svg|15px|Lautsprecherbild|link=]]<span class="aplay">&nbsp;</span>[[Media:De-at-Hund.ogg|Hund&nbsp;(Österreich)]]<sup>&nbsp;([[:Datei:De-at-Hund.ogg|Info]])</sup>[[Kategorie:Wiktionary:Audio-Datei]]""",
-        )
-        self.wxr.wtp.add_page(
-            "Vorlage:Lautschrift", 10, '[<span class="ipa">{{{1}}}</span>]'
         )
         data = parse_page(
             self.wxr,
@@ -48,9 +48,6 @@ class TestDEPronunciation(unittest.TestCase):
         self.assertEqual(data[0]["sounds"][2], {"rhymes": "ʊnt"})
 
     def test_nested_lists(self):
-        self.wxr.wtp.add_page(
-            "Vorlage:Lautschrift", 10, '[<span class="ipa">{{{1}}}</span>]'
-        )
         data = parse_page(
             self.wxr,
             "Garage",
@@ -67,9 +64,6 @@ class TestDEPronunciation(unittest.TestCase):
         )
 
     def test_italic_tag(self):
-        self.wxr.wtp.add_page(
-            "Vorlage:Lautschrift", 10, '[<span class="ipa">{{{1}}}</span>]'
-        )
         data = parse_page(
             self.wxr,
             "pokertest",
@@ -85,5 +79,25 @@ class TestDEPronunciation(unittest.TestCase):
             [
                 {"ipa": "[ˈpoːkɐtəst]"},
                 {"ipa": "[ˈpɔʊ̯kɐtəst]", "tags": ["rare"]},
+            ],
+        )
+
+    def test_plural_tag_template(self):
+        data = parse_page(
+            self.wxr,
+            "Julie",
+            """== Julie ({{Sprache|Deutsch}}) ==
+=== {{Wortart|Substantiv|Deutsch}} ===
+====Aussprache====
+:{{IPA}} {{Lautschrift|ˈjuːli̯ə}}, {{Pl.1}} {{Lautschrift|ˈjuːli̯ən}}, {{Pl.2}} {{Lautschrift|ˈjuːli̯əs}}
+====Bedeutungen====
+:[1] weiblicher [[Vorname]]""",
+        )
+        self.assertEqual(
+            data[0]["sounds"],
+            [
+                {"ipa": "[ˈjuːli̯ə]"},
+                {"ipa": "[ˈjuːli̯ən]", "tags": ["plural"]},
+                {"ipa": "[ˈjuːli̯əs]", "tags": ["plural"]},
             ],
         )

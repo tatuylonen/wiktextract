@@ -21,23 +21,50 @@ def extract_sound_section(
 ):
     for node in level_node.children:
         if isinstance(node, TemplateNode):
-            if node.template_name == "vie-pron":
-                extract_vie_pron_template(wxr, base_data, node)
-            elif node.template_name in [
-                "âm thanh-IPA",
-                "pron-audio",
-                "audio-for-pron",
-            ]:
-                extract_pron_audio_template(wxr, base_data, node)
-            elif node.template_name == "tyz-IPA":
-                extract_tyz_ipa_template(wxr, base_data, node)
-            elif node.template_name in ["zh-pron", "zho-pron"]:
-                extract_zh_pron_template(wxr, base_data, node)
-            elif node.template_name in ["th-pron", "tha-pron"]:
-                extract_th_pron_template(wxr, base_data, node)
+            extract_sound_template(wxr, base_data, node)
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
             for list_item in node.find_child(NodeKind.LIST_ITEM):
                 extract_sound_list_item(wxr, base_data, list_item)
+
+
+def extract_sound_template(
+    wxr: WiktextractContext, base_data: WordEntry, t_node: TemplateNode
+):
+    if t_node.template_name == "vie-pron":
+        extract_vie_pron_template(wxr, base_data, t_node)
+    elif t_node.template_name in [
+        "âm thanh-IPA",
+        "pron-audio",
+        "audio-for-pron",
+    ]:
+        extract_pron_audio_template(wxr, base_data, t_node)
+    elif t_node.template_name in ["zh-pron", "zho-pron"]:
+        extract_zh_pron_template(wxr, base_data, t_node)
+    elif t_node.template_name in ["th-pron", "tha-pron"]:
+        extract_th_pron_template(wxr, base_data, t_node)
+    elif t_node.template_name in ["ja-pron", "ja-IPA", "jpn-IPA", "jpn-pron"]:
+        extract_ja_pron_template(wxr, base_data, t_node)
+    elif t_node.template_name in ["âm thanh", "Audio", "Âm thanh"]:
+        extract_audio_template(wxr, base_data, t_node, 1)
+    elif t_node.template_name in ["âm thanh-2", "audio"]:
+        extract_audio_template(wxr, base_data, t_node, 2)
+    elif t_node.template_name.lower() in ["ko-ipa", "kor-ipa"]:
+        extract_ko_ipa_template(wxr, base_data, t_node)
+    elif t_node.template_name in [
+        "IPA",
+        "IPA2",
+        "IPA3",
+        "IPA4",
+    ] or t_node.template_name.endswith("-IPA"):
+        extract_ipa_template(wxr, base_data, t_node, "IPA")
+    elif t_node.template_name in ["enPR", "AHD"]:
+        extract_ipa_template(wxr, base_data, t_node, "enPR")
+    elif t_node.template_name in ["rhymes", "rhyme"]:
+        extract_rhymes_template(wxr, base_data, t_node)
+    elif t_node.template_name in ["hyphenation", "hyph"]:
+        extract_hyphenation_template(wxr, base_data, t_node)
+    elif t_node.template_name in ["homophones", "homophone", "hmp"]:
+        extract_homophones_template(wxr, base_data, t_node)
 
 
 def extract_sound_list_item(
@@ -45,25 +72,7 @@ def extract_sound_list_item(
 ):
     for node in list_item.children:
         if isinstance(node, TemplateNode):
-            if node.template_name in ["âm thanh", "Audio", "Âm thanh"]:
-                extract_audio_template(wxr, base_data, node, 1)
-            elif node.template_name in ["âm thanh-2", "audio"]:
-                extract_audio_template(wxr, base_data, node, 2)
-            elif node.template_name in [
-                "IPA",
-                "IPA2",
-                "IPA3",
-                "IPA4",
-                "fra-IPA",
-                "fr-IPA",
-            ]:
-                extract_ipa_template(wxr, base_data, node, "IPA")
-            elif node.template_name in ["enPR", "AHD"]:
-                extract_ipa_template(wxr, base_data, node, "enPR")
-            elif node.template_name in ["rhymes", "rhyme"]:
-                extract_rhymes_template(wxr, base_data, node)
-            elif node.template_name in ["hyphenation", "hyph"]:
-                extract_hyphenation_template(wxr, base_data, node)
+            extract_sound_template(wxr, base_data, node)
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
             for child_list_item in node.find_child(NodeKind.LIST_ITEM):
                 extract_sound_list_item(wxr, base_data, child_list_item)
@@ -189,34 +198,18 @@ def extract_audio_template(
     )
     if raw_tag != "":
         sound.raw_tags.append(raw_tag)
-    translate_raw_tags(sound)
-    base_data.sounds.append(sound)
-
-
-def extract_tyz_ipa_template(
-    wxr: WiktextractContext, base_data: WordEntry, t_node: TemplateNode
-):
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(t_node), expand_all=True
     )
-    for list in expanded_node.find_child(NodeKind.LIST):
-        for list_item in list.find_child(NodeKind.LIST_ITEM):
-            sound = Sound()
-            for node in list_item.children:
-                if isinstance(node, WikiNode) and node.kind == NodeKind.ITALIC:
-                    raw_tag = clean_node(wxr, None, node)
-                    if raw_tag != "":
-                        sound.raw_tags.append(raw_tag)
-                elif (
-                    isinstance(node, HTMLNode)
-                    and node.tag == "span"
-                    and "IPA" in node.attrs.get("class", "").split()
-                ):
-                    sound.ipa = clean_node(wxr, None, node)
-                elif isinstance(node, WikiNode) and node.kind == NodeKind.LINK:
-                    clean_node(wxr, base_data, node)
-            if sound.ipa != "":
-                base_data.sounds.append(sound)
+    for span_node in expanded_node.find_html_recursively(
+        "span", attr_name="class", attr_value="ib-content"
+    ):
+        for raw_tag in clean_node(wxr, None, span_node).split(","):
+            if raw_tag != "":
+                sound.raw_tags.append(raw_tag)
+    translate_raw_tags(sound)
+    clean_node(wxr, base_data, expanded_node)
+    base_data.sounds.append(sound)
 
 
 def extract_ipa_template(
@@ -229,22 +222,45 @@ def extract_ipa_template(
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(t_node), expand_all=True
     )
+    no_list_nodes = []
+    for node in expanded_node.children:
+        if isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
+            for list_item in node.find_child(NodeKind.LIST_ITEM):
+                extract_ipa_list_item(wxr, base_data, list_item, ipa_class)
+        else:
+            no_list_nodes.append(node)
+    if len(no_list_nodes) > 0:
+        tmp_node = WikiNode(NodeKind.ROOT, 0)
+        tmp_node.children = no_list_nodes
+        extract_ipa_list_item(wxr, base_data, tmp_node, ipa_class)
+    clean_node(wxr, base_data, expanded_node)
+
+
+def extract_ipa_list_item(
+    wxr: WiktextractContext,
+    base_data: WordEntry,
+    list_item: WikiNode,
+    class_name: str,
+):
     raw_tags = []
-    for span_tag in expanded_node.find_html("span"):
-        class_names = span_tag.attrs.get("class", "").split()
-        if "qualifier-content" in class_names:
-            raw_tag = clean_node(wxr, None, span_tag)
-            if raw_tag != "":
-                raw_tags.append(raw_tag)
-        elif ipa_class in class_names:
-            ipa = clean_node(wxr, None, span_tag)
-            if ipa != "":
-                sound = Sound(ipa=ipa, raw_tags=raw_tags)
+    for italic_node in list_item.find_child(NodeKind.ITALIC):
+        raw_tag = clean_node(wxr, None, italic_node)
+        if raw_tag != "":
+            raw_tags.append(raw_tag)
+    for span_tag in list_item.find_html_recursively("span"):
+        span_class = span_tag.attrs.get("class", "").split()
+        if "qualifier-content" in span_class or "label-content" in span_class:
+            for raw_tag in clean_node(wxr, None, span_tag).split(","):
+                raw_tag = raw_tag.strip()
+                if raw_tag != "":
+                    raw_tags.append(raw_tag)
+        elif class_name in span_class:
+            sound = Sound(
+                ipa=clean_node(wxr, None, span_tag), raw_tags=raw_tags
+            )
+            if sound.ipa != "":
                 translate_raw_tags(sound)
                 base_data.sounds.append(sound)
-
-    for link in expanded_node.find_child(NodeKind.LINK):
-        clean_node(wxr, base_data, link)
 
 
 def extract_rhymes_template(
@@ -277,11 +293,9 @@ def extract_hyphenation_template(
         "span", attr_name="lang", attr_value=lang_code
     ):
         h_str = clean_node(wxr, None, span_tag)
-        h_data = Hyphenation()
-        for part in h_str.split("‧"):
-            part = part.strip()
-            if part != "":
-                h_data.parts.append(part)
+        h_data = Hyphenation(
+            parts=list(filter(None, map(str.strip, h_str.split("‧"))))
+        )
         if len(h_data.parts) > 0:
             base_data.hyphenations.append(h_data)
 
@@ -607,3 +621,138 @@ def extract_th_pron_template(
 
     base_data.sounds.extend(sounds)
     clean_node(wxr, base_data, expanded_node)
+
+
+def extract_homophones_template(
+    wxr: WiktextractContext, base_data: WordEntry, t_node: TemplateNode
+):
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    homophones = []
+    lang_code = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
+    for top_span in expanded_node.find_html(
+        "span", attr_name="class", attr_value="homophones"
+    ):
+        for span_tag in top_span.find_html("span"):
+            span_lang = span_tag.attrs.get("lang", "")
+            span_class = span_tag.attrs.get("class", "").split()
+            if "tr" in span_class and len(homophones) > 0:
+                homophones[-1].roman = clean_node(wxr, None, span_tag)
+            elif span_lang == lang_code:
+                homophone = clean_node(wxr, None, span_tag)
+                if homophone != "":
+                    homophones.append(Sound(homophone=homophone))
+            elif "qualifier-content" in span_class and len(homophones) > 0:
+                raw_tag = clean_node(wxr, None, span_tag)
+                if raw_tag != "":
+                    homophones[-1].raw_tags.append(raw_tag)
+                    translate_raw_tags(homophones[-1])
+
+    base_data.sounds.extend(homophones)
+    for link_node in expanded_node.find_child(NodeKind.LINK):
+        clean_node(wxr, base_data, link_node)
+
+
+def extract_ja_pron_template(
+    wxr: WiktextractContext, base_data: WordEntry, t_node: TemplateNode
+):
+    JA_PRON_ACCENTS = {"Nakadaka", "Heiban", "Atamadaka", "Odaka"}
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for li_tag in expanded_node.find_html_recursively("li"):
+        sound = Sound()
+        for span_tag in li_tag.find_html("span"):
+            span_class = span_tag.attrs.get("class", "").split()
+            if "usage-label-accent" in span_class:
+                raw_tag = clean_node(wxr, None, span_tag).strip("() ")
+                if raw_tag != "":
+                    sound.raw_tags.append(raw_tag)
+            elif "IPA" in span_class:
+                sound.ipa = clean_node(wxr, None, span_tag)
+            elif "Latn" in span_class:
+                sound.roman = clean_node(wxr, None, span_tag)
+            elif span_tag.attrs.get("lang", "") == "ja":
+                sound.other = clean_node(wxr, None, span_tag)
+        for link_node in li_tag.find_child(NodeKind.LINK):
+            link_text = clean_node(wxr, None, link_node)
+            if link_text in JA_PRON_ACCENTS:
+                sound.tags.append(link_text)
+        if sound.ipa != "" or sound.other != "":
+            translate_raw_tags(sound)
+            base_data.sounds.append(sound)
+    audio_file = t_node.template_parameters.get(
+        "a", t_node.template_parameters.get("audio", "")
+    ).strip()
+    if audio_file != "":
+        sound = Sound()
+        set_sound_file_url_fields(wxr, audio_file, sound)
+        base_data.sounds.append(sound)
+
+    clean_node(wxr, base_data, expanded_node)
+
+
+def extract_ko_ipa_template(
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+):
+    sounds = []
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    clean_node(wxr, word_entry, expanded_node)
+    for ul_node in expanded_node.find_html("ul"):
+        for li_node in ul_node.find_html("li"):
+            if "ko-pron__ph" in li_node.attrs.get("class", ""):
+                for span_node in li_node.find_html(
+                    "span", attr_name="lang", attr_value="ko"
+                ):
+                    hangeul_str = clean_node(wxr, None, span_node).strip("[]")
+                    for hangeul in hangeul_str.split("/"):
+                        if hangeul != "":
+                            sounds.append(
+                                Sound(hangeul=hangeul, tags=["phonetic"])
+                            )
+            else:
+                raw_tags = []
+                for i_node in li_node.find_html("i"):
+                    for raw_tag in clean_node(wxr, None, i_node).split("/"):
+                        if raw_tag not in ["", "IPA"]:
+                            raw_tags.append(raw_tag)
+                for span_node in li_node.find_html(
+                    "span", attr_name="class", attr_value="IPA"
+                ):
+                    ipas = clean_node(wxr, None, span_node)
+                    for ipa in ipas.split("~"):
+                        ipa = ipa.strip()
+                        if ipa != "":
+                            sound = Sound(ipa=ipa, raw_tags=raw_tags)
+                            translate_raw_tags(sound)
+                            sounds.append(sound)
+
+    for table in expanded_node.find_html("table"):
+        for tr in table.find_html("tr"):
+            raw_tag = ""
+            for th in tr.find_html("th"):
+                raw_tag = clean_node(wxr, None, th)
+            for td in tr.find_html("td"):
+                roman = clean_node(wxr, None, td)
+                if roman != "":
+                    sound = Sound(roman=roman)
+                    if raw_tag != "":
+                        sound.raw_tags.append(raw_tag)
+                        translate_raw_tags(sound)
+                    sounds.append(sound)
+
+    audio_file = clean_node(
+        wxr,
+        None,
+        t_node.template_parameters.get(
+            "a", t_node.template_parameters.get("audio", "")
+        ),
+    )
+    if audio_file != "":
+        sound = Sound()
+        set_sound_file_url_fields(wxr, audio_file, sound)
+        sounds.append(sound)
+    word_entry.sounds.extend(sounds)

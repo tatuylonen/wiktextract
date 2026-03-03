@@ -11,6 +11,7 @@ from wikitextprocessor.parser import (
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from ..ruby import extract_ruby
 from .example import extract_example_list_item
 from .models import AltForm, Classifier, Form, Sense, WordEntry
 from .section_titles import POS_DATA
@@ -203,30 +204,133 @@ def extract_note_section(
 def extract_headword_template(
     wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
 ):
-    raw_tag = ""
+    forms = []
+    has_headword_span = False
     expanded_node = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(t_node), expand_all=True
     )
-    for node in expanded_node.find_child_recursively(
-        NodeKind.ITALIC | NodeKind.HTML
+    for main_span_tag in expanded_node.find_html(
+        "span", attr_name="class", attr_value="headword-line"
     ):
-        if node.kind == NodeKind.ITALIC:
-            raw_tag = clean_node(wxr, None, node)
-        elif (
-            isinstance(node, HTMLNode)
-            and node.tag == "span"
-            and "form-of" in node.attrs.get("class", "").split()
-        ):
-            form = Form(form=clean_node(wxr, None, node))
-            if raw_tag != "":
-                form.raw_tags.append(raw_tag)
-                translate_raw_tags(form)
-                raw_tag = ""
-            if form.form != "":
-                word_entry.forms.append(form)
+        has_headword_span = True
+        i_tags = []
+        for html_node in main_span_tag.find_child(NodeKind.HTML):
+            class_names = html_node.attrs.get("class", "").split()
+            if html_node.tag == "strong" and "headword" in class_names:
+                ruby, no_ruby = extract_ruby(wxr, html_node)
+                strong_str = clean_node(wxr, None, no_ruby)
+                if strong_str not in ["", wxr.wtp.title] or len(ruby) > 0:
+                    forms.append(
+                        Form(form=strong_str, tags=["canonical"], ruby=ruby)
+                    )
+            elif html_node.tag == "span":
+                if "headword-tr" in class_names or "tr" in class_names:
+                    roman = clean_node(wxr, None, html_node)
+                    if (
+                        len(forms) > 0
+                        and "canonical" not in forms[-1].tags
+                        and "romanization" not in forms[-1].tags
+                    ):
+                        forms[-1].roman = roman
+                    elif roman != "":
+                        forms.append(Form(form=roman, tags=["romanization"]))
+                elif "gender" in class_names:
+                    for abbr_tag in html_node.find_html("abbr"):
+                        gender_tag = abbr_tag.attrs.get(
+                            "title", clean_node(wxr, None, abbr_tag)
+                        )
+                        if (
+                            len(forms) > 0
+                            and "canonical" not in forms[-1].tags
+                            and "romanization" not in forms[-1].tags
+                        ):
+                            forms[-1].raw_tags.append(gender_tag)
+                        else:
+                            word_entry.raw_tags.append(gender_tag)
+                elif "ib-content" in class_names:
+                    raw_tag = clean_node(wxr, None, html_node)
+                    if raw_tag != "":
+                        word_entry.raw_tags.append(raw_tag)
+            elif html_node.tag == "sup" and word_entry.lang_code == "ja":
+                forms.append(extract_historical_kana(wxr, html_node))
+            elif html_node.tag == "i":
+                if len(i_tags) > 0:
+                    word_entry.raw_tags.extend(i_tags)
+                i_tags.clear()
+                for i_child in html_node.children:
+                    raw_tag = (
+                        clean_node(wxr, None, i_child)
+                        .removeprefix("^†")
+                        .strip()
+                    )
+                    if raw_tag != "":
+                        i_tags.append(raw_tag)
+            elif html_node.tag == "b":
+                ruby, no_ruby = extract_ruby(wxr, html_node)
+                for form_str in filter(
+                    None,
+                    map(str.strip, clean_node(wxr, None, no_ruby).split(",")),
+                ):
+                    form = Form(form=form_str, ruby=ruby)
+                    if i_tags == ["hoặc"]:
+                        if len(forms) > 0:
+                            form.raw_tags.extend(forms[-1].raw_tags)
+                    else:
+                        form.raw_tags.extend(i_tags)
+                    forms.append(form)
+                i_tags.clear()
 
-    for link_node in expanded_node.find_child(NodeKind.LINK):
-        clean_node(wxr, word_entry, link_node)
+        if len(i_tags) > 0:
+            word_entry.raw_tags.extend(i_tags)
+    new_forms = []
+    for form in forms:
+        if "loại từ" in form.raw_tags:
+            translate_raw_tags(form)
+            word_entry.classifiers.append(
+                Classifier(
+                    classifier=form.form, tags=form.tags, raw_tags=form.raw_tags
+                )
+            )
+        else:
+            translate_raw_tags(form)
+            new_forms.append(form)
+    word_entry.forms.extend(new_forms)
+    clean_node(wxr, word_entry, expanded_node)
+    translate_raw_tags(word_entry)
+
+    if not has_headword_span:
+        # Template:eng-noun
+        raw_tag = ""
+        for node in expanded_node.find_child_recursively(
+            NodeKind.ITALIC | NodeKind.HTML
+        ):
+            if node.kind == NodeKind.ITALIC:
+                raw_tag = clean_node(wxr, None, node)
+            elif (
+                isinstance(node, HTMLNode)
+                and node.tag == "span"
+                and "form-of" in node.attrs.get("class", "").split()
+            ):
+                form = Form(form=clean_node(wxr, None, node))
+                if raw_tag != "":
+                    form.raw_tags.append(raw_tag)
+                    translate_raw_tags(form)
+                    raw_tag = ""
+                if form.form != "":
+                    word_entry.forms.append(form)
+
+
+def extract_historical_kana(
+    wxr: WiktextractContext, sup_node: HTMLNode
+) -> Form:
+    form = Form(form="", tags=["archaic"])
+    for strong_node in sup_node.find_html("strong"):
+        form.form = clean_node(wxr, None, strong_node)
+    for span_node in sup_node.find_html(
+        "span", attr_name="class", attr_value="tr"
+    ):
+        form.roman = clean_node(wxr, None, span_node)
+    return form
 
 
 def extract_zh_mw_template(

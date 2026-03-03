@@ -11,7 +11,7 @@ from .parse_utils import (
     POSReturns,
     find_sections,
 )
-from .pos import extract_form_of_templates
+from .pos import extract_alt_form_templates
 from .pronunciation import process_pron
 from .section_titles import Heading, POSName
 
@@ -36,12 +36,12 @@ def process_etym(
     # Extract form_of data
     for i, t_node in enumerate(etym_contents):
         if isinstance(t_node, TemplateNode):
-            extract_form_of_templates(wxr, base_data, t_node, etym_contents, i)
+            extract_alt_form_templates(wxr, base_data, t_node, etym_contents, i)
         if isinstance(t_node, WikiNode) and t_node.kind == NodeKind.LIST:
             for l_item in t_node.find_child_recursively(NodeKind.LIST_ITEM):
                 for j, l_node in enumerate(l_item.children):
                     if isinstance(l_node, TemplateNode):
-                        extract_form_of_templates(
+                        extract_alt_form_templates(
                             wxr, base_data, l_node, l_item.children, j
                         )
 

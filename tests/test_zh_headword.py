@@ -12,7 +12,9 @@ from wiktextract.extractor.zh.page import parse_page
 from wiktextract.wxr_context import WiktextractContext
 
 
-class TestHeadword(TestCase):
+class TestZhHeadword(TestCase):
+    maxDiff = None
+
     def setUp(self):
         self.wxr = WiktextractContext(
             Wtp(lang_code="zh"),
@@ -158,7 +160,11 @@ class TestHeadword(TestCase):
                             "tags": ["canonical"],
                         },
                         {"form": "ōya", "tags": ["romanization"]},
-                        {"form": "おほや", "roman": "ofoya"},
+                        {
+                            "form": "おほや",
+                            "roman": "ofoya",
+                            "tags": ["archaic"],
+                        },
                     ],
                     "pos": "noun",
                 }
@@ -225,3 +231,165 @@ class TestHeadword(TestCase):
         )
         self.assertEqual(data[0]["tags"], ["form-i"])
         self.assertEqual(data[0]["categories"], ["阿拉伯語詞元"])
+
+    def test_split_form_words1(self):
+        self.wxr.wtp.add_page(
+            "Template:ko-noun",
+            10,
+            """<span class="headword-line"><strong class="Kore headword" lang="ko">-{0차원}-</strong> (<span lang="ko-Latn" class="headword-tr manual-tr tr Latn" dir="ltr">-{<!---->yeongchawon<!---->}-</span>) (諺文-{ <b class="Kore" lang="ko"><!-- -->[[영차원#朝鮮語|-{영차원}-]]</b>}-，漢字-{ <b class="Kore" lang="ko"><!-- -->[[零次元#朝鮮語|-{零次元}-]]／<!-- -->[[0次元#朝鮮語|-{0次元}-]]</b>}-)</span>[[Category:朝鮮語詞元|영차원]]""",
+        )
+        data = parse_page(
+            self.wxr,
+            "0차원",
+            """==朝鮮語==
+===名詞===
+{{ko-noun|hangeul=영차원|hanja=[[零次元]]／[[0次元]]}}
+# {{alt sp|ko|영차원}}""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {"form": "yeongchawon", "tags": ["romanization"]},
+                {"form": "영차원", "tags": ["hangeul"]},
+                {"form": "零次元", "tags": ["hanja"]},
+                {"form": "0次元", "tags": ["hanja"]},
+            ],
+        )
+        self.assertEqual(data[0]["categories"], ["朝鮮語詞元"])
+
+    def test_split_form_words2(self):
+        self.wxr.wtp.add_page(
+            "Template:ko-noun",
+            10,
+            """<span class="headword-line"><strong class="Kore headword" lang="ko">-{사과}-</strong> (<span lang="ko-Latn" class="headword-tr manual-tr tr Latn" dir="ltr">-{<!---->sagwa<!---->}-</span>) (漢字-{ <b class="Kore" lang="ko"><!-- -->[[沙果#朝鮮語|-{沙果}-]], <!-- -->[[砂果#朝鮮語|-{砂果}-]]</b>}-)</span>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "사과",
+            """==朝鮮語==
+===名詞===
+{{ko-noun|hanja=[[沙果]], [[砂果]]}}
+# [[蘋果]]""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {"form": "sagwa", "tags": ["romanization"]},
+                {"form": "沙果", "tags": ["hanja"]},
+                {"form": "砂果", "tags": ["hanja"]},
+            ],
+        )
+
+    def test_ja_verb_suru(self):
+        self.wxr.wtp.add_page(
+            "Template:ja-verb-suru",
+            10,
+            """<span class="headword-line"><strong class="Jpan headword" lang="ja">-{<ruby>電<rp>(</rp><rt><!-- -->[[でんわ#日語|-{でん}-]]</rt><rp>)</rp></ruby><ruby>話<rp>(</rp><rt><!-- -->[[でんわ#日語|-{わ}-]]</rt><rp>)</rp></ruby><!-- -->[[する#日語|-{する}-]]}-</strong> [[Wiktionary:日語轉寫|•]] (<span class="headword-tr tr" dir="ltr">-{<!----><span class="Latn" lang="ja">-{<!-- -->[[denwa#日語|-{denwa}-]] <!-- -->[[suru#日語|-{suru}-]]}-</span><!---->}-</span>)&nbsp;<i>自動詞&nbsp;<abbr title="サ行活用">サ行</abbr></i> (連用形-{ <b class="Jpan" lang="ja"><ruby>電<rp>(</rp><rt>でん</rt><rp>)</rp></ruby><ruby>話<rp>(</rp><rt>わ</rt><rp>)</rp></ruby><!-- -->[[し#日語|-{し}-]]</b> <span class="mention-gloss-paren annotation-paren">(</span><span class="tr">-{<!---->denwa [[shi]]<!---->}-</span><span class="mention-gloss-paren annotation-paren">)</span>}-，過去式-{ <b class="Jpan" lang="ja"><ruby>電<rp>(</rp><rt>でん</rt><rp>)</rp></ruby><ruby>話<rp>(</rp><rt>わ</rt><rp>)</rp></ruby><!-- -->[[した#日語|-{した}-]]</b> <span class="mention-gloss-paren annotation-paren">(</span><span class="tr">-{<!---->denwa [[shita]]<!---->}-</span><span class="mention-gloss-paren annotation-paren">)</span>}-)</span>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "電話",
+            """==日語==
+===動詞===
+{{ja-verb-suru|tr=intrans|でんわ}}
+# [[打電話]]""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {
+                    "form": "電話する",
+                    "ruby": [("電", "でん"), ("話", "わ")],
+                    "tags": ["canonical"],
+                },
+                {"form": "denwa suru", "tags": ["romanization"]},
+                {
+                    "form": "電話し",
+                    "roman": "denwa shi",
+                    "ruby": [("電", "でん"), ("話", "わ")],
+                    "tags": ["continuative"],
+                },
+                {
+                    "form": "電話した",
+                    "roman": "denwa shita",
+                    "ruby": [("電", "でん"), ("話", "わ")],
+                    "tags": ["past"],
+                },
+            ],
+        )
+        self.assertEqual(data[0]["tags"], ["intransitive", "suru"])
+
+    def test_ja_adj(self):
+        self.wxr.wtp.add_page(
+            "Template:ja-adj",
+            10,
+            """<span class="headword-line"><strong class="Jpan headword" lang="ja">-{<ruby>崔<rp>(</rp><rt><!-- -->[[さいかい#日語|-{さい}-]]</rt><rp>)</rp></ruby><ruby>嵬<rp>(</rp><rt><!-- -->[[さいかい#日語|-{かい}-]]</rt><rp>)</rp></ruby>}-</strong> [[Wiktionary:日語轉寫|•]] (<span class="headword-tr tr" dir="ltr">-{<!----><span class="Latn" lang="ja">-{<!-- -->[[saikai#日語|-{saikai}-]]}-</span><!---->}-</span>)&nbsp;<sup>←<strong class="Jpan headword" lang="ja">-{<!-- -->[[さいくわい#日語|-{さいくわい}-]]}-</strong> <span class="mention-gloss-paren annotation-paren">(</span><span class="tr">-{<!----><span class="mention-tr tr">-{<!---->saikwai<!---->}-</span><!---->}-</span><span class="mention-gloss-paren annotation-paren">)</span><sup>[[w:歷史假名遣|?]]</sup></sup><i><abbr title="タリ活用（古典）"><sup><small>†</small></sup>タリ</abbr></i> (連體形-{ <b class="Jpan" lang="ja"><ruby>崔<rp>(</rp><rt>さい</rt><rp>)</rp></ruby><ruby>嵬<rp>(</rp><rt>かい</rt><rp>)</rp></ruby><!-- -->[[とした#日語|-{とした}-]]</b> <span class="mention-gloss-paren annotation-paren">(</span><span class="tr">-{<!---->saikai to shita<!---->}-</span><span class="mention-gloss-paren annotation-paren">)</span> <small>或</small> <b class="Jpan" lang="ja"><ruby>崔<rp>(</rp><rt>さい</rt><rp>)</rp></ruby><ruby>嵬<rp>(</rp><rt>かい</rt><rp>)</rp></ruby><!-- -->[[たる#日語|-{たる}-]]</b> <span class="mention-gloss-paren annotation-paren">(</span><span class="tr">-{<!---->saikai taru<!---->}-</span><span class="mention-gloss-paren annotation-paren">)</span>}-，連用形-{ <b class="Jpan" lang="ja"><ruby>崔<rp>(</rp><rt>さい</rt><rp>)</rp></ruby><ruby>嵬<rp>(</rp><rt>かい</rt><rp>)</rp></ruby><!-- -->[[と#日語|-{と}-]]</b> <span class="mention-gloss-paren annotation-paren">(</span><span class="tr">-{<!---->saikai to<!---->}-</span><span class="mention-gloss-paren annotation-paren">)</span> <small>或</small> <b class="Jpan" lang="ja"><ruby>崔<rp>(</rp><rt>さい</rt><rp>)</rp></ruby><ruby>嵬<rp>(</rp><rt>かい</rt><rp>)</rp></ruby><!-- -->[[として#日語|-{として}-]]</b> <span class="mention-gloss-paren annotation-paren">(</span><span class="tr">-{<!---->saikai to shite<!---->}-</span><span class="mention-gloss-paren annotation-paren">)</span>}-)</span>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "崔嵬",
+            """==日語==
+===形容動詞===
+{{ja-adj|さいかい|infl=tari|hhira=さいくわい}}
+# [[險峻]]的""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {
+                    "form": "崔嵬",
+                    "ruby": [("崔", "さい"), ("嵬", "かい")],
+                    "tags": ["canonical"],
+                },
+                {"form": "saikai", "tags": ["romanization"]},
+                {"form": "さいくわい", "roman": "saikwai", "tags": ["archaic"]},
+                {
+                    "form": "崔嵬とした",
+                    "roman": "saikai to shita",
+                    "ruby": [("崔", "さい"), ("嵬", "かい")],
+                    "tags": ["attributive"],
+                },
+                {
+                    "form": "崔嵬たる",
+                    "roman": "saikai taru",
+                    "ruby": [("崔", "さい"), ("嵬", "かい")],
+                    "tags": ["attributive"],
+                },
+                {
+                    "form": "崔嵬と",
+                    "roman": "saikai to",
+                    "ruby": [("崔", "さい"), ("嵬", "かい")],
+                    "tags": ["continuative"],
+                },
+                {
+                    "form": "崔嵬として",
+                    "roman": "saikai to shite",
+                    "ruby": [("崔", "さい"), ("嵬", "かい")],
+                    "tags": ["continuative"],
+                },
+            ],
+        )
+        self.assertEqual(data[0]["tags"], ["-tari"])
+
+    def test_sv_adv(self):
+        self.wxr.wtp.add_page(
+            "Template:sv-adv",
+            10,
+            """<span class="headword-line"><strong class="Latn headword" lang="sv">-{rakt}-</strong></span>[[Category:瑞典語詞元|RAKT]][[Category:瑞典語副詞|RAKT]] (比較級 '''<span class="Latn form-of lang-sv comparative-form-of" lang="sv">-{<!-- -->[[raktare#瑞典語|-{raktare}-]]}-</span>'''，最高級 '''<span class="Latn form-of lang-sv superlative-form-of" lang="sv">-{<!-- -->[[raktast#瑞典語|-{raktast}-]]}-</span>''')""",
+        )
+        data = parse_page(
+            self.wxr,
+            "rakt",
+            """==瑞典語==
+===副詞===
+{{sv-adv}}
+# [[直接]]""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {"form": "raktare", "tags": ["comparative"]},
+                {"form": "raktast", "tags": ["superlative"]},
+            ],
+        )
+        self.assertEqual(data[0]["categories"], ["瑞典語詞元", "瑞典語副詞"])

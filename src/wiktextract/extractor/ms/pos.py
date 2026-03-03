@@ -3,7 +3,7 @@ from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .example import extract_example_list_item
-from .models import AltForm, Attestation, Form, Sense, WordEntry
+from .models import AltForm, Attestation, Classifier, Form, Sense, WordEntry
 from .section_titles import POS_DATA
 from .tags import translate_raw_tags
 
@@ -160,6 +160,17 @@ def extract_pos_header_template(
                 if form.form != "":
                     translate_raw_tags(form)
                     page_data[-1].forms.append(form)
+    new_forms = []
+    for form in page_data[-1].forms:
+        if "classifier" in form.raw_tags:
+            page_data[-1].classifiers.append(
+                Classifier(
+                    classifier=form.form, tags=form.tags, raw_tags=form.raw_tags
+                )
+            )
+        else:
+            new_forms.append(form)
+    page_data[-1].forms = new_forms
 
 
 def extract_label_template(

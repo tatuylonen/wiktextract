@@ -27,6 +27,4 @@ ADDITIONAL_EXPAND_TEMPLATES: set[str] = set()
 
 # Names of templates used in etymology sections whose parameters we want
 # to store in `etymology_templates`.
-ETYMOLOGY_TEMPLATES: set[str] = set(
-)
-
+ETYMOLOGY_TEMPLATES: set[str] = set()

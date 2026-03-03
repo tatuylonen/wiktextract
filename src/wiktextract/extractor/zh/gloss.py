@@ -1,7 +1,6 @@
 import re
 
-from wikitextprocessor import NodeKind, WikiNode
-from wikitextprocessor.parser import TemplateNode
+from wikitextprocessor import HTMLNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -30,7 +29,7 @@ FORM_OF_TEMPLATES = frozenset(
         "sup sp",
     ]
 )
-ABBR_TEMPALTES = frozenset(
+ABBR_TEMPLATES = frozenset(
     [
         "之縮寫",
         "abbreviation of",
@@ -71,7 +70,7 @@ def extract_gloss(
                     raw_tags.append(raw_tag.strip("〈〉"))
                 elif (
                     node.template_name
-                    in FORM_OF_TEMPLATES | ABBR_TEMPALTES | ZH_ALT_OF_TEMPLATES
+                    in FORM_OF_TEMPLATES | ABBR_TEMPLATES | ZH_ALT_OF_TEMPLATES
                     or node.template_name.endswith((" of", " form", "-form"))
                 ) and process_form_of_template(
                     wxr, node, gloss_data, page_data
@@ -138,7 +137,7 @@ def process_form_of_template(
         re.search(r"^alt|alt[\s-]|alternative", t_node.template_name.lower())
         or t_node.template_name.lower() in ZH_ALT_OF_TEMPLATES
     )
-    is_abbr = t_node.template_name.lower() in ABBR_TEMPALTES
+    is_abbr = t_node.template_name.lower() in ABBR_TEMPLATES
     if is_alt_of:
         sense.tags.append("alt-of")
     elif is_abbr:
@@ -148,8 +147,10 @@ def process_form_of_template(
     expanded_template = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(t_node), expand_all=True
     )
-    if t_node.template_name.endswith("-erhua form of"):
-        process_erhua_form_of_template(wxr, expanded_template, sense)
+    if t_node.template_name.endswith(("-erhua form of", "-pinyin of")):
+        process_erhua_form_of_template(
+            wxr, expanded_template, sense, t_node.template_name
+        )
         return True
     elif (
         t_node.template_name.lower()
@@ -212,11 +213,16 @@ def process_form_of_template_child(
 
 
 def process_erhua_form_of_template(
-    wxr: WiktextractContext, expanded_node: WikiNode, sense: Sense
+    wxr: WiktextractContext,
+    expanded_node: WikiNode,
+    sense: Sense,
+    template_name: str,
 ) -> None:
     # https://zh.wiktionary.org/wiki/Template:Cmn-erhua_form_of
     for index, span_node in enumerate(
-        expanded_node.find_html("span", attr_name="lang", attr_value="zh")
+        expanded_node.find_html_recursively(
+            "span", attr_name="lang", attr_value="zh"
+        )
     ):
         span_text = clean_node(wxr, None, span_node)
         form = AltForm(word=span_text)
@@ -226,11 +232,20 @@ def process_erhua_form_of_template(
             form.tags.append("Simplified-Chinese")
         if len(form.word) > 0:
             sense.form_of.append(form)
-    gloss_text = clean_node(wxr, sense, expanded_node)
-    if gloss_text.startswith("(官話)"):
-        gloss_text = gloss_text.removeprefix("(官話)").strip()
-        sense.tags.append("Mandarin")
-    sense.tags.append("Erhua")
+    gloss_nodes = []
+    for node in expanded_node.children:
+        if isinstance(node, HTMLNode) and node.tag == "small":
+            for span_node in node.find_html_recursively(
+                "span", attr_name="class", attr_value="ib-content"
+            ):
+                raw_tag = clean_node(wxr, None, span_node)
+                if raw_tag != "":
+                    sense.raw_tags.append(raw_tag)
+        else:
+            gloss_nodes.append(node)
+    gloss_text = clean_node(wxr, sense, gloss_nodes)
+    if template_name.endswith("-erhua form of"):
+        sense.tags.append("Erhua")
     if len(gloss_text) > 0:
         sense.glosses.append(gloss_text)
 

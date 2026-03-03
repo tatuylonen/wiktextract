@@ -26,7 +26,6 @@ def process_pron_graf_template(
     if len(table_nodes) == 0:
         return
     table_node = table_nodes[0]
-    extra_sounds = {}  # not translated
     for table_row in table_node.find_child(NodeKind.TABLE_ROW):
         table_cells = list(table_row.find_child(NodeKind.TABLE_CELL))
         if len(table_cells) != 2:
@@ -58,11 +57,11 @@ def process_pron_graf_template(
             process_pron_graf_text_cell(wxr, word_entry, value_node, "roman")
         elif header_text == "transcripciones silábicas":
             process_pron_graf_text_cell(wxr, word_entry, value_node, "syllabic")
-        else:
-            extra_sounds[header_text] = value_text
+        elif value_text not in ["", "falta agregar"] and header_text != "":
+            word_entry.sounds.append(
+                Sound(other=value_text, raw_tags=[header_text])
+            )
 
-    if len(extra_sounds) > 0:
-        word_entry.extra_sounds = extra_sounds
     clean_node(wxr, word_entry, expanded_node)
 
 

@@ -27,16 +27,34 @@ def extract_pos_section(
     page_data[-1].pos = pos_data["pos"]
     base_data.pos = pos_data["pos"]
     page_data[-1].tags.extend(pos_data.get("tags", []))
+    has_child_section = level_node.contain_node(LEVEL_KIND_FLAGS)
 
     for list_node in level_node.find_child(NodeKind.LIST):
         if list_node.sarg != "*":
             continue
         for list_item in list_node.find_child(NodeKind.LIST_ITEM):
-            for italic_node in list_item.find_child(NodeKind.ITALIC):
-                italic_str = clean_node(wxr, None, italic_node)
-                for raw_tag in italic_str.split():
-                    if raw_tag not in ["", "rod"]:
-                        page_data[-1].raw_tags.append(raw_tag)
+            if has_child_section:
+                for italic_node in list_item.find_child(NodeKind.ITALIC):
+                    italic_str = clean_node(wxr, None, italic_node)
+                    for raw_tag in italic_str.split():
+                        if raw_tag not in ["", "rod"]:
+                            page_data[-1].raw_tags.append(raw_tag)
+            else:
+                for link_node in list_item.find_child(NodeKind.LINK):
+                    word = clean_node(wxr, None, link_node)
+                    if word != "":
+                        page_data[-1].senses.append(
+                            Sense(
+                                glosses=[
+                                    clean_node(wxr, None, list_item.children)
+                                ],
+                                tags=["form-of"],
+                                form_of=[AltForm(word=word)],
+                            )
+                        )
+                        if "form-of" not in page_data[-1]:
+                            page_data[-1].tags.append("form-of")
+                        break
 
     translate_raw_tags(page_data[-1])
 

@@ -25,15 +25,16 @@ GLOSS_TAGS = {
 
 SOUND_TAGS = {
     # 틀:ko-IPA
-    "Revised Romanization": ["revised", "romanization"],
-    "Revised Romanization (translit.)": [
+    "국어의 로마자 표기\nRevised Romanization": ["revised", "romanization"],
+    "국어의 로마자 표기 (음역)\nRevised Romanization (translit.)": [
         "revised",
         "romanization",
         "transliteration",
     ],
-    "McCune-Reischauer": "McCune-Reischauer",
-    "Yale Romanization": ["Yale", "romanization"],
-    "표준어/서울": ["SK-Standard", "Seoul"],
+    "매큔-라이샤워 표기\nMcCune-Reischauer": "McCune-Reischauer",
+    "예일 표기\nYale Romanization": ["Yale", "romanization"],
+    "표준어": "SK-Standard",
+    "서울": "Seoul",
     # 틀:ja-pron
     "도쿄": "Tokyo",
     # 틀:발음 듣기, 틀:IPA
@@ -63,14 +64,25 @@ SOUND_TAGS = {
     "베를린": "Berlin",
     "비격식체": "informal",
     "민난어 장저우": ["Min-Nan", "Zhangzhou"],
+    "대한민국": "South-Korea",
 }
 
 HEADER_TAGS = {
     # 틀:한국어_동사
-    "부정사형": "infinitive",
-    "연결어미형": "sequential",
+    "활용": "infinitive",
+    "연결형": "sequential",
     "명사형": "noun",
     "사동사": "causative",
+    "한글": "hangeul",
+    "한자": "hanja",
+    # 모듈:Jpan-headword
+    "자동사 및 타동사": ["transitive", "intransitive"],
+    "연용형": "stem",
+    "과거형": "past",
+    "5단 활용": "godan",
+    "1단 활용": "ichidan",
+    "サ행 변격": "suru",
+    "kuru": "kuru",
 }
 
 # also in linkage lists
@@ -83,7 +95,6 @@ TRANSLATION_TAGS = {
     "번체": "Traditional-Chinese",
     "번체자": "Traditional-Chinese",
     "오스트리아": "Austria",
-    "표준어": "standard",
     "히브리 문자": ["Hebrew", "letter"],
     "아랍 문자": ["Arabic", "letter"],
     "복수형": "plural",
@@ -123,6 +134,8 @@ TAGS = {
     "한어병음": "Pinyin",
     "광저우 광둥어": "Guangzhou-Cantonese",
     "월병": "Jyutping",
+    # template:ja-kanjitab
+    "구자체": "kyūjitai",
 }
 
 TOPICS = {

@@ -11,7 +11,7 @@ from wikitextprocessor.parser import (
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
-from .linkage import QUALIFIER_TEMPALTES, extract_qualifier_template
+from .linkage import QUALIFIER_TEMPLATES, extract_qualifier_template
 from .models import Translation, WordEntry
 from .section_titles import TRANSLATION_SECTIONS
 from .tags import translate_raw_tags
@@ -100,7 +100,7 @@ def extract_translation_list_item(
                 )
         elif (
             isinstance(node, TemplateNode)
-            and node.template_name in QUALIFIER_TEMPALTES
+            and node.template_name in QUALIFIER_TEMPLATES
             and len(word_entry.translations) > 0
         ):
             word_entry.translations[-1].raw_tags.extend(

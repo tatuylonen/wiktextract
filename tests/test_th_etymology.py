@@ -43,8 +43,8 @@ class TestThEtymology(unittest.TestCase):
 ==== คำคุณศัพท์ ====
 [[ควร]][[ให]]""",
         )
-        self.assertEqual(data[0]["etymology_text"], "แผลงมาจาก")
-        self.assertEqual(data[1]["etymology_text"], "ยืมมาจากบาลี เทยฺย")
+        self.assertEqual(data[0]["etymology_texts"], ["แผลงมาจาก"])
+        self.assertEqual(data[1]["etymology_texts"], ["ยืมมาจากบาลี เทยฺย"])
         self.assertTrue(len(data[0]["forms"]) > 0)
         self.assertTrue("forms" not in data[1])
 
@@ -75,6 +75,25 @@ class TestThEtymology(unittest.TestCase):
             data[0]["categories"],
             ["ภาษาญี่ปุ่น redlinks/ja-see", "หน้าที่มีรายการ", "หน้าที่มี 1 รายการ"],
         )
-        self.assertTrue("etymology_text" not in data[0])
+        self.assertTrue("etymology_texts" not in data[0])
         self.assertTrue("redirects" not in data[1])
         self.assertTrue("categories" not in data[1])
+
+    def test_etymology_lists(self):
+        data = parse_page(
+            self.wxr,
+            "อับดุลลอหฺ",
+            """== ภาษาไทย ==
+===รากศัพท์===
+* เป็นคำสมาสภาษาอาหรับ อับดุ (ทาสหรือบ่าว) + อัลลอหฺ
+* จากอาหรับ أبدُ الله (“ทาสของอัลลอฮ์”), จาก أبد + الله (อัลลาฮ)
+===คำนาม===
+# ทาสของพระเจ้า หรือบ่าวของพระเจ้า""",
+        )
+        self.assertEqual(
+            data[0]["etymology_texts"],
+            [
+                "เป็นคำสมาสภาษาอาหรับ อับดุ (ทาสหรือบ่าว) + อัลลอหฺ",
+                "จากอาหรับ أبدُ الله (“ทาสของอัลลอฮ์”), จาก أبد + الله (อัลลาฮ)",
+            ],
+        )

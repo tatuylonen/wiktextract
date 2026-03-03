@@ -103,7 +103,7 @@ def parse_page(
     # word entries that are just collected into one big list and eventually
     # concatenated as a JSONL file. No hierarchies between words, just a flat
     # list.
-    word_datas: list[WordEntry] = []
+    word_data: list[WordEntry] = []
 
     # TIP:
     # It is good to keep in mind for the parse-tree: things like headings
@@ -195,9 +195,9 @@ def parse_page(
                 # new_data would be one WordEntry object, for one Part of
                 # Speech section ("Noun", "Verb"); this is generally how we
                 # want it.
-                word_datas.extend(new_data)
+                word_data.extend(new_data)
 
     # Transform pydantic objects to normal dicts so that the old code can
     # handle them.
-    return [wd.model_dump(exclude_defaults=True) for wd in word_datas]
+    return [wd.model_dump(exclude_defaults=True) for wd in word_data]
     # return [base_data.model_dump(exclude_defaults=True)]

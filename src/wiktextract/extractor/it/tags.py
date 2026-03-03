@@ -82,6 +82,7 @@ FORM_LINE_TEMPLATE_TAGS = {
     # Template:en-verb
     "3ª persona sing. presente": ["third-person", "singular", "present"],
     "passato semplice": "past",
+    "passato semplice e participio passato": ["past", "participle"],
 }
 
 # https://it.wiktionary.org/wiki/Template:Term/d
@@ -237,7 +238,7 @@ TERM_TEMPLATE_TAGS = {
 }
 
 # https://it.wiktionary.org/wiki/Categoria:Template_ambito
-GLOSS_LIST_TEMPATE_TAGS = {
+GLOSS_LIST_TEMPLATE_TAGS = {
     "accrescitivo": "augmentative",  # Template:Accr
     "colloquiale": "colloquial",  # Template:Coll
     "diminutivo": "diminutive",  # Template:Dim
@@ -265,7 +266,7 @@ TAGS = {
     **TABLE_TAGS,
     **FORM_LINE_TEMPLATE_TAGS,
     **TERM_TEMPLATE_TAGS,
-    **GLOSS_LIST_TEMPATE_TAGS,
+    **GLOSS_LIST_TEMPLATE_TAGS,
     **OTHER_TAGS,
 }
 

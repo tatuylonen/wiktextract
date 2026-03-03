@@ -96,6 +96,7 @@ class Sound(BaseModelWrap):
     )
     rhymes: str = ""
     homophone: str = ""
+    other: str = ""
 
 
 class Form(BaseModelWrap):
@@ -138,8 +139,8 @@ class WordEntry(BaseModelWrap):
     )
     sounds: list[Sound] = []
     translations: list[Translation] = []
-    etymology_text: str = Field(
-        default="", description="Etymology section as cleaned text."
+    etymology_texts: list[str] = Field(
+        default=[], description="Etymology section as cleaned text."
     )
     antonyms: list[Linkage] = []
     compounds: list[Linkage] = []
@@ -153,7 +154,6 @@ class WordEntry(BaseModelWrap):
     proverbs: list[Linkage] = []
     tags: list[str] = []
     raw_tags: list[str] = []
-    extra_sounds: dict[str, str] = {}
     forms: list[Form] = []
     hyphenations: list[Hyphenation] = []
     cognates: list[Linkage] = []

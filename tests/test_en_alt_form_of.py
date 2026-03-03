@@ -21,7 +21,7 @@ class FormOfTests(unittest.TestCase):
             Wtp(lang_code="en"),
             WiktionaryConfig(
                 dump_file_lang_code="en", capture_language_codes=None
-            )
+            ),
         )
         self.wxr.wtp.start_page("testpage")
         self.wxr.wtp.start_section("English")
@@ -167,4 +167,97 @@ class FormOfTests(unittest.TestCase):
                 {"form": "zùccuru", "tags": ["alternative"]},
                 {"form": "zùcchiru", "tags": ["alternative"]},
             ],
+        )
+
+    def test_ja_kt_tables_under_pos(self):
+        self.wxr.wtp.add_page(
+            "Template:ja-kanjitab",
+            10,
+            """{| class="wikitable kanji-table floatright"
+! colspan="2" | [[Appendix:Japanese_glossary#kanji|Kanji]] in this term
+|- lang="ja" class="Jpan"
+| [[元#Japanese|元]]
+| [[気#Japanese|気]]
+|-
+| <span class="Jpan" lang="ja">げん</span><br/><small>[[Appendix:Japanese_glossary#kyōiku_kanji|Grade: 2]]</small>
+| <span class="Jpan" lang="ja">き</span><br/><small>[[Appendix:Japanese_glossary#kyōiku_kanji|Grade: 1]]</small>
+|-
+| colspan="2" |[[Appendix:Japanese_glossary#kan'on|kan'on]]
+|}
+{| class="wikitable floatright"
+! style="font-weight:normal" | Alternative spelling
+|-
+| <span class="Jpan" lang="ja">[[元氣#Japanese|元氣]]</span> <small><span class="usage-label-sense"><span class="ib-brac label-brac">(</span><span class="ib-content label-content">kyūjitai</span><span class="ib-brac label-brac">)</span></span></small>
+|}[[Category:Japanese terms spelled with 元 read as げん|けんき']]""",
+        )
+        data = parse_page(
+            self.wxr,
+            "元気",
+            """==Japanese==
+{{ja-kanjitab|yomi=kanon|げん|き}}
+====Adjective====
+# [[healthy]]""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {
+                    "form": "元氣",
+                    "tags": ["alternative", "kanji", "kyūjitai"],
+                }
+            ],
+        )
+        self.assertEqual(
+            data[0]["categories"],
+            ["Japanese terms spelled with 元 read as げん"],
+        )
+
+    def test_ja_kt_table_under_pos(self):
+        self.wxr.wtp.add_page(
+            "Template:ja-kanjitab",
+            10,
+            """{| class="wikitable floatright"
+! style="font-weight:normal" | Alternative spellings
+|-
+| <span class="Jpan" lang="ja">[[親子#Japanese|親子]]</span><br><span class="Jpan" lang="ja">[[母子#Japanese|母子]]</span>
+|}""",
+        )
+        data = parse_page(
+            self.wxr,
+            "おやこ",
+            """==Japanese==
+{{ja-kanjitab|alt=親子,母子}}
+===Noun===
+# [[parent]] and [[child]]""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {"form": "親子", "tags": ["alternative", "kanji"]},
+                {"form": "母子", "tags": ["alternative", "kanji"]},
+            ],
+        )
+
+    def test_ja_kt_under_etymology(self):
+        self.wxr.wtp.add_page(
+            "Template:ja-kanjitab",
+            10,
+            """{| class="wikitable floatright"
+! style="font-weight:normal" | Alternative spelling
+|-
+| <span class="Jpan" lang="ja">[[今日#Japanese|今日]]</span>
+|}""",
+        )
+        data = parse_page(
+            self.wxr,
+            "きょう",
+            """==Japanese==
+===Etymology 1===
+{{ja-kanjitab|alt=今日}}
+====Noun====
+# [[today]]""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [{"form": "今日", "tags": ["alternative", "kanji"]}],
         )

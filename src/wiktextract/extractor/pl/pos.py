@@ -185,7 +185,7 @@ def update_pos_data(
 ) -> None:
     word_entry.pos = pos_data["pos"]
     word_entry.tags.extend(pos_data.get("tags", []))
-    word_entry.pos_text = pos_text
+    word_entry.pos_title = pos_text
 
 
 def process_gloss_list_item(

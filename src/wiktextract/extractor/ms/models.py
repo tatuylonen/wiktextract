@@ -95,6 +95,13 @@ class Sound(MalayBaseModel):
     rhymes: str = ""
     categories: list[str] = Field(default=[], exclude=True)
     hyphenations: list[Hyphenation] = Field(default=[], exclude=True)
+    hangeul: str = ""
+
+
+class Classifier(MalayBaseModel):
+    classifier: str = ""
+    tags: list[str] = []
+    raw_tags: list[str] = []
 
 
 class WordEntry(MalayBaseModel):
@@ -109,7 +116,7 @@ class WordEntry(MalayBaseModel):
     tags: list[str] = []
     raw_tags: list[str] = []
     forms: list[Form] = []
-    etymology_text: str = ""
+    etymology_texts: list[str] = []
     antonyms: list[Linkage] = []
     synonyms: list[Linkage] = []
     translations: list[Translation] = []
@@ -123,3 +130,4 @@ class WordEntry(MalayBaseModel):
     proverbs: list[Linkage] = []
     related: list[Linkage] = []
     notes: list[str] = []
+    classifiers: list[Classifier] = []

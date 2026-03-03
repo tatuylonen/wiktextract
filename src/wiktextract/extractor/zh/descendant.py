@@ -38,7 +38,7 @@ def extract_descendant_section(
         if (
             data.lang_code == page_data[-1].lang_code
             and data.sounds == page_data[-1].sounds
-            and data.etymology_text == page_data[-1].etymology_text
+            and data.etymology_texts == page_data[-1].etymology_texts
             and data.pos_level == page_data[-1].pos_level == level_node.kind
         ):
             data.descendants.extend(desc_list)

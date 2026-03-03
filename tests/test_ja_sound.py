@@ -37,7 +37,7 @@ class TestJaSound(TestCase):
             '[[w:X-SAMPA|X-SAMPA]]:&nbsp;<span title="X-SAMPA pronunciation">/<span class="SAMPA">"p@.pi</span>/, /<span class="SAMPA">"pVp.i</span>/</span>',
         )
         self.wxr.wtp.add_page(
-            "テンプレート:X-SAMPA",
+            "テンプレート:音声",
             10,
             '<table class="audiotable"><tr><td class="unicode audiolink" style="padding-right:5px; padding-left: 0;">音声 (米)<td class="audiofile">[[File:en-us-puppy.ogg|noicon|175px]]</td><td class="audiometa" style="font-size: 80%;">([[:File:en-us-puppy.ogg|ファイル]])</td></tr></table>[[カテゴリ:英語 音声リンクがある語句|PUPPY]]',
         )
@@ -80,9 +80,8 @@ class TestJaSound(TestCase):
             [
                 Sound(
                     roman="[nìhóńgó]",
-                    form="にほんご",
-                    raw_tags=["東京式"],
-                    tags=["Heiban"],
+                    other="にほんご",
+                    tags=["Heiban", "Tokyo"],
                 ),
                 Sound(ipa="[ɲ̟ihõ̞ŋɡo̞]"),
             ],
@@ -137,13 +136,7 @@ class TestJaSound(TestCase):
         data = base_data.model_dump(exclude_defaults=True)
         self.assertEqual(
             data["sounds"],
-            [
-                {
-                    "form": "とーにゅー",
-                    "tags": ["Heiban"],
-                    "raw_tags": ["京阪式"],
-                }
-            ],
+            [{"other": "とーにゅー", "tags": ["Heiban", "Kyoto", "Osaka"]}],
         )
 
     def test_ja_accent_common_template_two_span_tags(self):
@@ -161,7 +154,7 @@ class TestJaSound(TestCase):
         data = base_data.model_dump(exclude_defaults=True)
         self.assertEqual(
             data["sounds"],
-            [{"form": "まぜる", "tags": ["Heiban"], "raw_tags": ["京阪式"]}],
+            [{"other": "まぜる", "tags": ["Heiban", "Kyoto", "Osaka"]}],
         )
 
     def test_magic_word_in_template_param(self):
@@ -279,3 +272,18 @@ class TestJaSound(TestCase):
 # 変える。""",
         )
         self.assertEqual(page_data[0]["sounds"], [{"homophones": ["altar"]}])
+
+    def test_rhymes(self):
+        self.wxr.wtp.add_page(
+            "テンプレート:rhymes", 10, '押韻: <span class="IPA">-ɪʃ</span>'
+        )
+        data = parse_page(
+            self.wxr,
+            "fish",
+            """==英語==
+===発音===
+* {{rhymes|ɪʃ}}
+===名詞===
+# 魚""",
+        )
+        self.assertEqual(data[0]["sounds"], [{"rhymes": "-ɪʃ"}])

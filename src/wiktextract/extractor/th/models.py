@@ -27,6 +27,7 @@ class Sound(ThaiBaseModel):
     roman: str = ""
     rhymes: str = ""
     enpr: str = ""
+    hangeul: str = ""
 
 
 class Example(ThaiBaseModel):
@@ -81,6 +82,7 @@ class Form(ThaiBaseModel):
     tags: list[str] = []
     raw_tags: list[str] = []
     roman: str = ""
+    ruby: list[tuple[str, ...]] = []
 
 
 class Translation(ThaiBaseModel):
@@ -135,7 +137,7 @@ class WordEntry(ThaiBaseModel):
     categories: list[str] = []
     tags: list[str] = []
     raw_tags: list[str] = []
-    etymology_text: str = ""
+    etymology_texts: list[str] = []
     classifiers: list[Classifier] = []
     forms: list[Form] = []
     translations: list[Translation] = []

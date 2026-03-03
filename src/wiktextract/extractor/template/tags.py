@@ -76,7 +76,6 @@ tag_map: dict[str, list[str]] = {
 }
 
 
-
 # Check validity.
 # valid_tags is from higher level code, originally created for the English
 # extractor but also applicable to other extractors: these are the tags
@@ -91,4 +90,4 @@ for tags in tag_map.values():
 # like locations and dialect and language names.
 for k in uppercase_tags:
     if k not in tag_map:
-        tag_map[k] = [ k.replace(" ", "-") ]
+        tag_map[k] = [k.replace(" ", "-")]

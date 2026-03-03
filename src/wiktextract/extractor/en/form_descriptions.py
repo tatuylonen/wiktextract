@@ -194,7 +194,7 @@ head_final_re_text = r"( -)?( ({}))+".format(
         sorted(xlat_head_map.keys(), key=len, reverse=True)
     )
 )
-head_final_re = re.compile(head_final_re_text + "$")
+head_final_re = re.compile(head_final_re_text + r"$")
 
 # Regexp used to match head tag specifiers at end of a form for certain
 # Bantu languages (particularly Swahili and similar languages).
@@ -227,7 +227,7 @@ head_split_re_text = (
     + head_final_semitic_re_text
     + "|"
     + head_final_other_re_text
-    + ")?( or |[,;]+)"
+    + ")?( or |[,;]+| *$)"
 )
 head_split_re = re.compile(head_split_re_text)
 head_split_re_parens = 0
@@ -633,6 +633,8 @@ alt_of_form_of_clean_re = re.compile(
             r", called ",
             r", especially ",
             r", slang for ",
+            r", used to",  # c/o /English
+            r", commonly",  # b/w /English
             r" corresponding to ",
             r" equivalent to ",
             r" popularized by ",
@@ -1820,10 +1822,6 @@ def parse_word_head(
     if "Lua execution error" in text or "Lua timeout error" in text:
         return
 
-    # In Aug 2021, some words had spurious Template:en at the end of head forms
-    # due to a Wiktionary error.
-    text = re.sub(r"\s+Template:[-a-zA-Z]+\s*$", "", text)
-
     # Fix words with "superlative:" or "comparative:" at end of head
     # e.g. grande/Spanish/Adj
     text = re.sub(r" (superlative|comparative): (.*)", r" (\1 \2)", text)
@@ -1878,6 +1876,7 @@ def parse_word_head(
     # Many languages use • as a punctuation mark separating the base
     # from the rest of the head. στάδιος/Ancient Greek, issue #176
     base = base.strip()
+    # print(f"{base=}")
 
     # Check for certain endings in head (mostly for compatibility with weird
     # heads, e.g. rata/Romanian "1st conj." at end)
@@ -1950,6 +1949,7 @@ def parse_word_head(
     else:
         # Do the normal split; previous only-behavior.
         splits = re.split(head_split_re, base)
+    # print("BASE: ", repr(base))
     # print("SPLITS:", splits)
     alts: list[str] = []
     # print("parse_word_head: splits:", splits,
@@ -1996,6 +1996,13 @@ def parse_word_head(
         if alt.startswith("compound form:"):
             mode = "compound-form"
             alt = alt[14:].strip()
+        if ((dash_i := alt.find(" -")) > 0) and (
+            dash_i > (wxr.wtp.title or "").find(" -")
+        ):
+            # test_en_head / test_suffixes_at_end_of_form1
+            # Some heads have suffixes that end up attached to the form
+            # like in https://en.wiktionary.org/wiki/%E6%A5%BD%E3%81%97%E3%81%84
+            alt = alt[:dash_i]
         if mode == "compound-form":
             add_related(
                 wxr,
@@ -2873,8 +2880,9 @@ def parse_translation_desc(
                     tr["alt"] = a
                     if tr.get("roman") and tr.get("roman") != r:
                         wxr.wtp.debug(
-                            'more than one value in "roman": '
-                            "{} vs. {}".format(tr["roman"], r),
+                            'more than one value in "roman": {} vs. {}'.format(
+                                tr["roman"], r
+                            ),
                             sortid="form_descriptions/1936",
                         )
                     tr["roman"] = r

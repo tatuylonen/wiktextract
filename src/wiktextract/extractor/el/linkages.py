@@ -8,7 +8,7 @@ from wiktextract.extractor.el.tags import translate_raw_tags
 from wiktextract.page import clean_node
 from wiktextract.wxr_context import WiktextractContext
 
-from .models import Form, Linkage, WordEntry
+from .models import AltForm, Form, Linkage, WordEntry
 from .section_titles import Heading
 
 Node = str | WikiNode
@@ -22,6 +22,8 @@ LinkageType = Literal[
     Heading.Synonyms,
     Heading.Antonyms,
     Heading.Transliterations,
+    Heading.AltOf,
+    Heading.FormOf,
 ]
 """Headings variants supported by process_linkage_section."""
 
@@ -32,7 +34,7 @@ def process_linkage_section(
     rnode: WikiNode,
     linkage_type: LinkageType,
 ) -> None:
-    transliteration_template_data: list[Form] = []
+    esperanto_template_data: list[Form] = []
 
     def prehandle_templates_fn(
         node: WikiNode,
@@ -58,7 +60,7 @@ def process_linkage_section(
                 comma = True
             return ret
         if node.template_name in ("eo-h", "eo-x"):
-            transliteration_template_data.append(
+            esperanto_template_data.append(
                 Form(
                     form="".join(
                         wxr.wtp.node_to_text(arg) for arg in node.largs[1]
@@ -192,7 +194,7 @@ def process_linkage_section(
             target_field = data.antonyms
         case Heading.Transliterations:
             # For transliteration sections we add these to forms instead.
-            transliteration_forms = [
+            combined_line_forms = [
                 Form(
                     form=" ".join(link_parts),
                     raw_tags=ltags,
@@ -201,11 +203,24 @@ def process_linkage_section(
                 )
                 for link_parts, ltags, _ in combined_line_data
             ]
-            for form in transliteration_forms:
+            for form in combined_line_forms:
                 translate_raw_tags(form)
-            data.forms.extend(transliteration_forms)
-            if transliteration_template_data:
-                data.forms.extend(transliteration_template_data)
+            data.forms.extend(combined_line_forms)
+            if esperanto_template_data:
+                data.forms.extend(esperanto_template_data)
+            return
+        case Heading.AltOf | Heading.FormOf:
+            combined_line_forms = [
+                AltForm(word=" ".join(link_parts))
+                for link_parts, _, _ in combined_line_data
+            ]
+            match linkage_type:
+                case Heading.AltOf:
+                    data.alt_of.extend(combined_line_forms)
+                case Heading.FormOf:
+                    data.form_of.extend(combined_line_forms)
+            if esperanto_template_data:
+                data.forms.extend(esperanto_template_data)
             return
         case _:
             # unreachable

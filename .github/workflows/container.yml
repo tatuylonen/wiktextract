@@ -17,7 +17,7 @@ jobs:
       contents: read
       packages: write
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: podman login -u ${{ github.repository_owner }} -p ${{ secrets.GITHUB_TOKEN }} ghcr.io
       - run: podman build -t ghcr.io/${{ github.repository }} .
       - run: podman push ghcr.io/${{ github.repository }}

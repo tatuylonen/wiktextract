@@ -12,6 +12,8 @@ class Heading(Enum):
     Pron = auto()  # Pronunciation
     Infl = auto()
     Related = auto()
+    AltOf = auto()
+    FormOf = auto()
     Transliterations = auto()
     Synonyms = auto()
     Homonyms = auto()
@@ -52,6 +54,7 @@ POSName = Literal[
     "symbol",
     "verb",
 ]
+"""Greek subset of the English PARTS_OF_SPEECH."""
 POSMap = TypedDict(
     "POSMap",
     {
@@ -665,8 +668,17 @@ SUBSECTION_HEADINGS: dict[str, SubSectionMap] = {
     "κλίση": {"type": Heading.Infl},
     "references": {"type": Heading.Ref},
     "αναφορές": {"type": Heading.Ref},
-    "άλλες γραφές": {"type": Heading.Transliterations},
-    "άλλες μορφές": {"type": Heading.Related},
+    # Lit. other spellings
+    # Ex. γορίλλας/γορίλας @ https://el.wiktionary.org/wiki/γορίλλας
+    # Ex. ερωοτοπάλεμα/ἐρωτοπάλεμα @ https://el.wiktionary.org/wiki/ερωτοπάλεμα
+    #     from "{{άλλη γραφή}}" that expands to "άλλες γραφές"
+    # cf. γρ template parsing at pos.py. Keep both in sync.
+    "άλλες γραφές": {"type": Heading.AltOf},
+    # Lit. other forms
+    # Ex. ελαιόδενδρο/ελιά @ https://el.wiktionary.org/wiki/ελαιόδενδρο
+    #     from "{{μορφές}}" that expands to "άλλες μορφές"
+    # cf. γρ template parsing at pos.py. Keep both in sync.
+    "άλλες μορφές": {"type": Heading.FormOf},
     "ανεπίσημα": {"type": Heading.Related},
     "συγγενικά": {"type": Heading.Related},
     "πολυλεκτικοί όροι": {"type": Heading.Related},

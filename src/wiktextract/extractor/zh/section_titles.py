@@ -207,12 +207,12 @@ LINKAGE_TITLES: dict[str, str] = {
     "其他字母系統": "synonyms",
     "其他字符系统": "synonyms",
     "其他字體": "synonyms",
-    "其他寫法": "synonyms",
-    "其他形式": "synonyms",
-    "其他拼写方式": "synonyms",
-    "其他拼写方法": "synonyms",
-    "其他拼寫": "synonyms",
-    "其他拼法": "synonyms",
+    "其他寫法": "alt_forms",
+    "其他形式": "alt_forms",
+    "其他拼写方式": "alt_forms",
+    "其他拼写方法": "alt_forms",
+    "其他拼寫": "alt_forms",
+    "其他拼法": "alt_forms",
     "其他文字": "synonyms",
     "其他文字系統": "synonyms",
     "其他書寫系統": "synonyms",
@@ -320,6 +320,7 @@ LINKAGE_TITLES: dict[str, str] = {
     "關聯詞": "related",
     "關聯詞彙": "related",
     "短語": "derived",
+    "縮寫": "abbreviations",
 }
 
 ETYMOLOGY_TITLES: frozenset[str] = frozenset(

@@ -90,8 +90,8 @@ class TestESPage(unittest.TestCase):
 """,  # noqa:E501
         )
         self.assertEqual(
-            page_data[0]["etymology_text"],
-            "Del latín *agurium, variante del clásico augurium.",
+            page_data[0]["etymology_texts"],
+            ["Del latín *agurium, variante del clásico augurium."],
         )
         self.assertEqual(
             page_data[0]["senses"][0]["glosses"],

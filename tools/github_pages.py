@@ -7,6 +7,9 @@ def main():
     """
     Generate a simple HTML page to list files in the `_site` folder.
     """
+    from compare_schemas import create_compare_schemas_html
+    from generate_schema import create_json_schema_files
+
     parser = argparse.ArgumentParser()
     parser.add_argument("repo", help="The owner and repository name.")
     parser.add_argument("sha", help="The commit SHA.")
@@ -27,17 +30,20 @@ def main():
             <ul>
             <schema_list>
             </ul>
+            <h2><a href="compare_schemas.html">Compare JSON schemas</a></h2>
             <commit_sha>
         </body>
     </html>
     """
 
+    create_json_schema_files()
     schema_paths = [
         path
         for path in Path("_site").iterdir()
         if path.is_file() and path.suffix == ".json"
     ]
     schema_paths.sort(key=lambda p: p.name)
+    create_compare_schemas_html(schema_paths)
     schema_list_html = ""
     for schema_path in schema_paths:
         with schema_path.open(encoding="utf-8") as f:

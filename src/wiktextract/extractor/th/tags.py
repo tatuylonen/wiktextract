@@ -86,6 +86,26 @@ SOUND_TAGS = {
     "อู๋": "Wu",
     "เซียง": "Xiang",
     "Wiktionary Romanisation": ["Wiktionary-specific", "romanization"],
+    # Template:vi-ipa
+    "ฮานอย": "Hà-Nội",
+    "เว้": "Huế",
+    "นครโฮจิมินห์": "Saigon",
+    # Template:hi-ipa
+    "เดลี": "Delhi",
+    # Template:sa-ipa
+    "พระเวท": "Vedic",
+    "สันสกฤตคลาสสิก": "Classical-Sanskrit",
+    # Template:ko-ipa
+    "มาตรฐานเกาหลีใต้": "SK-Standard",
+    "โซล": "Seoul",
+    "การแผลงเป็นอักษรโรมันฉบับปรับปรุง": ["revised", "romanization"],
+    "การแผลงเป็นอักษรโรมันฉบับปรับปรุง (การถอดอักษร)": [
+        "revised",
+        "romanization",
+        "transliteration",
+    ],
+    "ระบบแมกคูน-ไรซ์ชาวเออร์": "McCune-Reischauer",
+    "ระบบเยล": ["Yale", "romanization"],
 }
 
 LABEL_TAGS = {
@@ -207,6 +227,7 @@ LABEL_TAGS = {
     "รูปกริยาขยายปัจจุบันกาล": ["participle", "present"],
     "อดีตกาล": "past",
     "รูปกริยาขยายอดีตกาล": ["participle", "past"],
+    "อดีตกาลและรูปกริยาขยายอดีตกาล": ["participle", "past"],
     # Template:en-adj
     "ขั้นกว่า": "comparative",
     "ขั้นสุด": "superlative",
@@ -225,6 +246,36 @@ LABEL_TAGS = {
     "เพศหญิงพหูพจน์": ["feminine", "plural"],
     # Template:es-adj
     "เพศชายและเพศหญิงพหูพจน์": ["masculine", "feminine", "plural"],
+    # มอดูล:Jpan-headword
+    "สกรรมหรืออกรรม": ["transitive", "intransitive"],
+    "ต้นเค้าศัพท์": "stem",
+    "โกดัง": "godan",
+    "อิจิดัง": "ichidan",
+    "ซูรุ": "suru",
+    "คูรุ": "kuru",
+    "-อิ": "-i",
+    "-นะ": "-na",
+    "โยดัง": "yodan",
+    "นิดัง": "nidan",
+    "-ริ": "-ri",
+    "-เซะ": "-se",
+    "-โกะ": "-ko",
+    "-ง": "-n",
+    "-นาริ": "-nari",
+    "-ตาริ": "-tari",
+    "-กุ": "-ku",
+    "-ชิกุ": "-shiku",
+    "-กะ": "-ka",
+    "adnominal": "adnominal",
+    "adverbial": "adverbial",
+    # Template:ko-noun
+    "ฮันกึล": "hangeul",
+    "ฮันจา": "hanja",
+    # Template:ja-kanjitab
+    "คีวจิไต": "kyūjitai",
+    # Template:hi-noun
+    "การสะกดภาษาอูรดู": "Urdu",
+    "เป็นทางการ": "formal",
 }
 
 

@@ -46,8 +46,8 @@ def process_translation_list_item(
     list_item: WikiNode,
     translations: dict[str, list[Translation]],
 ) -> None:
-    lang_name = ""
-    lang_code = ""
+    lang_name = "unknown"
+    lang_code = "unknown"
     sense_index = ""
     last_tr_data = None
     last_node = None
@@ -55,10 +55,8 @@ def process_translation_list_item(
     for index, node in enumerate(list_item.children):
         if isinstance(node, str):
             if index == 0 and ":" in node:
-                lang_name = node[: node.index(":")].strip()
-                lang_code = name_to_code(lang_name, "pl")
-                if lang_code == "":
-                    lang_code = "unknown"
+                lang_name = node[: node.index(":")].strip() or "unknown"
+                lang_code = name_to_code(lang_name, "pl") or "unknown"
             m_index = re.search(r"\(\d+\.\d+\)", node)
             if m_index is not None:
                 sense_index = m_index.group(0).strip("()")

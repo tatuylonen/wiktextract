@@ -1,4 +1,4 @@
-from wikitextprocessor.parser import LEVEL_KIND_FLAGS, NodeKind, TemplateNode
+from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -6,21 +6,29 @@ from .models import Attestation, WordEntry
 
 
 def extract_etymology_section(
-    wxr: WiktextractContext, word_entry: WordEntry, level_node: TemplateNode
-) -> None:
-    text = clean_node(
-        wxr,
-        word_entry,
-        list(
-            level_node.invert_find_child(
-                LEVEL_KIND_FLAGS, include_empty_str=True
-            )
-        ),
-    )
-    for t_node in level_node.find_child(NodeKind.TEMPLATE):
-        if t_node.template_name == "datación":
-            date = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
+    wxr: WiktextractContext, base_data: WordEntry, level_node: LevelNode
+):
+    missing_etymology = "Si puedes, incorpórala: ver cómo"
+    e_nodes = []
+    for node in level_node.children:
+        if isinstance(node, LevelNode):
+            break
+        elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
+            for list_item in node.find_child(NodeKind.LIST_ITEM):
+                e_text = clean_node(wxr, base_data, list_item.children)
+                if e_text != "" and not e_text.startswith(missing_etymology):
+                    base_data.etymology_texts.append(e_text)
+        elif (
+            isinstance(node, TemplateNode) and node.template_name == "datación"
+        ):
+            date = clean_node(wxr, None, node.template_parameters.get(1, ""))
             if date != "":
-                word_entry.attestations.append(Attestation(date=date))
-    if not text.startswith("Si puedes, incorpórala: ver cómo"):
-        word_entry.etymology_text = text
+                base_data.attestations.append(Attestation(date=date))
+            e_nodes.append(node)
+        else:
+            e_nodes.append(node)
+
+    if len(e_nodes) > 0:
+        e_text = clean_node(wxr, base_data, e_nodes)
+        if e_text != "" and not e_text.startswith(missing_etymology):
+            base_data.etymology_texts.append(e_text)

@@ -47,9 +47,21 @@ class TestDeForms(TestCase):
         self.assertEqual(
             word_entry.model_dump(exclude_defaults=True)["forms"],
             [
-                {"form": "des Wörterbuches", "tags": ["genitive", "singular"]},
-                {"form": "des Wörterbuchs", "tags": ["genitive", "singular"]},
-                {"form": "der Wörterbücher", "tags": ["genitive", "plural"]},
+                {
+                    "article": "des",
+                    "form": "Wörterbuches",
+                    "tags": ["genitive", "singular"],
+                },
+                {
+                    "article": "des",
+                    "form": "Wörterbuchs",
+                    "tags": ["genitive", "singular"],
+                },
+                {
+                    "article": "der",
+                    "form": "Wörterbücher",
+                    "tags": ["genitive", "plural"],
+                },
             ],
         )
 
@@ -70,6 +82,7 @@ class TestDeForms(TestCase):
 ! colspan="5" | ''All other forms:'' [[Flexion:arm|Flexion:arm]]
 |}""",
         )
+        # https://de.wiktionary.org/wiki/Flexion:arm
         self.wxr.wtp.add_page(
             "Flexion:arm",
             108,
@@ -144,7 +157,7 @@ class TestDeForms(TestCase):
                 {"form": "ärmer", "tags": ["comparative"]},
                 {"form": "am ärmsten", "tags": ["superlative"]},
                 {
-                    "form": "der arme",
+                    "form": "arme",
                     "tags": [
                         "positive",
                         "nominative",
@@ -153,9 +166,10 @@ class TestDeForms(TestCase):
                         "masculine",
                     ],
                     "source": "Flexion:arm",
+                    "article": "der",
                 },
                 {
-                    "form": "die arme",
+                    "form": "arme",
                     "tags": [
                         "positive",
                         "nominative",
@@ -164,9 +178,10 @@ class TestDeForms(TestCase):
                         "feminine",
                     ],
                     "source": "Flexion:arm",
+                    "article": "die",
                 },
                 {
-                    "form": "das arme",
+                    "form": "arme",
                     "tags": [
                         "positive",
                         "nominative",
@@ -175,11 +190,13 @@ class TestDeForms(TestCase):
                         "neuter",
                     ],
                     "source": "Flexion:arm",
+                    "article": "das",
                 },
                 {
-                    "form": "die armen",
+                    "form": "armen",
                     "tags": ["positive", "nominative", "weak", "plural"],
                     "source": "Flexion:arm",
+                    "article": "die",
                 },
                 {
                     "form": "er ist arm",
@@ -312,6 +329,7 @@ class TestDeForms(TestCase):
                 {"form": "sieh!", "tags": ["imperative", "singular"]},
                 {"form": "seht!", "tags": ["imperative", "plural"]},
                 {"form": "gesehen", "tags": ["participle-2", "perfect"]},
+                {"form": "sehen", "tags": ["participle-2", "perfect"]},
                 {"form": "haben", "tags": ["auxiliary", "perfect"]},
                 {
                     "form": "sehen",
@@ -514,8 +532,18 @@ class TestDeForms(TestCase):
             page_data[0]["forms"],
             [
                 {
+                    "form": "mein",
+                    "tags": ["nominative", "singular", "masculine"],
+                    "raw_tags": ["attributiv (vor Substantiv)"],
+                },
+                {
                     "form": "meine",
                     "tags": ["nominative", "singular", "feminine"],
+                    "raw_tags": ["attributiv (vor Substantiv)"],
+                },
+                {
+                    "form": "mein",
+                    "tags": ["nominative", "singular", "neuter"],
                     "raw_tags": ["attributiv (vor Substantiv)"],
                 },
                 {
@@ -524,24 +552,28 @@ class TestDeForms(TestCase):
                     "raw_tags": ["attributiv (vor Substantiv)"],
                 },
                 {
-                    "form": "der meine",
+                    "form": "meine",
                     "tags": ["nominative", "singular", "masculine"],
                     "raw_tags": ["nicht attributiv, mit Artikel"],
+                    "article": "der",
                 },
                 {
-                    "form": "die meine",
+                    "form": "meine",
                     "tags": ["nominative", "singular", "feminine"],
                     "raw_tags": ["nicht attributiv, mit Artikel"],
+                    "article": "die",
                 },
                 {
-                    "form": "das meine",
+                    "form": "meine",
                     "tags": ["nominative", "singular", "neuter"],
                     "raw_tags": ["nicht attributiv, mit Artikel"],
+                    "article": "das",
                 },
                 {
-                    "form": "die meinen",
+                    "form": "meinen",
                     "tags": ["nominative", "plural"],
                     "raw_tags": ["nicht attributiv, mit Artikel"],
+                    "article": "die",
                 },
             ],
         )
@@ -639,9 +671,81 @@ class TestDeForms(TestCase):
             data[0]["forms"],
             [
                 {
+                    "form": "swim",
+                    "pronouns": ["I", "you", "they"],
+                    "tags": ["present"],
+                },
+                {
                     "form": "swims",
                     "tags": ["present"],
                     "pronouns": ["he", "she", "it"],
-                }
+                },
             ],
         )
+
+    def test_name_table(self):
+        self.wxr.wtp.add_page(
+            "Vorlage:Deutsch Vorname Übersicht m",
+            10,
+            """{| class="wikitable float-right inflection-table flexbox"
+! width="65" |
+! [[Hilfe:Singular|Singular]]
+! [[Hilfe:Plural|Plural 1]]
+! [[Hilfe:Plural|Plural 2]]
+<nowiki />
+|-
+! style="text-align:left;" |  [[Hilfe:Nominativ|Nominativ]]
+| <small>(der)</small> Peter
+| die Peter
+| die [[Peters|Peters]]
+<nowiki />
+|-
+! style="text-align:left;" |  [[Hilfe:Genitiv|Genitiv]]
+| <small>(des Peter)<br />(des [[Peters|Peters]])</small><br />[[Peters|Peters]]
+|}[[Kategorie:Vorname m (Deutsch)]]""",
+        )
+        data = parse_page(
+            self.wxr,
+            "Peter",
+            """== Peter ({{Sprache|Deutsch}}) ==
+=== {{Wortart|Substantiv|Deutsch}}, {{m}}, {{Wortart|Vorname|Deutsch}} ===
+{{Deutsch Vorname Übersicht m
+|Nominativ Plural 1=Peter
+|Nominativ Plural 2=Peters
+|Genitiv Singular=Peters
+}}
+====Bedeutungen====
+:[1] männlicher [[Vorname]]""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {
+                    "article": "der",
+                    "form": "Peter",
+                    "tags": ["nominative", "singular"],
+                },
+                {
+                    "article": "die",
+                    "form": "Peter",
+                    "tags": ["nominative", "plural"],
+                },
+                {
+                    "article": "die",
+                    "form": "Peters",
+                    "tags": ["nominative", "plural"],
+                },
+                {
+                    "article": "des",
+                    "form": "Peter",
+                    "tags": ["genitive", "singular"],
+                },
+                {
+                    "article": "des",
+                    "form": "Peters",
+                    "tags": ["genitive", "singular"],
+                },
+                {"form": "Peters", "tags": ["genitive", "singular"]},
+            ],
+        )
+        self.assertEqual(data[0]["categories"], ["Vorname m (Deutsch)"])

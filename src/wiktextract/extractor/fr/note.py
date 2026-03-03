@@ -40,10 +40,10 @@ def process_note_template(
     page_data: list[WordEntry],
     template_node: TemplateNode,
 ) -> None:
-    expaned_template = wxr.wtp.parse(
+    expanded_template = wxr.wtp.parse(
         wxr.wtp.node_to_wikitext(template_node), expand_all=True
     )
-    extract_note(wxr, page_data, expaned_template)
+    extract_note(wxr, page_data, expanded_template)
 
 
 def extract_recognition_rate_section(

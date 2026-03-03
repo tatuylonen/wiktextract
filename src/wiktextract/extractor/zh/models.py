@@ -13,7 +13,6 @@ class ChineseBaseModel(BaseModel):
 
 class Example(ChineseBaseModel):
     text: str = Field(
-        default="",
         description="Example usage sentences, some might have have both "
         "Simplified and Traditional Chinese forms",
     )
@@ -107,6 +106,8 @@ class Sound(ChineseBaseModel):
     enpr: str = Field(default="", description="English pronunciation")
     other: str = ""
     roman: str = ""
+    rhymes: str = ""
+    hangeul: str = ""
 
 
 class Translation(ChineseBaseModel):
@@ -151,6 +152,10 @@ class Descendant(ChineseBaseModel):
     sense: str = ""
 
 
+class Hyphenation(ChineseBaseModel):
+    parts: list[str] = []
+
+
 class WordEntry(ChineseBaseModel):
     model_config = ConfigDict(title="Chinese Wiktionary")
 
@@ -160,7 +165,7 @@ class WordEntry(ChineseBaseModel):
     pos: str = Field(description="Part of speech type")
     pos_title: str = ""
     pos_level: NodeKind = Field(default=NodeKind.ROOT, exclude=True)
-    etymology_text: str = ""
+    etymology_texts: list[str] = []
     etymology_examples: list[Example] = []
     senses: list[Sense] = Field(default=[], description="Sense list")
     forms: list[Form] = Field(default=[], description="Inflection forms list")
@@ -175,7 +180,7 @@ class WordEntry(ChineseBaseModel):
     troponyms: list[Linkage] = []
     paronyms: list[Linkage] = []
     related: list[Linkage] = []
-    abbreviation: list[Linkage] = []
+    abbreviations: list[Linkage] = []
     proverbs: list[Linkage] = []
     antonyms: list[Linkage] = []
     coordinate_terms: list[Linkage] = []
@@ -195,3 +200,5 @@ class WordEntry(ChineseBaseModel):
     literal_meaning: str = ""
     original_title: str = ""
     anagrams: list[Linkage] = []
+    hyphenations: list[Hyphenation] = []
+    classifiers: list[Classifier] = []

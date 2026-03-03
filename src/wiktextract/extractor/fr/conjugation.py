@@ -5,6 +5,7 @@ from itertools import chain
 from wikitextprocessor.parser import (
     LEVEL_KIND_FLAGS,
     HTMLNode,
+    LevelNode,
     NodeKind,
     TemplateNode,
     WikiNode,
@@ -35,55 +36,16 @@ def extract_conjugation(
     if conj_page is None:
         return
     conj_root = wxr.wtp.parse(conj_page)
-    for conj_template in conj_root.find_child(NodeKind.TEMPLATE):
-        if conj_template.template_name.endswith("-intro"):
-            continue
-        if conj_template.template_name in ["ku-conj-trans", "ku-conj"]:
-            extract_ku_conj_trans_template(
-                wxr, entry, conj_template, conj_page_title
+    for node in conj_root.children:
+        if isinstance(node, TemplateNode):
+            extract_conj_templates(
+                wxr, entry, conj_page_title, node, select_tab
             )
-        elif conj_template.template_name == "ko-conj":
-            extract_ko_conj_template(wxr, entry, conj_template, conj_page_title)
-        elif conj_template.template_name == "de-conj":
-            extract_de_conj_template(wxr, entry, conj_template, conj_page_title)
-        elif conj_template.template_name.startswith("pt-conj/"):
-            extract_pt_conj_template(wxr, entry, conj_template, conj_page_title)
-        elif conj_template.template_name.startswith("cs-conj-"):
-            extract_cs_conj_template(wxr, entry, conj_template, conj_page_title)
-        elif conj_template.template_name.startswith(("ro-verb-", "se-conj-")):
-            from .inflection import extract_inf_table_template
-
-            extract_inf_table_template(
-                wxr, entry, conj_template, conj_page_title
-            )
-        elif (
-            "-conj" in conj_template.template_name
-            # https://fr.wiktionary.org/wiki/Catégorie:Modèles_de_conjugaison_en_italien
-            # Italian table templates
-            or conj_template.template_name.startswith("it-")
-        ):
-            process_conj_template(wxr, entry, conj_template, conj_page_title)
-        elif conj_template.template_name == "Onglets conjugaison":
-            process_onglets_conjugaison_template(
-                wxr, entry, conj_template, conj_page_title, select_tab
-            )
-        elif conj_template.template_name.removeprefix(":").startswith(
-            "Conjugaison:"
-        ):
-            extract_conjugation(
-                wxr,
-                entry,
-                conj_template.template_name.removeprefix(":"),
-                clean_node(
-                    wxr, None, conj_template.template_parameters.get("sél", "2")
-                ),
-            )
-        elif conj_template.template_name.startswith("ja-flx-adj"):
-            process_ja_flx_adj_template(
-                wxr, entry, conj_template, conj_page_title
-            )
-        elif conj_template.template_name.startswith("ja-"):
-            process_ja_conj_template(wxr, entry, conj_template, conj_page_title)
+        elif isinstance(node, LevelNode):
+            for t_node in node.find_child(NodeKind.TEMPLATE):
+                extract_conj_templates(
+                    wxr, entry, conj_page_title, t_node, select_tab
+                )
 
     if conj_page_title.startswith("Conjugaison:kurde/"):
         for table in conj_root.find_child(NodeKind.TABLE):
@@ -91,6 +53,59 @@ def extract_conjugation(
 
     for link_node in conj_root.find_child(NodeKind.LINK):
         clean_node(wxr, None, link_node)
+
+
+def extract_conj_templates(
+    wxr: WiktextractContext,
+    entry: WordEntry,
+    conj_page_title: str,
+    conj_template: TemplateNode,
+    select_tab: str = "1",
+) -> None:
+    if conj_template.template_name.endswith("-intro"):
+        return
+    if conj_template.template_name in ["ku-conj-trans", "ku-conj"]:
+        extract_ku_conj_trans_template(
+            wxr, entry, conj_template, conj_page_title
+        )
+    elif conj_template.template_name == "ko-conj":
+        extract_ko_conj_template(wxr, entry, conj_template, conj_page_title)
+    elif conj_template.template_name == "de-conj":
+        extract_de_conj_template(wxr, entry, conj_template, conj_page_title)
+    elif conj_template.template_name.startswith("pt-conj/"):
+        extract_pt_conj_template(wxr, entry, conj_template, conj_page_title)
+    elif conj_template.template_name.startswith("cs-conj-"):
+        extract_cs_conj_template(wxr, entry, conj_template, conj_page_title)
+    elif conj_template.template_name.startswith(("ro-verb-", "se-conj-")):
+        from .inflection import extract_inf_table_template
+
+        extract_inf_table_template(wxr, entry, conj_template, conj_page_title)
+    elif (
+        "-conj" in conj_template.template_name
+        # https://fr.wiktionary.org/wiki/Catégorie:Modèles_de_conjugaison_en_italien
+        # Italian table templates
+        or conj_template.template_name.startswith("it-")
+    ):
+        process_conj_template(wxr, entry, conj_template, conj_page_title)
+    elif conj_template.template_name == "Onglets conjugaison":
+        process_onglets_conjugaison_template(
+            wxr, entry, conj_template, conj_page_title, select_tab
+        )
+    elif conj_template.template_name.removeprefix(":").startswith(
+        "Conjugaison:"
+    ):
+        extract_conjugation(
+            wxr,
+            entry,
+            conj_template.template_name.removeprefix(":"),
+            clean_node(
+                wxr, None, conj_template.template_parameters.get("sél", "2")
+            ),
+        )
+    elif conj_template.template_name.startswith("ja-flx-adj"):
+        process_ja_flx_adj_template(wxr, entry, conj_template, conj_page_title)
+    elif conj_template.template_name.startswith("ja-"):
+        process_ja_conj_template(wxr, entry, conj_template, conj_page_title)
 
 
 def process_onglets_conjugaison_template(

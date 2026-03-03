@@ -185,6 +185,7 @@ xlat_head_map = {
     "n inan pl or f inan or f inan pl": "neuter inanimate plural feminine singular",  # XXX
     "f inan pl or m anim or m anim pl": "feminine inanimate plural masculine animate singular",  # XXX
     "f inan pl or m inan or m inan pl": "feminine inanimate plural masculine singular",  # XXX
+    "n anim or n inan or n anim pl or n inan pl": "neuter animate inanimate singular plural",
     "n anim pl or n inan or n inan pl": "neuter animate plural inanimate singular",  # XXX
     "n inan or n inan pl or f inan or f inan pl": "neuter inanimate singular plural feminine",
     "n inan pl or n anim or n anim pl": "neuter inanimate plural animate singular",  # XXX
@@ -387,6 +388,10 @@ xlat_head_map = {
     "mu class": "class-18",
     "m or f by sense": "masculine feminine by-personal-gender",
     "superlative dubious": "",
+    # пьянчужка/Russian
+    "m anim or f anim by sense": "masculine feminine by-personal-gender",
+    "m pl or f pl by sense": "masculine feminine plural by-personal-gender",
+    "m pers or f pers by sense": "masculine feminine personal by-personal-gender",
 }
 
 # Languages that can have head-final numeric class indicators.  They are mostly

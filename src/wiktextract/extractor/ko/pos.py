@@ -10,6 +10,7 @@ from wikitextprocessor import (
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
+from ..ruby import extract_ruby
 from .example import extract_example_list_item
 from .linkage import (
     LINKAGE_TEMPLATES,
@@ -62,8 +63,10 @@ def extract_pos_section(
                     if len(page_data[-1].senses) > 0
                     else "",
                 )
-            elif node.template_name in HEADER_TEMPLATES:
-                extract_header_template(wxr, page_data[-1], node)
+            elif node.template_name.startswith(
+                base_data.lang_code + "-"
+            ) or node.template_name.endswith((" 동사", " 명사", " 고유명사")):
+                extract_headword_line_template(wxr, page_data[-1], node)
         elif node.kind == NodeKind.LIST:
             for list_item in node.find_child(NodeKind.LIST_ITEM):
                 if node.sarg.startswith("#") and node.sarg.endswith("#"):
@@ -74,7 +77,7 @@ def extract_pos_section(
                         Sense(pattern=page_data[-1].pattern),
                     )
                 else:
-                    extract_unorderd_list_item(wxr, page_data[-1], list_item)
+                    extract_unordered_list_item(wxr, page_data[-1], list_item)
 
     if not (
         len(page_data[-1].senses) > 0
@@ -107,7 +110,7 @@ def extract_gloss_list_item(
                         wxr, word_entry, nested_list_item, sense
                     )
                 else:
-                    extract_unorderd_list_item(
+                    extract_unordered_list_item(
                         wxr, word_entry, nested_list_item
                     )
             continue
@@ -137,7 +140,7 @@ def extract_gloss_list_item(
         word_entry.senses.append(sense)
 
 
-def extract_unorderd_list_item(
+def extract_unordered_list_item(
     wxr: WiktextractContext, word_entry: WordEntry, list_item: WikiNode
 ) -> None:
     is_first_bold = True
@@ -211,69 +214,6 @@ def extract_form_of_template(
         sense.form_of.append(AltForm(word=word))
 
 
-HEADER_TEMPLATES = frozenset(
-    [
-        "ko-verb",
-        "한국어 동사",
-        "ko-noun",
-        "한국어 명사",
-        "ko-proper noun",
-        "한국어 고유명사",
-    ]
-)
-
-
-def extract_header_template(
-    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
-) -> None:
-    if t_node.template_name in ["ko-verb", "한국어 동사"]:
-        extract_ko_verb_template(wxr, word_entry, t_node)
-    elif t_node.template_name in [
-        "ko-noun",
-        "한국어 명사",
-        "ko-proper noun",
-        "한국어 고유명사",
-    ]:
-        extract_ko_noun_template(wxr, word_entry, t_node)
-
-
-def extract_ko_verb_template(
-    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
-) -> None:
-    # https://ko.wiktionary.org/wiki/틀:한국어_동사
-    expanded_node = wxr.wtp.parse(
-        wxr.wtp.node_to_wikitext(t_node), expand_all=True
-    )
-    clean_node(wxr, word_entry, expanded_node)
-    for top_span_tag in expanded_node.find_html(
-        "span", attr_name="class", attr_value="headword-line"
-    ):
-        raw_tag = ""
-        for node in top_span_tag.children:
-            if isinstance(node, str):
-                if "(" in node:
-                    raw_tag = node[node.rindex("(") + 1 :].strip(", ")
-                else:
-                    raw_tag = node.strip(", ")
-            elif isinstance(node, HTMLNode) and node.tag == "b":
-                form = Form(form=clean_node(wxr, None, node))
-                if raw_tag != "":
-                    form.raw_tags.append(raw_tag)
-                if form.form != "":
-                    translate_raw_tags(form)
-                    word_entry.forms.append(form)
-
-
-def extract_ko_noun_template(
-    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
-) -> None:
-    # https://ko.wiktionary.org/wiki/틀:한국어_명사
-    # https://ko.wiktionary.org/wiki/틀:한국어_고유명사
-    hanja = clean_node(wxr, None, t_node.template_parameters.get("한자", ""))
-    if hanja != "":
-        word_entry.forms.append(Form(form=hanja, tags=["hanja"]))
-
-
 def extract_grammar_note_section(
     wxr: WiktextractContext, word_entry: WordEntry, level_node: LevelNode
 ) -> None:
@@ -315,3 +255,100 @@ def extract_zh_mw_template(
     sense.classifiers.extend(classifiers)
     for classifier in sense.classifiers:
         translate_raw_tags(classifier)
+
+
+def extract_headword_line_template(
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+):
+    forms = []
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for main_span_tag in expanded_node.find_html(
+        "span", attr_name="class", attr_value="headword-line"
+    ):
+        i_tags = []
+        for html_node in main_span_tag.find_child(NodeKind.HTML):
+            class_names = html_node.attrs.get("class", "").split()
+            if html_node.tag == "strong" and "headword" in class_names:
+                ruby, no_ruby = extract_ruby(wxr, html_node)
+                strong_str = clean_node(wxr, None, no_ruby)
+                if strong_str not in ["", wxr.wtp.title] or len(ruby) > 0:
+                    forms.append(
+                        Form(form=strong_str, tags=["canonical"], ruby=ruby)
+                    )
+            elif html_node.tag == "span":
+                if "headword-tr" in class_names or "tr" in class_names:
+                    roman = clean_node(wxr, None, html_node)
+                    if (
+                        len(forms) > 0
+                        and "canonical" not in forms[-1].tags
+                        and "romanization" not in forms[-1].tags
+                    ):
+                        forms[-1].roman = roman
+                    elif roman != "":
+                        forms.append(Form(form=roman, tags=["romanization"]))
+                elif "gender" in class_names:
+                    for abbr_tag in html_node.find_html("abbr"):
+                        gender_tag = clean_node(wxr, None, abbr_tag)
+                        if (
+                            len(forms) > 0
+                            and "canonical" not in forms[-1].tags
+                            and "romanization" not in forms[-1].tags
+                        ):
+                            forms[-1].raw_tags.append(gender_tag)
+                        else:
+                            word_entry.raw_tags.append(gender_tag)
+                elif "ib-content" in class_names:
+                    raw_tag = clean_node(wxr, None, html_node)
+                    if raw_tag != "":
+                        word_entry.raw_tags.append(raw_tag)
+            elif html_node.tag == "sup" and word_entry.lang_code == "ja":
+                forms.append(extract_historical_kana(wxr, html_node))
+            elif html_node.tag == "i":
+                if len(i_tags) > 0:
+                    word_entry.raw_tags.extend(i_tags)
+                i_tags.clear()
+                for i_child in html_node.children:
+                    raw_tag = (
+                        clean_node(wxr, None, i_child)
+                        .removeprefix("^†")
+                        .strip()
+                    )
+                    if raw_tag != "":
+                        i_tags.append(raw_tag)
+            elif html_node.tag == "b":
+                ruby, no_ruby = extract_ruby(wxr, html_node)
+                for form_str in filter(
+                    None,
+                    map(str.strip, clean_node(wxr, None, no_ruby).split(",")),
+                ):
+                    form = Form(form=form_str, ruby=ruby)
+                    if i_tags == ["또는"]:
+                        if len(forms) > 0:
+                            form.raw_tags.extend(forms[-1].raw_tags)
+                    else:
+                        form.raw_tags.extend(i_tags)
+                    forms.append(form)
+                i_tags.clear()
+
+        if len(i_tags) > 0:
+            word_entry.raw_tags.extend(i_tags)
+    for form in forms:
+        translate_raw_tags(form)
+    word_entry.forms.extend(forms)
+    clean_node(wxr, word_entry, expanded_node)
+    translate_raw_tags(word_entry)
+
+
+def extract_historical_kana(
+    wxr: WiktextractContext, sup_node: HTMLNode
+) -> Form:
+    form = Form(form="", tags=["archaic"])
+    for strong_node in sup_node.find_html("strong"):
+        form.form = clean_node(wxr, None, strong_node)
+    for span_node in sup_node.find_html(
+        "span", attr_name="class", attr_value="tr"
+    ):
+        form.roman = clean_node(wxr, None, span_node)
+    return form

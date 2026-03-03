@@ -69,6 +69,7 @@ def extract_example_list_item(
             "collocation",
             "co",
             "coi",
+            "uxa",
         ]:
             copy_of_parent_data = deepcopy(parent_data)
             if template_node.template_name in ("collocation", "co", "coi"):
@@ -389,7 +390,7 @@ def clean_example_empty_data(data: ExampleData) -> None:
             new_raw_tags.append(raw_tag)
     data["raw_tags"] = new_raw_tags
     if len(data.get("ref", "")) > 0:
-        data["type"] = "quote"
+        data["type"] = "quotation"
     else:
         data["type"] = "example"
     for key, value in data.copy().items():

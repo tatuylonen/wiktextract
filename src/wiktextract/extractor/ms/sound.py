@@ -18,7 +18,7 @@ def extract_sound_section(
         for list_item in list_node.find_child(NodeKind.LIST_ITEM):
             sounds.extend(extract_sound_list_item(wxr, list_item))
     for node in level_node.find_child(NodeKind.TEMPLATE):
-        extract_sound_templates(wxr, node, [])
+        sounds.extend(extract_sound_templates(wxr, node, []))
 
     if len(page_data) == 0 or page_data[-1].lang_code != base_data.lang_code:
         for sound in sounds:
@@ -85,6 +85,8 @@ def extract_sound_templates(
         sounds.extend(extract_dewan_template(wxr, t_node))
     elif t_node.template_name in ["audio-AFA", "audio-IPA"]:
         sounds.extend(extract_audio_ipa_template(wxr, t_node, raw_tags))
+    elif t_node.template_name.lower() in ["ko-afa", "ko-ipa", "ko-pron"]:
+        sounds.extend(extract_ko_ipa_template(wxr, t_node))
     elif t_node.template_name.lower() in [
         "afa",
         "ipa",
@@ -205,4 +207,70 @@ def extract_audio_ipa_template(
         sound = Sound(ipa=ipa, categories=cats.get("categories", []))
         set_sound_file_url_fields(wxr, filename, sound)
         sounds.append(sound)
+    return sounds
+
+
+def extract_ko_ipa_template(
+    wxr: WiktextractContext, t_node: TemplateNode
+) -> list[Sound]:
+    sounds = []
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    for ul_node in expanded_node.find_html("ul"):
+        for li_node in ul_node.find_html("li"):
+            if "ko-pron__ph" in li_node.attrs.get("class", ""):
+                for span_node in li_node.find_html(
+                    "span", attr_name="lang", attr_value="ko"
+                ):
+                    hangeul_str = clean_node(wxr, None, span_node).strip("[]")
+                    for hangeul in hangeul_str.split("/"):
+                        if hangeul != "":
+                            sounds.append(
+                                Sound(hangeul=hangeul, tags=["phonetic"])
+                            )
+            else:
+                raw_tags = []
+                for i_node in li_node.find_html("i"):
+                    for raw_tag in clean_node(wxr, None, i_node).split("/"):
+                        if raw_tag not in ["", "AFA"]:
+                            raw_tags.append(raw_tag)
+                for span_node in li_node.find_html(
+                    "span", attr_name="class", attr_value="IPA"
+                ):
+                    ipas = clean_node(wxr, None, span_node)
+                    for ipa in ipas.split("~"):
+                        ipa = ipa.strip()
+                        if ipa != "":
+                            sound = Sound(ipa=ipa, raw_tags=raw_tags)
+                            translate_raw_tags(sound)
+                            sounds.append(sound)
+
+    for table in expanded_node.find_html("table"):
+        for tr in table.find_html("tr"):
+            raw_tag = ""
+            for th in tr.find_html("th"):
+                raw_tag = clean_node(wxr, None, th)
+            for td in tr.find_html("td"):
+                roman = clean_node(wxr, None, td)
+                if roman != "":
+                    sound = Sound(roman=roman)
+                    if raw_tag != "":
+                        sound.raw_tags.append(raw_tag)
+                        translate_raw_tags(sound)
+                    sounds.append(sound)
+
+    audio_file = clean_node(
+        wxr,
+        None,
+        t_node.template_parameters.get(
+            "a", t_node.template_parameters.get("audio", "")
+        ),
+    )
+    if audio_file != "":
+        sound = Sound()
+        set_sound_file_url_fields(wxr, audio_file, sound)
+        sounds.append(sound)
+    if len(sounds) > 0:
+        clean_node(wxr, sounds[-1], expanded_node)
     return sounds

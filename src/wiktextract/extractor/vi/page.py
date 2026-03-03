@@ -14,7 +14,7 @@ from wikitextprocessor.parser import (
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .descendant import extract_descendant_section
-from .etymology import extract_etymology_section
+from .etymology import extract_etymology_section, extract_ja_kanjitab_template
 from .linkage import extract_alt_form_section, extract_linkage_section
 from .models import Form, Sense, WordEntry
 from .pos import extract_note_section, extract_pos_section
@@ -130,6 +130,12 @@ def parse_page(
                     if isinstance(key, int):
                         base_data.redirects.append(clean_node(wxr, None, value))
                 clean_node(wxr, base_data, t_node)
+            elif (
+                t_node.template_name.endswith("-kanjitab")
+                or t_node.template_name == "ja-kt"
+            ):
+                extract_ja_kanjitab_template(wxr, t_node, base_data)
+
         if len(base_data.redirects) > 0:
             page_data.append(base_data)
         for next_level in level2_node.find_child(LEVEL_KIND_FLAGS):

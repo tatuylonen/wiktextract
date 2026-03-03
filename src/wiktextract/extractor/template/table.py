@@ -70,8 +70,8 @@ def parse_pos_table(
 
     # Check if there are actually any headers. This example was taken originally
     # from the Simple English extractor, and the SE edition doesn't use headers.
-    # Having headers is better than not, but when they're inconsistenly applied,
-    # it's a headache.
+    # Having headers is better than not, but when they're inconsistently
+    # applied, it's a headache.
     for header in tree.find_child_recursively(NodeKind.TABLE_HEADER_CELL):
         # Collect some data on what kind of headers are present in tables.
         wxr.wtp.debug(

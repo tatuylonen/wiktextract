@@ -267,6 +267,12 @@ def extract_alt_form_section(
                             )
                         )
                         add_tag()
+                elif isinstance(node, TemplateNode) and node.template_name in [
+                    "alter+",
+                    "alt+",
+                ]:
+                    forms.extend(extract_alter_plus_template(wxr, node))
+                    add_tag()
                 elif (
                     isinstance(node, str)
                     and node.strip().startswith(("(", "（"))
@@ -281,7 +287,7 @@ def extract_alt_form_section(
                     tag_nodes.append(node)
                 elif parentheses > 0:
                     tag_nodes.append(node)
-    add_tag()
+            add_tag()
     word_entry.forms.extend(forms)
 
 
@@ -341,3 +347,20 @@ def extract_zh_l_template(
                 )
             )
     return l_list
+
+
+def extract_alter_plus_template(
+    wxr: WiktextractContext, t_node: TemplateNode
+) -> list[Form]:
+    forms = []
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    lang_code = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
+    for span_node in expanded_node.find_html("span"):
+        span_lang = span_node.attrs.get("lang", "")
+        if span_lang == lang_code:
+            word = clean_node(wxr, None, span_node)
+            if word != "":
+                forms.append(Form(form=word, tags=["alternative"]))
+    return forms

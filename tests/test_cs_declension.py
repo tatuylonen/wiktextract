@@ -434,3 +434,77 @@ class TestCsDeclension(TestCase):
                 },
             ],
         )
+
+    def test_split_by_slash_without_space(self):
+        self.wxr.wtp.add_page(
+            "Šablona:Substantivum (cs)",
+            10,
+            """{| class="deklinace substantivum"
+|-
+! <span title="substantivum (podstatné jméno)">pád \\ číslo</span>
+! <span title="singulár (jednotné číslo)">jednotné</span>
+! <span title="plurál (množné číslo)">množné</span>
+|-
+! <span title="nominativ (1. pád: kdo? co?)">nominativ</span>
+| dianetik
+| dianetici/dianetikové
+|}""",
+        )
+        data = parse_page(
+            self.wxr,
+            "dianetik",
+            """== čeština ==
+=== podstatné jméno (1) ===
+* ''rod mužský životný''
+==== skloňování ====
+{{Substantivum (cs)
+  | snom = dianetik
+  | sgen = [[dianetika]]
+  | sdat = [[dianetiku]]/dianetikovi
+}}
+==== význam ====
+# [[kdo]] [[zabývat se|se zabývá]] [[dianetika|dianetikou]]""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {"form": "dianetici", "tags": ["nominative", "plural"]},
+                {"form": "dianetikové", "tags": ["nominative", "plural"]},
+            ],
+        )
+
+    def test_ja_verb(self):
+        self.wxr.wtp.add_page(
+            "Šablona:Sloveso (ja)",
+            10,
+            """{| class="konjugace verbum"
+|-
+! Sloveso
+! tvar
+! rómadži
+! odvozené tvary
+|-
+! 1. základ
+| lang="ja" xml:lang="ja" | 飲ま
+| lang="cs" xml:lang="cs" | noma
+| lang="ja" xml:lang="ja" | [[飲まない]], [[飲まなくて]]
+|}""",
+        )
+        data = parse_page(
+            self.wxr,
+            "飲む",
+            """== japonština ==
+=== sloveso ===
+==== časování ====
+{{Sloveso (ja)
+  | 1z = 飲ま
+  | 1r = noma
+  | 1o = [[飲まない]], [[飲まなくて]]
+}}
+==== význam ====
+# [[pít]]""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [{"form": "飲ま", "roman": "noma", "raw_tags": ["1. základ"]}],
+        )

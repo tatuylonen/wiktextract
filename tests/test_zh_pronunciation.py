@@ -63,6 +63,11 @@ class TestPronunciation(TestCase):
 
     def test_homophone_template(self):
         self.wxr.wtp.start_page("大家")
+        self.wxr.wtp.add_page(
+            "Template:homophones",
+            10,
+            """<span class="homophones">[[Appendix:術語表#同音詞|同音詞]]：<span class="Jpan" lang="ja">-{<!-- -->[[大矢#日語|-{大矢}-]]}-</span>、<span class="Jpan" lang="ja">-{<!-- -->[[大宅#日語|-{大宅}-]]}-</span>、<span class="Jpan" lang="ja">-{<!-- -->[[大谷#日語|-{大谷}-]]}-</span></span>[[Category:有同音詞的日語詞|大00宀07]]""",
+        )
         root = self.wxr.wtp.parse("* {{homophones|ja|大矢|大宅|大谷}}")
         base_data = WordEntry(
             word="大家", lang_code="ja", lang="日語", pos="noun"
@@ -76,10 +81,16 @@ class TestPronunciation(TestCase):
                 {"homophone": "大谷"},
             ],
         )
+        self.assertEqual(base_data.categories, ["有同音詞的日語詞"])
 
     def test_en_pron_list(self):
         self.wxr.wtp.start_page("hello")
         self.wxr.wtp.add_page("Template:a", 10, "(美國)")
+        self.wxr.wtp.add_page(
+            "Template:IPA",
+            10,
+            """[[Wiktionary:國際音標|國際音標]]<sup>([[Appendix:英語發音|幫助]])</sup>:&#32;<span class="IPA">/hɛˈloʊ/</span>、<span class="IPA">/həˈloʊ/</span>、<span class="IPA">/ˈhɛloʊ/</span>""",
+        )
         root = self.wxr.wtp.parse(
             "* {{a|US}} {{enPR|hĕ-lō'|hə-lō'}}、{{IPA|en|/hɛˈloʊ/|/həˈloʊ/|/ˈhɛloʊ/}}"
         )
@@ -90,11 +101,11 @@ class TestPronunciation(TestCase):
         self.assertEqual(
             [d.model_dump(exclude_defaults=True) for d in base_data.sounds],
             [
-                {"enpr": "hĕ-lō'", "raw_tags": ["美國"]},
-                {"enpr": "hə-lō'", "raw_tags": ["美國"]},
-                {"ipa": "/hɛˈloʊ/", "raw_tags": ["美國"]},
-                {"ipa": "/həˈloʊ/", "raw_tags": ["美國"]},
-                {"ipa": "/ˈhɛloʊ/", "raw_tags": ["美國"]},
+                {"enpr": "hĕ-lō'", "tags": ["US"]},
+                {"enpr": "hə-lō'", "tags": ["US"]},
+                {"ipa": "/hɛˈloʊ/", "tags": ["US"]},
+                {"ipa": "/həˈloʊ/", "tags": ["US"]},
+                {"ipa": "/ˈhɛloʊ/", "tags": ["US"]},
             ],
         )
 
@@ -110,12 +121,12 @@ class TestPronunciation(TestCase):
         self.wxr.wtp.add_page(
             "Template:zh-verb",
             10,
-            "充耳[[Category:漢語詞元|儿04耳00]][[Category:漢語動詞|儿04耳00]]",
+            '<span class="headword-line"><strong class="Hani headword" lang="zh">-{充耳}-</strong></span>[[Category:漢語詞元|儿04耳00]][[Category:漢語動詞|儿04耳00]]',
         )
         self.wxr.wtp.add_page(
             "Template:head",
             10,
-            "充耳[[Category:漢語詞元|儿04耳00]][[Category:漢語名詞|儿04耳00]]",
+            '<span class="headword-line"><strong class="Hani headword" lang="zh">-{充耳}-</strong></span>[[Category:漢語詞元|儿04耳00]][[Category:漢語名詞|儿04耳00]]',
         )
         self.assertEqual(
             parse_page(
@@ -635,3 +646,183 @@ class TestPronunciation(TestCase):
                 }
             ],
         )
+
+    def test_vi_ipa(self):
+        self.wxr.wtp.add_page(
+            "Template:vi-IPA",
+            10,
+            """* <span class="ib-brac qualifier-brac">(</span><span class="ib-content qualifier-content"><span class="usage-label-accent">[[w:胡志明市|胡志明市]]</span></span><span class="ib-brac qualifier-brac">)</span> [[Wiktionary:國際音標|國際音標]]<sup>([[Appendix:越南語發音|幫助]])</sup>:&#32;<span class="IPA">[kaːk̚˦˥ tak̚˨˩˨]</span>[[Category:有國際音標的越南語詞|CAT&#37; TAC&amp;]][[分類:有國際音標的越南語詞]]""",
+        )
+        data = parse_page(
+            self.wxr,
+            "cát tặc",
+            """==越南語==
+===發音===
+{{vi-IPA}}
+===名詞===
+# [[盜]][[採]][[砂石]]者，[[非法]]採砂者""",
+        )
+        self.assertEqual(
+            data[0]["sounds"],
+            [{"ipa": "[kaːk̚˦˥ tak̚˨˩˨]", "tags": ["Saigon"]}],
+        )
+
+    def test_hi_ipa(self):
+        self.wxr.wtp.add_page(
+            "Template:hi-IPA",
+            10,
+            """<span class="usage-label-accent"><span class="ib-brac">(</span><span class="ib-content">[[w:en:Delhi Hindi|德里]]</span><span class="ib-brac">)</span></span> [[Wiktionary:國際音標|國際音標]]<sup>([[Appendix:印地語發音|幫助]])</sup>:&#32;<span class="IPA">/bʱɑː.ɾət̪/</span>, <span class="IPA">[bʱäː.ɾɐt̪]</span>[[Category:有國際音標的印地語詞|भारत]]""",
+        )
+        data = parse_page(
+            self.wxr,
+            "भारत",
+            """==印地語==
+===發音===
+* {{hi-IPA}}
+===專有名詞===
+# {{place|hi|國家|r/南亞|t1=印度}}""",
+        )
+        self.assertEqual(
+            data[0]["sounds"],
+            [
+                {"ipa": "/bʱɑː.ɾət̪/", "tags": ["Delhi"]},
+                {"ipa": "[bʱäː.ɾɐt̪]", "tags": ["Delhi"]},
+            ],
+        )
+        self.assertEqual(data[0]["categories"], ["有國際音標的印地語詞"])
+
+    def test_sa_ipa(self):
+        self.wxr.wtp.add_page(
+            "Template:sa-IPA",
+            10,
+            """* <span class="usage-label-accent"><span class="ib-brac">(</span><span class="ib-content">[[w:吠陀梵語|吠陀]]</span><span class="ib-brac">)</span></span> [[Wiktionary:國際音標|國際音標]]<sup>([[wikipedia:梵語音系|幫助]])</sup>:&#32;<span class="IPA">/bʱɑ́ː.ɾɐ.tɐ/</span>[[Category:有國際音標的梵語詞|भारत]]""",
+        )
+        data = parse_page(
+            self.wxr,
+            "भारत",
+            """==梵語==
+===發音===
+{{sa-IPA|a=1}}
+===形容詞===
+# 源自{{l|sa|भरत}}/[[Bhāratas]]""",
+        )
+        self.assertEqual(
+            data[0]["sounds"],
+            [{"ipa": "/bʱɑ́ː.ɾɐ.tɐ/", "tags": ["Vedic"]}],
+        )
+        self.assertEqual(data[0]["categories"], ["有國際音標的梵語詞"])
+
+    def test_ca_ipa(self):
+        self.wxr.wtp.add_page(
+            "Template:ca-IPA",
+            10,
+            """[[Wiktionary:國際音標|國際音標]]<sup>([[Appendix:加泰羅尼亞語發音|幫助]])</sup>:&#32;<span class="ib-brac qualifier-brac">(</span><span class="ib-content qualifier-content"><span class="usage-label-accent">[[w:en:Central Catalan|中加泰羅尼亞]]</span></span><span class="ib-brac qualifier-brac">)</span> <span class="IPA">[kuˈβal]</span>[[Category:有國際音標的加泰羅尼亞語詞|COBALT]]
+* [[Wiktionary:國際音標|國際音標]]<sup>([[Appendix:加泰羅尼亞語發音|幫助]])</sup>:&#32;<span class="ib-brac qualifier-brac">(</span><span class="ib-content qualifier-content"><span class="usage-label-accent">[[w:en:Balearic Catalan|巴利阿里]]<span class="ib-comma">，</span>[[w:巴倫西亞語|瓦倫西亞]]</span></span><span class="ib-brac qualifier-brac">)</span> <span class="IPA">[koˈbalt]</span>[[Category:有國際音標的加泰羅尼亞語詞|COBALT]]""",
+        )
+        data = parse_page(
+            self.wxr,
+            "cobalt",
+            """==加泰羅尼亞語==
+===發音===
+* {{ca-IPA}}
+===名詞===
+# [[鈷]]]""",
+        )
+        self.assertEqual(
+            data[0]["sounds"],
+            [
+                {"ipa": "[koˈbalt]", "raw_tags": ["巴利阿里", "瓦倫西亞"]},
+                {"ipa": "[kuˈβal]", "raw_tags": ["中加泰羅尼亞"]},
+            ],
+        )
+        self.assertEqual(data[0]["categories"], ["有國際音標的加泰羅尼亞語詞"])
+
+    def test_pl_pr(self):
+        self.wxr.wtp.add_page(
+            "Template:pl-pr",
+            10,
+            """<div class="vsSwitcher" data-toggle-category="pronunciations"><span class="vsToggleElement">&nbsp;</span>
+*[[Wiktionary:國際音標|國際音標]]<sup>([[Appendix:波蘭語發音|幫助]])</sup>:&#32;<span class="IPA">/ˈtfɔ.ʐɘt͡ɕ/</span>
+<div class="vsHide">
+
+*<span class="usage-label-accent"><span class="ib-brac">(</span><span class="ib-content">[[w:中古波蘭語|中古波蘭語]]</span><span class="ib-brac">)</span></span> [[Wiktionary:國際音標|國際音標]]<sup>([[Appendix:波蘭語發音|幫助]])</sup>:&#32;<span class="ib-brac qualifier-brac">(</span><span class="ib-content qualifier-content"><span class="usage-label-accent">16世紀</span></span><span class="ib-brac qualifier-brac">)</span> <span class="IPA">/ˈtfɔ.r̝ɨt͡ɕ/</span>, <span class="ib-brac qualifier-brac">(</span><span class="ib-content qualifier-content"><span class="usage-label-accent">17至18世紀</span></span><span class="ib-brac qualifier-brac">)</span> <span class="IPA">/ˈtfɔ.ʐɨt͡ɕ/</span>
+</div></div>
+
+* <table class="audiotable"><tr><td>音頻1<span class="ib-semicolon qualifier-semicolon">；</span><i class="Latn mention" lang="pl">-{<span class="ib-quote qualifier-quote">“</span>tworzyć<span class="ib-quote qualifier-quote">”</span>}-</i><span class="ib-colon qualifier-colon">：</span></td><td class="audiofile">[[File:Pl-tworzyć.ogg|noicon|175px]]</td><td class="audiometa" style="font-size: 80%;">([[:File:Pl-tworzyć.ogg|檔案]])</td></tr></table>
+* 韻部：[[Rhymes:波蘭語/ɔʐɘt͡ɕ|<span class="IPA">-ɔʐɘt͡ɕ</span>]]
+* 音節化：<span class="Latn" lang="pl">-{two‧rzyć}-</span>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "tworzyć",
+            """==波兰语==
+===发音===
+* {{pl-pr|a=Pl-tworzyć.ogg<text:#>|mp=#}}
+===动词===
+#创建，创造，创制""",
+        )
+        self.assertEqual(
+            data[0]["sounds"][:3],
+            [
+                {"ipa": "/ˈtfɔ.ʐɘt͡ɕ/"},
+                {"ipa": "/ˈtfɔ.r̝ɨt͡ɕ/", "raw_tags": ["中古波蘭語", "16世紀"]},
+                {
+                    "ipa": "/ˈtfɔ.ʐɨt͡ɕ/",
+                    "raw_tags": ["中古波蘭語", "17至18世紀"],
+                },
+            ],
+        )
+        self.assertEqual(data[0]["sounds"][3]["audio"], "Pl-tworzyć.ogg")
+        self.assertEqual(data[0]["sounds"][3]["raw_tags"], ["“tworzyć”"])
+        self.assertEqual(data[0]["sounds"][4], {"rhymes": "-ɔʐɘt͡ɕ"})
+        self.assertEqual(data[0]["hyphenations"], [{"parts": ["two", "rzyć"]}])
+
+    def test_ko_ipa(self):
+        self.wxr.wtp.add_page(
+            "Template:ko-IPA",
+            10,
+            """<ul><li>([[w:韓國標準語|韓國標準語]]/[[w:首尔方言|首尔]]) [[Wiktionary:國際音標|IPA]]<sup>([[w:韓語音系|說明]])</sup>: <span class="IPA">[jʌ̹nɡjʌ̹ɭdwe̞da̠] ~ [jʌ̹nɡjʌ̹ɭdø̞da̠]</span><ul><li><table class="audiotable"><tr><td>音頻<span class="ib-colon qualifier-colon">：</span></td><td class="audiofile">[[File:Ko-연결되다.oga|noicon|175px]]</td><td class="audiometa" style="font-size: 80%;">([[:File:Ko-연결되다.oga|檔案]])</td></tr></table>[[Category:有音頻鏈接的朝鮮語詞|연결되다]]</li></ul></li><li class="ko-pron__ph">諺文注音：<span class="Kore" lang="ko">[<span>연</span><span>결</span><b>뒈</b><span>다</span>/<span>연</span><span>결</span><span>되</span><span>다</span>]</span></li></ul><table class="ko-pron mw-collapsible mw-collapsed"><tr><th colspan="2">羅馬化</th></tr><tr><th>[[w:文化觀光部2000年式|國語羅馬字]]<sup><small>[[Wiktionary:關於朝鮮語/羅馬化|?]]</small></sup></th><td class="IPA">yeon'gyeoldoeda</td></tr></table>[[Category:有國際音標的朝鮮語詞]]""",
+        )
+        data = parse_page(
+            self.wxr,
+            "연결되다",
+            """==朝鮮語==
+===發音===
+{{ko-IPA|a=Ko-연결되다.oga}}
+===動詞===
+# [[連接]]，[[連通]]""",
+        )
+        self.assertEqual(
+            data[0]["sounds"][:-1],
+            [
+                {"ipa": "[jʌ̹nɡjʌ̹ɭdwe̞da̠]", "tags": ["SK-Standard", "Seoul"]},
+                {"ipa": "[jʌ̹nɡjʌ̹ɭdø̞da̠]", "tags": ["SK-Standard", "Seoul"]},
+                {"hangeul": "연결뒈다", "tags": ["phonetic"]},
+                {"hangeul": "연결되다", "tags": ["phonetic"]},
+                {"roman": "yeon'gyeoldoeda", "tags": ["Gwoyeu-Romatsyh"]},
+            ],
+        )
+        self.assertEqual(data[0]["sounds"][-1]["audio"], "Ko-연결되다.oga")
+        self.assertEqual(
+            data[0]["categories"],
+            ["有音頻鏈接的朝鮮語詞", "有國際音標的朝鮮語詞"],
+        )
+
+    def test_audio_location(self):
+        self.wxr.wtp.add_page(
+            "Template:audio",
+            10,
+            """<table class="audiotable"><tr><td>音頻 <span class="ib-brac qualifier-brac">(</span><span class="usage-label-accent"><span class="ib-content">[[w:柏林|柏林]]</span></span><span class="ib-brac qualifier-brac">)</span><span class="ib-colon qualifier-colon">：</span></td><td class="audiofile">[[File:De-verrückt.ogg|noicon|175px]]</td><td class="audiometa" style="font-size: 80%;">([[:File:De-verrückt.ogg|檔案]])</td></tr></table>[[Category:有音頻鏈接的德語詞|VERRUCKT]]""",
+        )
+        data = parse_page(
+            self.wxr,
+            "verrückt",
+            """==德语==
+===发音===
+* {{audio|de|De-verrückt.ogg|a=Berlin}}
+===分词===
+# {{past participle of|de|verrücken}}""",
+        )
+        self.assertEqual(data[0]["sounds"][0]["audio"], "De-verrückt.ogg")
+        self.assertEqual(data[0]["sounds"][0]["tags"], ["Berlin"])
+        self.assertEqual(data[0]["categories"], ["有音頻鏈接的德語詞"])

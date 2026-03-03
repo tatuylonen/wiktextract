@@ -31,7 +31,7 @@ class Example(__EXAMPLE_TEMPLATE__BaseModel):
     # title: str = Field(default="", description="Title of the reference")
     # ref: str = Field(default="", description="Raw reference string")
     # url: str = Field(
-    #     default="", description="A web link. Not necessarily well-formated."
+    #     default="", description="A web link. Not necessarily well-formatted."
     # )
     # date: str = Field(default="", description="Original date")
     # date_published: str = Field(default="", description="Date of publication")
@@ -92,7 +92,7 @@ class Translation(__EXAMPLE_TEMPLATE__BaseModel):
 
 
 # General glass for "link to another related word", like synonym, antonym, etc.
-# Instead of having classes for each, we have differnet fields of list[Linkage],
+# Instead of having classes for each, we have different fields of list[Linkage],
 # like `synonyms: list[Linkage] = []`.
 class Linkage(__EXAMPLE_TEMPLATE__BaseModel):
     word: str
@@ -108,10 +108,12 @@ class Linkage(__EXAMPLE_TEMPLATE__BaseModel):
     # topics: list[str] = []
     # urls: list[str]
 
+
 class FormOf(__EXAMPLE_TEMPLATE__BaseModel):
     word: str
     # extra: str
     # roman: str
+
 
 # Basically a line or lines of gloss, a meaning of a word. These are collected
 # under the POS as a list.

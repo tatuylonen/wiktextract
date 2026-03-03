@@ -77,6 +77,7 @@ class Form(VietnameseBaseModel):
     raw_tags: list[str] = []
     roman: str = ""
     sense: str = ""
+    ruby: list[tuple[str, ...]] = []
 
 
 class Translation(VietnameseBaseModel):
@@ -110,6 +111,7 @@ class Sound(VietnameseBaseModel):
     zh_pron: str = ""
     roman: str = ""
     other: str = ""
+    hangeul: str = ""
 
 
 class Hyphenation(VietnameseBaseModel):
@@ -153,7 +155,7 @@ class WordEntry(VietnameseBaseModel):
     forms: list[Form] = []
     translations: list[Translation] = []
     sounds: list[Sound] = []
-    etymology_text: str = ""
+    etymology_texts: list[str] = []
     hyphenations: list[Hyphenation] = []
     notes: list[str] = []
     anagrams: list[Linkage] = []
@@ -162,3 +164,4 @@ class WordEntry(VietnameseBaseModel):
     literal_meaning: str = ""
     redirects: list[str] = []
     descendants: list[Descendant] = []
+    classifiers: list[Classifier] = []

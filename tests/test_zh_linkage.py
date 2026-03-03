@@ -622,3 +622,48 @@ class TestZhLinkage(TestCase):
                 }
             ],
         )
+
+    def test_qual_after_word(self):
+        self.wxr.wtp.add_page(
+            "Template:l",
+            10,
+            '<span class="Latn" lang="id">-{<!-- -->[[arsip#印尼語|-{arsip}-]]}-</span>',
+        )
+        self.wxr.wtp.add_page(
+            "Template:qual",
+            10,
+            '<span class="ib-brac qualifier-brac">(</span><span class="ib-content qualifier-content">印尼語</span><span class="ib-brac qualifier-brac">)</span>',
+        )
+        data = parse_page(
+            self.wxr,
+            "arkib",
+            """==馬來語==
+===其他形式===
+* {{l|id|arsip}} {{qual|印尼語}}
+===名詞===
+# [[檔案]]""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [{"form": "arsip", "tags": ["Indonesian", "alternative"]}],
+        )
+
+    def test_alt_template_tag(self):
+        self.wxr.wtp.add_page(
+            "Template:alt",
+            10,
+            '<span class="Latn" lang="pl">-{<!-- -->[[Mionsik#波蘭語|-{Mionsik}-]]}-</span> <span class="ib-brac">(</span><span class="ib-content">姓氏</span><span class="ib-brac">)</span>',
+        )
+        data = parse_page(
+            self.wxr,
+            "Miąsik",
+            """==波蘭語==
+===其他形式===
+* {{alt|pl|Mionsik||姓氏}}
+===專有名詞===
+# {{surname|pl|g=m}}""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [{"form": "Mionsik", "tags": ["surname", "alternative"]}],
+        )

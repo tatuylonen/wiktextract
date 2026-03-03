@@ -80,6 +80,7 @@ POS_HEADER_TAGS = {
     "bentuk jamak": "plural",
     "Ejaan bahasa Urdu": "Urdu",
     "partitif": "partitive",
+    "hanja": "hanja",
 }
 
 SOUND_TAGS = {
@@ -89,6 +90,16 @@ SOUND_TAGS = {
     "A.S.": "General-American",
     "Pinyin": "Pinyin",
     "Wade-Giles": "Wade-Giles",
+    "Baku Korea Selatan": "SK-Standard",
+    "Seoul": "Seoul",
+    "Perumian Semakan": ["revised", "romanization"],
+    "Perumian Semakan (translit.)": [
+        "revised",
+        "romanization",
+        "transliteration",
+    ],
+    "McCune–Reischauer": "McCune-Reischauer",
+    "Perumian Yale": ["Yale", "romanization"],
 }
 
 

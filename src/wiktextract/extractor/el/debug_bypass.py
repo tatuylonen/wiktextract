@@ -1,10 +1,7 @@
-import re
 
 from wiktextract.wxr_context import WiktextractContext
-from wiktextract.wxr_logging import logger
 
 from .models import WordEntry
-from .parse_utils import ADDITIONAL_EXPAND_TEMPLATES, PANEL_TEMPLATES
 
 # Quick regex to find the template name in text
 # TEMPLATE_NAME_RE = re.compile(r"{{\s*((w+\s+)*\w+)\s*(\||}})")
@@ -16,6 +13,7 @@ from .parse_utils import ADDITIONAL_EXPAND_TEMPLATES, PANEL_TEMPLATES
 # WHEN DOING BATCHES, PREFER LOGGER INSTEAD OF PRINT:
 # print() is not multiprocessing-friendly and some stuff will eventually
 # end up split, lost or mixed up with other prints.
+
 
 def debug_bypass(
     wxr: WiktextractContext, page_title: str, page_text: str
@@ -129,7 +127,4 @@ def debug_bypass(
     #         for tname in re.findall(r"{{\w+[\|}\s]", t):
     #             print(tname)
 
-
-
     return []
-

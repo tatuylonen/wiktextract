@@ -333,3 +333,31 @@ etymology text
                 },
             ],
         )
+
+    def test_alt_forms(self):
+        self.wxr.wtp.add_page(
+            "テンプレート:alter+",
+            10,
+            """{{#switch:{{{2}}}
+| aethereal = <span class="Latn" lang="en">[[aethereal#英語|aethereal]]</span>, <span class="Latn" lang="en">[[aetherial#英語|aetherial]]</span>
+| #default = <span class="Latn" lang="en">[[ætheriall#英語|ætheriall]]</span>
+}}""",
+        )
+        data = parse_page(
+            self.wxr,
+            "ethereal",
+            """=={{L|en}}==
+===異表記・別形===
+* {{alter+|en|aethereal|aetherial}} (旧綴り)
+* {{alter+|en|ætheriall}} (廃用)
+===形容詞===
+#[[空気]]のような。""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {"form": "aethereal", "tags": ["alternative"]},
+                {"form": "aetherial", "tags": ["alternative", "archaic"]},
+                {"form": "ætheriall", "tags": ["alternative", "obsolete"]},
+            ],
+        )

@@ -9,6 +9,7 @@ from wiktextract.extractor.el.linkages import (
 )
 from wiktextract.extractor.el.models import WordEntry
 from wiktextract.extractor.el.parse_utils import Heading
+from wiktextract.page import parse_page
 from wiktextract.wxr_context import WiktextractContext
 
 
@@ -140,18 +141,33 @@ class TestElLinkage(TestCase):
 
     def test_transliterations_esperanto(self) -> None:
         # https://el.wiktionary.org/wiki/acidaĵo
-        data = self.parse_related(
-            "foo",
-            """===={{άλλη γραφή}}====
+        word = "acidaĵo"
+        self.wxr.wtp.start_page(word)
+        self.wxr.wtp.add_page("Πρότυπο:-eo-", 10, "Εσπεράντο (eo)")
+        self.wxr.wtp.add_page("Πρότυπο:ουσιαστικό", 10, "Ουσιαστικό")
+        self.wxr.wtp.add_page("Πρότυπο:άλλη γραφή", 10, "Άλλες γραφές")
+        self.wxr.wtp.add_page(
+            "Πρότυπο:eo-h", 10, "''[[acidajho]]'' στο [[H-sistemo]]"
+        )
+        self.wxr.wtp.add_page(
+            "Πρότυπο:eo-x", 10, "''[[acidajho]]'' στο [[X-sistemo]]"
+        )
+
+        raw = """=={{-eo-}}==
+==={{ουσιαστικό|eo}}===
+'''{{PAGENAME}}'''
+* κάτι [[ξινό]]
+
+===={{άλλη γραφή}}====
 * {{eo-h|acidajho}}
 * {{eo-x|acidajxo}}
-""",
-            linkage_type=Heading.Transliterations,
-        )
-        # print(f"{data=}")
+"""
+        page_datas = parse_page(self.wxr, word, raw)
+        data = page_datas[0]
         self.assertEqual(
             data["forms"],
             [
+                {"form": "acidaĵo", "source": "header"},
                 {
                     "form": "acidajho",
                     "tags": ["transliteration"],

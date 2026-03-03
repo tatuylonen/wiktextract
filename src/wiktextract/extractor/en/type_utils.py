@@ -18,6 +18,7 @@ class LinkageData(TypedDict, total=False):
     translation: str
     extra: str
     qualifier: str
+    raw_tags: list[str]
     roman: str
     ruby: Union[list[Sequence[str]], list[tuple[str, str]]]
     sense: str

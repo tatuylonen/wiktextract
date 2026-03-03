@@ -236,3 +236,15 @@ class TestKuGloss(TestCase):
             page_data[0]["categories"],
             ["Tirkî", "Lema bi tirkî", "Lêker bi tirkî"],
         )
+
+    def test_etymology_list(self):
+        data = parse_page(
+            self.wxr,
+            "keçap",
+            """== {{ziman|ku}} ==
+=== Navdêr ===
+# keça mamê kesekê/î, qîza apê kesekê/î, kiça amê kesekê/î
+==== Etîmolojî ====
+* [[keç]] + [[ap]]""",
+        )
+        self.assertEqual(data[0]["etymology_texts"], ["keç + ap"])

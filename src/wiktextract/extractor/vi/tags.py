@@ -102,6 +102,21 @@ LABEL_TAGS = {
     "dated abbreviation": ["dated", "abbreviation"],
     "triều châu": "Teochew",
     "tiếng mân": "Min",
+    # Template:ja-verb-suru
+    # Module:Jpan-headword
+    "ngoại hoặc nội động từ": ["transitive", "intransitive"],
+    "suru": "suru",
+    "stem": "stem",
+    "past": "past",
+    # Template:ko-noun
+    "hanja": "hanja",
+    "hangeul": "hangeul",
+    # Template:ja-kanjitab
+    "kyūjitai": "kyūjitai",
+    # Template:sa-noun
+    "thân từ": "stem",
+    # Template:hi-noun
+    "chính tả urdu": "Urdu",
 }
 
 # https://vi.wiktionary.org/wiki/Mô_đun:gender_and_number/data
@@ -138,6 +153,20 @@ LOCATIONS = {
 SOUND_TAGS = {
     "phát âm giọng anh chuẩn": "Received-Pronunciation",
     "anh mỹ thông dụng": "General-American",
+    # Template:sa-ipa
+    "vệ đà": "Vedic",
+    "tiếng phạn cổ điển": "Classical-Sanskrit",
+    # Template:ko-ipa
+    "romaja quốc ngữ": ["revised", "romanization"],
+    "romaja quốc ngữ (chuyển tự)": [
+        "revised",
+        "romanization",
+        "transliteration",
+    ],
+    "mccune–reischauer": "McCune-Reischauer",
+    "latinh hóa yale": ["Yale", "romanization"],
+    "hq tiêu chuẩn": "SK-Standard",
+    "seoul": "Seoul",
 }
 
 ZH_X_TAGS = {

@@ -119,6 +119,13 @@ def parse_page(
     for data in page_data:
         if len(data.senses) == 0:
             data.senses.append(Sense(tags=["no-gloss"]))
+        new_sounds = []
+        for sound in data.sounds:
+            if sound.sense_index == "" or match_sense_index(
+                sound.sense_index, data
+            ):
+                new_sounds.append(sound)
+        data.sounds = new_sounds
     return [m.model_dump(exclude_defaults=True) for m in page_data]
 
 

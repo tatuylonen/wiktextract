@@ -18,6 +18,7 @@ def extract_sound_section(
 def extract_sound_list_item(
     wxr: WiktextractContext, word_entry: WordEntry, list_item: WikiNode
 ) -> None:
+    raw_tags = []
     for node in list_item.children:
         if isinstance(node, TemplateNode):
             if node.template_name in ["ku-IPA", "IPA-ku"]:
@@ -26,6 +27,12 @@ def extract_sound_list_item(
                 extract_deng_template(wxr, word_entry, node)
             elif node.template_name == "ku-kîte":
                 extract_ku_kîte(wxr, word_entry, node)
+            elif node.template_name == "kîte":
+                extract_kîte_template(wxr, word_entry, node, raw_tags)
+            elif node.template_name.endswith("."):
+                raw_tag = clean_node(wxr, None, node).removesuffix(":")
+                if raw_tag != "":
+                    raw_tags.append(raw_tag)
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
             for child_list_item in node.find_child(NodeKind.LIST_ITEM):
                 extract_sound_list_item(wxr, word_entry, child_list_item)
@@ -90,3 +97,23 @@ def extract_ku_kîte(
                     Hyphenation(parts=hyphenation.split("·"))
                 )
             break
+
+
+def extract_kîte_template(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    t_node: TemplateNode,
+    raw_tags: list[str],
+):
+    expanded_node = wxr.wtp.parse(
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
+    )
+    lang_code = clean_node(wxr, None, t_node.template_parameters.get(1, ""))
+    for span in expanded_node.find_html(
+        "span", attr_name="lang", attr_value=lang_code
+    ):
+        h_str = clean_node(wxr, None, span)
+        if h_str != "":
+            h_data = Hyphenation(parts=h_str.split("‧"), raw_tags=raw_tags)
+            translate_raw_tags(h_data)
+            word_entry.hyphenations.append(h_data)

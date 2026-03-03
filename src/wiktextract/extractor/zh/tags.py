@@ -38,6 +38,11 @@ NUMBER_TAGS: dict[str, str | list[str]] = {
     "賓格單數": ["accusative", "singular"],
     "賓格複數": ["accusative", "plural"],
     "無複數": "no-plural",
+    # Template:nb-noun-m1
+    "定指單數": ["definite", "singular"],
+    "定指複數": ["definite", "plural"],
+    "複": "plural",
+    "單": "singular",
 }
 
 # https://en.wikipedia.org/wiki/Count_noun
@@ -73,6 +78,13 @@ OTHER_TAGS: dict[str, str] = {
     "異體": "alternative",
     "仿譯詞": "calque",
     "貶稱詞": "pejorative",
+    # Template:ms-noun
+    "爪夷文": "Jawi",
+    "非正式第一人稱屬格": ["informal", "first-person", "genitive"],
+    "不禮貌第二人稱屬格": ["impolite", "second-person", "genitive"],
+    "第三人稱屬格": ["third-person", "genitive"],
+    "印尼語": "Indonesian",
+    "姓氏": "surname",
 }
 
 VERB_TAGS: dict[str, str] = {
@@ -102,6 +114,51 @@ VERB_TAGS: dict[str, str] = {
     "第IIq類": "form-iiq",
     "第IIIq類": "form-iiiq",
     "第IVq類": "form-ivq",
+    # Module:Jpan-headword
+    "他動詞": "transitive",
+    "自動詞": "intransitive",
+    "自、他動詞": ["transitive", "intransitive"],
+    "五段": "godan",
+    "一段": "ichidan",
+    "サ行": "suru",
+    "カ行": "kuru",
+    "イ形": "-i",
+    "ナ形": "-na",
+    "四段": "yodan",
+    "二段": "nidan",
+    "ラ行": "-ri",
+    "ナリ": "-nari",
+    "タリ": "-tari",
+    # Template:ja-conj-bungo
+    "語幹形態": "stem",
+    "對比連接詞": ["contrastive", "conjunction"],
+    "因果連接詞": ["causative", "conjunction"],
+    "條件連接詞": ["conditional", "conjunction"],
+    "過去式 (第一手消息)": "past",
+    "過去式 (第二手消息)": "past",
+    "完成式 (自覺動作)": "perfect",
+    "完成式 (自然事件)": ["perfect", "natural"],
+    "完成進行式": ["perfect", "continuative"],
+    "意志形": "volitional",
+    "副詞": "adverbial",
+    "無助動詞": "no-auxiliary",
+    "有助動詞": "auxiliary",
+    # Template:ja-na
+    "簡體否定": ["informal", "negative"],
+    "簡體過去": ["informal", "past"],
+    "簡體過去否定": ["informal", "past", "negative"],
+    "敬體": "formal",
+    "敬體否定": ["formal", "negative"],
+    "敬體過去": ["formal", "past"],
+    "敬體過去否定": ["formal", "past", "negative"],
+    "連接形": "conjunctive",
+    "暫定形": "provisional",
+    "推量形": "volitional",
+    "連用形": "adverbial",
+    "程度形": "degree",
+    # Template:ko-verb
+    "不定式": "infinitive",
+    "連續式": "sequential",
 }
 
 # https://en.wikipedia.org/wiki/Japanese_grammar#Stem_forms
@@ -114,6 +171,7 @@ JA_STEM_FORMS: dict[str, str] = {
     "假定形": "hypothetical",
     "仮定形": "hypothetical",
     "命令形": "imperative",
+    "已然形": "realis",
 }
 
 # https://en.wikipedia.org/wiki/Voice_(grammar)
@@ -164,6 +222,40 @@ TENSE_TAGS = {
     "動詞性名詞": "noun-from-verb",
     "主動分詞": ["active", "participle"],
     "被動分詞": ["passive", "participle"],
+    # Template:it-verb
+    # https://zh.wiktionary.org/wiki/Module:It-headword
+    "第一人稱單數現在時": ["first-person", "singular", "present"],
+    "第一人稱單數先過去時": ["first-person", "singular", "past", "historic"],
+    "第三人稱單數先過去時": ["third-person", "singular", "past", "historic"],
+    "第一人稱單數過去分詞": ["first-person", "singular", "past", "participle"],
+    "第三人稱單數過去分詞": ["third-person", "singular", "past", "participle"],
+    "第一人稱單數未完成時": ["first-person", "singular", "imperfect"],
+    "第三人稱單數未完成時": ["third-person", "singular", "imperfect"],
+    "第一人稱單數未來時": ["first-person", "singular", "future"],
+    "第三人稱單數未來時": ["third-person", "singular", "future"],
+    "第一人稱單數現在時虛擬式": ["first-person", "singular", "subjunctive"],
+    "第三人稱單數現在時虛擬式": ["third-person", "singular", "subjunctive"],
+    "第一人稱單數未完成時虛擬式": [
+        "first-person",
+        "singular",
+        "imperfect",
+        "subjunctive",
+    ],
+    "第三人稱單數未完成時虛擬式": [
+        "third-person",
+        "singular",
+        "imperfect",
+        "subjunctive",
+    ],
+    # Template:es-verb
+    "第一人稱單數過去時": ["first-person", "singular", "past"],
+    # Template:ast-verb-ar
+    "第一人稱單數直陳現在時": [
+        "first-person",
+        "singular",
+        "indicative",
+        "present",
+    ],
 }
 
 GRAMMATICAL_TAGS: dict[str, str] = {
@@ -358,6 +450,14 @@ LABEL_TAGS = {
     "古典": "Classical",
     "中國大陸": "Mainland-China",
     "書面語": "literary",
+    "文言": "literary",
+    "詞幹": "stem",
+    "烏爾都語寫法": "Urdu",
+    "波斯-阿拉伯字母": "Perso-Arabic",
+    # Template:kok-pos
+    "拉丁字母": ["Latin", "character"],
+    "卡納達文": ["Kannada", "character"],
+    "尼瓦爾文拼寫": "Newa",
 }
 
 # example sentence template
@@ -467,6 +567,10 @@ ZH_PRON_TAGS = {
     "中國大陸標準讀法": ["Mainland-China", "standard"],
     "臺灣異讀法": ["Taiwan", "variant"],
     "中國大陸與臺灣標準讀法": ["Mainland-China", "Taiwan", "standard"],
+    "異讀": "variant",
+    "上古": "Old-Chinese",
+    "白–沙": "Baxter–Sagart",
+    "鄭張": "Zhengzhang",
 }
 
 ZH_DIAL_TAGS = {
@@ -504,6 +608,35 @@ ALL_TAGS = {
     **ZH_PRON_TAGS,
     **ZH_DIAL_TAGS,
     **TH_PRON_TAGS,
+    # Template:vi-ipa
+    "河內": "Hà-Nội",
+    "順化": "Huế",
+    "胡志明市": "Saigon",
+    # Template:hi-ipa
+    "德里": "Delhi",
+    # Template:hi-noun
+    "烏爾都文拼寫": "Urdu",
+    # Template:sa-ipa
+    "吠陀": "Vedic",
+    "古典梵語": "Classical-Sanskrit",
+    # Template:ko-ipa
+    "韓國標準語": "SK-Standard",
+    "首爾": "Seoul",
+    "首尔": "Seoul",
+    "國語羅馬字（轉寫）": ["revised-romanization", "transliteration"],
+    "馬科恩-賴肖爾式": "McCune–Reischauer",
+    "耶魯拼音": ["Yale", "romanization"],
+    # Template:audio
+    "標準英音": "Received-Pronunciation",
+    "通用美式": "General-American",
+    "（通用美式）音频": "General-American",
+    "柏林": "Berlin",
+    "美國": "US",
+    "澳大利亞": "Australia",
+    "南英格蘭": "Southern-England",
+    "加利福尼亞": "California",
+    "加拿大": "Canada",
+    "新西蘭": "New-Zealand",
 }
 
 

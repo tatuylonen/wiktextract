@@ -167,8 +167,7 @@ class TestZhInflection(TestCase):
                     "form": "ね",
                     "roman": "ne",
                     "source": "inflection table",
-                    "raw_tags": ["語幹形態"],
-                    "tags": ["hypothetical"],
+                    "tags": ["stem", "hypothetical"],
                 }
             ],
         )
@@ -313,5 +312,49 @@ class TestZhInflection(TestCase):
                     "tags": ["Traditional-Chinese", "alternative"],
                 },
                 {"form": "门伐", "tags": ["Simplified-Chinese", "alternative"]},
+            ],
+        )
+
+    def test_ja_conj_bungo(self):
+        self.wxr.wtp.add_page(
+            "Template:ja-conj-bungo",
+            10,
+            """<div><div>「<span class="Jpan" lang="ja-Jpan">崔嵬たり</span>」的文語活用形 （<span class="Jpan" lang="ja-Jpan">[[タリ活用#日語|タリ活用]]</span>，參見[[Appendix:日語動詞]]）</div><div>
+{| class="wikitable"
+|-
+! colspan="4" | 語幹形態
+|-
+!<span class="Jpan" lang="ja-Jpan">[[連用形#日語|連用形]]</span>
+||<span class="Jpan" lang="ja-Jpan">崔嵬と</span><small><sup>[1]</sup></small><br/><span class="Jpan" lang="ja-Jpan">崔嵬たり</span><small><sup>[2]</sup></small>||<span class="Jpan" lang="ja-Jpan">さいくわいと</span><br/><span class="Jpan" lang="ja-Jpan">さいくわいたり</span>||<span class="Latn" lang="ja-Latn">saikwaito</span><br/><span class="Latn" lang="ja-Latn">saikwaitari</span>
+|-
+| colspan="5" |<small><sup>[1]</sup>無助動詞<br/><sup>[2]</sup>有助動詞<br/></small>
+|}</div></div>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "崔嵬",
+            """==日語==
+===形容動詞===
+# [[險峻]]的
+====活用====
+{{ja-conj-bungo|さいくわい|adj-tar}}""",
+        )
+        self.assertEqual(
+            data[0]["forms"],
+            [
+                {
+                    "form": "崔嵬と",
+                    "hiragana": "さいくわいと",
+                    "roman": "saikwaito",
+                    "source": "inflection table",
+                    "tags": ["stem", "continuative", "no-auxiliary"],
+                },
+                {
+                    "form": "崔嵬たり",
+                    "hiragana": "さいくわいたり",
+                    "roman": "saikwaitari",
+                    "source": "inflection table",
+                    "tags": ["stem", "continuative", "auxiliary"],
+                },
             ],
         )

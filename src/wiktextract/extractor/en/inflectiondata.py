@@ -2358,7 +2358,9 @@ infl_map: dict[str, InflMapNode] = {
     "f-w1": "",  # Icelandic ['-ína']
     "Supine": "supine",
     "Imper. plural": "imperative plural",
+    "imper. plural": "imperative plural",
     "Ind. plural": "indicative plural",
+    "ind. plural": "indicative plural",
     "-skur a24": "",  # Faroese ['-skur']
     "Singular (eintal)": "singular",
     "Nominative (hvørfall)": "nominative",
@@ -2481,6 +2483,12 @@ infl_map: dict[str, InflMapNode] = {
     "Perfective": "perfective",
     "Stem forms": "stem",
     "Continuative": "continuative",
+    "Mizenkei (\"imperfective\")": "imperfective",
+    "Ren’yōkei (\"continuative\")": "continuative",
+    "Shūshikei (\"terminal\")": "terminative",
+    "Rentaikei (\"attributive\")": "attributive",
+    "Kateikei (\"hypothetical\")": "hypothetical",
+    "Meireikei (\"imperative\")": "imperative",
     "Continuative (連用形)": "continuative",
     "Terminal (終止形)": "terminative",
     "Attributive (連体形)": "attributive",
@@ -2605,7 +2613,11 @@ infl_map: dict[str, InflMapNode] = {
     },
     "Subjunctive mood ➤": {
         "lang": "Greek",
-        "then": "subjunctive dummy-tense",
+        "then": {
+            "inflection-template": "el-conjug-1st",
+            "then": "dummy-skip-this",
+            "else": "subjunctive dummy-tense",
+        },
         "else": "subjunctive",
     },
     "Imperative mood ➤": {
@@ -3955,6 +3967,7 @@ infl_map: dict[str, InflMapNode] = {
     "f·p": "feminine plural",
     "n·p": "neuter plural",
     "Masc./Fem./Neut.": "masculine feminine neuter",  # mille/Latin
+    "masc./fem./neut.": "masculine feminine neuter",  # sūi/Latin
     "Reflexive third": "third-person reflexive",  # se/Latin
     "masculine dual": "masculine dual",  # a סוס/Hebrew
     "his": "third-person singular masculine possessive",  # moj/Serbo-Croatian
@@ -7266,9 +7279,10 @@ infl_start_map = {
     "with infinitive": "infinitive",
     "with gerund": "gerund",
     "with informal second-person singular imperative": "informal second-person singular imperative",
-    "with informal second-person singular tú imperative":  # cedular/Spanish
+    # Template:es-conj Module:es-verb
+    "with informal second-person singular tuteo imperative":  # cedular/Spanish
     "informal second-person singular imperative with-tú",
-    "with informal second-person singular vos imperative": "informal second-person singular imperative with-vos",
+    "with informal second-person singular voseo imperative": "informal second-person singular imperative with-vos",
     "with formal second-person singular imperative": "formal second-person singular imperative",
     "with first-person plural imperative": "first-person plural imperative",
     "with informal second-person plural imperative": "informal second-person plural imperative",

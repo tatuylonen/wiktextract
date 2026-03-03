@@ -16,7 +16,7 @@ from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .alt_form import extract_alt_form_section, extract_romanization_section
 from .descendant import extract_descendant_section
-from .etymology import extract_etymology_section
+from .etymology import extract_etymology_section, extract_ja_kanjitab_template
 from .linkage import extract_linkage_section
 from .models import Form, Linkage, Sense, WordEntry
 from .pos import (
@@ -165,6 +165,12 @@ def parse_page(
                 clean_node(wxr, base_data, t_node)
             elif t_node.template_name in ["ja-see", "ja-see-kango"]:
                 extract_ja_see_template(wxr, base_data, t_node)
+            elif (
+                t_node.template_name.endswith("-kanjitab")
+                or t_node.template_name == "ja-kt"
+            ):
+                extract_ja_kanjitab_template(wxr, t_node, base_data)
+
         if len(base_data.redirects) > 0:
             page_data.append(base_data)
         for next_level_node in level2_node.find_child(LEVEL_KIND_FLAGS):

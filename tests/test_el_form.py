@@ -25,10 +25,10 @@ class TestElInflection(TestCase):
         self.wxr.wtp.close_db_conn()
 
     def mktest_postprocess_table_forms(
-        self, raw: str, expected: list[str]
+        self, raw: str, expected: list[str], word: str = "filler"
     ) -> None:
         forms = [Form(form=entry.strip()) for entry in raw.splitlines()]
-        new_forms = postprocess_table_forms(forms, word="filler")
+        new_forms = postprocess_table_forms(forms, word)
         new_forms_lemmas = [form.form for form in new_forms]
         self.assertEqual(new_forms_lemmas, expected)
 
@@ -69,9 +69,17 @@ class TestElInflection(TestCase):
 
     def test_postprocess_forms_suffix(self) -> None:
         # https://el.wiktionary.org/wiki/-ισμός
+        word = "-ισμός"
         raw = "ο -ισμός"
         expected = ["-ισμός"]
-        self.mktest_postprocess_table_forms(raw, expected)
+        self.mktest_postprocess_table_forms(raw, expected, word)
+
+    def test_postprocess_forms_hyphenated_word(self) -> None:
+        # https://el.wiktionary.org/wiki/η-τάξη
+        word = "η-τάξη"
+        raw = "η η-τάξη"
+        expected = ["η-τάξη"]
+        self.mktest_postprocess_table_forms(raw, expected, word)
 
     def test_postprocess_forms_trailing_numbers(self) -> None:
         # https://el.wiktionary.org/wiki/Καπιτόπουλος

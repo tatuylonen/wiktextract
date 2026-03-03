@@ -353,8 +353,7 @@ def process_pos(
         ):
             if child.template_name not in pos_meta["templates"]:
                 wxr.wtp.debug(
-                    f"Template {child.template_name} "
-                    f"found under {pos_title}",
+                    f"Template {child.template_name} found under {pos_title}",
                     sortid="simple/pos/93",
                 )
             elif ttags := pos_meta["templates"][child.template_name]:
@@ -376,7 +375,7 @@ def process_pos(
                         str(k): clean_node(wxr, None, v)
                         for k, v in child.template_parameters.items()
                     },
-                    expansion="[POS TABLE]"
+                    expansion="[POS TABLE]",
                     # Clean node returns an empty string for a table.
                     # expansion = clean_node(wxr, None, child)
                 )

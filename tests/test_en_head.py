@@ -181,8 +181,7 @@ class HeadTests(unittest.TestCase):
         parse_word_head(
             self.wxr,
             "noun",
-            "testpage f (plurale tantum, stem testpag, inanimate) "
-            "(+ dative)",
+            "testpage f (plurale tantum, stem testpag, inanimate) (+ dative)",
             data,
             False,
             None,
@@ -672,7 +671,7 @@ class HeadTests(unittest.TestCase):
         parse_word_head(
             self.wxr,
             "noun",
-            "rear admiral (lower half) (plural rear admirals " "(lower half))",
+            "rear admiral (lower half) (plural rear admirals (lower half))",
             data,
             False,
             None,
@@ -952,6 +951,172 @@ class HeadTests(unittest.TestCase):
                     ],
                     "senses": [{"raw_tags": ["han"], "tags": ["no-gloss"]}],
                     "word": "敎",
+                }
+            ],
+        )
+
+    def test_suffixes_at_end_of_form1(self):
+        # Issue #1484
+        data = {}
+        self.wxr.wtp.start_page("foo")
+        self.wxr.wtp.start_section("Japanese")
+        self.wxr.wtp.start_subsection("Adjective")
+        self.wxr.wtp.add_page(
+            "Template:ja-adj",
+            10,
+            """
+<p><span class="headword-line"><strong class="Jpan headword" lang="ja"><ruby>楽<rp>(</rp><rt><a href="/wiki/%E3%81%9F%E3%81%AE%E3%81%97%E3%81%84#Japanese" title="たのしい">たの</a></rt><rp>)</rp></ruby>しい</strong> <a href="/wiki/Wiktionary:Japanese_transliteration" title="Wiktionary:Japanese transliteration">•</a> (<span lang="ja-Latn" class="headword-tr tr Latn" dir="ltr"><a href="/wiki/tanoshii#Japanese" title="tanoshii">tanoshii</a></span></span>)&nbsp;<i><abbr title="-i (type I) inflection">-i</abbr></i> (<i>adverbial</i> <b class="Jpan" lang="ja"><a href="/wiki/%E6%A5%BD%E3%81%97%E3%81%8F#Japanese" title="楽しく"><ruby>楽<rp>(</rp><rt>たの</rt><rp>)</rp></ruby>しく</a></b> <span class="mention-gloss-paren annotation-paren">(</span><span class="tr">tanoshiku</span><span class="mention-gloss-paren annotation-paren">)</span>)
+</p>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "楽しい",
+            """
+==Japanese==
+
+===Adjective===
+{{ja-adj}}
+
+# pleasant
+""",
+        )
+        self.assertEqual(
+            data,
+            [
+                {
+                    "forms": [
+                        {
+                            "form": "楽しい",
+                            "ruby": [("楽", "たの")],
+                            "tags": ["canonical"],
+                        },
+                        {"form": "tanoshii", "tags": ["romanization"]},
+                        {
+                            "form": "楽しく",
+                            "roman": "tanoshiku",
+                            "ruby": [("楽", "たの")],
+                            "tags": ["adverbial"],
+                        },
+                    ],
+                    "head_templates": [
+                        {
+                            "args": {},
+                            "expansion": "楽(たの)しい • (tanoshii) -i (adverbial 楽(たの)しく (tanoshiku))",
+                            "name": "ja-adj",
+                        }
+                    ],
+                    "lang": "Japanese",
+                    "lang_code": "ja",
+                    "pos": "adj",
+                    "senses": [
+                        {
+                            "glosses": ["pleasant"],
+                            "raw_glosses": ["pleasant"],
+                        }
+                    ],
+                    "word": "楽しい",
+                }
+            ],
+        )
+
+    def test_suffixes_at_end_of_form2(self):
+        # Don't chop off " -x" stuff if it's part of the word
+        data = {}
+        self.wxr.wtp.start_page("stand up -koomikko")
+        self.wxr.wtp.start_section("Finnish")
+        self.wxr.wtp.start_subsection("Noun")
+        self.wxr.wtp.add_page(
+            "Template:fi-noun",
+            10,
+            """
+[[stand up]] -[[koomikko]]
+""",
+        )
+        data = parse_page(
+            self.wxr,
+            "stand up -koomikko",
+            """
+==Finnish==
+
+===Noun===
+{{fi-noun}}
+
+# stand-up comedian
+""",
+        )
+        print(data)
+        self.assertEqual(
+            data,
+            [
+                {
+                    "senses": [
+                        {
+                            "raw_glosses": ["stand-up comedian"],
+                            "glosses": ["stand-up comedian"],
+                        }
+                    ],
+                    "pos": "noun",
+                    "head_templates": [
+                        {
+                            "name": "fi-noun",
+                            "args": {},
+                            "expansion": "stand up -koomikko",
+                        }
+                    ],
+                    "word": "stand up -koomikko",
+                    "lang": "Finnish",
+                    "lang_code": "fi",
+                }
+            ],
+        )
+
+    def test_suffixes_at_end_of_form3(self):
+        # Don't chop off " -x" stuff if it's part of the word
+        data = {}
+        self.wxr.wtp.start_page("stand up -koomikko -foo")
+        self.wxr.wtp.start_section("Finnish")
+        self.wxr.wtp.start_subsection("Noun")
+        self.wxr.wtp.add_page(
+            "Template:fi-noun",
+            10,
+            """
+[[stand up]] -[[koomikko]] -[[foo]]
+""",
+        )
+        data = parse_page(
+            self.wxr,
+            "stand up -koomikko -foo",
+            """
+==Finnish==
+
+===Noun===
+{{fi-noun}}
+
+# stand-up comedian
+""",
+        )
+        print(data)
+        self.assertEqual(
+            data,
+            [
+                {
+                    "senses": [
+                        {
+                            "raw_glosses": ["stand-up comedian"],
+                            "glosses": ["stand-up comedian"],
+                        }
+                    ],
+                    "pos": "noun",
+                    "head_templates": [
+                        {
+                            "name": "fi-noun",
+                            "args": {},
+                            "expansion": "stand up -koomikko -foo",
+                        }
+                    ],
+                    "word": "stand up -koomikko -foo",
+                    "lang": "Finnish",
+                    "lang_code": "fi",
                 }
             ],
         )

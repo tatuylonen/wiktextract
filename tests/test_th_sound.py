@@ -123,7 +123,15 @@ class TestThSound(unittest.TestCase):
         )
         self.assertEqual(
             data[0]["sounds"],
-            [{"roman": "[áꜜìshìtè ìrù]"}, {"ipa": "[a̠iɕi̥te̞ iɾɯ̟ᵝ]"}],
+            [
+                {
+                    "other": "あいしている",
+                    "raw_tags": ["โตเกียว"],
+                    "tags": ["Atamadaka"],
+                    "roman": "[áꜜìshìtè ìrù]",
+                },
+                {"ipa": "[a̠iɕi̥te̞ iɾɯ̟ᵝ]"},
+            ],
         )
         self.assertEqual(
             data[0]["categories"],
@@ -131,4 +139,71 @@ class TestThSound(unittest.TestCase):
                 "ศัพท์ภาษาญี่ปุ่นที่มีการออกเสียงไอพีเอ",
                 "ญี่ปุ่น terms with non-redundant non-automated sortkeys",
             ],
+        )
+
+    def test_rhymes(self):
+        self.wxr.wtp.add_page(
+            "แม่แบบ:rhymes",
+            10,
+            """สัมผัส: [[:หมวดหมู่:สัมผัส:ภาษาอังกฤษ/ɪʃɪŋ|<span class="IPA">-ɪʃɪŋ</span>]][[Category:สัมผัส:ภาษาอังกฤษ/ɪʃɪŋ|ຊ່ອງ]]""",
+        )
+        data = parse_page(
+            self.wxr,
+            "fishing",
+            """==ภาษาอังกฤษ==
+=== การออกเสียง ===
+* {{rhymes|ɪʃɪŋ|lang=en}}
+=== คำนาม ===
+# การจับปลา""",
+        )
+        self.assertEqual(data[0]["sounds"], [{"rhymes": "-ɪʃɪŋ"}])
+        self.assertEqual(data[0]["categories"], ["สัมผัส:ภาษาอังกฤษ/ɪʃɪŋ"])
+
+    def test_homophones(self):
+        self.wxr.wtp.add_page(
+            "แม่แบบ:homophones",
+            10,
+            """<span class="homophones">[[ภาคผนวก:อภิธานศัพท์#คำพ้องเสียง|คำพ้องเสียง]]: <span class="Laoo" lang="lo">[[:ສ່ອງ#ภาษาลาว|ສ່ອງ]]</span> <span class="mention-gloss-paren annotation-paren">(</span><span lang="lo" class="tr">ส่อง</span><span class="mention-gloss-paren annotation-paren">)</span> <span class="ib-brac qualifier-brac">(</span><span class="ib-content qualifier-content">ในถิ่นที่มีการออกเสียงอักษรคู่เหมือนกันเมื่อมีไม้เอก</span><span class="ib-brac qualifier-brac">)</span></span>[[Category:ศัพท์ภาษาลาวที่มีคำพ้องเสียง|ຊ່ອງ]]""",
+        )
+        data = parse_page(
+            self.wxr,
+            "ຊ່ອງ",
+            """== ภาษาลาว ==
+=== การออกเสียง ===
+* {{homophones|lo|qq1=ในถิ่นที่มีการออกเสียงอักษรคู่เหมือนกันเมื่อมีไม้เอก|ສ່ອງ}}
+=== คำนาม ===
+# [[ช่อง]]""",
+        )
+        self.assertEqual(
+            data[0]["sounds"],
+            [
+                {
+                    "homophone": "ສ່ອງ",
+                    "raw_tags": ["ในถิ่นที่มีการออกเสียงอักษรคู่เหมือนกันเมื่อมีไม้เอก"],
+                    "roman": "ส่อง",
+                }
+            ],
+        )
+        self.assertEqual(data[0]["categories"], ["ศัพท์ภาษาลาวที่มีคำพ้องเสียง"])
+
+    def test_vi_ipa(self):
+        self.wxr.wtp.add_page(
+            "แม่แบบ:vi-pron",
+            10,
+            """* (''[[นครโฮจิมินห์|นครโฮจิมินห์]]'') [[วิกิพจนานุกรม:สัทอักษรสากล|สัทอักษรสากล]] <sup>([[ภาคผนวก:การออกเสียงภาษาเวียดนาม|คำอธิบาย]])</sup>: <span class="IPA">[ʔɓuəŋ˨˩ ŋʊw˨˩˦]</span>[[หมวดหมู่:ศัพท์ภาษาเวียดนามที่มีการออกเสียงไอพีเอ]]""",
+        )
+        data = parse_page(
+            self.wxr,
+            "buồng ngủ",
+            """== ภาษาเวียดนาม ==
+=== การออกเสียง ===
+{{vi-pron}}
+=== คำนาม ===
+# [[ห้องนอน]]""",
+        )
+        self.assertEqual(
+            data[0]["sounds"], [{"ipa": "[ʔɓuəŋ˨˩ ŋʊw˨˩˦]", "tags": ["Saigon"]}]
+        )
+        self.assertEqual(
+            data[0]["categories"], ["ศัพท์ภาษาเวียดนามที่มีการออกเสียงไอพีเอ"]
         )

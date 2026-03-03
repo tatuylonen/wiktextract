@@ -1,7 +1,7 @@
 import re
 from dataclasses import dataclass
 
-from wikitextprocessor import NodeKind, TemplateNode
+from wikitextprocessor import NodeKind, TemplateNode, WikiNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
@@ -22,6 +22,7 @@ def extract_inf_table_template(
                 "Nachname Übersicht",
                 "Eigenname Übersicht",
                 "Vorname Übersicht m",
+                "Vorname Übersicht f",
                 "Name Übersicht",
                 "Pronomina-Tabelle",
                 "Pronomen Übersicht",
@@ -32,7 +33,7 @@ def extract_inf_table_template(
         )
         or re.search(r" Personalpronomen \d$", t_node.template_name)
     ):
-        process_noun_table(wxr, word_entry, t_node)
+        extract_noun_table_template(wxr, word_entry, t_node)
     elif t_node.template_name.endswith(
         ("Adjektiv Übersicht", "Adverb Übersicht")
     ):
@@ -43,7 +44,7 @@ def extract_inf_table_template(
     ):
         process_verb_table(wxr, word_entry, t_node)
     elif t_node.template_name == "Deutsch Possessivpronomen":
-        extract_pronoun_table(wxr, word_entry, t_node)
+        extract_de_pronoun_table(wxr, word_entry, t_node)
 
 
 @dataclass
@@ -54,11 +55,11 @@ class RowspanHeader:
 
 
 def process_verb_table(
-    wxr: WiktextractContext, word_entry: WordEntry, template_node: TemplateNode
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
 ) -> None:
     # Vorlage:Deutsch Verb Übersicht
     expanded_template = wxr.wtp.parse(
-        wxr.wtp.node_to_wikitext(template_node), expand_all=True
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
     )
     table_nodes = list(expanded_template.find_child(NodeKind.TABLE))
     if len(table_nodes) == 0:
@@ -96,8 +97,9 @@ def process_verb_table(
                     pronouns.clear()
                 header_col_index += 1
             elif table_cell.kind == NodeKind.TABLE_CELL:
-                if "background-color: #f4f4f4" in table_cell.attrs.get(
-                    "style", ""
+                if (
+                    "background-color: #f4f4f4"
+                    in table_cell.attrs.get("style", "").lower()
                 ):
                     # Template:Englisch Verb Übersicht
                     rowspan = int(table_cell.attrs.get("rowspan", "1"))
@@ -113,7 +115,7 @@ def process_verb_table(
                 else:
                     for cell_line in cell_text.splitlines():
                         for form_str in map(str.strip, cell_line.split(",")):
-                            if form_str in ["", "—", wxr.wtp.title]:
+                            if form_str in ["", "—"]:
                                 continue
                             elif form_str.startswith("Flexion:"):
                                 parse_flexion_page(wxr, word_entry, form_str)
@@ -135,22 +137,37 @@ def process_verb_table(
         row_headers = new_row_headers
 
 
-def process_noun_table(
-    wxr: WiktextractContext, word_entry: WordEntry, template_node: TemplateNode
-) -> None:
+def extract_noun_table_template(
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
+):
     # Vorlage:Deutsch Substantiv Übersicht
     from .page import extract_note_section
 
     expanded_template = wxr.wtp.parse(
-        wxr.wtp.node_to_wikitext(template_node), expand_all=True
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
     )
-    table_nodes = list(expanded_template.find_child(NodeKind.TABLE))
-    if len(table_nodes) == 0:
-        return
-    table_node = table_nodes[0]
+    clean_node(wxr, word_entry, expanded_template)
+    for table in expanded_template.find_child(NodeKind.TABLE):
+        process_noun_table(wxr, word_entry, table, t_node.template_name)
+
+    # Vorlage:Deutsch Nachname Übersicht
+    for level_node in expanded_template.find_child(NodeKind.LEVEL4):
+        section_text = clean_node(wxr, None, level_node.largs)
+        if section_text.startswith("Anmerkung"):
+            extract_note_section(wxr, word_entry, level_node)
+
+
+def process_noun_table(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    table: WikiNode,
+    template_name: str,
+):
     column_headers = []
     table_header = ""
-    for table_row in table_node.find_child(NodeKind.TABLE_ROW):
+    forms = []
+    flexion_pages = []
+    for table_row in table.find_child(NodeKind.TABLE_ROW):
         row_header = ""
         is_header_row = not table_row.contain_node(NodeKind.TABLE_CELL)
         row_has_header = table_row.contain_node(NodeKind.TABLE_HEADER_CELL)
@@ -187,13 +204,13 @@ def process_noun_table(
                 for link_node in table_cell.find_child(NodeKind.LINK):
                     link_text = clean_node(wxr, None, link_node)
                     if link_text.startswith("Flexion:"):
-                        parse_flexion_page(wxr, word_entry, link_text)
+                        flexion_pages.append(link_text)
             else:
                 for form_text in cell_text.splitlines():
                     form_text = form_text.strip()
                     if form_text.startswith("(") and form_text.endswith(")"):
                         form_text = form_text.strip("() ")
-                    if form_text in ["—", "–", "-", "", "?", wxr.wtp.title]:
+                    if form_text in ["—", "–", "-", "", "?"]:
                         continue
                     form = Form(form=form_text)
                     if table_header != "":
@@ -208,23 +225,26 @@ def process_noun_table(
                         ):
                             form.raw_tags.append(col_header.text)
                     translate_raw_tags(form)
-                    word_entry.forms.append(form)
+                    forms.append(form)
                 col_index += 1
 
-    clean_node(wxr, word_entry, expanded_template)  # category links
-    # Vorlage:Deutsch Nachname Übersicht
-    for level_node in expanded_template.find_child(NodeKind.LEVEL4):
-        section_text = clean_node(wxr, None, level_node.largs)
-        if section_text.startswith("Anmerkung"):
-            extract_note_section(wxr, word_entry, level_node)
+    if template_name in (
+        "Deutsch Substantiv Übersicht",
+        "Deutsch Vorname Übersicht m",
+        "Deutsch Vorname Übersicht f",
+    ):
+        forms = separate_de_article(wxr, forms)
+    word_entry.forms.extend(forms)
+    for flexion_page in flexion_pages:
+        parse_flexion_page(wxr, word_entry, flexion_page)
 
 
 def process_adj_table(
-    wxr: WiktextractContext, word_entry: WordEntry, template_node: TemplateNode
+    wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
 ) -> None:
     # Vorlage:Deutsch Adjektiv Übersicht
     expanded_template = wxr.wtp.parse(
-        wxr.wtp.node_to_wikitext(template_node), expand_all=True
+        wxr.wtp.node_to_wikitext(t_node), expand_all=True
     )
     table_nodes = list(expanded_template.find_child(NodeKind.TABLE))
     if len(table_nodes) == 0:
@@ -258,7 +278,7 @@ def process_adj_table(
                     word_entry.forms.append(form)
 
 
-def extract_pronoun_table(
+def extract_de_pronoun_table(
     wxr: WiktextractContext, word_entry: WordEntry, t_node: TemplateNode
 ) -> None:
     # Vorlage:Deutsch Possessivpronomen
@@ -301,14 +321,10 @@ def extract_pronoun_table(
                     col_index += colspan
             elif cell.kind == NodeKind.TABLE_CELL:
                 if col_index % 2 == 0:
-                    article = cell_text
+                    if cell_text != "—":
+                        article = cell_text
                 else:
-                    form_str = (
-                        article + " " + cell_text
-                        if article not in ["", "—"]
-                        else cell_text
-                    )
-                    form = Form(form=form_str)
+                    form = Form(form=cell_text, article=article)
                     if table_header != "":
                         form.raw_tags.append(table_header)
                     if row_header != "":
@@ -321,7 +337,25 @@ def extract_pronoun_table(
                         ):
                             form.raw_tags.append(header.text)
                     translate_raw_tags(form)
-                    if form.form != wxr.wtp.title:
+                    if form.form not in ["", "—"]:
                         word_entry.forms.append(form)
                     article = ""
                 col_index += 1
+
+
+def separate_de_article(
+    wxr: WiktextractContext, forms: list[Form]
+) -> list[Form]:
+    # https://en.wikipedia.org/wiki/German_articles
+    # https://de.wiktionary.org/wiki/Vorlage:Deutsch_Substantiv_Übersicht
+    # https://de.wiktionary.org/wiki/Vorlage:Deutsch_Vorname_Übersicht_m
+    # * May contain parens around the article
+    new_forms = []
+    for form in forms:
+        m = re.match(r"\(?(der|die|das|den|dem|des)\)?\s+", form.form)
+        if m is not None:
+            form.form = form.form[m.end() :]
+            form.article = m.group(1)
+        if form.form not in ["", "—"]:
+            new_forms.append(form)
+    return new_forms

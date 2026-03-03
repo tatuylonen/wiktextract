@@ -111,7 +111,7 @@ Daripada
 === Terbitan ===
 * [[kaumakan]]""",
         )
-        self.assertEqual(page_data[1]["etymology_text"], "Daripada")
+        self.assertEqual(page_data[1]["etymology_texts"], ["Daripada"])
         self.assertEqual(page_data[1]["derived"], [{"word": "kaumakan"}])
 
     def test_non_standard_list(self):
