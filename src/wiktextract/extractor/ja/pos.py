@@ -37,11 +37,14 @@ def parse_pos_section(
             continue
         if gloss_list_start == 0:
             gloss_list_start = list_index
-        for list_item in list_node.find_child(NodeKind.LIST_ITEM):
-            process_gloss_list_item(wxr, page_data[-1], list_item)
     extract_header_nodes(
         wxr, page_data[-1], level_node.children[:gloss_list_start]
     )
+    for list_index, list_node in level_node.find_child(NodeKind.LIST, True):
+        if not list_node.sarg.endswith("#"):  # linkage list
+            continue
+        for list_item in list_node.find_child(NodeKind.LIST_ITEM):
+            process_gloss_list_item(wxr, page_data[-1], list_item)
     old_forms_len = len(page_data[-1].forms)
     extract_conjugation_section(wxr, page_data[-1], level_node)
     if gloss_list_start == 0 and len(page_data[-1].forms) == old_forms_len:

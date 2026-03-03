@@ -124,6 +124,20 @@ class TestJaHeader(TestCase):
             ],
         )
 
+    def test_la_verb_form(self):
+        self.wxr.wtp.start_page("appellantur")
+        self.wxr.wtp.add_page(
+            "テンプレート:la-verb-form",
+            10,
+            """'''<span lang="la" style="font-family: 'Lucida Sans Unicode', 'Arial Bold', 'Arial', sans-serif;" xml:lang="la">appellantur</span>'''
+[[カテゴリ:ラテン語]][[カテゴリ:ラテン語 動詞 定形]]""",
+        )
+        data = WordEntry(lang="ラテン語", lang_code="la", word="appellantur")
+        root = self.wxr.wtp.parse("{{la-verb-form|appellantur}}")
+        extract_header_nodes(self.wxr, data, root.children)
+        self.assertEqual(data.categories, ["ラテン語", "ラテン語 動詞 定形"])
+        self.assertEqual(data.tags, ["form-of"])
+
     def test_ja_noun_small_tag(self):
         self.wxr.wtp.start_page("金玉")
         self.wxr.wtp.add_page(
