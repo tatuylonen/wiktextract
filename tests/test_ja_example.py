@@ -76,7 +76,7 @@ class TestJaExample(TestCase):
             sense.examples[0],
             Example(
                 text="尤も僕は気の毒にも度大島を泣かせては、泣虫泣虫とからかひしものなり。",
-                bold_text_offsets=[(19, 21), (21, 23)],
+                bold_text_offsets=[(19, 21), (21, 23), (21, 24)],
                 ref="（芥川龍之介『学校友だち』）〔1925年〕",
                 ruby=[("尤", "もっと"), ("度", "たびたび")],
             ),
@@ -95,7 +95,7 @@ class TestJaExample(TestCase):
             sense.examples[0],
             Example(
                 text="春夏と並んで、候鳥の「民間伝承の歌」に似たものは、秋の鳴き虫の誹諧である。",
-                bold_text_offsets=[(27, 30)],
+                bold_text_offsets=[(27, 31)],
                 ref="（折口信夫『俳諧歌の研究』）〔1934年〕 昭和9年5月、『続俳句講座』第3巻「特殊研究篇」初出、『折口信夫全集』13巻213ページ所収",
             ),
         )
