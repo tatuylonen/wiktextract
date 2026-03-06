@@ -1120,3 +1120,15 @@ class HeadTests(unittest.TestCase):
                 }
             ],
         )
+
+
+    def test_head_title_with_semicolon(self):
+        data = {}
+        self.wxr.wtp.title = "test; page"
+        parse_word_head(
+            self.wxr, "noun", "test; page f, m, n", data, False, None
+        )
+        self.assertEqual(self.wxr.wtp.warnings, [])
+        self.assertEqual(self.wxr.wtp.debugs, [])
+        self.assertEqual(data, {"tags": ["feminine", "masculine", "neuter"]})
+        self.wxr.wtp.title = "testpage"
