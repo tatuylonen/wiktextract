@@ -1,0 +1,3 @@
+{
+  "linktrailing_regex_pattern": "(?s)([a-z]+)(.*)"
+}

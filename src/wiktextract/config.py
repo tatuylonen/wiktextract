@@ -69,6 +69,7 @@ class WiktionaryConfig:
         "parser_function_aliases",
         "notes",
         "wiki_notices",
+        "linktrailing_regex_pattern",
     )
 
     def __init__(
@@ -136,6 +137,7 @@ class WiktionaryConfig:
         self.extract_ns_names = ["Main"]
         self.allowed_html_tags: dict[str, HTMLTagData] = {}
         self.parser_function_aliases: dict[str, str] = {}
+        self.linktrailing_regex_pattern: str | None = None
         self.load_edition_settings()
 
     def merge_return(self, ret: CollatedErrorReturnData):

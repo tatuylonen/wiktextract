@@ -1,5 +1,7 @@
 {
   "allowed_html_tags": {
     "phonos": {"parents": ["*"], "content": ["*"]}
-  }
+  },
+  "linktrailing_regex_pattern":
+    "(?s)([a-zαβγδεζηθικλμνξοπρστυφχψωςΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩάέήίόύώϊϋΐΰΆΈΉΊΌΎΏΪΫ]+)(.*)"
 }
