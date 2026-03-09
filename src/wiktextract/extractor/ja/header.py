@@ -103,6 +103,10 @@ def extract_header_nodes(
     clean_node(wxr, word_entry, expanded_nodes)
     if len(raw_tags) > 0:
         word_entry.raw_tags.extend(raw_tags)
+    for category in word_entry.categories:
+        if category.endswith("定形"):
+            # Needs to be tags and no raw_tags because of pos::find_form_of_data
+            word_entry.tags.append("form-of")
     translate_raw_tags(word_entry)
 
 
