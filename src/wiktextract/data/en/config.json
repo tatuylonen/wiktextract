@@ -10,5 +10,6 @@
     "Template",
     "Reconstruction"
   ],
-  "extract_ns_names": ["Main", "Reconstruction"]
+  "extract_ns_names": ["Main", "Reconstruction"],
+  "linktrailing_regex_pattern": "(?s)([a-z]+)(.*)"
 }

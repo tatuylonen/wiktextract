@@ -1,4 +1,5 @@
 # Wiktextract context object
+import re
 import sqlite3
 
 from wikitextprocessor import Wtp
@@ -33,6 +34,10 @@ class WiktextractContext:
             if config.extract_thesaurus_pages
             else None
         )
+        if config.linktrailing_regex_pattern is not None:
+            self.wtp.linktrailing_re = re.compile(
+                config.linktrailing_regex_pattern
+            )
 
     def reconnect_databases(self, check_same_thread: bool = True) -> None:
         # `multiprocessing.pool.Pool.imap()` runs in another thread, if the db
@@ -43,7 +48,8 @@ class WiktextractContext:
                 self.thesaurus_db_path, check_same_thread=check_same_thread
             )
         self.wtp.db_conn = sqlite3.connect(
-            self.wtp.db_path, check_same_thread=check_same_thread  # type: ignore[arg-type]
+            self.wtp.db_path,
+            check_same_thread=check_same_thread,  # type: ignore[arg-type]
         )
 
     def remove_unpicklable_objects(self) -> None:
