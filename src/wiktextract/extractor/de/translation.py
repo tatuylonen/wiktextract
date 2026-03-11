@@ -62,6 +62,10 @@ def process_u_tabelle_list_item(
                 before_colon = False
             elif node in [",", ";"] and len(tr_data.word) > 0:
                 tr_data = append_tr_data(word_entry, tr_data)
+            elif not before_colon and len(tr_data.word) > 0:
+                # Plain text between {{Ü}} templates of the same translation
+                # e.g. {{Ü|fr|temps}} de {{Ü|fr|travail}} → "temps de travail"
+                tr_data.word += " " + node
 
         if before_colon and len(tr_data.lang) == 0:
             tr_data.lang = clean_node(wxr, None, node)
@@ -71,9 +75,22 @@ def process_u_tabelle_list_item(
                 tr_data.lang_code = name_to_code(tr_data.lang_code, "de")
         elif isinstance(node, TemplateNode):
             if node.template_name.startswith("Ü"):
-                if len(tr_data.word) > 0:
+                u_lang_code = clean_node(
+                    wxr, None, node.template_parameters.get(1, "")
+                )
+                if len(tr_data.word) > 0 and u_lang_code != tr_data.lang_code:
+                    # Different language → save current, start new
                     tr_data = append_tr_data(word_entry, tr_data)
-                process_u_template(wxr, tr_data, node)
+                    process_u_template(wxr, tr_data, node)
+                elif len(tr_data.word) > 0:
+                    # Same language → append word to form multi-word translation
+                    # e.g. {{Ü|fr|temps}} de {{Ü|fr|travail}} → "temps de travail"
+                    new_word = clean_node(
+                        wxr, None, node.template_parameters.get(2, "")
+                    )
+                    tr_data.word += " " + new_word
+                else:
+                    process_u_template(wxr, tr_data, node)
             else:
                 raw_tag = clean_node(wxr, None, node).strip(": \n")
                 if raw_tag != "":
