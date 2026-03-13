@@ -5,6 +5,10 @@ from typing import Iterable, Optional, Union
 
 from wikitextprocessor import NodeKind, WikiNode
 
+from wiktextract.wxr_context import WiktextractContext
+
+from ..page import clean_node
+
 
 def strip_nodes(
     nodes: list[Union[WikiNode, str]],
@@ -95,7 +99,9 @@ def create_transcode_url(filename: str, transcode_suffix: str) -> str:
     )
 
 
-def set_sound_file_url_fields(wxr, filename, pydantic_model):
+def set_sound_file_url_fields(
+    wxr: WiktextractContext, filename, pydantic_model
+):
     file_data = create_audio_url_dict(filename)
     for key, value in file_data.items():
         if hasattr(pydantic_model, key):
@@ -136,15 +142,13 @@ def split_senseids(senseids_str: str) -> list[str]:
 
 
 def calculate_bold_offsets(
-    wxr,
+    wxr: WiktextractContext,
     node: WikiNode,
     node_text: str,
     example,
     field: str,
     extra_node_kind: NodeKind | None = None,
 ) -> None:
-    from ..page import clean_node
-
     offsets = []
     bold_words = set()
     for b_tag in node.find_html_recursively("b"):
@@ -161,7 +165,7 @@ def calculate_bold_offsets(
         if len(link_node.largs) > 0:
             link_dest = clean_node(wxr, None, link_node.largs[0])
             if "#" in link_dest and not link_dest.startswith("#"):
-                link_dest = link_dest[:link_dest.index("#")]
+                link_dest = link_dest[: link_dest.index("#")]
             if link_dest == wxr.wtp.title:
                 link_text = clean_node(wxr, None, link_node)
                 bold_words.add(link_text)

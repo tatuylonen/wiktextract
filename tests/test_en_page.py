@@ -8,7 +8,7 @@ from unittest.mock import patch
 from wikitextprocessor import Page, Wtp
 
 from wiktextract.config import WiktionaryConfig
-from wiktextract.page import parse_page
+from wiktextract.page import extract_links_from_node, parse_page
 from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.wxr_context import WiktextractContext
 
@@ -1084,3 +1084,24 @@ foo
                 },
             ],
         )
+
+    def test_extract_links_and_categories_from_nodes(self):
+        self.wxr.wtp.start_page("test")
+        root = self.wxr.wtp.parse("""test [[Category:foo]] [[link|bar]]
+[[link2|baz]]
+[[Category:boo]]""")
+        category_ns_names = {
+            "Category",
+        }
+        links, cats = extract_links_from_node(
+            self.wxr,
+            root,
+            category_ns_names=category_ns_names,
+        )
+        expected_links = [("bar", "link"), ("baz", "link2")]
+        expected_cats = {
+            "foo",
+            "boo",
+        }
+        self.assertEqual(expected_links, links)
+        self.assertEqual(expected_cats, cats)

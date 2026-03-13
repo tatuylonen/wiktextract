@@ -5,7 +5,7 @@
 import re
 from collections import defaultdict
 from copy import copy
-from typing import Any, Callable, Optional, Union
+from typing import Any, Callable, Optional, Sequence, Union
 
 from mediawiki_langcodes import name_to_code
 from wikitextprocessor.core import (
@@ -410,42 +410,15 @@ def clean_node(
                 if not sense_data_has_value(sense_data, "categories", cat):
                     data_append(sense_data, "categories", cat)
         else:
-            for m in re.finditer(
-                r"(?is)\[\[:?(\s*([^][|:]+):)?\s*([^]|]+)(\|([^]|]+))?\]\]",
-                #            1   2               3       4  5
-                v,
-            ):
-                # Add here other stuff different "Something:restofthelink"
-                # things;
-                if m.group(2) and m.group(2).strip() in category_ns_names:
-                    cat = clean_value(wxr, m.group(3))
-                    cat = re.sub(r"\s+", " ", cat)
-                    cat = cat.strip()
-                    if not cat:
-                        continue
-                    if not sense_data_has_value(sense_data, "categories", cat):
-                        data_append(sense_data, "categories", cat)
-                elif not m.group(1):
-                    if m.group(5):
-                        ltext = clean_value(wxr, m.group(5))
-                        ltarget = clean_value(wxr, m.group(3))
-                    elif not m.group(3):
-                        continue
-                    else:
-                        txt = clean_value(wxr, m.group(3))
-                        ltext = txt
-                        ltarget = txt
-                    ltarget = re.sub(r"\s+", " ", ltarget)
-                    ltarget = ltarget.strip()
-                    ltext = re.sub(r"\s+", " ", ltext)
-                    ltext = ltext.strip()
-                    if not ltext and not ltarget:
-                        continue
-                    if not ltext and ltarget:
-                        ltext = ltarget
-                    ltuple = (ltext, ltarget)
-                    if not sense_data_has_value(sense_data, "links", ltuple):
-                        data_append(sense_data, "links", ltuple)
+            links, categories = extract_links_from_node(
+                wxr, v, category_ns_names=category_ns_names
+            )
+            for ltuple in links:
+                if not sense_data_has_value(sense_data, "links", ltuple):
+                    data_append(sense_data, "links", ltuple)
+            for cat in categories:
+                if not sense_data_has_value(sense_data, "categories", cat):
+                    data_append(sense_data, "categories", cat)
 
     v = clean_value(wxr, v, no_strip=no_strip, no_html_strip=no_html_strip)
     # print("After clean_value:", repr(v))
@@ -477,3 +450,82 @@ def sense_data_has_value(
     elif isinstance(sense_data, dict):
         return value in sense_data.get(name, ())  # type:ignore[operator]
     return False
+
+
+def extract_links_from_node(
+    wxr: WiktextractContext,
+    nodes: WikiNode | list[WikiNode | str] | str,
+    category_ns_names: set[str] | None = None,
+    remove_anchor_tags=False,
+) -> tuple[list[tuple[str, str]], set[str]]:
+    """Find link nodes and extract them as a list of tuples. If
+    `category_ns_names` is passed, also extract category names separately and
+    return them as a list of strings."""
+    ret: list[tuple[str, str]] = []
+    cat_ret: set[str] = set()
+    if not isinstance(nodes, list):
+        nodes = [nodes]
+    for node in nodes:
+        if isinstance(node, str):
+            for m in re.finditer(
+                r"(?is)\[\[:?(\s*([^][|:]+):)?\s*([^]|]+)(\|([^]|]+))?\]\]",
+                #            1   2               3       4  5
+                node,
+            ):
+                if (
+                    m.group(2)
+                    and category_ns_names is not None
+                    and m.group(2).strip() in category_ns_names
+                ):
+                    cat = clean_value(wxr, m.group(3))
+                    cat = re.sub(r"\s+", " ", cat).strip()
+                    if not cat:
+                        continue
+                    cat_ret.add(cat)
+                elif not m.group(1):
+                    if m.group(5):
+                        ltext = clean_value(wxr, m.group(5))
+                        ltarget = clean_value(wxr, m.group(3))
+                    elif not m.group(3):
+                        continue
+                    else:
+                        txt = clean_value(wxr, m.group(3))
+                        ltext = txt
+                        ltarget = txt
+                    ltarget = re.sub(r"\s+", " ", ltarget).strip()
+                    ltext = re.sub(r"\s+", " ", ltext).strip()
+                    if not ltext and not ltarget:
+                        continue
+                    if not ltext and ltarget:
+                        ltext = ltarget
+                    ret.append((ltext, ltarget))
+        if not isinstance(node, WikiNode):
+            continue
+        for link_node in node.find_child_recursively(NodeKind.LINK):
+            if len(link_node.largs) > 0:
+                ltarget = clean_node(wxr, None, link_node.largs[0]).strip()
+                if not ltarget:
+                    continue
+                ltext = clean_node(wxr, None, link_node)
+                ret.append((ltext, ltarget))
+    # XXX extract category links
+    if category_ns_names is not None:
+        new_ret: list[tuple[str, str]] = []
+        for ltext, ltarget in ret:
+            if ltext.strip() or not ltarget.strip():
+                new_ret.append((ltext, ltarget))
+                continue
+            m2 = re.match(r"([^:]+):.+", ltarget)
+            if m2 is not None and m2.group(1).strip() in category_ns_names:
+                cat_ret.add(ltarget[ltarget.index(":")+1:])
+            else:
+                new_ret.append((ltext, ltarget))
+        ret = new_ret
+    if remove_anchor_tags is True:
+        new_ret = []
+        for ltext, ltarget in ret:
+            if "#" in ltarget and not ltarget.startswith("#"):
+                ltarget = ltarget[: ltarget.index("#")]
+            new_ret.append((ltext, ltarget))
+        ret = new_ret
+    return sorted(ret), cat_ret
