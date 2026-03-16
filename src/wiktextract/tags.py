@@ -392,6 +392,22 @@ xlat_head_map = {
     "m anim or f anim by sense": "masculine feminine by-personal-gender",
     "m pl or f pl by sense": "masculine feminine plural by-personal-gender",
     "m pers or f pers by sense": "masculine feminine personal by-personal-gender",
+    "gender m": "masculine",  # nene/Abau
+    "gender f": "feminine",  # just for completion's sake
+    "gender mf": "masculine feminine",
+    "class I": "class-i",
+    "class II": "class-ii",
+    "class III": "class-iii",
+    "class IV": "class-iv",
+    "class V": "class-v",
+    "class VI": "class-vi",
+    "class VII": "class-vii",
+    "class VIII": "class-viii",
+    "class IX": "class-ix",
+    "class X": "class-x",
+    "class XI": "class-xi",
+    "class XII": "class-xii",
+    "class XIII": "class-xiii",
 }
 
 # Languages that can have head-final numeric class indicators.  They are mostly
@@ -4584,6 +4600,16 @@ xlat_tags_map: dict[str, str | list[str]] = {
     "class I": "class-i",
     "class II": "class-ii",
     "class III": "class-iii",
+    "class IV": "class-iv",
+    "class V": "class-v",
+    "class VI": "class-vi",
+    "class VII": "class-vii",
+    "class VIII": "class-viii",
+    "class IX": "class-ix",
+    "class X": "class-x",
+    "class XI": "class-xi",
+    "class XII": "class-xii",
+    "class XIII": "class-xiii",
     "class N": "class-n",
     "class a-i": "class-a-i",
     "to multiple people": "addressee-plural",
@@ -5315,6 +5341,16 @@ valid_tags = {
     "class-i": "class",  # Choctaw
     "class-ii": "class",
     "class-iii": "class",
+    "class-iv": "class",
+    "class-v": "class",
+    "class-vi": "class",
+    "class-vii": "class",
+    "class-viii": "class",
+    "class-ix": "class",
+    "class-x": "class",
+    "class-xi": "class",
+    "class-xii": "class",
+    "class-xiii": "class",
     "class-n": "class",  # Chickasaw
     "class-a-i": "class",  # Akkadian
     "classifier": "detail",

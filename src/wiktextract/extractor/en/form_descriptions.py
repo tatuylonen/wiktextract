@@ -218,7 +218,7 @@ head_final_other_re_text = r" ({})".format(
 head_final_other_re = re.compile(head_final_other_re_text + "$")
 
 # Regexp for splitting heads.  See parse_word_head().
-head_split_re_text = (
+head_split_re_text_part_1 = (
     "("
     + head_final_re_text
     + "|"
@@ -227,9 +227,15 @@ head_split_re_text = (
     + head_final_semitic_re_text
     + "|"
     + head_final_other_re_text
-    + ")?( or |[,;]+| *$)"
 )
+
+head_split_re_text = head_split_re_text_part_1 + ")?( or |[,;]+| *$)"
+
+head_split_re_text_no_semicolon = head_split_re_text_part_1 + ")?( or |,+| *$)"
+
 head_split_re = re.compile(head_split_re_text)
+head_split_no_semicolon_re = re.compile(head_split_re_text_no_semicolon)
+
 head_split_re_parens = 0
 for m in re.finditer(r"(^|[^\\])[(]+", head_split_re_text):
     head_split_re_parens += m.group(0).count("(")
@@ -1359,38 +1365,50 @@ def parse_head_final_tags(
                 tags.extend(head_final_other_map[tagkeys].split(" "))
 
     # Handle normal head-final tags
-    m = re.search(head_final_re, form)
-    if m is not None:
-        tagkeys = m.group(3)
-        # Only replace tags ending with numbers in languages that have
-        # head-final numeric tags (e.g., Bantu classes); also, don't replace
-        # tags if the main title ends with them (then presume they are part
-        # of the word)
-        # print("head_final_tags form={!r} tagkeys={!r} lang={}"
-        #       .format(form, tagkeys, lang))
-        tagkeys_contains_digit = re.search(r"\d", tagkeys)
-        if (
-            (not tagkeys_contains_digit or lang in head_final_numeric_langs)
-            and not wxr.wtp.title.endswith(" " + tagkeys)  # type:ignore[union-attr]
-            and
-            # XXX the above test does not capture when the whole word is a
-            # xlat_head_map key, so I added the below test to complement
-            # it; does this break anything?
-            not wxr.wtp.title == tagkeys
-        ):  # defunct/English,
-            # "more defunct" -> "more" ["archaic"]
-            if not tagkeys_contains_digit or lang in head_final_numeric_langs:
-                form = form[: m.start()]
-                v = xlat_head_map[tagkeys]
-                if v.startswith("?"):
-                    v = v[1:]
-                    wxr.wtp.debug(
-                        "suspicious suffix {!r} in language {}: {}".format(
-                            tagkeys, lang, origform
-                        ),
-                        sortid="form_descriptions/1077",
-                    )
-                tags.extend(v.split())
+    # Loop this until nothing is found
+    while True:
+        prev_form = form
+        m = re.search(head_final_re, form)
+        if m is not None:
+            print(f"{m=}, {m.groups()=}")
+            tagkeys = m.group(3)
+            # Only replace tags ending with numbers in languages that have
+            # head-final numeric tags (e.g., Bantu classes); also, don't replace
+            # tags if the main title ends with them (then presume they are part
+            # of the word)
+            # print("head_final_tags form={!r} tagkeys={!r} lang={}"
+            #       .format(form, tagkeys, lang))
+            tagkeys_contains_digit = re.search(r"\d", tagkeys)
+            if (
+                (not tagkeys_contains_digit or lang in head_final_numeric_langs)
+                and not wxr.wtp.title.endswith(" " + tagkeys)  # type:ignore[union-attr]
+                and
+                # XXX the above test does not capture when the whole word is a
+                # xlat_head_map key, so I added the below test to complement
+                # it; does this break anything?
+                not wxr.wtp.title == tagkeys
+            ):  # defunct/English,
+                # "more defunct" -> "more" ["archaic"]
+                if (
+                    not tagkeys_contains_digit
+                    or lang in head_final_numeric_langs
+                ):
+                    # m.start(3) gets the start of what is in m.group(3), handy
+                    form = form[: m.start(3)].strip()
+                    v = xlat_head_map[tagkeys]
+                    if v.startswith("?"):
+                        v = v[1:]
+                        wxr.wtp.debug(
+                            "suspicious suffix {!r} in language {}: {}".format(
+                                tagkeys, lang, origform
+                            ),
+                            sortid="form_descriptions/1077",
+                        )
+                    tags.extend(v.split())
+        else:
+            break
+        if prev_form == form:
+            break
 
     # Generate warnings about words ending in " or" after processing
     if (
@@ -1931,11 +1949,26 @@ def parse_word_head(
     if m:
         base = base[: m.start()] + base[m.end() :]
 
+    semicolon_present = False
     # Split the head into alternatives.  This is a complicated task, as
     # we do not want so split on "or" or "," when immediately followed by more
     # head-final tags, but otherwise do want to split by them.
     # 20230907 added "or" to this to handle 'true or false', titles with 'or'
-    if wxr.wtp.title and ("," in wxr.wtp.title or " or " in wxr.wtp.title):
+    if wxr.wtp.title and (
+        "," in wxr.wtp.title or ";" in wxr.wtp.title or " or " in wxr.wtp.title
+    ):
+        # If the title has ";", we don't want to split on that and can remove
+        # the ; from the splitting regex pretty easily because it's uncommon.
+        # However, commas are so common that not splitting on them is just
+        # not feasible, and we have to just deal with that if there are
+        # alternative forms or variations with stray commas that shouldn't
+        # be split.
+        if ";" in wxr.wtp.title:
+            semicolon_present = True
+            base = base.replace(";", "<SEMICOLON>")
+            default_splitter = head_split_no_semicolon_re
+        else:
+            default_splitter = head_split_re
         # A kludge to handle article titles/phrases with commas.
         # Preprocess splits to first capture the title, then handle
         # all the others as usual.
@@ -1945,7 +1978,7 @@ def parse_word_head(
             if psplit == wxr.wtp.title:
                 splits.append(psplit)
             else:
-                splits.extend(re.split(head_split_re, psplit))
+                splits.extend(re.split(default_splitter, psplit))
     else:
         # Do the normal split; previous only-behavior.
         splits = re.split(head_split_re, base)
@@ -2038,7 +2071,7 @@ def parse_word_head(
             )
             tags = list(tags)  # Make sure we don't modify anything cached
             tags.append("canonical")
-            if alt_i == 0 and "," in wxr.wtp.title:  # type:ignore[operator]
+            if alt_i == 0 and "," in wxr.wtp.title or ";" in wxr.wtp.title:  # type:ignore[operator]
                 # Kludge to handle article titles/phrases with commas.
                 # basepart's regex strips commas, which leads to a
                 # canonical form that is the title phrase without a comma.
@@ -2047,6 +2080,16 @@ def parse_word_head(
                 # canonicals.append((tags, baseparts)) and not (tags, [alt])
                 baseparts = [alt]
             canonicals.append((tags, baseparts))
+
+    # If more of this kind of replace-and-return-original kind of stuff is
+    # needed, make semicolon_present into a flag enum, something like `modified`
+    if semicolon_present:
+        new_cans = []
+        for tags, baseparts in canonicals:
+            new_cans.append(
+                (tags, [s.replace("<SEMICOLON>", ";") for s in baseparts])
+            )
+        canonicals = new_cans
     for tags, baseparts in canonicals:
         add_related(
             wxr,
