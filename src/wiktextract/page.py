@@ -457,16 +457,23 @@ def extract_links_from_node(
     nodes: WikiNode | list[WikiNode | str] | str,
     category_ns_names: set[str] | None = None,
     remove_anchor_tags=False,
+    expand_nodes=False,
 ) -> tuple[list[tuple[str, str]], set[str]]:
     """Find link nodes and extract them as a list of tuples. If
     `category_ns_names` is passed, also extract category names separately and
     return them as a list of strings."""
     ret: list[tuple[str, str]] = []
     cat_ret: set[str] = set()
+
+    # Sometimes this function may receive nodes that have not been expanded,
+    # and like a head template node. Expanding the involves turning the nodes
+    # into wikitext and then parsing and expanding them, so it's expensive.
+    if expand_nodes is True:
+        nodes = wxr.wtp.parse(wxr.wtp.node_to_wikitext(nodes), expand_all=True)
     if not isinstance(nodes, list):
         nodes = [nodes]
     for node in nodes:
-        if isinstance(node, str):
+        if isinstance(node, str) and node.strip():
             for m in re.finditer(
                 r"(?is)\[\[:?(\s*([^][|:]+):)?\s*([^]|]+)(\|([^]|]+))?\]\]",
                 #            1   2               3       4  5

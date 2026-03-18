@@ -1583,7 +1583,6 @@ def parse_language(
         header_topics: list[str],
     ) -> None:
         ruby = []
-        links: list[str] = []
 
         # process template parse nodes here
         new_nodes = []
@@ -1605,29 +1604,6 @@ def parse_language(
                 pos_data["info_templates"] = info_template_data
             else:
                 pos_data["info_templates"].extend(info_template_data)
-
-        if not word.isalnum():
-            # `-` is kosher, add more of these if needed.
-            if word.replace("-", "").isalnum():
-                pass
-            else:
-                # if the word contains non-letter or -number characters, it
-                # might have something that messes with split-at-semi-comma; we
-                # collect links so that we can skip splitting them.
-                exp = wxr.wtp.parse(
-                    wxr.wtp.node_to_wikitext(header_nodes), expand_all=True
-                )
-                link_nodes, _ = recursively_extract(
-                    exp.children,
-                    lambda x: isinstance(x, WikiNode)
-                    and x.kind == NodeKind.LINK,
-                )
-                for ln in link_nodes:
-                    ltext = clean_node(wxr, None, ln.largs[-1])  # type: ignore[union-attr]
-                    if not ltext.isalnum():
-                        links.append(ltext)
-                if word not in links:
-                    links.append(word)
 
         if lang_code == "ja":
             exp = wxr.wtp.parse(
@@ -1687,8 +1663,9 @@ def parse_language(
         header_text = clean_node(
             wxr, pos_data, header_nodes, post_template_fn=head_post_template_fn
         )
+        header_text = re.sub(r"\s+", " ", header_text).strip()
 
-        if not header_text.strip():
+        if not header_text:
             return
 
         term_label_tags: list[str] = []
@@ -1711,17 +1688,17 @@ def parse_language(
                 term_label_topics.extend(tlb_topics)
             # print(f"{tlb_tagsets=}, {tlb_topicsets=}")
 
-        header_text = re.sub(r"\s+", " ", header_text)
         # print(f"{header_text=}")
         parse_word_head(
             wxr,
+            word,
             pos_type,
             header_text,
             pos_data,
             is_reconstruction,
             header_group,
+            header_nodes,
             ruby=ruby,
-            links=links,
         )
         if "tags" in pos_data:
             # pos_data can get "tags" data from some source; type-checkers

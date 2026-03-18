@@ -17,8 +17,10 @@ from typing import (
 
 import Levenshtein
 from nltk import TweetTokenizer  # type:ignore[import-untyped]
+from wikitextprocessor.parser import WikiNode
 
 from ...datautils import data_append, data_extend, split_at_comma_semi
+from ...page import extract_links_from_node
 from ...tags import (
     alt_of_tags,
     form_of_tags,
@@ -1797,13 +1799,14 @@ FORM_ASSOCIATED_TAG_WORDS: set[str] = {
 
 def parse_word_head(
     wxr: WiktextractContext,
+    word: str,
     pos: str,
     text: str,
     data: WordData,
     is_reconstruction: bool,
     head_group: Optional[int],
+    original_header_nodes: list[WikiNode | str] | None = None,
     ruby=None,
-    links=None,
 ) -> None:
     """Parses the head line for a word for in a particular language and
     part-of-speech, extracting tags and related forms."""
@@ -1817,10 +1820,39 @@ def parse_word_head(
     assert is_reconstruction in (True, False)
     # print("PARSE_WORD_HEAD: {}: {!r}".format(wxr.wtp.section, text))
     # print(f"PARSE_WORD_HEAD: {data=}")
-    if links is None:
-        links = []
 
-    if len(links) > 0:
+    # Save original text for if we want to look for mismatched form-links
+    orig_text = text
+
+    links: list[tuple[str, str]] | None = None
+
+
+    link_words_not_alnum = []
+    if not word.isalnum():
+        # `-` is kosher, add more of these if needed.
+        if word.replace("-", "").isalnum():
+            pass
+        else:
+            # if the word contains non-letter or -number characters, it
+            # might have something that messes with split-at-semi-comma; we
+            # collect links so that we can skip splitting them.
+            if original_header_nodes is not None:
+                links, _ = extract_links_from_node(
+                    wxr,
+                    original_header_nodes,
+                    remove_anchor_tags=True,
+                    expand_nodes=True,
+                )
+                for ltext, ltar in links:
+                    if not ltext.isalnum():
+                        link_words_not_alnum.append(ltext)
+            if word not in link_words_not_alnum:
+                link_words_not_alnum.append(word)
+
+    if link_words_not_alnum is None:
+        link_words_not_alnum = []
+
+    if len(link_words_not_alnum) > 0:
         # if we have link data (that is, links with stuff like commas and
         # spaces, replace word_re with a modified local scope pattern
         # print(f"links {list((c, ord(c)) for link in links for c in link)=}")
@@ -1829,7 +1861,10 @@ def parse_word_head(
             +
             # or words as a substring...
             r"\b|\b".join(
-                sorted((re.escape(s) for s in links), key=lambda x: -len(x))
+                sorted(
+                    (re.escape(s) for s in link_words_not_alnum),
+                    key=lambda x: -len(x),
+                )
             )
             + r"\b|"
             + word_pattern
@@ -1912,7 +1947,9 @@ def parse_word_head(
     if m:
         tag, readings = m.groups()
         tag = re.sub(r"\s+", "-", tag)
-        for reading in split_at_comma_semi(readings, skipped=links):
+        for reading in split_at_comma_semi(
+            readings, skipped=link_words_not_alnum
+        ):
             add_related(
                 wxr,
                 data,
@@ -2181,7 +2218,9 @@ def parse_word_head(
             new_desc.extend(
                 map_with(
                     xlat_tags_map,
-                    split_at_comma_semi(desc, extra=[", or "], skipped=links),
+                    split_at_comma_semi(
+                        desc, extra=[", or "], skipped=link_words_not_alnum
+                    ),
                 )
             )
         prev_tags: Union[list[list[str]], list[tuple[str, ...]], None] = None
@@ -2568,7 +2607,9 @@ def parse_word_head(
                             )
                         ):
                             for r in split_at_comma_semi(
-                                paren, extra=[" or "], skipped=links
+                                paren,
+                                extra=[" or "],
+                                skipped=link_words_not_alnum,
                             ):
                                 add_romanization(
                                     wxr,
@@ -2631,7 +2672,9 @@ def parse_word_head(
                 alts = [related_str]
             else:
                 alts = split_at_comma_semi(
-                    related_str, separators=[r"\bor\b"], skipped=links
+                    related_str,
+                    separators=[r"\bor\b"],
+                    skipped=link_words_not_alnum,
                 )
                 # print(f"{related_str=}, {alts=}")
                 if not alts:
