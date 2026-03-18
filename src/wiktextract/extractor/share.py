@@ -178,3 +178,6 @@ def calculate_bold_offsets(
             setattr(example, field, sorted(offsets))
         elif isinstance(example, dict):
             example[field] = sorted(offsets)
+
+
+
