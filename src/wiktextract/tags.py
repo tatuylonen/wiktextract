@@ -3643,6 +3643,7 @@ xlat_tags_map: dict[str, str | list[str]] = {
     "masculine/feminine": "masculine feminine",
     "masculine/neuter": "masculine neuter",
     "present/future": "present future",
+    "present/perfect": "present perfect",
     "present/preterite": "present preterite",
     "future/present": "present future",
     "present/aoriest": "present aorist error-misspelling",
