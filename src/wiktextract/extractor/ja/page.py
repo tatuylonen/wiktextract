@@ -8,6 +8,7 @@ from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .conjugation import extract_conjugation_section
 from .etymology import extract_etymology_section
+from .kanji import extract_ja_kanji
 from .linkage import extract_alt_form_section, extract_linkage_section
 from .models import Sense, WordEntry
 from .pos import extract_note_section, parse_pos_section
@@ -177,6 +178,8 @@ def parse_page(
         for t_node in level2_node.find_child(NodeKind.TEMPLATE):
             if t_node.template_name.endswith("-cat"):
                 clean_node(wxr, base_data, t_node)
+            elif t_node.template_name == "ja-kanji":
+                extract_ja_kanji(wxr, base_data, t_node)
         for level3_node in level2_node.find_child(NodeKind.LEVEL3):
             parse_section(wxr, page_data, base_data, level3_node)
 
