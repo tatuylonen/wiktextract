@@ -1354,7 +1354,7 @@ def clean_value(
             wxr.wtp.NAMESPACE_DATA["File"]["id"], suffix=""
         )
         IMAGE_LINK_RE = re.compile(
-            rf"(?:{'|'.join(image_link_prefixes)})\s*:", re.IGNORECASE
+            rf"(?:\s*{'|'.join(image_link_prefixes)})\s*:", re.IGNORECASE
         )
 
     def repl_1(m: re.Match) -> str:
@@ -1537,15 +1537,15 @@ def clean_value(
             r"(?s)\[\[\s*:?([^]|#<>:&]+?)\s*(#[^][|<>]*?)?\]\]", repl_1, title
         )
         title = re.sub(
-            r"(?s)\[\[\s*(([\w\d]+)\s*:)?\s*([^][#|<>]+?)"
+            r"(?s)\[\[\s*(([\w\d]+)\s*:)?(\s*[^][#|<>]+?)"
             r"\s*(#[^][|]*?)?\|?\]\]",
             repl_link,
             title,
         )
         title = re.sub(
-            r"(?s)\[\[\s*([^][|<>]+?)\s*\|"
-            r"\s*(([^][|]|\[[^]]*\])+?)"
-            r"(\s*\|\s*(([^][|]|\[[^]]*\])+?))*\s*\|*\]\]",
+            r"(?s)\[\[(\s*[^][|<>]+?\s*)\|"
+            r"((\s*[^][|]|\[[^]]*\])+?)"
+            r"(\s*\|\s*(([^][|]|\[[^]]*\])+?)\s*)*\|*\]\]",
             repl_link_bars,
             title,
         )

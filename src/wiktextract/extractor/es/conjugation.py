@@ -190,8 +190,11 @@ def process_es_v_cell(
     is_archaic: bool,
 ) -> list[Form]:
     forms = []
-    for form_str in clean_node(wxr, None, cell_nodes).split(","):
-        form = Form(form=form_str.strip())
+    for form_str in clean_node(wxr, None, cell_nodes, no_strip=True).split(","):
+        form_str = form_str.strip()
+        if not form_str:
+            continue
+        form = Form(form=form_str)
         for col_head in col_headers:
             if (
                 col_index >= col_head.index
