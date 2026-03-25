@@ -330,6 +330,7 @@ def clean_node(
     post_template_fn: Optional[PostTemplateFnCallable] = None,
     node_handler_fn: Optional[NodeHandlerFnCallable] = None,
     collect_links: bool = False,
+    remove_anchors_from_links: bool = False,
     no_strip=False,
     no_html_strip=False,
 ) -> str:
@@ -411,7 +412,10 @@ def clean_node(
                     data_append(sense_data, "categories", cat)
         else:
             links, categories = extract_links_from_node(
-                wxr, v, category_ns_names=category_ns_names
+                wxr,
+                v,
+                category_ns_names=category_ns_names,
+                remove_anchor_tags=remove_anchors_from_links,
             )
             for ltuple in links:
                 if not sense_data_has_value(sense_data, "links", ltuple):
@@ -524,7 +528,7 @@ def extract_links_from_node(
                 continue
             m2 = re.match(r"([^:]+):.+", ltarget)
             if m2 is not None and m2.group(1).strip() in category_ns_names:
-                cat_ret.add(ltarget[ltarget.index(":")+1:])
+                cat_ret.add(ltarget[ltarget.index(":") + 1 :])
             else:
                 new_ret.append((ltext, ltarget))
         ret = new_ret
@@ -535,4 +539,4 @@ def extract_links_from_node(
                 ltarget = ltarget[: ltarget.index("#")]
             new_ret.append((ltext, ltarget))
         ret = new_ret
-    return sorted(ret), cat_ret
+    return ret, cat_ret
