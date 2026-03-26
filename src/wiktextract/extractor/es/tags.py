@@ -1,4 +1,4 @@
-from .models import WordEntry
+from .models import Form, WordEntry
 
 # https://es.wiktionary.org/wiki/Wikcionario:Lista_de_etiquetas
 
@@ -852,7 +852,7 @@ ALL_TAGS = {
 }
 
 
-def translate_raw_tags(data: WordEntry):
+def translate_raw_tags(data: WordEntry | Form):
     raw_tags = []
     for raw_tag in data.raw_tags:
         lower_raw_tag = raw_tag.lower()

@@ -139,32 +139,32 @@ def process_es_v_template(
                     row_header = cell_text.removesuffix("^†").strip()
             else:
                 cell_nodes = []
+                found_sup = []
                 for node in cell.children:
                     if isinstance(node, HTMLNode) and node.tag == "sup":
                         sup_tag = clean_node(wxr, None, node.children)
-                        if sup_tag != "" and len(forms) > 0:
-                            forms[-1].raw_tags.append(sup_tag)
-                            translate_raw_tags(forms[-1])
-                    elif (
-                        isinstance(node, WikiNode)
-                        and node.kind == NodeKind.LINK
-                    ):
-                        cell_nodes.append(node)
-                        forms.extend(
-                            process_es_v_cell(
-                                wxr,
-                                cell_nodes,
-                                col_index,
-                                col_headers,
-                                row_header,
-                                is_archaic_row,
-                            )
-                        )
-                        cell_nodes.clear()
+                        if sup_tag != "":
+                            found_sup.append(sup_tag)
                     elif not (
                         isinstance(node, HTMLNode)
                         and "movil" in node.attrs.get("class", "")
                     ):
+                        if len(found_sup) > 0:
+                            forms.extend(
+                                process_es_v_cell(
+                                    wxr,
+                                    cell_nodes,
+                                    col_index,
+                                    col_headers,
+                                    row_header,
+                                    is_archaic_row,
+                                )
+                            )
+                            if len(forms) > 0:
+                                forms[-1].raw_tags.extend(found_sup)
+                                translate_raw_tags(forms[-1])
+                            found_sup.clear()
+                            cell_nodes.clear()
                         cell_nodes.append(node)  # hidden HTML tag
                 if len(cell_nodes) > 0:
                     forms.extend(
@@ -177,6 +177,11 @@ def process_es_v_template(
                             is_archaic_row,
                         )
                     )
+                    if len(found_sup) > 0 and len(forms) > 0:
+                        forms[-1].raw_tags.extend(found_sup)
+                        translate_raw_tags(forms[-1])
+                    found_sup.clear()
+                    cell_nodes.clear()
                 col_index += 1
     return forms, cats.get("categories", [])
 
