@@ -4,10 +4,10 @@ REPO ?= tatuylonen/wiktextract
 SHA ?= HEAD
 
 test:
-	python -m unittest discover -b -s tests
+	python -m pytest tests
 test_coverage:
 	python -m coverage erase
-	python -m coverage run -m unittest discover -b -s tests
+	python -m coverage run -m pytest tests
 coverage_report:
 	python -m coverage combine
 	python -m coverage html
