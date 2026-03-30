@@ -3,6 +3,7 @@ import unittest
 from wikitextprocessor import Wtp
 
 from wiktextract.clean import clean_value
+import wiktextract.clean as clean_module
 from wiktextract.config import WiktionaryConfig
 from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.wxr_context import WiktextractContext
@@ -130,6 +131,7 @@ class CleanTests(unittest.TestCase):
         # does not have anything from a set of parameters (left, right,
         # thumb etc.) that would not make it inline, it is an inline
         # image and its alt= text should be printer with [Alt: ...]
+        clean_module.IMAGE_LINK_RE = None  # clear cache
         v = "[[ File :bar.JPG|conf bar|baz|baz2|baz3|baz4|alt=Bar]]"
         v = clean_value(self.wxr, v)
         self.assertEqual(v, "[Alt: Bar]")
