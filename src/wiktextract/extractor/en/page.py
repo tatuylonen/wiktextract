@@ -1349,7 +1349,7 @@ def parse_language(
                         # Skips file links
                         continue
                 start_of_paragraph = False
-                pre[-1].extend(node.largs[-1])
+                pre[-1].append(node)
             elif kind == NodeKind.HTML:
                 if node.sarg == "br":
                     if pre[-1]:
