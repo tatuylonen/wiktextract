@@ -4,7 +4,7 @@ from wikitextprocessor.parser import TemplateNode
 
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
-from .models import Sound, WordEntry
+from .models import Form, WordEntry
 
 JA_KANJI_TEMPLATE_PARAMS = {
     "呉音": "go-on",
@@ -63,4 +63,6 @@ def extract_ja_kanji(
             tags = [reading_type]
             if r in joyo:
                 tags.append("joyo")
-            base_data.sounds.append(Sound(other=r, tags=tags))
+            base_data.forms.append(
+                Form(form=r, tags=["transliteration", *tags])
+            )

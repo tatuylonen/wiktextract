@@ -5,7 +5,7 @@ from wikitextprocessor.parser import NodeKind
 
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.ja.kanji import extract_ja_kanji
-from wiktextract.extractor.ja.models import Sound, WordEntry
+from wiktextract.extractor.ja.models import Form, WordEntry
 from wiktextract.wxr_context import WiktextractContext
 
 
@@ -39,12 +39,14 @@ class TestExtractJaKanji(unittest.TestCase):
             "{{ja-kanji|常用=イン|呉音=ウン|漢音=ウン|慣用音=イン<ヰン|訓=ひびき}}"
         )
         self.assertEqual(
-            data.sounds,
+            data.forms,
             [
-                Sound(other="ウン", tags=["go-on"]),
-                Sound(other="ウン", tags=["kan-on"]),
-                Sound(other="イン", tags=["kan-yo-on", "joyo"]),
-                Sound(other="ひびき", tags=["kun"]),
+                Form(form="ウン", tags=["transliteration", "go-on"]),
+                Form(form="ウン", tags=["transliteration", "kan-on"]),
+                Form(
+                    form="イン", tags=["transliteration", "kan-yo-on", "joyo"]
+                ),
+                Form(form="ひびき", tags=["transliteration", "kun"]),
             ],
         )
 
@@ -54,12 +56,12 @@ class TestExtractJaKanji(unittest.TestCase):
             "{{ja-kanji|常用=ブン,モン,ふみ|施策=教育:1|呉音=モン|漢音=ブン|訓=ふみ,あや,かざ-る}}"
         )
         self.assertEqual(
-            data.sounds,
+            data.forms,
             [
-                Sound(other="モン", tags=["go-on", "joyo"]),
-                Sound(other="ブン", tags=["kan-on", "joyo"]),
-                Sound(other="ふみ", tags=["kun", "joyo"]),
-                Sound(other="あや", tags=["kun"]),
-                Sound(other="かざ-る", tags=["kun"]),
+                Form(form="モン", tags=["transliteration", "go-on", "joyo"]),
+                Form(form="ブン", tags=["transliteration", "kan-on", "joyo"]),
+                Form(form="ふみ", tags=["transliteration", "kun", "joyo"]),
+                Form(form="あや", tags=["transliteration", "kun"]),
+                Form(form="かざ-る", tags=["transliteration", "kun"]),
             ],
         )
