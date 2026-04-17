@@ -1370,7 +1370,7 @@ def parse_head_final_tags(
         prev_form = form
         m = re.search(head_final_re, form)
         if m is not None:
-            print(f"{m=}, {m.groups()=}")
+            # print(f"{m=}, {m.groups()=}")
             tagkeys = m.group(3)
             # Only replace tags ending with numbers in languages that have
             # head-final numeric tags (e.g., Bantu classes); also, don't replace
