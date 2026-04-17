@@ -3223,6 +3223,8 @@ infl_map: dict[str, InflMapNode] = {
     },
     "Lenition": "lenition",
     "Eclipsis": "eclipsis",
+    "lenition": "lenition",
+    "eclipsis": "eclipsis",
     "+ object concord": "object-concord",
     "lative": "lative",
     "post./nom.": "postpositional",  # XXX what is nom. ?
