@@ -375,6 +375,7 @@ def parse_translation_item_text(
     m = re.match(r"\*?\s*([-' \w][-'&, \w()]*)[:：]\s*", item)
     tags = []
     if m:
+        lang_sublang = ""
         sublang = m.group(1).strip()
         language_name_variations: list[str] = list()
         if lang and sublang:
