@@ -371,10 +371,12 @@ def parse_translation_item_text(
         extra_langcodes.add(lang_code)
         # Canonicalize language name (we could have gotten it via
         # alias or other_names)
-        lang = code_to_name(lang_code, "en")
+        if new_lang_name := code_to_name(lang_code, "en"):
+            lang = new_lang_name
     m = re.match(r"\*?\s*([-' \w][-'&, \w()]*)[:：]\s*", item)
     tags = []
     if m:
+        lang_sublang = ""
         sublang = m.group(1).strip()
         language_name_variations: list[str] = list()
         if lang and sublang:
