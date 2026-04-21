@@ -33,7 +33,9 @@ class HeadTests(unittest.TestCase):
         data = {}
         self.wxr.wtp.start_page("Reconstruction:Proto-Germanic/testpage")
         self.wxr.wtp.start_section("Proto-Germanic")
-        parse_word_head(self.wxr, "testpage", "noun", "*testpage", data, True, None)
+        parse_word_head(
+            self.wxr, "testpage", "noun", "*testpage", data, True, None
+        )
         self.assertEqual(self.wxr.wtp.errors, [])
         self.assertEqual(self.wxr.wtp.warnings, [])
         self.assertEqual(self.wxr.wtp.debugs, [])
@@ -43,7 +45,9 @@ class HeadTests(unittest.TestCase):
         data = {}
         self.wxr.wtp.start_page("Reconstruction:Proto-Germanic/testpage")
         self.wxr.wtp.start_section("Proto-Germanic")
-        parse_word_head(self.wxr, "testpage", "noun", "*testfoo", data, True, None)
+        parse_word_head(
+            self.wxr, "testpage", "noun", "*testfoo", data, True, None
+        )
         self.assertEqual(self.wxr.wtp.errors, [])
         self.assertEqual(self.wxr.wtp.warnings, [])
         self.assertEqual(self.wxr.wtp.debugs, [])
@@ -53,7 +57,9 @@ class HeadTests(unittest.TestCase):
 
     def test_reconstruction3(self):
         data = {}
-        parse_word_head(self.wxr, "testpage", "noun", "*testpage", data, False, None)
+        parse_word_head(
+            self.wxr, "testpage", "noun", "*testpage", data, False, None
+        )
         self.assertEqual(
             data, {"forms": [{"form": "*testpage", "tags": ["canonical"]}]}
         )
@@ -68,7 +74,9 @@ class HeadTests(unittest.TestCase):
 
     def test_head2(self):
         data = {}
-        parse_word_head(self.wxr, "testpage", "noun", "testpage", data, False, None)
+        parse_word_head(
+            self.wxr, "testpage", "noun", "testpage", data, False, None
+        )
         self.assertEqual(self.wxr.wtp.errors, [])
         self.assertEqual(self.wxr.wtp.warnings, [])
         self.assertEqual(self.wxr.wtp.debugs, [])
@@ -76,7 +84,9 @@ class HeadTests(unittest.TestCase):
 
     def test_head3(self):
         data = {}
-        parse_word_head(self.wxr, "testpage", "noun", "testpAge", data, False, None)
+        parse_word_head(
+            self.wxr, "testpage", "noun", "testpAge", data, False, None
+        )
         self.assertEqual(self.wxr.wtp.errors, [])
         self.assertEqual(self.wxr.wtp.warnings, [])
         self.assertEqual(self.wxr.wtp.debugs, [])
@@ -86,7 +96,9 @@ class HeadTests(unittest.TestCase):
 
     def test_head4(self):
         data = {}
-        parse_word_head(self.wxr, "testpage", "noun", "testpage f", data, False, None)
+        parse_word_head(
+            self.wxr, "testpage", "noun", "testpage f", data, False, None
+        )
         self.assertEqual(self.wxr.wtp.errors, [])
         self.assertEqual(self.wxr.wtp.warnings, [])
         self.assertEqual(self.wxr.wtp.debugs, [])
@@ -94,7 +106,9 @@ class HeadTests(unittest.TestCase):
 
     def test_head5(self):
         data = {}
-        parse_word_head(self.wxr, "testpage", "noun", "testpAge m", data, False, None)
+        parse_word_head(
+            self.wxr, "testpage", "noun", "testpAge m", data, False, None
+        )
         self.assertEqual(self.wxr.wtp.errors, [])
         self.assertEqual(self.wxr.wtp.warnings, [])
         self.assertEqual(self.wxr.wtp.debugs, [])
@@ -109,14 +123,18 @@ class HeadTests(unittest.TestCase):
 
     def test_head6(self):
         data = {}
-        parse_word_head(self.wxr, "testpage", "noun", "testpage n", data, False, None)
+        parse_word_head(
+            self.wxr, "testpage", "noun", "testpage n", data, False, None
+        )
         self.assertEqual(self.wxr.wtp.warnings, [])
         self.assertEqual(self.wxr.wtp.debugs, [])
         self.assertEqual(data, {"tags": ["neuter"]})
 
     def test_head7(self):
         data = {}
-        parse_word_head(self.wxr, "testpage", "noun", "testpage c", data, False, None)
+        parse_word_head(
+            self.wxr, "testpage", "noun", "testpage c", data, False, None
+        )
         self.assertEqual(self.wxr.wtp.warnings, [])
         self.assertEqual(self.wxr.wtp.debugs, [])
         self.assertEqual(data, {"tags": ["common-gender"]})
@@ -124,7 +142,9 @@ class HeadTests(unittest.TestCase):
     def test_head8(self):
         data = {}
         self.wxr.wtp.start_section("Zulu")
-        parse_word_head(self.wxr, "testpage", "noun", "testpage 1", data, False, None)
+        parse_word_head(
+            self.wxr, "testpage", "noun", "testpage 1", data, False, None
+        )
         self.assertEqual(self.wxr.wtp.warnings, [])
         self.assertEqual(self.wxr.wtp.debugs, [])
         self.assertEqual(data, {"tags": ["class-1"]})
@@ -132,7 +152,9 @@ class HeadTests(unittest.TestCase):
     def test_head8b(self):
         # Trying to parse suffix 1 in English - should not get parsed
         data = {}
-        parse_word_head(self.wxr, "testpage", "noun", "testpage 1", data, False, None)
+        parse_word_head(
+            self.wxr, "testpage", "noun", "testpage 1", data, False, None
+        )
         self.assertEqual(self.wxr.wtp.errors, [])
         self.assertEqual(self.wxr.wtp.warnings, [])
         self.assertNotEqual(self.wxr.wtp.debugs, [])
@@ -211,7 +233,13 @@ class HeadTests(unittest.TestCase):
         # the hyphen in keyword names
         data = {}
         parse_word_head(
-            self.wxr, "testpage", "noun", "foo (McCune-Reischauer bar)", data, False, None
+            self.wxr,
+            "testpage",
+            "noun",
+            "foo (McCune-Reischauer bar)",
+            data,
+            False,
+            None,
         )
         self.assertEqual(self.wxr.wtp.warnings, [])
         self.assertEqual(self.wxr.wtp.debugs, [])
@@ -227,21 +255,27 @@ class HeadTests(unittest.TestCase):
 
     def test_head13(self):
         data = {}
-        parse_word_head(self.wxr, "testpage", "noun", "testpage f or m", data, False, None)
+        parse_word_head(
+            self.wxr, "testpage", "noun", "testpage f or m", data, False, None
+        )
         self.assertEqual(self.wxr.wtp.warnings, [])
         self.assertEqual(self.wxr.wtp.debugs, [])
         self.assertEqual(data, {"tags": ["feminine", "masculine"]})
 
     def test_head14(self):
         data = {}
-        parse_word_head(self.wxr, "testpage", "noun", "testpage f, m", data, False, None)
+        parse_word_head(
+            self.wxr, "testpage", "noun", "testpage f, m", data, False, None
+        )
         self.assertEqual(self.wxr.wtp.warnings, [])
         self.assertEqual(self.wxr.wtp.debugs, [])
         self.assertEqual(data, {"tags": ["feminine", "masculine"]})
 
     def test_head15(self):
         data = {}
-        parse_word_head(self.wxr, "testpage", "noun", "testpage f, m, n", data, False, None)
+        parse_word_head(
+            self.wxr, "testpage", "noun", "testpage f, m, n", data, False, None
+        )
         self.assertEqual(self.wxr.wtp.warnings, [])
         self.assertEqual(self.wxr.wtp.debugs, [])
         self.assertEqual(data, {"tags": ["feminine", "masculine", "neuter"]})
@@ -249,7 +283,13 @@ class HeadTests(unittest.TestCase):
     def test_head16(self):
         data = {}
         parse_word_head(
-            self.wxr, "testpage", "noun", "testpage f or m or n", data, False, None
+            self.wxr,
+            "testpage",
+            "noun",
+            "testpage f or m or n",
+            data,
+            False,
+            None,
         )
         self.assertEqual(self.wxr.wtp.warnings, [])
         self.assertEqual(self.wxr.wtp.debugs, [])
@@ -260,7 +300,9 @@ class HeadTests(unittest.TestCase):
         self.wxr.wtp.start_page("index")
         self.wxr.wtp.start_section("English")
         self.wxr.wtp.start_subsection("Noun")
-        parse_word_head(self.wxr, "testpage", "noun", "index n", data, False, None)
+        parse_word_head(
+            self.wxr, "testpage", "noun", "index n", data, False, None
+        )
         self.assertEqual(self.wxr.wtp.warnings, [])
         self.assertEqual(self.wxr.wtp.debugs, [])
         self.assertEqual(data, {"tags": ["neuter"]})
@@ -296,7 +338,9 @@ class HeadTests(unittest.TestCase):
         self.wxr.wtp.start_page("index")
         self.wxr.wtp.start_section("English")
         self.wxr.wtp.start_subsection("Noun")
-        parse_word_head(self.wxr, "testpage", "noun", "foo f or bar m", data, False, None)
+        parse_word_head(
+            self.wxr, "testpage", "noun", "foo f or bar m", data, False, None
+        )
         self.assertEqual(self.wxr.wtp.warnings, [])
         self.assertEqual(self.wxr.wtp.debugs, [])
         self.assertEqual(
@@ -314,7 +358,9 @@ class HeadTests(unittest.TestCase):
         self.wxr.wtp.start_page("index")
         self.wxr.wtp.start_section("English")
         self.wxr.wtp.start_subsection("Noun")
-        parse_word_head(self.wxr, "testpage", "noun", "foo or bar", data, False, None)
+        parse_word_head(
+            self.wxr, "testpage", "noun", "foo or bar", data, False, None
+        )
         self.assertEqual(self.wxr.wtp.warnings, [])
         self.assertEqual(self.wxr.wtp.debugs, [])
         self.assertEqual(
@@ -333,7 +379,13 @@ class HeadTests(unittest.TestCase):
         self.wxr.wtp.start_section("English")
         self.wxr.wtp.start_subsection("Noun")
         parse_word_head(
-            self.wxr, "testpage", "noun", "foo f or n or bar m or c", data, False, None
+            self.wxr,
+            "testpage",
+            "noun",
+            "foo f or n or bar m or c",
+            data,
+            False,
+            None,
         )
         self.assertEqual(self.wxr.wtp.warnings, [])
         self.assertEqual(self.wxr.wtp.debugs, [])
@@ -383,7 +435,13 @@ class HeadTests(unittest.TestCase):
         self.wxr.wtp.start_section("English")
         self.wxr.wtp.start_subsection("Adjective")
         parse_word_head(
-            self.wxr, "testpage", "adj", "indubitables m pl or f pl", data, False, None
+            self.wxr,
+            "testpage",
+            "adj",
+            "indubitables m pl or f pl",
+            data,
+            False,
+            None,
         )
         # print(json.dumps(data, indent=2))
         self.assertEqual(self.wxr.wtp.warnings, [])
@@ -395,7 +453,9 @@ class HeadTests(unittest.TestCase):
         self.wxr.wtp.start_page("foo")
         self.wxr.wtp.start_section("Japanese")
         self.wxr.wtp.start_subsection("Noun")
-        parse_word_head(self.wxr, "testpage", "noun", "foo (12 strokes)", data, False, None)
+        parse_word_head(
+            self.wxr, "testpage", "noun", "foo (12 strokes)", data, False, None
+        )
         self.assertEqual(self.wxr.wtp.warnings, [])
         self.assertEqual(self.wxr.wtp.debugs, [])
         self.assertEqual(
@@ -440,7 +500,13 @@ class HeadTests(unittest.TestCase):
         self.wxr.wtp.start_section("English")
         self.wxr.wtp.start_subsection("Noun")
         parse_word_head(
-            self.wxr, "testpage", "noun", "foos (plural of foo)", data, False, None
+            self.wxr,
+            "testpage",
+            "noun",
+            "foos (plural of foo)",
+            data,
+            False,
+            None,
         )
         self.assertEqual(self.wxr.wtp.warnings, [])
         self.assertEqual(self.wxr.wtp.debugs, [])
@@ -705,7 +771,13 @@ class HeadTests(unittest.TestCase):
         self.wxr.wtp.start_section("Latin")
         self.wxr.wtp.start_subsection("Noun")
         parse_word_head(
-            self.wxr, "testpage", "noun", "foo or baz (plural)", data, False, None
+            self.wxr,
+            "testpage",
+            "noun",
+            "foo or baz (plural)",
+            data,
+            False,
+            None,
         )
         # print(json.dumps(data, indent=2, sort_keys=True))
         self.assertEqual(
@@ -721,7 +793,9 @@ class HeadTests(unittest.TestCase):
         self.wxr.wtp.start_page("intueor")
         self.wxr.wtp.start_section("Latin")
         self.wxr.wtp.start_subsection("Noun")
-        parse_word_head(self.wxr, "testpage", "noun", "intueor (plural)", data, False, None)
+        parse_word_head(
+            self.wxr, "testpage", "noun", "intueor (plural)", data, False, None
+        )
         # print(json.dumps(data, indent=2, sort_keys=True))
         self.assertEqual(
             data,
@@ -1136,12 +1210,17 @@ class HeadTests(unittest.TestCase):
             ],
         )
 
-
     def test_head_title_with_semicolon(self):
         data = {}
         self.wxr.wtp.title = "test; page"
         parse_word_head(
-            self.wxr, "testpage", "noun", "test; page f, m, n", data, False, None
+            self.wxr,
+            "testpage",
+            "noun",
+            "test; page f, m, n",
+            data,
+            False,
+            None,
         )
         self.assertEqual(self.wxr.wtp.warnings, [])
         self.assertEqual(self.wxr.wtp.debugs, [])
@@ -1151,8 +1230,229 @@ class HeadTests(unittest.TestCase):
     def test_head_with_several_final_tags(self):
         data = {}
         parse_word_head(
-            self.wxr, "testpage", "noun", "testpage class III gender m ", data, False, None
+            self.wxr,
+            "testpage",
+            "noun",
+            "testpage class III gender m ",
+            data,
+            False,
+            None,
         )
         self.assertEqual(self.wxr.wtp.warnings, [])
         self.assertEqual(self.wxr.wtp.debugs, [])
         self.assertEqual(data, {"tags": ["class-iii", "masculine"]})
+
+    def test_head_link_collection_1(self):
+        # Collect form link data (or at least try to) if it's weird
+        self.wxr.wtp.start_page("testpage")
+        data = parse_page(
+            self.wxr,
+            "testpage",
+            """==Finnish==
+===Noun===
+'''testpage''', (feminine [[testpaga|testpagà]])
+# foo""",
+        )
+        expected = [
+            {
+                "form": "testpagà",
+                "links": [("testpagà", "testpaga")],
+                "tags": ["feminine"],
+            }
+        ]
+        self.assertEqual(len(data), 1)
+        self.assertIn("forms", data[0])
+        self.assertEqual(expected, data[0]["forms"])
+
+    def test_head_link_collection_2(self):
+        # Do not collect form link data that's not "weird"
+        self.wxr.wtp.start_page("testpage")
+        data = parse_page(
+            self.wxr,
+            "testpage",
+            """==Finnish==
+===Noun===
+'''testpage''', (feminine [[testpaga|testpaga]])
+# foo""",
+        )
+        expected = [
+            {
+                "form": "testpaga",
+                "tags": ["feminine"],
+            }
+        ]
+        self.assertEqual(len(data), 1)
+        self.assertIn("forms", data[0])
+        self.assertEqual(expected, data[0]["forms"])
+
+    def test_head_link_collection_3(self):
+        # Do not collect form link data that's not "weird"
+        self.wxr.wtp.start_page("testpage")
+        data = parse_page(
+            self.wxr,
+            "testpage",
+            """==Finnish==
+===Noun===
+'''testpage''', (feminine [[testpaga#foo|testpagà]])
+# foo""",
+        )
+        expected = [
+            {
+                "form": "testpagà",
+                "links": [("testpagà", "testpaga")],
+                "tags": ["feminine"],
+            }
+        ]
+        self.assertEqual(len(data), 1)
+        self.assertEqual(expected, data[0]["forms"])
+
+    def test_head_link_collection_4(self):
+        # Do not collect form link data that's not "weird"
+        self.wxr.wtp.start_page("testpage")
+        data = parse_page(
+            self.wxr,
+            "testpage",
+            """==Finnish==
+===Noun===
+'''testpage''', (feminine [[testpaga#foo|testpaga]])
+# foo""",
+        )
+        expected = [
+            {
+                "form": "testpaga",
+                "tags": ["feminine"],
+            }
+        ]
+        self.assertEqual(len(data), 1)
+        self.assertIn("forms", data[0])
+        self.assertEqual(expected, data[0]["forms"])
+
+    def test_head_link_collection_long_1(self):
+        # Collect multiple links if they match
+        self.wxr.wtp.start_page("testpage")
+        data = parse_page(
+            self.wxr,
+            "testpage",
+            """==Finnish==
+===Noun===
+'''testpage''', (feminine [[testpaga|testpagà]] [[foo]])
+# foo""",
+        )
+        expected = [
+            {
+                "form": "testpagà foo",
+                "links": [("testpagà", "testpaga"), ("foo", "foo")],
+                "tags": ["feminine"],
+            }
+        ]
+        self.assertEqual(len(data), 1)
+        self.assertIn("forms", data[0])
+        self.assertEqual(expected, data[0]["forms"])
+
+    def test_head_link_collection_long_2(self):
+        # Do not collect form link data that's not "weird"
+        self.wxr.wtp.start_page("testpage")
+        data = parse_page(
+            self.wxr,
+            "testpage",
+            """==Finnish==
+===Noun===
+'''testpage''', (feminine [[testpagà]] [[foo]])
+# foo""",
+        )
+        expected = [
+            {
+                "form": "testpagà foo",
+                "tags": ["feminine"],
+            }
+        ]
+        self.assertEqual(len(data), 1)
+        self.assertIn("forms", data[0])
+        self.assertEqual(expected, data[0]["forms"])
+
+    #     def test_head_link_collection_long_3(self):
+    #         # See if we can handle commas in forms
+    #         self.wxr.wtp.add_page(
+    #             "Template:en-noun",
+    #             10,
+    #             "[[big]], [[fat]], [[hairy]] [[deal]], "
+    #             "(plural [[bíg|big]], [[fat]], [[hairy]] [[deals]])",
+    #         )
+    #         self.wxr.wtp.start_page("big, fat, hairy deal")
+    #         self.wxr.wtp.start_section("English")
+    #         parsed = self.wxr.wtp.parse(
+    #         """==English==
+    # ====Noun====
+    # {{en-noun}}
+    # # test gloss
+    # """)
+    #         langret = parse_language(self.wxr, parsed.children[0], "English", "en")
+    #         print(langret)
+    #         self.assertEqual(self.wxr.wtp.warnings, [])
+    #         self.assertEqual(self.wxr.wtp.debugs, [])
+    #         print(langret[0])
+    #         self.assertEqual(
+    #             langret[0]["forms"][0],
+    #             {"tags": ["plural"], "form": "big, fat, hairy deals"},
+    #         )
+    #         self.AssertTrue(False)
+
+    def test_head_link_collection_long_4(self):
+        # No commas...
+        self.wxr.wtp.add_page(
+            "Template:en-noun",
+            10,
+            "[[big]] [[fat]] [[hairy]] [[deal]], "
+            "(plural [[foo|big]] [[fat]] [[hairy]] [[deals]], "
+            "paucal [[big]] [[fat]] [[hairy]] [[dealpaucal]],"
+            "genitive [[faa|big]] [[fat]] [[hairy]] [[dealiogen]])",
+        )
+        self.wxr.wtp.start_page("big fat hairy deal")
+        self.wxr.wtp.start_section("English")
+        parsed = self.wxr.wtp.parse(
+            """==English==
+====Noun====
+{{en-noun}}
+# test gloss
+"""
+        )
+        langret = parse_language(self.wxr, parsed.children[0], "English", "en")
+        # print(langret)
+        self.assertEqual(self.wxr.wtp.warnings, [])
+        self.assertEqual(self.wxr.wtp.debugs, [])
+        self.assertEqual(len(langret[0]["forms"]), 3)
+        plural, paucal, genitive = langret[0]["forms"]
+        self.assertEqual(
+            plural,
+            {
+                "tags": ["plural"],
+                "form": "big fat hairy deals",
+                "links": [
+                    ("big", "foo"),
+                    ("fat", "fat"),
+                    ("hairy", "hairy"),
+                    ("deals", "deals"),
+                ],
+            },
+        )
+        self.assertEqual(
+            paucal,
+            {
+                "tags": ["paucal"],
+                "form": "big fat hairy dealpaucal",
+                # Links are not weird
+            },
+        )
+        self.assertEqual(
+            genitive,
+            {
+                "tags": ["genitive"],
+                "form": "big fat hairy dealiogen",
+                "links": [
+                    ("big", "faa"),
+                    ("fat", "fat"),
+                    ("hairy", "hairy"),
+                    ("dealiogen", "dealiogen"),
+                ],
+            },
+        )

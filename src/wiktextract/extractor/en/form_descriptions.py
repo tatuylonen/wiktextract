@@ -1544,6 +1544,8 @@ def add_related(
     is_reconstruction: bool,
     head_group: Optional[int],
     ruby_data: Optional[Sequence[tuple[str, str]]] = None,
+    links: list[tuple[str, str]] | None = None,
+    link_dict: dict[str, list[str]] | None = None,
 ) -> Optional[list[tuple[str, ...]]]:
     """Internal helper function for some post-processing entries for related
     forms (e.g., in word head).  This returns a list of list of tags to be
@@ -1568,6 +1570,7 @@ def add_related(
     if is_reconstruction and related.startswith("*") and len(related) > 1:
         related = related[1:]
 
+    # print(f"{links=}, {link_dict=}")
     # Get title word, with any reconstruction prefix removed
     titleword = re.sub(r"^Reconstruction:[^/]*/", "", wxr.wtp.title)  # type:ignore[arg-type]
 
@@ -1637,7 +1640,7 @@ def add_related(
                     tagsets1, topics1 = decode_tags(paren)
     if related and related.startswith("{{"):
         wxr.wtp.debug(
-            "{{ in word head form - possible Wiktionary error: {!r}".format(
+            "`{{` in word head form - possible Wiktionary error: {!r}".format(
                 related
             ),
             sortid="form_descriptions/1177",
@@ -1715,6 +1718,16 @@ def add_related(
                     tags = list(tags1) + list(tags2) + list(final_tags)
                     check_related(related)
                     form: FormData = {"form": related}
+                    if (
+                        links
+                        and link_dict
+                        and (
+                            form_links := match_links_to_form(
+                                wxr, related, links, link_dict
+                            )
+                        )
+                    ):
+                        form["links"] = form_links
                     if head_group:
                         form["head_nr"] = head_group
                     if roman:
@@ -1768,6 +1781,53 @@ def add_related(
     return following_tagsets
 
 
+def match_links_to_form(
+    wxr: WiktextractContext,
+    form: str,
+    links: list[tuple[str, str]],
+    link_dict: dict[str, list[str]],
+) -> list[tuple[str, str]] | None:
+    if not links:
+        return None
+    ret: list[tuple[str, str]] = []
+    if form in link_dict:
+        if len(link_dict[form]) > 1:
+            wxr.wtp.warning(
+                f"{form=} has many different "
+                "link candidates `{link_dict[form]}`, "
+                "which can't be disambiguated.",
+                sortid="form_descriptions/match_links_to_form",
+            )
+        for ltarg in link_dict[form]:
+            ret.append((form, ltarg))
+    elif " " in form:
+        # split and search for a sequence of links...
+        split_forms = form.split()
+        found = False
+        for i, (ltext, ltarg) in enumerate(links):
+            if ltext == split_forms[0]:
+                for j, f in enumerate(split_forms):
+                    if i + j > len(links):
+                        break
+                    if f.strip(",;() ") != links[i + j][0].strip(",;() "):
+                        break
+                    if i + j == len(links):
+                        break
+                else:
+                    found = True
+            if found:
+                ret = links[i : i + len(split_forms)]
+                break
+    # We only care about weird links
+    # print(f"{len(ret)=}, {ret}")
+    for txt, tar in ret:
+        if txt != tar and txt != tar[ :tar.find("#")]:
+            break
+    else:
+        return None
+    return ret or None
+
+
 # Issue #967, in English word forms sometimes forms are skipped because
 # they are taggable words and their distw() is too big, like clipping from clip
 WORDS_WITH_FALSE_POSITIVE_TAGS: dict[str, list[str]] = {
@@ -1807,6 +1867,13 @@ def parse_word_head(
     head_group: Optional[int],
     original_header_nodes: list[WikiNode | str] | None = None,
     ruby=None,
+    links: list[
+        tuple[
+            str,
+            str,
+        ]
+    ]
+    | None = None,
 ) -> None:
     """Parses the head line for a word for in a particular language and
     part-of-speech, extracting tags and related forms."""
@@ -1820,13 +1887,25 @@ def parse_word_head(
     assert is_reconstruction in (True, False)
     # print("PARSE_WORD_HEAD: {}: {!r}".format(wxr.wtp.section, text))
     # print(f"PARSE_WORD_HEAD: {data=}")
+    # print(f"PARSE_WORD_HEAD: {links=}")
 
     # Save original text for if we want to look for mismatched form-links
     orig_text = text
 
-    links: list[tuple[str, str]] | None = None
+    link_dict: dict[str, list[str]] | None
+    if links is not None:
+        link_dict = {}
+        for ltxt, ltrg in links:
+            if ltxt not in link_dict:
+                link_dict[ltxt] = [
+                    ltrg,
+                ]
+            else:
+                link_dict[ltxt].append(ltrg)
+    else:
+        link_dict = None
 
-
+    # print(f"MAIN: {links=}")
     link_words_not_alnum = []
     if not word.isalnum():
         # `-` is kosher, add more of these if needed.
@@ -1836,13 +1915,14 @@ def parse_word_head(
             # if the word contains non-letter or -number characters, it
             # might have something that messes with split-at-semi-comma; we
             # collect links so that we can skip splitting them.
-            if original_header_nodes is not None:
+            if links is None and original_header_nodes is not None:
                 links, _ = extract_links_from_node(
                     wxr,
                     original_header_nodes,
                     remove_anchor_tags=True,
                     expand_nodes=True,
                 )
+            if links is not None:
                 for ltext, ltar in links:
                     if not ltext.isalnum():
                         link_words_not_alnum.append(ltext)
@@ -1892,6 +1972,8 @@ def parse_word_head(
             is_reconstruction,
             head_group,
             ruby,
+            links,
+            link_dict,
         )
         text = text[: m.start()] + text[m.end() :]
 
@@ -1960,6 +2042,8 @@ def parse_word_head(
                 is_reconstruction,
                 head_group,
                 ruby,
+                links,
+                link_dict,
             )
         return
 
@@ -1976,6 +2060,8 @@ def parse_word_head(
             is_reconstruction,
             head_group,
             ruby,
+            links,
+            link_dict,
         )
         base = base[: m.start()] + base[m.end() :]
 
@@ -2084,6 +2170,8 @@ def parse_word_head(
                 is_reconstruction,
                 head_group,
                 ruby,
+                links,
+                link_dict,
             )
             continue
         # For non-first parts, see if it can be treated as tags-only
@@ -2138,6 +2226,8 @@ def parse_word_head(
             is_reconstruction,
             head_group,
             ruby,
+            links,
+            link_dict,
         )
 
     # Handle parenthesized descriptors for the word form and links to
@@ -2203,6 +2293,8 @@ def parse_word_head(
                     is_reconstruction,
                     head_group,
                     ruby,
+                    links,
+                    link_dict,
                 )
             return ", "
 
@@ -2250,6 +2342,8 @@ def parse_word_head(
                         is_reconstruction,
                         head_group,
                         ruby,
+                        links,
+                        link_dict,
                     )
                     continue
             except ValueError:
@@ -2277,6 +2371,8 @@ def parse_word_head(
                         is_reconstruction,
                         head_group,
                         ruby,
+                        links,
+                        link_dict,
                     )
                 desc = " ".join(splitdesc[1:])
             elif (
@@ -2298,6 +2394,8 @@ def parse_word_head(
                         is_reconstruction,
                         head_group,
                         ruby,
+                        links,
+                        link_dict,
                     )
                 continue
             elif len(splitdesc) >= 2 and splitdesc[0] in ("including",):
@@ -2321,6 +2419,8 @@ def parse_word_head(
                                 is_reconstruction,
                                 head_group,
                                 ruby,
+                                links,
+                                link_dict,
                             )
                         continue
                     elif distw(titleparts, desc) <= 0.5:
@@ -2336,6 +2436,8 @@ def parse_word_head(
                             is_reconstruction,
                             head_group,
                             ruby,
+                            links,
+                            link_dict,
                         )
                         continue
                     elif (
@@ -2372,6 +2474,8 @@ def parse_word_head(
                     is_reconstruction,
                     head_group,
                     ruby,
+                    links,
+                    link_dict,
                 )
                 continue
 
@@ -2401,6 +2505,8 @@ def parse_word_head(
                     is_reconstruction,
                     head_group,
                     ruby,
+                    links,
+                    link_dict,
                 )
                 prev_tags = None
                 following_tags = None
@@ -2447,6 +2553,8 @@ def parse_word_head(
                     is_reconstruction,
                     head_group,
                     ruby,
+                    links,
+                    link_dict,
                 )
                 prev_tags = None
                 following_tags = None
@@ -2466,6 +2574,8 @@ def parse_word_head(
                     is_reconstruction,
                     head_group,
                     ruby,
+                    links,
+                    link_dict,
                 )
                 continue
 
@@ -2500,6 +2610,8 @@ def parse_word_head(
                             is_reconstruction,
                             head_group,
                             ruby,
+                            links,
+                            link_dict,
                         )
                         new_prev_tags1.append(tags)
                     prev_tags = new_prev_tags1
@@ -2714,6 +2826,8 @@ def parse_word_head(
                                     is_reconstruction,
                                     head_group,
                                     ruby,
+                                    links,
+                                    link_dict,
                                 )
                     else:
                         # Not merged with previous tags
@@ -2733,6 +2847,8 @@ def parse_word_head(
                                         is_reconstruction,
                                         head_group,
                                         ruby,
+                                        links,
+                                        link_dict,
                                     )
                             else:
                                 ret = add_related(
@@ -2745,6 +2861,8 @@ def parse_word_head(
                                     is_reconstruction,
                                     head_group,
                                     ruby,
+                                    links,
+                                    link_dict,
                                 )
                                 if ret is not None:
                                     following_tags = ret

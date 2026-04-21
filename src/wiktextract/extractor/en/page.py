@@ -1531,6 +1531,7 @@ def parse_language(
                     header_tags.clear()
                     header_topics.clear()
 
+                # print(f"{pre1=}")
                 process_gloss_header(
                     pre1, pos, head_group, pos_data, header_tags, header_topics
                 )
@@ -1661,8 +1662,22 @@ def parse_language(
                 header_nodes = new_header_nodes
 
         header_text = clean_node(
-            wxr, pos_data, header_nodes, post_template_fn=head_post_template_fn
+            wxr,
+            pos_data,
+            header_nodes,
+            post_template_fn=head_post_template_fn,
+            collect_links=True,
+            remove_anchors_from_links=True,
         )
+        if "links" in pos_data:
+            # WordData doesn't use `links`, so we can use `collect_links`
+            # here without special handling and smuggle link data.
+            extracted_links = pos_data["links"]  # type: ignore
+            del pos_data["links"]  # type: ignore
+        else:
+            extracted_links = None
+        # print(f"{header_text=}, {extracted_links=}")
+
         header_text = re.sub(r"\s+", " ", header_text).strip()
 
         if not header_text:
@@ -1699,6 +1714,7 @@ def parse_language(
             header_group,
             header_nodes,
             ruby=ruby,
+            links=extracted_links,
         )
         if "tags" in pos_data:
             # pos_data can get "tags" data from some source; type-checkers
