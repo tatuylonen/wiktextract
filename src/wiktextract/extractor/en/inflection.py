@@ -8,7 +8,7 @@ import functools
 import html
 import re
 import unicodedata
-from typing import Generator, Optional, Union
+from typing import TYPE_CHECKING, Generator, Literal, Optional, Union
 
 from mediawiki_langcodes import code_to_name, name_to_code
 from wikitextprocessor import MAGIC_FIRST, HTMLNode, NodeKind, WikiNode
@@ -27,7 +27,7 @@ from .inflection_kludges import ka_decl_noun_template_cell
 from .inflectiondata import infl_map, infl_start_map, infl_start_re
 from .lang_specific_configs import get_lang_conf, lang_specific_tags
 from .table_headers_heuristics_data import LANGUAGES_WITH_CELLS_AS_HEADERS
-from .type_utils import FormData
+from .type_utils import FormData, WordData
 
 # --debug-text-cell WORD
 # Command-line parameter for debugging. When parsing inflection tables,
@@ -1029,11 +1029,11 @@ def expand_header(
 def compute_coltags(
     lang: str,
     pos: str,
-    hdrspans: list[str],
+    hdrspans: list[HdrSpan],
     start: int,
     colspan: int,
-    celltext: int,
-) -> list[tuple[str]]:
+    celltext: str,
+) -> list[tuple[str, ...]]:
     """Computes column tags for a column of the given width based on the
     current header spans."""
     assert isinstance(lang, str)
@@ -1061,11 +1061,11 @@ def compute_coltags(
                 )
             )
     used = set()
-    coltags = [()]
+    coltags: list[tuple[str, ...]] = [()]
     last_header_row = 1000000
     # Iterate through the headers in reverse order, i.e., headers lower in the
     # table (closer to the cell) first.
-    row_tagsets = [()]
+    row_tagsets: list[tuple[str, ...]] = [()]
     row_tagsets_rownum = 1000000
     used_hdrspans = set()
     for hdrspan in reversed(hdrspans):
@@ -1409,8 +1409,17 @@ def compute_coltags(
 
 
 def parse_simple_table(
-    wxr, tablecontext, word, lang, pos, rows, titles, source, after, depth
-):
+    wxr: WiktextractContext,
+    tablecontext: "TableContext",
+    word: str,
+    lang: str,
+    pos: str,
+    rows: list[list[InflCell]],
+    titles: list[str],
+    source: str,
+    after: str,
+    depth: int,
+) -> list[FormData]:
     """This is the default table parser.  Despite its name, it can parse
     complex tables.  This returns a list of forms to be added to the
     part-of-speech, or None if the table could not be parsed."""
@@ -1424,8 +1433,8 @@ def parse_simple_table(
     assert isinstance(after, str)
     assert isinstance(depth, int)
     for row in rows:
-        for col in row:
-            assert isinstance(col, InflCell)
+        for cell in row:
+            assert isinstance(cell, InflCell)
     assert isinstance(titles, list)
     for x in titles:
         assert isinstance(x, str)
@@ -1513,13 +1522,13 @@ def parse_simple_table(
             def_ht[ref] = tags1
 
     def generate_tags(
-        rowtags: list[tuple[str]], table_tags: list[str]
+        rowtags: list[tuple[str, ...]], table_tags: list[str]
     ) -> tuple[
         list[tuple[str, ...]], list[tuple[str, ...]], list[tuple[str, ...]]
     ]:
-        new_coltags = []
-        all_hdr_tags = []  # list of tuples
-        new_rowtags = []
+        new_coltags: list[tuple[str, ...]] = []
+        all_hdr_tags: list[tuple[str, ...]] = []  # list of tuples
+        new_rowtags: list[tuple[str, ...]] = []
         for rt0 in rowtags:
             for ct0 in compute_coltags(
                 lang,
@@ -1530,10 +1539,7 @@ def parse_simple_table(
                 col,  # cell_text
             ):
                 base_tags: set[str] = (
-                    set(rt0)
-                    | set(ct0)
-                    | set(global_tags)
-                    | set(table_tags)
+                    set(rt0) | set(ct0) | set(global_tags) | set(table_tags)
                 )  # Union.
                 # print(f"{rt0=}, {ct0=}, {global_tags=},"
                 #       f" {table_tags=}, {base_tags=}")
@@ -1941,8 +1947,11 @@ def parse_simple_table(
         return form, extra_tags
 
     def handle_parens(
-        form: str, roman: str, clitic: str, extra_tags: list[str]
-    ) -> tuple[str, str, str]:
+        form: str, roman: str, clitic: str | None, extra_tags: list[str]
+    ) -> tuple[str, str, str | None]:
+        if TYPE_CHECKING:
+            assert isinstance(paren, str)
+            assert isinstance(m, re.Match)
         if re.match(r"[’'][a-z]([a-z][a-z]?)?$", paren):
             # is there a clitic starting with apostrophe?
             clitic = paren
@@ -1974,7 +1983,9 @@ def parse_simple_table(
             form = (form[: m.start()] + subst + form[m.end() :]).strip()
         return form, roman, clitic
 
-    def merge_row_and_column_tags(form, some_has_covered_text):
+    def merge_row_and_column_tags(
+        form: str, some_has_covered_text: bool
+    ) -> tuple[list[FormData], str, bool]:
         # Merge column tags and row tags.  We give preference
         # to moods etc coming from rowtags (cf. austteigen/German/Verb
         # imperative forms).
@@ -1984,7 +1995,7 @@ def parse_simple_table(
         # we replace certain tags with others if they're in
         # a column or row
 
-        ret = []
+        ret: list[FormData] = []
         # rtagreplacs = get_lang_conf(lang, "rowtag_replacements")
         # ctagreplacs = get_lang_conf(lang, "coltag_replacements")
         for rt in sorted(rowtags):
@@ -2181,8 +2192,12 @@ def parse_simple_table(
                     continue
 
                 # Add the form
-                tags = list(sorted(tags))
-                dt = {"form": form, "tags": tags, "source": source}
+                tags_list = list(sorted(tags))
+                dt: FormData = {
+                    "form": form,
+                    "tags": tags_list,
+                    "source": source,
+                }
                 if roman:
                     dt["roman"] = roman
                 if ipa:
@@ -2192,7 +2207,7 @@ def parse_simple_table(
                 if clitic:
                     dt = {
                         "form": clitic,
-                        "tags": tags + ["clitic"],
+                        "tags": tags_list + ["clitic"],
                         "source": source,
                     }
                     ret.append(dt)
@@ -2213,7 +2228,7 @@ def parse_simple_table(
 
     # Then extract the actual forms
     ret = []
-    hdrspans = []
+    hdrspans: list[HdrSpan] = []
     first_col_has_text = False
     rownum = 0
     title = None
@@ -2232,7 +2247,9 @@ def parse_simple_table(
         global_tags.extend(more_global_tags)
         table_tags.extend(more_table_tags)
         ret.extend(extra_forms)
-    cell_rowcnt = collections.defaultdict(int)
+    cell_rowcnt: collections.defaultdict[int, int] = collections.defaultdict(
+        int
+    )
     seen_cells = set()
     has_covering_hdr = set()
     some_has_covered_text = False
@@ -2287,7 +2304,7 @@ def parse_simple_table(
             continue  # Skip title rows without incrementing i
         if "dummy-skip-this" in global_tags:
             return []
-        rowtags = [()]
+        rowtags: list[tuple[str, ...]] = [()]
         # have_hdr = False
         # have_hdr never used?
         have_text = False
@@ -2315,7 +2332,7 @@ def parse_simple_table(
             # defaultdict(int) around line 1900
             cell_rowcnt[id(cell)] += 1
             # => how many cols this spans
-            col = cell.text
+            col: str = cell.text
             if not col:
                 continue
             row_empty = False
@@ -2330,7 +2347,7 @@ def parse_simple_table(
                 )
                 if not text:
                     continue
-                refs_tags = set()
+                refs_tags: set[str] = set()
                 for ref in refs:  # gets tags from footnotes
                     if ref in def_ht:
                         refs_tags.update(def_ht[ref])
@@ -2409,7 +2426,7 @@ def parse_simple_table(
                         tablecontext.section_header = tt
                         break
                     if "dummy-reset-section-header" in tt:
-                        tablecontext.section_header = []
+                        tablecontext.section_header = tuple()
                 # Text between headers on a row causes earlier headers to
                 # be reset
                 if have_text:
@@ -2433,6 +2450,8 @@ def parse_simple_table(
                 # resetted inside the col_idx-loops OR the bigger rows-loop, so
                 # applies to the whole table.
 
+                new_coltags: list[tuple[str, ...]]
+                all_hdr_tags: list[tuple[str, ...]]
                 rowtags, new_coltags, all_hdr_tags = generate_tags(
                     rowtags, table_tags
                 )
@@ -2521,15 +2540,18 @@ def parse_simple_table(
 
             # Some cells have mixed form content, like text and romanization,
             # or text and IPA. Handle these.
-            alts = handle_mixed_lines(alts)
+            altss = handle_mixed_lines(alts)
 
-            alts = list((x, combined_coltags) for x in alts)
+            altsss = list((x, combined_coltags) for x in altss)
 
             # Generate forms from the alternatives
             # alts is a list of (tuple of forms, tuple of tags)
-            for (form, base_roman, ipa), coltags in alts:
+            coltags: list[tuple[str, ...]]
+            base_roman: str
+            ipa: str
+            for (form, base_roman, ipa), coltags in altsss:
                 form = form.strip()
-                extra_tags = []
+                extra_tags: list[str] = []
                 extra_tags.extend(split_extra_tags)
                 # Handle special splits again here, so that we can have custom
                 # mappings from form to form and tags.
@@ -2547,9 +2569,10 @@ def parse_simple_table(
                 # in form using regex patterns
                 # this does a bit of the same stuff the above does,
                 # but with regexes and re.sub() instead
+                subst: str
                 for (
                     form_transformations_pos,
-                    v,
+                    vv,
                     subst,
                     tags,
                 ) in form_transformations:
@@ -2562,7 +2585,7 @@ def parse_simple_table(
                         and pos not in form_transformations_pos
                     ):
                         continue
-                    m = re.search(v, form)
+                    m: re.Match | None = re.search(vv, form)
                     if m is not None:
                         if base_roman:
                             for _, rom_v, rom_sub, _ in form_transformations:
@@ -2572,7 +2595,7 @@ def parse_simple_table(
                                         rom_v, rom_sub, base_roman
                                     )
                                     break
-                        form = re.sub(v, subst, form)
+                        form = re.sub(vv, subst, form)
                         for x in tags.split():
                             assert x in valid_tags
                         extra_tags.extend(tags.split())
@@ -2599,14 +2622,14 @@ def parse_simple_table(
                         # need to handle that here too....
                         for (
                             _,
-                            v,
+                            vv,
                             subst,
                             _,
                         ) in form_transformations:
                             # v is a pattern string, like "^ich"
-                            m = re.search(v, base_roman)
+                            m = re.search(vv, base_roman)
                             if m is not None:
-                                base_roman = re.sub(v, subst, base_roman)
+                                base_roman = re.sub(vv, subst, base_roman)
                                 # XXX add tag stuff here if needed
                                 break
 
@@ -2629,9 +2652,9 @@ def parse_simple_table(
 
                 # Handle parentheses in the table element.  We parse
                 # tags anywhere and romanizations anywhere but beginning.
-                roman = base_roman
-                paren = None
-                clitic = None
+                roman: str = base_roman
+                paren: str | None = None
+                clitic: str | None = None
                 m = re.search(r"(\s+|^)\(([^)]*)\)", form)
                 # start|spaces + (anything)
                 if m is not None:
@@ -2729,7 +2752,7 @@ def parse_simple_table(
         "noun" in x["tags"] for x in ret
     ):
         new_ret = []
-        saved_tags = set()
+        saved_tags: set[str] = set()
         had_noun = False
         for dt in ret:
             tags = dt["tags"]
@@ -2831,7 +2854,7 @@ def parse_simple_table(
         if dt["form"] == "":
             dt["form"] = "no-table-tags"
         if tablecontext.template_name:
-            tn = {
+            tn: FormData = {
                 "form": tablecontext.template_name,
                 "source": source,
                 "tags": ["inflection-template"],
@@ -2844,8 +2867,18 @@ def parse_simple_table(
 
 
 def handle_generic_table(
-    wxr, tablecontext, data, word, lang, pos, rows, titles, source, after, depth
-):
+    wxr: WiktextractContext,
+    tablecontext: "TableContext",
+    data: WordData,
+    word: str,
+    lang: str,
+    pos: str,
+    rows: list[list[InflCell]],
+    titles: list[str],
+    source: str,
+    after: str,
+    depth: int,
+) -> None:
     assert isinstance(wxr, WiktextractContext)
     assert isinstance(data, dict)
     assert isinstance(word, str)
@@ -2860,8 +2893,8 @@ def handle_generic_table(
         for x in row:
             assert isinstance(x, InflCell)
     assert isinstance(titles, list)
-    for x in titles:
-        assert isinstance(x, str)
+    for s in titles:
+        assert isinstance(s, str)
 
     # Try to parse the table as a simple table
     ret = parse_simple_table(
@@ -2901,27 +2934,32 @@ def handle_generic_table(
 
 
 def determine_header(
-    wxr,
+    wxr: WiktextractContext,
     tablecontext,
-    lang,
-    word,
-    pos,
-    table_kind,
-    kind,
-    style,
-    row,
-    col,
-    celltext,
-    titletext,
-    cols_headered,
-    target,
-    cellstyle,
-):
+    lang: str,
+    word: str,
+    pos: str,
+    table_kind: NodeKind,
+    kind: NodeKind | str,
+    style: str | None,
+    row: list[InflCell],
+    col: WikiNode,
+    celltext: str,
+    titletext: str,
+    cols_headered: list[bool],
+    target: str | None,
+    cellstyle: str,
+    # is_title,
+    # hdr_expansion,
+    # target,
+    # celltext,
+) -> tuple[bool, list[tuple[str, ...]], str | None, str]:
     assert isinstance(table_kind, NodeKind)
     assert isinstance(kind, (NodeKind, str))
     assert style is None or isinstance(style, str)
     assert cellstyle is None or isinstance(cellstyle, str)
 
+    header_kind: NodeKind | str
     if table_kind == NodeKind.TABLE:
         header_kind = NodeKind.TABLE_HEADER_CELL
     elif table_kind == NodeKind.HTML:
@@ -3103,10 +3141,10 @@ class TableContext:
         "template_name",
     )
 
-    def __init__(self, template_name=None):
-        self.stored_hdrspans = []
-        self.section_header = []
-        if not template_name:
+    def __init__(self, template_name: str | None = None) -> None:
+        self.stored_hdrspans: list[HdrSpan] = []
+        self.section_header: tuple[str, ...] = tuple()
+        if template_name is None:
             self.template_name = ""
         else:
             self.template_name = template_name
@@ -3117,11 +3155,11 @@ def handle_wikitext_or_html_table(
     word: str,
     lang: str,
     pos: str,
-    data,
-    tree,
-    titles,
-    source,
-    after,
+    data: WordData,
+    tree: WikiNode,
+    titles: list[str],
+    source: str,
+    after: str,
     tablecontext: TableContext | None = None,
 ):
     """Parses a table from parsed Wikitext format into rows and columns of
@@ -3153,9 +3191,7 @@ def handle_wikitext_or_html_table(
         tablecontext = TableContext()
 
     # Get language specific text removal patterns
-    remove_text_patterns: (
-        dict[tuple[str, ...], tuple[str | re.Pattern, ...]] | None
-    ) = None
+    remove_text_patterns: tuple[str | re.Pattern, ...] | None = None
     if rem := get_lang_conf(lang, "remove_text_patterns"):
         for poses in rem.keys():
             if pos in poses:
@@ -3163,18 +3199,19 @@ def handle_wikitext_or_html_table(
                 break
 
     def handle_table1(
-        wxr,
-        tablecontext,
-        word,
-        lang,
-        pos,
-        data,
-        tree,
-        titles,
-        source,
-        after,
-        depth,
-    ):
+        wxr: WiktextractContext,
+        tablecontext: TableContext,
+        word: str,
+        lang: str,
+        pos: str,
+        data: WordData,
+        tree: WikiNode,
+        titles: list[str],
+        source: str,
+        after: str,
+        depth: int,
+    ) -> list[tuple[list[list[InflCell]], list[str], str, int]]:
+        # rows, titles, after, depth
         """Helper function allowing the 'flattening' out of the table
         recursion: instead of handling the tables in the wrong order
         (recursively), this function adds to new_row that is then
@@ -3190,15 +3227,15 @@ def handle_wikitext_or_html_table(
         assert isinstance(depth, int)
         # print("HANDLE_WIKITEXT_TABLE", titles)
 
-        col_gap_data = []  # Filling for columns with rowspan > 1
-        # col_gap_data contains None or InflCell
-        vertical_still_left = []  # Number of remaining rows for which to fill
-        # the column; vertical_still_left contains int
-        cols_headered = []  # [F, T, F, F...]
+        # Filling for columns with rowspan > 1
+        col_gap_data: list[InflCell | None] = []
+        # Number of remaining rows for which to fill the column
+        vertical_still_left: list[int] = []
+        cols_headered: list[bool] = []  # [F, T, F, F...]
         # True when the whole column contains headers, even
         # when the cell is not considered a header; triggered
         # by the "*" inflmap meta-tag.
-        rows = []
+        rows: list[list[InflCell]] = []
 
         sub_ret = []
 
@@ -3207,6 +3244,7 @@ def handle_wikitext_or_html_table(
         for node in tree.children:
             if not isinstance(node, WikiNode):
                 continue
+            kind: NodeKind | str
             if node.kind == NodeKind.HTML:
                 kind = node.sarg
             else:
@@ -3231,7 +3269,7 @@ def handle_wikitext_or_html_table(
                 # continue
 
                 # Parse a table row.
-                row = []
+                row: list[InflCell] = []
                 style = None
                 row_has_nonempty_cells = False
                 # Have nonempty cell not from rowspan
@@ -3270,7 +3308,15 @@ def handle_wikitext_or_html_table(
                         # "None" cells, only emptiness between, and rowspan and
                         # colspan are just to generate the "fill-
                         vertical_still_left[len(row)] -= 1
-                        row.append(col_gap_data[len(row)])
+
+                        # KJ Apr 2026
+                        # type checking is ignored; I am pretty sure that
+                        # row will never contain None, even if col_gap_data
+                        # is `InflCell | None`, but this code is such
+                        # spaghetti that it's hard to figure out, except
+                        # by the process of elimination: this has never
+                        # caused trouble before, ergo, it works.
+                        row.append(col_gap_data[len(row)])  # type: ignore
 
                         # appending row is how "indexing" is
                         # done here; something is appended,
@@ -3343,7 +3389,7 @@ def handle_wikitext_or_html_table(
                             lang,
                             pos,
                             data,
-                            tbl,
+                            tbl,  # type: ignore
                             new_titles,
                             source,
                             "",
@@ -3456,7 +3502,7 @@ def handle_wikitext_or_html_table(
                     vertical_still_left[i] -= 1
                     while len(row) < i:
                         row.append(InflCell("", False, 1, 1, None))
-                    row.append(col_gap_data[i])
+                    row.append(col_gap_data[i])  # type: ignore
                 # print("  ROW {!r}".format(row))
                 if row_has_nonempty_cells:
                     rows.append(row)
@@ -3531,8 +3577,17 @@ def get_table_cells(node: WikiNode) -> Generator[WikiNode, None, None]:
 
 
 def handle_html_table(
-    wxr, word, lang, pos, data, tree, titles, source, after, tablecontext=None
-):
+    wxr: WiktextractContext,
+    word: str,
+    lang: str,
+    pos: str,
+    data: WordData,
+    tree: WikiNode,
+    titles: list[str],
+    source: str,
+    after: str,
+    tablecontext: TableContext | None = None,
+) -> None:
     """A passer-on function for html-tables, XXX, remove these?"""
     handle_wikitext_or_html_table(
         wxr, word, lang, pos, data, tree, titles, source, after, tablecontext
@@ -3540,8 +3595,17 @@ def handle_html_table(
 
 
 def handle_wikitext_table(
-    wxr, word, lang, pos, data, tree, titles, source, after, tablecontext=None
-):
+    wxr: WiktextractContext,
+    word: str,
+    lang: str,
+    pos: str,
+    data: WordData,
+    tree: WikiNode,
+    titles: list[str],
+    source: str,
+    after: str,
+    tablecontext: TableContext | None = None,
+) -> None:
     """A passer-on function for html-tables, XXX, remove these?"""
     handle_wikitext_or_html_table(
         wxr, word, lang, pos, data, tree, titles, source, after, tablecontext
@@ -3549,8 +3613,15 @@ def handle_wikitext_table(
 
 
 def parse_inflection_section(
-    wxr, data, word, lang, pos, section, tree, tablecontext=None
-):
+    wxr: WiktextractContext,
+    data: WordData,
+    word: str,
+    lang: str,
+    pos: str,
+    section: str,
+    tree: WikiNode,
+    tablecontext: TableContext | None = None,
+) -> None:
     """Parses an inflection section on a page.  ``data`` should be the
     data for a part-of-speech, and inflections will be added to it."""
 
@@ -3564,17 +3635,19 @@ def parse_inflection_section(
     assert isinstance(tree, WikiNode)
     assert tablecontext is None or isinstance(tablecontext, TableContext)
     source = section
-    tables = []
-    titleparts = []
+    tables: list[
+        tuple[Literal["html", "wikitext"], WikiNode, list[str], list[str]]
+    ] = []
+    titleparts: list[str] = []
     preceding_bolded_title = ""
 
     # from wikitextprocessor.parser import print_tree
     # print_tree(tree)
     # print("--------------******************----------------")
 
-    def process_tables():
-        for kind, node, titles, after in tables:
-            after = "".join(after).strip()
+    def process_tables() -> None:
+        for kind, node, titles, after_l in tables:
+            after = "".join(after_l).strip()
             after = clean_value(wxr, after)
             if kind == "wikitext":
                 handle_wikitext_table(
@@ -3607,7 +3680,7 @@ def parse_inflection_section(
                     "{}: unimplemented table kind {}".format(word, kind)
                 )
 
-    def recurse_navframe(node, titles):
+    def recurse_navframe(node: WikiNode | str, titles: list[str]) -> None:
         nonlocal tables
         nonlocal titleparts
         titleparts = []
@@ -3619,7 +3692,14 @@ def parse_inflection_section(
         process_tables()
         tables = old_tables
 
-    def recurse(node, titles, navframe=False):
+    def recurse(
+        node: WikiNode
+        | str
+        | list[WikiNode | str]
+        | list[list[WikiNode | str]],
+        titles: list[str],
+        navframe=False,
+    ) -> None:
         nonlocal tables
         if isinstance(node, (list, tuple)):
             for x in node:
@@ -3660,13 +3740,13 @@ def parse_inflection_section(
                     return
         else:
             if kind == NodeKind.TABLE:
-                tables.append(["wikitext", node, titles, []])
+                tables.append(("wikitext", node, titles, []))
                 return
             elif kind == NodeKind.HTML and node.sarg == "table":
-                classes = node.attrs.get("class", ())
-                if "audiotable" in classes:
+                htmlclasses = node.attrs.get("class", ())
+                if "audiotable" in htmlclasses:
                     return
-                tables.append(["html", node, titles, []])
+                tables.append(("html", node, titles, []))
                 return
             elif kind in (
                 NodeKind.LEVEL2,

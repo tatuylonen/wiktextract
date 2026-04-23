@@ -19,7 +19,8 @@ LangConfDict = TypedDict(
         "definitenesses": list[str],
         "empty_row_resets": bool,
         "form_transformations": list[
-            list[tuple[str, ...] | str]
+            # POS, pattern, replacement, tags
+            tuple[str, str, str, str]
         ],  # tag extraction, lang_specific_tags()
         "genders": Optional[list[str]],
         "imperative_no_tense": bool,
@@ -66,6 +67,8 @@ LangConfDict = TypedDict(
         # Cells to ignore in this language, unless the cell has the key
         # as a tag.
         "conditionally_ignored_cells": dict[str, list[str]],
+        # dictionary, with the key being a tuple of POS strings so that
+        # nouns can have different remove patterns from verbs, etc.
         "remove_text_patterns": dict[
             tuple[str, ...], tuple[str | re.Pattern, ...]
         ]
@@ -312,24 +315,24 @@ lang_specific: dict[str, LangConfDict] = {
     "English": {
         "stop_non_finite_tense": True,  # affect/English/Verb
         "form_transformations": [
-            ["verb", r"^\(to\) ", "", ""],
-            ["verb", "^to ", "", ""],
-            ["verb", r"^I ", "", "first-person singular"],
-            ["verb", r"^you ", "", "second-person"],
-            ["verb", r"^he ", "", "third-person singular"],
-            ["verb", r"^we ", "", "first-person plural"],
-            ["verb", r"^they ", "", "third-person"],
-            ["verb", r"^it ", "", "third-person singular"],
-            ["verb", r"^thou ", "", "second-person singular"],
-            ["verb", r"^ye ", "", "second-person plural"],
-            ["verb", r" \(thou\)$", "", "second-person singular"],
-            ["verb", r" \(ye\)$", "", "second-person plural"],
-            ["verb", r"^he/she/it ", "", "third-person singular"],
-            ["verb", r"^he/she/it/they ", "", "third-person singular"],
-            ["verb", r"\bhim/her/it/them ", "", "third-person singular"],
-            ["verb", r"\bthem ", "", "third-person"],
-            ["verb", r"\bus ", "", "first-person plural"],
-            ["verb", r"\bme ", "", "first-person singular"],
+            ("verb", r"^\(to\) ", "", ""),
+            ("verb", "^to ", "", ""),
+            ("verb", r"^I ", "", "first-person singular"),
+            ("verb", r"^you ", "", "second-person"),
+            ("verb", r"^he ", "", "third-person singular"),
+            ("verb", r"^we ", "", "first-person plural"),
+            ("verb", r"^they ", "", "third-person"),
+            ("verb", r"^it ", "", "third-person singular"),
+            ("verb", r"^thou ", "", "second-person singular"),
+            ("verb", r"^ye ", "", "second-person plural"),
+            ("verb", r" \(thou\)$", "", "second-person singular"),
+            ("verb", r" \(ye\)$", "", "second-person plural"),
+            ("verb", r"^he/she/it ", "", "third-person singular"),
+            ("verb", r"^he/she/it/they ", "", "third-person singular"),
+            ("verb", r"\bhim/her/it/them ", "", "third-person singular"),
+            ("verb", r"\bthem ", "", "third-person"),
+            ("verb", r"\bus ", "", "first-person plural"),
+            ("verb", r"\bme ", "", "first-person singular"),
         ],
         "form_replacements": {
             "let’s be": ["let's be", "first-person plural pronoun-included"],
@@ -392,57 +395,57 @@ lang_specific: dict[str, LangConfDict] = {
     "German": {
         "next": "german-group",
         "form_transformations": [
-            ["verb", "^ich ", "", "first-person singular"],
-            ["verb", "^du ", "", "second-person singular"],
-            ["verb", "^er ", "", "third-person singular"],
-            ["verb", "^wir ", "", "first-person plural"],
-            ["verb", "^ihr ", "", "second-person plural"],
-            ["verb", "^sie ", "", "third-person plural"],
-            [
+            ("verb", "^ich ", "", "first-person singular"),
+            ("verb", "^du ", "", "second-person singular"),
+            ("verb", "^er ", "", "third-person singular"),
+            ("verb", "^wir ", "", "first-person plural"),
+            ("verb", "^ihr ", "", "second-person plural"),
+            ("verb", "^sie ", "", "third-person plural"),
+            (
                 "verb",
                 "^dass ich ",
                 "",
                 "first-person singular subordinate-clause",
-            ],
-            [
+            ),
+            (
                 "verb",
                 "^dass du ",
                 "",
                 "second-person singular subordinate-clause",
-            ],
-            [
+            ),
+            (
                 "verb",
                 "^dass er ",
                 "",
                 "third-person singular subordinate-clause",
-            ],
-            [
+            ),
+            (
                 "verb",
                 "^dass wir ",
                 "",
                 "first-person plural subordinate-clause",
-            ],
-            [
+            ),
+            (
                 "verb",
                 "^dass ihr ",
                 "",
                 "second-person plural subordinate-clause",
-            ],
-            [
+            ),
+            (
                 "verb",
                 "^dass sie ",
                 "",
                 "third-person plural subordinate-clause",
-            ],
-            ["verb", r" \(du\)$", "", "second-person singular"],
-            ["verb", r" \(ihr\)$", "", "second-person plural"],
-            ["adj", "^er ist ", "", "masculine singular"],
-            ["adj", "^sie ist ", "", "feminine singular"],
-            ["adj", "^es ist ", "", "neuter singular"],
-            ["adj", "^sie sind ", "", "plural"],
-            ["adj", "^keine ", "keine ", "negative"],
-            ["adj", "^keiner ", "keiner ", "negative"],
-            ["adj", "^keinen ", "keinen ", "negative"],
+            ),
+            ("verb", r" \(du\)$", "", "second-person singular"),
+            ("verb", r" \(ihr\)$", "", "second-person plural"),
+            ("adj", "^er ist ", "", "masculine singular"),
+            ("adj", "^sie ist ", "", "feminine singular"),
+            ("adj", "^es ist ", "", "neuter singular"),
+            ("adj", "^sie sind ", "", "plural"),
+            ("adj", "^keine ", "keine ", "negative"),
+            ("adj", "^keiner ", "keiner ", "negative"),
+            ("adj", "^keinen ", "keinen ", "negative"),
         ],
         "conditionally_ignored_cells": {
             "definite": [
@@ -530,7 +533,7 @@ lang_specific: dict[str, LangConfDict] = {
         "hdr_expand_first": set(["mood", "tense"]),
         "hdr_expand_cont": set(["person", "register", "number", "misc"]),
         "form_transformations": [
-            ["verb", "^non ", "", "negative"],
+            ("verb", "^non ", "", "negative"),
         ],
     },
     "Irish": {
@@ -752,7 +755,7 @@ lang_specific: dict[str, LangConfDict] = {
     "Spanish": {
         "next": "romance-group",
         "form_transformations": [
-            ["verb", "^no ", "", "negative"],
+            ("verb", "^no ", "", "negative"),
         ],
         "special_references": {
             "vos": "informal vos-form second-person singular",
