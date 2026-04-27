@@ -161,6 +161,28 @@ class CleanTests(unittest.TestCase):
         v = clean_value(self.wxr, v)
         self.assertEqual(v, "Bar")
 
+    def test_cv_link18(self):
+        v = "[[faa|foo]][[bor| bar]]"
+        v = clean_value(self.wxr, v)
+        self.assertEqual(v, "foo bar")
+
+    def test_cv_link19(self):
+        v = "[[faa|foo ]][[bor|bar]]"
+        v = clean_value(self.wxr, v)
+        self.assertEqual(v, "foo bar")
+
+    def test_cv_link20(self):
+        # Wikitext behavior: remove whitespace at the start of [[ ...]]
+        v = "[[foo]][[ bar]]"
+        v = clean_value(self.wxr, v)
+        self.assertEqual(v, "foobar")
+
+    def test_cv_link21(self):
+        # ... but not after
+        v = "[[foo ]][[bar]]"
+        v = clean_value(self.wxr, v)
+        self.assertEqual(v, "foo bar")
+
     def test_cv_url1(self):
         v = "This is a [http://ylonen.org test]."
         v = clean_value(self.wxr, v)
