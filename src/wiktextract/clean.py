@@ -1381,7 +1381,7 @@ def clean_value(
             # Wikipedia or Wikisource link
             v = after_colon.split("|")[0]
         else:
-            v = m.group(0).strip("[] ").split("|")[0]
+            v = m.group(0).strip("[]").split("|")[0]
         return clean_value(wxr, v, no_strip=True)
 
     def repl_link_bars(m: re.Match) -> str:
@@ -1398,7 +1398,7 @@ def clean_value(
             return ""
         # m.group(5) is always the last matching group because you can
         # only access the last matched group; the indexes don't 'grow'
-        return clean_value(wxr, m.group(5) or m.group(2) or "", no_strip=True)
+        return clean_value(wxr, m.group(3) or "", no_strip=True)
 
     def repl_1_sup(m: re.Match) -> str:
         return to_superscript(clean_value(wxr, m.group(1)))
@@ -1534,18 +1534,19 @@ def clean_value(
             title,
         )
         title = re.sub(
-            r"(?s)\[\[\s*:?([^]|#<>:&]+?)\s*(#[^][|<>]*?)?\]\]", repl_1, title
+            r"(?s)\[\[\s*:?([^]|#<>:&]+?)(#[^][|<>]*?)?\]\]", repl_1, title
         )
         title = re.sub(
             r"(?s)\[\[\s*(([\w\d]+)\s*:)?(\s*[^][#|<>]+?)"
-            r"\s*(#[^][|]*?)?\|?\]\]",
+            r"(#[^][|]*?)?\|?\]\]",
             repl_link,
             title,
         )
         title = re.sub(
-            r"(?s)\[\[\s*([^][|<>]+?)\s*\|"
-            r"\s*(([^][|]|\[[^]]*\])+?)"
-            r"(\s*\|\s*(([^][|]|\[[^]]*\])+?))*\s*\|*\]\]",
+            # [[  (...)  |
+            r"(?s)\[\[\s*([^][|<>]+?)\s*"
+            # (|((...OR[...])+))*|]]
+            r"(\|(([^][|]|\[[^]]*\])+?))*\|*\]\]",
             repl_link_bars,
             title,
         )
