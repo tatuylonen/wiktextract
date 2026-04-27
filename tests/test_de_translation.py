@@ -218,6 +218,63 @@ class TestDETranslation(unittest.TestCase):
             ],
         )
 
+    def test_multi_word_translation(self):
+        """Multi-word translations like {{Ü|fr|temps}} de {{Ü|fr|travail}}
+        should produce a single entry 'temps de travail', not two separate ones."""
+        self.wxr.wtp.add_page("Vorlage:fr", 10, "[[Französisch]]")
+        self.wxr.wtp.start_page("Arbeitszeit")
+        root = self.wxr.wtp.parse("""{{Ü-Tabelle|1|G=Zeit, die man arbeitet|Ü-Liste=
+*{{fr}}: {{Ü|fr|temps}} de {{Ü|fr|travail}}
+}}""")
+        word_entry = WordEntry(
+            lang="Deutsch", lang_code="de", word="Arbeitszeit"
+        )
+        extract_translation(self.wxr, word_entry, root)
+        self.assertEqual(
+            word_entry.model_dump(exclude_defaults=True)["translations"],
+            [
+                {
+                    "lang_code": "fr",
+                    "lang": "Französisch",
+                    "word": "temps de travail",
+                    "sense": "Zeit, die man arbeitet",
+                    "sense_index": "1",
+                }
+            ],
+        )
+
+    def test_multi_word_with_comma_separator(self):
+        """Multi-word translations followed by a comma and another translation
+        should produce two separate entries."""
+        self.wxr.wtp.add_page("Vorlage:fr", 10, "[[Französisch]]")
+        self.wxr.wtp.start_page("Arbeitszeit")
+        root = self.wxr.wtp.parse("""{{Ü-Tabelle|1|G=Zeit|Ü-Liste=
+*{{fr}}: {{Ü|fr|temps}} de {{Ü|fr|travail}}, {{Ü|fr|horaire}}
+}}""")
+        word_entry = WordEntry(
+            lang="Deutsch", lang_code="de", word="Arbeitszeit"
+        )
+        extract_translation(self.wxr, word_entry, root)
+        self.assertEqual(
+            word_entry.model_dump(exclude_defaults=True)["translations"],
+            [
+                {
+                    "lang_code": "fr",
+                    "lang": "Französisch",
+                    "word": "temps de travail",
+                    "sense": "Zeit",
+                    "sense_index": "1",
+                },
+                {
+                    "lang_code": "fr",
+                    "lang": "Französisch",
+                    "word": "horaire",
+                    "sense": "Zeit",
+                    "sense_index": "1",
+                },
+            ],
+        )
+
     def test_hiragana(self):
         self.wxr.wtp.add_page("Vorlage:ja", 10, "[[Japanisch]]")
         data = parse_page(
