@@ -95,6 +95,7 @@ class FormData(TypedDict, total=False):
     tags: list[str]
     raw_tags: list[str]
     topics: list[str]
+    links: list[tuple[str, str]]
 
 
 class Hyphenation(TypedDict, total=False):

@@ -35,12 +35,16 @@ class EnArInflTests(unittest.TestCase):
         self.wxr.wtp.start_subsection(pos)
         tree = self.wxr.wtp.parse(text)
         data = {}
-        parse_inflection_section(self.wxr, data, word, lang, pos,
-                                 section, tree)
+        parse_inflection_section(self.wxr, data, word, lang, pos, section, tree)
         return data
 
     def test_arabic_noun1(self):
-        ret = self.xinfl("دمقس", "Arabic", "noun", "Declension", """
+        ret = self.xinfl(
+            "دمقس",
+            "Arabic",
+            "noun",
+            "Declension",
+            """
 <div class="NavFrame">
 <div class="NavHead">Declension of noun <span class="Arab" lang="ar">[[دمقس#Arabic|دِمَقْس]]</span>&lrm; (<span lang="ar-Latn" class="tr+Latn" style="color%3A+%23888%3B">dimaqs</span>)</div>
 <div class="NavContent">
@@ -126,154 +130,121 @@ class EnArInflTests(unittest.TestCase):
 
 </div>
 </div>[[Category:Arabic nouns with basic triptote singular|دمقس]]
-""")  # noqa: E501
+""",
+        )  # noqa: E501
         expected = {
             "forms": [
-              {
-                "form": "no-table-tags",
-                "source": "Declension",
-                "tags": [
-                  "table-tags"
-                ]
-              },
-              {
-                "form": "دِمَقْس",
-                "roman": "dimaqs",
-                "source": "Declension",
-                "tags": [
-                  "indefinite",
-                  "informal",
-                  "singular",
-                  "triptote"
-                ]
-              },
-              {
-                "form": "الدِّمَقْس",
-                "roman": "ad-dimaqs",
-                "source": "Declension",
-                "tags": [
-                  "definite",
-                  "informal",
-                  "singular",
-                  "triptote"
-                ]
-              },
-              {
-                "form": "دِمَقْس",
-                "roman": "dimaqs",
-                "source": "Declension",
-                "tags": [
-                  "construct",
-                  "informal",
-                  "singular",
-                  "triptote"
-                ]
-              },
-              {
-                "form": "دِمَقْسٌ",
-                "roman": "dimaqsun",
-                "source": "Declension",
-                "tags": [
-                  "indefinite",
-                  "nominative",
-                  "singular",
-                  "triptote"
-                ]
-              },
-              {
-                "form": "الدِّمَقْسُ",
-                "roman": "ad-dimaqsu",
-                "source": "Declension",
-                "tags": [
-                  "definite",
-                  "nominative",
-                  "singular",
-                  "triptote"
-                ]
-              },
-              {
-                "form": "دِمَقْسُ",
-                "roman": "dimaqsu",
-                "source": "Declension",
-                "tags": [
-                  "construct",
-                  "nominative",
-                  "singular",
-                  "triptote"
-                ]
-              },
-              {
-                "form": "دِمَقْسًا",
-                "roman": "dimaqsan",
-                "source": "Declension",
-                "tags": [
-                  "accusative",
-                  "indefinite",
-                  "singular",
-                  "triptote"
-                ]
-              },
-              {
-                "form": "الدِّمَقْسَ",
-                "roman": "ad-dimaqsa",
-                "source": "Declension",
-                "tags": [
-                  "accusative",
-                  "definite",
-                  "singular",
-                  "triptote"
-                ]
-              },
-              {
-                "form": "دِمَقْسَ",
-                "roman": "dimaqsa",
-                "source": "Declension",
-                "tags": [
-                  "accusative",
-                  "construct",
-                  "singular",
-                  "triptote"
-                ]
-              },
-              {
-                "form": "دِمَقْسٍ",
-                "roman": "dimaqsin",
-                "source": "Declension",
-                "tags": [
-                  "genitive",
-                  "indefinite",
-                  "singular",
-                  "triptote"
-                ]
-              },
-              {
-                "form": "الدِّمَقْسِ",
-                "roman": "ad-dimaqsi",
-                "source": "Declension",
-                "tags": [
-                  "definite",
-                  "genitive",
-                  "singular",
-                  "triptote"
-                ]
-              },
-              {
-                "form": "دِمَقْسِ",
-                "roman": "dimaqsi",
-                "source": "Declension",
-                "tags": [
-                  "construct",
-                  "genitive",
-                  "singular",
-                  "triptote"
-                ]
-              },
-            ],
+                {
+                    "form": "no-table-tags",
+                    "source": "Declension",
+                    "tags": ["table-tags"],
+                },
+                {
+                    "form": "دِمَقْس",
+                    "tags": ["indefinite", "informal", "singular", "triptote"],
+                    "source": "Declension",
+                    "roman": "dimaqs",
+                    "links": [("دِمَقْس", "دمقس#Arabic")],
+                },
+                {
+                    "form": "الدِّمَقْس",
+                    "tags": ["definite", "informal", "singular", "triptote"],
+                    "source": "Declension",
+                    "roman": "ad-dimaqs",
+                    "links": [("الدِّمَقْس", "الدمقس#Arabic")],
+                },
+                {
+                    "form": "دِمَقْس",
+                    "tags": ["construct", "informal", "singular", "triptote"],
+                    "source": "Declension",
+                    "roman": "dimaqs",
+                    "links": [("دِمَقْس", "دمقس#Arabic")],
+                },
+                {
+                    "form": "دِمَقْسٌ",
+                    "tags": [
+                        "indefinite",
+                        "nominative",
+                        "singular",
+                        "triptote",
+                    ],
+                    "source": "Declension",
+                    "roman": "dimaqsun",
+                    "links": [("دِمَقْسٌ", "دمقس#Arabic")],
+                },
+                {
+                    "form": "الدِّمَقْسُ",
+                    "tags": ["definite", "nominative", "singular", "triptote"],
+                    "source": "Declension",
+                    "roman": "ad-dimaqsu",
+                    "links": [("الدِّمَقْسُ", "الدمقس#Arabic")],
+                },
+                {
+                    "form": "دِمَقْسُ",
+                    "tags": ["construct", "nominative", "singular", "triptote"],
+                    "source": "Declension",
+                    "roman": "dimaqsu",
+                    "links": [("دِمَقْسُ", "دمقس#Arabic")],
+                },
+                {
+                    "form": "دِمَقْسًا",
+                    "tags": [
+                        "accusative",
+                        "indefinite",
+                        "singular",
+                        "triptote",
+                    ],
+                    "source": "Declension",
+                    "roman": "dimaqsan",
+                    "links": [("دِمَقْسًا", "دمقسا#Arabic")],
+                },
+                {
+                    "form": "الدِّمَقْسَ",
+                    "tags": ["accusative", "definite", "singular", "triptote"],
+                    "source": "Declension",
+                    "roman": "ad-dimaqsa",
+                    "links": [("الدِّمَقْسَ", "الدمقس#Arabic")],
+                },
+                {
+                    "form": "دِمَقْسَ",
+                    "tags": ["accusative", "construct", "singular", "triptote"],
+                    "source": "Declension",
+                    "roman": "dimaqsa",
+                    "links": [("دِمَقْسَ", "دمقس#Arabic")],
+                },
+                {
+                    "form": "دِمَقْسٍ",
+                    "tags": ["genitive", "indefinite", "singular", "triptote"],
+                    "source": "Declension",
+                    "roman": "dimaqsin",
+                    "links": [("دِمَقْسٍ", "دمقس#Arabic")],
+                },
+                {
+                    "form": "الدِّمَقْسِ",
+                    "tags": ["definite", "genitive", "singular", "triptote"],
+                    "source": "Declension",
+                    "roman": "ad-dimaqsi",
+                    "links": [("الدِّمَقْسِ", "الدمقس#Arabic")],
+                },
+                {
+                    "form": "دِمَقْسِ",
+                    "tags": ["construct", "genitive", "singular", "triptote"],
+                    "source": "Declension",
+                    "roman": "dimaqsi",
+                    "links": [("دِمَقْسِ", "دمقس#Arabic")],
+                },
+            ]
         }
+
         self.assertEqual(expected, ret)
 
     def test_arabic_verb1(self):
-        ret = self.xinfl("أبلع", "Arabic", "verb", "Conjugation", """
+        ret = self.xinfl(
+            "أبلع",
+            "Arabic",
+            "verb",
+            "Conjugation",
+            """
 <div class="NavFrame+ar-conj">
 <div class="NavHead" style="height%3A2.5em">Conjugation of <div style="display%3A+inline-block"><b lang="ar" class="Arab">أَبْلَعَ</b></div> (form-IV sound)</div>
 <div class="NavContent">
@@ -876,1784 +847,1918 @@ class EnArInflTests(unittest.TestCase):
 
 </div>
 </div><templatestyles src="Template%3Aar-conj%2Fstyle.css">[[Category:Arabic form-IV verbs|أبلع]][[Category:Arabic sound verbs by conjugation|أبلع]][[Category:Arabic sound form-IV verbs|أبلع]][[Category:Arabic sound verbs|أبلع]][[Category:Arabic verbs with full passive|أبلع]][[Category:Arabic transitive verbs|أبلع]]
-""")  # noqa: E501
+""",
+        )  # noqa: E501
         expected = {
             "forms": [
-              {
-                "form": "no-table-tags",
-                "source": "Conjugation",
-                "tags": [
-                  "table-tags"
-                ]
-              },
-              {
-                "form": "إِبْلَاع",
-                "roman": "ʾiblāʿ",
-                "source": "Conjugation",
-                "tags": [
-                  "noun-from-verb"
-                ]
-              },
-              {
-                "form": "مُبْلِع",
-                "roman": "mubliʿ",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "participle"
-                ]
-              },
-              {
-                "form": "مُبْلَع",
-                "roman": "mublaʿ",
-                "source": "Conjugation",
-                "tags": [
-                  "participle",
-                  "passive"
-                ]
-              },
-              {
-                "form": "أَبْلَعْتُ",
-                "roman": "ʾablaʿtu",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "first-person",
-                  "indicative",
-                  "masculine",
-                  "past",
-                  "perfective",
-                  "singular"
-                ]
-              },
-              {
-                "form": "أَبْلَعْتَ",
-                "roman": "ʾablaʿta",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "indicative",
-                  "masculine",
-                  "past",
-                  "perfective",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "أَبْلَعَ",
-                "roman": "ʾablaʿa",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "indicative",
-                  "masculine",
-                  "past",
-                  "perfective",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "أَبْلَعْتُمَا",
-                "roman": "ʾablaʿtumā",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "dual",
-                  "indicative",
-                  "masculine",
-                  "past",
-                  "perfective",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "أَبْلَعَا",
-                "roman": "ʾablaʿā",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "dual",
-                  "indicative",
-                  "masculine",
-                  "past",
-                  "perfective",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "أَبْلَعْنَا",
-                "roman": "ʾablaʿnā",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "first-person",
-                  "indicative",
-                  "masculine",
-                  "past",
-                  "perfective",
-                  "plural"
-                ]
-              },
-              {
-                "form": "أَبْلَعْتُمْ",
-                "roman": "ʾablaʿtum",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "indicative",
-                  "masculine",
-                  "past",
-                  "perfective",
-                  "plural",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "أَبْلَعُوا",
-                "roman": "ʾablaʿū",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "indicative",
-                  "masculine",
-                  "past",
-                  "perfective",
-                  "plural",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "أَبْلَعْتُ",
-                "roman": "ʾablaʿtu",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "feminine",
-                  "first-person",
-                  "indicative",
-                  "past",
-                  "perfective",
-                  "singular"
-                ]
-              },
-              {
-                "form": "أَبْلَعْتِ",
-                "roman": "ʾablaʿti",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "feminine",
-                  "indicative",
-                  "past",
-                  "perfective",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "أَبْلَعَتْ",
-                "roman": "ʾablaʿat",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "feminine",
-                  "indicative",
-                  "past",
-                  "perfective",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "أَبْلَعْتُمَا",
-                "roman": "ʾablaʿtumā",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "dual",
-                  "feminine",
-                  "indicative",
-                  "past",
-                  "perfective",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "أَبْلَعَتَا",
-                "roman": "ʾablaʿatā",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "dual",
-                  "feminine",
-                  "indicative",
-                  "past",
-                  "perfective",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "أَبْلَعْنَا",
-                "roman": "ʾablaʿnā",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "feminine",
-                  "first-person",
-                  "indicative",
-                  "past",
-                  "perfective",
-                  "plural"
-                ]
-              },
-              {
-                "form": "أَبْلَعْتُنَّ",
-                "roman": "ʾablaʿtunna",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "feminine",
-                  "indicative",
-                  "past",
-                  "perfective",
-                  "plural",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "أَبْلَعْنَ",
-                "roman": "ʾablaʿna",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "feminine",
-                  "indicative",
-                  "past",
-                  "perfective",
-                  "plural",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "أُبْلِعُ",
-                "roman": "ʾubliʿu",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "first-person",
-                  "imperfective",
-                  "indicative",
-                  "masculine",
-                  "non-past",
-                  "singular"
-                ]
-              },
-              {
-                "form": "تُبْلِعُ",
-                "roman": "tubliʿu",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperfective",
-                  "indicative",
-                  "masculine",
-                  "non-past",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "يُبْلِعُ",
-                "roman": "yubliʿu",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperfective",
-                  "indicative",
-                  "masculine",
-                  "non-past",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "تُبْلِعَانِ",
-                "roman": "tubliʿāni",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "dual",
-                  "imperfective",
-                  "indicative",
-                  "masculine",
-                  "non-past",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "يُبْلِعَانِ",
-                "roman": "yubliʿāni",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "dual",
-                  "imperfective",
-                  "indicative",
-                  "masculine",
-                  "non-past",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "نُبْلِعُ",
-                "roman": "nubliʿu",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "first-person",
-                  "imperfective",
-                  "indicative",
-                  "masculine",
-                  "non-past",
-                  "plural"
-                ]
-              },
-              {
-                "form": "تُبْلِعُونَ",
-                "roman": "tubliʿūna",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperfective",
-                  "indicative",
-                  "masculine",
-                  "non-past",
-                  "plural",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "يُبْلِعُونَ",
-                "roman": "yubliʿūna",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperfective",
-                  "indicative",
-                  "masculine",
-                  "non-past",
-                  "plural",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "أُبْلِعُ",
-                "roman": "ʾubliʿu",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "feminine",
-                  "first-person",
-                  "imperfective",
-                  "indicative",
-                  "non-past",
-                  "singular"
-                ]
-              },
-              {
-                "form": "تُبْلِعِينَ",
-                "roman": "tubliʿīna",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "feminine",
-                  "imperfective",
-                  "indicative",
-                  "non-past",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "تُبْلِعُ",
-                "roman": "tubliʿu",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "feminine",
-                  "imperfective",
-                  "indicative",
-                  "non-past",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "تُبْلِعَانِ",
-                "roman": "tubliʿāni",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "dual",
-                  "feminine",
-                  "imperfective",
-                  "indicative",
-                  "non-past",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "تُبْلِعَانِ",
-                "roman": "tubliʿāni",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "dual",
-                  "feminine",
-                  "imperfective",
-                  "indicative",
-                  "non-past",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "نُبْلِعُ",
-                "roman": "nubliʿu",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "feminine",
-                  "first-person",
-                  "imperfective",
-                  "indicative",
-                  "non-past",
-                  "plural"
-                ]
-              },
-              {
-                "form": "تُبْلِعْنَ",
-                "roman": "tubliʿna",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "feminine",
-                  "imperfective",
-                  "indicative",
-                  "non-past",
-                  "plural",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "يُبْلِعْنَ",
-                "roman": "yubliʿna",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "feminine",
-                  "imperfective",
-                  "indicative",
-                  "non-past",
-                  "plural",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "أُبْلِعَ",
-                "roman": "ʾubliʿa",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "first-person",
-                  "masculine",
-                  "singular",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "تُبْلِعَ",
-                "roman": "tubliʿa",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "masculine",
-                  "second-person",
-                  "singular",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "يُبْلِعَ",
-                "roman": "yubliʿa",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "masculine",
-                  "singular",
-                  "subjunctive",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "تُبْلِعَا",
-                "roman": "tubliʿā",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "dual",
-                  "masculine",
-                  "second-person",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "يُبْلِعَا",
-                "roman": "yubliʿā",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "dual",
-                  "masculine",
-                  "subjunctive",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "نُبْلِعَ",
-                "roman": "nubliʿa",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "first-person",
-                  "masculine",
-                  "plural",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "تُبْلِعُوا",
-                "roman": "tubliʿū",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "masculine",
-                  "plural",
-                  "second-person",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "يُبْلِعُوا",
-                "roman": "yubliʿū",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "masculine",
-                  "plural",
-                  "subjunctive",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "أُبْلِعَ",
-                "roman": "ʾubliʿa",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "feminine",
-                  "first-person",
-                  "singular",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "تُبْلِعِي",
-                "roman": "tubliʿī",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "feminine",
-                  "second-person",
-                  "singular",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "تُبْلِعَ",
-                "roman": "tubliʿa",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "feminine",
-                  "singular",
-                  "subjunctive",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "تُبْلِعَا",
-                "roman": "tubliʿā",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "dual",
-                  "feminine",
-                  "second-person",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "تُبْلِعَا",
-                "roman": "tubliʿā",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "dual",
-                  "feminine",
-                  "subjunctive",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "نُبْلِعَ",
-                "roman": "nubliʿa",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "feminine",
-                  "first-person",
-                  "plural",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "تُبْلِعْنَ",
-                "roman": "tubliʿna",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "feminine",
-                  "plural",
-                  "second-person",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "يُبْلِعْنَ",
-                "roman": "yubliʿna",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "feminine",
-                  "plural",
-                  "subjunctive",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "أُبْلِعْ",
-                "roman": "ʾubliʿ",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "first-person",
-                  "jussive",
-                  "masculine",
-                  "singular"
-                ]
-              },
-              {
-                "form": "تُبْلِعْ",
-                "roman": "tubliʿ",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "jussive",
-                  "masculine",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "يُبْلِعْ",
-                "roman": "yubliʿ",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "jussive",
-                  "masculine",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "تُبْلِعَا",
-                "roman": "tubliʿā",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "dual",
-                  "jussive",
-                  "masculine",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "يُبْلِعَا",
-                "roman": "yubliʿā",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "dual",
-                  "jussive",
-                  "masculine",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "نُبْلِعْ",
-                "roman": "nubliʿ",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "first-person",
-                  "jussive",
-                  "masculine",
-                  "plural"
-                ]
-              },
-              {
-                "form": "تُبْلِعُوا",
-                "roman": "tubliʿū",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "jussive",
-                  "masculine",
-                  "plural",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "يُبْلِعُوا",
-                "roman": "yubliʿū",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "jussive",
-                  "masculine",
-                  "plural",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "أُبْلِعْ",
-                "roman": "ʾubliʿ",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "feminine",
-                  "first-person",
-                  "jussive",
-                  "singular"
-                ]
-              },
-              {
-                "form": "تُبْلِعِي",
-                "roman": "tubliʿī",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "feminine",
-                  "jussive",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "تُبْلِعْ",
-                "roman": "tubliʿ",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "feminine",
-                  "jussive",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "تُبْلِعَا",
-                "roman": "tubliʿā",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "dual",
-                  "feminine",
-                  "jussive",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "تُبْلِعَا",
-                "roman": "tubliʿā",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "dual",
-                  "feminine",
-                  "jussive",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "نُبْلِعْ",
-                "roman": "nubliʿ",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "feminine",
-                  "first-person",
-                  "jussive",
-                  "plural"
-                ]
-              },
-              {
-                "form": "تُبْلِعْنَ",
-                "roman": "tubliʿna",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "feminine",
-                  "jussive",
-                  "plural",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "يُبْلِعْنَ",
-                "roman": "yubliʿna",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "feminine",
-                  "jussive",
-                  "plural",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "أَبْلِعْ",
-                "roman": "ʾabliʿ",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperative",
-                  "masculine",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "أَبْلِعَا",
-                "roman": "ʾabliʿā",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "dual",
-                  "imperative",
-                  "masculine",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "أَبْلِعُوا",
-                "roman": "ʾabliʿū",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperative",
-                  "masculine",
-                  "plural",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "أَبْلِعِي",
-                "roman": "ʾabliʿī",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "feminine",
-                  "imperative",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "أَبْلِعَا",
-                "roman": "ʾabliʿā",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "dual",
-                  "feminine",
-                  "imperative",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "أَبْلِعْنَ",
-                "roman": "ʾabliʿna",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "feminine",
-                  "imperative",
-                  "plural",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "أُبْلِعْتُ",
-                "roman": "ʾubliʿtu",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "indicative",
-                  "masculine",
-                  "passive",
-                  "past",
-                  "perfective",
-                  "singular"
-                ]
-              },
-              {
-                "form": "أُبْلِعْتَ",
-                "roman": "ʾubliʿta",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "masculine",
-                  "passive",
-                  "past",
-                  "perfective",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "أُبْلِعَ",
-                "roman": "ʾubliʿa",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "masculine",
-                  "passive",
-                  "past",
-                  "perfective",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "أُبْلِعْتُمَا",
-                "roman": "ʾubliʿtumā",
-                "source": "Conjugation",
-                "tags": [
-                  "dual",
-                  "indicative",
-                  "masculine",
-                  "passive",
-                  "past",
-                  "perfective",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "أُبْلِعَا",
-                "roman": "ʾubliʿā",
-                "source": "Conjugation",
-                "tags": [
-                  "dual",
-                  "indicative",
-                  "masculine",
-                  "passive",
-                  "past",
-                  "perfective",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "أُبْلِعْنَا",
-                "roman": "ʾubliʿnā",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "indicative",
-                  "masculine",
-                  "passive",
-                  "past",
-                  "perfective",
-                  "plural"
-                ]
-              },
-              {
-                "form": "أُبْلِعْتُمْ",
-                "roman": "ʾubliʿtum",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "masculine",
-                  "passive",
-                  "past",
-                  "perfective",
-                  "plural",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "أُبْلِعُوا",
-                "roman": "ʾubliʿū",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "masculine",
-                  "passive",
-                  "past",
-                  "perfective",
-                  "plural",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "أُبْلِعْتُ",
-                "roman": "ʾubliʿtu",
-                "source": "Conjugation",
-                "tags": [
-                  "feminine",
-                  "first-person",
-                  "indicative",
-                  "passive",
-                  "past",
-                  "perfective",
-                  "singular"
-                ]
-              },
-              {
-                "form": "أُبْلِعْتِ",
-                "roman": "ʾubliʿti",
-                "source": "Conjugation",
-                "tags": [
-                  "feminine",
-                  "indicative",
-                  "passive",
-                  "past",
-                  "perfective",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "أُبْلِعَتْ",
-                "roman": "ʾubliʿat",
-                "source": "Conjugation",
-                "tags": [
-                  "feminine",
-                  "indicative",
-                  "passive",
-                  "past",
-                  "perfective",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "أُبْلِعْتُمَا",
-                "roman": "ʾubliʿtumā",
-                "source": "Conjugation",
-                "tags": [
-                  "dual",
-                  "feminine",
-                  "indicative",
-                  "passive",
-                  "past",
-                  "perfective",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "أُبْلِعَتَا",
-                "roman": "ʾubliʿatā",
-                "source": "Conjugation",
-                "tags": [
-                  "dual",
-                  "feminine",
-                  "indicative",
-                  "passive",
-                  "past",
-                  "perfective",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "أُبْلِعْنَا",
-                "roman": "ʾubliʿnā",
-                "source": "Conjugation",
-                "tags": [
-                  "feminine",
-                  "first-person",
-                  "indicative",
-                  "passive",
-                  "past",
-                  "perfective",
-                  "plural"
-                ]
-              },
-              {
-                "form": "أُبْلِعْتُنَّ",
-                "roman": "ʾubliʿtunna",
-                "source": "Conjugation",
-                "tags": [
-                  "feminine",
-                  "indicative",
-                  "passive",
-                  "past",
-                  "perfective",
-                  "plural",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "أُبْلِعْنَ",
-                "roman": "ʾubliʿna",
-                "source": "Conjugation",
-                "tags": [
-                  "feminine",
-                  "indicative",
-                  "passive",
-                  "past",
-                  "perfective",
-                  "plural",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "أُبْلَعُ",
-                "roman": "ʾublaʿu",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "imperfective",
-                  "indicative",
-                  "masculine",
-                  "non-past",
-                  "passive",
-                  "singular"
-                ]
-              },
-              {
-                "form": "تُبْلَعُ",
-                "roman": "tublaʿu",
-                "source": "Conjugation",
-                "tags": [
-                  "imperfective",
-                  "indicative",
-                  "masculine",
-                  "non-past",
-                  "passive",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "يُبْلَعُ",
-                "roman": "yublaʿu",
-                "source": "Conjugation",
-                "tags": [
-                  "imperfective",
-                  "indicative",
-                  "masculine",
-                  "non-past",
-                  "passive",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "تُبْلَعَانِ",
-                "roman": "tublaʿāni",
-                "source": "Conjugation",
-                "tags": [
-                  "dual",
-                  "imperfective",
-                  "indicative",
-                  "masculine",
-                  "non-past",
-                  "passive",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "يُبْلَعَانِ",
-                "roman": "yublaʿāni",
-                "source": "Conjugation",
-                "tags": [
-                  "dual",
-                  "imperfective",
-                  "indicative",
-                  "masculine",
-                  "non-past",
-                  "passive",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "نُبْلَعُ",
-                "roman": "nublaʿu",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "imperfective",
-                  "indicative",
-                  "masculine",
-                  "non-past",
-                  "passive",
-                  "plural"
-                ]
-              },
-              {
-                "form": "تُبْلَعُونَ",
-                "roman": "tublaʿūna",
-                "source": "Conjugation",
-                "tags": [
-                  "imperfective",
-                  "indicative",
-                  "masculine",
-                  "non-past",
-                  "passive",
-                  "plural",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "يُبْلَعُونَ",
-                "roman": "yublaʿūna",
-                "source": "Conjugation",
-                "tags": [
-                  "imperfective",
-                  "indicative",
-                  "masculine",
-                  "non-past",
-                  "passive",
-                  "plural",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "أُبْلَعُ",
-                "roman": "ʾublaʿu",
-                "source": "Conjugation",
-                "tags": [
-                  "feminine",
-                  "first-person",
-                  "imperfective",
-                  "indicative",
-                  "non-past",
-                  "passive",
-                  "singular"
-                ]
-              },
-              {
-                "form": "تُبْلَعِينَ",
-                "roman": "tublaʿīna",
-                "source": "Conjugation",
-                "tags": [
-                  "feminine",
-                  "imperfective",
-                  "indicative",
-                  "non-past",
-                  "passive",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "تُبْلَعُ",
-                "roman": "tublaʿu",
-                "source": "Conjugation",
-                "tags": [
-                  "feminine",
-                  "imperfective",
-                  "indicative",
-                  "non-past",
-                  "passive",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "تُبْلَعَانِ",
-                "roman": "tublaʿāni",
-                "source": "Conjugation",
-                "tags": [
-                  "dual",
-                  "feminine",
-                  "imperfective",
-                  "indicative",
-                  "non-past",
-                  "passive",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "تُبْلَعَانِ",
-                "roman": "tublaʿāni",
-                "source": "Conjugation",
-                "tags": [
-                  "dual",
-                  "feminine",
-                  "imperfective",
-                  "indicative",
-                  "non-past",
-                  "passive",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "نُبْلَعُ",
-                "roman": "nublaʿu",
-                "source": "Conjugation",
-                "tags": [
-                  "feminine",
-                  "first-person",
-                  "imperfective",
-                  "indicative",
-                  "non-past",
-                  "passive",
-                  "plural"
-                ]
-              },
-              {
-                "form": "تُبْلَعْنَ",
-                "roman": "tublaʿna",
-                "source": "Conjugation",
-                "tags": [
-                  "feminine",
-                  "imperfective",
-                  "indicative",
-                  "non-past",
-                  "passive",
-                  "plural",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "يُبْلَعْنَ",
-                "roman": "yublaʿna",
-                "source": "Conjugation",
-                "tags": [
-                  "feminine",
-                  "imperfective",
-                  "indicative",
-                  "non-past",
-                  "passive",
-                  "plural",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "أُبْلَعَ",
-                "roman": "ʾublaʿa",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "masculine",
-                  "passive",
-                  "singular",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "تُبْلَعَ",
-                "roman": "tublaʿa",
-                "source": "Conjugation",
-                "tags": [
-                  "masculine",
-                  "passive",
-                  "second-person",
-                  "singular",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "يُبْلَعَ",
-                "roman": "yublaʿa",
-                "source": "Conjugation",
-                "tags": [
-                  "masculine",
-                  "passive",
-                  "singular",
-                  "subjunctive",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "تُبْلَعَا",
-                "roman": "tublaʿā",
-                "source": "Conjugation",
-                "tags": [
-                  "dual",
-                  "masculine",
-                  "passive",
-                  "second-person",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "يُبْلَعَا",
-                "roman": "yublaʿā",
-                "source": "Conjugation",
-                "tags": [
-                  "dual",
-                  "masculine",
-                  "passive",
-                  "subjunctive",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "نُبْلَعَ",
-                "roman": "nublaʿa",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "masculine",
-                  "passive",
-                  "plural",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "تُبْلَعُوا",
-                "roman": "tublaʿū",
-                "source": "Conjugation",
-                "tags": [
-                  "masculine",
-                  "passive",
-                  "plural",
-                  "second-person",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "يُبْلَعُوا",
-                "roman": "yublaʿū",
-                "source": "Conjugation",
-                "tags": [
-                  "masculine",
-                  "passive",
-                  "plural",
-                  "subjunctive",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "أُبْلَعَ",
-                "roman": "ʾublaʿa",
-                "source": "Conjugation",
-                "tags": [
-                  "feminine",
-                  "first-person",
-                  "passive",
-                  "singular",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "تُبْلَعِي",
-                "roman": "tublaʿī",
-                "source": "Conjugation",
-                "tags": [
-                  "feminine",
-                  "passive",
-                  "second-person",
-                  "singular",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "تُبْلَعَ",
-                "roman": "tublaʿa",
-                "source": "Conjugation",
-                "tags": [
-                  "feminine",
-                  "passive",
-                  "singular",
-                  "subjunctive",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "تُبْلَعَا",
-                "roman": "tublaʿā",
-                "source": "Conjugation",
-                "tags": [
-                  "dual",
-                  "feminine",
-                  "passive",
-                  "second-person",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "تُبْلَعَا",
-                "roman": "tublaʿā",
-                "source": "Conjugation",
-                "tags": [
-                  "dual",
-                  "feminine",
-                  "passive",
-                  "subjunctive",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "نُبْلَعَ",
-                "roman": "nublaʿa",
-                "source": "Conjugation",
-                "tags": [
-                  "feminine",
-                  "first-person",
-                  "passive",
-                  "plural",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "تُبْلَعْنَ",
-                "roman": "tublaʿna",
-                "source": "Conjugation",
-                "tags": [
-                  "feminine",
-                  "passive",
-                  "plural",
-                  "second-person",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "يُبْلَعْنَ",
-                "roman": "yublaʿna",
-                "source": "Conjugation",
-                "tags": [
-                  "feminine",
-                  "passive",
-                  "plural",
-                  "subjunctive",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "أُبْلَعْ",
-                "roman": "ʾublaʿ",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "jussive",
-                  "masculine",
-                  "passive",
-                  "singular"
-                ]
-              },
-              {
-                "form": "تُبْلَعْ",
-                "roman": "tublaʿ",
-                "source": "Conjugation",
-                "tags": [
-                  "jussive",
-                  "masculine",
-                  "passive",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "يُبْلَعْ",
-                "roman": "yublaʿ",
-                "source": "Conjugation",
-                "tags": [
-                  "jussive",
-                  "masculine",
-                  "passive",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "تُبْلَعَا",
-                "roman": "tublaʿā",
-                "source": "Conjugation",
-                "tags": [
-                  "dual",
-                  "jussive",
-                  "masculine",
-                  "passive",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "يُبْلَعَا",
-                "roman": "yublaʿā",
-                "source": "Conjugation",
-                "tags": [
-                  "dual",
-                  "jussive",
-                  "masculine",
-                  "passive",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "نُبْلَعْ",
-                "roman": "nublaʿ",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "jussive",
-                  "masculine",
-                  "passive",
-                  "plural"
-                ]
-              },
-              {
-                "form": "تُبْلَعُوا",
-                "roman": "tublaʿū",
-                "source": "Conjugation",
-                "tags": [
-                  "jussive",
-                  "masculine",
-                  "passive",
-                  "plural",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "يُبْلَعُوا",
-                "roman": "yublaʿū",
-                "source": "Conjugation",
-                "tags": [
-                  "jussive",
-                  "masculine",
-                  "passive",
-                  "plural",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "أُبْلَعْ",
-                "roman": "ʾublaʿ",
-                "source": "Conjugation",
-                "tags": [
-                  "feminine",
-                  "first-person",
-                  "jussive",
-                  "passive",
-                  "singular"
-                ]
-              },
-              {
-                "form": "تُبْلَعِي",
-                "roman": "tublaʿī",
-                "source": "Conjugation",
-                "tags": [
-                  "feminine",
-                  "jussive",
-                  "passive",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "تُبْلَعْ",
-                "roman": "tublaʿ",
-                "source": "Conjugation",
-                "tags": [
-                  "feminine",
-                  "jussive",
-                  "passive",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "تُبْلَعَا",
-                "roman": "tublaʿā",
-                "source": "Conjugation",
-                "tags": [
-                  "dual",
-                  "feminine",
-                  "jussive",
-                  "passive",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "تُبْلَعَا",
-                "roman": "tublaʿā",
-                "source": "Conjugation",
-                "tags": [
-                  "dual",
-                  "feminine",
-                  "jussive",
-                  "passive",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "نُبْلَعْ",
-                "roman": "nublaʿ",
-                "source": "Conjugation",
-                "tags": [
-                  "feminine",
-                  "first-person",
-                  "jussive",
-                  "passive",
-                  "plural"
-                ]
-              },
-              {
-                "form": "تُبْلَعْنَ",
-                "roman": "tublaʿna",
-                "source": "Conjugation",
-                "tags": [
-                  "feminine",
-                  "jussive",
-                  "passive",
-                  "plural",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "يُبْلَعْنَ",
-                "roman": "yublaʿna",
-                "source": "Conjugation",
-                "tags": [
-                  "feminine",
-                  "jussive",
-                  "passive",
-                  "plural",
-                  "third-person"
-                ]
-              }
-            ],
+                {
+                    "form": "no-table-tags",
+                    "source": "Conjugation",
+                    "tags": ["table-tags"],
+                },
+                {
+                    "form": "إِبْلَاع",
+                    "tags": ["noun-from-verb"],
+                    "source": "Conjugation",
+                    "roman": "ʾiblāʿ",
+                    "links": [("إِبْلَاع", "إبلاع#Arabic")],
+                },
+                {
+                    "form": "مُبْلِع",
+                    "tags": ["active", "participle"],
+                    "source": "Conjugation",
+                    "roman": "mubliʿ",
+                    "links": [("مُبْلِع", "مبلع#Arabic")],
+                },
+                {
+                    "form": "مُبْلَع",
+                    "tags": ["participle", "passive"],
+                    "source": "Conjugation",
+                    "roman": "mublaʿ",
+                    "links": [("مُبْلَع", "مبلع#Arabic")],
+                },
+                {
+                    "form": "أَبْلَعْتُ",
+                    "tags": [
+                        "active",
+                        "first-person",
+                        "indicative",
+                        "masculine",
+                        "past",
+                        "perfective",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "ʾablaʿtu",
+                    "links": [("أَبْلَعْتُ", "أبلعت#Arabic")],
+                },
+                {
+                    "form": "أَبْلَعْتَ",
+                    "tags": [
+                        "active",
+                        "indicative",
+                        "masculine",
+                        "past",
+                        "perfective",
+                        "second-person",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "ʾablaʿta",
+                    "links": [("أَبْلَعْتَ", "أبلعت#Arabic")],
+                },
+                {
+                    "form": "أَبْلَعَ",
+                    "tags": [
+                        "active",
+                        "indicative",
+                        "masculine",
+                        "past",
+                        "perfective",
+                        "singular",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "ʾablaʿa",
+                    "links": [("أَبْلَعَ", "أبلع#Arabic")],
+                },
+                {
+                    "form": "أَبْلَعْتُمَا",
+                    "tags": [
+                        "active",
+                        "dual",
+                        "indicative",
+                        "masculine",
+                        "past",
+                        "perfective",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "ʾablaʿtumā",
+                    "links": [("أَبْلَعْتُمَا", "أبلعتما#Arabic")],
+                },
+                {
+                    "form": "أَبْلَعَا",
+                    "tags": [
+                        "active",
+                        "dual",
+                        "indicative",
+                        "masculine",
+                        "past",
+                        "perfective",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "ʾablaʿā",
+                    "links": [("أَبْلَعَا", "أبلعا#Arabic")],
+                },
+                {
+                    "form": "أَبْلَعْنَا",
+                    "tags": [
+                        "active",
+                        "first-person",
+                        "indicative",
+                        "masculine",
+                        "past",
+                        "perfective",
+                        "plural",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "ʾablaʿnā",
+                    "links": [("أَبْلَعْنَا", "أبلعنا#Arabic")],
+                },
+                {
+                    "form": "أَبْلَعْتُمْ",
+                    "tags": [
+                        "active",
+                        "indicative",
+                        "masculine",
+                        "past",
+                        "perfective",
+                        "plural",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "ʾablaʿtum",
+                    "links": [("أَبْلَعْتُمْ", "أبلعتم#Arabic")],
+                },
+                {
+                    "form": "أَبْلَعُوا",
+                    "tags": [
+                        "active",
+                        "indicative",
+                        "masculine",
+                        "past",
+                        "perfective",
+                        "plural",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "ʾablaʿū",
+                    "links": [("أَبْلَعُوا", "أبلعوا#Arabic")],
+                },
+                {
+                    "form": "أَبْلَعْتُ",
+                    "tags": [
+                        "active",
+                        "feminine",
+                        "first-person",
+                        "indicative",
+                        "past",
+                        "perfective",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "ʾablaʿtu",
+                    "links": [("أَبْلَعْتُ", "أبلعت#Arabic")],
+                },
+                {
+                    "form": "أَبْلَعْتِ",
+                    "tags": [
+                        "active",
+                        "feminine",
+                        "indicative",
+                        "past",
+                        "perfective",
+                        "second-person",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "ʾablaʿti",
+                    "links": [("أَبْلَعْتِ", "أبلعت#Arabic")],
+                },
+                {
+                    "form": "أَبْلَعَتْ",
+                    "tags": [
+                        "active",
+                        "feminine",
+                        "indicative",
+                        "past",
+                        "perfective",
+                        "singular",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "ʾablaʿat",
+                    "links": [("أَبْلَعَتْ", "أبلعت#Arabic")],
+                },
+                {
+                    "form": "أَبْلَعْتُمَا",
+                    "tags": [
+                        "active",
+                        "dual",
+                        "feminine",
+                        "indicative",
+                        "past",
+                        "perfective",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "ʾablaʿtumā",
+                    "links": [("أَبْلَعْتُمَا", "أبلعتما#Arabic")],
+                },
+                {
+                    "form": "أَبْلَعَتَا",
+                    "tags": [
+                        "active",
+                        "dual",
+                        "feminine",
+                        "indicative",
+                        "past",
+                        "perfective",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "ʾablaʿatā",
+                    "links": [("أَبْلَعَتَا", "أبلعتا#Arabic")],
+                },
+                {
+                    "form": "أَبْلَعْنَا",
+                    "tags": [
+                        "active",
+                        "feminine",
+                        "first-person",
+                        "indicative",
+                        "past",
+                        "perfective",
+                        "plural",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "ʾablaʿnā",
+                    "links": [("أَبْلَعْنَا", "أبلعنا#Arabic")],
+                },
+                {
+                    "form": "أَبْلَعْتُنَّ",
+                    "tags": [
+                        "active",
+                        "feminine",
+                        "indicative",
+                        "past",
+                        "perfective",
+                        "plural",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "ʾablaʿtunna",
+                    "links": [("أَبْلَعْتُنَّ", "أبلعتن#Arabic")],
+                },
+                {
+                    "form": "أَبْلَعْنَ",
+                    "tags": [
+                        "active",
+                        "feminine",
+                        "indicative",
+                        "past",
+                        "perfective",
+                        "plural",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "ʾablaʿna",
+                    "links": [("أَبْلَعْنَ", "أبلعن#Arabic")],
+                },
+                {
+                    "form": "أُبْلِعُ",
+                    "tags": [
+                        "active",
+                        "first-person",
+                        "imperfective",
+                        "indicative",
+                        "masculine",
+                        "non-past",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "ʾubliʿu",
+                    "links": [("أُبْلِعُ", "أبلع#Arabic")],
+                },
+                {
+                    "form": "تُبْلِعُ",
+                    "tags": [
+                        "active",
+                        "imperfective",
+                        "indicative",
+                        "masculine",
+                        "non-past",
+                        "second-person",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "tubliʿu",
+                    "links": [("تُبْلِعُ", "تبلع#Arabic")],
+                },
+                {
+                    "form": "يُبْلِعُ",
+                    "tags": [
+                        "active",
+                        "imperfective",
+                        "indicative",
+                        "masculine",
+                        "non-past",
+                        "singular",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "yubliʿu",
+                    "links": [("يُبْلِعُ", "يبلع#Arabic")],
+                },
+                {
+                    "form": "تُبْلِعَانِ",
+                    "tags": [
+                        "active",
+                        "dual",
+                        "imperfective",
+                        "indicative",
+                        "masculine",
+                        "non-past",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "tubliʿāni",
+                    "links": [("تُبْلِعَانِ", "تبلعان#Arabic")],
+                },
+                {
+                    "form": "يُبْلِعَانِ",
+                    "tags": [
+                        "active",
+                        "dual",
+                        "imperfective",
+                        "indicative",
+                        "masculine",
+                        "non-past",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "yubliʿāni",
+                    "links": [("يُبْلِعَانِ", "يبلعان#Arabic")],
+                },
+                {
+                    "form": "نُبْلِعُ",
+                    "tags": [
+                        "active",
+                        "first-person",
+                        "imperfective",
+                        "indicative",
+                        "masculine",
+                        "non-past",
+                        "plural",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "nubliʿu",
+                    "links": [("نُبْلِعُ", "نبلع#Arabic")],
+                },
+                {
+                    "form": "تُبْلِعُونَ",
+                    "tags": [
+                        "active",
+                        "imperfective",
+                        "indicative",
+                        "masculine",
+                        "non-past",
+                        "plural",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "tubliʿūna",
+                    "links": [("تُبْلِعُونَ", "تبلعون#Arabic")],
+                },
+                {
+                    "form": "يُبْلِعُونَ",
+                    "tags": [
+                        "active",
+                        "imperfective",
+                        "indicative",
+                        "masculine",
+                        "non-past",
+                        "plural",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "yubliʿūna",
+                    "links": [("يُبْلِعُونَ", "يبلعون#Arabic")],
+                },
+                {
+                    "form": "أُبْلِعُ",
+                    "tags": [
+                        "active",
+                        "feminine",
+                        "first-person",
+                        "imperfective",
+                        "indicative",
+                        "non-past",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "ʾubliʿu",
+                    "links": [("أُبْلِعُ", "أبلع#Arabic")],
+                },
+                {
+                    "form": "تُبْلِعِينَ",
+                    "tags": [
+                        "active",
+                        "feminine",
+                        "imperfective",
+                        "indicative",
+                        "non-past",
+                        "second-person",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "tubliʿīna",
+                    "links": [("تُبْلِعِينَ", "تبلعين#Arabic")],
+                },
+                {
+                    "form": "تُبْلِعُ",
+                    "tags": [
+                        "active",
+                        "feminine",
+                        "imperfective",
+                        "indicative",
+                        "non-past",
+                        "singular",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "tubliʿu",
+                    "links": [("تُبْلِعُ", "تبلع#Arabic")],
+                },
+                {
+                    "form": "تُبْلِعَانِ",
+                    "tags": [
+                        "active",
+                        "dual",
+                        "feminine",
+                        "imperfective",
+                        "indicative",
+                        "non-past",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "tubliʿāni",
+                    "links": [("تُبْلِعَانِ", "تبلعان#Arabic")],
+                },
+                {
+                    "form": "تُبْلِعَانِ",
+                    "tags": [
+                        "active",
+                        "dual",
+                        "feminine",
+                        "imperfective",
+                        "indicative",
+                        "non-past",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "tubliʿāni",
+                    "links": [("تُبْلِعَانِ", "تبلعان#Arabic")],
+                },
+                {
+                    "form": "نُبْلِعُ",
+                    "tags": [
+                        "active",
+                        "feminine",
+                        "first-person",
+                        "imperfective",
+                        "indicative",
+                        "non-past",
+                        "plural",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "nubliʿu",
+                    "links": [("نُبْلِعُ", "نبلع#Arabic")],
+                },
+                {
+                    "form": "تُبْلِعْنَ",
+                    "tags": [
+                        "active",
+                        "feminine",
+                        "imperfective",
+                        "indicative",
+                        "non-past",
+                        "plural",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "tubliʿna",
+                    "links": [("تُبْلِعْنَ", "تبلعن#Arabic")],
+                },
+                {
+                    "form": "يُبْلِعْنَ",
+                    "tags": [
+                        "active",
+                        "feminine",
+                        "imperfective",
+                        "indicative",
+                        "non-past",
+                        "plural",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "yubliʿna",
+                    "links": [("يُبْلِعْنَ", "يبلعن#Arabic")],
+                },
+                {
+                    "form": "أُبْلِعَ",
+                    "tags": [
+                        "active",
+                        "first-person",
+                        "masculine",
+                        "singular",
+                        "subjunctive",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "ʾubliʿa",
+                    "links": [("أُبْلِعَ", "أبلع#Arabic")],
+                },
+                {
+                    "form": "تُبْلِعَ",
+                    "tags": [
+                        "active",
+                        "masculine",
+                        "second-person",
+                        "singular",
+                        "subjunctive",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "tubliʿa",
+                    "links": [("تُبْلِعَ", "تبلع#Arabic")],
+                },
+                {
+                    "form": "يُبْلِعَ",
+                    "tags": [
+                        "active",
+                        "masculine",
+                        "singular",
+                        "subjunctive",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "yubliʿa",
+                    "links": [("يُبْلِعَ", "يبلع#Arabic")],
+                },
+                {
+                    "form": "تُبْلِعَا",
+                    "tags": [
+                        "active",
+                        "dual",
+                        "masculine",
+                        "second-person",
+                        "subjunctive",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "tubliʿā",
+                    "links": [("تُبْلِعَا", "تبلعا#Arabic")],
+                },
+                {
+                    "form": "يُبْلِعَا",
+                    "tags": [
+                        "active",
+                        "dual",
+                        "masculine",
+                        "subjunctive",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "yubliʿā",
+                    "links": [("يُبْلِعَا", "يبلعا#Arabic")],
+                },
+                {
+                    "form": "نُبْلِعَ",
+                    "tags": [
+                        "active",
+                        "first-person",
+                        "masculine",
+                        "plural",
+                        "subjunctive",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "nubliʿa",
+                    "links": [("نُبْلِعَ", "نبلع#Arabic")],
+                },
+                {
+                    "form": "تُبْلِعُوا",
+                    "tags": [
+                        "active",
+                        "masculine",
+                        "plural",
+                        "second-person",
+                        "subjunctive",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "tubliʿū",
+                    "links": [("تُبْلِعُوا", "تبلعوا#Arabic")],
+                },
+                {
+                    "form": "يُبْلِعُوا",
+                    "tags": [
+                        "active",
+                        "masculine",
+                        "plural",
+                        "subjunctive",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "yubliʿū",
+                    "links": [("يُبْلِعُوا", "يبلعوا#Arabic")],
+                },
+                {
+                    "form": "أُبْلِعَ",
+                    "tags": [
+                        "active",
+                        "feminine",
+                        "first-person",
+                        "singular",
+                        "subjunctive",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "ʾubliʿa",
+                    "links": [("أُبْلِعَ", "أبلع#Arabic")],
+                },
+                {
+                    "form": "تُبْلِعِي",
+                    "tags": [
+                        "active",
+                        "feminine",
+                        "second-person",
+                        "singular",
+                        "subjunctive",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "tubliʿī",
+                    "links": [("تُبْلِعِي", "تبلعي#Arabic")],
+                },
+                {
+                    "form": "تُبْلِعَ",
+                    "tags": [
+                        "active",
+                        "feminine",
+                        "singular",
+                        "subjunctive",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "tubliʿa",
+                    "links": [("تُبْلِعَ", "تبلع#Arabic")],
+                },
+                {
+                    "form": "تُبْلِعَا",
+                    "tags": [
+                        "active",
+                        "dual",
+                        "feminine",
+                        "second-person",
+                        "subjunctive",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "tubliʿā",
+                    "links": [("تُبْلِعَا", "تبلعا#Arabic")],
+                },
+                {
+                    "form": "تُبْلِعَا",
+                    "tags": [
+                        "active",
+                        "dual",
+                        "feminine",
+                        "subjunctive",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "tubliʿā",
+                    "links": [("تُبْلِعَا", "تبلعا#Arabic")],
+                },
+                {
+                    "form": "نُبْلِعَ",
+                    "tags": [
+                        "active",
+                        "feminine",
+                        "first-person",
+                        "plural",
+                        "subjunctive",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "nubliʿa",
+                    "links": [("نُبْلِعَ", "نبلع#Arabic")],
+                },
+                {
+                    "form": "تُبْلِعْنَ",
+                    "tags": [
+                        "active",
+                        "feminine",
+                        "plural",
+                        "second-person",
+                        "subjunctive",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "tubliʿna",
+                    "links": [("تُبْلِعْنَ", "تبلعن#Arabic")],
+                },
+                {
+                    "form": "يُبْلِعْنَ",
+                    "tags": [
+                        "active",
+                        "feminine",
+                        "plural",
+                        "subjunctive",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "yubliʿna",
+                    "links": [("يُبْلِعْنَ", "يبلعن#Arabic")],
+                },
+                {
+                    "form": "أُبْلِعْ",
+                    "tags": [
+                        "active",
+                        "first-person",
+                        "jussive",
+                        "masculine",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "ʾubliʿ",
+                    "links": [("أُبْلِعْ", "أبلع#Arabic")],
+                },
+                {
+                    "form": "تُبْلِعْ",
+                    "tags": [
+                        "active",
+                        "jussive",
+                        "masculine",
+                        "second-person",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "tubliʿ",
+                    "links": [("تُبْلِعْ", "تبلع#Arabic")],
+                },
+                {
+                    "form": "يُبْلِعْ",
+                    "tags": [
+                        "active",
+                        "jussive",
+                        "masculine",
+                        "singular",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "yubliʿ",
+                    "links": [("يُبْلِعْ", "يبلع#Arabic")],
+                },
+                {
+                    "form": "تُبْلِعَا",
+                    "tags": [
+                        "active",
+                        "dual",
+                        "jussive",
+                        "masculine",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "tubliʿā",
+                    "links": [("تُبْلِعَا", "تبلعا#Arabic")],
+                },
+                {
+                    "form": "يُبْلِعَا",
+                    "tags": [
+                        "active",
+                        "dual",
+                        "jussive",
+                        "masculine",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "yubliʿā",
+                    "links": [("يُبْلِعَا", "يبلعا#Arabic")],
+                },
+                {
+                    "form": "نُبْلِعْ",
+                    "tags": [
+                        "active",
+                        "first-person",
+                        "jussive",
+                        "masculine",
+                        "plural",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "nubliʿ",
+                    "links": [("نُبْلِعْ", "نبلع#Arabic")],
+                },
+                {
+                    "form": "تُبْلِعُوا",
+                    "tags": [
+                        "active",
+                        "jussive",
+                        "masculine",
+                        "plural",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "tubliʿū",
+                    "links": [("تُبْلِعُوا", "تبلعوا#Arabic")],
+                },
+                {
+                    "form": "يُبْلِعُوا",
+                    "tags": [
+                        "active",
+                        "jussive",
+                        "masculine",
+                        "plural",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "yubliʿū",
+                    "links": [("يُبْلِعُوا", "يبلعوا#Arabic")],
+                },
+                {
+                    "form": "أُبْلِعْ",
+                    "tags": [
+                        "active",
+                        "feminine",
+                        "first-person",
+                        "jussive",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "ʾubliʿ",
+                    "links": [("أُبْلِعْ", "أبلع#Arabic")],
+                },
+                {
+                    "form": "تُبْلِعِي",
+                    "tags": [
+                        "active",
+                        "feminine",
+                        "jussive",
+                        "second-person",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "tubliʿī",
+                    "links": [("تُبْلِعِي", "تبلعي#Arabic")],
+                },
+                {
+                    "form": "تُبْلِعْ",
+                    "tags": [
+                        "active",
+                        "feminine",
+                        "jussive",
+                        "singular",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "tubliʿ",
+                    "links": [("تُبْلِعْ", "تبلع#Arabic")],
+                },
+                {
+                    "form": "تُبْلِعَا",
+                    "tags": [
+                        "active",
+                        "dual",
+                        "feminine",
+                        "jussive",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "tubliʿā",
+                    "links": [("تُبْلِعَا", "تبلعا#Arabic")],
+                },
+                {
+                    "form": "تُبْلِعَا",
+                    "tags": [
+                        "active",
+                        "dual",
+                        "feminine",
+                        "jussive",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "tubliʿā",
+                    "links": [("تُبْلِعَا", "تبلعا#Arabic")],
+                },
+                {
+                    "form": "نُبْلِعْ",
+                    "tags": [
+                        "active",
+                        "feminine",
+                        "first-person",
+                        "jussive",
+                        "plural",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "nubliʿ",
+                    "links": [("نُبْلِعْ", "نبلع#Arabic")],
+                },
+                {
+                    "form": "تُبْلِعْنَ",
+                    "tags": [
+                        "active",
+                        "feminine",
+                        "jussive",
+                        "plural",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "tubliʿna",
+                    "links": [("تُبْلِعْنَ", "تبلعن#Arabic")],
+                },
+                {
+                    "form": "يُبْلِعْنَ",
+                    "tags": [
+                        "active",
+                        "feminine",
+                        "jussive",
+                        "plural",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "yubliʿna",
+                    "links": [("يُبْلِعْنَ", "يبلعن#Arabic")],
+                },
+                {
+                    "form": "أَبْلِعْ",
+                    "tags": [
+                        "active",
+                        "imperative",
+                        "masculine",
+                        "second-person",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "ʾabliʿ",
+                    "links": [("أَبْلِعْ", "أبلع#Arabic")],
+                },
+                {
+                    "form": "أَبْلِعَا",
+                    "tags": [
+                        "active",
+                        "dual",
+                        "imperative",
+                        "masculine",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "ʾabliʿā",
+                    "links": [("أَبْلِعَا", "أبلعا#Arabic")],
+                },
+                {
+                    "form": "أَبْلِعُوا",
+                    "tags": [
+                        "active",
+                        "imperative",
+                        "masculine",
+                        "plural",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "ʾabliʿū",
+                    "links": [("أَبْلِعُوا", "أبلعوا#Arabic")],
+                },
+                {
+                    "form": "أَبْلِعِي",
+                    "tags": [
+                        "active",
+                        "feminine",
+                        "imperative",
+                        "second-person",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "ʾabliʿī",
+                    "links": [("أَبْلِعِي", "أبلعي#Arabic")],
+                },
+                {
+                    "form": "أَبْلِعَا",
+                    "tags": [
+                        "active",
+                        "dual",
+                        "feminine",
+                        "imperative",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "ʾabliʿā",
+                    "links": [("أَبْلِعَا", "أبلعا#Arabic")],
+                },
+                {
+                    "form": "أَبْلِعْنَ",
+                    "tags": [
+                        "active",
+                        "feminine",
+                        "imperative",
+                        "plural",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "ʾabliʿna",
+                    "links": [("أَبْلِعْنَ", "أبلعن#Arabic")],
+                },
+                {
+                    "form": "أُبْلِعْتُ",
+                    "tags": [
+                        "first-person",
+                        "indicative",
+                        "masculine",
+                        "passive",
+                        "past",
+                        "perfective",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "ʾubliʿtu",
+                    "links": [("أُبْلِعْتُ", "أبلعت#Arabic")],
+                },
+                {
+                    "form": "أُبْلِعْتَ",
+                    "tags": [
+                        "indicative",
+                        "masculine",
+                        "passive",
+                        "past",
+                        "perfective",
+                        "second-person",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "ʾubliʿta",
+                    "links": [("أُبْلِعْتَ", "أبلعت#Arabic")],
+                },
+                {
+                    "form": "أُبْلِعَ",
+                    "tags": [
+                        "indicative",
+                        "masculine",
+                        "passive",
+                        "past",
+                        "perfective",
+                        "singular",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "ʾubliʿa",
+                    "links": [("أُبْلِعَ", "أبلع#Arabic")],
+                },
+                {
+                    "form": "أُبْلِعْتُمَا",
+                    "tags": [
+                        "dual",
+                        "indicative",
+                        "masculine",
+                        "passive",
+                        "past",
+                        "perfective",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "ʾubliʿtumā",
+                    "links": [("أُبْلِعْتُمَا", "أبلعتما#Arabic")],
+                },
+                {
+                    "form": "أُبْلِعَا",
+                    "tags": [
+                        "dual",
+                        "indicative",
+                        "masculine",
+                        "passive",
+                        "past",
+                        "perfective",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "ʾubliʿā",
+                    "links": [("أُبْلِعَا", "أبلعا#Arabic")],
+                },
+                {
+                    "form": "أُبْلِعْنَا",
+                    "tags": [
+                        "first-person",
+                        "indicative",
+                        "masculine",
+                        "passive",
+                        "past",
+                        "perfective",
+                        "plural",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "ʾubliʿnā",
+                    "links": [("أُبْلِعْنَا", "أبلعنا#Arabic")],
+                },
+                {
+                    "form": "أُبْلِعْتُمْ",
+                    "tags": [
+                        "indicative",
+                        "masculine",
+                        "passive",
+                        "past",
+                        "perfective",
+                        "plural",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "ʾubliʿtum",
+                    "links": [("أُبْلِعْتُمْ", "أبلعتم#Arabic")],
+                },
+                {
+                    "form": "أُبْلِعُوا",
+                    "tags": [
+                        "indicative",
+                        "masculine",
+                        "passive",
+                        "past",
+                        "perfective",
+                        "plural",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "ʾubliʿū",
+                    "links": [("أُبْلِعُوا", "أبلعوا#Arabic")],
+                },
+                {
+                    "form": "أُبْلِعْتُ",
+                    "tags": [
+                        "feminine",
+                        "first-person",
+                        "indicative",
+                        "passive",
+                        "past",
+                        "perfective",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "ʾubliʿtu",
+                    "links": [("أُبْلِعْتُ", "أبلعت#Arabic")],
+                },
+                {
+                    "form": "أُبْلِعْتِ",
+                    "tags": [
+                        "feminine",
+                        "indicative",
+                        "passive",
+                        "past",
+                        "perfective",
+                        "second-person",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "ʾubliʿti",
+                    "links": [("أُبْلِعْتِ", "أبلعت#Arabic")],
+                },
+                {
+                    "form": "أُبْلِعَتْ",
+                    "tags": [
+                        "feminine",
+                        "indicative",
+                        "passive",
+                        "past",
+                        "perfective",
+                        "singular",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "ʾubliʿat",
+                    "links": [("أُبْلِعَتْ", "أبلعت#Arabic")],
+                },
+                {
+                    "form": "أُبْلِعْتُمَا",
+                    "tags": [
+                        "dual",
+                        "feminine",
+                        "indicative",
+                        "passive",
+                        "past",
+                        "perfective",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "ʾubliʿtumā",
+                    "links": [("أُبْلِعْتُمَا", "أبلعتما#Arabic")],
+                },
+                {
+                    "form": "أُبْلِعَتَا",
+                    "tags": [
+                        "dual",
+                        "feminine",
+                        "indicative",
+                        "passive",
+                        "past",
+                        "perfective",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "ʾubliʿatā",
+                    "links": [("أُبْلِعَتَا", "أبلعتا#Arabic")],
+                },
+                {
+                    "form": "أُبْلِعْنَا",
+                    "tags": [
+                        "feminine",
+                        "first-person",
+                        "indicative",
+                        "passive",
+                        "past",
+                        "perfective",
+                        "plural",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "ʾubliʿnā",
+                    "links": [("أُبْلِعْنَا", "أبلعنا#Arabic")],
+                },
+                {
+                    "form": "أُبْلِعْتُنَّ",
+                    "tags": [
+                        "feminine",
+                        "indicative",
+                        "passive",
+                        "past",
+                        "perfective",
+                        "plural",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "ʾubliʿtunna",
+                    "links": [("أُبْلِعْتُنَّ", "أبلعتن#Arabic")],
+                },
+                {
+                    "form": "أُبْلِعْنَ",
+                    "tags": [
+                        "feminine",
+                        "indicative",
+                        "passive",
+                        "past",
+                        "perfective",
+                        "plural",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "ʾubliʿna",
+                    "links": [("أُبْلِعْنَ", "أبلعن#Arabic")],
+                },
+                {
+                    "form": "أُبْلَعُ",
+                    "tags": [
+                        "first-person",
+                        "imperfective",
+                        "indicative",
+                        "masculine",
+                        "non-past",
+                        "passive",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "ʾublaʿu",
+                    "links": [("أُبْلَعُ", "أبلع#Arabic")],
+                },
+                {
+                    "form": "تُبْلَعُ",
+                    "tags": [
+                        "imperfective",
+                        "indicative",
+                        "masculine",
+                        "non-past",
+                        "passive",
+                        "second-person",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "tublaʿu",
+                    "links": [("تُبْلَعُ", "تبلع#Arabic")],
+                },
+                {
+                    "form": "يُبْلَعُ",
+                    "tags": [
+                        "imperfective",
+                        "indicative",
+                        "masculine",
+                        "non-past",
+                        "passive",
+                        "singular",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "yublaʿu",
+                    "links": [("يُبْلَعُ", "يبلع#Arabic")],
+                },
+                {
+                    "form": "تُبْلَعَانِ",
+                    "tags": [
+                        "dual",
+                        "imperfective",
+                        "indicative",
+                        "masculine",
+                        "non-past",
+                        "passive",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "tublaʿāni",
+                    "links": [("تُبْلَعَانِ", "تبلعان#Arabic")],
+                },
+                {
+                    "form": "يُبْلَعَانِ",
+                    "tags": [
+                        "dual",
+                        "imperfective",
+                        "indicative",
+                        "masculine",
+                        "non-past",
+                        "passive",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "yublaʿāni",
+                    "links": [("يُبْلَعَانِ", "يبلعان#Arabic")],
+                },
+                {
+                    "form": "نُبْلَعُ",
+                    "tags": [
+                        "first-person",
+                        "imperfective",
+                        "indicative",
+                        "masculine",
+                        "non-past",
+                        "passive",
+                        "plural",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "nublaʿu",
+                    "links": [("نُبْلَعُ", "نبلع#Arabic")],
+                },
+                {
+                    "form": "تُبْلَعُونَ",
+                    "tags": [
+                        "imperfective",
+                        "indicative",
+                        "masculine",
+                        "non-past",
+                        "passive",
+                        "plural",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "tublaʿūna",
+                    "links": [("تُبْلَعُونَ", "تبلعون#Arabic")],
+                },
+                {
+                    "form": "يُبْلَعُونَ",
+                    "tags": [
+                        "imperfective",
+                        "indicative",
+                        "masculine",
+                        "non-past",
+                        "passive",
+                        "plural",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "yublaʿūna",
+                    "links": [("يُبْلَعُونَ", "يبلعون#Arabic")],
+                },
+                {
+                    "form": "أُبْلَعُ",
+                    "tags": [
+                        "feminine",
+                        "first-person",
+                        "imperfective",
+                        "indicative",
+                        "non-past",
+                        "passive",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "ʾublaʿu",
+                    "links": [("أُبْلَعُ", "أبلع#Arabic")],
+                },
+                {
+                    "form": "تُبْلَعِينَ",
+                    "tags": [
+                        "feminine",
+                        "imperfective",
+                        "indicative",
+                        "non-past",
+                        "passive",
+                        "second-person",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "tublaʿīna",
+                    "links": [("تُبْلَعِينَ", "تبلعين#Arabic")],
+                },
+                {
+                    "form": "تُبْلَعُ",
+                    "tags": [
+                        "feminine",
+                        "imperfective",
+                        "indicative",
+                        "non-past",
+                        "passive",
+                        "singular",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "tublaʿu",
+                    "links": [("تُبْلَعُ", "تبلع#Arabic")],
+                },
+                {
+                    "form": "تُبْلَعَانِ",
+                    "tags": [
+                        "dual",
+                        "feminine",
+                        "imperfective",
+                        "indicative",
+                        "non-past",
+                        "passive",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "tublaʿāni",
+                    "links": [("تُبْلَعَانِ", "تبلعان#Arabic")],
+                },
+                {
+                    "form": "تُبْلَعَانِ",
+                    "tags": [
+                        "dual",
+                        "feminine",
+                        "imperfective",
+                        "indicative",
+                        "non-past",
+                        "passive",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "tublaʿāni",
+                    "links": [("تُبْلَعَانِ", "تبلعان#Arabic")],
+                },
+                {
+                    "form": "نُبْلَعُ",
+                    "tags": [
+                        "feminine",
+                        "first-person",
+                        "imperfective",
+                        "indicative",
+                        "non-past",
+                        "passive",
+                        "plural",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "nublaʿu",
+                    "links": [("نُبْلَعُ", "نبلع#Arabic")],
+                },
+                {
+                    "form": "تُبْلَعْنَ",
+                    "tags": [
+                        "feminine",
+                        "imperfective",
+                        "indicative",
+                        "non-past",
+                        "passive",
+                        "plural",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "tublaʿna",
+                    "links": [("تُبْلَعْنَ", "تبلعن#Arabic")],
+                },
+                {
+                    "form": "يُبْلَعْنَ",
+                    "tags": [
+                        "feminine",
+                        "imperfective",
+                        "indicative",
+                        "non-past",
+                        "passive",
+                        "plural",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "yublaʿna",
+                    "links": [("يُبْلَعْنَ", "يبلعن#Arabic")],
+                },
+                {
+                    "form": "أُبْلَعَ",
+                    "tags": [
+                        "first-person",
+                        "masculine",
+                        "passive",
+                        "singular",
+                        "subjunctive",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "ʾublaʿa",
+                    "links": [("أُبْلَعَ", "أبلع#Arabic")],
+                },
+                {
+                    "form": "تُبْلَعَ",
+                    "tags": [
+                        "masculine",
+                        "passive",
+                        "second-person",
+                        "singular",
+                        "subjunctive",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "tublaʿa",
+                    "links": [("تُبْلَعَ", "تبلع#Arabic")],
+                },
+                {
+                    "form": "يُبْلَعَ",
+                    "tags": [
+                        "masculine",
+                        "passive",
+                        "singular",
+                        "subjunctive",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "yublaʿa",
+                    "links": [("يُبْلَعَ", "يبلع#Arabic")],
+                },
+                {
+                    "form": "تُبْلَعَا",
+                    "tags": [
+                        "dual",
+                        "masculine",
+                        "passive",
+                        "second-person",
+                        "subjunctive",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "tublaʿā",
+                    "links": [("تُبْلَعَا", "تبلعا#Arabic")],
+                },
+                {
+                    "form": "يُبْلَعَا",
+                    "tags": [
+                        "dual",
+                        "masculine",
+                        "passive",
+                        "subjunctive",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "yublaʿā",
+                    "links": [("يُبْلَعَا", "يبلعا#Arabic")],
+                },
+                {
+                    "form": "نُبْلَعَ",
+                    "tags": [
+                        "first-person",
+                        "masculine",
+                        "passive",
+                        "plural",
+                        "subjunctive",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "nublaʿa",
+                    "links": [("نُبْلَعَ", "نبلع#Arabic")],
+                },
+                {
+                    "form": "تُبْلَعُوا",
+                    "tags": [
+                        "masculine",
+                        "passive",
+                        "plural",
+                        "second-person",
+                        "subjunctive",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "tublaʿū",
+                    "links": [("تُبْلَعُوا", "تبلعوا#Arabic")],
+                },
+                {
+                    "form": "يُبْلَعُوا",
+                    "tags": [
+                        "masculine",
+                        "passive",
+                        "plural",
+                        "subjunctive",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "yublaʿū",
+                    "links": [("يُبْلَعُوا", "يبلعوا#Arabic")],
+                },
+                {
+                    "form": "أُبْلَعَ",
+                    "tags": [
+                        "feminine",
+                        "first-person",
+                        "passive",
+                        "singular",
+                        "subjunctive",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "ʾublaʿa",
+                    "links": [("أُبْلَعَ", "أبلع#Arabic")],
+                },
+                {
+                    "form": "تُبْلَعِي",
+                    "tags": [
+                        "feminine",
+                        "passive",
+                        "second-person",
+                        "singular",
+                        "subjunctive",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "tublaʿī",
+                    "links": [("تُبْلَعِي", "تبلعي#Arabic")],
+                },
+                {
+                    "form": "تُبْلَعَ",
+                    "tags": [
+                        "feminine",
+                        "passive",
+                        "singular",
+                        "subjunctive",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "tublaʿa",
+                    "links": [("تُبْلَعَ", "تبلع#Arabic")],
+                },
+                {
+                    "form": "تُبْلَعَا",
+                    "tags": [
+                        "dual",
+                        "feminine",
+                        "passive",
+                        "second-person",
+                        "subjunctive",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "tublaʿā",
+                    "links": [("تُبْلَعَا", "تبلعا#Arabic")],
+                },
+                {
+                    "form": "تُبْلَعَا",
+                    "tags": [
+                        "dual",
+                        "feminine",
+                        "passive",
+                        "subjunctive",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "tublaʿā",
+                    "links": [("تُبْلَعَا", "تبلعا#Arabic")],
+                },
+                {
+                    "form": "نُبْلَعَ",
+                    "tags": [
+                        "feminine",
+                        "first-person",
+                        "passive",
+                        "plural",
+                        "subjunctive",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "nublaʿa",
+                    "links": [("نُبْلَعَ", "نبلع#Arabic")],
+                },
+                {
+                    "form": "تُبْلَعْنَ",
+                    "tags": [
+                        "feminine",
+                        "passive",
+                        "plural",
+                        "second-person",
+                        "subjunctive",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "tublaʿna",
+                    "links": [("تُبْلَعْنَ", "تبلعن#Arabic")],
+                },
+                {
+                    "form": "يُبْلَعْنَ",
+                    "tags": [
+                        "feminine",
+                        "passive",
+                        "plural",
+                        "subjunctive",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "yublaʿna",
+                    "links": [("يُبْلَعْنَ", "يبلعن#Arabic")],
+                },
+                {
+                    "form": "أُبْلَعْ",
+                    "tags": [
+                        "first-person",
+                        "jussive",
+                        "masculine",
+                        "passive",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "ʾublaʿ",
+                    "links": [("أُبْلَعْ", "أبلع#Arabic")],
+                },
+                {
+                    "form": "تُبْلَعْ",
+                    "tags": [
+                        "jussive",
+                        "masculine",
+                        "passive",
+                        "second-person",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "tublaʿ",
+                    "links": [("تُبْلَعْ", "تبلع#Arabic")],
+                },
+                {
+                    "form": "يُبْلَعْ",
+                    "tags": [
+                        "jussive",
+                        "masculine",
+                        "passive",
+                        "singular",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "yublaʿ",
+                    "links": [("يُبْلَعْ", "يبلع#Arabic")],
+                },
+                {
+                    "form": "تُبْلَعَا",
+                    "tags": [
+                        "dual",
+                        "jussive",
+                        "masculine",
+                        "passive",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "tublaʿā",
+                    "links": [("تُبْلَعَا", "تبلعا#Arabic")],
+                },
+                {
+                    "form": "يُبْلَعَا",
+                    "tags": [
+                        "dual",
+                        "jussive",
+                        "masculine",
+                        "passive",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "yublaʿā",
+                    "links": [("يُبْلَعَا", "يبلعا#Arabic")],
+                },
+                {
+                    "form": "نُبْلَعْ",
+                    "tags": [
+                        "first-person",
+                        "jussive",
+                        "masculine",
+                        "passive",
+                        "plural",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "nublaʿ",
+                    "links": [("نُبْلَعْ", "نبلع#Arabic")],
+                },
+                {
+                    "form": "تُبْلَعُوا",
+                    "tags": [
+                        "jussive",
+                        "masculine",
+                        "passive",
+                        "plural",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "tublaʿū",
+                    "links": [("تُبْلَعُوا", "تبلعوا#Arabic")],
+                },
+                {
+                    "form": "يُبْلَعُوا",
+                    "tags": [
+                        "jussive",
+                        "masculine",
+                        "passive",
+                        "plural",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "yublaʿū",
+                    "links": [("يُبْلَعُوا", "يبلعوا#Arabic")],
+                },
+                {
+                    "form": "أُبْلَعْ",
+                    "tags": [
+                        "feminine",
+                        "first-person",
+                        "jussive",
+                        "passive",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "ʾublaʿ",
+                    "links": [("أُبْلَعْ", "أبلع#Arabic")],
+                },
+                {
+                    "form": "تُبْلَعِي",
+                    "tags": [
+                        "feminine",
+                        "jussive",
+                        "passive",
+                        "second-person",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "tublaʿī",
+                    "links": [("تُبْلَعِي", "تبلعي#Arabic")],
+                },
+                {
+                    "form": "تُبْلَعْ",
+                    "tags": [
+                        "feminine",
+                        "jussive",
+                        "passive",
+                        "singular",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "tublaʿ",
+                    "links": [("تُبْلَعْ", "تبلع#Arabic")],
+                },
+                {
+                    "form": "تُبْلَعَا",
+                    "tags": [
+                        "dual",
+                        "feminine",
+                        "jussive",
+                        "passive",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "tublaʿā",
+                    "links": [("تُبْلَعَا", "تبلعا#Arabic")],
+                },
+                {
+                    "form": "تُبْلَعَا",
+                    "tags": [
+                        "dual",
+                        "feminine",
+                        "jussive",
+                        "passive",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "tublaʿā",
+                    "links": [("تُبْلَعَا", "تبلعا#Arabic")],
+                },
+                {
+                    "form": "نُبْلَعْ",
+                    "tags": [
+                        "feminine",
+                        "first-person",
+                        "jussive",
+                        "passive",
+                        "plural",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "nublaʿ",
+                    "links": [("نُبْلَعْ", "نبلع#Arabic")],
+                },
+                {
+                    "form": "تُبْلَعْنَ",
+                    "tags": [
+                        "feminine",
+                        "jussive",
+                        "passive",
+                        "plural",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "tublaʿna",
+                    "links": [("تُبْلَعْنَ", "تبلعن#Arabic")],
+                },
+                {
+                    "form": "يُبْلَعْنَ",
+                    "tags": [
+                        "feminine",
+                        "jussive",
+                        "passive",
+                        "plural",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "roman": "yublaʿna",
+                    "links": [("يُبْلَعْنَ", "يبلعن#Arabic")],
+                },
+            ]
         }
+
         self.assertEqual(expected, ret)
 
     def XXX_TEMPORARILY_DISABLED_20220619_ylo_test_arabic_adj1(self):
-        ret = self.xinfl("جاذب", "Arabic", "adj", "Declension", """
+        ret = self.xinfl(
+            "جاذب",
+            "Arabic",
+            "adj",
+            "Declension",
+            """
 <div class="NavFrame">
 <div class="NavHead">Declension of adjective <span class="Arab" lang="ar">[[جاذب#Arabic|جَاذِب]]</span>&lrm; (<span lang="ar-Latn" class="tr+Latn" style="color%3A+%23888%3B">jāḏib</span>)</div>
 <div class="NavContent">
@@ -2959,704 +3064,703 @@ class EnArInflTests(unittest.TestCase):
 
 </div>
 </div>[[Category:Arabic adjectives with basic triptote singular|جاذب]][[Category:Arabic adjectives with triptote singular in -a|جاذب]][[Category:Arabic adjectives with sound masculine plural|جاذب]][[Category:Arabic adjectives with sound feminine plural|جاذب]][[Category:Arabic adjectives with broken plural|جاذب]][[Category:Arabic adjectives with basic diptote broken plural|جاذب]]
-""")  # noqa: E501
+""",
+        )  # noqa: E501
         expected = {
             "forms": [
-              {
-                "form": "no-table-tags",
-                "source": "Declension",
-                "tags": [
-                  "table-tags"
-                ]
-              },
-              {
-                "form": "جَاذِب",
-                "roman": "jāḏib",
-                "source": "Declension",
-                "tags": [
-                  "indefinite",
-                  "informal",
-                  "masculine",
-                  "singular",
-                  "triptote"
-                ]
-              },
-              {
-                "form": "الْجَاذِب",
-                "roman": "al-jāḏib",
-                "source": "Declension",
-                "tags": [
-                  "definite",
-                  "informal",
-                  "masculine",
-                  "singular",
-                  "triptote"
-                ]
-              },
-              {
-                "form": "جَاذِبَة",
-                "roman": "jāḏiba",
-                "source": "Declension",
-                "tags": [
-                  "feminine",
-                  "indefinite",
-                  "informal",
-                  "singular",
-                  "triptote-a"
-                ]
-              },
-              {
-                "form": "الْجَاذِبَة",
-                "roman": "al-jāḏiba",
-                "source": "Declension",
-                "tags": [
-                  "definite",
-                  "feminine",
-                  "informal",
-                  "singular",
-                  "triptote-a"
-                ]
-              },
-              {
-                "form": "جَاذِبٌ",
-                "roman": "jāḏibun",
-                "source": "Declension",
-                "tags": [
-                  "indefinite",
-                  "masculine",
-                  "nominative",
-                  "singular",
-                  "triptote"
-                ]
-              },
-              {
-                "form": "الْجَاذِبُ",
-                "roman": "al-jāḏibu",
-                "source": "Declension",
-                "tags": [
-                  "definite",
-                  "masculine",
-                  "nominative",
-                  "singular",
-                  "triptote"
-                ]
-              },
-              {
-                "form": "جَاذِبَةٌ",
-                "roman": "jāḏibatun",
-                "source": "Declension",
-                "tags": [
-                  "feminine",
-                  "indefinite",
-                  "nominative",
-                  "singular",
-                  "triptote-a"
-                ]
-              },
-              {
-                "form": "الْجَاذِبَةُ",
-                "roman": "al-jāḏibatu",
-                "source": "Declension",
-                "tags": [
-                  "definite",
-                  "feminine",
-                  "nominative",
-                  "singular",
-                  "triptote-a"
-                ]
-              },
-              {
-                "form": "جَاذِبًا",
-                "roman": "jāḏiban",
-                "source": "Declension",
-                "tags": [
-                  "accusative",
-                  "indefinite",
-                  "masculine",
-                  "singular",
-                  "triptote"
-                ]
-              },
-              {
-                "form": "الْجَاذِبَ",
-                "roman": "al-jāḏiba",
-                "source": "Declension",
-                "tags": [
-                  "accusative",
-                  "definite",
-                  "masculine",
-                  "singular",
-                  "triptote"
-                ]
-              },
-              {
-                "form": "جَاذِبَةً",
-                "roman": "jāḏibatan",
-                "source": "Declension",
-                "tags": [
-                  "accusative",
-                  "feminine",
-                  "indefinite",
-                  "singular",
-                  "triptote-a"
-                ]
-              },
-              {
-                "form": "الْجَاذِبَةَ",
-                "roman": "al-jāḏibata",
-                "source": "Declension",
-                "tags": [
-                  "accusative",
-                  "definite",
-                  "feminine",
-                  "singular",
-                  "triptote-a"
-                ]
-              },
-              {
-                "form": "جَاذِبٍ",
-                "roman": "jāḏibin",
-                "source": "Declension",
-                "tags": [
-                  "genitive",
-                  "indefinite",
-                  "masculine",
-                  "singular",
-                  "triptote"
-                ]
-              },
-              {
-                "form": "الْجَاذِبِ",
-                "roman": "al-jāḏibi",
-                "source": "Declension",
-                "tags": [
-                  "definite",
-                  "genitive",
-                  "masculine",
-                  "singular",
-                  "triptote"
-                ]
-              },
-              {
-                "form": "جَاذِبَةٍ",
-                "roman": "jāḏibatin",
-                "source": "Declension",
-                "tags": [
-                  "feminine",
-                  "genitive",
-                  "indefinite",
-                  "singular",
-                  "triptote-a"
-                ]
-              },
-              {
-                "form": "الْجَاذِبَةِ",
-                "roman": "al-jāḏibati",
-                "source": "Declension",
-                "tags": [
-                  "definite",
-                  "feminine",
-                  "genitive",
-                  "singular",
-                  "triptote-a"
-                ]
-              },
-              {
-                "form": "جَاذِبَيْن",
-                "roman": "jāḏibayn",
-                "source": "Declension",
-                "tags": [
-                  "dual",
-                  "indefinite",
-                  "informal",
-                  "masculine",
-                  "triptote"
-                ]
-              },
-              {
-                "form": "الْجَاذِبَيْن",
-                "roman": "al-jāḏibayn",
-                "source": "Declension",
-                "tags": [
-                  "definite",
-                  "dual",
-                  "informal",
-                  "masculine",
-                  "triptote"
-                ]
-              },
-              {
-                "form": "جَاذِبَتَيْن",
-                "roman": "jāḏibatayn",
-                "source": "Declension",
-                "tags": [
-                  "dual",
-                  "feminine",
-                  "indefinite",
-                  "informal",
-                  "singular",
-                  "triptote-a"
-                ]
-              },
-              {
-                "form": "الْجَاذِبَتَيْن",
-                "roman": "al-jāḏibatayn",
-                "source": "Declension",
-                "tags": [
-                  "definite",
-                  "dual",
-                  "feminine",
-                  "informal",
-                  "singular",
-                  "triptote-a"
-                ]
-              },
-              {
-                "form": "جَاذِبَانِ",
-                "roman": "jāḏibāni",
-                "source": "Declension",
-                "tags": [
-                  "dual",
-                  "indefinite",
-                  "masculine",
-                  "nominative",
-                  "triptote"
-                ]
-              },
-              {
-                "form": "الْجَاذِبَانِ",
-                "roman": "al-jāḏibāni",
-                "source": "Declension",
-                "tags": [
-                  "definite",
-                  "dual",
-                  "masculine",
-                  "nominative",
-                  "triptote"
-                ]
-              },
-              {
-                "form": "جَاذِبَتَانِ",
-                "roman": "jāḏibatāni",
-                "source": "Declension",
-                "tags": [
-                  "dual",
-                  "feminine",
-                  "indefinite",
-                  "nominative",
-                  "singular",
-                  "triptote-a"
-                ]
-              },
-              {
-                "form": "الْجَاذِبَتَانِ",
-                "roman": "al-jāḏibatāni",
-                "source": "Declension",
-                "tags": [
-                  "definite",
-                  "dual",
-                  "feminine",
-                  "nominative",
-                  "singular",
-                  "triptote-a"
-                ]
-              },
-              {
-                "form": "جَاذِبَيْنِ",
-                "roman": "jāḏibayni",
-                "source": "Declension",
-                "tags": [
-                  "accusative",
-                  "dual",
-                  "indefinite",
-                  "masculine",
-                  "triptote"
-                ]
-              },
-              {
-                "form": "الْجَاذِبَيْنِ",
-                "roman": "al-jāḏibayni",
-                "source": "Declension",
-                "tags": [
-                  "accusative",
-                  "definite",
-                  "dual",
-                  "masculine",
-                  "triptote"
-                ]
-              },
-              {
-                "form": "جَاذِبَتَيْنِ",
-                "roman": "jāḏibatayni",
-                "source": "Declension",
-                "tags": [
-                  "accusative",
-                  "dual",
-                  "feminine",
-                  "indefinite",
-                  "singular",
-                  "triptote-a"
-                ]
-              },
-              {
-                "form": "الْجَاذِبَتَيْنِ",
-                "roman": "al-jāḏibatayni",
-                "source": "Declension",
-                "tags": [
-                  "accusative",
-                  "definite",
-                  "dual",
-                  "feminine",
-                  "singular",
-                  "triptote-a"
-                ]
-              },
-              {
-                "form": "جَاذِبَيْنِ",
-                "roman": "jāḏibayni",
-                "source": "Declension",
-                "tags": [
-                  "dual",
-                  "genitive",
-                  "indefinite",
-                  "masculine",
-                  "triptote"
-                ]
-              },
-              {
-                "form": "الْجَاذِبَيْنِ",
-                "roman": "al-jāḏibayni",
-                "source": "Declension",
-                "tags": [
-                  "definite",
-                  "dual",
-                  "genitive",
-                  "masculine",
-                  "triptote"
-                ]
-              },
-              {
-                "form": "جَاذِبَتَيْنِ",
-                "roman": "jāḏibatayni",
-                "source": "Declension",
-                "tags": [
-                  "dual",
-                  "feminine",
-                  "genitive",
-                  "indefinite",
-                  "singular",
-                  "triptote-a"
-                ]
-              },
-              {
-                "form": "الْجَاذِبَتَيْنِ",
-                "roman": "al-jāḏibatayni",
-                "source": "Declension",
-                "tags": [
-                  "definite",
-                  "dual",
-                  "feminine",
-                  "genitive",
-                  "singular",
-                  "triptote-a"
-                ]
-              },
-              {
-                "form": "جَاذِبِين",
-                "roman": "jāḏibīn",
-                "source": "Declension",
-                "tags": [
-                  "indefinite",
-                  "informal",
-                  "masculine",
-                  "plural",
-                  "sound-masculine-plural"
-                ]
-              },
-              {
-                "form": "الْجَاذِبِين",
-                "roman": "al-jāḏibīn",
-                "source": "Declension",
-                "tags": [
-                  "definite",
-                  "informal",
-                  "masculine",
-                  "plural",
-                  "sound-masculine-plural"
-                ]
-              },
-              {
-                "form": "جَاذِبَات",
-                "roman": "jāḏibāt",
-                "source": "Declension",
-                "tags": [
-                  "feminine",
-                  "indefinite",
-                  "informal",
-                  "plural",
-                  "sound-feminine-plural"
-                ]
-              },
-              {
-                "form": "جَوَاذِب",
-                "roman": "jawāḏib",
-                "source": "Declension",
-                "tags": [
-                  "broken-plural",
-                  "diptote",
-                  "feminine",
-                  "indefinite",
-                  "informal",
-                  "plural"
-                ]
-              },
-              {
-                "form": "الْجَاذِبَات",
-                "roman": "al-jāḏibāt",
-                "source": "Declension",
-                "tags": [
-                  "definite",
-                  "feminine",
-                  "informal",
-                  "plural",
-                  "sound-feminine-plural"
-                ]
-              },
-              {
-                "form": "الْجَوَاذِب",
-                "roman": "al-jawāḏib",
-                "source": "Declension",
-                "tags": [
-                  "broken-plural",
-                  "definite",
-                  "diptote",
-                  "feminine",
-                  "informal",
-                  "plural"
-                ]
-              },
-              {
-                "form": "جَاذِبُونَ",
-                "roman": "jāḏibūna",
-                "source": "Declension",
-                "tags": [
-                  "indefinite",
-                  "masculine",
-                  "nominative",
-                  "plural",
-                  "sound-masculine-plural"
-                ]
-              },
-              {
-                "form": "الْجَاذِبُونَ",
-                "roman": "al-jāḏibūna",
-                "source": "Declension",
-                "tags": [
-                  "definite",
-                  "masculine",
-                  "nominative",
-                  "plural",
-                  "sound-masculine-plural"
-                ]
-              },
-              {
-                "form": "جَاذِبَاتٌ",
-                "roman": "jāḏibātun",
-                "source": "Declension",
-                "tags": [
-                  "feminine",
-                  "indefinite",
-                  "nominative",
-                  "plural",
-                  "sound-feminine-plural"
-                ]
-              },
-              {
-                "form": "جَوَاذِبُ",
-                "roman": "jawāḏibu",
-                "source": "Declension",
-                "tags": [
-                  "broken-plural",
-                  "diptote",
-                  "feminine",
-                  "indefinite",
-                  "nominative",
-                  "plural"
-                ]
-              },
-              {
-                "form": "الْجَاذِبَاتُ",
-                "roman": "al-jāḏibātu",
-                "source": "Declension",
-                "tags": [
-                  "definite",
-                  "feminine",
-                  "nominative",
-                  "plural",
-                  "sound-feminine-plural"
-                ]
-              },
-              {
-                "form": "الْجَوَاذِبُ",
-                "roman": "al-jawāḏibu",
-                "source": "Declension",
-                "tags": [
-                  "broken-plural",
-                  "definite",
-                  "diptote",
-                  "feminine",
-                  "nominative",
-                  "plural"
-                ]
-              },
-              {
-                "form": "جَاذِبِينَ",
-                "roman": "jāḏibīna",
-                "source": "Declension",
-                "tags": [
-                  "accusative",
-                  "indefinite",
-                  "masculine",
-                  "plural",
-                  "sound-masculine-plural"
-                ]
-              },
-              {
-                "form": "الْجَاذِبِينَ",
-                "roman": "al-jāḏibīna",
-                "source": "Declension",
-                "tags": [
-                  "accusative",
-                  "definite",
-                  "masculine",
-                  "plural",
-                  "sound-masculine-plural"
-                ]
-              },
-              {
-                "form": "جَاذِبَاتٍ",
-                "roman": "jāḏibātin",
-                "source": "Declension",
-                "tags": [
-                  "accusative",
-                  "feminine",
-                  "indefinite",
-                  "plural",
-                  "sound-feminine-plural"
-                ]
-              },
-              {
-                "form": "جَوَاذِبَ",
-                "roman": "jawāḏiba",
-                "source": "Declension",
-                "tags": [
-                  "accusative",
-                  "broken-plural",
-                  "diptote",
-                  "feminine",
-                  "indefinite",
-                  "plural"
-                ]
-              },
-              {
-                "form": "الْجَاذِبَاتِ",
-                "roman": "al-jāḏibāti",
-                "source": "Declension",
-                "tags": [
-                  "accusative",
-                  "definite",
-                  "feminine",
-                  "plural",
-                  "sound-feminine-plural"
-                ]
-              },
-              {
-                "form": "الْجَوَاذِبَ",
-                "roman": "al-jawāḏiba",
-                "source": "Declension",
-                "tags": [
-                  "accusative",
-                  "broken-plural",
-                  "definite",
-                  "diptote",
-                  "feminine",
-                  "plural"
-                ]
-              },
-              {
-                "form": "جَاذِبِينَ",
-                "roman": "jāḏibīna",
-                "source": "Declension",
-                "tags": [
-                  "genitive",
-                  "indefinite",
-                  "masculine",
-                  "plural",
-                  "sound-masculine-plural"
-                ]
-              },
-              {
-                "form": "الْجَاذِبِينَ",
-                "roman": "al-jāḏibīna",
-                "source": "Declension",
-                "tags": [
-                  "definite",
-                  "genitive",
-                  "masculine",
-                  "plural",
-                  "sound-masculine-plural"
-                ]
-              },
-              {
-                "form": "جَاذِبَاتٍ",
-                "roman": "jāḏibātin",
-                "source": "Declension",
-                "tags": [
-                  "feminine",
-                  "genitive",
-                  "indefinite",
-                  "plural",
-                  "sound-feminine-plural"
-                ]
-              },
-              {
-                "form": "جَوَاذِبَ",
-                "roman": "jawāḏiba",
-                "source": "Declension",
-                "tags": [
-                  "broken-plural",
-                  "diptote",
-                  "feminine",
-                  "genitive",
-                  "indefinite",
-                  "plural"
-                ]
-              },
-              {
-                "form": "الْجَاذِبَاتِ",
-                "roman": "al-jāḏibāti",
-                "source": "Declension",
-                "tags": [
-                  "definite",
-                  "feminine",
-                  "genitive",
-                  "plural",
-                  "sound-feminine-plural"
-                ]
-              },
-              {
-                "form": "الْجَوَاذِبِ",
-                "roman": "al-jawāḏibi",
-                "source": "Declension",
-                "tags": [
-                  "broken-plural",
-                  "definite",
-                  "diptote",
-                  "feminine",
-                  "genitive",
-                  "plural"
-                ]
-              }
+                {
+                    "form": "no-table-tags",
+                    "source": "Declension",
+                    "tags": ["table-tags"],
+                },
+                {
+                    "form": "جَاذِب",
+                    "roman": "jāḏib",
+                    "source": "Declension",
+                    "tags": [
+                        "indefinite",
+                        "informal",
+                        "masculine",
+                        "singular",
+                        "triptote",
+                    ],
+                },
+                {
+                    "form": "الْجَاذِب",
+                    "roman": "al-jāḏib",
+                    "source": "Declension",
+                    "tags": [
+                        "definite",
+                        "informal",
+                        "masculine",
+                        "singular",
+                        "triptote",
+                    ],
+                },
+                {
+                    "form": "جَاذِبَة",
+                    "roman": "jāḏiba",
+                    "source": "Declension",
+                    "tags": [
+                        "feminine",
+                        "indefinite",
+                        "informal",
+                        "singular",
+                        "triptote-a",
+                    ],
+                },
+                {
+                    "form": "الْجَاذِبَة",
+                    "roman": "al-jāḏiba",
+                    "source": "Declension",
+                    "tags": [
+                        "definite",
+                        "feminine",
+                        "informal",
+                        "singular",
+                        "triptote-a",
+                    ],
+                },
+                {
+                    "form": "جَاذِبٌ",
+                    "roman": "jāḏibun",
+                    "source": "Declension",
+                    "tags": [
+                        "indefinite",
+                        "masculine",
+                        "nominative",
+                        "singular",
+                        "triptote",
+                    ],
+                },
+                {
+                    "form": "الْجَاذِبُ",
+                    "roman": "al-jāḏibu",
+                    "source": "Declension",
+                    "tags": [
+                        "definite",
+                        "masculine",
+                        "nominative",
+                        "singular",
+                        "triptote",
+                    ],
+                },
+                {
+                    "form": "جَاذِبَةٌ",
+                    "roman": "jāḏibatun",
+                    "source": "Declension",
+                    "tags": [
+                        "feminine",
+                        "indefinite",
+                        "nominative",
+                        "singular",
+                        "triptote-a",
+                    ],
+                },
+                {
+                    "form": "الْجَاذِبَةُ",
+                    "roman": "al-jāḏibatu",
+                    "source": "Declension",
+                    "tags": [
+                        "definite",
+                        "feminine",
+                        "nominative",
+                        "singular",
+                        "triptote-a",
+                    ],
+                },
+                {
+                    "form": "جَاذِبًا",
+                    "roman": "jāḏiban",
+                    "source": "Declension",
+                    "tags": [
+                        "accusative",
+                        "indefinite",
+                        "masculine",
+                        "singular",
+                        "triptote",
+                    ],
+                },
+                {
+                    "form": "الْجَاذِبَ",
+                    "roman": "al-jāḏiba",
+                    "source": "Declension",
+                    "tags": [
+                        "accusative",
+                        "definite",
+                        "masculine",
+                        "singular",
+                        "triptote",
+                    ],
+                },
+                {
+                    "form": "جَاذِبَةً",
+                    "roman": "jāḏibatan",
+                    "source": "Declension",
+                    "tags": [
+                        "accusative",
+                        "feminine",
+                        "indefinite",
+                        "singular",
+                        "triptote-a",
+                    ],
+                },
+                {
+                    "form": "الْجَاذِبَةَ",
+                    "roman": "al-jāḏibata",
+                    "source": "Declension",
+                    "tags": [
+                        "accusative",
+                        "definite",
+                        "feminine",
+                        "singular",
+                        "triptote-a",
+                    ],
+                },
+                {
+                    "form": "جَاذِبٍ",
+                    "roman": "jāḏibin",
+                    "source": "Declension",
+                    "tags": [
+                        "genitive",
+                        "indefinite",
+                        "masculine",
+                        "singular",
+                        "triptote",
+                    ],
+                },
+                {
+                    "form": "الْجَاذِبِ",
+                    "roman": "al-jāḏibi",
+                    "source": "Declension",
+                    "tags": [
+                        "definite",
+                        "genitive",
+                        "masculine",
+                        "singular",
+                        "triptote",
+                    ],
+                },
+                {
+                    "form": "جَاذِبَةٍ",
+                    "roman": "jāḏibatin",
+                    "source": "Declension",
+                    "tags": [
+                        "feminine",
+                        "genitive",
+                        "indefinite",
+                        "singular",
+                        "triptote-a",
+                    ],
+                },
+                {
+                    "form": "الْجَاذِبَةِ",
+                    "roman": "al-jāḏibati",
+                    "source": "Declension",
+                    "tags": [
+                        "definite",
+                        "feminine",
+                        "genitive",
+                        "singular",
+                        "triptote-a",
+                    ],
+                },
+                {
+                    "form": "جَاذِبَيْن",
+                    "roman": "jāḏibayn",
+                    "source": "Declension",
+                    "tags": [
+                        "dual",
+                        "indefinite",
+                        "informal",
+                        "masculine",
+                        "triptote",
+                    ],
+                },
+                {
+                    "form": "الْجَاذِبَيْن",
+                    "roman": "al-jāḏibayn",
+                    "source": "Declension",
+                    "tags": [
+                        "definite",
+                        "dual",
+                        "informal",
+                        "masculine",
+                        "triptote",
+                    ],
+                },
+                {
+                    "form": "جَاذِبَتَيْن",
+                    "roman": "jāḏibatayn",
+                    "source": "Declension",
+                    "tags": [
+                        "dual",
+                        "feminine",
+                        "indefinite",
+                        "informal",
+                        "singular",
+                        "triptote-a",
+                    ],
+                },
+                {
+                    "form": "الْجَاذِبَتَيْن",
+                    "roman": "al-jāḏibatayn",
+                    "source": "Declension",
+                    "tags": [
+                        "definite",
+                        "dual",
+                        "feminine",
+                        "informal",
+                        "singular",
+                        "triptote-a",
+                    ],
+                },
+                {
+                    "form": "جَاذِبَانِ",
+                    "roman": "jāḏibāni",
+                    "source": "Declension",
+                    "tags": [
+                        "dual",
+                        "indefinite",
+                        "masculine",
+                        "nominative",
+                        "triptote",
+                    ],
+                },
+                {
+                    "form": "الْجَاذِبَانِ",
+                    "roman": "al-jāḏibāni",
+                    "source": "Declension",
+                    "tags": [
+                        "definite",
+                        "dual",
+                        "masculine",
+                        "nominative",
+                        "triptote",
+                    ],
+                },
+                {
+                    "form": "جَاذِبَتَانِ",
+                    "roman": "jāḏibatāni",
+                    "source": "Declension",
+                    "tags": [
+                        "dual",
+                        "feminine",
+                        "indefinite",
+                        "nominative",
+                        "singular",
+                        "triptote-a",
+                    ],
+                },
+                {
+                    "form": "الْجَاذِبَتَانِ",
+                    "roman": "al-jāḏibatāni",
+                    "source": "Declension",
+                    "tags": [
+                        "definite",
+                        "dual",
+                        "feminine",
+                        "nominative",
+                        "singular",
+                        "triptote-a",
+                    ],
+                },
+                {
+                    "form": "جَاذِبَيْنِ",
+                    "roman": "jāḏibayni",
+                    "source": "Declension",
+                    "tags": [
+                        "accusative",
+                        "dual",
+                        "indefinite",
+                        "masculine",
+                        "triptote",
+                    ],
+                },
+                {
+                    "form": "الْجَاذِبَيْنِ",
+                    "roman": "al-jāḏibayni",
+                    "source": "Declension",
+                    "tags": [
+                        "accusative",
+                        "definite",
+                        "dual",
+                        "masculine",
+                        "triptote",
+                    ],
+                },
+                {
+                    "form": "جَاذِبَتَيْنِ",
+                    "roman": "jāḏibatayni",
+                    "source": "Declension",
+                    "tags": [
+                        "accusative",
+                        "dual",
+                        "feminine",
+                        "indefinite",
+                        "singular",
+                        "triptote-a",
+                    ],
+                },
+                {
+                    "form": "الْجَاذِبَتَيْنِ",
+                    "roman": "al-jāḏibatayni",
+                    "source": "Declension",
+                    "tags": [
+                        "accusative",
+                        "definite",
+                        "dual",
+                        "feminine",
+                        "singular",
+                        "triptote-a",
+                    ],
+                },
+                {
+                    "form": "جَاذِبَيْنِ",
+                    "roman": "jāḏibayni",
+                    "source": "Declension",
+                    "tags": [
+                        "dual",
+                        "genitive",
+                        "indefinite",
+                        "masculine",
+                        "triptote",
+                    ],
+                },
+                {
+                    "form": "الْجَاذِبَيْنِ",
+                    "roman": "al-jāḏibayni",
+                    "source": "Declension",
+                    "tags": [
+                        "definite",
+                        "dual",
+                        "genitive",
+                        "masculine",
+                        "triptote",
+                    ],
+                },
+                {
+                    "form": "جَاذِبَتَيْنِ",
+                    "roman": "jāḏibatayni",
+                    "source": "Declension",
+                    "tags": [
+                        "dual",
+                        "feminine",
+                        "genitive",
+                        "indefinite",
+                        "singular",
+                        "triptote-a",
+                    ],
+                },
+                {
+                    "form": "الْجَاذِبَتَيْنِ",
+                    "roman": "al-jāḏibatayni",
+                    "source": "Declension",
+                    "tags": [
+                        "definite",
+                        "dual",
+                        "feminine",
+                        "genitive",
+                        "singular",
+                        "triptote-a",
+                    ],
+                },
+                {
+                    "form": "جَاذِبِين",
+                    "roman": "jāḏibīn",
+                    "source": "Declension",
+                    "tags": [
+                        "indefinite",
+                        "informal",
+                        "masculine",
+                        "plural",
+                        "sound-masculine-plural",
+                    ],
+                },
+                {
+                    "form": "الْجَاذِبِين",
+                    "roman": "al-jāḏibīn",
+                    "source": "Declension",
+                    "tags": [
+                        "definite",
+                        "informal",
+                        "masculine",
+                        "plural",
+                        "sound-masculine-plural",
+                    ],
+                },
+                {
+                    "form": "جَاذِبَات",
+                    "roman": "jāḏibāt",
+                    "source": "Declension",
+                    "tags": [
+                        "feminine",
+                        "indefinite",
+                        "informal",
+                        "plural",
+                        "sound-feminine-plural",
+                    ],
+                },
+                {
+                    "form": "جَوَاذِب",
+                    "roman": "jawāḏib",
+                    "source": "Declension",
+                    "tags": [
+                        "broken-plural",
+                        "diptote",
+                        "feminine",
+                        "indefinite",
+                        "informal",
+                        "plural",
+                    ],
+                },
+                {
+                    "form": "الْجَاذِبَات",
+                    "roman": "al-jāḏibāt",
+                    "source": "Declension",
+                    "tags": [
+                        "definite",
+                        "feminine",
+                        "informal",
+                        "plural",
+                        "sound-feminine-plural",
+                    ],
+                },
+                {
+                    "form": "الْجَوَاذِب",
+                    "roman": "al-jawāḏib",
+                    "source": "Declension",
+                    "tags": [
+                        "broken-plural",
+                        "definite",
+                        "diptote",
+                        "feminine",
+                        "informal",
+                        "plural",
+                    ],
+                },
+                {
+                    "form": "جَاذِبُونَ",
+                    "roman": "jāḏibūna",
+                    "source": "Declension",
+                    "tags": [
+                        "indefinite",
+                        "masculine",
+                        "nominative",
+                        "plural",
+                        "sound-masculine-plural",
+                    ],
+                },
+                {
+                    "form": "الْجَاذِبُونَ",
+                    "roman": "al-jāḏibūna",
+                    "source": "Declension",
+                    "tags": [
+                        "definite",
+                        "masculine",
+                        "nominative",
+                        "plural",
+                        "sound-masculine-plural",
+                    ],
+                },
+                {
+                    "form": "جَاذِبَاتٌ",
+                    "roman": "jāḏibātun",
+                    "source": "Declension",
+                    "tags": [
+                        "feminine",
+                        "indefinite",
+                        "nominative",
+                        "plural",
+                        "sound-feminine-plural",
+                    ],
+                },
+                {
+                    "form": "جَوَاذِبُ",
+                    "roman": "jawāḏibu",
+                    "source": "Declension",
+                    "tags": [
+                        "broken-plural",
+                        "diptote",
+                        "feminine",
+                        "indefinite",
+                        "nominative",
+                        "plural",
+                    ],
+                },
+                {
+                    "form": "الْجَاذِبَاتُ",
+                    "roman": "al-jāḏibātu",
+                    "source": "Declension",
+                    "tags": [
+                        "definite",
+                        "feminine",
+                        "nominative",
+                        "plural",
+                        "sound-feminine-plural",
+                    ],
+                },
+                {
+                    "form": "الْجَوَاذِبُ",
+                    "roman": "al-jawāḏibu",
+                    "source": "Declension",
+                    "tags": [
+                        "broken-plural",
+                        "definite",
+                        "diptote",
+                        "feminine",
+                        "nominative",
+                        "plural",
+                    ],
+                },
+                {
+                    "form": "جَاذِبِينَ",
+                    "roman": "jāḏibīna",
+                    "source": "Declension",
+                    "tags": [
+                        "accusative",
+                        "indefinite",
+                        "masculine",
+                        "plural",
+                        "sound-masculine-plural",
+                    ],
+                },
+                {
+                    "form": "الْجَاذِبِينَ",
+                    "roman": "al-jāḏibīna",
+                    "source": "Declension",
+                    "tags": [
+                        "accusative",
+                        "definite",
+                        "masculine",
+                        "plural",
+                        "sound-masculine-plural",
+                    ],
+                },
+                {
+                    "form": "جَاذِبَاتٍ",
+                    "roman": "jāḏibātin",
+                    "source": "Declension",
+                    "tags": [
+                        "accusative",
+                        "feminine",
+                        "indefinite",
+                        "plural",
+                        "sound-feminine-plural",
+                    ],
+                },
+                {
+                    "form": "جَوَاذِبَ",
+                    "roman": "jawāḏiba",
+                    "source": "Declension",
+                    "tags": [
+                        "accusative",
+                        "broken-plural",
+                        "diptote",
+                        "feminine",
+                        "indefinite",
+                        "plural",
+                    ],
+                },
+                {
+                    "form": "الْجَاذِبَاتِ",
+                    "roman": "al-jāḏibāti",
+                    "source": "Declension",
+                    "tags": [
+                        "accusative",
+                        "definite",
+                        "feminine",
+                        "plural",
+                        "sound-feminine-plural",
+                    ],
+                },
+                {
+                    "form": "الْجَوَاذِبَ",
+                    "roman": "al-jawāḏiba",
+                    "source": "Declension",
+                    "tags": [
+                        "accusative",
+                        "broken-plural",
+                        "definite",
+                        "diptote",
+                        "feminine",
+                        "plural",
+                    ],
+                },
+                {
+                    "form": "جَاذِبِينَ",
+                    "roman": "jāḏibīna",
+                    "source": "Declension",
+                    "tags": [
+                        "genitive",
+                        "indefinite",
+                        "masculine",
+                        "plural",
+                        "sound-masculine-plural",
+                    ],
+                },
+                {
+                    "form": "الْجَاذِبِينَ",
+                    "roman": "al-jāḏibīna",
+                    "source": "Declension",
+                    "tags": [
+                        "definite",
+                        "genitive",
+                        "masculine",
+                        "plural",
+                        "sound-masculine-plural",
+                    ],
+                },
+                {
+                    "form": "جَاذِبَاتٍ",
+                    "roman": "jāḏibātin",
+                    "source": "Declension",
+                    "tags": [
+                        "feminine",
+                        "genitive",
+                        "indefinite",
+                        "plural",
+                        "sound-feminine-plural",
+                    ],
+                },
+                {
+                    "form": "جَوَاذِبَ",
+                    "roman": "jawāḏiba",
+                    "source": "Declension",
+                    "tags": [
+                        "broken-plural",
+                        "diptote",
+                        "feminine",
+                        "genitive",
+                        "indefinite",
+                        "plural",
+                    ],
+                },
+                {
+                    "form": "الْجَاذِبَاتِ",
+                    "roman": "al-jāḏibāti",
+                    "source": "Declension",
+                    "tags": [
+                        "definite",
+                        "feminine",
+                        "genitive",
+                        "plural",
+                        "sound-feminine-plural",
+                    ],
+                },
+                {
+                    "form": "الْجَوَاذِبِ",
+                    "roman": "al-jawāḏibi",
+                    "source": "Declension",
+                    "tags": [
+                        "broken-plural",
+                        "definite",
+                        "diptote",
+                        "feminine",
+                        "genitive",
+                        "plural",
+                    ],
+                },
             ],
         }
         self.assertEqual(expected, ret)

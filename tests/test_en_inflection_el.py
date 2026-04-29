@@ -33,12 +33,16 @@ class InflTests(unittest.TestCase):
         self.wxr.wtp.start_subsection(pos)
         tree = self.wxr.wtp.parse(text)
         data = {}
-        parse_inflection_section(self.wxr, data, word, lang, pos,
-                                 section, tree)
+        parse_inflection_section(self.wxr, data, word, lang, pos, section, tree)
         return data
 
     def test_Greek_verb1(self):
-        ret = self.xinfl("είμαι", "Greek", "verb", "Conjugation", """
+        ret = self.xinfl(
+            "είμαι",
+            "Greek",
+            "verb",
+            "Conjugation",
+            """
 <div class="NavFrame">
 <div class="NavHead" style="background%3A%239FBFFF%3B+text-align%3Aleft">είμαι</div>
 <div class="NavContent">
@@ -266,467 +270,468 @@ class InflTests(unittest.TestCase):
 |}
 </div></div>[[Category:Greek irregular verbs]]
 * <small><templatestyles src="audio%2Fstyles.css"></small><table class="audiotable" style="vertical-align%3A+bottom%3B+display%3Ainline-block%3B+list-style%3Anone%3Bline-height%3A+1em%3B+border-collapse%3Acollapse%3B"><tr><td class="unicode+audiolink" style="padding-right%3A5px%3B+padding-left%3A+0%3B">Audio: present indicative</td><td class="audiofile">[[File:El-είμαι conjugation-present indicative.ogg|noicon|175px]]</td><td class="audiometa" style="font-size%3A+80%25%3B">([[:File:El-είμαι conjugation-present indicative.ogg|file]])</td></tr></table>[[Category:Greek terms with audio links|ΕΙΜΑΙ]] <templatestyles src="audio%2Fstyles.css"><table class="audiotable" style="vertical-align%3A+bottom%3B+display%3Ainline-block%3B+list-style%3Anone%3Bline-height%3A+1em%3B+border-collapse%3Acollapse%3B"><tr><td class="unicode+audiolink" style="padding-right%3A5px%3B+padding-left%3A+0%3B">imperfect</td><td class="audiofile">[[File:El-είμαι-conjugation-imperfect-ήμουν.ogg|noicon|175px]]</td><td class="audiometa" style="font-size%3A+80%25%3B">([[:File:El-είμαι-conjugation-imperfect-ήμουν.ogg|file]])</td></tr></table>[[Category:Greek terms with audio links|ΕΙΜΑΙ]]</small>
-""")  # noqa: E501
+""",
+        )  # noqa: E501
         expected = {
             "forms": [
-              {
-                "form": "no-table-tags",
-                "source": "Conjugation",
-                "tags": [
-                  "table-tags"
-                ]
-              },
-              {
-                "form": "είμαι",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "first-person",
-                  "imperfective",
-                  "indicative",
-                  "present",
-                  "singular"
-                ]
-              },
-              {
-                "form": "ήμουν",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "first-person",
-                  "imperfect",
-                  "imperfective",
-                  "indicative",
-                  "informal",
-                  "singular"
-                ]
-              },
-              {
-                "form": "ήμουνα",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "first-person",
-                  "imperfect",
-                  "imperfective",
-                  "indicative",
-                  "informal",
-                  "singular"
-                ]
-              },
-              {
-                "form": "θα είμαι",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "first-person",
-                  "future",
-                  "imperfective",
-                  "indicative",
-                  "singular"
-                ]
-              },
-              {
-                "form": "είσαι",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperfective",
-                  "indicative",
-                  "present",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "ήσουν",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperfect",
-                  "imperfective",
-                  "indicative",
-                  "informal",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "ήσουνα",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperfect",
-                  "imperfective",
-                  "indicative",
-                  "informal",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "θα είσαι",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "future",
-                  "imperfective",
-                  "indicative",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "είναι",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperfective",
-                  "indicative",
-                  "present",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "ήταν",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperfect",
-                  "imperfective",
-                  "indicative",
-                  "informal",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "ήτανε",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperfect",
-                  "imperfective",
-                  "indicative",
-                  "informal",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "θα είναι",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "future",
-                  "imperfective",
-                  "indicative",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "είμαστε",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "first-person",
-                  "imperfective",
-                  "indicative",
-                  "plural",
-                  "present"
-                ]
-              },
-              {
-                "form": "είμεθα",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "archaic",
-                  "first-person",
-                  "formal",
-                  "imperfective",
-                  "indicative",
-                  "plural",
-                  "present",
-                  "rare"
-                ]
-              },
-              {
-                "form": "ήμαστε",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "first-person",
-                  "imperfect",
-                  "imperfective",
-                  "indicative",
-                  "plural"
-                ]
-              },
-              {
-                "form": "ήμασταν",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "first-person",
-                  "imperfect",
-                  "imperfective",
-                  "indicative",
-                  "plural"
-                ]
-              },
-              {
-                "form": "θα είμαστε",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "first-person",
-                  "future",
-                  "imperfective",
-                  "indicative",
-                  "plural"
-                ]
-              },
-              {
-                "form": "είστε",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperfective",
-                  "indicative",
-                  "plural",
-                  "present",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "είσαστε",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperfective",
-                  "indicative",
-                  "plural",
-                  "present",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "ήσαστε",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperfect",
-                  "imperfective",
-                  "indicative",
-                  "plural",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "ήσασταν",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperfect",
-                  "imperfective",
-                  "indicative",
-                  "plural",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "θα είστε",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "future",
-                  "imperfective",
-                  "indicative",
-                  "plural",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "θα είσαστε",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "future",
-                  "imperfective",
-                  "indicative",
-                  "plural",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "είναι",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperfective",
-                  "indicative",
-                  "plural",
-                  "present",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "ήταν",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperfect",
-                  "imperfective",
-                  "indicative",
-                  "informal",
-                  "plural",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "ήτανε",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperfect",
-                  "imperfective",
-                  "indicative",
-                  "informal",
-                  "plural",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "ήσαν",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "archaic",
-                  "formal",
-                  "imperfect",
-                  "imperfective",
-                  "indicative",
-                  "plural",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "ήσανε",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperfect",
-                  "imperfective",
-                  "indicative",
-                  "informal",
-                  "plural",
-                  "rare",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "θα είναι",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "future",
-                  "imperfective",
-                  "indicative",
-                  "plural",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "Formed using present tense from above "
-                        "with a particle (να, ας).",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "future",
-                  "imperfect",
-                  "imperfective",
-                  "present",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "να είσαι",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperative",
-                  "imperfective",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "έσο",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "archaic",
-                  "formal",
-                  "imperative",
-                  "imperfective",
-                  "rare",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "να είστε",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperative",
-                  "imperfective",
-                  "plural",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "να είσαστε",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperative",
-                  "imperfective",
-                  "plural",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "έστε",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "archaic",
-                  "formal",
-                  "imperative",
-                  "imperfective",
-                  "plural",
-                  "rare",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "όντας",
-                "source": "Conjugation",
-                "tags": [
-                  "participle",
-                  "present"
-                ]
-              }
+                {
+                    "form": "no-table-tags",
+                    "source": "Conjugation",
+                    "tags": ["table-tags"],
+                },
+                {
+                    "form": "είμαι",
+                    "source": "Conjugation",
+                    "tags": [
+                        "active",
+                        "first-person",
+                        "imperfective",
+                        "indicative",
+                        "present",
+                        "singular",
+                    ],
+                },
+                {
+                    "form": "ήμουν",
+                    "source": "Conjugation",
+                    "tags": [
+                        "active",
+                        "first-person",
+                        "imperfect",
+                        "imperfective",
+                        "indicative",
+                        "informal",
+                        "singular",
+                    ],
+                },
+                {
+                    "form": "ήμουνα",
+                    "source": "Conjugation",
+                    "tags": [
+                        "active",
+                        "first-person",
+                        "imperfect",
+                        "imperfective",
+                        "indicative",
+                        "informal",
+                        "singular",
+                    ],
+                },
+                {
+                    "form": "θα είμαι",
+                    "source": "Conjugation",
+                    "tags": [
+                        "active",
+                        "first-person",
+                        "future",
+                        "imperfective",
+                        "indicative",
+                        "singular",
+                    ],
+                },
+                {
+                    "form": "είσαι",
+                    "source": "Conjugation",
+                    "tags": [
+                        "active",
+                        "imperfective",
+                        "indicative",
+                        "present",
+                        "second-person",
+                        "singular",
+                    ],
+                },
+                {
+                    "form": "ήσουν",
+                    "source": "Conjugation",
+                    "tags": [
+                        "active",
+                        "imperfect",
+                        "imperfective",
+                        "indicative",
+                        "informal",
+                        "second-person",
+                        "singular",
+                    ],
+                },
+                {
+                    "form": "ήσουνα",
+                    "source": "Conjugation",
+                    "tags": [
+                        "active",
+                        "imperfect",
+                        "imperfective",
+                        "indicative",
+                        "informal",
+                        "second-person",
+                        "singular",
+                    ],
+                },
+                {
+                    "form": "θα είσαι",
+                    "source": "Conjugation",
+                    "tags": [
+                        "active",
+                        "future",
+                        "imperfective",
+                        "indicative",
+                        "second-person",
+                        "singular",
+                    ],
+                },
+                {
+                    "form": "είναι",
+                    "source": "Conjugation",
+                    "tags": [
+                        "active",
+                        "imperfective",
+                        "indicative",
+                        "present",
+                        "singular",
+                        "third-person",
+                    ],
+                },
+                {
+                    "form": "ήταν",
+                    "source": "Conjugation",
+                    "tags": [
+                        "active",
+                        "imperfect",
+                        "imperfective",
+                        "indicative",
+                        "informal",
+                        "singular",
+                        "third-person",
+                    ],
+                },
+                {
+                    "form": "ήτανε",
+                    "source": "Conjugation",
+                    "tags": [
+                        "active",
+                        "imperfect",
+                        "imperfective",
+                        "indicative",
+                        "informal",
+                        "singular",
+                        "third-person",
+                    ],
+                },
+                {
+                    "form": "θα είναι",
+                    "source": "Conjugation",
+                    "tags": [
+                        "active",
+                        "future",
+                        "imperfective",
+                        "indicative",
+                        "singular",
+                        "third-person",
+                    ],
+                },
+                {
+                    "form": "είμαστε",
+                    "source": "Conjugation",
+                    "tags": [
+                        "active",
+                        "first-person",
+                        "imperfective",
+                        "indicative",
+                        "plural",
+                        "present",
+                    ],
+                },
+                {
+                    "form": "είμεθα",
+                    "source": "Conjugation",
+                    "tags": [
+                        "active",
+                        "archaic",
+                        "first-person",
+                        "formal",
+                        "imperfective",
+                        "indicative",
+                        "plural",
+                        "present",
+                        "rare",
+                    ],
+                },
+                {
+                    "form": "ήμαστε",
+                    "source": "Conjugation",
+                    "tags": [
+                        "active",
+                        "first-person",
+                        "imperfect",
+                        "imperfective",
+                        "indicative",
+                        "plural",
+                    ],
+                },
+                {
+                    "form": "ήμασταν",
+                    "source": "Conjugation",
+                    "tags": [
+                        "active",
+                        "first-person",
+                        "imperfect",
+                        "imperfective",
+                        "indicative",
+                        "plural",
+                    ],
+                },
+                {
+                    "form": "θα είμαστε",
+                    "source": "Conjugation",
+                    "tags": [
+                        "active",
+                        "first-person",
+                        "future",
+                        "imperfective",
+                        "indicative",
+                        "plural",
+                    ],
+                },
+                {
+                    "form": "είστε",
+                    "source": "Conjugation",
+                    "tags": [
+                        "active",
+                        "imperfective",
+                        "indicative",
+                        "plural",
+                        "present",
+                        "second-person",
+                    ],
+                },
+                {
+                    "form": "είσαστε",
+                    "source": "Conjugation",
+                    "tags": [
+                        "active",
+                        "imperfective",
+                        "indicative",
+                        "plural",
+                        "present",
+                        "second-person",
+                    ],
+                },
+                {
+                    "form": "ήσαστε",
+                    "source": "Conjugation",
+                    "tags": [
+                        "active",
+                        "imperfect",
+                        "imperfective",
+                        "indicative",
+                        "plural",
+                        "second-person",
+                    ],
+                },
+                {
+                    "form": "ήσασταν",
+                    "source": "Conjugation",
+                    "tags": [
+                        "active",
+                        "imperfect",
+                        "imperfective",
+                        "indicative",
+                        "plural",
+                        "second-person",
+                    ],
+                },
+                {
+                    "form": "θα είστε",
+                    "source": "Conjugation",
+                    "tags": [
+                        "active",
+                        "future",
+                        "imperfective",
+                        "indicative",
+                        "plural",
+                        "second-person",
+                    ],
+                },
+                {
+                    "form": "θα είσαστε",
+                    "source": "Conjugation",
+                    "tags": [
+                        "active",
+                        "future",
+                        "imperfective",
+                        "indicative",
+                        "plural",
+                        "second-person",
+                    ],
+                },
+                {
+                    "form": "είναι",
+                    "source": "Conjugation",
+                    "tags": [
+                        "active",
+                        "imperfective",
+                        "indicative",
+                        "plural",
+                        "present",
+                        "third-person",
+                    ],
+                },
+                {
+                    "form": "ήταν",
+                    "source": "Conjugation",
+                    "tags": [
+                        "active",
+                        "imperfect",
+                        "imperfective",
+                        "indicative",
+                        "informal",
+                        "plural",
+                        "third-person",
+                    ],
+                },
+                {
+                    "form": "ήτανε",
+                    "source": "Conjugation",
+                    "tags": [
+                        "active",
+                        "imperfect",
+                        "imperfective",
+                        "indicative",
+                        "informal",
+                        "plural",
+                        "third-person",
+                    ],
+                },
+                {
+                    "form": "ήσαν",
+                    "source": "Conjugation",
+                    "tags": [
+                        "active",
+                        "archaic",
+                        "formal",
+                        "imperfect",
+                        "imperfective",
+                        "indicative",
+                        "plural",
+                        "third-person",
+                    ],
+                },
+                {
+                    "form": "ήσανε",
+                    "source": "Conjugation",
+                    "tags": [
+                        "active",
+                        "imperfect",
+                        "imperfective",
+                        "indicative",
+                        "informal",
+                        "plural",
+                        "rare",
+                        "third-person",
+                    ],
+                },
+                {
+                    "form": "θα είναι",
+                    "source": "Conjugation",
+                    "tags": [
+                        "active",
+                        "future",
+                        "imperfective",
+                        "indicative",
+                        "plural",
+                        "third-person",
+                    ],
+                },
+                {
+                    "form": "Formed using present tense from above "
+                    "with a particle (να, ας).",
+                    "source": "Conjugation",
+                    "tags": [
+                        "active",
+                        "future",
+                        "imperfect",
+                        "imperfective",
+                        "present",
+                        "subjunctive",
+                    ],
+                },
+                {
+                    "form": "να είσαι",
+                    "source": "Conjugation",
+                    "tags": [
+                        "active",
+                        "imperative",
+                        "imperfective",
+                        "second-person",
+                        "singular",
+                    ],
+                },
+                {
+                    "form": "έσο",
+                    "source": "Conjugation",
+                    "tags": [
+                        "active",
+                        "archaic",
+                        "formal",
+                        "imperative",
+                        "imperfective",
+                        "rare",
+                        "second-person",
+                        "singular",
+                    ],
+                },
+                {
+                    "form": "να είστε",
+                    "source": "Conjugation",
+                    "tags": [
+                        "active",
+                        "imperative",
+                        "imperfective",
+                        "plural",
+                        "second-person",
+                    ],
+                },
+                {
+                    "form": "να είσαστε",
+                    "source": "Conjugation",
+                    "tags": [
+                        "active",
+                        "imperative",
+                        "imperfective",
+                        "plural",
+                        "second-person",
+                    ],
+                },
+                {
+                    "form": "έστε",
+                    "source": "Conjugation",
+                    "tags": [
+                        "active",
+                        "archaic",
+                        "formal",
+                        "imperative",
+                        "imperfective",
+                        "plural",
+                        "rare",
+                        "second-person",
+                    ],
+                },
+                {
+                    "form": "όντας",
+                    "source": "Conjugation",
+                    "tags": ["participle", "present"],
+                },
             ],
         }
         self.assertEqual(expected, ret)
 
     def test_Greek_verb2(self):
-        ret = self.xinfl("περπατάω", "Greek", "verb", "Conjugation", """
+        ret = self.xinfl(
+            "περπατάω",
+            "Greek",
+            "verb",
+            "Conjugation",
+            """
 <div class="NavFrame">
 <div class="NavHead" style="background%3A%239FBFFF%3B+text-align%3Aleft">'''περπατάω / περπατώ, περπατιέμαι''' </div>
 <div class="NavContent">
@@ -1279,1255 +1284,1235 @@ class InflTests(unittest.TestCase):
 
 |}
 </div></div>[[Category:Greek verbs conjugating like 'αγαπάω-αγαπώ']]
-""")  # noqa: E501
+""",
+        )  # noqa: E501
         expected = {
             "forms": [
-              {
-                "form": "no-table-tags",
-                "source": "Conjugation",
-                "tags": [
-                  "table-tags"
-                ]
-              },
-              {
-                "form": "περπατάω",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "first-person",
-                  "imperfective",
-                  "indicative",
-                  "present",
-                  "singular"
-                ]
-              },
-              {
-                "form": "περπατώ",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "first-person",
-                  "imperfective",
-                  "indicative",
-                  "present",
-                  "singular"
-                ]
-              },
-              {
-                "form": "περπατήσω",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "dependent",
-                  "first-person",
-                  "indicative",
-                  "perfective",
-                  "singular"
-                ]
-              },
-              {
-                "form": "περπατιέμαι",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "imperfective",
-                  "indicative",
-                  "passive",
-                  "present",
-                  "singular"
-                ]
-              },
-              {
-                "form": "περπατηθώ",
-                "source": "Conjugation",
-                "tags": [
-                  "dependent",
-                  "first-person",
-                  "indicative",
-                  "passive",
-                  "perfective",
-                  "singular"
-                ]
-              },
-              {
-                "form": "περπατάς",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperfective",
-                  "indicative",
-                  "present",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "περπατήσεις",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "dependent",
-                  "indicative",
-                  "perfective",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "περπατιέσαι",
-                "source": "Conjugation",
-                "tags": [
-                  "imperfective",
-                  "indicative",
-                  "passive",
-                  "present",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "περπατηθείς",
-                "source": "Conjugation",
-                "tags": [
-                  "dependent",
-                  "indicative",
-                  "passive",
-                  "perfective",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "περπατάει",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperfective",
-                  "indicative",
-                  "present",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "περπατά",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperfective",
-                  "indicative",
-                  "present",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "περπατήσει",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "dependent",
-                  "indicative",
-                  "perfective",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "περπατιέται",
-                "source": "Conjugation",
-                "tags": [
-                  "imperfective",
-                  "indicative",
-                  "passive",
-                  "present",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "περπατηθεί",
-                "source": "Conjugation",
-                "tags": [
-                  "dependent",
-                  "indicative",
-                  "passive",
-                  "perfective",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "περπατάμε",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "first-person",
-                  "imperfective",
-                  "indicative",
-                  "plural",
-                  "present"
-                ]
-              },
-              {
-                "form": "περπατούμε",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "first-person",
-                  "imperfective",
-                  "indicative",
-                  "plural",
-                  "present"
-                ]
-              },
-              {
-                "form": "περπατήσουμε",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "dependent",
-                  "first-person",
-                  "indicative",
-                  "perfective",
-                  "plural"
-                ]
-              },
-              {
-                "form": "‑ομε",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "dependent",
-                  "first-person",
-                  "indicative",
-                  "perfective",
-                  "plural",
-                  "rare"
-                ]
-              },
-              {
-                "form": "περπατιόμαστε",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "imperfective",
-                  "indicative",
-                  "passive",
-                  "plural",
-                  "present"
-                ]
-              },
-              {
-                "form": "περπατηθούμε",
-                "source": "Conjugation",
-                "tags": [
-                  "dependent",
-                  "first-person",
-                  "indicative",
-                  "passive",
-                  "perfective",
-                  "plural"
-                ]
-              },
-              {
-                "form": "περπατάτε",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperfective",
-                  "indicative",
-                  "plural",
-                  "present",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "περπατήσετε",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "dependent",
-                  "indicative",
-                  "perfective",
-                  "plural",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "περπατιέστε",
-                "source": "Conjugation",
-                "tags": [
-                  "imperfective",
-                  "indicative",
-                  "passive",
-                  "plural",
-                  "present",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "‑ιόσαστε",
-                "source": "Conjugation",
-                "tags": [
-                  "imperfective",
-                  "indicative",
-                  "informal",
-                  "passive",
-                  "plural",
-                  "present",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "περπατηθείτε",
-                "source": "Conjugation",
-                "tags": [
-                  "dependent",
-                  "indicative",
-                  "passive",
-                  "perfective",
-                  "plural",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "περπατάνε",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperfective",
-                  "indicative",
-                  "plural",
-                  "present",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "περπατάν",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperfective",
-                  "indicative",
-                  "plural",
-                  "present",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "περπατούν",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperfective",
-                  "indicative",
-                  "plural",
-                  "present",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "περπατούνε",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperfective",
-                  "indicative",
-                  "plural",
-                  "present",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "περπατήσουν",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "dependent",
-                  "indicative",
-                  "perfective",
-                  "plural",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "περπατήσουνε",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "dependent",
-                  "indicative",
-                  "perfective",
-                  "plural",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "περπατιούνται",
-                "source": "Conjugation",
-                "tags": [
-                  "imperfective",
-                  "indicative",
-                  "passive",
-                  "plural",
-                  "present",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "‑ιόνται",
-                "source": "Conjugation",
-                "tags": [
-                  "imperfective",
-                  "indicative",
-                  "informal",
-                  "passive",
-                  "plural",
-                  "present",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "περπατηθούν",
-                "source": "Conjugation",
-                "tags": [
-                  "dependent",
-                  "indicative",
-                  "passive",
-                  "perfective",
-                  "plural",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "περπατηθούνε",
-                "source": "Conjugation",
-                "tags": [
-                  "dependent",
-                  "indicative",
-                  "passive",
-                  "perfective",
-                  "plural",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "περπατούσα",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "first-person",
-                  "imperfect",
-                  "imperfective",
-                  "indicative",
-                  "singular"
-                ]
-              },
-              {
-                "form": "περπάταγα",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "first-person",
-                  "imperfect",
-                  "imperfective",
-                  "indicative",
-                  "singular"
-                ]
-              },
-              {
-                "form": "περπάτησα",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "first-person",
-                  "indicative",
-                  "past",
-                  "perfective",
-                  "singular"
-                ]
-              },
-              {
-                "form": "περπατιόμουν",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "imperfect",
-                  "imperfective",
-                  "indicative",
-                  "passive",
-                  "singular"
-                ]
-              },
-              {
-                "form": "περπατιόμουνα",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "imperfect",
-                  "imperfective",
-                  "indicative",
-                  "passive",
-                  "singular"
-                ]
-              },
-              {
-                "form": "περπατήθηκα",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "indicative",
-                  "passive",
-                  "past",
-                  "perfective",
-                  "singular"
-                ]
-              },
-              {
-                "form": "περπατούσες",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperfect",
-                  "imperfective",
-                  "indicative",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "περπάταγες",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperfect",
-                  "imperfective",
-                  "indicative",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "περπάτησες",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "indicative",
-                  "past",
-                  "perfective",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "περπατιόσουν",
-                "source": "Conjugation",
-                "tags": [
-                  "imperfect",
-                  "imperfective",
-                  "indicative",
-                  "passive",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "περπατιόσουνα",
-                "source": "Conjugation",
-                "tags": [
-                  "imperfect",
-                  "imperfective",
-                  "indicative",
-                  "passive",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "περπατήθηκες",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "passive",
-                  "past",
-                  "perfective",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "περπατούσε",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperfect",
-                  "imperfective",
-                  "indicative",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "περπάταγε",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperfect",
-                  "imperfective",
-                  "indicative",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "περπάτησε",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "indicative",
-                  "past",
-                  "perfective",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "περπατιόταν",
-                "source": "Conjugation",
-                "tags": [
-                  "imperfect",
-                  "imperfective",
-                  "indicative",
-                  "passive",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "περπατιότανε",
-                "source": "Conjugation",
-                "tags": [
-                  "imperfect",
-                  "imperfective",
-                  "indicative",
-                  "passive",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "περπατήθηκε",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "passive",
-                  "past",
-                  "perfective",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "περπατούσαμε",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "first-person",
-                  "imperfect",
-                  "imperfective",
-                  "indicative",
-                  "plural"
-                ]
-              },
-              {
-                "form": "περπατάγαμε",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "first-person",
-                  "imperfect",
-                  "imperfective",
-                  "indicative",
-                  "plural"
-                ]
-              },
-              {
-                "form": "περπατήσαμε",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "first-person",
-                  "indicative",
-                  "past",
-                  "perfective",
-                  "plural"
-                ]
-              },
-              {
-                "form": "περπατιόμασταν",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "imperfect",
-                  "imperfective",
-                  "indicative",
-                  "passive",
-                  "plural"
-                ]
-              },
-              {
-                "form": "‑ιόμαστε",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "imperfect",
-                  "imperfective",
-                  "indicative",
-                  "informal",
-                  "passive",
-                  "plural"
-                ]
-              },
-              {
-                "form": "περπατηθήκαμε",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "indicative",
-                  "passive",
-                  "past",
-                  "perfective",
-                  "plural"
-                ]
-              },
-              {
-                "form": "περπατούσατε",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperfect",
-                  "imperfective",
-                  "indicative",
-                  "plural",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "περπατάγατε",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperfect",
-                  "imperfective",
-                  "indicative",
-                  "plural",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "περπατήσατε",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "indicative",
-                  "past",
-                  "perfective",
-                  "plural",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "περπατιόσασταν",
-                "source": "Conjugation",
-                "tags": [
-                  "imperfect",
-                  "imperfective",
-                  "indicative",
-                  "passive",
-                  "plural",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "‑ιόσαστε",
-                "source": "Conjugation",
-                "tags": [
-                  "imperfect",
-                  "imperfective",
-                  "indicative",
-                  "informal",
-                  "passive",
-                  "plural",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "περπατηθήκατε",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "passive",
-                  "past",
-                  "perfective",
-                  "plural",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "περπατούσαν",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperfect",
-                  "imperfective",
-                  "indicative",
-                  "plural",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "περπατούσανε",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperfect",
-                  "imperfective",
-                  "indicative",
-                  "plural",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "περπάταγαν",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperfect",
-                  "imperfective",
-                  "indicative",
-                  "plural",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "περπατάγανε",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperfect",
-                  "imperfective",
-                  "indicative",
-                  "informal",
-                  "plural",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "περπάτησαν",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "indicative",
-                  "past",
-                  "perfective",
-                  "plural",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "περπατήσαν",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "indicative",
-                  "past",
-                  "perfective",
-                  "plural",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "περπατήσανε",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "indicative",
-                  "past",
-                  "perfective",
-                  "plural",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "περπατιόνταν",
-                "source": "Conjugation",
-                "tags": [
-                  "imperfect",
-                  "imperfective",
-                  "indicative",
-                  "passive",
-                  "plural",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "περπατιόντανε",
-                "source": "Conjugation",
-                "tags": [
-                  "imperfect",
-                  "imperfective",
-                  "indicative",
-                  "passive",
-                  "plural",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "περπατιόντουσαν",
-                "source": "Conjugation",
-                "tags": [
-                  "imperfect",
-                  "imperfective",
-                  "indicative",
-                  "passive",
-                  "plural",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "περπατιούνταν",
-                "source": "Conjugation",
-                "tags": [
-                  "imperfect",
-                  "imperfective",
-                  "indicative",
-                  "passive",
-                  "plural",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "περπατήθηκαν",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "passive",
-                  "past",
-                  "perfective",
-                  "plural",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "περπατηθήκαν",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "passive",
-                  "past",
-                  "perfective",
-                  "plural",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "περπατηθήκανε",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "passive",
-                  "past",
-                  "perfective",
-                  "plural",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "θα περπατάω",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "first-person",
-                  "future",
-                  "imperfective",
-                  "indicative",
-                  "progressive",
-                  "singular"
-                ]
-              },
-              {
-                "form": "θα περπατώ",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "first-person",
-                  "future",
-                  "imperfective",
-                  "indicative",
-                  "progressive",
-                  "singular"
-                ]
-              },
-              {
-                "form": "θα περπατήσω",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "first-person",
-                  "future",
-                  "indicative",
-                  "perfective",
-                  "singular"
-                ]
-              },
-              {
-                "form": "θα περπατιέμαι",
-                "source": "Conjugation",
-                "tags": [
-                  "continuative",
-                  "first-person",
-                  "future",
-                  "imperfective",
-                  "indicative",
-                  "passive",
-                  "singular"
-                ]
-              },
-              {
-                "form": "θα περπατηθώ",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "future",
-                  "indicative",
-                  "passive",
-                  "perfective",
-                  "singular"
-                ]
-              },
-              {
-                "form": "Formed using present",
-                "source": "Conjugation",
-                "tags": [
-                  "continuative",
-                  "future",
-                  "imperfective",
-                  "perfective",
-                  "progressive",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "dependent (for simple past)",
-                "source": "Conjugation",
-                "tags": [
-                  "continuative",
-                  "future",
-                  "imperfective",
-                  "perfective",
-                  "progressive",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "present perfect from above with a particle (να, ας).",
-                "source": "Conjugation",
-                "tags": [
-                  "continuative",
-                  "future",
-                  "imperfective",
-                  "perfective",
-                  "progressive",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "περπάτα",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperative",
-                  "imperfective",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "περπάταγε",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperative",
-                  "imperfective",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "περπάτησε",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperative",
-                  "perfective",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "περπάτα",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperative",
-                  "perfective",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "-",
-                "source": "Conjugation",
-                "tags": [
-                  "imperative",
-                  "imperfective",
-                  "passive",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "περπατήσου",
-                "source": "Conjugation",
-                "tags": [
-                  "imperative",
-                  "passive",
-                  "perfective",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "περπατάτε",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperative",
-                  "imperfective",
-                  "plural",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "περπατήστε",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperative",
-                  "perfective",
-                  "plural",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "περπατιέστε",
-                "source": "Conjugation",
-                "tags": [
-                  "imperative",
-                  "imperfective",
-                  "passive",
-                  "plural",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "περπατηθείτε",
-                "source": "Conjugation",
-                "tags": [
-                  "imperative",
-                  "passive",
-                  "perfective",
-                  "plural",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "περπατώντας",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "participle",
-                  "present"
-                ]
-              },
-              {
-                "form": "-",
-                "source": "Conjugation",
-                "tags": [
-                  "participle",
-                  "passive",
-                  "present"
-                ]
-              },
-              {
-                "form": "έχοντας περπατήσει",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "participle",
-                  "past"
-                ]
-              },
-              {
-                "form": "περπατημένος",
-                "source": "Conjugation",
-                "tags": [
-                  "participle",
-                  "passive",
-                  "past"
-                ]
-              },
-              {
-                "form": "‑η",
-                "source": "Conjugation",
-                "tags": [
-                  "participle",
-                  "passive",
-                  "past"
-                ]
-              },
-              {
-                "form": "‑ο",
-                "source": "Conjugation",
-                "tags": [
-                  "participle",
-                  "passive",
-                  "past"
-                ]
-              },
-              {
-                "form": "περπατήσει",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "infinitive-aorist"
-                ]
-              },
-              {
-                "form": "περπατηθεί",
-                "source": "Conjugation",
-                "tags": [
-                  "infinitive-aorist",
-                  "passive"
-                ]
-              }
-            ],
+                {
+                    "form": "no-table-tags",
+                    "source": "Conjugation",
+                    "tags": ["table-tags"],
+                },
+                {
+                    "form": "περπατάω",
+                    "tags": [
+                        "active",
+                        "first-person",
+                        "imperfective",
+                        "indicative",
+                        "present",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατώ",
+                    "tags": [
+                        "active",
+                        "first-person",
+                        "imperfective",
+                        "indicative",
+                        "present",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατήσω",
+                    "tags": [
+                        "active",
+                        "dependent",
+                        "first-person",
+                        "indicative",
+                        "perfective",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατιέμαι",
+                    "tags": [
+                        "first-person",
+                        "imperfective",
+                        "indicative",
+                        "passive",
+                        "present",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατηθώ",
+                    "tags": [
+                        "dependent",
+                        "first-person",
+                        "indicative",
+                        "passive",
+                        "perfective",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατάς",
+                    "tags": [
+                        "active",
+                        "imperfective",
+                        "indicative",
+                        "present",
+                        "second-person",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατήσεις",
+                    "tags": [
+                        "active",
+                        "dependent",
+                        "indicative",
+                        "perfective",
+                        "second-person",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατιέσαι",
+                    "tags": [
+                        "imperfective",
+                        "indicative",
+                        "passive",
+                        "present",
+                        "second-person",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατηθείς",
+                    "tags": [
+                        "dependent",
+                        "indicative",
+                        "passive",
+                        "perfective",
+                        "second-person",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατάει",
+                    "tags": [
+                        "active",
+                        "imperfective",
+                        "indicative",
+                        "present",
+                        "singular",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατά",
+                    "tags": [
+                        "active",
+                        "imperfective",
+                        "indicative",
+                        "present",
+                        "singular",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατήσει",
+                    "tags": [
+                        "active",
+                        "dependent",
+                        "indicative",
+                        "perfective",
+                        "singular",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατιέται",
+                    "tags": [
+                        "imperfective",
+                        "indicative",
+                        "passive",
+                        "present",
+                        "singular",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατηθεί",
+                    "tags": [
+                        "dependent",
+                        "indicative",
+                        "passive",
+                        "perfective",
+                        "singular",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατάμε",
+                    "tags": [
+                        "active",
+                        "first-person",
+                        "imperfective",
+                        "indicative",
+                        "plural",
+                        "present",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατούμε",
+                    "tags": [
+                        "active",
+                        "first-person",
+                        "imperfective",
+                        "indicative",
+                        "plural",
+                        "present",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατήσουμε",
+                    "tags": [
+                        "active",
+                        "dependent",
+                        "first-person",
+                        "indicative",
+                        "perfective",
+                        "plural",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "‑ομε",
+                    "tags": [
+                        "active",
+                        "dependent",
+                        "first-person",
+                        "indicative",
+                        "perfective",
+                        "plural",
+                        "rare",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("‑ομε", "περπατήσομε")],
+                },
+                {
+                    "form": "περπατιόμαστε",
+                    "tags": [
+                        "first-person",
+                        "imperfective",
+                        "indicative",
+                        "passive",
+                        "plural",
+                        "present",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατηθούμε",
+                    "tags": [
+                        "dependent",
+                        "first-person",
+                        "indicative",
+                        "passive",
+                        "perfective",
+                        "plural",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατάτε",
+                    "tags": [
+                        "active",
+                        "imperfective",
+                        "indicative",
+                        "plural",
+                        "present",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατήσετε",
+                    "tags": [
+                        "active",
+                        "dependent",
+                        "indicative",
+                        "perfective",
+                        "plural",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατιέστε",
+                    "tags": [
+                        "imperfective",
+                        "indicative",
+                        "passive",
+                        "plural",
+                        "present",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "‑ιόσαστε",
+                    "tags": [
+                        "imperfective",
+                        "indicative",
+                        "informal",
+                        "passive",
+                        "plural",
+                        "present",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("‑ιόσαστε", "περπατιόσαστε")],
+                },
+                {
+                    "form": "περπατηθείτε",
+                    "tags": [
+                        "dependent",
+                        "indicative",
+                        "passive",
+                        "perfective",
+                        "plural",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατάνε",
+                    "tags": [
+                        "active",
+                        "imperfective",
+                        "indicative",
+                        "plural",
+                        "present",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατάν",
+                    "tags": [
+                        "active",
+                        "imperfective",
+                        "indicative",
+                        "plural",
+                        "present",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατούν",
+                    "tags": [
+                        "active",
+                        "imperfective",
+                        "indicative",
+                        "plural",
+                        "present",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατούνε",
+                    "tags": [
+                        "active",
+                        "imperfective",
+                        "indicative",
+                        "plural",
+                        "present",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατήσουν",
+                    "tags": [
+                        "active",
+                        "dependent",
+                        "indicative",
+                        "perfective",
+                        "plural",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατήσουνε",
+                    "tags": [
+                        "active",
+                        "dependent",
+                        "indicative",
+                        "perfective",
+                        "plural",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατιούνται",
+                    "tags": [
+                        "imperfective",
+                        "indicative",
+                        "passive",
+                        "plural",
+                        "present",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "‑ιόνται",
+                    "tags": [
+                        "imperfective",
+                        "indicative",
+                        "informal",
+                        "passive",
+                        "plural",
+                        "present",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("‑ιόνται", "περπατιόνται")],
+                },
+                {
+                    "form": "περπατηθούν",
+                    "tags": [
+                        "dependent",
+                        "indicative",
+                        "passive",
+                        "perfective",
+                        "plural",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατηθούνε",
+                    "tags": [
+                        "dependent",
+                        "indicative",
+                        "passive",
+                        "perfective",
+                        "plural",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατούσα",
+                    "tags": [
+                        "active",
+                        "first-person",
+                        "imperfect",
+                        "imperfective",
+                        "indicative",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπάταγα",
+                    "tags": [
+                        "active",
+                        "first-person",
+                        "imperfect",
+                        "imperfective",
+                        "indicative",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπάτησα",
+                    "tags": [
+                        "active",
+                        "first-person",
+                        "indicative",
+                        "past",
+                        "perfective",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατιόμουν",
+                    "tags": [
+                        "first-person",
+                        "imperfect",
+                        "imperfective",
+                        "indicative",
+                        "passive",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατιόμουνα",
+                    "tags": [
+                        "first-person",
+                        "imperfect",
+                        "imperfective",
+                        "indicative",
+                        "passive",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατήθηκα",
+                    "tags": [
+                        "first-person",
+                        "indicative",
+                        "passive",
+                        "past",
+                        "perfective",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατούσες",
+                    "tags": [
+                        "active",
+                        "imperfect",
+                        "imperfective",
+                        "indicative",
+                        "second-person",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπάταγες",
+                    "tags": [
+                        "active",
+                        "imperfect",
+                        "imperfective",
+                        "indicative",
+                        "second-person",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπάτησες",
+                    "tags": [
+                        "active",
+                        "indicative",
+                        "past",
+                        "perfective",
+                        "second-person",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατιόσουν",
+                    "tags": [
+                        "imperfect",
+                        "imperfective",
+                        "indicative",
+                        "passive",
+                        "second-person",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατιόσουνα",
+                    "tags": [
+                        "imperfect",
+                        "imperfective",
+                        "indicative",
+                        "passive",
+                        "second-person",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατήθηκες",
+                    "tags": [
+                        "indicative",
+                        "passive",
+                        "past",
+                        "perfective",
+                        "second-person",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατούσε",
+                    "tags": [
+                        "active",
+                        "imperfect",
+                        "imperfective",
+                        "indicative",
+                        "singular",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπάταγε",
+                    "tags": [
+                        "active",
+                        "imperfect",
+                        "imperfective",
+                        "indicative",
+                        "singular",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπάτησε",
+                    "tags": [
+                        "active",
+                        "indicative",
+                        "past",
+                        "perfective",
+                        "singular",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατιόταν",
+                    "tags": [
+                        "imperfect",
+                        "imperfective",
+                        "indicative",
+                        "passive",
+                        "singular",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατιότανε",
+                    "tags": [
+                        "imperfect",
+                        "imperfective",
+                        "indicative",
+                        "passive",
+                        "singular",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατήθηκε",
+                    "tags": [
+                        "indicative",
+                        "passive",
+                        "past",
+                        "perfective",
+                        "singular",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατούσαμε",
+                    "tags": [
+                        "active",
+                        "first-person",
+                        "imperfect",
+                        "imperfective",
+                        "indicative",
+                        "plural",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατάγαμε",
+                    "tags": [
+                        "active",
+                        "first-person",
+                        "imperfect",
+                        "imperfective",
+                        "indicative",
+                        "plural",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατήσαμε",
+                    "tags": [
+                        "active",
+                        "first-person",
+                        "indicative",
+                        "past",
+                        "perfective",
+                        "plural",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατιόμασταν",
+                    "tags": [
+                        "first-person",
+                        "imperfect",
+                        "imperfective",
+                        "indicative",
+                        "passive",
+                        "plural",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "‑ιόμαστε",
+                    "tags": [
+                        "first-person",
+                        "imperfect",
+                        "imperfective",
+                        "indicative",
+                        "informal",
+                        "passive",
+                        "plural",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("‑ιόμαστε", "περπατιόμαστε")],
+                },
+                {
+                    "form": "περπατηθήκαμε",
+                    "tags": [
+                        "first-person",
+                        "indicative",
+                        "passive",
+                        "past",
+                        "perfective",
+                        "plural",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατούσατε",
+                    "tags": [
+                        "active",
+                        "imperfect",
+                        "imperfective",
+                        "indicative",
+                        "plural",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατάγατε",
+                    "tags": [
+                        "active",
+                        "imperfect",
+                        "imperfective",
+                        "indicative",
+                        "plural",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατήσατε",
+                    "tags": [
+                        "active",
+                        "indicative",
+                        "past",
+                        "perfective",
+                        "plural",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατιόσασταν",
+                    "tags": [
+                        "imperfect",
+                        "imperfective",
+                        "indicative",
+                        "passive",
+                        "plural",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "‑ιόσαστε",
+                    "tags": [
+                        "imperfect",
+                        "imperfective",
+                        "indicative",
+                        "informal",
+                        "passive",
+                        "plural",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("‑ιόσαστε", "περπατιόσαστε")],
+                },
+                {
+                    "form": "περπατηθήκατε",
+                    "tags": [
+                        "indicative",
+                        "passive",
+                        "past",
+                        "perfective",
+                        "plural",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατούσαν",
+                    "tags": [
+                        "active",
+                        "imperfect",
+                        "imperfective",
+                        "indicative",
+                        "plural",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατούσανε",
+                    "tags": [
+                        "active",
+                        "imperfect",
+                        "imperfective",
+                        "indicative",
+                        "plural",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπάταγαν",
+                    "tags": [
+                        "active",
+                        "imperfect",
+                        "imperfective",
+                        "indicative",
+                        "plural",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατάγανε",
+                    "tags": [
+                        "active",
+                        "imperfect",
+                        "imperfective",
+                        "indicative",
+                        "informal",
+                        "plural",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπάτησαν",
+                    "tags": [
+                        "active",
+                        "indicative",
+                        "past",
+                        "perfective",
+                        "plural",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατήσαν",
+                    "tags": [
+                        "active",
+                        "indicative",
+                        "past",
+                        "perfective",
+                        "plural",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατήσανε",
+                    "tags": [
+                        "active",
+                        "indicative",
+                        "past",
+                        "perfective",
+                        "plural",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατιόνταν",
+                    "tags": [
+                        "imperfect",
+                        "imperfective",
+                        "indicative",
+                        "passive",
+                        "plural",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατιόντανε",
+                    "tags": [
+                        "imperfect",
+                        "imperfective",
+                        "indicative",
+                        "passive",
+                        "plural",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατιόντουσαν",
+                    "tags": [
+                        "imperfect",
+                        "imperfective",
+                        "indicative",
+                        "passive",
+                        "plural",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατιούνταν",
+                    "tags": [
+                        "imperfect",
+                        "imperfective",
+                        "indicative",
+                        "passive",
+                        "plural",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατήθηκαν",
+                    "tags": [
+                        "indicative",
+                        "passive",
+                        "past",
+                        "perfective",
+                        "plural",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατηθήκαν",
+                    "tags": [
+                        "indicative",
+                        "passive",
+                        "past",
+                        "perfective",
+                        "plural",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατηθήκανε",
+                    "tags": [
+                        "indicative",
+                        "passive",
+                        "past",
+                        "perfective",
+                        "plural",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "θα περπατάω",
+                    "tags": [
+                        "active",
+                        "first-person",
+                        "future",
+                        "imperfective",
+                        "indicative",
+                        "progressive",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "θα περπατώ",
+                    "tags": [
+                        "active",
+                        "first-person",
+                        "future",
+                        "imperfective",
+                        "indicative",
+                        "progressive",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "θα περπατήσω",
+                    "tags": [
+                        "active",
+                        "first-person",
+                        "future",
+                        "indicative",
+                        "perfective",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "θα περπατιέμαι",
+                    "tags": [
+                        "continuative",
+                        "first-person",
+                        "future",
+                        "imperfective",
+                        "indicative",
+                        "passive",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "θα περπατηθώ",
+                    "tags": [
+                        "first-person",
+                        "future",
+                        "indicative",
+                        "passive",
+                        "perfective",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "Formed using present",
+                    "tags": [
+                        "continuative",
+                        "future",
+                        "imperfective",
+                        "perfective",
+                        "progressive",
+                        "subjunctive",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "dependent (for simple past)",
+                    "tags": [
+                        "continuative",
+                        "future",
+                        "imperfective",
+                        "perfective",
+                        "progressive",
+                        "subjunctive",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "present perfect from above with a particle (να, ας).",
+                    "tags": [
+                        "continuative",
+                        "future",
+                        "imperfective",
+                        "perfective",
+                        "progressive",
+                        "subjunctive",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπάτα",
+                    "tags": [
+                        "active",
+                        "imperative",
+                        "imperfective",
+                        "second-person",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπάταγε",
+                    "tags": [
+                        "active",
+                        "imperative",
+                        "imperfective",
+                        "second-person",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπάτησε",
+                    "tags": [
+                        "active",
+                        "imperative",
+                        "perfective",
+                        "second-person",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπάτα",
+                    "tags": [
+                        "active",
+                        "imperative",
+                        "perfective",
+                        "second-person",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "-",
+                    "tags": [
+                        "imperative",
+                        "imperfective",
+                        "passive",
+                        "second-person",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατήσου",
+                    "tags": [
+                        "imperative",
+                        "passive",
+                        "perfective",
+                        "second-person",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατάτε",
+                    "tags": [
+                        "active",
+                        "imperative",
+                        "imperfective",
+                        "plural",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατήστε",
+                    "tags": [
+                        "active",
+                        "imperative",
+                        "perfective",
+                        "plural",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατιέστε",
+                    "tags": [
+                        "imperative",
+                        "imperfective",
+                        "passive",
+                        "plural",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατηθείτε",
+                    "tags": [
+                        "imperative",
+                        "passive",
+                        "perfective",
+                        "plural",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατώντας",
+                    "tags": ["active", "participle", "present"],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "-",
+                    "tags": ["participle", "passive", "present"],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "έχοντας περπατήσει",
+                    "tags": ["active", "participle", "past"],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατημένος",
+                    "tags": ["participle", "passive", "past"],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "‑η",
+                    "tags": ["participle", "passive", "past"],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "‑ο",
+                    "tags": ["participle", "passive", "past"],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατήσει",
+                    "tags": ["active", "infinitive-aorist"],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "περπατηθεί",
+                    "tags": ["infinitive-aorist", "passive"],
+                    "source": "Conjugation",
+                },
+            ]
         }
+
         self.assertEqual(expected, ret)
 
     def test_Greek_noun1(self):
-        ret = self.xinfl("νοσοκόμος", "Greek", "noun", "Declension", """
+        ret = self.xinfl(
+            "νοσοκόμος",
+            "Greek",
+            "noun",
+            "Declension",
+            """
 <div class="NavFrame" style="max-width%3A50em">
 <div class="NavHead" style="background%3A%23cce4fc%3B+text-align%3Aleft">declension of νοσοκόμος</div>
 <div class="NavContent">
@@ -2593,80 +2578,55 @@ class InflTests(unittest.TestCase):
 
 |}
 </div></div>[[Category:Greek nouns declining like 'δρόμος']]
-""")  # noqa: E501
+""",
+        )  # noqa: E501
         expected = {
             "forms": [
-              {
-                "form": "no-table-tags",
-                "source": "Declension",
-                "tags": [
-                  "table-tags"
-                ]
-              },
-              {
-                "form": "νοσοκόμος",
-                "source": "Declension",
-                "tags": [
-                  "nominative",
-                  "singular"
-                ]
-              },
-              {
-                "form": "νοσοκόμοι",
-                "source": "Declension",
-                "tags": [
-                  "nominative",
-                  "plural"
-                ]
-              },
-              {
-                "form": "νοσοκόμου",
-                "source": "Declension",
-                "tags": [
-                  "genitive",
-                  "singular"
-                ]
-              },
-              {
-                "form": "νοσοκόμων",
-                "source": "Declension",
-                "tags": [
-                  "genitive",
-                  "plural"
-                ]
-              },
-              {
-                "form": "νοσοκόμο",
-                "source": "Declension",
-                "tags": [
-                  "accusative",
-                  "singular"
-                ]
-              },
-              {
-                "form": "νοσοκόμους",
-                "source": "Declension",
-                "tags": [
-                  "accusative",
-                  "plural"
-                ]
-              },
-              {
-                "form": "νοσοκόμε",
-                "source": "Declension",
-                "tags": [
-                  "singular",
-                  "vocative"
-                ]
-              },
-              {
-                "form": "νοσοκόμοι",
-                "source": "Declension",
-                "tags": [
-                  "plural",
-                  "vocative"
-                ]
-              }
+                {
+                    "form": "no-table-tags",
+                    "source": "Declension",
+                    "tags": ["table-tags"],
+                },
+                {
+                    "form": "νοσοκόμος",
+                    "source": "Declension",
+                    "tags": ["nominative", "singular"],
+                },
+                {
+                    "form": "νοσοκόμοι",
+                    "source": "Declension",
+                    "tags": ["nominative", "plural"],
+                },
+                {
+                    "form": "νοσοκόμου",
+                    "source": "Declension",
+                    "tags": ["genitive", "singular"],
+                },
+                {
+                    "form": "νοσοκόμων",
+                    "source": "Declension",
+                    "tags": ["genitive", "plural"],
+                },
+                {
+                    "form": "νοσοκόμο",
+                    "source": "Declension",
+                    "tags": ["accusative", "singular"],
+                },
+                {
+                    "form": "νοσοκόμους",
+                    "source": "Declension",
+                    "tags": ["accusative", "plural"],
+                },
+                {
+                    "form": "νοσοκόμε",
+                    "source": "Declension",
+                    "tags": ["singular", "vocative"],
+                },
+                {
+                    "form": "νοσοκόμοι",
+                    "source": "Declension",
+                    "tags": ["plural", "vocative"],
+                },
             ],
         }
         self.assertEqual(expected, ret)
