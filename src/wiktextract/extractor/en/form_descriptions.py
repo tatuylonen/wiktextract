@@ -167,7 +167,8 @@ for k, v in xlat_head_map.items():
     for tag in v.split():
         if tag not in valid_tags:
             print(
-                "WARNING: xlat_head_map[{}] contains unrecognized tag {}".format(
+                "WARNING: xlat_head_map[{}] contains"
+                " unrecognized tag {}".format(
                     k, tag
                 )
             )
@@ -313,7 +314,8 @@ tr_note_re = re.compile(
     r"form|regular|irregular|alternative)"
     r")($|[) ])|^("
     # Following are only matched at the beginning of the string
-    r"pl|pl\.|see:|pl:|sg:|plurals:|e\.g\.|e\.g\.:|e\.g\.,|cf\.|compare|such as|"
+    r"pl|pl\.|see:|pl:|sg:|plurals:|e\.g\.|e\.g\.:"
+    r"|e\.g\.,|cf\.|compare|such as|"
     r"see|only|often|usually|used|usage:|of|not|in|compare|usu\.|"
     r"as|about|abbrv\.|abbreviation|abbr\.|that:|optionally|"
     r"mainly|from|for|also|also:|acronym|"
@@ -1425,7 +1427,8 @@ def parse_head_final_tags(
     ):
         if form not in ok_suspicious_forms:
             wxr.wtp.debug(
-                "suspicious unhandled suffix in {}: {!r}, originally {!r}".format(
+                "suspicious unhandled suffix in {}:"
+                " {!r}, originally {!r}".format(
                     lang, form, origform
                 ),
                 sortid="form_descriptions/1089",
@@ -1785,10 +1788,19 @@ def match_links_to_form(
     wxr: WiktextractContext,
     form: str,
     links: list[tuple[str, str]],
-    link_dict: dict[str, list[str]],
+    link_dict: dict[str, list[str]] | None,
 ) -> list[tuple[str, str]] | None:
     if not links:
         return None
+    if link_dict is None:
+        link_dict = {}
+        for ltxt, ltrg in links:
+            if ltxt not in link_dict:
+                link_dict[ltxt] = [
+                    ltrg,
+                ]
+            else:
+                link_dict[ltxt].append(ltrg)
     ret: list[tuple[str, str]] = []
     if form in link_dict:
         if len(link_dict[form]) > 1:
@@ -1807,7 +1819,7 @@ def match_links_to_form(
         for i, (ltext, ltarg) in enumerate(links):
             if ltext == split_forms[0]:
                 for j, f in enumerate(split_forms):
-                    if i + j > len(links):
+                    if i + j >= len(links):
                         break
                     if f.strip(",;() ") != links[i + j][0].strip(",;() "):
                         break
@@ -1821,7 +1833,7 @@ def match_links_to_form(
     # We only care about weird links
     # print(f"{len(ret)=}, {ret}")
     for txt, tar in ret:
-        if txt != tar and txt != tar[ :tar.find("#")]:
+        if txt != tar and txt != tar[: tar.find("#")]:
             break
     else:
         return None
@@ -1890,7 +1902,6 @@ def parse_word_head(
     # print(f"PARSE_WORD_HEAD: {links=}")
 
     # Save original text for if we want to look for mismatched form-links
-    orig_text = text
 
     link_dict: dict[str, list[str]] | None
     if links is not None:
@@ -3289,7 +3300,8 @@ def parse_alt_or_inflection_of(
 alt_infl_disallowed: set[str] = set(
     [
         "error-unknown-tag",
-        "place",  # Not in inflected forms and causes problems e.g. house/English
+        "place",  # Not in inflected forms and causes problems e.g. house/
+                  # English
     ]
 )
 
