@@ -33,12 +33,16 @@ class InflTests(unittest.TestCase):
         self.wxr.wtp.start_subsection(pos)
         tree = self.wxr.wtp.parse(text)
         data = {}
-        parse_inflection_section(self.wxr, data, word, lang, pos,
-                                 section, tree)
+        parse_inflection_section(self.wxr, data, word, lang, pos, section, tree)
         return data
 
     def test_Russian_adj1(self):
-        ret = self.xinfl("следующий", "Russian", "adj", "Declension", """
+        ret = self.xinfl(
+            "следующий",
+            "Russian",
+            "adj",
+            "Declension",
+            """
 <div>
 <div class="NavFrame" style="display%3A+inline-block%3B+min-width%3A+70em">
 <div class="NavHead" style="background%3A%23eff7ff">Declension of <b lang="ru" class="Cyrl"><span class="Cyrl" lang="ru">сле́дующий</span></b> (unknown short forms)</div>
@@ -171,237 +175,188 @@ class InflTests(unittest.TestCase):
 
 |}
 </div></div></div>[[Category:Russian sibilant-stem stem-stressed adjectives|СЛЕДУЮЩИЙ]]
-""")  # noqa: E501
+""",
+        )  # noqa: E501
         expected = {
             "forms": [
-              {
-                "form": "no-table-tags",
-                "source": "Declension",
-                "tags": [
-                  "table-tags"
-                ]
-              },
-              {
-                "form": "сле́дующий",
-                "roman": "slédujuščij",
-                "source": "Declension",
-                "tags": [
-                  "masculine",
-                  "nominative"
-                ]
-              },
-              {
-                "form": "сле́дующее",
-                "roman": "slédujuščeje",
-                "source": "Declension",
-                "tags": [
-                  "neuter",
-                  "nominative"
-                ]
-              },
-              {
-                "form": "сле́дующая",
-                "roman": "slédujuščaja",
-                "source": "Declension",
-                "tags": [
-                  "feminine",
-                  "nominative"
-                ]
-              },
-              {
-                "form": "сле́дующие",
-                "roman": "slédujuščije",
-                "source": "Declension",
-                "tags": [
-                  "nominative",
-                  "plural"
-                ]
-              },
-              {
-                "form": "сле́дующего",
-                "roman": "slédujuščevo",
-                "source": "Declension",
-                "tags": [
-                  "genitive",
-                  "masculine",
-                  "neuter"
-                ]
-              },
-              {
-                "form": "сле́дующей",
-                "roman": "slédujuščej",
-                "source": "Declension",
-                "tags": [
-                  "feminine",
-                  "genitive"
-                ]
-              },
-              {
-                "form": "сле́дующих",
-                "roman": "slédujuščix",
-                "source": "Declension",
-                "tags": [
-                  "genitive",
-                  "plural"
-                ]
-              },
-              {
-                "form": "сле́дующему",
-                "roman": "slédujuščemu",
-                "source": "Declension",
-                "tags": [
-                  "dative",
-                  "masculine",
-                  "neuter"
-                ]
-              },
-              {
-                "form": "сле́дующей",
-                "roman": "slédujuščej",
-                "source": "Declension",
-                "tags": [
-                  "dative",
-                  "feminine"
-                ]
-              },
-              {
-                "form": "сле́дующим",
-                "roman": "slédujuščim",
-                "source": "Declension",
-                "tags": [
-                  "dative",
-                  "plural"
-                ]
-              },
-              {
-                "form": "сле́дующего",
-                "roman": "slédujuščevo",
-                "source": "Declension",
-                "tags": [
-                  "accusative",
-                  "animate",
-                  "masculine"
-                ]
-              },
-              {
-                "form": "сле́дующее",
-                "roman": "slédujuščeje",
-                "source": "Declension",
-                "tags": [
-                  "accusative",
-                  "neuter"
-                ]
-              },
-              {
-                "form": "сле́дующую",
-                "roman": "slédujuščuju",
-                "source": "Declension",
-                "tags": [
-                  "accusative",
-                  "feminine"
-                ]
-              },
-              {
-                "form": "сле́дующих",
-                "roman": "slédujuščix",
-                "source": "Declension",
-                "tags": [
-                  "accusative",
-                  "animate",
-                  "plural"
-                ]
-              },
-              {
-                "form": "сле́дующий",
-                "roman": "slédujuščij",
-                "source": "Declension",
-                "tags": [
-                  "accusative",
-                  "inanimate",
-                  "masculine"
-                ]
-              },
-              {
-                "form": "сле́дующие",
-                "roman": "slédujuščije",
-                "source": "Declension",
-                "tags": [
-                  "accusative",
-                  "inanimate",
-                  "plural"
-                ]
-              },
-              {
-                "form": "сле́дующим",
-                "roman": "slédujuščim",
-                "source": "Declension",
-                "tags": [
-                  "instrumental",
-                  "masculine",
-                  "neuter"
-                ]
-              },
-              {
-                "form": "сле́дующей",
-                "roman": "slédujuščej",
-                "source": "Declension",
-                "tags": [
-                  "feminine",
-                  "instrumental"
-                ]
-              },
-              {
-                "form": "сле́дующею",
-                "roman": "slédujuščeju",
-                "source": "Declension",
-                "tags": [
-                  "feminine",
-                  "instrumental"
-                ]
-              },
-              {
-                "form": "сле́дующими",
-                "roman": "slédujuščimi",
-                "source": "Declension",
-                "tags": [
-                  "instrumental",
-                  "plural"
-                ]
-              },
-              {
-                "form": "сле́дующем",
-                "roman": "slédujuščem",
-                "source": "Declension",
-                "tags": [
-                  "masculine",
-                  "neuter",
-                  "prepositional"
-                ]
-              },
-              {
-                "form": "сле́дующей",
-                "roman": "slédujuščej",
-                "source": "Declension",
-                "tags": [
-                  "feminine",
-                  "prepositional"
-                ]
-              },
-              {
-                "form": "сле́дующих",
-                "roman": "slédujuščix",
-                "source": "Declension",
-                "tags": [
-                  "plural",
-                  "prepositional"
-                ]
-              }
-            ],
+                {
+                    "form": "no-table-tags",
+                    "source": "Declension",
+                    "tags": ["table-tags"],
+                },
+                {
+                    "form": "сле́дующий",
+                    "tags": ["masculine", "nominative"],
+                    "source": "Declension",
+                    "roman": "slédujuščij",
+                    "links": [("сле́дующий", "следующий#Russian")],
+                },
+                {
+                    "form": "сле́дующее",
+                    "tags": ["neuter", "nominative"],
+                    "source": "Declension",
+                    "roman": "slédujuščeje",
+                    "links": [("сле́дующее", "следующее#Russian")],
+                },
+                {
+                    "form": "сле́дующая",
+                    "tags": ["feminine", "nominative"],
+                    "source": "Declension",
+                    "roman": "slédujuščaja",
+                    "links": [("сле́дующая", "следующая#Russian")],
+                },
+                {
+                    "form": "сле́дующие",
+                    "tags": ["nominative", "plural"],
+                    "source": "Declension",
+                    "roman": "slédujuščije",
+                    "links": [("сле́дующие", "следующие#Russian")],
+                },
+                {
+                    "form": "сле́дующего",
+                    "tags": ["genitive", "masculine", "neuter"],
+                    "source": "Declension",
+                    "roman": "slédujuščevo",
+                    "links": [("сле́дующего", "следующего#Russian")],
+                },
+                {
+                    "form": "сле́дующей",
+                    "tags": ["feminine", "genitive"],
+                    "source": "Declension",
+                    "roman": "slédujuščej",
+                    "links": [("сле́дующей", "следующей#Russian")],
+                },
+                {
+                    "form": "сле́дующих",
+                    "tags": ["genitive", "plural"],
+                    "source": "Declension",
+                    "roman": "slédujuščix",
+                    "links": [("сле́дующих", "следующих#Russian")],
+                },
+                {
+                    "form": "сле́дующему",
+                    "tags": ["dative", "masculine", "neuter"],
+                    "source": "Declension",
+                    "roman": "slédujuščemu",
+                    "links": [("сле́дующему", "следующему#Russian")],
+                },
+                {
+                    "form": "сле́дующей",
+                    "tags": ["dative", "feminine"],
+                    "source": "Declension",
+                    "roman": "slédujuščej",
+                    "links": [("сле́дующей", "следующей#Russian")],
+                },
+                {
+                    "form": "сле́дующим",
+                    "tags": ["dative", "plural"],
+                    "source": "Declension",
+                    "roman": "slédujuščim",
+                    "links": [("сле́дующим", "следующим#Russian")],
+                },
+                {
+                    "form": "сле́дующего",
+                    "tags": ["accusative", "animate", "masculine"],
+                    "source": "Declension",
+                    "roman": "slédujuščevo",
+                    "links": [("сле́дующего", "следующего#Russian")],
+                },
+                {
+                    "form": "сле́дующее",
+                    "tags": ["accusative", "neuter"],
+                    "source": "Declension",
+                    "roman": "slédujuščeje",
+                    "links": [("сле́дующее", "следующее#Russian")],
+                },
+                {
+                    "form": "сле́дующую",
+                    "tags": ["accusative", "feminine"],
+                    "source": "Declension",
+                    "roman": "slédujuščuju",
+                    "links": [("сле́дующую", "следующую#Russian")],
+                },
+                {
+                    "form": "сле́дующих",
+                    "tags": ["accusative", "animate", "plural"],
+                    "source": "Declension",
+                    "roman": "slédujuščix",
+                    "links": [("сле́дующих", "следующих#Russian")],
+                },
+                {
+                    "form": "сле́дующий",
+                    "tags": ["accusative", "inanimate", "masculine"],
+                    "source": "Declension",
+                    "roman": "slédujuščij",
+                    "links": [("сле́дующий", "следующий#Russian")],
+                },
+                {
+                    "form": "сле́дующие",
+                    "tags": ["accusative", "inanimate", "plural"],
+                    "source": "Declension",
+                    "roman": "slédujuščije",
+                    "links": [("сле́дующие", "следующие#Russian")],
+                },
+                {
+                    "form": "сле́дующим",
+                    "tags": ["instrumental", "masculine", "neuter"],
+                    "source": "Declension",
+                    "roman": "slédujuščim",
+                    "links": [("сле́дующим", "следующим#Russian")],
+                },
+                {
+                    "form": "сле́дующей",
+                    "tags": ["feminine", "instrumental"],
+                    "source": "Declension",
+                    "roman": "slédujuščej",
+                    "links": [("сле́дующей", "следующей#Russian")],
+                },
+                {
+                    "form": "сле́дующею",
+                    "tags": ["feminine", "instrumental"],
+                    "source": "Declension",
+                    "roman": "slédujuščeju",
+                    "links": [("сле́дующею", "следующею#Russian")],
+                },
+                {
+                    "form": "сле́дующими",
+                    "tags": ["instrumental", "plural"],
+                    "source": "Declension",
+                    "roman": "slédujuščimi",
+                    "links": [("сле́дующими", "следующими#Russian")],
+                },
+                {
+                    "form": "сле́дующем",
+                    "tags": ["masculine", "neuter", "prepositional"],
+                    "source": "Declension",
+                    "roman": "slédujuščem",
+                    "links": [("сле́дующем", "следующем#Russian")],
+                },
+                {
+                    "form": "сле́дующей",
+                    "tags": ["feminine", "prepositional"],
+                    "source": "Declension",
+                    "roman": "slédujuščej",
+                    "links": [("сле́дующей", "следующей#Russian")],
+                },
+                {
+                    "form": "сле́дующих",
+                    "tags": ["plural", "prepositional"],
+                    "source": "Declension",
+                    "roman": "slédujuščix",
+                    "links": [("сле́дующих", "следующих#Russian")],
+                },
+            ]
         }
+
         self.assertEqual(expected, ret)
 
     def test_Russian_verb1(self):
-        ret = self.xinfl("произносить", "Russian", "verb", "Conjugation", """
+        ret = self.xinfl(
+            "произносить",
+            "Russian",
+            "verb",
+            "Conjugation",
+            """
 <templatestyles src="Module%3Aru-verb%2Fstyle.css"><div class="NavFrame" style="width%3A49.6em%3B">
 <div class="NavHead" style="text-align%3Aleft%3B+background%3A%23e0e0ff%3B">Conjugation of <span lang="ru" class="Cyrl">''произноси́ть''</span> (class 4c imperfective transitive)</div>
 <div class="NavContent">
@@ -598,299 +553,208 @@ class InflTests(unittest.TestCase):
 
 </div>
 </div>[[Category:Russian class 4 verbs|ПРОИЗНОСИТЬ]][[Category:Russian class 4c verbs|ПРОИЗНОСИТЬ]][[Category:Russian imperfective verbs|ПРОИЗНОСИТЬ]][[Category:Russian transitive verbs|ПРОИЗНОСИТЬ]]
-""")  # noqa: E501
+""",
+        )  # noqa: E501
         expected = {
             "forms": [
-              {
-                "form": "imperfective transitive",
-                "source": "Conjugation",
-                "tags": [
-                  "table-tags"
-                ]
-              },
-              {
-                "form": "4c imperfective transitive",
-                "source": "Conjugation",
-                "tags": [
-                  "class"
-                ]
-              },
-              {
-                "form": "произноси́ть",
-                "roman": "proiznosítʹ",
-                "source": "Conjugation",
-                "tags": [
-                  "imperfective",
-                  "infinitive"
-                ]
-              },
-              {
-                "form": "произнося́щий",
-                "roman": "proiznosjáščij",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "participle",
-                  "present"
-                ]
-              },
-              {
-                "form": "произноси́вший",
-                "roman": "proiznosívšij",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "participle",
-                  "past"
-                ]
-              },
-              {
-                "form": "произноси́мый",
-                "roman": "proiznosímyj",
-                "source": "Conjugation",
-                "tags": [
-                  "participle",
-                  "passive",
-                  "present"
-                ]
-              },
-              {
-                "form": "-",
-                "source": "Conjugation",
-                "tags": [
-                  "participle",
-                  "passive",
-                  "past"
-                ]
-              },
-              {
-                "form": "произнося́",
-                "roman": "proiznosjá",
-                "source": "Conjugation",
-                "tags": [
-                  "adverbial",
-                  "participle",
-                  "present"
-                ]
-              },
-              {
-                "form": "произноси́в",
-                "roman": "proiznosív",
-                "source": "Conjugation",
-                "tags": [
-                  "adverbial",
-                  "participle",
-                  "past"
-                ]
-              },
-              {
-                "form": "произноси́вши",
-                "roman": "proiznosívši",
-                "source": "Conjugation",
-                "tags": [
-                  "adverbial",
-                  "participle",
-                  "past"
-                ]
-              },
-              {
-                "form": "произношу́",
-                "roman": "proiznošú",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "present",
-                  "singular"
-                ]
-              },
-              {
-                "form": "бу́ду произноси́ть",
-                "roman": "búdu proiznosítʹ",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "future",
-                  "singular"
-                ]
-              },
-              {
-                "form": "произно́сишь",
-                "roman": "proiznósišʹ",
-                "source": "Conjugation",
-                "tags": [
-                  "present",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "бу́дешь произноси́ть",
-                "roman": "búdešʹ proiznosítʹ",
-                "source": "Conjugation",
-                "tags": [
-                  "future",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "произно́сит",
-                "roman": "proiznósit",
-                "source": "Conjugation",
-                "tags": [
-                  "present",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "бу́дет произноси́ть",
-                "roman": "búdet proiznosítʹ",
-                "source": "Conjugation",
-                "tags": [
-                  "future",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "произно́сим",
-                "roman": "proiznósim",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "plural",
-                  "present"
-                ]
-              },
-              {
-                "form": "бу́дем произноси́ть",
-                "roman": "búdem proiznosítʹ",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "future",
-                  "plural"
-                ]
-              },
-              {
-                "form": "произно́сите",
-                "roman": "proiznósite",
-                "source": "Conjugation",
-                "tags": [
-                  "plural",
-                  "present",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "бу́дете произноси́ть",
-                "roman": "búdete proiznosítʹ",
-                "source": "Conjugation",
-                "tags": [
-                  "future",
-                  "plural",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "произно́сят",
-                "roman": "proiznósjat",
-                "source": "Conjugation",
-                "tags": [
-                  "plural",
-                  "present",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "бу́дут произноси́ть",
-                "roman": "búdut proiznosítʹ",
-                "source": "Conjugation",
-                "tags": [
-                  "future",
-                  "plural",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "произноси́",
-                "roman": "proiznosí",
-                "source": "Conjugation",
-                "tags": [
-                  "imperative",
-                  "singular"
-                ]
-              },
-              {
-                "form": "произноси́те",
-                "roman": "proiznosíte",
-                "source": "Conjugation",
-                "tags": [
-                  "imperative",
-                  "plural"
-                ]
-              },
-              {
-                "form": "произноси́л",
-                "roman": "proiznosíl",
-                "source": "Conjugation",
-                "tags": [
-                  "masculine",
-                  "past",
-                  "singular"
-                ]
-              },
-              {
-                "form": "произноси́ли",
-                "roman": "proiznosíli",
-                "source": "Conjugation",
-                "tags": [
-                  "masculine",
-                  "past",
-                  "plural"
-                ]
-              },
-              {
-                "form": "произноси́ла",
-                "roman": "proiznosíla",
-                "source": "Conjugation",
-                "tags": [
-                  "feminine",
-                  "past",
-                  "singular"
-                ]
-              },
-              {
-                "form": "произноси́ли",
-                "roman": "proiznosíli",
-                "source": "Conjugation",
-                "tags": [
-                  "feminine",
-                  "past",
-                  "plural"
-                ]
-              },
-              {
-                "form": "произноси́ло",
-                "roman": "proiznosílo",
-                "source": "Conjugation",
-                "tags": [
-                  "neuter",
-                  "past",
-                  "singular"
-                ]
-              },
-              {
-                "form": "произноси́ли",
-                "roman": "proiznosíli",
-                "source": "Conjugation",
-                "tags": [
-                  "neuter",
-                  "past",
-                  "plural"
-                ]
-              }
-            ],
+                {
+                    "form": "imperfective transitive",
+                    "source": "Conjugation",
+                    "tags": ["table-tags"],
+                },
+                {
+                    "form": "4c imperfective transitive",
+                    "source": "Conjugation",
+                    "tags": ["class"],
+                },
+                {
+                    "form": "произноси́ть",
+                    "tags": ["imperfective", "infinitive"],
+                    "source": "Conjugation",
+                    "roman": "proiznosítʹ",
+                    "links": [("произноси́ть", "произносить#Russian")],
+                },
+                {
+                    "form": "произнося́щий",
+                    "tags": ["active", "participle", "present"],
+                    "source": "Conjugation",
+                    "roman": "proiznosjáščij",
+                    "links": [("произнося́щий", "произносящий#Russian")],
+                },
+                {
+                    "form": "произноси́вший",
+                    "tags": ["active", "participle", "past"],
+                    "source": "Conjugation",
+                    "roman": "proiznosívšij",
+                    "links": [("произноси́вший", "произносивший#Russian")],
+                },
+                {
+                    "form": "произноси́мый",
+                    "tags": ["participle", "passive", "present"],
+                    "source": "Conjugation",
+                    "roman": "proiznosímyj",
+                    "links": [("произноси́мый", "произносимый#Russian")],
+                },
+                {
+                    "form": "-",
+                    "tags": ["participle", "passive", "past"],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "произнося́",
+                    "tags": ["adverbial", "participle", "present"],
+                    "source": "Conjugation",
+                    "roman": "proiznosjá",
+                    "links": [("произнося́", "произнося#Russian")],
+                },
+                {
+                    "form": "произноси́в",
+                    "tags": ["adverbial", "participle", "past"],
+                    "source": "Conjugation",
+                    "roman": "proiznosív",
+                    "links": [("произноси́в", "произносив#Russian")],
+                },
+                {
+                    "form": "произноси́вши",
+                    "tags": ["adverbial", "participle", "past"],
+                    "source": "Conjugation",
+                    "roman": "proiznosívši",
+                    "links": [("произноси́вши", "произносивши#Russian")],
+                },
+                {
+                    "form": "произношу́",
+                    "tags": ["first-person", "present", "singular"],
+                    "source": "Conjugation",
+                    "roman": "proiznošú",
+                    "links": [("произношу́", "произношу#Russian")],
+                },
+                {
+                    "form": "бу́ду произноси́ть",
+                    "tags": ["first-person", "future", "singular"],
+                    "source": "Conjugation",
+                    "roman": "búdu proiznosítʹ",
+                },
+                {
+                    "form": "произно́сишь",
+                    "tags": ["present", "second-person", "singular"],
+                    "source": "Conjugation",
+                    "roman": "proiznósišʹ",
+                    "links": [("произно́сишь", "произносишь#Russian")],
+                },
+                {
+                    "form": "бу́дешь произноси́ть",
+                    "tags": ["future", "second-person", "singular"],
+                    "source": "Conjugation",
+                    "roman": "búdešʹ proiznosítʹ",
+                },
+                {
+                    "form": "произно́сит",
+                    "tags": ["present", "singular", "third-person"],
+                    "source": "Conjugation",
+                    "roman": "proiznósit",
+                    "links": [("произно́сит", "произносит#Russian")],
+                },
+                {
+                    "form": "бу́дет произноси́ть",
+                    "tags": ["future", "singular", "third-person"],
+                    "source": "Conjugation",
+                    "roman": "búdet proiznosítʹ",
+                },
+                {
+                    "form": "произно́сим",
+                    "tags": ["first-person", "plural", "present"],
+                    "source": "Conjugation",
+                    "roman": "proiznósim",
+                    "links": [("произно́сим", "произносим#Russian")],
+                },
+                {
+                    "form": "бу́дем произноси́ть",
+                    "tags": ["first-person", "future", "plural"],
+                    "source": "Conjugation",
+                    "roman": "búdem proiznosítʹ",
+                },
+                {
+                    "form": "произно́сите",
+                    "tags": ["plural", "present", "second-person"],
+                    "source": "Conjugation",
+                    "roman": "proiznósite",
+                    "links": [("произно́сите", "произносите#Russian")],
+                },
+                {
+                    "form": "бу́дете произноси́ть",
+                    "tags": ["future", "plural", "second-person"],
+                    "source": "Conjugation",
+                    "roman": "búdete proiznosítʹ",
+                },
+                {
+                    "form": "произно́сят",
+                    "tags": ["plural", "present", "third-person"],
+                    "source": "Conjugation",
+                    "roman": "proiznósjat",
+                    "links": [("произно́сят", "произносят#Russian")],
+                },
+                {
+                    "form": "бу́дут произноси́ть",
+                    "tags": ["future", "plural", "third-person"],
+                    "source": "Conjugation",
+                    "roman": "búdut proiznosítʹ",
+                },
+                {
+                    "form": "произноси́",
+                    "tags": ["imperative", "singular"],
+                    "source": "Conjugation",
+                    "roman": "proiznosí",
+                    "links": [("произноси́", "произноси#Russian")],
+                },
+                {
+                    "form": "произноси́те",
+                    "tags": ["imperative", "plural"],
+                    "source": "Conjugation",
+                    "roman": "proiznosíte",
+                    "links": [("произноси́те", "произносите#Russian")],
+                },
+                {
+                    "form": "произноси́л",
+                    "tags": ["masculine", "past", "singular"],
+                    "source": "Conjugation",
+                    "roman": "proiznosíl",
+                    "links": [("произноси́л", "произносил#Russian")],
+                },
+                {
+                    "form": "произноси́ли",
+                    "tags": ["masculine", "past", "plural"],
+                    "source": "Conjugation",
+                    "roman": "proiznosíli",
+                    "links": [("произноси́ли", "произносили#Russian")],
+                },
+                {
+                    "form": "произноси́ла",
+                    "tags": ["feminine", "past", "singular"],
+                    "source": "Conjugation",
+                    "roman": "proiznosíla",
+                    "links": [("произноси́ла", "произносила#Russian")],
+                },
+                {
+                    "form": "произноси́ли",
+                    "tags": ["feminine", "past", "plural"],
+                    "source": "Conjugation",
+                    "roman": "proiznosíli",
+                    "links": [("произноси́ли", "произносили#Russian")],
+                },
+                {
+                    "form": "произноси́ло",
+                    "tags": ["neuter", "past", "singular"],
+                    "source": "Conjugation",
+                    "roman": "proiznosílo",
+                    "links": [("произноси́ло", "произносило#Russian")],
+                },
+                {
+                    "form": "произноси́ли",
+                    "tags": ["neuter", "past", "plural"],
+                    "source": "Conjugation",
+                    "roman": "proiznosíli",
+                    "links": [("произноси́ли", "произносили#Russian")],
+                },
+            ]
         }
         self.assertEqual(expected, ret)

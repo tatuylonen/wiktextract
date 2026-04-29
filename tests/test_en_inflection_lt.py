@@ -33,12 +33,16 @@ class InflTests(unittest.TestCase):
         self.wxr.wtp.start_subsection(pos)
         tree = self.wxr.wtp.parse(text)
         data = {}
-        parse_inflection_section(self.wxr, data, word, lang, pos,
-                                 section, tree)
+        parse_inflection_section(self.wxr, data, word, lang, pos, section, tree)
         return data
 
     def test_Lithuanian_verb1(self):
-        ret = self.xinfl("važiuoti", "Lithuanian", "verb", "Conjugation", """
+        ret = self.xinfl(
+            "važiuoti",
+            "Lithuanian",
+            "verb",
+            "Conjugation",
+            """
 <div class="NavFrame" style>
 <div class="NavHead" style>Conjugation of <i class="Latn+mention" lang="lt">[[važiuoti#Lithuanian|važiuoti]]</i></div>
 <div class="NavContent">
@@ -402,726 +406,536 @@ class InflTests(unittest.TestCase):
 
 |}
 </div></div>
-""")  # noqa: E501
+""",
+        )  # noqa: E501
         expected = {
             "forms": [
-              {
-                "form": "no-table-tags",
-                "source": "Conjugation",
-                "tags": [
-                  "table-tags"
-                ]
-              },
-              {
-                "form": "važiuoju",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "indicative",
-                  "present",
-                  "singular"
-                ]
-              },
-              {
-                "form": "važiuoji",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "present",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "važiuoja",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "present",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "važiuojame",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "indicative",
-                  "plural",
-                  "present"
-                ]
-              },
-              {
-                "form": "važiuojam",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "indicative",
-                  "plural",
-                  "present"
-                ]
-              },
-              {
-                "form": "važiuojate",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "plural",
-                  "present",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "važiuojat",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "plural",
-                  "present",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "važiuoja",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "plural",
-                  "present",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "važiavau",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "indicative",
-                  "past",
-                  "singular"
-                ]
-              },
-              {
-                "form": "važiavai",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "past",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "važiavo",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "past",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "važiavome",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "indicative",
-                  "past",
-                  "plural"
-                ]
-              },
-              {
-                "form": "važiavom",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "indicative",
-                  "past",
-                  "plural"
-                ]
-              },
-              {
-                "form": "važiavote",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "past",
-                  "plural",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "važiavot",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "past",
-                  "plural",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "važiavo",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "past",
-                  "plural",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "važiuodavau",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "frequentative",
-                  "indicative",
-                  "past",
-                  "singular"
-                ]
-              },
-              {
-                "form": "važiuodavai",
-                "source": "Conjugation",
-                "tags": [
-                  "frequentative",
-                  "indicative",
-                  "past",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "važiuodavo",
-                "source": "Conjugation",
-                "tags": [
-                  "frequentative",
-                  "indicative",
-                  "past",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "važiuodavome",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "frequentative",
-                  "indicative",
-                  "past",
-                  "plural"
-                ]
-              },
-              {
-                "form": "važiuodavom",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "frequentative",
-                  "indicative",
-                  "past",
-                  "plural"
-                ]
-              },
-              {
-                "form": "važiuodavote",
-                "source": "Conjugation",
-                "tags": [
-                  "frequentative",
-                  "indicative",
-                  "past",
-                  "plural",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "važiuodavot",
-                "source": "Conjugation",
-                "tags": [
-                  "frequentative",
-                  "indicative",
-                  "past",
-                  "plural",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "važiuodavo",
-                "source": "Conjugation",
-                "tags": [
-                  "frequentative",
-                  "indicative",
-                  "past",
-                  "plural",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "važiuosiu",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "future",
-                  "indicative",
-                  "singular"
-                ]
-              },
-              {
-                "form": "važiuosi",
-                "source": "Conjugation",
-                "tags": [
-                  "future",
-                  "indicative",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "važiuos",
-                "source": "Conjugation",
-                "tags": [
-                  "future",
-                  "indicative",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "važiuosime",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "future",
-                  "indicative",
-                  "plural"
-                ]
-              },
-              {
-                "form": "važiuosim",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "future",
-                  "indicative",
-                  "plural"
-                ]
-              },
-              {
-                "form": "važiuosite",
-                "source": "Conjugation",
-                "tags": [
-                  "future",
-                  "indicative",
-                  "plural",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "važiuosit",
-                "source": "Conjugation",
-                "tags": [
-                  "future",
-                  "indicative",
-                  "plural",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "važiuos",
-                "source": "Conjugation",
-                "tags": [
-                  "future",
-                  "indicative",
-                  "plural",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "važiuočiau",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "singular",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "važiuotum",
-                "source": "Conjugation",
-                "tags": [
-                  "second-person",
-                  "singular",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "važiuotumei",
-                "source": "Conjugation",
-                "tags": [
-                  "second-person",
-                  "singular",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "važiuotų",
-                "source": "Conjugation",
-                "tags": [
-                  "singular",
-                  "subjunctive",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "važiuotumėme",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "plural",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "važiuotumėm",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "plural",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "važiuotume",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "plural",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "važiuotumėte",
-                "source": "Conjugation",
-                "tags": [
-                  "plural",
-                  "second-person",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "važiuotumėt",
-                "source": "Conjugation",
-                "tags": [
-                  "plural",
-                  "second-person",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "važiuotų",
-                "source": "Conjugation",
-                "tags": [
-                  "plural",
-                  "subjunctive",
-                  "third-person"
-                ]
-              },
-              {'form': '-',
-               'source': 'Conjugation',
-               'tags': ['first-person', 'imperative', 'singular']},
-              {
-                "form": "važiuok",
-                "source": "Conjugation",
-                "tags": [
-                  "imperative",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "važiuoki",
-                "source": "Conjugation",
-                "tags": [
-                  "imperative",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "tevažiuoja",
-                "source": "Conjugation",
-                "tags": [
-                  "imperative",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "tevažiuojie",
-                "source": "Conjugation",
-                "tags": [
-                  "imperative",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "važiuokime",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "imperative",
-                  "plural"
-                ]
-              },
-              {
-                "form": "važiuokim",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "imperative",
-                  "plural"
-                ]
-              },
-              {
-                "form": "važiuokite",
-                "source": "Conjugation",
-                "tags": [
-                  "imperative",
-                  "plural",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "važiuokit",
-                "source": "Conjugation",
-                "tags": [
-                  "imperative",
-                  "plural",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "tevažiuoja",
-                "source": "Conjugation",
-                "tags": [
-                  "imperative",
-                  "plural",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "tevažiuojie",
-                "source": "Conjugation",
-                "tags": [
-                  "imperative",
-                  "plural",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "no-table-tags",
-                "source": "Conjugation",
-                "tags": [
-                  "table-tags"
-                ]
-              },
-              {
-                "form": "važiuojąs",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "adjectival",
-                  "participle",
-                  "present"
-                ]
-              },
-              {
-                "form": "važiuojantis",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "adjectival",
-                  "participle",
-                  "present"
-                ]
-              },
-              {
-                "form": "važiuojamas",
-                "source": "Conjugation",
-                "tags": [
-                  "adjectival",
-                  "participle",
-                  "passive",
-                  "present"
-                ]
-              },
-              {
-                "form": "važiavęs",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "adjectival",
-                  "participle",
-                  "past"
-                ]
-              },
-              {
-                "form": "važiuotas",
-                "source": "Conjugation",
-                "tags": [
-                  "adjectival",
-                  "participle",
-                  "passive",
-                  "past"
-                ]
-              },
-              {
-                "form": "važiuodavęs",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "adjectival",
-                  "frequentative",
-                  "participle",
-                  "past"
-                ]
-              },
-              {'form': '-',
-               'source': 'Conjugation',
-               'tags': ['adjectival',
-                        'frequentative',
-                        'participle',
-                        'passive',
-                        'past']},
-              {
-                "form": "važiuosiąs",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "adjectival",
-                  "future",
-                  "participle"
-                ]
-              },
-              {
-                "form": "važiuosiantis",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "adjectival",
-                  "future",
-                  "participle"
-                ]
-              },
-              {
-                "form": "važiuosimas",
-                "source": "Conjugation",
-                "tags": [
-                  "adjectival",
-                  "future",
-                  "participle",
-                  "passive"
-                ]
-              },
-              {'form': '-',
-               'source': 'Conjugation',
-               'tags': ['active', 'adjectival', 'necessitative', 'participle']},
-              {
-                "form": "važiuotinas",
-                "source": "Conjugation",
-                "tags": [
-                  "adjectival",
-                  "necessitative",
-                  "participle",
-                  "passive"
-                ]
-              },
-              {
-                "form": "važiuodamas",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "adverbial",
-                  "participle",
-                  "special"
-                ]
-              },
-              {
-                "form": "važiuojant",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "adverbial",
-                  "half-participle",
-                  "participle",
-                  "present"
-                ]
-              },
-              {
-                "form": "važiavus",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "adverbial",
-                  "half-participle",
-                  "participle",
-                  "past"
-                ]
-              },
-              {
-                "form": "važiuodavus",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "adverbial",
-                  "frequentative",
-                  "half-participle",
-                  "participle",
-                  "past"
-                ]
-              },
-              {
-                "form": "važiuosiant",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "adverbial",
-                  "future",
-                  "half-participle",
-                  "participle"
-                ]
-              },
-              {
-                "form": "važiuote",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "adverbial",
-                  "adverbial-manner",
-                  "participle"
-                ]
-              },
-              {
-                "form": "važiuotinai",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "adverbial",
-                  "adverbial-manner",
-                  "participle"
-                ]
-              }
+                {
+                    "form": "no-table-tags",
+                    "source": "Conjugation",
+                    "tags": ["table-tags"],
+                },
+                {
+                    "form": "važiuoju",
+                    "source": "Conjugation",
+                    "tags": [
+                        "first-person",
+                        "indicative",
+                        "present",
+                        "singular",
+                    ],
+                },
+                {
+                    "form": "važiuoji",
+                    "source": "Conjugation",
+                    "tags": [
+                        "indicative",
+                        "present",
+                        "second-person",
+                        "singular",
+                    ],
+                },
+                {
+                    "form": "važiuoja",
+                    "source": "Conjugation",
+                    "tags": [
+                        "indicative",
+                        "present",
+                        "singular",
+                        "third-person",
+                    ],
+                },
+                {
+                    "form": "važiuojame",
+                    "source": "Conjugation",
+                    "tags": ["first-person", "indicative", "plural", "present"],
+                },
+                {
+                    "form": "važiuojam",
+                    "source": "Conjugation",
+                    "tags": ["first-person", "indicative", "plural", "present"],
+                },
+                {
+                    "form": "važiuojate",
+                    "source": "Conjugation",
+                    "tags": [
+                        "indicative",
+                        "plural",
+                        "present",
+                        "second-person",
+                    ],
+                },
+                {
+                    "form": "važiuojat",
+                    "source": "Conjugation",
+                    "tags": [
+                        "indicative",
+                        "plural",
+                        "present",
+                        "second-person",
+                    ],
+                },
+                {
+                    "form": "važiuoja",
+                    "source": "Conjugation",
+                    "tags": ["indicative", "plural", "present", "third-person"],
+                },
+                {
+                    "form": "važiavau",
+                    "source": "Conjugation",
+                    "tags": ["first-person", "indicative", "past", "singular"],
+                },
+                {
+                    "form": "važiavai",
+                    "source": "Conjugation",
+                    "tags": ["indicative", "past", "second-person", "singular"],
+                },
+                {
+                    "form": "važiavo",
+                    "source": "Conjugation",
+                    "tags": ["indicative", "past", "singular", "third-person"],
+                },
+                {
+                    "form": "važiavome",
+                    "source": "Conjugation",
+                    "tags": ["first-person", "indicative", "past", "plural"],
+                },
+                {
+                    "form": "važiavom",
+                    "source": "Conjugation",
+                    "tags": ["first-person", "indicative", "past", "plural"],
+                },
+                {
+                    "form": "važiavote",
+                    "source": "Conjugation",
+                    "tags": ["indicative", "past", "plural", "second-person"],
+                },
+                {
+                    "form": "važiavot",
+                    "source": "Conjugation",
+                    "tags": ["indicative", "past", "plural", "second-person"],
+                },
+                {
+                    "form": "važiavo",
+                    "source": "Conjugation",
+                    "tags": ["indicative", "past", "plural", "third-person"],
+                },
+                {
+                    "form": "važiuodavau",
+                    "source": "Conjugation",
+                    "tags": [
+                        "first-person",
+                        "frequentative",
+                        "indicative",
+                        "past",
+                        "singular",
+                    ],
+                },
+                {
+                    "form": "važiuodavai",
+                    "source": "Conjugation",
+                    "tags": [
+                        "frequentative",
+                        "indicative",
+                        "past",
+                        "second-person",
+                        "singular",
+                    ],
+                },
+                {
+                    "form": "važiuodavo",
+                    "source": "Conjugation",
+                    "tags": [
+                        "frequentative",
+                        "indicative",
+                        "past",
+                        "singular",
+                        "third-person",
+                    ],
+                },
+                {
+                    "form": "važiuodavome",
+                    "source": "Conjugation",
+                    "tags": [
+                        "first-person",
+                        "frequentative",
+                        "indicative",
+                        "past",
+                        "plural",
+                    ],
+                },
+                {
+                    "form": "važiuodavom",
+                    "source": "Conjugation",
+                    "tags": [
+                        "first-person",
+                        "frequentative",
+                        "indicative",
+                        "past",
+                        "plural",
+                    ],
+                },
+                {
+                    "form": "važiuodavote",
+                    "source": "Conjugation",
+                    "tags": [
+                        "frequentative",
+                        "indicative",
+                        "past",
+                        "plural",
+                        "second-person",
+                    ],
+                },
+                {
+                    "form": "važiuodavot",
+                    "source": "Conjugation",
+                    "tags": [
+                        "frequentative",
+                        "indicative",
+                        "past",
+                        "plural",
+                        "second-person",
+                    ],
+                },
+                {
+                    "form": "važiuodavo",
+                    "source": "Conjugation",
+                    "tags": [
+                        "frequentative",
+                        "indicative",
+                        "past",
+                        "plural",
+                        "third-person",
+                    ],
+                },
+                {
+                    "form": "važiuosiu",
+                    "source": "Conjugation",
+                    "tags": [
+                        "first-person",
+                        "future",
+                        "indicative",
+                        "singular",
+                    ],
+                },
+                {
+                    "form": "važiuosi",
+                    "source": "Conjugation",
+                    "tags": [
+                        "future",
+                        "indicative",
+                        "second-person",
+                        "singular",
+                    ],
+                },
+                {
+                    "form": "važiuos",
+                    "source": "Conjugation",
+                    "tags": [
+                        "future",
+                        "indicative",
+                        "singular",
+                        "third-person",
+                    ],
+                },
+                {
+                    "form": "važiuosime",
+                    "source": "Conjugation",
+                    "tags": ["first-person", "future", "indicative", "plural"],
+                },
+                {
+                    "form": "važiuosim",
+                    "source": "Conjugation",
+                    "tags": ["first-person", "future", "indicative", "plural"],
+                },
+                {
+                    "form": "važiuosite",
+                    "source": "Conjugation",
+                    "tags": ["future", "indicative", "plural", "second-person"],
+                },
+                {
+                    "form": "važiuosit",
+                    "source": "Conjugation",
+                    "tags": ["future", "indicative", "plural", "second-person"],
+                },
+                {
+                    "form": "važiuos",
+                    "source": "Conjugation",
+                    "tags": ["future", "indicative", "plural", "third-person"],
+                },
+                {
+                    "form": "važiuočiau",
+                    "source": "Conjugation",
+                    "tags": ["first-person", "singular", "subjunctive"],
+                },
+                {
+                    "form": "važiuotum",
+                    "source": "Conjugation",
+                    "tags": ["second-person", "singular", "subjunctive"],
+                },
+                {
+                    "form": "važiuotumei",
+                    "source": "Conjugation",
+                    "tags": ["second-person", "singular", "subjunctive"],
+                },
+                {
+                    "form": "važiuotų",
+                    "source": "Conjugation",
+                    "tags": ["singular", "subjunctive", "third-person"],
+                },
+                {
+                    "form": "važiuotumėme",
+                    "source": "Conjugation",
+                    "tags": ["first-person", "plural", "subjunctive"],
+                },
+                {
+                    "form": "važiuotumėm",
+                    "source": "Conjugation",
+                    "tags": ["first-person", "plural", "subjunctive"],
+                },
+                {
+                    "form": "važiuotume",
+                    "source": "Conjugation",
+                    "tags": ["first-person", "plural", "subjunctive"],
+                },
+                {
+                    "form": "važiuotumėte",
+                    "source": "Conjugation",
+                    "tags": ["plural", "second-person", "subjunctive"],
+                },
+                {
+                    "form": "važiuotumėt",
+                    "source": "Conjugation",
+                    "tags": ["plural", "second-person", "subjunctive"],
+                },
+                {
+                    "form": "važiuotų",
+                    "source": "Conjugation",
+                    "tags": ["plural", "subjunctive", "third-person"],
+                },
+                {
+                    "form": "-",
+                    "source": "Conjugation",
+                    "tags": ["first-person", "imperative", "singular"],
+                },
+                {
+                    "form": "važiuok",
+                    "source": "Conjugation",
+                    "tags": ["imperative", "second-person", "singular"],
+                },
+                {
+                    "form": "važiuoki",
+                    "source": "Conjugation",
+                    "tags": ["imperative", "second-person", "singular"],
+                },
+                {
+                    "form": "tevažiuoja",
+                    "source": "Conjugation",
+                    "tags": ["imperative", "singular", "third-person"],
+                },
+                {
+                    "form": "tevažiuojie",
+                    "source": "Conjugation",
+                    "tags": ["imperative", "singular", "third-person"],
+                },
+                {
+                    "form": "važiuokime",
+                    "source": "Conjugation",
+                    "tags": ["first-person", "imperative", "plural"],
+                },
+                {
+                    "form": "važiuokim",
+                    "source": "Conjugation",
+                    "tags": ["first-person", "imperative", "plural"],
+                },
+                {
+                    "form": "važiuokite",
+                    "source": "Conjugation",
+                    "tags": ["imperative", "plural", "second-person"],
+                },
+                {
+                    "form": "važiuokit",
+                    "source": "Conjugation",
+                    "tags": ["imperative", "plural", "second-person"],
+                },
+                {
+                    "form": "tevažiuoja",
+                    "source": "Conjugation",
+                    "tags": ["imperative", "plural", "third-person"],
+                },
+                {
+                    "form": "tevažiuojie",
+                    "source": "Conjugation",
+                    "tags": ["imperative", "plural", "third-person"],
+                },
+                {
+                    "form": "no-table-tags",
+                    "source": "Conjugation",
+                    "tags": ["table-tags"],
+                },
+                {
+                    "form": "važiuojąs",
+                    "source": "Conjugation",
+                    "tags": ["active", "adjectival", "participle", "present"],
+                },
+                {
+                    "form": "važiuojantis",
+                    "source": "Conjugation",
+                    "tags": ["active", "adjectival", "participle", "present"],
+                },
+                {
+                    "form": "važiuojamas",
+                    "source": "Conjugation",
+                    "tags": ["adjectival", "participle", "passive", "present"],
+                },
+                {
+                    "form": "važiavęs",
+                    "source": "Conjugation",
+                    "tags": ["active", "adjectival", "participle", "past"],
+                },
+                {
+                    "form": "važiuotas",
+                    "source": "Conjugation",
+                    "tags": ["adjectival", "participle", "passive", "past"],
+                },
+                {
+                    "form": "važiuodavęs",
+                    "source": "Conjugation",
+                    "tags": [
+                        "active",
+                        "adjectival",
+                        "frequentative",
+                        "participle",
+                        "past",
+                    ],
+                },
+                {
+                    "form": "-",
+                    "source": "Conjugation",
+                    "tags": [
+                        "adjectival",
+                        "frequentative",
+                        "participle",
+                        "passive",
+                        "past",
+                    ],
+                },
+                {
+                    "form": "važiuosiąs",
+                    "source": "Conjugation",
+                    "tags": ["active", "adjectival", "future", "participle"],
+                },
+                {
+                    "form": "važiuosiantis",
+                    "source": "Conjugation",
+                    "tags": ["active", "adjectival", "future", "participle"],
+                },
+                {
+                    "form": "važiuosimas",
+                    "source": "Conjugation",
+                    "tags": ["adjectival", "future", "participle", "passive"],
+                },
+                {
+                    "form": "-",
+                    "source": "Conjugation",
+                    "tags": [
+                        "active",
+                        "adjectival",
+                        "necessitative",
+                        "participle",
+                    ],
+                },
+                {
+                    "form": "važiuotinas",
+                    "source": "Conjugation",
+                    "tags": [
+                        "adjectival",
+                        "necessitative",
+                        "participle",
+                        "passive",
+                    ],
+                },
+                {
+                    "form": "važiuodamas",
+                    "source": "Conjugation",
+                    "tags": ["active", "adverbial", "participle", "special"],
+                },
+                {
+                    "form": "važiuojant",
+                    "source": "Conjugation",
+                    "tags": [
+                        "active",
+                        "adverbial",
+                        "half-participle",
+                        "participle",
+                        "present",
+                    ],
+                },
+                {
+                    "form": "važiavus",
+                    "source": "Conjugation",
+                    "tags": [
+                        "active",
+                        "adverbial",
+                        "half-participle",
+                        "participle",
+                        "past",
+                    ],
+                },
+                {
+                    "form": "važiuodavus",
+                    "source": "Conjugation",
+                    "tags": [
+                        "active",
+                        "adverbial",
+                        "frequentative",
+                        "half-participle",
+                        "participle",
+                        "past",
+                    ],
+                },
+                {
+                    "form": "važiuosiant",
+                    "source": "Conjugation",
+                    "tags": [
+                        "active",
+                        "adverbial",
+                        "future",
+                        "half-participle",
+                        "participle",
+                    ],
+                },
+                {
+                    "form": "važiuote",
+                    "source": "Conjugation",
+                    "tags": [
+                        "active",
+                        "adverbial",
+                        "adverbial-manner",
+                        "participle",
+                    ],
+                },
+                {
+                    "form": "važiuotinai",
+                    "source": "Conjugation",
+                    "tags": [
+                        "active",
+                        "adverbial",
+                        "adverbial-manner",
+                        "participle",
+                    ],
+                },
             ],
         }
         self.assertEqual(expected, ret)
 
     def test_Lithuanian_noun1(self):
-        ret = self.xinfl("akis", "Lithuanian", "noun", "Declension", """
+        ret = self.xinfl(
+            "akis",
+            "Lithuanian",
+            "noun",
+            "Declension",
+            """
 <div class="NavFrame" style>
 <div class="NavHead" style>declension of akis</div>
 <div class="NavContent">
@@ -1219,128 +1033,100 @@ class InflTests(unittest.TestCase):
 
 |}
 </div></div>
-""")  # noqa: E501
+""",
+        )  # noqa: E501
         expected = {
             "forms": [
-              {
-                "form": "no-table-tags",
-                "source": "Declension",
-                "tags": [
-                  "table-tags"
-                ]
-              },
-              {
-                "form": "akìs",
-                "source": "Declension",
-                "tags": [
-                  "nominative",
-                  "singular"
-                ]
-              },
-              {
-                "form": "ãkys",
-                "source": "Declension",
-                "tags": [
-                  "nominative",
-                  "plural"
-                ]
-              },
-              {
-                "form": "akiẽs",
-                "source": "Declension",
-                "tags": [
-                  "genitive",
-                  "singular"
-                ]
-              },
-              {
-                "form": "akių̃",
-                "source": "Declension",
-                "tags": [
-                  "genitive",
-                  "plural"
-                ]
-              },
-              {
-                "form": "ãkiai",
-                "source": "Declension",
-                "tags": [
-                  "dative",
-                  "singular"
-                ]
-              },
-              {
-                "form": "akìms",
-                "source": "Declension",
-                "tags": [
-                  "dative",
-                  "plural"
-                ]
-              },
-              {
-                "form": "ãkį",
-                "source": "Declension",
-                "tags": [
-                  "accusative",
-                  "singular"
-                ]
-              },
-              {
-                "form": "akìs",
-                "source": "Declension",
-                "tags": [
-                  "accusative",
-                  "plural"
-                ]
-              },
-              {
-                "form": "akimì",
-                "source": "Declension",
-                "tags": [
-                  "instrumental",
-                  "singular"
-                ]
-              },
-              {
-                "form": "akimìs",
-                "source": "Declension",
-                "tags": [
-                  "instrumental",
-                  "plural"
-                ]
-              },
-              {
-                "form": "akyjè",
-                "source": "Declension",
-                "tags": [
-                  "locative",
-                  "singular"
-                ]
-              },
-              {
-                "form": "akysè",
-                "source": "Declension",
-                "tags": [
-                  "locative",
-                  "plural"
-                ]
-              },
-              {
-                "form": "akiẽ",
-                "source": "Declension",
-                "tags": [
-                  "singular",
-                  "vocative"
-                ]
-              },
-              {
-                "form": "ãkys",
-                "source": "Declension",
-                "tags": [
-                  "plural",
-                  "vocative"
-                ]
-              }
-            ],
+                {
+                    "form": "no-table-tags",
+                    "source": "Declension",
+                    "tags": ["table-tags"],
+                },
+                {
+                    "form": "akìs",
+                    "tags": ["nominative", "singular"],
+                    "source": "Declension",
+                    "links": [("akìs", "akis#Lithuanian")],
+                },
+                {
+                    "form": "ãkys",
+                    "tags": ["nominative", "plural"],
+                    "source": "Declension",
+                    "links": [("ãkys", "akys#Lithuanian")],
+                },
+                {
+                    "form": "akiẽs",
+                    "tags": ["genitive", "singular"],
+                    "source": "Declension",
+                    "links": [("akiẽs", "akies#Lithuanian")],
+                },
+                {
+                    "form": "akių̃",
+                    "tags": ["genitive", "plural"],
+                    "source": "Declension",
+                    "links": [("akių̃", "akių#Lithuanian")],
+                },
+                {
+                    "form": "ãkiai",
+                    "tags": ["dative", "singular"],
+                    "source": "Declension",
+                    "links": [("ãkiai", "akiai#Lithuanian")],
+                },
+                {
+                    "form": "akìms",
+                    "tags": ["dative", "plural"],
+                    "source": "Declension",
+                    "links": [("akìms", "akims#Lithuanian")],
+                },
+                {
+                    "form": "ãkį",
+                    "tags": ["accusative", "singular"],
+                    "source": "Declension",
+                    "links": [("ãkį", "akį#Lithuanian")],
+                },
+                {
+                    "form": "akìs",
+                    "tags": ["accusative", "plural"],
+                    "source": "Declension",
+                    "links": [("akìs", "akis#Lithuanian")],
+                },
+                {
+                    "form": "akimì",
+                    "tags": ["instrumental", "singular"],
+                    "source": "Declension",
+                    "links": [("akimì", "akimi#Lithuanian")],
+                },
+                {
+                    "form": "akimìs",
+                    "tags": ["instrumental", "plural"],
+                    "source": "Declension",
+                    "links": [("akimìs", "akimis#Lithuanian")],
+                },
+                {
+                    "form": "akyjè",
+                    "tags": ["locative", "singular"],
+                    "source": "Declension",
+                    "links": [("akyjè", "akyje#Lithuanian")],
+                },
+                {
+                    "form": "akysè",
+                    "tags": ["locative", "plural"],
+                    "source": "Declension",
+                    "links": [("akysè", "akyse#Lithuanian")],
+                },
+                {
+                    "form": "akiẽ",
+                    "tags": ["singular", "vocative"],
+                    "source": "Declension",
+                    "links": [("akiẽ", "akie#Lithuanian")],
+                },
+                {
+                    "form": "ãkys",
+                    "tags": ["plural", "vocative"],
+                    "source": "Declension",
+                    "links": [("ãkys", "akys#Lithuanian")],
+                },
+            ]
         }
+
         self.assertEqual(expected, ret)

@@ -33,12 +33,16 @@ class InflTests(unittest.TestCase):
         self.wxr.wtp.start_subsection(pos)
         tree = self.wxr.wtp.parse(text)
         data = {}
-        parse_inflection_section(self.wxr, data, word, lang, pos,
-                                 section, tree)
+        parse_inflection_section(self.wxr, data, word, lang, pos, section, tree)
         return data
 
     def test_Latin_verb1(self):
-        ret = self.xinfl("accuso", "Latin", "verb", "Conjugation", """
+        ret = self.xinfl(
+            "accuso",
+            "Latin",
+            "verb",
+            "Conjugation",
+            """
 {| style="width%3A+100%25%3B+background%3A+%23EEE%3B+border%3A+1px+solid+%23AAA%3B+font-size%3A+95%25%3B+text-align%3A+center%3B" class="inflection-table+vsSwitcher" data-toggle-category="inflection"
 
 |-
@@ -775,1590 +779,1702 @@ class InflTests(unittest.TestCase):
 
 |}
 <sup style="color%3A+red">1</sup>At least one rare poetic syncopated perfect form is attested.<br>[[Category:Latin first conjugation verbs|ACCUSO]][[Category:Latin first conjugation verbs with perfect in -av-|ACCUSO]]
-""")  # noqa: E501
+""",
+        )  # noqa: E501
         expected = {
             "forms": [
-              {
-                "form": "conjugation-1",
-                "source": "Conjugation",
-                "tags": [
-                  "table-tags"
-                ]
-              },
-              {
-                "form": "accūsō",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "first-person",
-                  "indicative",
-                  "present",
-                  "singular"
-                ]
-              },
-              {
-                "form": "accūsās",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "indicative",
-                  "present",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "accūsat",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "indicative",
-                  "present",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "accūsāmus",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "first-person",
-                  "indicative",
-                  "plural",
-                  "present"
-                ]
-              },
-              {
-                "form": "accūsātis",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "indicative",
-                  "plural",
-                  "present",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "accūsant",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "indicative",
-                  "plural",
-                  "present",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "accūsābam",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "first-person",
-                  "imperfect",
-                  "indicative",
-                  "singular"
-                ]
-              },
-              {
-                "form": "accūsābās",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperfect",
-                  "indicative",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "accūsābat",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperfect",
-                  "indicative",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "accūsābāmus",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "first-person",
-                  "imperfect",
-                  "indicative",
-                  "plural"
-                ]
-              },
-              {
-                "form": "accūsābātis",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperfect",
-                  "indicative",
-                  "plural",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "accūsābant",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperfect",
-                  "indicative",
-                  "plural",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "accūsābō",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "first-person",
-                  "future",
-                  "indicative",
-                  "singular"
-                ]
-              },
-              {
-                "form": "accūsābis",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "future",
-                  "indicative",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "accūsābit",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "future",
-                  "indicative",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "accūsābimus",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "first-person",
-                  "future",
-                  "indicative",
-                  "plural"
-                ]
-              },
-              {
-                "form": "accūsābitis",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "future",
-                  "indicative",
-                  "plural",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "accūsābunt",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "future",
-                  "indicative",
-                  "plural",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "accūsāvī",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "first-person",
-                  "indicative",
-                  "perfect",
-                  "singular"
-                ]
-              },
-              {
-                "form": "accūsāvistī",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "indicative",
-                  "perfect",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "accūsāstī",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "indicative",
-                  "perfect",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "accūsāvit",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "indicative",
-                  "perfect",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "accūsāvimus",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "first-person",
-                  "indicative",
-                  "perfect",
-                  "plural"
-                ]
-              },
-              {
-                "form": "accūsāvistis",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "indicative",
-                  "perfect",
-                  "plural",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "accūsāstis",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "indicative",
-                  "perfect",
-                  "plural",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "accūsāvērunt",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "indicative",
-                  "perfect",
-                  "plural",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "accūsāvēre",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "indicative",
-                  "perfect",
-                  "plural",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "accūsāveram",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "first-person",
-                  "indicative",
-                  "pluperfect",
-                  "singular"
-                ]
-              },
-              {
-                "form": "accūsāverās",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "indicative",
-                  "pluperfect",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "accūsāverat",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "indicative",
-                  "pluperfect",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "accūsāverāmus",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "first-person",
-                  "indicative",
-                  "pluperfect",
-                  "plural"
-                ]
-              },
-              {
-                "form": "accūsāverātis",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "indicative",
-                  "pluperfect",
-                  "plural",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "accūsāverant",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "indicative",
-                  "pluperfect",
-                  "plural",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "accūsāverō",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "first-person",
-                  "future",
-                  "indicative",
-                  "perfect",
-                  "singular"
-                ]
-              },
-              {
-                "form": "accūsāveris",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "future",
-                  "indicative",
-                  "perfect",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "accūsāverit",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "future",
-                  "indicative",
-                  "perfect",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "accūsāverimus",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "first-person",
-                  "future",
-                  "indicative",
-                  "perfect",
-                  "plural"
-                ]
-              },
-              {
-                "form": "accūsāveritis",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "future",
-                  "indicative",
-                  "perfect",
-                  "plural",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "accūsāverint",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "future",
-                  "indicative",
-                  "perfect",
-                  "plural",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "accūsor",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "indicative",
-                  "passive",
-                  "present",
-                  "singular"
-                ]
-              },
-              {
-                "form": "accūsāris",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "passive",
-                  "present",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "accūsāre",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "passive",
-                  "present",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "accūsātur",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "passive",
-                  "present",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "accūsāmur",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "indicative",
-                  "passive",
-                  "plural",
-                  "present"
-                ]
-              },
-              {
-                "form": "accūsāminī",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "passive",
-                  "plural",
-                  "present",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "accūsantur",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "passive",
-                  "plural",
-                  "present",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "accūsābar",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "imperfect",
-                  "indicative",
-                  "passive",
-                  "singular"
-                ]
-              },
-              {
-                "form": "accūsābāris",
-                "source": "Conjugation",
-                "tags": [
-                  "imperfect",
-                  "indicative",
-                  "passive",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "accūsābāre",
-                "source": "Conjugation",
-                "tags": [
-                  "imperfect",
-                  "indicative",
-                  "passive",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "accūsābātur",
-                "source": "Conjugation",
-                "tags": [
-                  "imperfect",
-                  "indicative",
-                  "passive",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "accūsābāmur",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "imperfect",
-                  "indicative",
-                  "passive",
-                  "plural"
-                ]
-              },
-              {
-                "form": "accūsābāminī",
-                "source": "Conjugation",
-                "tags": [
-                  "imperfect",
-                  "indicative",
-                  "passive",
-                  "plural",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "accūsābantur",
-                "source": "Conjugation",
-                "tags": [
-                  "imperfect",
-                  "indicative",
-                  "passive",
-                  "plural",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "accūsābor",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "future",
-                  "indicative",
-                  "passive",
-                  "singular"
-                ]
-              },
-              {
-                "form": "accūsāberis",
-                "source": "Conjugation",
-                "tags": [
-                  "future",
-                  "indicative",
-                  "passive",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "accūsābere",
-                "source": "Conjugation",
-                "tags": [
-                  "future",
-                  "indicative",
-                  "passive",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "accūsābitur",
-                "source": "Conjugation",
-                "tags": [
-                  "future",
-                  "indicative",
-                  "passive",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "accūsābimur",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "future",
-                  "indicative",
-                  "passive",
-                  "plural"
-                ]
-              },
-              {
-                "form": "accūsābiminī",
-                "source": "Conjugation",
-                "tags": [
-                  "future",
-                  "indicative",
-                  "passive",
-                  "plural",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "accūsābuntur",
-                "source": "Conjugation",
-                "tags": [
-                  "future",
-                  "indicative",
-                  "passive",
-                  "plural",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "accūsātus + present active indicative of sum",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "passive",
-                  "perfect",
-                ]
-              },
-              {
-                "form": "accūsātus + imperfect active indicative of sum",
-                "source": "Conjugation",
-                "tags": [
-                  "indicative",
-                  "passive",
-                  "pluperfect",
-                ]
-              },
-              {
-                "form": "accūsātus + future active indicative of sum",
-                "source": "Conjugation",
-                "tags": [
-                  "future",
-                  "indicative",
-                  "passive",
-                  "perfect",
-                ]
-              },
-              {
-                "form": "accūsem",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "first-person",
-                  "present",
-                  "singular",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "accūsēs",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "present",
-                  "second-person",
-                  "singular",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "accūset",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "present",
-                  "singular",
-                  "subjunctive",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "accūsēmus",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "first-person",
-                  "plural",
-                  "present",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "accūsētis",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "plural",
-                  "present",
-                  "second-person",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "accūsent",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "plural",
-                  "present",
-                  "subjunctive",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "accūsārem",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "first-person",
-                  "imperfect",
-                  "singular",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "accūsārēs",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperfect",
-                  "second-person",
-                  "singular",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "accūsāret",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperfect",
-                  "singular",
-                  "subjunctive",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "accūsārēmus",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "first-person",
-                  "imperfect",
-                  "plural",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "accūsārētis",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperfect",
-                  "plural",
-                  "second-person",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "accūsārent",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperfect",
-                  "plural",
-                  "subjunctive",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "accūsāverim",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "first-person",
-                  "perfect",
-                  "singular",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "accūsāverīs",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "perfect",
-                  "second-person",
-                  "singular",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "accūsāverit",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "perfect",
-                  "singular",
-                  "subjunctive",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "accūsāverīmus",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "first-person",
-                  "perfect",
-                  "plural",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "accūsāverītis",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "perfect",
-                  "plural",
-                  "second-person",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "accūsāverint",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "perfect",
-                  "plural",
-                  "subjunctive",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "accūsāvissem",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "first-person",
-                  "pluperfect",
-                  "singular",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "accūsāssem",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "first-person",
-                  "pluperfect",
-                  "singular",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "accūsāvissēs",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "pluperfect",
-                  "second-person",
-                  "singular",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "accūsāssēs",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "pluperfect",
-                  "second-person",
-                  "singular",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "accūsāvisset",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "pluperfect",
-                  "singular",
-                  "subjunctive",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "accūsāsset",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "pluperfect",
-                  "singular",
-                  "subjunctive",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "accūsāvissēmus",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "first-person",
-                  "pluperfect",
-                  "plural",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "accūsāssēmus",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "first-person",
-                  "pluperfect",
-                  "plural",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "accūsāvissētis",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "pluperfect",
-                  "plural",
-                  "second-person",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "accūsāssētis",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "pluperfect",
-                  "plural",
-                  "second-person",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "accūsāvissent",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "pluperfect",
-                  "plural",
-                  "subjunctive",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "accūsāssent",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "pluperfect",
-                  "plural",
-                  "subjunctive",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "accūser",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "passive",
-                  "present",
-                  "singular",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "accūsēris",
-                "source": "Conjugation",
-                "tags": [
-                  "passive",
-                  "present",
-                  "second-person",
-                  "singular",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "accūsēre",
-                "source": "Conjugation",
-                "tags": [
-                  "passive",
-                  "present",
-                  "second-person",
-                  "singular",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "accūsētur",
-                "source": "Conjugation",
-                "tags": [
-                  "passive",
-                  "present",
-                  "singular",
-                  "subjunctive",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "accūsēmur",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "passive",
-                  "plural",
-                  "present",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "accūsēminī",
-                "source": "Conjugation",
-                "tags": [
-                  "passive",
-                  "plural",
-                  "present",
-                  "second-person",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "accūsentur",
-                "source": "Conjugation",
-                "tags": [
-                  "passive",
-                  "plural",
-                  "present",
-                  "subjunctive",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "accūsārer",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "imperfect",
-                  "passive",
-                  "singular",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "accūsārēris",
-                "source": "Conjugation",
-                "tags": [
-                  "imperfect",
-                  "passive",
-                  "second-person",
-                  "singular",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "accūsārēre",
-                "source": "Conjugation",
-                "tags": [
-                  "imperfect",
-                  "passive",
-                  "second-person",
-                  "singular",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "accūsārētur",
-                "source": "Conjugation",
-                "tags": [
-                  "imperfect",
-                  "passive",
-                  "singular",
-                  "subjunctive",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "accūsārēmur",
-                "source": "Conjugation",
-                "tags": [
-                  "first-person",
-                  "imperfect",
-                  "passive",
-                  "plural",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "accūsārēminī",
-                "source": "Conjugation",
-                "tags": [
-                  "imperfect",
-                  "passive",
-                  "plural",
-                  "second-person",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "accūsārentur",
-                "source": "Conjugation",
-                "tags": [
-                  "imperfect",
-                  "passive",
-                  "plural",
-                  "subjunctive",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "accūsātus + present active subjunctive of sum",
-                "source": "Conjugation",
-                "tags": [
-                  "passive",
-                  "perfect",
-                  "subjunctive"
-                ]
-              },
-              {
-                "form": "accūsātus + imperfect active subjunctive of sum",
-                "source": "Conjugation",
-                "tags": [
-                  "passive",
-                  "pluperfect",
-                  "subjunctive"
-                ]
-              },
-              {'form': '-',
-               'source': 'Conjugation',
-               'tags': ['active',
-                        'first-person',
-                        'imperative',
-                        'present',
-                        'singular']},
-              {
-                "form": "accūsā",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperative",
-                  "present",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {'form': '-',
-               'source': 'Conjugation',
-               'tags': ['active',
-                        'imperative',
-                        'present',
-                        'singular',
-                        'third-person']},
-              {'form': '-',
-               'source': 'Conjugation',
-               'tags': ['active',
-                        'first-person',
-                        'imperative',
-                        'plural',
-                        'present']},
-              {
-                "form": "accūsāte",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "imperative",
-                  "plural",
-                  "present",
-                  "second-person"
-                ]
-              },
-              {'form': '-',
-               'source': 'Conjugation',
-               'tags': ['active',
-                        'imperative',
-                        'plural',
-                        'present',
-                        'third-person']},
-              {'form': '-',
-               'source': 'Conjugation',
-               'tags': ['active',
-                        'first-person',
-                        'future',
-                        'imperative',
-                        'singular']},
-              {
-                "form": "accūsātō",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "future",
-                  "imperative",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "accūsātō",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "future",
-                  "imperative",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {'form': '-',
-               'source': 'Conjugation',
-               'tags': ['active',
-                        'first-person',
-                        'future',
-                        'imperative',
-                        'plural']},
-              {
-                "form": "accūsātōte",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "future",
-                  "imperative",
-                  "plural",
-                  "second-person"
-                ]
-              },
-              {
-                "form": "accūsantō",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "future",
-                  "imperative",
-                  "plural",
-                  "third-person"
-                ]
-              },
-              {'form': '-',
-               'source': 'Conjugation',
-               'tags': ['first-person',
-                        'imperative',
-                        'passive',
-                        'present',
-                        'singular']},
-              {
-                "form": "accūsāre",
-                "source": "Conjugation",
-                "tags": [
-                  "imperative",
-                  "passive",
-                  "present",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {'form': '-',
-               'source': 'Conjugation',
-               'tags': ['imperative',
-                        'passive',
-                        'present',
-                        'singular',
-                        'third-person']},
-              {'form': '-',
-               'source': 'Conjugation',
-               'tags': ['first-person',
-                        'imperative',
-                        'passive',
-                        'plural',
-                        'present']},
-              {
-                "form": "accūsāminī",
-                "source": "Conjugation",
-                "tags": [
-                  "imperative",
-                  "passive",
-                  "plural",
-                  "present",
-                  "second-person"
-                ]
-              },
-              {'form': '-',
-               'source': 'Conjugation',
-               'tags': ['imperative',
-                        'passive',
-                        'plural',
-                        'present',
-                        'third-person']},
-              {'form': '-',
-               'source': 'Conjugation',
-               'tags': ['first-person',
-                        'future',
-                        'imperative',
-                        'passive',
-                        'singular']},
-              {
-                "form": "accūsātor",
-                "source": "Conjugation",
-                "tags": [
-                  "future",
-                  "imperative",
-                  "passive",
-                  "second-person",
-                  "singular"
-                ]
-              },
-              {
-                "form": "accūsātor",
-                "source": "Conjugation",
-                "tags": [
-                  "future",
-                  "imperative",
-                  "passive",
-                  "singular",
-                  "third-person"
-                ]
-              },
-              {'form': '-',
-               'source': 'Conjugation',
-               'tags': ['first-person',
-                        'future',
-                        'imperative',
-                        'passive',
-                        'plural']},
-              {'form': '-',
-               'source': 'Conjugation',
-               'tags': ['future',
-                        'imperative',
-                        'passive',
-                        'plural',
-                        'second-person']},
-              {
-                "form": "accūsantor",
-                "source": "Conjugation",
-                "tags": [
-                  "future",
-                  "imperative",
-                  "passive",
-                  "plural",
-                  "third-person"
-                ]
-              },
-              {
-                "form": "accūsāre",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "infinitive",
-                  "present"
-                ]
-              },
-              {
-                "form": "accūsāvisse",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "infinitive",
-                  "perfect"
-                ]
-              },
-              {
-                "form": "accūsāsse",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "infinitive",
-                  "perfect"
-                ]
-              },
-              {
-                "form": "accūsātūrum esse",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "future",
-                  "infinitive"
-                ]
-              },
-              {
-                "form": "accūsārī",
-                "source": "Conjugation",
-                "tags": [
-                  "infinitive",
-                  "passive",
-                  "present"
-                ]
-              },
-              {
-                "form": "accūsātum esse",
-                "source": "Conjugation",
-                "tags": [
-                  "infinitive",
-                  "passive",
-                  "perfect"
-                ]
-              },
-              {
-                "form": "accūsātum īrī",
-                "source": "Conjugation",
-                "tags": [
-                  "future",
-                  "infinitive",
-                  "passive"
-                ]
-              },
-              {
-                "form": "accūsāns",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "participle",
-                  "present"
-                ]
-              },
-              {'form': '-',
-               'source': 'Conjugation',
-               'tags': ['active', 'participle', 'perfect']},
-              {
-                "form": "accūsātūrus",
-                "source": "Conjugation",
-                "tags": [
-                  "active",
-                  "future",
-                  "participle"
-                ]
-              },
-              {'form': '-',
-               'source': 'Conjugation',
-               'tags': ['participle', 'passive', 'present']},
-              {
-                "form": "accūsātus",
-                "source": "Conjugation",
-                "tags": [
-                  "participle",
-                  "passive",
-                  "perfect"
-                ]
-              },
-              {
-                "form": "accūsandus",
-                "source": "Conjugation",
-                "tags": [
-                  "future",
-                  "participle",
-                  "passive"
-                ]
-              },
-              {
-                "form": "accūsandī",
-                "source": "Conjugation",
-                "tags": [
-                  "genitive",
-                  "gerund",
-                  "noun-from-verb",
-                ]
-              },
-              {
-                "form": "accūsandō",
-                "source": "Conjugation",
-                "tags": [
-                  "dative",
-                  "gerund",
-                  "noun-from-verb",
-                ]
-              },
-              {
-                "form": "accūsandum",
-                "source": "Conjugation",
-                "tags": [
-                  "accusative",
-                  "gerund",
-                  "noun-from-verb",
-                ]
-              },
-              {
-                "form": "accūsandō",
-                "source": "Conjugation",
-                "tags": [
-                  "ablative",
-                  "gerund",
-                  "noun-from-verb"
-                ]
-              },
-              {
-                "form": "accūsātum",
-                "source": "Conjugation",
-                "tags": [
-                  "accusative",
-                  "noun-from-verb",
-                  "supine"
-                ]
-              },
-              {
-                "form": "accūsātū",
-                "source": "Conjugation",
-                "tags": [
-                  "ablative",
-                  "noun-from-verb",
-                  "supine"
-                ]
-              }
-            ],
+                {
+                    "form": "conjugation-1",
+                    "source": "Conjugation",
+                    "tags": ["table-tags"],
+                },
+                {
+                    "form": "accūsō",
+                    "tags": [
+                        "active",
+                        "first-person",
+                        "indicative",
+                        "present",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsō", "accuso#Latin")],
+                },
+                {
+                    "form": "accūsās",
+                    "tags": [
+                        "active",
+                        "indicative",
+                        "present",
+                        "second-person",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsās", "accusas#Latin")],
+                },
+                {
+                    "form": "accūsat",
+                    "tags": [
+                        "active",
+                        "indicative",
+                        "present",
+                        "singular",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsat", "accusat#Latin")],
+                },
+                {
+                    "form": "accūsāmus",
+                    "tags": [
+                        "active",
+                        "first-person",
+                        "indicative",
+                        "plural",
+                        "present",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsāmus", "accusamus#Latin")],
+                },
+                {
+                    "form": "accūsātis",
+                    "tags": [
+                        "active",
+                        "indicative",
+                        "plural",
+                        "present",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsātis", "accusatis#Latin")],
+                },
+                {
+                    "form": "accūsant",
+                    "tags": [
+                        "active",
+                        "indicative",
+                        "plural",
+                        "present",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsant", "accusant#Latin")],
+                },
+                {
+                    "form": "accūsābam",
+                    "tags": [
+                        "active",
+                        "first-person",
+                        "imperfect",
+                        "indicative",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsābam", "accusabam#Latin")],
+                },
+                {
+                    "form": "accūsābās",
+                    "tags": [
+                        "active",
+                        "imperfect",
+                        "indicative",
+                        "second-person",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsābās", "accusabas#Latin")],
+                },
+                {
+                    "form": "accūsābat",
+                    "tags": [
+                        "active",
+                        "imperfect",
+                        "indicative",
+                        "singular",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsābat", "accusabat#Latin")],
+                },
+                {
+                    "form": "accūsābāmus",
+                    "tags": [
+                        "active",
+                        "first-person",
+                        "imperfect",
+                        "indicative",
+                        "plural",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsābāmus", "accusabamus#Latin")],
+                },
+                {
+                    "form": "accūsābātis",
+                    "tags": [
+                        "active",
+                        "imperfect",
+                        "indicative",
+                        "plural",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsābātis", "accusabatis#Latin")],
+                },
+                {
+                    "form": "accūsābant",
+                    "tags": [
+                        "active",
+                        "imperfect",
+                        "indicative",
+                        "plural",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsābant", "accusabant#Latin")],
+                },
+                {
+                    "form": "accūsābō",
+                    "tags": [
+                        "active",
+                        "first-person",
+                        "future",
+                        "indicative",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsābō", "accusabo#Latin")],
+                },
+                {
+                    "form": "accūsābis",
+                    "tags": [
+                        "active",
+                        "future",
+                        "indicative",
+                        "second-person",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsābis", "accusabis#Latin")],
+                },
+                {
+                    "form": "accūsābit",
+                    "tags": [
+                        "active",
+                        "future",
+                        "indicative",
+                        "singular",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsābit", "accusabit#Latin")],
+                },
+                {
+                    "form": "accūsābimus",
+                    "tags": [
+                        "active",
+                        "first-person",
+                        "future",
+                        "indicative",
+                        "plural",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsābimus", "accusabimus#Latin")],
+                },
+                {
+                    "form": "accūsābitis",
+                    "tags": [
+                        "active",
+                        "future",
+                        "indicative",
+                        "plural",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsābitis", "accusabitis#Latin")],
+                },
+                {
+                    "form": "accūsābunt",
+                    "tags": [
+                        "active",
+                        "future",
+                        "indicative",
+                        "plural",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsābunt", "accusabunt#Latin")],
+                },
+                {
+                    "form": "accūsāvī",
+                    "tags": [
+                        "active",
+                        "first-person",
+                        "indicative",
+                        "perfect",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsāvī", "accusavi#Latin")],
+                },
+                {
+                    "form": "accūsāvistī",
+                    "tags": [
+                        "active",
+                        "indicative",
+                        "perfect",
+                        "second-person",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsāvistī", "accusavisti#Latin")],
+                },
+                {
+                    "form": "accūsāstī",
+                    "tags": [
+                        "active",
+                        "indicative",
+                        "perfect",
+                        "second-person",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsāstī", "accusasti#Latin")],
+                },
+                {
+                    "form": "accūsāvit",
+                    "tags": [
+                        "active",
+                        "indicative",
+                        "perfect",
+                        "singular",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsāvit", "accusavit#Latin")],
+                },
+                {
+                    "form": "accūsāvimus",
+                    "tags": [
+                        "active",
+                        "first-person",
+                        "indicative",
+                        "perfect",
+                        "plural",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsāvimus", "accusavimus#Latin")],
+                },
+                {
+                    "form": "accūsāvistis",
+                    "tags": [
+                        "active",
+                        "indicative",
+                        "perfect",
+                        "plural",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsāvistis", "accusavistis#Latin")],
+                },
+                {
+                    "form": "accūsāstis",
+                    "tags": [
+                        "active",
+                        "indicative",
+                        "perfect",
+                        "plural",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsāstis", "accusastis#Latin")],
+                },
+                {
+                    "form": "accūsāvērunt",
+                    "tags": [
+                        "active",
+                        "indicative",
+                        "perfect",
+                        "plural",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsāvērunt", "accusaverunt#Latin")],
+                },
+                {
+                    "form": "accūsāvēre",
+                    "tags": [
+                        "active",
+                        "indicative",
+                        "perfect",
+                        "plural",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsāvēre", "accusavere#Latin")],
+                },
+                {
+                    "form": "accūsāveram",
+                    "tags": [
+                        "active",
+                        "first-person",
+                        "indicative",
+                        "pluperfect",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsāveram", "accusaveram#Latin")],
+                },
+                {
+                    "form": "accūsāverās",
+                    "tags": [
+                        "active",
+                        "indicative",
+                        "pluperfect",
+                        "second-person",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsāverās", "accusaveras#Latin")],
+                },
+                {
+                    "form": "accūsāverat",
+                    "tags": [
+                        "active",
+                        "indicative",
+                        "pluperfect",
+                        "singular",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsāverat", "accusaverat#Latin")],
+                },
+                {
+                    "form": "accūsāverāmus",
+                    "tags": [
+                        "active",
+                        "first-person",
+                        "indicative",
+                        "pluperfect",
+                        "plural",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsāverāmus", "accusaveramus#Latin")],
+                },
+                {
+                    "form": "accūsāverātis",
+                    "tags": [
+                        "active",
+                        "indicative",
+                        "pluperfect",
+                        "plural",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsāverātis", "accusaveratis#Latin")],
+                },
+                {
+                    "form": "accūsāverant",
+                    "tags": [
+                        "active",
+                        "indicative",
+                        "pluperfect",
+                        "plural",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsāverant", "accusaverant#Latin")],
+                },
+                {
+                    "form": "accūsāverō",
+                    "tags": [
+                        "active",
+                        "first-person",
+                        "future",
+                        "indicative",
+                        "perfect",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsāverō", "accusavero#Latin")],
+                },
+                {
+                    "form": "accūsāveris",
+                    "tags": [
+                        "active",
+                        "future",
+                        "indicative",
+                        "perfect",
+                        "second-person",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsāveris", "accusaveris#Latin")],
+                },
+                {
+                    "form": "accūsāverit",
+                    "tags": [
+                        "active",
+                        "future",
+                        "indicative",
+                        "perfect",
+                        "singular",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsāverit", "accusaverit#Latin")],
+                },
+                {
+                    "form": "accūsāverimus",
+                    "tags": [
+                        "active",
+                        "first-person",
+                        "future",
+                        "indicative",
+                        "perfect",
+                        "plural",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsāverimus", "accusaverimus#Latin")],
+                },
+                {
+                    "form": "accūsāveritis",
+                    "tags": [
+                        "active",
+                        "future",
+                        "indicative",
+                        "perfect",
+                        "plural",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsāveritis", "accusaveritis#Latin")],
+                },
+                {
+                    "form": "accūsāverint",
+                    "tags": [
+                        "active",
+                        "future",
+                        "indicative",
+                        "perfect",
+                        "plural",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsāverint", "accusaverint#Latin")],
+                },
+                {
+                    "form": "accūsor",
+                    "tags": [
+                        "first-person",
+                        "indicative",
+                        "passive",
+                        "present",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsor", "accusor#Latin")],
+                },
+                {
+                    "form": "accūsāris",
+                    "tags": [
+                        "indicative",
+                        "passive",
+                        "present",
+                        "second-person",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsāris", "accusaris#Latin")],
+                },
+                {
+                    "form": "accūsāre",
+                    "tags": [
+                        "indicative",
+                        "passive",
+                        "present",
+                        "second-person",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsāre", "accusare#Latin")],
+                },
+                {
+                    "form": "accūsātur",
+                    "tags": [
+                        "indicative",
+                        "passive",
+                        "present",
+                        "singular",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsātur", "accusatur#Latin")],
+                },
+                {
+                    "form": "accūsāmur",
+                    "tags": [
+                        "first-person",
+                        "indicative",
+                        "passive",
+                        "plural",
+                        "present",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsāmur", "accusamur#Latin")],
+                },
+                {
+                    "form": "accūsāminī",
+                    "tags": [
+                        "indicative",
+                        "passive",
+                        "plural",
+                        "present",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsāminī", "accusamini#Latin")],
+                },
+                {
+                    "form": "accūsantur",
+                    "tags": [
+                        "indicative",
+                        "passive",
+                        "plural",
+                        "present",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsantur", "accusantur#Latin")],
+                },
+                {
+                    "form": "accūsābar",
+                    "tags": [
+                        "first-person",
+                        "imperfect",
+                        "indicative",
+                        "passive",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsābar", "accusabar#Latin")],
+                },
+                {
+                    "form": "accūsābāris",
+                    "tags": [
+                        "imperfect",
+                        "indicative",
+                        "passive",
+                        "second-person",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsābāris", "accusabaris#Latin")],
+                },
+                {
+                    "form": "accūsābāre",
+                    "tags": [
+                        "imperfect",
+                        "indicative",
+                        "passive",
+                        "second-person",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsābāre", "accusabare#Latin")],
+                },
+                {
+                    "form": "accūsābātur",
+                    "tags": [
+                        "imperfect",
+                        "indicative",
+                        "passive",
+                        "singular",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsābātur", "accusabatur#Latin")],
+                },
+                {
+                    "form": "accūsābāmur",
+                    "tags": [
+                        "first-person",
+                        "imperfect",
+                        "indicative",
+                        "passive",
+                        "plural",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsābāmur", "accusabamur#Latin")],
+                },
+                {
+                    "form": "accūsābāminī",
+                    "tags": [
+                        "imperfect",
+                        "indicative",
+                        "passive",
+                        "plural",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsābāminī", "accusabamini#Latin")],
+                },
+                {
+                    "form": "accūsābantur",
+                    "tags": [
+                        "imperfect",
+                        "indicative",
+                        "passive",
+                        "plural",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsābantur", "accusabantur#Latin")],
+                },
+                {
+                    "form": "accūsābor",
+                    "tags": [
+                        "first-person",
+                        "future",
+                        "indicative",
+                        "passive",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsābor", "accusabor#Latin")],
+                },
+                {
+                    "form": "accūsāberis",
+                    "tags": [
+                        "future",
+                        "indicative",
+                        "passive",
+                        "second-person",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsāberis", "accusaberis#Latin")],
+                },
+                {
+                    "form": "accūsābere",
+                    "tags": [
+                        "future",
+                        "indicative",
+                        "passive",
+                        "second-person",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsābere", "accusabere#Latin")],
+                },
+                {
+                    "form": "accūsābitur",
+                    "tags": [
+                        "future",
+                        "indicative",
+                        "passive",
+                        "singular",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsābitur", "accusabitur#Latin")],
+                },
+                {
+                    "form": "accūsābimur",
+                    "tags": [
+                        "first-person",
+                        "future",
+                        "indicative",
+                        "passive",
+                        "plural",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsābimur", "accusabimur#Latin")],
+                },
+                {
+                    "form": "accūsābiminī",
+                    "tags": [
+                        "future",
+                        "indicative",
+                        "passive",
+                        "plural",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsābiminī", "accusabimini#Latin")],
+                },
+                {
+                    "form": "accūsābuntur",
+                    "tags": [
+                        "future",
+                        "indicative",
+                        "passive",
+                        "plural",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsābuntur", "accusabuntur#Latin")],
+                },
+                {
+                    "form": "accūsātus + present active indicative of sum",
+                    "tags": ["indicative", "passive", "perfect"],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "accūsātus + imperfect active indicative of sum",
+                    "tags": ["indicative", "passive", "pluperfect"],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "accūsātus + future active indicative of sum",
+                    "tags": ["future", "indicative", "passive", "perfect"],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "accūsem",
+                    "tags": [
+                        "active",
+                        "first-person",
+                        "present",
+                        "singular",
+                        "subjunctive",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsem", "accusem#Latin")],
+                },
+                {
+                    "form": "accūsēs",
+                    "tags": [
+                        "active",
+                        "present",
+                        "second-person",
+                        "singular",
+                        "subjunctive",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsēs", "accuses#Latin")],
+                },
+                {
+                    "form": "accūset",
+                    "tags": [
+                        "active",
+                        "present",
+                        "singular",
+                        "subjunctive",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūset", "accuset#Latin")],
+                },
+                {
+                    "form": "accūsēmus",
+                    "tags": [
+                        "active",
+                        "first-person",
+                        "plural",
+                        "present",
+                        "subjunctive",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsēmus", "accusemus#Latin")],
+                },
+                {
+                    "form": "accūsētis",
+                    "tags": [
+                        "active",
+                        "plural",
+                        "present",
+                        "second-person",
+                        "subjunctive",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsētis", "accusetis#Latin")],
+                },
+                {
+                    "form": "accūsent",
+                    "tags": [
+                        "active",
+                        "plural",
+                        "present",
+                        "subjunctive",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsent", "accusent#Latin")],
+                },
+                {
+                    "form": "accūsārem",
+                    "tags": [
+                        "active",
+                        "first-person",
+                        "imperfect",
+                        "singular",
+                        "subjunctive",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsārem", "accusarem#Latin")],
+                },
+                {
+                    "form": "accūsārēs",
+                    "tags": [
+                        "active",
+                        "imperfect",
+                        "second-person",
+                        "singular",
+                        "subjunctive",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsārēs", "accusares#Latin")],
+                },
+                {
+                    "form": "accūsāret",
+                    "tags": [
+                        "active",
+                        "imperfect",
+                        "singular",
+                        "subjunctive",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsāret", "accusaret#Latin")],
+                },
+                {
+                    "form": "accūsārēmus",
+                    "tags": [
+                        "active",
+                        "first-person",
+                        "imperfect",
+                        "plural",
+                        "subjunctive",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsārēmus", "accusaremus#Latin")],
+                },
+                {
+                    "form": "accūsārētis",
+                    "tags": [
+                        "active",
+                        "imperfect",
+                        "plural",
+                        "second-person",
+                        "subjunctive",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsārētis", "accusaretis#Latin")],
+                },
+                {
+                    "form": "accūsārent",
+                    "tags": [
+                        "active",
+                        "imperfect",
+                        "plural",
+                        "subjunctive",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsārent", "accusarent#Latin")],
+                },
+                {
+                    "form": "accūsāverim",
+                    "tags": [
+                        "active",
+                        "first-person",
+                        "perfect",
+                        "singular",
+                        "subjunctive",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsāverim", "accusaverim#Latin")],
+                },
+                {
+                    "form": "accūsāverīs",
+                    "tags": [
+                        "active",
+                        "perfect",
+                        "second-person",
+                        "singular",
+                        "subjunctive",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsāverīs", "accusaveris#Latin")],
+                },
+                {
+                    "form": "accūsāverit",
+                    "tags": [
+                        "active",
+                        "perfect",
+                        "singular",
+                        "subjunctive",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsāverit", "accusaverit#Latin")],
+                },
+                {
+                    "form": "accūsāverīmus",
+                    "tags": [
+                        "active",
+                        "first-person",
+                        "perfect",
+                        "plural",
+                        "subjunctive",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsāverīmus", "accusaverimus#Latin")],
+                },
+                {
+                    "form": "accūsāverītis",
+                    "tags": [
+                        "active",
+                        "perfect",
+                        "plural",
+                        "second-person",
+                        "subjunctive",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsāverītis", "accusaveritis#Latin")],
+                },
+                {
+                    "form": "accūsāverint",
+                    "tags": [
+                        "active",
+                        "perfect",
+                        "plural",
+                        "subjunctive",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsāverint", "accusaverint#Latin")],
+                },
+                {
+                    "form": "accūsāvissem",
+                    "tags": [
+                        "active",
+                        "first-person",
+                        "pluperfect",
+                        "singular",
+                        "subjunctive",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsāvissem", "accusavissem#Latin")],
+                },
+                {
+                    "form": "accūsāssem",
+                    "tags": [
+                        "active",
+                        "first-person",
+                        "pluperfect",
+                        "singular",
+                        "subjunctive",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsāssem", "accusassem#Latin")],
+                },
+                {
+                    "form": "accūsāvissēs",
+                    "tags": [
+                        "active",
+                        "pluperfect",
+                        "second-person",
+                        "singular",
+                        "subjunctive",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsāvissēs", "accusavisses#Latin")],
+                },
+                {
+                    "form": "accūsāssēs",
+                    "tags": [
+                        "active",
+                        "pluperfect",
+                        "second-person",
+                        "singular",
+                        "subjunctive",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsāssēs", "accusasses#Latin")],
+                },
+                {
+                    "form": "accūsāvisset",
+                    "tags": [
+                        "active",
+                        "pluperfect",
+                        "singular",
+                        "subjunctive",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsāvisset", "accusavisset#Latin")],
+                },
+                {
+                    "form": "accūsāsset",
+                    "tags": [
+                        "active",
+                        "pluperfect",
+                        "singular",
+                        "subjunctive",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsāsset", "accusasset#Latin")],
+                },
+                {
+                    "form": "accūsāvissēmus",
+                    "tags": [
+                        "active",
+                        "first-person",
+                        "pluperfect",
+                        "plural",
+                        "subjunctive",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsāvissēmus", "accusavissemus#Latin")],
+                },
+                {
+                    "form": "accūsāssēmus",
+                    "tags": [
+                        "active",
+                        "first-person",
+                        "pluperfect",
+                        "plural",
+                        "subjunctive",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsāssēmus", "accusassemus#Latin")],
+                },
+                {
+                    "form": "accūsāvissētis",
+                    "tags": [
+                        "active",
+                        "pluperfect",
+                        "plural",
+                        "second-person",
+                        "subjunctive",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsāvissētis", "accusavissetis#Latin")],
+                },
+                {
+                    "form": "accūsāssētis",
+                    "tags": [
+                        "active",
+                        "pluperfect",
+                        "plural",
+                        "second-person",
+                        "subjunctive",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsāssētis", "accusassetis#Latin")],
+                },
+                {
+                    "form": "accūsāvissent",
+                    "tags": [
+                        "active",
+                        "pluperfect",
+                        "plural",
+                        "subjunctive",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsāvissent", "accusavissent#Latin")],
+                },
+                {
+                    "form": "accūsāssent",
+                    "tags": [
+                        "active",
+                        "pluperfect",
+                        "plural",
+                        "subjunctive",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsāssent", "accusassent#Latin")],
+                },
+                {
+                    "form": "accūser",
+                    "tags": [
+                        "first-person",
+                        "passive",
+                        "present",
+                        "singular",
+                        "subjunctive",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūser", "accuser#Latin")],
+                },
+                {
+                    "form": "accūsēris",
+                    "tags": [
+                        "passive",
+                        "present",
+                        "second-person",
+                        "singular",
+                        "subjunctive",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsēris", "accuseris#Latin")],
+                },
+                {
+                    "form": "accūsēre",
+                    "tags": [
+                        "passive",
+                        "present",
+                        "second-person",
+                        "singular",
+                        "subjunctive",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsēre", "accusere#Latin")],
+                },
+                {
+                    "form": "accūsētur",
+                    "tags": [
+                        "passive",
+                        "present",
+                        "singular",
+                        "subjunctive",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsētur", "accusetur#Latin")],
+                },
+                {
+                    "form": "accūsēmur",
+                    "tags": [
+                        "first-person",
+                        "passive",
+                        "plural",
+                        "present",
+                        "subjunctive",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsēmur", "accusemur#Latin")],
+                },
+                {
+                    "form": "accūsēminī",
+                    "tags": [
+                        "passive",
+                        "plural",
+                        "present",
+                        "second-person",
+                        "subjunctive",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsēminī", "accusemini#Latin")],
+                },
+                {
+                    "form": "accūsentur",
+                    "tags": [
+                        "passive",
+                        "plural",
+                        "present",
+                        "subjunctive",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsentur", "accusentur#Latin")],
+                },
+                {
+                    "form": "accūsārer",
+                    "tags": [
+                        "first-person",
+                        "imperfect",
+                        "passive",
+                        "singular",
+                        "subjunctive",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsārer", "accusarer#Latin")],
+                },
+                {
+                    "form": "accūsārēris",
+                    "tags": [
+                        "imperfect",
+                        "passive",
+                        "second-person",
+                        "singular",
+                        "subjunctive",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsārēris", "accusareris#Latin")],
+                },
+                {
+                    "form": "accūsārēre",
+                    "tags": [
+                        "imperfect",
+                        "passive",
+                        "second-person",
+                        "singular",
+                        "subjunctive",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsārēre", "accusarere#Latin")],
+                },
+                {
+                    "form": "accūsārētur",
+                    "tags": [
+                        "imperfect",
+                        "passive",
+                        "singular",
+                        "subjunctive",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsārētur", "accusaretur#Latin")],
+                },
+                {
+                    "form": "accūsārēmur",
+                    "tags": [
+                        "first-person",
+                        "imperfect",
+                        "passive",
+                        "plural",
+                        "subjunctive",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsārēmur", "accusaremur#Latin")],
+                },
+                {
+                    "form": "accūsārēminī",
+                    "tags": [
+                        "imperfect",
+                        "passive",
+                        "plural",
+                        "second-person",
+                        "subjunctive",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsārēminī", "accusaremini#Latin")],
+                },
+                {
+                    "form": "accūsārentur",
+                    "tags": [
+                        "imperfect",
+                        "passive",
+                        "plural",
+                        "subjunctive",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsārentur", "accusarentur#Latin")],
+                },
+                {
+                    "form": "accūsātus + present active subjunctive of sum",
+                    "tags": ["passive", "perfect", "subjunctive"],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "accūsātus + imperfect active subjunctive of sum",
+                    "tags": ["passive", "pluperfect", "subjunctive"],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "-",
+                    "tags": [
+                        "active",
+                        "first-person",
+                        "imperative",
+                        "present",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "accūsā",
+                    "tags": [
+                        "active",
+                        "imperative",
+                        "present",
+                        "second-person",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsā", "accusa#Latin")],
+                },
+                {
+                    "form": "-",
+                    "tags": [
+                        "active",
+                        "imperative",
+                        "present",
+                        "singular",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "-",
+                    "tags": [
+                        "active",
+                        "first-person",
+                        "imperative",
+                        "plural",
+                        "present",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "accūsāte",
+                    "tags": [
+                        "active",
+                        "imperative",
+                        "plural",
+                        "present",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsāte", "accusate#Latin")],
+                },
+                {
+                    "form": "-",
+                    "tags": [
+                        "active",
+                        "imperative",
+                        "plural",
+                        "present",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "-",
+                    "tags": [
+                        "active",
+                        "first-person",
+                        "future",
+                        "imperative",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "accūsātō",
+                    "tags": [
+                        "active",
+                        "future",
+                        "imperative",
+                        "second-person",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsātō", "accusato#Latin")],
+                },
+                {
+                    "form": "accūsātō",
+                    "tags": [
+                        "active",
+                        "future",
+                        "imperative",
+                        "singular",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsātō", "accusato#Latin")],
+                },
+                {
+                    "form": "-",
+                    "tags": [
+                        "active",
+                        "first-person",
+                        "future",
+                        "imperative",
+                        "plural",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "accūsātōte",
+                    "tags": [
+                        "active",
+                        "future",
+                        "imperative",
+                        "plural",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsātōte", "accusatote#Latin")],
+                },
+                {
+                    "form": "accūsantō",
+                    "tags": [
+                        "active",
+                        "future",
+                        "imperative",
+                        "plural",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsantō", "accusanto#Latin")],
+                },
+                {
+                    "form": "-",
+                    "tags": [
+                        "first-person",
+                        "imperative",
+                        "passive",
+                        "present",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "accūsāre",
+                    "tags": [
+                        "imperative",
+                        "passive",
+                        "present",
+                        "second-person",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsāre", "accusare#Latin")],
+                },
+                {
+                    "form": "-",
+                    "tags": [
+                        "imperative",
+                        "passive",
+                        "present",
+                        "singular",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "-",
+                    "tags": [
+                        "first-person",
+                        "imperative",
+                        "passive",
+                        "plural",
+                        "present",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "accūsāminī",
+                    "tags": [
+                        "imperative",
+                        "passive",
+                        "plural",
+                        "present",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsāminī", "accusamini#Latin")],
+                },
+                {
+                    "form": "-",
+                    "tags": [
+                        "imperative",
+                        "passive",
+                        "plural",
+                        "present",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "-",
+                    "tags": [
+                        "first-person",
+                        "future",
+                        "imperative",
+                        "passive",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "accūsātor",
+                    "tags": [
+                        "future",
+                        "imperative",
+                        "passive",
+                        "second-person",
+                        "singular",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsātor", "accusator#Latin")],
+                },
+                {
+                    "form": "accūsātor",
+                    "tags": [
+                        "future",
+                        "imperative",
+                        "passive",
+                        "singular",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsātor", "accusator#Latin")],
+                },
+                {
+                    "form": "-",
+                    "tags": [
+                        "first-person",
+                        "future",
+                        "imperative",
+                        "passive",
+                        "plural",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "-",
+                    "tags": [
+                        "future",
+                        "imperative",
+                        "passive",
+                        "plural",
+                        "second-person",
+                    ],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "accūsantor",
+                    "tags": [
+                        "future",
+                        "imperative",
+                        "passive",
+                        "plural",
+                        "third-person",
+                    ],
+                    "source": "Conjugation",
+                    "links": [("accūsantor", "accusantor#Latin")],
+                },
+                {
+                    "form": "accūsāre",
+                    "tags": ["active", "infinitive", "present"],
+                    "source": "Conjugation",
+                    "links": [("accūsāre", "accusare#Latin")],
+                },
+                {
+                    "form": "accūsāvisse",
+                    "tags": ["active", "infinitive", "perfect"],
+                    "source": "Conjugation",
+                    "links": [("accūsāvisse", "accusavisse#Latin")],
+                },
+                {
+                    "form": "accūsāsse",
+                    "tags": ["active", "infinitive", "perfect"],
+                    "source": "Conjugation",
+                    "links": [("accūsāsse", "accusasse#Latin")],
+                },
+                {
+                    "form": "accūsātūrum esse",
+                    "tags": ["active", "future", "infinitive"],
+                    "source": "Conjugation",
+                    "links": [
+                        ("accūsātūrum", "accusaturus#Latin"),
+                        ("esse", "esse#Latin"),
+                    ],
+                },
+                {
+                    "form": "accūsārī",
+                    "tags": ["infinitive", "passive", "present"],
+                    "source": "Conjugation",
+                    "links": [("accūsārī", "accusari#Latin")],
+                },
+                {
+                    "form": "accūsātum esse",
+                    "tags": ["infinitive", "passive", "perfect"],
+                    "source": "Conjugation",
+                    "links": [
+                        ("accūsātum", "accusatus#Latin"),
+                        ("esse", "esse#Latin"),
+                    ],
+                },
+                {
+                    "form": "accūsātum īrī",
+                    "tags": ["future", "infinitive", "passive"],
+                    "source": "Conjugation",
+                    "links": [
+                        ("accūsātum", "accusatum#Latin"),
+                        ("īrī", "iri#Latin"),
+                    ],
+                },
+                {
+                    "form": "accūsāns",
+                    "tags": ["active", "participle", "present"],
+                    "source": "Conjugation",
+                    "links": [("accūsāns", "accusans#Latin")],
+                },
+                {
+                    "form": "-",
+                    "tags": ["active", "participle", "perfect"],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "accūsātūrus",
+                    "tags": ["active", "future", "participle"],
+                    "source": "Conjugation",
+                    "links": [("accūsātūrus", "accusaturus#Latin")],
+                },
+                {
+                    "form": "-",
+                    "tags": ["participle", "passive", "present"],
+                    "source": "Conjugation",
+                },
+                {
+                    "form": "accūsātus",
+                    "tags": ["participle", "passive", "perfect"],
+                    "source": "Conjugation",
+                    "links": [("accūsātus", "accusatus#Latin")],
+                },
+                {
+                    "form": "accūsandus",
+                    "tags": ["future", "participle", "passive"],
+                    "source": "Conjugation",
+                    "links": [("accūsandus", "accusandus#Latin")],
+                },
+                {
+                    "form": "accūsandī",
+                    "tags": ["genitive", "gerund", "noun-from-verb"],
+                    "source": "Conjugation",
+                    "links": [("accūsandī", "accusandi#Latin")],
+                },
+                {
+                    "form": "accūsandō",
+                    "tags": ["dative", "gerund", "noun-from-verb"],
+                    "source": "Conjugation",
+                    "links": [("accūsandō", "accusando#Latin")],
+                },
+                {
+                    "form": "accūsandum",
+                    "tags": ["accusative", "gerund", "noun-from-verb"],
+                    "source": "Conjugation",
+                    "links": [("accūsandum", "accusandum#Latin")],
+                },
+                {
+                    "form": "accūsandō",
+                    "tags": ["ablative", "gerund", "noun-from-verb"],
+                    "source": "Conjugation",
+                    "links": [("accūsandō", "accusando#Latin")],
+                },
+                {
+                    "form": "accūsātum",
+                    "tags": ["accusative", "noun-from-verb", "supine"],
+                    "source": "Conjugation",
+                    "links": [("accūsātum", "accusatum#Latin")],
+                },
+                {
+                    "form": "accūsātū",
+                    "tags": ["ablative", "noun-from-verb", "supine"],
+                    "source": "Conjugation",
+                    "links": [("accūsātū", "accusatu#Latin")],
+                },
+            ]
         }
         self.assertEqual(expected, ret)
 
     def test_Latin_noun1(self):
         # This also tests handling of a form starting with "*" (non-attested)
-        ret = self.xinfl("mare", "Latin", "noun", "Declension", """
+        ret = self.xinfl(
+            "mare",
+            "Latin",
+            "noun",
+            "Declension",
+            """
 [[Appendix:Latin third declension|Third-declension]] noun (neuter, “pure” i-stem).<templatestyles src="Template%3Ala-decl-1st%2Fstyle.css">
 
 {| class="prettytable+inflection-table+inflection-table-la"
@@ -2447,134 +2563,99 @@ class InflTests(unittest.TestCase):
 *The ablative singular can be ''marī'' or ''mare''.
 *The genitive plural form *''marium'', although regularly formed for an i-stem noun, is not attested in the corpus of classical texts. ''Marum'' is found only once, in a line from Gnaeus Naevius.
 *The 5th/6th-century grammarian [[w:Priscian|Priscian]] (''Institutiones'' 7) says it is rarely used in the genitive plural, noting Caesar's use of ''maribus'' too. Similarly, the 4th-century grammarian [[w:Flavius Sosipater Charisius|Charisius]] claims it lacks both a genitive plural *''marium'' and a *''maribus'' form (but see the quotation from Julius Caesar above): <blockquote>''"maria" tamen quamvis dicantur pluraliter, attamen nec "marium" nec "maribus" dicemus'' <br>— although ''maria'' can be said in the plural, nevertheless we won't say ''marium'' nor ''maribus'' (''Ars'' 1.11).</blockquote>
-""")  # noqa: E501
+""",
+        )  # noqa: E501
         expected = {
             "forms": [
-              {
-                "form": "no-table-tags",
-                "source": "Declension",
-                "tags": [
-                  "table-tags"
-                ]
-              },
-              {
-                "form": "mare",
-                "source": "Declension",
-                "tags": [
-                  "nominative",
-                  "singular"
-                ]
-              },
-              {
-                "form": "maria",
-                "source": "Declension",
-                "tags": [
-                  "nominative",
-                  "plural"
-                ]
-              },
-              {
-                "form": "maris",
-                "source": "Declension",
-                "tags": [
-                  "genitive",
-                  "singular"
-                ]
-              },
-              {
-                "form": "marium",
-                "source": "Declension",
-                "tags": [
-                  "genitive",
-                  "plural"
-                ]
-              },
-              {
-                "form": "marum",
-                "source": "Declension",
-                "tags": [
-                  "genitive",
-                  "plural"
-                ]
-              },
-              {
-                "form": "marī",
-                "source": "Declension",
-                "tags": [
-                  "dative",
-                  "singular"
-                ]
-              },
-              {
-                "form": "maribus",
-                "source": "Declension",
-                "tags": [
-                  "dative",
-                  "plural"
-                ]
-              },
-              {
-                "form": "mare",
-                "source": "Declension",
-                "tags": [
-                  "accusative",
-                  "singular"
-                ]
-              },
-              {
-                "form": "maria",
-                "source": "Declension",
-                "tags": [
-                  "accusative",
-                  "plural"
-                ]
-              },
-              {
-                "form": "marī",
-                "source": "Declension",
-                "tags": [
-                  "ablative",
-                  "singular"
-                ]
-              },
-              {
-                "form": "mare",
-                "source": "Declension",
-                "tags": [
-                  "ablative",
-                  "singular"
-                ]
-              },
-              {
-                "form": "maribus",
-                "source": "Declension",
-                "tags": [
-                  "ablative",
-                  "plural"
-                ]
-              },
-              {
-                "form": "mare",
-                "source": "Declension",
-                "tags": [
-                  "singular",
-                  "vocative"
-                ]
-              },
-              {
-                "form": "maria",
-                "source": "Declension",
-                "tags": [
-                  "plural",
-                  "vocative"
-                ]
-              }
-            ],
+                {
+                    "form": "no-table-tags",
+                    "source": "Declension",
+                    "tags": ["table-tags"],
+                },
+                {
+                    "form": "mare",
+                    "tags": ["nominative", "singular"],
+                    "source": "Declension",
+                },
+                {
+                    "form": "maria",
+                    "tags": ["nominative", "plural"],
+                    "source": "Declension",
+                },
+                {
+                    "form": "maris",
+                    "tags": ["genitive", "singular"],
+                    "source": "Declension",
+                },
+                {
+                    "form": "marium",
+                    "tags": ["genitive", "plural"],
+                    "source": "Declension",
+                },
+                {
+                    "form": "marum",
+                    "tags": ["genitive", "plural"],
+                    "source": "Declension",
+                },
+                {
+                    "form": "marī",
+                    "tags": ["dative", "singular"],
+                    "source": "Declension",
+                    "links": [("marī", "mari#Latin")],
+                },
+                {
+                    "form": "maribus",
+                    "tags": ["dative", "plural"],
+                    "source": "Declension",
+                },
+                {
+                    "form": "mare",
+                    "tags": ["accusative", "singular"],
+                    "source": "Declension",
+                },
+                {
+                    "form": "maria",
+                    "tags": ["accusative", "plural"],
+                    "source": "Declension",
+                },
+                {
+                    "form": "marī",
+                    "tags": ["ablative", "singular"],
+                    "source": "Declension",
+                    "links": [("marī", "mari#Latin")],
+                },
+                {
+                    "form": "mare",
+                    "tags": ["ablative", "singular"],
+                    "source": "Declension",
+                },
+                {
+                    "form": "maribus",
+                    "tags": ["ablative", "plural"],
+                    "source": "Declension",
+                },
+                {
+                    "form": "mare",
+                    "tags": ["singular", "vocative"],
+                    "source": "Declension",
+                },
+                {
+                    "form": "maria",
+                    "tags": ["plural", "vocative"],
+                    "source": "Declension",
+                },
+            ]
         }
+
         self.assertEqual(expected, ret)
 
     def test_Latin_adj1(self):
-        ret = self.xinfl("magnificus", "Latin", "adj", "Declension", """
+        ret = self.xinfl(
+            "magnificus",
+            "Latin",
+            "adj",
+            "Declension",
+            """
 [[Appendix:Latin first declension|First]]/[[Appendix:Latin second declension|second-declension]] adjective.
 
 {| class="prettytable+inflection-table+inflection-table-la"
@@ -2743,308 +2824,204 @@ class InflTests(unittest.TestCase):
 
 
 |}
-""")  # noqa: E501
+""",
+        )  # noqa: E501
         expected = {
             "forms": [
-              {
-                "form": "no-table-tags",
-                "source": "Declension",
-                "tags": [
-                  "table-tags"
-                ]
-              },
-              {
-                "form": "magnificus",
-                "source": "Declension",
-                "tags": [
-                  "masculine",
-                  "nominative",
-                  "singular"
-                ]
-              },
-              {
-                "form": "magnifica",
-                "source": "Declension",
-                "tags": [
-                  "feminine",
-                  "nominative",
-                  "singular"
-                ]
-              },
-              {
-                "form": "magnificum",
-                "source": "Declension",
-                "tags": [
-                  "neuter",
-                  "nominative",
-                  "singular"
-                ]
-              },
-              {
-                "form": "magnificī",
-                "source": "Declension",
-                "tags": [
-                  "masculine",
-                  "nominative",
-                  "plural"
-                ]
-              },
-              {
-                "form": "magnificae",
-                "source": "Declension",
-                "tags": [
-                  "feminine",
-                  "nominative",
-                  "plural"
-                ]
-              },
-              {
-                "form": "magnifica",
-                "source": "Declension",
-                "tags": [
-                  "neuter",
-                  "nominative",
-                  "plural"
-                ]
-              },
-              {
-                "form": "magnificī",
-                "source": "Declension",
-                "tags": [
-                  "genitive",
-                  "masculine",
-                  "singular"
-                ]
-              },
-              {
-                "form": "magnificae",
-                "source": "Declension",
-                "tags": [
-                  "feminine",
-                  "genitive",
-                  "singular"
-                ]
-              },
-              {
-                "form": "magnificī",
-                "source": "Declension",
-                "tags": [
-                  "genitive",
-                  "neuter",
-                  "singular"
-                ]
-              },
-              {
-                "form": "magnificōrum",
-                "source": "Declension",
-                "tags": [
-                  "genitive",
-                  "masculine",
-                  "plural"
-                ]
-              },
-              {
-                "form": "magnificārum",
-                "source": "Declension",
-                "tags": [
-                  "feminine",
-                  "genitive",
-                  "plural"
-                ]
-              },
-              {
-                "form": "magnificōrum",
-                "source": "Declension",
-                "tags": [
-                  "genitive",
-                  "neuter",
-                  "plural"
-                ]
-              },
-              {
-                "form": "magnificō",
-                "source": "Declension",
-                "tags": [
-                  "dative",
-                  "masculine",
-                  "singular"
-                ]
-              },
-              {
-                "form": "magnificae",
-                "source": "Declension",
-                "tags": [
-                  "dative",
-                  "feminine",
-                  "singular"
-                ]
-              },
-              {
-                "form": "magnificō",
-                "source": "Declension",
-                "tags": [
-                  "dative",
-                  "neuter",
-                  "singular"
-                ]
-              },
-              {
-                "form": "magnificīs",
-                "source": "Declension",
-                "tags": [
-                  "dative",
-                  "feminine",
-                  "masculine",
-                  "neuter",
-                  "plural"
-                ]
-              },
-              {
-                "form": "magnificum",
-                "source": "Declension",
-                "tags": [
-                  "accusative",
-                  "masculine",
-                  "singular"
-                ]
-              },
-              {
-                "form": "magnificam",
-                "source": "Declension",
-                "tags": [
-                  "accusative",
-                  "feminine",
-                  "singular"
-                ]
-              },
-              {
-                "form": "magnificum",
-                "source": "Declension",
-                "tags": [
-                  "accusative",
-                  "neuter",
-                  "singular"
-                ]
-              },
-              {
-                "form": "magnificōs",
-                "source": "Declension",
-                "tags": [
-                  "accusative",
-                  "masculine",
-                  "plural"
-                ]
-              },
-              {
-                "form": "magnificās",
-                "source": "Declension",
-                "tags": [
-                  "accusative",
-                  "feminine",
-                  "plural"
-                ]
-              },
-              {
-                "form": "magnifica",
-                "source": "Declension",
-                "tags": [
-                  "accusative",
-                  "neuter",
-                  "plural"
-                ]
-              },
-              {
-                "form": "magnificō",
-                "source": "Declension",
-                "tags": [
-                  "ablative",
-                  "masculine",
-                  "singular"
-                ]
-              },
-              {
-                "form": "magnificā",
-                "source": "Declension",
-                "tags": [
-                  "ablative",
-                  "feminine",
-                  "singular"
-                ]
-              },
-              {
-                "form": "magnificō",
-                "source": "Declension",
-                "tags": [
-                  "ablative",
-                  "neuter",
-                  "singular"
-                ]
-              },
-              {
-                "form": "magnificīs",
-                "source": "Declension",
-                "tags": [
-                  "ablative",
-                  "feminine",
-                  "masculine",
-                  "neuter",
-                  "plural"
-                ]
-              },
-              {
-                "form": "magnifice",
-                "source": "Declension",
-                "tags": [
-                  "masculine",
-                  "singular",
-                  "vocative"
-                ]
-              },
-              {
-                "form": "magnifica",
-                "source": "Declension",
-                "tags": [
-                  "feminine",
-                  "singular",
-                  "vocative"
-                ]
-              },
-              {
-                "form": "magnificum",
-                "source": "Declension",
-                "tags": [
-                  "neuter",
-                  "singular",
-                  "vocative"
-                ]
-              },
-              {
-                "form": "magnificī",
-                "source": "Declension",
-                "tags": [
-                  "masculine",
-                  "plural",
-                  "vocative"
-                ]
-              },
-              {
-                "form": "magnificae",
-                "source": "Declension",
-                "tags": [
-                  "feminine",
-                  "plural",
-                  "vocative"
-                ]
-              },
-              {
-                "form": "magnifica",
-                "source": "Declension",
-                "tags": [
-                  "neuter",
-                  "plural",
-                  "vocative"
-                ]
-              }
-            ],
+                {
+                    "form": "no-table-tags",
+                    "source": "Declension",
+                    "tags": ["table-tags"],
+                },
+                {
+                    "form": "magnificus",
+                    "tags": ["masculine", "nominative", "singular"],
+                    "source": "Declension",
+                },
+                {
+                    "form": "magnifica",
+                    "tags": ["feminine", "nominative", "singular"],
+                    "source": "Declension",
+                },
+                {
+                    "form": "magnificum",
+                    "tags": ["neuter", "nominative", "singular"],
+                    "source": "Declension",
+                },
+                {
+                    "form": "magnificī",
+                    "tags": ["masculine", "nominative", "plural"],
+                    "source": "Declension",
+                    "links": [("magnificī", "magnifici#Latin")],
+                },
+                {
+                    "form": "magnificae",
+                    "tags": ["feminine", "nominative", "plural"],
+                    "source": "Declension",
+                },
+                {
+                    "form": "magnifica",
+                    "tags": ["neuter", "nominative", "plural"],
+                    "source": "Declension",
+                },
+                {
+                    "form": "magnificī",
+                    "tags": ["genitive", "masculine", "singular"],
+                    "source": "Declension",
+                    "links": [("magnificī", "magnifici#Latin")],
+                },
+                {
+                    "form": "magnificae",
+                    "tags": ["feminine", "genitive", "singular"],
+                    "source": "Declension",
+                },
+                {
+                    "form": "magnificī",
+                    "tags": ["genitive", "neuter", "singular"],
+                    "source": "Declension",
+                    "links": [("magnificī", "magnifici#Latin")],
+                },
+                {
+                    "form": "magnificōrum",
+                    "tags": ["genitive", "masculine", "plural"],
+                    "source": "Declension",
+                    "links": [("magnificōrum", "magnificorum#Latin")],
+                },
+                {
+                    "form": "magnificārum",
+                    "tags": ["feminine", "genitive", "plural"],
+                    "source": "Declension",
+                    "links": [("magnificārum", "magnificarum#Latin")],
+                },
+                {
+                    "form": "magnificōrum",
+                    "tags": ["genitive", "neuter", "plural"],
+                    "source": "Declension",
+                    "links": [("magnificōrum", "magnificorum#Latin")],
+                },
+                {
+                    "form": "magnificō",
+                    "tags": ["dative", "masculine", "singular"],
+                    "source": "Declension",
+                    "links": [("magnificō", "magnifico#Latin")],
+                },
+                {
+                    "form": "magnificae",
+                    "tags": ["dative", "feminine", "singular"],
+                    "source": "Declension",
+                },
+                {
+                    "form": "magnificō",
+                    "tags": ["dative", "neuter", "singular"],
+                    "source": "Declension",
+                    "links": [("magnificō", "magnifico#Latin")],
+                },
+                {
+                    "form": "magnificīs",
+                    "tags": [
+                        "dative",
+                        "feminine",
+                        "masculine",
+                        "neuter",
+                        "plural",
+                    ],
+                    "source": "Declension",
+                    "links": [("magnificīs", "magnificis#Latin")],
+                },
+                {
+                    "form": "magnificum",
+                    "tags": ["accusative", "masculine", "singular"],
+                    "source": "Declension",
+                },
+                {
+                    "form": "magnificam",
+                    "tags": ["accusative", "feminine", "singular"],
+                    "source": "Declension",
+                },
+                {
+                    "form": "magnificum",
+                    "tags": ["accusative", "neuter", "singular"],
+                    "source": "Declension",
+                },
+                {
+                    "form": "magnificōs",
+                    "tags": ["accusative", "masculine", "plural"],
+                    "source": "Declension",
+                    "links": [("magnificōs", "magnificos#Latin")],
+                },
+                {
+                    "form": "magnificās",
+                    "tags": ["accusative", "feminine", "plural"],
+                    "source": "Declension",
+                    "links": [("magnificās", "magnificas#Latin")],
+                },
+                {
+                    "form": "magnifica",
+                    "tags": ["accusative", "neuter", "plural"],
+                    "source": "Declension",
+                },
+                {
+                    "form": "magnificō",
+                    "tags": ["ablative", "masculine", "singular"],
+                    "source": "Declension",
+                    "links": [("magnificō", "magnifico#Latin")],
+                },
+                {
+                    "form": "magnificā",
+                    "tags": ["ablative", "feminine", "singular"],
+                    "source": "Declension",
+                    "links": [("magnificā", "magnifica#Latin")],
+                },
+                {
+                    "form": "magnificō",
+                    "tags": ["ablative", "neuter", "singular"],
+                    "source": "Declension",
+                    "links": [("magnificō", "magnifico#Latin")],
+                },
+                {
+                    "form": "magnificīs",
+                    "tags": [
+                        "ablative",
+                        "feminine",
+                        "masculine",
+                        "neuter",
+                        "plural",
+                    ],
+                    "source": "Declension",
+                    "links": [("magnificīs", "magnificis#Latin")],
+                },
+                {
+                    "form": "magnifice",
+                    "tags": ["masculine", "singular", "vocative"],
+                    "source": "Declension",
+                },
+                {
+                    "form": "magnifica",
+                    "tags": ["feminine", "singular", "vocative"],
+                    "source": "Declension",
+                },
+                {
+                    "form": "magnificum",
+                    "tags": ["neuter", "singular", "vocative"],
+                    "source": "Declension",
+                },
+                {
+                    "form": "magnificī",
+                    "tags": ["masculine", "plural", "vocative"],
+                    "source": "Declension",
+                    "links": [("magnificī", "magnifici#Latin")],
+                },
+                {
+                    "form": "magnificae",
+                    "tags": ["feminine", "plural", "vocative"],
+                    "source": "Declension",
+                },
+                {
+                    "form": "magnifica",
+                    "tags": ["neuter", "plural", "vocative"],
+                    "source": "Declension",
+                },
+            ]
         }
+
         self.assertEqual(expected, ret)

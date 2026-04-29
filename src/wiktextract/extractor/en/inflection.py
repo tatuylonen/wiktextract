@@ -21,6 +21,7 @@ from .form_descriptions import (
     classify_desc,
     decode_tags,
     distw,
+    match_links_to_form,
     parse_head_final_tags,
 )
 from .inflection_kludges import ka_decl_noun_template_cell
@@ -323,6 +324,7 @@ class InflCell:
         "colspan",
         "rowspan",
         "target",
+        "links",
     )
 
     def __init__(
@@ -331,7 +333,8 @@ class InflCell:
         is_title: bool,
         colspan: int,
         rowspan: int,
-        target: Optional[str],
+        target: str | None,
+        cell_links: list[tuple[str, str]] | None = None,
     ) -> None:
         assert isinstance(text, str)
         assert is_title in (True, False)
@@ -343,6 +346,7 @@ class InflCell:
         self.colspan = colspan
         self.rowspan = rowspan
         self.target = target
+        self.links = cell_links
 
     def __str__(self) -> str:
         v = "{}/{}/{}/{!r}".format(
@@ -1984,7 +1988,9 @@ def parse_simple_table(
         return form, roman, clitic
 
     def merge_row_and_column_tags(
-        form: str, some_has_covered_text: bool
+        form: str,
+        some_has_covered_text: bool,
+        links: list[tuple[str, str]] | None = None,
     ) -> tuple[list[FormData], str, bool]:
         # Merge column tags and row tags.  We give preference
         # to moods etc coming from rowtags (cf. austteigen/German/Verb
@@ -2202,6 +2208,12 @@ def parse_simple_table(
                     dt["roman"] = roman
                 if ipa:
                     dt["ipa"] = ipa
+                if cell_links is not None and (
+                    matched_links := match_links_to_form(
+                        wxr, form, cell_links, None
+                    )
+                ):
+                    dt["links"] = matched_links
                 ret.append(dt)
                 # If we got separate clitic form, add it
                 if clitic:
@@ -2315,6 +2327,7 @@ def parse_simple_table(
         for col_idx, cell in enumerate(row):
             colspan = cell.colspan  # >= 1
             rowspan = cell.rowspan  # >= 1
+            cell_links = cell.links  # for weird links
             previously_seen = id(cell) in seen_cells
             # checks to see if this cell was in the previous ROW
             seen_cells.add(id(cell))
@@ -2542,14 +2555,14 @@ def parse_simple_table(
             # or text and IPA. Handle these.
             altss = handle_mixed_lines(alts)
 
-            altsss = list((x, combined_coltags) for x in altss)
+            altsss = list((x, combined_coltags, cell_links) for x in altss)
 
             # Generate forms from the alternatives
             # alts is a list of (tuple of forms, tuple of tags)
             coltags: list[tuple[str, ...]]
             base_roman: str
             ipa: str
-            for (form, base_roman, ipa), coltags in altsss:
+            for (form, base_roman, ipa), coltags, cell_links in altsss:
                 form = form.strip()
                 extra_tags: list[str] = []
                 extra_tags.extend(split_extra_tags)
@@ -2709,7 +2722,9 @@ def parse_simple_table(
                     merge_ret,
                     form,
                     some_has_covered_text,
-                ) = merge_row_and_column_tags(form, some_has_covered_text)
+                ) = merge_row_and_column_tags(
+                    form, some_has_covered_text, cell_links
+                )
                 ret.extend(merge_ret)
 
         # End of row.
@@ -3357,14 +3372,23 @@ def handle_wikitext_or_html_table(
                     # Process any nested tables recursively.
                     tables, rest = recursively_extract(
                         col,
-                        lambda x: isinstance(x, WikiNode)
-                        and (x.kind == NodeKind.TABLE or x.sarg == "table"),
+                        lambda x: (
+                            isinstance(x, WikiNode)
+                            and (x.kind == NodeKind.TABLE or x.sarg == "table")
+                        ),
                     )
 
                     # Clean the rest of the cell.
-                    celltext = clean_node(wxr, None, rest)
+                    link_capture_dict: dict = {}
+                    celltext = clean_node(
+                        wxr, link_capture_dict, rest, collect_links=True
+                    )
+                    cell_links: list[tuple[str, str]] | None = (
+                        link_capture_dict.get("links", None)
+                    )
                     # print(f"CLEANED: {celltext=}")
                     # print(f"SUBTABLES: {tables}")
+                    # print(f"{link_capture_dict=}")
 
                     # Remove regexed patterns from text
                     if remove_text_patterns is not None:
@@ -3457,7 +3481,7 @@ def handle_wikitext_or_html_table(
                     #   ⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓
                     row_has_nonempty_cells |= is_title or celltext != ""
                     cell = InflCell(
-                        celltext, is_title, colspan, rowspan, target
+                        celltext, is_title, colspan, rowspan, target, cell_links
                     )
                     for _ in range(0, colspan):
                         # colspan🡘 current loop (col) or 1
