@@ -99,6 +99,7 @@ class TestPronunciation(TestCase):
                         "ogg_url": "https://upload.wikimedia.org/wikipedia/commons/transcoded/7/7a/LL-Q1860_%28eng%29-Back_ache-past.wav/LL-Q1860_%28eng%29-Back_ache-past.wav.ogg",
                         "mp3_url": "https://upload.wikimedia.org/wikipedia/commons/transcoded/7/7a/LL-Q1860_%28eng%29-Back_ache-past.wav/LL-Q1860_%28eng%29-Back_ache-past.wav.mp3",
                         "pos": "noun",
+                        "tags": ["UK"],
                     },
                     {"tags": ["US"], "enpr": "vöö", "pos": "verb"},
                     {"ipa": "/voo/", "tags": ["US"], "pos": "verb"},
@@ -107,6 +108,7 @@ class TestPronunciation(TestCase):
                         "ogg_url": "https://upload.wikimedia.org/wikipedia/commons/b/b0/En-us-past.ogg",
                         "mp3_url": "https://upload.wikimedia.org/wikipedia/commons/transcoded/b/b0/En-us-past.ogg/En-us-past.ogg.mp3",
                         "pos": "verb",
+                        "tags": ["US"],
                     },
                     {"homophone": "feu", "pos": "verb"},
                     {"rhymes": "-oo", "pos": "verb"},
@@ -812,6 +814,36 @@ Etymology 2
                     "other": "เล็่น-เพื่อน",
                     "raw_tags": ["Phonemic", "Unorthographical", "Short"],
                     "roman": "e l ˘ ˋ n – e b ụ̄ ˋ ɒ n",
+                }
+            ],
+        )
+
+    def test_audio_dialect_tags(self):
+        self.wxr.wtp.add_page(
+            "Template:th-pron",
+            10,
+            """<table cellpadding=10>
+<tr><th colspan="2">''[[w:Thai alphabet|Phonemic]]''<br><small>{<span title="This phonetic respelling violates Thai alphabet rules to indicate an irregular pronunciation.">Unorthographical</span>; <span title="The vowel in this word is pronounced irregularly short.">Short</span>}</small></th><td><div class="th-reading"><span lang="th" class="Thai ">เล็่น-เพื่อน</span><br><small><span title="Vowel sign appearing in front of the initial consonant.">e</span>&thinsp;l&thinsp;˘&thinsp;ˋ&thinsp;n&thinsp;&ndash;&thinsp;<span title="Vowel sign appearing in front of the initial consonant.">e</span>&thinsp;b&thinsp;ụ̄&thinsp;ˋ&thinsp;ɒ&thinsp;n</small></div></td></tr>
+</table>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "dizer",
+            """==Portuguese==
+===Pronunciation===
+* {{audio|pt|LL-Q5146 (por)-JnpoJuwan-dizer.wav|a=<<Brazil>> (<<São Paulo>>)}}
+===Verb===
+# gloss""",
+        )
+        print(data[0]["sounds"])
+        self.assertEqual(
+            data[0]["sounds"],
+            [
+                {
+                    "audio": "LL-Q5146 (por)-JnpoJuwan-dizer.wav",
+                    "tags": ["Brazil", "São-Paulo"],
+                    "ogg_url": "https://upload.wikimedia.org/wikipedia/commons/transcoded/9/9c/LL-Q5146_%28por%29-JnpoJuwan-dizer.wav/LL-Q5146_%28por%29-JnpoJuwan-dizer.wav.ogg",
+                    "mp3_url": "https://upload.wikimedia.org/wikipedia/commons/transcoded/9/9c/LL-Q5146_%28por%29-JnpoJuwan-dizer.wav/LL-Q5146_%28por%29-JnpoJuwan-dizer.wav.mp3",
                 }
             ],
         )
