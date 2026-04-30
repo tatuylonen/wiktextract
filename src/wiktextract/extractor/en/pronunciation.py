@@ -246,7 +246,7 @@ def parse_pronunciation(
         data = etym_data
     pron_templates: list[tuple[SoundData, list[SoundData]]] = []
     hyphenations: list[Hyphenation] = []
-    audios = []
+    audios: list[SoundData] = []
     have_panel_templates = False
 
     def parse_pronunciation_template_fn(
@@ -262,9 +262,21 @@ def parse_pronunciation(
             return ""
         if name == "audio":
             filename = ht.get(2) or ""
+            audio: SoundData = {"audio": filename.strip()}
+            dialect = ht.get("a", "")
+            if "aa" in ht:
+                dialect += ", " + ht.get("aa", "")
+            if dialect:
+                dialect = dialect.replace("<", "").replace(">", "")
+                dialect = clean_node(wxr, None, [dialect])
+                for part in split_at_comma_semi(dialect):
+                    if "(" not in part:
+                        parse_pronunciation_tags(wxr, part, audio)
+                    else:
+                        for ppart in re.split(r"[][()]", part):
+                            parse_pronunciation_tags(wxr, ppart, audio)
             desc = ht.get(3) or ""
             desc = clean_node(wxr, None, [desc])
-            audio: SoundData = {"audio": filename.strip()}
             if desc:
                 audio["text"] = desc
             m = re.search(r"\((([^()]|\([^()]*\))*)\)", desc)
