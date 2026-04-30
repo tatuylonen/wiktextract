@@ -153,7 +153,7 @@ class TestPronunciation(TestCase):
                             "US",
                             "paucal",
                         ],
-                        "note": "Cajun, dual",
+                        "note": "note-text; Cajun, dual",
                         "ipa": "foobaz(ipa accepts parens)",
                         "pos": ["verb"],
                     },
@@ -452,6 +452,70 @@ class TestPronunciation(TestCase):
         parse_pronunciation(self.wxr, tree.children[0], out, {}, {}, {}, "de")
         self.assertEqual(out, {"sounds": [{"ipa": "/ˈkoːkɔs/"}]})
 
+    def test_inline_ipa_q_pos_qualifier(self):
+        self.wxr.wtp.start_page("disuse")
+        self.wxr.wtp.add_page(
+            "Template:IPA", 10, "IPA⁽ᵏᵉʸ⁾: {{{2}}}"
+        )
+        tree = self.wxr.wtp.parse("""=== Pronunciation ===
+* {{IPA|en|/dɪsˈjuːs/<q:noun>}}
+* {{IPA|en|/dɪsˈjuːz/<q:verb>}}
+""")
+        out = {}
+        parse_pronunciation(self.wxr, tree.children[0], out, {}, {}, {}, "en")
+        self.assertEqual(
+            out,
+            {
+                "sounds": [
+                    {"ipa": "/dɪsˈjuːs/", "pos": ["noun"]},
+                    {"ipa": "/dɪsˈjuːz/", "pos": ["verb"]},
+                ]
+            },
+        )
+
+    def test_ipa_nonindexed_named_param_pos(self):
+        self.wxr.wtp.start_page("advocate")
+        self.wxr.wtp.add_page(
+            "Template:IPA", 10, "IPA⁽ᵏᵉʸ⁾: {{{2}}}"
+        )
+        tree = self.wxr.wtp.parse("""=== Pronunciation ===
+* {{IPA|en|/ˈæd.və.kət/|q=noun}}
+""")
+        out = {}
+        parse_pronunciation(self.wxr, tree.children[0], out, {}, {}, {}, "en")
+        self.assertEqual(
+            out,
+            {"sounds": [{"ipa": "/ˈæd.və.kət/", "pos": ["noun"]}]},
+        )
+
+    def test_ipa_indexed_param_pos(self):
+        self.wxr.wtp.start_page("rebound")
+        self.wxr.wtp.add_page(
+            "Template:IPA", 10, "IPA⁽ᵏᵉʸ⁾: {{{2}}}, {{{3}}}"
+        )
+        tree = self.wxr.wtp.parse("""=== Pronunciation ===
+* {{IPA|en|/ˈɹi.baʊnd/|q1=noun|/ɹiˈbaʊnd/|q2=verb|a=GA}}
+""")
+        out = {}
+        parse_pronunciation(self.wxr, tree.children[0], out, {}, {}, {}, "en")
+        self.assertEqual(
+            out,
+            {
+                "sounds": [
+                    {
+                        "ipa": "/ˈɹi.baʊnd/",
+                        "pos": ["noun"],
+                        "tags": ["General-American"],
+                    },
+                    {
+                        "ipa": "/ɹiˈbaʊnd/",
+                        "pos": ["verb"],
+                        "tags": ["General-American"],
+                    },
+                ]
+            },
+        )
+
     def test_no_templates1(self):
         self.wxr.wtp.start_page("baz")
         tree = self.wxr.wtp.parse("""=== Pronunciation ===
@@ -514,7 +578,7 @@ class TestPronunciation(TestCase):
                             "US",
                             "paucal",
                         ],
-                        "note": "Cajun, dual",
+                        "note": "note-text; Cajun, dual",
                         "ipa": "foobaz(ipa accepts parens)",
                     },
                     {

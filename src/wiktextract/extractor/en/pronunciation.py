@@ -62,6 +62,22 @@ class PronunciationPosPrefix(NamedTuple):
     is_persistent: bool
 
 
+class PronunciationQualifierSortItem(NamedTuple):
+    order_group: int
+    original_arg_position: int
+    qualifier_text: str
+
+
+class InlinePronunciationQualifiers(NamedTuple):
+    text: str
+    qualifiers: list[str]
+
+
+class PronunciationQualifierParams(NamedTuple):
+    base: list[str]
+    indexed: dict[int, list[str]]
+
+
 PRON_POS_TEMPLATE_NAMES = {
     "q",
     "qualifier",
@@ -74,6 +90,10 @@ PRON_POS_TEMPLATE_NAMES = {
     "lbl",
     "label",
 }
+
+PRON_QUALIFIER_PARAM_RE = re.compile(r"^(a|aa|q|qq)(\d*)$")
+PRON_QUALIFIER_PARAM_ORDER = {"a": 0, "q": 1, "aa": 2, "qq": 3}
+INLINE_PRON_QUAL_RE = re.compile(r"<(?:q|qq|a):([^<>]*)>")
 
 
 def normalize_pronunciation_pos_label(label: str) -> str:
@@ -110,14 +130,133 @@ def set_sound_pos(sound: SoundData, pos_values: list[str] | None) -> None:
     sound["pos"] = list(pos_values)  # type: ignore[typeddict-unknown-key]
 
 
+def merge_pronunciation_tag_data(
+    sound: SoundData, tag_data: SoundData
+) -> None:
+    for value in tag_data.get("tags", []):
+        if value not in sound.get("tags", []):
+            data_append(sound, "tags", value)
+    for value in tag_data.get("topics", []):
+        if value not in sound.get("topics", []):
+            data_append(sound, "topics", value)
+    if note := tag_data.get("note"):
+        existing_note = sound.get("note")
+        if not existing_note:
+            sound["note"] = note
+        elif note not in [n.strip() for n in existing_note.split(";")]:
+            sound["note"] = f"{existing_note}; {note}"
+
+
 def parse_pronunciation_tags_with_pos(
     wxr: WiktextractContext, text: str, sound: SoundData
 ) -> list[str]:
     match = split_pronunciation_pos_text(text)
     set_sound_pos(sound, match.pos_values)
     if match.residual:
-        parse_pronunciation_tags(wxr, match.residual, sound)
+        tag_data: SoundData = {}
+        parse_pronunciation_tags(wxr, match.residual, tag_data)
+        merge_pronunciation_tag_data(sound, tag_data)
     return match.pos_values
+
+
+def qualifier_text_is_rendered(text: str, rendered_texts: list[str]) -> bool:
+    text = text.strip().lower()
+    if not text:
+        return True
+    return any(text in rendered.lower() for rendered in rendered_texts)
+
+
+def extract_inline_pronunciation_qualifiers(
+    text: str,
+) -> InlinePronunciationQualifiers:
+    """Remove inline <q:...>/<qq:...>/<a:...> and return their text."""
+    qualifiers: list[str] = []
+
+    def repl(match: re.Match[str]) -> str:
+        qualifiers.append(match.group(1).strip())
+        return " "
+
+    text = INLINE_PRON_QUAL_RE.sub(repl, text)
+    return InlinePronunciationQualifiers(
+        re.sub(r"\s+", " ", text).strip(), qualifiers
+    )
+
+
+def extract_pronunciation_qualifier_params(
+    wxr: WiktextractContext, targs: TemplateArgs
+) -> PronunciationQualifierParams:
+    """Return unindexed and indexed a/aa/q/qq qualifier parameter text."""
+    # For {{IPA|en|/x/|q=verb|a=US}}, store
+    # PronunciationQualifierSortItem(1, 2, "verb") for q and
+    # PronunciationQualifierSortItem(0, 3, "US") for a.
+    base_qualifiers: list[PronunciationQualifierSortItem] = []
+    indexed_qualifiers: dict[int, list[PronunciationQualifierSortItem]] = {}
+    for ordinal, (key, value) in enumerate(targs.items()):
+        if not isinstance(key, str):
+            continue
+        match = PRON_QUALIFIER_PARAM_RE.fullmatch(key)
+        if not match:
+            continue
+        text = clean_node(wxr, None, [value])
+        if not text:
+            continue
+        name = match.group(1)
+        index = int(match.group(2) or 0)
+        sort_item = PronunciationQualifierSortItem(
+            PRON_QUALIFIER_PARAM_ORDER[name], ordinal, text
+        )
+        if index == 0:
+            base_qualifiers.append(sort_item)
+        else:
+            indexed_qualifiers.setdefault(index, []).append(sort_item)
+
+    base = [item.qualifier_text for item in sorted(base_qualifiers)]
+    indexed = {
+        index: [item.qualifier_text for item in sorted(params)]
+        for index, params in indexed_qualifiers.items()
+    }
+    return PronunciationQualifierParams(base, indexed)
+
+
+def extract_positional_inline_qualifier_params(
+    targs: TemplateArgs, first_pron_arg: int,
+) -> dict[int, list[str]]:
+    """Return inline qualifier text from original positional pron arguments."""
+    indexed_qualifiers: dict[int, list[str]] = {}
+    pron_index = 0
+    for _key, value in sorted(
+        (
+            (k, v)
+            for k, v in targs.items()
+            if isinstance(k, int) and k >= first_pron_arg
+        )
+    ):
+        text = str(value).strip()
+        if not text or text == ";":
+            continue
+        pron_index += 1
+        inline_qualifiers = extract_inline_pronunciation_qualifiers(text)
+        if inline_qualifiers.qualifiers:
+            indexed_qualifiers[pron_index] = inline_qualifiers.qualifiers
+    return indexed_qualifiers
+
+
+def apply_pronunciation_qualifier_params(
+    wxr: WiktextractContext,
+    sound: SoundData,
+    params: list[str],
+    rendered_texts: list[str],
+) -> None:
+    """Apply qualifier text as POS metadata or pronunciation tags/notes."""
+    for text in params:
+        match = split_pronunciation_pos_text(text)
+        set_sound_pos(sound, match.pos_values)
+        if match.residual and not qualifier_text_is_rendered(
+            match.residual, rendered_texts
+        ):
+            tag_data: SoundData = {}
+            parse_pronunciation_tags(wxr, match.residual, tag_data)
+            merge_pronunciation_tag_data(sound, tag_data)
 
 
 def extract_pos_prefix(text: str) -> PronunciationPosPrefix | None:
@@ -224,10 +363,24 @@ def extract_pron_template(
         return None
 
     base_data: SoundData = {}
+    qualifier_params = extract_pronunciation_qualifier_params(wxr, targs)
+    base_qualifier_params = qualifier_params.base
+    indexed_qualifier_params = qualifier_params.indexed
+    first_pron_arg = 1 if tname == "enPR" else 2
+    for index, params in extract_positional_inline_qualifier_params(
+        targs, first_pron_arg
+    ).items():
+        indexed_qualifier_params.setdefault(index, []).extend(params)
+    base_rendered_qualifiers = [q for q in (main_qual, post_qual) if q]
     if main_qual:
-        parse_pronunciation_tags(wxr, main_qual, base_data)
+        parse_pronunciation_tags_with_pos(wxr, main_qual, base_data)
     if post_qual:
-        parse_pronunciation_tags(wxr, post_qual, base_data)
+        parse_pronunciation_tags_with_pos(wxr, post_qual, base_data)
+    # Unindexed a/aa/q/qq params apply to every pronunciation emitted by
+    # this template, so store them in the shared base data.
+    apply_pronunciation_qualifier_params(
+        wxr, base_data, base_qualifier_params, base_rendered_qualifiers
+    )
     # This base_data is used as the base copy for all entries from this
     # template, but it is also returned so that its contents may be applied
     # to other templates on the same line.
@@ -238,7 +391,9 @@ def extract_pron_template(
     parts: list[list[str]] = [[]]
     inside = 0
     current: list[str] = []
-    for i, p in enumerate(re.split(r"(\s*,|;|\(|\)\s*)", pron_body)):
+    for i, p in enumerate(
+        re.split(r"(<[^<>]*>|\s*,|;|\(|\)\s*)", pron_body)
+    ):
         # Split the line on commas and semicolons outside of parens. This
         # gives us lines with "(main-qualifier) /phon/ (post-qualifier, maybe)"
         # print(f"   {i=}, {p=}")
@@ -290,7 +445,10 @@ def extract_pron_template(
             i2 = len(entry)
         else:
             i2 = -1
-        new_entry.append("".join(entry[i1:i2]).strip())
+        inline_qualifiers = extract_inline_pronunciation_qualifiers(
+            "".join(entry[i1:i2]).strip()
+        )
+        new_entry.append(inline_qualifiers.text)
         if not new_entry[-1]:
             wxr.wtp.error(
                 f"Missing IPA/enPRO sound data between qualifiers?{entry=}",
@@ -300,16 +458,26 @@ def extract_pron_template(
             new_entry.append(entry[-1][1:-1].strip())
         else:
             new_entry.append("")
+        new_entry.extend(inline_qualifiers.qualifiers)
         new_parts.append(new_entry)
 
     # print(f">>>>> {new_parts=}")
 
-    for part in new_parts:
+    for pron_index, part in enumerate(new_parts, 1):
         sd = deepcopy(base_data)
-        if part[0]:
-            parse_pronunciation_tags(wxr, part[0], sd)
-        if part[2]:
-            parse_pronunciation_tags(wxr, part[2], sd)
+        rendered_part_qualifiers = [
+            q for q in (part[0], *part[2:]) if q
+        ]
+        for qualifier_text in rendered_part_qualifiers:
+            parse_pronunciation_tags_with_pos(wxr, qualifier_text, sd)
+        # Indexed a1/q1/qq1/etc. params and inline qualifiers apply only to
+        # the pronunciation currently being emitted.
+        apply_pronunciation_qualifier_params(
+            wxr,
+            sd,
+            indexed_qualifier_params.get(pron_index, []),
+            base_rendered_qualifiers + rendered_part_qualifiers,
+        )
         if tname == "enPR":
             sd["enpr"] = part[1]
         else:
@@ -675,7 +843,8 @@ def parse_pronunciation(
                         elif "tags" in earlier_base_data:
                             pr["tags"] = sorted(set(earlier_base_data["tags"]))
                 for pr in first_prons:
-                    set_sound_pos(pr, line_pos or active_pos)
+                    if "pos" not in pr:
+                        set_sound_pos(pr, line_pos or active_pos)
                     if pr not in data.get("sounds", ()):
                         data_append(data, "sounds", pr)
                     current_group_sounds.append(pr)
