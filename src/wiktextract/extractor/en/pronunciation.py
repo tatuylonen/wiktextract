@@ -27,6 +27,8 @@ from .form_descriptions import (
 from .parts_of_speech import part_of_speech_map
 from .type_utils import Hyphenation, SoundData, TemplateArgs, WordData
 
+PronunciationPoses = tuple[str, ...]
+
 # Prefixes, tags, and regexp for finding romanizations from the pronuncation
 # section
 pron_romanizations = {
@@ -52,14 +54,19 @@ IPA_EXTRACT_RE = re.compile(IPA_EXTRACT)
 
 
 class PronunciationPosMatch(NamedTuple):
-    pos_values: list[str]
+    pos_values: PronunciationPoses
     residual: str
 
 
 class PronunciationPosPrefix(NamedTuple):
-    pos_values: list[str]
+    pos_values: PronunciationPoses
     text: str
     is_persistent: bool
+
+
+class FlattenedListNode(NamedTuple):
+    node: WikiNode | str
+    list_depth: int
 
 
 PRON_POS_TEMPLATE_NAMES = {
@@ -74,6 +81,19 @@ PRON_POS_TEMPLATE_NAMES = {
     "lbl",
     "label",
 }
+
+PRON_POS_BY_LABEL = {
+    label: pos_data["pos"] for label, pos_data in part_of_speech_map.items()
+}
+
+PRON_POS_LABEL_RE = re.compile(
+    r"^(?:(?P<residual>.+?)\s+)?(?P<label>"
+    + "|".join(
+        re.escape(label)
+        for label in sorted(PRON_POS_BY_LABEL, key=len, reverse=True)
+    )
+    + r")$"
+)
 
 
 def normalize_pronunciation_pos_label(label: str) -> str:
@@ -90,33 +110,107 @@ def normalize_pronunciation_pos_label(label: str) -> str:
 def split_pronunciation_pos_text(text: str) -> PronunciationPosMatch:
     pos_values: list[str] = []
     residual: list[str] = []
-    for part in re.split(r"\s*(?:[,;]|\band\b|\bor\b)\s*", text):
-        part = part.strip()
-        if not part:
-            continue
-        normalized = normalize_pronunciation_pos_label(part)
-        if normalized in part_of_speech_map:
-            pos = part_of_speech_map[normalized]["pos"]
+    for part in split_pronunciation_pos_parts(text):
+        pos, residual_part = pronunciation_pos_from_part(part)
+        if pos:
+            # POS-bearing qualifier text may also contain normal pronunciation
+            # tags before the POS label, e.g. "attributive adjective".
             if pos not in pos_values:
                 pos_values.append(pos)
-        else:
-            residual.append(part)
-    return PronunciationPosMatch(pos_values, ", ".join(residual))
-
-
-def set_sound_pos(sound: SoundData, pos_values: list[str] | None) -> None:
+            if residual_part:
+                residual.append(residual_part)
+        elif residual_part:
+            residual.append(residual_part)
     if not pos_values:
-        return
-    sound["pos"] = list(pos_values)  # type: ignore[typeddict-unknown-key]
+        # If nothing in the text was a POS label, preserve the original text
+        # for normal pronunciation tag/note parsing.
+        return PronunciationPosMatch((), text.strip())
+    return PronunciationPosMatch(tuple(pos_values), ", ".join(residual))
+
+
+def pronunciation_pos_from_part(part: str) -> tuple[str | None, str]:
+    normalized = normalize_pronunciation_pos_label(part)
+    if normalized in PRON_POS_BY_LABEL:
+        return PRON_POS_BY_LABEL[normalized], ""
+    # Match residual tag text followed by a POS label:
+    # "attributive adjective" -> ("adj", "attributive")
+    # "attributive proper noun" -> ("name", "attributive")
+    # The label alternation is sorted longest-first so multi-word POS labels
+    # such as "proper noun" win over their suffixes.
+    match = PRON_POS_LABEL_RE.match(normalized)
+    if match:
+        label = match.group("label")
+        residual = (match.group("residual") or "").rstrip(" ,;:")
+        if not residual or classify_desc(residual) == "tags":
+            return PRON_POS_BY_LABEL[label], residual
+    return None, part
+
+
+def split_pronunciation_pos_parts(text: str) -> list[str]:
+    parts: list[str] = []
+    for comma_part in re.split(r"[,;]", text):
+        comma_part = comma_part.strip()
+        if not comma_part:
+            continue
+        # Commas and semicolons reliably separate qualifier chunks.  Only split
+        # "and"/"or" when at least one side is a POS label, so prose notes
+        # stay intact.
+        conjunction_parts = re.split(r"\s+(?:and|or)\s+", comma_part)
+        if len(conjunction_parts) > 1 and any(
+            pronunciation_pos_from_part(part)[0]
+            for part in conjunction_parts
+        ):
+            parts.extend(conjunction_parts)
+        else:
+            parts.append(comma_part)
+    return parts
+
+
+def set_sound_pos(
+    sound: SoundData, pos_values: PronunciationPoses | None
+) -> PronunciationPoses | None:
+    if pos_values:
+        sound["pos"] = pos_values  # type: ignore[typeddict-unknown-key]
+        return pos_values
+    if "pos" in sound:
+        return sound["pos"]  # type: ignore[typeddict-item]
+    return None
+
+
+def common_sound_pos(
+    pos_candidates: set[PronunciationPoses],
+) -> PronunciationPoses | None:
+    if len(pos_candidates) != 1:
+        return None
+    return next(iter(pos_candidates))
+
+
+def merge_pronunciation_tag_data(
+    sound: SoundData, tag_data: SoundData
+) -> None:
+    for value in tag_data.get("tags", []):
+        if value not in sound.get("tags", []):
+            data_append(sound, "tags", value)
+    for value in tag_data.get("topics", []):
+        if value not in sound.get("topics", []):
+            data_append(sound, "topics", value)
+    if note := tag_data.get("note"):
+        existing_note = sound.get("note")
+        if not existing_note:
+            sound["note"] = note
+        elif note not in [n.strip() for n in existing_note.split(";")]:
+            sound["note"] = f"{existing_note}; {note}"
 
 
 def parse_pronunciation_tags_with_pos(
     wxr: WiktextractContext, text: str, sound: SoundData
-) -> list[str]:
+) -> PronunciationPoses:
     match = split_pronunciation_pos_text(text)
     set_sound_pos(sound, match.pos_values)
     if match.residual:
-        parse_pronunciation_tags(wxr, match.residual, sound)
+        tag_data: SoundData = {}
+        parse_pronunciation_tags(wxr, match.residual, tag_data)
+        merge_pronunciation_tag_data(sound, tag_data)
     return match.pos_values
 
 
@@ -177,7 +271,7 @@ def extract_pronunciation_pos_template(
                 pos_values.append(pos)
         if match.residual:
             residual.append(match.residual)
-    return PronunciationPosMatch(pos_values, ", ".join(residual))
+    return PronunciationPosMatch(tuple(pos_values), ", ".join(residual))
 
 
 def extract_pron_template(
@@ -225,9 +319,9 @@ def extract_pron_template(
 
     base_data: SoundData = {}
     if main_qual:
-        parse_pronunciation_tags(wxr, main_qual, base_data)
+        parse_pronunciation_tags_with_pos(wxr, main_qual, base_data)
     if post_qual:
-        parse_pronunciation_tags(wxr, post_qual, base_data)
+        parse_pronunciation_tags_with_pos(wxr, post_qual, base_data)
     # This base_data is used as the base copy for all entries from this
     # template, but it is also returned so that its contents may be applied
     # to other templates on the same line.
@@ -307,9 +401,9 @@ def extract_pron_template(
     for part in new_parts:
         sd = deepcopy(base_data)
         if part[0]:
-            parse_pronunciation_tags(wxr, part[0], sd)
+            parse_pronunciation_tags_with_pos(wxr, part[0], sd)
         if part[2]:
-            parse_pronunciation_tags(wxr, part[2], sd)
+            parse_pronunciation_tags_with_pos(wxr, part[2], sd)
         if tname == "enPR":
             sd["enpr"] = part[1]
         else:
@@ -376,7 +470,7 @@ def parse_pronunciation(
     if have_etym and data is base_data:
         data = etym_data
     pron_templates: list[tuple[SoundData, list[SoundData]]] = []
-    pron_pos_markers: list[list[str]] = []
+    pron_pos_markers: list[PronunciationPoses] = []
     hyphenations: list[Hyphenation] = []
     audios: list[SoundData] = []
     have_panel_templates = False
@@ -552,20 +646,27 @@ def parse_pronunciation(
             may_be_duplicates = True
         return text
 
-    def flattened_tree(lines: list[WikiNode | str]) -> Iterator[WikiNode | str]:
+    def flattened_tree(
+        lines: list[WikiNode | str],
+    ) -> Iterator[FlattenedListNode]:
         assert isinstance(lines, list)
         for line in lines:
-            yield from flattened_tree1(line)
+            yield from flattened_tree1(line, 0)
 
-    def flattened_tree1(node: WikiNode | str) -> Iterator[WikiNode | str]:
+    def flattened_tree1(
+        node: WikiNode | str, list_depth: int
+    ) -> Iterator[FlattenedListNode]:
         assert isinstance(node, (WikiNode, str))
         if isinstance(node, str):
-            yield node
+            yield FlattenedListNode(node, list_depth)
             return
         elif node.kind == NodeKind.LIST:
             for item in node.children:
-                yield from flattened_tree1(item)
+                yield from flattened_tree1(item, list_depth)
         elif node.kind == NodeKind.LIST_ITEM:
+            item_depth = (
+                len(node.sarg) if isinstance(node.sarg, str) else list_depth
+            )
             new_children = []
             sublist = None
             for child in node.children:
@@ -575,11 +676,11 @@ def parse_pronunciation(
                     new_children.append(child)
             node.children = new_children
             node.sarg = "*"
-            yield node
+            yield FlattenedListNode(node, item_depth)
             if sublist:
-                yield from flattened_tree1(sublist)
+                yield from flattened_tree1(sublist, item_depth)
         else:
-            yield node
+            yield FlattenedListNode(node, list_depth)
 
     # XXX Do not use flattened_tree more than once here, for example for
     # debug printing... The underlying data is changed, and the separated
@@ -589,29 +690,50 @@ def parse_pronunciation(
     # been caught by earlier kludges...
     def split_cleaned_node_on_newlines(
         contents: list[WikiNode | str],
-    ) -> Iterator[str]:
-        for litem in flattened_tree(contents):
+    ) -> Iterator[tuple[str, int]]:
+        for flattened in flattened_tree(contents):
             ipa_text = clean_node(
                 wxr,
                 data,
-                litem,
+                flattened.node,
                 template_fn=parse_pronunciation_template_fn,
                 post_template_fn=parse_pron_post_template_fn,
             )
             for line in ipa_text.splitlines():
-                yield line
+                yield line, flattened.list_depth
 
     # have_pronunciations = False
-    active_pos: list[str] | None = None
+    active_pos: PronunciationPoses | None = None
+    # POS values from parent pronunciation lines by original list depth.
+    # Audio-only child lines can inherit from a parent pronunciation line,
+    # but same-depth audio lines must not inherit from a preceding IPA.
+    pronunciation_pos_stack: list[tuple[int, PronunciationPoses]] = []
 
-    for line in split_cleaned_node_on_newlines(contents):
+    def parent_pronunciation_pos(
+        list_depth: int,
+    ) -> PronunciationPoses | None:
+        if not pronunciation_pos_stack:
+            return None
+        parent_depth, parent_pos = pronunciation_pos_stack[-1]
+        return parent_pos if parent_depth < list_depth else None
+
+    for line, list_depth in split_cleaned_node_on_newlines(contents):
         prefix: str | None = None
         earlier_base_data: SoundData | None = None
-        line_pos: list[str] | None = None
+        line_pos: PronunciationPoses | None = None
         current_group_sounds: list[SoundData] = []
+        # POS values seen on sounds extracted from this physical line.  A
+        # single candidate can seed adjacent audio-only child lines; multiple
+        # POS-marked sounds on one line are too ambiguous for inheritance.
+        line_sound_pos_candidates: set[PronunciationPoses] = set()
         line_has_sound = False
         if not line:
             continue
+        while (
+            pronunciation_pos_stack
+            and pronunciation_pos_stack[-1][0] >= list_depth
+        ):
+            pronunciation_pos_stack.pop()
 
         split_templates = re.split(r"__PRON_TEMPLATE_(\d+)__", line)
         for i, text in enumerate(split_templates):
@@ -621,9 +743,11 @@ def parse_pronunciation(
             text = re.sub(r"^\**\s*", "", text).strip()
             if i == 0:
                 # At the start of a line, check for stuff like "Noun:"
-                # for active_pos; active_pos is a temporary data field
-                # given to each saved SoundData entry which is later
-                # used to sort the entries into their respective PoSes.
+                # or "(verb)" for POS labels that apply to this line or
+                # structurally nested pronunciation lines.
+                # These labels feed the inheritance state that later sets the
+                # temporary sound["pos"] field used to route pronunciation
+                # data into matching POS sections.
                 if pos_prefix := extract_pos_prefix(text):
                     text = pos_prefix.text
                     line_pos = pos_prefix.pos_values
@@ -642,12 +766,23 @@ def parse_pronunciation(
                 if current_group_sounds:
                     for sound in current_group_sounds:
                         set_sound_pos(sound, pos_values)
+                    line_sound_pos_candidates.add(pos_values)
                 line_pos = pos_values
                 text = text[: m.start()] + text[m.end() :]
                 m = re.search(r"__PRON_POS_MARKER_(\d+)__", text)
             text = text.strip()
             if not text:
                 continue
+            # POS inheritance for normal pronunciation data:
+            # 1. line_pos: explicit POS marker on this line, e.g.
+            #    "* {{q|noun}} {{IPA|...}}".
+            # 2. parent_pronunciation_pos: structurally inherited from a
+            #    parent list item, e.g. "* {{q|noun}}" then "** {{IPA|...}}".
+            # 3. active_pos: support for "* Noun:" followed by
+            #    "* {{IPA|...}}"; broad, so it stays after structural data.
+            inherited_pos = (
+                line_pos or parent_pronunciation_pos(list_depth) or active_pos
+            )
 
             if i % 2 == 1:
                 # re.split (with capture groups) splits the lines so that
@@ -675,7 +810,11 @@ def parse_pronunciation(
                         elif "tags" in earlier_base_data:
                             pr["tags"] = sorted(set(earlier_base_data["tags"]))
                 for pr in first_prons:
-                    set_sound_pos(pr, line_pos or active_pos)
+                    if sound_pos := set_sound_pos(
+                        pr,
+                        None if "pos" in pr else inherited_pos,
+                    ):
+                        line_sound_pos_candidates.add(sound_pos)
                     if pr not in data.get("sounds", ()):
                         data_append(data, "sounds", pr)
                     current_group_sounds.append(pr)
@@ -711,7 +850,8 @@ def parse_pronunciation(
             m = re.search(r"(?m)\(Tokyo\) +([^ ]+) +\[", text)
             if m:
                 pron: SoundData = {field: m.group(1)}  # type: ignore[misc]
-                set_sound_pos(pron, line_pos or active_pos)
+                if sound_pos := set_sound_pos(pron, inherited_pos):
+                    line_sound_pos_candidates.add(sound_pos)
                 data_append(data, "sounds", pron)
                 current_group_sounds.append(pron)
                 line_has_sound = True
@@ -725,7 +865,8 @@ def parse_pronunciation(
                     ending = ending.strip()
                     if ending:
                         pron = {"rhymes": ending}
-                        set_sound_pos(pron, line_pos or active_pos)
+                        if sound_pos := set_sound_pos(pron, inherited_pos):
+                            line_sound_pos_candidates.add(sound_pos)
                         data_append(data, "sounds", pron)
                         current_group_sounds.append(pron)
                         line_has_sound = True
@@ -739,7 +880,8 @@ def parse_pronunciation(
                     w = w.strip()
                     if w:
                         pron = {"homophone": w}
-                        set_sound_pos(pron, line_pos or active_pos)
+                        if sound_pos := set_sound_pos(pron, inherited_pos):
+                            line_sound_pos_candidates.add(sound_pos)
                         data_append(data, "sounds", pron)
                         current_group_sounds.append(pron)
                         line_has_sound = True
@@ -755,7 +897,8 @@ def parse_pronunciation(
                     if w and w not in seen:
                         seen.add(w)
                         pron = {"hangeul": w}
-                        set_sound_pos(pron, line_pos or active_pos)
+                        if sound_pos := set_sound_pos(pron, inherited_pos):
+                            line_sound_pos_candidates.add(sound_pos)
                         data_append(data, "sounds", pron)
                         current_group_sounds.append(pron)
                         line_has_sound = True
@@ -854,8 +997,11 @@ def parse_pronunciation(
                         pron = {field: v}  # type: ignore[misc]
                     if prefix:
                         pron["form"] = prefix
-                    if "pos" not in pron:
-                        set_sound_pos(pron, line_pos or active_pos)
+                    if sound_pos := set_sound_pos(
+                        pron,
+                        None if "pos" in pron else inherited_pos,
+                    ):
+                        line_sound_pos_candidates.add(sound_pos)
                     if may_be_duplicates is True:
                         ok = True
                         for comp_sound in data.get("sounds", []):
@@ -872,13 +1018,22 @@ def parse_pronunciation(
                 # have_pronunciations = True
             if current_group_sounds and re.search(r"[,;]", text):
                 current_group_sounds = []
-        if line_pos and not line_has_sound:
-            active_pos = line_pos
-
         # XXX what about {{hyphenation|...}}, {{hyph|...}}
         # and those used to be stored under "hyphenation"
 
         # Add data that was collected in template_fn
+        # POS inheritance for audio has one extra source:
+        # common_sound_pos(line_sound_pos_candidates), from pronunciations
+        # extracted earlier on the same physical line, e.g.
+        # "* {{IPA|en|/foo/|a=verb}} {{audio|en|foo.wav}}".
+        # Explicit line_pos still wins, then same-line sound agreement, then
+        # parent-list structure, then active_pos.
+        audio_inherited_pos = (
+            line_pos
+            or common_sound_pos(line_sound_pos_candidates)
+            or parent_pronunciation_pos(list_depth)
+            or active_pos
+        )
         for audio in audios:
             if "audio" in audio:
                 # Compute audio file URLs
@@ -935,9 +1090,11 @@ def parse_pronunciation(
                     )
                 audio["ogg_url"] = ogg
                 audio["mp3_url"] = mp3
-                set_sound_pos(audio, line_pos or active_pos)
+                if "pos" not in audio:
+                    set_sound_pos(audio, audio_inherited_pos)
             if audio not in data.get("sounds", ()):
                 data_append(data, "sounds", audio)
+            line_has_sound = True
 
         # if audios:
         #     have_pronunciations = True
@@ -945,6 +1102,14 @@ def parse_pronunciation(
 
         data_extend(data, "hyphenations", hyphenations)
         hyphenations = []
+
+        if line_pos and not line_has_sound:
+            active_pos = line_pos
+            pronunciation_pos_stack.append((list_depth, line_pos))
+        elif line_pronunciation_pos := common_sound_pos(
+            line_sound_pos_candidates
+        ):
+            pronunciation_pos_stack.append((list_depth, line_pronunciation_pos))
 
     ## I have commented out the otherwise unused have_pronunciation
     ## toggles; uncomment them to use this debug print
