@@ -1242,6 +1242,9 @@ def parse_language(
         if name == "picdic" or name == "picdicimg" or name == "picdiclabel":
             # XXX extract?
             return ""
+        if name == "defdate":
+            # the one exampe I saw of this was weird.
+            return ""
 
         return None
 
