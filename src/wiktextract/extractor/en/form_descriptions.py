@@ -1499,7 +1499,7 @@ def quote_kept_ruby(
 
 
 def unquote_kept_parens(s: str) -> str:
-    """Conerts the quoted parentheses back to normal parentheses."""
+    """Converts the quoted parentheses back to normal parentheses."""
     return re.sub(r"__lpar__(.*?)__rpar__", r"(\1)", s)
 
 
@@ -1918,27 +1918,24 @@ def parse_word_head(
 
     # print(f"MAIN: {links=}")
     link_words_not_alnum = []
-    if not word.isalnum():
+    if not word.isalnum() and not word.replace("-", "").isalnum():
         # `-` is kosher, add more of these if needed.
-        if word.replace("-", "").isalnum():
-            pass
-        else:
-            # if the word contains non-letter or -number characters, it
-            # might have something that messes with split-at-semi-comma; we
-            # collect links so that we can skip splitting them.
-            if links is None and original_header_nodes is not None:
-                links, _ = extract_links_from_node(
-                    wxr,
-                    original_header_nodes,
-                    remove_anchor_tags=True,
-                    expand_nodes=True,
-                )
-            if links is not None:
-                for ltext, ltar in links:
-                    if not ltext.isalnum():
-                        link_words_not_alnum.append(ltext)
-            if word not in link_words_not_alnum:
-                link_words_not_alnum.append(word)
+        # if the word contains non-letter or -number characters, it
+        # might have something that messes with split-at-semi-comma; we
+        # collect links so that we can skip splitting them.
+        if links is None and original_header_nodes is not None:
+            links, _ = extract_links_from_node(
+                wxr,
+                original_header_nodes,
+                remove_anchor_tags=True,
+                expand_nodes=True,
+            )
+        if links is not None:
+            for ltext, ltar in links:
+                if not ltext.isalnum():
+                    link_words_not_alnum.append(ltext)
+        if word not in link_words_not_alnum:
+            link_words_not_alnum.append(word)
 
     if link_words_not_alnum is None:
         link_words_not_alnum = []
