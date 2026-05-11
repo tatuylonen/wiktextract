@@ -157,7 +157,7 @@ class TestPlTranslation(TestCase):
                     "ruby": [("死する", "しする")],
                     "sense_index": "1.1",
                     "roman": "shi suru",
-                    "tags": ["obsolete"],
+                    "tags": ["dated"],
                 },
             ],
         )
