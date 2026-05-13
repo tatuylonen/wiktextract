@@ -529,6 +529,7 @@ def parse_pronunciation(
             # contexts where they expand to something containing these.
             v = re.sub(r'href="[^"]*"', "", text)  # Ignore URLs
             v = re.sub(r'src="[^"]*"', "", v)
+            v = clean_value(wxr, v)
             if re.search(r"/[^/,]+?/|\[[^]0-9,/][^],/]*?\]", v):
                 # Note: replacing by empty results in Lua errors that we
                 # would rather not have.  For example, voi/Middle Vietnamese

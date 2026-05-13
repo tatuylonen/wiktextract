@@ -406,6 +406,52 @@ class TestPronunciation(TestCase):
             {"sounds": [{"ipa": "/ˈkɒndʌkt/", "tags": ["Received-Pronunciation"]}]},
         )
 
+    def test_ipa_qq_note_with_link_template(self):
+        self.wxr.wtp.start_page("jewellery")
+        self.wxr.wtp.add_page(
+            "Template:IPA",
+            10,
+            "({{{a}}}) IPA⁽ᵏᵉʸ⁾: {{{2}}} ({{{qq}}})",
+        )
+        self.wxr.wtp.add_page(
+            "Template:l",
+            10,
+            "[[:{{{2}}}#English|{{{2}}}]]",
+        )
+        tree = self.wxr.wtp.parse("""=== Pronunciation ===
+* {{IPA|en|/ˈd͡ʒuː(ə)ləɹi/|a=nonstandard|qq=this pronunciation gives rise to the Cockney rhyming slang ''{{l|en|tomfoolery}}''}}
+""")
+        out = {}
+        parse_pronunciation(self.wxr, tree.children[0], out, {}, {}, {}, "en")
+        self.assertEqual(
+            out["sounds"][0]["note"],
+            "this pronunciation gives rise to the Cockney rhyming slang tomfoolery",
+        )
+
+    def test_ipa_text_in_qualifier_template_not_extracted(self):
+        self.wxr.wtp.start_page("Kokos")
+        self.wxr.wtp.add_page(
+            "Template:IPA",
+            10,
+            "IPA⁽ᵏᵉʸ⁾: {{{2}}}",
+        )
+        self.wxr.wtp.add_page(
+            "Template:q",
+            10,
+            "({{{1}}})",
+        )
+        self.wxr.wtp.add_page(
+            "Template:IPAchar",
+            10,
+            '<span class="IPA nowrap">{{{1}}}</span>',
+        )
+        tree = self.wxr.wtp.parse("""=== Pronunciation ===
+* {{IPA|de|/ˈkoːkɔs/}} {{q|entirely uncommon in northern and central Germany, perhaps used by southern speakers whose {{IPAchar|/ɔ/}} is {{IPAchar|[o]}}}}
+""")
+        out = {}
+        parse_pronunciation(self.wxr, tree.children[0], out, {}, {}, {}, "de")
+        self.assertEqual(out, {"sounds": [{"ipa": "/ˈkoːkɔs/"}]})
+
     def test_no_templates1(self):
         self.wxr.wtp.start_page("baz")
         tree = self.wxr.wtp.parse("""=== Pronunciation ===
