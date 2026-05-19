@@ -1803,11 +1803,13 @@ def match_links_to_form(
                 link_dict[ltxt].append(ltrg)
     ret: list[tuple[str, str]] = []
     if form in link_dict:
-        if len(link_dict[form]) > 1:
+        if len(link_dict[form]) > 1 and any(
+            x != link_dict[form][0] for x in link_dict[form]
+        ):
             wxr.wtp.warning(
                 f"{form=} has many different "
-                "link candidates `{link_dict[form]}`, "
-                "which can't be disambiguated.",
+                f"link candidates `{link_dict[form]}`, "
+                f"which can't be disambiguated.",
                 sortid="form_descriptions/match_links_to_form",
             )
         for ltarg in link_dict[form]:
