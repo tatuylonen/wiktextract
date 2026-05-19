@@ -172,6 +172,7 @@ class TestJaGloss(TestCase):
 ==={{wago}}===
 #{{wagokanji of|てんぷら}}""",
         )
+        self.assertEqual(page_data[0]["pos"], "character")
         self.assertEqual(
             page_data[0]["senses"],
             [
