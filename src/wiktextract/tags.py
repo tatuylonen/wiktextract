@@ -6133,6 +6133,7 @@ valid_tags = {
     "volitional": "mood",  # Verb mood (e.g., Japanese: suggests, urges, initates act)
     "vos-form": "register",  # Spanish verb forms used with "vos"
     "vulgar": "register",
+    "wago-kanji": "misc",
     "weak": "misc",
     "with-a": "with",
     "with-ablative": "with",
@@ -6521,8 +6522,10 @@ def sort_tags(
     return tuple(
         sorted(
             set(tags),
-            key=lambda t: tag_categories.get(valid_tags.get(t, "unknown"), 0)
-            - len(t) / 1000,
+            key=lambda t: (
+                tag_categories.get(valid_tags.get(t, "unknown"), 0)
+                - len(t) / 1000
+            ),
             reverse=True,
         )
     )
