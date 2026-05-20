@@ -1167,87 +1167,6 @@ def parse_language(
             return base_data
         return etym_data
 
-    term_label_templates: list[TemplateData] = []
-
-    def head_post_template_fn(
-        name: str, ht: TemplateArgs, expansion: str
-    ) -> Optional[str]:
-        """Handles special templates in the head section of a word.  Head
-        section is the text after part-of-speech subtitle and before word
-        sense list. Typically it generates the bold line for the word, but
-        may also contain other useful information that often ends in
-        side boxes.  We want to capture some of that additional information."""
-        # print("HEAD_POST_TEMPLATE_FN", name, ht)
-        if is_panel_template(wxr, name):
-            # Completely ignore these templates (not even recorded in
-            # head_templates)
-            return ""
-        if name == "head":
-            # XXX are these also captured in forms?  Should this special case
-            # be removed?
-            t = ht.get(2, "")
-            if t == "pinyin":
-                data_append(pos_data, "tags", "Pinyin")
-            elif t == "romanization":
-                data_append(pos_data, "tags", "romanization")
-        if (
-            HEAD_TAG_RE.search(name) is not None
-            or name in WORD_LEVEL_HEAD_TEMPLATES
-        ):
-            args_ht = clean_template_args(wxr, ht)
-            cleaned_expansion = clean_node(wxr, None, expansion)
-            dt: TemplateData = {
-                "name": name,
-                "args": args_ht,
-                "expansion": cleaned_expansion,
-            }
-            data_append(pos_data, "head_templates", dt)
-            if name in WORD_LEVEL_HEAD_TEMPLATES:
-                term_label_templates.append(dt)
-                # Squash these, their tags are applied to the whole word,
-                # and some cause problems like "term-label"
-                return ""
-
-        # The following are both captured in head_templates and parsed
-        # separately
-
-        if name in wikipedia_templates:
-            # Note: various places expect to have content from wikipedia
-            # templates, so cannot convert this to empty
-            parse_wikipedia_template(wxr, pos_data, ht)
-            return None
-
-        if name == "number box":
-            # XXX extract numeric value?
-            return ""
-        if name == "enum":
-            # XXX extract?
-            return ""
-        if name == "cardinalbox":
-            # XXX extract similar to enum?
-            # XXX this can also occur in top-level under language
-            return ""
-        if name == "Han simplified forms":
-            # XXX extract?
-            return ""
-        # if name == "ja-kanji forms":
-        #     # XXX extract?
-        #     return ""
-        # if name == "vi-readings":
-        #     # XXX extract?
-        #     return ""
-        # if name == "ja-kanji":
-        #     # XXX extract?
-        #     return ""
-        if name == "picdic" or name == "picdicimg" or name == "picdiclabel":
-            # XXX extract?
-            return ""
-        if name == "defdate":
-            # the one exampe I saw of this was weird.
-            return ""
-
-        return None
-
     def parse_part_of_speech(posnode: WikiNode, pos: str) -> None:
         """Parses the subsection for a part-of-speech under a language on
         a page."""
@@ -1590,6 +1509,104 @@ def parse_language(
             if "__temp_sense_sorting_ordinal" in sd:
                 del sd["__temp_sense_sorting_ordinal"]  # type: ignore
 
+    term_label_templates: list[TemplateData] = []
+    normal_label_templates: list[TemplateData] = []
+
+    def head_post_template_fn(
+        name: str, ht: TemplateArgs, expansion: str
+    ) -> Optional[str]:
+        """Handles special templates in the head section of a word.  Head
+        section is the text after part-of-speech subtitle and before word
+        sense list. Typically it generates the bold line for the word, but
+        may also contain other useful information that often ends in
+        side boxes.  We want to capture some of that additional information."""
+        # print("HEAD_POST_TEMPLATE_FN", name, ht)
+        if is_panel_template(wxr, name):
+            # Completely ignore these templates (not even recorded in
+            # head_templates)
+            return ""
+        if name == "head":
+            # XXX are these also captured in forms?  Should this special case
+            # be removed?
+            t = ht.get(2, "")
+            if t == "pinyin":
+                data_append(pos_data, "tags", "Pinyin")
+            elif t == "romanization":
+                data_append(pos_data, "tags", "romanization")
+        if (
+            HEAD_TAG_RE.search(name) is not None
+            or name in WORD_LEVEL_HEAD_TEMPLATES
+        ):
+            args_ht = clean_template_args(wxr, ht)
+            cleaned_expansion = clean_node(wxr, None, expansion)
+            dt: TemplateData = {
+                "name": name,
+                "args": args_ht,
+                "expansion": cleaned_expansion,
+            }
+            data_append(pos_data, "head_templates", dt)
+            if name in WORD_LEVEL_HEAD_TEMPLATES:
+                term_label_templates.append(dt)
+                # Squash these, their tags are applied to the whole word,
+                # and some cause problems like "term-label"
+                return ""
+
+        # The following are both captured in head_templates and parsed
+        # separately
+
+        if name in wikipedia_templates:
+            # Note: various places expect to have content from wikipedia
+            # templates, so cannot convert this to empty
+            parse_wikipedia_template(wxr, pos_data, ht)
+            return None
+
+        if name == "number box":
+            # XXX extract numeric value?
+            return ""
+        if name == "enum":
+            # XXX extract?
+            return ""
+        if name == "cardinalbox":
+            # XXX extract similar to enum?
+            # XXX this can also occur in top-level under language
+            return ""
+        if name == "Han simplified forms":
+            # XXX extract?
+            return ""
+        # if name == "ja-kanji forms":
+        #     # XXX extract?
+        #     return ""
+        # if name == "vi-readings":
+        #     # XXX extract?
+        #     return ""
+        # if name == "ja-kanji":
+        #     # XXX extract?
+        #     return ""
+        if name == "picdic" or name == "picdicimg" or name == "picdiclabel":
+            # XXX extract?
+            return ""
+        if name == "defdate":
+            # the one exampe I saw of this in a head was weird.
+            return ""
+        if name in ("lb", "lbl", "label"):
+            args_ht = clean_template_args(wxr, ht)
+            cleaned_expansion = clean_node(wxr, None, expansion).strip("()")
+            dt = {
+                "name": name,
+                "args": args_ht,
+                "expansion": cleaned_expansion,
+            }
+            normal_label_templates.append(dt)
+            # The parens around __LABEL... below is meaningful: label
+            # templates generate text with parens, so if we add the magical
+            # phrase here with parens, it will look like a normal label that
+            # will be handled as a parenthetical text; only when handling
+            # parenthetical text do we need to actually actually access
+            # the contents of the label.
+            return f"(__LABEL_TEMPLATE_{len(normal_label_templates)-1}__)"
+
+        return None
+
     def process_gloss_header(
         header_nodes: list[Union[WikiNode, str]],
         pos_type: str,
@@ -1685,8 +1702,8 @@ def parse_language(
             remove_anchors_from_links=True,
         )
         if "links" in pos_data:
-            # WordData doesn't use `links`, so we can use `collect_links`
-            # here without special handling and smuggle link data.
+            # WordData doesn't use `links`, so we can use `collect_links=True`
+            # above without special handling and smuggle link data.
             extracted_links = pos_data["links"]  # type: ignore
             del pos_data["links"]  # type: ignore
         else:
@@ -1730,6 +1747,7 @@ def parse_language(
             header_nodes,
             ruby=ruby,
             links=extracted_links,
+            label_templates=normal_label_templates,
         )
         if "tags" in pos_data:
             # pos_data can get "tags" data from some source; type-checkers

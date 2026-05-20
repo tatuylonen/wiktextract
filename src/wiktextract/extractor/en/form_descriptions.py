@@ -52,6 +52,7 @@ from .type_utils import (
     LinkageData,
     SenseData,
     SoundData,
+    TemplateData,
     TranslationData,
     WordData,
 )
@@ -1886,6 +1887,7 @@ def parse_word_head(
         ]
     ]
     | None = None,
+    label_templates: list[TemplateData] | None = None,
 ) -> None:
     """Parses the head line for a word for in a particular language and
     part-of-speech, extracting tags and related forms."""
@@ -2019,7 +2021,7 @@ def parse_word_head(
     # Many languages use • as a punctuation mark separating the base
     # from the rest of the head. στάδιος/Ancient Greek, issue #176
     base = base.strip()
-    # print(f"{base=}")
+    # print(f"{base=}, {text=}")
 
     # Check for certain endings in head (mostly for compatibility with weird
     # heads, e.g. rata/Romanian "1st conj." at end)
@@ -2260,12 +2262,37 @@ def parse_word_head(
         paren = paren.strip()
         if not paren:
             continue
+        can_be_form = True
+        if label_templates is not None and paren.startswith(
+            "__LABEL_TEMPLATE_"
+        ):
+            # wxr.wtp.warning("Found label template in head")
+            # continue
+            can_be_form = False
+            m = re.match(r"__LABEL_TEMPLATE_(\d+)__", paren)
+            if m is None:
+                wxr.wtp.warning(
+                    f"Label template list magic phrase is broken: `{paren}`",
+                    sortid="20260508/label list index broken",
+                )
+                continue
+            ht = label_templates[int(m.group(1))]
+            desc = ht.get("expansion", "").strip()
+            if desc:
+                paren = desc
+            else:
+                wxr.wtp.warning(
+                    f"Label template seems to have no text contents: {ht=}",
+                    sortid="20260508/label_templates",
+                )
+                continue
         if paren.startswith("see "):
             continue
         if paren.startswith("U+"):
             continue
         # In some rare cases, strip word that inflects form the form
         # description, e.g. "look through rose-tinted glasses"/English.
+        # `([looks])`
         paren = re.sub(r"\s*\(\[[^])]*\]\)", "", paren)
 
         # If it starts with hiragana or katakana, treat as such form.  Note
@@ -2309,11 +2336,12 @@ def parse_word_head(
                 )
             return ", "
 
-        paren = re.sub(
-            r", (\d+) \(([^()]+)\), (\d+) \(([^()]+)\) strokes, ",
-            strokes_repl,
-            paren,
-        )
+        if can_be_form is True:
+            paren = re.sub(
+                r", (\d+) \(([^()]+)\), (\d+) \(([^()]+)\) strokes, ",
+                strokes_repl,
+                paren,
+            )
 
         descriptors = map_with(xlat_descs_map, [paren])
         new_desc = []
@@ -2342,7 +2370,10 @@ def parse_word_head(
             # CJK tag.  This is used at least for some Vietnamese
             # words (e.g., ba/Vietnamese)
             try:
-                if all(unicodedata.name(x).startswith("CJK ") for x in desc):
+                if (
+                    all(unicodedata.name(x).startswith("CJK ") for x in desc)
+                    and can_be_form
+                ):
                     add_related(
                         wxr,
                         data,
@@ -2367,6 +2398,7 @@ def parse_word_head(
                 and splitdesc[1] == "superlative"
                 and classify_desc(splitdesc[0]) != "tags"
                 and prev_tags
+                and can_be_form
             ):
                 # Handle the special case of second comparative after comma,
                 # followed by superlative without comma.  E.g.
@@ -2391,6 +2423,7 @@ def parse_word_head(
                 and splitdesc[0] in ("also", "and")
                 and prev_tags
                 and classify_desc(splitdesc[1]) != "tags"
+                and can_be_form
             ):
                 # Sometimes alternative forms are prefixed with "also" or
                 # "and"
@@ -2414,9 +2447,9 @@ def parse_word_head(
 
             # If only one word, assume it is comma-separated alternative
             # to the previous one
-            if " " not in desc:
+            if len(splitdesc) == 1:
                 cls = classify_desc(desc)
-                if cls != "tags":
+                if cls != "tags" and can_be_form:
                     if prev_tags:
                         # Assume comma-separated alternative to previous one
                         for ts in prev_tags:
@@ -2473,7 +2506,7 @@ def parse_word_head(
                         continue
 
             m = re.match(r"^(\d+) strokes?$", desc)
-            if m:
+            if m and can_be_form:
                 # Special case, used to give #strokes for Han characters
                 add_related(
                     wxr,
@@ -2498,7 +2531,7 @@ def parse_word_head(
                 r"simplified Chinese))?$",
                 desc,
             )
-            if m:
+            if m and can_be_form:
                 # Special case, used to give radical + strokes for Han
                 # characters
                 radical_strokes = m.group(1)
@@ -2548,7 +2581,7 @@ def parse_word_head(
                 r"traditional Chinese|simplified Chinese)$",
                 desc,
             )
-            if m:
+            if m and can_be_form:
                 # Special case, used to give just strokes for some Han chars
                 strokes = m.group(1)
                 lang = m.group(2)
@@ -2574,7 +2607,7 @@ def parse_word_head(
             # American Sign Language has images (or requests for image)
             # as heads, + this ASL gloss after.
             m2 = re.search(r"\(ASL gloss:\s+(.*)\)", text)
-            if m2:
+            if m2 and can_be_form:
                 add_related(
                     wxr,
                     data,
@@ -2598,10 +2631,14 @@ def parse_word_head(
 
             # Check for certain language-specific header part starts that
             # modify
-            if len(parts) == 2 and language in lang_specific_head_map:
-                ht = lang_specific_head_map[language]
-                if parts[0] in ht:
-                    rem_tags, add_tags = ht[parts[0]]
+            if (
+                len(parts) == 2
+                and language in lang_specific_head_map
+                and can_be_form
+            ):
+                ht2 = lang_specific_head_map[language]
+                if parts[0] in ht2:
+                    rem_tags, add_tags = ht2[parts[0]]
                     new_prev_tags1: list[list[str]] = []
                     tags2: Union[tuple[str, ...], list[str]]
                     for tags2 in prev_tags or [()]:
@@ -2717,8 +2754,9 @@ def parse_word_head(
                     alt_related = None
                     alt_tagsets = None
                     break
+                # for-else
                 else:
-                    if alt_related is None:
+                    if alt_related is None and can_be_form:
                         # Check if the parenthesized part is likely a
                         # romanization
                         if (
@@ -2803,7 +2841,7 @@ def parse_word_head(
                 if not alts:
                     alts = [""]
             for related_str in alts:
-                if related_str:
+                if related_str and can_be_form:
                     if prev_tags and (
                         all(
                             all(
