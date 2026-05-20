@@ -1456,3 +1456,34 @@ class HeadTests(unittest.TestCase):
                 ],
             },
         )
+
+    def test_do_not_parse_labels_as_forms(self):
+        self.wxr.wtp.add_page(
+            "Template:en-noun",
+            10,
+            "testpage (ergative testpagoo)",
+        )
+        self.wxr.wtp.add_page(
+            "Template:lb",
+            10,
+            "{{{2|}}}",
+        )
+        parsed = self.wxr.wtp.parse(
+            """==Finnish==
+====Noun====
+{{en-noun}} {{lb|en|FOO}}
+# test gloss
+"""
+        )
+        langret = parse_language(self.wxr, parsed.children[0], "English", "en")
+        print(langret)
+        self.assertEqual(self.wxr.wtp.warnings, [])
+        self.assertEqual(self.wxr.wtp.debugs, [])
+        self.assertEqual(len(langret[0]["forms"]), 1)
+        self.assertEqual(
+            langret[0]["forms"][0],
+            {
+                "tags": ["ergative"],
+                "form": "testpagoo",
+            },
+        )

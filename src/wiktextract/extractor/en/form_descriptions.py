@@ -52,6 +52,7 @@ from .type_utils import (
     LinkageData,
     SenseData,
     SoundData,
+    TemplateData,
     TranslationData,
     WordData,
 )
@@ -168,9 +169,7 @@ for k, v in xlat_head_map.items():
         if tag not in valid_tags:
             print(
                 "WARNING: xlat_head_map[{}] contains"
-                " unrecognized tag {}".format(
-                    k, tag
-                )
+                " unrecognized tag {}".format(k, tag)
             )
 
 # Regexp for finding nested translations from translation items (these are
@@ -1428,9 +1427,7 @@ def parse_head_final_tags(
         if form not in ok_suspicious_forms:
             wxr.wtp.debug(
                 "suspicious unhandled suffix in {}:"
-                " {!r}, originally {!r}".format(
-                    lang, form, origform
-                ),
+                " {!r}, originally {!r}".format(lang, form, origform),
                 sortid="form_descriptions/1089",
             )
 
@@ -1499,7 +1496,7 @@ def quote_kept_ruby(
 
 
 def unquote_kept_parens(s: str) -> str:
-    """Conerts the quoted parentheses back to normal parentheses."""
+    """Converts the quoted parentheses back to normal parentheses."""
     return re.sub(r"__lpar__(.*?)__rpar__", r"(\1)", s)
 
 
@@ -1803,11 +1800,13 @@ def match_links_to_form(
                 link_dict[ltxt].append(ltrg)
     ret: list[tuple[str, str]] = []
     if form in link_dict:
-        if len(link_dict[form]) > 1:
+        if len(link_dict[form]) > 1 and any(
+            x != link_dict[form][0] for x in link_dict[form]
+        ):
             wxr.wtp.warning(
                 f"{form=} has many different "
-                "link candidates `{link_dict[form]}`, "
-                "which can't be disambiguated.",
+                f"link candidates `{link_dict[form]}`, "
+                f"which can't be disambiguated.",
                 sortid="form_descriptions/match_links_to_form",
             )
         for ltarg in link_dict[form]:
@@ -1868,6 +1867,8 @@ FORM_ASSOCIATED_TAG_WORDS: set[str] = {
     "gerund",
 }
 
+SEMICOLON_REPLACEMENT = "__SEMICOLON__"
+
 
 def parse_word_head(
     wxr: WiktextractContext,
@@ -1886,6 +1887,7 @@ def parse_word_head(
         ]
     ]
     | None = None,
+    label_templates: list[TemplateData] | None = None,
 ) -> None:
     """Parses the head line for a word for in a particular language and
     part-of-speech, extracting tags and related forms."""
@@ -1918,27 +1920,24 @@ def parse_word_head(
 
     # print(f"MAIN: {links=}")
     link_words_not_alnum = []
-    if not word.isalnum():
+    if not word.isalnum() and not word.replace("-", "").isalnum():
         # `-` is kosher, add more of these if needed.
-        if word.replace("-", "").isalnum():
-            pass
-        else:
-            # if the word contains non-letter or -number characters, it
-            # might have something that messes with split-at-semi-comma; we
-            # collect links so that we can skip splitting them.
-            if links is None and original_header_nodes is not None:
-                links, _ = extract_links_from_node(
-                    wxr,
-                    original_header_nodes,
-                    remove_anchor_tags=True,
-                    expand_nodes=True,
-                )
-            if links is not None:
-                for ltext, ltar in links:
-                    if not ltext.isalnum():
-                        link_words_not_alnum.append(ltext)
-            if word not in link_words_not_alnum:
-                link_words_not_alnum.append(word)
+        # if the word contains non-letter or -number characters, it
+        # might have something that messes with split-at-semi-comma; we
+        # collect links so that we can skip splitting them.
+        if links is None and original_header_nodes is not None:
+            links, _ = extract_links_from_node(
+                wxr,
+                original_header_nodes,
+                remove_anchor_tags=True,
+                expand_nodes=True,
+            )
+        if links is not None:
+            for ltext, ltar in links:
+                if not ltext.isalnum():
+                    link_words_not_alnum.append(ltext)
+        if word not in link_words_not_alnum:
+            link_words_not_alnum.append(word)
 
     if link_words_not_alnum is None:
         link_words_not_alnum = []
@@ -2022,7 +2021,7 @@ def parse_word_head(
     # Many languages use • as a punctuation mark separating the base
     # from the rest of the head. στάδιος/Ancient Greek, issue #176
     base = base.strip()
-    # print(f"{base=}")
+    # print(f"{base=}, {text=}")
 
     # Check for certain endings in head (mostly for compatibility with weird
     # heads, e.g. rata/Romanian "1st conj." at end)
@@ -2099,7 +2098,7 @@ def parse_word_head(
         # be split.
         if ";" in wxr.wtp.title:
             semicolon_present = True
-            base = base.replace(";", "<SEMICOLON>")
+            base = base.replace(";", SEMICOLON_REPLACEMENT)
             default_splitter = head_split_no_semicolon_re
         else:
             default_splitter = head_split_re
@@ -2114,7 +2113,7 @@ def parse_word_head(
             else:
                 splits.extend(re.split(default_splitter, psplit))
     else:
-        # Do the normal split; previous only-behavior.
+        # Do the normal split; previous behavior.
         splits = re.split(head_split_re, base)
     # print("BASE: ", repr(base))
     # print("SPLITS:", splits)
@@ -2223,7 +2222,10 @@ def parse_word_head(
         new_cans = []
         for tags, baseparts in canonicals:
             new_cans.append(
-                (tags, [s.replace("<SEMICOLON>", ";") for s in baseparts])
+                (
+                    tags,
+                    [s.replace(SEMICOLON_REPLACEMENT, ";") for s in baseparts],
+                )
             )
         canonicals = new_cans
     for tags, baseparts in canonicals:
@@ -2260,12 +2262,37 @@ def parse_word_head(
         paren = paren.strip()
         if not paren:
             continue
+        can_be_form = True
+        if label_templates is not None and paren.startswith(
+            "__LABEL_TEMPLATE_"
+        ):
+            # wxr.wtp.warning("Found label template in head")
+            # continue
+            can_be_form = False
+            m = re.match(r"__LABEL_TEMPLATE_(\d+)__", paren)
+            if m is None:
+                wxr.wtp.warning(
+                    f"Label template list magic phrase is broken: `{paren}`",
+                    sortid="20260508/label list index broken",
+                )
+                continue
+            ht = label_templates[int(m.group(1))]
+            desc = ht.get("expansion", "").strip()
+            if desc:
+                paren = desc
+            else:
+                wxr.wtp.warning(
+                    f"Label template seems to have no text contents: {ht=}",
+                    sortid="20260508/label_templates",
+                )
+                continue
         if paren.startswith("see "):
             continue
         if paren.startswith("U+"):
             continue
         # In some rare cases, strip word that inflects form the form
         # description, e.g. "look through rose-tinted glasses"/English.
+        # `([looks])`
         paren = re.sub(r"\s*\(\[[^])]*\]\)", "", paren)
 
         # If it starts with hiragana or katakana, treat as such form.  Note
@@ -2309,11 +2336,12 @@ def parse_word_head(
                 )
             return ", "
 
-        paren = re.sub(
-            r", (\d+) \(([^()]+)\), (\d+) \(([^()]+)\) strokes, ",
-            strokes_repl,
-            paren,
-        )
+        if can_be_form is True:
+            paren = re.sub(
+                r", (\d+) \(([^()]+)\), (\d+) \(([^()]+)\) strokes, ",
+                strokes_repl,
+                paren,
+            )
 
         descriptors = map_with(xlat_descs_map, [paren])
         new_desc = []
@@ -2342,7 +2370,10 @@ def parse_word_head(
             # CJK tag.  This is used at least for some Vietnamese
             # words (e.g., ba/Vietnamese)
             try:
-                if all(unicodedata.name(x).startswith("CJK ") for x in desc):
+                if (
+                    all(unicodedata.name(x).startswith("CJK ") for x in desc)
+                    and can_be_form
+                ):
                     add_related(
                         wxr,
                         data,
@@ -2367,6 +2398,7 @@ def parse_word_head(
                 and splitdesc[1] == "superlative"
                 and classify_desc(splitdesc[0]) != "tags"
                 and prev_tags
+                and can_be_form
             ):
                 # Handle the special case of second comparative after comma,
                 # followed by superlative without comma.  E.g.
@@ -2391,6 +2423,7 @@ def parse_word_head(
                 and splitdesc[0] in ("also", "and")
                 and prev_tags
                 and classify_desc(splitdesc[1]) != "tags"
+                and can_be_form
             ):
                 # Sometimes alternative forms are prefixed with "also" or
                 # "and"
@@ -2414,9 +2447,9 @@ def parse_word_head(
 
             # If only one word, assume it is comma-separated alternative
             # to the previous one
-            if " " not in desc:
+            if len(splitdesc) == 1:
                 cls = classify_desc(desc)
-                if cls != "tags":
+                if cls != "tags" and can_be_form:
                     if prev_tags:
                         # Assume comma-separated alternative to previous one
                         for ts in prev_tags:
@@ -2473,7 +2506,7 @@ def parse_word_head(
                         continue
 
             m = re.match(r"^(\d+) strokes?$", desc)
-            if m:
+            if m and can_be_form:
                 # Special case, used to give #strokes for Han characters
                 add_related(
                     wxr,
@@ -2498,7 +2531,7 @@ def parse_word_head(
                 r"simplified Chinese))?$",
                 desc,
             )
-            if m:
+            if m and can_be_form:
                 # Special case, used to give radical + strokes for Han
                 # characters
                 radical_strokes = m.group(1)
@@ -2548,7 +2581,7 @@ def parse_word_head(
                 r"traditional Chinese|simplified Chinese)$",
                 desc,
             )
-            if m:
+            if m and can_be_form:
                 # Special case, used to give just strokes for some Han chars
                 strokes = m.group(1)
                 lang = m.group(2)
@@ -2574,7 +2607,7 @@ def parse_word_head(
             # American Sign Language has images (or requests for image)
             # as heads, + this ASL gloss after.
             m2 = re.search(r"\(ASL gloss:\s+(.*)\)", text)
-            if m2:
+            if m2 and can_be_form:
                 add_related(
                     wxr,
                     data,
@@ -2598,10 +2631,14 @@ def parse_word_head(
 
             # Check for certain language-specific header part starts that
             # modify
-            if len(parts) == 2 and language in lang_specific_head_map:
-                ht = lang_specific_head_map[language]
-                if parts[0] in ht:
-                    rem_tags, add_tags = ht[parts[0]]
+            if (
+                len(parts) == 2
+                and language in lang_specific_head_map
+                and can_be_form
+            ):
+                ht2 = lang_specific_head_map[language]
+                if parts[0] in ht2:
+                    rem_tags, add_tags = ht2[parts[0]]
                     new_prev_tags1: list[list[str]] = []
                     tags2: Union[tuple[str, ...], list[str]]
                     for tags2 in prev_tags or [()]:
@@ -2717,8 +2754,9 @@ def parse_word_head(
                     alt_related = None
                     alt_tagsets = None
                     break
+                # for-else
                 else:
-                    if alt_related is None:
+                    if alt_related is None and can_be_form:
                         # Check if the parenthesized part is likely a
                         # romanization
                         if (
@@ -2803,7 +2841,7 @@ def parse_word_head(
                 if not alts:
                     alts = [""]
             for related_str in alts:
-                if related_str:
+                if related_str and can_be_form:
                     if prev_tags and (
                         all(
                             all(
