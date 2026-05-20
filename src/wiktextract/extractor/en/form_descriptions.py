@@ -168,9 +168,7 @@ for k, v in xlat_head_map.items():
         if tag not in valid_tags:
             print(
                 "WARNING: xlat_head_map[{}] contains"
-                " unrecognized tag {}".format(
-                    k, tag
-                )
+                " unrecognized tag {}".format(k, tag)
             )
 
 # Regexp for finding nested translations from translation items (these are
@@ -1428,9 +1426,7 @@ def parse_head_final_tags(
         if form not in ok_suspicious_forms:
             wxr.wtp.debug(
                 "suspicious unhandled suffix in {}:"
-                " {!r}, originally {!r}".format(
-                    lang, form, origform
-                ),
+                " {!r}, originally {!r}".format(lang, form, origform),
                 sortid="form_descriptions/1089",
             )
 
@@ -1870,6 +1866,8 @@ FORM_ASSOCIATED_TAG_WORDS: set[str] = {
     "gerund",
 }
 
+SEMICOLON_REPLACEMENT = "__SEMICOLON__"
+
 
 def parse_word_head(
     wxr: WiktextractContext,
@@ -2098,7 +2096,7 @@ def parse_word_head(
         # be split.
         if ";" in wxr.wtp.title:
             semicolon_present = True
-            base = base.replace(";", "<SEMICOLON>")
+            base = base.replace(";", SEMICOLON_REPLACEMENT)
             default_splitter = head_split_no_semicolon_re
         else:
             default_splitter = head_split_re
@@ -2113,7 +2111,7 @@ def parse_word_head(
             else:
                 splits.extend(re.split(default_splitter, psplit))
     else:
-        # Do the normal split; previous only-behavior.
+        # Do the normal split; previous behavior.
         splits = re.split(head_split_re, base)
     # print("BASE: ", repr(base))
     # print("SPLITS:", splits)
@@ -2222,7 +2220,10 @@ def parse_word_head(
         new_cans = []
         for tags, baseparts in canonicals:
             new_cans.append(
-                (tags, [s.replace("<SEMICOLON>", ";") for s in baseparts])
+                (
+                    tags,
+                    [s.replace(SEMICOLON_REPLACEMENT, ";") for s in baseparts],
+                )
             )
         canonicals = new_cans
     for tags, baseparts in canonicals:
