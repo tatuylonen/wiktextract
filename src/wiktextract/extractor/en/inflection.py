@@ -1758,6 +1758,10 @@ def parse_simple_table(
         # where instead of romanization we have IPA pronunciation
         # (e.g., avoir/French/verb).
         len2 = len(alts) // 2
+
+        if len(alts) == 1 and "(" not in alts[0]:
+            return [(alts[0], "", "")]
+
         # Check for IPAs (forms first, IPAs under)
         # base, base, IPA, IPA
         if (
@@ -1767,7 +1771,7 @@ def parse_simple_table(
                 for x in alts[len2:]
             )
         ):  # In the second half of alts
-            nalts = list(
+            return list(
                 (alts[i], "", alts[i + len2])
                 # List of tuples: (base, "", ipa)
                 for i in range(len2)
@@ -1779,7 +1783,8 @@ def parse_simple_table(
             and all(not x.startswith("/") for x in alts[:-1])
         ):
             # Only if the last alt is IPA
-            nalts = list((alts[i], "", alts[-1]) for i in range(len(alts) - 1))
+            return list((alts[i], "", alts[-1]) for i in range(len(alts) - 1))
+
         # base, IPA, IPA, IPA
         elif (
             len(alts) > 2
@@ -1789,70 +1794,50 @@ def parse_simple_table(
             )
         ):
             # First is base and the rest is IPA alternatives
-            nalts = list((alts[0], "", alts[i]) for i in range(1, len(alts)))
+            return list((alts[0], "", alts[i]) for i in range(1, len(alts)))
+
+        alt_classifications = list(
+            classify_desc(
+                re.sub(
+                    r"\^.*$",
+                    "",
+                    # Remove ends of strings starting from ^.
+                    # Supescripts have been already removed
+                    # from the string, while ^xyz needs to be
+                    # removed separately, though it's usually
+                    # something with a single letter?
+                    "".join(xx for xx in x if not is_superscript(xx)),
+                )
+            )
+            for x in alts
+        )
 
         # Check for romanizations, forms first, romanizations under
-        elif (
+        if (
             len(alts) % 2 == 0
             and not any("(" in x for x in alts)
+            and all(x == "other" for x in alt_classifications[:len2])
             and all(
-                classify_desc(
-                    re.sub(
-                        r"\^.*$",
-                        "",
-                        # Remove ends of strings starting from ^.
-                        # Supescripts have been already removed
-                        # from the string, while ^xyz needs to be
-                        # removed separately, though it's usually
-                        # something with a single letter?
-                        "".join(xx for xx in x if not is_superscript(xx)),
-                    )
-                )
-                == "other"
-                for x in alts[:len2]
-            )
-            and all(
-                classify_desc(
-                    re.sub(
-                        r"\^.*$",
-                        "",
-                        "".join(xx for xx in x if not is_superscript(xx)),
-                    )
-                )
-                in ("romanization", "english")
-                for x in alts[len2:]
+                x in ("romanization", "english")
+                for x in alt_classifications[len2:]
             )
         ):
-            nalts = list((alts[i], alts[i + len2], "") for i in range(len2))
+            return list((alts[i], alts[i + len2], "") for i in range(len2))
         # Check for romanizations, forms and romanizations alternating
         elif (
             len(alts) % 2 == 0
             and not any("(" in x for x in alts)
             and all(
-                classify_desc(
-                    re.sub(
-                        r"\^.*$",
-                        "",
-                        "".join(xx for xx in alts[i] if not is_superscript(xx)),
-                    )
-                )
-                == "other"
+                alt_classifications[i] == "other"
                 for i in range(0, len(alts), 2)
             )
             and all(
-                classify_desc(
-                    re.sub(
-                        r"\^.*$",
-                        "",
-                        "".join(xx for xx in alts[i] if not is_superscript(xx)),
-                    )
-                )
-                in ("romanization", "english")
+                alt_classifications[i] in ("romanization", "english")
                 for i in range(1, len(alts), 2)
             )
         ):
             # odds
-            nalts = list(
+            return list(
                 (alts[i], alts[i + 1], "") for i in range(0, len(alts), 2)
             )
             # evens
@@ -1871,7 +1856,16 @@ def parse_simple_table(
             and len(alts) >= 1
             and any(" (" in alt_ for alt_ in alts)
         ):
-            nalts = ka_decl_noun_template_cell(alts)
+            return ka_decl_noun_template_cell(alts)
+        elif (
+            len(alts) > 2
+            and alt_classifications[0] == "other"
+            and all(
+                x in ("romanization", "english")
+                for x in alt_classifications[1:]
+            )
+        ):
+            return list((alts[0], x, "") for x in alts[1:])
         else:
             new_alts = []
             for alt in alts:
@@ -1911,9 +1905,9 @@ def parse_simple_table(
                 for x in lst:
                     new_alts.append(x + alt[idx:])
                     # add the end of alt
-            nalts = list((x, "", "") for x in new_alts)
+            return list((x, "", "") for x in new_alts)
             # [form, no romz, no ipa]
-        return nalts
+        return []
 
     def find_semantic_parens(form: str) -> tuple[str, list[str]]:
         # "Some languages" (=Greek) use brackets to mark things that
