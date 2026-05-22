@@ -72,6 +72,8 @@ linkage_ignore_prefixes = [
     "See contents of Category:",
     "See also Thesaurus:",
     "See also Appendix:",
+    "see also Appendix:",
+    "see also Thesaurus:",
     "As SMS messaging ",
     "For the reversed question mark used in some right-to-left-scripts",
     "such as ",
