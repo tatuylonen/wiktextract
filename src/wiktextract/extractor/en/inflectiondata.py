@@ -2142,6 +2142,7 @@ infl_map: dict[str, InflMapNode] = {
     },
     "մենք": {"lang": "Armenian", "if": "first-person plural", "then": ""},
     "նրանք": {"lang": "Armenian", "if": "third-person plural", "then": ""},
+    "անոնք": {"lang": "Armenian", "if": "third-person plural", "then": ""},
     "verbal nouns": "noun-from-verb",
     "supine": "supine",
     "past historic": "past historic",
