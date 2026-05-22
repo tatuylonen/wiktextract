@@ -2739,6 +2739,10 @@ def handle_mixed_lines(
             re.match(r"^\s*/.*/\s*$", x)  # Inside slashes = IPA
             for x in alts[len2:]
         )
+        and not any(
+            re.match(r"^\s*/.*/\s*$", x)  # first half without slashes
+            for x in alts[:len2]
+        )
     ):  # In the second half of alts
         return list(
             (alts[i], "", alts[i + len2])
@@ -2758,10 +2762,10 @@ def handle_mixed_lines(
     elif (
         len(alts) > 2
         and not alts[0].startswith("/")
-        and all(re.match(r"^\s*/.*/\s*$", alts[i]) for i in range(1, len(alts)))
+        and all(re.match(r"^\s*/.*/\s*$", x) for x in alts[1:])
     ):
         # First is base and the rest is IPA alternatives
-        return list((alts[0], "", alts[i]) for i in range(1, len(alts)))
+        return list((alts[0], "", x) for x in alts[1:])
 
     alt_classifications = list(
         classify_desc(
@@ -2834,11 +2838,11 @@ def handle_mixed_lines(
             lst = [""]
             idx = 0
             for m in re.finditer(
-                r"(^|\w|\*)\((\w+" r"(/\w+)*)\)",
+                r"(^|\w|\*)\((\w+(/\w+)*)\)",
                 # start OR letter OR asterisk (word/word*)
                 # \\___________group 1_______/ \    \_g3_///
-                # \                            \__gr. 2_//
-                #  \_____________group 0________________/
+                #  \                            \__gr. 2_//
+                #   \_____________group 0________________/
                 alt,
             ):
                 v = m.group(2)  # (word/word/word...)
