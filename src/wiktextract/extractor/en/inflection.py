@@ -1751,205 +1751,6 @@ def parse_simple_table(
         )
         return col, alts, split_extra_tags
 
-    def handle_mixed_lines(alts: list[str]) -> list[tuple[str, str, str]]:
-        # Handle the special case where romanization is given under
-        # normal form, e.g. in Russian.  There can be multiple
-        # comma-separated forms in each case.  We also handle the case
-        # where instead of romanization we have IPA pronunciation
-        # (e.g., avoir/French/verb).
-        len2 = len(alts) // 2
-        # Check for IPAs (forms first, IPAs under)
-        # base, base, IPA, IPA
-        if (
-            len(alts) % 2 == 0  # Divisibly by two
-            and all(
-                re.match(r"^\s*/.*/\s*$", x)  # Inside slashes = IPA
-                for x in alts[len2:]
-            )
-        ):  # In the second half of alts
-            nalts = list(
-                (alts[i], "", alts[i + len2])
-                # List of tuples: (base, "", ipa)
-                for i in range(len2)
-            )
-        # base, base, base, IPA
-        elif (
-            len(alts) > 2
-            and re.match(r"^\s*/.*/\s*$", alts[-1])
-            and all(not x.startswith("/") for x in alts[:-1])
-        ):
-            # Only if the last alt is IPA
-            nalts = list((alts[i], "", alts[-1]) for i in range(len(alts) - 1))
-        # base, IPA, IPA, IPA
-        elif (
-            len(alts) > 2
-            and not alts[0].startswith("/")
-            and all(
-                re.match(r"^\s*/.*/\s*$", alts[i]) for i in range(1, len(alts))
-            )
-        ):
-            # First is base and the rest is IPA alternatives
-            nalts = list((alts[0], "", alts[i]) for i in range(1, len(alts)))
-
-        # Check for romanizations, forms first, romanizations under
-        elif (
-            len(alts) % 2 == 0
-            and not any("(" in x for x in alts)
-            and all(
-                classify_desc(
-                    re.sub(
-                        r"\^.*$",
-                        "",
-                        # Remove ends of strings starting from ^.
-                        # Supescripts have been already removed
-                        # from the string, while ^xyz needs to be
-                        # removed separately, though it's usually
-                        # something with a single letter?
-                        "".join(xx for xx in x if not is_superscript(xx)),
-                    )
-                )
-                == "other"
-                for x in alts[:len2]
-            )
-            and all(
-                classify_desc(
-                    re.sub(
-                        r"\^.*$",
-                        "",
-                        "".join(xx for xx in x if not is_superscript(xx)),
-                    )
-                )
-                in ("romanization", "english")
-                for x in alts[len2:]
-            )
-        ):
-            nalts = list((alts[i], alts[i + len2], "") for i in range(len2))
-        # Check for romanizations, forms and romanizations alternating
-        elif (
-            len(alts) % 2 == 0
-            and not any("(" in x for x in alts)
-            and all(
-                classify_desc(
-                    re.sub(
-                        r"\^.*$",
-                        "",
-                        "".join(xx for xx in alts[i] if not is_superscript(xx)),
-                    )
-                )
-                == "other"
-                for i in range(0, len(alts), 2)
-            )
-            and all(
-                classify_desc(
-                    re.sub(
-                        r"\^.*$",
-                        "",
-                        "".join(xx for xx in alts[i] if not is_superscript(xx)),
-                    )
-                )
-                in ("romanization", "english")
-                for i in range(1, len(alts), 2)
-            )
-        ):
-            # odds
-            nalts = list(
-                (alts[i], alts[i + 1], "") for i in range(0, len(alts), 2)
-            )
-            # evens
-        # Handle complex Georgian entries with alternative forms and*
-        # *romanizations. It's a bit of a mess. Remove this kludge if not
-        # needed anymore. NOTE THAT THE PARENTHESES ON THE WEBSITE ARE NOT
-        # DISPLAYED. They are put inside their own span elements that are
-        # then hidden with some CSS.
-        # https://en.wiktionary.org/wiki/%E1%83%90%E1%83%9B%E1%83%94%E1%83%A0%E1%83%98%E1%83%99%E1%83%98%E1%83%A1_%E1%83%A8%E1%83%94%E1%83%94%E1%83%A0%E1%83%97%E1%83%94%E1%83%91%E1%83%A3%E1%83%9A%E1%83%98_%E1%83%A8%E1%83%A2%E1%83%90%E1%83%A2%E1%83%94%E1%83%91%E1%83%98
-        # ამერიკის შეერთებულ შტატებს(ა) (ameriḳis šeertebul šṭaṭebs(a))
-        # The above should generate two alts entries, with two different
-        # parallel versions, one without (a) and with (a) at the end,
-        # for both the Georgian original and the romanization.
-        elif (
-            tablecontext.template_name == "ka-decl-noun"
-            and len(alts) >= 1
-            and any(" (" in alt_ for alt_ in alts)
-        ):
-            nalts = ka_decl_noun_template_cell(alts)
-        else:
-            new_alts = []
-            for alt in alts:
-                lst = [""]
-                idx = 0
-                for m in re.finditer(
-                    r"(^|\w|\*)\((\w+" r"(/\w+)*)\)",
-                    # start OR letter OR asterisk (word/word*)
-                    # \\___________group 1_______/ \    \_g3_///
-                    # \                            \__gr. 2_//
-                    #  \_____________group 0________________/
-                    alt,
-                ):
-                    v = m.group(2)  # (word/word/word...)
-                    if (
-                        classify_desc(v) == "tags"  # Tags inside parens
-                        or m.group(0) == alt
-                    ):  # All in parens
-                        continue
-                    new_lst = []
-                    for x in lst:
-                        x += alt[idx : m.start()] + m.group(1)
-                        # alt until letter or asterisk
-                        idx = m.end()
-                        vparts = v.split("/")
-                        # group(2) = ["word", "wörd"...]
-                        if len(vparts) == 1:
-                            new_lst.append(x)
-                            new_lst.append(x + v)
-                            # "kind(er)" -> ["kind", "kinder"]
-                        else:
-                            for vv in vparts:
-                                new_lst.append(x + vv)
-                            # "lampai(tten/den)" ->
-                            # ["lampaitten", "lampaiden"]
-                    lst = new_lst
-                for x in lst:
-                    new_alts.append(x + alt[idx:])
-                    # add the end of alt
-            nalts = list((x, "", "") for x in new_alts)
-            # [form, no romz, no ipa]
-        return nalts
-
-    def find_semantic_parens(form: str) -> tuple[str, list[str]]:
-        # "Some languages" (=Greek) use brackets to mark things that
-        # require tags, like (informality), [rarity] and {archaicity}.
-        extra_tags = []
-        if re.match(r"\([^][(){}]*\)$", form):
-            if get_lang_conf(lang, "parentheses_for_informal"):
-                form = form[1:-1]
-                extra_tags.append("informal")
-            else:
-                form = form[1:-1]
-        elif re.match(r"\{\[[^][(){}]*\]\}$", form):
-            if get_lang_conf(
-                lang, "square_brackets_for_rare"
-            ) and get_lang_conf(lang, "curly_brackets_for_archaic"):
-                # είμαι/Greek/Verb
-                form = form[2:-2]
-                extra_tags.extend(["rare", "archaic"])
-            else:
-                form = form[2:-2]
-        elif re.match(r"\{[^][(){}]*\}$", form):
-            if get_lang_conf(lang, "curly_brackets_for_archaic"):
-                # είμαι/Greek/Verb
-                form = form[1:-1]
-                extra_tags.extend(["archaic"])
-            else:
-                form = form[1:-1]
-        elif re.match(r"\[[^][(){}]*\]$", form):
-            if get_lang_conf(lang, "square_brackets_for_rare"):
-                # είμαι/Greek/Verb
-                form = form[1:-1]
-                extra_tags.append("rare")
-            else:
-                form = form[1:-1]
-        return form, extra_tags
-
     def handle_parens(
         form: str, roman: str, clitic: str | None, extra_tags: list[str]
     ) -> tuple[str, str, str | None]:
@@ -2553,7 +2354,7 @@ def parse_simple_table(
 
             # Some cells have mixed form content, like text and romanization,
             # or text and IPA. Handle these.
-            altss = handle_mixed_lines(alts)
+            altss = handle_mixed_lines(alts, tablecontext)
 
             altsss = list((x, combined_coltags, cell_links) for x in altss)
 
@@ -2660,7 +2461,7 @@ def parse_simple_table(
                 form = form.strip()
 
                 # Look for parentheses that have semantic meaning
-                form, et = find_semantic_parens(form)
+                form, et = find_semantic_parens(form, lang)
                 extra_tags.extend(et)
 
                 # Handle parentheses in the table element.  We parse
@@ -2879,6 +2680,200 @@ def parse_simple_table(
             ret = [dt] + ret
 
     return ret
+
+
+def find_semantic_parens(form: str, lang: str) -> tuple[str, list[str]]:
+    # "Some languages" (=Greek) use brackets to mark things that
+    # require tags, like (informality), [rarity] and {archaicity}.
+    extra_tags = []
+    if re.match(r"\([^][(){}]*\)$", form):
+        if get_lang_conf(lang, "parentheses_for_informal"):
+            form = form[1:-1]
+            extra_tags.append("informal")
+        else:
+            form = form[1:-1]
+    elif re.match(r"\{\[[^][(){}]*\]\}$", form):
+        if get_lang_conf(lang, "square_brackets_for_rare") and get_lang_conf(
+            lang, "curly_brackets_for_archaic"
+        ):
+            # είμαι/Greek/Verb
+            form = form[2:-2]
+            extra_tags.extend(["rare", "archaic"])
+        else:
+            form = form[2:-2]
+    elif re.match(r"\{[^][(){}]*\}$", form):
+        if get_lang_conf(lang, "curly_brackets_for_archaic"):
+            # είμαι/Greek/Verb
+            form = form[1:-1]
+            extra_tags.extend(["archaic"])
+        else:
+            form = form[1:-1]
+    elif re.match(r"\[[^][(){}]*\]$", form):
+        if get_lang_conf(lang, "square_brackets_for_rare"):
+            # είμαι/Greek/Verb
+            form = form[1:-1]
+            extra_tags.append("rare")
+        else:
+            form = form[1:-1]
+    return form, extra_tags
+
+
+def handle_mixed_lines(
+    alts: list[str], tablecontext: "TableContext"
+) -> list[tuple[str, str, str]]:
+    # Handle the special case where romanization is given under
+    # normal form, e.g. in Russian.  There can be multiple
+    # comma-separated forms in each case.  We also handle the case
+    # where instead of romanization we have IPA pronunciation
+    # (e.g., avoir/French/verb).
+    len2 = len(alts) // 2
+
+    if len(alts) == 1 and "(" not in alts[0]:
+        return [(alts[0], "", "")]
+
+    # Check for IPAs (forms first, IPAs under)
+    # base, base, IPA, IPA
+    if (
+        len(alts) % 2 == 0  # Divisibly by two
+        and all(
+            re.match(r"^\s*/.*/\s*$", x)  # Inside slashes = IPA
+            for x in alts[len2:]
+        )
+        and not any(
+            re.match(r"^\s*/.*/\s*$", x)  # first half without slashes
+            for x in alts[:len2]
+        )
+    ):  # In the second half of alts
+        return list(
+            (alts[i], "", alts[i + len2])
+            # List of tuples: (base, "", ipa)
+            for i in range(len2)
+        )
+    # base, base, base, IPA
+    elif (
+        len(alts) > 2
+        and re.match(r"^\s*/.*/\s*$", alts[-1])
+        and all(not x.startswith("/") for x in alts[:-1])
+    ):
+        # Only if the last alt is IPA
+        return list((alts[i], "", alts[-1]) for i in range(len(alts) - 1))
+
+    # base, IPA, IPA, IPA
+    elif (
+        len(alts) > 2
+        and not alts[0].startswith("/")
+        and all(re.match(r"^\s*/.*/\s*$", x) for x in alts[1:])
+    ):
+        # First is base and the rest is IPA alternatives
+        return list((alts[0], "", x) for x in alts[1:])
+
+    alt_classifications = list(
+        classify_desc(
+            re.sub(
+                r"\^.*$",
+                "",
+                # Remove ends of strings starting from ^.
+                # Supescripts have been already removed
+                # from the string, while ^xyz needs to be
+                # removed separately, though it's usually
+                # something with a single letter?
+                "".join(xx for xx in x if not is_superscript(xx)),
+            )
+        )
+        for x in alts
+    )
+
+    # Check for romanizations, forms first, romanizations under
+    if (
+        len(alts) % 2 == 0
+        and not any("(" in x for x in alts)
+        and all(x == "other" for x in alt_classifications[:len2])
+        and all(
+            x in ("romanization", "english") for x in alt_classifications[len2:]
+        )
+    ):
+        return list((alts[i], alts[i + len2], "") for i in range(len2))
+    # Check for romanizations, forms and romanizations alternating
+    elif (
+        len(alts) % 2 == 0
+        and not any("(" in x for x in alts)
+        and all(
+            alt_classifications[i] == "other" for i in range(0, len(alts), 2)
+        )
+        and all(
+            alt_classifications[i] in ("romanization", "english")
+            for i in range(1, len(alts), 2)
+        )
+    ):
+        # odds
+        return list((alts[i], alts[i + 1], "") for i in range(0, len(alts), 2))
+        # evens
+    # Handle complex Georgian entries with alternative forms and*
+    # *romanizations. It's a bit of a mess. Remove this kludge if not
+    # needed anymore. NOTE THAT THE PARENTHESES ON THE WEBSITE ARE NOT
+    # DISPLAYED. They are put inside their own span elements that are
+    # then hidden with some CSS.
+    # https://en.wiktionary.org/wiki/%E1%83%90%E1%83%9B%E1%83%94%E1%83%A0%E1%83%98%E1%83%99%E1%83%98%E1%83%A1_%E1%83%A8%E1%83%94%E1%83%94%E1%83%A0%E1%83%97%E1%83%94%E1%83%91%E1%83%A3%E1%83%9A%E1%83%98_%E1%83%A8%E1%83%A2%E1%83%90%E1%83%A2%E1%83%94%E1%83%91%E1%83%98
+    # ამერიკის შეერთებულ შტატებს(ა) (ameriḳis šeertebul šṭaṭebs(a))
+    # The above should generate two alts entries, with two different
+    # parallel versions, one without (a) and with (a) at the end,
+    # for both the Georgian original and the romanization.
+    elif (
+        tablecontext.template_name == "ka-decl-noun"
+        and len(alts) >= 1
+        and any(" (" in alt_ for alt_ in alts)
+    ):
+        return ka_decl_noun_template_cell(alts)
+    elif (
+        len(alts) > 2
+        and alt_classifications[0] == "other"
+        and all(
+            x in ("romanization", "english") for x in alt_classifications[1:]
+        )
+    ):
+        return list((alts[0], x, "") for x in alts[1:])
+    else:
+        new_alts = []
+        for alt in alts:
+            lst = [""]
+            idx = 0
+            for m in re.finditer(
+                r"(^|\w|\*)\((\w+(/\w+)*)\)",
+                # start OR letter OR asterisk (word/word*)
+                # \\___________group 1_______/ \    \_g3_///
+                #  \                            \__gr. 2_//
+                #   \_____________group 0________________/
+                alt,
+            ):
+                v = m.group(2)  # (word/word/word...)
+                if (
+                    classify_desc(v) == "tags"  # Tags inside parens
+                    or m.group(0) == alt
+                ):  # All in parens
+                    continue
+                new_lst = []
+                for x in lst:
+                    x += alt[idx : m.start()] + m.group(1)
+                    # alt until letter or asterisk
+                    idx = m.end()
+                    vparts = v.split("/")
+                    # group(2) = ["word", "wörd"...]
+                    if len(vparts) == 1:
+                        new_lst.append(x)
+                        new_lst.append(x + v)
+                        # "kind(er)" -> ["kind", "kinder"]
+                    else:
+                        for vv in vparts:
+                            new_lst.append(x + vv)
+                        # "lampai(tten/den)" ->
+                        # ["lampaitten", "lampaiden"]
+                lst = new_lst
+            for x in lst:
+                new_alts.append(x + alt[idx:])
+                # add the end of alt
+        return list((x, "", "") for x in new_alts)
+        # [form, no romz, no ipa]
+    return []
 
 
 def handle_generic_table(
