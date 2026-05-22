@@ -812,7 +812,13 @@ def parse_sense_linkage(
         w = clean_node(wxr, data, ht[i])
         if "#" in w:
             w = w[: w.index("#")]
-        if w in ["", "<"]:  # used in "hypernyms" template
+        if w in ["", "<"]:  # `<` used in "hypernyms" template
+            continue
+        if (
+            i > 2
+            and w in (",", "or", ";")
+            or w.startswith(("see also", "See also"))
+        ):
             continue
         is_thesaurus = False
         for alias in ns_title_prefix_tuple(wxr, "Thesaurus"):
@@ -1603,7 +1609,7 @@ def parse_language(
             # will be handled as a parenthetical text; only when handling
             # parenthetical text do we need to actually actually access
             # the contents of the label.
-            return f"(__LABEL_TEMPLATE_{len(normal_label_templates)-1}__)"
+            return f"(__LABEL_TEMPLATE_{len(normal_label_templates) - 1}__)"
 
         return None
 
@@ -1644,9 +1650,11 @@ def parse_language(
             )
             rub, _ = recursively_extract(
                 exp.children,
-                lambda x: isinstance(x, WikiNode)
-                and x.kind == NodeKind.HTML
-                and x.sarg == "ruby",
+                lambda x: (
+                    isinstance(x, WikiNode)
+                    and x.kind == NodeKind.HTML
+                    and x.sarg == "ruby"
+                ),
             )
             if rub is not None:
                 for r in rub:
