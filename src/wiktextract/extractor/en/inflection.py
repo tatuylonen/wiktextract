@@ -219,6 +219,18 @@ title_contains_wordtags_map = {
     "pluperfect": "pluperfect",
     "future": "future",
     "aorist": "aorist",
+    "eastern armenian": "Eastern-Armenian",
+    "western armenian": "Western-Armenian",
+    "-al conjugation": "-al-conjugation",
+    "-al negative conjugation": "-al-conjugation",
+    "-il conjugation": "-il-conjugation",
+    "-il negative conjugation": "-il-conjugation",
+    "-el conjugation": "-el-conjugation",
+    "-el negative conjugation": "-el-conjugation",
+    "-ul conjugation": "-ul-conjugation",
+    "-ul negative conjugation": "-ul-conjugation",
+    "u-type": "u-type",
+    "nominalized infinitive": "noun infinitive",
 }
 for k, v in title_contains_wordtags_map.items():
     if any(t not in valid_tags for t in v.split()):
@@ -228,7 +240,12 @@ for k, v in title_contains_wordtags_map.items():
 title_contains_wordtags_re = re.compile(
     r"(?i)(^|\b)({}|{})($|\b)".format(
         table_hdr_ign_part,
-        "|".join(re.escape(x) for x in title_contains_wordtags_map.keys()),
+        "|".join(
+            re.escape(x)
+            for x in reversed(
+                sorted(title_contains_wordtags_map.keys(), key=len)
+            )
+        ),
     )
 )
 
@@ -1702,6 +1719,27 @@ def parse_simple_table(
                     assert x in valid_tags
                 assert isinstance(alts, (list, tuple))
                 assert isinstance(tags, str)
+            elif (
+                (
+                    m := re.match(
+                        # word1, word2 (romanization1, romanization2)
+                        r"\s*([^(),]+),([^(),]+)\(([^(),]+),([^(),]+)\)",
+                        col,
+                    )
+                )
+                # NOT `word, (tag, tag)` with an empty m.group(2)...
+                # There is a test that fails because of this. It's an
+                # outdated table, but still, ...Italian_verb1
+                and all(s.strip() for s in m.groups())
+                and any(
+                    (
+                        # except for entries like word1, word2 (tag2, tag2)...
+                        classify_desc(s) in ("english", "romanization")
+                        for s in (m.group(3), m.group(4))
+                    )
+                )
+            ):
+                alts = [m.group(1), m.group(2), m.group(3), m.group(4)]
             else:
                 # Use default splitting.  However, recognize
                 # language-specific replacements and change them to magic
@@ -2777,7 +2815,10 @@ def handle_mixed_lines(
                 # from the string, while ^xyz needs to be
                 # removed separately, though it's usually
                 # something with a single letter?
-                "".join(xx for xx in x if not is_superscript(xx)),
+                "".join(xx for xx in x if not is_superscript(xx))
+                # Remove trailing footnote asterisks that mess with
+                # classification
+                .strip("* "),
             )
         )
         for x in alts
@@ -3236,6 +3277,8 @@ def handle_wikitext_or_html_table(
         assert isinstance(after, str)
         assert isinstance(depth, int)
         # print("HANDLE_WIKITEXT_TABLE", titles)
+        # if len(titles) > 0:
+        #     wxr.wtp.debug(f"HANDLE_WIKITEXT_TABLE {titles=}")
 
         # Filling for columns with rowspan > 1
         col_gap_data: list[InflCell | None] = []
@@ -3263,7 +3306,8 @@ def handle_wikitext_or_html_table(
             # print("  {}".format(node))
             if kind in (NodeKind.TABLE_CAPTION, "caption"):
                 # print("  CAPTION:", node)
-                pass
+                if "inflection-table-title" in node.attrs.get("class", ""):
+                    titles = [clean_node(wxr, None, node.children)]
             elif kind in (NodeKind.TABLE_ROW, "tr"):
                 if "vsShow" in node.attrs.get("class", "").split():
                     # vsShow rows are those that are intially shown in tables

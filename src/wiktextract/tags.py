@@ -6483,6 +6483,12 @@ valid_tags = {
     "Jiaoliao-Mandarin": "script",
     "Central-Plains-Mandarin": "script",
     "Lanyin-Mandarin": "script",
+    # Table tags for Armenian conjugation
+    "-el-conjugation": "class",
+    "-al-conjugation": "class",
+    "-il-conjugation": "class",
+    "-ul-conjugation": "class",
+    "u-type": "class",
 }
 
 for k, v in valid_tags.items():
