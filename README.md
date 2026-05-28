@@ -653,7 +653,7 @@ following keys (others may also be present or added later):
   the etymology section.  These can be used to easily parse etymological
   relations.  Certain common templates that do not signify etymological
   relations are not included.
-* ``etymology_number`` - for words with multiple numbered etymologies, this contains the number of the etymology under which this entry appeared
+* ``etymology_number`` - for words with multiple numbered etymologies, this contains the number of the etymology under which this entry appeared, [as a string as of May 2026]
 * ``descendants`` - descendants of the word (see below)
 * ``synonyms`` - non-disambiguated synonym linkages for the word (see below)
 * ``antonyms`` - non-disambiguated antonym linkages for the word (see below)

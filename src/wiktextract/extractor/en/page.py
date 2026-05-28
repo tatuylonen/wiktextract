@@ -3320,9 +3320,9 @@ def parse_language(
                 push_etym()
                 wxr.wtp.start_subsection(None)
                 if wxr.config.capture_etymologies:
-                    m = re.search(r"\s(\d+)$", t)
+                    m = re.search(r"\s(\d+(\.\d+)?)$", t)
                     if m:
-                        etym_data["etymology_number"] = int(m.group(1))
+                        etym_data["etymology_number"] = m.group(1)
                     parse_etymology(etym_data, node)
             elif t == DESCENDANTS_TITLE and wxr.config.capture_descendants:
                 data = select_data()

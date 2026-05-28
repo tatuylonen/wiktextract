@@ -221,7 +221,7 @@ class WordEntry(__EXAMPLE_TEMPLATE__BaseModel):
         "etymology section.",
     )
     # For sections like "Etymology 1"
-    # etymology_number: int = -1
+    # etymology_number: str = "-1"
     senses: list[Sense] = []
     title: str = Field(default="", description="Redirect page source title")
     redirect: str = Field(default="", description="Redirect page target title")
