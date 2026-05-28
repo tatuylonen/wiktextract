@@ -446,9 +446,14 @@ def check_json_data(wxr: WiktextractContext, dt: dict) -> None:
     check_tags(wxr, dt, word, lang, pos, dt)
     check_str_fields(wxr, dt, word, lang, pos, dt, ["etymology_text"])
     num = dt.get("etymology_number")
-    if num is not None and not isinstance(num, int):
+    if num is not None and not isinstance(num, str):
         check_error(
-            wxr, dt, word, lang, pos, '"etymology_number" must be an int'
+            wxr,
+            dt,
+            word,
+            lang,
+            pos,
+            '"etymology_number" has been changed to str',
         )
     # Check that certain fields, if present, contain lists of dicts
     if not check_dict_list_fields(
