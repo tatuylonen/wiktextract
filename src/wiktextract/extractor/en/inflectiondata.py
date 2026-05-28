@@ -176,10 +176,8 @@ infl_map: dict[str, InflMapNode] = {
     "superessive": "superessive",
     "sublative": "sublative",
     "delative": "delative",
-    "non-attributive possessive - singular":
-        "predicative possessive possessed-single",  # XXX hűtő/Hungarian/Noun
-    "non-attributive possessive - plural":
-        "predicative possessive possessed-single",
+    "non-attributive possessive - singular": "predicative possessive possessed-single",  # XXX hűtő/Hungarian/Noun
+    "non-attributive possessive - plural": "predicative possessive possessed-single",
     "infinitive": "infinitive",
     "prepositional": "prepositional",
     "masculine": {
@@ -225,7 +223,7 @@ infl_map: dict[str, InflMapNode] = {
     "2nd person sing.": "second-person singular",
     "2nd person sing. (u)": "second-person singular formal",
     "2nd person sing. (gij)": [
-        "second-person singular archaic " "formal majestic",
+        "second-person singular archaic formal majestic",
         "second-person singular colloquial Flanders",
     ],
     "3rd person sing.": "third-person singular",
@@ -2142,6 +2140,7 @@ infl_map: dict[str, InflMapNode] = {
     },
     "մենք": {"lang": "Armenian", "if": "first-person plural", "then": ""},
     "նրանք": {"lang": "Armenian", "if": "third-person plural", "then": ""},
+    "անոնք": {"lang": "Armenian", "if": "third-person plural", "then": ""},
     "verbal nouns": "noun-from-verb",
     "supine": "supine",
     "past historic": "past historic",
@@ -2483,12 +2482,12 @@ infl_map: dict[str, InflMapNode] = {
     "Perfective": "perfective",
     "Stem forms": "stem",
     "Continuative": "continuative",
-    "Mizenkei (\"imperfective\")": "imperfective",
-    "Ren’yōkei (\"continuative\")": "continuative",
-    "Shūshikei (\"terminal\")": "terminative",
-    "Rentaikei (\"attributive\")": "attributive",
-    "Kateikei (\"hypothetical\")": "hypothetical",
-    "Meireikei (\"imperative\")": "imperative",
+    'Mizenkei ("imperfective")': "imperfective",
+    'Ren’yōkei ("continuative")': "continuative",
+    'Shūshikei ("terminal")': "terminative",
+    'Rentaikei ("attributive")': "attributive",
+    'Kateikei ("hypothetical")': "hypothetical",
+    'Meireikei ("imperative")': "imperative",
     "Continuative (連用形)": "continuative",
     "Terminal (終止形)": "terminative",
     "Attributive (連体形)": "attributive",
@@ -2722,7 +2721,7 @@ infl_map: dict[str, InflMapNode] = {
     "m.": "masculine",
     "f.": "feminine",
     "Stem": "stem",
-    "aorist stem": "stem",
+    "aorist stem": {"lang": "Armenian", "then": "aorist stem", "else": "stem"},
     "pos.": "positive",
     "neg.": "negative",
     "future perfect in the past": "future perfect past",
@@ -4041,11 +4040,15 @@ infl_map: dict[str, InflMapNode] = {
         "then": "stem",
     },
     "Base Form": {
-        "lang": ["Assyrian Neo-Aramaic",],
+        "lang": [
+            "Assyrian Neo-Aramaic",
+        ],
         "then": "stem",
     },
     "base form": {
-        "lang": ["Assyrian Neo-Aramaic",],
+        "lang": [
+            "Assyrian Neo-Aramaic",
+        ],
         "then": "stem",
     },
     "Personal-pronoun- including forms": {
@@ -6398,7 +6401,7 @@ infl_map: dict[str, InflMapNode] = {
     "*p/2/3/11/14": [
         "object-plural object-first-person "
         "object-second-person object-third-person",
-        "object-class-2 object-class-3 object-class-11 " "object-class-14",
+        "object-class-2 object-class-3 object-class-11 object-class-14",
     ],
     "c4/c6/c9": "object-class-4 object-class-6 object-class-9",
     "2s/2p/15/17": [
