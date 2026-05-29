@@ -27,15 +27,6 @@ def extract_example_list_item(
                     parent_data,
                 )
             )
-        elif template_node.template_name in ["ja-usex", "ja-x", "ja-ux"]:
-            examples.append(
-                extract_template_ja_usex(
-                    wxr,
-                    template_node,
-                    sense_data,
-                    parent_data,
-                )
-            )
         elif (
             template_node.template_name.startswith(("quote-", "RQ:"))
             or template_node.template_name == "quote"
@@ -70,6 +61,9 @@ def extract_example_list_item(
             "co",
             "coi",
             "uxa",
+            "ja-usex",
+            "ja-x",
+            "ja-ux",
         ]:
             copy_of_parent_data = deepcopy(parent_data)
             if template_node.template_name in ("collocation", "co", "coi"):
@@ -410,15 +404,30 @@ def extract_ux_template(
     clean_node(wxr, sense_data, expanded_node)
     for html_node in expanded_node.find_child_recursively(NodeKind.HTML):
         class_names = html_node.attrs.get("class", "")
+        if len(class_names) == 0:
+            continue
         if "e-example" in class_names:
-            example_data["text"] = clean_node(wxr, None, html_node)
-            calculate_bold_offsets(
-                wxr,
-                html_node,
-                example_data["text"],
-                example_data,
-                "bold_text_offsets",
-            )
+            # extract ruby in Japanese template
+            if t_node.template_name in ("ja-usex", "ja-x", "ja-ux"):
+                ruby_data, node_without_ruby = extract_ruby(wxr, html_node)
+                example_data["text"] = clean_node(wxr, None, node_without_ruby)
+                calculate_bold_offsets(
+                    wxr,
+                    wxr.wtp.parse(wxr.wtp.node_to_wikitext(node_without_ruby)),
+                    example_data["text"],
+                    example_data,
+                    "bold_text_offsets",
+                )
+                example_data["ruby"] = ruby_data
+            else:
+                example_data["text"] = clean_node(wxr, None, html_node)
+                calculate_bold_offsets(
+                    wxr,
+                    html_node,
+                    example_data["text"],
+                    example_data,
+                    "bold_text_offsets",
+                )
         elif "e-transliteration" in class_names:
             example_data["roman"] = clean_node(wxr, None, html_node)
             calculate_bold_offsets(
