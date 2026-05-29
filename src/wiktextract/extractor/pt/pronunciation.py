@@ -1,3 +1,5 @@
+import re
+
 from wikitextprocessor.parser import (
     LEVEL_KIND_FLAGS,
     LevelNode,
@@ -47,6 +49,12 @@ def extract_pronunciation_list_item(
 ) -> list[Sound]:
     raw_tags = parent_raw_tags[:]
     sounds = []
+    if len(list_item.children) == 1 and isinstance(list_item.children[0], str):
+        # Match minimal sections `  /ipa/  ` or ` [ipa]  `
+        if re.match(r"\s*(/[^/]+/|\[[^][]+\])\s*$", list_item.children[0]):
+            sound_value = clean_node(wxr, None, list_item.children[0]).strip()
+            sound = Sound(ipa=sound_value)
+            return [sound]
     for index, node in enumerate(list_item.children):
         if isinstance(node, str) and ":" in node:
             raw_tag = clean_node(wxr, None, list_item.children[:index])

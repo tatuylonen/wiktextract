@@ -26,7 +26,7 @@ class TestPtSound(TestCase):
     def tearDown(self):
         self.wxr.wtp.close_db_conn()
 
-    def test_subsection(self):
+    def test_subsection1(self):
         self.wxr.wtp.add_page("Predefinição:-pt-", 10, "Português")
         self.wxr.wtp.add_page(
             "Predefinição:pronúncia",
@@ -63,4 +63,61 @@ class TestPtSound(TestCase):
         )
         self.assertEqual(
             data[0]["categories"], ["Entrada com pronúncia (Português)"]
+        )
+
+    def test_bad_formatting1(self):
+        # https://github.com/tatuylonen/wiktextract/issues/1624
+        self.wxr.wtp.add_page("Predefinição:-pt-", 10, "Português")
+        self.wxr.wtp.add_page(
+            "Predefinição:pronúncia",
+            10,
+            """<span title="Pronúncia da palavra">Pronúncia</span>[[Categoria:Entrada com pronúncia (Português)|olho]]""",
+        )
+        self.wxr.wtp.add_page("Predefinição:AFI", 10, "{{{1}}}")
+        data = parse_page(
+            self.wxr,
+            "olho",
+            """={{-pt-}}=
+==Substantivo==
+# órgão
+=={{pronúncia|pt}}==
+===Brasil===
+* [fo:]
+""",
+        )
+        self.assertEqual(
+            data[0]["sounds"],
+            [
+                {
+                    "ipa": "[fo:]",
+                },
+            ],
+        )
+
+    def test_bad_formatting2(self):
+        self.wxr.wtp.add_page("Predefinição:-pt-", 10, "Português")
+        self.wxr.wtp.add_page(
+            "Predefinição:pronúncia",
+            10,
+            """<span title="Pronúncia da palavra">Pronúncia</span>[[Categoria:Entrada com pronúncia (Português)|olho]]""",
+        )
+        self.wxr.wtp.add_page("Predefinição:AFI", 10, "{{{1}}}")
+        data = parse_page(
+            self.wxr,
+            "olho",
+            """={{-pt-}}=
+==Substantivo==
+# órgão
+=={{pronúncia|pt}}==
+===Brasil===
+* /fo:/
+""",
+        )
+        self.assertEqual(
+            data[0]["sounds"],
+            [
+                {
+                    "ipa": "/fo:/",
+                },
+            ],
         )
