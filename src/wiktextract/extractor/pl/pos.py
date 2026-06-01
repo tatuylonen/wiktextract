@@ -5,83 +5,8 @@ from wikitextprocessor import LevelNode, NodeKind, TemplateNode, WikiNode
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .models import AltForm, Attestation, Sense, WordEntry
+from .section_titles import POS_DATA
 from .tags import TAGS, translate_raw_tags
-
-# All POS categories
-# https://pl.wiktionary.org/wiki/Kategoria:Części_mowy_wg_języków
-# Polish POS
-# https://pl.wiktionary.org/wiki/Kategoria:Części_mowy_języka_polskiego
-POS_DATA = {
-    "czasownik": {"pos": "verb"},
-    "czasownika": {"pos": "verb"},
-    # Szablon:szwedzki czasownik frazowy
-    "czasownik frazowy (partikelverb)": {"pos": "verb", "tags": ["phrase"]},
-    "fraza": {"pos": "phrase"},
-    "klasyfikator": {"pos": "classifier"},
-    "liczebnik": {"pos": "num"},
-    "liczebnikowa": {"pos": "num"},
-    "międzyrostek": {"pos": "interfix", "tags": ["morpheme"]},
-    "morfem": {"pos": "unknown", "tags": ["morpheme"]},
-    "określnik": {"pos": "det"},
-    "partykuła": {"pos": "particle"},
-    "partykułowa": {"pos": "particle"},
-    # Szablon:phrasal verb
-    "phrasal verb (czasownik frazowy)": {"pos": "verb", "tags": ["phrase"]},
-    "przedimek": {"pos": "article"},
-    "przedrostek": {"pos": "prefix", "tags": ["morpheme"]},
-    "przedrostkowy": {"pos": "prefix", "tags": ["morpheme"]},
-    "przyimek": {"pos": "prep"},
-    "przyimkowa": {"pos": "prep_phrase"},
-    "przymiotnik": {"pos": "adj"},
-    "przymiotnikowym": {"pos": "adj"},
-    "przymiotnikowa": {"pos": "adj_phrase"},
-    "przyrostek": {"pos": "suffix", "tags": ["morpheme"]},
-    "przyrostkowy": {"pos": "suffix", "tags": ["morpheme"]},
-    "przysłówek": {"pos": "adv"},
-    "przysłówkowa": {"pos": "adv_phrase"},
-    "pytajny": {"pos": "pron", "tags": ["interrogative"]},  # "zaimek pytajny"
-    "rodzajnik": {"pos": "article", "tags": ["gendered"]},
-    "rzeczownik": {"pos": "noun"},
-    "rzeczownikowa": {"pos": "noun"},
-    "skrótowiec": {"pos": "abbrev", "tags": ["abbreviation"]},
-    "skrót": {"pos": "abbrev", "tags": ["abbreviation"]},
-    "spójnik": {"pos": "conj"},
-    "symbol": {"pos": "symbol"},
-    "wrostek": {"pos": "infix", "tags": ["morpheme"]},
-    "wykrzyknik": {"pos": "intj"},
-    "wykrzyknika": {"pos": "intj"},
-    "wykrzyknikowa": {"pos": "intj"},
-    "zaimka": {"pos": "pron"},
-    "zaimek": {"pos": "pron"},
-    "zaimkowy": {"pos": "pron"},
-    "znak interpunkcyjny": {"pos": "punct", "tags": ["punctuation"]},
-    "dopełniacz saksoński": {"pos": "unknown"},
-    "forma ściągnięta": {
-        "pos": "contraction",
-        "tags": ["contraction", "form-of"],
-    },
-    "słowotwórczy": {"pos": "unknown", "tags": ["morpheme"]},
-    "liczebnik porządkowy": {"pos": "adj", "tags": ["ordinal"]},
-    "liczebnik główny": {"pos": "adj", "tags": ["cardinal"]},
-    "litera": {"pos": "character", "tags": ["letter"]},
-    "związek frazeologiczny": {"pos": "phrase", "tags": ["idiomatic"]},
-    "związek wyrazów": {"pos": "unknown"},
-    "sentencja łacińska": {"pos": "unknown"},
-    "imiesłów": {"pos": "verb", "tags": ["participle"]},
-    "postpozycja": {"pos": "postp"},
-    "zwrot": {"pos": "phrase"},
-    "słowo pomocnicze": {"pos": "unknown"},
-    "wyrażenie": {"pos": "phrase"},
-    "czasownik frazowy": {"pos": "verb", "tags": ["phrasal"]},
-    "zaimek osobowy": {"pos": "pron", "tags": ["person"]},
-    "zaimek pytajny": {"pos": "pron", "tags": ["interrogative"]},
-    "zbitka": {"pos": "unknown"},
-    "nazwa własna": {"pos": "name"},
-    "rzeczownik odczasownikowy": {
-        "pos": "verb",
-        "tags": ["participle", "gerund"],
-    },
-}
 
 # Category:Proverb Templates
 # https://pl.wiktionary.org/wiki/Kategoria:Szablony_przysłów
