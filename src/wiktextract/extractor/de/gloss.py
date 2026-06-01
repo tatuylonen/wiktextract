@@ -155,7 +155,7 @@ FORM_OF_POS_STRINGS = {
 def process_form_of_list_item(
     wxr: WiktextractContext, word_entry: WordEntry, list_item_node: WikiNode
 ) -> None:
-    from .section_titles import POS_SECTIONS
+    from .section_titles import POS_DATA
 
     sense = Sense()
     gloss_text = clean_node(wxr, None, list_item_node.children)
@@ -179,8 +179,8 @@ def process_form_of_list_item(
                 for sense_word in str_node.split():
                     if sense_word in FORM_OF_POS_STRINGS:
                         pos_data = FORM_OF_POS_STRINGS[sense_word]
-                    elif sense_word in POS_SECTIONS:
-                        pos_data = POS_SECTIONS[sense_word]
+                    elif sense_word in POS_DATA:
+                        pos_data = POS_DATA[sense_word]
                     elif sense_word in GRAMMATICAL_TAGS:
                         tr_tag = GRAMMATICAL_TAGS[sense_word]
                         if isinstance(tr_tag, str):

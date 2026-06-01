@@ -1,6 +1,8 @@
+from ...config import POSSubtitleData
+
 # https://id.wiktionary.org/wiki/Kategori:Templat_kelas_kata
 # https://id.wiktionary.org/wiki/Kategori:Templat_umum
-POS_DATA = {
+POS_DATA: dict[str, POSSubtitleData] = {
     "Adjektiva": {"pos": "adj"},
     "Adverbia": {"pos": "adv"},
     "Akronim": {"pos": "abbrev", "tags": ["abbreviation"]},

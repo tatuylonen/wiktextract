@@ -1,4 +1,6 @@
-POS_DATA = {
+from ...config import POSSubtitleData
+
+POS_DATA: dict[str, POSSubtitleData] = {
     "podstatné jméno": {"pos": "noun"},
     "přídavné jméno": {"pos": "adj"},
     "zájmeno": {"pos": "pron"},

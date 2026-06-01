@@ -3,6 +3,8 @@ import re
 from enum import Enum, auto
 from typing import Literal, TypedDict
 
+from ...config import POSSubtitleData
+
 
 class Heading(Enum):
     Err = auto()
@@ -55,21 +57,10 @@ POSName = Literal[
     "verb",
 ]
 """Greek subset of the English PARTS_OF_SPEECH."""
-POSMap = TypedDict(
-    "POSMap",
-    {
-        # TODO: Use Typing.Required (3.11>=) when python 3.10 support drops
-        "pos": POSName,
-        # "debug" is legacy from [en], might be implemented
-        "debug": str,
-        "tags": Tags,
-    },
-    total=False,
-)
 
 # Main entries for different kinds of POS headings; no aliases
 # XXX translate these
-POS_HEADINGS: dict[str, POSMap] = {
+POS_DATA: dict[str, POSSubtitleData] = {
     # "": {"pos": "", "tags": [""],
     # άρθρο: article // article // article of a charter, law, contract etc.
     # // limb
@@ -639,7 +630,7 @@ POS_HEADINGS: dict[str, POSMap] = {
 POS_HEADINGS_RE = re.compile(
     r"("
     + r"|".join(
-        re.escape(s) for s in sorted(POS_HEADINGS.keys(), key=len, reverse=True)
+        re.escape(s) for s in sorted(POS_DATA.keys(), key=len, reverse=True)
     )
     + r")(.*)"
 )
@@ -652,7 +643,7 @@ SubSectionMap = TypedDict(
         "type": Heading,
         # "debug" is legacy from [en], might be implemented
         "debug": str,
-        "tags": Tags,
+        "tags": list[str],
     },
     total=False,
 )
