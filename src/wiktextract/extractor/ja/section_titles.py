@@ -1,6 +1,8 @@
+from ...config import POSSubtitleData
+
 # List of templates
 # https://ja.wiktionary.org/wiki/Wiktionary:テンプレートの一覧#品詞表記
-POS_DATA = {
+POS_DATA: dict[str, POSSubtitleData] = {
     "名詞": {"pos": "noun"},
     "数詞": {"pos": "num"},
     "固有名詞": {"pos": "name"},

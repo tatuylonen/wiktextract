@@ -1,5 +1,7 @@
+from ...config import POSSubtitleData
+
 # https://sv.wiktionary.org/wiki/Wiktionary:Stilguide#Ordklassrubriken
-POS_DATA = {
+POS_DATA: dict[str, POSSubtitleData] = {
     "Substantiv": {"pos": "noun"},
     "Adjektiv": {"pos": "adj"},
     "Verb": {"pos": "verb"},

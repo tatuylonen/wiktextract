@@ -1,4 +1,6 @@
-POS_DATA = {
+from ...config import POSSubtitleData
+
+POS_DATA: dict[str, POSSubtitleData] = {
     "artigo": {"pos": "article"},
     "adjetivo": {"pos": "adj"},
     "advérbio": {"pos": "adv"},

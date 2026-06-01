@@ -1,5 +1,7 @@
+from ...config import POSSubtitleData
+
 # https://ku.wiktionary.org/wiki/Alîkarî:Cureyên_peyvan
-POS_DATA = {
+POS_DATA: dict[str, POSSubtitleData] = {
     "Navdêr": {"pos": "noun"},
     "Serenav": {"pos": "name"},
     "Lêker": {"pos": "verb"},
