@@ -29,7 +29,7 @@ from .section_titles import (
     IGNORED_TITLES,
     INFLECTION_TITLES,
     LINKAGE_TITLES,
-    POS_TITLES,
+    POS_DATA,
     PRONUNCIATION_TITLES,
     TRANSLATIONS_TITLES,
     USAGE_NOTE_TITLES,
@@ -50,7 +50,7 @@ def parse_section(
     wxr.wtp.start_subsection(subtitle)
     if subtitle in IGNORED_TITLES:
         pass
-    elif subtitle in POS_TITLES:
+    elif subtitle in POS_DATA:
         process_pos_block(wxr, page_data, base_data, level_node, subtitle)
         if len(page_data[-1].senses) == 0 and subtitle in LINKAGE_TITLES:
             page_data.pop()
@@ -134,7 +134,7 @@ def process_pos_block(
     level_node: LevelNode,
     pos_title: str,
 ):
-    pos_data = POS_TITLES[pos_title]
+    pos_data = POS_DATA[pos_title]
     pos_type = pos_data["pos"]
     base_data.pos = pos_type
     page_data.append(base_data.model_copy(deep=True))
@@ -273,8 +273,8 @@ def process_low_quality_page(
             if len(gloss_text) > 0:
                 for cat in word_entry.categories:
                     cat = cat.removeprefix(word_entry.lang).strip()
-                    if cat in POS_TITLES:
-                        pos_data = POS_TITLES[cat]
+                    if cat in POS_DATA:
+                        pos_data = POS_DATA[cat]
                         word_entry.pos = pos_data["pos"]
                         word_entry.tags.extend(pos_data.get("tags", []))
                         break
