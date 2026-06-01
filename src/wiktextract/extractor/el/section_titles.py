@@ -643,7 +643,7 @@ SubSectionMap = TypedDict(
         "type": Heading,
         # "debug" is legacy from [en], might be implemented
         "debug": str,
-        "tags": list[str],
+        "tags": Tags,
     },
     total=False,
 )
