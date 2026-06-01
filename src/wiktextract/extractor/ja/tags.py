@@ -219,7 +219,6 @@ TAGS = {
     "人称": "personal",
     "非標準": "uncommon",
     "頭字語": "initialism",
-    "首都": "uppercase",
     # "en-verb" template
     "三単現": ["third-person", "singular", "present"],
     "現在分詞": ["present", "participle"],
@@ -571,6 +570,7 @@ TOPICS = {
     "麻雀": "mahjong",
     "演算": "arithmetic",
     "ゲーム": "games",
+    "首都": "capital-city",
 }
 
 
