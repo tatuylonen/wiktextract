@@ -5,7 +5,7 @@ from wiktextract import WiktextractContext
 from wiktextract.page import clean_node
 
 from .models import Example, Form, Linkage, Sense, TemplateData, WordEntry
-from .section_titles import POS_HEADINGS
+from .section_titles import POS_DATA
 from .table import parse_pos_table
 from .tags_utils import convert_tags_in_sense
 from .text_utils import (
@@ -285,7 +285,7 @@ def process_pos(
     data common with other POS sections, like pronunciation or etymology."""
 
     # Metadata for different part-of-speech kinds.
-    pos_meta = POS_HEADINGS[pos_title]
+    pos_meta = POS_DATA[pos_title]
     data.pos = pos_meta["pos"]  # the internal/translated name for the POS
     data.pos_num = pos_num  # SEW uses "Noun 1", "Noun 2" style headings.
 
@@ -307,7 +307,7 @@ def process_pos(
                 else:
                     s_pos = sound_pos.strip().lower()
                     s_num = -1
-                sound_meta = POS_HEADINGS[s_pos]
+                sound_meta = POS_DATA[s_pos]
                 s_pos = sound_meta["pos"]
                 if s_pos == data.pos and s_num == data.pos_num:
                     new_sounds.append(sound)

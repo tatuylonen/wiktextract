@@ -8,7 +8,7 @@ from .etymology import process_etym
 from .models import WordEntry
 from .pos import process_pos
 from .pronunciation import process_pron
-from .section_titles import POS_HEADINGS
+from .section_titles import POS_DATA
 from .text_utils import POS_ENDING_NUMBER_RE
 
 # =========================
@@ -155,7 +155,7 @@ def parse_page(
             heading_title = heading_title[: m.start()]
         else:
             pos_num = -1  # default: see models.py/Sense
-        if heading_title in POS_HEADINGS:
+        if heading_title in POS_DATA:
             pos_data = base_data.model_copy(deep=True)
             new_data = process_pos(wxr, level, pos_data, heading_title, pos_num)
             if new_data is not None:

@@ -1,11 +1,11 @@
 import re
 
-from .section_titles import POS_HEADINGS
+from .section_titles import POS_DATA
 
 # List all the templates registered to POS headings.
 POS_TEMPLATE_NAMES: dict[str, str] = {}
 
-for pos, templates in POS_HEADINGS.items():
+for pos, templates in POS_DATA.items():
     POS_TEMPLATE_NAMES.update({tn: pos for tn in templates["templates"]})
 
 # Find digits at end of string, like "Noun 2".
