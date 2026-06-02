@@ -4,7 +4,10 @@ from wikitextprocessor import Wtp
 
 from wiktextract.config import WiktionaryConfig
 from wiktextract.extractor.en.page import parse_page
-from wiktextract.extractor.en.pronunciation import parse_pronunciation
+from wiktextract.extractor.en.pronunciation import (
+    parse_pronunciation,
+    pronunciation_pos_from_part,
+)
 from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.wxr_context import WiktextractContext
 
@@ -45,6 +48,26 @@ class TestPronunciation(TestCase):
             "Template:a",
             10,
             "({{{2}}}{{#if:{{{3|}}}|, {{{3}}}}})",
+        )
+
+    def test_pronunciation_pos_from_part(self):
+        self.assertEqual(
+            pronunciation_pos_from_part("attributive adjective"),
+            ("adj", "attributive"),
+        )
+        self.assertEqual(
+            pronunciation_pos_from_part("attributive proper noun"),
+            ("name", "attributive"),
+        )
+        self.assertEqual(
+            pronunciation_pos_from_part("proper noun"),
+            ("name", ""),
+        )
+        self.assertEqual(
+            pronunciation_pos_from_part(
+                "rare, with or without the horse-hoarse merger"
+            ),
+            (None, "rare, with or without the horse-hoarse merger"),
         )
 
     def test1(self):
@@ -93,47 +116,47 @@ class TestPronunciation(TestCase):
                     {
                         "tags": ["Received-Pronunciation"],
                         "enpr": "föö",
-                        "pos": ["noun"],
+                        "pos": ("noun",),
                     },
                     {
                         "ipa": "/foo/",
                         "tags": ["Received-Pronunciation"],
-                        "pos": ["noun"],
+                        "pos": ("noun",),
                     },
                     {
                         "tags": ["Received-Pronunciation"],
                         "ipa": "/bar/",
-                        "pos": ["noun"],
+                        "pos": ("noun",),
                     },
                     {
                         "enpr": "bär",
                         "tags": ["Received-Pronunciation"],
-                        "pos": ["noun"],
+                        "pos": ("noun",),
                     },
                     {
                         "tags": ["Northern-England", "Scotland"],
                         "ipa": "/baz/",
-                        "pos": ["noun"],
+                        "pos": ("noun",),
                     },
                     {
                         "audio": "LL-Q1860 (eng)-Back ache-past.wav",
                         "ogg_url": "https://upload.wikimedia.org/wikipedia/commons/transcoded/7/7a/LL-Q1860_%28eng%29-Back_ache-past.wav/LL-Q1860_%28eng%29-Back_ache-past.wav.ogg",
                         "mp3_url": "https://upload.wikimedia.org/wikipedia/commons/transcoded/7/7a/LL-Q1860_%28eng%29-Back_ache-past.wav/LL-Q1860_%28eng%29-Back_ache-past.wav.mp3",
-                        "pos": ["noun"],
+                        "pos": ("noun",),
                         "tags": ["UK"],
                     },
-                    {"tags": ["US"], "enpr": "vöö", "pos": ["verb"]},
-                    {"ipa": "/voo/", "tags": ["US"], "pos": ["verb"]},
+                    {"tags": ["US"], "enpr": "vöö", "pos": ("verb",)},
+                    {"ipa": "/voo/", "tags": ["US"], "pos": ("verb",)},
                     {
                         "audio": "en-us-past.ogg",
                         "ogg_url": "https://upload.wikimedia.org/wikipedia/commons/b/b0/En-us-past.ogg",
                         "mp3_url": "https://upload.wikimedia.org/wikipedia/commons/transcoded/b/b0/En-us-past.ogg/En-us-past.ogg.mp3",
-                        "pos": ["verb"],
+                        "pos": ("verb",),
                         "tags": ["US"],
                     },
-                    {"homophone": "feu", "pos": ["verb"]},
-                    {"rhymes": "-oo", "pos": ["verb"]},
-                    {"rhymes": "-öö", "pos": ["verb"]},
+                    {"homophone": "feu", "pos": ("verb",)},
+                    {"rhymes": "-oo", "pos": ("verb",)},
+                    {"rhymes": "-öö", "pos": ("verb",)},
                     {
                         "tags": [
                             "Received-Pronunciation",
@@ -144,7 +167,7 @@ class TestPronunciation(TestCase):
                         ],
                         "note": "Caribbean, note-fodder causes everything to be a note",
                         "ipa": "/foobar/",
-                        "pos": ["verb"],
+                        "pos": ("verb",),
                     },
                     {
                         "tags": [
@@ -153,9 +176,9 @@ class TestPronunciation(TestCase):
                             "US",
                             "paucal",
                         ],
-                        "note": "Cajun, dual",
+                        "note": "note-text; Cajun, dual",
                         "ipa": "foobaz(ipa accepts parens)",
-                        "pos": ["verb"],
+                        "pos": ("verb",),
                     },
                     {
                         "tags": [
@@ -165,7 +188,7 @@ class TestPronunciation(TestCase):
                             "paucal",
                         ],
                         "ipa": "barbar",
-                        "pos": ["verb"],
+                        "pos": ("verb",),
                     },
                     {
                         "tags": [
@@ -175,7 +198,7 @@ class TestPronunciation(TestCase):
                             "paucal",
                         ],
                         "ipa": "barbaz",
-                        "pos": ["verb"],
+                        "pos": ("verb",),
                     },
                     {
                         "tags": [
@@ -185,7 +208,7 @@ class TestPronunciation(TestCase):
                             "paucal",
                         ],
                         "ipa": "baz",
-                        "pos": ["verb"],
+                        "pos": ("verb",),
                     },
                     {
                         "tags": [
@@ -196,7 +219,7 @@ class TestPronunciation(TestCase):
                             "singular",
                         ],
                         "ipa": "bazfoo",
-                        "pos": ["verb"],
+                        "pos": ("verb",),
                     },
                 ]
             },
@@ -224,12 +247,12 @@ class TestPronunciation(TestCase):
                     {
                         "tags": ["Received-Pronunciation"],
                         "enpr": "föö",
-                        "pos": ["noun"],
+                        "pos": ("noun",),
                     },
                     {
                         "tags": ["Received-Pronunciation"],
                         "ipa": "/foo/",
-                        "pos": ["noun"],
+                        "pos": ("noun",),
                     },
                 ]
             },
@@ -246,7 +269,7 @@ class TestPronunciation(TestCase):
         parse_pronunciation(self.wxr, tree.children[0], out, {}, {}, {}, "en")
         self.assertEqual(
             out,
-            {"sounds": [{"ipa": "/ˈɔfsɛt/", "pos": ["noun", "verb"]}]},
+            {"sounds": [{"ipa": "/ˈɔfsɛt/", "pos": ("noun", "verb")}]},
         )
 
     def test_bold_pos_plain_text_label(self):
@@ -258,7 +281,7 @@ class TestPronunciation(TestCase):
 """)
         out = {}
         parse_pronunciation(self.wxr, tree.children[0], out, {}, {}, {}, "en")
-        self.assertEqual(out, {"sounds": [{"ipa": "/juːs/", "pos": ["noun"]}]})
+        self.assertEqual(out, {"sounds": [{"ipa": "/juːs/", "pos": ("noun",)}]})
 
     def test_non_pos_qualifier_not_converted_to_pos(self):
         self.wxr.wtp.start_page("foo")
@@ -289,12 +312,12 @@ class TestPronunciation(TestCase):
                     {
                         "ipa": "/dɪˈtɜːmɪnət/",
                         "tags": ["UK"],
-                        "pos": ["adj", "noun"],
+                        "pos": ("adj", "noun"),
                     },
                     {
                         "ipa": "/dɪˈtɜːmɪneɪt/",
                         "tags": ["UK"],
-                        "pos": ["verb"],
+                        "pos": ("verb",),
                     },
                 ]
             },
@@ -315,8 +338,8 @@ class TestPronunciation(TestCase):
             out,
             {
                 "sounds": [
-                    {"ipa": "/ɪnˈkɹiːs/", "pos": ["verb"]},
-                    {"ipa": "/ˈɪnkɹiːs/", "pos": ["noun"]},
+                    {"ipa": "/ɪnˈkɹiːs/", "pos": ("verb",)},
+                    {"ipa": "/ˈɪnkɹiːs/", "pos": ("noun",)},
                 ]
             },
         )
@@ -336,8 +359,8 @@ class TestPronunciation(TestCase):
             out,
             {
                 "sounds": [
-                    {"ipa": "/dɒtˈkɒm/", "pos": ["noun"]},
-                    {"ipa": "/ˈdɒtkɒm/", "pos": ["verb"]},
+                    {"ipa": "/dɒtˈkɒm/", "pos": ("noun",)},
+                    {"ipa": "/ˈdɒtkɒm/", "pos": ("verb",)},
                 ]
             },
         )
@@ -355,8 +378,8 @@ class TestPronunciation(TestCase):
             out,
             {
                 "sounds": [
-                    {"ipa": "/ɹiːˈbuːt/", "pos": ["verb"]},
-                    {"ipa": "/ˈɹiːbuːt/", "pos": ["noun", "verb"]},
+                    {"ipa": "/ɹiːˈbuːt/", "pos": ("verb",)},
+                    {"ipa": "/ˈɹiːbuːt/", "pos": ("noun", "verb")},
                 ]
             },
         )
@@ -371,7 +394,7 @@ class TestPronunciation(TestCase):
         parse_pronunciation(self.wxr, tree.children[0], out, {}, {}, {}, "en")
         self.assertEqual(
             out,
-            {"sounds": [{"ipa": "/ˈdɛzɚts/", "pos": ["noun", "verb"]}]},
+            {"sounds": [{"ipa": "/ˈdɛzɚts/", "pos": ("noun", "verb")}]},
         )
 
     def test_pos_template_multiple_groups_on_one_line(self):
@@ -387,8 +410,8 @@ class TestPronunciation(TestCase):
             out,
             {
                 "sounds": [
-                    {"ipa": "/abaŋˈdɔŋər/", "pos": ["noun"]},
-                    {"ipa": "/abandɔˈneːr/", "pos": ["verb"]},
+                    {"ipa": "/abaŋˈdɔŋər/", "pos": ("noun",)},
+                    {"ipa": "/abandɔˈneːr/", "pos": ("verb",)},
                 ]
             },
         )
@@ -405,6 +428,310 @@ class TestPronunciation(TestCase):
             out,
             {"sounds": [{"ipa": "/ˈkɒndʌkt/", "tags": ["Received-Pronunciation"]}]},
         )
+
+    def test_ipa_qq_note_with_link_template(self):
+        self.wxr.wtp.start_page("jewellery")
+        self.wxr.wtp.add_page(
+            "Template:IPA",
+            10,
+            "({{{a}}}) IPA⁽ᵏᵉʸ⁾: {{{2}}} ({{{qq}}})",
+        )
+        self.wxr.wtp.add_page(
+            "Template:l",
+            10,
+            "[[:{{{2}}}#English|{{{2}}}]]",
+        )
+        tree = self.wxr.wtp.parse("""=== Pronunciation ===
+* {{IPA|en|/ˈd͡ʒuː(ə)ləɹi/|a=nonstandard|qq=this pronunciation gives rise to the Cockney rhyming slang ''{{l|en|tomfoolery}}''}}
+""")
+        out = {}
+        parse_pronunciation(self.wxr, tree.children[0], out, {}, {}, {}, "en")
+        self.assertEqual(
+            out["sounds"][0]["note"],
+            "this pronunciation gives rise to the Cockney rhyming slang tomfoolery",
+        )
+
+    def test_ipa_text_in_qualifier_template_not_extracted(self):
+        self.wxr.wtp.start_page("Kokos")
+        self.wxr.wtp.add_page(
+            "Template:IPA",
+            10,
+            "IPA⁽ᵏᵉʸ⁾: {{{2}}}",
+        )
+        self.wxr.wtp.add_page(
+            "Template:q",
+            10,
+            "({{{1}}})",
+        )
+        self.wxr.wtp.add_page(
+            "Template:IPAchar",
+            10,
+            '<span class="IPA nowrap">{{{1}}}</span>',
+        )
+        tree = self.wxr.wtp.parse("""=== Pronunciation ===
+* {{IPA|de|/ˈkoːkɔs/}} {{q|entirely uncommon in northern and central Germany, perhaps used by southern speakers whose {{IPAchar|/ɔ/}} is {{IPAchar|[o]}}}}
+""")
+        out = {}
+        parse_pronunciation(self.wxr, tree.children[0], out, {}, {}, {}, "de")
+        self.assertEqual(out, {"sounds": [{"ipa": "/ˈkoːkɔs/"}]})
+
+    def test_inline_ipa_q_pos_qualifier(self):
+        self.wxr.wtp.start_page("disuse")
+        self.wxr.wtp.add_page(
+            "Template:IPA",
+            10,
+            "IPA⁽ᵏᵉʸ⁾: (noun) /dɪsˈjuːs/, (verb) /dɪsˈjuːz/",
+        )
+        tree = self.wxr.wtp.parse("""=== Pronunciation ===
+* {{IPA|en|/dɪsˈjuːs/<q:noun>|/dɪsˈjuːz/<q:verb>}}
+""")
+        out = {}
+        parse_pronunciation(self.wxr, tree.children[0], out, {}, {}, {}, "en")
+        self.assertEqual(
+            out,
+            {
+                "sounds": [
+                    {"ipa": "/dɪsˈjuːs/", "pos": ("noun",)},
+                    {"ipa": "/dɪsˈjuːz/", "pos": ("verb",)},
+                ]
+            },
+        )
+
+    def test_ipa_nonindexed_named_param_pos(self):
+        self.wxr.wtp.start_page("advocate")
+        self.wxr.wtp.add_page(
+            "Template:IPA", 10, "({{{q}}}) IPA⁽ᵏᵉʸ⁾: {{{2}}}"
+        )
+        tree = self.wxr.wtp.parse("""=== Pronunciation ===
+* {{IPA|en|/ˈæd.və.kət/|q=noun}}
+""")
+        out = {}
+        parse_pronunciation(self.wxr, tree.children[0], out, {}, {}, {}, "en")
+        self.assertEqual(
+            out,
+            {"sounds": [{"ipa": "/ˈæd.və.kət/", "pos": ("noun",)}]},
+        )
+
+    def test_ipa_indexed_param_pos(self):
+        self.wxr.wtp.start_page("rebound")
+        self.wxr.wtp.add_page(
+            "Template:IPA",
+            10,
+            "({{{a}}}) IPA⁽ᵏᵉʸ⁾: ({{{q1}}}) {{{2}}}, ({{{q2}}}) {{{3}}}",
+        )
+        tree = self.wxr.wtp.parse("""=== Pronunciation ===
+* {{IPA|en|/ˈɹi.baʊnd/|q1=noun|/ɹiˈbaʊnd/|q2=verb|a=GA}}
+""")
+        out = {}
+        parse_pronunciation(self.wxr, tree.children[0], out, {}, {}, {}, "en")
+        self.assertEqual(
+            out,
+            {
+                "sounds": [
+                    {
+                        "ipa": "/ˈɹi.baʊnd/",
+                        "pos": ("noun",),
+                        "tags": ["General-American"],
+                    },
+                    {
+                        "ipa": "/ɹiˈbaʊnd/",
+                        "pos": ("verb",),
+                        "tags": ["General-American"],
+                    },
+                ]
+            },
+        )
+
+    def test_ipa_note_keeps_prose_conjunctions(self):
+        self.wxr.wtp.start_page("mourn")
+        self.wxr.wtp.add_page(
+            "Template:IPA",
+            10,
+            "IPA⁽ᵏᵉʸ⁾: {{{2}}} (rare, rhotic, with or without the horse-hoarse merger)",
+        )
+        tree = self.wxr.wtp.parse("""=== Pronunciation ===
+* {{IPA|en|/mɔːn/|a=rare,rhotic,with or without the horse-hoarse merger}}
+""")
+        out = {}
+        parse_pronunciation(self.wxr, tree.children[0], out, {}, {}, {}, "en")
+        self.assertEqual(
+            out,
+            {
+                "sounds": [
+                    {
+                        "ipa": "/mɔːn/",
+                        "note": "rare, rhotic, with or without the horse-hoarse merger",
+                    }
+                ]
+            },
+        )
+
+    def test_compound_pos_qualifier_keeps_modifier_as_tag(self):
+        self.wxr.wtp.start_page("inbred")
+        self.wxr.wtp.add_page(
+            "Template:IPA",
+            10,
+            "({{{a}}}) IPA⁽ᵏᵉʸ⁾: {{{2}}}{{#if:{{{3|}}}|, {{{3}}}}}",
+        )
+        tree = self.wxr.wtp.parse("""=== Pronunciation ===
+* {{IPA|en|/ˈɪnˌbɹɛd/|a=[[attributive]] adjective,noun}}
+* {{IPA|en|/ˈɪnˌbɹɛd/|/ˌɪnˈbɹɛd/|a=[[predicative]] adjective,verb}}
+""")
+        out = {}
+        parse_pronunciation(self.wxr, tree.children[0], out, {}, {}, {}, "en")
+        self.assertEqual(
+            out,
+            {
+                "sounds": [
+                    {
+                        "ipa": "/ˈɪnˌbɹɛd/",
+                        "pos": ("adj", "noun"),
+                        "tags": ["attributive"],
+                    },
+                    {
+                        "ipa": "/ˈɪnˌbɹɛd/",
+                        "pos": ("adj", "verb"),
+                        "tags": ["predicative"],
+                    },
+                    {
+                        "ipa": "/ˌɪnˈbɹɛd/",
+                        "pos": ("adj", "verb"),
+                        "tags": ["predicative"],
+                    },
+                ]
+            },
+        )
+
+    def test_pos_filtered_pronunciation_audio_stays_with_matching_pos(self):
+        self.wxr.wtp.start_page("discharge")
+        self.wxr.wtp.add_page(
+            "Template:IPA",
+            10,
+            """{{#ifeq:{{{2}}}|/dɪsˈtʃɑːdʒ/<q:verb>|IPA⁽ᵏᵉʸ⁾: (verb) /dɪsˈtʃɑːdʒ/|{{#ifeq:{{{2}}}|/ˈdɪstʃɑːdʒ/<q:noun>|IPA⁽ᵏᵉʸ⁾: (noun) /ˈdɪstʃɑːdʒ/|IPA⁽ᵏᵉʸ⁾: {{{2}}}}}}}""",
+        )
+        self.wxr.wtp.add_page("Template:a", 10, "({{{2}}})")
+        self.wxr.wtp.add_page("Template:qualifier", 10, "({{{1}}})")
+        self.wxr.wtp.add_page("Template:enPR", 10, "enPR: {{{1}}}")
+        tree = self.wxr.wtp.parse("""===Pronunciation===
+* {{a|en|RP}}
+** {{IPA|en|/dɪsˈtʃɑːdʒ/<q:verb>}}
+*** {{audio|en|LL-Q1860 (eng)-Vealhurl-discharge (verb).wav|a=Southern England}}
+** {{IPA|en|/ˈdɪstʃɑːdʒ/<q:noun>}}
+*** {{audio|en|LL-Q1860 (eng)-Vealhurl-discharge (noun).wav|a=Southern England}}
+* {{a|en|US}}
+** {{qualifier|verb}} {{enPR|dĭschärj'}}, {{IPA|en|/dɪsˈtʃɑɹdʒ/}}
+** {{qualifier|noun}} {{enPR|dĭs'chärj}}, {{IPA|en|/ˈdɪstʃɑɹdʒ/}}
+*** {{audio|en|En-us-discharge.ogg|a=US}}
+* {{rhymes|en|ɑː(ɹ)dʒ|ɪstʃɑː(ɹ)dʒ|s=2}}
+""")
+        out = {}
+        parse_pronunciation(self.wxr, tree.children[0], out, {}, {}, {}, "en")
+        sounds = out["sounds"]
+        verb_sounds = [s for s in sounds if s.get("pos") == ("verb",)]
+        noun_sounds = [s for s in sounds if s.get("pos") == ("noun",)]
+        self.assertEqual(
+            [s["ipa"] for s in verb_sounds if "ipa" in s],
+            ["/dɪsˈtʃɑːdʒ/", "/dɪsˈtʃɑɹdʒ/"],
+        )
+        self.assertIn(
+            "LL-Q1860 (eng)-Vealhurl-discharge (verb).wav",
+            [s["audio"] for s in verb_sounds if "audio" in s],
+        )
+        self.assertNotIn(
+            "LL-Q1860 (eng)-Vealhurl-discharge (noun).wav",
+            [s["audio"] for s in verb_sounds if "audio" in s],
+        )
+        self.assertEqual(
+            [s["ipa"] for s in noun_sounds if "ipa" in s],
+            ["/ˈdɪstʃɑːdʒ/", "/ˈdɪstʃɑɹdʒ/"],
+        )
+        self.assertIn(
+            "LL-Q1860 (eng)-Vealhurl-discharge (noun).wav",
+            [s["audio"] for s in noun_sounds if "audio" in s],
+        )
+        self.assertNotIn(
+            "LL-Q1860 (eng)-Vealhurl-discharge (verb).wav",
+            [s["audio"] for s in noun_sounds if "audio" in s],
+        )
+
+    def test_audio_pos_inherits_only_from_parent_list_item(self):
+        self.wxr.wtp.start_page("abstract")
+        self.wxr.wtp.add_page("Template:a", 10, "({{{2}}})")
+        self.wxr.wtp.add_page(
+            "Template:IPA",
+            10,
+            """{{#switch:{{{a}}}
+| noun = (noun) IPA⁽ᵏᵉʸ⁾: {{{2}}}
+| adjective = (adjective) IPA⁽ᵏᵉʸ⁾: {{{2}}}{{#if:{{{3|}}}|, {{{3}}}}}{{#if:{{{4|}}}|, {{{4}}}}}
+| verb = (verb) IPA⁽ᵏᵉʸ⁾: {{{2}}}{{#if:{{{3|}}}|, {{{3}}}}}
+}}""",
+        )
+        tree = self.wxr.wtp.parse("""=== Pronunciation ===
+* {{a|en|RP}}
+** {{IPA|en|/ˈæbˌstɹækt/|a=noun}}
+** {{IPA|en|/ˈæbˌstɹækt/|a=adjective}}
+** {{IPA|en|/ˌæbˈstɹækt/|/əbˈstɹækt/|a=verb}}
+** {{audio|en|LL-Q1860 (eng)-Vealhurl-abstract (noun).wav|a=Southern England}}
+** {{audio|en|LL-Q1860 (eng)-Vealhurl-abstract (noun).wav|a=Southern England}}
+** {{audio|en|LL-Q1860 (eng)-Vealhurl-abstract (verb).wav|a=Southern England}}
+* {{a|en|GA}}
+** {{IPA|en|/ˈæbˌstɹækt/|a=noun}}
+** {{IPA|en|/ˌæbˈstɹækt/|/əbˈstɹækt/|/ˈæbˌstɹækt/|a=adjective}}
+** {{IPA|en|/ˌæbˈstɹækt/|/əbˈstɹækt/|a=verb}}
+* {{rhymes|en|ækt|s=2}}
+""")
+        out = {}
+        parse_pronunciation(self.wxr, tree.children[0], out, {}, {}, {}, "en")
+        sounds = out["sounds"]
+        self.assertIn(
+            ("/ˈæbˌstɹækt/", ("noun",)),
+            [(s.get("ipa"), s.get("pos")) for s in sounds],
+        )
+        self.assertIn(
+            ("/ˈæbˌstɹækt/", ("adj",)),
+            [(s.get("ipa"), s.get("pos")) for s in sounds],
+        )
+        self.assertIn(
+            ("/ˌæbˈstɹækt/", ("verb",)),
+            [(s.get("ipa"), s.get("pos")) for s in sounds],
+        )
+        audio_sounds = [s for s in sounds if "audio" in s]
+        self.assertEqual(
+            [s["audio"] for s in audio_sounds],
+            [
+                "LL-Q1860 (eng)-Vealhurl-abstract (noun).wav",
+                "LL-Q1860 (eng)-Vealhurl-abstract (verb).wav",
+            ],
+        )
+        self.assertTrue(all("pos" not in s for s in audio_sounds))
+
+    def test_audio_pos_inherits_from_suffix_pos_marker(self):
+        self.wxr.wtp.start_page("maculate")
+        self.wxr.wtp.add_page("Template:IPA", 10, "IPA⁽ᵏᵉʸ⁾: {{{2}}}")
+        self.wxr.wtp.add_page("Template:sense", 10, "({{{1}}}):")
+        tree = self.wxr.wtp.parse("""===Pronunciation===
+* {{IPA|en|/ˈmækjʊleɪt/}} {{sense|verb}}
+** {{audio|en|LL-Q1860 (eng)-Vealhurl-maculate.wav|a=Southern England}}
+* {{IPA|en|/ˈmækjʊlət/}} {{sense|adjective}}
+""")
+        out = {}
+        parse_pronunciation(self.wxr, tree.children[0], out, {}, {}, {}, "en")
+        sounds = out["sounds"]
+        verb_audio = next(
+            s
+            for s in sounds
+            if s.get("audio")
+            == "LL-Q1860 (eng)-Vealhurl-maculate.wav"
+        )
+        self.assertEqual(
+            [(s.get("ipa") or s.get("audio"), s.get("pos")) for s in sounds],
+            [
+                ("/ˈmækjʊleɪt/", ("verb",)),
+                ("LL-Q1860 (eng)-Vealhurl-maculate.wav", ("verb",)),
+                ("/ˈmækjʊlət/", ("adj",)),
+            ],
+        )
+        self.assertEqual(verb_audio["tags"], ["Southern-England"])
 
     def test_no_templates1(self):
         self.wxr.wtp.start_page("baz")
@@ -426,10 +753,10 @@ class TestPronunciation(TestCase):
                     {
                         "tags": ["Received-Pronunciation"],
                         "ipa": "/foo/",
-                        "pos": ["noun"],
+                        "pos": ("noun",),
                     },
-                    {"homophone": "feu", "pos": ["noun"]},
-                    {"rhymes": "-oo", "pos": ["noun"]},
+                    {"homophone": "feu", "pos": ("noun",)},
+                    {"rhymes": "-oo", "pos": ("noun",)},
                 ]
             },
         )
@@ -468,7 +795,7 @@ class TestPronunciation(TestCase):
                             "US",
                             "paucal",
                         ],
-                        "note": "Cajun, dual",
+                        "note": "note-text; Cajun, dual",
                         "ipa": "foobaz(ipa accepts parens)",
                     },
                     {
