@@ -8,7 +8,7 @@ from wiktextract.wxr_context import WiktextractContext
 from wiktextract.wxr_logging import logger
 
 from .models import Form, WordEntry
-from .simple_tags import simple_tag_map
+from .tags import TAGS
 from .tags_utils import convert_tags
 
 # Shorthand for this file. Could be an import, but it's so simple...
@@ -111,7 +111,7 @@ def parse_pos_table(
                 )
             if len(lines) == 1:
                 # XXX do tag parsing instead of i == 0; Levenshtein.
-                if text in simple_tag_map:
+                if text in TAGS:
                     # Found something that looks like a tag.
                     if i == 0:
                         row_hdr = text

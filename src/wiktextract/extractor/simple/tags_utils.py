@@ -2,7 +2,7 @@ import re
 
 from .models import Sense
 from .section_titles import POS_DATA
-from .simple_tags import simple_tag_map
+from .tags import TAGS
 from .text_utils import POS_ENDING_NUMBER_RE, STRIP_PUNCTUATION
 
 # If you want to use groups in a regex meant for re.split(), you need to use the
@@ -46,8 +46,8 @@ def convert_tags(raw_tags: list[str]) -> tuple[list[str], list[str], list[str]]:
                 else:
                     pos = s.lower()
                 pposes.append(pos)
-            elif s in simple_tag_map:
-                ttags.extend(simple_tag_map[s])
+            elif s in TAGS:
+                ttags.extend(TAGS[s])
             else:
                 rtags.append(s)
         if len(ttags) > 0 or len(pposes) > 0:
