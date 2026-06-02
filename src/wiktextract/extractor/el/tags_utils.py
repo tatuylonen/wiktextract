@@ -1,7 +1,7 @@
 import re
 
 from .models import Sense
-from .section_titles import POS_HEADINGS
+from .section_titles import POS_DATA
 from .text_utils import ENDING_NUMBER_RE, STRIP_PUNCTUATION, normalized_int
 
 # If you want to use groups in a regex meant for re.split(), you need to use the
@@ -39,7 +39,7 @@ def convert_tags(raw_tags: list[str]) -> tuple[list[str], list[str], list[str]]:
             if m := ENDING_NUMBER_RE.search(s):
                 s = s[: m.start()].strip()
                 pos_num = normalized_int(m.group(1))
-            heading_posmap = POS_HEADINGS.get(s.lower())
+            heading_posmap = POS_DATA.get(s.lower())
             if heading_posmap is not None:
                 # XXX might be better to separate out the POS-number here
                 pos = heading_posmap["pos"]

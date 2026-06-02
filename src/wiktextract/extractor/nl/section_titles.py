@@ -1,6 +1,8 @@
+from ...config import POSSubtitleData
+
 # pos templates
 # https://nl.wiktionary.org/wiki/Categorie:Woordsoortsjablonen
-POS_DATA = {
+POS_DATA: dict[str, POSSubtitleData] = {
     "Afkorting": {"pos": "abbrev", "tags": ["abbreviation"]},
     "Bijvoeglijk naamwoord": {"pos": "adj"},
     "Bijwoord": {"pos": "adv"},

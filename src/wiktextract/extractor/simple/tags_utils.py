@@ -1,7 +1,7 @@
 import re
 
 from .models import Sense
-from .section_titles import POS_HEADINGS
+from .section_titles import POS_DATA
 from .simple_tags import simple_tag_map
 from .text_utils import POS_ENDING_NUMBER_RE, STRIP_PUNCTUATION
 
@@ -39,7 +39,7 @@ def convert_tags(raw_tags: list[str]) -> tuple[list[str], list[str], list[str]]:
             if m := POS_ENDING_NUMBER_RE.search(s):
                 s = s[: m.start()].strip()
                 pos_num = int(m.group(1))
-            if s.lower() in POS_HEADINGS:
+            if s.lower() in POS_DATA:
                 # XXX might be better to separate out the POS-number here
                 if pos_num and pos_num != -1:
                     pos = f"{s.lower()} {pos_num}"

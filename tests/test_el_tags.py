@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from wiktextract.extractor.el.section_titles import (
-    POS_HEADINGS,
+    POS_DATA,
     SUBSECTION_HEADINGS,
 )
 from wiktextract.extractor.el.tags import tag_map, topic_map
@@ -26,7 +26,7 @@ class TestElTags(TestCase):
 
     def test_validate_headings_tags(self) -> None:
         heading_tags: list[str] = []
-        for entry in {**POS_HEADINGS, **SUBSECTION_HEADINGS}.values():
+        for entry in {**POS_DATA, **SUBSECTION_HEADINGS}.values():
             for tag in entry.get("tags", []):
                 if tag not in heading_tags:
                     heading_tags.append(tag)

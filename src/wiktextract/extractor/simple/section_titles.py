@@ -17,7 +17,7 @@ POSMap = TypedDict(
 )
 
 # Main entries for different kinds of POS headings; no aliases
-POS_HEADINGS: dict[str, POSMap] = {
+POS_DATA: dict[str, POSMap] = {
     # "": {"pos": "", "tags": [""], "templates": {"": [""]}},
     "noun": {
         "pos": "noun",
@@ -107,4 +107,4 @@ POS_HEADINGS_MAP = {
 
 
 for k, v in POS_HEADINGS_MAP.items():
-    POS_HEADINGS[k] = POS_HEADINGS[v]
+    POS_DATA[k] = POS_DATA[v]

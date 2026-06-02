@@ -25,13 +25,13 @@ from .linkage import extract_linkage
 from .models import Sense, WordEntry
 from .note import extract_note, extract_recognition_rate_section
 from .pronunciation import extract_homophone_section, extract_pronunciation
-from .section_types import (
+from .section_titles import (
     ETYMOLOGY_SECTIONS,
     IGNORED_SECTIONS,
     INFLECTION_SECTIONS,
     LINKAGE_SECTIONS,
     NOTES_SECTIONS,
-    POS_SECTIONS,
+    POS_DATA,
     PRONUNCIATION_SECTIONS,
     TRANSLATION_SECTIONS,
 )
@@ -62,7 +62,7 @@ def parse_section(
                 pass
             # POS parameters:
             # https://fr.wiktionary.org/wiki/Wiktionnaire:Liste_des_sections_de_types_de_mots
-            elif section_type in POS_SECTIONS:
+            elif section_type in POS_DATA:
                 process_pos_block(
                     wxr,
                     page_data,
@@ -156,7 +156,7 @@ def process_pos_block(
     pos_argument: str,
     pos_title: str,
 ):
-    pos_data = POS_SECTIONS[pos_argument]
+    pos_data = POS_DATA[pos_argument]
     pos_type = pos_data["pos"]
     if len(page_data) == 0 or "pos" in page_data[-1].model_fields_set:
         page_data.append(base_data.model_copy(deep=True))

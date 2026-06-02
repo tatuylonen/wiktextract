@@ -1,4 +1,6 @@
-POS_DATA = {
+from ...config import POSSubtitleData
+
+POS_DATA: dict[str, POSSubtitleData] = {
     "명사": {"pos": "noun"},
     "형용사": {"pos": "adj"},
     "대명사": {"pos": "pron"},

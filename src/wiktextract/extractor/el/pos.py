@@ -34,7 +34,7 @@ from .parse_utils import (
     parse_lower_heading,
     remove_duplicate_forms,
 )
-from .section_titles import POS_HEADINGS, Heading, POSName
+from .section_titles import POS_DATA, Heading, POSName
 from .table import parse_table, process_inflection_section, remove_article_forms
 from .tags_utils import convert_tags_in_sense
 from .text_utils import (
@@ -91,7 +91,7 @@ def process_pos(
                 else:
                     s_pos = sound_pos.strip().lower()
                     s_num = -1
-                sound_meta = POS_HEADINGS[s_pos]
+                sound_meta = POS_DATA[s_pos]
                 s_pos = sound_meta["pos"]
                 if s_pos == data.pos and s_num == data.pos_num:
                     new_sounds.append(sound)

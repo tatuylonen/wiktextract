@@ -1,6 +1,6 @@
 from ...config import POSSubtitleData
 
-POS_TITLES: dict[str, POSSubtitleData] = {
+POS_DATA: dict[str, POSSubtitleData] = {
     "аббревиатура": {"pos": "abbrev"},
     "глагол": {"pos": "verb"},
     "деепричастие": {"pos": "gerund"},

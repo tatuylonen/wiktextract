@@ -1,4 +1,6 @@
-POS_DATA = {
+from ...config import POSSubtitleData
+
+POS_DATA: dict[str, POSSubtitleData] = {
     "takrifan": {"pos": "unknown"},
     "kata nama": {"pos": "noun"},
     "kata kerja": {"pos": "verb"},

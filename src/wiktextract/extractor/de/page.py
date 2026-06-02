@@ -14,7 +14,7 @@ from .inflection import extract_inf_table_template, process_noun_table
 from .linkage import extract_descendant_section, extract_linkages
 from .models import AltForm, Hyphenation, Sense, WordEntry
 from .pronunciation import extract_pronunciation_section
-from .section_titles import FORM_TITLES, LINKAGE_TITLES, POS_SECTIONS
+from .section_titles import FORM_TITLES, LINKAGE_TITLES, POS_DATA
 from .tags import translate_raw_tags
 from .translation import extract_translation
 
@@ -167,8 +167,8 @@ def process_pos_section(
                 continue
             elif pos_argument in FORM_POS:
                 pos_data_list.append({"pos": "unknown", "tags": ["form-of"]})
-            elif pos_argument in POS_SECTIONS:
-                pos_data_list.append(POS_SECTIONS[pos_argument])
+            elif pos_argument in POS_DATA:
+                pos_data_list.append(POS_DATA[pos_argument])
             elif pos_argument == "Gebundenes Lexem":
                 if wxr.wtp.title.startswith("-") and wxr.wtp.title.endswith(
                     "-"

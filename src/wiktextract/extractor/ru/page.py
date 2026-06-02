@@ -35,7 +35,7 @@ from .section_titles import (
     ALT_FORM_SECTIONS,
     LINKAGE_TITLES,
     POS_TEMPLATE_NAMES,
-    POS_TITLES,
+    POS_DATA,
 )
 from .tags import MORPHOLOGICAL_TEMPLATE_TAGS
 from .translation import extract_translations
@@ -101,17 +101,17 @@ def get_pos_from_template(
         if len(pos_text) == 0:
             return
         pos_text = pos_text.split()[0]
-        if pos_text in POS_TITLES:
-            return POS_TITLES[pos_text]
+        if pos_text in POS_DATA:
+            return POS_DATA[pos_text]
 
     if template_name.startswith("прил ru"):
         pos_arg = clean_node(
             wxr, None, template_node.template_parameters.get("часть речи", "")
         ).lower()
         if pos_arg != "":
-            for pos_string in POS_TITLES.keys():
+            for pos_string in POS_DATA.keys():
                 if pos_string in pos_arg:
-                    return POS_TITLES[pos_string]
+                    return POS_DATA[pos_string]
         else:
             return {"pos": "adj"}
 
@@ -144,9 +144,9 @@ def get_pos(
             )
         ),
     )
-    for pos_string in POS_TITLES.keys():
+    for pos_string in POS_DATA.keys():
         if pos_string in text.lower():
-            return POS_TITLES[pos_string]
+            return POS_DATA[pos_string]
 
 
 def extract_morphological_section(
@@ -220,8 +220,8 @@ def parse_section(
         "тип и свойства сочетания",
     ]:
         extract_morphological_section(wxr, page_data, level_node)
-    elif section_title in POS_TITLES:
-        pos_data = POS_TITLES[section_title]
+    elif section_title in POS_DATA:
+        pos_data = POS_DATA[section_title]
         page_data[-1].pos = pos_data["pos"]
         page_data[-1].tags.extend(pos_data.get("tags", []))
         extract_gloss(wxr, page_data[-1], level_node)

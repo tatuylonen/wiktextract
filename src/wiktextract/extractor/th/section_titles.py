@@ -1,4 +1,6 @@
-POS_DATA = {
+from ...config import POSSubtitleData
+
+POS_DATA: dict[str, POSSubtitleData] = {
     "คำกริยา": {"pos": "verb"},
     "คำกริยาวิเศษณ์": {"pos": "adv"},
     "คำคุณศัพท์": {"pos": "adj"},

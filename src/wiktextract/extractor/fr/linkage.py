@@ -7,7 +7,7 @@ from ...wxr_context import WiktextractContext
 from ..ruby import extract_ruby
 from ..share import capture_text_in_parentheses
 from .models import Form, Linkage, WordEntry
-from .section_types import LINKAGE_SECTIONS, LINKAGE_TAGS
+from .section_titles import LINKAGE_SECTIONS, LINKAGE_TAGS
 from .tags import translate_raw_tags
 
 

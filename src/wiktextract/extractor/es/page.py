@@ -21,7 +21,7 @@ from .pronunciation import process_pron_graf_template
 from .section_titles import (
     IGNORED_TITLES,
     LINKAGE_TITLES,
-    POS_TITLES,
+    POS_DATA,
     TRANSLATIONS_TITLES,
 )
 from .translation import extract_translation_section
@@ -63,10 +63,10 @@ def parse_section(
     ]
     if section_title in IGNORED_TITLES:
         pass
-    elif any(key in POS_TITLES for key in pos_keys):
+    elif any(key in POS_DATA for key in pos_keys):
         pos_data = None
         for key in pos_keys:
-            pos_data = POS_TITLES.get(key)
+            pos_data = POS_DATA.get(key)
             if pos_data is not None:
                 break
         if pos_data is not None:

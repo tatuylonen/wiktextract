@@ -1,4 +1,6 @@
-POS_DATA = {
+from ...config import POSSubtitleData
+
+POS_DATA: dict[str, POSSubtitleData] = {
     "Danh từ": {"pos": "noun"},
     "Động từ": {"pos": "verb"},
     "Tính từ": {"pos": "adj"},

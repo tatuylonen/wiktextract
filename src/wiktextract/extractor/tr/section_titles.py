@@ -1,5 +1,7 @@
+from ...config import POSSubtitleData
+
 # https://tr.wiktionary.org/wiki/Vikisözlük:Girdilerin_biçimi#Söz_türü
-POS_DATA = {
+POS_DATA: dict[str, POSSubtitleData] = {
     "Ad": {"pos": "noun"},
     "Adıl": {"pos": "pron"},
     "Bağlaç": {"pos": "conj"},

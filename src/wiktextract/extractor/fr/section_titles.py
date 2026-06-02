@@ -5,7 +5,7 @@ from ...config import POSSubtitleData
 # https://fr.wiktionary.org/wiki/Wiktionnaire:Liste_des_sections
 # https://fr.wiktionary.org/wiki/Wiktionnaire:Liste_des_sections_de_types_de_mots
 # https://fr.wiktionary.org/wiki/Module:types_de_mots/data
-POS_SECTIONS: dict[str, POSSubtitleData] = {
+POS_DATA: dict[str, POSSubtitleData] = {
     "adj": {"pos": "adj"},
     "adj-dém": {"pos": "adj", "tags": ["demonstrative"]},
     "adj-excl": {"pos": "adj", "tags": ["exclamatory"]},

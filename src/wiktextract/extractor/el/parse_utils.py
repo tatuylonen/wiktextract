@@ -9,7 +9,7 @@ from wiktextract.wxr_context import WiktextractContext
 
 from .models import Form, WordEntry
 from .section_titles import (
-    POS_HEADINGS,
+    POS_DATA,
     POS_HEADINGS_RE,
     SUBSECTION_HEADINGS,
     SUBSECTIONS_RE,
@@ -148,7 +148,7 @@ def parse_pos_heading(
         if rest.strip().isdigit():
             post_number = normalized_int(rest.strip())
             # logger.info(f"POST_NUMBER {post_number}")
-    pos_data = POS_HEADINGS[pos_str]
+    pos_data = POS_DATA[pos_str]
     return (
         Heading.POS,
         pos_data["pos"],
