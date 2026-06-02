@@ -831,7 +831,7 @@ POS_TITLE_TAGS = {
 }
 
 
-ALL_TAGS = {
+TAGS = {
     **NUMBER_TAGS,
     **GENDER_TAGS,
     **COMPARISON_TAGS,
@@ -856,8 +856,8 @@ def translate_raw_tags(data: WordEntry | Form):
     raw_tags = []
     for raw_tag in data.raw_tags:
         lower_raw_tag = raw_tag.lower()
-        if lower_raw_tag in ALL_TAGS:
-            tr_tag = ALL_TAGS[lower_raw_tag]
+        if lower_raw_tag in TAGS:
+            tr_tag = TAGS[lower_raw_tag]
             if isinstance(tr_tag, str) and tr_tag not in data.tags:
                 data.tags.append(tr_tag)
             elif isinstance(tr_tag, list):

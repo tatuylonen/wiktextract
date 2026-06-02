@@ -462,7 +462,7 @@ INFLECTION_TABLE_TAGS = {
     "Zählform": "count-form",
 }
 
-GRAMMATICAL_TAGS = {
+TAGS = {
     **K_TEMPLATE_TAGS,
     **GENDER_TAGS,
     **NUMBER_TAGS,
@@ -549,8 +549,8 @@ K_TEMPLATE_TOPICS = {
 def translate_raw_tags(data: WordEntry) -> None:
     raw_tags = []
     for raw_tag in data.raw_tags:
-        if raw_tag in GRAMMATICAL_TAGS:
-            tag = GRAMMATICAL_TAGS[raw_tag]
+        if raw_tag in TAGS:
+            tag = TAGS[raw_tag]
             if isinstance(tag, str) and tag not in data.tags:
                 data.tags.append(tag)
             elif isinstance(tag, list):

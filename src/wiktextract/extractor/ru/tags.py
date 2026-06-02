@@ -602,7 +602,7 @@ MORPHOLOGICAL_TEMPLATE_TAGS = {
     "возвратный": "reflexive",
 }
 
-ALL_TAGS = {
+TAGS = {
     **STYLE_TAGS,
     **GRAMMATICAL_TAGS,
     **OTHER_TAGS,
@@ -620,8 +620,8 @@ def translate_raw_tags(data: WordEntry) -> None:
     raw_tags = []
     for raw_tag in data.raw_tags:
         raw_tag_lower = raw_tag.lower()
-        if raw_tag_lower in ALL_TAGS:
-            tr_data = ALL_TAGS[raw_tag_lower]
+        if raw_tag_lower in TAGS:
+            tr_data = TAGS[raw_tag_lower]
             if isinstance(tr_data, str):
                 data.tags.append(tr_data)
             elif isinstance(tr_data, list):

@@ -5,7 +5,7 @@ from wikitextprocessor.parser import LevelNode, NodeKind, TemplateNode, WikiNode
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .models import AltForm, Sense, WordEntry
-from .tags import GRAMMATICAL_TAGS, translate_raw_tags
+from .tags import TAGS, translate_raw_tags
 from .utils import extract_sense_index
 
 
@@ -181,8 +181,8 @@ def process_form_of_list_item(
                         pos_data = FORM_OF_POS_STRINGS[sense_word]
                     elif sense_word in POS_DATA:
                         pos_data = POS_DATA[sense_word]
-                    elif sense_word in GRAMMATICAL_TAGS:
-                        tr_tag = GRAMMATICAL_TAGS[sense_word]
+                    elif sense_word in TAGS:
+                        tr_tag = TAGS[sense_word]
                         if isinstance(tr_tag, str):
                             sense.tags.append(tr_tag)
                         elif isinstance(tr_tag, list):
