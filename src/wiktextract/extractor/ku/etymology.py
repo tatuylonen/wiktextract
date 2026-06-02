@@ -18,6 +18,8 @@ def extract_etymology_section(
                 e_text = clean_node(wxr, word_entry, list_item.children)
                 if e_text != "":
                     word_entry.etymology_texts.append(e_text)
+        else:
+            e_nodes.append(node)
     if len(e_nodes) > 0:
         e_text = clean_node(wxr, word_entry, e_nodes)
         if e_text != "":
