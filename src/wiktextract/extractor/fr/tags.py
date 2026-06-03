@@ -3,6 +3,7 @@
 # List of templates:
 # https://fr.wiktionary.org/wiki/Wiktionnaire:Liste_de_tous_les_modèles
 from .models import WordEntry
+from .topics import SLANG_TOPICS, TOPIC_TAGS
 
 # https://en.wikipedia.org/wiki/Grammatical_gender
 GENDER_TAGS: dict[str, str | list[str]] = {
@@ -563,10 +564,13 @@ TAGS: dict[str, str | list[str]] = {
     **ASPECT_TAGS,
 }
 
+TOPICS = {
+    **TOPIC_TAGS,
+    **SLANG_TOPICS,
+}
+
 
 def translate_raw_tags(data: WordEntry) -> WordEntry:
-    from .topics import SLANG_TOPICS, TOPIC_TAGS
-
     raw_tags = []
     for raw_tag in data.raw_tags:
         raw_tag_lower = raw_tag.lower()
@@ -578,12 +582,14 @@ def translate_raw_tags(data: WordEntry) -> WordEntry:
                 for t in tr_tag:
                     if t not in data.tags:
                         data.tags.append(t)
-        elif hasattr(data, "topics") and raw_tag_lower in TOPIC_TAGS:
-            data.topics.append(TOPIC_TAGS[raw_tag_lower])
-        elif hasattr(data, "topics") and raw_tag_lower in SLANG_TOPICS:
-            data.topics.append(SLANG_TOPICS[raw_tag_lower])
-            if "slang" not in data.tags:
-                data.tags.append("slang")
+        elif raw_tag_lower in TOPICS and hasattr(data, "topics"):
+            topic = TOPICS[raw_tag_lower]
+            if isinstance(topic, str) and topic not in data.topics:
+                data.topics.append(topic)
+            elif isinstance(topic, dict) and topic["topic"] not in data.topics:
+                data.topics.append(topic["topic"])
+                if topic["tag"] not in data.tags:
+                    data.tags.append(topic["tag"])
         else:
             raw_tags.append(raw_tag)
     data.raw_tags = raw_tags

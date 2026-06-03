@@ -302,7 +302,7 @@ TOPIC_TAGS: dict[str, str] = {
     "transport": "transport",
 }
 
-SLANG_TOPICS = {
+_SLANG_TOPICS = {
     # https://fr.wiktionary.org/wiki/Modèle:argot
     "argot scolaire": "school",
     "argot polytechnicien": "polytechnicien",
@@ -314,4 +314,8 @@ SLANG_TOPICS = {
     "argot des voleurs": "thieves",
     "argot des gadz’arts": "Gadz'Arts",
     "langage sms": "SMS",
+}
+
+SLANG_TOPICS = {
+    k: {"tag": "slang", "topic": v} for k, v in _SLANG_TOPICS.items()
 }
