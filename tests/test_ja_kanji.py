@@ -67,7 +67,7 @@ class TestExtractJaKanji(unittest.TestCase):
         )
 
     def test_extract_ja_kanji_3(self) -> None:
-        # https://ja.wiktionary.org/wiki/文#日本語
+        # https://ja.wiktionary.org/wiki/春#日本語
         data = self._extract_ja_kanji(
             "{{ja-kanji|常用=シュン,はる|施策=教育:2|呉音=*|漢音=シュン|訓=はる}}"
         )
@@ -75,7 +75,7 @@ class TestExtractJaKanji(unittest.TestCase):
         self.assertEqual(
             data.forms,
             [
-                Form(form="*", tags=["transliteration", "go-on"]),
+                Form(form="シュン", tags=["transliteration", "go-on", "joyo"]),
                 Form(form="シュン", tags=["transliteration", "kan-on", "joyo"]),
                 Form(form="はる", tags=["transliteration", "kun", "joyo"]),
             ],
