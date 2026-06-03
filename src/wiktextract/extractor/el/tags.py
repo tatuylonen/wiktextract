@@ -476,7 +476,7 @@ other_tags = {
     "αττικός τύπος": ["Attic"],
 }
 
-topic_map: dict[str, list[str]] = {
+TOPICS: dict[str, list[str]] = {
     "επάγγελμα": ["business"],  # really profession
     "οικονομία": ["business"],  # really economy
     "λογιστική": ["accounting"],
@@ -768,7 +768,7 @@ def translate_raw_tags(taggable: Taggable) -> None:
                 if tag not in taggable.tags:
                     taggable.tags.append(tag)
         else:
-            topics = topic_map.get(clean_raw_tag)
+            topics = TOPICS.get(clean_raw_tag)
             if topics is not None:
                 for topic in topics:
                     if topic not in taggable.topics:
