@@ -4,7 +4,7 @@ from wiktextract.extractor.el.section_titles import (
     POS_DATA,
     SUBSECTION_HEADINGS,
 )
-from wiktextract.extractor.el.tags import TAGS, topic_map
+from wiktextract.extractor.el.tags import TAGS, TOPICS
 from wiktextract.tags import valid_tags
 from wiktextract.topics import valid_topics
 
@@ -39,7 +39,7 @@ class TestElTags(TestCase):
                     self.assertFalse(f"Invalid tag in tag_map: {tag=}")
 
     def test_validate_topics(self) -> None:
-        for topics in topic_map.values():
+        for topics in TOPICS.values():
             for topic in topics:
                 for part in topic.split("-"):
                     if not part.isalpha() or (

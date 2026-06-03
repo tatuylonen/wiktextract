@@ -3,6 +3,7 @@
 # List of templates:
 # https://fr.wiktionary.org/wiki/Wiktionnaire:Liste_de_tous_les_modèles
 from .models import WordEntry
+from .topics import SLANG_TOPICS, TOPIC_TAGS
 
 # https://en.wikipedia.org/wiki/Grammatical_gender
 GENDER_TAGS: dict[str, str | list[str]] = {
@@ -563,27 +564,36 @@ TAGS: dict[str, str | list[str]] = {
     **ASPECT_TAGS,
 }
 
+TOPICS = {
+    **TOPIC_TAGS,
+    **SLANG_TOPICS,
+}
+
+
+def _append(container: list[str], value: str | list[str]) -> None:
+    if isinstance(value, str):
+        if value not in container:
+            container.append(value)
+    elif isinstance(value, list):
+        for t in value:
+            if t not in container:
+                container.append(t)
+
 
 def translate_raw_tags(data: WordEntry) -> WordEntry:
-    from .topics import SLANG_TOPICS, TOPIC_TAGS
-
     raw_tags = []
     for raw_tag in data.raw_tags:
         raw_tag_lower = raw_tag.lower()
         if raw_tag_lower in TAGS:
             tr_tag = TAGS[raw_tag_lower]
-            if isinstance(tr_tag, str) and tr_tag not in data.tags:
-                data.tags.append(tr_tag)
-            elif isinstance(tr_tag, list):
-                for t in tr_tag:
-                    if t not in data.tags:
-                        data.tags.append(t)
-        elif hasattr(data, "topics") and raw_tag_lower in TOPIC_TAGS:
-            data.topics.append(TOPIC_TAGS[raw_tag_lower])
-        elif hasattr(data, "topics") and raw_tag_lower in SLANG_TOPICS:
-            data.topics.append(SLANG_TOPICS[raw_tag_lower])
-            if "slang" not in data.tags:
-                data.tags.append("slang")
+            _append(data.tags, tr_tag)
+        elif raw_tag_lower in TOPICS and hasattr(data, "topics"):
+            topic = TOPICS[raw_tag_lower]
+            if isinstance(topic, str):
+                _append(data.topics, topic)
+            elif isinstance(topic, dict):
+                _append(data.tags, topic["tags"])
+                _append(data.topics, topic["topics"])
         else:
             raw_tags.append(raw_tag)
     data.raw_tags = raw_tags
