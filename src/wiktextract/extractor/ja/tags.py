@@ -147,7 +147,7 @@ TAGS = {
     "助動詞": "auxiliary",
     "卑語": "vulgar",
     "単数形で": "singular",
-    "単数形のみ": "singular singular-only singular",
+    "単数形のみ": "singular-only",
     "印": "India",
     "叙法": "modal",
     "叙述用法のみ": "predicative",
@@ -189,10 +189,9 @@ TAGS = {
     "疑問詞": "interrogative",
     "皮肉": "ironic",
     "破格": "nonstandard",
-    "筋肉": "anatomy",
     "米語": "US",
-    "絶対単数": "singular-only singular",
-    "絶対複数": "plural-only plural",
+    "絶対単数": "singular-only",
+    "絶対複数": "plural-only",
     "能格動詞": "ergative",
     "自他動詞": "ambitransitive",
     "自動詞": "intransitive",
@@ -230,7 +229,7 @@ TAGS = {
     "標準中国語": "Standard-Chinese",
     "ピンイン": "Pinyin",
     "注音符号": "Bopomofo",
-    "ウェード式": "Wade–Giles",
+    "ウェード式": "Wade-Giles",
     "IPA": "IPA",
     "広東語": "Cantonese",
     "改イェール式": ["Yale", "romanization", "Cantonese"],
@@ -272,7 +271,7 @@ TAGS = {
     # Template:日本語ダ活用 日本語サ変活用
     "未然形": "imperfective",
     "連用形": "continuative",
-    "終止形": "terminal",
+    "終止形": "conclusive",
     "連体形": "attributive",
     "仮定形": "hypothetical",
     "命令形": "imperative",
@@ -290,7 +289,7 @@ TAGS = {
     "東京式": "Tokyo",
     "京阪式": ["Kyoto", "Osaka"],
     "推量・意志": "volitional",
-    "様態": "appearance",
+    "様態": "evidential",
     "語幹": "stem",
     # Template:日本語下一段活用
     "意志・勧誘": "volitional",
@@ -571,6 +570,7 @@ TOPICS = {
     "演算": "arithmetic",
     "ゲーム": "games",
     "首都": "capital-city",
+    "筋肉": "anatomy",
 }
 
 

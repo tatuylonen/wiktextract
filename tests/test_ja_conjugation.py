@@ -164,7 +164,7 @@ class TestJaConjugation(TestCase):
                         "全然 形容動詞活用表（日本語の活用）",
                         "タルト活用",
                     ],
-                    "tags": ["terminal"],
+                    "tags": ["conclusive"],
                 },
             ],
         )
@@ -261,13 +261,13 @@ class TestJaConjugation(TestCase):
                     "form": "準静的だ",
                     "raw_tags": ["各活用形の基礎的な結合例", "終止形のみ"],
                     "ruby": [("準静的", "じゅんせいてき")],
-                    "tags": ["definitive", "terminal"],
+                    "tags": ["definitive", "conclusive"],
                 },
                 {
                     "form": "準静的そうだ",
                     "raw_tags": ["各活用形の基礎的な結合例", "語幹 + そうだ"],
                     "ruby": [("準静的", "じゅんせいてき")],
-                    "tags": ["appearance", "stem"],
+                    "tags": ["evidential", "stem"],
                 },
             ],
         )
