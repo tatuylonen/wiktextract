@@ -156,3 +156,150 @@ class TestEnDescendant(TestCase):
                 },
             ],
         )
+
+    def test_badly_formatted_language_names(self):
+        self.wxr.wtp.add_page(
+            "Template:l",
+            10,
+            '<span class="Latn" lang="ine-pro">&#42;glew-t-</span>',
+        )
+        self.wxr.wtp.add_page(
+            "Template:desc",
+            10,
+            """{{#switch:{{{1}}}
+| poz-pnp-pro = Proto-Nuclear Polynesian:
+| poz-pep-pro = Proto-Eastern Polynesian:
+| haw = Hawaiian: <span class="Latn" lang="haw"><a href="/wiki/kapu#Hawaiian" title="kapu">kapu</a></span><ul><li><span class="desc-arr" title="borrowed">→</span> English: <span class="Latn" lang="en"><a href="/wiki/kapu#English" title="kapu">kapu</a></span><link rel="mw-deduplicated-inline-style" href="mw-data:TemplateStyles:r68481116"></li></ul></li>
+| mi = Māori: <span class="Latn" lang="mi"><a href="/wiki/tapu#Māori" title="tapu">tapu</a></span><link rel="mw-deduplicated-inline-style" href="mw-data:TemplateStyles:r68481116">
+| ty = Tahitian: <span class="Latn" lang="ty"><a href="/wiki/tapu#Tahitian" title="tapu">tapu</a></span><link rel="mw-deduplicated-inline-style" href="mw-data:TemplateStyles:r68481116"></li>
+| rap = Rapa Nui: <span class="Latn" lang="rap"><a href="/wiki/tapu#Rapa_Nui" title="tapu">tapu</a></span><link rel="mw-deduplicated-inline-style" href="mw-data:TemplateStyles:r68481116"></li>
+| sm = Samoan: <span class="Latn" lang="sm"><a href="/wiki/tapu#Samoan" title="tapu">tapu</a></span><link rel="mw-deduplicated-inline-style" href="mw-data:TemplateStyles:r68481116">
+| tkl = Tokelauan: <span class="Latn" lang="tkl"><a href="/wiki/tapu#Tokelauan" title="tapu">tapu</a></span><link rel="mw-deduplicated-inline-style" href="mw-data:TemplateStyles:r68481116"></li></ul></li></ul></li>
+| to = Tongan: <span class="Latn" lang="to"><a href="/wiki/tapu#Tongan" title="tapu">tapu</a></span><link rel="mw-deduplicated-inline-style" href="mw-data:TemplateStyles:r68481116">
+| en = <span class="desc-arr" title="borrowed">→</span> English: <span class="Latn" lang="en"><a href="/wiki/taboo#English" title="taboo">taboo</a></span>
+}}""",
+        )
+        data = parse_page(
+            self.wxr,
+            "Reconstruction:Proto-Polynesian/tapu",
+            """==Proto-Polynesian==
+===Adjective===
+# [[taboo]]
+
+====Descendants====
+* {{desc|poz-pnp-pro|-}}
+** {{desc|poz-pep-pro|-}}
+*** Marquesic
+**** {{desc|haw|kapu}}
+*** Tahitic
+**** {{desc|mi|tapu}}
+**** {{desc|ty|tapu}}
+*** {{desc|rap|tapu}}
+** Samoic-Outlier
+*** Samoic
+**** {{desc|sm|tapu}}
+**** {{desc|tkl|tapu}}
+* Tongic
+** {{desc|to|tapu}}
+*** {{desc|en|taboo|bor=1}}
+""",
+        )
+        print(data[0]["descendants"])
+        self.assertEqual(
+            data[0]["descendants"],
+            [
+                {
+                    "lang_code": "poz-pnp-pro",
+                    "lang": "Proto-Nuclear Polynesian",
+                    "descendants": [
+                        {
+                            "lang_code": "poz-pep-pro",
+                            "lang": "Proto-Eastern Polynesian",
+                            "descendants": [
+                                {
+                                    "lang_code": "unknown",
+                                    "lang": "Marquesic",
+                                    "descendants": [
+                                        {
+                                            "lang": "Hawaiian",
+                                            "lang_code": "haw",
+                                            "word": "kapu",
+                                            "descendants": [
+                                                {
+                                                    "lang": "English",
+                                                    "lang_code": "en",
+                                                    "word": "kapu",
+                                                    "raw_tags": ["borrowed"],
+                                                }
+                                            ],
+                                        }
+                                    ],
+                                },
+                                {
+                                    "lang_code": "unknown",
+                                    "lang": "Tahitic",
+                                    "descendants": [
+                                        {
+                                            "lang": "Māori",
+                                            "lang_code": "mi",
+                                            "word": "tapu",
+                                        },
+                                        {
+                                            "lang": "Tahitian",
+                                            "lang_code": "ty",
+                                            "word": "tapu",
+                                        },
+                                    ],
+                                },
+                                {
+                                    "lang": "Rapa Nui",
+                                    "lang_code": "rap",
+                                    "word": "tapu",
+                                },
+                            ],
+                        },
+                        {
+                            "lang_code": "unknown",
+                            "lang": "Samoic-Outlier",
+                            "descendants": [
+                                {
+                                    "lang_code": "unknown",
+                                    "lang": "Samoic",
+                                    "descendants": [
+                                        {
+                                            "lang": "Samoan",
+                                            "lang_code": "sm",
+                                            "word": "tapu",
+                                        },
+                                        {
+                                            "lang": "Tokelauan",
+                                            "lang_code": "tkl",
+                                            "word": "tapu",
+                                        },
+                                    ],
+                                }
+                            ],
+                        },
+                    ],
+                },
+                {
+                    "lang_code": "unknown",
+                    "lang": "Tongic",
+                    "descendants": [
+                        {
+                            "lang": "Tongan",
+                            "lang_code": "to",
+                            "word": "tapu",
+                            "descendants": [
+                                {
+                                    "lang": "English",
+                                    "lang_code": "en",
+                                    "word": "taboo",
+                                    "raw_tags": ["borrowed"],
+                                }
+                            ],
+                        }
+                    ],
+                },
+            ],
+        )
