@@ -270,6 +270,10 @@ TAGS = {
     **OTHER_TAGS,
 }
 
+TOPICS = {
+    **TERM_TEMPLATE_TOPICS,
+}
+
 
 def translate_raw_tags(data: WordEntry) -> None:
     raw_tags = []
@@ -280,8 +284,8 @@ def translate_raw_tags(data: WordEntry) -> None:
                 data.tags.append(tr_tag)
             elif isinstance(tr_tag, list):
                 data.tags.extend(tr_tag)
-        elif raw_tag in TERM_TEMPLATE_TOPICS and hasattr(data, "topics"):
-            data.topics.append(TERM_TEMPLATE_TOPICS[raw_tag])
+        elif raw_tag in TOPICS and hasattr(data, "topics"):
+            data.topics.append(TOPICS[raw_tag])
         else:
             raw_tags.append(raw_tag)
     data.raw_tags = raw_tags

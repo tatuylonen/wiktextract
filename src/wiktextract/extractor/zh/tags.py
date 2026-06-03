@@ -639,6 +639,10 @@ TAGS = {
     "新西蘭": "New-Zealand",
 }
 
+TOPICS = {
+    **LABEL_TOPICS,
+}
+
 
 def translate_raw_tags(data: WordEntry) -> WordEntry:
     raw_tags = []
@@ -649,8 +653,8 @@ def translate_raw_tags(data: WordEntry) -> WordEntry:
                 data.tags.append(tr_tag)
             elif isinstance(tr_tag, list):
                 data.tags.extend(tr_tag)
-        elif raw_tag in LABEL_TOPICS and hasattr(data, "topics"):
-            data.topics.append(LABEL_TOPICS[raw_tag])
+        elif raw_tag in TOPICS and hasattr(data, "topics"):
+            data.topics.append(TOPICS[raw_tag])
         elif raw_tag not in raw_tags:
             raw_tags.append(raw_tag)
     data.raw_tags = raw_tags

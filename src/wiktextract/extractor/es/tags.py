@@ -851,6 +851,10 @@ TAGS = {
     "sin género": ["masculine", "feminine"],
 }
 
+TOPICS = {
+    **CSEM_TOPICS,
+}
+
 
 def translate_raw_tags(data: WordEntry | Form):
     raw_tags = []
@@ -864,8 +868,8 @@ def translate_raw_tags(data: WordEntry | Form):
                 for tag in tr_tag:
                     if tag not in data.tags:
                         data.tags.append(tag)
-        elif lower_raw_tag in CSEM_TOPICS and hasattr(data, "topics"):
-            data.topics.append(CSEM_TOPICS[lower_raw_tag])
+        elif lower_raw_tag in TOPICS and hasattr(data, "topics"):
+            data.topics.append(TOPICS[lower_raw_tag])
         elif raw_tag in AMBITO_TAGS:
             tr_tag = AMBITO_TAGS[raw_tag]
             if isinstance(tr_tag, str) and tr_tag not in data.tags:

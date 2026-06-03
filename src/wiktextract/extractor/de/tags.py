@@ -545,6 +545,10 @@ K_TEMPLATE_TOPICS = {
     "Elektrotechnik": "electrical-engineering",
 }
 
+TOPICS = {
+    **K_TEMPLATE_TOPICS,
+}
+
 
 def translate_raw_tags(data: WordEntry) -> None:
     raw_tags = []
@@ -557,8 +561,8 @@ def translate_raw_tags(data: WordEntry) -> None:
                 for t in tag:
                     if t not in data.tags:
                         data.tags.append(t)
-        elif raw_tag in K_TEMPLATE_TOPICS and hasattr(data, "topics"):
-            topic = K_TEMPLATE_TOPICS[raw_tag]
+        elif raw_tag in TOPICS and hasattr(data, "topics"):
+            topic = TOPICS[raw_tag]
             if isinstance(topic, str) and topic not in data.topics:
                 data.topics.append(topic)
             elif isinstance(topic, dict) and topic["topic"] not in data.topics:
