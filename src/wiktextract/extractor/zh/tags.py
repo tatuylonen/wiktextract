@@ -600,7 +600,7 @@ TH_PRON_TAGS = {
 }
 
 
-ALL_TAGS = {
+TAGS = {
     **GRAMMATICAL_TAGS,
     **LABEL_TAGS,
     **ZH_X_TAGS,
@@ -643,8 +643,8 @@ ALL_TAGS = {
 def translate_raw_tags(data: WordEntry) -> WordEntry:
     raw_tags = []
     for raw_tag in data.raw_tags:
-        if raw_tag in ALL_TAGS:
-            tr_tag = ALL_TAGS[raw_tag]
+        if raw_tag in TAGS:
+            tr_tag = TAGS[raw_tag]
             if isinstance(tr_tag, str) and tr_tag not in data.tags:
                 data.tags.append(tr_tag)
             elif isinstance(tr_tag, list):

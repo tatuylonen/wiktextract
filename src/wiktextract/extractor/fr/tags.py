@@ -542,7 +542,7 @@ ASPECT_TAGS = {
     "imperfectif": "imperfective",  # Modèle:imperfectif
 }
 
-GRAMMATICAL_TAGS: dict[str, str | list[str]] = {
+TAGS: dict[str, str | list[str]] = {
     **GENDER_TAGS,
     **NUMBER_TAGS,
     **MOOD_TAGS,
@@ -570,8 +570,8 @@ def translate_raw_tags(data: WordEntry) -> WordEntry:
     raw_tags = []
     for raw_tag in data.raw_tags:
         raw_tag_lower = raw_tag.lower()
-        if raw_tag_lower in GRAMMATICAL_TAGS:
-            tr_tag = GRAMMATICAL_TAGS[raw_tag_lower]
+        if raw_tag_lower in TAGS:
+            tr_tag = TAGS[raw_tag_lower]
             if isinstance(tr_tag, str) and tr_tag not in data.tags:
                 data.tags.append(tr_tag)
             elif isinstance(tr_tag, list):

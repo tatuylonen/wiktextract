@@ -4,7 +4,7 @@ from wiktextract.extractor.el.section_titles import (
     POS_DATA,
     SUBSECTION_HEADINGS,
 )
-from wiktextract.extractor.el.tags import tag_map, topic_map
+from wiktextract.extractor.el.tags import TAGS, topic_map
 from wiktextract.tags import valid_tags
 from wiktextract.topics import valid_topics
 
@@ -16,7 +16,7 @@ class TestElTags(TestCase):
         # extractor but also applicable to other extractors: these are the tags
         # that should be used for tagging. Can be added to when needed, but
         # often there's already an equivalent tag with a slightly different name.
-        for tags in tag_map.values():
+        for tags in TAGS.values():
             for tag in tags:
                 for part in tag.split("-"):
                     if not part.isalpha() or (

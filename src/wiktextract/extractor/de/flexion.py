@@ -12,7 +12,7 @@ from wikitextprocessor.parser import (
 from ...page import clean_node
 from ...wxr_context import WiktextractContext
 from .models import Form, WordEntry
-from .tags import GRAMMATICAL_TAGS, translate_raw_tags
+from .tags import TAGS, translate_raw_tags
 
 
 def parse_flexion_page(
@@ -37,9 +37,7 @@ def parse_flexion_page(
                 section_str = clean_node(wxr, None, node.largs)
                 for word in section_str.split(" "):
                     word = word.strip(", ")
-                    if word in GRAMMATICAL_TAGS and not page_title.endswith(
-                        f":{word}"
-                    ):
+                    if word in TAGS and not page_title.endswith(f":{word}"):
                         shared_raw_tags.append(word)
                 for raw_tag in LEVEL2_TAGS:
                     if raw_tag in section_str:

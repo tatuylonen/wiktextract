@@ -679,7 +679,7 @@ DONTCARES = {
     "πρόσωπα πτώσεις": [],
 }
 
-tag_map: dict[str, list[str]] = {
+TAGS: dict[str, list[str]] = {
     **DONTCARES,
     **verb_table_tags_base,
     **english_tables_tags,
@@ -762,7 +762,7 @@ def translate_raw_tags(taggable: Taggable) -> None:
     """
     for raw_tag in taggable.raw_tags:
         clean_raw_tag = raw_tag.replace("\n", " ").lower()
-        tags = tag_map.get(clean_raw_tag)
+        tags = TAGS.get(clean_raw_tag)
         if tags is not None:
             for tag in tags:
                 if tag not in taggable.tags:
