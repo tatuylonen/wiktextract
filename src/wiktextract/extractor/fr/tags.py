@@ -576,7 +576,8 @@ def _append(container: list[str], value: str | list[str]) -> None:
             container.append(value)
     elif isinstance(value, list):
         for t in value:
-            _append(container, t)
+            if t not in container:
+                container.append(t)
 
 
 def translate_raw_tags(data: WordEntry) -> WordEntry:
