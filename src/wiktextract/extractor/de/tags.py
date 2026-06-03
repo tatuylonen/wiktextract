@@ -499,7 +499,7 @@ K_TEMPLATE_TOPICS = {
     "Systematik": "systematics",
     "Zoologie": "zoology",
     "Seefahrt": "seafaring",
-    "Soldatensprache": {"topic": "military", "tag": "slang"},
+    "Soldatensprache": {"tags": "slang", "topics": "military"},
     "Botanik": "botany",
     "Marine": "navy",
     "Informationstechnologie": "computing",
@@ -550,25 +550,28 @@ TOPICS = {
 }
 
 
+def _append(container: list[str], value: str | list[str]) -> None:
+    if isinstance(value, str):
+        if value not in container:
+            container.append(value)
+    elif isinstance(value, list):
+        for t in value:
+            _append(container, t)
+
+
 def translate_raw_tags(data: WordEntry) -> None:
     raw_tags = []
     for raw_tag in data.raw_tags:
         if raw_tag in TAGS:
             tag = TAGS[raw_tag]
-            if isinstance(tag, str) and tag not in data.tags:
-                data.tags.append(tag)
-            elif isinstance(tag, list):
-                for t in tag:
-                    if t not in data.tags:
-                        data.tags.append(t)
+            _append(data.tags, tag)
         elif raw_tag in TOPICS and hasattr(data, "topics"):
             topic = TOPICS[raw_tag]
-            if isinstance(topic, str) and topic not in data.topics:
-                data.topics.append(topic)
-            elif isinstance(topic, dict) and topic["topic"] not in data.topics:
-                data.topics.append(topic["topic"])
-                if topic["tag"] not in data.tags:
-                    data.tags.append(topic["tag"])
+            if isinstance(topic, str):
+                _append(data.topics, topic)
+            elif isinstance(topic, dict):
+                _append(data.tags, topic["tags"])
+                _append(data.topics, topic["topics"])
         else:
             raw_tags.append(raw_tag)
     data.raw_tags = raw_tags

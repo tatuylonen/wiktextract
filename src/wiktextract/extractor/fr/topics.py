@@ -317,5 +317,5 @@ _SLANG_TOPICS = {
 }
 
 SLANG_TOPICS = {
-    k: {"tag": "slang", "topic": v} for k, v in _SLANG_TOPICS.items()
+    k: {"tags": "slang", "topics": v} for k, v in _SLANG_TOPICS.items()
 }

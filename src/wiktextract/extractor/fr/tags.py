@@ -570,26 +570,29 @@ TOPICS = {
 }
 
 
+def _append(container: list[str], value: str | list[str]) -> None:
+    if isinstance(value, str):
+        if value not in container:
+            container.append(value)
+    elif isinstance(value, list):
+        for t in value:
+            _append(container, t)
+
+
 def translate_raw_tags(data: WordEntry) -> WordEntry:
     raw_tags = []
     for raw_tag in data.raw_tags:
         raw_tag_lower = raw_tag.lower()
         if raw_tag_lower in TAGS:
             tr_tag = TAGS[raw_tag_lower]
-            if isinstance(tr_tag, str) and tr_tag not in data.tags:
-                data.tags.append(tr_tag)
-            elif isinstance(tr_tag, list):
-                for t in tr_tag:
-                    if t not in data.tags:
-                        data.tags.append(t)
+            _append(data.tags, tr_tag)
         elif raw_tag_lower in TOPICS and hasattr(data, "topics"):
             topic = TOPICS[raw_tag_lower]
-            if isinstance(topic, str) and topic not in data.topics:
-                data.topics.append(topic)
-            elif isinstance(topic, dict) and topic["topic"] not in data.topics:
-                data.topics.append(topic["topic"])
-                if topic["tag"] not in data.tags:
-                    data.tags.append(topic["tag"])
+            if isinstance(topic, str):
+                _append(data.topics, topic)
+            elif isinstance(topic, dict):
+                _append(data.tags, topic["tags"])
+                _append(data.topics, topic["topics"])
         else:
             raw_tags.append(raw_tag)
     data.raw_tags = raw_tags
