@@ -72,7 +72,7 @@ def extract_cjkv_template(
 def extract_desc_list_item(
     wxr: WiktextractContext,
     list_item: WikiNode,
-    parent_data: list[DescendantData],
+    parent_descendant_datas: list[DescendantData],
     seen_lists: set[WikiNode],
     raw_tags: list[str],
     lang_code: str = "unknown",
@@ -83,11 +83,19 @@ def extract_desc_list_item(
     before_word_raw_tags = []
     after_word = False
     for child in list_item.children:
-        if isinstance(child, str) and child.strip().endswith(":"):
-            lang_name = child.strip(": \n") or "unknown"
-            lang_code = name_to_code(lang_name, "en") or "unknown"
-        elif isinstance(child, str) and child.strip() == ",":
-            after_word = False
+        if isinstance(child, str):
+            child = child.strip()
+            if child == ",":
+                after_word = False
+            elif child.endswith(":"):
+                lang_name = child.strip(": \n") or "unknown"
+                lang_code = name_to_code(lang_name, "en") or "unknown"
+            elif lcode := name_to_code(child):
+                lang_name = child
+                lang_code = lcode
+            elif lname := does_text_look_like_language_name(child):
+                lang_name = lname
+                lang_code = name_to_code(lang_name, "en") or "unknown"
         elif isinstance(child, HTMLNode) and child.tag == "span":
             after_word = extract_desc_span_tag(
                 wxr,
@@ -146,10 +154,8 @@ def extract_desc_list_item(
             lang_code = new_l_code
             lang_name = new_l_name
 
-    if (
-        wxr.wtp.title.startswith("Reconstruction:")
-        and len(data_list) == 0
-        and (lang_code != "unknown" or lang_name != "unknown")
+    if len(data_list) == 0 and (
+        lang_code != "unknown" or lang_name != "unknown"
     ):
         data = DescendantData(lang_code=lang_code, lang=lang_name)
         if len(raw_tags) > 0:
@@ -168,7 +174,7 @@ def extract_desc_list_item(
                 wxr, next_list_item, data_list, seen_lists, []
             )
 
-    for p_data in parent_data:
+    for p_data in parent_descendant_datas:
         data_extend(p_data, "descendants", data_list)
     return data_list, lang_code, lang_name
 
@@ -251,3 +257,19 @@ def extract_desc_span_tag(
             desc_lists[-1]["sense"] = sense
 
     return after_word
+
+
+def does_text_look_like_language_name(text: str) -> str | None:
+    text = text.strip()
+    if not text:
+        return None
+    split_text = text.replace("-", " ").split()
+    if any(name_to_code(s.strip(), "en") for s in split_text):
+        return text
+    if len(split_text) >= 2:
+        if all(s != "" and s[0].isupper() for s in split_text):
+            return text
+    # len(text) == 1
+    elif text.endswith(("ic", "ish", "an")):
+        return text
+    return None

@@ -6489,6 +6489,7 @@ valid_tags = {
     "-il-conjugation": "class",
     "-ul-conjugation": "class",
     "u-type": "class",
+    "derived": "misc",
 }
 
 for k, v in valid_tags.items():
