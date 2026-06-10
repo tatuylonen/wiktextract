@@ -965,6 +965,9 @@ def parse_language(
     elif word.startswith("Reconstruction:"):
         word = word[word.find("/") + 1 :]
         is_reconstruction = True
+    elif word.startswith("a/languages"):
+        # ATM there's only one "mammoth page" in English wiktionary, 'a'
+        word = "a"
 
     base_data: WordData = {
         "word": word,
