@@ -72,7 +72,7 @@ def extract_cjkv_template(
 def extract_desc_list_item(
     wxr: WiktextractContext,
     list_item: WikiNode,
-    parent_data: list[DescendantData],
+    parent_descendant_datas: list[DescendantData],
     seen_lists: set[WikiNode],
     raw_tags: list[str],
     lang_code: str = "unknown",
@@ -84,13 +84,14 @@ def extract_desc_list_item(
     after_word = False
     for child in list_item.children:
         if isinstance(child, str):
-            if child.strip() == ",":
+            child = child.strip()
+            if child == ",":
                 after_word = False
-            elif child.strip().endswith(":"):
+            elif child.endswith(":"):
                 lang_name = child.strip(": \n") or "unknown"
                 lang_code = name_to_code(lang_name, "en") or "unknown"
-            elif lcode := name_to_code(child.strip()):
-                lang_name = child.strip()
+            elif lcode := name_to_code(child):
+                lang_name = child
                 lang_code = lcode
             elif lname := does_text_look_like_language_name(child):
                 lang_name = lname
@@ -153,10 +154,8 @@ def extract_desc_list_item(
             lang_code = new_l_code
             lang_name = new_l_name
 
-    if (
-        wxr.wtp.title.startswith("Reconstruction:")
-        and len(data_list) == 0
-        and (lang_code != "unknown" or lang_name != "unknown")
+    if len(data_list) == 0 and (
+        lang_code != "unknown" or lang_name != "unknown"
     ):
         data = DescendantData(lang_code=lang_code, lang=lang_name)
         if len(raw_tags) > 0:
@@ -175,7 +174,7 @@ def extract_desc_list_item(
                 wxr, next_list_item, data_list, seen_lists, []
             )
 
-    for p_data in parent_data:
+    for p_data in parent_descendant_datas:
         data_extend(p_data, "descendants", data_list)
     return data_list, lang_code, lang_name
 
