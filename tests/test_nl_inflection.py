@@ -550,3 +550,17 @@ class TestNlInflection(TestCase):
             nl_split_cell("treinsurfde\ntreinsurfte"),
             ["treinsurfde", "treinsurfte"],
         )
+
+    def test_split_cell_should_fail_1(self):
+        # Remove me when not needed anymore
+        self.assertEqual(
+            nl_split_cell("foo/baz treinsurfde\ntreinsurfte"),
+            ["foo/baz treinsurfde\ntreinsurfte"],
+        )
+
+    def test_split_cell_should_fail_2(self):
+        # Remove me when not needed anymore
+        self.assertEqual(
+            nl_split_cell("foo(baz) treinsurfde\ntreinsurfte"),
+            ["foo(baz) treinsurfde\ntreinsurfte"],
+        )
