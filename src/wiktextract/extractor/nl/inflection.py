@@ -275,17 +275,7 @@ def extract_nlverb_template(
                         small_tag = cell_str
                         col_index += cell_colspan
                         continue
-                    form_texts = [cell_str]
-                    if "/ " in cell_str:  # "zweerde/ zwoor"
-                        form_texts = cell_str.split("/")
-                    elif "/" in cell_str and " " in cell_str:
-                        # "zult/zal zweren" -> ["zult zweren", "zal zweren"]
-                        space_index = cell_str.index(" ")
-                        second_part = cell_str[space_index:]
-                        form_texts = [
-                            f_str + second_part
-                            for f_str in cell_str[:space_index].split("/")
-                        ]
+                    form_texts = nl_split_cell(cell_str)
                     for form_str in form_texts:
                         form_str = form_str.strip()
                         if len(form_str) == 0:
@@ -450,3 +440,29 @@ def extract_dumverb_table(
                     word_entry.forms.append(form)
                 col_index += cell_colspan
         last_row_all_header = current_row_all_header
+
+
+def nl_split_cell(text: str) -> list[str]:
+    if not text:
+        return []
+    if "/ " in text:  # "zweerde/ zwoor"
+        form_texts = [s.strip() for s in text.split("/")]
+    elif "/" in text and " " in text:
+        # "zult/zal zweren" -> ["zult zweren", "zal zweren"]
+        space_index = text.index(" ")
+        second_part = text[space_index:]
+        form_texts = [
+            (f_str + second_part).strip()
+            for f_str in text[:space_index].split("/")
+        ]
+    elif m := re.match(r"([^()]+)\(([^)]+)\)(.+)", text):
+        # "zou(dt) treinsurfen" -> ["zou treinsurfen", "zoudt treinsurfen"]
+        form_texts = [
+            m.group(1) + m.group(3),
+            m.group(1) + m.group(2) + m.group(3),
+            ]
+    elif "\n" in text:
+        form_texts = [s.strip() for s in text.split("\n")]
+    else:
+        form_texts = [text]
+    return form_texts
