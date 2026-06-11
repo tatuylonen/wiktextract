@@ -3,6 +3,7 @@ from unittest import TestCase
 from wikitextprocessor import Wtp
 
 from wiktextract.config import WiktionaryConfig
+from wiktextract.extractor.nl.inflection import nl_split_cell
 from wiktextract.extractor.nl.page import parse_page
 from wiktextract.wxr_context import WiktextractContext
 
@@ -517,4 +518,35 @@ class TestNlInflection(TestCase):
                     "source": "graven/vervoeging",
                 },
             ],
+        )
+
+
+    def test_split_cell_1(self):
+        self.assertEqual(
+            nl_split_cell(""),
+            [],
+        )
+
+    def test_split_cell_2(self):
+        self.assertEqual(
+            nl_split_cell("zweerde/ zwoor"),
+            ["zweerde", "zwoor"],
+        )
+
+    def test_split_cell_3(self):
+        self.assertEqual(
+            nl_split_cell("zult/zal zweren"),
+            ["zult zweren", "zal zweren"],
+        )
+
+    def test_split_cell_4(self):
+        self.assertEqual(
+            nl_split_cell("zou(dt) treinsurfen"),
+            ["zou treinsurfen", "zoudt treinsurfen"],
+        )
+
+    def test_split_cell_5(self):
+        self.assertEqual(
+            nl_split_cell("treinsurfde\ntreinsurfte"),
+            ["treinsurfde", "treinsurfte"],
         )
