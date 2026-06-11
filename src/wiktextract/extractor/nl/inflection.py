@@ -445,6 +445,9 @@ def extract_dumverb_table(
 def nl_split_cell(text: str) -> list[str]:
     if not text:
         return []
+    if ("/" in text) + ("\n" in text) + ("(" in text) > 1:
+        # Leave messy entries alone; remove this when not applicable anymore
+        return [text]
     if "/ " in text:  # "zweerde/ zwoor"
         form_texts = [s.strip() for s in text.split("/")]
     elif "/" in text and " " in text:
