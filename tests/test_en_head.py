@@ -1476,7 +1476,6 @@ class HeadTests(unittest.TestCase):
 """
         )
         langret = parse_language(self.wxr, parsed.children[0], "English", "en")
-        print(langret)
         self.assertEqual(self.wxr.wtp.warnings, [])
         self.assertEqual(self.wxr.wtp.debugs, [])
         self.assertEqual(len(langret[0]["forms"]), 1)
@@ -1486,4 +1485,40 @@ class HeadTests(unittest.TestCase):
                 "tags": ["ergative"],
                 "form": "testpagoo",
             },
+        )
+
+    def test_etymon_in_head(self):
+        self.wxr.wtp.add_page(
+            "Template:etymon",
+            10,
+            "<span></span>",  # can't add empty page
+        )
+        self.wxr.wtp.add_page(
+            "Template:ine-root",
+            10,
+            """<span class="headword-line"><strong class="Latn headword" lang="ine-pro">&#42;bʰeh₂-</strong> (<i>imperfective</i>)</span>[[Category:Proto-Indo-European lemmas|B¯HEH2-]][[Category:Proto-Indo-European roots|B¯HEH2-]][[Category:Proto-Indo-European CeH-shaped roots|B¯HEH2-]][[Category:Proto-Indo-European imperfective roots|B¯HEH2-]][[Category:Proto-Indo-European entries with incorrect language header|B¯HEH2-]][[Category:Pages with entries|BʰEH₂-]][[Category:Pages with 1 entry|BʰEH₂-]]""",
+        )
+        parsed = self.wxr.wtp.parse(
+            """==Proto-Indo-European==
+
+===Root 1===
+{{etymon|ine-pro|id=shine|pos=root}}
+{{ine-root|impf}}
+
+# to [[shine]], glow [[light]]
+"""
+        )
+        langret = parse_language(
+            self.wxr, parsed.children[0], "Proto-Indo-European", "ine-pro"
+        )
+        self.assertEqual(len(langret[0]["forms"]), 1)
+        self.assertEqual(
+            langret[0]["etymology_templates"],
+            [
+                {
+                    "name": "etymon",
+                    "args": {"1": "ine-pro", "id": "shine", "pos": "root"},
+                    "expansion": "",
+                }
+            ],
         )

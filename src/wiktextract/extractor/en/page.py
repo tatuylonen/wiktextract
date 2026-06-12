@@ -277,6 +277,17 @@ HEAD_TAG_RE = re.compile(
 # data for later.
 WORD_LEVEL_HEAD_TEMPLATES = {"term-label", "tlb"}
 
+# Annoying templates that should be in etymology sections, but sometimes
+# are thrown in heads because the etymology section is missing, like at
+# the oldest level of a reconstruction: see wiktextract#1658
+ETYMOLOGY_TEMPLATES_IN_HEADS = {
+    "etymon",
+}
+
+PROBLEMATIC_TEMPLATES_CLUMP = (
+    WORD_LEVEL_HEAD_TEMPLATES | ETYMOLOGY_TEMPLATES_IN_HEADS
+)
+
 FLOATING_TABLE_TEMPLATES: set[str] = {
     # az-suffix-form creates a style=floatright div that is otherwise
     # deleted; if it is not pre-expanded, we can intercept the template
@@ -1544,7 +1555,7 @@ def parse_language(
                 data_append(pos_data, "tags", "romanization")
         if (
             HEAD_TAG_RE.search(name) is not None
-            or name in WORD_LEVEL_HEAD_TEMPLATES
+            or name in PROBLEMATIC_TEMPLATES_CLUMP
         ):
             args_ht = clean_template_args(wxr, ht)
             cleaned_expansion = clean_node(wxr, None, expansion)
@@ -1553,7 +1564,10 @@ def parse_language(
                 "args": args_ht,
                 "expansion": cleaned_expansion,
             }
-            data_append(pos_data, "head_templates", dt)
+            if name in ETYMOLOGY_TEMPLATES_IN_HEADS:
+                data_append(pos_data, "etymology_templates", dt)
+            else:
+                data_append(pos_data, "head_templates", dt)
             if name in WORD_LEVEL_HEAD_TEMPLATES:
                 term_label_templates.append(dt)
                 # Squash these, their tags are applied to the whole word,
