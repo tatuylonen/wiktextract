@@ -17,6 +17,10 @@ def extract_example_list_item(
     parent_data: ExampleData,
 ) -> list[ExampleData]:
     examples = []
+    if "tags" not in parent_data:
+        parent_data["tags"] = []
+    if "raw_tags" not in parent_data:
+        parent_data["raw_tags"] = []
     for template_node in list_item.find_child(NodeKind.TEMPLATE):
         if template_node.template_name in ["zh-x", "zh-usex", "zh-q", "zh-co"]:
             examples.extend(
@@ -295,21 +299,13 @@ def extract_template_zh_x(
             if span_lang in ["zh-Hant", "zh-Hans"]:
                 example_text = clean_node(wxr, None, span_tag)
                 if len(example_text) > 0:
-                    new_example = deepcopy(example_data)
-                    new_example["text"] = example_text
-                    calculate_bold_offsets(
+                    new_example = add_zh_hant_hans_spans(
                         wxr,
-                        span_tag,
+                        example_data,
                         example_text,
-                        new_example,
-                        "bold_text_offsets",
+                        span_tag,
+                        span_lang,
                     )
-                    new_example["tags"].append(
-                        "Traditional-Chinese"
-                        if span_lang == "zh-Hant"
-                        else "Simplified-Chinese"
-                    )
-                    clean_example_empty_data(new_example)
                     results.append(new_example)
     return results
 
@@ -323,14 +319,12 @@ def extract_zh_x_dl_span_tag(
     for span_tag in dl_tag.find_html("span"):
         span_lang = span_tag.attrs.get("lang", "")
         if span_lang in ["zh-Hant", "zh-Hans"]:
-            new_example = deepcopy(example)
-            new_example["text"] = clean_node(wxr, None, span_tag)
-            calculate_bold_offsets(
+            new_example = add_zh_hant_hans_spans(
                 wxr,
+                example,
+                clean_node(wxr, None, span_tag),
                 span_tag,
-                new_example["text"],
-                new_example,
-                "bold_text_offsets",
+                span_lang,
             )
             results.append(new_example)
         elif "vsHide" in span_tag.attrs.get("class", ""):
@@ -465,3 +459,24 @@ def extract_ux_template(
 
     clean_example_empty_data(example_data)
     return example_data
+
+
+def add_zh_hant_hans_spans(
+    wxr, example_data, example_text, span_tag, span_lang
+):
+    new_example = deepcopy(example_data)
+    new_example["text"] = example_text
+    calculate_bold_offsets(
+        wxr,
+        span_tag,
+        example_text,
+        new_example,
+        "bold_text_offsets",
+    )
+    new_example["tags"].append(
+        "Traditional-Chinese"
+        if span_lang == "zh-Hant"
+        else "Simplified-Chinese"
+    )
+    clean_example_empty_data(new_example)
+    return new_example
