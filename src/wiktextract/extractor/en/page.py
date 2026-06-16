@@ -1693,7 +1693,6 @@ def parse_language(
                     isinstance(node, TemplateNode)
                     and node.template_name == "vi-readings"
                 ):
-                    print(node.template_parameters)
                     for parameter, tag in (
                         ("hanviet", "han-viet-reading"),
                         ("nom", "nom-reading"),
