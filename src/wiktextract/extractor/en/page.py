@@ -369,6 +369,9 @@ PANEL_TEMPLATES: set[str] = {
     "French possessive adjectives",
     "French possessive pronouns",
     "Han etym",
+    "Han etyl",  # this redirects to Han etym and would cause Lua errors,
+                 # and I don't know why, but I'm putting it here because
+                 # we should be ignoring it anyhow.
     "Japanese demonstratives",
     "Latn-script",
     "LDL",
@@ -1693,7 +1696,6 @@ def parse_language(
                     isinstance(node, TemplateNode)
                     and node.template_name == "vi-readings"
                 ):
-                    print(node.template_parameters)
                     for parameter, tag in (
                         ("hanviet", "han-viet-reading"),
                         ("nom", "nom-reading"),
