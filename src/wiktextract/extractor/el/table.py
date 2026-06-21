@@ -287,8 +287,8 @@ def parse_table(
     # If we come across a header that has those exact same bookends, only
     # then do we replace the previous tags with it; if you have overlapping
     # 'widths', leave them so that we inherit different 'levels' of headers.
-    Spread = tuple[int, int]
-    SpreadDict = dict[Spread, str]
+    Spread: TypeAlias = tuple[int, int]
+    SpreadDict: TypeAlias = dict[Spread, str]
     # The column and row headers are saved into big dicts: column_hdrs is a dict
     # whose key is what row or column we are in. The values of that table grid
     # square is a dict with the bookends (`Spread`) and the tags associated with

@@ -41,6 +41,14 @@ dev = [
     "mypy",
     "ruff",
 ]
+live-lookup = [
+    "lupa",
+    "psycopg2-binary",
+]
+live-lookup-api = [
+    "fastapi",
+    "uvicorn",
+]
 
 [project.scripts]
 wiktwords = "wiktextract.wiktwords:main"

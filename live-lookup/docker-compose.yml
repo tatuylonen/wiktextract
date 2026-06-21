@@ -1,0 +1,35 @@
+services:
+  cache-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - cache_db_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+
+  lookup-api:
+    build:
+      context: ..
+      dockerfile_inline: |
+        FROM python:3.13
+        WORKDIR /app
+        COPY pyproject.toml README.md LICENSE ./
+        COPY src src
+        COPY live-lookup live-lookup
+        RUN python -m pip install -U pip && \
+            python -m pip install --use-pep517 ".[live-lookup,live-lookup-api]"
+        WORKDIR /app/live-lookup
+        EXPOSE 8000
+        CMD ["uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8000"]
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@cache-db:5432/${POSTGRES_DB}
+    depends_on:
+      - cache-db
+    ports:
+      - "8001:8000"
+
+volumes:
+  cache_db_data:

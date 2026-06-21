@@ -4049,6 +4049,32 @@ def fix_subtitle_hierarchy(wxr: WiktextractContext, text: str) -> str:
     return text
 
 
+# Top-level language section headers, e.g. "==English==". Never "===...==="
+# (POS/etc. sub-sections) thanks to the (?!=)/(?<!=) guards against a third
+# "=" on either side.
+LANGUAGE_HEADING_RE = re.compile(r"^==(?!=)(.+?)(?<!=)==[ \t]*$", re.MULTILINE)
+
+
+def keep_only_requested_language_sections(
+    wxr: WiktextractContext, text: str
+) -> str:
+    """Drop ==Language== sections not in wxr.config.capture_language_codes.
+    Keeps any preamble before the first heading untouched, since top-level
+    templates/links there (see parse_top_template below) aren't tied to any
+    one language."""
+    headings = list(LANGUAGE_HEADING_RE.finditer(text))
+    if not headings:
+        return text
+
+    kept = [text[: headings[0].start()]]
+    for i, m in enumerate(headings):
+        end = headings[i + 1].start() if i + 1 < len(headings) else len(text)
+        lang_code = name_to_code(m.group(1).strip(), "en")
+        if lang_code in wxr.config.capture_language_codes:
+            kept.append(text[m.start() : end])
+    return "".join(kept)
+
+
 def parse_page(wxr: WiktextractContext, word: str, text: str) -> list[WordData]:
     # Skip translation pages
     if word.endswith("/" + TRANSLATIONS_TITLE):
@@ -4072,6 +4098,17 @@ def parse_page(wxr: WiktextractContext, word: str, text: str) -> list[WordData]:
     # Translations section on the same level as Noun.  Enforce a proper
     # hierarchy by manipulating the subtitle levels in certain cases.
     text = fix_subtitle_hierarchy(wxr, text)
+
+    # If we only want specific languages, drop the other ==Language==
+    # sections before the pre_expand parse below: that parse eagerly
+    # expands every ADDITIONAL_EXPAND_TEMPLATES call (col, multitrans,
+    # "inflection of", ...) in the whole page text regardless of language,
+    # so an unfiltered page fetches/caches templates for languages we never
+    # asked for. Top-level language headers are always literal "==Name=="
+    # wikitext (never templates), so this is safe to do as a plain text
+    # slice before any parsing happens.
+    if wxr.config.capture_language_codes:
+        text = keep_only_requested_language_sections(wxr, text)
 
     # Parse the page, pre-expanding those templates that are likely to
     # influence parsing
