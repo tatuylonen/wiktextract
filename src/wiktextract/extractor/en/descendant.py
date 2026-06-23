@@ -89,13 +89,26 @@ def extract_desc_list_item(
                 after_word = False
             elif child.endswith(":"):
                 lang_name = child.strip(": \n") or "unknown"
-                lang_code = name_to_code(lang_name, "en") or "unknown"
+                lang_code = (
+                    choose_more_specific_langcode(
+                        name_to_code(lang_name, "en"), lang_code
+                    )
+                    or "unknown"
+                )
             elif lcode := name_to_code(child):
                 lang_name = child
                 lang_code = lcode
+                lang_code = (
+                    choose_more_specific_langcode(lcode, lang_code) or "unknown"
+                )
             elif lname := does_text_look_like_language_name(child):
                 lang_name = lname
-                lang_code = name_to_code(lang_name, "en") or "unknown"
+                lang_code = (
+                    choose_more_specific_langcode(
+                        name_to_code(lang_name, "en"), lang_code
+                    )
+                    or "unknown"
+                )
         elif isinstance(child, HTMLNode) and child.tag == "span":
             after_word = extract_desc_span_tag(
                 wxr,
@@ -273,3 +286,14 @@ def does_text_look_like_language_name(text: str) -> str | None:
     elif text.endswith(("ic", "ish", "an")):
         return text
     return None
+
+
+def choose_more_specific_langcode(new: str | None, old: str) -> str | None:
+    if old == "unknown":
+        return new
+    if new is None or new == "":
+        return old
+    if old.startswith(new + "-"):
+        # "fa-cls" or "fa" -> "fa-cls"
+        return old
+    return new
