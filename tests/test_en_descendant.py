@@ -426,7 +426,6 @@ class TestEnDescendant(TestCase):
 {{bottom}}
 """,
         )
-        print(data[0]["descendants"])
         self.assertEqual(
             data[0]["descendants"],
             [
@@ -857,22 +856,22 @@ class TestEnDescendant(TestCase):
                                     "descendants": [
                                         {
                                             "lang": "Gascon",
-                                            "lang_code": "oc",
+                                            "lang_code": "oc-gas",
                                             "word": "àuger",
                                         },
                                         {
                                             "lang": "Gascon",
-                                            "lang_code": "oc",
+                                            "lang_code": "oc-gas",
                                             "word": "er",
                                         },
                                         {
                                             "lang": "Provençal",
-                                            "lang_code": "oc",
+                                            "lang_code": "oc-pro",
                                             "word": "aguer",
                                         },
                                         {
                                             "lang": "Vivaro-Alpine",
-                                            "lang_code": "oc",
+                                            "lang_code": "oc-viv",
                                             "word": "aguer",
                                         },
                                     ],
@@ -891,22 +890,22 @@ class TestEnDescendant(TestCase):
                                     "descendants": [
                                         {
                                             "lang": "Gascon",
-                                            "lang_code": "oc",
+                                            "lang_code": "oc-gas",
                                             "word": "àuger",
                                         },
                                         {
                                             "lang": "Gascon",
-                                            "lang_code": "oc",
+                                            "lang_code": "oc-gas",
                                             "word": "er",
                                         },
                                         {
                                             "lang": "Provençal",
-                                            "lang_code": "oc",
+                                            "lang_code": "oc-pro",
                                             "word": "aguer",
                                         },
                                         {
                                             "lang": "Vivaro-Alpine",
-                                            "lang_code": "oc",
+                                            "lang_code": "oc-viv",
                                             "word": "aguer",
                                         },
                                     ],
@@ -1021,22 +1020,22 @@ class TestEnDescendant(TestCase):
                     "descendants": [
                         {
                             "lang": "Old Sardinian",
-                            "lang_code": "sc",
+                            "lang_code": "sc-old",
                             "word": "avere",
                             "descendants": [
                                 {
                                     "lang": "Campidanese",
-                                    "lang_code": "sc",
+                                    "lang_code": "sc-sro",
                                     "word": "ai",
                                 },
                                 {
                                     "lang": "Campidanese",
-                                    "lang_code": "sc",
+                                    "lang_code": "sc-sro",
                                     "word": "airi",
                                 },
                                 {
                                     "lang": "Logudorese",
-                                    "lang_code": "sc",
+                                    "lang_code": "sc-src",
                                     "word": "àere",
                                 },
                             ],
