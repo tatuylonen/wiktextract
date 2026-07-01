@@ -603,6 +603,7 @@ def extract_cell_content(
         r"^\s*(There are |"
         r"\* |"
         r"see |"
+        r"See |"
         r"Use |"
         r"use the |"
         r"Only used |"
