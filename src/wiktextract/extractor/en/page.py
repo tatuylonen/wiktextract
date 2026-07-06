@@ -281,6 +281,7 @@ WORD_LEVEL_HEAD_TEMPLATES = {"term-label", "tlb"}
 # are thrown in heads because the etymology section is missing, like at
 # the oldest level of a reconstruction: see wiktextract#1658
 ETYMOLOGY_TEMPLATES_IN_HEADS = {
+    "ety",
     "etymon",
 }
 
