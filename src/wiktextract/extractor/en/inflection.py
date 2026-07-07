@@ -135,6 +135,12 @@ title_contains_global_map = {
     "command form of": "imperative",  # a راتلل/Pashto
     "historical inflection of": "dummy-skip-this",  # kork/Norwegian Nynorsk
     "obsolete declension": "obsolete",  # März/German 20241111
+    # käyminen/Finnish 20260707
+    "first-person singular possessor": "first-person singular singular-possessive",
+    "second-person singular possessor": "second-person singular singular-possessive",
+    "first-person plural possessor": "first-person plural plural-possessive",
+    "second-person plural possessor": "second-person plural plural-possessive",
+    "third-person possessor": "third-person possessive",
 }
 for k, v in title_contains_global_map.items():
     if any(t not in valid_tags for t in v.split()):

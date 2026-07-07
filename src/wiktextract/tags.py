@@ -5891,6 +5891,7 @@ valid_tags = {
     "plural-of-variety": "misc",  # Plural indicating different kinds of things (Arabic)
     "plural-only": "misc",  # Word only manifested in plural in this sense
     "plural-normally": "misc",  # Usually plural, but singular may be possible
+    "plural-possessive": "number",  # käymisesi vs. käymistenne
     "poetic": "misc",
     "polite": "register",  # Politeness degree of verbs etc
     "polytonic": "misc",
@@ -5990,6 +5991,7 @@ valid_tags = {
     "singular": "number",  # Number, cf. plural, dual, trial, paucal
     "singular-normally": "misc",
     "singular-only": "misc",
+    "singular-possessive": "number", # käymisesi vs. käymistenne
     "singulative": "misc",  # Individuation of a collective or mass noun, like number
     "situative": "case",  # expressing location of things in comparison with one another
     "slang": "register",
