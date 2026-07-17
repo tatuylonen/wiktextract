@@ -54,7 +54,7 @@ class FormOf(TypedDict, total=False):
     roman: str
 
 
-LinkData = list[Sequence[str]]
+LinkData = tuple[str, str]  # text, link target
 
 
 class PlusObjTemplateData(TypedDict, total=False):
@@ -95,7 +95,7 @@ class FormData(TypedDict, total=False):
     tags: list[str]
     raw_tags: list[str]
     topics: list[str]
-    links: list[tuple[str, str]]
+    links: list[LinkData]
 
 
 class Hyphenation(TypedDict, total=False):
