@@ -135,8 +135,8 @@ class WiktionaryConfig:
         self.save_ns_names = ["Main", "Template", "Module"]
         # these are extracted namespaces
         self.extract_ns_names = ["Main"]
-        self.allowed_html_tags: dict[str, HTMLTagData] = {}
         self.parser_function_aliases: dict[str, str] = {}
+        self.allowed_html_tags: dict[str, HTMLTagData] = {}
         self.linktrailing_regex_pattern: str | None = None
         self.load_edition_settings()
 
@@ -170,3 +170,8 @@ class WiktionaryConfig:
             with file_path.open(encoding="utf-8") as f:
                 for key, value in json.load(f).items():
                     setattr(self, key, value)
+
+        file_path = self.data_folder / "htmltags.json"
+        if file_path.exists():
+            with file_path.open(encoding="utf-8") as f:
+                self.allowed_html_tags.update(json.load(f))
