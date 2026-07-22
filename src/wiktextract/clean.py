@@ -1416,7 +1416,7 @@ def clean_value(
 
     def repl_1_syntaxhighlight(m: re.Match) -> str:
         # Content is preformatted
-        return "\n" + m.group(1).strip() + "\n"
+        return "`" + m.group(1).strip() + "`"
 
     # remove nowiki tag returned from `Wtp.node_to_html()`
     title = re.sub(r"<nowiki\s*/>", "", title)
