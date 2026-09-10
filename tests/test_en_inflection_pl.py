@@ -5,10 +5,12 @@
 # Copyright (c) 2021 Tatu Ylonen.  See file LICENSE and https://ylonen.org
 import unittest
 
-from wikitextprocessor import Wtp
+from wikitextprocessor import Page, Wtp
 
 from wiktextract.config import WiktionaryConfig
+from wiktextract.extractor.en.analyze_template import analyze_template
 from wiktextract.extractor.en.inflection import parse_inflection_section
+from wiktextract.page import parse_page
 from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.wxr_context import WiktextractContext
 
@@ -1832,3 +1834,90 @@ class EnPlInflTests(unittest.TestCase):
             ],
         }
         self.assertEqual(expected, ret)
+
+
+class EnPlInflBookEndTests(unittest.TestCase):
+    maxDiff = None
+
+    def setUp(self):
+        self.wxr = WiktextractContext(
+            Wtp(),
+            WiktionaryConfig(capture_language_codes=None),
+        )
+
+    def tearDown(self) -> None:
+        self.wxr.wtp.close_db_conn()
+        close_thesaurus_db(
+            self.wxr.thesaurus_db_path, self.wxr.thesaurus_db_conn
+        )
+
+    def _add_inflection_page(self, title: str, real_body: str, stand_in: str) -> None:
+        page = Page(
+            title=title, namespace_id=10, body=real_body, model="wikitext"
+        )
+        _, need_pre_expand = analyze_template(self.wxr.wtp, page)
+        self.wxr.wtp.add_page(
+            title, 10, stand_in, need_pre_expand=need_pre_expand
+        )
+
+    def test_Polish_verb_book_end_table(self):
+        """{{pl-conj-ap}} and friends open their table inside
+        {{inflection-table-top}}, whose body is nothing but "{{#invoke:...}}",
+        which needs to be pre-expanded to get the table.
+
+        # https://en.wiktionary.org/wiki/pobiec
+        # https://en.wiktionary.org/w/index.php?diff=91770185&oldid=91769986
+        """
+        self._add_inflection_page(
+            "Template:inflection-table-top",
+            "<includeonly>{{#invoke:inflection-table|top}}</includeonly>"
+            "<noinclude>{{documentation}}</noinclude>",
+            '<div class="inflection-table-wrapper">\n'
+            '{| class="inflection-table"\n|-',
+        )
+        self._add_inflection_page(
+            "Template:inflection-table-bottom",
+            "<includeonly>{{#invoke:inflection-table|bottom}}</includeonly>"
+            "<noinclude>{{documentation}}</noinclude>",
+            "|}\n</div>",
+        )
+        self.wxr.wtp.add_page(
+            "Template:l", 10, '<span class="Latn" lang="pl">{{{2}}}</span>'
+        )
+
+        ret = parse_page(
+            self.wxr,
+            "pobiec",
+            """
+==Polish==
+
+===Verb===
+'''pobiec'''
+
+# to [[run]] forward
+
+====Conjugation====
+{{inflection-table-top|title=Conjugation of pobiec}}
+! rowspan="2" |
+! rowspan="2" title="osoba" | person
+! title="liczba pojedyncza" | singular
+|-
+! class="secondary" title="rodzaj męski" | masculine
+|-
+! colspan="2" title="bezokolicznik" | infinitive
+| pobiec
+|-
+! title="czas przeszły" | past tense
+! class="secondary" | 3<sup>rd</sup>
+| {{l|pl|pobiegł}}
+{{inflection-table-bottom}}
+""",
+        )
+        self.assertIn(
+            {
+                "form": "pobiegł",
+                "source": "conjugation",
+                "tags": ["masculine", "past", "third-person"],
+            },
+            ret[0]["forms"],
+        )
