@@ -111,6 +111,23 @@ class TestCleanNodeLinks(unittest.TestCase):
         self.assertEqual(text, "aval")
         self.assertEqual(links, [("aval", "aval#fr")])
 
+    def test_empty_namespace_targets_are_excluded(self):
+        # Some live language templates expand to an empty Wikipedia target.
+        self.wxr.wtp.add_page(
+            "Modèle:empty-target",
+            10,
+            "[[w:|Proto-Germanic]] [[wikipedia:|language]] [[root#French|root]]",
+        )
+        source = self.wxr.wtp.parse("{{empty-target}}")
+        before, after, links = {}, {}, []
+        expected = clean_node(self.wxr, before, source, collect_links=True)
+        text = clean_node(
+            self.wxr, after, source, collect_links=True, link_collector=links
+        )
+        self.assertEqual(text, expected)
+        self.assertEqual(after, before)
+        self.assertEqual(links, [("root", "root#French")])
+
     def test_omitted_markup_cannot_supply_a_matching_destination(self):
         for markup in (
             '<div class="floatright">[[hidden|root]]</div>',

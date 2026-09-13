@@ -439,7 +439,13 @@ def clean_node(
             category_ns_names=category_ns_names,
             remove_anchor_tags=remove_anchors_from_links,
         )
-        link_collector.extend(captured_links)
+        # An empty namespace/interwiki link (e.g. [[w:|language]]) can
+        # otherwise fall back to a bare "w:" target in the string parser.
+        link_collector.extend(
+            (label, target)
+            for label, target in captured_links
+            if not re.fullmatch(r"[^:]+:", target)
+        )
 
     v = clean_value(wxr, v, no_strip=no_strip, no_html_strip=no_html_strip)
     # print("After clean_value:", repr(v))
