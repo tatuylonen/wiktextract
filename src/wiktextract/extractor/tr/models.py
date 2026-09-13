@@ -98,6 +98,7 @@ class WordEntry(TurkishBaseModel):
     tags: list[str] = []
     raw_tags: list[str] = []
     forms: list[Form] = []
+    etymology_links: list[tuple[str, str]] = []
     etymology_texts: list[str] = []
     sounds: list[Sound] = []
     hyphenations: list[Hyphenation] = []

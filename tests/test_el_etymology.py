@@ -43,3 +43,34 @@ class TestElEtymology(TestCase):
             # mock templates or something for these tests
             "κατακουκουλωμένος < :Πρότυπο:μτχππ φοο < κατα- + κουκουλώνω",
         )
+
+    def test_template_and_ordinary_links(self):
+        self.wxr.wtp.add_page(
+            "Πρότυπο:link-test",
+            10,
+            "[[{{{1}}}#Ελληνικά|{{{2}}}]][[Κατηγορία:Ετυμολογία]]",
+        )
+        entries = parse_page(
+            self.wxr,
+            "λέξη",
+            "==Νέα ελληνικά (el)==\n===Ετυμολογία===\n"
+            "{{link-test|πηγή|πηγής}} + [[πηγή#Ελληνικά|πηγής]]\n"
+            "===Ουσιαστικό===\n# [[ορισμός]]",
+        )
+        self.assertEqual(len(entries), 1)
+        self.assertEqual(
+            entries[0]["etymology_links"],
+            [("πηγής", "πηγή#Ελληνικά"), ("πηγής", "πηγή#Ελληνικά")],
+        )
+        self.assertEqual(entries[0]["etymology_text"], "πηγής + πηγής")
+        self.assertIn("Ετυμολογία", entries[0]["categories"])
+
+    def test_plain_etymology_omits_links(self):
+        entries = parse_page(
+            self.wxr,
+            "λέξη",
+            "==Νέα ελληνικά (el)==\n===Ετυμολογία===\nΆγνωστη.\n"
+            "===Ουσιαστικό===\n# ορισμός",
+        )
+        self.assertEqual(len(entries), 1)
+        self.assertNotIn("etymology_links", entries[0])

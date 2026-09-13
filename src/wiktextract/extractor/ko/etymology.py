@@ -11,15 +11,20 @@ def extract_etymology_section(
 ) -> None:
     if len(word_entry.etymology_texts) > 0:
         word_entry.etymology_texts.clear()
+        word_entry.etymology_links.clear()
         word_entry.categories.clear()
 
     has_list = False
     for list_node in level_node.find_child(NodeKind.LIST):
         has_list = True
         for list_item in list_node.find_child(NodeKind.LIST_ITEM):
-            text = clean_node(wxr, word_entry, list_item.children)
+            e_links: list[tuple[str, str]] = []
+            text = clean_node(
+                wxr, word_entry, list_item.children, link_collector=e_links
+            )
             if len(text) > 0:
                 word_entry.etymology_texts.append(text)
+                word_entry.etymology_links.extend(e_links)
 
     if not has_list:
         e_nodes = []
@@ -34,9 +39,11 @@ def extract_etymology_section(
             else:
                 e_nodes.append(node)
 
-        text = clean_node(wxr, word_entry, e_nodes)
+        e_links: list[tuple[str, str]] = []
+        text = clean_node(wxr, word_entry, e_nodes, link_collector=e_links)
         if len(text) > 0:
             word_entry.etymology_texts.append(text)
+            word_entry.etymology_links.extend(e_links)
 
 
 def extract_ja_kanjitab_template(

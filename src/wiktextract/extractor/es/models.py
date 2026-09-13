@@ -139,6 +139,7 @@ class WordEntry(BaseModelWrap):
     )
     sounds: list[Sound] = []
     translations: list[Translation] = []
+    etymology_links: list[tuple[str, str]] = []
     etymology_texts: list[str] = Field(
         default=[], description="Etymology section as cleaned text."
     )

@@ -14,10 +14,15 @@ def extract_etymology_section(
     for list_node in level_node.find_child(NodeKind.LIST):
         has_list = True
         for list_item in list_node.find_child(NodeKind.LIST_ITEM):
-            e_str = clean_node(wxr, word_entry, list_item.children)
+            e_links: list[tuple[str, str]] = []
+            e_str = clean_node(
+                wxr, word_entry, list_item.children, link_collector=e_links
+            )
             if e_str != "":
                 word_entry.etymology_texts.append(e_str)
+                word_entry.etymology_links.extend(e_links)
     if not has_list:
+        e_links: list[tuple[str, str]] = []
         e_str = clean_node(
             wxr,
             word_entry,
@@ -26,6 +31,8 @@ def extract_etymology_section(
                     LEVEL_KIND_FLAGS, include_empty_str=True
                 )
             ),
+            link_collector=e_links,
         )
         if e_str != "":
             word_entry.etymology_texts.append(e_str)
+            word_entry.etymology_links.extend(e_links)

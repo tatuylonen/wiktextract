@@ -125,6 +125,7 @@ class WordEntry(JapaneseBaseModel):
     raw_tags: list[str] = []
     forms: list[Form] = []
     etymology_texts: list[str] = []
+    etymology_links: list[tuple[str, str]] = []
     sounds: list[Sound] = []
     translations: list[Translation] = []
     antonyms: list[Linkage] = []

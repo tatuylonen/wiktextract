@@ -160,6 +160,7 @@ class WordEntry(FrenchBaseModel):
         exclude=True,
     )
     etymology_texts: list[str] = Field(default=[], description="Etymology list")
+    etymology_links: list[tuple[str, str]] = []
     etymology_examples: list[Example] = Field(
         default=[], description="Data in 'Attestations historiques' section"
     )

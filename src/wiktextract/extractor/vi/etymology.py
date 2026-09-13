@@ -24,18 +24,24 @@ def extract_etymology_section(
             extract_ja_kanjitab_template(wxr, node, base_data)
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
             for list_item in node.find_child(NodeKind.LIST_ITEM):
-                e_text = clean_node(wxr, base_data, list_item.children)
+                e_links: list[tuple[str, str]] = []
+                e_text = clean_node(
+                    wxr, base_data, list_item.children, link_collector=e_links
+                )
                 if e_text != "":
                     base_data.etymology_texts.append(e_text)
+                    base_data.etymology_links.extend(e_links)
         elif isinstance(node, LevelNode):
             break
         else:
             e_nodes.append(node)
 
     if len(e_nodes) > 0:
-        e_text = clean_node(wxr, base_data, e_nodes)
+        e_links: list[tuple[str, str]] = []
+        e_text = clean_node(wxr, base_data, e_nodes, link_collector=e_links)
         if e_text != "":
             base_data.etymology_texts.append(e_text)
+            base_data.etymology_links.extend(e_links)
 
 
 def extract_ja_kanjitab_template(

@@ -166,6 +166,7 @@ class WordEntry(ChineseBaseModel):
     pos_title: str = ""
     pos_level: NodeKind = Field(default=NodeKind.ROOT, exclude=True)
     etymology_texts: list[str] = []
+    etymology_links: list[tuple[str, str]] = []
     etymology_examples: list[Example] = []
     senses: list[Sense] = Field(default=[], description="Sense list")
     forms: list[Form] = Field(default=[], description="Inflection forms list")

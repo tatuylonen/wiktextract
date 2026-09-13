@@ -51,9 +51,13 @@ def extract_etymology_section(
                     clean_node(wxr, base_data, template_node)
             if not has_zh_x:
                 for list_item in node.find_child(NodeKind.LIST_ITEM):
-                    e_text = clean_node(wxr, None, list_item.children)
+                    e_links: list[tuple[str, str]] = []
+                    e_text = clean_node(
+                        wxr, None, list_item.children, link_collector=e_links
+                    )
                     if len(e_text) > 0:
                         base_data.etymology_texts.append(e_text)
+                        base_data.etymology_links.extend(e_links)
         elif isinstance(node, TemplateNode) and node.template_name in [
             "ja-see",
             "ja-see-kango",
@@ -74,9 +78,13 @@ def extract_etymology_section(
             e_nodes.append(node)
 
     if len(e_nodes) > 0:
-        etymology_text = clean_node(wxr, base_data, e_nodes)
+        e_links: list[tuple[str, str]] = []
+        etymology_text = clean_node(
+            wxr, base_data, e_nodes, link_collector=e_links
+        )
         if len(etymology_text) > 0:
             base_data.etymology_texts.append(etymology_text)
+            base_data.etymology_links.extend(e_links)
 
 
 def extract_ja_kanjitab_template(

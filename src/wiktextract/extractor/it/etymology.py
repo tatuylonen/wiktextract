@@ -11,13 +11,19 @@ def extract_etymology_section(
 ) -> None:
     # https://it.wiktionary.org/wiki/Aiuto:Etimologia
     etymology_texts = []
+    etymology_links = []
     for list_node in level_node.find_child(NodeKind.LIST):
         for list_item in list_node.find_child(NodeKind.LIST_ITEM):
-            e_str = clean_node(wxr, None, list_item.children)
+            links: list[tuple[str, str]] = []
+            e_str = clean_node(
+                wxr, None, list_item.children, link_collector=links
+            )
             if e_str != "":
                 etymology_texts.append(e_str)
+                etymology_links.extend(links)
 
     if len(etymology_texts) == 0:
+        links = []
         e_str = clean_node(
             wxr,
             None,
@@ -26,13 +32,16 @@ def extract_etymology_section(
                     LEVEL_KIND_FLAGS, include_empty_str=True
                 )
             ),
+            link_collector=links,
         )
         if e_str != "":
             etymology_texts.append(e_str)
+            etymology_links.extend(links)
 
     for data in page_data:
         if data.lang_code == page_data[-1].lang_code:
             data.etymology_texts.extend(etymology_texts)
+            data.etymology_links.extend(etymology_links)
 
 
 def extract_citation_section(

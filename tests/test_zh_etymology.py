@@ -42,6 +42,9 @@ class TestNote(TestCase):
         self.assertEqual(
             base_data.etymology_texts, ["源自宋．蘇軾《春夜》詩："]
         )
+        self.assertFalse(
+            any("春宵" in target for _, target in base_data.etymology_links)
+        )
         self.assertEqual(
             [
                 e.model_dump(exclude_defaults=True)
@@ -94,6 +97,9 @@ class TestNote(TestCase):
             self.wxr, [base_data], base_data, root.children[0]
         )
         self.assertEqual(base_data.etymology_texts, ["出自唐·韓愈《進學解》："])
+        self.assertFalse(
+            any("膏油" in target for _, target in base_data.etymology_links)
+        )
         self.assertEqual(
             [
                 e.model_dump(exclude_defaults=True)

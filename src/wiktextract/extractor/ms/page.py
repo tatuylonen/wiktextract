@@ -118,32 +118,38 @@ def extract_etymology_section(
     cats = {}
     e_nodes = []
     e_texts = []
+    links: list[tuple[str, str]] = []
     for node in level_node.children:
         if isinstance(node, LevelNode):
             break
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
             for list_item in node.find_child(NodeKind.LIST_ITEM):
-                e_text = clean_node(wxr, cats, list_item.children)
+                e_text = clean_node(
+                    wxr, cats, list_item.children, link_collector=links
+                )
                 if e_text != "":
                     e_texts.append(e_text)
         else:
             e_nodes.append(node)
     if len(e_nodes) > 0:
-        e_text = clean_node(wxr, cats, e_nodes)
+        e_text = clean_node(wxr, cats, e_nodes, link_collector=links)
         if e_text != "":
             e_texts.append(e_text)
     if len(e_texts) == 0:
         return
     if len(page_data) == 0 or page_data[-1].lang_code != base_data.lang_code:
         base_data.etymology_texts = e_texts
+        base_data.etymology_links = links.copy()
         base_data.categories.extend(cats.get("categories", []))
     elif level_node.kind == NodeKind.LEVEL3:
         for data in page_data:
             if data.lang_code == page_data[-1].lang_code:
                 data.etymology_texts = e_texts
+                data.etymology_links = links.copy()
                 data.categories.extend(cats.get("categories", []))
     else:
         page_data[-1].etymology_texts = e_texts
+        page_data[-1].etymology_links = links.copy()
         page_data[-1].categories.extend(cats.get("categories", []))
 
 

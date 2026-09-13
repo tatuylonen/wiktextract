@@ -42,6 +42,10 @@ class TestESEtymology(unittest.TestCase):
             page_data[0]["etymology_texts"], ["Del griego antiguo ἀνθρωποειδής"]
         )
         self.assertEqual(
+            page_data[0]["etymology_links"],
+            [("ἀνθρωποειδής", "ἀνθρωποειδής#Griego antiguo")],
+        )
+        self.assertEqual(
             page_data[0]["senses"],
             [{"glosses": ["Que recuerda"], "sense_index": "1"}],
         )
@@ -81,6 +85,15 @@ class TestESEtymology(unittest.TestCase):
         )
         self.assertTrue("categories" not in page_data[1])
         self.assertTrue("etymology_texts" not in page_data[1])
+        self.assertEqual(
+            page_data[0]["etymology_links"],
+            [
+                ("pula", "pula#Setsuana"),
+                ("pula", "pula#Sotho norteño"),
+                ("pula", "pula#Sesoto"),
+            ],
+        )
+        self.assertNotIn("etymology_links", page_data[1])
 
     def test_missing_etymology_data(self):
         self.wxr.wtp.add_page(
@@ -102,6 +115,7 @@ class TestESEtymology(unittest.TestCase):
             ["DE:Palabras de etimología sin precisar"],
         )
         self.assertTrue("etymology_texts" not in page_data[0])
+        self.assertNotIn("etymology_links", page_data[0])
 
     def test_attestation(self):
         self.wxr.wtp.add_page(

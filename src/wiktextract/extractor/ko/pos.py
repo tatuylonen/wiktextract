@@ -162,9 +162,13 @@ def extract_unordered_list_item(
             etymology_nodes = []
             etymology_nodes.append(node[node.index(":") + 1 :])
             etymology_nodes.extend(list_item.children[index + 1 :])
-            e_text = clean_node(wxr, None, etymology_nodes)
+            e_links: list[tuple[str, str]] = []
+            e_text = clean_node(
+                wxr, None, etymology_nodes, link_collector=e_links
+            )
             if len(e_text) > 0:
                 word_entry.etymology_texts.append(e_text)
+                word_entry.etymology_links.extend(e_links)
             break
         elif (
             isinstance(node, str)

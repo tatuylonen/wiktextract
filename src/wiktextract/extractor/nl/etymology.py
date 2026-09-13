@@ -18,7 +18,9 @@ def extract_etymology_section(
                     return etymology_list
             e_data = Etymology()
             cats = {}
-            e_text = clean_node(wxr, cats, list_item.children)
+            e_text = clean_node(
+                wxr, cats, list_item.children, link_collector=e_data.links
+            )
             m = re.match(r"\[([A-Z])\]", e_text)
             if m is not None:
                 e_data.index = m.group(1)

@@ -98,6 +98,7 @@ class WordEntry(ItalianBaseModel):
     raw_tags: list[str] = []
     translations: list[Translation] = []
     forms: list[Form] = []
+    etymology_links: list[tuple[str, str]] = []
     etymology_texts: list[str] = []
     etymology_examples: list[Example] = []
     hyphenations: list[Hyphenation] = []

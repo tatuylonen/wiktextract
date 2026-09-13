@@ -49,12 +49,18 @@ def process_etym(
             etym_templates.append(tdata)
         return None
 
+    links: list[tuple[str, str]] = []
     etym_text = clean_node(
-        wxr, base_data, etym_contents, post_template_fn=post_etym_template_fn
+        wxr,
+        base_data,
+        etym_contents,
+        post_template_fn=post_etym_template_fn,
+        link_collector=links,
     )
 
     if etym_text:
         base_data.etymology_text = etym_text
+        base_data.etymology_links = links
         if etym_templates:
             base_data.etymology_templates = etym_templates
 

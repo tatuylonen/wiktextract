@@ -40,6 +40,14 @@ class TestCsEtymology(TestCase):
                 "Složenina, viz česká předpona auto- a francouzské substantivum mobile.",
             ],
         )
+        self.assertEqual(
+            data[0]["etymology_links"],
+            [
+                ("automobile", "automobile"),
+                ("auto-", "auto-"),
+                ("mobile", "mobile"),
+            ],
+        )
 
     def test_etymology_under_pos(self):
         data = parse_page(
@@ -57,3 +65,5 @@ Jde vlastně o tzv.
         )
         self.assertTrue("etymology_texts" not in data[0])
         self.assertEqual(data[1]["etymology_texts"], ["Jde vlastně o tzv."])
+        self.assertNotIn("etymology_links", data[0])
+        self.assertNotIn("etymology_links", data[1])

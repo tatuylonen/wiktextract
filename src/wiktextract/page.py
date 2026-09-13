@@ -5,7 +5,7 @@
 import re
 from collections import defaultdict
 from copy import copy
-from typing import Any, Callable, Optional, Sequence, Union
+from typing import Any, Callable, Optional, Union
 
 from mediawiki_langcodes import name_to_code
 from wikitextprocessor.core import (
@@ -17,7 +17,7 @@ from wikitextprocessor.core import (
 from wikitextprocessor.node_expand import NodeHandlerFnCallable
 from wikitextprocessor.parser import GeneralNode, NodeKind, WikiNode
 
-from .clean import clean_value
+from .clean import clean_value, remove_invisible_markup
 from .datautils import data_append, data_extend
 from .import_utils import import_extractor_module
 from .wxr_context import WiktextractContext
@@ -333,13 +333,16 @@ def clean_node(
     remove_anchors_from_links: bool = False,
     no_strip=False,
     no_html_strip=False,
+    link_collector: list[tuple[str, str]] | None = None,
 ) -> str:
     """
     Expands node or nodes to text, cleaning up HTML tags and duplicate spaces.
 
     If `sense_data` is a dictionary, expanded category links will be added to
     it under the `categories` key. And if `collect_link` is `True`, expanded
-    links will be added to the `links` key.
+    links will be added to the `links` key. An optional `link_collector` also
+    receives expanded links, independently of `sense_data`. This lets callers
+    retain links alongside other text fields without changing category handling.
     """
 
     # print("CLEAN_NODE:", repr(value))
@@ -425,6 +428,18 @@ def clean_node(
             for ltuple in links:
                 # We want to keep link data as is, even duplicated
                 data_append(sense_data, "links", ltuple)
+
+    if link_collector is not None:
+        # Use the same visibility rules as the returned prose, so citations,
+        # tables and side panels cannot contribute unrelated destinations.
+        link_text = remove_invisible_markup(v)
+        captured_links, _ = extract_links_from_node(
+            wxr,
+            link_text,
+            category_ns_names=category_ns_names,
+            remove_anchor_tags=remove_anchors_from_links,
+        )
+        link_collector.extend(captured_links)
 
     v = clean_value(wxr, v, no_strip=no_strip, no_html_strip=no_html_strip)
     # print("After clean_value:", repr(v))
