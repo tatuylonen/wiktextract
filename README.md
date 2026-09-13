@@ -752,10 +752,6 @@ section cleaned into human-readable text (i.e., templates have been expanded
 and HTML tags removed, among other things).
 
 The editions with etymology extraction support ``etymology_links``.
-This includes the English edition and the Czech, German, Greek, Spanish,
-French, Indonesian, Italian, Japanese, Korean, Kurdish, Malay, Dutch, Polish,
-Portuguese, Russian, Simple English, Thai, Turkish, Vietnamese, and Chinese
-editions. The Swedish extractor does not yet extract etymologies.
 
 The ``etymology_links`` field contains ``[display text, target]`` pairs,
 using the same format as sense ``links``. It preserves links from expanded
