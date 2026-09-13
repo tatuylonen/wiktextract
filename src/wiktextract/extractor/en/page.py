@@ -3222,17 +3222,24 @@ def parse_language(
             for x in node.children
             if not isinstance(x, WikiNode) or x.kind not in LEVEL_KINDS
         )
+        # Collect expanded links separately from templates. Generic linking
+        # templates such as m/l remain ignored in etymology_templates, but
+        # their destinations (and ordinary wikilinks) are still useful.
+        link_data: SenseData = {}
         # Convert to text, also capturing templates using post_template_fn
         text = clean_node(
             wxr,
-            None,
+            link_data,
             contents,
             template_fn=etym_template_fn,
             post_template_fn=etym_post_template_fn,
+            collect_links=True,
         ).strip(": \n")  # remove ":" indent wikitext before zh-x template
         # Save the collected information.
         if len(text) > 0:
             data["etymology_text"] = text
+        if links := link_data.get("links"):
+            data["etymology_links"] = links
         if len(templates) > 0:
             # Some etymology templates, like Template:root do not generate
             # text, so they should be added here. Elsewhere, we check
