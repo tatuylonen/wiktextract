@@ -755,8 +755,7 @@ The ``etymology_links`` field contains ``[display text, target]`` pairs,
 using the same format as sense ``links``. It preserves links from expanded
 templates (including ``m`` and ``l``) and ordinary wikilinks. Targets retain
 language or sense anchors, and repeated links are retained in source order.
-Categories are excluded. There are no character offsets into the cleaned
-text. The field is omitted when no links are found. For example, French
+Categories are excluded. The field is omitted when no links are found. For example, French
 ``{{m|fr|aval}} + {{m|fr|-er}}`` produces:
 
 ```json
