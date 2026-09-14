@@ -104,7 +104,7 @@ def match_sense_index(sense_idx: str, sense: Sense) -> bool:
         return True
     first_number_str = re.split(r",|\.|-|–", sense.sense_index, maxsplit=1)[0]
     first_number = 0
-    if first_number_str.isdigit():
+    if first_number_str.isdecimal():
         first_number = int(first_number_str)
     else:
         return False

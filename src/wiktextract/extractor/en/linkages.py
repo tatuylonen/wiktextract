@@ -1074,7 +1074,7 @@ def parse_linkage_item_text(
             else:
                 sense = desc
             item = rest
-        elif desc.isdigit():
+        elif desc.isdecimal():
             idx = int(desc) - 1
             if idx >= 0 and idx < len(pos_datas):
                 d = pos_datas[idx]
@@ -1179,7 +1179,7 @@ def parse_linkage_item_text(
                 and (
                     not re.search(head_final_re, item2)
                     or (
-                        item2[-1].isdigit()
+                        item2[-1].isdecimal()
                         and lang not in head_final_numeric_langs
                     )
                 )
@@ -1417,7 +1417,7 @@ def parse_linkage_item_text(
                     roman = par
                 elif cls == "taxonomic":
                     taxonomic = par
-                elif par.isdigit():
+                elif par.isdecimal():
                     idx = int(par) - 1
                     if idx >= 0 and idx < len(pos_datas):
                         d = pos_datas[idx]
