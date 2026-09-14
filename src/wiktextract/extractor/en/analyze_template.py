@@ -3,6 +3,14 @@ from collections import defaultdict
 
 from wikitextprocessor import Page, Wtp
 
+# Templates whose body is nothing but a "{{#invoke:...}}" call.
+FORCE_PRE_EXPAND = frozenset(
+    [
+        "Template:inflection-table-top",
+        "Template:inflection-table-bottom",
+    ]
+)
+
 
 def analyze_template(wtp: Wtp, page: Page) -> tuple[set[str], bool]:
     """Analyzes a template body and returns a set of the canonicalized
@@ -151,7 +159,8 @@ def analyze_template(wtp: Wtp, page: Page) -> tuple[set[str], bool]:
 
     # Determine whether this template should be pre-expanded
     pre_expand = (
-        contains_list
+        page.title in FORCE_PRE_EXPAND
+        or contains_list
         or contains_unpaired_table
         or contains_table_element
         or contains_unbalanced_html

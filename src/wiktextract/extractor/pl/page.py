@@ -145,7 +145,7 @@ def match_sense_index(sense_index: str, word_entry: WordEntry) -> bool:
         if exact_match:
             return sense_index == sense.sense_index
 
-    pos_index_str = sense.sense_index[: sense_index.find(".")]
+    pos_index_str = sense.sense_index.split(".", 1)[0]
     pos_section_index = 0
     if pos_index_str.isdigit():
         pos_section_index = int(pos_index_str)
@@ -164,6 +164,11 @@ def match_sense_index(sense_index: str, word_entry: WordEntry) -> bool:
             if int(start_str) <= pos_section_index and pos_section_index <= int(
                 end_str
             ):
+                return True
+        elif part_of_index.isdigit():
+            # index only has the POS section number, like "(1)"
+            # See: https://pl.wiktionary.org/wiki/pobiec
+            if int(part_of_index) == pos_section_index:
                 return True
 
     return False

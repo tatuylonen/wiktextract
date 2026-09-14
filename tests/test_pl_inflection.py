@@ -349,6 +349,39 @@ class TestPlInflection(TestCase):
             ],
         )
 
+    def test_verb_table_pos_section_sense_index(self):
+        # https://pl.wiktionary.org/wiki/pobiec
+        # the sense index only has the POS section number
+        self.wxr.wtp.add_page(
+            "Szablon:odmiana-czasownik-polski",
+            10,
+            """<div><div><table><tr><th>[[forma]]</th><th>''3.'' <span>[[Aneks:Skróty używane w Wikisłowniku#O|<span><span>os.</span></span>]]</span></th></tr><tr><th>[[czas przeszły]]</th><td>pobiegł </td></tr></table></div></div>""",
+        )
+        self.wxr.wtp.start_page("pobiec")
+        root = self.wxr.wtp.parse(
+            "{{odmiana}}\n: (1) {{odmiana-czasownik-polski}}"
+        )
+        page_data = [
+            WordEntry(
+                word="pobiec",
+                lang="język polski",
+                lang_code="pl",
+                pos="verb",
+                senses=[Sense(sense_index="1.1"), Sense(sense_index="1.4")],
+            ),
+        ]
+        extract_inflection_section(self.wxr, page_data, "pl", root)
+        self.assertEqual(
+            [f.model_dump(exclude_defaults=True) for f in page_data[0].forms],
+            [
+                {
+                    "form": "pobiegł",
+                    "tags": ["third-person", "past"],
+                    "sense_index": "1",
+                },
+            ],
+        )
+
     def test_eo_noun_table(self):
         self.wxr.wtp.add_page(
             "Szablon:odmiana-rzeczownik-esperanto",
