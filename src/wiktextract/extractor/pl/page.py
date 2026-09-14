@@ -147,7 +147,7 @@ def match_sense_index(sense_index: str, word_entry: WordEntry) -> bool:
 
     pos_index_str = sense.sense_index.split(".", 1)[0]
     pos_section_index = 0
-    if pos_index_str.isdigit():
+    if pos_index_str.isdecimal():
         pos_section_index = int(pos_index_str)
     else:
         return False

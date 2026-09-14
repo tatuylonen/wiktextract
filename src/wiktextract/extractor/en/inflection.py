@@ -706,7 +706,7 @@ def extract_cell_content(
     if (
         len(col) > 2
         and col[1] in (")", " ", ":")
-        and col[0].isdigit()
+        and col[0].isdecimal()
         and not re.match(nondef_re, col)
     ):
         return "", [], [(col[0], col[2:].strip())], []

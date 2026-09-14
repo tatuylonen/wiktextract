@@ -3629,7 +3629,7 @@ def classify_desc(
         lst_bool = list(
             x not in not_english_words
             and
-            # not x.isdigit() and
+            # not x.isdecimal() and
             (
                 x in english_words
                 or x.lower() in english_words
