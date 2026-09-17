@@ -444,7 +444,7 @@ def clean_node(
         link_collector.extend(
             (label, target)
             for label, target in captured_links
-            if not re.fullmatch(r"[^:]+:", target)
+            if not (target.endswith(":") and re.fullmatch(r"[^:]+:", target))
         )
 
     v = clean_value(wxr, v, no_strip=no_strip, no_html_strip=no_html_strip)
