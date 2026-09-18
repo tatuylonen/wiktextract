@@ -540,6 +540,14 @@ lang_specific: dict[str, LangConfDict] = {
         "next": "Old Irish",
         "genders": ["masculine", "feminine"],
     },
+    "Japanese": {
+        "form_transformations": [  # {{ja-conj-ex}}
+            ("verb", r"^short form: ", "", "short-form"),
+            ("verb", r"^colloquial: ", "", "colloquial"),
+            ("verb", r"^standard: ", "", "standard"),
+            ("verb", r"^contraction: ", "", "contraction"),
+        ],
+    },
     "Kamba": {
         "next": "bantu-group",
     },
