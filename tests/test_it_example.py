@@ -173,7 +173,7 @@ class TestItExample(TestCase):
                             "text": "May I have a glass of water?",
                             "bold_text_offsets": [(22, 27)],
                             "translation": "Posso avere un bicchiere d'acqua?",
-                            "bold_translation_offsets": [(26, 32)],
+                            "bold_translation_offsets": [(27, 32)],
                         }
                     ],
                 }
