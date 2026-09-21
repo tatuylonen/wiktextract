@@ -439,3 +439,18 @@ class CleanTests(unittest.TestCase):
     def test_html_numeric_character(self):
         # https://de.wiktionary.org/wiki/Sonne
         self.assertEqual(clean_value(self.wxr, "[[&#x2609;]]"), "☉")
+
+    def test_unbalanced_apostrophes(self):
+        # '''word''. 
+        # MediaWiki resolves this by giving one apostrophe back to the text.
+        # https://de.wiktionary.org/wiki/orient
+        self.assertEqual(
+            clean_value(self.wxr, "El sol surt per l'''orient.''"),
+            "El sol surt per l'orient.",
+        )
+        # balanced markup is unaffected
+        # https://de.wiktionary.org/wiki/lakto
+        self.assertEqual(
+            clean_value(self.wxr, "Ili trinkas bongustan '''lakton.'''"),
+            "Ili trinkas bongustan lakton.",
+        )
