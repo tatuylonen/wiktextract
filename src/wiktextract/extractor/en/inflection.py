@@ -2525,6 +2525,10 @@ def parse_simple_table(
                     if m is not None:
                         paren = m.group(1)
                         subst = m.group(2)
+                    # "走らせる [hashiraseru]" in 走る/Japanese
+                    elif m := re.search(r"\s+\[([^][]*)\]$", form):
+                        if classify_desc(m.group(1)) == "romanization":
+                            paren, subst = m.group(1), ""
                 if paren is not None:
                     form, roman, clitic = handle_parens(
                         form, roman, clitic, extra_tags

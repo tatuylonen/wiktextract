@@ -3739,6 +3739,18 @@ infl_map: dict[str, InflMapNode] = {
         "lang": "Japanese",
         "then": "noun-from-adj",  # equivalent to English -ness, needs more
     },
+    'Ren’yōkei ("continuative form")': {  # 走る/Japanese
+        "lang": "Japanese",
+        "then": "continuative",
+    },
+    "Verb stem": {  # 走る/Japanese
+        "lang": "Japanese",
+        "then": "stem",
+    },
+    "Causative passive": {  # 走る/Japanese
+        "lang": "Japanese",
+        "then": "causative passive",
+    },
     # in חתול/Hebrew:
     "With possessive pronouns": "possessed-form",
     "Person": {
@@ -5812,7 +5824,7 @@ infl_map: dict[str, InflMapNode] = {
     "conditional 2": "conditional-ii conditional",
     # 능숙하다/Korean
     "Plain": {
-        "lang": "Korean",
+        "lang": ["Korean", "Japanese"],
         "then": "",
     },
     # stupid Interlingua hand-crafted minimal tables, deber/Interlingua
