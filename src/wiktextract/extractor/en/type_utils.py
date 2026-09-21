@@ -203,6 +203,7 @@ class WordData(TypedDict, total=False):
     derived: list[LinkageData]
     descendants: list[DescendantData]
     etymology_examples: list[EtymologyExample]
+    etymology_links: list[LinkData]
     etymology_number: str
     etymology_templates: list[TemplateData]
     etymology_text: str

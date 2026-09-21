@@ -649,6 +649,7 @@ following keys (others may also be present or added later):
 * ``topics`` - list of non-disambiguated topics for the word
 * ``translations`` - non-disambiguated translation entries (see below)
 * ``etymology_text`` - etymology section as cleaned text
+* ``etymology_links`` - links in the etymology as ``[display text, target]`` pairs
 * ``etymology_templates`` - templates and their arguments and expansions from
   the etymology section.  These can be used to easily parse etymological
   relations.  Certain common templates that do not signify etymological
@@ -740,14 +741,33 @@ where each dictionary has the following keys (and possibly others):
 
 ### Etymologies
 
-Etymological information is stored under the ``etymology_text`` and
-``etymology_templates`` keys in the word's data.  When multiple parts-of-speech
+Etymological information is stored under ``etymology_text`` or
+``etymology_texts``, and may also include ``etymology_templates`` and
+``etymology_links``, depending on the edition. When multiple parts-of-speech
 are listed under the same etymology, the same data is copied to each
 part-of-speech entry under that etymology.
 
 The ``etymology_text`` field contains the contents of the whole etymology
 section cleaned into human-readable text (i.e., templates have been expanded
 and HTML tags removed, among other things).
+
+The editions with etymology extraction support ``etymology_links``.
+
+The ``etymology_links`` field contains ``[display text, target]`` pairs,
+using the same format as sense ``links``. It preserves links from expanded
+templates (including ``m`` and ``l``) and ordinary wikilinks. Targets retain
+language or sense anchors, and repeated links are retained.
+Categories and links inside omitted footnotes or side panels are excluded.
+The field is omitted
+when no links are found. For example, French
+``{{m|fr|aval}} + {{m|fr|-er}}`` produces:
+
+```json
+{
+  "etymology_text": "aval + -er",
+  "etymology_links": [["aval", "aval#French"], ["-er", "-er#French"]]
+}
+```
 
 The ``etymology_templates`` field contains a list of templates from
 the etymology section.  Some common templates considered not relevant

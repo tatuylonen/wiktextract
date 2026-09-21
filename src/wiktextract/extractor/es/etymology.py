@@ -15,9 +15,13 @@ def extract_etymology_section(
             break
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
             for list_item in node.find_child(NodeKind.LIST_ITEM):
-                e_text = clean_node(wxr, base_data, list_item.children)
+                links: list[tuple[str, str]] = []
+                e_text = clean_node(
+                    wxr, base_data, list_item.children, link_collector=links
+                )
                 if e_text != "" and not e_text.startswith(missing_etymology):
                     base_data.etymology_texts.append(e_text)
+                    base_data.etymology_links.extend(links)
         elif (
             isinstance(node, TemplateNode) and node.template_name == "datación"
         ):
@@ -29,6 +33,8 @@ def extract_etymology_section(
             e_nodes.append(node)
 
     if len(e_nodes) > 0:
-        e_text = clean_node(wxr, base_data, e_nodes)
+        links = []
+        e_text = clean_node(wxr, base_data, e_nodes, link_collector=links)
         if e_text != "" and not e_text.startswith(missing_etymology):
             base_data.etymology_texts.append(e_text)
+            base_data.etymology_links.extend(links)

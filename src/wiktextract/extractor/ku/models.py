@@ -122,6 +122,7 @@ class WordEntry(KurdishBaseModel):
     raw_tags: list[str] = []
     forms: list[Form] = []
     etymology_texts: list[str] = []
+    etymology_links: list[tuple[str, str]] = []
     translations: list[Translation] = []
     synonyms: list[Linkage] = []
     antonyms: list[Linkage] = []

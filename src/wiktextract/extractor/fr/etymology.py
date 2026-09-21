@@ -21,6 +21,7 @@ class EtymologyData:
     texts: list[str] = field(default_factory=list)
     categories: list[str] = field(default_factory=list)
     attestations: list[AttestationData] = field(default_factory=list)
+    links: list[tuple[str, str]] = field(default_factory=list)
 
 
 EtymologyDict = dict[tuple[str, str], EtymologyData]
@@ -56,12 +57,16 @@ def extract_etymology(
                 attestations.extend(extract_date_template(wxr, base_data, node))
             else:
                 e_nodes.append(node)
-        etymology_text = clean_node(wxr, categories, e_nodes)
+        links = []
+        etymology_text = clean_node(
+            wxr, categories, e_nodes, link_collector=links
+        )
         if len(etymology_text) > 0:
             etymology_dict[("", "")].texts.extend(
                 list(filter(None, map(str.strip, etymology_text.splitlines())))
             )
             etymology_dict[("", "")].attestations = attestations
+            etymology_dict[("", "")].links.extend(links)
             etymology_dict[(pos_id, pos_title)].categories.extend(
                 categories.get("categories", [])
             )
@@ -89,6 +94,9 @@ def extract_etymology_list_item(
             etymology_dict[(pos_id, pos_title)].texts.extend(
                 etymology_data.texts
             )
+            etymology_dict[(pos_id, pos_title)].links.extend(
+                etymology_data.links
+            )
             etymology_dict[(pos_id, pos_title)].categories.extend(
                 etymology_data.categories
             )
@@ -102,6 +110,9 @@ def extract_etymology_list_item(
         if len(etymology_data.texts) > 0:
             etymology_dict[(pos_id, pos_title)].texts.extend(
                 etymology_data.texts
+            )
+            etymology_dict[(pos_id, pos_title)].links.extend(
+                etymology_data.links
             )
             etymology_dict[(pos_id, pos_title)].categories.extend(
                 etymology_data.categories
@@ -214,7 +225,7 @@ def extract_etymology_list_item_nodes(
             is_first_attest_template = False
         elif not (isinstance(node, WikiNode) and node.kind == NodeKind.LIST):
             used_nodes.append(node)
-    e_text = clean_node(wxr, cats, used_nodes)
+    e_text = clean_node(wxr, cats, used_nodes, link_collector=e_data.links)
     if e_text != "":
         e_data.texts.append(e_text)
     e_data.categories = cats.get("categories", [])
@@ -249,6 +260,7 @@ def insert_etymology_data(
                 for sense_data in sense_data_list:
                     if sense_data not in added_sense:
                         sense_data.etymology_texts = etymology_data.texts
+                        sense_data.etymology_links = etymology_data.links.copy()
                         sense_data.categories.extend(etymology_data.categories)
                         sense_data.attestations.extend(
                             etymology_data.attestations
@@ -260,6 +272,9 @@ def insert_etymology_data(
                     for sense_data in sense_dict[pos_key]:
                         if sense_data not in added_sense:
                             sense_data.etymology_texts = etymology_data.texts
+                            sense_data.etymology_links = (
+                                etymology_data.links.copy()
+                            )
                             sense_data.categories.extend(
                                 etymology_data.categories
                             )

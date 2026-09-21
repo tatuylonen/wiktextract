@@ -59,6 +59,7 @@ class TestThGloss(TestCase):
                         "ศัพท์ภาษาไทยที่รับมาจากภาษาไทดั้งเดิม",
                     ],
                     "etymology_texts": ["สืบทอดจากไทดั้งเดิม *kɤpᴰ"],
+                    "etymology_links": [("*kɤpᴰ", "การสืบสร้าง:ไทดั้งเดิม/kɤpᴰ")],
                     "senses": [{"glosses": ["ชื่อ"]}],
                     "pos": "noun",
                     "pos_title": "คำนาม",

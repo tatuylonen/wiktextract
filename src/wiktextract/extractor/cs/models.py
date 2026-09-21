@@ -99,6 +99,7 @@ class WordEntry(CzechBaseModel):
     raw_tags: list[str] = []
     sounds: list[Sound] = []
     hyphenations: list[Hyphenation] = []
+    etymology_links: list[tuple[str, str]] = []
     etymology_texts: list[str] = []
     forms: list[Form] = []
     translations: list[Translation] = []

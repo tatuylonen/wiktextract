@@ -109,6 +109,7 @@ class WordEntry(PortugueseBaseModel):
     homonyms: list[Linkage] = []
     paronyms: list[Linkage] = []
     phraseology: list[Linkage] = []
+    etymology_links: list[tuple[str, str]] = []
     etymology_texts: list[str] = []
     sounds: list[Sound] = []
     forms: list[Form] = []

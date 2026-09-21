@@ -106,6 +106,7 @@ class WordEntry(IndonesianBaseModel):
     tags: list[str] = []
     raw_tags: list[str] = []
     etymology_texts: list[str] = []
+    etymology_links: list[tuple[str, str]] = []
     translations: list[Translation] = []
     sounds: list[Sound] = []
     antonyms: list[Linkage] = []

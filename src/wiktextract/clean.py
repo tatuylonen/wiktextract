@@ -1338,6 +1338,72 @@ URL_STARTS_RE = re.compile(
 IMAGE_LINK_RE: Optional[re.Pattern] = None
 
 
+def remove_invisible_markup(title: str) -> str:
+    """Remove omitted content before text and link extraction."""
+    # remove nowiki tag returned from `Wtp.node_to_html()`
+    title = re.sub(r"<nowiki\s*/>", "", title)
+
+    # Remove any remaining templates
+    # title = re.sub(r"\{\{[^}]+\}\}", "", title)
+
+    # Remove tables, which can contain other tables
+    prev = ""
+    while title != prev:
+        prev = title
+        title = re.sub(
+            r"\{\|((?!\{\|)(?!\|\}).)*\|\}",
+            "\n",
+            title,
+            flags=re.DOTALL,
+        )
+    # title = re.sub(r"(?s)\{\|.*?\|\}", "\n", title)
+    # Remove second reference tags (<ref name="ref_name"/>)
+    title = re.sub(r"<ref\s+name=\"[^\"]+\"\s*/>", "", title)
+    # Remove references (<ref>...</ref>).
+    title = re.sub(r"(?is)<ref\b\s*[^>/]*?>\s*.*?</ref\s*>", "", title)
+    # Replace <span>...</span> by stripped content without newlines
+    title = re.sub(
+        r"(?is)<span\b\s*[^>]*?>(.*?)\s*</span\s*>",
+        lambda m: re.sub(r"\s+", " ", m.group(1)),
+        title,
+    )
+    # Replace <br/> by comma space (it is used to express alternatives in some
+    # declensions)
+    title = re.sub(r"(?si)\s*<br\s*/?>\n*", "\n", title)
+    # Remove divs with floatright class (generated e.g. by {{ja-kanji|...}})
+    title = re.sub(
+        r'(?si)<div\b[^>]*?\bclass="[^"]*?\bfloatright\b[^>]*?>'
+        r"((<div\b(<div\b.*?</div\s*>|.)*?</div>)|.)*?"
+        r"</div\s*>",
+        "",
+        title,
+    )
+    # Remove divs with float: attribute
+    title = re.sub(
+        r'(?si)<div\b[^>]*?\bstyle="[^"]*?\bfloat:[^>]*?>'
+        r"((<div\b(<div\b.*?</div\s*>|.)*?</div>)|.)*?"
+        r"</div\s*>",
+        "",
+        title,
+    )
+    # Remove <sup> with previewonly class (generated e.g. by {{taxlink|...}})
+    title = re.sub(
+        r'(?si)<sup\b[^>]*?\bclass="[^"<>]*?'
+        r"\bpreviewonly\b[^>]*?>"
+        r".+?</sup\s*>",
+        "",
+        title,
+    )
+    # Remove <strong class="error">...</strong>
+    title = re.sub(
+        r'(?si)<strong\b[^>]*?\bclass="[^"]*?\berror\b[^>]*?>'
+        r".+?</strong\s*>",
+        "",
+        title,
+    )
+    return title
+
+
 def clean_value(
     wxr: WiktextractContext, title: str, no_strip=False, no_html_strip=False
 ) -> str:
@@ -1418,67 +1484,7 @@ def clean_value(
         # Content is preformatted
         return "`" + m.group(1).strip() + "`"
 
-    # remove nowiki tag returned from `Wtp.node_to_html()`
-    title = re.sub(r"<nowiki\s*/>", "", title)
-
-    # Remove any remaining templates
-    # title = re.sub(r"\{\{[^}]+\}\}", "", title)
-
-    # Remove tables, which can contain other tables
-    prev = ""
-    while title != prev:
-        prev = title
-        title = re.sub(
-            r"\{\|((?!\{\|)(?!\|\}).)*\|\}",
-            "\n",
-            title,
-            flags=re.DOTALL,
-        )
-    # title = re.sub(r"(?s)\{\|.*?\|\}", "\n", title)
-    # Remove second reference tags (<ref name="ref_name"/>)
-    title = re.sub(r"<ref\s+name=\"[^\"]+\"\s*/>", "", title)
-    # Remove references (<ref>...</ref>).
-    title = re.sub(r"(?is)<ref\b\s*[^>/]*?>\s*.*?</ref\s*>", "", title)
-    # Replace <span>...</span> by stripped content without newlines
-    title = re.sub(
-        r"(?is)<span\b\s*[^>]*?>(.*?)\s*</span\s*>",
-        lambda m: re.sub(r"\s+", " ", m.group(1)),
-        title,
-    )
-    # Replace <br/> by comma space (it is used to express alternatives in some
-    # declensions)
-    title = re.sub(r"(?si)\s*<br\s*/?>\n*", "\n", title)
-    # Remove divs with floatright class (generated e.g. by {{ja-kanji|...}})
-    title = re.sub(
-        r'(?si)<div\b[^>]*?\bclass="[^"]*?\bfloatright\b[^>]*?>'
-        r"((<div\b(<div\b.*?</div\s*>|.)*?</div>)|.)*?"
-        r"</div\s*>",
-        "",
-        title,
-    )
-    # Remove divs with float: attribute
-    title = re.sub(
-        r'(?si)<div\b[^>]*?\bstyle="[^"]*?\bfloat:[^>]*?>'
-        r"((<div\b(<div\b.*?</div\s*>|.)*?</div>)|.)*?"
-        r"</div\s*>",
-        "",
-        title,
-    )
-    # Remove <sup> with previewonly class (generated e.g. by {{taxlink|...}})
-    title = re.sub(
-        r'(?si)<sup\b[^>]*?\bclass="[^"<>]*?'
-        r"\bpreviewonly\b[^>]*?>"
-        r".+?</sup\s*>",
-        "",
-        title,
-    )
-    # Remove <strong class="error">...</strong>
-    title = re.sub(
-        r'(?si)<strong\b[^>]*?\bclass="[^"]*?\berror\b[^>]*?>'
-        r".+?</strong\s*>",
-        "",
-        title,
-    )
+    title = remove_invisible_markup(title)
     # Change <div> and </div> to newlines.  Ditto for tr, li, table, dl, ul, ol
     title = re.sub(r"(?si)</?(div|tr|li|table|dl|ul|ol)\b[^>]*>", "\n", title)
     # Change <dt>, <dd>, </dt> and </dd> into newlines;

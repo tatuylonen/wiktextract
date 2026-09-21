@@ -189,6 +189,7 @@ def parse_page(
                         or e_data.index == ""
                     ):
                         data.etymology_texts.append(e_data.text)
+                        data.etymology_links.extend(e_data.links)
                         data.categories.extend(e_data.categories)
 
     for data in page_data:

@@ -57,8 +57,15 @@ class TestTrEtymology(TestCase):
         )
         self.assertEqual(page_data[0]["etymology_texts"], ["ada + -m"])
         self.assertEqual(
+            page_data[0]["etymology_links"],
+            [("ada", "ada#Türkçe"), ("-m", "-m#Türkçe")],
+        )
+        self.assertEqual(
             page_data[1]["categories"], ["Arapça kökenli Türkçe sözcükler"]
         )
         self.assertEqual(
             page_data[1]["etymology_texts"], ["Arapça آدَم (ʾādem)"]
+        )
+        self.assertEqual(
+            page_data[1]["etymology_links"], [("آدَم", "آدم#Arapça")]
         )

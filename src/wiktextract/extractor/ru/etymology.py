@@ -14,14 +14,20 @@ def extract_etymology(
             break
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
             for list_item in node.find_child(NodeKind.LIST_ITEM):
-                e_text = clean_node(wxr, word_entry, list_item.children)
+                links: list[tuple[str, str]] = []
+                e_text = clean_node(
+                    wxr, word_entry, list_item.children, link_collector=links
+                )
                 if e_text != "":
                     word_entry.etymology_texts.append(e_text)
+                    word_entry.etymology_links.extend(links)
         elif not (
             isinstance(node, TemplateNode) and node.template_name == "improve"
         ):
             e_nodes.append(node)
     if len(e_nodes) > 0:
-        e_str = clean_node(wxr, word_entry, e_nodes)
+        links = []
+        e_str = clean_node(wxr, word_entry, e_nodes, link_collector=links)
         if e_str != "":
             word_entry.etymology_texts.append(e_str)
+            word_entry.etymology_links.extend(links)

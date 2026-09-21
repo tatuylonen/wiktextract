@@ -74,6 +74,7 @@ class Translation(DutchBaseModel):
 
 class Etymology(DutchBaseModel):
     text: str = ""
+    links: list[tuple[str, str]] = []
     categories: list[str] = []
     index: str = ""
 
@@ -114,6 +115,7 @@ class WordEntry(DutchBaseModel):
     raw_tags: list[str] = []
     etymology_index: str = Field(default="", exclude=True)
     etymology_texts: list[str] = []
+    etymology_links: list[tuple[str, str]] = []
     sounds: list[Sound] = []
     abbreviations: list[Linkage] = []
     anagrams: list[Linkage] = []

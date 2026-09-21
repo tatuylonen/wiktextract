@@ -235,6 +235,7 @@ class WordEntry(GreekBaseModel):
     pos: POSName = Field(default="", description="Part of speech type")
     pos_title: str = ""  # `==Noun==`
     pos_num: int = -1  # `==Noun 2==` Default -1 gets removed.
+    etymology_links: list[tuple[str, str]] = []
     etymology_text: str = Field(
         default="", description="Etymology section as cleaned text."
     )

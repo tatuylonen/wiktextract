@@ -75,6 +75,8 @@ class TestKoEtymology(TestCase):
             ["욕설로 사용되는 용례는 1950년대부터 확인됨."],
         )
         self.assertEqual(data[1]["etymology_texts"], ["한문 丙申."])
+        self.assertNotIn("etymology_links", data[0])
+        self.assertEqual(data[1]["etymology_links"], [("丙申", "丙申")])
         self.assertEqual(
             data[1]["categories"], ["한국어 terms borrowed from 한문"]
         )

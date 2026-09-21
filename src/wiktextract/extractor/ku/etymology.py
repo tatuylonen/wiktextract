@@ -15,12 +15,18 @@ def extract_etymology_section(
             break
         elif isinstance(node, WikiNode) and node.kind == NodeKind.LIST:
             for list_item in node.find_child(NodeKind.LIST_ITEM):
-                e_text = clean_node(wxr, word_entry, list_item.children)
+                e_links: list[tuple[str, str]] = []
+                e_text = clean_node(
+                    wxr, word_entry, list_item.children, link_collector=e_links
+                )
                 if e_text != "":
                     word_entry.etymology_texts.append(e_text)
+                    word_entry.etymology_links.extend(e_links)
         else:
             e_nodes.append(node)
     if len(e_nodes) > 0:
-        e_text = clean_node(wxr, word_entry, e_nodes)
+        e_links: list[tuple[str, str]] = []
+        e_text = clean_node(wxr, word_entry, e_nodes, link_collector=e_links)
         if e_text != "":
             word_entry.etymology_texts.append(e_text)
+            word_entry.etymology_links.extend(e_links)

@@ -151,6 +151,7 @@ class WordEntry(GermanBaseModel):
     raw_tags: list[str] = []
     categories: list[str] = []
     redirects: list[str] = []
+    etymology_links: list[tuple[str, str]] = []
     etymology_texts: list[str] = []
     forms: list[Form] = []
     meronyms: list[Linkage] = []

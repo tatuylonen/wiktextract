@@ -47,10 +47,16 @@ def process_etym(
 
     # Greek wiktionary doesn't seem to have etymology templates, or at
     # least they're not used as much.
-    etym_text = clean_node(wxr, base_data, etym_contents).lstrip(":#").strip()
+    links: list[tuple[str, str]] = []
+    etym_text = (
+        clean_node(wxr, base_data, etym_contents, link_collector=links)
+        .lstrip(":#")
+        .strip()
+    )
 
     if etym_text:
         base_data.etymology_text = etym_text
+        base_data.etymology_links = links
 
     for heading_type, pos, title, tags, num, subnode in find_sections(
         wxr, etym_sublevels

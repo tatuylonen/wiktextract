@@ -17,6 +17,7 @@ def extract_etymology_section(
     from .page import match_sense_index
 
     etymology_texts = defaultdict(list)
+    etymology_links = defaultdict(list)
     has_list = False
     sense_index = ""
     for list_item in level_node.find_child_recursively(NodeKind.LIST_ITEM):
@@ -33,19 +34,25 @@ def extract_etymology_section(
                     e_nodes.append(node)
             else:
                 e_nodes.append(node)
-        text = clean_node(wxr, None, e_nodes)
+        links = []
+        text = clean_node(wxr, None, e_nodes, link_collector=links)
         if len(text) > 0:
             etymology_texts[sense_index].append(text)
+            etymology_links[sense_index].extend(links)
             has_list = True
     if not has_list:
-        text = clean_node(wxr, None, level_node.children)
+        links = []
+        text = clean_node(wxr, None, level_node.children, link_collector=links)
         if len(text) > 0:
             etymology_texts[sense_index].append(text)
+            etymology_links[sense_index].extend(links)
 
     for data in page_data:
         if data.lang_code == base_data.lang_code:
             for sense_index, texts in etymology_texts.items():
                 if sense_index == "" or match_sense_index(sense_index, data):
                     data.etymology_texts = texts
+                    data.etymology_links = etymology_links[sense_index].copy()
 
     base_data.etymology_texts = etymology_texts.get("", [])
+    base_data.etymology_links = etymology_links.get("", []).copy()

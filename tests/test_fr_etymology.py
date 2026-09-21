@@ -135,7 +135,11 @@ class TestEtymology(TestCase):
                 ("fr-interj-1", "Interjection 1"): EtymologyData(
                     texts=[
                         "Abréviation de « Notre-Dame ! » ou de « dame Dieu ! » (« Seigneur Dieu ! »)."
-                    ]
+                    ],
+                    links=[
+                        ("Notre-Dame", "Notre-Dame"),
+                        ("Seigneur Dieu", "Seigneur Dieu"),
+                    ],
                 ),
             },
         )
@@ -198,6 +202,10 @@ class TestEtymology(TestCase):
                     "etymology_texts": [
                         "Abréviation de « Notre-Dame ! » ou de « dame Dieu ! » (« Seigneur Dieu ! »)."
                     ],
+                    "etymology_links": [
+                        ("Notre-Dame", "Notre-Dame"),
+                        ("Seigneur Dieu", "Seigneur Dieu"),
+                    ],
                 },
             ],
         )
@@ -220,7 +228,8 @@ class TestEtymology(TestCase):
                     ]
                 ),
                 ("fr-nom", "Nom"): EtymologyData(
-                    texts=["Par substantivation de l’interjection."]
+                    texts=["Par substantivation de l’interjection."],
+                    links=[("substantivation", "substantivation")],
                 ),
             },
         )
@@ -265,6 +274,7 @@ class TestEtymology(TestCase):
                     "etymology_texts": [
                         "Par substantivation de l’interjection."
                     ],
+                    "etymology_links": [("substantivation", "substantivation")],
                 },
             ],
         )
@@ -362,6 +372,7 @@ class TestEtymology(TestCase):
                         "De l’espagnol nata, « crème », d'origine inconnue."
                     ],
                     categories=["Mots en français issus d’un mot en espagnol"],
+                    links=[("nata", "nata#es")],
                 ),
                 ("fr-nom-3", "Nom commun 3"): EtymologyData(
                     texts=[
@@ -381,7 +392,8 @@ class TestEtymology(TestCase):
             etymology_data,
             {
                 ("", ""): EtymologyData(
-                    texts=["Dérivé du substantif huzuni (« tristesse »)."]
+                    texts=["Dérivé du substantif huzuni (« tristesse »)."],
+                    links=[("huzuni", "huzuni")],
                 ),
             },
         )
@@ -409,7 +421,8 @@ class TestEtymology(TestCase):
             etymology_data,
             {
                 ("", ""): EtymologyData(
-                    texts=["Composé de mètre avec le suffixe -ifier."]
+                    texts=["Composé de mètre avec le suffixe -ifier."],
+                    links=[("mètre", "mètre"), ("-ifier", "-ifier")],
                 )
             },
         )
@@ -488,3 +501,58 @@ class TestEtymology(TestCase):
 # [[celle|Celle]]""",
         )
         self.assertEqual(data[0]["attestations"], [{"date": "1477-1478"}])
+
+    def test_links_follow_pos_and_language_without_heading_links(self):
+        self.wxr.wtp.add_page(
+            "Modèle:S",
+            10,
+            '<span id="{{{2|fr}}}-{{{1}}}-{{{num|1}}}">'
+            "{{{1}}} {{{num|1}}}</span>",
+        )
+        self.wxr.wtp.add_page(
+            "Modèle:origine-test",
+            10,
+            "[[domina#la|domina]][[Catégorie:Origine latine]]",
+        )
+        data = parse_page(
+            self.wxr,
+            "dame",
+            """== {{langue|fr}} ==
+=== {{S|étymologie}} ===
+: (''[[#fr-nom-1|Nom commun 1]]'') Du {{origine-test}}, puis [[domina#la|domina]].
+: (''[[#fr-nom-2|Nom commun 2]]'') Du [[dam#nl|dam]].
+=== {{S|nom|fr|num=1}} ===
+# Première définition.
+=== {{S|nom|fr|num=2}} ===
+# Seconde définition.
+== {{langue|en}} ==
+=== {{S|nom|en}} ===
+# English definition.""",
+        )
+        self.assertEqual(
+            data[0]["etymology_links"],
+            [("domina", "domina#la"), ("domina", "domina#la")],
+        )
+        self.assertEqual(data[1]["etymology_links"], [("dam", "dam#nl")])
+        self.assertNotIn("etymology_links", data[2])
+        self.assertEqual(data[0]["categories"], ["Origine latine"])
+        self.assertNotIn("categories", data[1])
+
+    def test_prose_links_and_json_serialization(self):
+        import json
+
+        self.wxr.wtp.start_page("mot")
+        self.wxr.wtp.add_page("Modèle:mot-test", 10, "[[verbum#la|verbum]]")
+        root = self.wxr.wtp.parse(
+            "De {{mot-test}} et [[mot#fr|mot]].[[Catégorie:Origine latine]]"
+        )
+        etymology = extract_etymology(self.wxr, root, None)
+        entry = WordEntry(
+            word="mot", lang="Français", lang_code="fr", pos="noun"
+        )
+        insert_etymology_data("fr", [entry], etymology)
+        self.assertEqual(
+            json.loads(entry.model_dump_json())["etymology_links"],
+            [["verbum", "verbum#la"], ["mot", "mot#fr"]],
+        )
+        self.assertEqual(entry.etymology_texts, ["De verbum et mot."])
