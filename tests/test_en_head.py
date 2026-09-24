@@ -1512,6 +1512,7 @@ class HeadTests(unittest.TestCase):
             self.wxr, parsed.children[0], "Proto-Indo-European", "ine-pro"
         )
         self.assertEqual(len(langret[0]["forms"]), 1)
+        self.assertEqual(len(langret[0]["etymology_templates"]), 1)
         self.assertEqual(
             langret[0]["etymology_templates"],
             [

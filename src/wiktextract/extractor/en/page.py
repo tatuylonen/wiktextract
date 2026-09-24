@@ -1569,7 +1569,9 @@ def parse_language(
                 "expansion": cleaned_expansion,
             }
             if name in ETYMOLOGY_TEMPLATES_IN_HEADS:
-                data_append(pos_data, "etymology_templates", dt)
+                etymology_template_append(
+                    pos_data, name, args_ht, cleaned_expansion
+                )
             else:
                 data_append(pos_data, "head_templates", dt)
             if name in WORD_LEVEL_HEAD_TEMPLATES:
@@ -3196,8 +3198,6 @@ def parse_language(
                 ignore_count += 1
             return None
 
-        # CONTINUE_HERE
-
         def etym_post_template_fn(
             name: str, ht: TemplateArgs, expansion: str
         ) -> None:
@@ -3296,6 +3296,12 @@ def parse_language(
                     or node.template_name == "ja-kt"
                 ):
                     extract_ja_kanjitab_template(wxr, node, select_data())
+                elif node.template_name in ETYMOLOGY_TEMPLATES_IN_HEADS:
+                    args_ht = clean_template_args(wxr, node.template_parameters)
+                    expansion = clean_node(wxr, etym_data, node)
+                    etymology_template_append(
+                        etym_data, node.template_name, args_ht, expansion
+                    )
 
             if not isinstance(node, LevelNode):
                 # XXX handle e.g. wikipedia links at the top of a language
@@ -4416,3 +4422,14 @@ def extract_ja_kanjitab_template(
         data_extend(base_data, "forms", forms)
     for link_node in expanded_node.find_child(NodeKind.LINK):
         clean_node(wxr, base_data, link_node)
+
+
+def etymology_template_append(
+    data: WordData, name: str, args_ht: TemplateArgs, expansion: str
+):
+    dt: TemplateData = {
+        "name": name,
+        "args": args_ht,
+        "expansion": expansion,
+    }
+    data_append(data, "etymology_templates", dt)
