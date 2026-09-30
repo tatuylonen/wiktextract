@@ -848,11 +848,11 @@ class TestPronunciation(TestCase):
         self.assertEqual(
             out["sounds"],
             [
-                {"ipa": "/ˈwɔː.tə/", "tags": ["UK", "Received-Pronunciation"]},
-                {"ipa": "[ˈwo̞ː.tʰə]", "tags": ["UK", "Received-Pronunciation"]},
+                {"ipa": "/ˈwɔː.tə/", "tags": ["Received-Pronunciation", "UK"]},
+                {"ipa": "[ˈwo̞ː.tʰə]", "tags": ["Received-Pronunciation", "UK"]},
                 {
                     "ipa": "/ˈwa.tə/",
-                    "tags": ["UK", "Northern-England", "Yorkshire"],
+                    "tags": ["Northern-England", "UK", "Yorkshire"],
                 },
                 {
                     "ipa": "/ˈwɔ.tɚ/",

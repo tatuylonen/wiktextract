@@ -205,13 +205,18 @@ def merge_pronunciation_tag_data(
 def inherit_pronunciation_tag_data(
     sound: SoundData, parent_tag_data: SoundData
 ) -> None:
-    """Put the tags, topics and note of a parent list item, such as
-    "* {{a|en|GA}}", before the nested pronunciation's own."""
+    """Add the tags and topics of a parent list item, such as
+    "* {{a|en|GA}}", to a nested pronunciation, and put its note before
+    the nested pronunciation's own."""
     if not parent_tag_data:
         return
     tag_data: SoundData = {}
     merge_pronunciation_tag_data(tag_data, parent_tag_data)
     merge_pronunciation_tag_data(tag_data, sound)
+    if "tags" in tag_data:
+        tag_data["tags"] = sorted(tag_data["tags"])
+    if "topics" in tag_data:
+        tag_data["topics"] = sorted(tag_data["topics"])
     sound.update(tag_data)
 
 
