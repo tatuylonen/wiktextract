@@ -876,6 +876,63 @@ class TestPronunciation(TestCase):
             ],
         )
 
+    def test_list_item_with_several_sublists(self):
+        # "**" and "*:" lines under the same list item are two sublists.
+        self.wxr.wtp.start_page("can't")
+        self.wxr.wtp.add_page(
+            "Template:a",
+            10,
+            """{{#switch:{{{2}}}
+| trap-bath split = (trap–bath split)
+| non-trap-bath split = (without the trap–bath split)
+| US = (US, Canada)
+}}""",
+        )
+        self.wxr.wtp.add_page(
+            "Template:IPA",
+            10,
+            """{{#switch:{{{2}}}
+| /kɑːnt/ = (Received Pronunciation) IPA⁽ᵏᵉʸ⁾: /kɑːnt/
+| /kænt/ = (without /æ/ raising) IPA⁽ᵏᵉʸ⁾: /kænt/
+| /känt/ = (Scotland) IPA⁽ᵏᵉʸ⁾: /känt/
+}}""",
+        )
+        self.wxr.wtp.add_page("Template:rhymes", 10, "Rhymes: -{{{2}}}")
+        tree = self.wxr.wtp.parse("""===Pronunciation===
+* {{a|en|trap-bath split}}
+** {{IPA|en|/kɑːnt/|[kʰɑːnt]|a=RP}}
+*: {{rhymes|en|ɑːnt|s=1}}
+* {{a|en|non-trap-bath split}}
+** {{a|en|US|CA}}
+*** {{IPA|en|/kænt/|[kʰænt]|a=non-æ-tensing}}
+** {{IPA|en|/känt/|[k(ʰ)änt]|a=Scotland}}
+*: {{rhymes|en|ænt|s=1}}
+""")
+        out = {}
+        parse_pronunciation(self.wxr, tree.children[0], out, {}, {}, {}, "en")
+        self.assertEqual(
+            out["sounds"],
+            [
+                {
+                    "ipa": "/kɑːnt/",
+                    "tags": ["Received-Pronunciation"],
+                    "note": "trap–bath split",
+                },
+                {"rhymes": "-ɑːnt"},
+                {
+                    "ipa": "/kænt/",
+                    "tags": ["Canada", "US"],
+                    "note": "without the trap–bath split; without /æ/ raising",
+                },
+                {
+                    "ipa": "/känt/",
+                    "tags": ["Scotland"],
+                    "note": "without the trap–bath split",
+                },
+                {"rhymes": "-ænt"},
+            ],
+        )
+
     def test_no_templates1(self):
         self.wxr.wtp.start_page("baz")
         tree = self.wxr.wtp.parse("""=== Pronunciation ===

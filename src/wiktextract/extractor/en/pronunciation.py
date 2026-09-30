@@ -681,16 +681,18 @@ def parse_pronunciation(
                 len(node.sarg) if isinstance(node.sarg, str) else list_depth
             )
             new_children = []
-            sublist = None
+            # A list item can have several sublists, e.g. "**" lines
+            # followed by a "*:" line.
+            sublists = []
             for child in node.children:
                 if isinstance(child, WikiNode) and child.kind == NodeKind.LIST:
-                    sublist = child
+                    sublists.append(child)
                 else:
                     new_children.append(child)
             node.children = new_children
             node.sarg = "*"
             yield FlattenedListNode(node, item_depth)
-            if sublist:
+            for sublist in sublists:
                 yield from flattened_tree1(sublist, item_depth)
         else:
             yield FlattenedListNode(node, list_depth)
