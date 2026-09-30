@@ -47,7 +47,11 @@ from ...wxr_context import WiktextractContext
 from ...wxr_logging import logger
 from ..ruby import extract_ruby, parse_ruby
 from ..share import strip_nodes
-from .descendant import extract_descendant_section
+from .descendant import (
+    ETYMOLOGY_TEMPLATES_IN_HEADS,
+    etymology_template_append,
+    extract_descendant_section,
+)
 from .example import extract_example_list_item, extract_template_zh_x
 from .form_descriptions import (
     classify_desc,
@@ -277,13 +281,6 @@ HEAD_TAG_RE = re.compile(
 # data for later.
 WORD_LEVEL_HEAD_TEMPLATES = {"term-label", "tlb"}
 
-# Annoying templates that should be in etymology sections, but sometimes
-# are thrown in heads because the etymology section is missing, like at
-# the oldest level of a reconstruction: see wiktextract#1658
-ETYMOLOGY_TEMPLATES_IN_HEADS = {
-    "ety",
-    "etymon",
-}
 
 PROBLEMATIC_TEMPLATES_CLUMP = (
     WORD_LEVEL_HEAD_TEMPLATES | ETYMOLOGY_TEMPLATES_IN_HEADS
@@ -371,8 +368,8 @@ PANEL_TEMPLATES: set[str] = {
     "French possessive pronouns",
     "Han etym",
     "Han etyl",  # this redirects to Han etym and would cause Lua errors,
-                 # and I don't know why, but I'm putting it here because
-                 # we should be ignoring it anyhow.
+    # and I don't know why, but I'm putting it here because
+    # we should be ignoring it anyhow.
     "Japanese demonstratives",
     "Latn-script",
     "LDL",
@@ -4415,14 +4412,3 @@ def extract_ja_kanjitab_template(
         data_extend(base_data, "forms", forms)
     for link_node in expanded_node.find_child(NodeKind.LINK):
         clean_node(wxr, base_data, link_node)
-
-
-def etymology_template_append(
-    data: WordData, name: str, args_ht: TemplateArgs, expansion: str
-):
-    dt: TemplateData = {
-        "name": name,
-        "args": args_ht,
-        "expansion": expansion,
-    }
-    data_append(data, "etymology_templates", dt)

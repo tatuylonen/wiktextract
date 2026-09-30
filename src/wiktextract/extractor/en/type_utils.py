@@ -83,6 +83,7 @@ class DescendantData(TypedDict, total=False):
     descendants: list["DescendantData"]
     ruby: list[tuple[str, ...]]
     sense: str
+    etymology_templates: list[TemplateData]
 
 
 class FormData(TypedDict, total=False):

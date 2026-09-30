@@ -9,12 +9,21 @@ from wikitextprocessor import (
     WikiNode,
 )
 
+from ...clean import clean_template_args
 from ...datautils import data_append, data_extend
 from ...page import clean_node
 from ...tags import valid_tags
 from ...wxr_context import WiktextractContext
 from ..ruby import extract_ruby
-from .type_utils import DescendantData, WordData
+from .type_utils import DescendantData, TemplateArgs, TemplateData, WordData
+
+# Annoying templates that should be in etymology sections, but sometimes
+# are thrown in heads because the etymology section is missing, like at
+# the oldest level of a reconstruction: see wiktextract#1658
+ETYMOLOGY_TEMPLATES_IN_HEADS = {
+    "ety",
+    "etymon",
+}
 
 
 def extract_descendant_section(
@@ -77,10 +86,13 @@ def extract_desc_list_item(
     raw_tags: list[str],
     lang_code: str = "unknown",
     lang_name: str = "unknown",
+    etym_templates: list[TemplateNode] | None = None,
 ) -> tuple[list[DescendantData], str, str]:
     # process list item node and <li> tag
     data_list = []
     before_word_raw_tags = []
+    if etym_templates is None:
+        etym_templates = []
     after_word = False
     for child in list_item.children:
         if isinstance(child, str):
@@ -119,6 +131,7 @@ def extract_desc_list_item(
                 raw_tags,
                 before_word_raw_tags,
                 after_word,
+                etym_templates,
             )
         elif (
             isinstance(child, HTMLNode)
@@ -161,11 +174,17 @@ def extract_desc_list_item(
                 raw_tags,
                 lang_code,
                 lang_name,
+                etym_templates,
             )
             data_list.extend(new_data)
             # save lang data from desc template
             lang_code = new_l_code
             lang_name = new_l_name
+        elif (
+            isinstance(child, TemplateNode)
+            and child.template_name in ETYMOLOGY_TEMPLATES_IN_HEADS
+        ):
+            etym_templates.append(child)
 
     if len(data_list) == 0 and (
         lang_code != "unknown" or lang_name != "unknown"
@@ -173,18 +192,31 @@ def extract_desc_list_item(
         data = DescendantData(lang_code=lang_code, lang=lang_name)
         if len(raw_tags) > 0:
             data["raw_tags"] = raw_tags
+        if len(etym_templates) > 0:
+            etymology_nodes_append(wxr, data, etym_templates)
+            etym_templates.clear()
         data_list.append(data)
 
     for ul_tag in list_item.find_html("ul"):
         for li_tag in ul_tag.find_html("li"):
-            extract_desc_list_item(wxr, li_tag, data_list, seen_lists, [])
+            extract_desc_list_item(
+                wxr,
+                li_tag,
+                data_list,
+                seen_lists,
+                [],
+            )
     for next_list in list_item.find_child(NodeKind.LIST):
         if next_list in seen_lists:
             continue
         seen_lists.add(next_list)
         for next_list_item in next_list.find_child(NodeKind.LIST_ITEM):
             extract_desc_list_item(
-                wxr, next_list_item, data_list, seen_lists, []
+                wxr,
+                next_list_item,
+                data_list,
+                seen_lists,
+                [],
             )
 
     for p_data in parent_descendant_datas:
@@ -201,6 +233,7 @@ def extract_desc_span_tag(
     raw_tags: list[str],
     before_word_raw_tags: list[str],
     after_word: bool,
+    etym_templates: list[TemplateNode],
 ) -> bool:
     class_names = span_tag.attrs.get("class", "").split()
     span_lang = span_tag.attrs.get("lang", "")
@@ -248,6 +281,9 @@ def extract_desc_span_tag(
         before_word_raw_tags.clear()
         if len(ruby_data) > 0:
             desc_data["ruby"] = ruby_data
+        if len(etym_templates) > 0:
+            etymology_nodes_append(wxr, desc_data, etym_templates)
+            etym_templates.clear()
         if desc_data["lang_code"] == "unknown":
             desc_data["lang_code"] = span_lang
         if "Hant" in class_names:
@@ -297,3 +333,30 @@ def choose_more_specific_langcode(new: str | None, old: str) -> str | None:
         # "fa-cls" or "fa" -> "fa-cls"
         return old
     return new
+
+
+def etymology_template_append(
+    data: WordData | DescendantData,
+    name: str,
+    args_ht: TemplateArgs,
+    expansion: str,
+):
+    dt: TemplateData = {
+        "name": name,
+        "args": args_ht,
+        "expansion": expansion,
+    }
+    data_append(data, "etymology_templates", dt)
+
+
+def etymology_nodes_append(
+    wxr: WiktextractContext,
+    desc_data: DescendantData,
+    etym_templates: list[TemplateNode],
+) -> None:
+    for etemp in etym_templates:
+        args_ht = clean_template_args(wxr, etemp.template_parameters)
+        expansion = clean_node(wxr, None, etemp)
+        etymology_template_append(
+            desc_data, etemp.template_name, args_ht, expansion
+        )
