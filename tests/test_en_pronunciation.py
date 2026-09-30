@@ -733,6 +733,149 @@ class TestPronunciation(TestCase):
         )
         self.assertEqual(verb_audio["tags"], ["Southern-England"])
 
+    def test_nested_accent_label_line(self):
+        # A label-only line applies to the pronunciations nested under it,
+        # not to its siblings.
+        self.wxr.wtp.start_page("life")
+        self.wxr.wtp.add_page("Template:a", 10, "(Canada, Canadian raising)")
+        self.wxr.wtp.add_page(
+            "Template:IPA",
+            10,
+            """{{#switch:{{{2}}}
+| /ˈlaɪ̯f/ = IPA⁽ᵏᵉʸ⁾: /ˈlaɪ̯f/, &#91;ˈlaɪ̯f&#93;
+| /ˈlɐɪ̯f/ = IPA⁽ᵏᵉʸ⁾: /ˈlɐɪ̯f/, &#91;ˈlɐɪ̯f&#93;; /ˈlɜɪ̯f/, &#91;ˈlɜɪ̯f&#93;
+}}""",
+        )
+        self.wxr.wtp.add_page("Template:rhymes", 10, "Rhymes: -{{{2}}}")
+        tree = self.wxr.wtp.parse("""===Pronunciation===
+* {{IPA|en|/ˈlaɪ̯f/|[ˈlaɪ̯f]}}
+* {{a|en|CA|Canadian raising}}
+** {{IPA|en|/ˈlɐɪ̯f/|[ˈlɐɪ̯f]|;|/ˈlɜɪ̯f/|[ˈlɜɪ̯f]}}
+* {{rhymes|en|aɪf|s=1}}
+""")
+        out = {}
+        parse_pronunciation(self.wxr, tree.children[0], out, {}, {}, {}, "en")
+        self.assertEqual(
+            out["sounds"],
+            [
+                {"ipa": "/ˈlaɪ̯f/"},
+                {"ipa": "[ˈlaɪ̯f]"},
+                {"ipa": "/ˈlɐɪ̯f/", "note": "Canada, Canadian raising"},
+                {"ipa": "[ˈlɐɪ̯f]", "note": "Canada, Canadian raising"},
+                {"ipa": "/ˈlɜɪ̯f/", "note": "Canada, Canadian raising"},
+                {"ipa": "[ˈlɜɪ̯f]", "note": "Canada, Canadian raising"},
+                {"rhymes": "-aɪf"},
+            ],
+        )
+
+    def test_nested_accent_label_combines_with_ipa_label(self):
+        self.wxr.wtp.start_page("king")
+        self.wxr.wtp.add_page(
+            "Template:a",
+            10,
+            """{{#switch:{{{2}}}
+| non-NG-coalescence = (without the ng-coalescence)
+| Appalachian = (Appalachia, African-American Vernacular, thank-think merger)
+}}""",
+        )
+        self.wxr.wtp.add_page(
+            "Template:IPA",
+            10,
+            """{{#switch:{{{2}}}
+| /ˈkɪŋɡ/ = (UK) IPA⁽ᵏᵉʸ⁾: /ˈkɪŋɡ/
+| /ˈkæŋ/ = (without /æ/ raising) IPA⁽ᵏᵉʸ⁾: /ˈkæŋ/, &#91;ˈkʰæŋ&#93;
+| /ˈkeɪ̯ŋ/ = (/æ/ raising) IPA⁽ᵏᵉʸ⁾: /ˈkeɪ̯ŋ/; /ˈkɛ̃ŋ/
+}}""",
+        )
+        tree = self.wxr.wtp.parse("""===Pronunciation===
+* {{a|en|non-NG-coalescence}}
+** {{IPA|en|/ˈkɪŋɡ/|[ˈkʰɪŋɡ]|a=UK}}
+* {{a|en|Appalachian|AAVE|[[w:Thank-think merger|thank-think merger]]}}
+** {{IPA|en|/ˈkæŋ/|[ˈkʰæŋ]|a=non-æ-tensing}}
+** {{IPA|en|/ˈkeɪ̯ŋ/|;|/ˈkɛ̃ŋ/|a=æ-tensing}}
+""")
+        out = {}
+        parse_pronunciation(self.wxr, tree.children[0], out, {}, {}, {}, "en")
+        heading = "Appalachia, African-American Vernacular, thank-think merger"
+        self.assertEqual(
+            out["sounds"],
+            [
+                {
+                    "ipa": "/ˈkɪŋɡ/",
+                    "tags": ["UK"],
+                    "note": "without the ng-coalescence",
+                },
+                {"ipa": "/ˈkæŋ/", "note": f"{heading}; without /æ/ raising"},
+                {"ipa": "[ˈkʰæŋ]", "note": f"{heading}; without /æ/ raising"},
+                {"ipa": "/ˈkeɪ̯ŋ/", "note": f"{heading}; /æ/ raising"},
+                {"ipa": "/ˈkɛ̃ŋ/", "note": f"{heading}; /æ/ raising"},
+            ],
+        )
+
+    def test_nested_accent_labels_by_list_depth(self):
+        self.wxr.wtp.start_page("water")
+        self.wxr.wtp.add_page(
+            "Template:a",
+            10,
+            """{{#switch:{{{2}}}
+| GA = (General American)
+| #default = ({{{2}}})
+}}""",
+        )
+        self.wxr.wtp.add_page(
+            "Template:IPA",
+            10,
+            """{{#switch:{{{2}}}
+| /ˈwɔː.tə/ = (Received Pronunciation) IPA⁽ᵏᵉʸ⁾: /ˈwɔː.tə/, &#91;ˈwo̞ː.tʰə&#93;
+| /ˈwa.tə/ = (Yorkshire) IPA⁽ᵏᵉʸ⁾: /ˈwa.tə/
+| /ˈwɔ.tɚ/ = (without the cot–caught merger) IPA⁽ᵏᵉʸ⁾: /ˈwɔ.tɚ/, &#91;ˈwɔ.ɾɚ&#93;
+| /ˈwɑ.tɚ/ = (cot–caught merger) IPA⁽ᵏᵉʸ⁾: /ˈwɑ.tɚ/, &#91;ˈwɑ.ɾɚ&#93;
+| /ˈwoː.tə/ = (Australia, New Zealand) IPA⁽ᵏᵉʸ⁾: /ˈwoː.tə/
+}}""",
+        )
+        tree = self.wxr.wtp.parse("""===Pronunciation===
+* {{a|en|UK}}
+** {{IPA|en|/ˈwɔː.tə/|[ˈwo̞ː.tʰə]|a=RP}}
+** {{a|en|Northern England}}
+*** {{IPA|en|/ˈwa.tə/|a=Yorkshire}}
+* {{a|en|GA}}
+** {{IPA|en|/ˈwɔ.tɚ/|[ˈwɔ.ɾɚ]|a=non-cot-caught}}
+** {{IPA|en|/ˈwɑ.tɚ/|[ˈwɑ.ɾɚ]|a=cot-caught}}
+* {{IPA|en|/ˈwoː.tə/|[ˈwoː.ɾə]|a=AU,NZ}}
+""")
+        out = {}
+        parse_pronunciation(self.wxr, tree.children[0], out, {}, {}, {}, "en")
+        self.assertEqual(
+            out["sounds"],
+            [
+                {"ipa": "/ˈwɔː.tə/", "tags": ["UK", "Received-Pronunciation"]},
+                {"ipa": "[ˈwo̞ː.tʰə]", "tags": ["UK", "Received-Pronunciation"]},
+                {
+                    "ipa": "/ˈwa.tə/",
+                    "tags": ["UK", "Northern-England", "Yorkshire"],
+                },
+                {
+                    "ipa": "/ˈwɔ.tɚ/",
+                    "tags": ["General-American"],
+                    "note": "without the cot–caught merger",
+                },
+                {
+                    "ipa": "[ˈwɔ.ɾɚ]",
+                    "tags": ["General-American"],
+                    "note": "without the cot–caught merger",
+                },
+                {
+                    "ipa": "/ˈwɑ.tɚ/",
+                    "tags": ["General-American", "cot-caught-merger"],
+                },
+                {
+                    "ipa": "[ˈwɑ.ɾɚ]",
+                    "tags": ["General-American", "cot-caught-merger"],
+                },
+                {"ipa": "/ˈwoː.tə/", "tags": ["Australia", "New-Zealand"]},
+            ],
+        )
+
     def test_no_templates1(self):
         self.wxr.wtp.start_page("baz")
         tree = self.wxr.wtp.parse("""=== Pronunciation ===

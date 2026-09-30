@@ -202,6 +202,19 @@ def merge_pronunciation_tag_data(
             sound["note"] = f"{existing_note}; {note}"
 
 
+def inherit_pronunciation_tag_data(
+    sound: SoundData, parent_tag_data: SoundData
+) -> None:
+    """Put the tags, topics and note of a parent list item, such as
+    "* {{a|en|GA}}", before the nested pronunciation's own."""
+    if not parent_tag_data:
+        return
+    tag_data: SoundData = {}
+    merge_pronunciation_tag_data(tag_data, parent_tag_data)
+    merge_pronunciation_tag_data(tag_data, sound)
+    sound.update(tag_data)
+
+
 def parse_pronunciation_tags_with_pos(
     wxr: WiktextractContext, text: str, sound: SoundData
 ) -> PronunciationPoses:
@@ -717,6 +730,17 @@ def parse_pronunciation(
         parent_depth, parent_pos = pronunciation_pos_stack[-1]
         return parent_pos if parent_depth < list_depth else None
 
+    # Tags from label-only lines by original list depth, e.g.
+    # "* {{a|en|GA}}" over "** {{IPA|en|...}}".  Nested pronunciations
+    # start from their parent's tags and add their own.
+    pronunciation_tags_stack: list[tuple[int, SoundData]] = []
+
+    def parent_pronunciation_tags(list_depth: int) -> SoundData:
+        if not pronunciation_tags_stack:
+            return {}
+        parent_depth, parent_tags = pronunciation_tags_stack[-1]
+        return parent_tags if parent_depth < list_depth else {}
+
     for line, list_depth in split_cleaned_node_on_newlines(contents):
         prefix: str | None = None
         earlier_base_data: SoundData | None = None
@@ -734,6 +758,12 @@ def parse_pronunciation(
             and pronunciation_pos_stack[-1][0] >= list_depth
         ):
             pronunciation_pos_stack.pop()
+        while (
+            pronunciation_tags_stack
+            and pronunciation_tags_stack[-1][0] >= list_depth
+        ):
+            pronunciation_tags_stack.pop()
+        parent_tags = parent_pronunciation_tags(list_depth)
 
         split_templates = re.split(r"__PRON_TEMPLATE_(\d+)__", line)
         for i, text in enumerate(split_templates):
@@ -810,6 +840,7 @@ def parse_pronunciation(
                         elif "tags" in earlier_base_data:
                             pr["tags"] = sorted(set(earlier_base_data["tags"]))
                 for pr in first_prons:
+                    inherit_pronunciation_tag_data(pr, parent_tags)
                     if sound_pos := set_sound_pos(
                         pr,
                         None if "pos" in pr else inherited_pos,
@@ -997,6 +1028,7 @@ def parse_pronunciation(
                         pron = {field: v}  # type: ignore[misc]
                     if prefix:
                         pron["form"] = prefix
+                    inherit_pronunciation_tag_data(pron, parent_tags)
                     if sound_pos := set_sound_pos(
                         pron,
                         None if "pos" in pron else inherited_pos,
@@ -1110,6 +1142,13 @@ def parse_pronunciation(
             line_sound_pos_candidates
         ):
             pronunciation_pos_stack.append((list_depth, line_pronunciation_pos))
+
+        if not line_has_sound and earlier_base_data:
+            line_tags: SoundData = {}
+            merge_pronunciation_tag_data(line_tags, earlier_base_data)
+            if line_tags:
+                inherit_pronunciation_tag_data(line_tags, parent_tags)
+                pronunciation_tags_stack.append((list_depth, line_tags))
 
     ## I have commented out the otherwise unused have_pronunciation
     ## toggles; uncomment them to use this debug print
