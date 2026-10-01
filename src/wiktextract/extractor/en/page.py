@@ -47,7 +47,11 @@ from ...wxr_context import WiktextractContext
 from ...wxr_logging import logger
 from ..ruby import extract_ruby, parse_ruby
 from ..share import strip_nodes
-from .descendant import extract_descendant_section
+from .descendant import (
+    ETYMOLOGY_TEMPLATES_IN_HEADS,
+    etymology_template_append,
+    extract_descendant_section,
+)
 from .example import extract_example_list_item, extract_template_zh_x
 from .form_descriptions import (
     classify_desc,
@@ -277,13 +281,6 @@ HEAD_TAG_RE = re.compile(
 # data for later.
 WORD_LEVEL_HEAD_TEMPLATES = {"term-label", "tlb"}
 
-# Annoying templates that should be in etymology sections, but sometimes
-# are thrown in heads because the etymology section is missing, like at
-# the oldest level of a reconstruction: see wiktextract#1658
-ETYMOLOGY_TEMPLATES_IN_HEADS = {
-    "ety",
-    "etymon",
-}
 
 PROBLEMATIC_TEMPLATES_CLUMP = (
     WORD_LEVEL_HEAD_TEMPLATES | ETYMOLOGY_TEMPLATES_IN_HEADS
@@ -1569,7 +1566,9 @@ def parse_language(
                 "expansion": cleaned_expansion,
             }
             if name in ETYMOLOGY_TEMPLATES_IN_HEADS:
-                data_append(pos_data, "etymology_templates", dt)
+                etymology_template_append(
+                    pos_data, name, args_ht, cleaned_expansion
+                )
             else:
                 data_append(pos_data, "head_templates", dt)
             if name in WORD_LEVEL_HEAD_TEMPLATES:
@@ -3196,8 +3195,6 @@ def parse_language(
                 ignore_count += 1
             return None
 
-        # CONTINUE_HERE
-
         def etym_post_template_fn(
             name: str, ht: TemplateArgs, expansion: str
         ) -> None:
@@ -3296,6 +3293,12 @@ def parse_language(
                     or node.template_name == "ja-kt"
                 ):
                     extract_ja_kanjitab_template(wxr, node, select_data())
+                elif node.template_name in ETYMOLOGY_TEMPLATES_IN_HEADS:
+                    args_ht = clean_template_args(wxr, node.template_parameters)
+                    expansion = clean_node(wxr, etym_data, node)
+                    etymology_template_append(
+                        etym_data, node.template_name, args_ht, expansion
+                    )
 
             if not isinstance(node, LevelNode):
                 # XXX handle e.g. wikipedia links at the top of a language
