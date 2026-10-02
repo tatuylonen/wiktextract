@@ -55,7 +55,10 @@ def extract_překlady_template(
                     continue
                 lang_code = node.attrs.get("lang", "unknown")
                 if joinable and translations[-1].lang_code == lang_code:
-                    translations[-1].word += " " + word
+                    # no space after an elision: "{{P|fr|d’}}{{P|fr|avion}}"
+                    if not translations[-1].word.endswith(("'", "’")):
+                        translations[-1].word += " "
+                    translations[-1].word += word
                     joined = True
                 else:
                     translations.append(
