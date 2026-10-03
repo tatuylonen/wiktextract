@@ -461,9 +461,12 @@ class TestNlInflection(TestCase):
         self.assertEqual(
             [f["form"] for f in data[0]["forms"]],
             [
-                "zal/zult getreinsurfd\ngetreinsurft hebben",
+                "zal getreinsurfd hebben",
+                "zult getreinsurfd hebben",
+                "zal getreinsurft hebben",
+                "zult getreinsurft hebben",
                 "heb getreinsurfd",
-                "getreinsurft",
+                "heb getreinsurft",
                 "zullen afnokken",
                 "af zullen nokken",
                 "ev.",
