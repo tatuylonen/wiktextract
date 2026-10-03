@@ -426,6 +426,52 @@ class TestNlInflection(TestCase):
             ],
         )
 
+    def test_nlverb_br_between_links(self):
+        # `<br>` between links separates values of one template parameter
+        # that is embedded in shared text; otherwise it separates full forms
+        self.wxr.wtp.add_page("Sjabloon:-nlstam-", 10, "")
+        self.wxr.wtp.add_page(
+            "treinsurfen/vervoeging",
+            0,
+            "{{-nlverb-|treinsurfen}}",
+        )
+        self.wxr.wtp.add_page(
+            "Sjabloon:-nlverb-",
+            10,
+            """{|
+! toekomend
+|-
+| zal/zult [[getreinsurfd]]<br>[[getreinsurft]] hebben
+|-
+| heb [[getreinsurfd]]<br />[[getreinsurft]]
+|-
+| zullen afnokken<br />af zullen nokken
+|-
+| ev.<br> [[hou buiten]]<br>[[houd buiten]]
+|}""",
+        )
+        data = parse_page(
+            self.wxr,
+            "treinsurfen",
+            """==Nederlands==
+{{-nlstam-}}
+=====Werkwoord=====
+# gloss""",
+        )
+        self.assertEqual(
+            [f["form"] for f in data[0]["forms"]],
+            [
+                "zal/zult getreinsurfd\ngetreinsurft hebben",
+                "heb getreinsurfd",
+                "getreinsurft",
+                "zullen afnokken",
+                "af zullen nokken",
+                "ev.",
+                "hou buiten",
+                "houd buiten",
+            ],
+        )
+
     def test_dumstam_and_dumverb_templates(self):
         self.wxr.wtp.add_page("Sjabloon:-dumstam-", 10, "")
         self.wxr.wtp.add_page(
