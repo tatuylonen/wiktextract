@@ -13,7 +13,7 @@ from typing import Callable, Optional, Union
 
 from wikitextprocessor.common import MAGIC_FIRST, MAGIC_LAST, URL_STARTS
 from wikitextprocessor.core import NamespaceDataEntry, TemplateArgs
-from wikitextprocessor.parser import TemplateParameters
+from wikitextprocessor.parser import TemplateParameters, balance_apostrophes
 
 from .wxr_context import WiktextractContext
 
@@ -1267,7 +1267,7 @@ def remove_italic_and_bold(text: str) -> str:
     parts_re = re.compile(r"(''+)")
     new_text_parts = []
     for line in lines:
-        parts = re.split(parts_re, line)
+        parts = balance_apostrophes(re.split(parts_re, line))
         state = 0  # 1=in italic 2=in bold 3=in both
         for i, part in enumerate(parts):
             if part.startswith("''"):
