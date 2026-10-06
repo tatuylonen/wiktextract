@@ -76,3 +76,88 @@ class TestCsTranslation(TestCase):
             ],
         )
         self.assertEqual(data[0]["categories"], ["Monitoring:P/1/de"])
+
+    def test_multi_word_translation(self):
+        self.wxr.wtp.add_page(
+            "Šablona:Překlady",
+            10,
+            """<div class="translations"><dfn>mající nízkou finanční hodnotu</dfn><ul><li style="page-break-inside: avoid;">francouzština: <span class="translation-item" lang="fr" dir="ltr">[[peu#francouzština|peu]]</span>[[Kategorie:Monitoring:P/1/fr]] <span class="translation-item" lang="fr" dir="ltr">[[cher#francouzština|cher]]</span>[[Kategorie:Monitoring:P/1/fr]], <span class="translation-item" lang="fr" dir="ltr">[[pas#francouzština|pas]]</span>[[Kategorie:Monitoring:P/1/fr]] <span class="translation-item" lang="fr" dir="ltr">[[cher#francouzština|cher]]</span>[[Kategorie:Monitoring:P/1/fr]], <span class="translation-item" lang="fr" dir="ltr">[[bon marché#francouzština|bon marché]]</span>[[Kategorie:Monitoring:P/1/fr]]</li></ul></div>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "levný",
+            """==čeština==
+===přídavné jméno===
+# gloss
+====překlady====
+# {{Překlady
+  | význam = mající nízkou finanční hodnotu
+  | fr = {{P|fr|peu}} {{P|fr|cher}}, {{P|fr|pas}} {{P|fr|cher}}, {{P|fr|bon marché}}
+}}""",
+        )
+        self.assertEqual(
+            [t["word"] for t in data[0]["translations"]],
+            ["peu cher", "pas cher", "bon marché"],
+        )
+
+    def test_multi_word_translation_gender(self):
+        self.wxr.wtp.add_page(
+            "Šablona:Překlady",
+            10,
+            """<div class="translations"><dfn>test</dfn><ul><li style="page-break-inside: avoid;">francouzština: <span class="translation-item" lang="fr" dir="ltr">[[soupe#francouzština|soupe]]</span>&nbsp;<abbr class="genus" title="femininum (ženský rod)">ž</abbr>[[Kategorie:Monitoring:P/1/fr]] <span class="translation-item" lang="fr" dir="ltr">[[à#francouzština|à]]</span>[[Kategorie:Monitoring:P/1/fr]] <span class="translation-item" lang="fr" dir="ltr">[[l’oignon#francouzština|l’oignon]]</span>[[Kategorie:Monitoring:P/1/fr]], <span class="translation-item" lang="fr" dir="ltr">[[une#francouzština|une]]</span>[[Kategorie:Monitoring:P/1/fr]] <span class="translation-item" lang="fr" dir="ltr">[[fois#francouzština|fois]]</span>&nbsp;<abbr class="genus" title="femininum (ženský rod)">ž</abbr>[[Kategorie:Monitoring:P/1/fr]]</li></ul></div>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "test",
+            """==čeština==
+===podstatné jméno===
+# gloss
+====překlady====
+# {{Překlady
+  | význam = test
+  | fr = {{P|fr|soupe|f}} {{P|fr|à}} {{P|fr|l’oignon}}, {{P|fr|une}} {{P|fr|fois|f}}
+}}""",
+        )
+        self.assertEqual(
+            data[0]["translations"],
+            [
+                {
+                    "lang": "francouzština",
+                    "lang_code": "fr",
+                    "tags": ["feminine"],
+                    "sense": "test",
+                    "sense_index": 1,
+                    "word": "soupe à l’oignon",
+                },
+                {
+                    "lang": "francouzština",
+                    "lang_code": "fr",
+                    "sense": "test",
+                    "sense_index": 1,
+                    "word": "une fois",
+                },
+            ],
+        )
+
+    def test_multi_word_translation_elision(self):
+        self.wxr.wtp.add_page(
+            "Šablona:Překlady",
+            10,
+            """<div class="translations"><dfn>test</dfn><ul><li style="page-break-inside: avoid;">francouzština: <span class="translation-item" lang="fr" dir="ltr">[[billet#francouzština|billet]]</span>[[Kategorie:Monitoring:P/1/fr]] <span class="translation-item" lang="fr" dir="ltr">[[d’#francouzština|d’]]</span>[[Kategorie:Monitoring:P/1/fr]]<span class="translation-item" lang="fr" dir="ltr">[[avion#francouzština|avion]]</span>[[Kategorie:Monitoring:P/1/fr]], <span class="translation-item" lang="fr" dir="ltr">[[soupe#francouzština|soupe]]</span>[[Kategorie:Monitoring:P/1/fr]] <span class="translation-item" lang="fr" dir="ltr">[[à#francouzština|à]]</span>[[Kategorie:Monitoring:P/1/fr]] <span class="translation-item" lang="fr" dir="ltr">[[l'#francouzština|l']]</span>[[Kategorie:Monitoring:P/1/fr]]<span class="translation-item" lang="fr" dir="ltr">[[oignon#francouzština|oignon]]</span>[[Kategorie:Monitoring:P/1/fr]]</li></ul></div>""",
+        )
+        data = parse_page(
+            self.wxr,
+            "test",
+            """==čeština==
+===podstatné jméno===
+# gloss
+====překlady====
+# {{Překlady
+  | význam = test
+  | fr = {{P|fr|billet}} {{P|fr|d’}}{{P|fr|avion}}, {{P|fr|soupe}} {{P|fr|à}} {{P|fr|l'}}{{P|fr|oignon}}
+}}""",
+        )
+        self.assertEqual(
+            [t["word"] for t in data[0]["translations"]],
+            ["billet d’avion", "soupe à l'oignon"],
+        )
