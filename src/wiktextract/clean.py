@@ -1142,18 +1142,25 @@ def to_math(text: str) -> str:
             elif re.match(r"\\pmod\b", v):
                 v = v[5:].strip()
                 v = "(mod " + expand_group(v) + ")"
-            elif re.match(r"\\sqrt\[", v):
-                a = v[6:-1].strip()
-                if a == "2":
-                    v = "√"
-                elif a == "3":
-                    v = "∛"
-                elif a == "4":
-                    v = "∜"
+            elif re.match(r"\\sqrt($|[0-9\[]|\b)", v):
+                m = re.match(r"\\sqrt\s*(?:\[([^\]]*)\])?(.*)$", v, re.DOTALL)
+                assert m is not None
+                index, radicand = m.groups()
+                index = (index or "").strip()
+                if index in ("", "2"):
+                    root = "√"
+                elif index == "3":
+                    root = "∛"
+                elif index == "4":
+                    root = "∜"
                 else:
-                    v = to_superscript(a) + "√"
-            elif re.match(r"\\sqrt($|[0-9]|\b)", v):
-                v = "√"
+                    root = to_superscript(index) + "√"
+                # Keep the radicand after the root sign, in parentheses unless
+                # it is a single symbol or number.
+                radicand = expand_group(radicand.strip()).strip()
+                if len(radicand) > 1 and not radicand.isalnum():
+                    radicand = "(" + radicand + ")"
+                v = root + radicand
             elif re.match(r"\\(frac|binom)($|[0-9]|\b)", v):
                 m = re.match(
                     r"\\(frac|binom)\s*(\\[a-zA-Z]+|\\.|.)\s*"

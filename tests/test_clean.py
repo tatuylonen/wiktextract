@@ -294,6 +294,19 @@ class CleanTests(unittest.TestCase):
         v = clean_value(self.wxr, v)
         self.assertEqual(v, "∑ᵢ₌₀¹⁰⁰1/i")
 
+    def test_cv_math_sqrt(self):
+        for v, expected in [
+            (r"<math>\sqrt{2}</math>", "√2"),
+            (r"<math>\sqrt2</math>", "√2"),
+            (r"<math>\sqrt{x + 1}</math>", "√(x+1)"),
+            (r"<math>\sqrt[3]{x}</math>", "∛x"),
+            (r"<math>\sqrt[4]{16}</math>", "∜16"),
+            (r"<math>\sqrt[5]{x}</math>", "⁵√x"),
+            (r"<math>a\sqrt{b}</math>", "a√b"),
+        ]:
+            with self.subTest(v=v):
+                self.assertEqual(clean_value(self.wxr, v), expected)
+
     def test_cv_math7(self):
         v = r"<math>x^\infty</math>"
         v = clean_value(self.wxr, v)
