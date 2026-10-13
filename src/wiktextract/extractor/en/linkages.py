@@ -810,7 +810,11 @@ def parse_linkage_item(
                             and v[0][0] == ":"
                         ):
                             v = [v[0][1:]] + list(v[1:])  # type:ignore
-                        if isinstance(v[0], str) and not v[0].isalnum():
+                        if (
+                            len(v) > 0
+                            and isinstance(v[0], str)
+                            and not v[0].isalnum()
+                        ):
                             links_that_should_not_be_split.append("".join(v[0]))  # type: ignore
                         item_recurse(v, possible_sense)
             elif kind == NodeKind.URL:
