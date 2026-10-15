@@ -5215,6 +5215,13 @@ valid_tags = {
     "-na": "class",  # Japanese inflection type
     "-nari": "class",  # Japanese inflection type
     "-tari": "class",  # Japanese inflection type
+    "-ka": "class",  # Japanese inflection type (dialectal)
+    "-ko": "class",  # Japanese k-special conjugation (classical)
+    "-ku": "class",  # Japanese inflection type (classical)
+    "-n": "class",  # Japanese n-special conjugation (classical)
+    "-ri": "class",  # Japanese r-special conjugation (classical)
+    "-se": "class",  # Japanese s-special conjugation (classical)
+    "-shiku": "class",  # Japanese inflection type (classical)
     "abbreviation": "mod",
     "abessive": "case",  # Case
     "ablative": "case",  # Case
@@ -5595,6 +5602,7 @@ valid_tags = {
     "gerund": "non-finite",
     "gnomic": "mood",  # e.g. hojiwa/Swahili
     "goal": "mood",  # Verb form, e.g., উঘাল/Assamese
+    "godan": "class",  # Japanese verb inflection type
     "grade-1-kanji": "misc",
     "grade-2-kanji": "misc",
     "grade-3-kanji": "misc",
@@ -5619,6 +5627,7 @@ valid_tags = {
     "hypercorrect": "misc",
     "hyponym": "misc",
     "hypothetical": "mood",  # Verb mood (e.g., Japanese)
+    "ichidan": "class",  # Japanese verb inflection type
     "ideophonic": "misc",
     "idiomatic": "misc",
     "if-not-form": "mood",  # e.g. hojiwa/Swahili
@@ -5696,6 +5705,7 @@ valid_tags = {
     "katakana": "script",  # Japanese syllabic spelling for foreign words
     "krama": "register",  # Javanese register (polite form)
     "krama-ngoko": "register",  # Javanese register (neutral, without polite)
+    "kuru": "class",  # Japanese verb inflection type
     "kyūjitai": "detail",  # Traditional Japanese Kanji (before 1947)
     "l-participle": "non-finite",  # dati/Proto-Slavic
     "lative": "case",  # Case, e.g., тіл/Khakas
@@ -5756,6 +5766,8 @@ valid_tags = {
     "neologism": "misc",
     "neuter": "gender",  # Gender, cf. masculine, feminine, common-gender etc.
     "next": "misc",  # Next value in sequence (number, letter, etc.)
+    "nidan": "class",  # Japanese verb inflection type (classical)
+    "yodan": "class",  # Japanese verb inflection type (classical)
     "no-absolute": "misc",  # No aboslute form; femri/Icelandic
     "no-auxiliary": "misc",  # No auxiliary needed for verb (?); lavarsi/Italian
     "no-comparative": "misc",  # The word has no comparative form

@@ -1101,6 +1101,7 @@ class HeadTests(unittest.TestCase):
                         {
                             "glosses": ["pleasant"],
                             "raw_glosses": ["pleasant"],
+                            "tags": ["-i"],
                         }
                     ],
                     "word": "楽しい",
@@ -1115,29 +1116,29 @@ class HeadTests(unittest.TestCase):
                 "走る",
                 [("走", "はし")],
                 "走(はし)る intransitive godan",
-                ["走る intransitive godan"],
-                None,
+                ["走る"],
+                ["godan", "intransitive"],
             ),
             (
                 "給ふ",
                 [("給", "たま")],
                 "給(たま)ふ transitive or intransitive ^†yodan",
-                ["給ふ transitive", "intransitive ^†yodan"],
-                None,
+                ["給ふ"],
+                ["intransitive", "transitive", "yodan"],
             ),
             (
                 "静か",
                 [("静", "しず")],
                 "静(しず)か ^(←しづか)-na",
-                ["静か ^-na"],
-                None,
+                ["静か"],
+                ["-na"],
             ),
             (
                 "有り得る",
                 [("有", "あ"), ("得", "う")],
                 "有(あ)り得(う)る intransitive irregular",
-                ["有り得る intransitive irregular"],
-                None,
+                ["有り得る"],
+                ["intransitive", "irregular"],
             ),
         ]:
             with self.subTest(title=title):
