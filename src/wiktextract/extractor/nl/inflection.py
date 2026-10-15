@@ -444,12 +444,13 @@ def extract_dumverb_table(
         last_row_all_header = current_row_all_header
 
 
-LINK_PAIR_RE = re.compile(r"(.*?)(\[\[[^\]]+\]\])\0(\[\[[^\]]+\]\])(.*)", re.S)
+LINK_BREAK = "__LINK_BREAK__"
+LINK_PAIR_RE = re.compile(
+    rf"(.*?)(\[\[[^\]]+\]\]){LINK_BREAK}(\[\[[^\]]+\]\])(.*)", re.S
+)
 
 
-def nl_cell_variants(
-    wxr: WiktextractContext, cell_node: WikiNode
-) -> list[str]:
+def nl_cell_variants(wxr: WiktextractContext, cell_node: WikiNode) -> list[str]:
     """Split a cell into texts.
 
     A `<br>` between two links separates variants that share surrounding text:
@@ -458,8 +459,8 @@ def nl_cell_variants(
     Any other `<br>` separates lines.
     """
     wikitext = wxr.wtp.node_to_wikitext(cell_node.children)
-    wikitext = re.sub(r"(?<=\]\])\s*<br\s*/?>\s*(?=\[\[)", "\0", wikitext)
-    if "\0" not in wikitext:
+    wikitext = re.sub(r"(?<=\]\])\s*<br\s*/?>\s*(?=\[\[)", LINK_BREAK, wikitext)
+    if LINK_BREAK not in wikitext:
         return [clean_node(wxr, None, cell_node).strip("| ")]
     variants = []
     for line in re.split(r"<br\s*/?>", wikitext):
@@ -470,7 +471,9 @@ def nl_cell_variants(
                 for link in (link1, link2)
             )
         else:
-            variants.append(clean_node(wxr, None, line.replace("\0", "<br>")))
+            variants.append(
+                clean_node(wxr, None, line.replace(LINK_BREAK, "<br>"))
+            )
     return [v for v in variants if v]
 
 
@@ -495,7 +498,7 @@ def nl_split_cell(text: str) -> list[str]:
         form_texts = [
             m.group(1) + m.group(3),
             m.group(1) + m.group(2) + m.group(3),
-            ]
+        ]
     elif "\n" in text:
         form_texts = [s.strip() for s in text.split("\n")]
     else:
