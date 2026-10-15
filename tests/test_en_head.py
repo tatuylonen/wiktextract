@@ -1108,6 +1108,48 @@ class HeadTests(unittest.TestCase):
             ],
         )
 
+    def test_ja_head_end_labels(self):
+        # Issue #1484
+        for title, ruby, text, forms, tags in [
+            (
+                "走る",
+                [("走", "はし")],
+                "走(はし)る intransitive godan",
+                ["走る intransitive godan"],
+                None,
+            ),
+            (
+                "給ふ",
+                [("給", "たま")],
+                "給(たま)ふ transitive or intransitive ^†yodan",
+                ["給ふ transitive", "intransitive ^†yodan"],
+                None,
+            ),
+            (
+                "静か",
+                [("静", "しず")],
+                "静(しず)か ^(←しづか)-na",
+                ["静か ^-na"],
+                None,
+            ),
+            (
+                "有り得る",
+                [("有", "あ"), ("得", "う")],
+                "有(あ)り得(う)る intransitive irregular",
+                ["有り得る intransitive irregular"],
+                None,
+            ),
+        ]:
+            with self.subTest(title=title):
+                data = {}
+                self.wxr.wtp.start_page(title)
+                self.wxr.wtp.start_section("Japanese")
+                parse_word_head(
+                    self.wxr, title, "verb", text, data, False, None, ruby=ruby
+                )
+                self.assertEqual([f["form"] for f in data["forms"]], forms)
+                self.assertEqual(data.get("tags"), tags)
+
     def test_suffixes_at_end_of_form2(self):
         # Don't chop off " -x" stuff if it's part of the word
         data = {}
