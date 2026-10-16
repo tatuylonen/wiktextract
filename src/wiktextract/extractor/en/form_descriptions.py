@@ -450,6 +450,14 @@ head_end_re = re.compile(
     r"(" + "|".join(re.escape(x) for x in head_end_map.keys()) + r")$"
 )
 
+# Transitivity and inflection class labels at the end of Japanese heads,
+# e.g. 走る "intransitive godan", 給ふ "transitive or intransitive ^†yodan"
+ja_head_end_re = re.compile(
+    r" (?:\^†)?(transitive|intransitive|godan|ichidan|suru|kuru|yodan|nidan"
+    r"|irregular|uninflectable"
+    r"|-i|-na|-nari|-tari|-ku|-shiku|-ka|-ri|-se|-ko|-n)(?: or)?$"
+)
+
 
 # Dictionary of language-specific parenthesized head part starts that
 # either introduce new tags or modify previous tags.  The value for each
@@ -2031,6 +2039,17 @@ def parse_word_head(
         tags = head_end_map[m.group(1).lower()].split()
         data_extend(data, "tags", tags)
         base = base[: m.start()]
+
+    if language == "Japanese":
+        # Remove the leftover "^" of the historical kana superscript,
+        # e.g. 静か "^(←しづか)-na"
+        base = re.sub(r" \^(?!†)", " ", base).strip()
+        while m := ja_head_end_re.search(base):
+            tag = m.group(1)
+            if tag == "uninflectable":
+                tag = "uninflected"
+            data_extend(data, "tags", [tag])
+            base = base[: m.start()]
 
     # Special case: handle Hán Nôm readings for Vietnamese characters
     m = re.match(
