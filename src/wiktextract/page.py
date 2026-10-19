@@ -375,7 +375,7 @@ def clean_node(
     v = wxr.wtp.node_to_html(
         wikinode,
         node_handler_fn=clean_node_handler_fn,
-        template_fn=template_fn,
+        template_fn=clean_template_fn,
         post_template_fn=post_template_fn,
     )
     # print("##########")
