@@ -346,9 +346,7 @@ def clean_node(
     """
 
     # print("CLEAN_NODE:", repr(value))
-    def clean_template_fn(name: str, ht: TemplateArgs) -> Optional[str]:
-        if template_fn is not None:
-            return template_fn(name, ht)
+    def clean_template_fn_default(name: str, ht: TemplateArgs) -> Optional[str]:
         if is_panel_template(wxr, name):
             return ""
         return None
@@ -371,11 +369,16 @@ def clean_node(
     else:
         clean_node_handler_fn = clean_node_handler_fn_default
 
+    if template_fn is not None:
+        clean_template_fn = template_fn
+    else:
+        clean_template_fn = clean_template_fn_default
+
     # print("clean_node: value={!r}".format(value))
     v = wxr.wtp.node_to_html(
         wikinode,
         node_handler_fn=clean_node_handler_fn,
-        template_fn=template_fn,
+        template_fn=clean_template_fn,
         post_template_fn=post_template_fn,
     )
     # print("##########")
