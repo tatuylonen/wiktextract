@@ -37,7 +37,7 @@ from .wiktionary import (
     parse_page,
     parse_wiktionary,
     reprocess_wiktionary,
-    write_json_data,
+    sanitize_and_write_json_data,
 )
 from .wxr_context import WiktextractContext
 from .wxr_logging import logger
@@ -81,7 +81,7 @@ def process_single_page(
     ret = parse_page(wxr, title, text)
     for data in ret:
         check_json_data(wxr, data)
-        write_json_data(data, out_f, human_readable)
+        sanitize_and_write_json_data(data, out_f, human_readable)
 
 
 def main():
