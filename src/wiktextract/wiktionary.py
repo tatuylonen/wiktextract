@@ -133,14 +133,20 @@ def parse_wiktionary(
         reprocess_wiktionary(wxr, num_processes, out_f, human_readable)
 
 
-def write_json_data(data: dict, out_f: TextIO, human_readable: bool) -> None:
+def sanitize_and_write_json_data(
+    data: dict, out_f: TextIO, human_readable: bool
+) -> None:
     if out_f is not None:
         if human_readable:
-            out_f.write(
-                json.dumps(data, indent=2, sort_keys=True, ensure_ascii=False)
+            out_json = json.dumps(
+                data, indent=2, sort_keys=True, ensure_ascii=False
             )
         else:
-            out_f.write(json.dumps(data, ensure_ascii=False))
+            out_json = json.dumps(data, ensure_ascii=False)
+        # Sanitize output for weird Unicode punctuation that breaks json
+        # on other systems and applications.
+        out_json = out_json.replace("\u2028", "")
+        out_f.write(out_json)
         out_f.write("\n")
 
 
@@ -813,7 +819,7 @@ def reprocess_wiktionary(
             wxr.config.merge_return(wtp_stats)
             for dt in page_data:
                 check_json_data(wxr, dt)
-                write_json_data(dt, out_f, human_readable)
+                sanitize_and_write_json_data(dt, out_f, human_readable)
                 word = dt.get("word")
                 lang_code = dt.get("lang_code")
                 pos = dt.get("pos")

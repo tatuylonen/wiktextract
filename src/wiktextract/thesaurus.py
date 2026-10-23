@@ -245,7 +245,7 @@ def emit_words_in_thesaurus(
     # Emit words that occur in thesaurus as main words but for which
     # Wiktionary has no word in the main namespace. This seems to happen
     # sometimes.
-    from .wiktionary import write_json_data
+    from .wiktionary import sanitize_and_write_json_data
 
     logger.info("Emitting words that only occur in thesaurus")
     for entry_id, entry, pos, lang_code, sense in wxr.thesaurus_db_conn.execute(  # type:ignore[union-attr]
@@ -309,4 +309,4 @@ def emit_words_in_thesaurus(
             "source": "thesaurus",
         }
         entry = {k: v for k, v in entry.items() if v}
-        write_json_data(entry, out_f, human_readable)
+        sanitize_and_write_json_data(entry, out_f, human_readable)
