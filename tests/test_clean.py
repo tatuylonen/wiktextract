@@ -47,6 +47,52 @@ class CleanTests(unittest.TestCase):
         v = clean_value(self.wxr, v)
         self.assertEqual(v, "This is a test.")
 
+    def test_cv_noinclude_in_attribute(self):
+        # Wtp.node_to_html() marks "[[" and "]]" in strings like this
+        v = clean_value(
+            self.wxr, '<ul data-x="a [<noinclude/>[b]<noinclude/>] c">d</ul>e'
+        )
+        self.assertEqual(v, "d\ne")
+
+    def test_cv_noinclude_link(self):
+        v = clean_value(self.wxr, "a [<noinclude/>[b|c]<noinclude/>] d")
+        self.assertEqual(v, "a c d")
+
+    def test_cv_noinclude_no_html_strip(self):
+        v = clean_value(
+            self.wxr, "<b>[<noinclude/>[c]<noinclude/>]</b>", no_html_strip=True
+        )
+        self.assertEqual(v, "<b>c</b>")
+
+    def test_cv_etymology_tree(self):
+        depth = 20  # deeper than the floatright regex reaches
+        tree = (
+            '<div class="etytree NavFrame" data-etytree-height="3">'
+            + "<div>x" * depth
+            + "</div>" * depth
+            + "</div>"
+        )
+        self.assertEqual(clean_value(self.wxr, f"a{tree}b"), "ab")
+        self.assertEqual(clean_value(self.wxr, f"a{tree}b{tree}c"), "abc")
+
+    def test_cv_etymology_tree_second_class(self):
+        v = clean_value(self.wxr, '<div class="NavFrame etytree">x</div>a')
+        self.assertEqual(v, "a")
+
+    def test_cv_etymology_tree_not_closed(self):
+        v = clean_value(self.wxr, '<div class="etytree"><div>x</div>')
+        self.assertEqual(v, "x")
+
+    def test_cv_other_divs_stay(self):
+        for div in (
+            '<div class="etytree-body">x</div>',
+            '<div class="x-etytree">x</div>',
+            '<div class="NavFrame">x</div>',
+            '<div data-class="etytree">x</div>',
+        ):
+            with self.subTest(div=div):
+                self.assertEqual(clean_value(self.wxr, div), "x")
+
     def test_cv_html(self):
         v = "This <thispurportstobeatag> is a test."
         v = clean_value(self.wxr, v)

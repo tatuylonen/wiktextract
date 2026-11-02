@@ -1344,11 +1344,37 @@ URL_STARTS_RE = re.compile(
 
 IMAGE_LINK_RE: Optional[re.Pattern] = None
 
+ETYMOLOGY_TREE_RE = re.compile(
+    r'(?si)<div\b[^>]*?\sclass="(?:[^"]*?\s)?etytree(?=[\s"])[^>]*>'
+)
+DIV_TAG_RE = re.compile(r"(?si)<(/?)div\b[^>]*>")
+
+
+def remove_etymology_trees(title: str) -> str:
+    """Remove the boxes drawn by `{{etymon|tree=1}}` (Module:etymon/tree). Their
+    words only make sense when laid out by CSS, and their divs nest too deeply
+    for a regex like the ones for floating divs."""
+    while m := ETYMOLOGY_TREE_RE.search(title):
+        depth = 1
+        for tag in DIV_TAG_RE.finditer(title, m.end()):
+            depth += -1 if tag.group(1) else 1
+            if depth == 0:
+                title = title[: m.start()] + title[tag.end() :]
+                break
+        else:
+            # Never closed: there is no telling where the box ends
+            break
+    return title
+
 
 def remove_invisible_markup(title: str) -> str:
     """Remove omitted content before text and link extraction."""
     # remove nowiki tag returned from `Wtp.node_to_html()`
     title = re.sub(r"<nowiki\s*/>", "", title)
+    # Also `<noinclude/>`, which it writes inside "[[" and "]]" in strings.  It
+    # has to go before the tag regexes, as they would end at its ">" when it
+    # is inside an attribute value.
+    title = re.sub(r"(?si)<noinclude\s*/\s*>", "", title)
 
     # Remove any remaining templates
     # title = re.sub(r"\{\{[^}]+\}\}", "", title)
@@ -1377,6 +1403,8 @@ def remove_invisible_markup(title: str) -> str:
     # Replace <br/> by comma space (it is used to express alternatives in some
     # declensions)
     title = re.sub(r"(?si)\s*<br\s*/?>\n*", "\n", title)
+    # Remove etymology trees
+    title = remove_etymology_trees(title)
     # Remove divs with floatright class (generated e.g. by {{ja-kanji|...}})
     title = re.sub(
         r'(?si)<div\b[^>]*?\bclass="[^"]*?\bfloatright\b[^>]*?>'
@@ -1519,9 +1547,6 @@ def clean_value(
     if not no_html_strip:
         title = re.sub(r"(?s)<[/!a-zA-Z][^>]*>", "", title)
         title = re.sub(r"(?s)</[^>]+>", "", title)
-    else:
-        # Strip <noinclude/> anyway
-        title = re.sub(r"(?si)<noinclude\s*/\s*>", "", title)
     # Replace [...]
     title = re.sub(r"(?s)\[\s*\.\.\.\s*\]", "…", title)
     # Remove http links in superscript
