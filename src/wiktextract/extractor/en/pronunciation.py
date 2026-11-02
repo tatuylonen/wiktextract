@@ -220,6 +220,68 @@ def inherit_pronunciation_tag_data(
     sound.update(tag_data)
 
 
+def is_toggled_expansion(text: str) -> bool:
+    """A big, toggleable section, whose collapsed "header" may be a duplicate
+    of its first line."""
+    return text.startswith("<") and "vsToggleElement" in text
+
+
+def ipa_qualifiers(text: str, ipa_matches: list[re.Match[str]]) -> list[str]:
+    """For each IPA match, the text of the parenthesized qualifier that follows
+    it: "/a/ [b] (Spain), /c/ (Peru (north))" gives "Spain" for the first two
+    and "Peru (north)" for the last.  Language modules such as {{es-pr}} expand
+    to plain lines like that, so these never reach extract_pron_template().
+    Parentheses inside a transcription, as in /ˈhæp(ə)n/, are no qualifier, nor
+    is a group holding a transcription itself, as in "/a/ (also /b/)".  Anything
+    else between a transcription and the group, such as the comma of
+    "/a/, (old) /b/" or "/a/, /b/ (Spain)", means the group is not about it."""
+    masked = text
+    for m in ipa_matches:
+        masked = masked[: m.start()] + " " * len(m.group()) + masked[m.end() :]
+    groups: list[tuple[int, int]] = []
+    depth = group_start = 0
+    for i, char in enumerate(masked):
+        if char == "(":
+            if depth == 0:
+                group_start = i
+            depth += 1
+        elif char == ")" and depth > 0:
+            depth -= 1
+            if depth == 0:
+                groups.append((group_start, i))
+    qualifiers = []
+    for m in ipa_matches:
+        qualifier = ""
+        for start, end in groups:
+            if m.start() < start:
+                if not masked[m.end() : start].strip() and not any(
+                    start < o.start() < end for o in ipa_matches
+                ):
+                    qualifier = text[start + 1 : end].strip()
+                break
+            if m.start() < end:
+                break
+        qualifiers.append(qualifier)
+    return qualifiers
+
+
+def parse_ipa_qualifier(
+    wxr: WiktextractContext, qualifier: str, sound: SoundData
+) -> None:
+    """Like parse_pronunciation_tags_with_pos(), one part at a time, so that
+    the known "Spain" of "Spain, Equatorial Guinea" still becomes a tag.  A
+    part that needs several tags stays a note: the tags of "northern Mexico"
+    would read as all of Mexico."""
+    match = split_pronunciation_pos_text(qualifier)
+    set_sound_pos(sound, match.pos_values)
+    for part in split_at_comma_semi(match.residual):
+        tag_data: SoundData = {}
+        parse_pronunciation_tags(wxr, part, tag_data)
+        if len(tag_data.get("tags", [])) > 1:
+            tag_data = {"note": part}
+        merge_pronunciation_tag_data(sound, tag_data)
+
+
 def parse_pronunciation_tags_with_pos(
     wxr: WiktextractContext, text: str, sound: SoundData
 ) -> PronunciationPoses:
@@ -470,6 +532,8 @@ def parse_pronunciation(
         for x in contents
         if not isinstance(x, WikiNode) or x.kind not in LEVEL_KINDS
     ]
+    # Set when a template's expansion may generate duplicate sound data
+    may_be_duplicates = False
     if not any(
         isinstance(x, WikiNode) and x.kind == NodeKind.LIST for x in contents
     ):
@@ -479,6 +543,8 @@ def parse_pronunciation(
             if isinstance(lst, TemplateNode):
                 temp = wxr.wtp.node_to_wikitext(lst)
                 temp = wxr.wtp.expand(temp)
+                if is_toggled_expansion(temp):
+                    may_be_duplicates = True
                 temp_parsed = wxr.wtp.parse(temp)
                 new_contents.extend(temp_parsed.children)
             else:
@@ -604,8 +670,6 @@ def parse_pronunciation(
             return ""
         return None
 
-    may_be_duplicates = False
-
     def parse_pron_post_template_fn(
         name: str, ht: TemplateArgs, text: str
     ) -> str | None:
@@ -660,7 +724,7 @@ def parse_pronunciation(
         # here; if the text produces a big, toggleable section, the
         # "header" for that section might be duplicated. Add more conditions
         # if necessary.
-        if text.startswith("<") and "vsToggleElement" in text:
+        if is_toggled_expansion(text):
             may_be_duplicates = True
         return text
 
@@ -1008,8 +1072,13 @@ def parse_pronunciation(
                 data_append(data, "forms", form)
 
             # Find IPA pronunciations
-            for m in re.finditer(
-                r"(?m)/[^][\n/,]+?/" r"|" r"\[[^]\n0-9,/][^],/]*?\]", text
+            ipa_matches = list(
+                re.finditer(
+                    r"(?m)/[^][\n/,]+?/" r"|" r"\[[^]\n0-9,/][^],/]*?\]", text
+                )
+            )
+            for m, qualifier in zip(
+                ipa_matches, ipa_qualifiers(text, ipa_matches)
             ):
                 v = m.group(0)
                 # The regexp above can match file links.  Skip them.
@@ -1035,6 +1104,8 @@ def parse_pronunciation(
                         pron = {field: v}  # type: ignore[misc]
                     if prefix:
                         pron["form"] = prefix
+                    if qualifier:
+                        parse_ipa_qualifier(wxr, qualifier, pron)
                     inherit_pronunciation_tag_data(pron, parent_tags)
                     if sound_pos := set_sound_pos(
                         pron,
@@ -1046,6 +1117,16 @@ def parse_pronunciation(
                         for comp_sound in data.get("sounds", []):
                             # Python has dict comparison since 3.8
                             if pron == comp_sound:
+                                ok = False
+                                break
+                            # The collapsed header of a toggle repeats the
+                            # line without its qualifier: keep the labelled.
+                            if qualifier and all(
+                                pron.get(k) == val  # type: ignore[misc]
+                                for k, val in comp_sound.items()
+                            ):
+                                comp_sound.update(pron)
+                                pron = comp_sound
                                 ok = False
                                 break
                         if ok:
