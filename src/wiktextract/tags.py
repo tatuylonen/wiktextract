@@ -1051,6 +1051,7 @@ uppercase_tags = {
     "Epic",
     "Epigraphic Gandhari",
     "Epirote",  # Ancient Greek
+    "Equatorial Guinea",
     "Erhua",  # Northern Chinese dialectal feature
     "Erzgebirgisch",
     "Esham",

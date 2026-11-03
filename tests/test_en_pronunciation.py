@@ -1583,8 +1583,14 @@ Etymology 2
                 "esperanza",
             ),
             [
-                {"ipa": "/espeˈɾanθa/", "note": "Spain, Equatorial Guinea"},
-                {"ipa": "[es.peˈɾãn̟.θa]", "note": "Spain, Equatorial Guinea"},
+                {
+                    "ipa": "/espeˈɾanθa/",
+                    "tags": ["Equatorial-Guinea", "Spain"],
+                },
+                {
+                    "ipa": "[es.peˈɾãn̟.θa]",
+                    "tags": ["Equatorial-Guinea", "Spain"],
+                },
                 {
                     "ipa": "/espeˈɾansa/",
                     "tags": ["Latin-America", "Philippines"],
