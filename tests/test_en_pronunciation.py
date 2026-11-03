@@ -1583,17 +1583,12 @@ Etymology 2
                 "esperanza",
             ),
             [
+                {"ipa": "/espeˈɾanθa/", "note": "Spain, Equatorial Guinea"},
+                {"ipa": "[es.peˈɾãn̟.θa]", "note": "Spain, Equatorial Guinea"},
                 {
-                    "ipa": "/espeˈɾanθa/",
-                    "tags": ["Spain"],
-                    "note": "Equatorial Guinea",
+                    "ipa": "/espeˈɾansa/",
+                    "tags": ["Latin-America", "Philippines"],
                 },
-                {
-                    "ipa": "[es.peˈɾãn̟.θa]",
-                    "tags": ["Spain"],
-                    "note": "Equatorial Guinea",
-                },
-                {"ipa": "/espeˈɾansa/", "tags": ["Latin-America", "Philippines"]},
                 {
                     "ipa": "[es.peˈɾãn.sa]",
                     "tags": ["Latin-America", "Philippines"],
@@ -1630,7 +1625,9 @@ Etymology 2
 
     def test_qualifier_applies_to_the_transcriptions_before_it(self):
         self.assertEqual(
-            self.sounds_of_plain_lines("* IPA(key): /a/ [b] (Spain), /c/ (Peru)"),
+            self.sounds_of_plain_lines(
+                "* IPA(key): /a/ [b] (Spain), /c/ (Peru)"
+            ),
             [
                 {"ipa": "/a/", "tags": ["Spain"]},
                 {"ipa": "[b]", "tags": ["Spain"]},
@@ -1648,7 +1645,9 @@ Etymology 2
 
     def test_qualifier_with_nested_parentheses(self):
         self.assertEqual(
-            self.sounds_of_plain_lines("* IPA(key): /a/ (Spain (except Madrid))"),
+            self.sounds_of_plain_lines(
+                "* IPA(key): /a/ (Spain (except Madrid))"
+            ),
             [{"ipa": "/a/", "note": "Spain (except Madrid)"}],
         )
 
@@ -1662,16 +1661,18 @@ Etymology 2
             [{"ipa": "/a/"}, {"ipa": "/b/", "tags": ["Spain"]}],
         )
 
-    def test_qualifier_part_needing_several_tags_stays_a_note(self):
+    def test_qualifier_that_is_not_all_tags_stays_one_note(self):
+        # Split at its commas, this would give a false tag "Uruguay".
         self.assertEqual(
             self.sounds_of_plain_lines(
-                "* IPA(key): /a/ (Paraguay, northeastern Argentina)"
+                "* IPA(key): /a/ (everywhere but Pampas and southern Argentina,"
+                " Uruguay)"
             ),
             [
                 {
                     "ipa": "/a/",
-                    "tags": ["Paraguay"],
-                    "note": "northeastern Argentina",
+                    "note": "everywhere but Pampas and southern Argentina, "
+                    "Uruguay",
                 }
             ],
         )
@@ -1686,7 +1687,11 @@ Etymology 2
 
     def test_trailing_pos_qualifier(self):
         self.assertEqual(
-            self.sounds_of_plain_lines("* IPA(key): /a/ (noun)\n* IPA(key): /b/ (verb)"),
-            [{"ipa": "/a/", "pos": ("noun",)}, {"ipa": "/b/", "pos": ("verb",)}],
+            self.sounds_of_plain_lines(
+                "* IPA(key): /a/ (noun)\n* IPA(key): /b/ (verb)"
+            ),
+            [
+                {"ipa": "/a/", "pos": ("noun",)},
+                {"ipa": "/b/", "pos": ("verb",)},
+            ],
         )
-

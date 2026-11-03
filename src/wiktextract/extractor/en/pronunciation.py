@@ -52,6 +52,10 @@ pron_romanization_re = re.compile(
 IPA_EXTRACT = r"^(\((.+)\) )?(IPA⁽ᵏᵉʸ⁾|enPR): ((.+?)( \(([^(]+)\))?\s*)$"
 IPA_EXTRACT_RE = re.compile(IPA_EXTRACT)
 
+IPA_MATCHES_RE = re.compile(
+    r"(?m)/[^][\n/,]+?/" r"|" r"\[[^]\n0-9,/][^],/]*?\]"
+)
+
 
 class PronunciationPosMatch(NamedTuple):
     pos_values: PronunciationPoses
@@ -226,8 +230,8 @@ def is_toggled_expansion(text: str) -> bool:
     return text.startswith("<") and "vsToggleElement" in text
 
 
-def ipa_qualifiers(text: str, ipa_matches: list[re.Match[str]]) -> list[str]:
-    """For each IPA match, the text of the parenthesized qualifier that follows
+def ipa_qualifiers(text: str) -> list[tuple[re.Match[str], str]]:
+    """Each IPA match in the text, with the parenthesized qualifier that follows
     it: "/a/ [b] (Spain), /c/ (Peru (north))" gives "Spain" for the first two
     and "Peru (north)" for the last.  Language modules such as {{es-pr}} expand
     to plain lines like that, so these never reach extract_pron_template().
@@ -235,6 +239,7 @@ def ipa_qualifiers(text: str, ipa_matches: list[re.Match[str]]) -> list[str]:
     is a group holding a transcription itself, as in "/a/ (also /b/)".  Anything
     else between a transcription and the group, such as the comma of
     "/a/, (old) /b/" or "/a/, /b/ (Spain)", means the group is not about it."""
+    ipa_matches = list(IPA_MATCHES_RE.finditer(text))
     masked = text
     for m in ipa_matches:
         masked = masked[: m.start()] + " " * len(m.group()) + masked[m.end() :]
@@ -261,25 +266,8 @@ def ipa_qualifiers(text: str, ipa_matches: list[re.Match[str]]) -> list[str]:
                 break
             if m.start() < end:
                 break
-        qualifiers.append(qualifier)
+        qualifiers.append((m, qualifier))
     return qualifiers
-
-
-def parse_ipa_qualifier(
-    wxr: WiktextractContext, qualifier: str, sound: SoundData
-) -> None:
-    """Like parse_pronunciation_tags_with_pos(), one part at a time, so that
-    the known "Spain" of "Spain, Equatorial Guinea" still becomes a tag.  A
-    part that needs several tags stays a note: the tags of "northern Mexico"
-    would read as all of Mexico."""
-    match = split_pronunciation_pos_text(qualifier)
-    set_sound_pos(sound, match.pos_values)
-    for part in split_at_comma_semi(match.residual):
-        tag_data: SoundData = {}
-        parse_pronunciation_tags(wxr, part, tag_data)
-        if len(tag_data.get("tags", [])) > 1:
-            tag_data = {"note": part}
-        merge_pronunciation_tag_data(sound, tag_data)
 
 
 def parse_pronunciation_tags_with_pos(
@@ -1072,14 +1060,7 @@ def parse_pronunciation(
                 data_append(data, "forms", form)
 
             # Find IPA pronunciations
-            ipa_matches = list(
-                re.finditer(
-                    r"(?m)/[^][\n/,]+?/" r"|" r"\[[^]\n0-9,/][^],/]*?\]", text
-                )
-            )
-            for m, qualifier in zip(
-                ipa_matches, ipa_qualifiers(text, ipa_matches)
-            ):
+            for m, qualifier in ipa_qualifiers(text):
                 v = m.group(0)
                 # The regexp above can match file links.  Skip them.
                 if v.startswith("[[File:"):
@@ -1105,7 +1086,7 @@ def parse_pronunciation(
                     if prefix:
                         pron["form"] = prefix
                     if qualifier:
-                        parse_ipa_qualifier(wxr, qualifier, pron)
+                        parse_pronunciation_tags_with_pos(wxr, qualifier, pron)
                     inherit_pronunciation_tag_data(pron, parent_tags)
                     if sound_pos := set_sound_pos(
                         pron,
