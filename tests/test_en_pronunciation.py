@@ -1566,3 +1566,138 @@ Etymology 2
                 }
             ],
         )
+
+    def sounds_of_plain_lines(self, lines: str, word: str = "word") -> list:
+        self.wxr.wtp.start_page(word)
+        tree = self.wxr.wtp.parse(f"=== Pronunciation ===\n{lines}\n")
+        data = {}
+        parse_pronunciation(self.wxr, tree.children[0], data, {}, {}, {}, "es")
+        return data["sounds"]
+
+    def test_es_pr_region_qualifiers(self):
+        # {{es-pr}} of "esperanza", abridged
+        self.assertEqual(
+            self.sounds_of_plain_lines(
+                """* [[Wiktionary:International Phonetic Alphabet|IPA]]<sup>([[Appendix:Spanish pronunciation|key]])</sup>:&#32;<span class="IPA nowrap">/espeˈɾanθa/</span> <span class="IPA nowrap">[es.peˈɾãn̟.θa]</span> <span class="ib-brac qualifier-brac">(</span><span class="ib-content qualifier-content"><span class="usage-label-accent">[[w:Peninsular Spanish|Spain]], [[w:Equatoguinean Spanish|Equatorial Guinea]]</span></span><span class="ib-brac qualifier-brac">)</span>
+* [[Wiktionary:International Phonetic Alphabet|IPA]]<sup>([[Appendix:Spanish pronunciation|key]])</sup>:&#32;<span class="IPA nowrap">/espeˈɾansa/</span> <span class="IPA nowrap">[es.peˈɾãn.sa]</span> <span class="ib-brac qualifier-brac">(</span><span class="ib-content qualifier-content"><span class="usage-label-accent">[[w:Spanish language in the Americas|Latin America]], [[w:Philippine Spanish|Philippines]]</span></span><span class="ib-brac qualifier-brac">)</span>""",
+                "esperanza",
+            ),
+            [
+                {
+                    "ipa": "/espeˈɾanθa/",
+                    "tags": ["Equatorial-Guinea", "Spain"],
+                },
+                {
+                    "ipa": "[es.peˈɾãn̟.θa]",
+                    "tags": ["Equatorial-Guinea", "Spain"],
+                },
+                {
+                    "ipa": "/espeˈɾansa/",
+                    "tags": ["Latin-America", "Philippines"],
+                },
+                {
+                    "ipa": "[es.peˈɾãn.sa]",
+                    "tags": ["Latin-America", "Philippines"],
+                },
+            ],
+        )
+
+    def test_toggled_template_header_merges_into_labelled_line(self):
+        # {{es-pr}} of "llamar", abridged: a toggle whose collapsed header is
+        # the first line without its qualifier
+        self.wxr.wtp.start_page("llamar")
+        self.wxr.wtp.add_page(
+            "Template:es-pr",
+            10,
+            """<div class="vsSwitcher" data-toggle-category="pronunciations"><span class="vsToggleElement"></span><div class="vsShow">
+* IPA(key):&#32;/ʝaˈmaɾ/ [ɟ͡ʝaˈmaɾ]
+</div><div class="vsHide">
+* IPA(key):&#32;/ʝaˈmaɾ/ [ɟ͡ʝaˈmaɾ] (Spain)
+* IPA(key):&#32;/ʃaˈmaɾ/ [ʃaˈmaɾ] (Buenos Aires and environs)
+</div></div>""",
+        )
+        tree = self.wxr.wtp.parse("=== Pronunciation ===\n{{es-pr}}\n")
+        data = {}
+        parse_pronunciation(self.wxr, tree.children[0], data, {}, {}, {}, "es")
+        self.assertEqual(
+            data["sounds"],
+            [
+                {"ipa": "/ʝaˈmaɾ/", "tags": ["Spain"]},
+                {"ipa": "[ɟ͡ʝaˈmaɾ]", "tags": ["Spain"]},
+                {"ipa": "/ʃaˈmaɾ/", "note": "Buenos Aires and environs"},
+                {"ipa": "[ʃaˈmaɾ]", "note": "Buenos Aires and environs"},
+            ],
+        )
+
+    def test_qualifier_applies_to_the_transcriptions_before_it(self):
+        self.assertEqual(
+            self.sounds_of_plain_lines(
+                "* IPA(key): /a/ [b] (Spain), /c/ (Peru)"
+            ),
+            [
+                {"ipa": "/a/", "tags": ["Spain"]},
+                {"ipa": "[b]", "tags": ["Spain"]},
+                {"ipa": "/c/", "tags": ["Peru"]},
+            ],
+        )
+
+    def test_parentheses_that_are_no_qualifier(self):
+        for lines, expected in (
+            ("* IPA(key): /a/ (also /b/)", [{"ipa": "/a/"}, {"ipa": "/b/"}]),
+            ("* IPA(key): /ˈhæp(ə)n/", [{"ipa": "/ˈhæp(ə)n/"}]),
+        ):
+            with self.subTest(lines=lines):
+                self.assertEqual(self.sounds_of_plain_lines(lines), expected)
+
+    def test_qualifier_with_nested_parentheses(self):
+        self.assertEqual(
+            self.sounds_of_plain_lines(
+                "* IPA(key): /a/ (Spain (except Madrid))"
+            ),
+            [{"ipa": "/a/", "note": "Spain (except Madrid)"}],
+        )
+
+    def test_qualifier_after_a_comma_is_not_about_what_came_before(self):
+        self.assertEqual(
+            self.sounds_of_plain_lines("* IPA(key): /a/, (traditional) /b/"),
+            [{"ipa": "/a/"}, {"ipa": "/b/"}],
+        )
+        self.assertEqual(
+            self.sounds_of_plain_lines("* IPA(key): /a/, /b/ (Spain)"),
+            [{"ipa": "/a/"}, {"ipa": "/b/", "tags": ["Spain"]}],
+        )
+
+    def test_qualifier_that_is_not_all_tags_stays_one_note(self):
+        # Split at its commas, this would give a false tag "Uruguay".
+        self.assertEqual(
+            self.sounds_of_plain_lines(
+                "* IPA(key): /a/ (everywhere but Pampas and southern Argentina,"
+                " Uruguay)"
+            ),
+            [
+                {
+                    "ipa": "/a/",
+                    "note": "everywhere but Pampas and southern Argentina, "
+                    "Uruguay",
+                }
+            ],
+        )
+
+    def test_labelled_line_without_toggle_keeps_unlabelled_line(self):
+        self.assertEqual(
+            self.sounds_of_plain_lines(
+                "* IPA(key): /a/\n* IPA(key): /a/ (Spain)"
+            ),
+            [{"ipa": "/a/"}, {"ipa": "/a/", "tags": ["Spain"]}],
+        )
+
+    def test_trailing_pos_qualifier(self):
+        self.assertEqual(
+            self.sounds_of_plain_lines(
+                "* IPA(key): /a/ (noun)\n* IPA(key): /b/ (verb)"
+            ),
+            [
+                {"ipa": "/a/", "pos": ("noun",)},
+                {"ipa": "/b/", "pos": ("verb",)},
+            ],
+        )
