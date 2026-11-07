@@ -89,7 +89,7 @@ class TestPronunciation(TestCase):
 | /bar/ = (Received Pronunciation) IPA⁽ᵏᵉʸ⁾: /bar/
 | /baz/ = (Northern England, Scotland) IPA⁽ᵏᵉʸ⁾: /baz/
 | /voo/ = IPA⁽ᵏᵉʸ⁾: /voo/
-| foobar = (Received Pronunciation, ergative) IPA⁽ᵏᵉʸ⁾: (Caribbean, note-fodder causes everything to be a note) /foobar/ (singular), (note-text) foobaz (ipa accepts parens) (Cajun, dual), barbar, barbaz; baz, bazfoo (singular) (US, paucal)
+| foobar = (Received Pronunciation, ergative) IPA⁽ᵏᵉʸ⁾: (Caribbean, note-fodder causes everything to be a note) /foobar/ (singular), (note-text) foobaz (ipa accepts parens) (Foobaria, dual), barbar, barbaz; baz, bazfoo (singular) (US, paucal)
 }}""",
         )
         self.wxr.wtp.add_page("Template:homophones", 10, "Homophone: feu")
@@ -105,7 +105,7 @@ class TestPronunciation(TestCase):
 * {{audio|en|en-us-past.ogg|a=US}}
 * {{homophones|en|feu}}
 * {{rhymes|en|oo|öö|s=1}}
-* {{IPA|en|foobar|foobaz (ipa accepts parens)|barbar|barbaz|;|baz|bazfoo|a=RP|aa=US|q=ergative|qq=paucal|q1=note-fodder causes everything to be a note|qq1=singular|a1=Caribbean|aa2=Cajun|q2=note-text|qq2=dual|qq6=singular}}
+* {{IPA|en|foobar|foobaz (ipa accepts parens)|barbar|barbaz|;|baz|bazfoo|a=RP|aa=US|q=ergative|qq=paucal|q1=note-fodder causes everything to be a note|qq1=singular|a1=Caribbean|aa2=Foobaria|q2=note-text|qq2=dual|qq6=singular}}
 """)
         out = {}
         parse_pronunciation(self.wxr, tree.children[0], out, {}, {}, {}, "en")
@@ -176,7 +176,7 @@ class TestPronunciation(TestCase):
                             "US",
                             "paucal",
                         ],
-                        "note": "note-text; Cajun, dual",
+                        "note": "note-text; Foobaria, dual",
                         "ipa": "foobaz(ipa accepts parens)",
                         "pos": ("verb",),
                     },
@@ -966,10 +966,10 @@ class TestPronunciation(TestCase):
         self.wxr.wtp.add_page(
             "IPA",
             10,
-            "(Received Pronunciation, ergative) IPA⁽ᵏᵉʸ⁾: (Caribbean, note-fodder causes everything to be a note) /foobar/ (singular), (note-text) foobaz (ipa accepts parens) (Cajun, dual), barbar, barbaz; baz, bazfoo (singular) (US, paucal)",
+            "(Received Pronunciation, ergative) IPA⁽ᵏᵉʸ⁾: (Caribbean, note-fodder causes everything to be a note) /foobar/ (singular), (note-text) foobaz (ipa accepts parens) (Foobaria, dual), barbar, barbaz; baz, bazfoo (singular) (US, paucal)",
         )
         tree = self.wxr.wtp.parse("""=== Pronunciation ===
-* {{IPA|en|foobar|foobaz (ipa accepts parens)|barbar|barbaz|;|baz|bazfoo|a=RP|aa=US|q=ergative|qq=paucal|q1=note-fodder causes everything to be a note|qq1=singular|a1=Caribbean|aa2=Cajun|q2=note-text|qq2=dual|qq6=singular}}
+* {{IPA|en|foobar|foobaz (ipa accepts parens)|barbar|barbaz|;|baz|bazfoo|a=RP|aa=US|q=ergative|qq=paucal|q1=note-fodder causes everything to be a note|qq1=singular|a1=Caribbean|aa2=Foobaria|q2=note-text|qq2=dual|qq6=singular}}
 """)
         out = {}
         parse_pronunciation(self.wxr, tree.children[0], out, {}, {}, {}, "en")
@@ -995,7 +995,7 @@ class TestPronunciation(TestCase):
                             "US",
                             "paucal",
                         ],
-                        "note": "note-text; Cajun, dual",
+                        "note": "note-text; Foobaria, dual",
                         "ipa": "foobaz(ipa accepts parens)",
                     },
                     {
