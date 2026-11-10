@@ -168,6 +168,7 @@ def extract_morphological_section(
                 "сущ ",
                 "сущ-ru",
                 "гл ",
+                "гл-ru",
                 "мест ru ",
                 "числ ru ",
                 "числ-",
