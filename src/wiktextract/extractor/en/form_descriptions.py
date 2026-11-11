@@ -3056,20 +3056,45 @@ def parse_pronunciation_tags(
     if not text:
         return
     cls = classify_desc(text)
-    notes = []
+    found_tags = False
+    got_notes_text = False
     if cls == "tags":
         tagsets, topics = decode_tags(text)
         data_extend(data, "topics", topics)
         for tagset in tagsets:
             for t in tagset:
                 if " " in t:
-                    notes.append(t)
+                    got_notes_text = True
                 else:
+                    found_tags = True
                     data_append(data, "tags", t)
-    else:
-        notes.append(text)
-    if notes:
-        data["note"] = "; ".join(notes)
+
+    if not found_tags:
+        # Try again to find tags, but keep notes text as above for context;
+        # tags will be in the note text itself, but if we remove them, it'll
+        # just be confusing.
+        got_notes_text = False
+        for s in split_at_comma_semi(text):
+            if not (s := s.strip()):
+                continue
+            if classify_desc(s) != "tags":
+                got_notes_text = True
+                break
+            tagsets, topics = decode_tags(s)
+            data_extend(data, "topics", topics)
+            for tagset in tagsets:
+                for t in tagset:
+                    if " " not in t:
+                        data_append(data, "tags", t)
+                    else:
+                        got_notes_text = True
+        if got_notes_text:
+            # If we're mixing and matching tags and notes text, keep whole note
+            # text
+            data["note"] = text
+
+    if got_notes_text is True:
+        data["note"] = text
 
 
 def parse_translation_desc(

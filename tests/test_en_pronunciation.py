@@ -163,6 +163,7 @@ class TestPronunciation(TestCase):
                             "ergative",
                             "US",
                             "paucal",
+                            "Caribbean",
                             "singular",
                         ],
                         "note": "Caribbean, note-fodder causes everything to be a note",
@@ -561,6 +562,7 @@ class TestPronunciation(TestCase):
                     {
                         "ipa": "/mɔːn/",
                         "note": "rare, rhotic, with or without the horse-hoarse merger",
+                        "tags": ["rare", "rhotic"],
                     }
                 ]
             },
@@ -760,10 +762,10 @@ class TestPronunciation(TestCase):
             [
                 {"ipa": "/ˈlaɪ̯f/"},
                 {"ipa": "[ˈlaɪ̯f]"},
-                {"ipa": "/ˈlɐɪ̯f/", "note": "Canada, Canadian raising"},
-                {"ipa": "[ˈlɐɪ̯f]", "note": "Canada, Canadian raising"},
-                {"ipa": "/ˈlɜɪ̯f/", "note": "Canada, Canadian raising"},
-                {"ipa": "[ˈlɜɪ̯f]", "note": "Canada, Canadian raising"},
+                {"ipa": "/ˈlɐɪ̯f/", "note": "Canada, Canadian raising", "tags": ["Canada"]},
+                {"ipa": "[ˈlɐɪ̯f]", "note": "Canada, Canadian raising", "tags": ["Canada"]},
+                {"ipa": "/ˈlɜɪ̯f/", "note": "Canada, Canadian raising", "tags": ["Canada"]},
+                {"ipa": "[ˈlɜɪ̯f]", "note": "Canada, Canadian raising", "tags": ["Canada"]},
                 {"rhymes": "-aɪf"},
             ],
         )
@@ -805,10 +807,10 @@ class TestPronunciation(TestCase):
                     "tags": ["UK"],
                     "note": "without the ng-coalescence",
                 },
-                {"ipa": "/ˈkæŋ/", "note": f"{heading}; without /æ/ raising"},
-                {"ipa": "[ˈkʰæŋ]", "note": f"{heading}; without /æ/ raising"},
-                {"ipa": "/ˈkeɪ̯ŋ/", "note": f"{heading}; /æ/ raising"},
-                {"ipa": "/ˈkɛ̃ŋ/", "note": f"{heading}; /æ/ raising"},
+                {"ipa": "/ˈkæŋ/", "note": f"{heading}; without /æ/ raising", "tags": ["Appalachia"]},
+                {"ipa": "[ˈkʰæŋ]", "note": f"{heading}; without /æ/ raising", "tags": ["Appalachia"]},
+                {"ipa": "/ˈkeɪ̯ŋ/", "note": f"{heading}; /æ/ raising", "tags": ["Appalachia"]},
+                {"ipa": "/ˈkɛ̃ŋ/", "note": f"{heading}; /æ/ raising", "tags": ["Appalachia"]},
             ],
         )
 
@@ -983,6 +985,7 @@ class TestPronunciation(TestCase):
                             "ergative",
                             "US",
                             "paucal",
+                            "Caribbean",
                             "singular",
                         ],
                         "note": "Caribbean, note-fodder causes everything to be a note",
