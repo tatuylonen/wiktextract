@@ -50,7 +50,10 @@ def process_translate_list_item_nodes(
     for node in nodes:
         if isinstance(node, WikiNode):
             if node.kind == NodeKind.HTML:
-                if node.tag == "sub":
+                css_class = node.attrs.get("class", "").split()
+                if node.tag == "sub" or (
+                    node.tag == "span" and "perev-code" in css_class
+                ):
                     translation.lang_code = clean_node(
                         wxr, None, node.children
                     )
@@ -59,6 +62,11 @@ def process_translate_list_item_nodes(
                     title = node.attrs.get("title", "")
                     if len(title) > 0:
                         translation.raw_tags.append(title)
+                elif node.tag == "span" and "perev-lang" in css_class:
+                    # language label, Модуль:languages since 2026-10-13
+                    process_translate_list_item_nodes(
+                        wxr, word_entry, translation, node.children
+                    )
                 elif node.tag == "span":
                     process_translate_list_span_tag(
                         wxr, word_entry, translation, node
