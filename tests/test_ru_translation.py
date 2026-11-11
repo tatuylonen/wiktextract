@@ -171,3 +171,82 @@ class TestRUTranslation(unittest.TestCase):
                 },
             ],
         )
+
+    def test_translation_list_perev_lang(self):
+        # https://ru.wiktionary.org/wiki/Модуль:languages since 2026-10-13
+        self.wxr.wtp.start_page("русский")
+        self.wxr.wtp.add_page(
+            "Шаблон:перев-блок",
+            10,
+            """{|
+| относящийся к России, россиянам
+|-
+|<div class="plainlist multicol">
+* <templatestyles src="Шаблон:перев-блок/styles.css" /><span class="perev-lang">[[английский#Русский|Английский]]<span class="perev-code">en</span></span> <span lang="en">[[Russian]]; ''относящийся к Киевской Руси'' [[Ruthenian]]</span>
+* <span class="perev-lang">[[итальянский#Русский|Итальянский]]<span class="perev-code">it</span></span> <span lang="it">[[russo]] <span title="форма (формы) мужского рода" style="border-bottom: 1px dotted; cursor: help">''м''.</span></span>
+* <span class="perev-lang">[[китайский#Русский|Китайский]] (традиц.)</span> <span lang="">''письменный'' [[俄文]] (Éwén), ''устный'' [[俄語]] (Éyǔ)</span>
+* <span class="perev-lang">[[эсперанто#Русский|Эсперанто]]<sup title="искусственный язык">и</sup><span class="perev-code">eo</span></span> <span lang="eo">[[rusa]]</span>
+</div>
+|}""",  # noqa: E501
+        )
+        root = self.wxr.wtp.parse(
+            """{{перев-блок|относящийся к России, россиянам
+|en=[[Russian]]; ''относящийся к Киевской Руси'' [[Ruthenian]]
+|it=[[russo]] {{m}}
+|zh-tw=''письменный'' [[俄文]] (Éwén), ''устный'' [[俄語]] (Éyǔ)
+|eo=[[rusa]]
+}}"""
+        )
+        word_entry = WordEntry(word="русский", lang_code="ru", lang="Русский")
+        extract_translations(self.wxr, word_entry, root)
+        self.assertEqual(
+            [
+                t.model_dump(exclude_defaults=True)
+                for t in word_entry.translations
+            ],
+            [
+                {
+                    "lang": "Английский",
+                    "lang_code": "en",
+                    "sense": "относящийся к России, россиянам",
+                    "word": "Russian",
+                },
+                {
+                    "lang": "Английский",
+                    "lang_code": "en",
+                    "sense": "относящийся к России, россиянам",
+                    "raw_tags": ["относящийся к Киевской Руси"],
+                    "word": "Ruthenian",
+                },
+                {
+                    "lang": "Итальянский",
+                    "lang_code": "it",
+                    "sense": "относящийся к России, россиянам",
+                    "tags": ["masculine"],
+                    "word": "russo",
+                },
+                {
+                    "lang": "Китайский",
+                    "lang_code": "zh",
+                    "sense": "относящийся к России, россиянам",
+                    "tags": ["traditional", "Written-Form"],
+                    "word": "俄文",
+                    "roman": "Éwén",
+                },
+                {
+                    "lang": "Китайский",
+                    "lang_code": "zh",
+                    "sense": "относящийся к России, россиянам",
+                    "tags": ["colloquial"],
+                    "word": "俄語",
+                    "roman": "Éyǔ",
+                },
+                {
+                    "lang": "Эсперанто",
+                    "lang_code": "eo",
+                    "sense": "относящийся к России, россиянам",
+                    "raw_tags": ["искусственный язык"],
+                    "word": "rusa",
+                },
+            ],
+        )
