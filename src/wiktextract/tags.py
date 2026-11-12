@@ -4918,6 +4918,8 @@ xlat_tags_map: dict[str, str | list[str]] = {
     "not inflected": "indeclinable",
     "Sparsely attested near 1500": "archaic rare",
     "Tajik spelling": "Tajik Cyrillic",
+    "weak form": "weak-pron",
+    "strong form": "strong-pron",
 }
 
 # This mapping is applied to full descriptions before splitting by comma.
@@ -6599,6 +6601,10 @@ valid_tags = {
     "-ul-conjugation": "class",
     "u-type": "class",
     "derived": "misc",
+    "rhotic": "phonetic",
+    "non-rhotic": "phonetic",
+    "weak-pron": "phonetic",  # are/English
+    "strong-pron": "phonetic",
 }
 
 for k, v in valid_tags.items():
