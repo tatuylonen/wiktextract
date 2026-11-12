@@ -31,32 +31,50 @@ def process_translate_block_template(
         NodeKind.LIST_ITEM
     ):
         translation = Translation(word="", lang="", sense=sense)
-        for node in list_item.children:
-            if isinstance(node, WikiNode):
-                if node.kind == NodeKind.HTML:
-                    if node.tag == "sub":
-                        translation.lang_code = clean_node(
-                            wxr, None, node.children
-                        )
-                    elif node.tag == "sup":
-                        # language index
-                        title = node.attrs.get("title", "")
-                        if len(title) > 0:
-                            translation.raw_tags.append(title)
-                    elif node.tag == "span":
-                        process_translate_list_span_tag(
-                            wxr, word_entry, translation, node
-                        )
-                elif node.kind == NodeKind.LINK:
-                    translation.lang = clean_node(wxr, None, node)
-            elif isinstance(node, str) and len(node.strip(" ():\n")) > 0:
-                translation.raw_tags.append(node.strip(" ():\n"))
-
+        process_translate_list_item_nodes(
+            wxr, word_entry, translation, list_item.children
+        )
         if translation.word != "" and translation.lang != "":
             if translation.lang_code == "":
                 translation.lang_code = name_to_code(translation.lang, "ru")
             translate_raw_tags(translation)
             word_entry.translations.append(translation)
+
+
+def process_translate_list_item_nodes(
+    wxr: WiktextractContext,
+    word_entry: WordEntry,
+    translation: Translation,
+    nodes: list[WikiNode | str],
+) -> None:
+    for node in nodes:
+        if isinstance(node, WikiNode):
+            if node.kind == NodeKind.HTML:
+                css_class = node.attrs.get("class", "").split()
+                if node.tag == "sub" or (
+                    node.tag == "span" and "perev-code" in css_class
+                ):
+                    translation.lang_code = clean_node(
+                        wxr, None, node.children
+                    )
+                elif node.tag == "sup":
+                    # language index
+                    title = node.attrs.get("title", "")
+                    if len(title) > 0:
+                        translation.raw_tags.append(title)
+                elif node.tag == "span" and "perev-lang" in css_class:
+                    # language label, Модуль:languages since 2026-10-13
+                    process_translate_list_item_nodes(
+                        wxr, word_entry, translation, node.children
+                    )
+                elif node.tag == "span":
+                    process_translate_list_span_tag(
+                        wxr, word_entry, translation, node
+                    )
+            elif node.kind == NodeKind.LINK:
+                translation.lang = clean_node(wxr, None, node)
+        elif isinstance(node, str) and len(node.strip(" ():\n")) > 0:
+            translation.raw_tags.append(node.strip(" ():\n"))
 
 
 def process_translate_list_span_tag(
