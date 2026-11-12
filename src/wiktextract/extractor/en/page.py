@@ -1014,6 +1014,8 @@ def parse_language(
     stack: list[str] = []  # names of items on the "stack"
 
     def merge_base(data: WordData, base: WordData) -> None:
+        etym_num_base = base.get("etymology_number", None)
+        etym_num_data = data.get("etymology_number", None)
         for k, v in base.items():
             # Copy the value to ensure that we don't share lists or
             # dicts between structures (even nested ones).
@@ -1024,7 +1026,13 @@ def parse_language(
                 continue
             if data[k] == v:  # type: ignore[literal-required]
                 continue
-            if (
+            # If we're in a new etymology section, and we get new pronunciation
+            # data, ignore data from base data if it has a different etymology
+            # number.
+            # Use this place for similar kind of filtering, if needed.
+            if k == "sounds" and etym_num_base != etym_num_data:
+                continue
+            elif (
                 isinstance(data[k], (list, tuple))  # type: ignore[literal-required]
                 or isinstance(
                     v,
