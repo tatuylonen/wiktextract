@@ -30,9 +30,7 @@ class TestPronunciation(TestCase):
         )
 
     def add_pos_pronunciation_templates(self) -> None:
-        self.wxr.wtp.add_page(
-            "Template:IPA", 10, "IPA⁽ᵏᵉʸ⁾: {{{2}}}"
-        )
+        self.wxr.wtp.add_page("Template:IPA", 10, "IPA⁽ᵏᵉʸ⁾: {{{2}}}")
         self.wxr.wtp.add_page(
             "Template:q",
             10,
@@ -427,7 +425,11 @@ class TestPronunciation(TestCase):
         parse_pronunciation(self.wxr, tree.children[0], out, {}, {}, {}, "en")
         self.assertEqual(
             out,
-            {"sounds": [{"ipa": "/ˈkɒndʌkt/", "tags": ["Received-Pronunciation"]}]},
+            {
+                "sounds": [
+                    {"ipa": "/ˈkɒndʌkt/", "tags": ["Received-Pronunciation"]}
+                ]
+            },
         )
 
     def test_ipa_qq_note_with_link_template(self):
@@ -500,9 +502,7 @@ class TestPronunciation(TestCase):
 
     def test_ipa_nonindexed_named_param_pos(self):
         self.wxr.wtp.start_page("advocate")
-        self.wxr.wtp.add_page(
-            "Template:IPA", 10, "({{{q}}}) IPA⁽ᵏᵉʸ⁾: {{{2}}}"
-        )
+        self.wxr.wtp.add_page("Template:IPA", 10, "({{{q}}}) IPA⁽ᵏᵉʸ⁾: {{{2}}}")
         tree = self.wxr.wtp.parse("""=== Pronunciation ===
 * {{IPA|en|/ˈæd.və.kət/|q=noun}}
 """)
@@ -722,8 +722,7 @@ class TestPronunciation(TestCase):
         verb_audio = next(
             s
             for s in sounds
-            if s.get("audio")
-            == "LL-Q1860 (eng)-Vealhurl-maculate.wav"
+            if s.get("audio") == "LL-Q1860 (eng)-Vealhurl-maculate.wav"
         )
         self.assertEqual(
             [(s.get("ipa") or s.get("audio"), s.get("pos")) for s in sounds],
@@ -762,10 +761,26 @@ class TestPronunciation(TestCase):
             [
                 {"ipa": "/ˈlaɪ̯f/"},
                 {"ipa": "[ˈlaɪ̯f]"},
-                {"ipa": "/ˈlɐɪ̯f/", "note": "Canada, Canadian raising", "tags": ["Canada"]},
-                {"ipa": "[ˈlɐɪ̯f]", "note": "Canada, Canadian raising", "tags": ["Canada"]},
-                {"ipa": "/ˈlɜɪ̯f/", "note": "Canada, Canadian raising", "tags": ["Canada"]},
-                {"ipa": "[ˈlɜɪ̯f]", "note": "Canada, Canadian raising", "tags": ["Canada"]},
+                {
+                    "ipa": "/ˈlɐɪ̯f/",
+                    "note": "Canada, Canadian raising",
+                    "tags": ["Canada"],
+                },
+                {
+                    "ipa": "[ˈlɐɪ̯f]",
+                    "note": "Canada, Canadian raising",
+                    "tags": ["Canada"],
+                },
+                {
+                    "ipa": "/ˈlɜɪ̯f/",
+                    "note": "Canada, Canadian raising",
+                    "tags": ["Canada"],
+                },
+                {
+                    "ipa": "[ˈlɜɪ̯f]",
+                    "note": "Canada, Canadian raising",
+                    "tags": ["Canada"],
+                },
                 {"rhymes": "-aɪf"},
             ],
         )
@@ -807,10 +822,26 @@ class TestPronunciation(TestCase):
                     "tags": ["UK"],
                     "note": "without the ng-coalescence",
                 },
-                {"ipa": "/ˈkæŋ/", "note": f"{heading}; without /æ/ raising", "tags": ["Appalachia"]},
-                {"ipa": "[ˈkʰæŋ]", "note": f"{heading}; without /æ/ raising", "tags": ["Appalachia"]},
-                {"ipa": "/ˈkeɪ̯ŋ/", "note": f"{heading}; /æ/ raising", "tags": ["Appalachia"]},
-                {"ipa": "/ˈkɛ̃ŋ/", "note": f"{heading}; /æ/ raising", "tags": ["Appalachia"]},
+                {
+                    "ipa": "/ˈkæŋ/",
+                    "note": f"{heading}; without /æ/ raising",
+                    "tags": ["Appalachia"],
+                },
+                {
+                    "ipa": "[ˈkʰæŋ]",
+                    "note": f"{heading}; without /æ/ raising",
+                    "tags": ["Appalachia"],
+                },
+                {
+                    "ipa": "/ˈkeɪ̯ŋ/",
+                    "note": f"{heading}; /æ/ raising",
+                    "tags": ["Appalachia"],
+                },
+                {
+                    "ipa": "/ˈkɛ̃ŋ/",
+                    "note": f"{heading}; /æ/ raising",
+                    "tags": ["Appalachia"],
+                },
             ],
         )
 
@@ -1704,3 +1735,36 @@ Etymology 2
                 {"ipa": "/b/", "pos": ("verb",)},
             ],
         )
+
+    def test_ignore_old_pron_if_new_pron_in_etym(self):
+        self.wxr.wtp.add_page(
+            "Template:IPA",
+            10,
+            """[[Wiktionary:International Phonetic Alphabet|IPA]]<sup>([[Appendix:English pronunciation|key]])</sup>:&#32;<span class="IPA">{{{2}}}</span>[[Category:English 1-syllable words|TEE]][[Category:English terms with IPA pronunciation|TEE]]""",
+        )
+        data = parse_page(
+            self.wxr,
+            "foobar",
+            """==English==
+===Etymology 1===
+Etymology 1
+===Pronunciation===
+* {{IPA|en|/foo/}}
+====Noun====
+# The name of the Latin-script letter T/t.
+====Verb====
+# To redirect output to multiple destinations.
+
+===Etymology 2===
+Etymology 2
+===Pronunciation===
+* {{IPA|en|/bar/}}
+====Noun====
+# A flat area of ground""",
+        )
+        self.assertEqual(data[0]["etymology_text"], "Etymology 1")
+        self.assertEqual(data[0]["etymology_text"], data[1]["etymology_text"])
+        self.assertEqual(data[2]["etymology_text"], "Etymology 2")
+        self.assertEqual(data[0]["sounds"], [{"ipa": "/foo/"}])
+        self.assertEqual(data[0]["sounds"], data[1]["sounds"])
+        self.assertEqual(data[2]["sounds"], [{"ipa": "/bar/"}])
