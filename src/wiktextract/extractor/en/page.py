@@ -980,9 +980,10 @@ def parse_language(
     elif word.startswith("Reconstruction:"):
         word = word[word.find("/") + 1 :]
         is_reconstruction = True
-    elif word.startswith("a/languages"):
-        # ATM there's only one "mammoth page" in English wiktionary, 'a'
-        word = "a"
+
+    if len(word) >= 18 and "/languages " in word:
+        # for split pages like "a/languages A_to_L"
+        word = word[:word.find("/")]
 
     base_data: WordData = {
         "word": word,
