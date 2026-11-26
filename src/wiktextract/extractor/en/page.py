@@ -3205,6 +3205,9 @@ def parse_language(
                 return ""
             if re.match(ignored_etymology_templates_re, name):
                 ignore_count += 1
+            if name in ("etymon", "ety"):
+                if "tree" in ht:
+                    del ht["tree"]
             return None
 
         def etym_post_template_fn(
