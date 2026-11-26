@@ -983,7 +983,7 @@ def parse_language(
 
     if len(word) >= 18 and "/languages " in word:
         # for split pages like "a/languages A_to_L"
-        word = word[:word.find("/")]
+        word = word[: word.find("/")]
 
     base_data: WordData = {
         "word": word,

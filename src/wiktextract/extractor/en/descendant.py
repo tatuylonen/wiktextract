@@ -346,6 +346,14 @@ def etymology_template_append(
         "args": args_ht,
         "expansion": expansion,
     }
+    if (
+        name in ("ety", "etymon")
+        and "etymology_templates" in data
+        and dt in data["etymology_templates"]
+    ):
+        # don't add ety or etymon duplicates. Other duplicates are unlikely
+        # to happen, this check is just a tiny bit less resource-intensive
+        return
     data_append(data, "etymology_templates", dt)
 
 
