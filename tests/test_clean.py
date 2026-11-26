@@ -2,8 +2,8 @@ import unittest
 
 from wikitextprocessor import Wtp
 
-from wiktextract.clean import clean_value
 import wiktextract.clean as clean_module
+from wiktextract.clean import clean_value
 from wiktextract.config import WiktionaryConfig
 from wiktextract.thesaurus import close_thesaurus_db
 from wiktextract.wxr_context import WiktextractContext
@@ -46,6 +46,23 @@ class CleanTests(unittest.TestCase):
         v = "This <ref>junk\nmore junk</ref> is a test."
         v = clean_value(self.wxr, v)
         self.assertEqual(v, "This is a test.")
+
+    def test_cv_noinclude_in_attribute(self):
+        # Wtp.node_to_html() marks "[[" and "]]" in strings like this
+        v = clean_value(
+            self.wxr, '<ul data-x="a [<noinclude/>[b]<noinclude/>] c">d</ul>e'
+        )
+        self.assertEqual(v, "d\ne")
+
+    def test_cv_noinclude_link(self):
+        v = clean_value(self.wxr, "a [<noinclude/>[b|c]<noinclude/>] d")
+        self.assertEqual(v, "a c d")
+
+    def test_cv_noinclude_no_html_strip(self):
+        v = clean_value(
+            self.wxr, "<b>[<noinclude/>[c]<noinclude/>]</b>", no_html_strip=True
+        )
+        self.assertEqual(v, "<b>c</b>")
 
     def test_cv_html(self):
         v = "This <thispurportstobeatag> is a test."
