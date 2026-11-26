@@ -1578,6 +1578,9 @@ def parse_language(
                 "expansion": cleaned_expansion,
             }
             if name in ETYMOLOGY_TEMPLATES_IN_HEADS:
+                if "tree" in args_ht:
+                    del args_ht["tree"]
+                    cleaned_expansion = clean_node(wxr, None, expansion)
                 etymology_template_append(
                     pos_data, name, args_ht, cleaned_expansion
                 )
@@ -3309,11 +3312,7 @@ def parse_language(
                 ):
                     extract_ja_kanjitab_template(wxr, node, select_data())
                 elif node.template_name in ETYMOLOGY_TEMPLATES_IN_HEADS:
-                    args_ht = clean_template_args(wxr, node.template_parameters)
-                    expansion = clean_node(wxr, etym_data, node)
-                    etymology_template_append(
-                        etym_data, node.template_name, args_ht, expansion
-                    )
+                    add_clean_etymon_template(wxr, etym_data, node)
 
             if not isinstance(node, LevelNode):
                 # XXX handle e.g. wikipedia links at the top of a language
@@ -4434,3 +4433,30 @@ def extract_ja_kanjitab_template(
         data_extend(base_data, "forms", forms)
     for link_node in expanded_node.find_child(NodeKind.LINK):
         clean_node(wxr, base_data, link_node)
+
+
+# Handler function to disable "ety" and "etymon" template `tree=1` arguments
+def etymon_template_tree_removal_fn(
+    name: str, ht: TemplateArgs
+) -> Optional[str]:
+    if name in ("etymon", "ety"):
+        if "tree" in ht:
+            del ht["tree"]
+    return None
+
+
+def add_clean_etymon_template(
+    wxr: WiktextractContext,
+    etym_data: WordData,
+    node: TemplateNode,
+) -> None:
+    args_ht = clean_template_args(wxr, node.template_parameters)
+    if "tree" in args_ht:
+        del args_ht["tree"]
+    expansion = clean_node(
+        wxr,
+        etym_data,
+        node,
+        template_fn=etymon_template_tree_removal_fn,
+    )
+    etymology_template_append(etym_data, node.template_name, args_ht, expansion)
