@@ -1569,6 +1569,7 @@ def parse_language(
         if (
             HEAD_TAG_RE.search(name) is not None
             or name in PROBLEMATIC_TEMPLATES_CLUMP
+            and name not in ETYMOLOGY_TEMPLATES_IN_HEADS
         ):
             args_ht = clean_template_args(wxr, ht)
             cleaned_expansion = clean_node(wxr, None, expansion)
@@ -1577,15 +1578,7 @@ def parse_language(
                 "args": args_ht,
                 "expansion": cleaned_expansion,
             }
-            if name in ETYMOLOGY_TEMPLATES_IN_HEADS:
-                if "tree" in args_ht:
-                    del args_ht["tree"]
-                    cleaned_expansion = clean_node(wxr, None, expansion)
-                etymology_template_append(
-                    pos_data, name, args_ht, cleaned_expansion
-                )
-            else:
-                data_append(pos_data, "head_templates", dt)
+            data_append(pos_data, "head_templates", dt)
             if name in WORD_LEVEL_HEAD_TEMPLATES:
                 term_label_templates.append(dt)
                 # Squash these, their tags are applied to the whole word,
