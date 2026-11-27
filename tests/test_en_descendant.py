@@ -1051,6 +1051,11 @@ class TestEnDescendant(TestCase):
             '<span class="Latn" lang="ine-pro">&#42;glew-t-</span>',
         )
         self.wxr.wtp.add_page(
+            "Template:etymon",
+            10,
+            '<span>{{{tree|}}}{{{bar|}}}</span>',
+        )
+        self.wxr.wtp.add_page(
             "Template:desc",
             10,
             """{{#switch:{{{1}}}
@@ -1070,14 +1075,14 @@ class TestEnDescendant(TestCase):
 ===Root===
 # to [[ball]] up, [[clump]] together
 ====Extensions====
-* {{etymon|ine-pro|id=root present|:der|*foobar-<id:to ball up>}}{{l|ine-pro||*glew-t-}}
+* {{etymon|ine-pro|id=root present|:der|*foobar-<id:to ball up>|tree=SHOUDL BE DELETED BY NOW|bar=bar}}{{l|ine-pro||*glew-t-}}
 ** {{desc|ine-pro||der=1|nolb=1}}
 *** {{desc|ine-bsl-pro|}}
 **** {{desc|sla-pro|}}
 ***** {{desc|sl|glûta|t=lump, swelling}}
 ====Derived terms====
 * Unsorted formations:
-** {{etymon|ine-pro|id=root present|:der|*foobaz-<id:to ball up>}}{{desc|iir-pro|}}
+** {{etymon|ine-pro|id=root present|:der|*foobaz-<id:to ball up>|tree=SHOULD BE DELETED BY NOW}}{{desc|iir-pro|}}
 *** {{desc|inc-pro|}}
 **** {{desc|sa|ग्लौ|tr=gláu-|t=swelling, tumor}}""",
         )
@@ -1097,8 +1102,9 @@ class TestEnDescendant(TestCase):
                                 "id": "root present",
                                 "2": ":der",
                                 "3": "*foobar-<id:to ball up>",
+                                "bar": "bar",
                             },
-                            "expansion": ":Template:etymon",
+                            "expansion": "bar",
                         }
                     ],
                     "descendants": [
@@ -1148,7 +1154,7 @@ class TestEnDescendant(TestCase):
                                         "2": ":der",
                                         "3": "*foobaz-<id:to ball up>",
                                     },
-                                    "expansion": ":Template:etymon",
+                                    "expansion": "",
                                 }
                             ],
                             "descendants": [

@@ -49,7 +49,7 @@ from ..ruby import extract_ruby, parse_ruby
 from ..share import strip_nodes
 from .descendant import (
     ETYMOLOGY_TEMPLATES_IN_HEADS,
-    etymology_template_append,
+    add_clean_etymon_template,
     extract_descendant_section,
 )
 from .example import extract_example_list_item, extract_template_zh_x
@@ -3201,7 +3201,7 @@ def parse_language(
                 return ""
             if re.match(ignored_etymology_templates_re, name):
                 ignore_count += 1
-            if name in ("etymon", "ety"):
+            if name in ETYMOLOGY_TEMPLATES_IN_HEADS:
                 if "tree" in ht:
                     del ht["tree"]
             return None
@@ -4426,30 +4426,3 @@ def extract_ja_kanjitab_template(
         data_extend(base_data, "forms", forms)
     for link_node in expanded_node.find_child(NodeKind.LINK):
         clean_node(wxr, base_data, link_node)
-
-
-# Handler function to disable "ety" and "etymon" template `tree=1` arguments
-def etymon_template_tree_removal_fn(
-    name: str, ht: TemplateArgs
-) -> Optional[str]:
-    if name in ("etymon", "ety"):
-        if "tree" in ht:
-            del ht["tree"]
-    return None
-
-
-def add_clean_etymon_template(
-    wxr: WiktextractContext,
-    etym_data: WordData,
-    node: TemplateNode,
-) -> None:
-    args_ht = clean_template_args(wxr, node.template_parameters)
-    if "tree" in args_ht:
-        del args_ht["tree"]
-    expansion = clean_node(
-        wxr,
-        etym_data,
-        node,
-        template_fn=etymon_template_tree_removal_fn,
-    )
-    etymology_template_append(etym_data, node.template_name, args_ht, expansion)

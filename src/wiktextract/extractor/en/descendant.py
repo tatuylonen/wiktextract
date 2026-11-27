@@ -1,4 +1,5 @@
 from copy import deepcopy
+from typing import Optional
 
 from mediawiki_langcodes import name_to_code
 from wikitextprocessor import (
@@ -193,7 +194,8 @@ def extract_desc_list_item(
         if len(raw_tags) > 0:
             data["raw_tags"] = raw_tags
         if len(etym_templates) > 0:
-            etymology_nodes_append(wxr, data, etym_templates)
+            for etemp in etym_templates:
+                add_clean_etymon_template(wxr, data, etemp)
             etym_templates.clear()
         data_list.append(data)
 
@@ -282,7 +284,8 @@ def extract_desc_span_tag(
         if len(ruby_data) > 0:
             desc_data["ruby"] = ruby_data
         if len(etym_templates) > 0:
-            etymology_nodes_append(wxr, desc_data, etym_templates)
+            for etemp in etym_templates:
+                add_clean_etymon_template(wxr, desc_data, etemp)
             etym_templates.clear()
         if desc_data["lang_code"] == "unknown":
             desc_data["lang_code"] = span_lang
@@ -335,6 +338,33 @@ def choose_more_specific_langcode(new: str | None, old: str) -> str | None:
     return new
 
 
+# Handler function to disable "ety" and "etymon" template `tree=1` arguments
+def etymon_template_tree_removal_fn(
+    name: str, ht: TemplateArgs
+) -> Optional[str]:
+    if name in ("etymon", "ety"):
+        if "tree" in ht:
+            del ht["tree"]
+    return None
+
+
+def add_clean_etymon_template(
+    wxr: WiktextractContext,
+    etym_data: WordData | DescendantData,
+    node: TemplateNode,
+) -> None:
+    args_ht = clean_template_args(wxr, node.template_parameters)
+    if "tree" in args_ht:
+        del args_ht["tree"]
+    expansion = clean_node(
+        wxr,
+        etym_data,
+        node,
+        template_fn=etymon_template_tree_removal_fn,
+    )
+    etymology_template_append(etym_data, node.template_name, args_ht, expansion)
+
+
 def etymology_template_append(
     data: WordData | DescendantData,
     name: str,
@@ -347,7 +377,7 @@ def etymology_template_append(
         "expansion": expansion,
     }
     if (
-        name in ("ety", "etymon")
+        name in ETYMOLOGY_TEMPLATES_IN_HEADS
         and "etymology_templates" in data
         and dt in data["etymology_templates"]
     ):
@@ -355,16 +385,3 @@ def etymology_template_append(
         # to happen, this check is just a tiny bit less resource-intensive
         return
     data_append(data, "etymology_templates", dt)
-
-
-def etymology_nodes_append(
-    wxr: WiktextractContext,
-    desc_data: DescendantData,
-    etym_templates: list[TemplateNode],
-) -> None:
-    for etemp in etym_templates:
-        args_ht = clean_template_args(wxr, etemp.template_parameters)
-        expansion = clean_node(wxr, None, etemp)
-        etymology_template_append(
-            desc_data, etemp.template_name, args_ht, expansion
-        )
