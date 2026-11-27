@@ -49,7 +49,7 @@ from ..ruby import extract_ruby, parse_ruby
 from ..share import strip_nodes
 from .descendant import (
     ETYMOLOGY_TEMPLATES_IN_HEADS,
-    etymology_template_append,
+    add_clean_etymon_template,
     extract_descendant_section,
 )
 from .example import extract_example_list_item, extract_template_zh_x
@@ -983,7 +983,7 @@ def parse_language(
 
     if len(word) >= 18 and "/languages " in word:
         # for split pages like "a/languages A_to_L"
-        word = word[:word.find("/")]
+        word = word[: word.find("/")]
 
     base_data: WordData = {
         "word": word,
@@ -1569,6 +1569,7 @@ def parse_language(
         if (
             HEAD_TAG_RE.search(name) is not None
             or name in PROBLEMATIC_TEMPLATES_CLUMP
+            and name not in ETYMOLOGY_TEMPLATES_IN_HEADS
         ):
             args_ht = clean_template_args(wxr, ht)
             cleaned_expansion = clean_node(wxr, None, expansion)
@@ -1577,12 +1578,7 @@ def parse_language(
                 "args": args_ht,
                 "expansion": cleaned_expansion,
             }
-            if name in ETYMOLOGY_TEMPLATES_IN_HEADS:
-                etymology_template_append(
-                    pos_data, name, args_ht, cleaned_expansion
-                )
-            else:
-                data_append(pos_data, "head_templates", dt)
+            data_append(pos_data, "head_templates", dt)
             if name in WORD_LEVEL_HEAD_TEMPLATES:
                 term_label_templates.append(dt)
                 # Squash these, their tags are applied to the whole word,
@@ -3205,6 +3201,9 @@ def parse_language(
                 return ""
             if re.match(ignored_etymology_templates_re, name):
                 ignore_count += 1
+            if name in ETYMOLOGY_TEMPLATES_IN_HEADS:
+                if "tree" in ht:
+                    del ht["tree"]
             return None
 
         def etym_post_template_fn(
@@ -3306,11 +3305,7 @@ def parse_language(
                 ):
                     extract_ja_kanjitab_template(wxr, node, select_data())
                 elif node.template_name in ETYMOLOGY_TEMPLATES_IN_HEADS:
-                    args_ht = clean_template_args(wxr, node.template_parameters)
-                    expansion = clean_node(wxr, etym_data, node)
-                    etymology_template_append(
-                        etym_data, node.template_name, args_ht, expansion
-                    )
+                    add_clean_etymon_template(wxr, etym_data, node)
 
             if not isinstance(node, LevelNode):
                 # XXX handle e.g. wikipedia links at the top of a language
